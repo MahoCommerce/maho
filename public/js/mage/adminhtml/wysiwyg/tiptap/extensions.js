@@ -769,9 +769,6 @@ export const MahoSlideshow = Node.create({
                 const dialogContent = `
                     <div class="slideshow-editor">
                         <ul class="slides-list"></ul>
-                        <datalist id="slideshow-breakpoint-presets">
-                            ${presets.map((preset) => `<option value="${escapeHtml(preset.label, true)}">${preset.width} px</option>`).join('')}
-                        </datalist>
                     </div>
                 `;
                 const translate = (string) => editor.options.wysiwygSetup.translate(string);
@@ -797,11 +794,24 @@ export const MahoSlideshow = Node.create({
                 `;
                 const sourceTemplate = `
                     <img class="source-preview" src="" alt="" title="${escapeHtml(translate('Mobile image'), true)}">
-                    <label class="source-breakpoint">
-                        <span>${escapeHtml(translate('Breakpoint'), true)}</span>
-                        <input type="text" class="source-breakpoint-input" list="slideshow-breakpoint-presets" autocomplete="off">
+                    <div class="source-breakpoint">
+                        <label class="source-breakpoint-label">${escapeHtml(translate('Breakpoint'), true)}</label>
+                        <div class="source-breakpoint-combo">
+                            <input type="text" class="source-breakpoint-input" autocomplete="off"
+                                   role="combobox" aria-autocomplete="none" aria-expanded="false">
+                            <button type="button" class="source-breakpoint-toggle" tabindex="-1" aria-hidden="true">
+                                ${editor.options.wysiwygSetup.getIcon('chevron-down')}
+                            </button>
+                            <ul class="source-breakpoint-menu" role="listbox" hidden>
+                                ${presets.map((preset) => `
+                                    <li role="option" data-code="${escapeHtml(preset.code, true)}">
+                                        <span>${escapeHtml(preset.label, true)}</span>
+                                        <span class="source-breakpoint-width">${preset.width} px</span>
+                                    </li>`).join('')}
+                            </ul>
+                        </div>
                         <span class="source-breakpoint-unit"></span>
-                    </label>
+                    </div>
                     <button type="button" class="remove-source" title="${escapeHtml(translate('Remove mobile image'), true)}">
                         ${editor.options.wysiwygSetup.getIcon('trash')}
                     </button>
@@ -875,14 +885,48 @@ export const MahoSlideshow = Node.create({
                                     };
                                     showValue();
 
-                                    // The datalist only lists the presets that match the text, so the
-                                    // field is empty while it has the focus and shows its value as a hint
+                                    input.id = `slide-${index}-source-${sourceIndex}-breakpoint`;
+                                    row.querySelector('.source-breakpoint-label').htmlFor = input.id;
+
+                                    // The menu lists every preset, whatever the field holds, and the field
+                                    // also takes a width that the user types
+                                    const menu = row.querySelector('.source-breakpoint-menu');
+                                    const options = [...menu.querySelectorAll('[role="option"]')];
+                                    let active = -1;
+                                    const highlight = (position) => {
+                                        active = position;
+                                        options.forEach((option, n) => {
+                                            option.classList.toggle('active', n === position);
+                                            option.setAttribute('aria-selected', option.dataset.code === source.preset ? 'true' : 'false');
+                                        });
+                                    };
+                                    const openMenu = () => {
+                                        if (options.length && menu.hidden) {
+                                            menu.hidden = false;
+                                            input.setAttribute('aria-expanded', 'true');
+                                            highlight(options.findIndex((option) => option.dataset.code === source.preset));
+                                        }
+                                    };
+                                    const closeMenu = () => {
+                                        menu.hidden = true;
+                                        input.setAttribute('aria-expanded', 'false');
+                                    };
+                                    const pick = (option) => {
+                                        source.preset = option.dataset.code;
+                                        source.breakpoint = null;
+                                        delete source.invalid;
+                                        showValue();
+                                        closeMenu();
+                                    };
+
                                     input.addEventListener('focus', () => {
-                                        input.placeholder = input.value;
-                                        input.value = '';
+                                        openMenu();
+                                        // After the click that gave the focus, so that typing replaces the value
+                                        setTimeout(() => input.select());
                                     });
+                                    input.addEventListener('click', openMenu);
                                     input.addEventListener('blur', () => {
-                                        input.placeholder = '';
+                                        closeMenu();
                                         if (input.value.trim() === '') {
                                             delete source.invalid;
                                         }
@@ -890,7 +934,24 @@ export const MahoSlideshow = Node.create({
                                             showValue();
                                         }
                                     });
+                                    input.addEventListener('keydown', (event) => {
+                                        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                                            event.preventDefault();
+                                            openMenu();
+                                            const step = event.key === 'ArrowDown' ? 1 : -1;
+                                            highlight((active + step + options.length) % options.length);
+                                        } else if (event.key === 'Enter' && !menu.hidden && options[active]) {
+                                            event.preventDefault();
+                                            pick(options[active]);
+                                        } else if (event.key === 'Escape' && !menu.hidden) {
+                                            // Close the menu, not the dialog
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                            closeMenu();
+                                        }
+                                    });
                                     input.addEventListener('input', () => {
+                                        closeMenu();
                                         const parsed = parseBreakpointInput(input.value, presets);
                                         if (parsed) {
                                             Object.assign(source, parsed);
@@ -900,6 +961,22 @@ export const MahoSlideshow = Node.create({
                                         }
                                         showUnit();
                                     });
+                                    // mousedown, not click: a click comes after the blur of the field
+                                    row.querySelector('.source-breakpoint-toggle').addEventListener('mousedown', (event) => {
+                                        event.preventDefault();
+                                        if (menu.hidden) {
+                                            input.focus();
+                                            openMenu();
+                                        } else {
+                                            closeMenu();
+                                        }
+                                    });
+                                    for (const option of options) {
+                                        option.addEventListener('mousedown', (event) => {
+                                            event.preventDefault();
+                                            pick(option);
+                                        });
+                                    }
                                     row.querySelector('.remove-source').addEventListener('click', () => {
                                         slide.sources.splice(sourceIndex, 1);
                                         renderSlideRows();
