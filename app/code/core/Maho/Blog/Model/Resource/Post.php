@@ -6,7 +6,7 @@
  * @package Maho_Blog
  */
 
-class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
+class Maho_Blog_Model_Resource_Post extends Maho_Blog_Model_Resource_Abstract
 {
     protected string $_storeTable;
 
@@ -45,7 +45,9 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
     }
 
     /**
-     * Get static attribute codes
+     * The codes of the attributes that are columns of the entity table.
+     *
+     * @return list<string>
      */
     public function getStaticAttributeCodes(): array
     {
@@ -75,22 +77,6 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         }
 
         return parent::_afterSave($object);
-    }
-
-    /**
-     * The value tables have a unique key on (entity_id, attribute_id, store_id). Without store_id
-     * in the row, SQLite and PostgreSQL do not find that key, so the update of a value fails.
-     */
-    #[\Override]
-    protected function _saveAttribute($object, $attribute, $value)
-    {
-        parent::_saveAttribute($object, $attribute, $value);
-
-        $table = $attribute->getBackend()->getTable();
-        $row = array_key_last($this->_attributeValuesToSave[$table]);
-        $this->_attributeValuesToSave[$table][$row]['store_id'] = Mage_Core_Model_App::ADMIN_STORE_ID;
-
-        return $this;
     }
 
     protected function _saveStoreRelations(\Maho\DataObject $post): void
@@ -175,6 +161,11 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
     {
         $coreHelper = Mage::helper('core');
 
+        $object->setData('attribute_set_id', Mage::helper('blog')->getValidAttributeSetId(
+            (int) $object->getData('attribute_set_id'),
+            $this->getEntityType(),
+        ));
+
         // Strip all HTML tags from title and meta fields
         $stringFields = ['title', 'url_key', 'meta_title', 'meta_keywords', 'meta_description'];
         foreach ($stringFields as $field) {
@@ -193,18 +184,11 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             $object->setData('publish_date', Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT));
         }
 
-        // Sanitize the markup authored in this field on save, keeping the template directives it
+        // Sanitize the markup authored in these fields on save, keeping the template directives it
         // contains intact. This is not a complete boundary: what a directive resolves to at render
-        // is not sanitized, so a crafted parameter still reaches the page. Links get
-        // target="_blank" — blog content is article-style, so an outbound link should not
-        // navigate the reader away from the post.
-        Mage::getSingleton('core/input_filter_maliciousCode')->sanitizeFields(
-            $object,
-            ['content', 'short_content'],
-            applyLinkFilter: true,
-            // Matches Maho_Blog_Model_Post::getFilteredContent(), which renders it.
-            renderer: Mage::helper('cms')->getPageTemplateProcessor(),
-        );
+        // is not sanitized, so a crafted parameter still reaches the page.
+        // Maho_Blog_Model_Post::getFilteredContent() renders the content with the same processor.
+        Mage::helper('blog')->sanitizeAttributeValues($object, $this->getEntityType(), ['content', 'short_content']);
 
         // Auto-generate URL key from title if empty
         if (empty($object->getData('url_key'))) {

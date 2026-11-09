@@ -42,6 +42,12 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     public const COL_PARENT_ID = 'parent_id';
 
     /**
+     * The name of the attribute set of the category. Without it, a new category takes the set of its
+     * parent, and a saved category keeps its set.
+     */
+    public const COL_ATTRIBUTE_SET = '_attribute_set';
+
+    /**
      * The folder that the image column is relative to. Without it, the image must already be in media/catalog/category.
      */
     public const PARAM_MEDIA_DIR = 'media_dir';
@@ -63,12 +69,14 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     public const ERROR_CATEGORY_NOT_FOUND = 'categoryNotFound';
     public const ERROR_URL_KEY_MISMATCH = 'urlKeyMismatch';
     public const ERROR_IMAGE_NOT_FOUND = 'imageNotFound';
+    public const ERROR_INVALID_ATTRIBUTE_SET = 'invalidAttributeSet';
+    public const ERROR_ATTRIBUTE_NOT_IN_SET = 'attributeNotInSet';
 
     /**
      * Columns that are not attributes, or attributes that the tree sets and an import never writes.
      */
     protected const SKIPPED_COLUMNS = [
-        self::COL_STORE, self::COL_ROOT, self::COL_PATH, self::COL_CATEGORY_ID, self::COL_PARENT_ID,
+        self::COL_STORE, self::COL_ROOT, self::COL_PATH, self::COL_CATEGORY_ID, self::COL_PARENT_ID, self::COL_ATTRIBUTE_SET,
         'all_children', 'children', 'children_count', 'level', 'path', 'path_in_store', 'url_path',
     ];
 
@@ -80,7 +88,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
      * @var array
      */
     #[\Override]
-    protected $_particularAttributes = [self::COL_STORE, self::COL_ROOT, self::COL_PATH];
+    protected $_particularAttributes = [self::COL_STORE, self::COL_ROOT, self::COL_PATH, self::COL_ATTRIBUTE_SET];
 
     /**
      * Category ID to parent ID, for every category below the tree root.
@@ -88,6 +96,34 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
      * @var array<int, int>
      */
     protected $_categoryIds = [];
+
+    /**
+     * Category ID to attribute set ID, for every category below the tree root.
+     *
+     * @var array<int, int>
+     */
+    protected array $_categorySetIds = [];
+
+    /**
+     * The attribute set of each category that a row creates, by key.
+     *
+     * @var array<string, int>
+     */
+    protected array $_newKeySetIds = [];
+
+    /**
+     * Attribute set name to ID, for the sets of categories.
+     *
+     * @var array<string, int>|null
+     */
+    protected ?array $_setIdsByName = null;
+
+    /**
+     * Attribute set ID to the codes of the attributes that the set holds.
+     *
+     * @var array<int, array<string, true>>|null
+     */
+    protected ?array $_setAttributeCodes = null;
 
     /**
      * Store code to store ID.
@@ -133,6 +169,8 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
         self::ERROR_CATEGORY_NOT_FOUND => 'Category "%s" not found, a store row cannot create it',
         self::ERROR_URL_KEY_MISMATCH => 'The url_key of the new category "%s" must be the last part of _path',
         self::ERROR_IMAGE_NOT_FOUND => 'Image "%s" not found, or not an image file',
+        self::ERROR_INVALID_ATTRIBUTE_SET => 'Attribute set "%s" is not a set of categories',
+        self::ERROR_ATTRIBUTE_NOT_IN_SET => 'Attribute "%s" is not in the attribute set of the category',
     ];
 
     public function __construct()
@@ -156,12 +194,14 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     protected function _initCategories(): self
     {
         $select = $this->_connection->select()
-            ->from(Mage::getSingleton('core/resource')->getTableName('catalog_category_entity'), ['entity_id', 'parent_id'])
+            ->from(Mage::getSingleton('core/resource')->getTableName('catalog_category_entity'), ['entity_id', 'parent_id', 'attribute_set_id'])
             ->where('level > 0');
 
         $this->_categoryIds = [];
+        $this->_categorySetIds = [];
         foreach ($this->_connection->fetchAll($select) as $category) {
             $this->_categoryIds[(int) $category['entity_id']] = (int) $category['parent_id'];
+            $this->_categorySetIds[(int) $category['entity_id']] = (int) $category['attribute_set_id'];
         }
         return $this;
     }
@@ -252,7 +292,15 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                 $this->addRowError(self::ERROR_CATEGORY_NOT_FOUND, $rowNum, $label);
                 return false;
             }
-            return $this->_validateValues($rowData, $rowNum);
+            $setId = $categoryId !== null ? $this->_getCategorySetId($categoryId) : $this->_newKeySetIds[$key[0] . '/' . $key[1]];
+            return $this->_validateValues($rowData, $rowNum) && $this->_validateSetAttributes($rowData, $rowNum, $setId);
+        }
+
+        $setName = $this->_value($rowData, self::COL_ATTRIBUTE_SET);
+        $postedSetId = $setName === '' ? null : ($this->_getSetIdsByName()[$setName] ?? null);
+        if ($setName !== '' && $postedSetId === null) {
+            $this->addRowError(self::ERROR_INVALID_ATTRIBUTE_SET, $rowNum, $setName);
+            return false;
         }
 
         if ($categoryId !== null) {
@@ -267,7 +315,8 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                     return false;
                 }
             }
-            return $this->_validateValues($rowData, $rowNum);
+            $setId = $postedSetId ?? $this->_getCategorySetId($categoryId);
+            return $this->_validateValues($rowData, $rowNum) && $this->_validateSetAttributes($rowData, $rowNum, $setId);
         }
 
         if ($key === null) {
@@ -279,6 +328,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                 $this->addRowError(self::ERROR_PARENT_NOT_FOUND, $rowNum, $label);
                 return false;
             }
+            $setId = $postedSetId ?? $this->_getCategorySetId((int) $this->_value($rowData, self::COL_PARENT_ID));
         } else {
             [$rootName, $path] = $key;
             $keyString = $rootName . '/' . $path;
@@ -299,12 +349,19 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                     return false;
                 }
                 $parentKey = [$rootName, implode('/', $segments)];
-                if ($this->_keyMap->getId(...$parentKey) === null && !$this->_isCreatedBefore($parentKey, $rowNum)) {
+                $parentId = $this->_keyMap->getId(...$parentKey);
+                if ($parentId === null && !$this->_isCreatedBefore($parentKey, $rowNum)) {
                     $this->addRowError(self::ERROR_PARENT_NOT_FOUND, $rowNum, $label);
                     return false;
                 }
+                $setId = $postedSetId ?? ($parentId !== null
+                    ? $this->_getCategorySetId($parentId)
+                    : $this->_newKeySetIds[$parentKey[0] . '/' . $parentKey[1]]);
+            } else {
+                $setId = $postedSetId ?? $this->_getCategorySetId(Mage_Catalog_Model_Category::TREE_ROOT_ID);
             }
             $this->_newKeys[$keyString] = $rowNum;
+            $this->_newKeySetIds[$keyString] = $setId;
         }
 
         // A new root category takes its name from _root, and the next run finds it by that name
@@ -314,7 +371,71 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
             $this->addRowError(self::ERROR_INVALID_NAME, $rowNum, $label);
             return false;
         }
-        return $this->_validateValues($rowData, $rowNum);
+        return $this->_validateValues($rowData, $rowNum) && $this->_validateSetAttributes($rowData, $rowNum, $setId);
+    }
+
+    /**
+     * Refuse a value of an attribute that set $setId does not hold. The nightly cleanup deletes such a value.
+     */
+    protected function _validateSetAttributes(array $rowData, int $rowNum, int $setId): bool
+    {
+        $codes = $this->_getSetAttributeCodes()[$setId] ?? [];
+        foreach ($rowData as $attrCode => $value) {
+            if ($this->_value($rowData, (string) $attrCode) === '' || in_array($attrCode, self::SKIPPED_COLUMNS, true)
+                || $attrCode === 'position' || isset($codes[$attrCode])
+            ) {
+                continue;
+            }
+            $attribute = Mage::getSingleton('eav/config')->getAttribute('catalog_category', $attrCode);
+            if ($attribute && $attribute->getId() && $attribute->getBackendType() !== 'static') {
+                $this->addRowError(self::ERROR_ATTRIBUTE_NOT_IN_SET, $rowNum, (string) $attrCode);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Return the set of category $categoryId, or the default set. A new child of a category takes the set of its parent.
+     */
+    protected function _getCategorySetId(int $categoryId): int
+    {
+        return ($this->_categorySetIds[$categoryId] ?? 0)
+            ?: (int) Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Category::ENTITY)->getDefaultAttributeSetId();
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    protected function _getSetIdsByName(): array
+    {
+        $this->_setIdsByName ??= array_map(intval(...), $this->_connection->fetchPairs(
+            $this->_connection->select()
+                ->from(Mage::getSingleton('core/resource')->getTableName('eav/attribute_set'), ['attribute_set_name', 'attribute_set_id'])
+                ->where('entity_type_id = ?', (int) Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Category::ENTITY)->getId()),
+        ));
+        return $this->_setIdsByName;
+    }
+
+    /**
+     * @return array<int, array<string, true>>
+     */
+    protected function _getSetAttributeCodes(): array
+    {
+        if ($this->_setAttributeCodes === null) {
+            $resource = Mage::getSingleton('core/resource');
+            $rows = $this->_connection->fetchAll(
+                $this->_connection->select()
+                    ->from(['ea' => $resource->getTableName('eav/entity_attribute')], ['attribute_set_id'])
+                    ->join(['a' => $resource->getTableName('eav/attribute')], 'a.attribute_id = ea.attribute_id', ['attribute_code'])
+                    ->where('ea.entity_type_id = ?', (int) Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Category::ENTITY)->getId()),
+            );
+            $this->_setAttributeCodes = [];
+            foreach ($rows as $row) {
+                $this->_setAttributeCodes[(int) $row['attribute_set_id']][(string) $row['attribute_code']] = true;
+            }
+        }
+        return $this->_setAttributeCodes;
     }
 
     protected function _validateDeleteRow(array $rowData, int $rowNum): bool
@@ -394,6 +515,11 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                 $this->_categoryIds[$categoryId] = $parentId;
             }
             $category = Mage::getModel('catalog/category')->setStoreId($storeId)->load($categoryId);
+            $setName = $this->_value($rowData, self::COL_ATTRIBUTE_SET);
+            if ($storeId === Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID && $setName !== '') {
+                $category->assignAttributeSet($this->_getSetIdsByName()[$setName]);
+                $this->_categorySetIds[$categoryId] = (int) $category->getAttributeSetId();
+            }
             $this->_applyValues($category, $rowData);
             $category->save();
             return;
@@ -409,6 +535,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
 
         $categoryId = (int) $category->getId();
         $this->_categoryIds[$categoryId] = (int) $category->getParentId();
+        $this->_categorySetIds[$categoryId] = (int) $category->getAttributeSetId();
         if ($key !== null) {
             $this->_keyMap->add($categoryId, ...$key);
         }
@@ -422,8 +549,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     protected function _createCategory(array $rowData, ?array $key): Mage_Catalog_Model_Category
     {
         $category = Mage::getModel('catalog/category')->setStoreId(Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID);
-        $category->setAttributeSetId($category->getDefaultAttributeSetId())
-            ->setIsActive(1)
+        $category->setIsActive(1)
             ->setIncludeInMenu(1)
             ->setIsAnchor(1)
             ->setDisplayMode(Mage_Catalog_Model_Category::DM_PRODUCT);
@@ -442,7 +568,9 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
         $parentPath = $parentId === Mage_Catalog_Model_Category::TREE_ROOT_ID
             ? (string) $parentId
             : (string) Mage::getModel('catalog/category')->load($parentId)->getPath();
-        return $category->setPath($parentPath);
+        $setName = $this->_value($rowData, self::COL_ATTRIBUTE_SET);
+        $category->setPath($parentPath);
+        return $category->assignAttributeSet($setName === '' ? null : $this->_getSetIdsByName()[$setName]);
     }
 
     protected function _applyValues(Mage_Catalog_Model_Category $category, array $rowData): void

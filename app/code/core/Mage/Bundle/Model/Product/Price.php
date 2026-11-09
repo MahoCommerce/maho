@@ -157,10 +157,12 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
         /** @var Mage_Tax_Helper_Data $taxHelper */
         $taxHelper = $this->_getHelperData('tax');
 
+        // The cart rounds the price to cents before it adds the tax, as the price template does.
+        $store = $product->getStore();
         if ($this->_isPricesCalculatedByIndex) {
             $minimalPrice = $taxHelper->getPrice(
                 $product,
-                $product->getData('min_price'),
+                $store->roundPrice($product->getData('min_price')),
                 $includeTax,
                 null,
                 null,
@@ -171,7 +173,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
             );
             $maximalPrice = $taxHelper->getPrice(
                 $product,
-                $product->getData('max_price'),
+                $store->roundPrice($product->getData('max_price')),
                 $includeTax,
                 null,
                 null,
@@ -185,7 +187,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
             /**
              * Check if product price is fixed
              */
-            $finalPrice = $product->getFinalPrice();
+            $finalPrice = $store->roundPrice($product->getFinalPrice());
             if ($isPriceFixedType) {
                 $minimalPrice = $maximalPrice = $taxHelper->getPrice(
                     $product,

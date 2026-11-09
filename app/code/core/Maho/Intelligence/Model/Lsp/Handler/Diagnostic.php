@@ -80,6 +80,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Diagnostic
                             if ($resolved['class'] === null || $resolved['file'] === null) {
                                 $diagnostics[] = $this->diagnostic(
                                     $lineNum,
+                                    $line,
                                     $offset,
                                     $alias,
                                     "Unresolved {$type} alias: '{$alias}'",
@@ -111,6 +112,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Diagnostic
                             if ($resolved['class'] === null || $resolved['file'] === null) {
                                 $diagnostics[] = $this->diagnostic(
                                     $lineNum,
+                                    $line,
                                     $offset,
                                     $alias,
                                     "Unresolved {$type} alias: '{$alias}'",
@@ -131,6 +133,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Diagnostic
                     if ($resolved['class'] === null || $resolved['file'] === null) {
                         $diagnostics[] = $this->diagnostic(
                             $lineNum,
+                            $line,
                             $offset,
                             $alias,
                             "Unresolved model alias in cron callback: '{$alias}'",
@@ -143,12 +146,12 @@ class Maho_Intelligence_Model_Lsp_Handler_Diagnostic
         return $diagnostics;
     }
 
-    private function diagnostic(int $line, int|string $offset, string $alias, string $message): array
+    private function diagnostic(int $line, string $lineText, int $offset, string $alias, string $message): array
     {
         return [
             'range' => [
-                'start' => ['line' => $line, 'character' => (int) $offset],
-                'end' => ['line' => $line, 'character' => (int) $offset + strlen($alias)],
+                'start' => ['line' => $line, 'character' => Maho_Intelligence_Model_Lsp_Position::toUtf16Offset($lineText, $offset)],
+                'end' => ['line' => $line, 'character' => Maho_Intelligence_Model_Lsp_Position::toUtf16Offset($lineText, $offset + strlen($alias))],
             ],
             'severity' => self::SEVERITY_WARNING,
             'source' => 'maho-intelligence',

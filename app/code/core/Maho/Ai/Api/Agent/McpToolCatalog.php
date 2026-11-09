@@ -22,6 +22,7 @@ use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInter
 use ApiPlatform\Metadata\Resource\Factory\ResourceNameCollectionFactoryInterface;
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
+use Symfony\AI\Platform\Tool\ToolEffectHints;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
@@ -74,17 +75,13 @@ final class McpToolCatalog
                 continue;
             }
 
-            $tools[] = ToolDefinition::create(
+            $tools[] = new Tool(
                 new ExecutionReference(McpToolbox::class, 'execute'),
                 $this->alias($name),
                 $this->describe($mcp),
-                self::stringEnums($this->parameters($mcp)),
-                [
-                    'mcp_name' => $name,
-                    'title' => (string) ($mcp->getTitle() ?? $name),
-                    'read_only' => $this->isReadOnly($name),
-                    'destructive' => $this->isDestructive($name),
-                ],
+                // @phpstan-ignore argument.type (API Platform builds the schema at runtime, so PHPStan cannot know its shape)
+                $this->parameters($mcp),
+                effectHints: $this->effectHints($name),
             );
         }
 
@@ -174,12 +171,26 @@ final class McpToolCatalog
     /** A tool the model may run without asking the administrator. Unknown tools are never read-only. */
     public function isReadOnly(string $nameOrAlias): bool
     {
-        return ($this->annotations($nameOrAlias)['readOnlyHint'] ?? false) === true;
+        return $this->effectHints($nameOrAlias)->readOnlyHint === true;
     }
 
     public function isDestructive(string $nameOrAlias): bool
     {
-        return ($this->annotations($nameOrAlias)['destructiveHint'] ?? false) === true;
+        return $this->effectHints($nameOrAlias)->destructiveHint === true;
+    }
+
+    /** The MCP annotations of a tool, which use the same hint names. An unknown tool gets no hint. */
+    private function effectHints(string $nameOrAlias): ToolEffectHints
+    {
+        $annotations = $this->annotations($nameOrAlias);
+        $hint = static fn(string $key): ?bool => is_bool($annotations[$key] ?? null) ? $annotations[$key] : null;
+
+        return new ToolEffectHints(
+            readOnlyHint: $hint('readOnlyHint'),
+            destructiveHint: $hint('destructiveHint'),
+            idempotentHint: $hint('idempotentHint'),
+            openWorldHint: $hint('openWorldHint'),
+        );
     }
 
     /**
@@ -421,7 +432,7 @@ final class McpToolCatalog
             if (!is_array($property)) {
                 continue;
             }
-            // Gemini rejects any keyword outside its subset, such as writeOnly or format, so only the common core stays.
+            // Only the common core stays: it is what every provider accepts, and it keeps the schemas short.
             $property = array_intersect_key($property, array_flip(self::SCHEMA_KEYWORDS));
             $type = $property['type'] ?? null;
             if (is_array($type)) {
@@ -440,7 +451,7 @@ final class McpToolCatalog
                 $property['properties'] = $this->plainProperties($property['properties']);
             }
             if ($type === 'array') {
-                // Gemini refuses an array without items.
+                // OpenAI and Gemini refuse an array without items.
                 $items = is_array($property['items'] ?? null) ? $property['items'] : [];
                 $property['items'] = $this->plainProperties(['item' => $items])['item'];
             } else {
@@ -469,38 +480,6 @@ final class McpToolCatalog
             ['<', '>', '&', '"', "'", '/'],
             $value,
         );
-    }
-
-    /**
-     * Give each enum that holds a value other than a string the type string and string values.
-     * Gemini refuses a number in an enum. coerce() reads the schema of parameters(), so it
-     * changes the value that the model sends back into the type of the property.
-     *
-     * @param array<string, mixed> $schema
-     * @return array<string, mixed>
-     */
-    private static function stringEnums(array $schema): array
-    {
-        $enum = is_array($schema['enum'] ?? null) ? $schema['enum'] : [];
-        if (array_any($enum, static fn(mixed $value): bool => !is_string($value))) {
-            $values = array_map(
-                static fn(mixed $value): string => is_bool($value) ? ($value ? 'true' : 'false') : (string) $value,
-                array_filter($enum, is_scalar(...)),
-            );
-            $schema['type'] = 'string';
-            $schema['enum'] = array_values(array_unique($values));
-        }
-        if (is_array($schema['properties'] ?? null)) {
-            $schema['properties'] = array_map(
-                static fn(mixed $property): mixed => is_array($property) ? self::stringEnums($property) : $property,
-                $schema['properties'],
-            );
-        }
-        if (is_array($schema['items'] ?? null)) {
-            $schema['items'] = self::stringEnums($schema['items']);
-        }
-
-        return $schema;
     }
 
     /**

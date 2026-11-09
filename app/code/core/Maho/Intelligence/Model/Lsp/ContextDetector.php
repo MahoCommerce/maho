@@ -171,29 +171,34 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
     }
 
     /**
-     * Detect what context the cursor is in for completion.
+     * Detect completion context at an LSP UTF-16 column.
      *
      * @return array{context: string, prefix: string, prefixStart: int, suggestions?: list<string>}
      */
     public function detect(string $text, int $line, int $character, string $uri = ''): array
     {
-        if (self::isXmlUri($uri)) {
-            return $this->detectXml($text, $line, $character, $uri);
-        }
-        return $this->detectPhp($text, $line, $character);
+        $lineText = explode("\n", $text)[$line] ?? '';
+        $byteOffset = Maho_Intelligence_Model_Lsp_Position::toByteOffset($lineText, $character);
+        $context = self::isXmlUri($uri)
+            ? $this->detectXml($text, $line, $byteOffset, $uri)
+            : $this->detectPhp($text, $line, $byteOffset);
+        $context['prefixStart'] = Maho_Intelligence_Model_Lsp_Position::toUtf16Offset($lineText, $context['prefixStart']);
+        return $context;
     }
 
     /**
-     * Detect context for an existing alias string at cursor position (for definition/hover).
+     * Detect definition or hover context at an LSP UTF-16 column.
      *
      * @return array{context: string, alias: string, ...}|null
      */
     public function detectAtCursor(string $text, int $line, int $character, string $uri = ''): ?array
     {
+        $lineText = explode("\n", $text)[$line] ?? '';
+        $byteOffset = Maho_Intelligence_Model_Lsp_Position::toByteOffset($lineText, $character);
         if (self::isXmlUri($uri)) {
-            return $this->detectXmlAtCursor($text, $line, $character);
+            return $this->detectXmlAtCursor($text, $line, $byteOffset);
         }
-        return $this->detectPhpAtCursor($text, $line, $character);
+        return $this->detectPhpAtCursor($text, $line, $byteOffset);
     }
 
     /**

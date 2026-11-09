@@ -28,6 +28,28 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Return the shipping callback URL of the quote, with a token in it.
+     * Maho sends this URL to PayPal only, so a callback with a valid token comes from PayPal.
+     */
+    public function getShippingCallbackUrl(Mage_Sales_Model_Quote $quote): string
+    {
+        return Mage::getUrl('paypal/checkout/shippingCallback', [
+            '_secure' => true,
+            '_query' => ['token' => $this->getShippingCallbackToken((int) $quote->getId())],
+        ]);
+    }
+
+    public function isValidShippingCallbackToken(Mage_Sales_Model_Quote $quote, #[\SensitiveParameter] string $token): bool
+    {
+        return $token !== '' && hash_equals($this->getShippingCallbackToken((int) $quote->getId()), $token);
+    }
+
+    protected function getShippingCallbackToken(int $quoteId): string
+    {
+        return hash_hmac('sha256', 'paypal_shipping_callback|' . $quoteId, Mage::getEncryptionKeyAsHex());
+    }
+
+    /**
      * Refuse a PayPal order that was not created for the given quote or order, or whose
      * total was changed since: invoice_id must equal the reserved order id, and currency
      * and amount must match (1-cent tolerance for rounding drift).

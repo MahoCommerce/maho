@@ -638,6 +638,21 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Return the attribute set of a customer group for the customer or customer_address entity type.
+     * A group without a set uses the default set of the entity type.
+     */
+    public function getGroupAttributeSetId(int $groupId, string $entityTypeCode): int
+    {
+        $group = Mage::getModel('customer/group')->load($groupId);
+        $setId = match ($entityTypeCode) {
+            'customer' => $group->getCustomerAttributeSetId(),
+            'customer_address' => $group->getCustomerAddressAttributeSetId(),
+            default => null,
+        };
+        return $setId ?: (int) Mage::getSingleton('eav/config')->getEntityType($entityTypeCode)->getDefaultAttributeSetId();
+    }
+
+    /**
      * Retrieve forgot password flow secure type
      *
      * @return int

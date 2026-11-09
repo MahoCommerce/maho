@@ -12,6 +12,7 @@ namespace Mage\Sales\Api;
 
 use Maho\Config\ApiResource;
 use Maho\ApiPlatform\Metadata\EnumSource;
+use Maho\ApiPlatform\Metadata\CustomAttributeSchema;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -65,7 +66,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             uriTemplate: '/orders',
             name: 'place_order',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/create')",
-            description: 'Place a new order from an authenticated customer cart. Body: cartId, plus the full checkout state in one shot: shippingAddress, billingAddress, guestEmail, paymentMethod, paymentData, shippingMethod (carrier_method), orderNote',
+            description: 'Place a new order from an authenticated customer cart. Body: cartId, plus the full checkout state in one shot: shippingAddress, billingAddress (each with an optional customAttributes map that follows the Address Book and Checkout form), guestEmail, customerCustomAttributes (a guest order only: the values of the Checkout Registration form, with each required attribute of it), paymentMethod, paymentData, shippingMethod (carrier_method), orderNote',
         ),
         new Post(
             // The placeholder is named `maskedQuoteId` rather than `id` so
@@ -79,7 +80,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             ],
             requirements: ['maskedQuoteId' => \Mage_Checkout_Service_Cart::MASKED_ID_PATTERN],
             security: 'true',
-            description: 'Place order from guest cart. Body carries the full checkout state in one shot: shippingAddress, billingAddress, guestEmail, paymentMethod, paymentData, shippingMethod (carrier_method), orderNote',
+            description: 'Place order from guest cart. Body carries the full checkout state in one shot: shippingAddress, billingAddress (each with an optional customAttributes map that follows the Address Book and Checkout form), guestEmail, customerCustomAttributes (a guest order only: the values of the Checkout Registration form, with each required attribute of it), paymentMethod, paymentData, shippingMethod (carrier_method), orderNote',
         ),
         new Post(
             // Authenticated counterpart to place_guest_order: place an order from
@@ -91,7 +92,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             name: 'place_customer_order',
             requirements: ['id' => '\d+'],
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/create')",
-            description: 'Place order from the authenticated customer cart. Body carries the full checkout state in one shot: shippingAddress, billingAddress, guestEmail, paymentMethod, paymentData, shippingMethod (carrier_method), orderNote',
+            description: 'Place order from the authenticated customer cart. Body carries the full checkout state in one shot: shippingAddress, billingAddress (each with an optional customAttributes map that follows the Address Book and Checkout form), guestEmail, customerCustomAttributes (a guest order only: the values of the Checkout Registration form, with each required attribute of it), paymentMethod, paymentData, shippingMethod (carrier_method), orderNote',
         ),
         // Order lifecycle actions. hold/unhold and comments are management
         // operations (admin or orders/write grant); cancel additionally lets a
@@ -198,6 +199,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
                 'paymentMethod' => ['type' => 'String'],
                 'shippingMethod' => ['type' => 'String'],
                 'guestEmail' => ['type' => 'String'],
+                'customerCustomAttributes' => ['type' => 'Iterable', 'description' => 'A guest order only: the values of the custom attributes of the Checkout Registration form, keyed by attribute code. Each required attribute of the form must be in it'],
                 'orderNote' => ['type' => 'String'],
             ],
             description: 'Place order from cart (requires maskedId for guest, or authentication for customer carts)',
@@ -298,6 +300,14 @@ class Order extends CrudResource
 
     #[ApiProperty(writable: false, description: 'Whether the order was placed as a guest')]
     public bool $customerIsGuest = false;
+
+    /** @var array<string, mixed>|null */
+    #[ApiProperty(writable: false, description: 'Values of the user-defined customer attributes when the order was placed, keyed by attribute code, in the shape of customAttributes of a customer. A customer or a guest gets the attributes of the storefront customer forms only', extraProperties: [CustomAttributeSchema::KEY => 'customer'])]
+    public ?array $customerCustomAttributes = null;
+
+    /** @var array<string, string|list<string>>|null */
+    #[ApiProperty(writable: false, description: 'The option labels of the dropdown, multiselect and Yes/No values of customerCustomAttributes, keyed by attribute code, as the customer saw them when the order was placed. A multiselect has a list of labels', extraProperties: ['computed' => true])]
+    public ?array $customerCustomAttributeLabels = null;
 
     #[ApiProperty(writable: false, description: 'Customer note captured at checkout (orderNote at placement)')]
     public ?string $customerNote = null;

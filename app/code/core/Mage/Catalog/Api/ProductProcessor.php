@@ -22,6 +22,7 @@ use Mage_CatalogInventory_Service_Stock;
 use Mage_Core_Exception_Input;
 use Mage_Core_Exception_NoSuchEntity;
 use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Service\CustomAttributes;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
@@ -85,13 +86,6 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         'customDesignTo' => 'custom_design_to',
     ];
 
-    /** Codes that a dedicated field sets, and the system codes. customAttributesWrite cannot set them. */
-    private const PROTECTED_ATTRIBUTE_CODES = [
-        'entity_id', 'type_id', 'sku', 'attribute_set_id', 'tax_class_id',
-        'website_ids', 'stock_data', 'status', 'visibility',
-        'created_at', 'updated_at', 'entity_type_id',
-    ];
-
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Product
     {
@@ -145,6 +139,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             ->setVisibility($this->toVisibility($data->visibility) ?? Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
             ->setTaxClassId($data->taxClassId ?? 0);
         $product->addData($this->collectAttributeData($data));
+        $product->addData($this->collectCustomAttributeData($product, $data));
         $allowedStoreIds = $user->getAllowedStoreIds();
         $service->setWebsiteIds($product, $data->websiteIds ?? $service->getDefaultWebsiteIds(StoreContext::getStoreId(), $allowedStoreIds), $allowedStoreIds);
         if ($data->categoryIds !== []) {
@@ -183,6 +178,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             $product->setTaxClassId($data->taxClassId);
         }
         $product->addData($this->collectAttributeData($data));
+        $product->addData($this->collectCustomAttributeData($product, $data));
         $service->useDefault($product, array_map(strval(...), $data->useDefault ?? []));
         if ($data->websiteIds !== null) {
             $service->setWebsiteIds($product, $data->websiteIds, $user->getAllowedStoreIds());
@@ -213,7 +209,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         $service->assertInStores($product, $user->getAllowedStoreIds());
         $oldData = $product->getData();
 
-        $attrData = $this->collectAttributeData($data);
+        $attrData = $this->collectAttributeData($data) + $this->collectCustomAttributeData($product, $data);
         if ($data->name !== '') {
             $attrData['name'] = $data->name;
         }
@@ -250,11 +246,11 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Return the attribute values that the dedicated fields and customAttributesWrite of the request set, by code:
-     * a date in the midnight form of the admin, a flag as 0 or 1.
+     * Return the attribute values that the dedicated fields of the request set, by code: a date in the midnight form
+     * of the admin, a flag as 0 or 1.
      *
      * @return array<string, mixed>
-     * @throws Mage_Core_Exception_Input for an invalid date and for a protected code in customAttributesWrite
+     * @throws Mage_Core_Exception_Input for an invalid date
      */
     private function collectAttributeData(Product $data): array
     {
@@ -269,13 +265,6 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
                 $attrData[$code] = $this->toDate($data->$property, $code);
             }
         }
-        foreach ($data->customAttributesWrite ?? [] as $code => $value) {
-            $code = (string) $code;
-            if (in_array($code, self::PROTECTED_ATTRIBUTE_CODES, true)) {
-                throw new Mage_Core_Exception_Input()->addError($code, "Attribute '{$code}' cannot be set via customAttributes; use the dedicated field.");
-            }
-            $attrData[$code] = $value;
-        }
         // An attribute that this install does not have, such as gtin on an old install, is skipped
         foreach (array_keys($attrData) as $code) {
             $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $code);
@@ -284,6 +273,29 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             }
         }
         return $attrData;
+    }
+
+    /**
+     * Return the values of the customAttributes map, by code: the user-defined attributes without a dedicated field.
+     * A user-defined attribute must be in the set of $product, because the nightly eav_clean_orphaned_records cron
+     * deletes a value whose attribute is not in the set.
+     *
+     * @return array<string, mixed>
+     * @throws Mage_Core_Exception_Input
+     */
+    private function collectCustomAttributeData(Mage_Catalog_Model_Product $product, Product $data): array
+    {
+        if (empty($data->customAttributes)) {
+            return [];
+        }
+        $values = new \Maho\DataObject();
+        CustomAttributes::apply(
+            $values,
+            $data->customAttributes,
+            Product::customAttributeDefinitions(),
+            array_keys(Product::customAttributeDefinitions($product)),
+        );
+        return $values->getData();
     }
 
     /**

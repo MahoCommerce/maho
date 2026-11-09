@@ -48,7 +48,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         $name = $operation->getName();
         $isGraphQl = in_array($name, ['create', 'update', 'delete', 'validate'], true);
         $input = $isGraphQl ? $context['args']['input'] ?? [] : ($operation instanceof Delete ? [] : $context['request']?->toArray() ?? []);
-        $id = (int) ($isGraphQl ? $input['id'] ?? 0 : $uriVariables['id'] ?? 0);
+        $id = $isGraphQl ? $this->parseGraphQlId($input['id'] ?? null) : (int) ($uriVariables['id'] ?? 0);
 
         return match (true) {
             str_contains($name, 'validate') => $this->validate((string) ($input['code'] ?? ''), isset($input['cartId']) ? (int) $input['cartId'] : null),

@@ -35,6 +35,8 @@ class Mage_Core_Model_Design_Content_Bundle
     public const TAILWIND_BINARY = 'node_modules/.bin/tailwindcss';
     /** Seconds before a queued build runs, so the saves of an import give one build. */
     public const BUILD_DELAY = 60;
+    /** Seconds before the build that a save of content queues runs. */
+    public const SAVE_DELAY = 10;
     public const BUILD_TIMEOUT = 600;
 
     public const STATUS_BUILT = 'built';
@@ -42,7 +44,7 @@ class Mage_Core_Model_Design_Content_Bundle
     public const STATUS_EMPTY = 'empty';
     public const STATUS_FAILED = 'failed';
 
-    /** @var array<string, array{file: ?string, tokens: string, styles: string, failed?: string}>|null */
+    /** @var array<string, array{file: ?string, tokens: string, styles: string, failed?: string, stat?: ?string}>|null */
     protected ?array $manifest = null;
 
     /**
@@ -138,6 +140,9 @@ class Mage_Core_Model_Design_Content_Bundle
 
             $file = $this->compile($binary, $workDir, $theme, $paths['entry']);
             if ($file === null) {
+                if (($previous['failed'] ?? null) !== $stylesHash) {
+                    $this->notifyFailure($theme);
+                }
                 // The store keeps the previous file. A save tries again, the cron job only after a new styles.css
                 $built[$theme] = ['failed' => $stylesHash] + ($previous ?? ['file' => null, 'tokens' => '', 'styles' => '']);
                 $status[$theme] = self::STATUS_FAILED;
@@ -188,6 +193,22 @@ class Mage_Core_Model_Design_Content_Bundle
         $file = self::FOLDER . "/{$name}-" . substr(hash('xxh128', $css), 0, 16) . '.css';
         Mage::getStorage(self::MOUNT)->moveAtomic($file, $css);
         return $file;
+    }
+
+    /**
+     * Tell the administrators, through the admin inbox, that the build of $theme failed.
+     */
+    protected function notifyFailure(string $theme): void
+    {
+        $helper = Mage::helper('core');
+        if (!$helper->isModuleEnabled('Mage_AdminNotification')) {
+            return;
+        }
+        Mage::helper('adminnotification')->notifyAdmin(
+            Mage_AdminNotification_Model_Inbox::SEVERITY_MAJOR,
+            $helper->__('The Tailwind build of the content failed for the theme %s', $theme),
+            $helper->__('The storefront keeps its previous stylesheet, so a new class in the content has no effect. The system log has the output of Tailwind. Run "%s" to try again.', './maho theme:content:build'),
+        );
     }
 
     /**
@@ -298,7 +319,15 @@ class Mage_Core_Model_Design_Content_Bundle
         if (!str_starts_with($stylesFile, $skinDir) || !str_ends_with($stylesFile, $suffix)) {
             return null;
         }
-        $entry = $manifest[substr($stylesFile, strlen($skinDir), -strlen($suffix))] ?? null;
+        $theme = substr($stylesFile, strlen($skinDir), -strlen($suffix));
+        $entry = $manifest[$theme] ?? null;
+        if ($entry === null) {
+            return null;
+        }
+        if (($entry['stat'] ?? null) !== $this->getStatKey($stylesFile)) {
+            // The flag has the file even when the cache dropped it, so a styles.css that goes back gets its copy again
+            $entry = $this->refreshManifest()[$theme] ?? null;
+        }
         if ($entry === null || $entry['file'] === null) {
             return null;
         }
@@ -341,7 +370,7 @@ class Mage_Core_Model_Design_Content_Bundle
      * Queue a build, and record the time of the request. A build that started before this
      * time queues one more build when it ends. Nothing happens without the Tailwind CLI.
      */
-    public function queueBuild(): void
+    public function queueBuild(int $delaySeconds = self::BUILD_DELAY): void
     {
         if ($this->getTailwindBinary() === null) {
             return;
@@ -352,7 +381,7 @@ class Mage_Core_Model_Design_Content_Bundle
             ->save();
         \Maho\Queue\QueueManager::dispatch(
             new Mage_Core_Model_Design_Content_BuildMessage(),
-            delaySeconds: self::BUILD_DELAY,
+            delaySeconds: $delaySeconds,
             queue: self::QUEUE_NAME,
             dedupeKey: self::QUEUE_NAME,
         );
@@ -370,10 +399,10 @@ class Mage_Core_Model_Design_Content_Bundle
      * The manifest from the cache, or from the database when the cache has no entry. A file
      * that comes from another version of the committed css/styles.css, such as after a deploy,
      * or that the mount does not have, such as after a restore of the database alone, is left
-     * out, so the head links the committed file. The check runs when the cache is filled,
-     * not on each page.
+     * out, so the head links the committed file. Each entry also records the stat key of its
+     * css/styles.css, so getUrl() checks the file again when the key changes.
      *
-     * @return array<string, array{file: ?string, tokens: string, styles: string, failed?: string}>
+     * @return array<string, array{file: ?string, tokens: string, styles: string, failed?: string, stat?: ?string}>
      */
     public function getManifest(): array
     {
@@ -393,19 +422,59 @@ class Mage_Core_Model_Design_Content_Bundle
             }
         }
 
-        $manifest = $this->loadManifest();
-        $mount = Mage::getStorage(self::MOUNT);
-        foreach ($manifest as $theme => $entry) {
-            $stylesFile = $this->getSkinDir() . "/{$theme}/" . self::STYLES_FILE;
-            if ($entry['file'] !== null && (!is_file($stylesFile)
-                || hash_file('xxh128', $stylesFile) !== $entry['styles']
-                || !$mount->fileExists($entry['file']))
-            ) {
-                $manifest[$theme]['file'] = null;
-            }
+        return $this->refreshManifest();
+    }
+
+    /**
+     * Check each entry of the manifest in the flag, and put the result in the cache. When a
+     * build saved a new manifest after this method read the flag, the cache entry goes, so the
+     * cache cannot keep the old manifest.
+     *
+     * @return array<string, array{file: ?string, tokens: string, styles: string, failed?: string, stat: ?string}>
+     */
+    protected function refreshManifest(): array
+    {
+        $source = $this->loadManifest();
+        $manifest = [];
+        foreach ($source as $theme => $entry) {
+            $manifest[$theme] = $this->checkEntry($entry, $this->getSkinDir() . "/{$theme}/" . self::STYLES_FILE);
         }
         Mage::app()->saveCache(Mage::helper('core')->jsonEncode($manifest), self::CACHE_ID, [Mage_Core_Model_Config::CACHE_TAG]);
+        if ($this->loadManifest() !== $source) {
+            Mage::app()->removeCache(self::CACHE_ID);
+        }
         return $this->manifest = $manifest;
+    }
+
+    /**
+     * $entry with the stat key of $stylesFile, and with no file when the file does not come
+     * from the current $stylesFile or is not on the mount.
+     *
+     * @param array{file: ?string, tokens: string, styles: string, failed?: string, stat?: ?string} $entry
+     * @return array{file: ?string, tokens: string, styles: string, failed?: string, stat: ?string}
+     */
+    protected function checkEntry(array $entry, string $stylesFile): array
+    {
+        $entry['stat'] = $this->getStatKey($stylesFile);
+        if ($entry['file'] !== null && ($entry['stat'] === null
+            || hash_file('xxh128', $stylesFile) !== $entry['styles']
+            || !Mage::getStorage(self::MOUNT)->fileExists($entry['file']))
+        ) {
+            $entry['file'] = null;
+        }
+        return $entry;
+    }
+
+    /**
+     * The modification time, change time, size and inode of $file, or null when it does not
+     * exist. Each write sets the change time, also a copy that keeps the modification time. When
+     * the key changes, the caller compares the hash, because a copy of the same file changes the time.
+     */
+    protected function getStatKey(string $file): ?string
+    {
+        clearstatcache();
+        $stat = @stat($file);
+        return $stat === false ? null : "{$stat['mtime']}-{$stat['ctime']}-{$stat['size']}-{$stat['ino']}";
     }
 
     /**

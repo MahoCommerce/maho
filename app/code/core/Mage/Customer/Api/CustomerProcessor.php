@@ -35,7 +35,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $args = $context['args']['input'] ?? [];
 
         return match (true) {
-            $operationName === 'update_profile' => $this->updateProfile($data->firstname, $data->lastname, $data->email !== '' ? $data->email : null, $this->extractProfileFields($data)),
+            $operationName === 'update_profile' => $this->updateProfile($data->firstname, $data->lastname, $data->email !== '' ? $data->email : null, $this->extractProfileFields($data), $data->customAttributes),
             $operation instanceof Put && isset($uriVariables['id']) => $this->updateCustomerAdmin((int) $uriVariables['id'], $data),
             $operationName === 'change_password' => $this->changePassword($data->currentPassword ?? '', $data->newPassword ?? ''),
             $operationName === 'forgot_password_rest', $operationName === 'forgotPassword' => $this->forgotPassword($args),
@@ -44,7 +44,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             $operation instanceof Post => $this->createCustomer($data),
             $operationName === 'quickCreate' => $this->createCustomerQuick($context['args']['input'] ?? $context['args'] ?? []),
             $operationName === 'login' => $this->customerLogin($args),
-            $operationName === 'update' => $this->updateProfile($args['firstName'] ?? null, $args['lastName'] ?? null, $args['email'] ?? null),
+            $operationName === 'update' => $this->updateProfile($args['firstName'] ?? null, $args['lastName'] ?? null, $args['email'] ?? null, customAttributes: $args['customAttributes'] ?? null),
             $operationName === 'changePassword' => $this->changePassword($args['currentPassword'] ?? '', $args['newPassword'] ?? ''),
             // A stateless API has no session: the client logs out when it drops its tokens
             $operationName === 'logout' => new Customer(),
@@ -89,6 +89,12 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             $customer->setData($field, $value);
         }
         $this->applyAdminOnlyFields($customer, $data);
+        // A registration takes the attributes of the registration form, as the storefront does
+        CustomAttributes::apply(
+            $customer,
+            $isPrivileged ? 'adminhtml_customer' : 'customer_account_create',
+            $data->customAttributes ?? [],
+        );
         if ($data->isActive === null) {
             $customer->setData('is_active', 1);
         }
@@ -165,6 +171,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
      *
      * @param array<string, mixed> $profile Optional name-part/gender/dob fields; a null
      *                                      value clears the attribute, an absent key is untouched
+     * @param array<string, mixed>|null $customAttributes the values of the Customer Account Edit form
      */
     private function updateProfile(
         ?string $firstName,
@@ -172,6 +179,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         #[\SensitiveParameter]
         ?string $email,
         array $profile = [],
+        ?array $customAttributes = null,
     ): Customer {
         $customer = $this->getService()->requireById($this->requireCustomerId());
         if ($firstName !== null) {
@@ -185,6 +193,9 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         }
         foreach ($profile as $field => $value) {
             $customer->setData($field, $value);
+        }
+        if ($customAttributes !== null) {
+            CustomAttributes::apply($customer, 'customer_account_edit', $customAttributes);
         }
 
         return Customer::fromModel($this->getService()->updateAccount($customer));
@@ -218,6 +229,9 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             $customer->setGroupId($data->groupId);
         }
         $this->applyAdminOnlyFields($customer, $data);
+        if ($data->customAttributes !== null) {
+            CustomAttributes::apply($customer, 'adminhtml_customer', $data->customAttributes);
+        }
 
         return Customer::fromModel($this->getService()->save($customer));
     }

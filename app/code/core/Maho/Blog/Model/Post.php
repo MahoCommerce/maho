@@ -8,6 +8,10 @@
 
 declare(strict_types=1);
 
+/**
+ * @method Maho_Blog_Model_Resource_Post getResource()
+ * @method Maho_Blog_Model_Resource_Post _getResource()
+ */
 class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
 {
     public const ENTITY = 'blog_post';
@@ -20,21 +24,6 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
     #[\Override]
     protected $_cacheTag = self::ENTITY;
 
-    /**
-     * Static attributes that are stored directly in the main entity table
-     */
-    protected array $_staticAttributes = [
-        'title',
-        'url_key',
-        'is_active',
-        'publish_date',
-        'content',
-        'short_content',
-        'meta_description',
-        'meta_keywords',
-        'meta_title',
-        'meta_robots',
-    ];
 
     #[\Override]
     protected function _construct()
@@ -89,7 +78,7 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
      */
     public function isStaticAttribute(string $attributeCode): bool
     {
-        return in_array($attributeCode, $this->_staticAttributes, true);
+        return in_array($attributeCode, $this->getStaticAttributes(), true);
     }
 
     /**
@@ -97,7 +86,30 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
      */
     public function getStaticAttributes(): array
     {
-        return $this->_staticAttributes;
+        return $this->_getResource()->getStaticAttributeCodes();
+    }
+
+    public function getAttributeSetId(): ?int
+    {
+        $value = $this->getData('attribute_set_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAttributeSetId(?int $value): static
+    {
+        return $this->setData('attribute_set_id', $value);
+    }
+
+    /**
+     * The attributes of the set of this record, keyed by code.
+     *
+     * @return array<string, Maho_Blog_Model_Resource_Eav_Attribute>
+     */
+    public function getAttributes(): array
+    {
+        return $this->_getResource()
+            ->loadAllAttributes($this)
+            ->getSortedAttributes($this->getAttributeSetId() ?: null);
     }
 
     /**

@@ -48,7 +48,8 @@ class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
         /** @var Mage_Eav_Model_Entity_Attribute_Group $group */
         foreach ($groups as $group) {
             $newGroup = clone $group;
-            $newGroup->setId(null)
+            $newGroup->setStoreLabels($group->getStoreLabels())
+                ->setId(null)
                 ->setAttributeSetId($this->getId())
                 ->setDefaultId($group->getDefaultId());
 
@@ -102,6 +103,10 @@ class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
                     ->setAttributeGroupName($group[1])
                     ->setAttributeSetId($this->getId())
                     ->setSortOrder($group[2]);
+                // The labels for each store view are optional, so an older client keeps the saved ones
+                if (isset($group[3]) && is_array($group[3])) {
+                    $modelGroup->setStoreLabels($group[3]);
+                }
 
                 if ($data['attributes']) {
                     foreach ($data['attributes'] as $attribute) {

@@ -390,6 +390,10 @@ class DataObject implements ArrayAccess, JsonSerializable
     public function setDataUsingMethod($key, $args = [])
     {
         $method = 'set' . $this->_camelize($key);
+        if (!method_exists($this, $method)) {
+            // __call builds the key from the camelized method name, which drops the underscore in floor_2nd
+            return $this->setData($this->_underscore($key), $args);
+        }
         $this->$method($args);
         return $this;
     }
@@ -404,6 +408,9 @@ class DataObject implements ArrayAccess, JsonSerializable
     public function getDataUsingMethod($key, $args = null)
     {
         $method = 'get' . $this->_camelize($key);
+        if (!method_exists($this, $method)) {
+            return $this->getData($this->_underscore($key), $args);
+        }
         return $this->$method($args);
     }
 

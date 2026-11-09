@@ -42,7 +42,7 @@ class Mage_Catalog_Service_Category
     }
 
     /**
-     * Return a new category under $parentId, with the values of the admin scope and the default attribute set.
+     * Return a new category under $parentId, with the values of the admin scope and the attribute set of the parent.
      *
      * @param list<int>|null $storeIds with a list, the parent must be in the tree of one of these store views
      * @throws Mage_Core_Exception when the parent does not exist
@@ -59,7 +59,7 @@ class Mage_Catalog_Service_Category
         /** @var Category $category */
         $category = Mage::getModel('catalog/category');
         return $category->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID)
-            ->setAttributeSetId((int) $category->getDefaultAttributeSetId())
+            ->setAttributeSetId($parent->getAttributeSetId() ?: (int) $category->getDefaultAttributeSetId())
             ->setParentId((int) $parent->getId())
             ->setPath($parent->getPath());
     }
@@ -156,18 +156,19 @@ class Mage_Catalog_Service_Category
 
     /**
      * Check and save $category. The transport puts its input into the category first. An attribute of
-     * USE_CONFIG_CODES that holds null takes the value of the configuration.
+     * USE_CONFIG_CODES that holds null takes the value of the configuration. Each error of a user-defined
+     * attribute names the attribute code after $customAttributePrefix, for example customAttributes. for the API.
      *
      * @throws Mage_Core_Exception_Input with one error for each invalid attribute
      * @throws Mage_Core_Exception when the default sort order is not one of the available sort orders
      */
-    public function save(Category $category): Category
+    public function save(Category $category, string $customAttributePrefix = ''): Category
     {
         $availableSortBy = $category->getData('available_sort_by');
         if (is_string($availableSortBy) && $availableSortBy !== '') {
             $category->setData('available_sort_by', explode(',', $availableSortBy));
         }
-        $this->validate($category);
+        $this->validate($category, $customAttributePrefix);
         $category->save();
         return $category;
     }
@@ -223,11 +224,12 @@ class Mage_Catalog_Service_Category
     }
 
     /**
-     * Check each value that changed, then the required attributes, the backends of the attributes and the name.
+     * Check each value that changed, then each attribute of the set of the category: a required value, a unique value
+     * and the check of its backend.
      *
      * @throws Mage_Core_Exception_Input
      */
-    private function validate(Category $category): void
+    private function validate(Category $category, string $customAttributePrefix): void
     {
         $errors = new Mage_Core_Exception_Input();
         foreach ($this->getValueErrors($category) as $code => $message) {
@@ -235,26 +237,50 @@ class Mage_Catalog_Service_Category
         }
         $errors->throwIfErrors();
 
-        $category->setData('use_post_data_config', array_values(array_filter(
-            self::USE_CONFIG_CODES,
-            fn(string $code): bool => $category->getData($code) === null,
-        )));
-        try {
-            $result = $category->validate();
-        } catch (Mage_Eav_Model_Entity_Attribute_Exception $e) {
-            $result = [(string) $e->getAttributeCode() => $e->getMessage()];
-        } finally {
-            $category->unsetData('use_post_data_config');
-        }
-        $result = $result === true ? [] : $result;
-        if (is_string($category->getName()) && trim($category->getName()) === '') {
-            $result['name'] = true;
+        // The save gives a new category the default values, but the check runs before the save
+        if (!$category->getId()) {
+            foreach ($category->getAttributes() as $code => $attribute) {
+                $default = $attribute->getBackend()->getDefaultValue();
+                if (!$category->hasData($code) && $default) {
+                    $category->setData($code, $default);
+                }
+            }
         }
 
-        foreach ($result as $code => $error) {
-            $errors->addError((string) $code, $error === true
-                ? Mage::helper('catalog')->__('Attribute "%s" is required.', $category->getResource()->getAttribute($code)->getFrontend()->getLabel())
-                : (string) $error);
+        $useConfig = array_values(array_filter(
+            self::USE_CONFIG_CODES,
+            fn(string $code): bool => $category->getData($code) === null,
+        ));
+        $isAdminScope = (int) $category->getStoreId() === Mage_Core_Model_App::ADMIN_STORE_ID;
+        $category->setData('use_post_data_config', $useConfig);
+        try {
+            foreach ($category->getAttributes() as $code => $attribute) {
+                $value = $category->getData($code);
+                // In a store view, false means that the store view uses the default value
+                if (!$isAdminScope && $value === false) {
+                    continue;
+                }
+                $field = $attribute->getIsUserDefined() ? $customAttributePrefix . $code : (string) $code;
+                $required = Mage::helper('catalog')->__('Attribute "%s" is required.', (string) $attribute->getFrontend()->getLabel());
+                // The catalog takes only false as an empty value, so the backend accepts a blank text
+                if ($attribute->getIsRequired() && is_string($value) && trim($value) === '' && !in_array($code, $useConfig, true)) {
+                    $errors->addError($field, $required);
+                    continue;
+                }
+                try {
+                    $result = $attribute->getBackend()->validate($category);
+                } catch (Mage_Core_Exception $e) {
+                    $errors->addError($field, $e->getMessage());
+                    continue;
+                }
+                if ($result === false) {
+                    $errors->addError($field, $required);
+                } elseif (is_string($result)) {
+                    $errors->addError($field, $result);
+                }
+            }
+        } finally {
+            $category->unsetData('use_post_data_config');
         }
         $errors->throwIfErrors();
     }

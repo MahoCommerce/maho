@@ -186,7 +186,7 @@ User-role messages on `submitTask()` and the prompt on `submitImageTask()` go th
 | `pending` | Queued, awaiting cron pickup |
 | `processing` | Cron has picked it up and is calling the provider |
 | `complete` | Provider returned successfully; callback fired |
-| `failed` | Provider returned an error after `max_retries` attempts; callback fires with the error message in `$response` |
+| `failed` | An error that a retry cannot fix (for example a wrong API key or a missing setting), or any other error after `max_retries` attempts. The callback does not run |
 | `cancelled` | Cancelled by admin |
 
 ### Cron Behaviour
@@ -198,17 +198,13 @@ User-role messages on `submitTask()` and the prompt on `submitImageTask()` go th
 
 ### Callbacks
 
-When a task completes (or fails after exhausting retries), the configured callback class is instantiated and the method is called with the task and the response (or error message). The callback class **must implement `Maho_Ai_Model_TaskCallbackInterface`** - this is a deliberate guard against arbitrary class instantiation from a crafted task row.
+When a task completes, the configured callback class is instantiated and the method is called with the task and the response. The callback class **must implement `Maho_Ai_Model_TaskCallbackInterface`** - this is a deliberate guard against arbitrary class instantiation from a crafted task row.
 
 ```php
 class My_Module_Model_Callback implements Maho_Ai_Model_TaskCallbackInterface
 {
     public function onComplete(Maho_Ai_Model_Task $task, string $response): void
     {
-        if ($task->getData('status') === Maho_Ai_Model_Task::STATUS_FAILED) {
-            // $response holds the error message
-            return;
-        }
         $product = Mage::getModel('catalog/product')->load(/* ... */);
         $product->setData('description', $response)->save();
     }

@@ -29,14 +29,8 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
          * basing on how much shipping should be refunded.
          */
         $baseShippingAmount = (float) $creditmemo->getBaseShippingAmount();
-        $orderBaseShippingAmount = (float) $order->getBaseShippingAmount();
-        if ($baseShippingAmount && $orderBaseShippingAmount) {
-            $shippingRefundRatio = $baseShippingAmount / $orderBaseShippingAmount;
-            $baseShippingDiscount = $shippingRefundRatio * $order->getBaseShippingDiscountAmount();
-            $shippingDiscount = $shippingRefundRatio * $order->getShippingDiscountAmount();
-            $totalDiscountAmount += $shippingDiscount;
-            $baseTotalDiscountAmount += $baseShippingDiscount;
-        }
+        $totalDiscountAmount += $this->_getShippingShare($creditmemo, (float) $order->getShippingDiscountAmount(), $baseShippingAmount);
+        $baseTotalDiscountAmount += $this->_getShippingShare($creditmemo, (float) $order->getBaseShippingDiscountAmount(), $baseShippingAmount);
 
         /** @var Mage_Sales_Model_Order_Creditmemo_Item $item */
         foreach ($creditmemo->getAllItems() as $item) {

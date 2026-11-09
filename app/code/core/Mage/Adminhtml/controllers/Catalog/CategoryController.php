@@ -101,7 +101,8 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
                 if ($storeId && !$parent->getResource()->isInStore($parent, $storeId)) {
                     Mage::throwException(Mage::helper('catalog')->__('Parent category was not found.'));
                 }
-                $category->setPath($parent->getPath());
+                $category->setPath($parent->getPath())
+                    ->setAttributeSetId($parent->getAttributeSetId() ?: (int) $category->getDefaultAttributeSetId());
             }
         } catch (Mage_Core_Exception $e) {
             $error = $e->getMessage();
@@ -123,6 +124,20 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
         // Restore saved data in case of exception during save
         $data = Mage::getSingleton('adminhtml/session')->getCategoryData(true);
         $category->addData($data['general'] ?? []);
+
+        // The set select reloads the form with the fields of another set, and posts the values that the admin typed
+        $setId = (int) $this->getRequest()->getParam('set');
+        if ($setId) {
+            $posted = $this->getRequest()->getPost('general');
+            if (is_array($posted)) {
+                $category->addData(array_diff_key($posted, array_flip(['id', 'path', 'attribute_set_id'])));
+            }
+            try {
+                $category->assignAttributeSet($setId);
+            } catch (Mage_Core_Exception $e) {
+                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+            }
+        }
 
         $this->loadLayout();
 
@@ -229,6 +244,14 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
             // Add dynamic category data if present
             if (isset($data['category']) && is_array($data['category'])) {
                 $category->addData($data['category']);
+            }
+
+            // Without a posted set, an existing category keeps its set
+            $setId = (int) ($data['general']['attribute_set_id'] ?? 0);
+            if (!$setId && $category->getId() && $category->getOrigData('attribute_set_id')) {
+                $category->setAttributeSetId((int) $category->getOrigData('attribute_set_id'));
+            } else {
+                $category->assignAttributeSet($setId ?: null);
             }
 
             $this->_getService()->useDefault($category, array_map(strval(...), (array) $this->getRequest()->getPost('use_default', [])));

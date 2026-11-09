@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
+class Maho_Blog_Model_Resource_Category extends Maho_Blog_Model_Resource_Abstract
 {
     protected string $_storeTable;
     protected string $_postCategoryTable;
@@ -48,15 +48,38 @@ class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
         ];
     }
 
+    /**
+     * The codes of the attributes that are columns of the entity table.
+     *
+     * @return list<string>
+     */
     public function getStaticAttributeCodes(): array
     {
-        return Mage::getModel('blog/category')->getStaticAttributes();
+        return [
+            'parent_id',
+            'path',
+            'level',
+            'position',
+            'name',
+            'url_key',
+            'is_active',
+            'meta_title',
+            'meta_keywords',
+            'meta_description',
+            'meta_robots',
+        ];
     }
 
     #[\Override]
     protected function _beforeSave(\Maho\DataObject $object): self
     {
         $coreHelper = Mage::helper('core');
+
+        $object->setData('attribute_set_id', Mage::helper('blog')->getValidAttributeSetId(
+            (int) $object->getData('attribute_set_id'),
+            $this->getEntityType(),
+        ));
+        Mage::helper('blog')->sanitizeAttributeValues($object, $this->getEntityType());
 
         // Strip HTML tags from string fields
         $stringFields = ['name', 'url_key', 'meta_title', 'meta_keywords', 'meta_description'];

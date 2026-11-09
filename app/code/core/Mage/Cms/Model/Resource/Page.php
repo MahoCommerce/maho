@@ -139,6 +139,13 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
                 $errors->addError($field, Mage::helper('cms')->__('The value must be one of: %s', implode(', ', array_filter($values))));
             }
         }
+        try {
+            $this->prepareCustomAttributes($object);
+        } catch (Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $errors->addError($error['field'], $error['message']);
+            }
+        }
         $errors->throwIfErrors();
 
         if (!$this->getIsUniquePageToStores($object)) {
@@ -153,6 +160,146 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
         $object->setUpdateTime(Mage::app()->getLocale()->formatDateForDb('now'));
 
         return parent::_beforeSave($object);
+    }
+
+    /**
+     * Return the custom attributes of CMS pages that have a column and that the attribute set of the
+     * pages holds, keyed by code, in the order of the set. Every page uses the default set.
+     *
+     * @return array<string, Mage_Eav_Model_Entity_Attribute_Abstract>
+     */
+    public function getCustomAttributes(): array
+    {
+        $attributes = [];
+        foreach ($this->getCustomAttributeGroups() as ['attributes' => $groupAttributes]) {
+            foreach ($groupAttributes as $attribute) {
+                $attributes[(string) $attribute->getAttributeCode()] = $attribute;
+            }
+        }
+        return $attributes;
+    }
+
+    /**
+     * Return the groups of the attribute set of the pages in the order of the set, each with its
+     * custom attributes in the order of the group.
+     *
+     * @return list<array{group: Mage_Eav_Model_Entity_Attribute_Group, attributes: list<Mage_Eav_Model_Entity_Attribute_Abstract>}>
+     */
+    public function getCustomAttributeGroups(): array
+    {
+        try {
+            $setId = (int) Mage::getSingleton('eav/config')->getEntityType(Mage_Cms_Model_Page::ENTITY)->getDefaultAttributeSetId();
+            $all = Mage::getSingleton('eav/config')->getAttributes(Mage_Cms_Model_Page::ENTITY);
+        } catch (Mage_Core_Exception) {
+            // The install saves pages before the cms_setup upgrade adds the entity type
+            return [];
+        }
+        if (!$setId) {
+            return [];
+        }
+        $columns = $this->_getReadAdapter()->describeTable($this->getMainTable());
+        $byId = [];
+        foreach ($all as $attribute) {
+            if ($attribute->getIsUserDefined() && isset($columns[(string) $attribute->getAttributeCode()])) {
+                $byId[(int) $attribute->getId()] = $attribute;
+            }
+        }
+
+        $adapter = $this->_getReadAdapter();
+        $rows = $adapter->fetchAll(
+            $adapter->select()
+                ->from($this->getTable('eav/entity_attribute'), ['attribute_id', 'attribute_group_id'])
+                ->where('attribute_set_id = ?', $setId)
+                ->order(['sort_order', 'attribute_id']),
+        );
+        $byGroup = [];
+        foreach ($rows as $row) {
+            if (isset($byId[(int) $row['attribute_id']])) {
+                $byGroup[(int) $row['attribute_group_id']][] = $byId[(int) $row['attribute_id']];
+            }
+        }
+
+        $groups = [];
+        foreach (Mage::getResourceModel('eav/entity_attribute_group_collection')->setAttributeSetFilter($setId)->setSortOrder() as $group) {
+            $groups[] = ['group' => $group, 'attributes' => $byGroup[(int) $group->getId()] ?? []];
+        }
+        return $groups;
+    }
+
+    /**
+     * Turn the custom attribute values of $page into column values, and check the required and unique attributes.
+     * An attribute that $page does not hold keeps its stored value, and a new page gets its default value.
+     * Each error names the attribute code after $fieldPrefix, for example customAttributes. for the API.
+     *
+     * @throws Mage_Core_Exception_Input
+     */
+    public function prepareCustomAttributes(Mage_Core_Model_Abstract $page, string $fieldPrefix = ''): void
+    {
+        $helper = Mage::helper('eav');
+        $errors = new Mage_Core_Exception_Input();
+        foreach ($this->getCustomAttributes() as $code => $attribute) {
+            $label = (string) $attribute->getFrontend()->getLabel();
+            if (!$page->hasData($code)) {
+                if ($page->getId()) {
+                    continue;
+                }
+                $default = (string) $attribute->getDefaultValue();
+                if ($default === '') {
+                    if ($attribute->getIsRequired()) {
+                        $errors->addError($fieldPrefix . $code, $helper->__('"%s" is a required value.', $label));
+                    }
+                    continue;
+                }
+                $page->setData($code, $default);
+            }
+
+            $value = $page->getData($code);
+            if (is_array($value)) {
+                $value = implode(',', array_filter(array_map(strval(...), $value), fn(string $item): bool => $item !== ''));
+            }
+            if (is_bool($value)) {
+                $value = (int) $value;
+            }
+            if (is_string($value) && trim($value) === '') {
+                $value = null;
+            }
+            if ($value !== null && $attribute->getFrontendInput() === 'date') {
+                try {
+                    $value = Mage::app()->getLocale()->formatDateForDb($value, withTime: false);
+                } catch (Exception) {
+                    $errors->addError($fieldPrefix . $code, $helper->__('The value of "%s" must be a date.', $label));
+                    continue;
+                }
+            }
+            $length = $attribute->getColumnDefinition()['length'];
+            if ($length === 255 && $value !== null && mb_strlen((string) $value) > $length) {
+                $errors->addError($fieldPrefix . $code, $helper->__('"%s" length must be equal or less than %s characters.', $label, $length));
+                continue;
+            }
+            $page->setData($code, $value);
+
+            if ($value === null) {
+                if ($attribute->getIsRequired()) {
+                    $errors->addError($fieldPrefix . $code, $helper->__('"%s" is a required value.', $label));
+                }
+                continue;
+            }
+            if ($attribute->getIsUnique() && $this->isCustomAttributeValueUsed($code, $value, (int) $page->getId())) {
+                $errors->addError($fieldPrefix . $code, $helper->__('The value of attribute "%s" must be unique', $label));
+            }
+        }
+        $errors->throwIfErrors();
+    }
+
+    protected function isCustomAttributeValueUsed(string $code, mixed $value, int $pageId): bool
+    {
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from($this->getMainTable(), ['page_id'])
+            ->where($adapter->quoteIdentifier($code) . ' = ?', $value)
+            ->where('page_id != ?', $pageId)
+            ->limit(1);
+        return (bool) $adapter->fetchOne($select);
     }
 
     /**

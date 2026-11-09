@@ -119,7 +119,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             if ($methodCode === Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT) {
                 $returnUrl = Mage::getUrl('paypal/checkout/approveOrder', ['_secure' => true]);
                 $cancelUrl = Mage::getUrl('checkout/cart', ['_secure' => true]);
-                $shippingCallbackUrl = Mage::getUrl('paypal/checkout/shippingCallback', ['_secure' => true]);
+                $shippingCallbackUrl = Mage::helper('paypal')->getShippingCallbackUrl($quote);
             }
 
             $orderRequest = $builder->buildFromQuote(
@@ -354,9 +354,10 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             $shippingAddress = $data['shipping_address'] ?? [];
             $selectedOption = $data['shipping_option'] ?? null;
 
-            // Find quote by PayPal order ID
+            $token = $this->getRequest()->getParam('token');
             $quote = $this->_findQuoteByPaypalOrderId($paypalOrderId);
-            if (!$quote || !$quote->getId() || $quote->isVirtual()) {
+            if (!$quote || !$quote->getId() || $quote->isVirtual() || !is_string($token)
+                || !Mage::helper('paypal')->isValidShippingCallbackToken($quote, $token)) {
                 $this->getResponse()->setHttpResponseCode(422);
                 return;
             }

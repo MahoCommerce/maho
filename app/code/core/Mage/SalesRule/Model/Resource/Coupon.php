@@ -28,11 +28,7 @@ class Mage_SalesRule_Model_Resource_Coupon extends Mage_Core_Model_Resource_Db_A
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
-        if (!$object->getExpirationDate()) {
-            $object->setExpirationDate(null);
-        } elseif ($object->getExpirationDate() instanceof DateTimeInterface) {
-            $object->setExpirationDate($object->getExpirationDate()->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
-        }
+        $object->setExpirationDate($object->getExpirationDate() ?: null);
 
         // maintain single primary coupon per rule
         $object->setIsPrimary($object->getIsPrimary() ? 1 : null);

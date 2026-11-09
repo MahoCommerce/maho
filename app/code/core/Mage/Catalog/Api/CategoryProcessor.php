@@ -16,6 +16,7 @@ use Mage;
 use Mage_Catalog_Model_Category;
 use Mage_Catalog_Service_Category;
 use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Service\CustomAttributes;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -52,7 +53,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
             ->setIncludeInMenu(($data->includeInMenu ?? true) ? 1 : 0)
             ->setUrlKey($data->urlKey);
         $this->applyCategoryData($category, $data);
-        $service->save($category);
+        $service->save($category, 'customAttributes.');
         $this->logApiActivity('catalog/category', 'create', null, $category);
 
         return $this->refreshDto($category);
@@ -93,7 +94,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
 
         // A store view write stores only the fields of the request.
         $inherited = StoreScopeWrite::keepInheritedValues($category, $oldData, StoreScopeWrite::requestedCodes($data));
-        $service->save($category);
+        $service->save($category, 'customAttributes.');
         StoreScopeWrite::restoreInheritedValues($category, $oldData, $inherited);
         $this->logApiActivity('catalog/category', 'update', $oldData, $category);
 
@@ -102,6 +103,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
 
     private function applyCategoryData(Mage_Catalog_Model_Category $category, Category $data): void
     {
+        $category->assignAttributeSet($data->attributeSetId);
         $fields = [
             'description' => $data->description,
             'position' => $data->position,
@@ -129,7 +131,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
                 $category->setData($code, $this->toModelValue($code, $value));
             }
         }
-        $this->applyCustomAttributes($category, $data->customAttributesWrite ?? []);
+        $this->applyCustomAttributes($category, $data->customAttributes ?? []);
         if (!empty($data->productPositions)) {
             self::service()->setProductPositions($category, $data->productPositions);
         }
@@ -137,7 +139,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
 
     /**
      * Convert a value of the request into the value of the model attribute $code: an empty value clears the
-     * attribute. The service checks the value. The customAttributesWrite bag goes through here too.
+     * attribute. The service checks the value.
      */
     private function toModelValue(string $code, mixed $value): mixed
     {
@@ -188,33 +190,24 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Codes that a dedicated DTO field sets, and the columns of the tree. customAttributesWrite cannot set them.
-     */
-    private const PROTECTED_ATTRIBUTE_CODES = [
-        'entity_id', 'entity_type_id', 'attribute_set_id', 'parent_id', 'path',
-        'level', 'position', 'children_count', 'children', 'all_children',
-        'url_path', 'created_at', 'updated_at',
-    ];
-
-    /**
-     * Set the attributes of customAttributesWrite. A code that is not a category attribute is skipped, so that a
-     * typing error cannot write another column.
+     * Apply the values of the customAttributes map: the user-defined attributes of the category. A
+     * user-defined attribute must be in the set of the category, because the nightly
+     * eav_clean_orphaned_records cron deletes a value whose attribute is not in the set.
      *
      * @param array<string, mixed> $attributes
+     * @throws \Mage_Core_Exception_Input
      */
     private function applyCustomAttributes(Mage_Catalog_Model_Category $category, array $attributes): void
     {
-        $eavConfig = Mage::getSingleton('eav/config');
-        foreach ($attributes as $code => $value) {
-            $code = (string) $code;
-            if (in_array($code, self::PROTECTED_ATTRIBUTE_CODES, true)) {
-                throw new \Mage_Core_Exception_Input()->addError('custom_attributes_write', "Attribute '{$code}' cannot be set via customAttributes; use the dedicated field.");
-            }
-            $attribute = $eavConfig->getAttribute(Mage_Catalog_Model_Category::ENTITY, $code);
-            if ($attribute && $attribute->getId()) {
-                $category->setData($code, $this->toModelValue($code, $value));
-            }
+        if ($attributes === []) {
+            return;
         }
+        CustomAttributes::apply(
+            $category,
+            $attributes,
+            CustomAttributes::userDefined(Mage_Catalog_Model_Category::ENTITY),
+            array_keys($category->getAttributes()),
+        );
     }
 
     /**

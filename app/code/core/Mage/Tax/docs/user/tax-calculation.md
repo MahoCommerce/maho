@@ -100,6 +100,12 @@ gross price changes with the address of the customer, and it can change at check
 With **Enable Cross Border Trade** set to Yes, the gross price stays the same, and only the share
 of tax in it changes.
 
+When **Catalog Prices** is **Excluding Tax**, the store rounds the net price to cents before it adds
+the tax. The product page, the cart, the structured data and the product feeds use the same rule. So
+a net price of 11.4754 is a net price of 11.48, and with a rate of 22% the gross price is 11.48 +
+2.53 = 14.01. A net price with two decimals cannot give every gross price: 11.47 gives 13.99. If your
+prices end in .00 with the tax, set **Catalog Prices** to **Including Tax** and enter the gross price.
+
 What the customer sees is a separate choice, in **Price Display Settings** (**Display Product
 Prices In Catalog**, **Display Shipping Prices**), **Shopping Cart Display Settings** and **Orders,
 Invoices, Credit Memos Display Settings**. These settings change how prices show, not the tax
@@ -126,6 +132,7 @@ amount.
 | The gross price changes at checkout, with prices including tax | **Enable Cross Border Trade** is No, so the store applies the rate of the customer | Set **Enable Cross Border Trade** to Yes if every customer must pay the same gross price |
 | The tax changed after the customer entered a VAT number | **Enable Automatic Assignment to Customer Group** moved the customer to another group | Check the groups in **Create New Account Options** and their tax classes |
 | Shipping has no tax | **Tax Class for Shipping** is empty | Select a product tax class for shipping, and add a tax rule for it |
+| A gross price is 14.01 when you expected 14.00 | **Catalog Prices** is **Excluding Tax**, and the store adds the tax to the net price rounded to cents | Set **Catalog Prices** to **Including Tax** and enter the gross price |
 | The order tax and the sum of the line taxes differ by a cent | The rounding of **Tax Calculation Method Based On** | Use the same method for all your stores. **Total** rounds once on the total |
 | A downloadable product has the tax of the wrong country | The cart has no shipping address, so the store uses the billing address | Check the billing address of the order |
 

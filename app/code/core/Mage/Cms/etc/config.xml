@@ -8,7 +8,7 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Mage_Cms>
-            <version>2.0.0</version>
+            <version>2.0.1</version>
         </Mage_Cms>
     </modules>
     <frontend>
@@ -119,6 +119,9 @@ SPDX-License-Identifier: AFL-3.0
                     <block_store>
                         <table>cms_block_store</table>
                     </block_store>
+                    <eav_attribute>
+                        <table>cms_eav_attribute</table>
+                    </eav_attribute>
                 </entities>
             </cms_resource>
         </models>

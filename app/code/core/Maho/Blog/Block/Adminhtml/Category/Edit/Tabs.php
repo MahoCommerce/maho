@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-class Maho_Blog_Block_Adminhtml_Category_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tabs
+class Maho_Blog_Block_Adminhtml_Category_Edit_Tabs extends Maho_Blog_Block_Adminhtml_Edit_Tabs
 {
     public function __construct()
     {
@@ -19,8 +19,21 @@ class Maho_Blog_Block_Adminhtml_Category_Edit_Tabs extends Mage_Adminhtml_Block_
     }
 
     #[\Override]
+    public function getEntity(): Maho_Blog_Model_Category
+    {
+        return Mage::registry('blog_category');
+    }
+
+    #[\Override]
+    protected function getFieldNameSuffix(): ?string
+    {
+        return 'category';
+    }
+
+    #[\Override]
     protected function _beforeToHtml()
     {
+        $this->addAttributeTabs();
         $this->addTab('posts_section', [
             'label' => Mage::helper('blog')->__('Posts'),
             'title' => Mage::helper('blog')->__('Category Posts'),

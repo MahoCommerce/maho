@@ -87,7 +87,17 @@ The product sub-resources and the admin product page use the same rules. A tier 
 | GET | `/attribute-sets` | Admin/API | List product attribute sets |
 | GET | `/attribute-sets/{id}` | Admin/API | Get an attribute set and its attribute codes |
 
-The product write endpoints additionally accept `attributeSetId`, `taxClassId`, and a generic `customAttributesWrite` map (`{attribute_code: value}`) for any catalog_product EAV attribute without a dedicated field; system columns (`sku`, `type_id`, `status`, …) are rejected.
+The product write endpoints additionally accept `attributeSetId`, `taxClassId`, and a `customAttributes` map (`{attribute_code: value}`) of the user-defined attributes without a dedicated field, in the attribute set of the product. A system attribute or an unknown code is a 422. A read returns the same map.
+
+**Custom attributes of other entity types** (read-only) <span class="version-badge">v27.1+</span>:
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/custom-attributes?entityType=…` | Admin/API | List the attributes that an admin added to `catalog_category`, `customer`, `customer_address`, `cms_page`, `blog_post` or `blog_category`: code, input type, options and the attribute sets that hold them |
+| GET | `/custom-attributes/{id}` | Admin/API | Get one custom attribute |
+| GET | `/customer-forms/{form}` | Public | List the custom fields that a storefront form (`customer_account_create`, `customer_account_edit`, `checkout_register`, `customer_address_edit` or `customer_register_address`) shows to the customer group of the caller: label in the store view, input type, options, required flag and group title |
+
+The `customAttributes` field of products, categories, customers, addresses, CMS pages, blog posts and blog categories holds the user-defined attributes only, and a read returns the same shape that a write takes: a dropdown is an option ID, a multiselect a list of option IDs, a Yes/No a boolean, a number an integer or a float, and a date `Y-m-d`. An error of a value names the field `customAttributes.<code>`. The OpenAPI document and the MCP tools list each attribute of the entity type as a typed property of `customAttributes`, with the option IDs of a dropdown as an enum. An order address also has the read-only `customAttributeLabels`: the option labels that the customer saw. On customers, addresses and carts, a customer token or a guest reads and writes only the attributes of the storefront forms: registration, account edit, and address book and checkout. The cart address setters and the addresses in the place-order body take `customAttributes` too, and must send each required attribute of the Address Book and Checkout form.
 
 ---
 
@@ -198,6 +208,8 @@ The checkout sub-resources mirror the guest-cart flow so a logged-in customer ca
 | POST | `/orders` | None | Place an order from a customer or guest cart |
 | POST | `/carts/{id}/place-order` | Customer/Admin/API | Place an order from the authenticated customer cart |
 | POST | `/guest-carts/{id}/place-order` | None | Place an order from a guest cart |
+
+**Customer fields of a guest order** <span class="version-badge">v27.1+</span>: the place-order body of a guest takes `customerCustomAttributes`, the values of the custom attributes of the **Checkout Registration** form (`{attribute_code: value}`), and must send each required one. The order keeps them in `customerCustomAttributes`. A customer order takes the values of the customer account and refuses the field with a 422. The GraphQL `placeOrder` mutation takes the same argument.
 
 **Checkout addresses:** the `shippingAddress` / `billingAddress` objects in the place-order body accept either a numeric `regionId` **or** a region `region` name - for countries with a fixed region list (US, CA, ...) the API resolves the `region_id` from the code (or name) against `countryId` when `regionId` is omitted, so a client can send `"region": "California"` without looking the ID up first. On a match the returned address carries the canonical region name.
 
@@ -371,7 +383,7 @@ Omit `items` to ship every remaining item on the order. Each track entry needs a
 - `comment`, Optional refund note.
 - `adjustmentPositive`, Additional positive adjustment (add to refund).
 - `adjustmentNegative`, Negative adjustment (reduce refund).
-- `offlineRefund`, `true` (default) for offline refund, `false` to trigger payment gateway refund.
+- `offlineRefund`, `true` (default) for offline refund. An online refund needs the invoice of the capture, which the API cannot name yet, so `false` is refused with a 422 asking for an offline refund.
 
 ---
 

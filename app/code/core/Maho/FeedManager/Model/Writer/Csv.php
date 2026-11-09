@@ -144,7 +144,12 @@ class Maho_FeedManager_Model_Writer_Csv implements Maho_FeedManager_Model_Writer
      */
     protected function _writeRow(array $row): void
     {
-        fputcsv($this->_handle, $row, $this->_delimiter, $this->_enclosure, escape: '\\');
+        if ($this->_enclosure === '') {
+            fwrite($this->_handle, implode($this->_delimiter, $row) . "\n");
+            return;
+        }
+
+        fputcsv($this->_handle, $row, $this->_delimiter, $this->_enclosure, escape: '');
     }
 
     /**
@@ -154,6 +159,16 @@ class Maho_FeedManager_Model_Writer_Csv implements Maho_FeedManager_Model_Writer
     {
         $this->_delimiter = $delimiter;
         return $this;
+    }
+
+    public function getDelimiter(): string
+    {
+        return $this->_delimiter;
+    }
+
+    public function getEnclosure(): string
+    {
+        return $this->_enclosure;
     }
 
     /**

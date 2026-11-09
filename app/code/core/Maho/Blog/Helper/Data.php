@@ -11,6 +11,46 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
     #[\Override]
     protected $_moduleName = 'Maho_Blog';
 
+    /**
+     * Return $setId, or the default set of $entityType when $setId is 0.
+     *
+     * @throws Mage_Core_Exception when $setId is a set of another entity type
+     */
+    public function getValidAttributeSetId(int $setId, Mage_Eav_Model_Entity_Type $entityType): int
+    {
+        if (!$setId) {
+            return (int) $entityType->getDefaultAttributeSetId();
+        }
+        Mage::helper('eav')->assertSetOfType($setId, $entityType);
+        return $setId;
+    }
+
+    /**
+     * Sanitize $fields of $object, and the values of its attributes that allow HTML or use the
+     * WYSIWYG editor. The directives stay, for the processor of the post content to resolve.
+     *
+     * @param list<string> $fields
+     */
+    public function sanitizeAttributeValues(\Maho\DataObject $object, Mage_Eav_Model_Entity_Type $entityType, array $fields = []): void
+    {
+        foreach (Mage::getSingleton('eav/config')->getAttributes($entityType) as $attribute) {
+            if ($attribute->getIsUserDefined()
+                && in_array($attribute->getFrontendInput(), ['text', 'textarea'], true)
+                && ($attribute->getData('is_html_allowed_on_front') || $attribute->getData('is_wysiwyg_enabled'))
+            ) {
+                $fields[] = (string) $attribute->getAttributeCode();
+            }
+        }
+        // Links get target="_blank": blog content is article-style, so an outbound link does not
+        // take the reader away from the post
+        Mage::getSingleton('core/input_filter_maliciousCode')->sanitizeFields(
+            $object,
+            array_values(array_unique($fields)),
+            applyLinkFilter: true,
+            renderer: Mage::helper('cms')->getPageTemplateProcessor(),
+        );
+    }
+
     public function isEnabled(): bool
     {
         /** @var Maho_Blog_Service_Post $service */

@@ -16,6 +16,7 @@ use Maho\Docs\Library;
 use Maho\Docs\Page;
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
+use Symfony\AI\Platform\Tool\ToolEffectHints;
 
 /**
  * The pages come from the files of this installation, so a store reads the guide of its own
@@ -34,9 +35,15 @@ final class DocsTool
         return $this->pages() !== [];
     }
 
+    /** The tool reads the user guide. It changes no store data. */
+    public static function effectHints(): ToolEffectHints
+    {
+        return new ToolEffectHints(readOnlyHint: true, destructiveHint: false, openWorldHint: false);
+    }
+
     public function tool(): Tool
     {
-        return ToolDefinition::create(
+        return new Tool(
             new ExecutionReference(self::class, 'read'),
             self::NAME,
             'The user guide of this store, for the people who work in the admin and run the server: how a feature works, the order in which the store picks a value, and the steps in the admin. Before you answer a question about how a feature works, call it without a page: it returns the pages of each module, with a description of each. Then read the page of the feature, and answer from it.',
@@ -48,9 +55,10 @@ final class DocsTool
                         'description' => 'The page to read, as the list gives it. Omit it for the list of pages.',
                     ],
                 ],
+                'required' => [],
                 'additionalProperties' => false,
             ],
-            ['title' => self::TITLE, 'read_only' => true, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 

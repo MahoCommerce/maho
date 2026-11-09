@@ -423,6 +423,14 @@ class Maho_FeedManager_Model_Mapper
     }
 
     /**
+     * Remove the control characters that XML does not allow. Keep tab, line feed and carriage return.
+     */
+    public static function removeControlCharacters(string $value): string
+    {
+        return preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $value);
+    }
+
+    /**
      * The fields the mappings fill with a value.
      *
      * @return array<int, string>
@@ -1833,8 +1841,9 @@ class Maho_FeedManager_Model_Mapper
             }
 
             // Build XML element
-            $valueStr = (string) ($value ?? '');
+            $valueStr = self::removeControlCharacters((string) ($value ?? ''));
             if ($cdata) {
+                $valueStr = str_replace(']]>', ']]]]><![CDATA[>', $valueStr);
                 $xml .= $indentStr . '<' . $tag . '><![CDATA[' . $valueStr . ']]></' . $tag . ">\n";
             } else {
                 $xml .= $indentStr . '<' . $tag . '>' . htmlspecialchars($valueStr) . '</' . $tag . ">\n";

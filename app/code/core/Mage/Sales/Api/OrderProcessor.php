@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 use Mage\Checkout\Api\CartRequest;
+use Mage\Customer\Api\CustomAttributes;
 use ApiPlatform\Metadata\Operation;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -129,9 +130,18 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // together with the shipping method, and the final save persists them.
         if (isset($args['shippingAddress']) && is_array($args['shippingAddress'])) {
             $this->cartService->applyShippingAddress($quote, $this->cartService->mapAddressInput($args['shippingAddress']));
+            CustomAttributes::applyToCartAddress($quote->getShippingAddress(), $args['shippingAddress']['customAttributes'] ?? null);
         }
         if (isset($args['billingAddress']) && is_array($args['billingAddress'])) {
             $this->cartService->applyBillingAddress($quote, $this->cartService->mapAddressInput($args['billingAddress']));
+            CustomAttributes::applyToCartAddress($quote->getBillingAddress(), $args['billingAddress']['customAttributes'] ?? null);
+        }
+
+        // A guest sends the fields of the Checkout Registration form, which a customer order takes from the account
+        if (!$quote->getCustomerId()) {
+            CustomAttributes::applyToGuestQuote($quote, $args['customerCustomAttributes'] ?? null, $isAdminOrder);
+        } elseif (isset($args['customerCustomAttributes'])) {
+            throw new \Mage_Core_Exception_Input()->addError('customer_custom_attributes', 'customerCustomAttributes is for a guest order. A customer order takes the values of the customer account');
         }
 
         // Set customer email from the body if provided (guest checkout)

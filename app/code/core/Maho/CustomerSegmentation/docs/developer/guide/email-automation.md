@@ -114,6 +114,24 @@ CREATE TABLE customer_segment_sequence_progress (
 );
 ```
 
+### customer_segment_coupon
+
+Records the customer that received each coupon that `Maho_CustomerSegmentation_Helper_Coupon::generateCustomerCoupon()` creates:
+
+```sql
+CREATE TABLE customer_segment_coupon (
+    coupon_id INT UNSIGNED PRIMARY KEY,
+    customer_id INT UNSIGNED NOT NULL,
+    INDEX idx_customer (customer_id),
+    FOREIGN KEY (coupon_id) REFERENCES salesrule_coupon(coupon_id) ON DELETE CASCADE,
+    FOREIGN KEY (customer_id) REFERENCES customer_entity(entity_id) ON DELETE CASCADE
+);
+```
+
+**Key Points:**
+- Before it creates a coupon, the helper looks for an unused, unexpired coupon of the same customer on the same sales rule, and sends that coupon again
+- A coupon without a row in this table is never sent again. Coupons from before this table stay valid, but the next email gives a new coupon
+
 ### newsletter_queue (Extended)
 
 New fields for automation tracking:

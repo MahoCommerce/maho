@@ -14,6 +14,7 @@ namespace Maho\Ai\Api\Agent;
 
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
+use Symfony\AI\Platform\Tool\ToolEffectHints;
 
 /**
  * The tool exists only when image generation is on in the AI configuration. It is a write,
@@ -33,9 +34,15 @@ final class ImageTool
             && \Mage::getSingleton('admin/session')->isAllowed('cms/media_gallery');
     }
 
+    /** The tool calls an image provider, which costs money, and stores the image. */
+    public static function effectHints(): ToolEffectHints
+    {
+        return new ToolEffectHints(readOnlyHint: false, destructiveHint: false, openWorldHint: true);
+    }
+
     public function tool(): Tool
     {
-        return ToolDefinition::create(
+        return new Tool(
             new ExecutionReference(self::class, 'generate'),
             self::NAME,
             'Generate an image from a description and save it in the media library, for a page, a block, a banner or a product. Describe the subject, the style, the mood and the format in one paragraph. The result gives the media directive to put the image into content: <img src="{{media url=\"wysiwyg/ai/name.png\"}}" alt="...">.',
@@ -50,7 +57,7 @@ final class ImageTool
                 'required' => ['prompt', 'file_name'],
                 'additionalProperties' => false,
             ],
-            ['title' => self::TITLE, 'read_only' => false, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 

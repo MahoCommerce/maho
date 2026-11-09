@@ -31,7 +31,7 @@ use Maho_Ai_Model_Conversation_Message as Message;
 use Maho_Ai_Model_Platform_Symfony;
 use Symfony\AI\Agent\Agent;
 use Symfony\AI\Agent\Exception\MaxIterationsExceededException;
-use Symfony\AI\Agent\Execution\Execution;
+use Symfony\AI\Agent\Execution\ExecutionInterface;
 use Symfony\AI\Platform\Message\Message as PlatformMessage;
 use Symfony\AI\Platform\Message\MessageBag;
 use Symfony\AI\Agent\Execution\Update\Progress;
@@ -302,7 +302,7 @@ final class Assistant
                 $agent = $this->agentFactory->create($prompt, $executor, $storeId, $wrapUp ? 0 : null);
                 $bag = new Maho_Ai_Model_Chat_MessageBagBuilder()->build($conversation, $limit);
                 if ($wrapUp) {
-                    $bag->add(PlatformMessage::ofUser(self::WRAP_UP_INSTRUCTION));
+                    $bag = $bag->with(PlatformMessage::ofUser(self::WRAP_UP_INSTRUCTION));
                 }
                 try {
                     $execution = $this->stream($agent, $bag, $sse, $roundText);
@@ -322,7 +322,7 @@ final class Assistant
                     }
                 }
             } while ($restart);
-            assert($execution instanceof Execution);
+            assert($execution instanceof ExecutionInterface);
 
             $text = $roundText;
             if ($text === '') {
@@ -439,7 +439,7 @@ final class Assistant
     }
 
     /** Run the agent once and forward its progress as SSE events. */
-    private function stream(Agent $agent, MessageBag $bag, Maho_Ai_Model_Chat_SseWriter $sse, string &$roundText): Execution
+    private function stream(Agent $agent, MessageBag $bag, Maho_Ai_Model_Chat_SseWriter $sse, string &$roundText): ExecutionInterface
     {
         // With ai/general/log_requests on, one line per model request tells how the provider
         // streamed it: a repeated answer or a repeated tool call then points at the provider.

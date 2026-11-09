@@ -36,7 +36,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         }
         if ($operationName === 'update' || $operationName === 'delete') {
             $args = $context['args']['input'] ?? [];
-            $addressId = (int) ($args['id'] ?? 0);
+            $addressId = $this->parseGraphQlId($args['id'] ?? null);
             if (!$addressId) {
                 throw new \Mage_Core_Exception_Input()->addError('id', 'Address ID is required');
             }
@@ -76,9 +76,10 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
     private function save(Address $data, int $customerId, ?\Mage_Customer_Model_Address $address): Address
     {
         $address ??= \Mage::getModel('customer/address');
+        // The custom attributes of the address follow the forms of the customer group
+        $address->setCustomerId($customerId);
         $this->populateAddressFromDto($address, $data);
-        $address->setCustomerId($customerId)
-            ->setIsDefaultBilling($data->isDefaultBilling)
+        $address->setIsDefaultBilling($data->isDefaultBilling)
             ->setIsDefaultShipping($data->isDefaultShipping);
         $this->getService()->save($address);
 
@@ -134,6 +135,15 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
                 $address->setData($field, $value === '' ? null : $value);
             }
         }
+
+        // A new address gets the required attributes of its form, as in the address book
+        if ($data->customAttributes !== null || !$address->getId()) {
+            CustomAttributes::apply(
+                $address,
+                $this->hasBackendAccess('addresses') ? 'adminhtml_customer_address' : 'customer_address_edit',
+                $data->customAttributes ?? [],
+            );
+        }
     }
 
     /**
@@ -167,6 +177,8 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
                 $dto->{$flag} = (bool) $args[$flag];
             }
         }
+        // Without the argument the stored values stay: apply() would check them against the form of the current group
+        $dto->customAttributes = $args['customAttributes'] ?? null;
         return $dto;
     }
 

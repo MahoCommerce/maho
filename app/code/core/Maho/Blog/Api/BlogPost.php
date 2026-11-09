@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Maho\Blog\Api;
 
+use Maho\ApiPlatform\Metadata\CustomAttributeSchema;
 use ApiPlatform\Metadata\ApiProperty;
 use Maho\ApiPlatform\Metadata\EnumSource;
 use Maho\ApiPlatform\Metadata\ValueLists;
@@ -178,6 +179,13 @@ class BlogPost extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $excerpt = null;
 
+    #[ApiProperty(description: 'Attribute set ID. A new post without one takes the default set', security: "has_backend_access('blog-posts')", extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::blogPostAttributeSets'])]
+    public ?int $attributeSetId = null;
+
+    /** @var array<string, mixed>|null */
+    #[ApiProperty(description: 'Values of the user-defined attributes, keyed by attribute code. A multiselect is a list of option IDs, a dropdown an option ID, a Yes/No a boolean, a date Y-m-d. A write takes the attributes of the attribute set of the record. GET /custom-attributes?entityType=blog_post lists the attributes and their options. Admin and API tokens only', security: "has_backend_access('blog-posts')", extraProperties: [CustomAttributeSchema::KEY => 'blog_post', 'computed' => true])]
+    public ?array $customAttributes = null;
+
     #[ApiProperty(writable: false)]
     public ?string $createdAt = null;
 
@@ -189,11 +197,17 @@ class BlogPost extends CrudResource
     {
         // The generic mapping would write the raw input, which can hold {id, position} objects, to category_ids
         $categoryIds = $this->categoryIds;
+        $customAttributes = $this->customAttributes;
         $this->categoryIds = null;
+        $this->customAttributes = null;
         try {
             parent::applyToModel($model, $sentProperties);
         } finally {
             $this->categoryIds = $categoryIds;
+            $this->customAttributes = $customAttributes;
+        }
+        if ($customAttributes !== null || !$model->getId()) {
+            CustomAttributes::apply($model, $customAttributes ?? []);
         }
 
         if ($categoryIds !== null) {
@@ -242,6 +256,7 @@ class BlogPost extends CrudResource
 
         $dto->stores = array_map(intval(...), $model->getStores());
         $dto->categoryIds = array_map(intval(...), $model->getCategories());
+        $dto->customAttributes = CustomAttributes::read($model);
 
         if ($model->getContent()) {
             $text = strip_tags($model->getContent());

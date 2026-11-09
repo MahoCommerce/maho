@@ -8,7 +8,7 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Mage_Sales>
-            <version>2.0.3</version>
+            <version>2.0.5</version>
         </Mage_Sales>
     </modules>
     <global>
@@ -1305,16 +1305,19 @@ SPDX-License-Identifier: AFL-3.0
                     </subtotal>
                     <shipping>
                         <class>sales/order_creditmemo_total_shipping</class>
-                        <after>subtotal,discount</after>
+                        <after>subtotal</after>
                         <before>grand_total,tax</before>
                     </shipping>
                     <tax>
                         <class>sales/order_creditmemo_total_tax</class>
                         <after>subtotal</after>
                     </tax>
+                    <!-- The shipping total sets the shipping refund, and the discount total takes a share of it.
+                         The tax total uses the rounding that the discount total leaves. -->
                     <discount>
                         <class>sales/order_creditmemo_total_discount</class>
-                        <after>subtotal</after>
+                        <after>subtotal,shipping</after>
+                        <before>tax</before>
                     </discount>
                     <grand_total>
                         <class>sales/order_creditmemo_total_grand</class>
