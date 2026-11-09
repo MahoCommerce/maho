@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Mage_Review_Model_Channel as Channel;
 use Mage_Review_Model_Review as Review;
 
 class Mage_Review_Service_Review
@@ -53,19 +54,29 @@ class Mage_Review_Service_Review
     /**
      * Save the review that a customer or a guest writes on the storefront, with the status pending. The transport
      * sets the product ID, the title, the detail and the nickname. $votes gives the option ID by the rating ID.
-     * $customerId is the customer who is logged in, or null for a guest.
+     * $customerId is the customer who is logged in, or null for a guest. The API sends the solved CAPTCHA in
+     * $captchaToken. Maho_Captcha checks the storefront form before the controller.
      *
      * @param array<int|string, int|string> $votes
      * @throws Mage_Core_Exception_Forbidden when $customerId is null and the store does not accept reviews of guests
      * @throws Mage_Core_Exception_TooManyRequests when the client or the customer is over the limit
      * @throws Mage_Core_Exception_NoSuchEntity when the store does not show the product
-     * @throws Mage_Core_Exception_Input with one error for each invalid field
+     * @throws Mage_Core_Exception_Input with one error for each invalid field, or when the CAPTCHA refuses the token
      */
-    public function submit(Review $review, array $votes, int $storeId, ?int $customerId): Review
-    {
+    public function submit(
+        Review $review,
+        array $votes,
+        int $storeId,
+        ?int $customerId,
+        Channel $channel,
+        ?string $captchaToken = null,
+    ): Review {
         $helper = Mage::helper('review');
         if ($customerId === null && !$this->isGuestAllowed($storeId)) {
             throw new Mage_Core_Exception_Forbidden($helper->__('Only registered customers can write reviews.'));
+        }
+        if ($channel === Channel::Api) {
+            Mage::helper('apiplatform')->assertCaptcha(['captchaToken' => $captchaToken]);
         }
         $this->checkRateLimits($storeId, $customerId);
         $product = $this->getProduct((int) $review->getEntityPkValue(), $storeId);

@@ -37,7 +37,14 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
 
         if ($operation->getName() === 'submit') {
             $args = $context['args']['input'] ?? [];
-            return $this->submitReview((int) $args['productId'], $args['title'], $args['detail'], $args['nickname'], (int) $args['rating']);
+            return $this->submitReview(
+                (int) $args['productId'],
+                $args['title'],
+                $args['detail'],
+                $args['nickname'],
+                isset($args['rating']) ? (int) $args['rating'] : null,
+                isset($args['captchaToken']) ? (string) $args['captchaToken'] : null,
+            );
         }
 
         if ($operation instanceof Put && isset($uriVariables['id']) && $data instanceof Review) {
@@ -46,7 +53,7 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
 
         $productId = (int) ($uriVariables['productId'] ?? 0);
         if ($productId && $data instanceof Review) {
-            return $this->submitReview($productId, $data->title, $data->detail, $data->nickname, $data->rating);
+            return $this->submitReview($productId, $data->title, $data->detail, $data->nickname, $data->rating, $data->captchaToken);
         }
 
         throw new BadRequestHttpException('Invalid review operation');
@@ -91,8 +98,14 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         return $dto;
     }
 
-    private function submitReview(int $productId, string $title, string $detail, string $nickname, int $rating): Review
-    {
+    private function submitReview(
+        int $productId,
+        string $title,
+        string $detail,
+        string $nickname,
+        ?int $rating,
+        ?string $captchaToken,
+    ): Review {
         $customerId = $this->requireCustomerId();
         $storeId = StoreContext::getStoreId();
         $service = \Mage::getService('review/review');
@@ -102,11 +115,18 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
             ->setTitle($title)
             ->setDetail($detail)
             ->setNickname($nickname);
-        $service->submit($review, $service->getStarVotes($rating, $storeId), $storeId, $customerId);
+        $service->submit(
+            $review,
+            $rating === null ? [] : $service->getStarVotes($rating, $storeId),
+            $storeId,
+            $customerId,
+            \Mage_Review_Model_Channel::Api,
+            $captchaToken,
+        );
 
         $dto = Review::fromModel($review);
         $dto->productName = $service->getProduct($productId, $storeId)->getName();
-        $dto->rating = $rating;
+        $dto->rating = $rating ?? $dto->rating;
         $dto->status = 'pending';
 
         return $dto;

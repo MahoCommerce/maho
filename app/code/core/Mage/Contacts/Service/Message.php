@@ -71,7 +71,7 @@ class Mage_Contacts_Service_Message
         $message = $this->readMessage($fields);
         $this->validate($message);
         if ($channel === Channel::Api) {
-            $this->verifyApiCaptcha($fields);
+            Mage::helper('apiplatform')->assertCaptcha($fields);
         }
         $this->checkRateLimits($storeId, (string) $message->getData('email'));
 
@@ -148,21 +148,6 @@ class Mage_Contacts_Service_Message
         }
 
         $errors->throwIfErrors();
-    }
-
-    /**
-     * Ask the CAPTCHA module of the store to check the token in $fields. Maho_Captcha checks the storefront form
-     * before the controller runs, and it observes this event for the API.
-     *
-     * @param array<array-key, mixed> $fields
-     * @throws Mage_Core_Exception_Input when the CAPTCHA module refuses the token
-     */
-    private function verifyApiCaptcha(array $fields): void
-    {
-        $error = Mage::helper('apiplatform')->verifyCaptcha($fields);
-        if ($error !== null) {
-            throw new Mage_Core_Exception_Input()->addError('captcha_token', $error);
-        }
     }
 
     /**

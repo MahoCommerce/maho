@@ -31,7 +31,12 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
         $service = $this->subscriberService();
 
         try {
-            $subscriber = $service->subscribe((string) $this->getRequest()->getPost('email'), $storeId, $customerId);
+            $subscriber = $service->subscribe(
+                (string) $this->getRequest()->getPost('email'),
+                $storeId,
+                $customerId,
+                Mage_Newsletter_Model_Channel::Web,
+            );
             $session->addSuccess($service->isConfirmationPending($subscriber, $customerId, $storeId)
                 ? $this->__('Confirmation request has been sent.')
                 : $this->__('Thank you for your subscription.'));

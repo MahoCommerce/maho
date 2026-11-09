@@ -117,7 +117,8 @@ use Maho\ApiPlatform\CrudResource;
                 'title' => ['type' => 'String!', 'description' => 'Review title/summary'],
                 'detail' => ['type' => 'String!', 'description' => 'Review content'],
                 'nickname' => ['type' => 'String!', 'description' => 'Reviewer nickname'],
-                'rating' => ['type' => 'Int!', 'description' => 'Rating 1-5'],
+                'rating' => ['type' => 'Int', 'description' => 'Stars from 1 to 5. Without it, the review has no vote, as on the storefront form'],
+                'captchaToken' => ['type' => 'String', 'description' => 'CAPTCHA token from the client-side widget, when the store uses a CAPTCHA'],
             ],
         ),
     ],
@@ -142,8 +143,12 @@ class Review extends CrudResource
     public string $detail = '';
     public string $nickname = '';
 
-    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
-    public int $rating = 5;
+    /** On a read, the average of the votes. On a submit, the stars from 1 to 5, or none for a review with no vote. */
+    #[ApiProperty(extraProperties: ['computed' => true])]
+    public ?int $rating = null;
+
+    #[ApiProperty(description: 'CAPTCHA token from the client-side widget, when the store uses a CAPTCHA', readable: false, extraProperties: ['computed' => true])]
+    public ?string $captchaToken = null;
 
     /** approved | pending | not_approved. Writable through the moderation Put only; submit always forces pending. */
     #[ApiProperty(securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('reviews/write')", extraProperties: [EnumSource::KEY => ['approved', 'pending', 'not_approved'], 'computed' => true])]

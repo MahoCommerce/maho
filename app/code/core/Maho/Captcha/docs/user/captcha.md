@@ -48,7 +48,11 @@ Out of the box, the captcha guards the most-abused forms in a typical store:
 
 **API**
 
-- Contact form (`POST /contact`), for a headless storefront. `GET /contact/config` gives the frontend the challenge URL.
+For a headless storefront, the API asks the captcha where the storefront form asks it. `GET /contact/config` gives the frontend the challenge URL.
+
+- Contact form (`POST /contact`)
+- Newsletter subscription (`POST /newsletter/subscribe` and the GraphQL `subscribeNewsletter` mutation)
+- Product reviews (`POST /products/{productId}/reviews` and the GraphQL `submitReview` mutation)
 
 **Admin**
 
