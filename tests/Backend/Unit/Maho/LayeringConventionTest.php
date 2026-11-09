@@ -21,7 +21,6 @@ declare(strict_types=1);
 /** Files that create a Symfony HttpException outside Maho_ApiPlatform. */
 const LAYERING_HTTP_EXCEPTION_ALLOWLIST = [
     'app/code/core/Mage/Adminhtml/Api/GlobalSearchProvider.php' => 1,
-    'app/code/core/Mage/Catalog/Api/AttributeSetProcessor.php' => 5,
     'app/code/core/Mage/Catalog/Api/CategoryProvider.php' => 1,
     'app/code/core/Mage/Catalog/Api/ProductAttributeProcessor.php' => 5,
     'app/code/core/Mage/Catalog/Api/ProductCustomOptionProvider.php' => 3,

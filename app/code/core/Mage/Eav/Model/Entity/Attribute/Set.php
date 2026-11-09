@@ -155,16 +155,15 @@ class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Validate attribute set name
+     * Refuse the name of another set of the entity type. Each save checks it.
      *
      * @return bool
-     * @throws Mage_Core_Exception
+     * @throws Mage_Core_Exception_Conflict
      */
     public function validate()
     {
-        if (!$this->_getResource()->validate($this, $this->getAttributeSetName())) {
-            throw Mage::exception(
-                'Mage_Eav',
+        if (!$this->_getResource()->validate($this, (string) $this->getAttributeSetName())) {
+            throw new Mage_Core_Exception_Conflict(
                 Mage::helper('eav')->__('Attribute set with the "%s" name already exists.', $this->getAttributeSetName()),
             );
         }

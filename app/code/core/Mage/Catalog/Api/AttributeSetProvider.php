@@ -40,20 +40,14 @@ final class AttributeSetProvider extends CrudProvider
             ->getId();
     }
 
-    /**
-     * Load a single set and verify it belongs to catalog_product.
-     */
     #[\Override]
-    protected function provideItem(int|string $id): ?AttributeSet
+    protected function provideItem(int|string $id): AttributeSet
     {
-        /** @var \Mage_Eav_Model_Entity_Attribute_Set $set */
-        $set = $this->loadById('eav/entity_attribute_set', $id);
-        if (!$set->getId() || (int) $set->getEntityTypeId() !== $this->getProductEntityTypeId()) {
-            return null;
-        }
+        /** @var \Mage_Eav_Service_Attribute_Set $service */
+        $service = \Mage::getService('eav/attribute_set');
 
         /** @var AttributeSet */
-        return $this->toDto($set);
+        return $this->toDto($service->getById((int) $id, \Mage_Catalog_Model_Product::ENTITY));
     }
 
     /**
