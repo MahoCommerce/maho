@@ -58,6 +58,10 @@ raise its quantity, until you also set **Stock Availability** to In Stock.
 With **Backorders** set to **Allow Qty Below 0** or **Allow Qty Below 0 and Notify Customer**,
 rule 2 never applies. The quantity can go below zero and the product stays in stock.
 
+You can also enter a quantity below zero yourself, in the admin, the API or an import. With
+backorders, it is the number of units that customers ordered and that you do not have yet. Without
+backorders, rule 2 sets the product to Out of Stock.
+
 ## Store-wide stock settings
 
 Go to **System > Configuration > Catalog > Inventory**.

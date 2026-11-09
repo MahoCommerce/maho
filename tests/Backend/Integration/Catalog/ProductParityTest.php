@@ -162,16 +162,17 @@ it('refuses a special price date range that starts after it ends on both transpo
         ->and($api['errors'])->toBe([$message]);
 });
 
-it('refuses a negative quantity on both transports', function () {
+it('refuses a quantity that the stock column cannot hold on both transports', function () {
     $fields = productAdminFields('PEST-PARITY-QTY');
-    $fields['product']['stock_data']['qty'] = -1;
+    $fields['product']['stock_data']['qty'] = -100000000;
     $admin = productViaAdmin('save', $fields);
-    $api = productViaApi(['sku' => 'PEST-PARITY-QTY', 'name' => 'Pest Parity Product', 'websiteIds' => [1], 'stockData' => ['qty' => -1]]);
+    $api = productViaApi(['sku' => 'PEST-PARITY-QTY', 'name' => 'Pest Parity Product', 'websiteIds' => [1], 'stockData' => ['qty' => -100000000]]);
 
-    expect($admin['errors'])->toBe(['Quantity cannot be negative'])
+    $message = 'Quantity must be between -99999999.9999 and 99999999.9999';
+    expect($admin['errors'])->toBe([$message])
         ->and($api['status'])->toBe(422)
         ->and($api['fields'])->toBe(['qty'])
-        ->and($api['errors'])->toBe(['Quantity cannot be negative']);
+        ->and($api['errors'])->toBe([$message]);
 });
 
 it('deletes a product through the service, which sends the delete event, on both transports', function () {

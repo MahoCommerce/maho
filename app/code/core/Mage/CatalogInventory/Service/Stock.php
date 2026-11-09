@@ -52,7 +52,7 @@ class Mage_CatalogInventory_Service_Stock
         'manage_stock' => 'use_config_manage_stock',
     ];
 
-    private const NON_NEGATIVE_COLUMNS = ['qty', 'min_qty', 'min_sale_qty', 'max_sale_qty', 'notify_stock_qty', 'qty_increments'];
+    private const NON_NEGATIVE_COLUMNS = ['min_qty', 'min_sale_qty', 'max_sale_qty', 'notify_stock_qty', 'qty_increments'];
 
     /**
      * Return the stock change in $input, as column => value. A key is a column of COLUMNS, in snake case or in camel
@@ -81,28 +81,25 @@ class Mage_CatalogInventory_Service_Stock
 
     /**
      * Check the stock change $data and return it with the stock status: a quantity without a stock status puts the
-     * product in stock when the quantity is above 0. A quantity equal to $storedQty is accepted when it is
-     * negative, because orders with backorders take the stock below 0 and a save must not refuse the product.
+     * product in stock when the quantity is above 0. The quantity can be negative: with backorders it is the
+     * number of units that customers ordered and the store does not have, and without backorders the product is
+     * out of stock.
      *
      * @param array<string, mixed> $data the columns of the change
      * @return array<string, mixed>
      * @throws Mage_Core_Exception_Input
      */
-    public function prepare(array $data, ?float $storedQty = null): array
+    public function prepare(array $data): array
     {
         $errors = new Mage_Core_Exception_Input();
         $helper = Mage::helper('cataloginventory');
         foreach (self::NON_NEGATIVE_COLUMNS as $column) {
-            if (isset($data[$column]) && is_numeric($data[$column]) && (float) $data[$column] < 0
-                && !($column === 'qty' && $storedQty !== null && (float) $data[$column] === $storedQty)
-            ) {
-                $errors->addError($column, $column === 'qty'
-                    ? $helper->__('Quantity cannot be negative')
-                    : $helper->__('%s cannot be negative', $column));
+            if (isset($data[$column]) && is_numeric($data[$column]) && (float) $data[$column] < 0) {
+                $errors->addError($column, $helper->__('%s cannot be negative', $column));
             }
         }
-        if (isset($data['qty']) && is_numeric($data['qty']) && (float) $data['qty'] > self::MAX_QTY) {
-            $errors->addError('qty', $helper->__('Quantity cannot be greater than %s', self::MAX_QTY));
+        if (isset($data['qty']) && is_numeric($data['qty']) && abs((float) $data['qty']) > self::MAX_QTY) {
+            $errors->addError('qty', $helper->__('Quantity must be between -%1$s and %1$s', self::MAX_QTY));
         }
         $backorders = [
             Mage_CatalogInventory_Model_Stock::BACKORDERS_NO,
@@ -168,7 +165,7 @@ class Mage_CatalogInventory_Service_Stock
      */
     public function update(StockItem $item, array $data): StockItem
     {
-        $this->applyTo($item, $this->prepare($data, $item->getId() ? (float) $item->getQty() : null));
+        $this->applyTo($item, $this->prepare($data));
         $item->save();
         return $item;
     }
@@ -183,7 +180,7 @@ class Mage_CatalogInventory_Service_Stock
     {
         $transaction = Mage::getModel('core/resource_transaction');
         foreach ($changes as [$item, $data]) {
-            $this->applyTo($item, $this->prepare($data, $item->getId() ? (float) $item->getQty() : null));
+            $this->applyTo($item, $this->prepare($data));
             $transaction->addObject($item);
         }
         $transaction->save();

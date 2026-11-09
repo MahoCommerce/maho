@@ -103,17 +103,19 @@ it('turns off the configuration of manage stock when a value comes without its f
         ->and((int) stockParityItem($forApi)->getManageStock())->toBe(0);
 });
 
-it('refuses a negative quantity on both transports', function () {
+it('saves a negative quantity on both transports, and a product without backorders goes out of stock', function () {
     $forAdmin = stockParityProduct('PEST-STOCK-PARITY-NEGATIVE-ADMIN');
-    stockParityProduct('PEST-STOCK-PARITY-NEGATIVE-API');
+    $forApi = stockParityProduct('PEST-STOCK-PARITY-NEGATIVE-API');
 
     $admin = stockViaAdmin($forAdmin, ['qty' => -1, 'is_in_stock' => 1]);
     $api = stockViaApi(['sku' => 'PEST-STOCK-PARITY-NEGATIVE-API', 'qty' => -1]);
 
-    expect($admin['errors'])->toBe(['Quantity cannot be negative'])
-        ->and($api['status'])->toBe(422)
-        ->and($api['fields'])->toBe(['qty'])
-        ->and((float) stockParityItem($forAdmin)->getQty())->toBe(10.0);
+    expect($admin['errors'])->toBe([])
+        ->and($api['status'])->toBe(200)
+        ->and((float) stockParityItem($forAdmin)->getQty())->toBe(-1.0)
+        ->and((float) stockParityItem($forApi)->getQty())->toBe(-1.0)
+        ->and((bool) stockParityItem($forAdmin)->getIsInStock())->toBeFalse()
+        ->and((bool) stockParityItem($forApi)->getIsInStock())->toBeFalse();
 });
 
 it('saves a product whose stored quantity is negative after orders with backorders, on both transports', function () {
