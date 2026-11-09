@@ -60,7 +60,10 @@ class CustomerChangepassword extends BaseMahoCommand
         }
 
         try {
-            Mage::getService('customer/customer')->setPassword($customer, trim($password));
+            // The search loads a few attributes only, and a save writes only the attributes that the model loaded
+            /** @var \Mage_Customer_Service_Customer $service */
+            $service = Mage::getService('customer/customer');
+            $service->setPassword($service->requireById((int) $customer->getId()), trim($password));
         } catch (\Mage_Core_Exception_Input $e) {
             foreach ($e->getErrors() as $error) {
                 $io->writeln("<error>{$error['message']}</error>");
