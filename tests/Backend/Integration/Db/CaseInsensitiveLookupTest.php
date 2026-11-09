@@ -48,7 +48,7 @@ describe('Customer email lookups ignore letter case', function (): void {
             ->setFirstname('Case')
             ->setLastname('Duplicate');
 
-        expect(fn() => $duplicate->save())->toThrow(Mage_Customer_Exception::class);
+        expect(fn() => $duplicate->save())->toThrow(Mage_Core_Exception_Conflict::class);
     });
 
     test('the newsletter subscriber is found from an email in other case', function (): void {
