@@ -15,6 +15,11 @@ SPDX-License-Identifier: AFL-3.0
         <docs>
             <developer>docs/developer</developer>
         </docs>
+        <services>
+            <eav>
+                <class>Mage_Eav_Service</class>
+            </eav>
+        </services>
         <models>
             <eav>
                 <class>Mage_Eav_Model</class>
