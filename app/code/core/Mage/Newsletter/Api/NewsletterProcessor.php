@@ -55,9 +55,10 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
         $customerId = $this->getAuthenticatedCustomerId();
         // A customer subscribes the address of the account only, so that a token cannot subscribe the address of somebody else
         $email = (string) ($data->email ?: ($input['email'] ?? ''));
+        $captchaToken = $data->captchaToken ?? (isset($input['captchaToken']) ? (string) $input['captchaToken'] : null);
         $subscriber = $customerId === null
-            ? $service->subscribe($email, $storeId)
-            : $service->subscribeCustomer($customerId, $storeId);
+            ? $service->subscribe($email, $storeId, null, \Mage_Newsletter_Model_Channel::Api, $captchaToken)
+            : $service->subscribeCustomer($customerId, $storeId, \Mage_Newsletter_Model_Channel::Api, $captchaToken);
         $confirmationPending = $service->isConfirmationPending($subscriber, $customerId, $storeId);
         $message = $confirmationPending
             ? 'A confirmation email has been sent. Please check your inbox.'

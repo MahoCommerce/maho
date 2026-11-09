@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Mage_Newsletter_Model_Channel as Channel;
 use Mage_Newsletter_Model_Subscriber as Subscriber;
 
 class Mage_Newsletter_Service_Subscriber
@@ -70,17 +71,27 @@ class Mage_Newsletter_Service_Subscriber
      * Subscribe $email on the store $storeId. $customerId is the customer who is logged in, or null for a guest.
      * A customer who subscribes the address of the account needs no confirmation.
      * When the address is already subscribed, return its subscriber unchanged: getIsStatusChanged() is false.
+     * The API sends the solved CAPTCHA in $captchaToken. Maho_Captcha checks the footer form before the controller.
      *
-     * @throws Mage_Core_Exception_Input when the email is empty or not valid
-     * @throws Mage_Core_Exception when the store does not accept guests and $customerId is null
+     * @throws Mage_Core_Exception_Input when the email is empty or not valid, or when the CAPTCHA refuses the token
+     * @throws Mage_Core_Exception_Forbidden when the store does not accept guests and $customerId is null
      * @throws Mage_Core_Exception_TooManyRequests when the client or the address is over its limit
      */
-    public function subscribe(#[\SensitiveParameter] string $email, int $storeId, ?int $customerId = null): Subscriber
-    {
+    public function subscribe(
+        #[\SensitiveParameter]
+        string $email,
+        int $storeId,
+        ?int $customerId,
+        Channel $channel,
+        ?string $captchaToken = null,
+    ): Subscriber {
         $helper = Mage::helper('newsletter');
         $core = Mage::helper('core');
         if ($customerId === null && !$this->isGuestSubscriptionAllowed($storeId)) {
             throw new Mage_Core_Exception_Forbidden($helper->__('Guest subscription is not allowed. Please login first.'));
+        }
+        if ($channel === Channel::Api) {
+            $this->verifyApiCaptcha($captchaToken);
         }
         // The limit of the client comes first: a client that sends many addresses gets past the limit of one address
         $limit = (int) Mage::getStoreConfig(self::XML_PATH_SUBSCRIBE_RATE_LIMIT, $storeId);
@@ -98,11 +109,12 @@ class Mage_Newsletter_Service_Subscriber
      * Subscribe the address of the account of the customer $customerId.
      *
      * @throws Mage_Core_Exception_NoSuchEntity when the customer does not exist
+     * @throws Mage_Core_Exception_Input when the CAPTCHA refuses the token
      * @throws Mage_Core_Exception_TooManyRequests
      */
-    public function subscribeCustomer(int $customerId, int $storeId): Subscriber
+    public function subscribeCustomer(int $customerId, int $storeId, Channel $channel, ?string $captchaToken = null): Subscriber
     {
-        return $this->subscribe((string) $this->getCustomer($customerId)->getEmail(), $storeId, $customerId);
+        return $this->subscribe((string) $this->getCustomer($customerId)->getEmail(), $storeId, $customerId, $channel, $captchaToken);
     }
 
     /**
@@ -153,6 +165,19 @@ class Mage_Newsletter_Service_Subscriber
         $customers = Mage::getService('customer/customer');
         return $customers->getById($customerId)
             ?? throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('newsletter')->__('Customer not found'));
+    }
+
+    /**
+     * Ask the CAPTCHA module of the store to check $captchaToken. Maho_Captcha observes this event for the API.
+     *
+     * @throws Mage_Core_Exception_Input when the CAPTCHA module refuses the token
+     */
+    private function verifyApiCaptcha(?string $captchaToken): void
+    {
+        $error = Mage::helper('apiplatform')->verifyCaptcha(['captchaToken' => $captchaToken]);
+        if ($error !== null) {
+            throw new Mage_Core_Exception_Input()->addError('captcha_token', $error);
+        }
     }
 
     /**

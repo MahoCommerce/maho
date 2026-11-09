@@ -121,6 +121,7 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
                     is_array($rating) ? $rating : [],
                     (int) Mage::app()->getStore()->getId(),
                     $customerId ? (int) $customerId : null,
+                    Mage_Review_Model_Channel::Web,
                 );
                 $session->addSuccess($this->__('Your review has been accepted for moderation.'));
             } catch (Mage_Core_Exception_Input $e) {

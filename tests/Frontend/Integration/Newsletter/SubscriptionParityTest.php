@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GraphQl\Mutation;
 use ApiPlatform\Metadata\Post;
 use Mage\Newsletter\Api\NewsletterProcessor;
 use Mage\Newsletter\Api\NewsletterProvider;
@@ -23,6 +24,7 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Tests\Helpers\CaptchaStub;
 
 uses(Tests\MahoFrontendTestCase::class);
 
@@ -167,18 +169,25 @@ function newsletterParityApiError(Throwable $e, SymfonyRequest $request): array
 
 /**
  * Call POST /api/rest/v2/newsletter/subscribe or /unsubscribe, as a guest or with the token of $customerId.
+ * With $graphQl, call the mutation of the same name, with the input in the arguments.
  *
  * @return array{accepted: bool, status: int, messages: list<string>, fields: list<string>, dto?: NewsletterSubscription, response?: ?Response}
  */
-function newsletterViaApi(string $operation, ?string $email = null, ?int $customerId = null): array
+function newsletterViaApi(string $operation, ?string $email = null, ?int $customerId = null, ?string $captchaToken = null, bool $graphQl = false): array
 {
     $request = SymfonyRequest::create("/api/rest/v2/newsletter/{$operation}", 'POST', server: ['CONTENT_TYPE' => 'application/json']);
     $data = new NewsletterSubscription();
-    $data->email = $email;
+    $context = ['request' => $request];
+    if ($graphQl) {
+        $context['args']['input'] = array_filter(['email' => $email, 'captchaToken' => $captchaToken], fn($value) => $value !== null);
+    } else {
+        $data->email = $email;
+        $data->captchaToken = $captchaToken;
+    }
 
     try {
         $dto = new NewsletterProcessor(newsletterParitySecurity($customerId))
-            ->process($data, new Post(name: "{$operation}_rest"), [], ['request' => $request]);
+            ->process($data, $graphQl ? new Mutation(name: $operation) : new Post(name: "{$operation}_rest"), [], $context);
         return ['accepted' => true, 'status' => 200, 'messages' => [(string) $dto->message], 'fields' => [], 'dto' => $dto];
     } catch (Throwable $e) {
         return newsletterParityApiError($e, $request);
@@ -342,7 +351,7 @@ it('unsubscribes a customer on the API and on the account page, with one limit',
     $customerId = (int) $this->customer->getId();
     Mage::getSingleton('customer/session')->setCustomer($this->customer);
     $service = Mage::getService('newsletter/subscriber');
-    $service->subscribeCustomer($customerId, (int) Mage::app()->getStore()->getId());
+    $service->subscribeCustomer($customerId, (int) Mage::app()->getStore()->getId(), Mage_Newsletter_Model_Channel::Web);
 
     $api = newsletterViaApi('unsubscribe', null, $customerId);
     expect($api['messages'])->toBe(['You have been successfully unsubscribed from the newsletter.'])
@@ -353,7 +362,7 @@ it('unsubscribes a customer on the API and on the account page, with one limit',
     expect(newsletterViaAccountPage(false))->toBe(['accepted' => false, 'messages' => ['Too many requests. Please try again later.']]);
 
     Mage::app()->cleanCache([\Maho\Security\RateLimiter::CACHE_TAG]);
-    $service->subscribeCustomer($customerId, (int) Mage::app()->getStore()->getId());
+    $service->subscribeCustomer($customerId, (int) Mage::app()->getStore()->getId(), Mage_Newsletter_Model_Channel::Web);
     expect(newsletterViaAccountPage(false))->toBe(['accepted' => true, 'messages' => ['The subscription has been removed.']])
         ->and(newsletterParitySubscriber((string) $this->customer->getEmail())->getStatus())
         ->toBe(Mage_Newsletter_Model_Subscriber::STATUS_UNSUBSCRIBED);
@@ -417,7 +426,7 @@ describe('the answers that each transport keeps (see #1348)', function () {
             ->and($api['messages'])->toBe(['Guest subscription is not allowed. Please login first.'])
             ->and(newsletterParitySubscriber($email)->getId())->toBeNull();
 
-        expect(fn() => Mage::getService('newsletter/subscriber')->subscribe($email, (int) Mage::app()->getStore()->getId()))
+        expect(fn() => Mage::getService('newsletter/subscriber')->subscribe($email, (int) Mage::app()->getStore()->getId(), null, Mage_Newsletter_Model_Channel::Web))
             ->toThrow(Mage_Core_Exception_Forbidden::class, 'Guest subscription is not allowed. Please login first.');
     });
 
@@ -431,5 +440,52 @@ describe('the answers that each transport keeps (see #1348)', function () {
             ->and(newsletterParitySubscriber($other)->getCustomerId())->toBe(0)
             ->and(newsletterViaApi('subscribe', newsletterParityEmail(), (int) $this->customer->getId())['dto']->email)
             ->toBe($this->customer->getEmail());
+    });
+});
+
+describe('the CAPTCHA', function () {
+    afterEach(fn() => Mage::unregister('_helper/apiplatform'));
+
+    it('asks the CAPTCHA module of the store on the API, and leaves the footer form to its predispatch observer', function () {
+        $captcha = CaptchaStub::install();
+        $email = newsletterParityEmail();
+
+        $api = newsletterViaApi('subscribe', $email);
+        expect($api['status'])->toBe(422)
+            ->and($api['fields'])->toBe(['captchaToken'])
+            ->and($api['messages'])->toBe(['Incorrect CAPTCHA.'])
+            ->and(newsletterParitySubscriber($email)->getId())->toBeNull()
+            ->and($captcha->checks)->toHaveCount(1);
+
+        expect(newsletterViaFooter($email)['accepted'])->toBeTrue()
+            ->and($captcha->checks)->toHaveCount(1);
+    });
+
+    it('subscribes on the API with a token that the CAPTCHA module accepts', function (bool $graphQl) {
+        $captcha = CaptchaStub::install();
+        $email = newsletterParityEmail();
+
+        expect(newsletterViaApi('subscribe', $email, captchaToken: CaptchaStub::SOLVED, graphQl: $graphQl)['accepted'])->toBeTrue()
+            ->and(newsletterParitySubscriber($email)->getStatus())->toBe(Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED)
+            ->and($captcha->checks)->toBe([['captchaToken' => CaptchaStub::SOLVED]]);
+    })->with(['REST' => false, 'GraphQL' => true]);
+
+    it('asks the CAPTCHA of a customer token too, as the footer form asks it of a customer who is logged in', function () {
+        CaptchaStub::install();
+        $this->customer = newsletterParityCustomer();
+
+        $api = newsletterViaApi('subscribe', null, (int) $this->customer->getId());
+        expect($api['status'])->toBe(422)
+            ->and($api['fields'])->toBe(['captchaToken'])
+            ->and(newsletterParitySubscriber((string) $this->customer->getEmail())->getId())->toBeNull();
+    });
+
+    it('does not ask the CAPTCHA on the account page', function () {
+        $captcha = CaptchaStub::install();
+        $this->customer = newsletterParityCustomer();
+        Mage::getSingleton('customer/session')->setCustomer($this->customer);
+
+        expect(newsletterViaAccountPage(true)['accepted'])->toBeTrue()
+            ->and($captcha->checks)->toBe([]);
     });
 });

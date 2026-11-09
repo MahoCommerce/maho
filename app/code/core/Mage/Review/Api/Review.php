@@ -118,6 +118,7 @@ use Maho\ApiPlatform\CrudResource;
                 'detail' => ['type' => 'String!', 'description' => 'Review content'],
                 'nickname' => ['type' => 'String!', 'description' => 'Reviewer nickname'],
                 'rating' => ['type' => 'Int!', 'description' => 'Rating 1-5'],
+                'captchaToken' => ['type' => 'String', 'description' => 'CAPTCHA token from the client-side widget, when the store uses a CAPTCHA'],
             ],
         ),
     ],
@@ -144,6 +145,9 @@ class Review extends CrudResource
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public int $rating = 5;
+
+    #[ApiProperty(description: 'CAPTCHA token from the client-side widget, when the store uses a CAPTCHA', readable: false, extraProperties: ['computed' => true])]
+    public ?string $captchaToken = null;
 
     /** approved | pending | not_approved. Writable through the moderation Put only; submit always forces pending. */
     #[ApiProperty(securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('reviews/write')", extraProperties: [EnumSource::KEY => ['approved', 'pending', 'not_approved'], 'computed' => true])]

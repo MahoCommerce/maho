@@ -52,7 +52,7 @@ class Mage_Newsletter_ManageController extends Mage_Core_Controller_Front_Action
         $service = Mage::getService('newsletter/subscriber');
         try {
             if ($this->getRequest()->getParam('is_subscribed')) {
-                $service->subscribeCustomer($customerId, (int) Mage::app()->getStore()->getId());
+                $service->subscribeCustomer($customerId, (int) Mage::app()->getStore()->getId(), Mage_Newsletter_Model_Channel::Web);
                 $session->addSuccess($this->__('The subscription has been saved.'));
             } else {
                 $service->unsubscribeCustomer($customerId);
