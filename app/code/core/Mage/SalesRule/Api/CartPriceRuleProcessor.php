@@ -85,11 +85,7 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
                 $service->save($rule, $errors);
             } catch (\Mage_Core_Exception_Input $e) {
                 // The coupon calls its code "code", and the client of a rule sends it as couponCode
-                $renamed = new \Mage_Core_Exception_Input();
-                foreach ($e->getErrors() as ['field' => $field, 'message' => $message]) {
-                    $renamed->addError($field === 'code' ? 'coupon_code' : $field, $message);
-                }
-                throw $renamed;
+                throw $e->withFieldNames(['code' => 'coupon_code']);
             }
             $this->logApiActivity('cart_price_rule', $oldData === null ? 'create' : 'update', $oldData, $rule);
 

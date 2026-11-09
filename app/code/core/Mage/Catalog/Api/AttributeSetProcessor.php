@@ -61,23 +61,8 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
                 default => $id > 0 ? $this->rename($id, $body) : $this->create($body),
             };
         } catch (\Mage_Core_Exception_Input $e) {
-            throw self::renameErrorFields($e);
+            throw $e->withFieldNames(self::ERROR_FIELDS);
         }
-    }
-
-    /**
-     * Return a copy of $e that gives each field of ERROR_FIELDS its name in the request body.
-     */
-    private static function renameErrorFields(\Mage_Core_Exception_Input $e): \Mage_Core_Exception_Input
-    {
-        if (array_intersect(array_column($e->getErrors(), 'field'), array_keys(self::ERROR_FIELDS)) === []) {
-            return $e;
-        }
-        $renamed = new \Mage_Core_Exception_Input('', 0, $e);
-        foreach ($e->getErrors() as $error) {
-            $renamed->addError(self::ERROR_FIELDS[$error['field']] ?? $error['field'], $error['message']);
-        }
-        return $renamed;
     }
 
     /**
