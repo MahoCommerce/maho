@@ -71,7 +71,7 @@ class CartMutationHandler
         AdminAcl::checkResource(Cart::class);
         $cartId = $variables['cartId'] ?? $variables['input']['cartId'] ?? null;
         $sku = $variables['sku'] ?? $variables['input']['sku'] ?? null;
-        $qty = $variables['qty'] ?? $variables['input']['qty'] ?? 1;
+        $qty = $variables['qty'] ?? $variables['input']['qty'] ?? null;
         // Admin-only surface (AdminAcl gate above), so no extra gate on the price override
         $customPrice = $variables['customPrice'] ?? $variables['input']['customPrice'] ?? null;
         if ($customPrice === '') {
@@ -91,7 +91,13 @@ class CartMutationHandler
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
-        $quote = $this->cartService->addItem($quote, $sku, (float) $qty, [], $customPrice !== null ? (float) $customPrice : null);
+        $this->cartService->addProduct(
+            $quote,
+            $this->cartService->getProductBySku((string) $sku, (int) $quote->getStoreId()),
+            new \Maho\DataObject($qty === null ? [] : ['qty' => (float) $qty]),
+            \Mage_Checkout_Model_Actor::Staff,
+            $customPrice !== null ? (float) $customPrice : null,
+        );
 
         return ['addToCart' => $this->mapCart($quote)];
     }
@@ -118,7 +124,7 @@ class CartMutationHandler
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
-        $quote = $this->cartService->updateItem($quote, (int) $itemId, (float) $qty);
+        $quote = $this->cartService->updateItems($quote, [(int) $itemId => (float) $qty]);
         return ['updateQty' => $this->mapCart($quote)];
     }
 
@@ -169,9 +175,9 @@ class CartMutationHandler
         }
         try {
             if ($giftcard->getId() && $giftcard->isValid()) {
-                $this->cartService->applyGiftcard($quote, $couponCode, null, true);
+                $this->cartService->applyGiftcard($quote, $couponCode, null, \Mage_Checkout_Model_Actor::Staff);
             } else {
-                $this->cartService->applyCoupon($quote, $couponCode, true);
+                $this->cartService->applyCoupon($quote, $couponCode, \Mage_Checkout_Model_Actor::Staff);
             }
         } catch (\Mage_Core_Exception $e) {
             throw ValidationException::invalidValue('couponCode', $e->getMessage());
@@ -288,7 +294,7 @@ class CartMutationHandler
         // and duplicate checks stay in one place (\Mage_Checkout_Service_Cart::applyGiftcard also
         // collects totals and saves). Avoids the drift this handler had before.
         try {
-            $this->cartService->applyGiftcard($quote, (string) $code, $amount, true);
+            $this->cartService->applyGiftcard($quote, (string) $code, $amount, \Mage_Checkout_Model_Actor::Staff);
         } catch (\Mage_Core_Exception $e) {
             throw ValidationException::invalidValue('code', $e->getMessage());
         }

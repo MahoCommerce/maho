@@ -77,9 +77,20 @@ class Mage_Catalog_Service_Product_Option
      */
     public function openUploadedFile(int $quoteItemOptionId, string $key): array
     {
+        return $this->openItemOptionFile(Mage::getModel('sales/quote_item_option')->load($quoteItemOptionId), $key);
+    }
+
+    /**
+     * Open the file that a shopper uploaded for a file option. $itemOption is the option of a cart item or of a
+     * wishlist item, and $key is the secret key of the file. The caller closes the stream.
+     *
+     * @return array{stream: resource, size: int|null, title: string, type: string}
+     * @throws Mage_Core_Exception_NoSuchEntity when $itemOption is not a file option, or the file is gone
+     * @throws Mage_Core_Exception_Forbidden when $key is not the secret key of the file
+     */
+    public function openItemOptionFile(Mage_Sales_Model_Quote_Item_Option|Mage_Wishlist_Model_Item_Option $itemOption, string $key): array
+    {
         $helper = Mage::helper('catalog');
-        /** @var Mage_Sales_Model_Quote_Item_Option $itemOption */
-        $itemOption = Mage::getModel('sales/quote_item_option')->load($quoteItemOptionId);
 
         // Only a file option holds a stored file: the value of another option is the text of the shopper
         $optionId = str_starts_with((string) $itemOption->getCode(), Mage_Catalog_Model_Product_Type_Abstract::OPTION_PREFIX)

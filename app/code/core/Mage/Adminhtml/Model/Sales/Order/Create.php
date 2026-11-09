@@ -152,6 +152,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
      */
     public function initRuleData()
     {
+        Mage::unregister('rule_data');
         Mage::register('rule_data', new \Maho\DataObject([
             'store_id'  => $this->_session->getStore()->getId(),
             'website_id'  => $this->_session->getStore()->getWebsiteId(),
@@ -772,40 +773,37 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         }
         $config = new \Maho\DataObject($config);
 
+        $service = Mage::getService('checkout/cart');
         if (!($product instanceof Mage_Catalog_Model_Product)) {
-            $productId = $product;
-            $product = Mage::getModel('catalog/product')
-                ->setStore($this->getSession()->getStore())
-                ->setStoreId($this->getSession()->getStoreId())
-                ->load($product);
-            if (!$product->getId()) {
-                Mage::throwException(
-                    Mage::helper('adminhtml')->__('Failed to add a product to cart by id "%s".', $productId),
-                );
-            }
+            $product = $service->getProductById((int) $product, (int) $this->getSession()->getStoreId())
+                ->setStore($this->getSession()->getStore());
         }
 
         $stockItem = $product->getStockItem();
         if ($stockItem && $stockItem->getIsQtyDecimal()) {
             $product->setIsQtyDecimal();
-        } else {
+        } elseif ($config->hasQty()) {
             $config->setQty((int) $config->getQty());
+        }
+        if ($config->hasQty() && $config->getQty() <= 0) {
+            $config->setQty(1);
         }
 
         $product->setCartQty((float) $config->getQty());
-        $item = $this->getQuote()->addProductAdvanced(
-            $product,
-            $config,
-            Mage_Catalog_Model_Product_Type_Abstract::PROCESS_MODE_FULL,
-        );
-        if (is_string($item)) {
-            if ($product->getTypeId() != Mage_Catalog_Model_Product_Type_Grouped::TYPE_CODE) {
-                $item = $this->getQuote()->addProductAdvanced(
-                    $product,
-                    $config,
-                    Mage_Catalog_Model_Product_Type_Abstract::PROCESS_MODE_LITE,
-                );
+        try {
+            $item = $service->addProduct($this->getQuote(), $product, $config, Mage_Checkout_Model_Actor::Staff);
+        } catch (Mage_Core_Exception $e) {
+            // A product that misses options goes to the order anyway: the grid then opens its configure popup
+            if (!$e->getMessages(Mage_Core_Model_Message::NOTICE)
+                || $product->getTypeId() == Mage_Catalog_Model_Product_Type_Grouped::TYPE_CODE
+            ) {
+                throw $e;
             }
+            $item = $this->getQuote()->addProductAdvanced(
+                $product,
+                $config,
+                Mage_Catalog_Model_Product_Type_Abstract::PROCESS_MODE_LITE,
+            );
             if (is_string($item)) {
                 Mage::throwException($item);
             }
@@ -928,8 +926,19 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
 
                         if (empty($info['action']) || !empty($info['configured'])) {
                             $item->setQty($itemQty);
-                            $item->setCustomPrice($itemPrice);
-                            $item->setOriginalCustomPrice($itemPrice);
+                            $currentPrice = $item->getOriginalCustomPrice();
+                            if (($itemPrice === null) !== ($currentPrice === null) || (float) $itemPrice !== (float) $currentPrice) {
+                                // A new configuration can give a new line, which has no ID before the save
+                                if (!$item->getId()) {
+                                    $this->getQuote()->save();
+                                }
+                                Mage::getService('checkout/cart')->setCustomPrice(
+                                    $this->getQuote(),
+                                    (int) $item->getId(),
+                                    $itemPrice === null ? null : (float) $itemPrice,
+                                    Mage_Checkout_Model_Actor::Staff,
+                                );
+                            }
                             $item->setNoDiscount($noDiscount);
                             $item->getProduct()->setIsSuperMode();
                             $item->getProduct()->unsSkipCheckRequiredOption();
@@ -1305,7 +1314,17 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
     public function applyCoupon($code)
     {
         $code = trim((string) $code);
-        $this->getQuote()->setCouponCode($code);
+        if ($code === '') {
+            $this->getQuote()->setCouponCode('');
+        } else {
+            // The catalog price rules of the totals read the rule data
+            $this->initRuleData();
+            try {
+                Mage::getService('checkout/cart')->applyCoupon($this->getQuote(), $code, Mage_Checkout_Model_Actor::Staff);
+            } catch (Mage_Core_Exception) {
+                // The cart keeps its coupon, and the controller tells that the code is not valid
+            }
+        }
         $this->setRecollect(true);
         return $this;
     }

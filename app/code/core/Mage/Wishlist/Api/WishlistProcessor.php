@@ -133,7 +133,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * The cart of the API takes a SKU, so the item goes to the cart without the options of its buy request.
+     * Add the item to the cart with the options of its buy request, then remove it from the wishlist.
      */
     private function moveToCart(int $itemId, int $qty = 1, ?string $cartId = null): WishlistItem
     {
@@ -166,7 +166,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
             $quote = $this->cartService->getForCustomer($customerId, (int) \Mage::app()->getStore()->getId());
         }
 
-        $this->cartService->addItem($quote, $item->getProduct()->getSku(), (float) $qty);
+        $this->cartService->addProduct($quote, $item->getProduct(), $item->getBuyRequest()->setQty($qty));
 
         // Build the response before the delete, which needs the data of the item
         $dto = $this->toDto($item);

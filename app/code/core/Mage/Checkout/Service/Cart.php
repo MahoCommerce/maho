@@ -210,260 +210,175 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Add item to cart
-     *
-     * @param \Mage_Sales_Model_Quote $quote Quote
-     * @param string $sku Product SKU
-     * @param float $qty Quantity
-     * @param array $options Custom options (option_id => value)
-     * @param float|null $customPrice Unit price override in quote currency (caller must authorize)
+     * @throws \Mage_Core_Exception when the product does not exist
      */
-    public function addItem(\Mage_Sales_Model_Quote $quote, string $sku, float $qty, array $options = [], ?float $customPrice = null): \Mage_Sales_Model_Quote
+    public function getProductById(int $productId, int $storeId): \Mage_Catalog_Model_Product
     {
-        // Validate quantity
-        if ($qty <= 0) {
-            throw new \Mage_Core_Exception('Quantity must be greater than zero');
-        }
-        if ($qty > self::MAX_ITEM_QTY) {
-            throw new \Mage_Core_Exception('Quantity cannot exceed 10,000');
-        }
-        if ($customPrice !== null && $customPrice < 0) {
-            throw new \Mage_Core_Exception('Custom price cannot be negative');
-        }
-
-        // First find product ID by SKU
-        $productId = \Mage::getResourceModel('catalog/product')->getIdBySku($sku);
-
-        if (!$productId) {
-            throw new \Mage_Core_Exception("Product with SKU '{$sku}' not found");
-        }
-
-        $this->logDebug("Adding product {$sku} (ID: {$productId}) to quote {$quote->getId()}, quote store_id: {$quote->getStoreId()}");
-
-        // Load product in the quote's store context to get correct prices
-        $product = \Mage::getModel('catalog/product')
-            ->setStoreId($quote->getStoreId())
-            ->load($productId);
-
+        $product = \Mage::getModel('catalog/product')->setStoreId($storeId)->load($productId);
         if (!$product->getId()) {
-            throw new \Mage_Core_Exception("Product with SKU '{$sku}' not found");
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('The product could not be found.'));
         }
+        return $product;
+    }
 
-        // Status gate, addProduct does not check this itself, so without an
-        // explicit guard a disabled SKU is addable through the public API.
-        if ((int) $product->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
-            throw new \Mage_Core_Exception("Product '{$sku}' is not available");
+    /**
+     * @throws \Mage_Core_Exception when no product has $sku
+     */
+    public function getProductBySku(string $sku, int $storeId): \Mage_Catalog_Model_Product
+    {
+        $productId = $sku === '' ? false : \Mage::getResourceModel('catalog/product')->getIdBySku($sku);
+        $product = \Mage::getModel('catalog/product')->setStoreId($storeId);
+        if ($productId) {
+            $product->load((int) $productId);
         }
-
-        // Visibility gate: refuse 'not_visible_individually' simples that
-        // aren't part of a configurable. Variants of a configurable are
-        // legitimately not-visible-individually and are auto-promoted to the
-        // configurable parent below.
-        $visibility = (int) $product->getVisibility();
-        if ($visibility === \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE
-            && $product->getTypeId() !== \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
-        ) {
-            throw new \Mage_Core_Exception("Product '{$sku}' is not available");
+        if (!$product->getId()) {
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__("Product with SKU '%s' not found", $sku));
         }
+        return $product;
+    }
 
-        // Check if this simple product is a child of a configurable
-        // If so, add the configurable parent with the proper super_attribute options
-        $buyRequest = new \Maho\DataObject(['qty' => $qty]);
+    /**
+     * Add $product to $quote with $buyRequest, and save the cart. A simple product that the storefront does not show
+     * goes to the cart as its configurable parent. A buy request without a qty gets the default qty of the product,
+     * and a new line gets at least the minimum sale qty. Only staff can set $customPrice.
+     *
+     * @throws \Mage_Core_Exception_Forbidden when a customer sets a custom price
+     * @throws \Mage_Core_Exception_Conflict when the custom price would change the price of units already in the cart
+     * @throws \Mage_Core_Exception when the product or the qty is not valid, or the product type refuses the buy
+     *                              request. Then the exception has a notice message for an option to fix, or an error
+     *                              message for another reason.
+     */
+    public function addProduct(
+        \Mage_Sales_Model_Quote $quote,
+        \Mage_Catalog_Model_Product $product,
+        \Maho\DataObject $buyRequest,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+        ?float $customPrice = null,
+    ): \Mage_Sales_Model_Quote_Item {
+        $this->assertCustomPrice($customPrice, $actor);
+        $storeId = (int) $quote->getStoreId();
+        $sku = (string) $product->getSku();
+        $this->assertSellable($product, $storeId, $sku);
+        $product = $this->getConfigurableParent($product, $buyRequest, $storeId, $sku) ?? $product;
+        $this->assertAvailable($product, $storeId, $actor, $sku);
+        $this->prepareOptions($product, $buyRequest);
 
-        // Add custom options, downloadable links, grouped, and bundle params if provided
-        // Supports two formats:
-        //   Structured: ['options' => [...], 'links' => [...], 'super_group' => [...], 'bundle_option' => [...]] (from GraphQL CartProcessor)
-        //   Flat: [optionId => valueId, ...] (from REST GuestCartController)
-        if (!empty($options)) {
-            if (isset($options['options']) || isset($options['links']) || isset($options['super_group']) || isset($options['bundle_option']) || isset($options['giftcard_amount'])) {
-                // Structured format
-                if (!empty($options['options'])) {
-                    $buyRequest->setData('options', $options['options']);
-                }
-                if (!empty($options['links'])) {
-                    $buyRequest->setData('links', $options['links']);
-                }
-                if (!empty($options['super_group'])) {
-                    $buyRequest->setData('super_group', $options['super_group']);
-                }
-                if (!empty($options['bundle_option'])) {
-                    $buyRequest->setData('bundle_option', $options['bundle_option']);
-                }
-                if (!empty($options['bundle_option_qty'])) {
-                    $buyRequest->setData('bundle_option_qty', $options['bundle_option_qty']);
-                }
-                foreach ([
-                    'giftcard_amount', 'giftcard_sender_name', 'giftcard_sender_email',
-                    'giftcard_recipient_name', 'giftcard_recipient_email',
-                    'giftcard_message', 'giftcard_delivery_date',
-                ] as $gcKey) {
-                    if (!empty($options[$gcKey])) {
-                        $buyRequest->setData($gcKey, $options[$gcKey]);
-                    }
-                }
-            } else {
-                // Flat custom options format (REST)
-                $buyRequest->setData('options', $options);
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $product, $buyRequest, $customPrice): \Mage_Sales_Model_Quote_Item {
+            \Mage::dispatchEvent('checkout_cart_product_add_before', ['request' => $buyRequest, 'product' => $product]);
+
+            if (!$buyRequest->hasQty()) {
+                $buyRequest->setQty(\Mage::helper('catalog/product')->getDefaultQty($product));
             }
-        }
+            $this->assertQty((float) $buyRequest->getQty());
+            $this->raiseToMinimumSaleQty($quote, $product, $buyRequest);
 
-        // Only auto-promote a simple to its configurable parent when the simple
-        // is not individually visible. A simple that *is* visible on its own
-        // (e.g. POS adding a specific variant SKU) is sold as-is; otherwise we
-        // resolve to the parent so the cart shows the configurable, matching
-        // storefront behaviour.
-        if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
-            && (int) $product->getVisibility() === \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE
-        ) {
-            $parentIds = \Mage::getModel('catalog/product_type_configurable')
-                ->getParentIdsByChild((int) $productId);
-
-            if (!empty($parentIds)) {
-                $parentId = $parentIds[0];
-                $this->logDebug("Simple product {$productId} has configurable parent {$parentId}, adding as configurable");
-
-                // Load the configurable parent
-                $configurableProduct = \Mage::getModel('catalog/product')
-                    ->setStoreId($quote->getStoreId())
-                    ->load($parentId);
-
-                if ($configurableProduct->getId()) {
-                    // The originally-loaded simple passed the status gate, but the
-                    // product actually added to the cart is the configurable parent.
-                    // A disabled parent with an enabled child must not be addable.
-                    if ((int) $configurableProduct->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
-                        throw new \Mage_Core_Exception("Product '{$sku}' is not available");
-                    }
-
-                    // Get the super_attribute values for this simple product
-                    $superAttributes = $this->getSuperAttributesForSimple($configurableProduct, $product);
-
-                    if (!empty($superAttributes)) {
-                        // Build buy request with super_attribute
-                        $buyRequest->setData('product', $parentId);
-                        $buyRequest->setData('super_attribute', $superAttributes);
-
-                        // Use the configurable product instead
-                        $product = $configurableProduct;
-                        $this->logDebug("Using configurable product {$parentId} with super_attributes: " . \Mage::helper('core')->jsonEncode($superAttributes));
-                    }
-                }
+            // The storefront shows a notice and opens the product page for an option to fix
+            $messages = \Mage::getSingleton('core/message');
+            try {
+                $item = $quote->addProduct($product, $buyRequest);
+            } catch (\Mage_Core_Exception $e) {
+                throw $e->addMessage($messages->error($e->getMessage()));
             }
-        }
-
-        // If the product is still a not-visible simple at this point, it was not
-        // promoted to a configurable parent (no parent, or super-attributes could
-        // not be resolved). Such a SKU must not be added directly, as that would
-        // bypass the visibility gate. Only genuine configurable variants reach the
-        // cart, and always as their configurable parent.
-        if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
-            && (int) $product->getVisibility() === \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE
-        ) {
-            throw new \Mage_Core_Exception("Product '{$sku}' is not available");
-        }
-
-        $this->logDebug("Product loaded: ID={$product->getId()}, StoreId={$product->getStoreId()}, Price={$product->getPrice()}, FinalPrice={$product->getFinalPrice()}");
-        // Convert flat date/datetime values to the array format Magento expects
-        $currentOptions = $buyRequest->getData('options') ?: [];
-        if (!empty($currentOptions)) {
-            foreach ($product->getOptions() as $opt) {
-                $optId = (string) $opt->getId();
-                if (!isset($currentOptions[$optId])) {
-                    continue;
-                }
-                $val = $currentOptions[$optId];
-                if (is_string($val) && in_array($opt->getType(), [
-                    \Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE,
-                    \Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME,
-                    \Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME,
-                ], true)) {
-                    if ($opt->getType() === \Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE) {
-                        $currentOptions[$optId] = ['date' => $val];
-                    } elseif ($opt->getType() === \Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME) {
-                        $currentOptions[$optId] = ['datetime' => $val];
-                    } elseif ($opt->getType() === \Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME) {
-                        $currentOptions[$optId] = ['time' => $val];
-                    }
-                }
-            }
-            $buyRequest->setData('options', $currentOptions);
-        }
-
-        // Inject API file uploads into buyRequest (prevents forgery, uses DataObject pattern)
-        if (!empty($options['options_files'])) {
-            $optionsFiles = [];
-            foreach ($options['options_files'] as $optionId => $fileData) {
-                $optionId = (int) $optionId;
-                // Verify this option ID belongs to a file-type option on this product
-                $productOption = $product->getOptionById((string) $optionId);
-                if (!$productOption || $productOption->getType() !== \Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE) {
-                    throw new \Mage_Core_Exception("Option ID {$optionId} is not a valid file-type option for this product");
-                }
-                if (!is_array($fileData) || empty($fileData['base64_encoded_data']) || empty($fileData['name'])) {
-                    throw new \Mage_Core_Exception("File option {$optionId} requires 'name' and 'base64_encoded_data'");
-                }
-                $optionsFiles[$optionId] = $fileData;
-            }
-            if (!empty($optionsFiles)) {
-                $buyRequest->setData('options_files', $optionsFiles);
-            }
-        }
-        return $this->inQuoteStoreScope($quote, function () use ($quote, $product, $buyRequest, $customPrice): \Mage_Sales_Model_Quote {
-            $result = $quote->addProduct($product, $buyRequest);
-
-            // addProduct returns a string error message on failure
-            if (is_string($result)) {
-                $this->logDebug("Failed to add product: {$result}");
-                throw new \Mage_Core_Exception("Failed to add product: {$result}");
+            if (is_string($item)) {
+                throw new \Mage_Core_Exception($item)->addMessage($messages->notice($item));
             }
 
             if ($customPrice !== null) {
                 // A persisted id means addProduct() merged into an existing line, and the
                 // override would apply to units already in the cart at another price
                 // (compared at the column's DECIMAL(12,4) scale, so a re-add of the same value passes)
-                $existingOverride = $result->getOriginalCustomPrice();
-                if ($result->getId() && ($existingOverride === null || round((float) $existingOverride, 4) !== round($customPrice, 4))) {
-                    throw new \Mage_Core_Exception_Conflict('customPrice would reprice units already in the cart; update the existing item instead');
+                $existingOverride = $item->getOriginalCustomPrice();
+                if ($item->getId() && ($existingOverride === null || round((float) $existingOverride, 4) !== round($customPrice, 4))) {
+                    throw new \Mage_Core_Exception_Conflict(\Mage::helper('checkout')->__('customPrice would reprice units already in the cart; update the existing item instead'));
                 }
-                $result->setCustomPrice($customPrice);
-                $result->setOriginalCustomPrice($customPrice);
+                $item->setCustomPrice($customPrice);
+                $item->setOriginalCustomPrice($customPrice);
             }
 
-            $this->collectAndSave($quote);
+            \Mage::dispatchEvent('checkout_cart_product_add_after', ['quote_item' => $item, 'product' => $product]);
+            $this->saveWithShippingRates($quote);
+
+            return $item;
+        });
+    }
+
+    /**
+     * Give the cart line $itemId the options and the qty of $buyRequest, and save the cart.
+     *
+     * @param array<string, mixed>|\Maho\DataObject|null $params see Mage_Sales_Model_Quote::updateItem()
+     * @throws \Mage_Core_Exception_Input when $itemId is empty
+     * @throws \Mage_Core_Exception_NoSuchEntity when the cart has no line $itemId
+     * @throws \Mage_Core_Exception
+     */
+    public function reconfigureItem(
+        \Mage_Sales_Model_Quote $quote,
+        int $itemId,
+        \Maho\DataObject $buyRequest,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+        array|\Maho\DataObject|null $params = null,
+    ): \Mage_Sales_Model_Quote_Item {
+        $storeId = (int) $quote->getStoreId();
+        $product = $this->getProductById((int) $this->requireItem($quote, $itemId)->getProduct()->getId(), $storeId);
+        $this->assertAvailable($product, $storeId, $actor, (string) $product->getSku());
+        $this->prepareOptions($product, $buyRequest);
+        if ($buyRequest->hasQty()) {
+            $this->assertQty((float) $buyRequest->getQty());
+        }
+
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $itemId, $product, $buyRequest, $params): \Mage_Sales_Model_Quote_Item {
+            $item = $quote->updateItem($itemId, $buyRequest, $params);
+            \Mage::dispatchEvent('checkout_cart_product_update_after', ['quote_item' => $item, 'product' => $product]);
+            $this->saveWithShippingRates($quote);
+
+            return $item;
+        });
+    }
+
+    /**
+     * Give each cart line of $qtyByItemId its new qty, and save the cart once.
+     *
+     * @param array<int, float> $qtyByItemId
+     * @throws \Mage_Core_Exception_Input when an item ID is empty
+     * @throws \Mage_Core_Exception_NoSuchEntity when the cart has no such line
+     * @throws \Mage_Core_Exception when a qty is not above 0 or is above 10,000
+     */
+    public function updateItems(\Mage_Sales_Model_Quote $quote, array $qtyByItemId): \Mage_Sales_Model_Quote
+    {
+        $items = [];
+        foreach ($qtyByItemId as $itemId => $qty) {
+            $items[] = [$this->requireItem($quote, (int) $itemId), (float) $qty];
+            $this->assertQty((float) $qty);
+        }
+
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $items): \Mage_Sales_Model_Quote {
+            foreach ($items as [$item, $qty]) {
+                $item->setQty($qty);
+            }
+            $this->saveWithShippingRates($quote);
 
             return $quote;
         });
     }
 
     /**
-     * Update cart item
+     * Change the qty and the custom price of the cart line $itemId, and save the cart once. A null value keeps the
+     * current one. Only staff can set $customPrice.
      *
-     * @param \Mage_Sales_Model_Quote $quote Quote
-     * @param int $itemId Item ID
-     * @param float|null $qty New quantity, null keeps the current one
-     * @param float|null $customPrice New unit price override in quote currency (caller must authorize)
+     * @throws \Mage_Core_Exception_Forbidden when a customer sets a custom price
+     * @throws \Mage_Core_Exception_NoSuchEntity when the cart has no line $itemId
+     * @throws \Mage_Core_Exception
      */
-    public function updateItem(\Mage_Sales_Model_Quote $quote, int $itemId, ?float $qty, ?float $customPrice = null): \Mage_Sales_Model_Quote
-    {
-        if ($customPrice !== null && $customPrice < 0) {
-            throw new \Mage_Core_Exception('Custom price cannot be negative');
-        }
-
-        $item = $quote->getItemById($itemId);
-
-        if (!$item) {
-            throw new \Mage_Core_Exception_NoSuchEntity("Cart item with ID '{$itemId}' not found");
-        }
-
+    public function updateItem(
+        \Mage_Sales_Model_Quote $quote,
+        int $itemId,
+        ?float $qty,
+        ?float $customPrice = null,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Staff,
+    ): \Mage_Sales_Model_Quote {
+        $this->assertCustomPrice($customPrice, $actor);
+        $item = $this->requireItem($quote, $itemId);
         $qty ??= (float) $item->getQty();
-
-        // Validate quantity
-        if ($qty <= 0) {
-            throw new \Mage_Core_Exception('Quantity must be greater than zero');
-        }
-        if ($qty > self::MAX_ITEM_QTY) {
-            throw new \Mage_Core_Exception('Quantity cannot exceed 10,000');
-        }
+        $this->assertQty($qty);
 
         return $this->inQuoteStoreScope($quote, function () use ($quote, $item, $qty, $customPrice): \Mage_Sales_Model_Quote {
             $item->setQty($qty);
@@ -471,38 +386,299 @@ class Mage_Checkout_Service_Cart
                 $item->setCustomPrice($customPrice);
                 $item->setOriginalCustomPrice($customPrice);
             }
-
-            $this->collectAndSave($quote);
+            $this->saveWithShippingRates($quote);
 
             return $quote;
         });
     }
 
     /**
-     * Remove item from cart
+     * Give the cart line $itemId the unit price $price in the currency of the cart, or its catalog price again when
+     * $price is null. Only staff can change the price of a line.
      *
-     * @param \Mage_Sales_Model_Quote $quote Quote
-     * @param int $itemId Item ID
+     * @throws \Mage_Core_Exception_Forbidden when $actor is a customer
+     * @throws \Mage_Core_Exception_NoSuchEntity when the cart has no line $itemId
+     * @throws \Mage_Core_Exception when $price is negative
+     */
+    public function setCustomPrice(
+        \Mage_Sales_Model_Quote $quote,
+        int $itemId,
+        ?float $price,
+        \Mage_Checkout_Model_Actor $actor,
+    ): \Mage_Sales_Model_Quote {
+        $this->assertCustomPrice($price ?? 0.0, $actor);
+        $item = $this->requireItem($quote, $itemId);
+        $item->setCustomPrice($price);
+        $item->setOriginalCustomPrice($price);
+        $this->saveWithShippingRates($quote);
+
+        return $quote;
+    }
+
+    /**
+     * @throws \Mage_Core_Exception_Input when $itemId is empty
+     * @throws \Mage_Core_Exception_NoSuchEntity when the cart has no line $itemId
      */
     public function removeItem(\Mage_Sales_Model_Quote $quote, int $itemId): \Mage_Sales_Model_Quote
     {
-        // removeItem() is a silent no-op for an unknown ID, so guard explicitly
-        // to return a 404 instead of a false-positive 200 (mirrors updateItem()).
-        if (!$quote->getItemById($itemId)) {
-            throw new \Mage_Core_Exception_NoSuchEntity("Cart item with ID '{$itemId}' not found");
-        }
+        $this->requireItem($quote, $itemId);
 
         return $this->inQuoteStoreScope($quote, function () use ($quote, $itemId): \Mage_Sales_Model_Quote {
             $quote->removeItem($itemId);
-            $this->collectAndSave($quote);
+            $this->saveWithShippingRates($quote);
 
             return $quote;
         });
     }
 
+    public function truncate(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
+    {
+        $quote->removeAllItems();
+        $this->saveWithShippingRates($quote);
+
+        return $quote;
+    }
+
+    /**
+     * Give the shipping address of $quote the country, the region, the postcode and the city of $estimate, and save the
+     * cart with the shipping rates of this place.
+     *
+     * @throws \Mage_Core_Exception_Input when the country does not exist
+     */
+    public function estimateShipping(\Mage_Sales_Model_Quote $quote, \Mage_Sales_Model_Quote_Address $estimate): \Mage_Sales_Model_Quote
+    {
+        $countryId = (string) $estimate->getCountryId();
+        try {
+            $country = \Mage::getModel('directory/country')->loadByCode($countryId);
+        } catch (\Mage_Core_Exception) {
+            $country = null;
+        }
+        if (!$country?->getId()) {
+            throw new \Mage_Core_Exception_Input()->addError('country_id', \Mage::helper('directory')->__('Invalid country code: %s', $countryId));
+        }
+
+        $quote->getShippingAddress()
+            ->setCountryId($countryId)
+            ->setCity($estimate->getCity())
+            ->setPostcode($estimate->getPostcode())
+            ->setRegionId($estimate->getRegionId())
+            ->setRegion($estimate->getRegion());
+        $this->saveWithShippingRates($quote);
+
+        return $quote;
+    }
+
+    /**
+     * Add item to cart
+     *
+     * @deprecated since 26.11.1, use getProductBySku() and addProduct()
+     * @param array $options Custom options (option_id => value), or the structured keys of the GraphQL input
+     * @param float|null $customPrice Unit price override in quote currency (caller must authorize)
+     */
+    public function addItem(\Mage_Sales_Model_Quote $quote, string $sku, float $qty, array $options = [], ?float $customPrice = null): \Mage_Sales_Model_Quote
+    {
+        $buyRequest = new \Maho\DataObject(['qty' => $qty]);
+        $structuredKeys = [
+            'options', 'options_files', 'links', 'super_group', 'bundle_option', 'bundle_option_qty',
+            'giftcard_amount', 'giftcard_sender_name', 'giftcard_sender_email', 'giftcard_recipient_name',
+            'giftcard_recipient_email', 'giftcard_message', 'giftcard_delivery_date',
+        ];
+        if (array_intersect_key($options, array_flip(['options', 'links', 'super_group', 'bundle_option', 'giftcard_amount', 'options_files']))) {
+            $buyRequest->addData(array_filter(array_intersect_key($options, array_flip($structuredKeys))));
+        } elseif ($options !== []) {
+            $buyRequest->setData('options', $options);
+        }
+
+        $product = $this->getProductBySku($sku, (int) $quote->getStoreId());
+        $actor = $customPrice === null ? \Mage_Checkout_Model_Actor::Customer : \Mage_Checkout_Model_Actor::Staff;
+        $this->addProduct($quote, $product, $buyRequest, $actor, $customPrice);
+
+        return $quote;
+    }
+
+    /**
+     * @throws \Mage_Core_Exception_Input when $itemId is empty
+     * @throws \Mage_Core_Exception_NoSuchEntity when the cart has no line $itemId
+     */
+    private function requireItem(\Mage_Sales_Model_Quote $quote, int $itemId): \Mage_Sales_Model_Quote_Item
+    {
+        $helper = \Mage::helper('checkout');
+        if ($itemId <= 0) {
+            throw new \Mage_Core_Exception_Input()->addError('item_id', $helper->__('Item ID is required'));
+        }
+        $item = $quote->getItemById($itemId);
+        if (!$item) {
+            throw new \Mage_Core_Exception_NoSuchEntity($helper->__("Cart item with ID '%s' not found", $itemId));
+        }
+        return $item;
+    }
+
+    /**
+     * @throws \Mage_Core_Exception when $qty is not above 0 or is above 10,000
+     */
+    private function assertQty(float $qty): void
+    {
+        if ($qty <= 0) {
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('Quantity must be greater than zero'));
+        }
+        if ($qty > self::MAX_ITEM_QTY) {
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('Quantity cannot exceed 10,000'));
+        }
+    }
+
+    /**
+     * @throws \Mage_Core_Exception_Forbidden when a customer sets a price
+     * @throws \Mage_Core_Exception when $price is negative
+     */
+    private function assertCustomPrice(?float $price, \Mage_Checkout_Model_Actor $actor): void
+    {
+        if ($price === null) {
+            return;
+        }
+        if ($actor !== \Mage_Checkout_Model_Actor::Staff) {
+            throw new \Mage_Core_Exception_Forbidden(\Mage::helper('checkout')->__('customPrice requires admin or carts/write authorization'));
+        }
+        if ($price < 0) {
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('Custom price cannot be negative'));
+        }
+    }
+
+    /**
+     * @throws \Mage_Core_Exception when $product is disabled or is not in the website of $storeId
+     */
+    private function assertSellable(\Mage_Catalog_Model_Product $product, int $storeId, string $sku): void
+    {
+        $websiteId = (int) \Mage::app()->getStore($storeId)->getWebsiteId();
+        if ((int) $product->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED
+            || !in_array($websiteId, array_map(intval(...), (array) $product->getWebsiteIds()), true)
+        ) {
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__("Product '%s' is not available", $sku));
+        }
+    }
+
+    /**
+     * Staff can add any product of the website that is enabled. A customer can add only a product that the
+     * storefront shows.
+     *
+     * @throws \Mage_Core_Exception
+     */
+    private function assertAvailable(\Mage_Catalog_Model_Product $product, int $storeId, \Mage_Checkout_Model_Actor $actor, string $sku): void
+    {
+        $this->assertSellable($product, $storeId, $sku);
+        if ($actor === \Mage_Checkout_Model_Actor::Customer && !\Mage::helper('catalog/product')->isVisibleInStore($product, $storeId)) {
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__("Product '%s' is not available", $sku));
+        }
+    }
+
+    /**
+     * Return the configurable parent of $product when $product is a simple product that the storefront does not show,
+     * and point $buyRequest at the parent with the values of $product. Return null for any other product.
+     *
+     * @throws \Mage_Core_Exception when the parent is disabled or is not in the website of $storeId
+     */
+    private function getConfigurableParent(
+        \Mage_Catalog_Model_Product $product,
+        \Maho\DataObject $buyRequest,
+        int $storeId,
+        string $sku,
+    ): ?\Mage_Catalog_Model_Product {
+        if ($product->getTypeId() !== \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
+            || (int) $product->getVisibility() !== \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE
+        ) {
+            return null;
+        }
+
+        $parentId = \Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild((int) $product->getId())[0] ?? null;
+        if (!$parentId) {
+            return null;
+        }
+        $parent = \Mage::getModel('catalog/product')->setStoreId($storeId)->load($parentId);
+        if (!$parent->getId()) {
+            return null;
+        }
+        $superAttributes = $this->getSuperAttributesForSimple($parent, $product);
+        if ($superAttributes === []) {
+            return null;
+        }
+        $this->assertSellable($parent, $storeId, $sku);
+
+        $buyRequest->setData('product', (int) $parent->getId());
+        $buyRequest->setData('super_attribute', $superAttributes);
+        $this->logDebug("Simple product {$product->getId()} goes to the cart as its configurable parent {$parent->getId()}");
+
+        return $parent;
+    }
+
+    /**
+     * Check the uploaded files of the buy request, and give a date, date and time, or time option that the buy request
+     * holds as one string the array shape of the product form.
+     *
+     * @throws \Mage_Core_Exception when a file is not for a file option of $product, or has no name or no data
+     */
+    private function prepareOptions(\Mage_Catalog_Model_Product $product, \Maho\DataObject $buyRequest): void
+    {
+        $files = $buyRequest->getData('options_files');
+        if (!empty($files)) {
+            $optionsFiles = [];
+            foreach ((array) $files as $optionId => $fileData) {
+                $optionId = (int) $optionId;
+                $productOption = $product->getOptionById((string) $optionId);
+                if (!$productOption || $productOption->getType() !== \Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE) {
+                    throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('Option ID %s is not a valid file-type option for this product', $optionId));
+                }
+                if (!is_array($fileData) || empty($fileData['base64_encoded_data']) || empty($fileData['name'])) {
+                    throw new \Mage_Core_Exception(\Mage::helper('checkout')->__("File option %s requires 'name' and 'base64_encoded_data'", $optionId));
+                }
+                $optionsFiles[$optionId] = $fileData;
+            }
+            $buyRequest->setData('options_files', $optionsFiles);
+        }
+
+        $options = $buyRequest->getData('options');
+        if (!is_array($options) || $options === []) {
+            return;
+        }
+        $shapes = [
+            \Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE => 'date',
+            \Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME => 'datetime',
+            \Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME => 'time',
+        ];
+        foreach ($product->getOptions() as $option) {
+            $optionId = (string) $option->getId();
+            if (is_string($options[$optionId] ?? null) && isset($shapes[$option->getType()])) {
+                $options[$optionId] = [$shapes[$option->getType()] => $options[$optionId]];
+            }
+        }
+        $buyRequest->setData('options', $options);
+    }
+
+    /**
+     * A new line below the minimum sale qty of its product gets the minimum. The stock check does not run for a cart
+     * in super mode (the admin order create), so its qty stays.
+     */
+    private function raiseToMinimumSaleQty(\Mage_Sales_Model_Quote $quote, \Mage_Catalog_Model_Product $product, \Maho\DataObject $buyRequest): void
+    {
+        $stockItem = $product->getStockItem();
+        if ($quote->getIsSuperMode() || $product->isConfigurable() || !$stockItem) {
+            return;
+        }
+        $minimumQty = (float) $stockItem->getMinSaleQty();
+        if ($minimumQty > 0 && (float) $buyRequest->getQty() < $minimumQty && !$quote->hasProductId($product->getId())) {
+            $buyRequest->setQty($minimumQty);
+        }
+    }
+
+    /**
+     * A change of the items can change the shipping rates, so collect them again before the save.
+     */
+    private function saveWithShippingRates(\Mage_Sales_Model_Quote $quote): void
+    {
+        $quote->getShippingAddress()->setCollectShippingRates(true);
+        $this->collectAndSave($quote);
+    }
     /**
      * Apply the coupon $couponCode to $quote. A coupon that applies tells that its code exists, so a shopper
-     * has a limit of codes per minute. A privileged caller (an admin or a staff API token) has no limit.
+     * has a limit of codes per minute. Staff has no limit.
      * When the coupon does not apply, the cart keeps its previous coupon and nothing is saved.
      *
      * @throws \Mage_Core_Exception_Input when the code is empty
@@ -510,8 +686,11 @@ class Mage_Checkout_Service_Cart
      * @throws \Mage_Core_Exception_TooManyRequests when the shopper is over the limit
      * @throws \Mage_Core_Exception when the code does not exist or its rule does not apply to the cart
      */
-    public function applyCoupon(\Mage_Sales_Model_Quote $quote, string $couponCode, bool $isPrivileged = false): \Mage_Sales_Model_Quote
-    {
+    public function applyCoupon(
+        \Mage_Sales_Model_Quote $quote,
+        string $couponCode,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+    ): \Mage_Sales_Model_Quote {
         $helper = \Mage::helper('checkout');
         $couponCode = trim($couponCode);
         if ($couponCode === '') {
@@ -520,7 +699,7 @@ class Mage_Checkout_Service_Cart
         if (!$quote->getItemsCount()) {
             throw new \Mage_Core_Exception_Conflict($helper->__('Your shopping cart is empty.'));
         }
-        if (!$isPrivileged) {
+        if ($actor === \Mage_Checkout_Model_Actor::Customer) {
             $this->limitCodeAttempts('cart_coupon', \Mage_SalesRule_Service_Rule::XML_PATH_CHECK_RATE_LIMIT);
         }
 
@@ -611,7 +790,7 @@ class Mage_Checkout_Service_Cart
 
     /**
      * Apply the gift card $giftcardCode to $quote. The errors of a code tell whether it exists, so a shopper
-     * has a limit of codes per minute. A privileged caller (an admin or a staff API token) has no limit.
+     * has a limit of codes per minute. Staff has no limit.
      *
      * @throws \Mage_Core_Exception_TooManyRequests when the shopper is over the limit
      * @throws \Mage_Core_Exception
@@ -620,9 +799,9 @@ class Mage_Checkout_Service_Cart
         \Mage_Sales_Model_Quote $quote,
         string $giftcardCode,
         ?float $amount = null,
-        bool $isPrivileged = false,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
     ): \Mage_Sales_Model_Quote {
-        if (!$isPrivileged) {
+        if ($actor === \Mage_Checkout_Model_Actor::Customer) {
             $this->limitCodeAttempts('cart_giftcard', \Maho_Giftcard_Service_Giftcard::XML_PATH_BALANCE_RATE_LIMIT);
         }
         $giftcard = $this->validateGiftcard($quote, trim($giftcardCode));

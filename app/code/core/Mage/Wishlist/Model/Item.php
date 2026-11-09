@@ -317,28 +317,18 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
     public function addToCart(Mage_Checkout_Model_Cart $cart, $delete = false)
     {
         $product = $this->getProduct();
-        $storeId = $this->getStoreId();
 
-        if ($product->getStatus() != Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
+        if ($product->getStatus() != Mage_Catalog_Model_Product_Status::STATUS_ENABLED
+            || !$product->isVisibleInSiteVisibility()
+        ) {
             return false;
-        }
-
-        if (!$product->isVisibleInSiteVisibility()) {
-            if ($product->getStoreId() == $storeId) {
-                return false;
-            }
         }
 
         if (!$product->isSalable()) {
             throw new Mage_Core_Exception('', self::EXCEPTION_CODE_NOT_SALABLE);
         }
 
-        $buyRequest = $this->getBuyRequest();
-
-        $cart->addProduct($product, $buyRequest);
-        if (!$product->isVisibleInSiteVisibility()) {
-            $cart->getQuote()->getItemByProduct($product)->setStoreId($storeId);
-        }
+        $cart->addProduct($product, $this->getBuyRequest());
 
         if ($delete) {
             $this->delete();
