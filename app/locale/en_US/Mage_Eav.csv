@@ -182,7 +182,6 @@ These attributes leave the set: %s.,These attributes leave the set: %s.
 "The value of attribute ""%s"" must be unique","The value of attribute ""%s"" must be unique"
 "The value of attribute ""%s"" must be unique.","The value of attribute ""%s"" must be unique."
 "They will lose their values of the attributes that are not in the default set: %s.","They will lose their values of the attributes that are not in the default set: %s."
-"This attribute cannot be deleted.","This attribute cannot be deleted."
 "This attribute cannot be edited.","This attribute cannot be edited."
 "This attribute cannot be updated.","This attribute cannot be updated."
 "This attribute is used in configurable products","This attribute is used in configurable products"
