@@ -164,6 +164,20 @@ it('uses the address set of the group of the quote for a quote address', functio
         ->and(customerSetTestFormCodes('customer_address_edit', $guestAddress))->toContain('city');
 });
 
+it('keeps the order of the address forms when a set is made from the default set', function () {
+    $resource = Mage::getSingleton('core/resource');
+    $adapter = $resource->getConnection('core_read');
+    $formOrders = fn(): array => array_map(intval(...), $adapter->fetchPairs($adapter->select()
+        ->from(['ea' => $resource->getTableName('eav/attribute')], ['attribute_code'])
+        ->join(['cea' => $resource->getTableName('customer/eav_attribute')], 'cea.attribute_id = ea.attribute_id', ['sort_order'])
+        ->where('ea.entity_type_id = ?', (int) Mage::getSingleton('eav/config')->getEntityType('customer_address')->getId())));
+    $before = $formOrders();
+
+    $this->sets[] = customerSetTestCreateSet('customer_address', 'Pest Order ' . $this->suffix);
+
+    expect($formOrders())->toBe($before);
+});
+
 it('puts a new attribute that names no set into the default set, which every group without a set uses', function () {
     $code = 'pest_default_' . $this->suffix;
     $attribute = $this->attributes[] = customerSetTestCreateAttribute('customer', $code, null, ['customer_account_edit']);

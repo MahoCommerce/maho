@@ -119,6 +119,8 @@ final class AdminApiParity
         );
         $request->setRouteName($route)->setControllerName($controller)->setActionName($action)->setDispatched(true);
         \Mage::app()->setRequest($request);
+        // A message that an earlier test left in the session is not an outcome of this action
+        self::adminMessages();
 
         try {
             new $controllerClass($request, new \Mage_Core_Controller_Response_Http())->{$action . 'Action'}();

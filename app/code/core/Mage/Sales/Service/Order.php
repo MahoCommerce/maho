@@ -262,7 +262,7 @@ class Mage_Sales_Service_Order
      */
     public function requireInvoice(int $invoiceId, ?int $orderId = null): Invoice
     {
-        return $this->requireDocument(Mage::getModel('sales/order_invoice'), $invoiceId, $orderId, 'Invoice not found');
+        return $this->requireDocument(Mage::getModel('sales/order_invoice'), $invoiceId, $orderId, Mage::helper('sales')->__('Invoice not found'));
     }
 
     /**
@@ -270,7 +270,7 @@ class Mage_Sales_Service_Order
      */
     public function requireShipment(int $shipmentId): Shipment
     {
-        return $this->requireDocument(Mage::getModel('sales/order_shipment'), $shipmentId, null, 'Shipment not found');
+        return $this->requireDocument(Mage::getModel('sales/order_shipment'), $shipmentId, null, Mage::helper('sales')->__('Shipment not found'));
     }
 
     /**
@@ -278,7 +278,7 @@ class Mage_Sales_Service_Order
      */
     public function requireCreditmemo(int $creditmemoId): Creditmemo
     {
-        return $this->requireDocument(Mage::getModel('sales/order_creditmemo'), $creditmemoId, null, 'Credit memo not found');
+        return $this->requireDocument(Mage::getModel('sales/order_creditmemo'), $creditmemoId, null, Mage::helper('sales')->__('Credit memo not found'));
     }
 
     /**
@@ -422,7 +422,7 @@ class Mage_Sales_Service_Order
             $document->load($id);
         }
         if (!$document->getId() || ($orderId !== null && (int) $document->getOrderId() !== $orderId)) {
-            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('sales')->__($notFound));
+            throw new Mage_Core_Exception_NoSuchEntity($notFound);
         }
         return $document;
     }
@@ -705,12 +705,12 @@ class Mage_Sales_Service_Order
             // Re-read under the lock, so that the check sees what another request changed while this one waited
             $order->load((int) $order->getId());
             [$allowed, $refusal, $prefix] = match ($action) {
-                'cancel' => [$order->canCancel(), 'Order cannot be cancelled', 'Order cancelled: '],
-                'hold' => [$order->canHold(), 'Order cannot be held', 'Order held: '],
-                'unhold' => [$order->canUnhold(), 'Order is not on hold', 'Order released from hold: '],
+                'cancel' => [$order->canCancel(), Mage::helper('sales')->__('Order cannot be cancelled'), 'Order cancelled: '],
+                'hold' => [$order->canHold(), Mage::helper('sales')->__('Order cannot be held'), 'Order held: '],
+                'unhold' => [$order->canUnhold(), Mage::helper('sales')->__('Order is not on hold'), 'Order released from hold: '],
             };
             if (!$allowed) {
-                throw new Mage_Core_Exception_Conflict(Mage::helper('sales')->__($refusal));
+                throw new Mage_Core_Exception_Conflict($refusal);
             }
 
             $order->{$action}();
@@ -981,12 +981,12 @@ class Mage_Sales_Service_Order
             $invoice->load((int) $invoice->getId());
 
             [$allowed, $refusal] = match ($action) {
-                'capture' => [$invoice->canCapture(), 'The invoice cannot be captured in its current state'],
-                'void' => [$invoice->canVoid(), 'The invoice cannot be voided in its current state'],
-                'cancel' => [$invoice->canCancel(), 'The invoice cannot be canceled in its current state'],
+                'capture' => [$invoice->canCapture(), Mage::helper('sales')->__('The invoice cannot be captured in its current state')],
+                'void' => [$invoice->canVoid(), Mage::helper('sales')->__('The invoice cannot be voided in its current state')],
+                'cancel' => [$invoice->canCancel(), Mage::helper('sales')->__('The invoice cannot be canceled in its current state')],
             };
             if (!$allowed) {
-                throw new Mage_Core_Exception_Conflict(Mage::helper('sales')->__($refusal));
+                throw new Mage_Core_Exception_Conflict($refusal);
             }
 
             $invoice->{$action}();

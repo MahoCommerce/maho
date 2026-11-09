@@ -643,7 +643,13 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getGroupAttributeSetId(int $groupId, string $entityTypeCode): int
     {
-        $group = Mage::getModel('customer/group')->load($groupId);
+        try {
+            /** @var Mage_Customer_Service_Group $service */
+            $service = Mage::getService('customer/group');
+            $group = $service->getById($groupId);
+        } catch (Mage_Core_Exception_NoSuchEntity) {
+            $group = Mage::getModel('customer/group');
+        }
         $setId = match ($entityTypeCode) {
             'customer' => $group->getCustomerAttributeSetId(),
             'customer_address' => $group->getCustomerAddressAttributeSetId(),

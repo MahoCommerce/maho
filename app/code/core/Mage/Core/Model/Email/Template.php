@@ -32,19 +32,6 @@ declare(strict_types=1);
 class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abstract
 {
     /**
-     * The fields that must not hold HTML tags, with their admin labels. Only the text of a template may hold HTML.
-     */
-    public const TAG_FREE_FIELDS = [
-        'template_code' => 'Template Name',
-        'template_subject' => 'Template Subject',
-        'template_styles' => 'Template Styles',
-        'template_sender_name' => 'Sender Name',
-        'template_sender_email' => 'Sender Email',
-        'orig_template_code' => 'Original Template',
-        'orig_template_variables' => 'Template Variables',
-    ];
-
-    /**
      * Configuration path for default email templates
      */
     public const XML_PATH_TEMPLATE_EMAIL               = 'global/template/email';
@@ -613,6 +600,25 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     }
 
     /**
+     * Return the fields that must not hold HTML tags, with their admin labels. Only the text of a template may hold HTML.
+     *
+     * @return array<string, string>
+     */
+    protected function getTagFreeFields(): array
+    {
+        $helper = Mage::helper('core');
+        return [
+            'template_code' => $helper->__('Template Name'),
+            'template_subject' => $helper->__('Template Subject'),
+            'template_styles' => $helper->__('Template Styles'),
+            'template_sender_name' => $helper->__('Sender Name'),
+            'template_sender_email' => $helper->__('Sender Email'),
+            'orig_template_code' => $helper->__('Original Template'),
+            'orig_template_variables' => $helper->__('Template Variables'),
+        ];
+    }
+
+    /**
      * Check the template. The name must be set and unique, the subject and the text must be set, and only the text
      * may hold HTML tags. The text keeps its template directives as they are, because only an admin user writes a
      * template. A plain text template has no styles.
@@ -649,9 +655,9 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         if ($senderEmail !== '' && !$helper->isValidEmail($senderEmail)) {
             $errors->addError('template_sender_email', $helper->__('The sender email is not a valid email address.'));
         }
-        foreach (self::TAG_FREE_FIELDS as $field => $label) {
+        foreach ($this->getTagFreeFields() as $field => $label) {
             if ($helper->hasTags((string) $this->getData($field))) {
-                $errors->addError($field, $helper->__('%s must not contain HTML tags.', $helper->__($label)));
+                $errors->addError($field, $helper->__('%s must not contain HTML tags.', $label));
             }
         }
 

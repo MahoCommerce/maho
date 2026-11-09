@@ -39,6 +39,7 @@
 "This customer has no linked sign-in providers.","This customer has no linked sign-in providers."
 "This sign-in method is not available.","This sign-in method is not available."
 "Too many attempts. Please try again later.","Too many attempts. Please try again later."
+"Too many requests. Please try again later.","Too many requests. Please try again later."
 "Unknown sign-in provider.","Unknown sign-in provider."
 "Unlink","Unlink"
 "When disabled, only customers with an existing account can sign in with a social provider.","When disabled, only customers with an existing account can sign in with a social provider."
@@ -46,4 +47,3 @@
 "You have no connected sign-in providers.","You have no connected sign-in providers."
 "Your account has been created.","Your account has been created."
 "Your sign-in attempt has expired. Please try again.","Your sign-in attempt has expired. Please try again."
-"Too many requests. Please try again later.","Too many requests. Please try again later."

@@ -321,19 +321,19 @@ class Mage_SalesRule_Service_Rule
         $rule = Mage::getModel('salesrule/rule')->load($coupon->getRuleId());
         $locale = Mage::app()->getLocale();
         $reason = match (true) {
-            !$rule->getId() || !$rule->getIsActive() => 'Coupon is not active',
-            !$this->hasWebsite($rule, [$websiteId]) => 'Coupon is not valid for this website',
+            !$rule->getId() || !$rule->getIsActive() => $helper->__('Coupon is not active'),
+            !$this->hasWebsite($rule, [$websiteId]) => $helper->__('Coupon is not valid for this website'),
             $customerGroupId !== null && !in_array($customerGroupId, array_map(intval(...), $rule->getCustomerGroupIds()), true)
-                => 'Coupon is not valid for this customer group',
-            !$locale->isStoreDateInInterval(null, dateFrom: $rule->getFromDate()) => 'Coupon is not yet active',
+                => $helper->__('Coupon is not valid for this customer group'),
+            !$locale->isStoreDateInInterval(null, dateFrom: $rule->getFromDate()) => $helper->__('Coupon is not yet active'),
             !$locale->isStoreDateInInterval(null, dateTo: $rule->getToDate()),
-            $coupon->getData('expiration_date') && $coupon->getData('expiration_date') < $locale->formatDateForDb('now') => 'Coupon has expired',
+            $coupon->getData('expiration_date') && $coupon->getData('expiration_date') < $locale->formatDateForDb('now') => $helper->__('Coupon has expired'),
             $coupon->getUsageLimit() && $coupon->getTimesUsed() >= $coupon->getUsageLimit(),
-            $customerId !== null && $this->hasNoUsesLeft($rule, $coupon, $customerId) => 'Coupon usage limit reached',
+            $customerId !== null && $this->hasNoUsesLeft($rule, $coupon, $customerId) => $helper->__('Coupon usage limit reached'),
             default => null,
         };
         if ($reason !== null) {
-            throw new Mage_SalesRule_Exception($helper->__($reason));
+            throw new Mage_SalesRule_Exception($reason);
         }
         return $coupon;
     }

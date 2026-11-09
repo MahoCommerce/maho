@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-class Mage_Eav_Model_Entity_Attribute_Exception extends Exception
+class Mage_Eav_Model_Entity_Attribute_Exception extends Mage_Core_Exception
 {
     /**
      * Eav entity attribute

@@ -61,8 +61,10 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Group extends Mage_Core_Model_Res
     {
         if ($object->getAttributes()) {
             foreach ($object->getAttributes() as $attribute) {
+                // Write only the place in the set: a full save writes the sort order of the set into the table of
+                // the attribute, and customer_eav_attribute.sort_order gives the order of the customer forms
                 $attribute->setAttributeGroupId($object->getId());
-                $attribute->save();
+                $attribute->getResource()->saveInSetIncluding($attribute);
             }
         }
         if (is_array($object->getData('store_labels'))) {
