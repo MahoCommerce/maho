@@ -54,14 +54,6 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     {
         $code = trim((string) $this->getRequest()->getParam('giftcard_code'));
 
-        if (!$code) {
-            Mage::getSingleton('checkout/session')->addError(
-                $this->__('Please enter a gift card code.'),
-            );
-            $this->_redirect('checkout/cart');
-            return;
-        }
-
         try {
             Mage::getService('checkout/cart')->applyGiftcard($this->_getQuote(), $code);
 
@@ -117,12 +109,6 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
         }
 
         $code = trim((string) $this->getRequest()->getPost('giftcard_code'));
-
-        if (!$code) {
-            $result['message'] = $this->__('Please enter a gift card code.');
-            $this->_sendJsonResponse($result);
-            return;
-        }
 
         try {
             $quote = $this->_getQuote();

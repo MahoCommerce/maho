@@ -152,38 +152,29 @@ class CartMutationHandler
     {
         AdminAcl::checkResource(Cart::class);
         $cartId = $variables['cartId'] ?? null;
-        $couponCode = $variables['couponCode'] ?? null;
+        $couponCode = is_scalar($variables['couponCode'] ?? null) ? (string) $variables['couponCode'] : '';
         if (!$cartId) {
             throw ValidationException::requiredField('cartId');
-        }
-        if (!$couponCode) {
-            throw ValidationException::requiredField('couponCode');
         }
         $quote = CartRequest::load((int) $cartId);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
 
-        // First, check if this is a gift card code
+        // The POS code box takes a gift card code or a coupon code
         /** @var \Maho_Giftcard_Model_Giftcard $giftcard */
-        $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($couponCode);
-        if ($giftcard->getId() && $giftcard->isValid()) {
-            // It's a valid gift card - apply via the shared REST path so the
-            // website-scope and currency checks aren't bypassed.
-            try {
-                $this->cartService->applyGiftcard($quote, $couponCode);
-            } catch (\Mage_Core_Exception $e) {
-                throw ValidationException::invalidValue('couponCode', $e->getMessage());
-            }
-            return ['applyCoupon' => $this->mapCart($quote)];
+        $giftcard = \Mage::getModel('giftcard/giftcard');
+        if (trim($couponCode) !== '') {
+            $giftcard->loadByCode(trim($couponCode));
         }
-
-        // Not a gift card, try as coupon
         try {
-            $this->cartService->applyCoupon($quote, $couponCode);
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            throw ValidationException::invalidValue('couponCode', 'invalid or expired coupon');
+            if ($giftcard->getId() && $giftcard->isValid()) {
+                $this->cartService->applyGiftcard($quote, $couponCode, null, true);
+            } else {
+                $this->cartService->applyCoupon($quote, $couponCode, true);
+            }
+        } catch (\Mage_Core_Exception $e) {
+            throw ValidationException::invalidValue('couponCode', $e->getMessage());
         }
 
         return ['applyCoupon' => $this->mapCart($quote)];
@@ -214,20 +205,17 @@ class CartMutationHandler
     {
         AdminAcl::checkResource(Cart::class);
         $cartId = $variables['cartId'] ?? null;
-        $customerId = $variables['customerId'] ?? null;
+        $customerId = (int) ($variables['customerId'] ?? 0);
         if (!$cartId) {
             throw ValidationException::requiredField('cartId');
-        }
-        if (!$customerId) {
-            throw ValidationException::requiredField('customerId');
         }
         $quote = CartRequest::load((int) $cartId);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
-        $customer = \Mage::getModel('customer/customer')->load($customerId);
-        if (!$customer->getId()) {
-            throw NotFoundException::customer($customerId);
+        $customer = \Mage::getModel('customer/customer');
+        if ($customerId) {
+            $customer->load($customerId);
         }
         $quote = $this->cartService->assignCustomer($quote, $customer);
         return ['assignCustomerToCart' => $this->mapCart($quote)];
@@ -300,7 +288,7 @@ class CartMutationHandler
         // and duplicate checks stay in one place (\Mage_Checkout_Service_Cart::applyGiftcard also
         // collects totals and saves). Avoids the drift this handler had before.
         try {
-            $this->cartService->applyGiftcard($quote, (string) $code, $amount);
+            $this->cartService->applyGiftcard($quote, (string) $code, $amount, true);
         } catch (\Mage_Core_Exception $e) {
             throw ValidationException::invalidValue('code', $e->getMessage());
         }

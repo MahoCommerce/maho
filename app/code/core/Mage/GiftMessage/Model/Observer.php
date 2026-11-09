@@ -63,7 +63,8 @@ class Mage_GiftMessage_Model_Observer extends \Maho\DataObject
     }
 
     /**
-     * Operate with gift messages on checkout process
+     * Save the gift messages of the shipping method step of the checkout through Mage_Checkout_Service_Cart, which
+     * the API uses too. The step saves the shipping method, so a message that the store refuses does not stop it.
      *
      * @return $this
      */
@@ -71,53 +72,38 @@ class Mage_GiftMessage_Model_Observer extends \Maho\DataObject
     public function checkoutEventCreateGiftMessage(\Maho\Event\Observer $observer)
     {
         $giftMessages = $observer->getEvent()->getRequest()->getParam('giftmessage');
-        $quote = $observer->getEvent()->getQuote();
         /** @var Mage_Sales_Model_Quote $quote */
-        if (is_array($giftMessages)) {
-            foreach ($giftMessages as $key => $message) {
-                $giftMessage = Mage::getModel('giftmessage/message');
+        $quote = $observer->getEvent()->getQuote();
+        if (!is_array($giftMessages)) {
+            return $this;
+        }
 
-                // Extract the actual entity ID from the prefixed key
-                if (str_contains($key, '_')) {
-                    $entityId = substr($key, strpos($key, '_') + 1);
-                } else {
-                    // Fallback for backward compatibility
-                    $entityId = $key;
-                }
+        /** @var Mage_Checkout_Service_Cart $service */
+        $service = Mage::getService('checkout/cart');
+        foreach ($giftMessages as $key => $message) {
+            if (!is_array($message)) {
+                continue;
+            }
+            $type = $message['type'] ?? 'quote';
+            if ($type !== 'quote' && $type !== 'quote_item') {
+                continue;
+            }
+            // The form names the message of an item item_<item ID>, an older form names it <item ID>
+            $key = (string) $key;
+            $itemId = $type === 'quote_item' ? (int) (str_contains($key, '_') ? substr($key, strpos($key, '_') + 1) : $key) : null;
 
-                $entity = match ($message['type']) {
-                    'quote' => $quote,
-                    'quote_item' => $quote->getItemById($entityId),
-                    'quote_address' => $quote->getAddressById($entityId),
-                    default => $quote,
-                };
-
-                if ($entity->getGiftMessageId()) {
-                    $giftMessage->load($entity->getGiftMessageId());
-                }
-
-                if (trim($message['message']) == '') {
-                    if ($giftMessage->getId()) {
-                        try {
-                            $giftMessage->delete();
-                            $entity->setGiftMessageId(0)
-                                ->save();
-                        } catch (Exception) {
-                        }
-                    }
-                    continue;
-                }
-
-                try {
-                    $giftMessage->setSender($message['from'])
-                        ->setRecipient($message['to'])
-                        ->setMessage($message['message'])
-                        ->save();
-
-                    $entity->setGiftMessageId($giftMessage->getId())
-                        ->save();
-                } catch (Exception) {
-                }
+            try {
+                $service->setGiftMessage(
+                    $quote,
+                    $itemId,
+                    (string) ($message['from'] ?? ''),
+                    (string) ($message['to'] ?? ''),
+                    (string) ($message['message'] ?? ''),
+                );
+            } catch (Mage_Core_Exception) {
+                // The store does not allow this message, or the item is not in the cart
+            } catch (Exception $e) {
+                Mage::logException($e);
             }
         }
         return $this;

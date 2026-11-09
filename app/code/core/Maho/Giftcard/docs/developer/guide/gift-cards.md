@@ -621,6 +621,10 @@ the My Account page and the `checkBalance` GraphQL query:
 - 10 failed lookups per hour for one logged-in customer
 - An unknown, expired, disabled or foreign card gives the same `Mage_Core_Exception_NoSuchEntity`
 
+`Mage_Checkout_Service_Cart::applyGiftcard()` applies a code to a cart, for the cart page, the checkout and the API.
+The same limit applies to the codes that one client tries, on a counter of its own. An admin token and an API user
+token have no limit.
+
 ### Transaction Safety
 
 Balance deductions use row locking:
