@@ -659,7 +659,9 @@ class Mage_Customer_Service_Customer
         $this->attempt($core->rateLimiter('change_password', $limit, self::RATE_LIMIT_WINDOW, RateLimitScope::Ip));
         $this->attempt($core->rateLimiterBy('change_password', 'change_password:customer:' . $customer->getId(), $limit, self::RATE_LIMIT_WINDOW));
 
-        if (!$customer->validatePassword($password)) {
+        // The transport can set the new password on $customer before this check, so compare with the stored hash
+        $hash = (string) ($customer->getId() ? $customer->getOrigData('password_hash') : $customer->getPasswordHash());
+        if ($hash === '' || !Mage::helper('core')->validateHash($password, $hash)) {
             throw new Mage_Core_Exception(Mage::helper('customer')->__('Current password is incorrect.'));
         }
     }
