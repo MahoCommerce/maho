@@ -188,8 +188,17 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
             }
         }
 
-        $deleteTransaction->delete();
-        $saveTransaction->save();
+        // One transaction for both, so a value that fails its check keeps the deleted values too
+        $resource = Mage::getResourceSingleton('core/config_data');
+        $resource->beginTransaction();
+        try {
+            $deleteTransaction->delete();
+            $saveTransaction->save();
+            $resource->commit();
+        } catch (\Throwable $e) {
+            $resource->rollBack();
+            throw $e;
+        }
 
         return $this;
     }

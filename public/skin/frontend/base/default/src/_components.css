@@ -3289,7 +3289,7 @@
         }
 
         picture {
-            @apply block;
+            @apply block h-full;
         }
 
         img {
@@ -3298,9 +3298,10 @@
         }
 
         /* The image the browser picks among the alternatives keeps its own ratio, so the desktop,
-           tablet and mobile versions of a slide are never cropped into one another's shape */
+           tablet and mobile versions of a slide are never cropped into one another's shape. When
+           CMS CSS fixes the height of the slide, the image fits inside it */
         picture img {
-            @apply h-auto w-full max-w-none;
+            @apply h-auto max-h-full w-full max-w-none object-contain;
         }
     }
 

@@ -71,6 +71,7 @@
 "Admin","Admin"
 "Advanced Profiles","Advanced Profiles"
 "After authorization application will have access to you account.","After authorization application will have access to you account."
+"After this change, the breakpoints of ""%s"" are not in order. Change the breakpoints of ""%s"" first.","After this change, the breakpoints of ""%s"" are not in order. Change the breakpoints of ""%s"" first."
 "Alert","Alert"
 "All","All"
 "All Allowed Countries","All Allowed Countries"

@@ -569,7 +569,8 @@ const firstCandidate = (srcset) => {
         const end = value.indexOf('}}');
         return end === -1 ? value : value.slice(0, end + 2);
     }
-    return value.split(/\s+/)[0];
+    // A comma separates the candidates, so `a.jpg, b.jpg 2x` starts with `a.jpg,`
+    return value.split(/\s+/)[0].replace(/,+$/, '');
 };
 
 /** The breakpoint of a new alternative: the first preset that the slide does not use, else a free width. */
@@ -876,11 +877,18 @@ export const MahoSlideshow = Node.create({
                                     const showUnit = () => {
                                         const width = source.invalid === undefined ? sourceWidth(source, presets) : null;
                                         unit.textContent = source.preset && width !== null ? `${width} px` : 'px';
+                                        input.setAttribute('aria-invalid', source.invalid === undefined ? 'false' : 'true');
                                     };
+                                    // A text that is not valid stays in the field until the user corrects it,
+                                    // also when the rows are drawn again
                                     const showValue = () => {
-                                        input.value = source.preset
-                                            ? presets.find((item) => item.code === source.preset)?.label ?? source.preset
-                                            : source.breakpoint ?? '';
+                                        if (source.invalid !== undefined) {
+                                            input.value = source.invalid;
+                                        } else {
+                                            input.value = source.preset
+                                                ? presets.find((item) => item.code === source.preset)?.label ?? source.preset
+                                                : source.breakpoint ?? '';
+                                        }
                                         showUnit();
                                     };
                                     showValue();
@@ -891,14 +899,24 @@ export const MahoSlideshow = Node.create({
                                     // The menu lists every preset, whatever the field holds, and the field
                                     // also takes a width that the user types
                                     const menu = row.querySelector('.source-breakpoint-menu');
+                                    menu.id = `${input.id}-menu`;
+                                    input.setAttribute('aria-controls', menu.id);
                                     const options = [...menu.querySelectorAll('[role="option"]')];
+                                    options.forEach((option, n) => {
+                                        option.id = `${menu.id}-${n}`;
+                                    });
                                     let active = -1;
                                     const highlight = (position) => {
                                         active = position;
                                         options.forEach((option, n) => {
                                             option.classList.toggle('active', n === position);
-                                            option.setAttribute('aria-selected', option.dataset.code === source.preset ? 'true' : 'false');
+                                            option.setAttribute('aria-selected', n === position ? 'true' : 'false');
                                         });
+                                        if (options[position]) {
+                                            input.setAttribute('aria-activedescendant', options[position].id);
+                                        } else {
+                                            input.removeAttribute('aria-activedescendant');
+                                        }
                                     };
                                     const openMenu = () => {
                                         if (options.length && menu.hidden) {
@@ -910,6 +928,7 @@ export const MahoSlideshow = Node.create({
                                     const closeMenu = () => {
                                         menu.hidden = true;
                                         input.setAttribute('aria-expanded', 'false');
+                                        input.removeAttribute('aria-activedescendant');
                                     };
                                     const pick = (option) => {
                                         source.preset = option.dataset.code;
@@ -925,14 +944,10 @@ export const MahoSlideshow = Node.create({
                                         setTimeout(() => input.select());
                                     });
                                     input.addEventListener('click', openMenu);
+                                    // An empty field stays empty, so Insert Slideshow reports it
                                     input.addEventListener('blur', () => {
                                         closeMenu();
-                                        if (input.value.trim() === '') {
-                                            delete source.invalid;
-                                        }
-                                        if (source.invalid === undefined) {
-                                            showValue();
-                                        }
+                                        showValue();
                                     });
                                     input.addEventListener('keydown', (event) => {
                                         if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
@@ -1065,17 +1080,20 @@ export const MahoSlideshow = Node.create({
                         // Each variant gets a width in range, and the variants grow by width, because in a
                         // <picture> the first matching <source> wins
                         const normalized = [];
-                        for (const slide of slides) {
+                        const reject = (message, index, sourceIndex) => {
+                            alert(translate(message));
+                            dialog.querySelector(`#slide-${index}-source-${sourceIndex}-breakpoint`)?.focus();
+                            return false;
+                        };
+                        for (const [index, slide] of slides.entries()) {
                             const sources = [];
-                            for (const source of slide.sources ?? []) {
+                            for (const [sourceIndex, source] of (slide.sources ?? []).entries()) {
                                 const width = source.invalid === undefined ? sourceWidth(source, presets) : null;
                                 if (width === null) {
-                                    alert(translate('Select a breakpoint from the list, or enter a whole number between 1 and 9999'));
-                                    return false;
+                                    return reject('Select a breakpoint from the list, or enter a whole number between 1 and 9999', index, sourceIndex);
                                 }
                                 if (sources.some((item) => sourceWidth(item, presets) === width)) {
-                                    alert(translate('Two images in a slide need different breakpoints'));
-                                    return false;
+                                    return reject('Two images in a slide need different breakpoints', index, sourceIndex);
                                 }
                                 sources.push(source.preset
                                     ? { srcset: source.srcset, preset: source.preset, breakpoint: null }

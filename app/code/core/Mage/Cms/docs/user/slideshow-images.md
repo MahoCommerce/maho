@@ -49,12 +49,20 @@ Go to **System > Configuration > Design > Breakpoints**. The default values are:
 | Tablet | 1023 |
 
 Each value is a whole number from 1 to 9999. **Tablet** must be wider than **Mobile**. You can set a
-different value for each website or store view (see [Scope](scope.md)).
+different value for each website or store view (see [Scope](scope.md)). The store checks the order in
+each website and store view that a change reaches. If a change puts the presets of a store view out
+of order, the store does not save it and names that store view.
 
 !!! warning "A slide with a preset and a custom width"
     The editor sorts the images of a slide when you save the slideshow. If you later change a preset
     to a width on the other side of a custom width of the same slide, the order of the images is
     wrong. Open the slideshow and click **Insert Slideshow** again to sort the images.
+
+    The editor sorts the images with the presets of one store view. If a page or a block shows in
+    more than one store view, and the store views have different presets, a custom width can be on
+    a different side of a preset in each store view. Then no order is correct for all of them. In
+    this case, use only presets or only custom widths in the slide, or make one page or block for
+    each store view.
 
 ## In the source view
 
@@ -71,6 +79,7 @@ page.
 ```
 
 Write the code of the preset without quotes, as in the example. If the store does not know the
-code, the slide shows the default image on every screen. The content editor removes a `<source>`
+code, the browser never uses that image. It uses the next image that matches the screen, or the
+default image. The content editor removes a `<source>`
 whose `media` is not a preset or one `(max-width: ...px)` value, and it shows a message before it
 removes it.
