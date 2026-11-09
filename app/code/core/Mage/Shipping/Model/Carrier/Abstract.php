@@ -343,36 +343,37 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
         if (!$freeMethod) {
             return;
         }
-        $freeRateId = false;
+        $freeRate = null;
 
-        if (is_object($this->_result)) {
-            foreach ($this->_result->getAllRates() as $i => $item) {
-                if ($item->getMethod() == $freeMethod) {
-                    $freeRateId = $i;
+        if ($this->_result instanceof Mage_Shipping_Model_Rate_Result) {
+            foreach ($this->_result->getAllRates() as $item) {
+                if ($item instanceof Mage_Shipping_Model_Rate_Result_Method && $item->getMethod() == $freeMethod) {
+                    $freeRate = $item;
                     break;
                 }
             }
         }
 
-        if ($freeRateId === false) {
+        if ($freeRate === null) {
             return;
         }
+        $originalResult = $this->_result;
         $price = null;
         if ($request->getFreeMethodWeight() > 0) {
             $this->_setFreeMethodRequest($freeMethod);
 
-            $result = $this->_getQuotes();
-            if ($result && ($rates = $result->getAllRates()) && count($rates) > 0) {
-                if ((count($rates) == 1) && ($rates[0] instanceof Mage_Shipping_Model_Rate_Result_Method)) {
-                    $price = $rates[0]->getPrice();
-                }
-                if (count($rates) > 1) {
-                    foreach ($rates as $rate) {
-                        if ($rate instanceof Mage_Shipping_Model_Rate_Result_Method
-                            && $rate->getMethod() == $freeMethod
-                        ) {
-                            $price = $rate->getPrice();
-                        }
+            try {
+                $result = $this->_getQuotes();
+            } finally {
+                // A carrier may replace _result while quoting the reduced weight.
+                $this->_result = $originalResult;
+            }
+            if ($result instanceof Mage_Shipping_Model_Rate_Result) {
+                foreach ($result->getAllRates() as $rate) {
+                    if ($rate instanceof Mage_Shipping_Model_Rate_Result_Method
+                        && $rate->getMethod() == $freeMethod
+                    ) {
+                        $price = $rate->getPrice();
                     }
                 }
             }
@@ -388,7 +389,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
          * if we did not get our free shipping method in response we must use its old price
          */
         if (!is_null($price)) {
-            $this->_result->getRateById($freeRateId)->setPrice($price);
+            $freeRate->setPrice($price);
         }
     }
 
