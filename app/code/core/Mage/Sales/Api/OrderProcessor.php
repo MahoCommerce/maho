@@ -14,10 +14,7 @@ use Mage\Checkout\Api\CartRequest;
 use Mage\Customer\Api\CustomAttributes;
 use ApiPlatform\Metadata\Operation;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Order State Processor - Handles order mutations for API Platform.
@@ -113,19 +110,13 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $isAdminOrder = \Mage::app()->getStore()->isAdmin();
 
         ['quote' => $quote, 'accessedByMaskedId' => $accessedByMaskedId] = CartRequest::resolve($uriVariables, $context);
-
-        if (!$quote) {
-            throw new NotFoundHttpException('Cart not found');
-        }
-
-        // Verify cart ownership
-        $this->verifyCartOwnership($quote, $accessedByMaskedId);
-
-        // The admin places guest orders for any product, as in the admin order form
-        if (!$isAdminOrder && !$quote->getCustomerId() && !$quote->isAllowedGuestCheckout()) {
-            // The error code keeps a call without a token from reading as a missing login (401)
-            throw new AccessDeniedHttpException('Guest checkout is not allowed for this cart', null, 0, ['X-Api-Error-Code' => 'forbidden']);
-        }
+        $quote = $this->cartService->requireAccessible(
+            $quote,
+            $accessedByMaskedId,
+            $this->getAuthenticatedCustomerId(),
+            $isPrivileged,
+        );
+        $this->orderService->assertGuestCheckoutAllowed($quote);
 
         // Frontend callers send the full checkout state in the body. Apply any
         // provided addresses in-memory; the single collection below prices them
@@ -172,12 +163,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // Validate before persisting so a bogus method never lands on the saved
         // quote's shipping address (which would corrupt later loads of the cart).
         if ($validateShippingMethod) {
-            $rate = $quote->getShippingAddress()->getShippingRateByCode($shippingMethod);
-            // A carrier failure produces a rate whose code is the carrier's
-            // error entry; it must not be orderable (it would price at 0)
-            if (!$rate || $rate->getErrorMessage()) {
-                throw new UnprocessableEntityHttpException('Shipping method is not available for this address');
-            }
+            $this->cartService->assertShippingMethodAvailable($quote, $shippingMethod);
         }
 
         // Gate the method pre-fee: setMethod() alone accepts any configured
@@ -300,19 +286,6 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         );
 
         return $this->orderProvider->mapToDto($order);
-    }
-
-    /**
-     * Verify the current user has access to place an order for this cart
-     */
-    private function verifyCartOwnership(\Mage_Sales_Model_Quote $quote, bool $accessedByMaskedId): void
-    {
-        $this->cartService->verifyAccess(
-            $quote,
-            $accessedByMaskedId,
-            $this->getAuthenticatedCustomerId(),
-            $this->isPrivilegedOrderActor(),
-        );
     }
 
     /**
