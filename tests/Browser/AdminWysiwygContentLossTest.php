@@ -38,6 +38,12 @@ const WYSIWYG_LOSS_RICH_TEXT = "<h2>The boring stuff, done right</h2>\n"
     . "<p>Braided cables, chargers that do not get hot, and stands that do not wobble.</p>\n"
     . "<div class=\"promo\">\n    <h3>Free shipping</h3>\n    <p>Every order over <strong>50</strong> euro.</p>\n</div>";
 
+// The feature strip of the sample data home pages. A cell writes colspan and rowspan with the
+// default value, and the editor does not write a default value back.
+const WYSIWYG_LOSS_DEFAULT_SPANS = '<table style="min-width: 50px;"><colgroup><col style="min-width: 25px;"><col style="min-width: 25px;"></colgroup>'
+    . '<tbody><tr><td colspan="1" rowspan="1" style="width: 1%; padding-right: 0.75rem; vertical-align: middle;"><p>Leaf</p></td>'
+    . '<td colspan="1" rowspan="1" style="vertical-align: middle;"><p><strong>Short ingredient lists</strong><br>Ten or fewer, on the front</p></td></tr></tbody></table>';
+
 beforeEach(function () {
     createWysiwygLossAdmin();
 });
@@ -403,4 +409,55 @@ it('does not let a button or a label of the content act on the admin form', func
         document.querySelector(".tiptap label").click();
     ');
     expect($page->script('document.activeElement?.id ?? ""'))->not->toBe('email');
+});
+
+it('opens the rich text editor on cells that write the default colspan and rowspan', function () {
+    $page = visitWysiwygLossBlock(createWysiwygLossBlock(WYSIWYG_LOSS_DEFAULT_SPANS));
+
+    expect($page->script('window.tiptapEditors.get("block_content").isTiptapActive() ? 1 : 0'))->toBe(1)
+        ->and($page->script('document.querySelectorAll(".tiptap-content-notice").length'))->toBe(0);
+});
+
+it('still reports a colspan that is not the default value', function () {
+    // The default value of one cell must not hide the loss of the colspan of another cell.
+    $setup = 'window.tiptapEditors.get("block_content")';
+    $page = visitWysiwygLossBlock(createWysiwygLossBlock(WYSIWYG_LOSS_RICH_TEXT));
+
+    $dropped = $page->script($setup . '.findDroppedContent(
+        "<table><tbody><tr><td colspan=\'2\'>a</td><td colspan=\'1\'>b</td></tr></tbody></table>",
+        "<table><tbody><tr><td>a</td><td>b</td></tr></tbody></table>",
+    )?.join("|") ?? ""');
+
+    expect($dropped)->toBe('colspan on <td>');
+});
+
+it('keeps the text of title, alt and class attributes through the editor', function () {
+    // The old filter checked every attribute as a URL. It wrote "unsafe:" before a value with an
+    // ampersand, or with a space before a colon, such as a Tailwind class list with a variant.
+    $page = visitWysiwygLossBlock(createWysiwygLossBlock(
+        '<p class="text-sm md:text-lg"><a href="/sale" title="Tom &amp; Jerry" target="_blank">Sale</a>'
+        . '<img src="/media/a.jpg" alt="Big Sale: 50%"></p>',
+    ));
+
+    expect($page->script('window.tiptapEditors.get("block_content").isTiptapActive() ? 1 : 0'))->toBe(1);
+
+    $page->script('window.tiptapEditors.get("block_content").editor.chain().focus("end").insertContent("<p>Tail</p>").run();');
+    $page->script('window.tiptapEditors.get("block_content").turnOff();');
+
+    $value = $page->script('document.getElementById("block_content").value');
+    expect($value)->not->toContain('unsafe:')
+        ->toContain('class="text-sm md:text-lg"')
+        ->toContain('title="Tom &amp; Jerry"')
+        ->toContain('alt="Big Sale: 50%"')
+        ->toContain('target="_blank"');
+});
+
+it('does not turn escaped text into markup', function () {
+    // The old filter returned the text of a text node without escaping it again.
+    $page = visitWysiwygLossBlock(createWysiwygLossBlock(WYSIWYG_LOSS_RICH_TEXT));
+
+    expect($page->script('xssFilter("&lt;img src=x onerror=alert(1)&gt;")'))
+        ->toBe('&lt;img src=x onerror=alert(1)&gt;')
+        ->and($page->script('xssFilter("<a href=\'javascript:alert(1)\'>x</a><img src=x onerror=alert(1)>")'))
+        ->toBe('<a>x</a><img src="x">');
 });

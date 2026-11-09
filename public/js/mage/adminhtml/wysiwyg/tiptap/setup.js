@@ -295,6 +295,11 @@ class tiptapWysiwygSetup {
         'details open',
     ];
 
+    /** The editor does not write a default value, because the browser uses the same value. */
+    static isDefaultAttributeValue(name, value) {
+        return (name === 'colspan' || name === 'rowspan') && value.trim() === '1';
+    }
+
     /**
      * List what the editor removes from `rawValue`, or null. `html` is what the editor made of
      * it, by default the content of the editor.
@@ -328,9 +333,10 @@ class tiptapWysiwygSetup {
                 dropped.add(`<${tag}>`);
                 continue;
             }
-            for (const { name } of element.attributes) {
+            for (const { name, value } of element.attributes) {
                 const key = `${tag} ${name}`;
-                if (tiptapWysiwygSetup.normalizedAttributes.includes(key)) {
+                if (tiptapWysiwygSetup.normalizedAttributes.includes(key)
+                    || tiptapWysiwygSetup.isDefaultAttributeValue(name, value)) {
                     continue;
                 }
                 if ((after.attributes.get(key) ?? 0) < before.attributes.get(key)) {
@@ -362,7 +368,10 @@ class tiptapWysiwygSetup {
         for (const element of body.querySelectorAll('*')) {
             const tag = tiptapWysiwygSetup.tagName(element);
             tags.set(tag, (tags.get(tag) ?? 0) + 1);
-            for (const { name } of element.attributes) {
+            for (const { name, value } of element.attributes) {
+                if (tiptapWysiwygSetup.isDefaultAttributeValue(name, value)) {
+                    continue;
+                }
                 const key = `${tag} ${name}`;
                 attributes.set(key, (attributes.get(key) ?? 0) + 1);
             }
