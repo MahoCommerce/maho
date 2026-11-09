@@ -63,8 +63,9 @@ class Config extends AbstractImporter
     }
 
     /**
-     * The web/ rows are saved first, and the service reloads the stores after them, so a {{store_url:code}} macro
-     * in a later row sees the base URLs and the store code flag this same file sets.
+     * The web/ rows are saved first, and the config and the stores reload before the other rows. So a
+     * {{store_url:code}} macro in a later row sees the base URLs and the store code flag that this same file sets,
+     * and a store that this process created.
      */
     #[\Override]
     protected function write(CsvFile $file, array $rows, array $options, Reporter $reporter): Result
@@ -72,6 +73,11 @@ class Config extends AbstractImporter
         $result = new Result();
         $web = array_filter($rows, static fn(array $row): bool => str_starts_with($row['path'], 'web/'));
         $rest = array_diff_key($rows, $web);
+        if ($web === []) {
+            // The service reloads after a web/ batch only, and a store created after the config loaded has no config
+            Mage::getConfig()->reinit();
+            Mage::app()->reinitStores();
+        }
         foreach ([$web, $rest] as $batch) {
             $line = 0;
             // The generator expands each value when the service reaches it, after the web/ batch reloaded the stores
