@@ -520,20 +520,128 @@ export const MahoImage = Image.extend({
 
 
 /**
- * Parse a `<div class="slideshow">` node into an array of slides `[{ src, alt, href }, ...]`
+ * Bounds of a custom breakpoint, in pixels. A `<source>` applies up to its max-width and the first
+ * matching `<source>` wins, so the narrowest breakpoint must come first in the `<picture>`.
  */
-const parseSlides = (div) => {
+const BREAKPOINT_MIN = 1;
+const BREAKPOINT_MAX = 9999;
+
+/** Read a custom breakpoint: a whole number in range, or null. */
+const toBreakpoint = (value) => {
+    const number = typeof value === 'string' && value.trim() === '' ? NaN : Number(value ?? NaN);
+    return Number.isInteger(number) && number >= BREAKPOINT_MIN && number <= BREAKPOINT_MAX ? number : null;
+};
+
+/**
+ * Read the breakpoint of a `<source>`: `{{breakpoint code=mobile}}` gives a preset that the store
+ * knows, and one max-width query with nothing else gives a custom breakpoint. Any other `media`
+ * returns null, so a variant that the browser would read differently is dropped instead of rewritten.
+ */
+const parseBreakpoint = (media, presets) => {
+    const preset = /^\s*\{\{\s*breakpoint\s+code\s*=\s*(["']?)([a-z0-9_]+)\1\s*\}\}\s*$/i.exec(media ?? '')?.[2];
+    if (preset !== undefined) {
+        return presets.some((item) => item.code === preset) ? { preset, breakpoint: null } : null;
+    }
+    const breakpoint = toBreakpoint(/^\s*\(\s*max-width\s*:\s*(\d+)\s*px\s*\)\s*$/i.exec(media ?? '')?.[1]);
+    return breakpoint === null ? null : { preset: null, breakpoint };
+};
+
+/** The `media` of a source. A preset stays a directive, so the storefront reads its current width. */
+const renderMedia = (source) => source.preset
+    ? `{{breakpoint code=${source.preset}}}`
+    : `(max-width: ${source.breakpoint}px)`;
+
+/** The width in pixels up to which a source applies: the width of its preset, or its custom breakpoint. */
+const sourceWidth = (source, presets) => source.preset
+    ? presets.find((item) => item.code === source.preset)?.width ?? null
+    : toBreakpoint(source.breakpoint);
+
+const sortSources = (sources, presets) =>
+    [...sources].sort((a, b) => (sourceWidth(a, presets) ?? 0) - (sourceWidth(b, presets) ?? 0));
+
+/**
+ * The URL of the first candidate in a `srcset`, for the preview. A directive is a candidate of its
+ * own, spaces included, so it is read up to its closing braces.
+ */
+const firstCandidate = (srcset) => {
+    const value = (srcset ?? '').trim();
+    if (value.startsWith('{{')) {
+        const end = value.indexOf('}}');
+        return end === -1 ? value : value.slice(0, end + 2);
+    }
+    // A comma separates the candidates, so `a.jpg, b.jpg 2x` starts with `a.jpg,`
+    return value.split(/\s+/)[0].replace(/,+$/, '');
+};
+
+/** The breakpoint of a new alternative: the first preset that the slide does not use, else a free width. */
+const nextBreakpoint = (slide, presets) => {
+    const sources = slide.sources ?? [];
+    const preset = presets.find((item) => !sources.some((source) => source.preset === item.code));
+    if (preset) {
+        return { preset: preset.code, breakpoint: null };
+    }
+    const used = new Set(sources.map((source) => sourceWidth(source, presets)));
+    let breakpoint = [768, 480, 991, 1200, 360, 1600].find((value) => !used.has(value)) ?? BREAKPOINT_MIN;
+    while (used.has(breakpoint)) {
+        breakpoint++;
+    }
+    return { preset: null, breakpoint };
+};
+
+/**
+ * Read the text of the breakpoint field: a preset by its label or its code, or a width such as
+ * `900` or `900px`. Returns null for any other text.
+ */
+const parseBreakpointInput = (text, presets) => {
+    const value = (text ?? '').trim().toLowerCase();
+    const preset = presets.find((item) => item.label.toLowerCase() === value || item.code === value);
+    if (preset) {
+        return { preset: preset.code, breakpoint: null };
+    }
+    const breakpoint = toBreakpoint(/^(\d+)\s*(?:px)?$/.exec(value)?.[1]);
+    return breakpoint === null ? null : { preset: null, breakpoint };
+};
+
+/**
+ * Read the image that the media browser returns, as a slide stores it: null when the dialog gave
+ * no image back.
+ */
+const parseBrowserImage = (returnValue) => {
+    const src = /src="({{.*?}})"/.exec(returnValue ?? '')?.[1];
+    if (!src) {
+        return null;
+    }
+    const alt = unescapeHtml(/alt="(.*?)"/.exec(returnValue ?? '')?.[1]);
+    return { src, alt, directiveObj: parseDirective(src) };
+};
+
+/**
+ * Parse a `<div class="slideshow">` node into an array of slides
+ * `[{ src, alt, href, directiveObj, sources: [{ srcset, preset, breakpoint }] }, ...]`
+ */
+const parseSlides = (div, presets) => {
     // Parse each <li> child and add to our array if it's a valid slide, i.e. contains an image
     const slides = [];
     for (const li of div.querySelectorAll(':scope > ul > li')) {
         const img = li.querySelector('img');
         const link = li.querySelector('a');
         if (img) {
+            // The alternatives live in the <source> elements of a <picture> around the fallback <img>
+            const sources = [];
+            for (const source of li.querySelectorAll(':scope > a > picture > source, :scope > picture > source')) {
+                const srcset = (source.getAttribute('srcset') ?? '').trim();
+                const breakpoint = parseBreakpoint(source.getAttribute('media'), presets);
+                if (srcset && breakpoint !== null) {
+                    sources.push({ srcset, ...breakpoint });
+                }
+            }
+
             slides.push({
                 src: img.getAttribute('src') ?? '',
                 alt: img.getAttribute('alt') ?? '',
                 href: link?.getAttribute('href'),
                 directiveObj: parseDirective(img.getAttribute('src')),
+                sources: sortSources(sources, presets),
             });
         }
     }
@@ -541,15 +649,29 @@ const parseSlides = (div) => {
 };
 
 /**
- * Render array of slides into a TipTap node object
+ * Render array of slides into a TipTap node object.
+ *
+ * A slide without alternatives renders the same `<li><a><img></a></li>` as before, so existing
+ * content saves byte for byte. With alternatives the `<img>` stays as the fallback for a browser
+ * that ignores `<picture>`.
  */
-const renderSlides = (slides) => {
+const renderSlides = (slides, presets) => {
     return slides.map((slide) => {
-        const { src, alt, href } = slide;
-        const content = href
-              ? ['a', { href }, ['img', { src, alt }]]
-              : ['img', { src, alt }];
+        const { src, alt, href, sources = [] } = slide;
 
+        let media;
+        if (sources.length) {
+            const picture = ['picture', {}];
+            for (const source of sortSources(sources, presets)) {
+                picture.push(['source', { media: renderMedia(source), srcset: source.srcset }]);
+            }
+            picture.push(['img', { src, alt }]);
+            media = picture;
+        } else {
+            media = ['img', { src, alt }];
+        }
+
+        const content = href ? ['a', { href }, media] : media;
         return ['li', {}, content];
     });
 }
@@ -578,14 +700,14 @@ export const MahoSlideshow = Node.create({
         return [{
             tag: 'div.slideshow',
             getAttrs: (div) => {
-                const slides = parseSlides(div);
+                const slides = parseSlides(div, this.options.breakpoints ?? []);
                 return { slides };
             },
         }];
     },
 
     renderHTML({ node }) {
-        const slides = renderSlides(node.attrs.slides);
+        const slides = renderSlides(node.attrs.slides, this.options.breakpoints ?? []);
         return ['div', { class: 'slideshow' }, ['ul', {}, ...slides]];
     },
 
@@ -597,6 +719,9 @@ export const MahoSlideshow = Node.create({
             dom.dataset.type = 'maho-slideshow';
             dom.contentEditable = 'false';
             dom.title = editor.options.wysiwygSetup.translate('Double-click to edit');
+
+            // The preview keeps showing the desktop image only; the flag marks the slides that have alternatives
+            dom.dataset.hasMobile = slides.some((slide) => slide.sources?.length) ? 'true' : 'false';
 
             // Create slide container and show the first slide if it exists
             const slideshow = dom.appendChild(document.createElement('div'));
@@ -633,15 +758,21 @@ export const MahoSlideshow = Node.create({
         return {
             insertMahoSlideshow: (node) => ({ editor, state }) => {
                 const { from, to } = state.selection;
-                let slides = Array.from(node?.attrs?.slides ?? []);
+                // Deep copy, so that cancelling the dialog leaves the content as it is
+                let slides = (node?.attrs?.slides ?? []).map((slide) => ({
+                    ...slide,
+                    sources: (slide.sources ?? []).map((source) => ({ ...source })),
+                }));
                 let sortableInstance;
 
                 // Create slideshow editor dialog content
+                const presets = this.options.breakpoints ?? [];
                 const dialogContent = `
                     <div class="slideshow-editor">
                         <ul class="slides-list"></ul>
                     </div>
                 `;
+                const translate = (string) => editor.options.wysiwygSetup.translate(string);
                 const slideTemplate = `
                     <div class="slide-handle">
                         ${editor.options.wysiwygSetup.getIcon('hamburger')}
@@ -652,8 +783,37 @@ export const MahoSlideshow = Node.create({
                     <div class="slide-controls">
                         <input type="text" class="slide-alt" placeholder="Alt text">
                         <input type="text" class="slide-href" placeholder="Link URL (optional)">
+                        <div class="slide-sources"></div>
+                        <button type="button" class="add-source">
+                            ${editor.options.wysiwygSetup.getIcon('plus')}
+                            <span>${escapeHtml(translate('Add mobile image'), true)}</span>
+                        </button>
                     </div>
                     <button type="button" class="remove-slide" title="Remove slide">
+                        ${editor.options.wysiwygSetup.getIcon('trash')}
+                    </button>
+                `;
+                const sourceTemplate = `
+                    <img class="source-preview" src="" alt="" title="${escapeHtml(translate('Mobile image'), true)}">
+                    <div class="source-breakpoint">
+                        <label class="source-breakpoint-label">${escapeHtml(translate('Breakpoint'), true)}</label>
+                        <div class="source-breakpoint-combo">
+                            <input type="text" class="source-breakpoint-input" autocomplete="off"
+                                   role="combobox" aria-autocomplete="none" aria-expanded="false">
+                            <button type="button" class="source-breakpoint-toggle" tabindex="-1" aria-hidden="true">
+                                ${editor.options.wysiwygSetup.getIcon('chevron-down')}
+                            </button>
+                            <ul class="source-breakpoint-menu" role="listbox" hidden>
+                                ${presets.map((preset) => `
+                                    <li role="option" data-code="${escapeHtml(preset.code, true)}">
+                                        <span>${escapeHtml(preset.label, true)}</span>
+                                        <span class="source-breakpoint-width">${preset.width} px</span>
+                                    </li>`).join('')}
+                            </ul>
+                        </div>
+                        <span class="source-breakpoint-unit"></span>
+                    </div>
+                    <button type="button" class="remove-source" title="${escapeHtml(translate('Remove mobile image'), true)}">
                         ${editor.options.wysiwygSetup.getIcon('trash')}
                     </button>
                 `;
@@ -672,10 +832,29 @@ export const MahoSlideshow = Node.create({
                         const container = dialog.querySelector('.slideshow-editor');
                         const slidesList = container.querySelector('.slides-list');
 
-                        // Render existing slides
-                        const renderSlides = () => {
+                        const addSource = (slide) => {
+                            MediabrowserUtility.openDialog(this.options.browserUrl, null, null, null, {
+                                ok: false, // Disable OK button - use Insert File button or double-click instead
+                                onClose: (dialog) => {
+                                    const image = parseBrowserImage(dialog.returnValue);
+                                    if (!image) {
+                                        if (dialog.returnValue) {
+                                            console.error('Could not parse image from:', dialog.returnValue);
+                                        }
+                                        return;
+                                    }
+                                    slide.sources ??= [];
+                                    slide.sources.push({ srcset: image.src, ...nextBreakpoint(slide, presets) });
+                                    renderSlideRows();
+                                },
+                            });
+                        };
+
+                        // Render existing slides. Named apart from the module-level renderSlides,
+                        // which builds the TipTap node.
+                        const renderSlideRows = () => {
                             slidesList.innerHTML = '';
-                            for (const [index, slide] of Object.entries(slides)) {
+                            slides.forEach((slide, index) => {
                                 const li = slidesList.appendChild(document.createElement('li'));
                                 li.className = 'slide-item';
                                 li.dataset.index = index;
@@ -685,18 +864,153 @@ export const MahoSlideshow = Node.create({
                                 li.querySelector('.slide-preview img').src =
                                     renderDirectiveImageUrl(slide.src, slide.directiveObj, this.options.directivesUrl);
 
+                                const sourcesList = li.querySelector('.slide-sources');
+                                (slide.sources ?? []).forEach((source, sourceIndex) => {
+                                    const row = sourcesList.appendChild(document.createElement('div'));
+                                    row.className = 'slide-source';
+                                    row.innerHTML = sourceTemplate;
+                                    const previewUrl = firstCandidate(source.srcset);
+                                    row.querySelector('.source-preview').src =
+                                        renderDirectiveImageUrl(previewUrl, parseDirective(previewUrl), this.options.directivesUrl);
+                                    const input = row.querySelector('.source-breakpoint-input');
+                                    const unit = row.querySelector('.source-breakpoint-unit');
+                                    const showUnit = () => {
+                                        const width = source.invalid === undefined ? sourceWidth(source, presets) : null;
+                                        unit.textContent = source.preset && width !== null ? `${width} px` : 'px';
+                                        input.setAttribute('aria-invalid', source.invalid === undefined ? 'false' : 'true');
+                                    };
+                                    // A text that is not valid stays in the field until the user corrects it,
+                                    // also when the rows are drawn again
+                                    const showValue = () => {
+                                        if (source.invalid !== undefined) {
+                                            input.value = source.invalid;
+                                        } else {
+                                            input.value = source.preset
+                                                ? presets.find((item) => item.code === source.preset)?.label ?? source.preset
+                                                : source.breakpoint ?? '';
+                                        }
+                                        showUnit();
+                                    };
+                                    showValue();
+
+                                    input.id = `slide-${index}-source-${sourceIndex}-breakpoint`;
+                                    row.querySelector('.source-breakpoint-label').htmlFor = input.id;
+
+                                    // The menu lists every preset, whatever the field holds, and the field
+                                    // also takes a width that the user types
+                                    const menu = row.querySelector('.source-breakpoint-menu');
+                                    menu.id = `${input.id}-menu`;
+                                    input.setAttribute('aria-controls', menu.id);
+                                    const options = [...menu.querySelectorAll('[role="option"]')];
+                                    options.forEach((option, n) => {
+                                        option.id = `${menu.id}-${n}`;
+                                    });
+                                    let active = -1;
+                                    const highlight = (position) => {
+                                        active = position;
+                                        options.forEach((option, n) => {
+                                            option.classList.toggle('active', n === position);
+                                            option.setAttribute('aria-selected', n === position ? 'true' : 'false');
+                                        });
+                                        if (options[position]) {
+                                            input.setAttribute('aria-activedescendant', options[position].id);
+                                        } else {
+                                            input.removeAttribute('aria-activedescendant');
+                                        }
+                                    };
+                                    const openMenu = () => {
+                                        if (options.length && menu.hidden) {
+                                            menu.hidden = false;
+                                            input.setAttribute('aria-expanded', 'true');
+                                            highlight(options.findIndex((option) => option.dataset.code === source.preset));
+                                        }
+                                    };
+                                    const closeMenu = () => {
+                                        menu.hidden = true;
+                                        input.setAttribute('aria-expanded', 'false');
+                                        input.removeAttribute('aria-activedescendant');
+                                    };
+                                    const pick = (option) => {
+                                        source.preset = option.dataset.code;
+                                        source.breakpoint = null;
+                                        delete source.invalid;
+                                        showValue();
+                                        closeMenu();
+                                    };
+
+                                    input.addEventListener('focus', () => {
+                                        openMenu();
+                                        // After the click that gave the focus, so that typing replaces the value
+                                        setTimeout(() => input.select());
+                                    });
+                                    input.addEventListener('click', openMenu);
+                                    // An empty field stays empty, so Insert Slideshow reports it
+                                    input.addEventListener('blur', () => {
+                                        closeMenu();
+                                        showValue();
+                                    });
+                                    input.addEventListener('keydown', (event) => {
+                                        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                                            event.preventDefault();
+                                            openMenu();
+                                            const step = event.key === 'ArrowDown' ? 1 : -1;
+                                            highlight((active + step + options.length) % options.length);
+                                        } else if (event.key === 'Enter' && !menu.hidden && options[active]) {
+                                            event.preventDefault();
+                                            pick(options[active]);
+                                        } else if (event.key === 'Escape' && !menu.hidden) {
+                                            // Close the menu, not the dialog
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                            closeMenu();
+                                        }
+                                    });
+                                    input.addEventListener('input', () => {
+                                        closeMenu();
+                                        const parsed = parseBreakpointInput(input.value, presets);
+                                        if (parsed) {
+                                            Object.assign(source, parsed);
+                                            delete source.invalid;
+                                        } else {
+                                            source.invalid = input.value;
+                                        }
+                                        showUnit();
+                                    });
+                                    // mousedown, not click: a click comes after the blur of the field
+                                    row.querySelector('.source-breakpoint-toggle').addEventListener('mousedown', (event) => {
+                                        event.preventDefault();
+                                        if (menu.hidden) {
+                                            input.focus();
+                                            openMenu();
+                                        } else {
+                                            closeMenu();
+                                        }
+                                    });
+                                    for (const option of options) {
+                                        option.addEventListener('mousedown', (event) => {
+                                            event.preventDefault();
+                                            pick(option);
+                                        });
+                                    }
+                                    row.querySelector('.remove-source').addEventListener('click', () => {
+                                        slide.sources.splice(sourceIndex, 1);
+                                        renderSlideRows();
+                                    });
+                                });
+
                                 // Attach event listeners
                                 li.querySelector('.slide-alt').addEventListener('change', (event) => {
-                                    slides[index].alt = event.target.value
+                                    slide.alt = event.target.value
                                 });
                                 li.querySelector('.slide-href').addEventListener('change', (event) => {
-                                    slides[index].href = event.target.value
+                                    slide.href = event.target.value
                                 });
+                                li.querySelector('.add-source').addEventListener('click', () => addSource(slide));
                                 li.querySelector('.remove-slide').addEventListener('click', () => {
                                     slides.splice(index, 1);
-                                    renderSlides();
+                                    renderSlideRows();
                                 });
-                            }
+                            });
                         };
 
                         // Initialize SortableJS for drag and drop
@@ -713,7 +1027,7 @@ export const MahoSlideshow = Node.create({
                                         newSlides.push(slides[oldIndex]);
                                     }
                                     slides = newSlides;
-                                    renderSlides();
+                                    renderSlideRows();
                                 }
                             });
                         };
@@ -723,28 +1037,15 @@ export const MahoSlideshow = Node.create({
                                 ok: false, // Disable OK button - use Insert File button or double-click instead
                                 onClose: (dialog) => {
                                     // Handle the actual image insertion after the dialog closes with returnValue
-                                    const returnValue = dialog.returnValue || '';
-
-                                    if (!returnValue) {
-                                        // Dialog was cancelled or no image selected
+                                    const image = parseBrowserImage(dialog.returnValue);
+                                    if (!image) {
+                                        if (dialog.returnValue) {
+                                            console.error('Could not parse image from:', dialog.returnValue);
+                                        }
                                         return;
                                     }
-
-                                    //  Parse out the directive and alt text
-                                    let match;
-                                    match = returnValue.match(/src="({{.*?}})"/);
-                                    const src = match?.[1];
-                                    const directiveObj = parseDirective(src);
-
-                                    match = returnValue.match(/alt="(.*?)"/);
-                                    const alt = unescapeHtml(match?.[1]);
-
-                                    if (src) {
-                                        slides.push({ directiveObj, src, alt });
-                                        renderSlides();
-                                    } else {
-                                        console.error('Could not parse image from:', dialog.returnValue);
-                                    }
+                                    slides.push({ directiveObj: image.directiveObj, src: image.src, alt: image.alt, sources: [] });
+                                    renderSlideRows();
                                 },
                                 onCancel: () => {
                                     // If this was the initial add and user cancelled, close the slideshow dialog too
@@ -758,11 +1059,11 @@ export const MahoSlideshow = Node.create({
                             });
                         };
 
-                        // Add slide button handler
-                        dialog.querySelector('.add-slide-btn').addEventListener('click', addSlide);
+                        // Add slide button handler. The click event must not reach isInitialAdd as a truthy value
+                        dialog.querySelector('.add-slide-btn').addEventListener('click', () => addSlide());
 
                         // Initial render
-                        renderSlides();
+                        renderSlideRows();
                         bindSortable();
 
                         // If this is a new slideshow (no slides), automatically open the image browser
@@ -772,13 +1073,38 @@ export const MahoSlideshow = Node.create({
                     },
                     onOk: (dialog) => {
                         if (slides.length === 0) {
-                            alert(editor.options.wysiwygSetup.translate('Please add at least one image to the slideshow'));
+                            alert(translate('Please add at least one image to the slideshow'));
                             return false;
+                        }
+
+                        // Each variant gets a width in range, and the variants grow by width, because in a
+                        // <picture> the first matching <source> wins
+                        const normalized = [];
+                        const reject = (message, index, sourceIndex) => {
+                            alert(translate(message));
+                            dialog.querySelector(`#slide-${index}-source-${sourceIndex}-breakpoint`)?.focus();
+                            return false;
+                        };
+                        for (const [index, slide] of slides.entries()) {
+                            const sources = [];
+                            for (const [sourceIndex, source] of (slide.sources ?? []).entries()) {
+                                const width = source.invalid === undefined ? sourceWidth(source, presets) : null;
+                                if (width === null) {
+                                    return reject('Select a breakpoint from the list, or enter a whole number between 1 and 9999', index, sourceIndex);
+                                }
+                                if (sources.some((item) => sourceWidth(item, presets) === width)) {
+                                    return reject('Two images in a slide need different breakpoints', index, sourceIndex);
+                                }
+                                sources.push(source.preset
+                                    ? { srcset: source.srcset, preset: source.preset, breakpoint: null }
+                                    : { srcset: source.srcset, preset: null, breakpoint: width });
+                            }
+                            normalized.push({ ...slide, sources: sortSources(sources, presets) });
                         }
 
                         editor.commands.insertContentAt({ from, to }, {
                             type: this.name,
-                            attrs: { slides },
+                            attrs: { slides: normalized },
                         });
                         return true;
                     },

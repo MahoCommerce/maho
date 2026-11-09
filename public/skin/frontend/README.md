@@ -542,9 +542,12 @@ times slower, and `--watch` rebuilds the bundle on each write under `var/`.
 
 Notes:
 
-- The custom `nav:` breakpoint (`min-width: 771px`) pairs with `bp.medium`
-  (770) in `public/skin/frontend/base/default/js/app.js`, so CSS and JS switch
-  layout together. Change them in tandem or not at all.
+- The `<breakpoints>` of `app/design/frontend/base/default/etc/theme.xml` give
+  the widest screen of each layout: `mobile` 770 and `tablet` 1023. The CSS
+  changes the layout one pixel above them, with the custom `nav:` breakpoint
+  (`min-width: 771px`) and the desktop rules (`min-width: 1024px`). `app.js`
+  reads the two values as `bp.medium` and `bp.large`, and content images use
+  them through `{{breakpoint}}`. Change the CSS and `theme.xml` together.
 - DaisyUI components used in templates or CMS content are tree-shaken by
   template scanning (`@source`); a curated safelist in `src/tailwind.css`
   keeps the common ones (`btn`, `badge`, `alert`, `card`, ...) available for

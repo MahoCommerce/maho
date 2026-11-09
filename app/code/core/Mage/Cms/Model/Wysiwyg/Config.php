@@ -68,6 +68,7 @@ class Mage_Cms_Model_Wysiwyg_Config extends \Maho\DataObject
             'render_directives_url'         => Mage::getSingleton('adminhtml/url')->getUrl('*/cms_wysiwyg/renderDirectives'),
             'render_store_id'               => $this->getPreviewStoreId(),
             'class_check_url'               => Mage::getSingleton('adminhtml/url')->getUrl('*/cms_wysiwyg/classCheck'),
+            'breakpoints'                   => Mage::getSingleton('core/design_breakpoints')->getEditorPresets($this->getPreviewStoreId()),
         ]);
         $config->setData('directives_url_quoted', preg_quote($config->getData('directives_url')));
 

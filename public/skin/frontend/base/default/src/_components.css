@@ -527,8 +527,8 @@
         }
     }
 
-    /* app.js moves .col-right inside .col-wrapper below 1000px */
-    @media (min-width: 771px) and (max-width: 1000px) {
+    /* app.js moves .col-right inside .col-wrapper up to the tablet breakpoint of theme.xml */
+    @media (min-width: 771px) and (max-width: 1023px) {
         .col3-layout .main {
             grid-template-columns: minmax(0, 1fr);
             grid-template-areas:
@@ -3288,9 +3288,20 @@
             @apply block h-full;
         }
 
+        picture {
+            @apply block h-full;
+        }
+
         img {
             /* Fills the slide when CMS CSS fixes its height; intrinsic ratio otherwise */
             @apply block h-full w-full max-w-none object-cover;
+        }
+
+        /* The image the browser picks among the alternatives keeps its own ratio, so the desktop,
+           tablet and mobile versions of a slide are never cropped into one another's shape. When
+           CMS CSS fixes the height of the slide, the image fits inside it */
+        picture img {
+            @apply h-auto max-h-full w-full max-w-none object-contain;
         }
     }
 
