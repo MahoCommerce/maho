@@ -107,7 +107,8 @@ class tiptapWysiwygSetup {
         // Convert any <span> widget into <div> if they only have other <div> parents
         const blockTags = ['DIV'];
         // The parser makes a separate document, so an id such as "location" cannot clobber the admin page.
-        const doc = new DOMParser().parseFromString(xssFilter(content, { SANITIZE_DOM: false }), 'text/html');
+        // The save keeps the SVG animation elements, so the editor keeps them too.
+        const doc = new DOMParser().parseFromString(xssFilter(content, { SANITIZE_DOM: false, ADD_TAGS: ['animate', 'set'] }), 'text/html');
 
         for (const widget of doc.body.querySelectorAll('span[data-type=maho-widget]')) {
             let ref = widget.parentElement;

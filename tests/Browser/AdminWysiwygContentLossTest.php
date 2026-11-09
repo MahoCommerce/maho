@@ -469,3 +469,15 @@ it('keeps an id that is also a property of the document', function () {
 
     expect($page->script('document.getElementById("block_content").value'))->toContain('id="location"');
 });
+
+it('keeps the animation of an inline svg through the editor', function () {
+    $page = visitWysiwygLossBlock(createWysiwygLossBlock(
+        '<p>Loading</p><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"><animate attributeName="r" values="2;6;2" dur="1s" repeatCount="indefinite"></animate></circle></svg>',
+    ));
+
+    expect($page->script('window.tiptapEditors.get("block_content").isTiptapActive() ? 1 : 0'))->toBe(1);
+
+    $page->script('window.tiptapEditors.get("block_content").turnOff();');
+
+    expect($page->script('document.getElementById("block_content").value'))->toContain('<animate');
+});
