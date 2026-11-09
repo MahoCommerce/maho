@@ -90,13 +90,13 @@ function reviewViaForm(int $productId, string $title, array $ratings = []): arra
  *
  * @return array{status: int, result: mixed, errors: list<string>, fields: list<string>}
  */
-function reviewViaApi(int $customerId, int $productId, string $title, int $rating = 4, ?string $captchaToken = null, bool $graphQl = false): array
+function reviewViaApi(int $customerId, int $productId, string $title, ?int $rating = 4, ?string $captchaToken = null, bool $graphQl = false): array
 {
     $request = AdminApiParity::jsonRequest('POST', "/api/rest/v2/products/{$productId}/reviews");
     $processor = new ReviewProcessor(reviewParityCustomerSecurity($customerId));
     if ($graphQl) {
-        $input = ['productId' => $productId, 'title' => $title, 'detail' => 'Parity detail', 'nickname' => 'Parity', 'rating' => $rating];
-        $input += $captchaToken === null ? [] : ['captchaToken' => $captchaToken];
+        $input = ['productId' => $productId, 'title' => $title, 'detail' => 'Parity detail', 'nickname' => 'Parity'];
+        $input += array_filter(['rating' => $rating, 'captchaToken' => $captchaToken], fn($value) => $value !== null);
         return AdminApiParity::api($request, fn() => $processor
             ->process(new Review(), new Mutation(name: 'submit'), [], ['request' => $request, 'args' => ['input' => $input]]));
     }
@@ -214,6 +214,27 @@ it('saves a pending review of the customer in the current store on both transpor
             ->and(reviewParityVotes((int) $review->getId()))->toBe($votes);
     }
 });
+
+it('saves a review with no vote when the rating is missing, on both transports', function () {
+    expect(reviewViaForm((int) $this->product->getId(), $this->title)['accepted'])->toBeTrue()
+        ->and(reviewViaApi((int) $this->customer->getId(), (int) $this->product->getId(), $this->title, null)['status'])->toBe(200)
+        ->and(reviewViaApi((int) $this->customer->getId(), (int) $this->product->getId(), $this->title, null, graphQl: true)['status'])->toBe(200);
+
+    $reviews = reviewParityReviews($this->title);
+    expect($reviews)->toHaveCount(3);
+    foreach ($reviews as $review) {
+        expect(reviewParityVotes((int) $review->getId()))->toBe([]);
+    }
+});
+
+it('refuses stars out of 1 to 5 on the API with an error on rating', function (int $rating, bool $graphQl) {
+    $api = reviewViaApi((int) $this->customer->getId(), (int) $this->product->getId(), $this->title, $rating, graphQl: $graphQl);
+
+    expect($api['status'])->toBe(422)
+        ->and($api['fields'])->toBe(['rating'])
+        ->and($api['errors'])->toBe(['Rating must be between 1 and 5'])
+        ->and(reviewParityReviews($this->title))->toBe([]);
+})->with([[0, false], [6, false], [0, true], [6, true]]);
 
 it('rejects an empty title with the same message on both transports', function () {
     $api = reviewViaApi((int) $this->customer->getId(), (int) $this->product->getId(), '   ');

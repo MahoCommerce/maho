@@ -42,7 +42,7 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
                 $args['title'],
                 $args['detail'],
                 $args['nickname'],
-                (int) $args['rating'],
+                isset($args['rating']) ? (int) $args['rating'] : null,
                 isset($args['captchaToken']) ? (string) $args['captchaToken'] : null,
             );
         }
@@ -103,7 +103,7 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         string $title,
         string $detail,
         string $nickname,
-        int $rating,
+        ?int $rating,
         ?string $captchaToken,
     ): Review {
         $customerId = $this->requireCustomerId();
@@ -117,7 +117,7 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
             ->setNickname($nickname);
         $service->submit(
             $review,
-            $service->getStarVotes($rating, $storeId),
+            $rating === null ? [] : $service->getStarVotes($rating, $storeId),
             $storeId,
             $customerId,
             \Mage_Review_Model_Channel::Api,
@@ -126,7 +126,7 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
 
         $dto = Review::fromModel($review);
         $dto->productName = $service->getProduct($productId, $storeId)->getName();
-        $dto->rating = $rating;
+        $dto->rating = $rating ?? $dto->rating;
         $dto->status = 'pending';
 
         return $dto;

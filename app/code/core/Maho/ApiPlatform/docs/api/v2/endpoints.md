@@ -614,6 +614,8 @@ blog is off. The same rule applies to the GraphQL queries `blogPost`, `blogPosts
 | POST | `/products/{productId}/reviews` | Customer/API | Submit a review (requires authentication) |
 | GET | `/customers/me/reviews` | Customer/API | List own reviews |
 
+The body of `POST /products/{productId}/reviews` and the input of `submitReview` take `title`, `detail`, `nickname` and an optional `rating`: the stars from 1 to 5, which become the vote for the first rating of the store. A `rating` outside 1 to 5 gives a 422 with an entry for `rating` in `details.errors`. Without a `rating`, the review has no vote, as on the storefront form. On a read, `rating` is the average of the votes.
+
 `POST /products/{productId}/reviews` and the `submitReview` mutation use the same CAPTCHA as the review form of the storefront. When the CAPTCHA of the store is on, send the solved token in `captchaToken`. A missing or refused token gives a 422 with an entry for `captchaToken` in `details.errors`. `GET /contact/config` gives the provider and the challenge URL for the widget (see [Contact](#contact)).
 
 ---
