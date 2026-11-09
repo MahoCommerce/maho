@@ -126,7 +126,7 @@ it('answers a missing rewrite as not found on both transports', function () {
         ->and($api['status'])->toBe(404);
 });
 
-describe('a system rewrite (decision needed: the admin page may change it, the API may not)', function () {
+describe('a system rewrite', function () {
     beforeEach(function () {
         $this->system = Mage::getModel('core/url_rewrite')
             ->setStoreId($this->storeId)
@@ -150,14 +150,26 @@ describe('a system rewrite (decision needed: the admin page may change it, the A
             ->and(Mage::getModel('core/url_rewrite')->load($this->system->getId())->getDescription())->toBe('Changed in the admin');
     });
 
-    it('refuses an API update and an API delete', function () {
+    it('lets the API change its description and delete it, as the admin page does', function () {
         $update = urlRewriteViaApi(['description' => 'Changed in the API'], (int) $this->system->getId());
-        $delete = urlRewriteViaApi([], (int) $this->system->getId(), delete: true);
+        $saved = Mage::getModel('core/url_rewrite')->load($this->system->getId());
+        expect($update['status'])->toBe(200)
+            ->and($saved->getDescription())->toBe('Changed in the API')
+            ->and((bool) $saved->getIsSystem())->toBeTrue();
 
-        expect($update['status'])->toBe(409)
-            ->and($update['errors'][0])->toContain('system URL rewrite')
-            ->and($delete['status'])->toBe(409)
-            ->and(Mage::getModel('core/url_rewrite')->load($this->system->getId())->getId())->not->toBeNull();
+        $delete = urlRewriteViaApi([], (int) $this->system->getId(), delete: true);
+        expect($delete['status'])->toBe(200)
+            ->and(Mage::getModel('core/url_rewrite')->load($this->system->getId())->getId())->toBeNull();
+    });
+
+    it('keeps its store view on the API, as the admin form does', function () {
+        $otherStoreId = (int) array_key_last(array_diff_key(Mage::app()->getStores(), [$this->storeId => true]));
+
+        $update = urlRewriteViaApi(['storeId' => $otherStoreId], (int) $this->system->getId());
+
+        expect($update['status'])->toBe(422)
+            ->and($update['fields'])->toBe(['storeId'])
+            ->and((int) Mage::getModel('core/url_rewrite')->load($this->system->getId())->getStoreId())->toBe($this->storeId);
     });
 });
 

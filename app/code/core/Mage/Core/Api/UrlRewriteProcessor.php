@@ -26,9 +26,6 @@ final class UrlRewriteProcessor extends \Maho\ApiPlatform\Processor
             ? $service->getById((int) $uriVariables['id'], $user->getAllowedStoreIds())
             : $service->newRewrite();
         $oldData = $rewrite->getId() ? $rewrite->getData() : null;
-        if ($oldData !== null) {
-            $service->assertCustom($rewrite);
-        }
 
         if ($operation instanceof DeleteOperationInterface) {
             $service->delete($rewrite);

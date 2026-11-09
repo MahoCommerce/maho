@@ -33,16 +33,6 @@ function deleteUrlRewrite(int $id): void
     }
 }
 
-function systemUrlRewriteId(): ?int
-{
-    $rewrite = Mage::getModel('core/url_rewrite')->getCollection()
-        ->addFieldToFilter('is_system', 1)
-        ->setPageSize(1)
-        ->getFirstItem();
-
-    return $rewrite->getId() ? (int) $rewrite->getId() : null;
-}
-
 describe('URL rewrite permission enforcement', function (): void {
 
     it('rejects anonymous reads and writes', function (): void {
@@ -214,25 +204,27 @@ describe('URL rewrite CRUD lifecycle', function (): void {
 
 describe('System URL rewrites', function (): void {
 
-    it('refuses to update or delete a system rewrite', function (): void {
-        $systemId = systemUrlRewriteId();
-        if ($systemId === null) {
-            $this->markTestSkipped('No system URL rewrite in the test fixture');
-        }
+    it('updates and deletes a system rewrite, as the admin does', function (): void {
+        $suffix = uniqid();
+        $rewrite = Mage::getModel('core/url_rewrite')
+            ->setStoreId((int) Mage::app()->getDefaultStoreView()->getId())
+            ->setIdPath("pest/api/system-{$suffix}")
+            ->setRequestPath("pest-api-system-{$suffix}.html")
+            ->setTargetPath('contacts')
+            ->setIsSystem(true);
+        $rewrite->save();
+        $systemId = (int) $rewrite->getId();
         $token = serviceToken(['url-rewrites/read', 'url-rewrites/write', 'url-rewrites/delete']);
 
-        $read = apiGet("/api/rest/v2/url-rewrites/{$systemId}", $token);
-        expect($read['status'])->toBe(200);
-        expect($read['json']['isSystem'])->toBeTrue();
-
-        $update = apiPut("/api/rest/v2/url-rewrites/{$systemId}", ['description' => 'nope'], $token);
-        expect($update['status'])->toBe(409);
-        expect($update['json']['message'] ?? '')->toContain('system URL rewrite');
+        $update = apiPut("/api/rest/v2/url-rewrites/{$systemId}", ['description' => 'Changed in the API'], $token);
+        expect($update['status'])->toBe(200);
+        expect($update['json']['description'])->toBe('Changed in the API');
+        expect($update['json']['isSystem'])->toBeTrue();
 
         $delete = apiDelete("/api/rest/v2/url-rewrites/{$systemId}", $token);
-        expect($delete['status'])->toBe(409);
+        expect($delete['status'])->toBe(204);
 
-        expect(apiGet("/api/rest/v2/url-rewrites/{$systemId}", $token)['status'])->toBe(200);
+        expect(apiGet("/api/rest/v2/url-rewrites/{$systemId}", $token)['status'])->toBe(404);
     });
 
     it('lists only system rewrites with isSystem=true', function (): void {

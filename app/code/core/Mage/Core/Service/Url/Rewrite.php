@@ -38,23 +38,11 @@ class Mage_Core_Service_Url_Rewrite
     }
 
     /**
-     * Refuse a system rewrite. The catalog URL indexer writes a system rewrite again, so a change to it does not last.
-     *
-     * @throws Mage_Core_Exception_Conflict
-     */
-    public function assertCustom(Mage_Core_Model_Url_Rewrite $rewrite): void
-    {
-        if ($rewrite->getIsSystem()) {
-            throw new Mage_Core_Exception_Conflict(Mage::helper('core')->__(
-                'This is a system URL rewrite. The catalog URL indexer generates and regenerates it, so it cannot be changed through the API. Create a custom rewrite instead.',
-            ));
-        }
-    }
-
-    /**
      * Save $rewrite. The transport puts its input into the rewrite through the typed setters first. A new rewrite is
      * custom. A rewrite with a product or a category gets the ID path and the target path of that product or category.
-     * The resource model checks the fields and the uniqueness of the request path and the ID path.
+     * The resource model checks the fields and the uniqueness of the request path and the ID path. A system rewrite
+     * keeps its store view. The catalog URL indexer writes a system rewrite again when it reindexes its product or
+     * category, so a change to a system rewrite lasts until then.
      *
      * @throws Mage_Core_Exception_Input with one error for each invalid field
      * @throws Mage_Core_Exception_Conflict when another rewrite of the store view has the request path or the ID path
@@ -63,6 +51,9 @@ class Mage_Core_Service_Url_Rewrite
     {
         if (!$rewrite->getId()) {
             $rewrite->setIsSystem(false);
+        } elseif ($rewrite->getIsSystem() && $rewrite->dataHasChangedFor('store_id')) {
+            throw new Mage_Core_Exception_Input()
+                ->addError('store_id', Mage::helper('core')->__('The store view of a system URL rewrite cannot be changed.'));
         }
         $product = $rewrite->getProductId() === null ? null : Mage::getModel('catalog/product')->load($rewrite->getProductId());
         $category = $rewrite->getCategoryId() === null ? null : Mage::getModel('catalog/category')->load($rewrite->getCategoryId());
