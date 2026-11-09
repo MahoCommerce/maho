@@ -27,11 +27,7 @@ const MahoCaptcha = {
         }
 
         this.altchaWidget.addEventListener('statechange', this.onStateChange.bind(this));
-        this.altchaWidget.addEventListener('load', () => {
-            this.onStateChange({ detail: { state: this.altchaWidget.getState() } });
-            // Never let the widget's own auto mode do this: two solves in flight abort each other.
-            this.startVerification();
-        });
+        this.altchaWidget.addEventListener('load', () => this.onWidgetLoad());
 
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && (this.altchaState === 'expired' || this.altchaState === 'error')) {
@@ -39,6 +35,22 @@ const MahoCaptcha = {
                 this.startVerification();
             }
         });
+    },
+
+    // Some mobile browsers fire the widget's load event before its methods (getState, verify) are bound to the
+    // element: wait for them, and report an error past one second so that no form waits forever.
+    onWidgetLoad(attempt = 0) {
+        if (typeof this.altchaWidget.getState !== 'function' || typeof this.altchaWidget.verify !== 'function') {
+            if (attempt < 50) {
+                setTimeout(() => this.onWidgetLoad(attempt + 1), 20);
+            } else {
+                this.onStateChange({ detail: { state: 'error' } });
+            }
+            return;
+        }
+        this.onStateChange({ detail: { state: this.altchaWidget.getState() } });
+        // Never let the widget's own auto mode do this: two solves in flight abort each other.
+        this.startVerification();
     },
 
     getForms() {
@@ -159,8 +171,13 @@ const MahoCaptcha = {
     },
 
     startVerification() {
-        // Nothing to drive before the widget has loaded: its load handler starts the first one.
+        // Nothing to drive before the widget has loaded: onWidgetLoad() starts the first one.
         if (this.altchaState === null || this.altchaState === 'verifying') {
+            return;
+        }
+        // onWidgetLoad() gave up on a widget whose methods never bound: answer "not verified" instead of waiting.
+        if (typeof this.altchaWidget.verify !== 'function') {
+            this.settleVerification(false);
             return;
         }
         // The widget only solves a new challenge from the unverified state.
