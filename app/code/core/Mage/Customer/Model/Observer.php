@@ -254,18 +254,6 @@ class Mage_Customer_Model_Observer
     }
 
     /**
-     * Clear customer flow password table
-     */
-    #[Maho\Config\CronJob('customer_flowpassword', schedule: '0 0 1 * *')]
-    public function deleteCustomerFlowPassword()
-    {
-        $resource   = Mage::getSingleton('core/resource');
-        $connection = $resource->getConnection('write');
-        $condition  = ['requested_date < ?' => Mage::app()->getLocale()->formatDateForDb('-1 day')];
-        $connection->delete($resource->getTableName('customer_flowpassword'), $condition);
-    }
-
-    /**
      * Upgrade customer password hash when customer has logged in
      *
      * @param \Maho\Event\Observer $observer

@@ -55,7 +55,7 @@ SPDX-License-Identifier: AFL-3.0
                 </api>
                 <abuse translate="label comment">
                     <label>Abuse Protection</label>
-                    <comment><![CDATA[Invisible background measures (honeypot, rate limits) that blunt spam and email-bombing without inconveniencing real customers. Do not set the limits so low that legitimate visitors are blocked.]]></comment>
+                    <comment><![CDATA[An invisible trap field that stops spam bots without a step for real customers. The limits of the contact form are under System > Configuration > Advanced > System > Rate limit.]]></comment>
                     <sort_order>30</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
@@ -70,24 +70,6 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </honeypot_enabled>
-                        <ip_rate_limit_per_hour translate="label comment">
-                            <label>Submissions per IP per Hour</label>
-                            <comment>0 disables the limit.</comment>
-                            <validate>validate-digits</validate>
-                            <sort_order>10</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </ip_rate_limit_per_hour>
-                        <recipient_rate_limit_per_hour translate="label comment">
-                            <label>Auto-Reply Emails per Recipient per Hour</label>
-                            <comment>Caps how many auto-reply emails a single address can receive per hour. The merchant notification is still sent. Defeats email-bombing of third parties. 0 disables the limit.</comment>
-                            <validate>validate-digits</validate>
-                            <sort_order>20</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </recipient_rate_limit_per_hour>
                     </fields>
                 </abuse>
                 <email translate="label">
@@ -161,13 +143,22 @@ SPDX-License-Identifier: AFL-3.0
                     <fields>
                         <contact translate="label comment" module="contacts">
                             <label>Contact form (web + API)</label>
-                            <comment>Per email address. Default 3 per hour. 0 to disable.</comment>
+                            <comment>Per client and per email address. Default 3 per hour. 0 to disable.</comment>
                             <sort_order>110</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                             <validate>validate-digits validate-zero-or-greater</validate>
                         </contact>
+                        <contact_auto_reply translate="label comment" module="contacts">
+                            <label>Contact form auto-reply</label>
+                            <comment>Per recipient address. Counts the auto-reply emails, the store still gets each message. Default 3 per hour. 0 to disable.</comment>
+                            <sort_order>111</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </contact_auto_reply>
                     </fields>
                 </rate_limit>
             </groups>

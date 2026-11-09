@@ -19,20 +19,20 @@ class Maho_SocialLogin_Service_Identity
 
     public const LOG_FILE = 'social_login.log';
 
-    public const XML_PATH_API_RATE_LIMIT = 'system/rate_limit/auth_token_ip';
+    /** The storefront and the API share the limit of the token endpoint, and each sign-in attempt counts. */
+    public const XML_PATH_RATE_LIMIT = 'system/rate_limit/auth_token_ip';
 
-    /** The window of the rate limit of each channel, in seconds */
-    public const RATE_LIMIT_WINDOWS = [Channel::Web->value => 3600, Channel::Api->value => 60];
+    public const RATE_LIMIT_WINDOW = 60;
 
     /** Whether the client has no sign-in attempt left. This reads the counter and changes nothing. */
-    public function isRateLimited(Channel $channel, int $storeId): bool
+    public function isRateLimited(int $storeId): bool
     {
-        return $this->getRateLimiter($channel, $storeId)->tooManyAttempts();
+        return $this->getRateLimiter($storeId)->tooManyAttempts();
     }
 
     /**
-     * The web channel counts only the failed attempts and requires $expectedNonce, which the session
-     * issued, for a provider with a nonce. The API counts every attempt, and a null nonce skips the check.
+     * The web channel requires $expectedNonce, which the session issued, for a provider with a nonce.
+     * On the API, a null nonce skips the check.
      *
      * @param array{firstname?: string, lastname?: string} $nameHints Names forwarded by the caller
      *        (Apple sends them only in the first authorization response); used only when a new
@@ -52,86 +52,75 @@ class Maho_SocialLogin_Service_Identity
         array $nameHints = [],
     ): array {
         $helper = Mage::helper('sociallogin');
-        $limiter = $this->getRateLimiter($channel, $storeId);
-        if ($channel === Channel::Web ? $limiter->tooManyAttempts() : !$limiter->attempt()) {
-            throw new Mage_Core_Exception_TooManyRequests(match ($channel) {
-                Channel::Web => $helper->__('Too many attempts. Please try again later.'),
-                Channel::Api => $helper->__('Too many requests. Please try again later.'),
-            }, self::RATE_LIMIT_WINDOWS[$channel->value]);
+        if (!$this->getRateLimiter($storeId)->attempt()) {
+            throw new Mage_Core_Exception_TooManyRequests($helper->__('Too many requests. Please try again later.'), self::RATE_LIMIT_WINDOW);
+        }
+
+        $providerModel = $this->getProvider($provider);
+        if (!$providerModel->isEnabled($storeId) || $token === '') {
+            Mage::throwException($helper->__('This sign-in method is not available.'));
+        }
+        if ($channel === Channel::Web && $expectedNonce === null && $providerModel->requiresNonce()) {
+            Mage::throwException($helper->__('Your sign-in attempt has expired. Please try again.'));
         }
 
         try {
-            $providerModel = $this->getProvider($provider);
-            if (!$providerModel->isEnabled($storeId) || $token === '') {
-                Mage::throwException($helper->__('This sign-in method is not available.'));
-            }
-            if ($channel === Channel::Web && $expectedNonce === null && $providerModel->requiresNonce()) {
-                Mage::throwException($helper->__('Your sign-in attempt has expired. Please try again.'));
-            }
-
-            try {
-                $claims = $providerModel->verify($token, $storeId, $expectedNonce);
-            } catch (InvalidArgumentException $e) {
-                Mage::log("Social auth token rejected ({$provider}): {$e->getMessage()}", Mage::LOG_WARNING, self::LOG_FILE);
-                Mage::throwException($helper->__('Invalid authentication token.'));
-            } catch (RuntimeException $e) {
-                Mage::log("Social auth provider error ({$provider}): {$e->getMessage()}", Mage::LOG_ERROR, self::LOG_FILE);
-                throw new Maho_SocialLogin_Model_ProviderUnavailableException(
-                    $helper->__('Sign-in verification is temporarily unavailable. Please try again later.'),
-                );
-            }
-
-            $store = Mage::app()->getStore($storeId);
-            $websiteId = (int) $store->getWebsiteId();
-            $isWebsiteScope = Mage::getSingleton('customer/config_share')->isWebsiteScope();
-
-            $identity = Mage::getModel('sociallogin/identity')->loadByProviderIdentity(
-                $provider,
-                $claims['sub'],
-                $isWebsiteScope ? $websiteId : null,
+            $claims = $providerModel->verify($token, $storeId, $expectedNonce);
+        } catch (InvalidArgumentException $e) {
+            Mage::log("Social auth token rejected ({$provider}): {$e->getMessage()}", Mage::LOG_WARNING, self::LOG_FILE);
+            Mage::throwException($helper->__('Invalid authentication token.'));
+        } catch (RuntimeException $e) {
+            Mage::log("Social auth provider error ({$provider}): {$e->getMessage()}", Mage::LOG_ERROR, self::LOG_FILE);
+            throw new Maho_SocialLogin_Model_ProviderUnavailableException(
+                $helper->__('Sign-in verification is temporarily unavailable. Please try again later.'),
             );
-            if ($identity->getId()) {
-                $customer = Mage::getService('customer/customer')->getById($identity->getCustomerId());
-                if (!$customer) {
-                    Mage::throwException($helper->__('The linked customer account no longer exists.'));
-                }
-                $this->assertUsable($customer);
-                if ($identity->getProviderEmail() !== $claims['email']) {
-                    $identity->setProviderEmail($claims['email'])->save();
-                }
-                return $this->finish($customer, $provider, false);
-            }
-
-            $customer = $this->loadCustomerByEmail($claims['email'], $isWebsiteScope ? $websiteId : null);
-            if ($customer->getId()) {
-                $this->assertUsable($customer);
-                // The provider proved ownership of this address, which is exactly what a
-                // pending email confirmation would prove; clear it so login can proceed.
-                if ($customer->getConfirmation()) {
-                    Mage::getService('customer/customer')->save($customer->setConfirmation(null));
-                }
-                $this->createLink($customer, $websiteId, $provider, $claims);
-                Mage::log(
-                    "Auto-linked {$provider} identity to customer {$customer->getId()} by verified email",
-                    Mage::LOG_INFO,
-                    self::LOG_FILE,
-                );
-                return $this->finish($customer, $provider, false);
-            }
-
-            if (!$helper->isRegistrationAllowedViaSocial($storeId) || !Mage::helper('customer')->isRegistrationAllowed()) {
-                Mage::throwException($helper->__('Creating new accounts with social sign-in is not allowed. Please register first.'));
-            }
-
-            $customer = $this->createCustomer($claims, $nameHints, $storeId);
-            $this->createLink($customer, $websiteId, $provider, $claims);
-            return $this->finish($customer, $provider, true);
-        } catch (Throwable $e) {
-            if ($channel === Channel::Web) {
-                $limiter->hit();
-            }
-            throw $e;
         }
+
+        $store = Mage::app()->getStore($storeId);
+        $websiteId = (int) $store->getWebsiteId();
+        $isWebsiteScope = Mage::getSingleton('customer/config_share')->isWebsiteScope();
+
+        $identity = Mage::getModel('sociallogin/identity')->loadByProviderIdentity(
+            $provider,
+            $claims['sub'],
+            $isWebsiteScope ? $websiteId : null,
+        );
+        if ($identity->getId()) {
+            $customer = Mage::getService('customer/customer')->getById($identity->getCustomerId());
+            if (!$customer) {
+                Mage::throwException($helper->__('The linked customer account no longer exists.'));
+            }
+            $this->assertUsable($customer);
+            if ($identity->getProviderEmail() !== $claims['email']) {
+                $identity->setProviderEmail($claims['email'])->save();
+            }
+            return $this->finish($customer, $provider, false);
+        }
+
+        $customer = $this->loadCustomerByEmail($claims['email'], $isWebsiteScope ? $websiteId : null);
+        if ($customer->getId()) {
+            $this->assertUsable($customer);
+            // The provider proved ownership of this address, which is exactly what a
+            // pending email confirmation would prove; clear it so login can proceed.
+            if ($customer->getConfirmation()) {
+                Mage::getService('customer/customer')->save($customer->setConfirmation(null));
+            }
+            $this->createLink($customer, $websiteId, $provider, $claims);
+            Mage::log(
+                "Auto-linked {$provider} identity to customer {$customer->getId()} by verified email",
+                Mage::LOG_INFO,
+                self::LOG_FILE,
+            );
+            return $this->finish($customer, $provider, false);
+        }
+
+        if (!$helper->isRegistrationAllowedViaSocial($storeId) || !Mage::helper('customer')->isRegistrationAllowed()) {
+            Mage::throwException($helper->__('Creating new accounts with social sign-in is not allowed. Please register first.'));
+        }
+
+        $customer = $this->createCustomer($claims, $nameHints, $storeId);
+        $this->createLink($customer, $websiteId, $provider, $claims);
+        return $this->finish($customer, $provider, true);
     }
 
     public function getProvider(string $code): Maho_SocialLogin_Model_Provider_ProviderInterface
@@ -234,17 +223,13 @@ class Maho_SocialLogin_Service_Identity
         }
     }
 
-    /** The API reads the limit of the token endpoint, but keeps its own counter. */
-    protected function getRateLimiter(Channel $channel, int $storeId): \Maho\Security\RateLimiter
+    /** The token endpoint has its own counter. */
+    protected function getRateLimiter(int $storeId): \Maho\Security\RateLimiter
     {
-        [$namespace, $configPath] = match ($channel) {
-            Channel::Web => ['sociallogin_auth', Maho_SocialLogin_Helper_Data::XML_PATH_IP_RATE_LIMIT],
-            Channel::Api => ['social_auth', self::XML_PATH_API_RATE_LIMIT],
-        };
         return Mage::helper('core')->rateLimiter(
-            $namespace,
-            (int) Mage::getStoreConfig($configPath, $storeId),
-            self::RATE_LIMIT_WINDOWS[$channel->value],
+            'social_auth',
+            (int) Mage::getStoreConfig(self::XML_PATH_RATE_LIMIT, $storeId),
+            self::RATE_LIMIT_WINDOW,
             \Maho\Security\RateLimitScope::Ip,
         );
     }

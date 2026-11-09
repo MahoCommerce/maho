@@ -64,8 +64,8 @@ SPDX-License-Identifier: AFL-3.0
                 <rate_limit>
                     <fields>
                         <auth_token_ip translate="label comment" module="api">
-                            <label>Auth-token endpoint (per IP)</label>
-                            <comment>Anti-scraping throttle on /api/rest/v2/auth/token. Default 20 per minute. 0 to disable.</comment>
+                            <label>Auth-token endpoint and social sign-in (per IP)</label>
+                            <comment>Per IP address. Counts each request to /api/rest/v2/auth/token and each social sign-in attempt on the storefront. Default 20 per minute. 0 to disable.</comment>
                             <sort_order>180</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>

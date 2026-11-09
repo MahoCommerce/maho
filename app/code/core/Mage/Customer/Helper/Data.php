@@ -66,9 +66,6 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Configuration path to password forgotten flow change
      */
-    public const XML_PATH_CUSTOMER_FORGOT_PASSWORD_FLOW_SECURE = 'admin/security/forgot_password_flow_secure';
-    public const XML_PATH_CUSTOMER_FORGOT_PASSWORD_EMAIL_TIMES = 'admin/security/forgot_password_email_times';
-    public const XML_PATH_CUSTOMER_FORGOT_PASSWORD_IP_TIMES    = 'admin/security/forgot_password_ip_times';
 
     /**
      * VAT class constants
@@ -476,22 +473,6 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Get magic link rate limit for email
-     */
-    public function getMagicLinkRateLimitEmail(): int
-    {
-        return (int) Mage::getStoreConfig('customer/login/magic_link_rate_limit_email') ?: 3;
-    }
-
-    /**
-     * Get magic link rate limit for IP
-     */
-    public function getMagicLinkRateLimitIp(): int
-    {
-        return (int) Mage::getStoreConfig('customer/login/magic_link_rate_limit_ip') ?: 10;
-    }
-
-    /**
      * Get magic link registration mode
      */
     public function getMagicLinkRegistrationMode(): string
@@ -656,36 +637,6 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
             default => null,
         };
         return $setId ?: (int) Mage::getSingleton('eav/config')->getEntityType($entityTypeCode)->getDefaultAttributeSetId();
-    }
-
-    /**
-     * Retrieve forgot password flow secure type
-     *
-     * @return int
-     */
-    public function getCustomerForgotPasswordFlowSecure()
-    {
-        return Mage::getStoreConfigAsInt(self::XML_PATH_CUSTOMER_FORGOT_PASSWORD_FLOW_SECURE);
-    }
-
-    /**
-     * Retrieve forgot password requests to times per 24 hours from 1 e-mail
-     *
-     * @return int
-     */
-    public function getCustomerForgotPasswordEmailTimes()
-    {
-        return Mage::getStoreConfigAsInt(self::XML_PATH_CUSTOMER_FORGOT_PASSWORD_EMAIL_TIMES);
-    }
-
-    /**
-     * Retrieve forgot password requests to times per hour from 1 IP
-     *
-     * @return int
-     */
-    public function getCustomerForgotPasswordIpTimes()
-    {
-        return Mage::getStoreConfigAsInt(self::XML_PATH_CUSTOMER_FORGOT_PASSWORD_IP_TIMES);
     }
 
     /**

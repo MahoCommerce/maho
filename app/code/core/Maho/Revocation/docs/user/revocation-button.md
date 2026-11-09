@@ -130,9 +130,14 @@ This form must stay frictionless, so only **invisible** background measures are 
 | Setting | Description | Default |
 |---------|-------------|---------|
 | **Minimum Submit Time (Seconds)** | Submissions faster than this after the page renders are silently dropped as bots. `0` disables. | 3 |
-| **Submissions per IP per Hour** | Hard limit per IP; over-limit submissions are refused. `0` disables. | 5 |
-| **Receipt Emails per Recipient per Day** | Over this, the request is still recorded but the **customer receipt email** is suppressed (resendable in admin). Defeats email-bombing of third parties. `0` disables. | 1 |
-| **Merchant Notifications per Store per Hour** | Throttles merchant notification emails. `0` disables. | 100 |
+
+The rate limits of the form are in **System > Configuration > Advanced > System > Rate limit**, with the limits of the other public forms:
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| **Revocation form** | Hard limit per IP; over-limit submissions are refused. `0` disables. | 5 per hour |
+| **Revocation receipt email** | Over this, the request is still recorded but the **customer receipt email** is suppressed (resendable in admin). Defeats email-bombing of third parties. `0` disables. | 1 per day |
+| **Revocation merchant notification** | Throttles merchant notification emails, per store view. `0` disables. | 100 per hour |
 
 !!! tip "Do not over-tighten these"
     These gates exist to stop bots and abuse, not real customers. Setting them too strictly can block legitimate declarations, which defeats the legal purpose of the button. The defaults are conservative on purpose.

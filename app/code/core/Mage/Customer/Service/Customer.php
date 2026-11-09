@@ -53,6 +53,8 @@ class Mage_Customer_Service_Customer
     public const XML_PATH_LOGIN_IP_RATE_LIMIT = 'system/rate_limit/auth_token_ip';
     public const XML_PATH_LOGIN_RATE_LIMIT = 'system/rate_limit/customer_login';
     public const XML_PATH_FORGOT_PASSWORD_RATE_LIMIT = 'system/rate_limit/forgot_password';
+    public const XML_PATH_MAGIC_LINK_EMAIL_RATE_LIMIT = 'system/rate_limit/magic_link_email';
+    public const XML_PATH_MAGIC_LINK_IP_RATE_LIMIT = 'system/rate_limit/magic_link_ip';
     public const XML_PATH_CHANGE_PASSWORD_RATE_LIMIT = 'system/rate_limit/change_password';
     /** Counts only a rejected token: a password reset link, an account confirmation key or a magic login link */
     public const XML_PATH_TOKEN_RATE_LIMIT = 'system/rate_limit/reset_password';
@@ -456,19 +458,54 @@ class Mage_Customer_Service_Customer
         $this->attempt($core->rateLimiter('forgot_password', $limit, self::RATE_LIMIT_WINDOW, RateLimitScope::Ip));
         $this->attempt($core->rateLimiterBy('forgot_password', 'forgot_password:email:' . strtolower($email), $limit, self::RATE_LIMIT_WINDOW));
 
-        $flow = Mage::getModel('customer/flowpassword');
-        $flow->setEmail($email)->save();
-        if (!$flow->checkCustomerForgotPasswordFlowEmail($email)) {
-            throw new Mage_Core_Exception_TooManyRequests($helper->__('You have exceeded requests to times per 24 hours from 1 e-mail.'));
-        }
-        if (!$flow->checkCustomerForgotPasswordFlowIp()) {
-            throw new Mage_Core_Exception_TooManyRequests($helper->__('You have exceeded requests to times per hour from 1 IP.'), self::RATE_LIMIT_WINDOW);
-        }
-
         $customer = Mage::getModel('customer/customer')->setWebsiteId($websiteId)->loadByEmail($email);
         if ($customer->getId()) {
             try {
                 $customer->sendPasswordResetLinkEmail();
+            } catch (Exception $e) {
+                Mage::logException($e);
+            }
+        }
+    }
+
+    /**
+     * Email a login link to the active customer of the website $websiteId that has $email. Throw nothing when
+     * no active customer has the email, or when the email fails, so that the answer does not show which
+     * addresses have an account.
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity when the magic link login is disabled
+     * @throws Mage_Core_Exception_Input when the email is empty or not valid
+     * @throws Mage_Core_Exception_TooManyRequests when the client or the email is over its limit
+     */
+    public function sendMagicLink(
+        #[\SensitiveParameter]
+        string $email,
+        int $websiteId,
+    ): void {
+        $helper = Mage::helper('customer');
+        $core = Mage::helper('core');
+        if (!$helper->isMagicLinkEnabled()) {
+            throw new Mage_Core_Exception_NoSuchEntity($helper->__('This sign-in method is not available.'));
+        }
+        if (!$core->isValidNotBlank($email)) {
+            throw new Mage_Core_Exception_Input()->addError('email', $helper->__('Please enter your email.'));
+        }
+        if (!$core->isValidEmail($email)) {
+            throw new Mage_Core_Exception_Input()->addError('email', $helper->__('Invalid email address.'));
+        }
+
+        $this->attempt($core->rateLimiter('magic_link', (int) Mage::getStoreConfig(self::XML_PATH_MAGIC_LINK_IP_RATE_LIMIT), self::RATE_LIMIT_WINDOW, RateLimitScope::Ip));
+        $this->attempt($core->rateLimiterBy(
+            'magic_link',
+            'magic_link:email:' . strtolower($email),
+            (int) Mage::getStoreConfig(self::XML_PATH_MAGIC_LINK_EMAIL_RATE_LIMIT),
+            self::RATE_LIMIT_WINDOW,
+        ));
+
+        $customer = Mage::getModel('customer/customer')->setWebsiteId($websiteId)->loadByEmail($email);
+        if ($customer->getId() && $customer->getIsActive()) {
+            try {
+                $customer->sendMagicLinkEmail();
             } catch (Exception $e) {
                 Mage::logException($e);
             }

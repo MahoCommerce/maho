@@ -19,7 +19,6 @@ class Maho_SocialLogin_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_FACEBOOK_APP_ID = 'customer/social_login/facebook_app_id';
     public const XML_PATH_FACEBOOK_APP_SECRET = 'customer/social_login/facebook_app_secret';
     public const XML_PATH_ALLOW_REGISTRATION = 'customer/social_login/allow_registration';
-    public const XML_PATH_IP_RATE_LIMIT = 'customer/social_login/ip_rate_limit_per_hour';
     public const XML_PATH_NONCE_TTL = 'customer/social_login/nonce_ttl';
 
     #[\Override]

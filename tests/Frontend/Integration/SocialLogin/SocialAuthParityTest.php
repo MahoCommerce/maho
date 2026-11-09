@@ -107,8 +107,7 @@ beforeEach(function () {
     $store->setConfig(Maho_SocialLogin_Helper_Data::XML_PATH_GOOGLE_CLIENT_ID, SOCIAL_PARITY_CLIENT_ID);
     $store->setConfig(Maho_SocialLogin_Helper_Data::XML_PATH_APPLE_ENABLED, '0');
     $store->setConfig(Maho_SocialLogin_Helper_Data::XML_PATH_ALLOW_REGISTRATION, '1');
-    $store->setConfig(Maho_SocialLogin_Helper_Data::XML_PATH_IP_RATE_LIMIT, '30');
-    $store->setConfig(Maho_SocialLogin_Service_Identity::XML_PATH_API_RATE_LIMIT, '20');
+    $store->setConfig(Maho_SocialLogin_Service_Identity::XML_PATH_RATE_LIMIT, '20');
     Mage::app()->cleanCache([\Maho\Security\RateLimiter::CACHE_TAG]);
 
     $GLOBALS['socialParityCustomerIds'] = [];
@@ -167,21 +166,20 @@ it('refuses a new account on both transports when social registration is disable
         ->and($api['message'])->toBe($message);
 });
 
-describe('kept differences: each transport has its own rate limit and its own nonce rule', function () {
-    it('counts only the failed attempts of the web, and every attempt of the API, each on its own counter', function () {
-        Mage::app()->getStore()->setConfig(Maho_SocialLogin_Helper_Data::XML_PATH_IP_RATE_LIMIT, '1');
-        Mage::app()->getStore()->setConfig(Maho_SocialLogin_Service_Identity::XML_PATH_API_RATE_LIMIT, '1');
+it('counts every attempt of both transports against one limit', function () {
+    Mage::app()->getStore()->setConfig(Maho_SocialLogin_Service_Identity::XML_PATH_RATE_LIMIT, '1');
 
-        expect(socialViaWeb('google', 'garbage-token', null)['status'])->toBe(400);
-        $web = socialViaWeb('google', 'garbage-token', null);
-        expect($web['status'])->toBe(429)
-            ->and($web['message'])->toBe('Too many attempts. Please try again later.');
+    expect(socialViaWeb('google', 'garbage-token', null)['status'])->toBe(400);
+    $api = socialViaApi('google', 'garbage-token', null);
+    $web = socialViaWeb('google', 'garbage-token', null);
 
-        expect(socialViaApi('google', 'garbage-token', null)['status'])->toBe(400);
-        $api = socialViaApi('google', 'garbage-token', null);
-        expect($api['status'])->toBe(429)
-            ->and($api['message'])->toBe('Too many requests. Please try again later.');
-    });
+    expect($api['status'])->toBe(429)
+        ->and($api['message'])->toBe('Too many requests. Please try again later.')
+        ->and($web['status'])->toBe(429)
+        ->and($web['message'])->toBe($api['message']);
+});
+
+describe('kept differences: each transport has its own nonce rule', function () {
 
     it('requires a nonce that the session issued on the web, and skips a missing nonce on the API', function () {
         $token = socialParityToken('no-nonce-' . uniqid() . '@example.com', 'sub-' . uniqid());

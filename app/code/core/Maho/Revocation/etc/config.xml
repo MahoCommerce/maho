@@ -115,10 +115,14 @@ SPDX-License-Identifier: OSL-3.0
             <abuse>
                 <honeypot_enabled>1</honeypot_enabled>
                 <min_submit_seconds>3</min_submit_seconds>
-                <ip_rate_limit_per_hour>5</ip_rate_limit_per_hour>
-                <recipient_rate_limit_per_day>1</recipient_rate_limit_per_day>
-                <merchant_notification_rate_limit_per_hour>100</merchant_notification_rate_limit_per_hour>
             </abuse>
         </revocation>
+        <system>
+            <rate_limit>
+                <revocation_submit>5</revocation_submit>
+                <revocation_receipt>1</revocation_receipt>
+                <revocation_merchant_notification>100</revocation_merchant_notification>
+            </rate_limit>
+        </system>
     </default>
 </config>

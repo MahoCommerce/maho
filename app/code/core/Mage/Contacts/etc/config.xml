@@ -65,6 +65,7 @@ SPDX-License-Identifier: AFL-3.0
         <system>
             <rate_limit>
                 <contact>3</contact>
+                <contact_auto_reply>3</contact_auto_reply>
             </rate_limit>
         </system>
         <contacts>
@@ -76,8 +77,6 @@ SPDX-License-Identifier: AFL-3.0
             </api>
             <abuse>
                 <honeypot_enabled>1</honeypot_enabled>
-                <ip_rate_limit_per_hour>10</ip_rate_limit_per_hour>
-                <recipient_rate_limit_per_hour>3</recipient_rate_limit_per_hour>
             </abuse>
             <email>
                 <recipient_email><![CDATA[hello@example.com]]></recipient_email>

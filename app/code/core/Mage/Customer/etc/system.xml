@@ -556,26 +556,6 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>0</show_in_store>
                             <depends><magic_link_enabled>1</magic_link_enabled></depends>
                         </magic_link_token_expiration>
-                        <magic_link_rate_limit_email translate="label comment">
-                            <label>Magic Link Rate Limit - Email (requests per hour)</label>
-                            <comment>Maximum magic link requests per email address per hour. Default: 3.</comment>
-                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
-                            <sort_order>40</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <depends><magic_link_enabled>1</magic_link_enabled></depends>
-                        </magic_link_rate_limit_email>
-                        <magic_link_rate_limit_ip translate="label comment">
-                            <label>Magic Link Rate Limit - IP (requests per hour)</label>
-                            <comment>Maximum magic link requests per IP address per hour. Default: 10.</comment>
-                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
-                            <sort_order>50</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <depends><magic_link_enabled>1</magic_link_enabled></depends>
-                        </magic_link_rate_limit_ip>
                         <magic_link_email_template translate="label">
                             <label>Magic Link Email Template</label>
                             <frontend_type>select</frontend_type>
@@ -681,33 +661,6 @@ SPDX-License-Identifier: AFL-3.0
             <groups>
                 <security>
                     <fields>
-                        <forgot_password_flow_secure translate="label">
-                            <label>Forgot password flow secure</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_customer_forgotpassword</source_model>
-                            <sort_order>140</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </forgot_password_flow_secure>
-                        <forgot_password_ip_times translate="label comment">
-                            <label>Forgot password requests to times per hour from 1 IP</label>
-                            <sort_order>150</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><forgot_password_flow_secure separator=",">1,2</forgot_password_flow_secure></depends>
-                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
-                        </forgot_password_ip_times>
-                        <forgot_password_email_times translate="label">
-                            <label>Forgot password requests to times per 24 hours from 1 e-mail</label>
-                            <sort_order>160</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><forgot_password_flow_secure separator=",">1,3</forgot_password_flow_secure></depends>
-                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
-                        </forgot_password_email_times>
                         <min_admin_password_length translate="label comment">
                             <label>Minimum admin password length</label>
                             <comment>Please enter a number 7 or greater in this field.</comment>
@@ -745,6 +698,24 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>1</show_in_store>
                             <validate>validate-digits validate-zero-or-greater</validate>
                         </forgot_password>
+                        <magic_link_email translate="label comment" module="customer">
+                            <label>Magic link request (per email)</label>
+                            <comment>Per email address. Default 3 per hour. 0 to disable.</comment>
+                            <sort_order>151</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </magic_link_email>
+                        <magic_link_ip translate="label comment" module="customer">
+                            <label>Magic link request (per IP)</label>
+                            <comment>Per IP address. Higher than the email limit, for customers on a shared network. Default 10 per hour. 0 to disable.</comment>
+                            <sort_order>152</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </magic_link_ip>
                         <reset_password translate="label comment" module="customer">
                             <label>Reset password</label>
                             <comment>Per client. Counts only a rejected password reset link, account confirmation key or magic login link. Default 10 per hour. 0 to disable.</comment>

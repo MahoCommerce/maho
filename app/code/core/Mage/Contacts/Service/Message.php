@@ -17,9 +17,8 @@ class Mage_Contacts_Service_Message
     public const XML_PATH_ENABLED = 'contacts/contacts/enabled';
     public const XML_PATH_API_ENABLED = 'contacts/api/enabled';
     public const XML_PATH_HONEYPOT_ENABLED = 'contacts/abuse/honeypot_enabled';
-    public const XML_PATH_IP_RATE_LIMIT = 'contacts/abuse/ip_rate_limit_per_hour';
-    public const XML_PATH_RECIPIENT_RATE_LIMIT = 'contacts/abuse/recipient_rate_limit_per_hour';
-    public const XML_PATH_EMAIL_RATE_LIMIT = 'system/rate_limit/contact';
+    public const XML_PATH_RATE_LIMIT = 'system/rate_limit/contact';
+    public const XML_PATH_RECIPIENT_RATE_LIMIT = 'system/rate_limit/contact_auto_reply';
     public const XML_PATH_EMAIL_SENDER = 'contacts/email/sender_email_identity';
     public const XML_PATH_EMAIL_RECIPIENT = 'contacts/email/recipient_email';
     public const XML_PATH_EMAIL_TEMPLATE = 'contacts/email/email_template';
@@ -74,7 +73,7 @@ class Mage_Contacts_Service_Message
         if ($channel === Channel::Api) {
             $this->verifyApiCaptcha($fields);
         }
-        $this->checkRateLimits($channel, $storeId, (string) $message->getData('email'));
+        $this->checkRateLimits($storeId, (string) $message->getData('email'));
 
         $this->sendToStore($message, $storeId);
         $this->sendAutoReply($message, $storeId);
@@ -167,24 +166,16 @@ class Mage_Contacts_Service_Message
     }
 
     /**
-     * Each channel keeps its own limit for one client. Both channels share the limit for one email address.
+     * One limit, for one client and for one email address. The storefront form and the API count together.
      *
      * @throws Mage_Core_Exception_TooManyRequests
      */
-    private function checkRateLimits(Channel $channel, int $storeId, #[\SensitiveParameter] string $email): void
+    private function checkRateLimits(int $storeId, #[\SensitiveParameter] string $email): void
     {
         $core = Mage::helper('core');
-        $emailLimit = (int) Mage::getStoreConfig(self::XML_PATH_EMAIL_RATE_LIMIT, $storeId);
-        $clientLimiter = match ($channel) {
-            Channel::Web => $core->rateLimiter(
-                'contacts_ip',
-                (int) Mage::getStoreConfig(self::XML_PATH_IP_RATE_LIMIT, $storeId),
-                self::RATE_LIMIT_WINDOW,
-                \Maho\Security\RateLimitScope::Ip,
-            ),
-            Channel::Api => $core->rateLimiter("contact:{$storeId}", $emailLimit, self::RATE_LIMIT_WINDOW, \Maho\Security\RateLimitScope::Ip),
-        };
-        $emailLimiter = $core->rateLimiterBy('contact', $storeId . ':' . strtolower($email), $emailLimit, self::RATE_LIMIT_WINDOW);
+        $limit = (int) Mage::getStoreConfig(self::XML_PATH_RATE_LIMIT, $storeId);
+        $clientLimiter = $core->rateLimiter("contact:{$storeId}", $limit, self::RATE_LIMIT_WINDOW, \Maho\Security\RateLimitScope::Ip);
+        $emailLimiter = $core->rateLimiterBy('contact', $storeId . ':' . strtolower($email), $limit, self::RATE_LIMIT_WINDOW);
 
         if (!$clientLimiter->attempt() || !$emailLimiter->attempt()) {
             throw new Mage_Core_Exception_TooManyRequests(

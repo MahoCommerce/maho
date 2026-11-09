@@ -99,8 +99,8 @@ class Maho_SocialLogin_SocialController extends Mage_Core_Controller_Front_Actio
             $this->jsonError($this->__('This sign-in method is not available.'), 404);
             return false;
         }
-        if ($this->getService()->isRateLimited(Maho_SocialLogin_Model_Channel::Web, (int) Mage::app()->getStore()->getId())) {
-            $this->jsonError($this->__('Too many attempts. Please try again later.'), 429);
+        if ($this->getService()->isRateLimited((int) Mage::app()->getStore()->getId())) {
+            $this->jsonError($this->__('Too many requests. Please try again later.'), 429);
             return false;
         }
         return true;

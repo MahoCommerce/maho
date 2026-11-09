@@ -170,8 +170,7 @@ beforeEach(function () {
     $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_ENABLED, '1');
     $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_API_ENABLED, '1');
     $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_HONEYPOT_ENABLED, '1');
-    $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_EMAIL_RATE_LIMIT, '3');
-    $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_IP_RATE_LIMIT, '10');
+    $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_RATE_LIMIT, '3');
     $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_RECIPIENT_RATE_LIMIT, '3');
     $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_AUTO_REPLY_ENABLED, '0');
     $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_EMAIL_RECIPIENT, CONTACT_STORE_EMAIL);
@@ -229,8 +228,8 @@ it('accepts a message that fills the honeypot on both transports and sends nothi
         ->and($this->spy->sent)->toBe([]);
 });
 
-it('shares the limit for one email address between the form and the API', function () {
-    Mage::app()->getStore()->setConfig(Mage_Contacts_Service_Message::XML_PATH_EMAIL_RATE_LIMIT, '1');
+it('shares the limit for one email address and for one client between the form and the API', function () {
+    Mage::app()->getStore()->setConfig(Mage_Contacts_Service_Message::XML_PATH_RATE_LIMIT, '1');
     $fields = contactFields();
 
     expect(contactViaWeb($fields)['accepted'])->toBeTrue();

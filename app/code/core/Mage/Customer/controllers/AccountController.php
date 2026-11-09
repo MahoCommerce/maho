@@ -765,11 +765,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/customer/account/magicLinkRequestPost', name: 'customer.account.magicLinkRequestPost', methods: ['POST'])]
     public function magicLinkRequestPostAction(): void
     {
-        if (!Mage::helper('customer')->isMagicLinkEnabled()) {
-            $this->norouteAction();
-            return;
-        }
-
         // Handle both 'email' field (from magic link request page) and 'login[username]' (from login form)
         $email = (string) $this->getRequest()->getPost('email');
         if (!$email) {
@@ -777,46 +772,21 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $email = is_array($loginData) ? (string) ($loginData['username'] ?? '') : '';
         }
 
-        if (!$email) {
-            $this->_getSession()->addError($this->__('Please enter your email.'));
-            $this->_redirect('*/*/magiclinkrequest');
+        try {
+            Mage::getService('customer/customer')->sendMagicLink($email, (int) Mage::app()->getStore()->getWebsiteId());
+        } catch (Mage_Core_Exception_NoSuchEntity) {
+            $this->norouteAction();
             return;
-        }
-
-        $flowPassword = Mage::getModel('customer/flowpassword');
-        $flowPassword->setEmail($email)->save();
-
-        if (!$flowPassword->checkMagicLinkFlowEmail($email)) {
-            $this->_getSession()->addError($this->__('You have exceeded magic link requests per hour from this email address.'));
-            $this->_redirect('*/*/magiclinkrequest');
-            return;
-        }
-
-        if (!$flowPassword->checkMagicLinkFlowIp()) {
-            $this->_getSession()->addError($this->__('You have exceeded magic link requests per hour from this IP address.'));
-            $this->_redirect('*/*/magiclinkrequest');
-            return;
-        }
-
-        if (!Mage::helper('core')->isValidEmail($email)) {
-            $this->_getSession()->addError($this->__('Invalid email address.'));
-            $this->_redirect('*/*/magiclinkrequest');
-            return;
-        }
-
-        $customer = Mage::getModel('customer/customer')
-            ->setWebsiteId(Mage::app()->getStore()->getWebsiteId())
-            ->loadByEmail($email);
-
-        $customerId = $customer->getId();
-        if ($customerId && $customer->getIsActive()) {
-            try {
-                $customer->sendMagicLinkEmail();
-            } catch (Exception $exception) {
-                $this->_getSession()->addError($exception->getMessage());
-                $this->_redirect('*/*/magiclinkrequest');
-                return;
+        } catch (Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $this->_getSession()->addError($error['message']);
             }
+            $this->_redirect('*/*/magiclinkrequest');
+            return;
+        } catch (Mage_Core_Exception $e) {
+            $this->_getSession()->addError($e->getMessage());
+            $this->_redirect('*/*/magiclinkrequest');
+            return;
         }
 
         // Always show success message (security: don't reveal if email exists)

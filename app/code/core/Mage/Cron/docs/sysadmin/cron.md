@@ -133,7 +133,6 @@ these two commands:
 | catalog_product_index_price_reindex_all      | catalog/observer::reindexProductPrices                    | 0 2 * * *    |
 | core_clean_cache                             | core/observer::cleanCache                                 | 30 2 * * *   |
 | currency_rates_update                        | directory/observer::scheduledUpdateCurrencyRates          |              |
-| customer_flowpassword                        | customer/observer::deleteCustomerFlowPassword             | 0 0 1 * *    |
 | index_clean_events                           | index/observer::cleanOutdatedEvents                       | 30 */4 * * * |
 | log_clean                                    | log/cron::logClean                                        |              |
 | newsletter_send_all                          | newsletter/observer::scheduledSend                        | */5 * * * *  |

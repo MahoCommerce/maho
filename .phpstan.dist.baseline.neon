@@ -8785,12 +8785,6 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Observer.php
 
 		-
-			rawMessage: 'Method Mage_Customer_Model_Observer::deleteCustomerFlowPassword() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Observer.php
-
-		-
 			rawMessage: 'Method Mage_Customer_Model_Observer::quoteSubmitAfter() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -8825,12 +8819,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Resource/Customer/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Customer_Model_Resource_Flowpassword::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Resource/Flowpassword.php
 
 		-
 			rawMessage: 'Method Mage_Customer_Model_Resource_Form_Attribute::_construct() has no return type specified.'

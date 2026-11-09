@@ -150,18 +150,18 @@ if (Mage::getStoreConfigFlag('mymodule/abuse/honeypot_enabled')
 
 ## Worked example: the contact form
 
-The contact form (`Mage_Contacts_IndexController`) combines all three tools and is the canonical reference implementation:
+The contact form (`Mage_Contacts_Service_Message`, which the storefront form and `POST /contact` call) combines all three tools and is the canonical reference implementation:
 
 1. **Honeypot** - a hidden field. Bots that fill it get the normal success page (so they can't detect the trap) and no email is sent.
-2. **Per-IP throttle** (`rateLimiter('contacts_ip', ..., RateLimitScope::Ip)`) - blunts automated submission floods.
+2. **Per-client and per-email throttle** (`rateLimiter("contact:{$storeId}", ..., RateLimitScope::Ip)` and `rateLimiterBy('contact', $email, ...)`) - blunts automated submission floods. Both transports count together.
 3. **Per-recipient throttle** (`rateLimiterBy('contacts_recipient', $email, ...)`) - caps how many auto-reply emails a single address can receive, defeating email-bombing of third parties. The merchant notification is still sent; only the attacker-controllable auto-reply is capped, and only when auto-reply is enabled.
 
-These are exposed under **System > Configuration > Contacts > Abuse Protection** with three fields:
+The honeypot switch is a field of the module, under **System > Configuration > General > Contacts > Abuse Protection**. The limits are under **System > Configuration > Advanced > System > Rate limit**, as for every public endpoint:
 
-| Field | Purpose |
-|-------|---------|
-| Honeypot Field | Adds the invisible trap field. Submissions that fill it are silently dropped. |
-| Submissions per IP per Hour | Per-IP throttle. `0` disables the limit. |
-| Auto-Reply Emails per Recipient per Hour | Caps auto-reply emails per address. `0` disables the limit. |
+| Field | Path | Purpose |
+|-------|------|---------|
+| Honeypot Field | `contacts/abuse/honeypot_enabled` | Adds the invisible trap field. Submissions that fill it are silently dropped. |
+| Contact form (web + API) | `system/rate_limit/contact` | Per-client and per-email throttle. `0` disables the limit. |
+| Contact form auto-reply | `system/rate_limit/contact_auto_reply` | Caps auto-reply emails per address. `0` disables the limit. |
 
 Follow this pattern when adding abuse protection to your own public endpoints: keep the measures invisible to real customers, and don't set limits so low that legitimate visitors get blocked.
