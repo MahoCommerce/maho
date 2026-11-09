@@ -89,18 +89,7 @@ trait DatabaseCliTrait
      */
     private function containsMultipleStatements(string $sql, string $engine, string $sqlMode = ''): bool
     {
-        return count($this->splitSqlStatements($sql, $engine, $sqlMode)) > 1;
-    }
-
-    /**
-     * Split a SQL string into individual statements, ignoring semicolons that appear inside
-     * string literals, quoted identifiers, or comments. Empty fragments are dropped.
-     *
-     * @return list<string>
-     */
-    private function splitSqlStatements(string $sql, string $engine, string $sqlMode = ''): array
-    {
-        return \Maho\Db\Sql\StatementSplitter::split($sql, $engine, $sqlMode);
+        return count(\Maho\Db\Sql\StatementSplitter::split($sql, $engine, $sqlMode)) > 1;
     }
 
     private function createTempMySQLConfig(

@@ -53,13 +53,15 @@ final class StatementSplitter
         $statements = [];
         $statement = '';
         $hasSql = false;
+        $bodyStatementStart = 0;
         $length = strlen($sql);
         $i = 0;
 
         while ($i < $length) {
             if (substr_compare($sql, $delimiter, $i, strlen($delimiter)) === 0) {
-                if ($engine === 'sqlite' && self::isOpenSqliteTrigger($statement)) {
+                if ($engine === 'sqlite' && self::isOpenSqliteTrigger($statement, $bodyStatementStart)) {
                     $statement .= $delimiter;
+                    $bodyStatementStart = strlen($statement);
                     $i += strlen($delimiter);
                     continue;
                 }
@@ -67,6 +69,7 @@ final class StatementSplitter
                     $statements[] = trim($statement);
                 }
                 $statement = '';
+                $bodyStatementStart = 0;
                 $hasSql = false;
                 $i += strlen($delimiter);
                 continue;
@@ -195,16 +198,17 @@ final class StatementSplitter
 
     /**
      * Whether $statement is a SQLite CREATE TRIGGER whose BEGIN ... END body is still open.
-     * As in sqlite3_complete(), the word END before a semicolon closes the body.
+     * As in sqlite3_complete(), the body ends at END when END is the first word after a semicolon.
+     * $bodyStatementStart is the offset in $statement where the last body statement starts.
      */
-    private static function isOpenSqliteTrigger(string $statement): bool
+    private static function isOpenSqliteTrigger(string $statement, int $bodyStatementStart): bool
     {
         if (!preg_match('#^(?:\s+|--[^\n]*\n?|/\*.*?\*/)*CREATE\s+(?:TEMP(?:ORARY)?\s+)?TRIGGER\b#is', $statement)) {
             return false;
         }
 
-        $statement = rtrim($statement);
-        return strcasecmp(substr($statement, -3), 'END') !== 0
-            || preg_match('/[A-Za-z0-9_$\x80-\xff]/', substr($statement, -4, 1)) === 1;
+        $skip = '(?:\s|--[^\n]*(?:\n|$)|/\*.*?\*/)*';
+        return $bodyStatementStart === 0
+            || preg_match("#^{$skip}END{$skip}$#is", substr($statement, $bodyStatementStart)) !== 1;
     }
 }

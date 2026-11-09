@@ -120,46 +120,9 @@ it('splits MySQL strings by quote escaping and only recognizes comments outside 
         ->and(dbQueryReflect('containsMultipleStatements', 'SELECT /*!40101 1; */ 2', 'mysql'))->toBeFalse()
         ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1; /* trailing comment */', 'mysql'))->toBeFalse()
         ->and(dbQueryReflect('containsMultipleStatements', '/* ordinary comment */', 'mysql'))->toBeFalse()
-        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1; /*!40101 SET @x = 1 */', 'mysql'))->toBeTrue();
-});
-
-it('splits a MySQL multiQuery batch after an even run of backslashes', function () {
-    $adapterClass = new ReflectionClass(\Maho\Db\Adapter\Pdo\Mysql::class);
-    $adapter = $adapterClass->newInstanceWithoutConstructor();
-    $split = new ReflectionMethod(\Maho\Db\Adapter\Pdo\Mysql::class, '_splitMultiQuery');
-
-    expect($split->invoke($adapter, "SELECT 'a\\\\'; SELECT 2"))->toBe(["SELECT 'a\\\\'", 'SELECT 2']);
-});
-
-it('does not let comment markers inside a MySQL string hide later statement boundaries', function () {
-    $adapterClass = new ReflectionClass(\Maho\Db\Adapter\Pdo\Mysql::class);
-    $adapter = $adapterClass->newInstanceWithoutConstructor();
-    $split = new ReflectionMethod(\Maho\Db\Adapter\Pdo\Mysql::class, '_splitMultiQuery');
-
-    expect($split->invoke($adapter, "SELECT '/*'; SELECT 2"))->toBe(["SELECT '/*'", 'SELECT 2']);
-});
-
-it('keeps semicolons inside doubled-quote MySQL strings', function () {
-    $adapterClass = new ReflectionClass(\Maho\Db\Adapter\Pdo\Mysql::class);
-    $adapter = $adapterClass->newInstanceWithoutConstructor();
-    $split = new ReflectionMethod(\Maho\Db\Adapter\Pdo\Mysql::class, '_splitMultiQuery');
-
-    expect($split->invoke($adapter, "SELECT 'it''s; fine'; SELECT 2"))->toBe(["SELECT 'it''s; fine'", 'SELECT 2']);
-});
-
-it('does not emit ordinary trailing comments as adapter statements', function () {
-    $adapters = [
-        \Maho\Db\Adapter\Pdo\Mysql::class,
-        \Maho\Db\Adapter\Pdo\Pgsql::class,
-        \Maho\Db\Adapter\Pdo\Sqlite::class,
-    ];
-
-    foreach ($adapters as $adapterClass) {
-        $adapter = new ReflectionClass($adapterClass)->newInstanceWithoutConstructor();
-        $split = new ReflectionMethod($adapterClass, '_splitMultiQuery');
-        expect($split->invoke($adapter, 'SELECT 1; /* trailing comment */'))->toBe(['SELECT 1'])
-            ->and($split->invoke($adapter, '/* comment only */'))->toBe([]);
-    }
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1; /*!40101 SET @x = 1 */', 'mysql'))->toBeTrue()
+        ->and(dbQueryReflect('containsMultipleStatements', "SELECT 'a\\'; SELECT 2", 'mysql', 'NO_BACKSLASH_ESCAPES'))->toBeTrue()
+        ->and(dbQueryReflect('containsMultipleStatements', "SELECT 'a\\'; SELECT 2", 'mysql'))->toBeFalse();
 });
 
 it('uses PostgreSQL string and dollar-quote rules when detecting statement boundaries', function () {

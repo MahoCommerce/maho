@@ -7,7 +7,6 @@
 
 declare(strict_types=1);
 
-use MahoCLI\Commands\DBQuery;
 use Maho\Db\Adapter\Pdo\Mysql;
 use Maho\Db\Adapter\Pdo\Pgsql;
 use Maho\Db\Adapter\Pdo\Sqlite;
@@ -87,16 +86,6 @@ it('routes each PDO adapter multiQuery splitter through its engine grammar witho
     }
 });
 
-it('routes the CLI single-statement guard through the selected engine grammar', function () {
-    $query = new DBQuery('db:query');
-    $split = new ReflectionMethod(DBQuery::class, 'splitSqlStatements');
-
-    expect($split->invoke($query, 'SELECT $$a;b$$', 'pgsql'))->toHaveCount(1)
-        ->and($split->invoke($query, 'SELECT $$a;b$$; SELECT 2', 'pgsql'))->toHaveCount(2)
-        ->and($split->invoke($query, "SELECT 'a\\'; SELECT 2", 'pgsql'))->toHaveCount(2)
-        ->and($split->invoke($query, "SELECT 1 -- comment\r; SELECT 2", 'pgsql'))->toHaveCount(2);
-});
-
 it('recognizes PostgreSQL dollar tags with non-ASCII identifier characters', function () {
     expect(StatementSplitter::split('SELECT $é$a;b$é$; SELECT 2', 'pgsql'))
         ->toBe(['SELECT $é$a;b$é$', 'SELECT 2'])
@@ -173,6 +162,14 @@ it('keeps the BEGIN ... END body of a SQLite trigger in one statement', function
         ->and(StatementSplitter::split("/* c */ {$trigger};", 'sqlite'))->toBe(["/* c */ {$trigger}"])
         ->and(StatementSplitter::split('CREATE TRIGGER t_ai AFTER INSERT ON t BEGIN SELECT legend; END; SELECT 1', 'sqlite'))
         ->toBe(['CREATE TRIGGER t_ai AFTER INSERT ON t BEGIN SELECT legend; END', 'SELECT 1'])
+        ->and(StatementSplitter::split('CREATE TRIGGER a AFTER INSERT ON t BEGIN SELECT 1; END /* c */; SELECT 2', 'sqlite'))
+        ->toBe(['CREATE TRIGGER a AFTER INSERT ON t BEGIN SELECT 1; END /* c */', 'SELECT 2'])
+        ->and(StatementSplitter::split("CREATE TRIGGER a AFTER INSERT ON t BEGIN SELECT 1; END -- c\n; SELECT 2", 'sqlite'))
+        ->toBe(['CREATE TRIGGER a AFTER INSERT ON t BEGIN SELECT 1; END -- c', 'SELECT 2'])
+        ->and(StatementSplitter::split('CREATE TRIGGER a AFTER INSERT ON t BEGIN SELECT CASE WHEN 1 THEN 2 END; SELECT 3; END; SELECT 4', 'sqlite'))
+        ->toBe(['CREATE TRIGGER a AFTER INSERT ON t BEGIN SELECT CASE WHEN 1 THEN 2 END; SELECT 3; END', 'SELECT 4'])
+        ->and(StatementSplitter::split("CREATE TRIGGER a AFTER INSERT ON t BEGIN SELECT 1 -- ; END\n; SELECT 2; END; SELECT 3", 'sqlite'))
+        ->toBe(["CREATE TRIGGER a AFTER INSERT ON t BEGIN SELECT 1 -- ; END\n; SELECT 2; END", 'SELECT 3'])
         ->and(StatementSplitter::split('CREATE TABLE t (a INT); SELECT 1', 'sqlite'))->toHaveCount(2)
         ->and(StatementSplitter::split("{$trigger}; SELECT 1", 'pgsql'))->toHaveCount(4);
 });
