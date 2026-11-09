@@ -144,7 +144,7 @@ it('keeps the coupon of the cart when a code does not apply', function () {
     $code = (string) $this->rule->getCouponCode();
     $expired = couponParityRule(toDate: '2001-01-01');
     $this->carts = [$cart = CartParity::cart()];
-    Mage::getService('checkout/cart')->applyCoupon($cart, $code, true);
+    Mage::getService('checkout/cart')->applyCoupon($cart, $code, Mage_Checkout_Model_Actor::Staff);
 
     try {
         $web = couponViaWeb($cart, (string) $expired->getCouponCode());
@@ -162,7 +162,7 @@ it('keeps the coupon of the cart when a code does not apply', function () {
 it('keeps the coupon of the cart when the promo code box applies a gift card', function () {
     $code = (string) $this->rule->getCouponCode();
     $this->carts = [$cart = CartParity::cart()];
-    Mage::getService('checkout/cart')->applyCoupon($cart, $code, true);
+    Mage::getService('checkout/cart')->applyCoupon($cart, $code, Mage_Checkout_Model_Actor::Staff);
     $giftcard = Mage::getModel('giftcard/giftcard')
         ->setCode(Mage::helper('giftcard')->generateCode())
         ->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE)

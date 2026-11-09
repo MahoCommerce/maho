@@ -34,6 +34,11 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
         return Mage::getResourceSingleton('checkout/cart');
     }
 
+    protected function _getService(): Mage_Checkout_Service_Cart
+    {
+        return Mage::getService('checkout/cart');
+    }
+
     /**
      * Retrieve checkout session model
      *
@@ -172,23 +177,10 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
      */
     protected function _getProduct($productInfo)
     {
-        $product = null;
         if ($productInfo instanceof Mage_Catalog_Model_Product) {
-            $product = $productInfo;
-        } elseif (is_int($productInfo) || is_string($productInfo)) {
-            $product = Mage::getModel('catalog/product')
-                ->setStoreId(Mage::app()->getStore()->getId())
-                ->load($productInfo);
+            return $productInfo;
         }
-        $currentWebsiteId = Mage::app()->getStore()->getWebsiteId();
-        if (!$product
-            || !$product->getId()
-            || !is_array($product->getWebsiteIds())
-            || !in_array($currentWebsiteId, $product->getWebsiteIds())
-        ) {
-            Mage::throwException(Mage::helper('checkout')->__('The product could not be found.'));
-        }
-        return $product;
+        return $this->_getService()->getProductById((int) $productInfo, (int) Mage::app()->getStore()->getId());
     }
 
     /**
@@ -223,56 +215,26 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
         $product = $this->_getProduct($productInfo);
         $request = $this->_getProductRequest($requestInfo);
 
-        Mage::dispatchEvent('checkout_cart_product_add_before', ['request' => $request, 'product' => $product]);
-
-        /** @var Mage_Catalog_Helper_Product $helper */
-        $helper  = Mage::helper('catalog/product');
-
-        if (!$request->hasQty()) {
-            $request->setQty($helper->getDefaultQty($product));
-        }
-
-        $productId = $product->getId();
-
-        if (!$product->isConfigurable() && $product->getStockItem()) {
-            $minimumQty = $product->getStockItem()->getMinSaleQty();
-            //If product was not found in cart and there is set minimal qty for it
-            if ($minimumQty && $minimumQty > 0 && $request->getQty() < $minimumQty
-                && !$this->getQuote()->hasProductId($productId)
-            ) {
-                $request->setQty($minimumQty);
-            }
-        }
-
-        if ($productId) {
-            try {
-                $result = $this->getQuote()->addProduct($product, $request);
-            } catch (Mage_Core_Exception $e) {
-                $this->getCheckoutSession()->setUseNotice(false);
-                $result = $e->getMessage();
-            }
-            /**
-             * String we can get if prepare process has error
-             */
-            if (is_string($result)) {
-                $redirectUrl = ($product->hasOptionsValidationFail())
-                    ? $product->getUrlModel()->getUrl(
-                        $product,
-                        ['_query' => ['startcustomization' => 1]],
-                    )
-                    : $product->getProductUrl();
-                $this->getCheckoutSession()->setRedirectUrl($redirectUrl);
-                if ($this->getCheckoutSession()->getUseNotice() === null) {
+        try {
+            $this->_getService()->addProduct($this->getQuote(), $product, $request);
+        } catch (Mage_Core_Exception $e) {
+            // A message on the exception means that the product refused the buy request: the shopper fixes it on the product page
+            if ($e->getMessages()) {
+                // A variant goes to the cart as its parent, so the shopper fixes the options on the page of the parent
+                $cartProduct = $this->_getService()->getCartProduct($product, $request, (int) $this->getQuote()->getStoreId());
+                $this->getCheckoutSession()->setRedirectUrl($product->hasOptionsValidationFail()
+                    ? $cartProduct->getUrlModel()->getUrl($cartProduct, ['_query' => ['startcustomization' => 1]])
+                    : $cartProduct->getProductUrl());
+                if (!$e->getMessages(Mage_Core_Model_Message::NOTICE)) {
+                    $this->getCheckoutSession()->setUseNotice(false);
+                } elseif ($this->getCheckoutSession()->getUseNotice() === null) {
                     $this->getCheckoutSession()->setUseNotice();
                 }
-                Mage::throwException($result);
             }
-        } else {
-            Mage::throwException(Mage::helper('checkout')->__('The product does not exist.'));
+            throw $e;
         }
 
-        Mage::dispatchEvent('checkout_cart_product_add_after', ['quote_item' => $result, 'product' => $product]);
-        $this->getCheckoutSession()->setLastAddedProductId($productId);
+        $this->getCheckoutSession()->setLastAddedProductId($product->getId());
         return $this;
     }
 
@@ -294,9 +256,9 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
                     continue;
                 }
                 $product = $this->_getProduct($productId);
-                if ($product->getId() && $product->isVisibleInCatalog()) {
+                if ($product->isVisibleInCatalog()) {
                     try {
-                        $this->getQuote()->addProduct($product);
+                        $this->_getService()->addProduct($this->getQuote(), $product, new \Maho\DataObject());
                     } catch (Exception) {
                         $allAdded = false;
                     }
@@ -375,6 +337,7 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
         $messageFactory = Mage::getSingleton('core/message');
         $session = $this->getCheckoutSession();
         $qtyRecalculatedFlag = false;
+        $qtyByItemId = [];
         foreach ($data as $itemId => $itemInfo) {
             $item = $this->getQuote()->getItemById($itemId);
             if (!$item) {
@@ -386,22 +349,18 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
                 continue;
             }
 
-            $qty = isset($itemInfo['qty']) ? (float) $itemInfo['qty'] : false;
+            $qty = isset($itemInfo['qty']) ? (float) $itemInfo['qty'] : 0;
             if ($qty > 0) {
-                $item->setQty($qty);
-
-                $itemInQuote = $this->getQuote()->getItemById($item->getId());
-
-                if (!$itemInQuote && $item->getHasError()) {
-                    Mage::throwException($item->getMessage());
-                }
-
+                $qtyByItemId[(int) $itemId] = $qty;
                 if (isset($itemInfo['before_suggest_qty']) && ($itemInfo['before_suggest_qty'] != $qty)) {
                     $qtyRecalculatedFlag = true;
                     $message = $messageFactory->notice(Mage::helper('checkout')->__('Quantity was recalculated from %d to %d', $itemInfo['before_suggest_qty'], $qty));
                     $session->addQuoteItemMessage($item->getId(), $message);
                 }
             }
+        }
+        if ($qtyByItemId) {
+            $this->_getService()->updateItems($this->getQuote(), $qtyByItemId);
         }
 
         if ($qtyRecalculatedFlag) {
@@ -422,7 +381,11 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
      */
     public function removeItem($itemId)
     {
-        $this->getQuote()->removeItem($itemId);
+        try {
+            $this->_getService()->removeItem($this->getQuote(), (int) $itemId);
+        } catch (Mage_Core_Exception_NoSuchEntity|Mage_Core_Exception_Input) {
+            // The cart has no such line, so the outcome is the same
+        }
         return $this;
     }
 
@@ -435,10 +398,8 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
     {
         Mage::dispatchEvent('checkout_cart_save_before', ['cart' => $this]);
 
-        $this->getQuote()->getBillingAddress();
         $this->getQuote()->getShippingAddress()->setCollectShippingRates();
-        $this->getQuote()->collectTotals();
-        $this->getQuote()->save();
+        $this->_getService()->collectAndSave($this->getQuote());
         $this->getCheckoutSession()->setQuoteId($this->getQuote()->getId());
         /**
          * Cart save usually called after changes with cart items.
@@ -464,7 +425,7 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
      */
     public function truncate()
     {
-        $this->getQuote()->removeAllItems();
+        $this->_getService()->truncate($this->getQuote());
         return $this;
     }
 
@@ -546,46 +507,26 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
      */
     public function updateItem($itemId, $requestInfo = null, $updatingParams = null)
     {
+        $item = $this->getQuote()->getItemById($itemId);
+        if (!$item) {
+            $this->getCheckoutSession()->setUseNotice(false);
+            Mage::throwException(Mage::helper('checkout')->__('Quote item does not exist.'));
+        }
+        $productId = $item->getProduct()->getId();
+
         try {
-            $item = $this->getQuote()->getItemById($itemId);
-            if (!$item) {
-                Mage::throwException(Mage::helper('checkout')->__('Quote item does not exist.'));
-            }
-            $productId = $item->getProduct()->getId();
-            $product = $this->_getProduct($productId);
-            $request = $this->_getProductRequest($requestInfo);
-
-            if ($product->getStockItem()) {
-                $minimumQty = $product->getStockItem()->getMinSaleQty();
-                // If product was not found in cart and there is set minimal qty for it
-                if ($minimumQty && ($minimumQty > 0)
-                    && ($request->getQty() < $minimumQty)
-                    && !$this->getQuote()->hasProductId($productId)
-                ) {
-                    $request->setQty($minimumQty);
-                }
-            }
-
-            $result = $this->getQuote()->updateItem($itemId, $request, $updatingParams);
+            $result = $this->_getService()->reconfigureItem(
+                $this->getQuote(),
+                (int) $itemId,
+                $this->_getProductRequest($requestInfo),
+                Mage_Checkout_Model_Actor::Customer,
+                $updatingParams,
+            );
         } catch (Mage_Core_Exception $e) {
             $this->getCheckoutSession()->setUseNotice(false);
-            $result = $e->getMessage();
+            throw $e;
         }
 
-        /**
-         * We can get string if updating process had some errors
-         */
-        if (is_string($result)) {
-            if ($this->getCheckoutSession()->getUseNotice() === null) {
-                $this->getCheckoutSession()->setUseNotice();
-            }
-            Mage::throwException($result);
-        }
-
-        Mage::dispatchEvent('checkout_cart_product_update_after', [
-            'quote_item' => $result,
-            'product' => $product,
-        ]);
         $this->getCheckoutSession()->setLastAddedProductId($productId);
         return $result;
     }

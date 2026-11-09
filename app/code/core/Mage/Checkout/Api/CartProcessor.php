@@ -117,15 +117,6 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Whether the caller has no limit on the coupon codes and the gift card codes that it tries: an admin
-     * or a staff API token, for a high volume checkout.
-     */
-    private function hasNoCodeLimit(): bool
-    {
-        return $this->isAdmin() || $this->isApiUser();
-    }
-
-    /**
      * Whether the caller may bypass cart ownership and act on any cart.
      *
      * Admins are gated upstream by AdminAclListener (Cart::ADMIN_RESOURCE), so
@@ -141,6 +132,11 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             return true;
         }
         return $this->isApiUser() && $this->requireUser()->hasPermission('carts/write');
+    }
+
+    private function actor(): \Mage_Checkout_Model_Actor
+    {
+        return $this->isPrivilegedCartActor() ? \Mage_Checkout_Model_Actor::Staff : \Mage_Checkout_Model_Actor::Customer;
     }
 
     /**
@@ -205,52 +201,12 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function addItemToCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $sku = $args['sku'] ?? '';
-        $qty = (float) ($args['qty'] ?? 1);
-
-        // Build buy request options
-        $buyOptions = [];
-        if (!empty($args['options'])) {
-            $buyOptions['options'] = $args['options'];
-        }
-        // File-type custom options: the base64 uploads must be forwarded to
-        // \Mage_Checkout_Service_Cart::addItem, which injects them into the buy request. Without
-        // this they're dropped and a provided file reads as a missing required
-        // option (add-to-cart 400s).
-        if (!empty($args['options_files'])) {
-            $buyOptions['options_files'] = $args['options_files'];
-        }
-        if (!empty($args['links'])) {
-            $buyOptions['links'] = $args['links'];
-        }
-        if (!empty($args['superGroup'])) {
-            $buyOptions['super_group'] = $args['superGroup'];
-        }
-        if (!empty($args['bundleOption'])) {
-            $buyOptions['bundle_option'] = $args['bundleOption'];
-        }
-        if (!empty($args['bundleOptionQty'])) {
-            $buyOptions['bundle_option_qty'] = $args['bundleOptionQty'];
-        }
-        foreach ([
-            'giftcardAmount' => 'giftcard_amount',
-            'giftcardSenderName' => 'giftcard_sender_name',
-            'giftcardSenderEmail' => 'giftcard_sender_email',
-            'giftcardRecipientName' => 'giftcard_recipient_name',
-            'giftcardRecipientEmail' => 'giftcard_recipient_email',
-            'giftcardMessage' => 'giftcard_message',
-            'giftcardDeliveryDate' => 'giftcard_delivery_date',
-        ] as $camel => $snake) {
-            if (!empty($args[$camel])) {
-                $buyOptions[$snake] = $args[$camel];
-            }
-        }
-
-        $customPrice = $this->extractCustomPrice($args);
+        $customPrice = $this->parseCustomPrice($args);
 
         $recreated = false;
         $quote = $this->resolveCartForItemAdd($context, $uriVariables, $recreated);
-        $quote = $this->cartService->addItem($quote, $sku, $qty, $buyOptions, $customPrice);
+        $product = $this->cartService->getProductBySku(is_scalar($args['sku'] ?? null) ? (string) $args['sku'] : '', (int) $quote->getStoreId());
+        $this->cartService->addProduct($quote, $product, $this->buildBuyRequest($args), $this->actor(), $customPrice);
 
         $cart = $this->cartMapper->mapQuoteToCart($quote);
         $cart->cartRecreated = $recreated;
@@ -258,16 +214,44 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Read the optional customPrice override, rejecting an unauthorized or
-     * malformed value rather than silently dropping or coercing it.
+     * Turn the camelCase fields of an add to cart into a buy request. Without a qty, the cart service gives the
+     * default qty of the product.
      */
-    private function extractCustomPrice(array $args): ?float
+    private function buildBuyRequest(array $args): \Maho\DataObject
+    {
+        $buyRequest = new \Maho\DataObject();
+        if (isset($args['qty'])) {
+            $buyRequest->setQty((float) $args['qty']);
+        }
+        foreach ([
+            'options' => 'options',
+            'options_files' => 'options_files',
+            'links' => 'links',
+            'superGroup' => 'super_group',
+            'bundleOption' => 'bundle_option',
+            'bundleOptionQty' => 'bundle_option_qty',
+            'giftcardAmount' => 'giftcard_amount',
+            'giftcardSenderName' => 'giftcard_sender_name',
+            'giftcardSenderEmail' => 'giftcard_sender_email',
+            'giftcardRecipientName' => 'giftcard_recipient_name',
+            'giftcardRecipientEmail' => 'giftcard_recipient_email',
+            'giftcardMessage' => 'giftcard_message',
+            'giftcardDeliveryDate' => 'giftcard_delivery_date',
+        ] as $field => $key) {
+            if (!empty($args[$field])) {
+                $buyRequest->setData($key, $args[$field]);
+            }
+        }
+        return $buyRequest;
+    }
+
+    /**
+     * Read the optional customPrice override. The cart service decides who may set it.
+     */
+    private function parseCustomPrice(array $args): ?float
     {
         if (!isset($args['customPrice']) || $args['customPrice'] === '') {
             return null;
-        }
-        if (!$this->isPrivilegedCartActor()) {
-            throw new \Mage_Core_Exception_Forbidden('customPrice requires admin or carts/write authorization');
         }
         if (!is_numeric($args['customPrice'])) {
             throw new BadRequestHttpException('customPrice must be a number');
@@ -317,16 +301,16 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function updateCartItem(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $itemId = $args['itemId'] ?? $uriVariables['itemId'] ?? null;
-        $qty = isset($args['qty']) ? (float) $args['qty'] : null;
-        $customPrice = $this->extractCustomPrice($args);
-
-        if (!$itemId) {
-            throw new \Mage_Core_Exception_Input()->addError('item_id', 'Item ID is required');
-        }
+        $customPrice = $this->parseCustomPrice($args);
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
-        $quote = $this->cartService->updateItem($quote, (int) $itemId, $qty, $customPrice);
+        $quote = $this->cartService->updateItem(
+            $quote,
+            (int) ($args['itemId'] ?? $uriVariables['itemId'] ?? 0),
+            isset($args['qty']) ? (float) $args['qty'] : null,
+            $customPrice,
+            $this->actor(),
+        );
 
         return $this->cartMapper->mapQuoteToCart($quote);
     }
@@ -337,18 +321,12 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function removeItemFromCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $itemId = $args['itemId'] ?? $uriVariables['itemId'] ?? null;
-
-        if (!$itemId) {
-            throw new \Mage_Core_Exception_Input()->addError('item_id', 'Item ID is required');
-        }
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
-        $quote = $this->cartService->removeItem($quote, (int) $itemId);
+        $quote = $this->cartService->removeItem($quote, (int) ($args['itemId'] ?? $uriVariables['itemId'] ?? 0));
 
         return $this->cartMapper->mapQuoteToCart($quote);
     }
-
 
     /**
      * Apply coupon code to cart
@@ -361,7 +339,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $couponCode = $args['couponCode'] ?? $args['code'] ?? '';
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
-        $quote = $this->cartService->applyCoupon($quote, is_scalar($couponCode) ? (string) $couponCode : '', $this->hasNoCodeLimit());
+        $quote = $this->cartService->applyCoupon($quote, is_scalar($couponCode) ? (string) $couponCode : '', $this->actor());
 
         return $this->cartMapper->mapQuoteToCart($quote);
     }
@@ -418,10 +396,9 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Get available shipping methods for the cart. Accepts an optional
-     * {address: {...}} body, when present, the address is applied to the
-     * cart first so the rate calculator has something to evaluate. Returns
-     * the cart (the mapper populates availableShippingMethods).
+     * Get available shipping methods for the cart. With an optional {address: {...}} body, the cart estimates the
+     * shipping for the country, the region, the postcode and the city of the address first, as the cart page does.
+     * Returns the cart (the mapper populates availableShippingMethods).
      */
     private function getShippingMethodsForCart(array $context, array $uriVariables, bool $focused): Cart|Response
     {
@@ -431,7 +408,8 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->resolveAndVerify($context, $uriVariables);
 
         if (is_array($address) && $address !== []) {
-            $quote = $this->cartService->setShippingAddress($quote, $this->cartService->mapAddressInput($address));
+            $estimate = \Mage::getModel('sales/quote_address')->addData($this->cartService->mapAddressInput($address));
+            $quote = $this->cartService->estimateShipping($quote, $estimate);
         } else {
             // No address in the body: request fresh rates for the current cart
             // state. Without the flag collectShippingRates() is a no-op and the
@@ -538,7 +516,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $giftcardCode = is_scalar($args['giftcardCode'] ?? null) ? (string) $args['giftcardCode'] : '';
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
-        $quote = $this->cartService->applyGiftcard($quote, $giftcardCode, null, $this->hasNoCodeLimit());
+        $quote = $this->cartService->applyGiftcard($quote, $giftcardCode, null, $this->actor());
 
         return $this->cartMapper->mapQuoteToCart($quote);
     }

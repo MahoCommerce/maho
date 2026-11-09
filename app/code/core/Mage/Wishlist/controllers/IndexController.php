@@ -717,41 +717,16 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
             return;
         }
 
-        $optionId = null;
-        if (str_starts_with($option->getCode(), Mage_Catalog_Model_Product_Type_Abstract::OPTION_PREFIX)) {
-            $optionId = str_replace(Mage_Catalog_Model_Product_Type_Abstract::OPTION_PREFIX, '', $option->getCode());
-            if (!is_numeric($optionId)) {
-                $this->_forward('noRoute');
-                return;
-            }
-        }
-        $productOption = Mage::getModel('catalog/product_option')->load($optionId);
-
-        if (!$productOption
-            || !$productOption->getId()
-            || $productOption->getProductId() != $option->getProductId()
-            || $productOption->getType() != 'file'
-        ) {
+        try {
+            $file = Mage::getService('catalog/product_option')->openItemOptionFile($option, (string) $this->getRequest()->getParam('key'));
+        } catch (Mage_Core_Exception) {
             $this->_forward('noRoute');
             return;
         }
-
-        try {
-            $info      = Mage::helper('core/unserializeArray')->unserialize($option->getValue());
-            $secretKey = $this->getRequest()->getParam('key');
-
-            if (is_array($info) && isset($info['secret_key']) && hash_equals((string) $info['secret_key'], (string) $secretKey)) {
-                $file = Mage::getModel('catalog/product_option_type_file')->openStoredFile($info);
-                if ($file !== null) {
-                    $this->_prepareDownloadResponse($info['title'], [
-                        'value' => $file['stream'],
-                        'type'  => 'stream',
-                    ], contentLength: $file['size']);
-                }
-            }
-        } catch (Exception) {
-            $this->_forward('noRoute');
-        }
+        $this->_prepareDownloadResponse($file['title'], [
+            'value' => $file['stream'],
+            'type'  => 'stream',
+        ], contentLength: $file['size']);
         exit(0);
     }
 

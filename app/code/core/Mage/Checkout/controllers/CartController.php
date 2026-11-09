@@ -538,9 +538,15 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         $region     = (string) $this->getRequest()->getParam('region');
         $isAjax     = (bool) $this->getRequest()->getParam('isAjax');
 
+        $estimate = Mage::getModel('sales/quote_address')
+            ->setCountryId($country)
+            ->setCity($city)
+            ->setPostcode($postcode)
+            ->setRegionId($regionId)
+            ->setRegion($region);
         try {
-            Mage::getModel('directory/country')->loadByCode($country);
-        } catch (Mage_Core_Exception $e) {
+            Mage::getService('checkout/cart')->estimateShipping($this->_getQuote(), $estimate);
+        } catch (Mage_Core_Exception_Input $e) {
             if ($isAjax) {
                 $this->getResponse()->setBodyJson([
                     'success' => false,
@@ -554,15 +560,6 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             return;
         }
 
-        $this->_getQuote()->getShippingAddress()
-            ->setCountryId($country)
-            ->setCity($city)
-            ->setPostcode($postcode)
-            ->setRegionId($regionId)
-            ->setRegion($region)
-            ->setCollectShippingRates()
-            ->collectShippingRates();
-        $this->_getQuote()->save();
         $this->_getSession()->setEstimatedShippingAddressData([
             'country_id' => $country,
             'postcode'   => $postcode,
@@ -823,7 +820,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 if (is_numeric($qty) && $qty == 0) {
                     $cart->removeItem($id);
                 } else {
-                    $quoteItem->setQty($qty);
+                    Mage::getService('checkout/cart')->updateItems($cart->getQuote(), [$id => (float) $qty]);
                 }
                 $this->_getCart()->save();
 
