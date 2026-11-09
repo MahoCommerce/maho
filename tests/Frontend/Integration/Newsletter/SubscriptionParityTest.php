@@ -212,8 +212,13 @@ beforeEach(function () {
     $session = new Session(new MockArraySessionStorage());
     $session->start();
     Mage::register(Mage_Core_Model_Session_Abstract::REGISTRY_KEY, $session);
+    // A message that an earlier test left in the session is not an outcome of this test
+    Mage::getSingleton('core/session')->getMessages(true);
+    Mage::getSingleton('customer/session')->getMessages(true);
 
     Mage::app()->setCurrentStore(Mage::app()->getDefaultStoreView());
+    // The customer of the test logs in without the confirmation email
+    Mage::app()->getStore()->setConfig(Mage_Customer_Model_Customer::XML_PATH_IS_CONFIRM, '0');
     Mage::getSingleton('customer/session')->logout();
     $store = Mage::app()->getStore();
     $store->setConfig(Mage_Newsletter_Model_Subscriber::XML_PATH_ALLOW_GUEST_SUBSCRIBE_FLAG, '1');

@@ -125,8 +125,13 @@ beforeEach(function () {
     $session = new Session(new MockArraySessionStorage());
     $session->start();
     Mage::register(Mage_Core_Model_Session_Abstract::REGISTRY_KEY, $session);
+    // A message that an earlier test left in the session is not an outcome of this test
+    Mage::getSingleton('core/session')->getMessages(true);
+    Mage::getSingleton('customer/session')->getMessages(true);
 
     Mage::app()->setCurrentStore(Mage::app()->getDefaultStoreView());
+    // The customer of the test logs in without the confirmation email
+    Mage::app()->getStore()->setConfig(Mage_Customer_Model_Customer::XML_PATH_IS_CONFIRM, '0');
     $this->storeId = (int) Mage::app()->getStore()->getId();
     Mage::app()->getStore()->setConfig(Mage_Review_Service_Review::XML_PATH_GUEST_ALLOWED, '1');
     Mage::app()->getStore()->setConfig(Mage_Review_Service_Review::XML_PATH_RATE_LIMIT, '10');

@@ -124,8 +124,13 @@ beforeEach(function () {
     $session = new Session(new MockArraySessionStorage());
     $session->start();
     Mage::register(Mage_Core_Model_Session_Abstract::REGISTRY_KEY, $session);
+    // A message that an earlier test left in the session is not an outcome of this test
+    Mage::getSingleton('core/session')->getMessages(true);
+    Mage::getSingleton('customer/session')->getMessages(true);
 
     Mage::app()->setCurrentStore(Mage::app()->getDefaultStoreView());
+    // The customer of the test logs in without the confirmation email
+    Mage::app()->getStore()->setConfig(Mage_Customer_Model_Customer::XML_PATH_IS_CONFIRM, '0');
     Mage::app()->getStore()->setConfig(Mage_Wishlist_Service_Wishlist::XML_PATH_ENABLED, '1');
 
     $this->product = Mage::getResourceModel('catalog/product_collection')

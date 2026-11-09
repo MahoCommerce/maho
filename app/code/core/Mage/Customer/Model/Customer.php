@@ -149,13 +149,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     protected $_cacheTag = self::CACHE_TAG;
 
     /**
-     * Confirmation requirement flag
-     *
-     * @var bool
-     */
-    private static $_isConfirmationRequired;
-
-    /**
      * Initialize customer model
      */
     #[\Override]
@@ -716,12 +709,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         if ($this->canSkipConfirmation()) {
             return false;
         }
-        if (self::$_isConfirmationRequired === null) {
-            $storeId = $this->getStoreId() ?: null;
-            self::$_isConfirmationRequired = Mage::getStoreConfigFlag(self::XML_PATH_IS_CONFIRM, $storeId);
-        }
-
-        return self::$_isConfirmationRequired;
+        return Mage::getStoreConfigFlag(self::XML_PATH_IS_CONFIRM, $this->getStoreId() ?: null);
     }
 
     /**
