@@ -58,7 +58,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
     private function updateFromGraphQl(array $context): Coupon
     {
         $args = $context['args']['input'] ?? [];
-        $id = (int) ($args['id'] ?? 0);
+        $id = $this->parseGraphQlId($args['id'] ?? null);
         if (!$id) {
             throw new UnprocessableEntityHttpException('Coupon ID is required');
         }
@@ -67,7 +67,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
     private function deleteFromGraphQl(array $context): null
     {
-        $id = (int) ($context['args']['input']['id'] ?? 0);
+        $id = $this->parseGraphQlId($context['args']['input']['id'] ?? null);
         return $this->doDelete($id);
     }
 

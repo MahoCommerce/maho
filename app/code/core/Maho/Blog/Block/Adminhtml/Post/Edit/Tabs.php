@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-class Maho_Blog_Block_Adminhtml_Post_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tabs
+class Maho_Blog_Block_Adminhtml_Post_Edit_Tabs extends Maho_Blog_Block_Adminhtml_Edit_Tabs
 {
     public function __construct()
     {
@@ -16,5 +16,18 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Tabs extends Mage_Adminhtml_Block_Widg
         $this->setId('post_tabs');
         $this->setDestElementId('edit_form');
         $this->setTitle(Mage::helper('blog')->__('Post Information'));
+    }
+
+    #[\Override]
+    public function getEntity(): Maho_Blog_Model_Post
+    {
+        return Mage::registry('blog_post');
+    }
+
+    #[\Override]
+    protected function _beforeToHtml()
+    {
+        $this->addAttributeTabs();
+        return parent::_beforeToHtml();
     }
 }

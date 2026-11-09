@@ -448,6 +448,20 @@
         color: var(--color-error);
     }
 
+    /* The group window of the attribute set editor: a heading for each website, with its store
+       views indented below it */
+    .group-labels {
+        tr.website th {
+            padding-top: var(--maho-space-3);
+            text-align: left;
+            font-weight: 600;
+        }
+
+        tr.store-view td.label {
+            padding-left: var(--maho-space-4);
+        }
+    }
+
     .success-msg {
         @apply d-alert-success;
         --message-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='m8 12 3 3 5-6'/%3E%3C/svg%3E");

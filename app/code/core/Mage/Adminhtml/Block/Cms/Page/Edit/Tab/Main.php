@@ -10,6 +10,8 @@
 
 class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Main extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
+    use Mage_Adminhtml_Block_Cms_Page_Edit_AttributeFieldsTrait;
+
     #[\Override]
     protected function _prepareForm()
     {
@@ -87,6 +89,9 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Main extends Mage_Adminhtml_Block_W
         if (!$model->getId()) {
             $model->setData('is_active', $isElementDisabled ? '0' : '1');
         }
+
+        $groups = Mage::getResourceSingleton('cms/page')->getCustomAttributeGroups();
+        $this->addAttributeFields($fieldset, $groups[0]['attributes'] ?? [], $model);
 
         Mage::dispatchEvent('adminhtml_cms_page_edit_tab_main_prepare_form', ['form' => $form]);
 

@@ -13,6 +13,7 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\Pagination\TraversablePaginator;
+use Maho\ApiPlatform\Service\CustomAttributes;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -859,21 +860,11 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         // Generic EAV read: user-defined attribute values not covered by a
-        // dedicated DTO property (the read counterpart of customAttributesWrite).
+        // dedicated DTO property, the same keys that a write takes.
         // Backend only, like cost: it ignores is_visible_on_front and would
         // otherwise expose internal data. Frontend callers get the curated
         // additionalAttributes list below instead.
-        $dedicated = Product::dedicatedAttributeCodes();
-        $dto->customAttributes = [];
-        foreach ($product->getAttributes() as $code => $attribute) {
-            if (!$attribute->getIsUserDefined() || isset($dedicated[$code])) {
-                continue;
-            }
-            $value = $product->getData($code);
-            if ($value !== null && $value !== '') {
-                $dto->customAttributes[$code] = $value;
-            }
-        }
+        $dto->customAttributes = CustomAttributes::read($product, Product::customAttributeDefinitions($product));
 
         $typeId = $product->getTypeId();
         $typeInstance = $product->getTypeInstance(true);

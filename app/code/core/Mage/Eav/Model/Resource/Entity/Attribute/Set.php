@@ -141,4 +141,59 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Set extends Mage_Core_Model_Resou
             ->limit(1);
         return $adapter->fetchOne($select, $bind);
     }
+
+    /**
+     * Return the labels of the attributes that set $fromSetId holds and set $toSetId does not.
+     * A record that moves from the first set to the second loses its values of these attributes.
+     *
+     * @return list<string>
+     */
+    public function getMissingAttributeLabels(int $fromSetId, int $toSetId): array
+    {
+        $adapter = $this->_getReadAdapter();
+        $entityAttributeTable = $this->getTable('eav/entity_attribute');
+
+        return $adapter->fetchCol(
+            $adapter->select()
+                ->from(['ea' => $entityAttributeTable], [])
+                ->join(['a' => $this->getTable('eav/attribute')], 'a.attribute_id = ea.attribute_id', ['frontend_label'])
+                ->where('ea.attribute_set_id = ?', $fromSetId)
+                ->where(
+                    "NOT EXISTS (SELECT 1 FROM {$entityAttributeTable} d"
+                    . ' WHERE d.attribute_id = ea.attribute_id AND d.attribute_set_id = ?)',
+                    $toSetId,
+                )
+                ->order('a.frontend_label'),
+        );
+    }
+
+    /**
+     * Return the number of records of set $setId that have a value of $attribute, or null when the
+     * records of the entity type have no set or the attribute has no value table.
+     */
+    public function countRecordsWithValue(int $setId, Mage_Eav_Model_Entity_Attribute_Abstract $attribute): ?int
+    {
+        if ($attribute->isStatic()) {
+            return null;
+        }
+        $entityType = $attribute->getEntityType();
+        $adapter = $this->_getReadAdapter();
+        try {
+            $entityTable = $this->getTable((string) $entityType->getEntityTable());
+            $valueTable = (string) $attribute->getBackendTable();
+        } catch (Mage_Core_Exception) {
+            return null;
+        }
+        if (!$adapter->isTableExists($valueTable) || !$adapter->tableColumnExists($entityTable, 'attribute_set_id')) {
+            return null;
+        }
+        $idField = (string) ($entityType->getEntityIdField() ?: 'entity_id');
+        return (int) $adapter->fetchOne(
+            $adapter->select()
+                ->from(['v' => $valueTable], [new Maho\Db\Expr('COUNT(DISTINCT v.entity_id)')])
+                ->join(['e' => $entityTable], "e.{$idField} = v.entity_id", [])
+                ->where('v.attribute_id = ?', (int) $attribute->getId())
+                ->where('e.attribute_set_id = ?', $setId),
+        );
+    }
 }

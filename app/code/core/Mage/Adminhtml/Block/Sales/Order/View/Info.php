@@ -100,10 +100,20 @@ class Mage_Adminhtml_Block_Sales_Order_View_Info extends Mage_Adminhtml_Block_Sa
         $config     = Mage::getSingleton('eav/config');
         $entityType = 'customer';
         $customer   = Mage::getModel('customer/customer');
+        $order = $this->getOrder();
+        foreach (Mage::getSingleton('sales/observer_customerAttributes')->getDisplayValues($order, false) as $row) {
+            $attribute = $config->getAttribute($entityType, $row['code']);
+            $sortOrder = $this->_prepareAccountDataSortOrder($accountData, (int) $attribute->getSortOrder() + 200);
+            $accountData[$sortOrder] = [
+                'label' => $row['label'],
+                'value' => $this->escapeHtml($row['value']),
+            ];
+        }
         foreach ($config->getEntityAttributeCodes($entityType) as $attributeCode) {
             /** @var Mage_Customer_Model_Attribute $attribute */
             $attribute = $config->getAttribute($entityType, $attributeCode);
-            if (!$attribute->getIsVisible() || $attribute->getIsSystem()) {
+            // The rows above show the user-defined attributes, with the labels that the customer saw
+            if (!$attribute->getIsVisible() || $attribute->getIsSystem() || $attribute->getIsUserDefined()) {
                 continue;
             }
             $orderKey   = sprintf('customer_%s', $attribute->getAttributeCode());
@@ -112,7 +122,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Info extends Mage_Adminhtml_Block_Sa
                 $customer->setData($attribute->getAttributeCode(), $orderValue);
                 $dataModel  = Mage_Customer_Model_Attribute_Data::factory($attribute, $customer);
                 $value      = $dataModel->outputValue(Mage_Customer_Model_Attribute_Data::OUTPUT_FORMAT_HTML);
-                $sortOrder  = $attribute->getSortOrder() + $attribute->getIsUserDefined() ? 200 : 0;
+                $sortOrder  = (int) $attribute->getSortOrder();
                 $sortOrder  = $this->_prepareAccountDataSortOrder($accountData, $sortOrder);
                 $accountData[$sortOrder] = [
                     'label' => $attribute->getFrontendLabel(),

@@ -397,3 +397,71 @@ describe('Coupon and cart price rule', function (): void {
     });
 
 });
+
+describe('GraphQL coupon mutations', function (): void {
+
+    $createCoupon = function (): int {
+        $create = apiPost('/api/rest/v2/coupons', [
+            'code' => 'PestGql' . substr(uniqid(), -6),
+            'discountType' => 'percent',
+            'discountAmount' => 10,
+        ], adminToken());
+        expect($create['status'])->toBeSuccessful();
+
+        return (int) $create['json']['id'];
+    };
+
+    it('updates a coupon that the id names as a plain ID', function () use ($createCoupon): void {
+        $id = $createCoupon();
+
+        $response = gqlQuery(
+            'mutation { updateCoupon(input: {id: ' . $id . ', discountAmount: 15}) { coupon { discountAmount } } }',
+            [],
+            adminToken(),
+        );
+
+        expect($response['json']['errors'] ?? [])->toBeEmpty()
+            ->and($response['json']['data']['updateCoupon']['coupon']['discountAmount'] ?? null)->toEqual(15)
+            ->and(apiGet("/api/rest/v2/coupons/{$id}", adminToken())['json']['discountAmount'])->toEqual(15);
+    });
+
+    it('updates a coupon that the id names as an IRI', function () use ($createCoupon): void {
+        $id = $createCoupon();
+
+        $response = gqlQuery(
+            'mutation { updateCoupon(input: {id: "/api/rest/v2/coupons/' . $id . '", discountAmount: 20}) { coupon { discountAmount } } }',
+            [],
+            adminToken(),
+        );
+
+        expect($response['json']['errors'] ?? [])->toBeEmpty()
+            ->and($response['json']['data']['updateCoupon']['coupon']['discountAmount'] ?? null)->toEqual(20);
+    });
+
+    it('deletes a coupon that the id names as an IRI', function () use ($createCoupon): void {
+        $id = $createCoupon();
+
+        $response = gqlQuery(
+            'mutation { deleteCoupon(input: {id: "/api/rest/v2/coupons/' . $id . '"}) { coupon { id } } }',
+            [],
+            adminToken(),
+        );
+
+        expect($response['json']['errors'] ?? [])->toBeEmpty()
+            ->and(apiGet("/api/rest/v2/coupons/{$id}", adminToken())['status'])->toBe(404);
+    });
+
+    it('deletes a coupon that the id names as a plain ID', function () use ($createCoupon): void {
+        $id = $createCoupon();
+
+        $response = gqlQuery(
+            'mutation { deleteCoupon(input: {id: "' . $id . '"}) { coupon { id } } }',
+            [],
+            adminToken(),
+        );
+
+        expect($response['json']['errors'] ?? [])->toBeEmpty()
+            ->and(apiGet("/api/rest/v2/coupons/{$id}", adminToken())['status'])->toBe(404);
+    });
+
+});

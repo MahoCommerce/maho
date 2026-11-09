@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Checkout\Api;
 
 use ApiPlatform\Metadata\Operation;
+use Mage\Customer\Api\CustomAttributes;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Bundle\SecurityBundle\Security;
 use Maho\ApiPlatform\Service\StoreContext;
@@ -402,6 +403,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $addressData = $this->cartService->mapAddressInput($args);
         $this->cartService->assertCompleteAddressInput($addressData);
+        CustomAttributes::applyToCartAddress($quote->getShippingAddress(), $args['customAttributes'] ?? null);
         $quote = $this->cartService->setShippingAddress($quote, $addressData);
 
         return $this->cartMapper->mapQuoteToCart($quote);
@@ -419,8 +421,13 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $addressData = $sameAsShipping ? [] : $this->cartService->mapAddressInput($args);
-        if (!$sameAsShipping) {
+        if ($sameAsShipping) {
+            foreach (array_keys(\Maho\ApiPlatform\Service\CustomAttributes::userDefined('customer_address')) as $code) {
+                $quote->getBillingAddress()->setData($code, $quote->getShippingAddress()->getData($code));
+            }
+        } else {
             $this->cartService->assertCompleteAddressInput($addressData);
+            CustomAttributes::applyToCartAddress($quote->getBillingAddress(), $args['customAttributes'] ?? null);
         }
         $quote = $this->cartService->setBillingAddress($quote, $addressData, $sameAsShipping);
 
