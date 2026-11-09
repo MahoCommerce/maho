@@ -307,4 +307,19 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
 
         return null;
     }
+
+    /**
+     * Ask the CAPTCHA module of the store to check the token in $data['captchaToken']. A service calls this for the
+     * API only: Maho_Captcha checks a storefront form before its controller runs.
+     *
+     * @param array<array-key, mixed> $data the fields of the request
+     * @throws Mage_Core_Exception_Input with an error on captcha_token when the CAPTCHA module refuses the token
+     */
+    public function assertCaptcha(array $data): void
+    {
+        $error = $this->verifyCaptcha($data);
+        if ($error !== null) {
+            throw new Mage_Core_Exception_Input()->addError('captcha_token', $error);
+        }
+    }
 }

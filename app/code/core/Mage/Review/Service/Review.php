@@ -76,7 +76,7 @@ class Mage_Review_Service_Review
             throw new Mage_Core_Exception_Forbidden($helper->__('Only registered customers can write reviews.'));
         }
         if ($channel === Channel::Api) {
-            $this->verifyApiCaptcha($captchaToken);
+            Mage::helper('apiplatform')->assertCaptcha(['captchaToken' => $captchaToken]);
         }
         $this->checkRateLimits($storeId, $customerId);
         $product = $this->getProduct((int) $review->getEntityPkValue(), $storeId);
@@ -199,19 +199,6 @@ class Mage_Review_Service_Review
     {
         if (!array_key_exists((int) $statusId, Mage::helper('review')->getReviewStatuses())) {
             $errors->addError('status_id', Mage::helper('review')->__('Please select a valid status.'));
-        }
-    }
-
-    /**
-     * Ask the CAPTCHA module of the store to check $captchaToken. Maho_Captcha observes this event for the API.
-     *
-     * @throws Mage_Core_Exception_Input when the CAPTCHA module refuses the token
-     */
-    private function verifyApiCaptcha(?string $captchaToken): void
-    {
-        $error = Mage::helper('apiplatform')->verifyCaptcha(['captchaToken' => $captchaToken]);
-        if ($error !== null) {
-            throw new Mage_Core_Exception_Input()->addError('captcha_token', $error);
         }
     }
 

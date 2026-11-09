@@ -24,6 +24,7 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Tests\Helpers\AdminApiParity;
 use Tests\Helpers\CaptchaStub;
 
 uses(Tests\MahoFrontendTestCase::class);
@@ -478,6 +479,18 @@ describe('the CAPTCHA', function () {
         expect($api['status'])->toBe(422)
             ->and($api['fields'])->toBe(['captchaToken'])
             ->and(newsletterParitySubscriber((string) $this->customer->getEmail())->getId())->toBeNull();
+    });
+
+    it('asks no CAPTCHA of an admin token, as the admin asks none', function () {
+        $captcha = CaptchaStub::install();
+        $email = newsletterParityEmail();
+        $request = SymfonyRequest::create('/api/rest/v2/newsletter/subscribe', 'POST', server: ['CONTENT_TYPE' => 'application/json']);
+        $data = new NewsletterSubscription();
+        $data->email = $email;
+
+        new NewsletterProcessor(AdminApiParity::adminSecurity())->process($data, new Post(name: 'subscribe_rest'), [], ['request' => $request]);
+        expect(newsletterParitySubscriber($email)->getStatus())->toBe(Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED)
+            ->and($captcha->checks)->toBe([]);
     });
 
     it('does not ask the CAPTCHA on the account page', function () {

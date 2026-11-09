@@ -669,7 +669,7 @@ curl -X PUT /api/rest/v2/revocation-requests/1234 \
 
 The API, the footer form and the newsletter page of the customer account use the same rules. An empty or invalid `email` gives a 422 with an entry in `details.errors`. A guest gets the same answer for an address that is already subscribed as for a new one. The limit `system/rate_limit/newsletter_subscribe` counts the subscriptions of one client and of one address on the API and the footer form together, and `system/rate_limit/newsletter_unsubscribe` counts the unsubscriptions of the API and the account page. A client over a limit gets a 429 with a `Retry-After` header. A customer token for a customer that does not exist gives a 404.
 
-`POST /newsletter/subscribe` and the `subscribeNewsletter` mutation use the same CAPTCHA as the footer form, for a guest and for a customer token. When the CAPTCHA of the store is on, send the solved token in `captchaToken`. A missing or refused token gives a 422 with an entry for `captchaToken` in `details.errors`. `GET /contact/config` gives the provider and the challenge URL for the widget (see [Contact](#contact)).
+`POST /newsletter/subscribe` and the `subscribeNewsletter` mutation use the same CAPTCHA as the footer form, for a guest and for a customer token. When the CAPTCHA of the store is on, send the solved token in `captchaToken`. An admin token, or a service token with a `newsletter` permission, needs no token, because the admin asks no CAPTCHA. A missing or refused token gives a 422 with an entry for `captchaToken` in `details.errors`. `GET /contact/config` gives the provider and the challenge URL for the widget (see [Contact](#contact)).
 
 ---
 

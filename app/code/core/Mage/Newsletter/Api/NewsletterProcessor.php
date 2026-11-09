@@ -57,7 +57,7 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
         $email = (string) ($data->email ?: ($input['email'] ?? ''));
         $captchaToken = $data->captchaToken ?? (isset($input['captchaToken']) ? (string) $input['captchaToken'] : null);
         $subscriber = $customerId === null
-            ? $service->subscribe($email, $storeId, null, \Mage_Newsletter_Model_Channel::Api, $captchaToken)
+            ? $service->subscribe($email, $storeId, null, $this->getGuestChannel(), $captchaToken)
             : $service->subscribeCustomer($customerId, $storeId, \Mage_Newsletter_Model_Channel::Api, $captchaToken);
         $confirmationPending = $service->isConfirmationPending($subscriber, $customerId, $storeId);
         $message = $confirmationPending
@@ -76,6 +76,14 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
         $dto->confirmationRequired = $confirmationPending;
         $dto->message = $subscriber->getIsStatusChanged() ? $message : 'You are already subscribed to the newsletter.';
         return $dto;
+    }
+
+    /**
+     * An admin token or a service token with access to the newsletter is the admin on the API, which asks no CAPTCHA.
+     */
+    private function getGuestChannel(): \Mage_Newsletter_Model_Channel
+    {
+        return $this->hasBackendAccess('newsletter') ? \Mage_Newsletter_Model_Channel::Admin : \Mage_Newsletter_Model_Channel::Api;
     }
 
     private function unsubscribe(): NewsletterSubscription
