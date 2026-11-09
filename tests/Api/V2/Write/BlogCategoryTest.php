@@ -17,7 +17,26 @@ declare(strict_types=1);
  * @group write
  */
 
+const BLOG_CATEGORY_TEST_ENABLED = 'blog/general/enable_categories';
+
+/**
+ * Turn "Enable Categories" on or off for the store, for the API server too. It is off by default.
+ */
+function setBlogCategoriesEnabled(bool $enabled): void
+{
+    \Mage::getModel('core/config')->saveConfig(BLOG_CATEGORY_TEST_ENABLED, $enabled ? '1' : '0', 'default', 0);
+    \Mage::app()->getCache()->cleanType('config');
+}
+
+beforeAll(function (): void {
+    \Mage::app();
+    // A read without a backend token follows the storefront switch, so the store must show the categories
+    setBlogCategoriesEnabled(true);
+});
+
 afterAll(function (): void {
+    \Mage::getModel('core/config')->deleteConfig(BLOG_CATEGORY_TEST_ENABLED, 'default', 0);
+    \Mage::app()->getCache()->cleanType('config');
     foreach ($GLOBALS['_test_blog_categories'] ?? [] as $id) {
         try {
             $write = Mage::getSingleton('core/resource')->getConnection('core_write');
@@ -282,6 +301,28 @@ describe('Blog Category Backend Reads (REST)', function (): void {
         expect(array_column(getItems($list), 'id'))->toContain($categoryId);
 
         expect(apiGet('/api/rest/v2/blog-categories?scope=all')['status'])->toBe(401);
+    });
+
+    it('answers 404 to a read without a backend token when the store does not show the categories', function (): void {
+        $token = serviceToken(['blog-categories/write']);
+        $create = apiPost('/api/rest/v2/blog-categories', [
+            'name' => 'Test Hidden Category',
+            'urlKey' => 'test-pest-hidden-category',
+        ], $token);
+        expect($create['status'])->toBeIn([200, 201]);
+        $categoryId = (int) $create['json']['id'];
+        trackBlogCategory($categoryId);
+
+        setBlogCategoriesEnabled(false);
+        try {
+            $public = apiGet("/api/rest/v2/blog-categories/{$categoryId}");
+            $backend = apiGet("/api/rest/v2/blog-categories/{$categoryId}", $token);
+        } finally {
+            setBlogCategoriesEnabled(true);
+        }
+
+        expect($public['status'])->toBe(404)
+            ->and($backend['status'])->toBe(200);
     });
 
 });

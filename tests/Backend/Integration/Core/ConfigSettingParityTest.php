@@ -111,15 +111,17 @@ afterEach(function (): void {
 });
 
 it('reloads the configuration after a save on every transport', function (): void {
+    // The sample data sets the name for each website, so read the admin store, which takes the default value
+    $adminStore = Mage_Core_Model_App::ADMIN_STORE_ID;
     configParityAdmin('general', 'store_information', 'name', 'Admin Name');
-    expect(Mage::getStoreConfig(CONFIG_PARITY_NAME))->toBe('Admin Name');
+    expect(Mage::getStoreConfig(CONFIG_PARITY_NAME, $adminStore))->toBe('Admin Name');
 
     expect(configParityApi('PUT', CONFIG_PARITY_NAME, ['value' => 'Api Name'])['status'])->toBe(200)
-        ->and(Mage::getStoreConfig(CONFIG_PARITY_NAME))->toBe('Api Name');
+        ->and(Mage::getStoreConfig(CONFIG_PARITY_NAME, $adminStore))->toBe('Api Name');
 
     $cli = configParityCli(new ConfigSet(), ['path' => CONFIG_PARITY_NAME, 'value' => 'Cli Name', '--scope' => 'default', '--scope-id' => 0]);
     expect($cli['code'])->toBe(Command::SUCCESS)
-        ->and(Mage::getStoreConfig(CONFIG_PARITY_NAME))->toBe('Cli Name');
+        ->and(Mage::getStoreConfig(CONFIG_PARITY_NAME, $adminStore))->toBe('Cli Name');
 });
 
 it('encrypts a secret on every transport', function (): void {

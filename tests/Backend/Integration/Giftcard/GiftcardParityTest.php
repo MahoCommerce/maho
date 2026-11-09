@@ -66,7 +66,7 @@ function giftcardParityCartBalance(string $code): array
 
 function giftcardParityCard(string $suffix, array $data = []): Maho_Giftcard_Model_Giftcard
 {
-    $giftcard = Mage::getModel('giftcard/giftcard')->addData(['code' => GIFTCARD_PARITY_PREFIX . $suffix, 'balance' => 25.0] + $data);
+    $giftcard = Mage::getModel('giftcard/giftcard')->addData(['code' => GIFTCARD_PARITY_PREFIX . $suffix] + $data + ['balance' => 25.0]);
     $giftcard->setWebsiteIds([(int) Mage::app()->getStore()->getWebsiteId()]);
     return Mage::getService('giftcard/giftcard')->save($giftcard);
 }

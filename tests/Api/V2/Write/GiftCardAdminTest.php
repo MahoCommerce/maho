@@ -95,7 +95,8 @@ describe('GET /api/rest/v2/giftcards/{id} (admin read)', function (): void {
             'websiteIds' => [99999],
         ], adminToken());
 
-        expect($response['status'])->toBe(422);
+        expect($response['status'])->toBe(422)
+            ->and($response['json']['details']['errors'] ?? [])->toBe([['field' => 'websiteIds', 'message' => 'Unknown website ID: 99999.']]);
     });
 
     it('rejects website id 0 on create instead of scoping to the admin website', function (): void {
@@ -125,7 +126,8 @@ describe('GET /api/rest/v2/giftcards/{id} (admin read)', function (): void {
             'websiteId' => 99999,
         ], adminToken());
 
-        expect($response['status'])->toBe(422);
+        expect($response['status'])->toBe(422)
+            ->and($response['json']['details']['errors'] ?? [])->toBe([['field' => 'websiteIds', 'message' => 'Unknown website ID: 99999.']]);
     });
 
     it('deduplicates repeated websiteIds on create instead of failing on the junction key', function (): void {
