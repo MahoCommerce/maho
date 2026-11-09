@@ -169,24 +169,6 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
         $this->_redirectReferer();
     }
 
-    #[Maho\Config\Route('/admin/system_store/deleteWebsite')]
-    public function deleteWebsiteAction(): void
-    {
-        $this->_renderDeletePage('website', Mage::helper('core')->__('Website'), 'website', Mage::helper('core')->__('Delete Website'));
-    }
-
-    #[Maho\Config\Route('/admin/system_store/deleteGroup')]
-    public function deleteGroupAction(): void
-    {
-        $this->_renderDeletePage('group', Mage::helper('core')->__('Store'), 'store', Mage::helper('core')->__('Delete Store'));
-    }
-
-    #[Maho\Config\Route('/admin/system_store/deleteStore')]
-    public function deleteStoreAction(): void
-    {
-        $this->_renderDeletePage('store', Mage::helper('core')->__('Store View'), 'store view', Mage::helper('core')->__('Delete Store View'));
-    }
-
     #[Maho\Config\Route('/admin/system_store/deleteWebsitePost')]
     public function deleteWebsitePostAction(): void
     {
@@ -203,41 +185,6 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
     public function deleteStorePostAction(): void
     {
         $this->_deleteItem('store', Mage::helper('core')->__('The store view has been deleted.'), Mage::helper('core')->__('Unable to delete store view. Please, try again later.'));
-    }
-
-    /**
-     * Show the confirmation page before the delete of the $type with the ID of the item_id parameter.
-     */
-    protected function _renderDeletePage(string $type, string $typeTitle, string $noticeType, string $title): void
-    {
-        $this->_title($this->__('System'))
-             ->_title($this->__('Stores'))
-             ->_title($title);
-
-        $itemId = (int) $this->getRequest()->getParam('item_id');
-        try {
-            $model = $this->loadItem($type, $itemId);
-            $this->storeService()->validateDelete($model);
-        } catch (Mage_Core_Exception_NoSuchEntity $e) {
-            $this->_getSession()->addError($e->getMessage());
-            $this->_redirect('*/*/');
-            return;
-        } catch (Mage_Core_Exception $e) {
-            $this->_getSession()->addError($e->getMessage());
-            $this->_redirect('*/*/edit' . ucfirst($type), [$type . '_id' => $itemId]);
-            return;
-        }
-
-        $this->_addDeletionNotice($noticeType);
-
-        $this->_initAction()
-            ->_addBreadcrumb($title, $title)
-            ->_addContent($this->getLayout()->createBlock('adminhtml/system_store_delete')
-                ->setFormActionUrl($this->getUrl('*/*/delete' . ucfirst($type) . 'Post'))
-                ->setBackUrl($this->getUrl('*/*/edit' . ucfirst($type), [$type . '_id' => $itemId]))
-                ->setStoreTypeTitle($typeTitle)
-                ->setDataObject($model))
-            ->renderLayout();
     }
 
     /**
@@ -279,19 +226,5 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
     protected function storeService(): Mage_Core_Service_Store
     {
         return Mage::getService('core/store');
-    }
-
-    /**
-     * Add notification on deleting store / store view / website
-     *
-     * @param string $typeTitle
-     * @return $this
-     */
-    protected function _addDeletionNotice($typeTitle)
-    {
-        $this->_getSession()->addNotice(
-            Mage::helper('core')->__('Deleting a %1$s will not delete the information associated with the %1$s (e.g. categories, products, etc.), but the %1$s will not be able to be restored. It is suggested that you create a database backup before deleting the %1$s.', $typeTitle),
-        );
-        return $this;
     }
 }
