@@ -141,15 +141,50 @@ class Mage_Core_Service_Config
         int $scopeId = 0,
         bool $allowUndeclared = false,
     ): void {
+        $this->saveAll([[$path, $value, $scope, $scopeId]], $allowUndeclared);
+    }
+
+    /**
+     * Save each value of $values in order, as save() does. Then reload the configuration and tell the observers
+     * once for each section and scope that changed, so an import of many values does not do it for each value.
+     *
+     * @param iterable<array{0: string, 1: ?string, 2: string, 3: int}> $values the path, the value, the scope and
+     *                                                                         the scope ID of each value
+     * @throws Mage_Core_Exception_NoSuchEntity when no field declares a path and $allowUndeclared is false
+     * @throws Mage_Core_Exception_Input when a scope does not exist or a field does not show at it
+     * @throws Mage_Core_Exception when a backend model refuses a value
+     */
+    public function saveAll(iterable $values, bool $allowUndeclared = false): void
+    {
+        $changes = [];
+        foreach ($values as [$path, $value, $scope, $scopeId]) {
+            $field = $this->assertWritable($path, $scope, $scopeId, $allowUndeclared);
+            Mage::getModel('adminhtml/config_data')->saveValue($path, $value, $scope, $scopeId);
+            $section = $field['section'] ?? explode('/', $path)[0];
+            $changes["{$section}/{$scope}/{$scopeId}"] = [$section, $scope, $scopeId];
+        }
+        foreach ($changes as [$section, $scope, $scopeId]) {
+            $this->afterChange($section, ...$this->scopeCodes($scope, $scopeId));
+        }
+    }
+
+    /**
+     * Check that $path can be saved at the scope, and return its field. Return null for a path that no field
+     * declares when $allowUndeclared.
+     *
+     * @return FieldInfo|null
+     * @throws Mage_Core_Exception_NoSuchEntity when no field declares the path and $allowUndeclared is false
+     * @throws Mage_Core_Exception_Input when the scope does not exist or the field does not show at it
+     */
+    public function assertWritable(string $path, string $scope, int $scopeId, bool $allowUndeclared = false): ?array
+    {
         $field = $allowUndeclared ? $this->findField($path) : $this->getField($path);
         $this->assertScope($scope, $scopeId);
         if ($field !== null && !$this->isShownAtScope($field, $scope)) {
             throw new Mage_Core_Exception_Input()
                 ->addError('scope', Mage::helper('core')->__("Field '%s' cannot be set at scope '%s'", $path, $scope));
         }
-
-        Mage::getModel('adminhtml/config_data')->saveValue($path, $value, $scope, $scopeId);
-        $this->afterChange($field['section'] ?? explode('/', $path)[0], ...$this->scopeCodes($scope, $scopeId));
+        return $field;
     }
 
     /**

@@ -61,7 +61,7 @@ it('saves values by scope code and resolves macros', function (): void {
         ['catalog/frontend/imp_store_url', '{{store_url:imp_cfg}}', 'default', ''],
     ]);
 
-    $result = (new Config())->import($path);
+    $result = (new Config())->import($path, ['undeclared' => true]);
     expect($result->updated)->toBe(5);
 
     $websiteId = (int) Mage::getModel('core/website')->load('imp_cfg', 'code')->getId();
@@ -79,7 +79,7 @@ it('saves values by scope code and resolves macros', function (): void {
     expect($read('catalog/frontend/imp_swatch_ids', 'default', 0))->toBe($expected);
     expect($read('catalog/frontend/imp_store_url', 'default', 0))->toBe(Mage::app()->getStore('imp_cfg')->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK));
 
-    (new Config())->import($path);
+    (new Config())->import($path, ['undeclared' => true]);
     $count = Mage::getResourceModel('core/config')->getReadConnection()->fetchOne(
         Mage::getResourceModel('core/config')->getReadConnection()->select()
             ->from(Mage::getSingleton('core/resource')->getTableName('core_config_data'), 'COUNT(*)')
@@ -98,7 +98,7 @@ it('resolves a store url macro against the web rows of the same file', function 
         ['web/unsecure/base_link_url', 'https://imp-cfg.example/shop/', 'stores', 'imp_cfg'],
     ]);
 
-    (new Config())->import($path);
+    (new Config())->import($path, ['undeclared' => true]);
     unlink($path);
 
     $value = Mage::getResourceModel('core/config')->getReadConnection()->fetchOne(
@@ -181,6 +181,27 @@ it('saves the value of a field whose backend model reads only an upload', functi
         Mage::getModel('core/config')->deleteConfig('sales/identity/logo', 'default', 0);
         Mage::app()->getCache()->cleanType('config');
     }
+});
+
+it('refuses a path that no field declares, with its line, and imports it with the undeclared option', function (): void {
+    $path = configCsv([['path', 'value'], ['general/store_information/name', 'Kept'], ['catalog/frontend/imp_undeclared', 'x']]);
+
+    expect(fn() => (new Config())->validate($path))
+        ->toThrow(RowException::class, "line 3: path 'catalog/frontend/imp_undeclared' is not a field of System > Configuration");
+
+    $result = (new Config())->import($path, ['undeclared' => true]);
+    expect($result->updated)->toBe(2)
+        ->and(Mage::getConfig()->getNode('default/catalog/frontend/imp_undeclared') !== false)->toBeTrue();
+
+    Mage::getConfig()->deleteConfig('catalog/frontend/imp_undeclared');
+    unlink($path);
+});
+
+it('refuses a field at a scope where the admin does not show it', function (): void {
+    $path = configCsv([['path', 'value', 'scope', 'scope_code'], ['admin/security/twofa_required', '0', 'stores', 'default']]);
+
+    expect(fn() => (new Config())->validate($path))->toThrow(RowException::class, "line 2: Field 'admin/security/twofa_required' cannot be set at scope 'stores'");
+    unlink($path);
 });
 
 it('rejects unknown scopes, codes and macros before writing', function (): void {
