@@ -165,3 +165,14 @@ it('reads the MySQL adapter sql_mode from its config before it connects', functi
     expect($adapter->getSessionSqlMode())->toBe('NO_BACKSLASH_ESCAPES')
         ->and($split->invoke($adapter, "SELECT 'a\\'; SELECT 2"))->toHaveCount(2);
 });
+
+it('keeps the BEGIN ... END body of a SQLite trigger in one statement', function () {
+    $trigger = "CREATE TEMP TRIGGER t_ai AFTER INSERT ON t BEGIN UPDATE t SET a = 1; UPDATE t SET b = 'end;'; END";
+
+    expect(StatementSplitter::split("{$trigger}; SELECT 1", 'sqlite'))->toBe([$trigger, 'SELECT 1'])
+        ->and(StatementSplitter::split("/* c */ {$trigger};", 'sqlite'))->toBe(["/* c */ {$trigger}"])
+        ->and(StatementSplitter::split('CREATE TRIGGER t_ai AFTER INSERT ON t BEGIN SELECT legend; END; SELECT 1', 'sqlite'))
+        ->toBe(['CREATE TRIGGER t_ai AFTER INSERT ON t BEGIN SELECT legend; END', 'SELECT 1'])
+        ->and(StatementSplitter::split('CREATE TABLE t (a INT); SELECT 1', 'sqlite'))->toHaveCount(2)
+        ->and(StatementSplitter::split("{$trigger}; SELECT 1", 'pgsql'))->toHaveCount(4);
+});

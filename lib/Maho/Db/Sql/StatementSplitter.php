@@ -58,6 +58,11 @@ final class StatementSplitter
 
         while ($i < $length) {
             if (substr_compare($sql, $delimiter, $i, strlen($delimiter)) === 0) {
+                if ($engine === 'sqlite' && self::isOpenSqliteTrigger($statement)) {
+                    $statement .= $delimiter;
+                    $i += strlen($delimiter);
+                    continue;
+                }
                 if ($hasSql) {
                     $statements[] = trim($statement);
                 }
@@ -107,6 +112,7 @@ final class StatementSplitter
                 $depth = 1;
                 $end = $i + 2;
                 while ($end < $length && $depth > 0) {
+                    $end += strcspn($sql, '/*', $end);
                     if ($engine === 'pgsql' && substr($sql, $end, 2) === '/*') {
                         $depth++;
                         $end += 2;
@@ -117,6 +123,7 @@ final class StatementSplitter
                         $end++;
                     }
                 }
+                $end = min($end, $length);
                 $statement .= substr($sql, $i, $end - $i);
                 $hasSql = $hasSql || $executableMysqlComment;
                 $i = $end;
@@ -150,22 +157,25 @@ final class StatementSplitter
                     $backslashEscapes = true;
                 }
 
+                $quoteStops = $backslashEscapes ? '\\' . $closingQuote : $closingQuote;
                 $i++;
                 while ($i < $length) {
-                    if ($backslashEscapes && $sql[$i] === '\\' && $i + 1 < $length) {
+                    $i += strcspn($sql, $quoteStops, $i);
+                    if ($i >= $length) {
+                        break;
+                    }
+                    if ($sql[$i] === '\\') {
                         $i += 2;
                         continue;
                     }
-                    if ($sql[$i] === $closingQuote) {
-                        if ($closingQuote !== ']' && ($sql[$i + 1] ?? '') === $closingQuote) {
-                            $i += 2;
-                            continue;
-                        }
-                        $i++;
-                        break;
+                    if ($closingQuote !== ']' && ($sql[$i + 1] ?? '') === $closingQuote) {
+                        $i += 2;
+                        continue;
                     }
                     $i++;
+                    break;
                 }
+                $i = min($i, $length);
                 $statement .= substr($sql, $start, $i - $start);
                 $hasSql = true;
                 continue;
@@ -181,5 +191,20 @@ final class StatementSplitter
         }
 
         return $statements;
+    }
+
+    /**
+     * Whether $statement is a SQLite CREATE TRIGGER whose BEGIN ... END body is still open.
+     * As in sqlite3_complete(), the word END before a semicolon closes the body.
+     */
+    private static function isOpenSqliteTrigger(string $statement): bool
+    {
+        if (!preg_match('#^(?:\s+|--[^\n]*\n?|/\*.*?\*/)*CREATE\s+(?:TEMP(?:ORARY)?\s+)?TRIGGER\b#is', $statement)) {
+            return false;
+        }
+
+        $statement = rtrim($statement);
+        return strcasecmp(substr($statement, -3), 'END') !== 0
+            || preg_match('/[A-Za-z0-9_$\x80-\xff]/', substr($statement, -4, 1)) === 1;
     }
 }

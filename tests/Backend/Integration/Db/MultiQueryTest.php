@@ -47,7 +47,7 @@ it('runs each statement of a batch with semicolons in values and comments', func
         INSERT INTO {t} (id, val) VALUES (3, '/* ; */');
 
         SQL;
-    [$engineSql, $engineValues] = match (true) {
+    [$engineSql, $engineValues, $engineStatements] = match (true) {
         $this->adapter instanceof Mysql => [<<<'SQL'
             # hash; comment
             INSERT INTO {t} (id, val) VALUES (4, 'C:\\');
@@ -55,21 +55,26 @@ it('runs each statement of a batch with semicolons in values and comments', func
             INSERT INTO {t} (id, val) VALUES (5, 'p;q')//
             DELIMITER ;
             INSERT INTO {t} (id, val) VALUES (6, 'r');
-            SQL, [4 => 'C:\\', 5 => 'p;q', 6 => 'r']],
+            SQL, [4 => 'C:\\', 5 => 'p;q', 6 => 'r'], 3],
         $this->adapter instanceof Pgsql => [<<<'SQL'
             INSERT INTO {t} (id, val) VALUES (4, 'C:\');
             INSERT INTO {t} (id, val) VALUES (5, $$p;q$$);
             INSERT INTO {t} (id, val) VALUES (6, E'r\';s');
-            SQL, [4 => 'C:\\', 5 => 'p;q', 6 => "r';s"]],
+            SQL, [4 => 'C:\\', 5 => 'p;q', 6 => "r';s"], 3],
         default => [<<<'SQL'
             INSERT INTO {t} (id, val) VALUES (4, 'C:\');
             INSERT INTO {t} (id, [val]) VALUES (5, 'p;q');
-            SQL, [4 => 'C:\\', 5 => 'p;q']],
+            CREATE TRIGGER {t}_ai AFTER INSERT ON {t} WHEN NEW.id = 6 BEGIN
+                UPDATE {t} SET val = val || ';t' WHERE id = NEW.id;
+                UPDATE {t} SET val = val || '!' WHERE id = NEW.id;
+            END;
+            INSERT INTO {t} (id, val) VALUES (6, 'v');
+            SQL, [4 => 'C:\\', 5 => 'p;q', 6 => 'v;t!'], 4],
     };
 
     $result = $this->adapter->multiQuery(str_replace('{t}', $this->tableName, $common . $engineSql));
 
-    expect($result)->toHaveCount(3 + count($engineValues))
+    expect($result)->toHaveCount(3 + $engineStatements)
         ->and(multiQueryValues($this))->toEqual([1 => 'a;b', 2 => "it's; fine", 3 => '/* ; */'] + $engineValues);
 });
 
