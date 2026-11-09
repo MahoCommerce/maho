@@ -229,7 +229,7 @@ class VarienRulesForm {
                     .map(option => option.text);
 
                 const str = selectedOptions.join(', ');
-                label.innerHTML = str !== '' ? str : '...';
+                label.textContent = str !== '' ? str : '...';
             }
 
             const inputElem = container.querySelector('input.input-text');
@@ -241,7 +241,7 @@ class VarienRulesForm {
                 } else if (str.length > 100) {
                     str = str.substr(0, 100) + '...';
                 }
-                label.innerHTML = xssFilter(str);
+                label.textContent = str;
             }
         } else {
             const elem = container.querySelector('.element-value-changer');
