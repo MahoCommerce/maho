@@ -19,6 +19,10 @@ beforeEach(function () {
     $session = new Session(new MockArraySessionStorage());
     $session->start();
     Mage::register(Mage_Core_Model_Session_Abstract::REGISTRY_KEY, $session);
+    // An earlier test can leave a quote or the cart_was_updated flag in $_SESSION, which the session singletons share
+    $_SESSION = [];
+    Mage::unregister('_singleton/checkout/session');
+    Mage::unregister('_singleton/checkout/type_onepage');
     Mage::app()->setCurrentStore(Mage::app()->getDefaultStoreView());
 });
 
