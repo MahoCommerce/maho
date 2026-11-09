@@ -471,7 +471,7 @@ class Mage_Checkout_Service_Cart
     /**
      * Add item to cart
      *
-     * @deprecated since 26.11.1, use getProductBySku() and addProduct()
+     * @deprecated since 27.1, use getProductBySku() and addProduct()
      * @param array $options Custom options (option_id => value), or the structured keys of the GraphQL input
      * @param float|null $customPrice Unit price override in quote currency (caller must authorize)
      */

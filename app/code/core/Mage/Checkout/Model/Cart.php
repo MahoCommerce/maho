@@ -381,8 +381,8 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
     {
         try {
             $this->_getService()->removeItem($this->getQuote(), (int) $itemId);
-        } catch (Mage_Core_Exception_NoSuchEntity) {
-            // The line is not in the cart any more, so the outcome is the same
+        } catch (Mage_Core_Exception_NoSuchEntity|Mage_Core_Exception_Input) {
+            // The cart has no such line, so the outcome is the same
         }
         return $this;
     }
