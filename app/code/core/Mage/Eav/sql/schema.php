@@ -470,6 +470,42 @@ return function (SchemaEditor $schema): void {
 
     $schema->addTable(
         Table::editor()
+            ->setUnquotedName('eav_attribute_group_label')
+            ->addColumn(Schema::column('label_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('attribute_group_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('value', Types::STRING, length: 255))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('label_id')->create())
+            ->addIndex(
+                Index::editor()
+                    ->setType(IndexType::UNIQUE)
+                    ->setUnquotedColumnNames('attribute_group_id', 'store_id'),
+            )
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('attribute_group_id')
+                    ->setUnquotedReferencedTableName('eav_attribute_group')
+                    ->setUnquotedReferencedColumnNames('attribute_group_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Eav Attribute Group Label')
+            ->create(),
+    );
+
+    $schema->addTable(
+        Table::editor()
             ->setUnquotedName('eav_form_type')
             ->addColumn(Schema::column('type_id', Types::SMALLINT, unsigned: true, autoincrement: true))
             ->addColumn(Schema::column('code', Types::STRING, length: 64))

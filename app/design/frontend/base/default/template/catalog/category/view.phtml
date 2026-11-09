@@ -30,6 +30,8 @@
     </div>
     <?php endif ?>
 
+<?= $this->getChildHtml('category.attributes') ?>
+
 <?php if ($this->isContentMode()): ?>
     <div class="category-cms std"><?= $this->getCmsBlockHtml() ?></div>
 

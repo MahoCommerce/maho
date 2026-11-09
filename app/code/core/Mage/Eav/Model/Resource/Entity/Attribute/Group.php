@@ -65,8 +65,55 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Group extends Mage_Core_Model_Res
                 $attribute->save();
             }
         }
+        if (is_array($object->getData('store_labels'))) {
+            $this->saveStoreLabels((int) $object->getId(), $object->getData('store_labels'));
+        }
 
         return parent::_afterSave($object);
+    }
+
+    /**
+     * Return the labels of group $groupId for each store view, by store id.
+     *
+     * @return array<int, string>
+     */
+    public function getStoreLabels(int $groupId): array
+    {
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from($this->getTable('eav/attribute_group_label'), ['store_id', 'value'])
+            ->where('attribute_group_id = ?', $groupId);
+        $labels = [];
+        foreach ($adapter->fetchPairs($select) as $storeId => $value) {
+            $labels[(int) $storeId] = (string) $value;
+        }
+        return $labels;
+    }
+
+    /**
+     * Replace the labels of group $groupId. A label is plain text. An empty label, the admin store
+     * and a store that does not exist are left out.
+     *
+     * @param array<int|string, mixed> $labels
+     */
+    public function saveStoreLabels(int $groupId, array $labels): static
+    {
+        $storeIds = array_map(intval(...), array_keys(Mage::app()->getStores()));
+        $rows = [];
+        foreach ($labels as $storeId => $value) {
+            $value = mb_substr(trim(strip_tags((string) $value)), 0, 255);
+            if ($value !== '' && in_array((int) $storeId, $storeIds, true)) {
+                $rows[] = ['attribute_group_id' => $groupId, 'store_id' => (int) $storeId, 'value' => $value];
+            }
+        }
+
+        $adapter = $this->_getWriteAdapter();
+        $table = $this->getTable('eav/attribute_group_label');
+        $adapter->delete($table, ['attribute_group_id = ?' => $groupId]);
+        if ($rows) {
+            $adapter->insertMultiple($table, $rows);
+        }
+        return $this;
     }
 
     /**

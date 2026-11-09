@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Mage\Customer\Api;
 
+use Maho\ApiPlatform\Metadata\CustomAttributeSchema;
 use Maho\Config\ApiResource;
 use Maho\ApiPlatform\Metadata\EnumSource;
 use Maho\ApiPlatform\Metadata\ValueLists;
@@ -151,6 +152,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
                 'firstName' => ['type' => 'String'],
                 'lastName' => ['type' => 'String'],
                 'email' => ['type' => 'String'],
+                'customAttributes' => ['type' => 'Iterable', 'description' => 'Values of the custom attributes of the Customer Account Edit form, keyed by attribute code'],
             ],
             description: 'Update authenticated customer profile',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('customers/write')",
@@ -264,6 +266,10 @@ class Customer extends CrudResource
     #[ApiProperty(writable: false)]
     public ?string $updatedAt = null;
 
+    /** @var array<string, mixed>|null */
+    #[ApiProperty(description: 'Values of the user-defined customer attributes, keyed by attribute code. A multiselect is a list of option IDs, a dropdown an option ID, a Yes/No a boolean, a date Y-m-d. An admin or API token reads and writes the attributes of the Admin Customer form. A customer or a guest reads and writes the attributes that the storefront forms show: Customer Registration for a registration, Customer Account Edit for an update. The set of the customer group and the mode of the website apply. GET /custom-attributes?entityType=customer lists the attributes and their options', extraProperties: [CustomAttributeSchema::KEY => 'customer'])]
+    public ?array $customAttributes = null;
+
     /** @var string|null Write-only password for registration */
     #[ApiProperty(writable: true, readable: false)]
     public ?string $password = null;
@@ -285,5 +291,8 @@ class Customer extends CrudResource
         }
         // Derived only; the confirmation token itself is never exposed
         $dto->isConfirmed = !$model->getData('confirmation');
+        if ($model instanceof \Mage_Customer_Model_Customer) {
+            $dto->customAttributes = CustomAttributes::readCustomer($model);
+        }
     }
 }

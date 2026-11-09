@@ -201,9 +201,31 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('customer_group_id', Types::SMALLINT, unsigned: true, autoincrement: true))
             ->addColumn(Schema::column('customer_group_code', Types::STRING, length: 32))
             ->addColumn(Schema::column('tax_class_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('customer_attribute_set_id', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('customer_address_attribute_set_id', Types::SMALLINT, unsigned: true, notNull: false))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('customer_group_id')
+                    ->create(),
+            )
+            ->addIndex(Index::editor()->setUnquotedColumnNames('customer_attribute_set_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('customer_address_attribute_set_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('customer_attribute_set_id')
+                    ->setUnquotedReferencedTableName('eav_attribute_set')
+                    ->setUnquotedReferencedColumnNames('attribute_set_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::SET_NULL)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('customer_address_attribute_set_id')
+                    ->setUnquotedReferencedTableName('eav_attribute_set')
+                    ->setUnquotedReferencedColumnNames('attribute_set_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::SET_NULL)
                     ->create(),
             )
             ->setComment('Customer Group')

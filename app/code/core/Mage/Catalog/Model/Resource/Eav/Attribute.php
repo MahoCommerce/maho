@@ -177,6 +177,36 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
         return is_null($storeId) ? null : (int) $storeId;
     }
 
+    #[\Override]
+    public function getAdminPageSettings(): ?Mage_Eav_Model_Entity_Attribute_AdminPageSettings
+    {
+        if ($this->getEntityType()->getEntityTypeCode() !== Mage_Catalog_Model_Category::ENTITY) {
+            return null;
+        }
+        $helper = Mage::helper('catalog');
+        return new Mage_Eav_Model_Entity_Attribute_AdminPageSettings(
+            acl: 'system/attributes/catalog_category',
+            title: $helper->__('Category Attributes'),
+            setsTitle: $helper->__('Category Attribute Sets'),
+            mainTab: 'adminhtml/catalog_category_attribute_edit_tab_main',
+            allowedTags: explode(',', (string) Mage::getStoreConfig('system/catalog/frontend/allowed_html_tags_list')),
+            addToDefaultSet: true,
+        );
+    }
+
+    #[\Override]
+    protected function _getInputTypes(): array
+    {
+        $types = parent::_getInputTypes();
+        if ($this->getEntityType()->getEntityTypeCode() === Mage_Catalog_Model_Category::ENTITY) {
+            $types['image'] = [
+                'label' => Mage::helper('catalog')->__('Image'),
+                'backend_model' => 'catalog/category_attribute_backend_image',
+            ];
+        }
+        return $types;
+    }
+
     /**
      * Retrieve apply to products array
      * Return empty array if applied to all products

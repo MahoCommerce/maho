@@ -40,6 +40,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
             'country_id' => Mage::helper('customersegmentation')->__('Country'),
             'telephone' => Mage::helper('customersegmentation')->__('Telephone'),
         ];
+        $attributes = $this->addCustomAttributeOptions($attributes, 'customer_address');
 
         asort($attributes);
         $this->setAttributeOption($attributes);
@@ -61,6 +62,10 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
     #[\Override]
     public function getInputType(): string
     {
+        $custom = $this->getSelectedCustomAttribute('customer_address');
+        if ($custom) {
+            return $this->getCustomInputType($custom);
+        }
         return match ($this->getAttribute()) {
             'country_id', 'region' => 'select',
             default => 'string',
@@ -70,6 +75,10 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
     #[\Override]
     public function getValueElementType(): string
     {
+        $custom = $this->getSelectedCustomAttribute('customer_address');
+        if ($custom) {
+            return $this->getCustomValueElementType($custom);
+        }
         return match ($this->getAttribute()) {
             'country_id', 'region' => 'select',
             default => 'text',
@@ -77,8 +86,22 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
     }
 
     #[\Override]
+    public function getOperatorSelectOptions(): array
+    {
+        $custom = $this->getSelectedCustomAttribute('customer_address');
+        if ($custom && ($customOperators = $this->getCustomOperatorOptions($custom)) !== null) {
+            return $customOperators;
+        }
+        return parent::getOperatorSelectOptions();
+    }
+
+    #[\Override]
     public function getValueSelectOptions(): array
     {
+        $custom = $this->getSelectedCustomAttribute('customer_address');
+        if ($custom) {
+            return $this->getCustomValueOptions($custom);
+        }
         $options = [];
         $options = match ($this->getAttribute()) {
             'country_id' => Mage::getResourceModel('directory/country_collection')->toOptionArray(),
@@ -97,6 +120,11 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
 
         if ($attribute === 'region') {
             return $this->buildRegionCondition($adapter, $operator, $value);
+        }
+        $custom = $this->getSelectedCustomAttribute('customer_address');
+        if ($custom) {
+            return 'e.entity_id IN (SELECT ca.parent_id FROM ' . $this->getCustomerAddressTable() . ' ca WHERE '
+                . $this->buildCustomAttributeCondition($adapter, $custom, 'ca.entity_id') . ')';
         }
 
         return $this->buildAddressAttributeCondition($adapter, $attribute, $operator, $value);

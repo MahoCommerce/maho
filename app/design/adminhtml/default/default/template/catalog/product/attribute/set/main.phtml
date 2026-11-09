@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isReadOnly: <?= var_export((bool) $this->getIsReadOnly(), true) ?>,
         saveUrl: '<?= $this->getSaveUrl() ?>',
         deleteUrl: '<?= $this->getDeleteUrl() ?>',
+        groupDialog: <?= $this->getGroupDialogJson() ?>,
         canDeleteSet: () => {
             const response = prompt(Translator.translate('All products of this set will be deleted! Type "confirm" to proceed.'));
             return response === 'confirm';
