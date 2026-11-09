@@ -213,6 +213,11 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
         $collection = $this->_getProductCollection();
         $collection->setPageSize($this->_batchSize)->setCurPage($page);
 
+        // Do not let a request for a page past the current end revisit the last page.
+        if ($collection->getCurPage() !== $page) {
+            return 0;
+        }
+
         $productIds = $collection->getAllIds();
         if (!empty($productIds)) {
             $this->_mapper->preloadParentMappings($productIds);
