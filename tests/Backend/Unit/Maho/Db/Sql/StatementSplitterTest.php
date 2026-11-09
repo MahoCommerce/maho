@@ -119,3 +119,49 @@ it('rejects an engine that it has no grammar for', function () {
     expect(fn() => StatementSplitter::split('SELECT 1', 'postgres'))
         ->toThrow(InvalidArgumentException::class, 'Unsupported database engine: postgres');
 });
+
+it('reads MySQL quoted values by the session sql_mode', function () {
+    expect(StatementSplitter::split("SELECT 'a\\'; SELECT 2", 'mysql', 'STRICT_TRANS_TABLES,NO_BACKSLASH_ESCAPES'))
+        ->toBe(["SELECT 'a\\'", 'SELECT 2'])
+        ->and(StatementSplitter::split("SELECT 'a\\'; SELECT 2", 'mysql', 'STRICT_TRANS_TABLES'))
+        ->toBe(["SELECT 'a\\'; SELECT 2"])
+        ->and(StatementSplitter::split('SELECT "a\\"; SELECT 2', 'mysql', 'ANSI_QUOTES'))
+        ->toBe(['SELECT "a\\"', 'SELECT 2'])
+        ->and(StatementSplitter::split('SELECT "a\\"; SELECT 2', 'mysql'))
+        ->toBe(['SELECT "a\\"; SELECT 2'])
+        ->and(StatementSplitter::split("SELECT 'a\\'; SELECT 2", 'pgsql', 'NO_BACKSLASH_ESCAPES'))
+        ->toBe(["SELECT 'a\\'", 'SELECT 2']);
+});
+
+it('changes the MySQL statement terminator at a DELIMITER line', function () {
+    $sql = "DROP TRIGGER IF EXISTS t1;\n"
+        . "DELIMITER //\n"
+        . "CREATE TRIGGER t1 BEFORE INSERT ON t FOR EACH ROW BEGIN SET NEW.a = 1; SET NEW.b = 2; END//\n"
+        . "delimiter \$\$\n"
+        . "SELECT 'x\$\$y' \$\$\n"
+        . "DELIMITER ;\n"
+        . 'SELECT 1; SELECT 2';
+
+    expect(StatementSplitter::split($sql, 'mysql'))->toBe([
+        'DROP TRIGGER IF EXISTS t1',
+        'CREATE TRIGGER t1 BEFORE INSERT ON t FOR EACH ROW BEGIN SET NEW.a = 1; SET NEW.b = 2; END',
+        "SELECT 'x\$\$y'",
+        'SELECT 1',
+        'SELECT 2',
+    ])
+        ->and(StatementSplitter::split("SELECT 1 DELIMITER //\n; SELECT 2", 'mysql'))
+        ->toBe(['SELECT 1 DELIMITER //', 'SELECT 2'])
+        ->and(StatementSplitter::split("DELIMITER //\nSELECT 1; SELECT 2", 'pgsql'))
+        ->toBe(["DELIMITER //\nSELECT 1", 'SELECT 2']);
+});
+
+it('reads the MySQL adapter sql_mode from its config before it connects', function () {
+    $adapter = new ReflectionClass(Mysql::class)->newInstanceWithoutConstructor();
+    $split = new ReflectionMethod(Mysql::class, '_splitMultiQuery');
+
+    expect($split->invoke($adapter, "SELECT 'a\\'; SELECT 2"))->toHaveCount(1);
+
+    new ReflectionProperty(Mysql::class, '_config')->setValue($adapter, ['sql_mode' => 'NO_BACKSLASH_ESCAPES']);
+    expect($adapter->getSessionSqlMode())->toBe('NO_BACKSLASH_ESCAPES')
+        ->and($split->invoke($adapter, "SELECT 'a\\'; SELECT 2"))->toHaveCount(2);
+});

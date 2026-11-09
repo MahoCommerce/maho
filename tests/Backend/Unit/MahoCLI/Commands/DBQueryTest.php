@@ -193,5 +193,6 @@ it('refuses an unsupported engine on the framework connection', function () {
     $output = new Symfony\Component\Console\Output\BufferedOutput();
     $status = dbQueryReflect('executeViaAdapter', $output, 'SELECT 1', 'postgres', false);
 
-    expect($status)->toBe(Symfony\Component\Console\Command\Command::FAILURE);
+    expect($status)->toBe(Symfony\Component\Console\Command\Command::FAILURE)
+        ->and($output->fetch())->toContain('Unsupported database engine: postgres');
 });

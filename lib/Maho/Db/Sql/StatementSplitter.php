@@ -18,16 +18,38 @@ final class StatementSplitter
 {
     public const array ENGINES = ['mysql', 'pgsql', 'sqlite'];
 
+    private const string WHITESPACE = " \t\n\r\v\f";
+
     /**
+     * Characters that can start a quote, a comment or a dollar-quoted value, per engine.
+     */
+    private const array SPECIAL_CHARS = [
+        'mysql' => "'\"`-/#",
+        'pgsql' => "'\"`-/\$",
+        'sqlite' => "'\"`-/[",
+    ];
+
+    /**
+     * $sqlMode is the MySQL session sql_mode. NO_BACKSLASH_ESCAPES and ANSI_QUOTES change
+     * how MySQL reads a quoted value. The other engines ignore it.
+     *
+     * A MySQL line "DELIMITER x" sets the statement terminator to x, as in the mysql client.
+     *
      * @return list<string>
      * @throws \InvalidArgumentException if $engine is not in ENGINES
      */
-    public static function split(string $sql, string $engine): array
+    public static function split(string $sql, string $engine, string $sqlMode = ''): array
     {
         if (!in_array($engine, self::ENGINES, true)) {
             throw new \InvalidArgumentException("Unsupported database engine: {$engine}");
         }
 
+        $modes = $engine === 'mysql' ? explode(',', strtoupper($sqlMode)) : [];
+        $noBackslashEscapes = in_array('NO_BACKSLASH_ESCAPES', $modes, true);
+        $ansiQuotes = in_array('ANSI_QUOTES', $modes, true);
+
+        $delimiter = ';';
+        $stopChars = self::SPECIAL_CHARS[$engine] . $delimiter[0];
         $statements = [];
         $statement = '';
         $hasSql = false;
@@ -35,16 +57,34 @@ final class StatementSplitter
         $i = 0;
 
         while ($i < $length) {
-            $char = $sql[$i];
-            $next = $sql[$i + 1] ?? '';
-
-            if ($char === ';') {
+            if (substr_compare($sql, $delimiter, $i, strlen($delimiter)) === 0) {
                 if ($hasSql) {
                     $statements[] = trim($statement);
                 }
                 $statement = '';
                 $hasSql = false;
-                $i++;
+                $i += strlen($delimiter);
+                continue;
+            }
+
+            // Before the first SQL of a statement, take only whitespace, so that DELIMITER is seen.
+            $run = $hasSql ? strcspn($sql, $stopChars, $i) : strspn($sql, self::WHITESPACE, $i);
+            if ($run > 0) {
+                $statement .= substr($sql, $i, $run);
+                $i += $run;
+                continue;
+            }
+
+            $char = $sql[$i];
+            $next = $sql[$i + 1] ?? '';
+
+            if ($engine === 'mysql' && !$hasSql && ($char === 'D' || $char === 'd')
+                && preg_match('/\GDELIMITER[ \t]+(\S+)[^\n]*\n?/i', $sql, $match, 0, $i)
+            ) {
+                $delimiter = $match[1];
+                $stopChars = self::SPECIAL_CHARS[$engine] . $delimiter[0];
+                $statement = '';
+                $i += strlen($match[0]);
                 continue;
             }
 
@@ -88,9 +128,9 @@ final class StatementSplitter
                 && ($i === 0 || !preg_match('/[A-Za-z0-9_$\x80-\xff]/', $sql[$i - 1]))
                 && preg_match('/\G\$([A-Za-z_\x80-\xff][A-Za-z_0-9\x80-\xff]*)?\$/', $sql, $match, 0, $i)
             ) {
-                $delimiter = $match[0];
-                $end = strpos($sql, $delimiter, $i + strlen($delimiter));
-                $end = $end === false ? $length : $end + strlen($delimiter);
+                $dollarTag = $match[0];
+                $end = strpos($sql, $dollarTag, $i + strlen($dollarTag));
+                $end = $end === false ? $length : $end + strlen($dollarTag);
                 $statement .= substr($sql, $i, $end - $i);
                 $hasSql = true;
                 $i = $end;
@@ -100,7 +140,8 @@ final class StatementSplitter
             if ($char === "'" || $char === '"' || $char === '`' || ($engine === 'sqlite' && $char === '[')) {
                 $closingQuote = $char === '[' ? ']' : $char;
                 $start = $i;
-                $backslashEscapes = $engine === 'mysql' && $char !== '`';
+                $backslashEscapes = $engine === 'mysql' && !$noBackslashEscapes
+                    && $char !== '`' && !($ansiQuotes && $char === '"');
                 // PostgreSQL only gives backslashes escape meaning in E'...' strings.
                 if ($engine === 'pgsql' && $char === "'" && $i > 0
                     && ($sql[$i - 1] === 'E' || $sql[$i - 1] === 'e')
@@ -131,9 +172,7 @@ final class StatementSplitter
             }
 
             $statement .= $char;
-            if (!ctype_space($char)) {
-                $hasSql = true;
-            }
+            $hasSql = true;
             $i++;
         }
 

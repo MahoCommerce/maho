@@ -652,7 +652,19 @@ class Mysql extends AbstractPdoAdapter
      */
     protected function _splitMultiQuery($sql)
     {
-        return \Maho\Db\Sql\StatementSplitter::split($sql, 'mysql');
+        return \Maho\Db\Sql\StatementSplitter::split($sql, 'mysql', $this->getSessionSqlMode());
+    }
+
+    /**
+     * The sql_mode of the session, which decides how MySQL reads a backslash or a double quote.
+     */
+    public function getSessionSqlMode(): string
+    {
+        if ($this->_connection === null) {
+            // _connect() sets this mode when it opens the session.
+            return (string) ($this->_config['sql_mode'] ?? '');
+        }
+        return (string) $this->fetchOne('SELECT @@SESSION.sql_mode');
     }
 
     /**

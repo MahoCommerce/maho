@@ -85,11 +85,11 @@ trait DatabaseCliTrait
     }
 
     /**
-     * Whether the SQL string contains more than one statement.
+     * Whether the SQL string contains more than one statement. $sqlMode is the MySQL session sql_mode.
      */
-    private function containsMultipleStatements(string $sql, string $engine): bool
+    private function containsMultipleStatements(string $sql, string $engine, string $sqlMode = ''): bool
     {
-        return count($this->splitSqlStatements($sql, $engine)) > 1;
+        return count($this->splitSqlStatements($sql, $engine, $sqlMode)) > 1;
     }
 
     /**
@@ -98,9 +98,9 @@ trait DatabaseCliTrait
      *
      * @return list<string>
      */
-    private function splitSqlStatements(string $sql, string $engine): array
+    private function splitSqlStatements(string $sql, string $engine, string $sqlMode = ''): array
     {
-        return \Maho\Db\Sql\StatementSplitter::split($sql, $engine);
+        return \Maho\Db\Sql\StatementSplitter::split($sql, $engine, $sqlMode);
     }
 
     private function createTempMySQLConfig(
