@@ -220,9 +220,11 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
         } catch (Mage_Core_Exception $e) {
             // A message on the exception means that the product refused the buy request: the shopper fixes it on the product page
             if ($e->getMessages()) {
+                // A variant goes to the cart as its parent, so the shopper fixes the options on the page of the parent
+                $cartProduct = $this->_getService()->getCartProduct($product, $request, (int) $this->getQuote()->getStoreId());
                 $this->getCheckoutSession()->setRedirectUrl($product->hasOptionsValidationFail()
-                    ? $product->getUrlModel()->getUrl($product, ['_query' => ['startcustomization' => 1]])
-                    : $product->getProductUrl());
+                    ? $cartProduct->getUrlModel()->getUrl($cartProduct, ['_query' => ['startcustomization' => 1]])
+                    : $cartProduct->getProductUrl());
                 if (!$e->getMessages(Mage_Core_Model_Message::NOTICE)) {
                     $this->getCheckoutSession()->setUseNotice(false);
                 } elseif ($this->getCheckoutSession()->getUseNotice() === null) {

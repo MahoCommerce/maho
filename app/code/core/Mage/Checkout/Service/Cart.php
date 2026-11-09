@@ -259,7 +259,7 @@ class Mage_Checkout_Service_Cart
         $storeId = (int) $quote->getStoreId();
         $sku = (string) $product->getSku();
         $this->assertSellable($product, $storeId, $sku);
-        $product = $this->getConfigurableParent($product, $buyRequest, $storeId, $sku) ?? $product;
+        $product = $this->getCartProduct($product, $buyRequest, $storeId);
         $this->assertAvailable($product, $storeId, $actor, $sku);
         $this->prepareOptions($product, $buyRequest);
 
@@ -571,36 +571,37 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Return the configurable parent of $product when $product is a simple product that the storefront does not show,
-     * and point $buyRequest at the parent with the values of $product. Return null for any other product.
+     * Return the product that goes to the cart for $product: the configurable parent when $product is a simple product
+     * that the storefront does not show, else $product. For a parent, point $buyRequest at it with the values of
+     * $product. A caller that adds a product without addProduct() uses it, so that a variant goes to the cart as its
+     * parent on every path.
      *
      * @throws \Mage_Core_Exception when the parent is disabled or is not in the website of $storeId
      */
-    private function getConfigurableParent(
+    public function getCartProduct(
         \Mage_Catalog_Model_Product $product,
         \Maho\DataObject $buyRequest,
         int $storeId,
-        string $sku,
-    ): ?\Mage_Catalog_Model_Product {
+    ): \Mage_Catalog_Model_Product {
         if ($product->getTypeId() !== \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
             || (int) $product->getVisibility() !== \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE
         ) {
-            return null;
+            return $product;
         }
 
         $parentId = \Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild((int) $product->getId())[0] ?? null;
         if (!$parentId) {
-            return null;
+            return $product;
         }
         $parent = \Mage::getModel('catalog/product')->setStoreId($storeId)->load($parentId);
         if (!$parent->getId()) {
-            return null;
+            return $product;
         }
         $superAttributes = $this->getSuperAttributesForSimple($parent, $product);
         if ($superAttributes === []) {
-            return null;
+            return $product;
         }
-        $this->assertSellable($parent, $storeId, $sku);
+        $this->assertSellable($parent, $storeId, (string) $product->getSku());
 
         $buyRequest->setData('product', (int) $parent->getId());
         $buyRequest->setData('super_attribute', $superAttributes);

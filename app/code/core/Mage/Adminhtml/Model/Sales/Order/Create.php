@@ -800,7 +800,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                 throw $e;
             }
             $item = $this->getQuote()->addProductAdvanced(
-                $product,
+                $service->getCartProduct($product, $config, (int) $this->getQuote()->getStoreId()),
                 $config,
                 Mage_Catalog_Model_Product_Type_Abstract::PROCESS_MODE_LITE,
             );

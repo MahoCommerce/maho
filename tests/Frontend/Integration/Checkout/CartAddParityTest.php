@@ -136,6 +136,28 @@ function cartAddParityLines(Mage_Sales_Model_Quote $quote): array
     return $lines;
 }
 
+/**
+ * Give $product a required text option for the time of $call, then remove it and restore the option flags.
+ */
+function cartAddParityWithRequiredOption(Mage_Catalog_Model_Product $product, callable $call): mixed
+{
+    $resource = Mage::getSingleton('core/resource');
+    $write = $resource->getConnection('core_write');
+    $table = $resource->getTableName('catalog/product');
+    $flags = $write->fetchRow($write->select()->from($table, ['has_options', 'required_options'])->where('entity_id = ?', $product->getId()));
+    $option = Mage::getModel('catalog/product_option')->setProductId($product->getId())->setStoreId(0)->addData([
+        'title' => 'Engraving', 'type' => 'field', 'is_require' => 1, 'price' => 0, 'price_type' => 'fixed', 'sort_order' => 0,
+    ]);
+    $option->save();
+    $write->update($table, ['has_options' => 1, 'required_options' => 1], ['entity_id = ?' => $product->getId()]);
+    try {
+        return $call();
+    } finally {
+        $option->delete();
+        $write->update($table, $flags, ['entity_id = ?' => $product->getId()]);
+    }
+}
+
 beforeEach(function () {
     Mage::unregister(Mage_Core_Model_Session_Abstract::REGISTRY_KEY);
     $session = new Session(new MockArraySessionStorage());
@@ -207,6 +229,20 @@ it('adds a variant as its configurable parent on both transports', function () {
     ];
     expect(cartAddParityLines($webCart))->toBe($lines)
         ->and(cartAddParityLines($apiCart))->toBe($lines);
+});
+
+it('opens the page of the parent when the parent of a variant misses a required option', function () {
+    $variant = cartAddParityVariant();
+    if ($variant === null) {
+        $this->markTestSkipped('The store has no configurable product with a variant that the storefront does not show');
+    }
+    [$child, $parent] = $variant;
+    $web = cartAddParityWithRequiredOption($parent, fn() => cartAddViaWeb($this->carts[0], $child));
+
+    // The configurable product gives its own message for any missing option
+    expect($web['errors'])->toBe(["Please specify the product's option(s)."])
+        ->and($web['redirect'])->toBe((string) $parent->getProductUrl())
+        ->and(cartAddParityLines($this->carts[0]))->toBe([]);
 });
 
 it('raises a new line below the minimum sale qty to the minimum on both transports', function () {
