@@ -547,6 +547,11 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
             $response->setError(true);
             $response->setAttribute($e->getErrors()[0]['field'] ?? null);
             $response->setMessage(Mage::helper('core')->escapeHtml($e->getMessage()));
+        } catch (Mage_Core_Exception_Conflict $e) {
+            // The validation gives a conflict only for a SKU that another product has
+            $response->setError(true);
+            $response->setAttribute('sku');
+            $response->setMessage(Mage::helper('core')->escapeHtml($e->getMessage()));
         } catch (Mage_Core_Exception $e) {
             $response->setError(true);
             $response->setMessage($e->getMessage());

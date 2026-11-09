@@ -348,7 +348,7 @@ class Mage_Catalog_Service_Product
      * Check the SKU, the name, the type, the attribute set, then the backend of each attribute and the date ranges.
      *
      * @throws Mage_Core_Exception_Input
-     * @throws Mage_Core_Exception_Conflict
+     * @throws Mage_Core_Exception_Conflict when another product has the SKU
      */
     public function validate(Product $product): void
     {
