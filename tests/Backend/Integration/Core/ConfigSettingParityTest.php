@@ -185,14 +185,21 @@ it('refuses a scope that does not exist on the CLI', function (): void {
         ->and($cli['output'])->toContain('The website with the ID 999999 does not exist.');
 });
 
-describe('kept difference: the CLI writes a path that no field declares', function (): void {
-    it('saves an undeclared path from the CLI and refuses it on the API', function (): void {
+describe('a path that no field declares', function (): void {
+    it('is refused on the API and the CLI, as in the admin, and saved on the CLI with --undeclared', function (): void {
         $path = 'dev/parity/undeclared';
-        $cli = configParityCli(new ConfigSet(), ['path' => $path, 'value' => 'x', '--scope' => 'default', '--scope-id' => 0]);
         $api = configParityApi('PUT', $path, ['value' => 'y']);
+        $cli = configParityCli(new ConfigSet(), ['path' => $path, 'value' => 'x', '--scope' => 'default', '--scope-id' => 0]);
+        $stored = configParityStored($path, 'default', 0);
+        $forced = configParityCli(new ConfigSet(), ['path' => $path, 'value' => 'x', '--scope' => 'default', '--scope-id' => 0, '--undeclared' => true]);
+        $forcedStored = configParityStored($path, 'default', 0);
         Mage::getConfig()->deleteConfig($path);
 
-        expect($cli['code'])->toBe(Command::SUCCESS)
-            ->and($api['status'])->toBe(404);
+        expect($api['status'])->toBe(404)
+            ->and($cli['code'])->toBe(Command::FAILURE)
+            ->and($cli['output'])->toContain("Configuration setting '{$path}' not found")
+            ->and($stored)->toBeFalse()
+            ->and($forced['code'])->toBe(Command::SUCCESS)
+            ->and($forcedStored)->toBe('x');
     });
 });

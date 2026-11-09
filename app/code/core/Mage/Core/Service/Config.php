@@ -127,16 +127,22 @@ class Mage_Core_Service_Config
     }
 
     /**
-     * Save $value at one scope through the backend model of the field, so a secret is encrypted.
-     * A path that no field declares is saved as it is.
+     * Save $value at one scope through the backend model of the field, so a secret is encrypted. A path that no
+     * field of system.xml declares is refused, as in the admin, unless $allowUndeclared: then it is saved as it is.
      *
+     * @throws Mage_Core_Exception_NoSuchEntity when no field declares the path and $allowUndeclared is false
      * @throws Mage_Core_Exception_Input when the scope does not exist or the field does not show at it
      * @throws Mage_Core_Exception when the backend model refuses the value
      */
-    public function save(string $path, ?string $value, string $scope = ConfigData::SCOPE_DEFAULT, int $scopeId = 0): void
-    {
+    public function save(
+        string $path,
+        ?string $value,
+        string $scope = ConfigData::SCOPE_DEFAULT,
+        int $scopeId = 0,
+        bool $allowUndeclared = false,
+    ): void {
+        $field = $allowUndeclared ? ($this->getFields()[$path] ?? null) : $this->getField($path);
         $this->assertScope($scope, $scopeId);
-        $field = $this->getFields()[$path] ?? null;
         if ($field !== null && !$this->isShownAtScope($field, $scope)) {
             throw new Mage_Core_Exception_Input()
                 ->addError('scope', Mage::helper('core')->__("Field '%s' cannot be set at scope '%s'", $path, $scope));
