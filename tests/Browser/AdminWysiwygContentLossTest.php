@@ -477,7 +477,12 @@ it('keeps the animation of an inline svg through the editor', function () {
 
     expect($page->script('window.tiptapEditors.get("block_content").isTiptapActive() ? 1 : 0'))->toBe(1);
 
+    // The edit makes the save write the markup of the editor, not the original source.
+    $page->script('window.tiptapEditors.get("block_content").editor.chain().focus("end").insertContent("<p>Tail</p>").run();');
     $page->script('window.tiptapEditors.get("block_content").turnOff();');
 
-    expect($page->script('document.getElementById("block_content").value'))->toContain('<animate');
+    expect($page->script('document.getElementById("block_content").value'))
+        ->toContain('Tail')
+        ->toContain('<animate')
+        ->toContain('attributeName="r"');
 });
