@@ -64,16 +64,15 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         if ($columns === []) {
             throw new Mage_Core_Exception('At least one stock field must be provided');
         }
-        $data = self::stock()->prepare($columns);
         $productId = self::products()->getIdBySku($sku)
             ?? throw new \Mage_Core_Exception_NoSuchEntity("Product not found for SKU: {$sku}");
         self::products()->assertIdsInStores([$productId], $this->requireUser()->getAllowedStoreIds());
 
         $item = self::stock()->getByProductId($productId);
         $previousQty = (float) $item->getQty();
-        self::stock()->update($item, $data);
+        self::stock()->update($item, $columns);
 
-        return $this->toDto($sku, $item, $previousQty, $data);
+        return $this->toDto($sku, $item, $previousQty, $columns);
     }
 
     /**
@@ -96,7 +95,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
             }
             $productId = self::products()->getIdBySku($sku)
                 ?? throw new Mage_Core_Exception("Item at index {$index}: Product not found for SKU: {$sku}");
-            $changes[$index] = ['sku' => $sku, 'id' => $productId, 'data' => self::stock()->prepare(self::stock()->toColumns($item))];
+            $changes[$index] = ['sku' => $sku, 'id' => $productId, 'data' => self::stock()->toColumns($item)];
         }
         self::products()->assertIdsInStores(array_column($changes, 'id'), $this->requireUser()->getAllowedStoreIds());
 

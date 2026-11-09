@@ -99,8 +99,8 @@ it('turns off the configuration of manage stock when a value comes without its f
         ->and($api['status'])->toBe(200)
         ->and((int) stockParityItem($forAdmin)->getData('use_config_manage_stock'))->toBe(0)
         ->and((int) stockParityItem($forApi)->getData('use_config_manage_stock'))->toBe(0)
-        ->and(stockParityItem($forAdmin)->getManageStock())->toBeFalse()
-        ->and(stockParityItem($forApi)->getManageStock())->toBeFalse();
+        ->and((int) stockParityItem($forAdmin)->getManageStock())->toBe(0)
+        ->and((int) stockParityItem($forApi)->getManageStock())->toBe(0);
 });
 
 it('refuses a negative quantity on both transports', function () {
