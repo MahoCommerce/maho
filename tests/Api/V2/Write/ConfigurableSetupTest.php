@@ -120,7 +120,9 @@ describe('Configurable Setup, Child Management', function (): void {
         // Verify removed
         $final = apiGet("/api/rest/v2/products/{$configId}/configurable");
         $finalData = getItems($final);
-        expect($finalData[0]['childProductIds'])->not->toContain($childId);
+        expect($finalData[0]['childProductIds'])->not->toContain($childId)
+            ->and(Mage::getResourceSingleton('catalog/product_type_configurable')->getChildrenIds($configId, false)[0])
+            ->not->toHaveKey($childId);
     });
 
 });
