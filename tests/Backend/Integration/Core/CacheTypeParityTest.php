@@ -149,11 +149,11 @@ beforeEach(function () {
     $session->start();
     Mage::register(Mage_Core_Model_Session_Abstract::REGISTRY_KEY, $session);
 
-    $this->options = cacheStoredOptions();
+    $this->cacheOptions = cacheStoredOptions();
 });
 
 afterEach(function () {
-    cacheRestoreOptions($this->options);
+    cacheRestoreOptions($this->cacheOptions);
 });
 
 describe('disable', function () {
@@ -168,9 +168,9 @@ describe('disable', function () {
             // The next request reads the options from the database, not a stale copy in the cache
             ->and(Mage::app()->getCache()->load(Mage_Core_Model_Cache::OPTIONS_CACHE_ID))->toBeFalse();
     })->with([
-        'admin' => fn() => fn() => expect(cacheViaAdmin('massDisable', [CACHE_PARITY_TYPE]))->toBe(['1 cache type(s) disabled.']),
-        'api' => fn() => fn() => expect(cacheViaApi(new Put(), CACHE_PARITY_TYPE, ['enabled' => false])['body']['enabled'])->toBeFalse(),
-        'cli' => fn() => fn() => expect(cacheViaCli(new CacheDisable()))->toBe(Command::SUCCESS),
+        'admin' => fn() => expect(cacheViaAdmin('massDisable', [CACHE_PARITY_TYPE]))->toBe(['1 cache type(s) disabled.']),
+        'api' => fn() => expect(cacheViaApi(new Put(), CACHE_PARITY_TYPE, ['enabled' => false])['body']['enabled'])->toBeFalse(),
+        'cli' => fn() => expect(cacheViaCli(new CacheDisable()))->toBe(Command::SUCCESS),
     ]);
 });
 
@@ -184,9 +184,9 @@ describe('enable', function () {
             ->and(Mage::app()->useCache(CACHE_PARITY_TYPE))->toBeTrue()
             ->and(Mage::app()->getCache()->load(Mage_Core_Model_Cache::OPTIONS_CACHE_ID))->toBeFalse();
     })->with([
-        'admin' => fn() => fn() => expect(cacheViaAdmin('massEnable', [CACHE_PARITY_TYPE]))->toBe(['1 cache type(s) enabled.']),
-        'api' => fn() => fn() => expect(cacheViaApi(new Put(), CACHE_PARITY_TYPE, ['enabled' => true])['body']['enabled'])->toBeTrue(),
-        'cli' => fn() => fn() => expect(cacheViaCli(new CacheEnable()))->toBe(Command::SUCCESS),
+        'admin' => fn() => expect(cacheViaAdmin('massEnable', [CACHE_PARITY_TYPE]))->toBe(['1 cache type(s) enabled.']),
+        'api' => fn() => expect(cacheViaApi(new Put(), CACHE_PARITY_TYPE, ['enabled' => true])['body']['enabled'])->toBeTrue(),
+        'cli' => fn() => expect(cacheViaCli(new CacheEnable()))->toBe(Command::SUCCESS),
     ]);
 
     it('keeps the types that the request turned off in memory', function () {
@@ -210,8 +210,8 @@ describe('refresh', function () {
         expect(Mage::getService('core/cache')->isInvalidated(CACHE_PARITY_TYPE))->toBeFalse()
             ->and(Mage::app()->getCache()->load('cache_parity_entry'))->toBeFalse();
     })->with([
-        'admin' => fn() => fn() => expect(cacheViaAdmin('massRefresh', [CACHE_PARITY_TYPE]))->toBe(['1 cache type(s) refreshed.']),
-        'api' => fn() => fn() => expect(cacheViaApi(new Post(name: 'cache_type_refresh'), CACHE_PARITY_TYPE)['body']['invalidated'])->toBeFalse(),
+        'admin' => fn() => expect(cacheViaAdmin('massRefresh', [CACHE_PARITY_TYPE]))->toBe(['1 cache type(s) refreshed.']),
+        'api' => fn() => expect(cacheViaApi(new Post(name: 'cache_type_refresh'), CACHE_PARITY_TYPE)['body']['invalidated'])->toBeFalse(),
     ]);
 });
 
@@ -241,8 +241,8 @@ describe('flush', function () {
 
         expect(Mage::app()->getCache()->load('cache_parity_entry'))->toBeFalse();
     })->with([
-        'admin' => fn() => fn() => expect(cacheViaAdmin('flushAll'))->toBe(['The cache storage has been flushed.']),
-        'api' => fn() => fn() => expect(cacheViaApi(new Post(name: 'cache_type_flush_all'))['body']['success'])->toBeTrue(),
-        'cli' => fn() => fn() => expect(cacheViaCli(new CacheFlush()))->toBe(Command::SUCCESS),
+        'admin' => fn() => expect(cacheViaAdmin('flushAll'))->toBe(['The cache storage has been flushed.']),
+        'api' => fn() => expect(cacheViaApi(new Post(name: 'cache_type_flush_all'))['body']['success'])->toBeTrue(),
+        'cli' => fn() => expect(cacheViaCli(new CacheFlush()))->toBe(Command::SUCCESS),
     ]);
 });

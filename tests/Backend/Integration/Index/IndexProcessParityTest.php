@@ -136,11 +136,11 @@ describe('mode', function () {
 
         expect(indexParityProcess()->getMode())->toBe(Mage_Index_Model_Process::MODE_MANUAL);
     })->with([
-        'admin edit' => fn() => fn(int $id) => expect(indexViaAdmin('save', ['process' => $id, 'mode' => 'manual']))
+        'admin edit' => fn(int $id) => expect(indexViaAdmin('save', ['process' => $id, 'mode' => 'manual']))
             ->toBe(['The index has been saved.']),
-        'admin grid' => fn() => fn(int $id) => expect(indexViaAdmin('massChangeMode', ['process' => [$id], 'index_mode' => 'manual']))
+        'admin grid' => fn(int $id) => expect(indexViaAdmin('massChangeMode', ['process' => [$id], 'index_mode' => 'manual']))
             ->toBe(['Total of 1 index(es) have changed index mode.']),
-        'api' => fn() => fn(int $id) => expect(indexViaApi(new Put(), $id, ['mode' => 'manual'])['body']['mode'])->toBe('manual'),
+        'api' => fn(int $id) => expect(indexViaApi(new Put(), $id, ['mode' => 'manual'])['body']['mode'])->toBe('manual'),
     ]);
 
     it('refuses a mode that does not exist with the same message on the admin and the API', function () {
