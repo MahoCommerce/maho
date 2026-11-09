@@ -186,15 +186,26 @@ class Mage_Core_Service_Config
         $helper = Mage::helper('core');
         [$field, $error] = match ($scope) {
             ConfigData::SCOPE_DEFAULT => ['scope_id', $scopeId === 0 ? null : $helper->__('The default scope has the scope ID 0.')],
-            ConfigData::SCOPE_WEBSITES => ['scope_id', Mage::getModel('core/website')->load($scopeId)->getId()
+            ConfigData::SCOPE_WEBSITES => ['scope_id', $this->hasId('core/website', 'website_id', $scopeId)
                 ? null : $helper->__('The website with the ID %d does not exist.', $scopeId)],
-            ConfigData::SCOPE_STORES => ['scope_id', Mage::getModel('core/store')->load($scopeId)->getId()
+            ConfigData::SCOPE_STORES => ['scope_id', $this->hasId('core/store', 'store_id', $scopeId)
                 ? null : $helper->__('The store view with the ID %d does not exist.', $scopeId)],
             default => ['scope', $helper->__('The scope must be default, websites or stores.')],
         };
         if ($error !== null) {
             throw new Mage_Core_Exception_Input()->addError($field, $error);
         }
+    }
+
+    /**
+     * Read all the IDs of $table, because a WHERE with an ID out of the column range fails the query on PostgreSQL.
+     */
+    private function hasId(string $table, string $column, int $id): bool
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $ids = $adapter->fetchCol($adapter->select()->from($resource->getTableName($table), [$column]));
+        return in_array($id, array_map(intval(...), $ids), true);
     }
 
     /**

@@ -88,11 +88,12 @@ class Mage_Catalog_Service_Product
         if ($storeIds === null) {
             return null;
         }
+        // The loaded store views: getStore() queries an unknown ID, and PostgreSQL fails an ID out of the column range
+        $stores = Mage::app()->getStores(true);
         $websiteIds = [];
         foreach ($storeIds as $storeId) {
-            try {
-                $websiteIds[] = (int) Mage::app()->getStore($storeId)->getWebsiteId();
-            } catch (Mage_Core_Model_Store_Exception) {
+            if (isset($stores[$storeId])) {
+                $websiteIds[] = (int) $stores[$storeId]->getWebsiteId();
             }
         }
         return array_values(array_unique($websiteIds));
