@@ -37,8 +37,8 @@ const MahoCaptcha = {
         });
     },
 
-    // Some mobile browsers fire the widget's load event before its methods (getState, verify) are bound to the
-    // element: wait for them, and report an error past one second so that no form waits forever.
+    // Some mobile browsers fire load before the widget has getState() and verify().
+    // Wait up to one second for them, then set the error state.
     onWidgetLoad(attempt = 0) {
         if (typeof this.altchaWidget.getState !== 'function' || typeof this.altchaWidget.verify !== 'function') {
             if (attempt < 50) {
@@ -175,7 +175,7 @@ const MahoCaptcha = {
         if (this.altchaState === null || this.altchaState === 'verifying') {
             return;
         }
-        // onWidgetLoad() gave up on a widget whose methods never bound: answer "not verified" instead of waiting.
+        // The widget has no verify() after onWidgetLoad() stops waiting: answer not verified.
         if (typeof this.altchaWidget.verify !== 'function') {
             this.settleVerification(false);
             return;
