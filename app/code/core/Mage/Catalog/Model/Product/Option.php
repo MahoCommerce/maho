@@ -302,7 +302,10 @@ class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
      */
     public function saveOptions()
     {
-        foreach ($this->getOptions() as $option) {
+        // This model is a singleton, so a list that stays would go into the next product save of the process
+        $options = $this->getOptions();
+        $this->unsetOptions();
+        foreach ($options as $option) {
             $this->setData($option)
                 ->setData('product_id', $this->getProduct()->getId())
                 ->setData('store_id', $this->getProduct()->getStoreId());
