@@ -164,14 +164,11 @@ class Mage_Adminhtml_Permissions_UserController extends Mage_Adminhtml_Controlle
             $this->_redirect('*/*/');
             return;
         }
-        if (Mage::getSingleton('admin/session')->getUser()->getId() == $id) {
-            $session->addError($this->__('You cannot delete your own account.'));
-            $this->_redirect('*/*/edit', ['user_id' => $id]);
-            return;
-        }
-
         try {
-            $this->getService()->delete($this->getService()->getById($id));
+            $this->getService()->delete(
+                $this->getService()->getById($id),
+                (int) Mage::getSingleton('admin/session')->getUser()->getId(),
+            );
             $session->addSuccess($this->__('The user has been deleted.'));
             $this->_redirect('*/*/');
             return;

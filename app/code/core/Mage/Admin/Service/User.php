@@ -96,8 +96,16 @@ class Mage_Admin_Service_User
         $user->setTwofaEnabled(false)->setTwofaSecret(null)->save();
     }
 
-    public function delete(User $user): void
+    /**
+     * Delete $user. $actingUserId is the admin user who makes the request. This user cannot delete the own account.
+     *
+     * @throws Mage_Core_Exception_Conflict when $actingUserId deletes the own account
+     */
+    public function delete(User $user, ?int $actingUserId = null): void
     {
+        if ($actingUserId !== null && $actingUserId === (int) $user->getId()) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('adminhtml')->__('You cannot delete your own account.'));
+        }
         $user->delete();
     }
 }
