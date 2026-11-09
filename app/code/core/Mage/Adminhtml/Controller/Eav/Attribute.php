@@ -45,19 +45,23 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
 
     protected function createAttributeModel(): Mage_Eav_Model_Entity_Attribute
     {
-        /** @var Mage_Eav_Model_Entity_Attribute $model */
-        $model = Mage::getModel($this->getEntityType()->getAttributeModel());
-        return $model->setEntityTypeId((int) $this->getEntityType()->getId());
+        return $this->getAttributeService()->newAttribute((string) $this->getEntityType()->getEntityTypeCode());
+    }
+
+    protected function getAttributeService(): Mage_Eav_Service_Attribute
+    {
+        /** @var Mage_Eav_Service_Attribute */
+        return Mage::getService('eav/attribute');
     }
 
     /**
-     * Return the HTML tags that an option label can keep when the attribute allows HTML on the storefront.
+     * Load the attribute $id of the entity type of the page.
      *
-     * @return list<string>
+     * @throws Mage_Core_Exception_NoSuchEntity
      */
-    protected function getAllowedTags(): array
+    protected function loadAttribute(int $id): Mage_Eav_Model_Entity_Attribute
     {
-        return [];
+        return $this->getAttributeService()->getById($id, (string) $this->getEntityType()->getEntityTypeCode());
     }
 
     /**
@@ -97,19 +101,17 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
     public function editAction(): void
     {
         $id = (int) $this->getRequest()->getParam('attribute_id');
-        $model = $this->createAttributeModel();
-        if ($id) {
-            $model->load($id);
-            if (!$model->getId()) {
-                $this->_getSession()->addError(Mage::helper('eav')->__('This attribute no longer exists.'));
-                $this->_redirect('*/*/');
-                return;
-            }
-            if ((int) $model->getEntityTypeId() !== (int) $this->getEntityType()->getId() || !$this->canEditAttribute($model)) {
-                $this->_getSession()->addError(Mage::helper('eav')->__('This attribute cannot be edited.'));
-                $this->_redirect('*/*/');
-                return;
-            }
+        try {
+            $model = $id ? $this->loadAttribute($id) : $this->createAttributeModel();
+        } catch (Mage_Core_Exception_NoSuchEntity $e) {
+            $this->_getSession()->addError($e->getMessage());
+            $this->_redirect('*/*/');
+            return;
+        }
+        if ($id && !$this->canEditAttribute($model)) {
+            $this->_getSession()->addError(Mage::helper('eav')->__('This attribute cannot be edited.'));
+            $this->_redirect('*/*/');
+            return;
         }
 
         $data = $this->_getSession()->getAttributeData(true);
@@ -160,12 +162,19 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
     public function validateAction(): void
     {
         $response = new \Maho\DataObject(['error' => false]);
+        $errors = [];
+        try {
+            $this->getAttributeService()->validate($this->buildAttribute($this->getRequest()->getPost()));
+        } catch (Mage_Core_Exception_Input $e) {
+            $errors = array_column($e->getErrors(), 'message');
+        } catch (Mage_Core_Exception $e) {
+            $errors = [$e->getMessage()];
+        }
 
-        $attribute = $this->createAttributeModel()
-            ->loadByCode($this->getEntityType()->getId(), (string) $this->getRequest()->getParam('attribute_code'));
-
-        if ($attribute->getId() && !$this->getRequest()->getParam('attribute_id')) {
-            $this->_getSession()->addError(Mage::helper('eav')->__('Attribute with the same code already exists'));
+        if ($errors !== []) {
+            foreach ($errors as $error) {
+                $this->_getSession()->addError($error);
+            }
             $this->_initLayoutMessages('adminhtml/session');
             $response->setError(true);
             $response->setMessage($this->getLayout()->getMessagesBlock()->getGroupedHtml());
@@ -181,11 +190,54 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
             $this->_redirect('*/*/');
             return;
         }
-        $posted = $data;
 
         $session = $this->_getSession();
         $id = (int) $this->getRequest()->getParam('attribute_id');
-        $model = $this->createAttributeModel();
+        try {
+            $model = $this->buildAttribute($data);
+            $this->getAttributeService()->save($model);
+            $model->saveAdminData($data);
+        } catch (Mage_Core_Exception_NoSuchEntity|Mage_Core_Exception_Forbidden $e) {
+            $session->addError($e->getMessage());
+            $this->_redirect('*/*/');
+            return;
+        } catch (Mage_Core_Exception $e) {
+            if ($e instanceof Mage_Core_Exception_Input) {
+                foreach ($e->getErrors() as $error) {
+                    $session->addError($error['message']);
+                }
+            } else {
+                $session->addError($e->getMessage());
+            }
+            $session->setAttributeData($data);
+            $this->_redirect('*/*/edit', ['attribute_id' => $id, '_current' => true]);
+            return;
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $session->addError(Mage::helper('eav')->__('Unable to save the attribute.'));
+            $session->setAttributeData($data);
+            $this->_redirect('*/*/edit', ['attribute_id' => $id, '_current' => true]);
+            return;
+        }
+
+        $session->addSuccess($this->getSavedMessage());
+        $session->setAttributeData(false);
+        $this->redirectAfterSave($model);
+    }
+
+    /**
+     * Return the attribute of the attribute_id parameter, or a new attribute, with the values of the posted form.
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity when the attribute is not an attribute of the entity type of the page
+     * @throws Mage_Core_Exception_Forbidden when the page does not manage the attribute
+     */
+    protected function buildAttribute(array $data): Mage_Eav_Model_Entity_Attribute
+    {
+        $id = (int) $this->getRequest()->getParam('attribute_id');
+        $model = $id ? $this->loadAttribute($id) : $this->createAttributeModel();
+        if ($id && !$this->canEditAttribute($model)) {
+            throw new Mage_Core_Exception_Forbidden(Mage::helper('eav')->__('This attribute cannot be updated.'));
+        }
 
         // The entity type, the storage and the models come from the server, never from the form
         unset(
@@ -200,59 +252,17 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
             $data['frontend_model'],
             $data['attribute_model'],
             $data['data_model'],
+            $data['is_user_defined'],
         );
 
-        if (isset($data['attribute_code'])
-            && !Mage::helper('core')->isValidRegex($data['attribute_code'], '/^(?!event$)[a-z][a-z_0-9]{1,254}$/')
-        ) {
-            $session->addError(Mage::helper('eav')->__('Attribute code is invalid. Please use only letters (a-z), numbers (0-9) or underscore(_) in this field, first character should be a letter. Do not use "event" for an attribute code.'));
-            $this->_redirect('*/*/edit', ['attribute_id' => $id, '_current' => true]);
-            return;
-        }
-
-        if ($id) {
-            $model->load($id);
-            if (!$model->getId()) {
-                $session->addError(Mage::helper('eav')->__('This attribute no longer exists.'));
-                $this->_redirect('*/*/');
-                return;
-            }
-            if ((int) $model->getEntityTypeId() !== (int) $this->getEntityType()->getId() || !$this->canEditAttribute($model)) {
-                $session->addError(Mage::helper('eav')->__('This attribute cannot be updated.'));
-                $this->_redirect('*/*/');
-                return;
-            }
-            $data['backend_model'] = $model->getBackendModel();
-            $data['attribute_code'] = $model->getAttributeCode();
-            $data['is_user_defined'] = $model->getIsUserDefined();
-            $data['frontend_input'] = $model->getFrontendInput();
-        } else {
-            $input = (string) ($data['frontend_input'] ?? '');
-            if (!$this->isValidInputType($input, $model)) {
-                $session->addError(Mage::helper('eav')->__('Input type "%s" not found in the input types list.', $input));
-                $session->setAttributeData($data);
-                $this->_redirect('*/*/edit', ['_current' => true]);
-                return;
-            }
-            $data = array_merge($data, $this->getInputTypeModels($input, $model));
-        }
-
-        if (!$model->getBackendType() && $model->getIsUserDefined() !== false) {
-            $data['backend_type'] = $model->getBackendTypeByInput($data['frontend_input']);
-        }
-
-        $defaultValueField = $model->getDefaultValueByInput($data['frontend_input']);
+        $input = $id ? (string) $model->getFrontendInput() : (string) ($data['frontend_input'] ?? '');
+        $defaultValueField = $model->getDefaultValueByInput($input);
         if ($defaultValueField) {
             $data['default_value'] = $this->getRequest()->getParam($defaultValueField);
         }
+        $data['frontend_label'] = (array) ($data['frontend_label'] ?? []);
 
-        $data = $this->prepareSaveData($model->prepareAdminData($this->filterPostData($data)), $model);
-        $model->addData($data);
-
-        if (!$id) {
-            $model->setEntityTypeId((int) $this->getEntityType()->getId());
-            $model->setIsUserDefined(true);
-        }
+        $model->addData($this->prepareSaveData($model->prepareAdminData($data), $model));
 
         $setId = (int) $this->getRequest()->getParam('set');
         $groupId = (int) $this->getRequest()->getParam('group');
@@ -263,42 +273,7 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
             $model->setAttributeSetId($setId);
             $model->setAttributeGroupId($groupId);
         }
-
-        try {
-            $model->save();
-            $model->saveAdminData($posted);
-        } catch (Exception $e) {
-            $session->addError($e->getMessage());
-            $session->setAttributeData($data);
-            $this->_redirect('*/*/edit', ['attribute_id' => $id, '_current' => true]);
-            return;
-        }
-
-        $session->addSuccess($this->getSavedMessage());
-        // Attribute labels are in the translation cache
-        Mage::app()->cleanCache([Mage_Core_Model_Translate::CACHE_TAG]);
-        $session->setAttributeData(false);
-        $this->redirectAfterSave($model);
-    }
-
-    protected function isValidInputType(string $input, Mage_Eav_Model_Entity_Attribute $model): bool
-    {
-        return isset($model->getInputTypes()[$input]);
-    }
-
-    /**
-     * Return the backend, source and frontend models of an input type.
-     *
-     * @return array<string, string|null>
-     */
-    protected function getInputTypeModels(string $input, Mage_Eav_Model_Entity_Attribute $model): array
-    {
-        $type = $model->getInputTypes()[$input] ?? [];
-        return [
-            'backend_model' => $type['backend_model'] ?? null,
-            'source_model' => $type['source_model'] ?? null,
-            'frontend_model' => $type['frontend_model'] ?? null,
-        ];
+        return $model;
     }
 
     /**
@@ -328,35 +303,6 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
         $this->_redirect('*/*/');
     }
 
-    /**
-     * Strip the HTML tags from the labels and the option labels.
-     */
-    protected function filterPostData(array $data): array
-    {
-        $helper = Mage::helper('core');
-        $data['frontend_label'] = (array) ($data['frontend_label'] ?? []);
-        foreach ($data['frontend_label'] as &$label) {
-            if ($label) {
-                $label = $helper->stripTags($label);
-            }
-        }
-        unset($label);
-
-        if (!empty($data['option']['value']) && is_array($data['option']['value'])) {
-            $allowedTags = !empty($data['is_html_allowed_on_front']) && $this->getAllowedTags()
-                ? sprintf('<%s>', implode('><', $this->getAllowedTags())) : null;
-            $filter = Mage::getSingleton('core/input_filter_maliciousCode');
-            foreach ($data['option']['value'] as $key => $values) {
-                foreach ($values as $storeId => $storeLabel) {
-                    $storeLabel = $helper->stripTags($storeLabel, $allowedTags);
-                    // An allowed tag keeps its attributes, such as onclick
-                    $data['option']['value'][$key][$storeId] = $allowedTags ? $filter->filter($storeLabel) : $storeLabel;
-                }
-            }
-        }
-        return $data;
-    }
-
     public function deleteAction(): void
     {
         $id = (int) $this->getRequest()->getParam('attribute_id');
@@ -366,20 +312,23 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
             return;
         }
 
-        $model = $this->createAttributeModel()->load($id);
-        if ((int) $model->getEntityTypeId() !== (int) $this->getEntityType()->getId() || !$model->getIsUserDefined()) {
-            $this->_getSession()->addError(Mage::helper('eav')->__('This attribute cannot be deleted.'));
+        try {
+            $this->getAttributeService()->delete($this->loadAttribute($id));
+        } catch (Mage_Core_Exception_NoSuchEntity $e) {
+            $this->_getSession()->addError($e->getMessage());
             $this->_redirect('*/*/');
             return;
-        }
-
-        try {
-            $model->delete();
-            $this->_getSession()->addSuccess($this->getDeletedMessage());
-            $this->_redirect('*/*/');
-        } catch (Exception $e) {
+        } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
             $this->_redirect('*/*/edit', ['attribute_id' => $id]);
+            return;
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $this->_getSession()->addError(Mage::helper('eav')->__('Unable to delete the attribute.'));
+            $this->_redirect('*/*/edit', ['attribute_id' => $id]);
+            return;
         }
+        $this->_getSession()->addSuccess($this->getDeletedMessage());
+        $this->_redirect('*/*/');
     }
 }

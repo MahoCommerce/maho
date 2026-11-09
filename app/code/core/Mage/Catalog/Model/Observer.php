@@ -250,28 +250,6 @@ class Mage_Catalog_Model_Observer
     }
 
     /**
-     * Checks whether attribute_code by current module is reserved
-     *
-     * @throws Mage_Core_Exception
-     */
-    #[Maho\Config\Observer('catalog_entity_attribute_save_before')]
-    public function checkReservedAttributeCodes(\Maho\Event\Observer $observer)
-    {
-        /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
-        $attribute = $observer->getEvent()->getAttribute();
-        if (!is_object($attribute)) {
-            return;
-        }
-        /** @var Mage_Catalog_Model_Product $product */
-        $product = Mage::getModel('catalog/product');
-        if ($product->isReservedAttribute($attribute)) {
-            throw new Mage_Core_Exception(
-                Mage::helper('catalog')->__('The attribute code \'%s\' is reserved by system. Please try another attribute code', $attribute->getAttributeCode()),
-            );
-        }
-    }
-
-    /**
      * Add file attribute type to product attributes
      *
      * @return $this

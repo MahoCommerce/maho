@@ -21,7 +21,7 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
     /**
      * List of tags from setting
      */
-    public const XML_PATH_ALLOWED_TAGS = 'system/catalog/frontend/allowed_html_tags_list';
+    public const XML_PATH_ALLOWED_TAGS = Mage_Catalog_Model_Resource_Eav_Attribute::XML_PATH_ALLOWED_HTML_TAGS;
 
     #[\Override]
     protected string $gridContainerBlock = 'adminhtml/catalog_product_attribute';
@@ -36,12 +36,6 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
     protected function getPageTitles(): array
     {
         return [$this->__('Catalog'), $this->__('Attributes'), $this->__('Manage Attributes')];
-    }
-
-    #[\Override]
-    protected function getAllowedTags(): array
-    {
-        return explode(',', (string) Mage::getStoreConfig(self::XML_PATH_ALLOWED_TAGS));
     }
 
     #[\Override]
@@ -68,41 +62,17 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
     }
 
     /**
-     * Product input types also come from the config and from the event adminhtml_product_attribute_types.
+     * A select that the form hides posts nothing, so it saves No. A locked field is disabled and keeps its value.
      */
-    #[\Override]
-    protected function isValidInputType(string $input, Mage_Eav_Model_Entity_Attribute $model): bool
-    {
-        /** @var Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator $validator */
-        $validator = Mage::getModel('eav/adminhtml_system_config_source_inputtype_validator');
-        if ($validator->isValid($input)) {
-            return true;
-        }
-        foreach ($validator->getMessages() as $message) {
-            $this->_getSession()->addError($message);
-        }
-        return false;
-    }
-
-    #[\Override]
-    protected function getInputTypeModels(string $input, Mage_Eav_Model_Entity_Attribute $model): array
-    {
-        /** @var Mage_Catalog_Helper_Product $helper */
-        $helper = Mage::helper('catalog/product');
-        return [
-            'source_model' => $helper->getAttributeSourceModelByInputType($input),
-            'backend_model' => $helper->getAttributeBackendModelByInputType($input),
-            'frontend_model' => $helper->getAttributeFrontendModelByInputType($input),
-        ];
-    }
-
     #[\Override]
     protected function prepareSaveData(array $data, Mage_Eav_Model_Entity_Attribute $model): array
     {
-        $data['is_configurable'] ??= 0;
-        $data['is_filterable'] ??= 0;
-        $data['is_filterable_multiple'] ??= 0;
-        $data['is_filterable_in_search'] ??= 0;
+        $locked = $model->getLockedFields();
+        foreach (['is_configurable', 'is_filterable', 'is_filterable_multiple', 'is_filterable_in_search'] as $field) {
+            if (!in_array($field, $locked, true)) {
+                $data[$field] ??= 0;
+            }
+        }
         $data['apply_to'] ??= [];
         return $data;
     }

@@ -207,7 +207,7 @@ it('does not update a product attribute through the category page', function () 
     ]);
 
     $reloaded = Mage::getModel('catalog/resource_eav_attribute')->load($name->getId());
-    expect(categoryAttributeAdminMessages()['errors'])->toBe(['This attribute cannot be updated.'])
+    expect(categoryAttributeAdminMessages()['errors'])->toBe(['This attribute no longer exists.'])
         ->and($reloaded->getFrontendLabel())->toBe($name->getFrontendLabel());
 });
 
@@ -217,7 +217,7 @@ it('deletes a user-defined category attribute and refuses a system one', functio
     categoryAttributeAdminRun(Mage_Adminhtml_Eav_AttributeController::class, 'eav_attribute', 'delete', [
         'attribute_id' => $system->getId(),
     ]);
-    expect(categoryAttributeAdminMessages()['errors'])->toBe(['This attribute cannot be deleted.']);
+    expect(categoryAttributeAdminMessages()['errors'])->toBe(['A system attribute cannot be deleted.']);
 
     $attribute = Mage::getModel('catalog/resource_eav_attribute')->setData([
         'entity_type_id' => categoryAttributeAdminTypeId(),
