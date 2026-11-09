@@ -11,8 +11,8 @@
 var bp = {
     xsmall: 479,
     small: 599,
-    medium: window.BREAKPOINTS?.mobile ?? 770,
-    large: window.BREAKPOINTS?.tablet ?? 1023,
+    medium: BREAKPOINTS.mobile,
+    large: BREAKPOINTS.tablet,
     xlarge: 1199
 };
 
