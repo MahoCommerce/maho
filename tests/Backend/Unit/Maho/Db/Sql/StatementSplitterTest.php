@@ -170,6 +170,12 @@ it('keeps the BEGIN ... END body of a SQLite trigger in one statement', function
         ->toBe(['CREATE TRIGGER a AFTER INSERT ON t BEGIN SELECT CASE WHEN 1 THEN 2 END; SELECT 3; END', 'SELECT 4'])
         ->and(StatementSplitter::split("CREATE TRIGGER a AFTER INSERT ON t BEGIN SELECT 1 -- ; END\n; SELECT 2; END; SELECT 3", 'sqlite'))
         ->toBe(["CREATE TRIGGER a AFTER INSERT ON t BEGIN SELECT 1 -- ; END\n; SELECT 2; END", 'SELECT 3'])
+        ->and(StatementSplitter::split("CREATE TRIGGER a AFTER INSERT ON t BEGIN SELECT 1; -- c\nEND; SELECT 2", 'sqlite'))
+        ->toBe(["CREATE TRIGGER a AFTER INSERT ON t BEGIN SELECT 1; -- c\nEND", 'SELECT 2'])
+        ->and(StatementSplitter::split('create trigger a after insert on t begin select 1; /* c */ end; select 2', 'sqlite'))
+        ->toBe(['create trigger a after insert on t begin select 1; /* c */ end', 'select 2'])
+        ->and(StatementSplitter::split('CREATE TRIGGER a AFTER INSERT ON t BEGIN SELECT 1; /* a */ UPDATE t SET f = CASE WHEN 1 THEN 1 ELSE 0 /* b */ END; SELECT 2; END; SELECT 3', 'sqlite'))
+        ->toBe(['CREATE TRIGGER a AFTER INSERT ON t BEGIN SELECT 1; /* a */ UPDATE t SET f = CASE WHEN 1 THEN 1 ELSE 0 /* b */ END; SELECT 2; END', 'SELECT 3'])
         ->and(StatementSplitter::split('CREATE TABLE t (a INT); SELECT 1', 'sqlite'))->toHaveCount(2)
         ->and(StatementSplitter::split("{$trigger}; SELECT 1", 'pgsql'))->toHaveCount(4);
 });
