@@ -148,6 +148,44 @@ it('reports a user that does not exist on the admin page and the CLI', function 
         ->and($cli['output'])->toContain(Mage::helper('adminhtml')->__('The user %s does not exist.', 'parity_missing'));
 });
 
+it('refuses to deactivate the own account of the admin user who saves it', function (): void {
+    $admin = AdminApiParity::admin(Mage_Adminhtml_Permissions_UserController::class, 'save', [
+        'user_id' => $this->admin->getId(),
+        'username' => $this->admin->getUsername(),
+        'firstname' => $this->admin->getFirstname(),
+        'lastname' => $this->admin->getLastname(),
+        'email' => $this->admin->getEmail(),
+        'is_active' => '0',
+        'current_password' => ADMIN_USER_PARITY_PASSWORD,
+    ]);
+
+    expect($admin['errors'])->toBe([Mage::helper('adminhtml')->__('You cannot deactivate your own account.')])
+        ->and(Mage::getModel('admin/user')->load($this->admin->getId())->getIsActive())->toBeTrue();
+
+    $service = Mage::getService('admin/user');
+    $user = $service->getById((int) $this->admin->getId())->setIsActive(false);
+    expect(fn() => $service->save($user, actingUserId: (int) $this->admin->getId()))
+        ->toThrow(Mage_Core_Exception_Conflict::class);
+});
+
+it('lets an admin user deactivate the account of another user', function (): void {
+    adminUserParityCreate('parity_cli', 'parity-secret-1234', 'parity-cli@example.test');
+    $other = Mage::getModel('admin/user')->loadByUsername('parity_cli');
+
+    $admin = AdminApiParity::admin(Mage_Adminhtml_Permissions_UserController::class, 'save', [
+        'user_id' => $other->getId(),
+        'username' => 'parity_cli',
+        'firstname' => 'Parity',
+        'lastname' => 'User',
+        'email' => 'parity-cli@example.test',
+        'is_active' => '0',
+        'current_password' => ADMIN_USER_PARITY_PASSWORD,
+    ]);
+
+    expect($admin['success'])->toBe([Mage::helper('adminhtml')->__('The user has been saved.')])
+        ->and($other->reload()->getIsActive())->toBeFalse();
+});
+
 describe('kept difference: the admin page checks the person who uses it', function (): void {
     it('asks for the current password and refuses to delete the own account in the admin only', function (): void {
         $wrongPassword = AdminApiParity::admin(Mage_Adminhtml_Permissions_UserController::class, 'delete', [
@@ -161,5 +199,10 @@ describe('kept difference: the admin page checks the person who uses it', functi
 
         expect($wrongPassword['errors'])->toBe([Mage::helper('adminhtml')->__('Invalid current password.')])
             ->and($ownAccount['errors'])->toBe([Mage::helper('adminhtml')->__('You cannot delete your own account.')]);
+    });
+
+    it('lets the CLI, which has no acting admin user, disable any account', function (): void {
+        expect(adminUserParityCli(new AdminUserDisable(), ['username' => $this->admin->getUsername()])['code'])->toBe(Command::SUCCESS)
+            ->and(Mage::getModel('admin/user')->load($this->admin->getId())->getIsActive())->toBeFalse();
     });
 });
