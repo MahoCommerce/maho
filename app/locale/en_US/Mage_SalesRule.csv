@@ -125,7 +125,7 @@
 "The code format must be one of: %s.","The code format must be one of: %s."
 "The code length must be from 1 to %d.","The code length must be from 1 to %d."
 "The coupon code is required for a specific coupon.","The coupon code is required for a specific coupon."
-"The coupon code must have 3 to 64 characters of A-Z, a-z, 0-9, _ and -.","The coupon code must have 3 to 64 characters of A-Z, a-z, 0-9, _ and -."
+"The coupon code must have at most %d characters.","The coupon code must have at most %d characters."
 "The coupon type is not valid.","The coupon type is not valid."
 "The dash interval must be from 0 to the code length.","The dash interval must be from 0 to the code length."
 "The discount amount must be 0 or more.","The discount amount must be 0 or more."

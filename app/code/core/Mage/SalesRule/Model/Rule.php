@@ -53,9 +53,6 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     /** The actions of a cart price rule */
     public const SIMPLE_ACTIONS = [self::BY_PERCENT_ACTION, self::BY_FIXED_ACTION, self::CART_FIXED_ACTION, self::BUY_X_GET_Y_ACTION];
 
-    /** A new specific coupon code */
-    public const COUPON_CODE_PATTERN = '/^[A-Za-z0-9_-]{3,64}$/';
-
     /**
      * Store coupon code generator instance
      *
@@ -142,7 +139,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Add an error to $errors for each problem of the rule, and return $errors. The coupon resource model
-     * refuses a code that another coupon uses.
+     * refuses a code that is too long or that another coupon uses.
      */
     public function validateRecord(Mage_Core_Exception_Input $errors = new Mage_Core_Exception_Input()): Mage_Core_Exception_Input
     {
@@ -174,15 +171,8 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
             $this->_addRecordError($errors, 'simple_free_shipping', $helper->__('The free shipping option must be 0, 1 or 2.'));
         }
 
-        $couponType = (int) ($this->getCouponType() ?? self::COUPON_TYPE_NO_COUPON);
-        if (!in_array($couponType, [self::COUPON_TYPE_NO_COUPON, self::COUPON_TYPE_SPECIFIC, self::COUPON_TYPE_AUTO], true)) {
+        if (!in_array((int) ($this->getCouponType() ?? self::COUPON_TYPE_NO_COUPON), [self::COUPON_TYPE_NO_COUPON, self::COUPON_TYPE_SPECIFIC, self::COUPON_TYPE_AUTO], true)) {
             $this->_addRecordError($errors, 'coupon_type', $helper->__('The coupon type is not valid.'));
-        } elseif ($couponType === self::COUPON_TYPE_SPECIFIC && !$this->getUseAutoGeneration()) {
-            $code = trim((string) $this->getCouponCode());
-            // A code that the rule had before passes, because older codes can have other characters
-            if ($code !== '' && (!$this->getId() || $this->dataHasChangedFor('coupon_code')) && !preg_match(self::COUPON_CODE_PATTERN, $code)) {
-                $this->_addRecordError($errors, 'coupon_code', $helper->__('The coupon code must have 3 to 64 characters of A-Z, a-z, 0-9, _ and -.'));
-            }
         }
         return $errors;
     }

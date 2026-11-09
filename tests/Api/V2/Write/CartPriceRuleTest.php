@@ -189,7 +189,7 @@ describe('Cart price rule fields', function (): void {
         expect($duplicate['status'])->toBe(409);
 
         expect(cprwFields(cprwCreate(['couponType' => 'specific'])))->toBe(['couponCode'])
-            ->and(cprwFields(cprwCreate(['couponType' => 'specific', 'couponCode' => 'bad code!'])))->toBe(['couponCode'])
+            ->and(cprwFields(cprwCreate(['couponType' => 'specific', 'couponCode' => str_repeat('A', 256)])))->toBe(['code'])
             ->and(cprwFields(cprwCreate(['couponType' => 'none', 'couponCode' => cprwCode()])))->toBe(['couponCode']);
 
         $auto = apiPut(CPRW_PATH . "/{$id}", ['couponType' => 'auto'], $token);
@@ -207,6 +207,10 @@ describe('Cart price rule fields', function (): void {
         // The own code does not count as a duplicate
         $same = apiPut(CPRW_PATH . "/{$id}", ['couponCode' => $newCode], $token);
         expect($same['status'])->toBe(200);
+
+        // The admin and the cart accept any character
+        $spaced = 'SUMMER 2026.' . cprwCode('A');
+        expect(apiPut(CPRW_PATH . "/{$id}", ['couponCode' => $spaced], $token)['json']['couponCode'] ?? null)->toBe($spaced);
 
         $none = apiPut(CPRW_PATH . "/{$id}", ['couponType' => 'none'], $token);
         expect($none['json']['couponType'])->toBe('none')

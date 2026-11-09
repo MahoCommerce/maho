@@ -243,9 +243,6 @@ class Mage_SalesRule_Service_Rule
     {
         if ($coupon->getIsPrimary()) {
             $rule->setCouponType(Rule::COUPON_TYPE_SPECIFIC)->setUseAutoGeneration(false)->setCouponCode($coupon->getCode());
-        } elseif ($coupon->dataHasChangedFor('code') && !preg_match(Rule::COUPON_CODE_PATTERN, (string) $coupon->getCode())) {
-            $inputErrors ??= new Mage_Core_Exception_Input();
-            $inputErrors->addError('code', Mage::helper('salesrule')->__('The coupon code must have 3 to 64 characters of A-Z, a-z, 0-9, _ and -.'));
         }
 
         $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');

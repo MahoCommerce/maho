@@ -68,7 +68,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         $errors = new \Mage_Core_Exception_Input();
         $code = (string) ($data['code'] ?? '');
 
-        $rule = $service->newRule()->setIsActive()->setName($data['description'] ?? "Coupon: {$code}")->setDescription($data['description'] ?? '');
+        $rule = $service->newRule()->setIsActive()->setName($data['description'] ?? mb_substr("Coupon: {$code}", 0, 255))->setDescription($data['description'] ?? '');
         // Without scope fields, a coupon is for all groups and for the website of the current store only
         $rule->setCustomerGroupIds(\Mage::getResourceModel('customer/group_collection')->getAllIds())
             ->setWebsiteIds([(int) \Maho\ApiPlatform\Service\StoreContext::getStore()->getWebsiteId()]);
