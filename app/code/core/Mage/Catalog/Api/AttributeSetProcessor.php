@@ -22,6 +22,9 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
 {
     private const IGNORED_FIELDS = ['extensions', '@context', '@id', '@type'];
 
+    /** The request body sends the name of a set or of a group as "name", so an error of that name gives this field */
+    private const ERROR_FIELDS = ['attribute_set_name' => 'name', 'attribute_group_name' => 'name'];
+
     public function __construct(
         Security $security,
         private readonly AttributeSetProvider $provider,
@@ -51,11 +54,30 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
 
         $body = $this->parseRequestBody($context['request'] ?? null);
 
-        return match ($name) {
-            'attribute_set_group_create' => $this->createGroup($id, $body),
-            'attribute_set_attribute_assign' => $this->assignAttribute($id, $body),
-            default => $id > 0 ? $this->rename($id, $body) : $this->create($body),
-        };
+        try {
+            return match ($name) {
+                'attribute_set_group_create' => $this->createGroup($id, $body),
+                'attribute_set_attribute_assign' => $this->assignAttribute($id, $body),
+                default => $id > 0 ? $this->rename($id, $body) : $this->create($body),
+            };
+        } catch (\Mage_Core_Exception_Input $e) {
+            throw self::renameErrorFields($e);
+        }
+    }
+
+    /**
+     * Return a copy of $e that gives each field of ERROR_FIELDS its name in the request body.
+     */
+    private static function renameErrorFields(\Mage_Core_Exception_Input $e): \Mage_Core_Exception_Input
+    {
+        if (array_intersect(array_column($e->getErrors(), 'field'), array_keys(self::ERROR_FIELDS)) === []) {
+            return $e;
+        }
+        $renamed = new \Mage_Core_Exception_Input('', 0, $e);
+        foreach ($e->getErrors() as $error) {
+            $renamed->addError(self::ERROR_FIELDS[$error['field']] ?? $error['field'], $error['message']);
+        }
+        return $renamed;
     }
 
     /**

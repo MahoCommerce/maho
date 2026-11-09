@@ -43,12 +43,17 @@ class Mage_Admin_Service_User
     /**
      * Check $user with validate(), save it, and give it the role $roleId when it is set. A new user
      * triggers the new admin user notification when admin/security/crate_admin_user_notification is on.
+     * $actingUserId is the admin user who makes the request. This user cannot deactivate the own account.
      *
      * @throws Mage_Core_Exception_Input with the errors of validate()
+     * @throws Mage_Core_Exception_Conflict when $actingUserId deactivates the own account
      */
-    public function save(User $user, ?int $roleId = null): User
+    public function save(User $user, ?int $roleId = null, ?int $actingUserId = null): User
     {
         $isNew = !$user->getId();
+        if (!$isNew && $actingUserId === (int) $user->getId() && $user->getIsActive() === false) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('adminhtml')->__('You cannot deactivate your own account.'));
+        }
         $messages = $user->validate();
         $errors = new Mage_Core_Exception_Input();
         foreach ($messages === true ? [] : $messages as $field => $message) {
@@ -91,8 +96,16 @@ class Mage_Admin_Service_User
         $user->setTwofaEnabled(false)->setTwofaSecret(null)->save();
     }
 
-    public function delete(User $user): void
+    /**
+     * Delete $user. $actingUserId is the admin user who makes the request. This user cannot delete the own account.
+     *
+     * @throws Mage_Core_Exception_Conflict when $actingUserId deletes the own account
+     */
+    public function delete(User $user, ?int $actingUserId = null): void
     {
+        if ($actingUserId !== null && $actingUserId === (int) $user->getId()) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('adminhtml')->__('You cannot delete your own account.'));
+        }
         $user->delete();
     }
 }

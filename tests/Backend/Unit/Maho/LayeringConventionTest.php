@@ -13,43 +13,58 @@ declare(strict_types=1);
  * result. A service never reads the request or the session, a status code belongs to the API edge, and
  * a rate limit or a honeypot belongs to the service, so that no transport can forget it.
  *
- * Each rule has an allowlist of the files that broke it when the rule came in, with the number of
- * matches in each file. The allowlist only shrinks: a pull request that fixes a file lowers or removes
- * its entry, and the test fails until it does. Comments and docblocks are not scanned.
+ * Each rule has two lists. The allowlist holds the debt: the files that broke the rule when it came in,
+ * with the number of matches in each file. It only shrinks: a pull request that fixes a file lowers or
+ * removes its entry, and the test fails until it does. The permanent list holds the matches that stay,
+ * each with its count and its reason. A file can have entries in both lists. When the count of a file
+ * goes down, the test fails until its entries go down too. Comments and docblocks are not scanned.
  */
 
-/** Files that create a Symfony HttpException outside Maho_ApiPlatform. */
+/** Files that create a Symfony HttpException outside Maho_ApiPlatform, and must stop. */
 const LAYERING_HTTP_EXCEPTION_ALLOWLIST = [
-    'app/code/core/Mage/Catalog/Api/CategoryProvider.php' => 1,
+    // The storefront sales/download/downloadCustomOption checks the same secret key, so the download needs a service
     'app/code/core/Mage/Catalog/Api/ProductCustomOptionProvider.php' => 3,
     'app/code/core/Mage/Checkout/Api/CartProcessor.php' => 14,
-    'app/code/core/Mage/Core/Api/ConfigSettingProcessor.php' => 1,
-    'app/code/core/Mage/Core/Api/ConfigSettingProvider.php' => 2,
-    'app/code/core/Mage/Core/Api/StoreConfigProvider.php' => 2,
-    'app/code/core/Mage/Core/Api/StoreProcessor.php' => 1,
-    'app/code/core/Mage/Customer/Api/CustomerProcessor.php' => 1,
-    'app/code/core/Mage/Newsletter/Api/NewsletterProcessor.php' => 2,
-    'app/code/core/Mage/Reports/Api/ReportQuery.php' => 2,
-    'app/code/core/Mage/Reports/Api/ReportStatisticsProcessor.php' => 1,
     'app/code/core/Mage/Sales/Api/OrderProcessor.php' => 3,
-    'app/code/core/Maho/Ai/Api/Chat/ChatController.php' => 17,
-    'app/code/core/Maho/SocialLogin/Api/SocialAuthProcessor.php' => 3,
 ];
 
-/** Files in a Service folder that read the request, the superglobals or the session. */
+/** Files that create a Symfony HttpException outside Maho_ApiPlatform for a reason that stays. */
+const LAYERING_HTTP_EXCEPTION_PERMANENT = [
+    'app/code/core/Mage/Catalog/Api/CategoryProvider.php' => [1, '403 for scope=all without a backend token'],
+    'app/code/core/Mage/Core/Api/ConfigSettingProcessor.php' => [1, '403 for a scope that the API token cannot access'],
+    'app/code/core/Mage/Core/Api/ConfigSettingProvider.php' => [2, '403 for a store or a config section that the API token cannot access'],
+    'app/code/core/Mage/Core/Api/StoreProcessor.php' => [1, '403 for a store that the API token cannot access'],
+    'app/code/core/Mage/Customer/Api/CustomerProcessor.php' => [1, '401 of the GraphQL login for a wrong email or password'],
+    'app/code/core/Mage/Newsletter/Api/NewsletterProcessor.php' => [2, '403 for a store that the API token cannot access, and for an unsubscribe without a customer token'],
+    'app/code/core/Mage/Reports/Api/ReportQuery.php' => [2, '403 for a store or a website that the API token cannot access'],
+    'app/code/core/Mage/Reports/Api/ReportStatisticsProcessor.php' => [1, '403 for a refresh with an API token that has a store restriction'],
+    'app/code/core/Maho/Ai/Api/Chat/ChatController.php' => [17, 'the admin assistant chat, which only this controller starts'],
+    'app/code/core/Maho/SocialLogin/Api/SocialAuthProcessor.php' => [3, 'the answers of a token endpoint (RFC 6749)'],
+];
+
+/** Files in a Service folder that read the request, the superglobals or the session, and must stop. */
 const LAYERING_SERVICE_INPUT_ALLOWLIST = [
     'app/code/core/Mage/Sales/Model/Service/Quote.php' => 1,
 ];
 
-/** Transport files that call a rate limiter or a honeypot check themselves. */
+/** Files in a Service folder that read the request, the superglobals or the session for a reason that stays. */
+const LAYERING_SERVICE_INPUT_PERMANENT = [];
+
+/** Transport files that call a rate limiter or a honeypot check themselves, and must stop. */
 const LAYERING_TRANSPORT_GATE_ALLOWLIST = [
-    'app/code/core/Mage/Adminhtml/controllers/IndexController.php' => 2,
     'app/code/core/Mage/Checkout/Api/CartProcessor.php' => 2,
-    'app/code/core/Mage/Downloadable/controllers/DownloadController.php' => 2,
-    'app/code/core/Mage/Shipping/controllers/TrackingController.php' => 2,
-    'app/code/core/Maho/ApiPlatform/Api/AuthTokenProcessor.php' => 5,
-    'app/code/core/Maho/ApiPlatform/symfony/Controller/OAuthController.php' => 1,
-    'app/code/core/Maho/ApiPlatform/symfony/Trait/RateLimitTrait.php' => 2,
+    // The customer grant keeps its own login limit, apart from Mage_Customer_Service_Customer::authenticate()
+    'app/code/core/Maho/ApiPlatform/Api/AuthTokenProcessor.php' => 1,
+];
+
+/** Transport files that call a rate limiter or a honeypot check themselves for a reason that stays. */
+const LAYERING_TRANSPORT_GATE_PERMANENT = [
+    'app/code/core/Mage/Adminhtml/controllers/IndexController.php' => [2, 'the admin password reset link, which only the admin login page checks'],
+    'app/code/core/Mage/Downloadable/controllers/DownloadController.php' => [2, 'the download link of the storefront, which only this controller serves'],
+    'app/code/core/Mage/Shipping/controllers/TrackingController.php' => [2, 'the tracking popup of the storefront, which only this controller serves'],
+    'app/code/core/Maho/ApiPlatform/Api/AuthTokenProcessor.php' => [4, 'the limits of the token endpoint and of the grants that only the API has'],
+    'app/code/core/Maho/ApiPlatform/symfony/Controller/OAuthController.php' => [1, 'the limit of the OAuth endpoints, which only the API has'],
+    'app/code/core/Maho/ApiPlatform/symfony/Trait/RateLimitTrait.php' => [2, 'the shared limiter of the token endpoints'],
 ];
 
 /**
@@ -118,34 +133,51 @@ function layeringMatches(string $pathPattern, string $codePattern, ?callable $ac
 }
 
 /**
- * Compare the matches of a rule with its allowlist. $fix tells the developer how to fix a new match.
+ * Compare the matches of a rule with its allowlist $allowed and its permanent list $permanent. $fix
+ * tells the developer how to fix a new match.
  *
  * @param array<string, int> $found
  * @param array<string, int> $allowed
+ * @param array<string, array{int, string}> $permanent
  * @return list<string> one message for each difference
  */
-function layeringRatchet(array $found, array $allowed, string $fix): array
+function layeringRatchet(array $found, array $allowed, array $permanent, string $fix): array
 {
     $messages = [];
-    $sorted = $allowed;
-    ksort($sorted);
-    if (array_keys($sorted) !== array_keys($allowed)) {
-        $messages[] = 'Sort the allowlist by path.';
+    foreach (['allowlist' => $allowed, 'permanent list' => $permanent] as $name => $list) {
+        $sorted = $list;
+        ksort($sorted);
+        if (array_keys($sorted) !== array_keys($list)) {
+            $messages[] = "Sort the $name by path.";
+        }
+    }
+    foreach ($permanent as $path => [$limit, $reason]) {
+        if (trim($reason) === '') {
+            $messages[] = "$path: give the reason of its permanent entry.";
+        }
     }
 
     foreach ($found as $path => $count) {
-        $limit = $allowed[$path] ?? 0;
+        $limit = ($allowed[$path] ?? 0) + ($permanent[$path][0] ?? 0);
         if ($count > $limit) {
-            $messages[] = "$path: $count matches, the allowlist permits $limit. $fix";
+            $messages[] = "$path: $count matches, the lists permit $limit. $fix";
         }
     }
-    foreach ($allowed as $path => $limit) {
+    foreach (array_keys($allowed + $permanent) as $path) {
+        $debt = $allowed[$path] ?? 0;
+        $kept = $permanent[$path][0] ?? 0;
         $count = $found[$path] ?? 0;
-        if ($count === 0) {
-            $messages[] = "$path: no matches. Remove its entry from the allowlist.";
-        } elseif ($count < $limit) {
-            $messages[] = "$path: $count matches, the allowlist permits $limit. Lower its entry to $count.";
+        if ($count >= $debt + $kept) {
+            continue;
         }
+        $changes = [];
+        if ($debt > 0) {
+            $changes[] = $count > $kept ? 'lower its allowlist entry to ' . ($count - $kept) : 'remove its allowlist entry';
+        }
+        if ($kept > 0 && $count < $kept) {
+            $changes[] = $count === 0 ? 'remove its permanent entry' : "lower its permanent entry to $count";
+        }
+        $messages[] = "$path: $count matches, the lists permit " . ($debt + $kept) . '. ' . ucfirst(implode(' and ', $changes)) . '.';
     }
     return $messages;
 }
@@ -161,6 +193,7 @@ it('creates a Symfony HttpException only at the API edge', function () {
     $messages = layeringRatchet(
         $found,
         LAYERING_HTTP_EXCEPTION_ALLOWLIST,
+        LAYERING_HTTP_EXCEPTION_PERMANENT,
         'Throw a Mage_Core_Exception subclass: ApiExceptionListener maps it to the status code.',
     );
 
@@ -177,6 +210,7 @@ it('keeps the request and the session out of every service', function () {
     $messages = layeringRatchet(
         $found,
         LAYERING_SERVICE_INPUT_ALLOWLIST,
+        LAYERING_SERVICE_INPUT_PERMANENT,
         'Read the input in the transport and write it into the model that the service takes.',
     );
 
@@ -193,8 +227,26 @@ it('leaves rate limits and honeypot checks to the services', function () {
     $messages = layeringRatchet(
         $found,
         LAYERING_TRANSPORT_GATE_ALLOWLIST,
+        LAYERING_TRANSPORT_GATE_PERMANENT,
         'Move the rate limit or the honeypot check into the service of the flow.',
     );
 
     expect($messages)->toBe([], implode("\n", $messages));
+});
+
+it('fails on a new match and on an entry that is higher than the count', function () {
+    $permanent = ['b.php' => [2, 'a reason']];
+
+    expect(layeringRatchet(['a.php' => 1, 'b.php' => 2], [], $permanent, 'Fix it.'))
+        ->toBe(['a.php: 1 matches, the lists permit 0. Fix it.'])
+        ->and(layeringRatchet(['b.php' => 1], [], $permanent, 'Fix it.'))
+        ->toBe(['b.php: 1 matches, the lists permit 2. Lower its permanent entry to 1.'])
+        ->and(layeringRatchet([], [], $permanent, 'Fix it.'))
+        ->toBe(['b.php: 0 matches, the lists permit 2. Remove its permanent entry.'])
+        ->and(layeringRatchet(['b.php' => 3], ['b.php' => 2], $permanent, 'Fix it.'))
+        ->toBe(['b.php: 3 matches, the lists permit 4. Lower its allowlist entry to 1.'])
+        ->and(layeringRatchet(['b.php' => 2], ['b.php' => 2], $permanent, 'Fix it.'))
+        ->toBe(['b.php: 2 matches, the lists permit 4. Remove its allowlist entry.'])
+        ->and(layeringRatchet(['b.php' => 2], [], ['b.php' => [2, ' ']], 'Fix it.'))
+        ->toBe(['b.php: give the reason of its permanent entry.']);
 });

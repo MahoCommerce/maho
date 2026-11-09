@@ -1164,6 +1164,7 @@
 "Yes (301 Moved Permanently)","Yes (301 Moved Permanently)"
 "Yes (302 Found)","Yes (302 Found)"
 "Yes (only price with tax)","Yes (only price with tax)"
+"You cannot deactivate your own account.","You cannot deactivate your own account."
 "You cannot delete your own account.","You cannot delete your own account."
 "You did not sign in correctly or your account is temporarily disabled.","You did not sign in correctly or your account is temporarily disabled."
 "You have %s, %s and %s unread messages. <a href=""%s"">Go to messages inbox</a>.","You have %s, %s and %s unread messages. <a href=""%s"">Go to messages inbox</a>."

@@ -116,6 +116,10 @@ describe('Attribute set lifecycle', function (): void {
         expect($duplicate['status'])->toBe(409)
             ->and($duplicate['json']['message'])->toBe("Attribute set with the \"{$create['json']['attributeSetName']}\" name already exists.");
 
+        $emptyName = apiPut(ASET_PATH . "/{$id}", ['name' => ''], $token);
+        expect($emptyName['status'])->toBe(422)
+            ->and(asetFields($emptyName))->toBe(['name']);
+
         $rename = apiPut(ASET_PATH . "/{$id}", ['name' => 'Pest renamed ' . substr(uniqid(), -6)], $token);
         expect($rename['status'])->toBe(200)
             ->and($rename['json']['attributeSetName'])->toStartWith('Pest renamed');
@@ -128,7 +132,7 @@ describe('Attribute set lifecycle', function (): void {
     it('rejects a missing name, an unknown skeleton and a value of the wrong type', function (): void {
         $missing = apiPost(ASET_PATH, [], adminToken());
         expect($missing['status'])->toBe(422)
-            ->and(asetFields($missing))->toBe(['attributeSetName']);
+            ->and(asetFields($missing))->toBe(['name']);
 
         $wrongType = apiPost(ASET_PATH, ['name' => 'Pest wrong type', 'skeletonId' => 'abc'], adminToken());
         expect($wrongType['status'])->toBe(400)
@@ -162,6 +166,10 @@ describe('Attribute set groups and attributes', function (): void {
 
         $again = apiPost(ASET_PATH . "/{$setId}/groups", ['name' => 'Pest group'], $token);
         expect($again['status'])->toBe(409);
+
+        $empty = apiPost(ASET_PATH . "/{$setId}/groups", ['name' => ''], $token);
+        expect($empty['status'])->toBe(422)
+            ->and(asetFields($empty))->toBe(['name']);
 
         $assign = apiPost(ASET_PATH . "/{$setId}/attributes", ['attributeCode' => $attribute['attributeCode'], 'groupName' => 'Pest group'], $token);
         expect($assign['status'])->toBe(200)

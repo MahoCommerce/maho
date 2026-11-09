@@ -169,8 +169,8 @@ it('rejects the same name with the same message on each transport', function (Cl
         ->and($api['errors'])->toBe([$message])
         ->and($api['fields'])->toBe($field === null ? [] : [$field]);
 })->with([
-    'an empty name' => [fn(string $name): array => ['  ', 422, 'attributeSetName', 'The name of an attribute set must have 1 to 255 characters.']],
-    'a name that is too long' => [fn(string $name): array => [str_repeat('x', 256), 422, 'attributeSetName', 'The name of an attribute set must have 1 to 255 characters.']],
+    'an empty name' => [fn(string $name): array => ['  ', 422, 'name', 'The name of an attribute set must have 1 to 255 characters.']],
+    'a name that is too long' => [fn(string $name): array => [str_repeat('x', 256), 422, 'name', 'The name of an attribute set must have 1 to 255 characters.']],
     'the name of another set' => [function (string $name): array {
         setParityCreate($name);
         return [$name, 409, null, "Attribute set with the \"{$name}\" name already exists."];
@@ -230,6 +230,13 @@ it('refuses a group name that another group of the set has on each transport', f
     expect($admin)->toBe(['error' => true, 'message' => $message])
         ->and($api)->toMatchArray(['status' => 409, 'errors' => [$message]])
         ->and(array_column(setParityGroups($set), 1))->toContain($second[1]);
+});
+
+it('names the field of an empty group name as the request body does', function (): void {
+    $set = setParityCreate($this->name);
+    $api = setParityApi('POST', "/api/rest/v2/attribute-sets/{$set->getId()}/groups", ['name' => '  '], ['id' => (int) $set->getId()], 'attribute_set_group_create');
+
+    expect($api)->toMatchArray(['status' => 422, 'errors' => ['The name of a group must have 1 to 255 characters.'], 'fields' => ['name']]);
 });
 
 it('refuses to take a system attribute out of a set on each transport', function (): void {
