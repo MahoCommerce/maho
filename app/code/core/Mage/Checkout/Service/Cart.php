@@ -9,6 +9,7 @@
 declare(strict_types=1);
 
 use Maho\ApiPlatform\Service\StoreDefaults;
+use Maho\Security\RateLimitScope;
 
 /**
  * Creates and finds carts, changes their items, codes, addresses, shipping and payment, and merges them.
@@ -22,6 +23,9 @@ class Mage_Checkout_Service_Cart
 
     /** additional_information key that holds the client payment data the API accepted. */
     public const PAYMENT_ADDITIONAL_DATA_KEY = 'api_additional_data';
+
+    /** The coupon codes and the gift card codes that one shopper can try in this number of seconds have a limit. */
+    public const CODE_RATE_LIMIT_WINDOW = 60;
 
     public function isValidMaskedId(mixed $maskedId): bool
     {
@@ -183,6 +187,26 @@ class Mage_Checkout_Service_Cart
         if (!$accessedByMaskedId) {
             throw new \Mage_Core_Exception_NoSuchEntity('Cart not found');
         }
+    }
+
+    /**
+     * Return $quote when the caller can use it. A cart that does not exist gets the same error as a cart of
+     * another caller, see verifyAccess().
+     *
+     * @throws \Mage_Core_Exception_NoSuchEntity
+     */
+    public function requireAccessible(
+        ?\Mage_Sales_Model_Quote $quote,
+        bool $accessedByMaskedId,
+        ?int $authenticatedCustomerId,
+        bool $isPrivileged = false,
+    ): \Mage_Sales_Model_Quote {
+        if ($quote === null) {
+            throw new \Mage_Core_Exception_NoSuchEntity('Cart not found');
+        }
+        $this->verifyAccess($quote, $accessedByMaskedId, $authenticatedCustomerId, $isPrivileged);
+
+        return $quote;
     }
 
     /**
@@ -477,36 +501,78 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Apply coupon code
+     * Apply the coupon $couponCode to $quote. A coupon that applies tells that its code exists, so a shopper
+     * has a limit of codes per minute. A privileged caller (an admin or a staff API token) has no limit.
+     * When the coupon does not apply, the cart keeps its previous coupon and nothing is saved.
      *
-     * @param \Mage_Sales_Model_Quote $quote Quote
-     * @param string $couponCode Coupon code
+     * @throws \Mage_Core_Exception_Input when the code is empty
+     * @throws \Mage_Core_Exception_Conflict when the cart has no items
+     * @throws \Mage_Core_Exception_TooManyRequests when the shopper is over the limit
+     * @throws \Mage_Core_Exception when the code does not exist or its rule does not apply to the cart
      */
-    public function applyCoupon(\Mage_Sales_Model_Quote $quote, string $couponCode): \Mage_Sales_Model_Quote
+    public function applyCoupon(\Mage_Sales_Model_Quote $quote, string $couponCode, bool $isPrivileged = false): \Mage_Sales_Model_Quote
     {
-        // Validate coupon exists in the database before applying
-        /** @var \Mage_SalesRule_Model_Coupon $coupon */
-        $coupon = \Mage::getModel('salesrule/coupon')->load($couponCode, 'code');
-        if (!$coupon->getId()) {
-            throw new \Mage_Core_Exception("Coupon code '{$couponCode}' is not valid");
+        $helper = \Mage::helper('checkout');
+        $couponCode = trim($couponCode);
+        if ($couponCode === '') {
+            throw new \Mage_Core_Exception_Input()->addError('coupon_code', \Mage::helper('salesrule')->__('Coupon code is required'));
+        }
+        if (!$quote->getItemsCount()) {
+            throw new \Mage_Core_Exception_Conflict($helper->__('Your shopping cart is empty.'));
+        }
+        if (!$isPrivileged) {
+            $this->limitCodeAttempts('cart_coupon', \Mage_SalesRule_Service_Rule::XML_PATH_CHECK_RATE_LIMIT);
         }
 
-        $quote->setCouponCode($couponCode);
+        // A code that is longer than a coupon code can be does not exist
+        /** @var \Mage_SalesRule_Model_Coupon $coupon */
+        $coupon = \Mage::getModel('salesrule/coupon');
+        if (strlen($couponCode) <= \Mage_Checkout_Helper_Cart::COUPON_CODE_MAX_LENGTH) {
+            $coupon->load($couponCode, 'code');
+        }
+        if (!$coupon->getId()) {
+            throw new \Mage_Core_Exception($helper->__("Coupon code '%s' is not valid", $couponCode));
+        }
 
-        return $this->inQuoteStoreScope($quote, function () use ($quote, $couponCode, $coupon): \Mage_Sales_Model_Quote {
+        $previousCode = (string) $quote->getCouponCode();
+
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $couponCode, $coupon, $previousCode, $helper): \Mage_Sales_Model_Quote {
+            // A coupon can give free shipping, so the rates must follow it
+            $quote->getShippingAddress()->setCollectShippingRates(true);
+            $quote->setCouponCode($couponCode);
             self::collectTotalsInCurrentScope($quote);
 
             // setCouponCode() keeps the string even when the rule does not fire
             // (inactive/expired/exhausted/wrong website), so confirm the rule id
             // landed on a quote address before persisting anything
             if ($quote->getCouponCode() !== $couponCode || !$this->isCouponRuleApplied($quote, (int) $coupon->getRuleId())) {
-                throw new \Mage_Core_Exception("Coupon code '{$couponCode}' could not be applied");
+                // The caller can still show or save this cart, so give it back its coupon and its totals
+                $quote->getShippingAddress()->setCollectShippingRates(true);
+                $quote->setCouponCode($previousCode);
+                self::collectTotalsInCurrentScope($quote);
+                throw new \Mage_Core_Exception($helper->__("Coupon code '%s' could not be applied", $couponCode));
             }
 
             $quote->save();
 
             return $quote;
         });
+    }
+
+    /**
+     * Count one code that the shopper tries, for the limit of $limitPath.
+     *
+     * @throws \Mage_Core_Exception_TooManyRequests when the shopper is over the limit
+     */
+    private function limitCodeAttempts(string $namespace, string $limitPath): void
+    {
+        $limit = (int) \Mage::getStoreConfig($limitPath);
+        if (!\Mage::helper('core')->rateLimiter($namespace, $limit, self::CODE_RATE_LIMIT_WINDOW, RateLimitScope::Ip)->attempt()) {
+            throw new \Mage_Core_Exception_TooManyRequests(
+                \Mage::helper('checkout')->__('Too many requests. Please try again later.'),
+                self::CODE_RATE_LIMIT_WINDOW,
+            );
+        }
     }
 
     /**
@@ -536,6 +602,7 @@ class Mage_Checkout_Service_Cart
      */
     public function removeCoupon(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
     {
+        $quote->getShippingAddress()->setCollectShippingRates(true);
         $quote->setCouponCode('');
         $this->collectAndSave($quote);
 
@@ -543,13 +610,22 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Apply gift card to cart
+     * Apply the gift card $giftcardCode to $quote. The errors of a code tell whether it exists, so a shopper
+     * has a limit of codes per minute. A privileged caller (an admin or a staff API token) has no limit.
      *
+     * @throws \Mage_Core_Exception_TooManyRequests when the shopper is over the limit
      * @throws \Mage_Core_Exception
      */
-    public function applyGiftcard(\Mage_Sales_Model_Quote $quote, string $giftcardCode, ?float $amount = null): \Mage_Sales_Model_Quote
-    {
-        $giftcard = $this->validateGiftcard($quote, $giftcardCode);
+    public function applyGiftcard(
+        \Mage_Sales_Model_Quote $quote,
+        string $giftcardCode,
+        ?float $amount = null,
+        bool $isPrivileged = false,
+    ): \Mage_Sales_Model_Quote {
+        if (!$isPrivileged) {
+            $this->limitCodeAttempts('cart_giftcard', \Maho_Giftcard_Service_Giftcard::XML_PATH_BALANCE_RATE_LIMIT);
+        }
+        $giftcard = $this->validateGiftcard($quote, trim($giftcardCode));
         $giftcardCode = (string) $giftcard->getCode();
 
         $appliedCodes = $quote->getGiftcardCodes();
@@ -740,8 +816,8 @@ class Mage_Checkout_Service_Cart
         if ($entity->getGiftMessageId()) {
             $giftMessage->load($entity->getGiftMessageId());
         }
-        $giftMessage->setSender($sender)
-            ->setRecipient($recipient)
+        $giftMessage->setSender(trim($sender))
+            ->setRecipient(trim($recipient))
             ->setMessage($message)
             ->save();
 
@@ -905,18 +981,20 @@ class Mage_Checkout_Service_Cart
      */
     public function setShippingMethod(\Mage_Sales_Model_Quote $quote, string $carrierCode, string $methodCode, bool $skipValidation = false): \Mage_Sales_Model_Quote
     {
+        if ($carrierCode === '' || $methodCode === '') {
+            throw new \Mage_Core_Exception_Input()->addError(
+                $carrierCode === '' ? 'carrier_code' : 'method_code',
+                \Mage::helper('checkout')->__('Carrier code and method code are required'),
+            );
+        }
         $shippingMethod = $carrierCode . '_' . $methodCode;
 
         return $this->inQuoteStoreScope($quote, function () use ($quote, $shippingMethod, $skipValidation): \Mage_Sales_Model_Quote {
             $address = $quote->getShippingAddress();
 
-            // Same gate as OrderProcessor: a carrier error entry would price the shipment at 0
             if (!$skipValidation) {
                 $address->collectShippingRates();
-                $rate = $address->getShippingRateByCode($shippingMethod);
-                if (!$rate || $rate->getErrorMessage()) {
-                    throw new \Mage_Core_Exception('Shipping method is not available for this address');
-                }
+                $this->assertShippingMethodAvailable($quote, $shippingMethod);
             }
 
             $address->setShippingMethod($shippingMethod);
@@ -924,6 +1002,20 @@ class Mage_Checkout_Service_Cart
 
             return $quote;
         });
+    }
+
+    /**
+     * Refuse a shipping method for which the shipping address of $quote has no rate. Collect the rates first.
+     * A carrier that fails gives a rate with an error, which would price the shipment at 0.
+     *
+     * @throws \Mage_Core_Exception
+     */
+    public function assertShippingMethodAvailable(\Mage_Sales_Model_Quote $quote, string $shippingMethod): void
+    {
+        $rate = $quote->getShippingAddress()->getShippingRateByCode($shippingMethod);
+        if (!$rate || $rate->getErrorMessage()) {
+            throw new \Mage_Core_Exception('Shipping method is not available for this address');
+        }
     }
 
     /**
@@ -935,6 +1027,9 @@ class Mage_Checkout_Service_Cart
      */
     public function setPaymentMethod(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData = null): \Mage_Sales_Model_Quote
     {
+        if ($methodCode === '') {
+            throw new \Mage_Core_Exception_Input()->addError('method_code', \Mage::helper('checkout')->__('Payment method code is required'));
+        }
         // Resolve the checks in the caller's scope, before entering the quote's store scope
         $checks = \Mage_Payment_Model_Method_Abstract::checksForCurrentScope();
 
@@ -1088,9 +1183,14 @@ class Mage_Checkout_Service_Cart
 
     /**
      * Assignment changes the quote's customer group, so totals must be recollected.
+     *
+     * @throws \Mage_Core_Exception_Input when $customer does not exist
      */
     public function assignCustomer(\Mage_Sales_Model_Quote $quote, \Mage_Customer_Model_Customer $customer): \Mage_Sales_Model_Quote
     {
+        if (!$customer->getId()) {
+            throw new \Mage_Core_Exception_Input()->addError('customer_id', \Mage::helper('checkout')->__('Customer not found'));
+        }
         $quote->assignCustomer($customer);
         $quote->setCustomerIsGuest(false);
         $this->collectAndSave($quote);
@@ -1107,6 +1207,9 @@ class Mage_Checkout_Service_Cart
      */
     public function merge(string $guestMaskedId, int $customerId): \Mage_Sales_Model_Quote
     {
+        if ($guestMaskedId === '') {
+            throw new \Mage_Core_Exception_Input()->addError('masked_id', \Mage::helper('checkout')->__('Masked cart ID is required'));
+        }
         $guestCartId = $this->getCartIdFromMaskedId($guestMaskedId);
         if (!$guestCartId) {
             throw new \Mage_Core_Exception_NoSuchEntity('Guest cart not found');

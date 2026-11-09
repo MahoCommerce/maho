@@ -98,8 +98,12 @@ class Mage_Sales_Model_Service_Quote
         $isVirtual = $quote->isVirtual();
 
         $transaction = Mage::getModel('core/resource_transaction');
+        $newCustomer = null;
         if ($quote->getCustomerId() || $quote->getCustomerIsNew()) {
-            $transaction->addObject($quote->getCustomer());
+            $customer = $quote->getCustomer();
+            $transaction->addObject($customer);
+            // A customer that registers in the checkout gets its ID from the save below
+            $newCustomer = $customer->getId() ? null : $customer;
         }
         $transaction->addObject($quote);
 
@@ -150,10 +154,8 @@ class Mage_Sales_Model_Service_Quote
         try {
             $transaction->save();
         } catch (Exception $e) {
-            if (!Mage::getSingleton('customer/session')->isLoggedIn()) {
-                // reset customer ID's on exception, because customer not saved
-                $quote->getCustomer()->setId(null);
-            }
+            // The rollback removed the new customer, so it must not keep the ID of the failed save
+            $newCustomer?->setId(null);
 
             //reset order ID's on exception, because order not saved
             $order->setId(null);

@@ -223,7 +223,8 @@ Customers can check their gift card balance without applying it:
 !!! warning "Rate Limiting"
     Balance checks are rate-limited to prevent code enumeration attacks. The limit is 10 checks per minute for one
     visitor by default, and the checkout box, the My Account page and the API share it. Set it in
-    **System > Configuration > Advanced > System > Rate limit > Gift card balance check**.
+    **System > Configuration > Advanced > System > Rate limit > Gift card balance check**. The same number limits
+    the gift card codes that one visitor can apply to a cart in one minute.
 
 ### Check Balance From My Account <span class="version-badge">v26.9+</span>
 

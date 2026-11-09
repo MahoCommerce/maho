@@ -32,6 +32,21 @@ class Mage_Sales_Service_Order
     public const CAPTURE_CASES = [Invoice::CAPTURE_ONLINE, Invoice::CAPTURE_OFFLINE, Invoice::NOT_CAPTURE];
 
     /**
+     * Refuse the order of $quote when it has no customer and its store does not allow guest checkout. The admin
+     * scope places a guest order in any store, as the admin order form does.
+     *
+     * @throws Mage_Core_Exception_Forbidden
+     */
+    public function assertGuestCheckoutAllowed(\Mage_Sales_Model_Quote $quote): void
+    {
+        if (!$quote->getCustomerId() && !Mage::app()->getStore()->isAdmin() && !$quote->isAllowedGuestCheckout()) {
+            throw new Mage_Core_Exception_Forbidden(
+                Mage::helper('checkout')->__('Sorry, guest checkout is not enabled. Please try again or contact store owner.'),
+            );
+        }
+    }
+
+    /**
      * Place order from quote
      *
      * @param \Mage_Sales_Model_Quote $quote Quote to convert to order

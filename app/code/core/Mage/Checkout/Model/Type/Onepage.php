@@ -528,8 +528,9 @@ class Mage_Checkout_Model_Type_Onepage
     {
         $quote  = $this->getQuote();
 
-        if ($quote->getCheckoutMethod() == self::METHOD_GUEST && !$quote->isAllowedGuestCheckout()) {
-            Mage::throwException(Mage::helper('checkout')->__('Sorry, guest checkout is not enabled. Please try again or contact store owner.'));
+        // A shopper who registers in the checkout gets a customer before the order is placed
+        if ($quote->getCheckoutMethod() == self::METHOD_GUEST) {
+            Mage::getService('sales/order')->assertGuestCheckoutAllowed($quote);
         }
     }
 

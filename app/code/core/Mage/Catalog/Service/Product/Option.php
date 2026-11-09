@@ -67,6 +67,56 @@ class Mage_Catalog_Service_Product_Option
         $this->write($product, $option, true);
     }
 
+    /**
+     * Open the file that a shopper uploaded for a file option of a cart item. $quoteItemOptionId is the ID of the
+     * option of the cart item, and $key is the secret key of the file. The caller closes the stream.
+     *
+     * @return array{stream: resource, size: int|null, title: string, type: string}
+     * @throws Mage_Core_Exception_NoSuchEntity when the cart item has no such file option, or the file is gone
+     * @throws Mage_Core_Exception_Forbidden when $key is not the secret key of the file
+     */
+    public function openUploadedFile(int $quoteItemOptionId, string $key): array
+    {
+        $helper = Mage::helper('catalog');
+        /** @var Mage_Sales_Model_Quote_Item_Option $itemOption */
+        $itemOption = Mage::getModel('sales/quote_item_option')->load($quoteItemOptionId);
+
+        // Only a file option holds a stored file: the value of another option is the text of the shopper
+        $optionId = str_starts_with((string) $itemOption->getCode(), Mage_Catalog_Model_Product_Type_Abstract::OPTION_PREFIX)
+            ? substr((string) $itemOption->getCode(), strlen(Mage_Catalog_Model_Product_Type_Abstract::OPTION_PREFIX))
+            : '';
+        $productOption = ctype_digit($optionId) ? Mage::getModel('catalog/product_option')->load((int) $optionId) : null;
+        if (!$itemOption->getId()
+            || !$productOption?->getId()
+            || (int) $productOption->getProductId() !== (int) $itemOption->getProductId()
+            || $productOption->getType() !== Option::OPTION_TYPE_FILE
+        ) {
+            throw new Mage_Core_Exception_NoSuchEntity($helper->__('File not found'));
+        }
+
+        try {
+            $value = Mage::helper('core/unserializeArray')->unserialize((string) $itemOption->getValue());
+        } catch (Exception) {
+            $value = null;
+        }
+        if (!is_array($value)) {
+            throw new Mage_Core_Exception_NoSuchEntity($helper->__('File not found'));
+        }
+        if (!isset($value['secret_key']) || !hash_equals((string) $value['secret_key'], $key)) {
+            throw new Mage_Core_Exception_Forbidden($helper->__('Invalid key'));
+        }
+
+        $file = Mage::getModel('catalog/product_option_type_file')->openStoredFile($value);
+        if ($file === null) {
+            throw new Mage_Core_Exception_NoSuchEntity($helper->__('File not found on disk'));
+        }
+
+        return $file + [
+            'title' => (string) ($value['title'] ?? 'file'),
+            'type' => (string) ($value['type'] ?? 'application/octet-stream'),
+        ];
+    }
+
     private function write(Product $product, Option $target, bool $delete): Product
     {
         $product = Mage::getService('catalog/product')->getById((int) $product->getId());

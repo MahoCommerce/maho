@@ -620,19 +620,6 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     {
         $isAjax = (bool) $this->getRequest()->getParam('isAjax');
 
-        // Check for empty cart
-        if (!$this->_getCart()->getQuote()->getItemsCount()) {
-            if ($isAjax) {
-                $this->getResponse()->setBodyJson([
-                    'success' => false,
-                    'message' => $this->__('Your shopping cart is empty.'),
-                ]);
-                return;
-            }
-            $this->_goBack();
-            return;
-        }
-
         // Handle remove action (for unified promo code removal)
         $removeType = $this->getRequest()->getParam('remove_type');
         $removeCode = $this->getRequest()->getParam('remove_code');
@@ -642,134 +629,57 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             return;
         }
 
+        if ($this->getRequest()->getParam('remove') == 1) {
+            $this->_removePromoCode('coupon', (string) $this->_getQuote()->getCouponCode(), $isAjax);
+            return;
+        }
+
         // Get code from either parameter name (coupon_code for legacy, promo_code for unified)
         $code = trim((string) ($this->getRequest()->getParam('promo_code') ?: $this->getRequest()->getParam('coupon_code')));
-        $isRemove = $this->getRequest()->getParam('remove') == 1;
 
-        if ($isRemove) {
-            $this->_removePromoCode('coupon', $this->_getQuote()->getCouponCode(), $isAjax);
-            return;
-        }
-
-        if (!$code) {
-            if ($isAjax) {
-                $this->getResponse()->setBodyJson([
-                    'success' => false,
-                    'message' => $this->__('Please enter a promo code.'),
-                ]);
-                return;
-            }
-            $this->_goBack();
-            return;
-        }
-
-        // Check code length
-        if (strlen($code) > Mage_Checkout_Helper_Cart::COUPON_CODE_MAX_LENGTH) {
-            $message = $this->__('Promo code "%s" is not valid.', $code);
-            if ($isAjax) {
-                $this->getResponse()->setBodyJson([
-                    'success' => false,
-                    'message' => $message,
-                ]);
-                return;
-            }
-            $this->_getSession()->addError($message);
-            $this->_goBack();
-            return;
-        }
-
-        // First, try as coupon code
-        $couponApplied = $this->_tryApplyCoupon($code);
-
-        if ($couponApplied) {
-            $message = $this->__('Coupon code "%s" was applied.', $code);
-            if ($isAjax) {
-                $this->getResponse()->setBodyJson([
-                    'success' => true,
-                    'message' => $message,
-                    'type' => 'coupon',
-                    'code' => $code,
-                    'promo_block_html' => $this->_getPromoBlockHtml(),
-                ]);
-                return;
-            }
-            $this->_getSession()->addSuccess($message);
+        try {
+            Mage::getService('checkout/cart')->applyCoupon($this->_getQuote(), $code);
             $this->_getSession()->setCartCouponCode($code);
-            $this->_goBack();
+            $this->_sendPromoResult($isAjax, true, $this->__('Coupon code "%s" was applied.', $code), ['type' => 'coupon', 'code' => $code]);
             return;
+        } catch (Mage_Core_Exception_Input|Mage_Core_Exception_Conflict|Mage_Core_Exception_TooManyRequests $e) {
+            $this->_sendPromoResult($isAjax, false, $e->getMessage());
+            return;
+        } catch (Mage_Core_Exception) {
+            // The code is not a coupon of this cart, so it can be a gift card
         }
 
-        // Coupon didn't work, try as gift card
         $giftcardResult = $this->_tryApplyGiftcard($code);
-
         if ($giftcardResult['success']) {
-            $message = $this->__('Gift card "%s" was applied.', $code);
-            if ($isAjax) {
-                $this->getResponse()->setBodyJson([
-                    'success' => true,
-                    'message' => $message,
-                    'type' => 'giftcard',
-                    'code' => $code,
-                    'promo_block_html' => $this->_getPromoBlockHtml(),
-                ]);
-                return;
-            }
-            $this->_getSession()->addSuccess($message);
-            $this->_goBack();
+            $this->_sendPromoResult($isAjax, true, $this->__('Gift card "%s" was applied.', $code), ['type' => 'giftcard', 'code' => $code]);
             return;
         }
 
-        // Neither worked
-        $message = $this->__('Promo code "%s" is not valid.', $code);
-        if ($giftcardResult['message']) {
-            $message = $giftcardResult['message'];
-        }
-
-        if ($isAjax) {
-            $this->getResponse()->setBodyJson([
-                'success' => false,
-                'message' => $message,
-            ]);
-            return;
-        }
-        $this->_getSession()->addError($message);
-        $this->_goBack();
+        $this->_sendPromoResult($isAjax, false, $giftcardResult['message'] ?: $this->__('Promo code "%s" is not valid.', $code));
     }
 
     /**
-     * Try to apply code as a coupon
+     * Send the result of the promo code box: JSON for an AJAX request, else a session message and a redirect back.
+     *
+     * @param array<string, string> $data
      */
-    protected function _tryApplyCoupon(string $code): bool
+    protected function _sendPromoResult(bool $isAjax, bool $success, string $message, array $data = []): void
     {
-        $quote = $this->_getQuote();
-        $oldCouponCode = $quote->getCouponCode();
-
-        // If same code already applied, return true
-        if ($oldCouponCode === $code) {
-            return true;
+        if ($isAjax) {
+            $body = ['success' => $success, 'message' => $message] + $data;
+            if ($success) {
+                $body['promo_block_html'] = $this->_getPromoBlockHtml();
+            }
+            $this->getResponse()->setBodyJson($body);
+            return;
         }
 
-        try {
-            $quote->getShippingAddress()->setCollectShippingRates();
-            $quote->setCouponCode($code)->collectTotals()->save();
-
-            // Check if coupon was actually applied
-            if ($code === $quote->getCouponCode()) {
-                return true;
-            }
-
-            // Coupon was not valid, restore old coupon if any
-            if ($oldCouponCode) {
-                $quote->setCouponCode($oldCouponCode)->collectTotals()->save();
-            }
-            return false;
-        } catch (Exception) {
-            // Restore old coupon if any
-            if ($oldCouponCode) {
-                $quote->setCouponCode($oldCouponCode)->collectTotals()->save();
-            }
-            return false;
+        if ($success) {
+            $this->_getSession()->addSuccess($message);
+        } else {
+            $this->_getSession()->addError($message);
         }
+        $this->_goBack();
     }
 
     /**
@@ -811,7 +721,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
 
         try {
             if ($type === 'coupon') {
-                $quote->setCouponCode('')->collectTotals()->save();
+                Mage::getService('checkout/cart')->removeCoupon($quote);
                 $message = $this->__('Coupon code was removed.');
                 $this->_getSession()->setCartCouponCode('');
             } elseif ($type === 'giftcard') {

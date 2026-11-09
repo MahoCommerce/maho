@@ -21,12 +21,7 @@ declare(strict_types=1);
  */
 
 /** Files that create a Symfony HttpException outside Maho_ApiPlatform, and must stop. */
-const LAYERING_HTTP_EXCEPTION_ALLOWLIST = [
-    // The storefront sales/download/downloadCustomOption checks the same secret key, so the download needs a service
-    'app/code/core/Mage/Catalog/Api/ProductCustomOptionProvider.php' => 3,
-    'app/code/core/Mage/Checkout/Api/CartProcessor.php' => 14,
-    'app/code/core/Mage/Sales/Api/OrderProcessor.php' => 3,
-];
+const LAYERING_HTTP_EXCEPTION_ALLOWLIST = [];
 
 /** Files that create a Symfony HttpException outside Maho_ApiPlatform for a reason that stays. */
 const LAYERING_HTTP_EXCEPTION_PERMANENT = [
@@ -43,16 +38,13 @@ const LAYERING_HTTP_EXCEPTION_PERMANENT = [
 ];
 
 /** Files in a Service folder that read the request, the superglobals or the session, and must stop. */
-const LAYERING_SERVICE_INPUT_ALLOWLIST = [
-    'app/code/core/Mage/Sales/Model/Service/Quote.php' => 1,
-];
+const LAYERING_SERVICE_INPUT_ALLOWLIST = [];
 
 /** Files in a Service folder that read the request, the superglobals or the session for a reason that stays. */
 const LAYERING_SERVICE_INPUT_PERMANENT = [];
 
 /** Transport files that call a rate limiter or a honeypot check themselves, and must stop. */
 const LAYERING_TRANSPORT_GATE_ALLOWLIST = [
-    'app/code/core/Mage/Checkout/Api/CartProcessor.php' => 2,
     // The customer grant keeps its own login limit, apart from Mage_Customer_Service_Customer::authenticate()
     'app/code/core/Maho/ApiPlatform/Api/AuthTokenProcessor.php' => 1,
 ];

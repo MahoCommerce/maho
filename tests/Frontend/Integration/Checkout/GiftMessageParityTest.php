@@ -1,0 +1,133 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+declare(strict_types=1);
+
+use ApiPlatform\Metadata\Put;
+use Mage\Checkout\Api\CartProcessor;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
+use Tests\Helpers\AdminApiParity;
+use Tests\Helpers\CartParity;
+
+uses(Tests\MahoFrontendTestCase::class);
+
+/**
+ * The shipping method step of the checkout and PUT /guest-carts/{id}/gift-message save a gift message through
+ * Mage_Checkout_Service_Cart::setGiftMessage() (#1348). Each test gives the same message to both transports and
+ * compares the outcome.
+ */
+
+/**
+ * Post the gift message fields of the shipping method step for $quote, as the checkout form names them.
+ *
+ * @param array<string, array<string, string>> $giftMessages
+ */
+function giftMessageViaWeb(Mage_Sales_Model_Quote $quote, array $giftMessages): void
+{
+    $request = new Mage_Core_Controller_Request_Http(
+        SymfonyRequest::create('/checkout/onepage/saveShippingMethod', 'POST', ['giftmessage' => $giftMessages]),
+    );
+    Mage::getModel('giftmessage/observer')->checkoutEventCreateGiftMessage(new \Maho\Event\Observer([
+        'event' => new \Maho\Event(['request' => $request, 'quote' => $quote]),
+    ]));
+}
+
+/**
+ * Put $body to /api/rest/v2/guest-carts/{id}/gift-message.
+ *
+ * @param array<string, string> $body
+ * @return array{status: int, result: mixed, errors: list<string>, fields: list<string>}
+ */
+function giftMessageViaApi(Mage_Sales_Model_Quote $quote, array $body): array
+{
+    $maskedId = (string) $quote->getData('masked_quote_id');
+    $request = AdminApiParity::jsonRequest('PUT', "/api/rest/v2/guest-carts/{$maskedId}/gift-message", $body);
+    $processor = new CartProcessor(CartParity::guestSecurity());
+
+    return AdminApiParity::api($request, fn() => $processor->process(null, new Put(name: 'set_guest_cart_gift_message'), ['id' => $maskedId], ['request' => $request]));
+}
+
+/**
+ * @return array{sender: string, recipient: string, message: string}|null
+ */
+function giftMessageStored(Mage_Sales_Model_Quote $quote): ?array
+{
+    $messageId = (int) Mage::getModel('sales/quote')->loadByIdWithoutStore($quote->getId())->getGiftMessageId();
+    $message = Mage::getModel('giftmessage/message')->load($messageId);
+    return $message->getId()
+        ? ['sender' => (string) $message->getSender(), 'recipient' => (string) $message->getRecipient(), 'message' => (string) $message->getMessage()]
+        : null;
+}
+
+beforeEach(function () {
+    Mage::unregister(Mage_Core_Model_Session_Abstract::REGISTRY_KEY);
+    $session = new Session(new MockArraySessionStorage());
+    $session->start();
+    Mage::register(Mage_Core_Model_Session_Abstract::REGISTRY_KEY, $session);
+    Mage::app()->setCurrentStore(Mage::app()->getDefaultStoreView());
+    Mage::app()->getStore()->setConfig(Mage_GiftMessage_Helper_Message::XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ORDER, '1');
+    $this->carts = [CartParity::cart(), CartParity::cart()];
+});
+
+afterEach(function () {
+    foreach ($this->carts as $cart) {
+        Mage::getService('checkout/cart')->removeGiftMessage($cart, null);
+        $cart->delete();
+    }
+});
+
+it('saves the gift message of the cart on both transports', function () {
+    [$webCart, $apiCart] = $this->carts;
+
+    giftMessageViaWeb($webCart, ["quote_{$webCart->getId()}" => ['type' => 'quote', 'from' => ' Ann ', 'to' => 'Bob ', 'message' => 'Happy birthday']]);
+    $api = giftMessageViaApi($apiCart, ['sender' => ' Ann ', 'recipient' => 'Bob ', 'message' => 'Happy birthday']);
+
+    $expected = ['sender' => 'Ann', 'recipient' => 'Bob', 'message' => 'Happy birthday'];
+    expect($api['status'])->toBe(200)
+        ->and(giftMessageStored($webCart))->toBe($expected)
+        ->and(giftMessageStored($apiCart))->toBe($expected);
+});
+
+it('removes the gift message of the cart for an empty message on both transports', function () {
+    [$webCart, $apiCart] = $this->carts;
+    foreach ($this->carts as $cart) {
+        Mage::getService('checkout/cart')->setGiftMessage($cart, null, 'Ann', 'Bob', 'Happy birthday');
+    }
+
+    giftMessageViaWeb($webCart, ["quote_{$webCart->getId()}" => ['type' => 'quote', 'from' => 'Ann', 'to' => 'Bob', 'message' => ' ']]);
+    $api = giftMessageViaApi($apiCart, ['sender' => 'Ann', 'recipient' => 'Bob', 'message' => ' ']);
+
+    expect($api['status'])->toBe(200)
+        ->and(giftMessageStored($webCart))->toBeNull()
+        ->and(giftMessageStored($apiCart))->toBeNull();
+});
+
+describe('a store that does not allow gift messages on the order', function () {
+    it('saves no gift message, and only the API reports it, since the checkout step goes on', function () {
+        Mage::app()->getStore()->setConfig(Mage_GiftMessage_Helper_Message::XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ORDER, '0');
+        [$webCart, $apiCart] = $this->carts;
+
+        giftMessageViaWeb($webCart, ["quote_{$webCart->getId()}" => ['type' => 'quote', 'from' => 'Ann', 'to' => 'Bob', 'message' => 'Happy birthday']]);
+        $api = giftMessageViaApi($apiCart, ['sender' => 'Ann', 'recipient' => 'Bob', 'message' => 'Happy birthday']);
+
+        expect($api['status'])->toBe(422)
+            ->and($api['errors'])->toBe(['Gift messages are not available for this cart'])
+            ->and(giftMessageStored($webCart))->toBeNull()
+            ->and(giftMessageStored($apiCart))->toBeNull();
+    });
+});
+
+it('skips the message of an item that is not in the cart of the checkout', function () {
+    [$webCart, $otherCart] = $this->carts;
+    $otherItemId = (int) $otherCart->getItemsCollection()->getFirstItem()->getId();
+
+    giftMessageViaWeb($webCart, ["item_{$otherItemId}" => ['type' => 'quote_item', 'from' => 'Ann', 'to' => 'Bob', 'message' => 'Hi']]);
+
+    expect((int) Mage::getModel('sales/quote_item')->load($otherItemId)->getGiftMessageId())->toBe(0);
+});
