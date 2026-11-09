@@ -53,7 +53,7 @@ Country listings live under [Directory](#directory) (`/countries`).
 | GET / POST / DELETE | `/products/{productId}/tier-prices` | Admin/API | Tier pricing (POST replaces, DELETE clears all) |
 | GET / POST | `/products/{productId}/custom-options` | GET=None, POST=Admin/API | Custom options |
 | PUT / DELETE | `/products/{productId}/custom-options/{id}` | Admin/API | Update/remove a custom option |
-| GET | `/custom-option-file/{optionId}/{key}` | None | Download a customer-uploaded option file |
+| GET | `/custom-option-file/{optionId}/{key}` | None | Download the file that a shopper uploaded for a file option. A wrong key gives a 403, an option that is not a file option a 404 |
 | GET / POST / PUT / DELETE | `/products/{productId}/bundle-options` | GET=None, writes=Admin/API | Bundle product options |
 | PUT / DELETE | `/products/{productId}/bundle-options/{id}` | Admin/API | Update/remove a bundle option |
 | GET / PUT | `/products/{productId}/configurable` | GET=None, PUT=Admin/API | Read super-attributes + child IDs / set them all |
@@ -160,6 +160,13 @@ The checkout sub-resources mirror the guest-cart flow so a logged-in customer ca
 | PUT / DELETE | `/guest-carts/{id}/gift-message` | None | Set / remove the cart-level gift message |
 | PUT / DELETE | `/guest-carts/{id}/items/{itemId}/gift-message` | None | Set / remove a per-item gift message |
 | POST | `/guest-carts/{id}/place-order` | None | Place order from guest cart |
+
+The cart page of the storefront and the API use the same rules for a coupon, a gift card, a gift message and a guest order:
+
+- A coupon needs a cart with items: an empty cart gives a 409. An empty code gives a 422 with `couponCode` in `details.errors`. A code that does not exist or does not apply gives a 422, and the cart keeps the coupon that it had.
+- Each client can try `system/rate_limit/coupon_validate` coupon codes and `system/rate_limit/giftcard_balance` gift card codes in one minute, on the cart page and on the API together. A client over a limit gets a 429 with a `Retry-After` header. An admin token and an API user token have no limit.
+- A gift message that the store does not allow gives a 422. The checkout of the storefront leaves such a message out and goes on.
+- A guest order in a store that does not allow guest checkout gives a 403.
 
 ---
 
