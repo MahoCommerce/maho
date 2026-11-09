@@ -203,11 +203,11 @@ final class StatementSplitter
      */
     private static function isOpenSqliteTrigger(string $statement, int $bodyStatementStart): bool
     {
-        if (!preg_match('#^(?:\s+|--[^\n]*\n?|(?>/\*.*?\*/))*CREATE\s+(?:TEMP(?:ORARY)?\s+)?TRIGGER\b#is', $statement)) {
+        if (!preg_match('#^(?:[ \t\n\r\f]+|--[^\n]*\n?|(?>/\*.*?\*/))*CREATE[ \t\n\r\f]+(?:TEMP(?:ORARY)?[ \t\n\r\f]+)?TRIGGER\b#is', $statement)) {
             return false;
         }
 
-        $skip = '(?:\s|--[^\n]*(?:\n|$)|(?>/\*.*?\*/))*';
+        $skip = '(?:[ \t\n\r\f]|--[^\n]*(?:\n|$)|(?>/\*.*?\*/))*';
         return $bodyStatementStart === 0
             || preg_match("#^{$skip}END{$skip}$#is", substr($statement, $bodyStatementStart)) !== 1;
     }
