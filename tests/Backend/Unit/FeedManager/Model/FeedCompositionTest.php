@@ -192,8 +192,9 @@ describe('Feed generation with saved products and mappings', function () {
             ->and($batch->visitedIds)->toBe([$ids[0], $ids[1]])
             ->and($batch->writtenIds)->toBe([$ids[0], $ids[1]]);
         $before = json_decode($this->feeds->read($job['job_id'] . '/state.json'), true, flags: JSON_THROW_ON_ERROR);
-        $products[0]->setStatus(Mage_Catalog_Model_Product_Status::STATUS_DISABLED)->save();
-        $products[2]->setStatus(Mage_Catalog_Model_Product_Status::STATUS_DISABLED)->save();
+        // Reload saved products so this status change does not reuse their stock creation data.
+        Mage::getModel('catalog/product')->setStoreId(0)->load($ids[0])->setStatus(Mage_Catalog_Model_Product_Status::STATUS_DISABLED)->save();
+        Mage::getModel('catalog/product')->setStoreId(0)->load($ids[2])->setStatus(Mage_Catalog_Model_Product_Status::STATUS_DISABLED)->save();
         $survivors = Mage::getResourceModel('catalog/product_collection')->setStoreId(1)
             ->addIdFilter($ids)->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
             ->addAttributeToSort('entity_id', 'ASC')->getAllIds();
