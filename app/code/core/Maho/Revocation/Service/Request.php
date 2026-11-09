@@ -48,7 +48,7 @@ class Maho_Revocation_Service_Request
      * Record the declaration in $input and send its emails. Return null and record nothing when the
      * web form fills the honeypot or comes back too fast, so that a bot cannot detect the trap.
      *
-     * @throws Mage_Core_Exception_NoSuchEntity when revocation is disabled, or the customer or the order of the API does not exist
+     * @throws Mage_Core_Exception_NoSuchEntity when revocation is disabled, or the customer of the API does not exist
      * @throws Mage_Core_Exception_TooManyRequests when the client is over its limit
      * @throws Mage_Core_Exception on validation failure (before any row is written)
      */
@@ -160,11 +160,12 @@ class Maho_Revocation_Service_Request
     }
 
     /**
-     * Fill the declaration of the API from the account of the customer and from the order, which the
-     * customer must own. The order must be inside its revocation period.
+     * Fill the declaration of the API from the account of the customer. An order of the customer gives a verified
+     * declaration, as the link on the order page of the storefront does. Any other order, and an order after its
+     * revocation period, is recorded too, as on the public form: the merchant decides in the admin.
      *
-     * @throws Mage_Core_Exception_NoSuchEntity
-     * @throws Mage_Core_Exception
+     * @throws Mage_Core_Exception_NoSuchEntity when the customer does not exist
+     * @throws Mage_Core_Exception when the input names no order
      */
     protected function _readCustomerOrder(\Maho\DataObject $input): void
     {
@@ -178,25 +179,25 @@ class Maho_Revocation_Service_Request
         $orderReference = trim((string) $input->getOrderReference());
         if ($input->getOrderId()) {
             $order->load((int) $input->getOrderId());
+            $orderReference = $orderReference !== '' ? $orderReference : (string) (int) $input->getOrderId();
         } elseif ($orderReference !== '') {
             $order->loadByIncrementId($orderReference);
         } else {
             Mage::throwException($helper->__('An order reference is required'));
         }
-        if (!$order->getId() || (int) $order->getCustomerId() !== (int) $customer->getId()) {
-            throw new Mage_Core_Exception_NoSuchEntity($helper->__('Order not found'));
-        }
-        if (!$helper->isOrderWithinCoolingOffWindow($order)) {
-            Mage::throwException($helper->__('The revocation period for this order has expired'));
-        }
 
         $input->addData([
             'customer_name' => trim($customer->getName() ?: $customer->getFirstname() . ' ' . $customer->getLastname()),
             'email' => (string) $customer->getEmail(),
-            'order_reference' => (string) $order->getIncrementId(),
-            'store_id' => (int) $order->getStoreId(),
-            'session_order_id' => (int) $order->getId(),
+            'order_reference' => $orderReference,
         ]);
+        if ($order->getId() && (int) $order->getCustomerId() === (int) $customer->getId()) {
+            $input->addData([
+                'order_reference' => (string) $order->getIncrementId(),
+                'store_id' => (int) $order->getStoreId(),
+                'session_order_id' => (int) $order->getId(),
+            ]);
+        }
     }
 
     /**

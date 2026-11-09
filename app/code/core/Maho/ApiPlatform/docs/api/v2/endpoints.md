@@ -636,9 +636,8 @@ curl -X POST /api/rest/v2/customers/me/revocation-requests \
   -d '{"orderId": 1234, "reason": "I changed my mind"}'
 ```
 - `orderId` (int) or `orderReference` (order increment ID) identifies the order; one is required.
-- Ownership is re-checked server-side: an order that isn't the authenticated customer's returns `404`.
-- Because the customer is authenticated and owns the order, the recorded declaration is **verified** (`verified: true`), the same trust level as the my-account web link. The declaration row is the legal receipt and is always written, even if the receipt/notification emails are suppressed.
-- The submission is gated by the store's cooling-off window; an order past it returns `422`.
+- The API records every declaration, as the public form does: the merchant decides in the admin.
+- An order of the authenticated customer gives a **verified** declaration (`verified: true`), the same trust level as the my-account web link, also after the cooling-off window. Any other order reference is recorded **unverified**, and it is not linked to an order. The declaration row is the legal receipt and is always written, even if the receipt/notification emails are suppressed.
 - Disabled revocation (`revocation/general/enabled = 0`) returns `404`.
 
 **Response fields:** `id`, `orderId`, `orderReference`, `reason`, `customerName`, `email`, `verified`, `storeId`, `receivedAt`, `processedStatus`, `processedAt`, `suppressedAt`, `suppressedReason`. The internal-only fields `adminNote`, `ip`, and `userAgent` are returned **only** to admins.

@@ -113,7 +113,6 @@
 "The request has been linked to order %s.","The request has been linked to order %s."
 "The revocation has been marked as accepted.","The revocation has been marked as accepted."
 "The revocation has been marked as rejected.","The revocation has been marked as rejected."
-"The revocation period for this order has expired","The revocation period for this order has expired"
 "The revocation request has been saved.","The revocation request has been saved."
 "This revocation request no longer exists.","This revocation request no longer exists."
 "This revocation was accepted. To refund the customer, %s for order %s.","This revocation was accepted. To refund the customer, %s for order %s."

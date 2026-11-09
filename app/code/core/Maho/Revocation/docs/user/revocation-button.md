@@ -106,7 +106,7 @@ All settings live under **System → Configuration → Sales → Revocation Butt
 | **Enabled** | Master switch. Does not by itself display the button, you must place the widget. | Store View | No |
 | **Button Label** | Text for the storefront button. Leave empty for the translated default ("Revoke contract" / "Vertrag widerrufen"). | Store View | (empty) |
 | **Merchant Notification Email** | Where merchant notifications are sent. Leave empty to use the General Contact email. | Store View | (empty) |
-| **Cooling-Off Period (Days)** | Gates the my-account shortcut and the API, never the public form. The statutory period is 14 days. | Store View | 14 |
+| **Cooling-Off Period (Days)** | Shows the my-account shortcut only during the period. It never refuses a declaration, on the public form or the API. The statutory period is 14 days. | Store View | 14 |
 
 The cooling-off window is measured from the latest shipment date when available, falling back to the order date. Setting it to `0` always shows the my-account link. It never restricts the public `/revocation` form, which must remain open.
 

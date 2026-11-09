@@ -223,8 +223,8 @@ it('counts the submissions of one client on both transports together', function 
         ->and($web['errors'])->toBe(['Your request could not be processed right now. Please try again later or contact us directly.']);
 });
 
-describe('kept differences: the web form takes any declaration, the API takes only an own order in its period', function () {
-    it('records an order of another customer as an unverified declaration on the web and refuses it on the API', function () {
+describe('every declaration is recorded, because the law requires it', function () {
+    it('records an order of another customer as an unverified declaration that is not linked, on both transports', function () {
         $customer = revocationParityCustomer();
         $order = revocationParityOrder(revocationParityCustomer());
 
@@ -234,11 +234,12 @@ describe('kept differences: the web form takes any declaration, the API takes on
         expect($web['accepted'])->toBeTrue()
             ->and($web['request']->getVerified())->toBe(0)
             ->and($web['request']->getOrderId())->toBeNull()
-            ->and($api['status'])->toBe(404)
-            ->and($api['message'])->toBe('Order not found');
+            ->and($api['status'])->toBe(200)
+            ->and($api['request']->getVerified())->toBe(0)
+            ->and($api['request']->getOrderId())->toBeNull();
     });
 
-    it('records an order after its revocation period on the web and refuses it on the API', function () {
+    it('records an own order after its revocation period as a verified declaration, on both transports', function () {
         $customer = revocationParityCustomer();
         $order = revocationParityOrder($customer, '-30 days');
 
@@ -247,7 +248,8 @@ describe('kept differences: the web form takes any declaration, the API takes on
 
         expect($web['accepted'])->toBeTrue()
             ->and($web['request']->getVerified())->toBe(1)
-            ->and($api['status'])->toBe(422)
-            ->and($api['message'])->toBe('The revocation period for this order has expired');
+            ->and($api['status'])->toBe(200)
+            ->and($api['request']->getVerified())->toBe(1)
+            ->and((int) $api['request']->getOrderId())->toBe((int) $order->getId());
     });
 });
