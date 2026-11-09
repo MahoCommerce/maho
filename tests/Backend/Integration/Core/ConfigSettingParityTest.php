@@ -186,6 +186,18 @@ it('refuses a scope that does not exist on the CLI', function (): void {
 });
 
 describe('a path that no field declares', function (): void {
+    it('accepts a field of a group that the admin makes from the module list, on the API and the CLI', function (): void {
+        $path = 'advanced/modules_disable_output/Mage_Cms';
+        $cli = configParityCli(new ConfigSet(), ['path' => $path, 'value' => '0', '--scope' => 'default', '--scope-id' => 0]);
+        $api = configParityApi('PUT', $path, ['value' => '0']);
+        $stored = configParityStored($path, 'default', 0);
+        Mage::getConfig()->deleteConfig($path);
+
+        expect($cli['code'])->toBe(Command::SUCCESS)
+            ->and($api['status'])->toBe(200)
+            ->and($stored)->toBe('0');
+    });
+
     it('is refused on the API and the CLI, as in the admin, and saved on the CLI with --undeclared', function (): void {
         $path = 'dev/parity/undeclared';
         $api = configParityApi('PUT', $path, ['value' => 'y']);

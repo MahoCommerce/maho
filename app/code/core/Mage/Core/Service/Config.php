@@ -60,7 +60,7 @@ class Mage_Core_Service_Config
      */
     public function getField(string $path): array
     {
-        return $this->getFields()[trim($path, '/')]
+        return $this->findField(trim($path, '/'))
             ?? throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('core')->__("Configuration setting '%s' not found", $path));
     }
 
@@ -141,7 +141,7 @@ class Mage_Core_Service_Config
         int $scopeId = 0,
         bool $allowUndeclared = false,
     ): void {
-        $field = $allowUndeclared ? ($this->getFields()[$path] ?? null) : $this->getField($path);
+        $field = $allowUndeclared ? $this->findField($path) : $this->getField($path);
         $this->assertScope($scope, $scopeId);
         if ($field !== null && !$this->isShownAtScope($field, $scope)) {
             throw new Mage_Core_Exception_Input()
@@ -212,6 +212,45 @@ class Mage_Core_Service_Config
         $adapter = $resource->getConnection('core_read');
         $ids = $adapter->fetchCol($adapter->select()->from($resource->getTableName($table), [$column]));
         return in_array($id, array_map(intval(...), $ids), true);
+    }
+
+    /**
+     * @return FieldInfo|null the field of $path in system.xml, or in a group that makes its fields when the admin
+     *                        renders it, such as Disable Modules Output
+     */
+    private function findField(string $path): ?array
+    {
+        $field = $this->getFields()[$path] ?? null;
+        if ($field !== null) {
+            return $field;
+        }
+        $parts = explode('/', $path);
+        if (count($parts) !== 3) {
+            return null;
+        }
+        [$sectionCode, $groupCode, $fieldCode] = $parts;
+        $section = Mage::getSingleton('adminhtml/config')->getSections()->{$sectionCode};
+        $group = $section?->groups?->{$groupCode};
+        // The admin saves any field of a dynamic group, so the service accepts it too
+        if (!$group || !(int) $group->dynamic_group) {
+            return null;
+        }
+        return [
+            'path' => $path,
+            'section' => $sectionCode,
+            'group' => $groupCode,
+            'field' => $fieldCode,
+            'label' => $fieldCode,
+            'groupLabel' => $this->label($group),
+            'sectionLabel' => $this->label($section),
+            'comment' => '',
+            'frontendType' => 'select',
+            'backendModel' => null,
+            'sourceModel' => null,
+            'showInDefault' => (bool) (int) $group->show_in_default,
+            'showInWebsite' => (bool) (int) $group->show_in_website,
+            'showInStore' => (bool) (int) $group->show_in_store,
+        ];
     }
 
     /**
