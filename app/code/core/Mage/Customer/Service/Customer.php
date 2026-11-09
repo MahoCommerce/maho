@@ -292,13 +292,15 @@ class Mage_Customer_Service_Customer
 
     /**
      * Save the changes that the customer made to their own account. With $currentPassword, check it first, unless
-     * the store registers customers without a password. A new email or a new password, set with its confirmation,
+     * the store registers customers without a password. A new email needs $currentPassword in that case too.
+     * A new email or a new password, set with its confirmation,
      * ends the other sessions of the customer and invalidates the password reset link, and the customer gets an
      * email about the change at the old address.
      *
      * @throws Mage_Core_Exception_TooManyRequests when the client or the customer is over the password change limit
      * @throws Mage_Core_Exception when $currentPassword is wrong
-     * @throws Mage_Core_Exception_Input with one error for each problem of the customer
+     * @throws Mage_Core_Exception_Input with one error for each problem of the customer, or when a new email has
+     *                                    no $currentPassword
      * @throws Mage_Core_Exception_Conflict when another customer has the email
      */
     public function updateAccount(
@@ -306,12 +308,17 @@ class Mage_Customer_Service_Customer
         #[\SensitiveParameter]
         ?string $currentPassword = null,
     ): Customer {
-        if ($currentPassword !== null && !$this->isPasswordless()) {
-            $this->verifyPassword($customer, $currentPassword);
-        }
-
         $oldEmail = (string) $customer->getOrigData('email');
         $isChangeEmail = $oldEmail !== '' && $oldEmail !== (string) $customer->getEmail();
+
+        if (!$this->isPasswordless()) {
+            if ($currentPassword !== null) {
+                $this->verifyPassword($customer, $currentPassword);
+            } elseif ($isChangeEmail) {
+                throw new Mage_Core_Exception_Input()
+                    ->addError('current_password', Mage::helper('customer')->__('Enter your current password to change your email.'));
+            }
+        }
         $isChangePassword = $customer->getPassword() !== '';
 
         $errors = new Mage_Core_Exception_Input();

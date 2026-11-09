@@ -152,6 +152,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
                 'firstName' => ['type' => 'String'],
                 'lastName' => ['type' => 'String'],
                 'email' => ['type' => 'String'],
+                'currentPassword' => ['type' => 'String', 'description' => 'Required to change the email'],
                 'customAttributes' => ['type' => 'Iterable', 'description' => 'Values of the custom attributes of the Customer Account Edit form, keyed by attribute code'],
             ],
             description: 'Update authenticated customer profile',
@@ -274,7 +275,7 @@ class Customer extends CrudResource
     #[ApiProperty(writable: true, readable: false)]
     public ?string $password = null;
 
-    /** @var string|null Current password for password change */
+    /** @var string|null Current password for a password change, or for a profile update that changes the email */
     #[ApiProperty(writable: true, readable: false)]
     public ?string $currentPassword = null;
 

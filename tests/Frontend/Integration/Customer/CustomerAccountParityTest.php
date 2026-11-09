@@ -10,6 +10,7 @@ declare(strict_types=1);
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GraphQl\Mutation;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use Mage\Customer\Api\Address as AddressDto;
 use Mage\Customer\Api\AddressProcessor;
 use Mage\Customer\Api\Customer as CustomerDto;
@@ -305,6 +306,28 @@ describe('password change', function () {
         expect($web['errors'])->toBe(['Current password is incorrect.'])
             ->and($api['status'])->toBe(422)
             ->and($api['message'])->toBe('Current password is incorrect.');
+    });
+});
+
+describe('email change', function () {
+    it('needs the current password on the API, as the storefront form does', function () {
+        $customer = customerParityCustomer();
+        $oldEmail = $customer->getEmail();
+        $update = fn(?string $currentPassword) => TransportParity::api(function () use ($customer, $currentPassword) {
+            $dto = new CustomerDto();
+            $dto->email = 'changed-' . $customer->getEmail();
+            $dto->currentPassword = $currentPassword;
+            return new CustomerProcessor(customerParitySecurity((int) $customer->getId()))
+                ->process($dto, new Put(name: 'update_profile'));
+        });
+
+        $refused = $update(null);
+        expect($refused['status'])->toBe(422)
+            ->and($refused['fields'])->toBe(['currentPassword'])
+            ->and(customerParityReload($customer)->getEmail())->toBe($oldEmail);
+
+        expect($update(CUSTOMER_PARITY_PASSWORD)['status'])->toBe(200)
+            ->and(customerParityReload($customer)->getEmail())->toBe('changed-' . $oldEmail);
     });
 });
 
