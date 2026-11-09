@@ -225,7 +225,16 @@ class tiptapWysiwygSetup {
         sections.push(snapshot('Slideshow', () => editor.commands.insertContent({
             type: 'mahoSlideshow',
             attrs: { slides: [
-                { src: '{{media url="wysiwyg/slide-1.jpg"}}', alt: 'First slide', href: '{{store url="sale"}}' },
+                {
+                    src: '{{media url="wysiwyg/slide-1.jpg"}}',
+                    alt: 'First slide',
+                    href: '{{store url="sale"}}',
+                    // Alternatives in a <picture>: one for a breakpoint preset of the store, one for a custom max-width
+                    sources: [
+                        { srcset: '{{media url="wysiwyg/slide-1-mobile.jpg"}}', preset: 'mobile', breakpoint: null },
+                        { srcset: '{{media url="wysiwyg/slide-1-tablet.jpg"}}', preset: null, breakpoint: 1100 },
+                    ],
+                },
                 { src: '{{media url="wysiwyg/slide-2.jpg"}}', alt: 'Second slide' },
             ] },
         })));
@@ -637,6 +646,7 @@ class tiptapWysiwygSetup {
                 TiptapModules.MahoSpan,
                 ...(this.config.add_slideshows !== false ? [TiptapModules.MahoSlideshow.configure({
                     directivesUrl: this.config.directives_url,
+                    breakpoints: this.config.breakpoints ?? [],
                     browserUrl: setRouteParams(this.config.files_browser_window_url, {
                         store: this.storeId,
                         filetype: 'image',
@@ -847,9 +857,8 @@ class tiptapWysiwygSetup {
             blockDropdown(this, 'accordion'),
             ...blockButtons(this, ['Insert Image', 'Insert Slideshow', 'Insert Widget', 'Insert Variable']),
             { type: 'spacer' },
+            // Source and Fullscreen share the last group, which CSS pins to the end of the first row
             { type: 'button', title: 'Source', icon: 'source', onClick: () => this.toggle() || this.loadCodeEditor().then((codeEditor) => codeEditor?.view.focus()), data: { source: '' } },
-            // Fullscreen has a group of its own: CSS pins that group to the end of the first row
-            { type: 'group' },
             // The command focuses the editor without a scroll. The focus() of a toolbar chain scrolls to the selection
             { type: 'button', title: 'Fullscreen Page Builder', icon: 'fullscreen-maximize', onClick: () => this.editor.commands.toggleFullscreen(), data: { command: 'toggleFullscreen', args: '[]' }, enabled: !this.textarea.closest('dialog') },
         ]);

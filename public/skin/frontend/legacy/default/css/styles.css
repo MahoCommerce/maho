@@ -1126,7 +1126,7 @@ button.btn-remove {
   width: 26.31579%;
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: 979px) {
   .col3-layout .col-right {
     float: left;
     clear: left;
