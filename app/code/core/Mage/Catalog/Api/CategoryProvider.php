@@ -65,7 +65,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
     private function getItem(int $id, bool $checkVisibility = true): ?Category
     {
         try {
-            $mahoCategory = $this->service()->getById($id);
+            $mahoCategory = $this->service()->getById($id, StoreContext::getStoreId());
         } catch (\Mage_Core_Exception_NoSuchEntity) {
             return null;
         }
