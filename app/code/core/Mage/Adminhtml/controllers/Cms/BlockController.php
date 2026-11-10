@@ -70,7 +70,7 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
         $this->_title($this->__('CMS'))->_title($this->__('Static Blocks'));
 
         $id = $this->getRequest()->getParam('block_id');
-        $model = Mage::getModel('cms/block');
+        $model = $this->blockService()->newBlock();
         if ($id) {
             try {
                 $model = $this->blockService()->getById((int) $id);

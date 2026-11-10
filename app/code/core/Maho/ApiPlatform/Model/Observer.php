@@ -202,6 +202,18 @@ class Maho_ApiPlatform_Model_Observer
     }
 
     /**
+     * Clean the API product cache after a write that does not save the product: the mass update of attributes,
+     * websites and categories in the admin and the fast update of the API
+     */
+    #[Maho\Config\Observer('catalog_product_attribute_update_after')]
+    #[Maho\Config\Observer('catalog_product_website_update')]
+    #[Maho\Config\Observer('catalog_product_category_update')]
+    public function invalidateProductMassUpdateCache(\Maho\Event\Observer $_observer): void
+    {
+        $this->cleanApiCache(['API_PRODUCTS']);
+    }
+
+    /**
      * Invalidate API cache when a category is saved
      */
     #[Maho\Config\Observer('catalog_category_save_after')]

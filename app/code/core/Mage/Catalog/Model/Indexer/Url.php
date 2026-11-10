@@ -36,6 +36,7 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
     protected $_matchedEntities = [
         Mage_Catalog_Model_Product::ENTITY => [
             Mage_Index_Model_Event::TYPE_SAVE,
+            Mage_Index_Model_Event::TYPE_MASS_ACTION,
         ],
         Mage_Catalog_Model_Category::ENTITY => [
             Mage_Index_Model_Event::TYPE_SAVE,
@@ -97,7 +98,10 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
         }
 
         $entity = $event->getEntity();
-        if ($entity == Mage_Core_Model_Store::ENTITY) {
+        if ($entity == Mage_Catalog_Model_Product::ENTITY && $event->getType() === Mage_Index_Model_Event::TYPE_MASS_ACTION) {
+            // Of the mass actions, only a change of the categories changes the URL rewrites of a product
+            $result = (bool) $event->getDataObject()?->hasData('category_ids');
+        } elseif ($entity == Mage_Core_Model_Store::ENTITY) {
             $store = $event->getDataObject();
             if ($store && ($store->isObjectNew() || $store->dataHasChangedFor('group_id'))) {
                 $result = true;
@@ -168,6 +172,10 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
      */
     protected function _registerProductEvent(Mage_Index_Model_Event $event)
     {
+        if ($event->getType() === Mage_Index_Model_Event::TYPE_MASS_ACTION) {
+            $event->addNewData('rewrite_product_ids', $event->getDataObject()->getProductIds());
+            return;
+        }
         $product = $event->getDataObject();
         $dataChange = $product->dataHasChangedFor('url_key')
             || $product->getIsChangedCategories()

@@ -25,34 +25,16 @@ class Mage_CatalogSearch_ResultController extends Mage_Core_Controller_Front_Act
     #[Maho\Config\Route('/catalogsearch/result', name: 'catalogsearch.result.index', methods: ['GET'])]
     public function indexAction(): void
     {
-        $helper = Mage::helper('catalogsearch');
-        $query = $helper->getQuery();
-        /** @var Mage_CatalogSearch_Model_Query $query */
-
-        $query->setStoreId(Mage::app()->getStore()->getId());
-
-        // The term is persisted once, after the search, and only while the client is inside
-        // its analytics budget. A blocked client still gets the full result page.
-        $canLog = false;
+        /** @var Mage_CatalogSearch_Service_Query $service */
+        $service = Mage::getService('catalogsearch/query');
+        $query = $service->prepare((int) Mage::app()->getStore()->getId());
 
         if ($query->getQueryText() != '') {
-            if ($helper->isMinQueryLength()) {
-                $query->setId(0)
-                    ->setIsActive()
-                    ->setIsProcessed();
-            } else {
-                $canLog = $helper->canLogQuery();
-                if ($canLog) {
-                    $query->setPopularity($query->getId() ? $query->getPopularity() + 1 : 1);
-                }
-
-                if ($query->getRedirect()) {
-                    if ($canLog) {
-                        $query->save();
-                    }
-                    $this->getResponse()->setRedirect($query->getRedirect());
-                    return;
-                }
+            $redirect = $service->getRedirect($query);
+            if ($redirect !== null) {
+                $service->log($query);
+                $this->getResponse()->setRedirect($redirect);
+                return;
             }
 
             if (!Mage::getSingleton('catalogsearch/layer')->isValidRequest($this->getRequest())) {
@@ -60,16 +42,15 @@ class Mage_CatalogSearch_ResultController extends Mage_Core_Controller_Front_Act
                 return;
             }
 
-            $helper->checkNotes();
+            Mage::helper('catalogsearch')->checkNotes();
 
             $this->loadLayout();
             $this->_initLayoutMessages('catalog/session');
             $this->_initLayoutMessages('checkout/session');
             $this->renderLayout();
 
-            if ($canLog) {
-                $query->save();
-            }
+            // The result block sets the number of results during the render
+            $service->log($query);
 
             // Redirect to product if there's only one result
             if (Mage::getStoreConfigFlag('catalog/search/redirect_to_product_if_one_result')) {

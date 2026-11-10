@@ -28,12 +28,11 @@ class Mage_Catalog_Block_Product_List_Related extends Mage_Catalog_Block_Product
         $product = Mage::registry('product');
         /** @var Mage_Catalog_Model_Product $product */
 
-        $this->_itemCollection = $product->getRelatedProductCollection()
+        /** @var Mage_Catalog_Service_Product_Link $service */
+        $service = Mage::getService('catalog/product_link');
+        $this->_itemCollection = $service->getVisibleLinkCollection($product, Mage_Catalog_Service_Product_Link::TYPE_RELATED, (int) Mage::app()->getStore()->getId())
             ->addAttributeToSelect('required_options')
-            ->setPositionOrder()
-            ->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds())
-            ->addStoreFilter()
-        ;
+            ->setPositionOrder();
 
         if ($this->isModuleEnabled('Mage_Checkout', 'catalog')) {
             Mage::getResourceSingleton('checkout/cart')->addExcludeProductFilter(
@@ -41,10 +40,6 @@ class Mage_Catalog_Block_Product_List_Related extends Mage_Catalog_Block_Product
                 Mage::getSingleton('checkout/session')->getQuoteId(),
             );
             $this->_addProductAttributesAndPrices($this->_itemCollection);
-        }
-
-        if (!Mage::helper('cataloginventory')->isShowOutOfStock()) {
-            Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($this->_itemCollection);
         }
 
         $this->_itemCollection->load();

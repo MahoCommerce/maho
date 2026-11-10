@@ -199,6 +199,35 @@ describe('pages', function (): void {
             ->and($api['result']->identifier)->toBe(CMS_PARITY_PREFIX . 'from-title');
     });
 
+    it('gives a new page the default layout of the theme in the admin, the API and the importer', function (): void {
+        Mage::unregister('_singleton/page/source_layout');
+        Mage::register('_singleton/page/source_layout', new class extends Mage_Page_Model_Source_Layout {
+            #[\Override]
+            public function getDefaultValue()
+            {
+                return 'two_columns_left';
+            }
+        });
+        $csv = tempnam(sys_get_temp_dir(), 'cms') . '.csv';
+        file_put_contents($csv, "identifier,stores,title,content\n" . CMS_PARITY_PREFIX . "import,,Parity,<p>Body</p>\n");
+
+        try {
+            $admin = Mage::getService('cms/page')->newPage();
+            $api = cmsParityApi(CmsPageProcessor::class, CmsPage::class, ['identifier' => CMS_PARITY_PREFIX . 'api', 'title' => 'Parity']);
+            (new Maho\Import\Importer\CmsPages())->import($csv);
+            $imported = Mage::getModel('cms/page')->load(CMS_PARITY_PREFIX . 'import', 'identifier');
+        } finally {
+            Mage::unregister('_singleton/page/source_layout');
+            unlink($csv);
+        }
+
+        expect($admin->getRootTemplate())->toBe('two_columns_left')
+            ->and($admin->getIsActive())->toBeTrue()
+            ->and($api['result']->pageLayout)->toBe('two_columns_left')
+            ->and($api['result']->isActive)->toBeTrue()
+            ->and($imported->getRootTemplate())->toBe('two_columns_left');
+    });
+
     it('refuses to delete an unknown page on both transports', function (): void {
         $admin = AdminApiParity::admin(Mage_Adminhtml_Cms_PageController::class, 'delete', ['page_id' => 999999]);
         $api = cmsParityApi(CmsPageProcessor::class, CmsPage::class, [], 999999);

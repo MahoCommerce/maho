@@ -169,6 +169,10 @@ final class UrlResolverProvider extends \Maho\ApiPlatform\Provider
 
             // Check if this is a simple product with a configurable parent
             $productId = $this->resolveParentProductId($productId);
+            if (!$this->isProductVisible($productId)) {
+                $result->type = 'not_found';
+                return $result;
+            }
 
             $result->type = 'product';
             $result->id = $productId;
@@ -177,6 +181,12 @@ final class UrlResolverProvider extends \Maho\ApiPlatform\Provider
         }
 
         if (preg_match('#^catalog/category/view/id/(\d+)#', $targetPath, $matches)) {
+            try {
+                self::categoryService()->getVisibleById((int) $matches[1], StoreContext::getStoreId());
+            } catch (\Mage_Core_Exception_NoSuchEntity) {
+                $result->type = 'not_found';
+                return $result;
+            }
             $result->type = 'category';
             $result->id = (int) $matches[1];
             $result->identifier = $identifier;
@@ -217,13 +227,17 @@ final class UrlResolverProvider extends \Maho\ApiPlatform\Provider
     {
         $collection = \Mage::getModel('catalog/category')->getCollection();
         $collection->setStoreId($storeId);
+        $collection->addAttributeToSelect(['url_key', 'is_active']);
         $collection->addAttributeToFilter('url_key', $urlKey);
         $collection->addAttributeToFilter('is_active', 1);
-        $collection->setPageSize(1);
 
-        $category = $collection->getFirstItem();
-
-        return $category->getId() ? $category : null;
+        // A URL key can repeat in the trees of other stores
+        foreach ($collection as $category) {
+            if (self::categoryService()->isVisibleInStore($category, $storeId)) {
+                return $category;
+            }
+        }
+        return null;
     }
 
     private function findProductByUrlKey(string $urlKey, int $storeId): ?\Mage_Catalog_Model_Product
@@ -244,13 +258,28 @@ final class UrlResolverProvider extends \Maho\ApiPlatform\Provider
         // If this is a simple product, check if it has a parent (configurable, grouped, or bundle)
         // and return the parent instead (for proper display)
         if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
-            $parent = $this->findParentProduct($product->getId());
-            if ($parent) {
-                return $parent;
-            }
+            $product = $this->findParentProduct($product->getId()) ?? $product;
         }
 
-        return $product;
+        return $this->isProductVisible((int) $product->getId()) ? $product : null;
+    }
+
+    private function isProductVisible(int $productId): bool
+    {
+        /** @var \Mage_Catalog_Service_Product $service */
+        $service = \Mage::getService('catalog/product');
+        try {
+            $service->getVisibleById($productId, StoreContext::getStoreId());
+        } catch (\Mage_Core_Exception_NoSuchEntity) {
+            return false;
+        }
+        return true;
+    }
+
+    private static function categoryService(): \Mage_Catalog_Service_Category
+    {
+        /** @var \Mage_Catalog_Service_Category */
+        return \Mage::getService('catalog/category');
     }
 
     /**

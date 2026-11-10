@@ -42,6 +42,30 @@ class Mage_Catalog_Service_Category
     }
 
     /**
+     * Load the category $id for the storefront of the store view $storeId.
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity when the store view does not show the category
+     */
+    public function getVisibleById(int $id, int $storeId): Category
+    {
+        $category = $this->getById($id, $storeId);
+        if (!$this->isVisibleInStore($category, $storeId)) {
+            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('catalog')->__('Category not found'));
+        }
+        return $category;
+    }
+
+    /**
+     * Tell whether the storefront of the store view $storeId shows $category: the category is active, and it is the
+     * root category of the store or a category below it.
+     */
+    public function isVisibleInStore(Category $category, int $storeId): bool
+    {
+        return $category->getId() && $category->getIsActive()
+            && $this->isInTrees($category, [(int) Mage::app()->getStore($storeId)->getRootCategoryId()]);
+    }
+
+    /**
      * Return a new category under $parentId, with the values of the admin scope and the attribute set of the parent.
      *
      * @param list<int>|null $storeIds with a list, the parent must be in the tree of one of these store views

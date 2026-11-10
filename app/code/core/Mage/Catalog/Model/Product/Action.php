@@ -80,6 +80,49 @@ class Mage_Catalog_Model_Product_Action extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Put the product $productId in the categories $categoryIds only, without a save of the product. The category
+     * product index and the URL rewrites of the product follow.
+     *
+     * @param list<int> $categoryIds
+     */
+    public function updateCategories(int $productId, array $categoryIds): static
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        $table = $resource->getTableName('catalog/category_product');
+
+        $existing = array_map(intval(...), $write->fetchCol("SELECT category_id FROM {$table} WHERE product_id = ?", [$productId]));
+        $added = array_values(array_diff($categoryIds, $existing));
+        $removed = array_values(array_diff($existing, $categoryIds));
+        foreach ($added as $categoryId) {
+            $write->insertOnDuplicate($table, ['category_id' => $categoryId, 'product_id' => $productId, 'position' => 0]);
+        }
+        if ($removed !== []) {
+            $write->delete($table, ['product_id = ?' => $productId, 'category_id IN (?)' => $removed]);
+        }
+        if ($added === [] && $removed === []) {
+            return $this;
+        }
+
+        $this->setData([
+            'product_ids' => [$productId],
+            'category_ids' => $categoryIds,
+        ]);
+        Mage::getSingleton('index/indexer')->processEntityAction(
+            $this,
+            Mage_Catalog_Model_Product::ENTITY,
+            Mage_Index_Model_Event::TYPE_MASS_ACTION,
+        );
+        Mage::dispatchEvent('catalog_product_category_update', [
+            'product_ids' => [$productId],
+            'category_ids' => $categoryIds,
+        ]);
+        $this->_cleanProductCache([$productId]);
+
+        return $this;
+    }
+
+    /**
      * Update websites for product action
      *
      * allowed types:

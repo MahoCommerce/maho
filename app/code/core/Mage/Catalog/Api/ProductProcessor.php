@@ -239,7 +239,6 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             $product->setWebsiteIds($wanted);
         }
 
-        Mage::app()->cleanCache(["API_PRODUCT_{$id}", 'API_PRODUCTS']);
         $this->logApiActivity('catalog/product', 'update', $oldData, $product);
 
         return $this->refreshDto($product);

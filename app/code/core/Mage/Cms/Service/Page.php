@@ -36,6 +36,18 @@ class Mage_Cms_Service_Page
     }
 
     /**
+     * Return a new page with the defaults of the admin form: enabled, in all store views, with the default layout.
+     */
+    public function newPage(): Mage_Cms_Model_Page
+    {
+        /** @var Mage_Cms_Model_Page $page */
+        $page = Mage::getModel('cms/page');
+        return $page->setIsActive()
+            ->setRootTemplate(Mage::getSingleton('page/source_layout')->getDefaultValue())
+            ->setData('stores', [Mage_Core_Model_App::ADMIN_STORE_ID]);
+    }
+
+    /**
      * Save $page. The transport puts its input into the page first.
      * The resource model sanitizes the content and checks the identifier, the layouts, the layout updates and the robots value.
      *

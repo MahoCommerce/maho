@@ -72,6 +72,8 @@ Country listings live under [Directory](#directory) (`/countries`).
 
 The product sub-resources and the admin product page use the same rules. A tier price or a group price needs a price of 0 or more, a website and a customer group that exist, and one row for each website, group and quantity. A tier price needs a quantity above 0. An uploaded image goes through the checks of the admin upload: a known image type, the maximum size of `catalog/product_image/max_dimension`, and a new copy of the pixels. A grouped child, a configurable child and a bundle selection need a product of an allowed type. A super attribute needs the global scope, a list of options and "Use To Create Configurable Product", and it must be in the attribute set of the product. A problem in the body gives a 422 with `details.errors`. A DELETE of a link, a grouped child or a configurable child that does not exist gives a 404. A token restricted to some stores keeps the prices of the other websites when it replaces or deletes tier prices or group prices.
 
+A guest and a customer read what the storefront of the store shows. A product by `urlKey` must be enabled, visible in the catalog or the search, and in the website of the store. A `categoryId` filter of `/products` and of `/layered-filters` needs a category that is active and in the tree of the root category of the store; for another category the list is empty. The links of a product and its embedded `relatedProducts`, `crosssellProducts` and `upsellProducts` list only the linked products that are enabled, visible in the catalog and in the website of the store, and in stock when the store hides products that are out of stock. The reviews of a product, and one review, give a 404 when the storefront does not show the product, except to the author of the review. An admin token or a token with the products grant reads all the links of a product. A product search with `search` counts the term in the Search Terms report, as the search of the storefront does.
+
 **Layered navigation:**
 
 | Method | Endpoint | Auth | Description |
@@ -790,3 +792,5 @@ Admin-only. Used for group-based pricing and tax-class assignment.
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | GET | `/url-resolver?path=/some-page` | None | Resolve URL to entity |
+
+A product or a category that the storefront does not show resolves to `not_found`: a disabled product, a product that is not visible or not in the website of the store, an inactive category and a category outside the tree of the store.

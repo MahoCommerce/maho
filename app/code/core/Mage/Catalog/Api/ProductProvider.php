@@ -59,6 +59,18 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         return $dto;
     }
 
+    private static function searchService(): \Mage_CatalogSearch_Service_Query
+    {
+        /** @var \Mage_CatalogSearch_Service_Query */
+        return \Mage::getService('catalogsearch/query');
+    }
+
+    private static function categoryService(): \Mage_Catalog_Service_Category
+    {
+        /** @var \Mage_Catalog_Service_Category */
+        return \Mage::getService('catalog/category');
+    }
+
     private static function service(): \Mage_Catalog_Service_Product
     {
         /** @var \Mage_Catalog_Service_Product */
@@ -381,14 +393,18 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      *
      * @return TraversablePaginator<Product>
      */
-    private function getByUrlKey(string $urlKey, int $page, int $pageSize): TraversablePaginator
+    private function getByUrlKey(string $urlKey, int $page, int $pageSize, bool $backend): TraversablePaginator
     {
         $collection = \Mage::getResourceModel('catalog/product_collection')
             ->addAttributeToSelect('*')
             ->addAttributeToFilter('url_key', $urlKey)
-            ->addAttributeToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
             ->setPageSize($pageSize)
             ->setCurPage($page);
+        if ($backend) {
+            $collection->addAttributeToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
+        } else {
+            self::service()->addVisibleFilter($collection, StoreContext::getStoreId());
+        }
 
         // Sort composite products first so they take priority over simples with shared url_keys.
         // ANSI CASE instead of MySQL's FIELD() so the ordering works on PostgreSQL and SQLite too.
@@ -448,7 +464,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // Handle urlKey filter, direct DB lookup, bypass search
         $urlKey = $this->stringFilter($requestFilters, 'urlKey');
         if ($urlKey !== null) {
-            return $this->getByUrlKey($urlKey, $page, $pageSize);
+            return $this->getByUrlKey($urlKey, $page, $pageSize, $backend);
         }
 
         // Pick the collection source by intent. Use a fresh layer instance
@@ -464,19 +480,17 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         //   root category isn't a normal browsable node), so it must NOT back the
         //   full-catalog listing.
         $layer = null;
+        $searchQuery = null;
         if ($backend) {
             // Like the admin product grid: every status and visibility
             $collection = \Mage::getResourceModel('catalog/product_collection');
             $collection->addAttributeToSelect('*');
             $this->applyBackendFilters($collection, $requestFilters, $search);
         } elseif (!empty($search)) {
-            // Fulltext prepareResult() reads the term from the catalogsearch
-            // helper's getQueryText() (request 'q'); feed it in and reset the
-            // FPM-persisted helper so a prior request's term can't leak in.
+            // A new helper, so that the text of an earlier request in the same process does not stay
             \Mage::unregister('_helper/catalogsearch');
-            $searchHelper = \Mage::helper('catalogsearch');
-            \Mage::app()->getRequest()->setParam($searchHelper->getQueryParamName(), $search);
-            $searchHelper->getQuery()->setStoreId((int) \Mage::app()->getStore()->getId());
+            \Mage::app()->getRequest()->setParam(\Mage::helper('catalogsearch')->getQueryParamName(), $search);
+            $searchQuery = self::searchService()->prepare(StoreContext::getStoreId());
             $layer = \Mage::getModel('catalogsearch/layer');
         } elseif (!empty($requestFilters['categoryId'])) {
             $layer = \Mage::getModel('catalog/layer');
@@ -484,10 +498,12 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
         if ($layer !== null) {
             if (!empty($requestFilters['categoryId'])) {
-                $category = \Mage::getModel('catalog/category')->load((int) $requestFilters['categoryId']);
-                if ($category->getId()) {
-                    $layer->setCurrentCategory($category);
+                try {
+                    $category = self::categoryService()->getVisibleById((int) $requestFilters['categoryId'], StoreContext::getStoreId());
+                } catch (\Mage_Core_Exception_NoSuchEntity) {
+                    return new TraversablePaginator(new \ArrayIterator([]), $page, $pageSize, 0);
                 }
+                $layer->setCurrentCategory($category);
             }
             $collection = $layer->getProductCollection();
         } elseif (!$backend) {
@@ -617,6 +633,9 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         $total = $collection->getSize();
+        if ($searchQuery !== null) {
+            self::searchService()->log($searchQuery, (int) $total);
+        }
         $collection->setPageSize($pageSize);
         $collection->setCurPage($page);
         // One query for all tier prices, as the finalPrice of each product reads them
@@ -953,9 +972,9 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // so GraphQL renders them as Iterable scalar rather than the broken
         // CursorConnection wrapping (see the typed-array null-edges commit
         // history). Flatten each Product to a summary-shape array on assignment.
-        $dto->relatedProducts   = array_map($this->productToSummary(...), $this->getLinkedProducts($product->getRelatedProductCollection()));
-        $dto->crosssellProducts = array_map($this->productToSummary(...), $this->getLinkedProducts($product->getCrossSellProductCollection()));
-        $dto->upsellProducts    = array_map($this->productToSummary(...), $this->getLinkedProducts($product->getUpSellProductCollection()));
+        $dto->relatedProducts   = array_map($this->productToSummary(...), $this->getLinkedProducts($product, \Mage_Catalog_Service_Product_Link::TYPE_RELATED));
+        $dto->crosssellProducts = array_map($this->productToSummary(...), $this->getLinkedProducts($product, \Mage_Catalog_Service_Product_Link::TYPE_CROSS_SELL));
+        $dto->upsellProducts    = array_map($this->productToSummary(...), $this->getLinkedProducts($product, \Mage_Catalog_Service_Product_Link::TYPE_UP_SELL));
 
         // Grouped children
         if ($typeId === \Mage_Catalog_Model_Product_Type::TYPE_GROUPED) {
@@ -1218,15 +1237,13 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     /**
      * @return Product[]
      */
-    private function getLinkedProducts(\Mage_Catalog_Model_Resource_Product_Collection $collection): array
+    private function getLinkedProducts(\Mage_Catalog_Model_Product $product, string $type): array
     {
+        /** @var \Mage_Catalog_Service_Product_Link $service */
+        $service = \Mage::getService('catalog/product_link');
+        $collection = $service->getVisibleLinkCollection($product, $type, StoreContext::getStoreId());
         $collection->addAttributeToSelect(['name', 'price', 'special_price', 'image', 'url_key', 'status', 'visibility'])
-            ->addFieldToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
             ->setPageSize(20);
-        $collection->setVisibility(\Mage::getSingleton('catalog/product_visibility')->getVisibleInCatalogIds());
-        if (!\Mage::getStoreConfigFlag('cataloginventory/options/show_out_of_stock')) {
-            \Mage::getModel('cataloginventory/stock_status')->addIsInStockFilterToCollection($collection);
-        }
 
         $products = [];
         foreach ($collection as $product) {
