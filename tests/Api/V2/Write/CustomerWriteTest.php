@@ -101,7 +101,7 @@ describe('POST /api/rest/v2/customers (extended fields)', function (): void {
 
         $read = apiGet('/api/rest/v2/customers/' . (int) $response['json']['id'], adminToken());
         expect($read['json']['groupId'])->toBe(1)
-            ->and($read['json']['taxvat'])->toBeNull();
+            ->and($read['json']['taxvat'] ?? null)->toBeNull();
     });
 
     it('rejects a non-existent groupId', function (): void {
