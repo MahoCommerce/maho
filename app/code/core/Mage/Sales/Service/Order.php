@@ -53,10 +53,12 @@ class Mage_Sales_Service_Order
 
     /**
      * Place the order of $quote through submit(), for the API. $guestEmail is the email of a guest order, $orderNote
-     * the note of the customer, and $cashTendered and $employeeId the fields of a POS order.
+     * the note of the customer, and $cashTendered and $employeeId the fields of a POS order. Before submit(),
+     * sales_api_place_order_before lets a module prepare the cart, such as a POS module that sets a default method.
      *
      * @param list<int|string>|null $agreementIds see submit()
      * @return array{order: Order, accessToken: ?string, changeAmount: ?float}
+     * @throws Mage_Core_Exception_Input when $guestEmail is not a valid email address
      * @throws Mage_Core_Exception
      */
     public function place(
@@ -70,6 +72,9 @@ class Mage_Sales_Service_Order
         ?bool $sendConfirmation = null,
     ): array {
         if ($guestEmail && !$quote->getCustomerId()) {
+            if (!Mage::helper('core')->isValidEmail($guestEmail)) {
+                throw new Mage_Core_Exception_Input()->addError('guest_email', Mage::helper('core')->__('Invalid email address.'));
+            }
             $quote->setCustomerEmail($guestEmail);
         }
         if ($orderNote) {
@@ -80,6 +85,11 @@ class Mage_Sales_Service_Order
         }
         $quote->setData(self::CASH_TENDERED_KEY, $cashTendered);
 
+        Mage::dispatchEvent('sales_api_place_order_before', [
+            'quote' => $quote,
+            'payment_method' => $quote->getPayment()->getMethod() ?: null,
+            'shipping_method' => $quote->isVirtual() ? null : ($quote->getShippingAddress()->getShippingMethod() ?: null),
+        ]);
         $order = $this->submit($quote, $actor, $agreementIds, sendConfirmation: $sendConfirmation);
         $changeAmount = $order->getPayment()->getAdditionalInformation('change_amount');
 

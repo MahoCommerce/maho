@@ -8,7 +8,9 @@
 declare(strict_types=1);
 
 use ApiPlatform\Metadata\Post;
+use Mage\Sales\Api\GraphQL\OrderMutationHandler;
 use Mage\Sales\Api\OrderProcessor;
+use Mage\Sales\Api\OrderProvider;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
@@ -368,4 +370,74 @@ it('refuses a gift card that another order spends during the placement, and send
         ->and($this->spy->paymentFailedEmails)->toBe($messages)
         ->and(placeOrderOf($this->carts[0])->getId())->toBeNull()
         ->and(placeOrderOf($this->carts[1])->getId())->toBeNull();
+});
+
+/**
+ * Place the cart $quote through the POS placeOrder mutation.
+ *
+ * @param array<string, mixed> $variables
+ * @return array<string, mixed>
+ */
+function placeOrderViaPos(Mage_Sales_Model_Quote $quote, array $variables = []): array
+{
+    $handler = new OrderMutationHandler(new OrderProvider(AdminApiParity::adminSecurity()));
+
+    return $handler->handlePlaceOrder(['cartId' => (int) $quote->getId()] + $variables, []);
+}
+
+describe('the API and the POS', function () {
+    it('refuse a guest email that is not valid', function () {
+        [$posCart, $apiCart] = $this->carts;
+
+        $api = placeOrderViaApi($apiCart, ['guestEmail' => 'not-an-email']);
+
+        expect($api['status'])->toBe(422)
+            ->and($api['errors'])->toBe(['Invalid email address.'])
+            ->and($api['fields'])->toBe(['guestEmail'])
+            ->and(fn() => placeOrderViaPos($posCart, ['guestEmail' => 'not-an-email']))
+            ->toThrow(Mage_Core_Exception_Input::class, 'Invalid email address.')
+            ->and(placeOrderOf($posCart)->getId())->toBeNull()
+            ->and(placeOrderOf($apiCart)->getId())->toBeNull();
+    });
+
+    it('dispatch sales_api_place_order_before once before each order', function () {
+        [$posCart, $apiCart] = $this->carts;
+        $listener = new class {
+            /** @var list<array{quote: int, payment: ?string, shipping: ?string, ordered: bool}> */
+            public array $calls = [];
+
+            public function record(Maho\Event\Observer $observer): void
+            {
+                $quote = $observer->getEvent()->getQuote();
+                $this->calls[] = [
+                    'quote' => (int) $quote->getId(),
+                    'payment' => $observer->getEvent()->getPaymentMethod(),
+                    'shipping' => $observer->getEvent()->getShippingMethod(),
+                    'ordered' => (bool) placeOrderOf($quote)->getId(),
+                ];
+            }
+        };
+        Mage::register('_singleton/place_order_parity_api_listener', $listener, true);
+        (function (): void {
+            $this->_events['global']['sales_api_place_order_before']['observers']['place_order_parity_api_listener']
+                = ['type' => 'singleton', 'model' => 'place_order_parity_api_listener', 'method' => 'record'];
+        })->call(Mage::app());
+
+        try {
+            placeOrderViaPos($posCart);
+            $api = placeOrderViaApi($apiCart);
+        } finally {
+            (function (): void {
+                unset($this->_events['global']['sales_api_place_order_before']['observers']['place_order_parity_api_listener']);
+            })->call(Mage::app());
+            Mage::unregister('_singleton/place_order_parity_api_listener');
+        }
+
+        $expected = fn(Mage_Sales_Model_Quote $cart): array => [
+            'quote' => (int) $cart->getId(), 'payment' => 'checkmo', 'shipping' => 'flatrate_flatrate', 'ordered' => false,
+        ];
+        expect($api['status'])->toBe(200)
+            ->and($listener->calls)->toBe([$expected($posCart), $expected($apiCart)])
+            ->and(placeOrderOf($posCart)->getId())->not->toBeNull();
+    });
 });
