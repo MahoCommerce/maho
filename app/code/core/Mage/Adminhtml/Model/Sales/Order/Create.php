@@ -1466,10 +1466,10 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             // Create new customer if customer is not registered in specified store
             if (!$customerIsInStore) {
                 $customer->setId(null)
+                    ->unsetData('created_at')
                     ->setStore($store)
                     ->setDefaultBilling(null)
-                    ->setDefaultShipping(null)
-                    ->setPassword($customer->generatePassword());
+                    ->setDefaultShipping(null);
                 $this->_setCustomerData($customer);
             }
 
@@ -1513,7 +1513,6 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             // Prepare new customer
             $customerBillingAddress = $this->getBillingAddress()->exportCustomerAddress();
             $customer->addData($customerBillingAddress->getData())
-                ->setPassword($customer->generatePassword())
                 ->setStore($store);
             $customer->setEmail($this->_getNewCustomerEmail($customer));
             $this->_setCustomerData($customer);
@@ -1619,16 +1618,19 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             }
         }
 
-        $order = $orderService->submit($quote, Mage_Checkout_Model_Actor::Staff, null, $orderData, (bool) $this->getSendConfirmation());
-        $customer = $quote->getCustomer();
-        if ((!$customer->getId() || !$customer->isInStore($this->getSession()->getStore()))
-            && !$quote->getCustomerIsGuest()
-        ) {
-            $customer->setCreatedAt($order->getCreatedAt());
-            $customer
-                ->save()
-                ->sendNewAccountEmail('registered', '', $quote->getStoreId());
+        $order = null;
+        $placeOrder = function () use ($orderService, $quote, $orderData, &$order): void {
+            $order = $orderService->submit($quote, Mage_Checkout_Model_Actor::Staff, null, $orderData, (bool) $this->getSendConfirmation());
+        };
+        if ($quote->getCustomerIsNew()) {
+            /** @var Mage_Customer_Service_Customer $customerService */
+            $customerService = Mage::getService('customer/customer');
+            $storeId = (int) $quote->getStoreId();
+            $customerService->create($quote->getCustomer(), $storeId, $storeId, $placeOrder);
+        } else {
+            $placeOrder();
         }
+        /** @var Mage_Sales_Model_Order $order */
         if ($oldOrder->getId()) {
             $oldOrder->setRelationChildId((string) $order->getId());
             $oldOrder->setRelationChildRealId($order->getIncrementId());

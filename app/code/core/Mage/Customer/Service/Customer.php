@@ -209,13 +209,15 @@ class Mage_Customer_Service_Customer
      * new addresses first, and sets the password and its confirmation. In the passwordless registration mode a
      * missing password becomes a random one. Send the confirmation link when the store requires a confirmation,
      * the magic login link in the passwordless mode, and the welcome email otherwise. $backUrl goes into the
-     * confirmation link.
+     * confirmation link. $save saves the customer: a checkout gives the placement of its order, which saves the
+     * customer with the order, so that a failed order leaves no account and sends no email.
      *
+     * @param (Closure(): void)|null $save
      * @throws Mage_Core_Exception_TooManyRequests when the client is over the registration limit
      * @throws Mage_Core_Exception_Input with one error for each problem of the customer and of its new addresses
      * @throws Mage_Core_Exception_Conflict when another customer has the email
      */
-    public function register(Customer $customer, int $storeId, string $backUrl = ''): Customer
+    public function register(Customer $customer, int $storeId, string $backUrl = '', ?Closure $save = null): Customer
     {
         $limit = (int) Mage::getStoreConfig(self::XML_PATH_REGISTER_RATE_LIMIT, $storeId);
         $this->attempt(Mage::helper('core')->rateLimiter('create_customer', $limit, self::RATE_LIMIT_WINDOW, RateLimitScope::Ip));
@@ -225,16 +227,16 @@ class Mage_Customer_Service_Customer
             $password = Mage::helper('core')->getRandomString(32);
             $customer->setPassword($password)->setPasswordConfirmation($password);
         }
-        $this->saveNew($customer, $storeId);
+        $this->saveNew($customer, $storeId, $save);
         Mage::dispatchEvent('customer_register_success', ['customer' => $customer]);
 
         try {
             if ($customer->isConfirmationRequired() && $customer->getConfirmation()) {
-                $customer->sendNewAccountEmail('confirmation', $backUrl, $storeId);
+                $this->sendNewAccountEmail($customer, 'confirmation', $storeId, $backUrl);
             } elseif ($isPasswordless) {
                 $customer->sendMagicLinkEmail();
             } else {
-                $customer->sendNewAccountEmail('registered', '', $storeId);
+                $this->sendNewAccountEmail($customer, 'registered', $storeId);
             }
         } catch (Exception $e) {
             Mage::logException($e);
@@ -245,23 +247,25 @@ class Mage_Customer_Service_Customer
     /**
      * Create $customer for an admin, the CLI or an API integration, on the store $storeId. The account needs no
      * confirmation. When the transport sets no password, the customer gets a random one and sets their own with
-     * a password reset. With $welcomeEmailStoreId, send the welcome email from that store.
+     * a password reset. With $welcomeEmailStoreId, send the welcome email from that store. $save saves the
+     * customer: the admin order create gives the placement of its order, as register() describes.
      *
+     * @param (Closure(): void)|null $save
      * @throws Mage_Core_Exception_Input with one error for each problem of the customer and of its new addresses
      * @throws Mage_Core_Exception_Conflict when another customer has the email
      */
-    public function create(Customer $customer, int $storeId, ?int $welcomeEmailStoreId = null): Customer
+    public function create(Customer $customer, int $storeId, ?int $welcomeEmailStoreId = null, ?Closure $save = null): Customer
     {
         if ($customer->getPassword() === '') {
             $password = $customer->generatePassword(16);
             $customer->setPassword($password)->setPasswordConfirmation($password);
         }
         $customer->setForceConfirmed(true);
-        $this->saveNew($customer, $storeId);
+        $this->saveNew($customer, $storeId, $save);
 
         if ($welcomeEmailStoreId !== null) {
             try {
-                $customer->sendNewAccountEmail('registered', '', $welcomeEmailStoreId);
+                $this->sendNewAccountEmail($customer, 'registered', $welcomeEmailStoreId);
             } catch (Exception $e) {
                 Mage::logException($e);
             }
@@ -658,12 +662,21 @@ class Mage_Customer_Service_Customer
     }
 
     /**
-     * Check a new customer and its new addresses, then save them.
+     * Send the new account email $type ('registered' or 'confirmation') to $customer from the store $storeId.
+     */
+    protected function sendNewAccountEmail(Customer $customer, string $type, int $storeId, string $backUrl = ''): void
+    {
+        $customer->sendNewAccountEmail($type, $backUrl, $storeId);
+    }
+
+    /**
+     * Check a new customer and its new addresses, then save them, with $save when it is given.
      *
+     * @param (Closure(): void)|null $save
      * @throws Mage_Core_Exception_Input
      * @throws Mage_Core_Exception_Conflict
      */
-    private function saveNew(Customer $customer, int $storeId): void
+    private function saveNew(Customer $customer, int $storeId, ?Closure $save): void
     {
         $store = Mage::app()->getStore($storeId);
         if (!$customer->getWebsiteId()) {
@@ -686,7 +699,7 @@ class Mage_Customer_Service_Customer
 
         $customer->setPasswordCreatedAt(time());
         $customer->cleanPasswordsValidationData();
-        $customer->save();
+        $save ? $save() : $customer->save();
     }
 
     /**
