@@ -383,7 +383,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $sameAsShipping = filter_var($args['sameAsShipping'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
-        $addressData = $sameAsShipping ? [] : $this->cartService->mapAddressInput($args);
+        $addressData = $this->cartService->mapAddressInput($args);
         if ($sameAsShipping) {
             foreach (array_keys(\Maho\ApiPlatform\Service\CustomAttributes::userDefined('customer_address')) as $code) {
                 $quote->getBillingAddress()->setData($code, $quote->getShippingAddress()->getData($code));
