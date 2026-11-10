@@ -356,17 +356,6 @@ class Sqlite extends AbstractPdoAdapter
 
             $span?->setStatus('error', $e::class . ': ' . ($e->getCode() ?: 'unknown'));
 
-            // Detect implicit rollback - SQLite constraint violation
-            if ($this->_transactionLevel > 0
-                && str_contains($e->getMessage(), 'constraint failed')
-            ) {
-                if ($this->_debug) {
-                    $this->_debugWriteToFile('IMPLICIT ROLLBACK AFTER CONSTRAINT VIOLATION');
-                }
-                $this->_transactionLevel = 1;
-                $this->rollBack();
-            }
-
             $this->_debugException($e);
         } finally {
             $span?->end();

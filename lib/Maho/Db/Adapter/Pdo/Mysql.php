@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Maho\Db\Adapter\Pdo;
 
+use Doctrine\DBAL\Exception\DeadlockException;
 use Doctrine\DBAL\Schema\Exception\TableDoesNotExist;
 use Doctrine\DBAL\Schema\Name\OptionallyQualifiedName;
 use Doctrine\DBAL\Types\Type;
@@ -403,16 +404,11 @@ class Mysql extends AbstractPdoAdapter
 
             $span?->setStatus('error', $e::class . ': ' . ($e->getCode() ?: 'unknown'));
 
-            // Detect implicit rollback: ER_LOCK_WAIT_TIMEOUT (1205), ER_LOCK_DEADLOCK
-            // (1213), or ER_CHECKREAD (1020) on MariaDB. The server rolls the whole
-            // transaction back, so the adapter must drop its own nesting as well.
-            $previous = $e->getPrevious();
-            if ($this->_transactionLevel > 0
-                && $previous instanceof \PDOException && isset($previous->errorInfo[1])
-                && in_array($previous->errorInfo[1], [1020, 1205, 1213])
-            ) {
+            // After a deadlock (1213), or ER_CHECKREAD (1020) on MariaDB, the server rolls
+            // the whole transaction back, so the adapter must drop its own nesting as well.
+            if ($this->_transactionLevel > 0 && $e instanceof DeadlockException) {
                 if ($this->_debug) {
-                    $this->_debugWriteToFile('IMPLICIT ROLLBACK AFTER SQLSTATE: ' . $previous->errorInfo[1]);
+                    $this->_debugWriteToFile('IMPLICIT ROLLBACK AFTER ERROR: ' . $e->getCode());
                 }
                 $this->_transactionLevel = 1; // the server rolled the entire transaction back
                 $this->rollBack();
