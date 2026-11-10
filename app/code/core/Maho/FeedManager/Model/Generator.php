@@ -164,8 +164,8 @@ class Maho_FeedManager_Model_Generator
     }
 
     /**
-     * Check if feed is currently being generated
-     * Returns false if the job has been running for more than 30 minutes (stuck)
+     * Check if a generation of the feed runs. A generation that runs for longer than
+     * Maho_FeedManager_Model_Cron::HUNG_FEED_TIMEOUT_MINUTES does not count: the next generation replaces it.
      */
     public static function isGenerating(int $feedId): bool
     {
@@ -175,39 +175,8 @@ class Maho_FeedManager_Model_Generator
             return false;
         }
 
-        // Check if the job is stuck (running for more than 30 minutes)
-        if (!empty($status['started_at'])) {
-            $startedAt = strtotime($status['started_at']);
-            $maxRunTime = 30 * 60; // 30 minutes
-            if (time() - $startedAt > $maxRunTime) {
-                // Mark as failed due to timeout
-                self::markStuckJobAsFailed($feedId);
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Mark a stuck job as failed
-     */
-    public static function markStuckJobAsFailed(int $feedId): void
-    {
-        /** @var Maho_FeedManager_Model_Resource_Log_Collection $collection */
-        $collection = Mage::getResourceModel('feedmanager/log_collection')
-            ->addFeedFilter($feedId)
-            ->addFieldToFilter('status', Maho_FeedManager_Model_Log::STATUS_RUNNING)
-            ->setOrder('started_at', 'DESC')
-            ->setPageSize(1);
-
-        foreach ($collection as $log) {
-            /** @var Maho_FeedManager_Model_Log $log */
-            $log->setStatus(Maho_FeedManager_Model_Log::STATUS_FAILED)
-                ->addError('Generation timed out after 30 minutes')
-                ->save();
-            break;
-        }
+        return empty($status['started_at'])
+            || time() - strtotime($status['started_at']) <= Maho_FeedManager_Model_Cron::HUNG_FEED_TIMEOUT_MINUTES * 60;
     }
 
     /**

@@ -60,6 +60,9 @@ class FeedGenerate extends BaseMahoCommand
                 $output->writeln(sprintf('  Products: %d', $log->getProductCount()));
                 $output->writeln(sprintf('  File size: %s', $this->humanReadableSize((int) $feed->getLastFileSize())));
                 $output->writeln(sprintf('  Duration: %.2fs', $duration));
+                if ($log->getUploadStatus()) {
+                    $output->writeln(sprintf('  Upload: %s (%s)', $log->getUploadStatus(), $log->getUploadMessage()));
+                }
 
                 // Show any warnings
                 $errors = $log->getErrorMessagesArray();

@@ -34,7 +34,7 @@ class Maho_FeedManager_Model_Generator_Batch
     /** A job ID is feed_{feed ID}_{uniqid()}. It names a folder, so a request can give no other value. */
     public const JOB_ID_PATTERN = '/^feed_\d+_[0-9a-f]+$/';
 
-    /** Seconds without progress after which a job of a feed is removed when a new job of the feed starts */
+    /** Seconds without progress after which the files of a job are removed when a new job of the feed starts */
     public const STALE_JOB_SECONDS = 300;
 
     protected Maho_FeedManager_Model_Feed $_feed;
@@ -57,8 +57,7 @@ class Maho_FeedManager_Model_Generator_Batch
     {
         $this->_feed = $feed;
 
-        // Clean up any stale running jobs for this feed (older than 5 minutes with no recent progress)
-        $this->_cleanupStaleJobs($feed->getId());
+        $this->deleteFeedJobs((int) $feed->getId(), self::STALE_JOB_SECONDS);
         $this->_batchSize = Mage::helper('feedmanager')->getBatchSize();
         $this->_platform = Maho_FeedManager_Model_Platform::getAdapter($feed->getPlatform());
         $this->_mapper = new Maho_FeedManager_Model_Mapper($feed);
@@ -265,15 +264,17 @@ class Maho_FeedManager_Model_Generator_Batch
      *     file_size_formatted?: string,
      *     errors?: list<string>,
      *     has_destination?: bool,
-     *     upload_status?: string,
-     *     upload_message?: string,
+     *     upload_status?: ?string,
+     *     upload_message?: ?string,
      *     progress?: int,
      *     total?: int,
      *     batches_processed?: int,
      *     batches_total?: int,
      * }
+     * @param (callable(Maho_FeedManager_Model_Feed, Maho_FeedManager_Model_Log, string): array{status: string, message: string})|null $afterPublish
+     *     Gets the local file of the published feed, and gives the result of the upload. It must not throw.
      */
-    public function finalize(string $jobId): array
+    public function finalize(string $jobId, ?callable $afterPublish = null): array
     {
         $this->_jobId = $jobId;
 
@@ -326,8 +327,7 @@ class Maho_FeedManager_Model_Generator_Batch
             $fileSize = (int) filesize($tempPath);
             $this->_finalizeGenerationSuccess($this->_state['product_count'], $fileSize, $this->_errors);
 
-            // Handle upload if configured
-            $uploadResult = $this->_handleUpload($tempPath);
+            $uploadResult = $afterPublish !== null ? $afterPublish($this->_feed, $this->_log, $tempPath) : null;
 
             $this->_deleteJob();
 
@@ -346,8 +346,8 @@ class Maho_FeedManager_Model_Generator_Batch
                 'message' => "Feed generated successfully with {$this->_state['product_count']} products",
                 'errors' => array_values(array_map(strval(...), $this->_errors)),
                 'has_destination' => (bool) $this->_feed->getDestinationId(),
-                'upload_status' => $uploadResult['status'],
-                'upload_message' => $uploadResult['message'],
+                'upload_status' => $uploadResult['status'] ?? null,
+                'upload_message' => $uploadResult['message'] ?? null,
             ];
         } catch (\Throwable $e) {
             return $this->_failWithError($e->getMessage());
@@ -578,7 +578,7 @@ class Maho_FeedManager_Model_Generator_Batch
     }
 
     // ──────────────────────────────────────────────────────────────────────
-    // Error handling and upload
+    // Error handling
     // ──────────────────────────────────────────────────────────────────────
 
     /**
@@ -624,137 +624,9 @@ class Maho_FeedManager_Model_Generator_Batch
         ];
     }
 
-    /**
-     * Handle upload after successful generation
-     *
-     * @param string $localPath The local file that holds the published feed
-     * @return array{status: string, message: string}
-     */
-    protected function _handleUpload(string $localPath): array
-    {
-        // Check if auto-upload is enabled
-        if (!$this->_feed->getAutoUpload()) {
-            $this->_log->recordUploadSkipped('Auto-upload disabled');
-            return [
-                'status' => Maho_FeedManager_Model_Log::UPLOAD_STATUS_SKIPPED,
-                'message' => 'Auto-upload disabled',
-            ];
-        }
-
-        // Check if destination is configured
-        $destinationId = (int) $this->_feed->getDestinationId();
-        if (!$destinationId) {
-            $this->_log->recordUploadSkipped('No destination configured');
-            return [
-                'status' => Maho_FeedManager_Model_Log::UPLOAD_STATUS_SKIPPED,
-                'message' => 'No destination configured',
-            ];
-        }
-
-        try {
-            $destination = Mage::getModel('feedmanager/destination')->load($destinationId);
-
-            if (!$destination->getId()) {
-                $message = 'Destination not found';
-                $this->_log->recordUploadFailure($destinationId, $message);
-                return [
-                    'status' => Maho_FeedManager_Model_Log::UPLOAD_STATUS_FAILED,
-                    'message' => $message,
-                ];
-            }
-
-            if (!$destination->isEnabled()) {
-                $message = 'Destination is disabled';
-                $this->_log->recordUploadFailure($destinationId, $message);
-                return [
-                    'status' => Maho_FeedManager_Model_Log::UPLOAD_STATUS_FAILED,
-                    'message' => $message,
-                ];
-            }
-
-            // Perform upload
-            $uploader = new Maho_FeedManager_Model_Uploader($destination);
-            $remoteName = $this->_feed->getOutputFilename();
-
-            $success = $uploader->upload($localPath, $remoteName);
-
-            // Update destination last upload info
-            $destination->setLastUploadAt(Mage::app()->getLocale()->formatDateForDb('now'))
-                ->setLastUploadStatus($success ? 'success' : 'failed')
-                ->save();
-
-            if ($success) {
-                $message = "Uploaded to {$destination->getName()} as {$remoteName}";
-                $this->_log->recordUploadSuccess($destinationId, $message);
-                Mage::log(
-                    "FeedManager: Successfully uploaded feed '{$this->_feed->getName()}' to destination '{$destination->getName()}'",
-                    Mage::LOG_INFO,
-                );
-                return [
-                    'status' => Maho_FeedManager_Model_Log::UPLOAD_STATUS_SUCCESS,
-                    'message' => $message,
-                ];
-            }
-
-            $message = 'Upload failed';
-            $this->_log->recordUploadFailure($destinationId, $message);
-            Mage::log(
-                "FeedManager: Failed to upload feed '{$this->_feed->getName()}' to destination '{$destination->getName()}'",
-                Mage::LOG_ERROR,
-            );
-            return [
-                'status' => Maho_FeedManager_Model_Log::UPLOAD_STATUS_FAILED,
-                'message' => $message,
-            ];
-        } catch (\Throwable $e) {
-            Mage::logException($e);
-            $message = $e->getMessage();
-            $this->_log->recordUploadFailure($destinationId, $message);
-
-            // Send failure notification
-            $notifier = new Maho_FeedManager_Model_Notifier();
-            $notifier->notify($this->_feed, [$message], 'upload');
-
-            return [
-                'status' => Maho_FeedManager_Model_Log::UPLOAD_STATUS_FAILED,
-                'message' => $message,
-            ];
-        }
-    }
-
     // ──────────────────────────────────────────────────────────────────────
     // Cleanup
     // ──────────────────────────────────────────────────────────────────────
-
-    /**
-     * Clean up stale running jobs for a feed
-     * Jobs are considered stale if they've been running for more than 5 minutes
-     */
-    protected function _cleanupStaleJobs(int $feedId): void
-    {
-        $staleTimeout = self::STALE_JOB_SECONDS;
-
-        /** @var Maho_FeedManager_Model_Resource_Log_Collection $collection */
-        $collection = Mage::getResourceModel('feedmanager/log_collection')
-            ->addFeedFilter($feedId)
-            ->addFieldToFilter('status', Maho_FeedManager_Model_Log::STATUS_RUNNING);
-
-        foreach ($collection as $log) {
-            $startedAt = strtotime($log->getStartedAt());
-            if (time() - $startedAt > $staleTimeout) {
-                $log->setStatus(Maho_FeedManager_Model_Log::STATUS_FAILED)
-                    ->addError('Generation was interrupted or timed out')
-                    ->save();
-
-                Mage::log(
-                    "FeedManager: Cleaned up stale job for feed {$feedId}, log {$log->getId()}",
-                    Mage::LOG_INFO,
-                );
-            }
-        }
-
-        $this->deleteFeedJobs($feedId, $staleTimeout);
-    }
 
     /**
      * Clean up old jobs and old files on the feeds mount

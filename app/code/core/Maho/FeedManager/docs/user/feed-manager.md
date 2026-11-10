@@ -598,7 +598,9 @@ Navigate to **Catalog > Feed Manager > Destinations** and click "Add New Destina
 
 ### Linking Feeds to Destinations
 
-In your feed's General tab, select the destination and enable "Auto Upload" to automatically push the feed after each generation.
+In your feed's General tab, select the destination and enable "Auto Upload" to automatically push the feed after each generation. The upload follows every generation: the **Generate** buttons of the admin, the cron, `feed:generate` and `feed:generate:all`. The log of the generation shows the result of the upload.
+
+When a feed has a destination and its upload did not succeed or did not run, the dialog that shows the generated feed has an **Upload Now** button. It sends the newest file of the feed to the destination and writes the result on the newest log.
 
 ---
 
@@ -692,7 +694,7 @@ FeedManager provides command-line tools for automation and debugging.
 ./maho feed:validate 4
 ```
 
-A feed that is already being generated, from the admin, the cron or another command, is not generated a second time. `feed:generate` shows the error "Feed '...' is already being generated" and ends with a failure exit code. `feed:generate:all` skips the feed with the same message and does not count it as a failure. A generation that runs for more than 30 minutes counts as stuck and does not block a new one.
+A feed that is already being generated, from the admin, the cron or another command, is not generated a second time. `feed:generate` shows the error "Feed '...' is already being generated" and ends with a failure exit code. `feed:generate:all` skips the feed with the same message and does not count it as a failure. A generation that runs for more than 30 minutes counts as stuck and does not block a new one. The hourly cron marks it as failed and sends the timeout notification.
 
 !!! example "Cron Script for Custom Scheduling"
     Add to your system crontab for custom generation times:
