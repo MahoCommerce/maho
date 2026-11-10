@@ -11,7 +11,7 @@ Maho's built-in Gift Card module provides a complete solution for selling, manag
 The Gift Card module enables:
 
 - **Selling gift cards** as virtual products with fixed or custom amounts
-- **Delivery by email**, with QR codes and barcodes
+- **Delivery by email**, at once or on a date that the customer selects, with QR codes and barcodes
 - **Flexible redemption** at checkout with partial balance support
 - **Full order lifecycle integration** including invoices, credit memos, and refunds
 - **Complete admin management** with history tracking and batch operations
@@ -26,7 +26,7 @@ The Gift Card module enables:
 - **Reduced fraud** compared to discount codes through unique, trackable codes
 
 ### For Customers
-- **Easy gifting** with personalized messages
+- **Easy gifting** with personalized messages and a delivery date
 - **Flexible spending** with partial redemption and balance tracking
 - **Multiple payment options** by combining gift cards with other payment methods
 - **Instant delivery** via email for last-minute gifts
@@ -124,7 +124,7 @@ When customers view a gift card product, they see:
 2. **Recipient information** - Name and email for delivery
 3. **Sender information** - Name and optional email
 4. **Gift message** - Personal message (if enabled)
-5. **Delivery date** - Optional. The store keeps the date with the order and shows it to you. It does not delay the email
+5. **Delivery date** - Optional. The day on which the recipient gets the email. Leave it empty to send the email when the invoice is paid
 
 ```
 ┌─────────────────────────────────────────┐
@@ -158,12 +158,17 @@ Gift cards appear in the cart with their selected options:
 
 ### Gift Card Delivery
 
-When the invoice is paid, Maho creates the gift card and sends the email to the recipient at once.
+When the invoice is paid, Maho creates the gift card. The delivery date that the customer selects sets when the email goes to the recipient:
 
-The delivery date that the customer selects does not change when the email goes. Maho keeps the date with the order item. It shows the date with the other gift card options: in the cart, on the order in the admin and in the order emails. To deliver the card on that date, open the gift card on that day and click **Send Email**.
+1. **No delivery date, today or a past date**: Maho sends the email at once.
+2. **A date after today**: Maho schedules the email for the start of that day, in the timezone of the store of the order. A cron job sends it at most 5 minutes later.
 
-!!! info "Activation"
-    A gift card is **active** as soon as the invoice is paid. The code is valid from that moment. The expiration date is calculated from the activation date, not from the delivery date.
+The cart, the order in the admin and the order emails show the delivery date with the other gift card options. The delivery date must be a real date. The cart refuses another value, on the storefront and in the API.
+
+A scheduled email uses the same template, sender and store as an email at once. When the cron job cannot send it, Maho logs the error and the cron job tries again on its next run. When you click **Send Email** before the date, the recipient gets the email at once, and the cron job does not send it again.
+
+!!! info "Activation vs. Delivery"
+    A gift card is **activated immediately** when the invoice is paid, also when its email is scheduled for a later date. The code is valid from that moment. The expiration date is calculated from the activation date, not from the delivery date.
 
 Email contents:
 
@@ -410,7 +415,7 @@ To send the gift card email to the recipient:
 
 1. Open the gift card
 2. Click **Send Email**
-3. Maho sends the email immediately, also when the card got the email before
+3. Maho sends the email immediately, also when the card got the email before or waits for its delivery date
 
 A gift card without a **Recipient Email** has no **Send Email** button. A gift card that you create on this page gets no email until you click **Send Email**. The API follows the same rule.
 
@@ -665,13 +670,14 @@ A daily cron job (runs at 1 AM) automatically:
 **Possible causes:**
 
 - No recipient email on gift card
+- Email scheduled for a later delivery date
 - Email queue not processing
 - SMTP configuration issues
 
 **Solution:**
 
 1. Check gift card has recipient email set
-2. Check `email_sent_at` of the gift card: it holds the time of the last email
+2. Check `email_scheduled_at` and `email_sent_at` of the gift card: the first holds the time of a scheduled email, the second the time of the last email
 3. Verify email cron job is running (every 5 minutes)
 4. Check email logs for delivery errors
 

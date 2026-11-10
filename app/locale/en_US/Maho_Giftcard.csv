@@ -122,6 +122,7 @@
 "Per IP address. Default 10 per minute. 0 to disable.","Per IP address. Default 10 per minute. 0 to disable."
 "Personal Message","Personal Message"
 "Please enter a gift card code.","Please enter a gift card code."
+"Please enter the delivery date in the format YYYY-MM-DD.","Please enter the delivery date in the format YYYY-MM-DD."
 "Please select a valid gift card amount","Please select a valid gift card amount"
 "Please select gift card(s).","Please select gift card(s)."
 "Price varies","Price varies"

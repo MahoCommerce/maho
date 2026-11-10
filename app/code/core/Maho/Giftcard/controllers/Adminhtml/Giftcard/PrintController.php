@@ -90,7 +90,6 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
     public function emailAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
-        $scheduleAt = $this->getRequest()->getParam('schedule_at');
         /** @var Maho_Giftcard_Service_Giftcard $service */
         $service = Mage::getService('giftcard/giftcard');
 
@@ -103,16 +102,8 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
         }
 
         try {
-            if ($scheduleAt) {
-                $scheduleDate = new DateTime($scheduleAt);
-                Mage::helper('giftcard')->scheduleGiftcardEmail($giftcard, $scheduleDate);
-                $this->_getSession()->addSuccess(
-                    sprintf('Gift card email scheduled for %s', $scheduleDate->format('Y-m-d H:i')),
-                );
-            } else {
-                $service->sendEmail($giftcard);
-                $this->_getSession()->addSuccess('Gift card email sent successfully.');
-            }
+            $service->sendEmail($giftcard);
+            $this->_getSession()->addSuccess('Gift card email sent successfully.');
         } catch (Mage_Core_Exception_Input $e) {
             foreach ($e->getErrors() as $error) {
                 $this->_getSession()->addError($error['message']);
