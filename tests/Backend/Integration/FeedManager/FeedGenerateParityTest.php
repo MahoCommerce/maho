@@ -37,13 +37,13 @@ function feedGenerateSpy(int $feedId): Maho_FeedManager_Service_Feed
         public function __construct(private readonly int $testFeedId) {}
 
         #[\Override]
-        public function generate(Maho_FeedManager_Model_Feed $feed, ?callable $afterPublish = null): Maho_FeedManager_Model_Log
+        public function generate(Maho_FeedManager_Model_Feed $feed): Maho_FeedManager_Model_Log
         {
             $this->feedIds[] = (int) $feed->getId();
             if ((int) $feed->getId() !== $this->testFeedId) {
                 return Mage::getModel('feedmanager/log')->setStatus(Maho_FeedManager_Model_Log::STATUS_COMPLETED);
             }
-            return parent::generate($feed, $afterPublish);
+            return parent::generate($feed);
         }
     };
     Mage::unregister('_service/feedmanager/feed');
