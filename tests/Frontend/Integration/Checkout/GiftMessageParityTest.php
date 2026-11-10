@@ -131,3 +131,45 @@ it('skips the message of an item that is not in the cart of the checkout', funct
 
     expect((int) Mage::getModel('sales/quote_item')->load($otherItemId)->getGiftMessageId())->toBe(0);
 });
+
+describe('the admin order page', function () {
+    /**
+     * Post the gift message fields of the admin order page for $quote, as its form names them.
+     *
+     * @param array<int, array<string, string>> $giftMessages
+     */
+    function giftMessageViaAdmin(Mage_Sales_Model_Quote $quote, array $giftMessages): void
+    {
+        $save = new class extends Mage_Adminhtml_Model_Giftmessage_Save {
+            public ?Mage_Sales_Model_Quote $quote = null;
+
+            #[\Override]
+            protected function _getQuote()
+            {
+                return $this->quote;
+            }
+        };
+        $save->quote = $quote;
+        $save->setGiftmessages($giftMessages)->saveAllInQuote();
+    }
+
+    it('trims the sender and the recipient, as the checkout and the API do', function () {
+        [$adminCart, $apiCart] = $this->carts;
+
+        giftMessageViaAdmin($adminCart, [(int) $adminCart->getId() => ['type' => 'main', 'sender' => ' Ann ', 'recipient' => 'Bob ', 'message' => 'Happy birthday']]);
+        giftMessageViaApi($apiCart, ['sender' => ' Ann ', 'recipient' => 'Bob ', 'message' => 'Happy birthday']);
+
+        expect(giftMessageStored($adminCart))->toBe(['sender' => 'Ann', 'recipient' => 'Bob', 'message' => 'Happy birthday'])
+            ->and(giftMessageStored($adminCart))->toBe(giftMessageStored($apiCart));
+    });
+
+    it('saves no gift message when the store does not allow gift messages on the order', function () {
+        Mage::app()->getStore()->setConfig(Mage_GiftMessage_Helper_Message::XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ORDER, '0');
+        [$adminCart] = $this->carts;
+
+        giftMessageViaAdmin($adminCart, [(int) $adminCart->getId() => ['type' => 'main', 'sender' => 'Ann', 'recipient' => 'Bob', 'message' => 'Happy birthday']]);
+
+        expect((int) $adminCart->getGiftMessageId())->toBe(0)
+            ->and(giftMessageStored($adminCart))->toBeNull();
+    });
+});

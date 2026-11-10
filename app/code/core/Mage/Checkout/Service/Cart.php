@@ -45,6 +45,9 @@ class Mage_Checkout_Service_Cart
         'vat_id' => 'vatId',
     ];
 
+    /**
+     * @phpstan-assert-if-true string $maskedId
+     */
     public function isValidMaskedId(mixed $maskedId): bool
     {
         return is_string($maskedId) && preg_match('/^' . self::MASKED_ID_PATTERN . '$/i', $maskedId) === 1;
@@ -808,8 +811,44 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
+     * Apply $code, the input of the one code box, to $quote: as a coupon when it is one, else as a gift card of the
+     * website of the cart. Return the type that applied.
+     *
+     * @return 'coupon'|'giftcard'
+     * @throws \Mage_Core_Exception_TooManyRequests when the shopper is over the limit
+     * @throws \Mage_Core_Exception
+     */
+    public function applyCode(
+        \Mage_Sales_Model_Quote $quote,
+        string $code,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+    ): string {
+        $code = trim($code);
+        try {
+            $this->applyCoupon($quote, $code, $actor);
+            return 'coupon';
+        } catch (\Mage_Core_Exception_Input|\Mage_Core_Exception_Conflict|\Mage_Core_Exception_TooManyRequests $e) {
+            throw $e;
+        } catch (\Mage_Core_Exception) {
+            // The code is not a coupon of this cart, so it can be a gift card
+        }
+
+        if (\Mage::helper('core')->isModuleEnabled('Maho_Giftcard')) {
+            try {
+                \Mage::getService('giftcard/giftcard')->getByCode($code, (int) $quote->getStore()->getWebsiteId());
+            } catch (\Mage_Core_Exception_NoSuchEntity) {
+                throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('Promo code "%s" is not valid.', $code));
+            }
+            $this->applyGiftcard($quote, $code, null, $actor);
+            return 'giftcard';
+        }
+        throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('Promo code "%s" is not valid.', $code));
+    }
+
+    /**
      * Apply the gift card $giftcardCode to $quote. The errors of a code tell whether it exists, so a shopper
-     * has a limit of codes per minute. Staff has no limit.
+     * has a limit of codes per minute. Staff has no limit. With $collectAndSave false, the caller collects
+     * the totals and saves the cart, as the admin order page does.
      *
      * @throws \Mage_Core_Exception_TooManyRequests when the shopper is over the limit
      * @throws \Mage_Core_Exception
@@ -819,6 +858,7 @@ class Mage_Checkout_Service_Cart
         string $giftcardCode,
         ?float $amount = null,
         \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+        bool $collectAndSave = true,
     ): \Mage_Sales_Model_Quote {
         if ($actor === \Mage_Checkout_Model_Actor::Customer) {
             $this->limitCodeAttempts('cart_giftcard', \Maho_Giftcard_Service_Giftcard::XML_PATH_BALANCE_RATE_LIMIT);
@@ -840,15 +880,15 @@ class Mage_Checkout_Service_Cart
         $appliedCodes[$giftcardCode] = $amount === null ? $balance : min($amount, $balance);
 
         $quote->setGiftcardCodes(\Mage::helper('core')->jsonEncode($appliedCodes));
-        $this->collectAndSave($quote);
+        if ($collectAndSave) {
+            $this->collectAndSave($quote);
+        }
 
         return $quote;
     }
 
     /**
      * Return the gift card of $giftcardCode when $quote can take it.
-     *
-     * The admin order page calls this without applyGiftcard(), because it collects the totals itself.
      *
      * @throws \Mage_Core_Exception when the card does not exist, cannot pay for this cart, or is already applied
      */
@@ -940,12 +980,16 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Remove gift card from cart
+     * Remove the gift card $giftcardCode from $quote. The case of the code does not matter. With $collectAndSave
+     * false, the caller collects the totals and saves the cart, as the admin order page does.
      *
      * @throws \Mage_Core_Exception
      */
-    public function removeGiftcard(\Mage_Sales_Model_Quote $quote, string $giftcardCode): \Mage_Sales_Model_Quote
-    {
+    public function removeGiftcard(
+        \Mage_Sales_Model_Quote $quote,
+        string $giftcardCode,
+        bool $collectAndSave = true,
+    ): \Mage_Sales_Model_Quote {
         if (!$giftcardCode) {
             throw new \Mage_Core_Exception('Gift card code is required');
         }
@@ -973,7 +1017,9 @@ class Mage_Checkout_Service_Cart
 
         // Force a fresh totals pass, otherwise an already-collected quote in the
         // same request leaves a stale giftcard_amount on the saved quote.
-        $this->collectAndSave($quote);
+        if ($collectAndSave) {
+            $this->collectAndSave($quote);
+        }
 
         return $quote;
     }
@@ -1606,6 +1652,27 @@ class Mage_Checkout_Service_Cart
         $guestCart->save();
 
         return $customerCart;
+    }
+
+    /**
+     * Return the cart of the customer $customerId after a login. A valid $guestMaskedId merges that guest cart into
+     * the customer cart. A merge that fails does not fail the login: the customer then gets the active cart of the
+     * current store, or null when there is none.
+     */
+    public function mergeAtLogin(mixed $guestMaskedId, int $customerId): ?\Mage_Sales_Model_Quote
+    {
+        if ($this->isValidMaskedId($guestMaskedId)) {
+            try {
+                return $this->merge($guestMaskedId, $customerId);
+            } catch (\Exception $e) {
+                \Mage::log('Cart merge failed: ' . $e->getMessage(), \Mage::LOG_WARNING);
+            }
+        }
+
+        $customerCart = \Mage::getModel('sales/quote')
+            ->setSharedStoreIds([\Mage::app()->getStore()->getId()])
+            ->loadByCustomer($customerId);
+        return $customerCart->getId() ? $customerCart : null;
     }
 
     /**
