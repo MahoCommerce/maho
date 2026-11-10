@@ -487,7 +487,6 @@ class Mage_Checkout_Model_Type_Onepage
 
         Mage::helper('core')->copyFieldset('checkout_onepage_quote', 'to_customer', $quote, $customer);
         $customer->setPassword($customer->decryptPassword($quote->getPasswordHash()));
-        $customer->setPasswordCreatedAt(time());
         $quote->setCustomer($customer)
             ->setCustomerIsNew();
         $quote->setPasswordHash('');
@@ -531,22 +530,21 @@ class Mage_Checkout_Model_Type_Onepage
     }
 
     /**
-     * Involve new customer to system
+     * Log in the customer who registered in the checkout, or tell the customer to confirm the email first.
+     * Mage_Customer_Service_Customer::register() sends the email.
      *
      * @return $this
      */
     protected function _involveNewCustomer()
     {
         $customer = $this->getQuote()->getCustomer();
-        if ($customer->isConfirmationRequired()) {
-            $customer->sendNewAccountEmail('confirmation', '', $this->getQuote()->getStoreId());
+        if ($customer->isConfirmationRequired() && $customer->getConfirmation()) {
             $url = Mage::helper('customer')->getEmailConfirmationUrl($customer->getEmail());
             $this->getCustomerSession()->addSuccess(
                 Mage::helper('customer')->__('Account confirmation is required. Please, check your e-mail for confirmation link. To resend confirmation email please %s.'),
                 new \Maho\Message\Link(Mage::helper('customer')->__('click here'), $url),
             );
         } else {
-            $customer->sendNewAccountEmail('registered', '', $this->getQuote()->getStoreId());
             $this->getCustomerSession()
                  ->setRememberMe($this->_checkoutSession->getRememberMe())
                  ->loginById($customer->getId());
@@ -579,15 +577,24 @@ class Mage_Checkout_Model_Type_Onepage
                 break;
         }
 
-        $order = Mage::getService('sales/order')->submit($this->getQuote(), Mage_Checkout_Model_Actor::Customer, $agreementIds);
-
+        $quote = $this->getQuote();
+        $order = null;
+        $placeOrder = function () use ($quote, $agreementIds, &$order): void {
+            $order = Mage::getService('sales/order')->submit($quote, Mage_Checkout_Model_Actor::Customer, $agreementIds);
+        };
         if ($isNewCustomer) {
+            /** @var Mage_Customer_Service_Customer $customerService */
+            $customerService = Mage::getService('customer/customer');
+            $customerService->register($quote->getCustomer(), (int) $quote->getStoreId(), '', $placeOrder);
             try {
                 $this->_involveNewCustomer();
             } catch (Exception $e) {
                 Mage::logException($e);
             }
+        } else {
+            $placeOrder();
         }
+        /** @var Mage_Sales_Model_Order $order */
 
         $this->_checkoutSession->setLastQuoteId($this->getQuote()->getId())
             ->setLastSuccessQuoteId($this->getQuote()->getId())
