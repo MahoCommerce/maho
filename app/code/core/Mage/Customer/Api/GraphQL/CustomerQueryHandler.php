@@ -15,6 +15,7 @@ use Mage\Customer\Api\Customer;
 use Mage\Customer\Api\CustomerProvider;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\AdminAcl;
+use Maho\ApiPlatform\Service\StoreContext;
 
 /**
  * Customer Query Handler.
@@ -80,9 +81,9 @@ class CustomerQueryHandler
     }
 
     /**
-     * Handle createCustomer mutation. The customer gets a random password and sets their own with a password reset.
+     * Handle createCustomer mutation on the store of the request. A telephone becomes the default address.
      */
-    public function handleCreateCustomer(array $variables): array
+    public function handleCreateCustomer(array $variables, array $context): array
     {
         AdminAcl::checkResource(Customer::class);
         $input = $variables['input'] ?? $variables;
@@ -101,10 +102,8 @@ class CustomerQueryHandler
         if (isset($input['groupId'])) {
             $customer->setGroupId((int) $input['groupId']);
         }
-        if (!empty($input['telephone'])) {
-            $customer->addAddress($this->fillAddress(\Mage::getModel('customer/address'), $customer, $input));
-        }
-        $this->customerService->create($customer, (int) \Mage::app()->getStore()->getId());
+        $address = empty($input['telephone']) ? null : $this->fillAddress(\Mage::getModel('customer/address'), $input);
+        $this->customerService->quickCreate($customer, (int) ($context['store_id'] ?? StoreContext::getDefaultStoreId()), $address);
 
         return ['createCustomer' => [
             'customer' => $this->mapCustomer($customer),
@@ -134,8 +133,14 @@ class CustomerQueryHandler
         $billingId = (int) $customer->getDefaultBilling();
         $address = $billingId
             ? \Mage::getService('customer/address')->getByCustomer($billingId, $customerId)
-            : \Mage::getModel('customer/address')->setCustomerId($customerId)->setIsDefaultBilling(true)->setIsDefaultShipping(true);
-        \Mage::getService('customer/address')->save($this->fillAddress($address, $customer, $input));
+            : \Mage::getModel('customer/address')
+                ->setCustomerId($customerId)
+                ->setFirstname($customer->getFirstname())
+                ->setLastname($customer->getLastname())
+                ->setCountryId(\Maho\ApiPlatform\Service\StoreDefaults::getCountryId())
+                ->setIsDefaultBilling(true)
+                ->setIsDefaultShipping(true);
+        \Mage::getService('customer/address')->save($this->fillAddress($address, $input));
 
         return ['updateCustomerAddress' => [
             'success' => true,
@@ -144,26 +149,16 @@ class CustomerQueryHandler
     }
 
     /**
-     * Write the address fields of $input into $address. A new address gets the name of the customer, and a
-     * placeholder for each field that a point of sale does not ask, so the address skips the validation.
+     * Write the address fields of $input into $address. A point of sale asks only some of the fields, so the
+     * address skips the validation.
      */
-    private function fillAddress(\Mage_Customer_Model_Address $address, \Mage_Customer_Model_Customer $customer, array $input): \Mage_Customer_Model_Address
+    private function fillAddress(\Mage_Customer_Model_Address $address, array $input): \Mage_Customer_Model_Address
     {
-        if (!$address->getId()) {
-            $address->setFirstname($customer->getFirstname())
-                ->setLastname($customer->getLastname())
-                ->setStreet('TBC')
-                ->setCity('TBC')
-                ->setPostcode('0000')
-                ->setIsDefaultBilling(true)
-                ->setIsDefaultShipping(true);
-        }
-        foreach (['street', 'city', 'postcode', 'telephone'] as $field) {
-            if (isset($input[$field])) {
-                $address->setData($field, $input[$field]);
+        foreach (['street' => 'street', 'city' => 'city', 'postcode' => 'postcode', 'telephone' => 'telephone', 'country_id' => 'countryId'] as $field => $key) {
+            if (isset($input[$key])) {
+                $address->setData($field, $input[$key]);
             }
         }
-        $address->setCountryId($input['countryId'] ?? ($address->getCountryId() ?: \Maho\ApiPlatform\Service\StoreDefaults::getCountryId()));
         return $address->setShouldIgnoreValidation(true);
     }
 

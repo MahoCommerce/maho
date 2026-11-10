@@ -63,17 +63,17 @@ class SocialAuthProcessor extends \Maho\ApiPlatform\Processor
 
         $customer = $result['customer'];
 
-        // The storefront flow sends 2FA-enabled customers through a TOTP
-        // challenge after the provider proves identity; the headless flow must
-        // enforce the same second factor before a JWT is issued.
-        if ($customer->isTwofaRequired()) {
-            $code = is_string($data->twofaCode) ? trim($data->twofaCode) : '';
-            if ($code === '') {
-                throw new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is required', null, 0, ['X-Api-Error-Code' => 'twofa_required']);
+        // A customer who uses 2FA gives the code before the token, as on the storefront
+        $code = is_string($data->twofaCode) ? trim($data->twofaCode) : '';
+        try {
+            \Mage::getService('customer/customer')->verifySecondFactor($customer, $code);
+        } catch (\Mage_Core_Exception $e) {
+            if ($e->getCode() !== \Mage_Customer_Model_Customer::EXCEPTION_2FA_INVALID) {
+                throw $e;
             }
-            if (!$customer->verifyTwofaCode($code)) {
-                throw new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is invalid', null, 0, ['X-Api-Error-Code' => 'twofa_invalid']);
-            }
+            throw $code === ''
+                ? new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is required', $e, 0, ['X-Api-Error-Code' => 'twofa_required'])
+                : new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is invalid', $e, 0, ['X-Api-Error-Code' => 'twofa_invalid']);
         }
 
         // A fresh DTO so the inbound credential is never echoed back

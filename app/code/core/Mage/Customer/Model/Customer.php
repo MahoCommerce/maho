@@ -838,14 +838,14 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Send email with link to set password
+     * Send the email with the link to set a password. With $isNew, send the welcome email of a new account.
+     * Without $storeId, send it from the current store. The admin store sends from a store of the website.
      *
-     * @bool $isNew Send welcome email?
      * @return $this
      */
-    public function sendPasswordLinkEmail(bool $isNew = false)
+    public function sendPasswordLinkEmail(bool $isNew = false, ?int $storeId = null)
     {
-        $storeId = Mage::app()->getStore()->getId();
+        $storeId ??= (int) Mage::app()->getStore()->getId();
         if (!$storeId) {
             $storeId = $this->_getWebsiteStoreId();
         }

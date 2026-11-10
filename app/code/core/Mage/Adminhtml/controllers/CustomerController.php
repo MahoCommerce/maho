@@ -311,7 +311,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
 
             $isNewCustomer = $customer->isObjectNew();
             try {
-                // An empty password makes the service pick a random one
+                // An empty password makes the service pick a random one and email the link to set a password
                 $sendPassToEmail = $isNewCustomer && trim((string) ($data['account']['password'] ?? '')) === 'auto';
                 if ($isNewCustomer) {
                     $customer->setPassword($sendPassToEmail ? '' : (string) ($data['account']['password'] ?? ''));
@@ -325,7 +325,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
                 $sendWelcomeEmail = $customer->getWebsiteId() && isset($data['account']['sendemail']) && !$sendPassToEmail;
                 $emailStoreId = (int) $customer->getSendemailStoreId();
                 if ($isNewCustomer) {
-                    $this->getService()->create($customer, Mage_Core_Model_App::ADMIN_STORE_ID, $sendWelcomeEmail ? $emailStoreId : null);
+                    $this->getService()->create($customer, Mage_Core_Model_App::ADMIN_STORE_ID, $sendWelcomeEmail || $sendPassToEmail ? $emailStoreId : null);
                 } else {
                     $this->getService()->save($customer);
                     if ($sendWelcomeEmail && !$customer->getConfirmation()) {
@@ -340,8 +340,6 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
                 } elseif ($newPassword !== '') {
                     $this->getService()->setPassword($customer, $newPassword);
                     $customer->sendPasswordReminderEmail();
-                } elseif ($sendPassToEmail) {
-                    $customer->sendPasswordLinkEmail($isNewCustomer);
                 }
 
                 Mage::getSingleton('adminhtml/session')->addSuccess(

@@ -298,7 +298,10 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
-     * Verify the challenge code and, on success, complete the pending login
+     * Check the 2FA code of the pending customer with Mage_Customer_Service_Customer::verifySecondFactor(). When the
+     * code is right, log the customer in.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests when the client or the email is over the login limit
      */
     public function completeTwofaChallenge(#[\SensitiveParameter] string $code): bool
     {
@@ -306,7 +309,11 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
         if (!$customer) {
             return false;
         }
-        if (!$customer->verifyTwofaCode($code)) {
+        try {
+            Mage::getService('customer/customer')->verifySecondFactor($customer, $code);
+        } catch (Mage_Core_Exception_TooManyRequests $e) {
+            throw $e;
+        } catch (Mage_Core_Exception) {
             return false;
         }
         $this->unsTwofaPendingCustomerId();

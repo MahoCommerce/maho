@@ -109,38 +109,24 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Create a customer for a point of sale (GraphQL quickCreate). The customer gets a random password and sets
-     * their own with a password reset. A telephone becomes an address that holds only the name and the telephone.
+     * Create a customer for a point of sale (GraphQL quickCreate). A telephone becomes the default address.
      */
     private function createCustomerQuick(array $args): Customer
     {
         StoreContext::ensureStore();
-        $storeId = StoreContext::getStoreId();
-
         $customer = \Mage::getModel('customer/customer')
             ->setEmail((string) ($args['email'] ?? ''))
             ->setFirstname((string) ($args['firstname'] ?? ''))
             ->setLastname((string) ($args['lastname'] ?? ''));
-        if (!empty($args['telephone'])) {
-            $customer->addAddress(\Mage::getModel('customer/address')
-                ->setFirstname($customer->getFirstname())
-                ->setLastname($customer->getLastname())
-                ->setTelephone((string) $args['telephone'])
-                ->setStreet([''])
-                ->setCity('')
-                ->setPostcode('')
-                ->setCountryId(\Mage::getStoreConfig('general/country/default', $storeId) ?: 'US')
-                ->setIsDefaultBilling(true)
-                ->setIsDefaultShipping(true)
-                ->setShouldIgnoreValidation(true));
-        }
-        $this->getService()->create($customer, $storeId, $storeId);
+        $address = empty($args['telephone']) ? null : \Mage::getModel('customer/address')->setTelephone((string) $args['telephone']);
+        $this->getService()->quickCreate($customer, StoreContext::getStoreId(), $address);
 
         return Customer::fromModel($customer);
     }
 
     /**
-     * Check the email and the password of a customer (GraphQL login). A wrong email, password or 2FA code is a 401.
+     * Check the email and the password of a customer (GraphQL login), in the website of the request first and then
+     * in the others, as the token endpoint does. A wrong email, password or 2FA code is a 401.
      */
     private function customerLogin(array $args): Customer
     {
@@ -153,7 +139,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         StoreContext::ensureStore();
         $websiteId = (int) \Mage::app()->getStore(StoreContext::getStoreId())->getWebsiteId();
         try {
-            $customer = $this->getService()->authenticate($email, $password, $websiteId);
+            $customer = $this->getService()->authenticateInAnyWebsite($email, $password, $websiteId);
         } catch (\Mage_Core_Exception $e) {
             if (in_array($e->getCode(), [\Mage_Customer_Model_Customer::EXCEPTION_INVALID_EMAIL_OR_PASSWORD, \Mage_Customer_Model_Customer::EXCEPTION_2FA_INVALID], true)) {
                 throw new UnauthorizedHttpException('Bearer', 'Invalid email or password', $e, 0, ['X-Api-Error-Code' => 'invalid_credentials']);

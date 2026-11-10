@@ -251,6 +251,25 @@ describe('login', function () {
             ->and(Mage::getSingleton('customer/session')->isLoggedIn())->toBeFalse()
             ->and($api['status'])->toBe(401);
     });
+
+    it('finds the account of another website on GraphQL, as the token endpoint does', function () {
+        $customer = customerParityCustomer();
+        $customer->setWebsiteId((int) Mage::app()->getStore('fashion')->getWebsiteId())->save();
+        $store = Mage::app()->getStore();
+        $shareScope = (string) $store->getConfig(Mage_Customer_Model_Config_Share::XML_PATH_CUSTOMER_ACCOUNT_SHARE);
+        $store->setConfig(Mage_Customer_Model_Config_Share::XML_PATH_CUSTOMER_ACCOUNT_SHARE, (string) Mage_Customer_Model_Config_Share::SHARE_WEBSITE);
+
+        try {
+            $api = TransportParity::api(fn() => new CustomerProcessor()->process(null, new Mutation(name: 'login'), [], [
+                'args' => ['input' => ['email' => $customer->getEmail(), 'password' => CUSTOMER_PARITY_PASSWORD]],
+            ]));
+        } finally {
+            $store->setConfig(Mage_Customer_Model_Config_Share::XML_PATH_CUSTOMER_ACCOUNT_SHARE, $shareScope);
+        }
+
+        expect($api['status'])->toBe(200)
+            ->and($api['result']->id)->toBe((int) $customer->getId());
+    });
 });
 
 describe('password change', function () {

@@ -78,12 +78,13 @@ function socialViaWeb(string $provider, string $token, ?string $nonce): array
 /**
  * @return array{status: int, message: string, customer_id: ?int}
  */
-function socialViaApi(string $provider, string $token, ?string $nonce): array
+function socialViaApi(string $provider, string $token, ?string $nonce, ?string $twofaCode = null): array
 {
     $dto = new SocialAuth();
     $dto->provider = $provider;
     $dto->providerToken = $token;
     $dto->nonce = $nonce;
+    $dto->twofaCode = $twofaCode;
     $processor = new SocialAuthProcessor(TransportParity::adminSecurity(), new SocialParityJwtService());
     $result = TransportParity::api(fn() => $processor->process($dto, new Post(name: 'social_auth')));
 
@@ -92,6 +93,32 @@ function socialViaApi(string $provider, string $token, ?string $nonce): array
         $GLOBALS['socialParityCustomerIds'][] = $customerId;
     }
     return ['status' => $result['status'], 'message' => $result['message'], 'customer_id' => $customerId];
+}
+
+/**
+ * Post the 2FA code of the challenge that the sign-in started on the storefront. Return the errors of the session.
+ *
+ * @return list<string>
+ */
+function socialTwofaViaWeb(string $code): array
+{
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/customer/account/twofaChallengePost', 'POST', [
+        'twofa_verification_code' => $code,
+    ]));
+    $request->setRouteName('customer')->setControllerName('account')->setActionName('twofaChallengePost')
+        ->setControllerModule('Mage_Customer')->setDispatched(true);
+    Mage::app()->setRequest($request);
+    // A message that an earlier test left in the session is not an outcome of this action
+    Mage::getSingleton('customer/session')->getMessages(true);
+    new Mage_Customer_AccountController($request, new Mage_Core_Controller_Response_Http())->twofaChallengePostAction();
+
+    $errors = [];
+    foreach (Mage::getSingleton('customer/session')->getMessages(true)->getItems() as $message) {
+        if ($message->getType() === Mage_Core_Model_Message::ERROR) {
+            $errors[] = $message->getText();
+        }
+    }
+    return $errors;
 }
 
 beforeEach(function () {
@@ -234,4 +261,38 @@ it('registers a new account through the customer service on both transports, wit
         ->and($webCustomer->getConfirmation())->toBeNull()
         ->and($apiCustomer->getConfirmation())->toBeNull()
         ->and($spy->emails)->toBe([['registered', $webEmail], ['registered', $apiEmail]]);
+});
+
+it('counts each 2FA code of both transports against the login limit of the email', function () {
+    $store = Mage::app()->getStore();
+    $store->setConfig('customer/password/allow_2fa', '1');
+    $store->setConfig(Mage_Customer_Service_Customer::XML_PATH_LOGIN_RATE_LIMIT, '2');
+    $email = 'social-twofa-' . uniqid() . '@example.com';
+    $sub = 'twofa-sub-' . uniqid();
+    $customer = Mage::getModel('customer/customer')
+        ->setWebsiteId((int) $store->getWebsiteId())
+        ->setStoreId((int) $store->getId())
+        ->setEmail($email)
+        ->setFirstname('Social')
+        ->setLastname('Parity')
+        ->setPassword('Password123!')
+        ->setTwofaSecret(Mage::helper('core/security')->generateTotpSecret())
+        ->setTwofaEnabled();
+    $customer->save();
+    $GLOBALS['socialParityCustomerIds'][] = (int) $customer->getId();
+
+    $webNonce = Mage::getModel('sociallogin/nonce')->issue();
+    $signIn = socialViaWeb('google', socialParityToken($email, $sub, $webNonce), $webNonce);
+    $web = socialTwofaViaWeb('000000');
+    $api = socialViaApi('google', socialParityToken($email, $sub), null, '000000');
+    $webOverLimit = socialTwofaViaWeb('000000');
+    $apiOverLimit = socialViaApi('google', socialParityToken($email, $sub), null, '000000');
+
+    expect($signIn['status'])->toBe(200)
+        ->and($signIn['customer_id'])->toBeNull()
+        ->and($web)->toBe(['2FA verification code is invalid.'])
+        ->and($api['status'])->toBe(401)
+        ->and($webOverLimit)->toBe(['Too many requests. Please try again later.'])
+        ->and($apiOverLimit['status'])->toBe(429)
+        ->and(Mage::getSingleton('customer/session')->isLoggedIn())->toBeFalse();
 });
