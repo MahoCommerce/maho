@@ -46,9 +46,8 @@ abstract class Mage_Wishlist_Controller_Abstract extends Mage_Core_Controller_Fr
 
         $messages   = [];
         $addedItems = [];
-        $notSalable = [];
-        $hasOptions = [];
 
+        $service    = Mage::getService('wishlist/wishlist');
         $cart       = Mage::getSingleton('checkout/cart');
         $collection = $wishlist->getItemsCollection()
                 ->setVisibilityFilter();
@@ -64,26 +63,12 @@ abstract class Mage_Wishlist_Controller_Abstract extends Mage_Core_Controller_Fr
                 $disableAddToCart = $item->getProduct()->getDisableAddToCart();
                 $item->unsProduct();
 
-                // Set qty
-                if (isset($qtys[$item->getId()])) {
-                    $qty = $this->_processLocalizedQty($qtys[$item->getId()]);
-                    if ($qty) {
-                        $item->setQty($qty);
-                    }
-                }
+                $qty = isset($qtys[$item->getId()]) ? $this->_processLocalizedQty($qtys[$item->getId()]) : null;
                 $item->getProduct()->setDisableAddToCart($disableAddToCart);
-                // Add to cart
-                if ($item->addToCart($cart, $isOwner)) {
-                    $addedItems[] = $item->getProduct();
-                }
+                $service->moveToCart($wishlist, $item, $cart->getQuote(), $qty ?: null, keepItem: !$isOwner);
+                $addedItems[] = $item->getProduct();
             } catch (Mage_Core_Exception $e) {
-                if ($e->getCode() == Mage_Wishlist_Model_Item::EXCEPTION_CODE_NOT_SALABLE) {
-                    $notSalable[] = $item;
-                } elseif ($e->getCode() == Mage_Wishlist_Model_Item::EXCEPTION_CODE_HAS_REQUIRED_OPTIONS) {
-                    $hasOptions[] = $item;
-                } else {
-                    $messages[] = $this->__('%s for "%s".', trim($e->getMessage(), '.'), $item->getProduct()->getName());
-                }
+                $messages[] = $this->__('%s for "%s".', trim($e->getMessage(), '.'), $item->getProduct()->getName());
 
                 $cartItem = $cart->getQuote()->getItemByProduct($item->getProduct());
                 if ($cartItem) {
@@ -108,37 +93,12 @@ abstract class Mage_Wishlist_Controller_Abstract extends Mage_Core_Controller_Fr
             $redirectUrl = $indexUrl;
         }
 
-        if ($notSalable) {
-            $products = [];
-            foreach ($notSalable as $item) {
-                $products[] = '"' . $item->getProduct()->getName() . '"';
-            }
-            $messages[] = Mage::helper('wishlist')->__('Unable to add the following product(s) to shopping cart: %s.', implode(', ', $products));
-        }
-
-        if ($hasOptions) {
-            $products = [];
-            foreach ($hasOptions as $item) {
-                $products[] = '"' . $item->getProduct()->getName() . '"';
-            }
-            $messages[] = Mage::helper('wishlist')->__('Product(s) %s have required options. Each of them can be added to cart separately only.', implode(', ', $products));
-        }
-
         if ($messages) {
-            $isMessageSole = (count($messages) == 1);
-            if ($isMessageSole && count($hasOptions) == 1) {
-                $item = $hasOptions[0];
-                if ($isOwner) {
-                    $item->delete();
-                }
-                $redirectUrl = $item->getProductUrl();
-            } else {
-                $wishlistSession = Mage::getSingleton('wishlist/session');
-                foreach ($messages as $message) {
-                    $wishlistSession->addError($message);
-                }
-                $redirectUrl = $indexUrl;
+            $wishlistSession = Mage::getSingleton('wishlist/session');
+            foreach ($messages as $message) {
+                $wishlistSession->addError($message);
             }
+            $redirectUrl = $indexUrl;
         }
 
         if ($addedItems) {
@@ -159,8 +119,8 @@ abstract class Mage_Wishlist_Controller_Abstract extends Mage_Core_Controller_Fr
                 Mage::helper('wishlist')->__('%d product(s) have been added to shopping cart: %s.', count($addedItems), implode(', ', $products)),
             );
 
-            // save cart and collect totals
-            $cart->save()->getQuote()->collectTotals();
+            $cart->save();
+            Mage::getSingleton('checkout/session')->setLastAddedProductId((int) end($addedItems)->getId());
         }
 
         Mage::helper('wishlist')->calculate();

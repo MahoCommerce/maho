@@ -166,11 +166,9 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
             $quote = $this->cartService->getForCustomer($customerId, (int) \Mage::app()->getStore()->getId());
         }
 
-        $this->cartService->addProduct($quote, $item->getProduct(), $item->getBuyRequest()->setQty($qty));
-
-        // Build the response before the delete, which needs the data of the item
+        // Build the response before the move deletes the item
         $dto = $this->toDto($item);
-        $this->wishlistService->removeItem($wishlist, $item);
+        $this->wishlistService->moveToCart($wishlist, $item, $quote, (float) $qty);
 
         return $dto;
     }

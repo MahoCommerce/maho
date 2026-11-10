@@ -78,10 +78,11 @@ class Mage_Wishlist_SharedController extends Mage_Wishlist_Controller_Abstract
         $code = $this->getRequest()->getParam('code');
         $redirectUrl = Mage::getUrl('*/*/index', ['code' => $code]);
 
-        /** @var Mage_Wishlist_Model_Item $item */
-        $item = Mage::getModel('wishlist/item')->load($itemId);
+        $service = Mage::getService('wishlist/wishlist');
         $wishlist = Mage::getModel('wishlist/wishlist')->loadByCode($code);
-        if (!$wishlist->getId() || (int) $item->getWishlistId() !== (int) $wishlist->getId()) {
+        try {
+            $item = $service->getItem($wishlist, $itemId);
+        } catch (Mage_Core_Exception_NoSuchEntity) {
             return $this->_redirectUrl($redirectUrl);
         }
 
@@ -90,29 +91,27 @@ class Mage_Wishlist_SharedController extends Mage_Wishlist_Controller_Abstract
         $cart       = Mage::getSingleton('checkout/cart');
 
         try {
-            $options = Mage::getModel('wishlist/item_option')->getCollection()
-                    ->addItemFilter([$itemId]);
-            $item->setOptions($options->getOptionsByItem($itemId));
-
-            $item->addToCart($cart);
-            $cart->save()->getQuote()->collectTotals();
+            $service->moveToCart($wishlist, $item, $cart->getQuote(), keepItem: true);
+            $cart->save();
+            Mage::getSingleton('checkout/session')->setLastAddedProductId((int) $item->getProductId());
 
             if (Mage::helper('checkout/cart')->getShouldRedirectToCart()) {
                 $redirectUrl = Mage::helper('checkout/cart')->getCartUrl();
             }
         } catch (Mage_Core_Exception $e) {
-            if ($e->getCode() == Mage_Wishlist_Model_Item::EXCEPTION_CODE_NOT_SALABLE) {
-                $session->addError(Mage::helper('wishlist')->__('This product(s) is currently out of stock'));
-            } elseif ($e->getCode() == Mage_Wishlist_Model_Item::EXCEPTION_CODE_NOT_SPECIFIED_PRODUCT) {
+            if ($e->getCode() == Mage_Wishlist_Model_Item::EXCEPTION_CODE_NOT_SPECIFIED_PRODUCT) {
                 if (!$wishlist->getItemsCount()) {
                     $redirectUrl = Mage::helper('checkout/cart')->getCartUrl();
                     $session = Mage::getSingleton('catalog/session');
                 }
                 $message = Mage::helper('wishlist')->__('Cannot add the selected product to shopping cart because the product was removed from the wishlist');
                 $session->addNotice($message);
-            } else {
+            } elseif ($e->getMessages(Mage_Core_Model_Message::NOTICE)) {
+                // A notice asks for an option that the shopper chooses on the product page
                 Mage::getSingleton('catalog/session')->addNotice($e->getMessage());
                 $redirectUrl = $item->getProductUrl();
+            } else {
+                $session->addError($e->getMessage());
             }
         } catch (Exception $e) {
             $session->addException($e, Mage::helper('wishlist')->__('Cannot add item to shopping cart'));
