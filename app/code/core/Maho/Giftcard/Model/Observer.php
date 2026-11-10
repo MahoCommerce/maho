@@ -57,6 +57,7 @@ class Maho_Giftcard_Model_Observer
             $senderName = $buyRequest['giftcard_sender_name'] ?? '';
             $senderEmail = $buyRequest['giftcard_sender_email'] ?? '';
             $message = $buyRequest['giftcard_message'] ?? '';
+            $deliveryDate = $buyRequest['giftcard_delivery_date'] ?? null;
 
             // Generate gift cards for each invoiced quantity
             $qtyInvoiced = (int) $invoiceItem->getQty();
@@ -72,7 +73,7 @@ class Maho_Giftcard_Model_Observer
                     $message,
                 );
 
-                $service->sendToRecipient($giftcard, (int) $order->getStoreId());
+                $service->sendToRecipient($giftcard, (int) $order->getStoreId(), is_string($deliveryDate) ? $deliveryDate : null);
             }
         }
     }

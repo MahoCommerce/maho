@@ -176,11 +176,18 @@ class Maho_Giftcard_Service_Giftcard
 
     /**
      * Email $giftcard to its recipient, once, with the settings of the store $storeId or of the current store.
-     * A failed email does not fail the action that created the card.
+     * A $deliveryDate (Y-m-d) after today in the timezone of that store schedules the email for the start of that
+     * day, and sendScheduledEmails() sends it then. Today, a past date, a date that is not valid or no date sends
+     * the email now. A failed email does not fail the action that created the card.
      */
-    public function sendToRecipient(Maho_Giftcard_Model_Giftcard $giftcard, ?int $storeId = null): void
+    public function sendToRecipient(Maho_Giftcard_Model_Giftcard $giftcard, ?int $storeId = null, ?string $deliveryDate = null): void
     {
         if (!$giftcard->getRecipientEmail() || $giftcard->getEmailSentAt()) {
+            return;
+        }
+        $scheduledAt = $this->getScheduledTime($deliveryDate, $storeId);
+        if ($scheduledAt !== null) {
+            Mage::helper('giftcard')->scheduleGiftcardEmail($giftcard, DateTime::createFromImmutable($scheduledAt));
             return;
         }
         try {
@@ -188,5 +195,46 @@ class Maho_Giftcard_Service_Giftcard
         } catch (Exception $e) {
             Mage::logException($e);
         }
+    }
+
+    /**
+     * Email each card whose scheduled time has come and that has no email yet, with the settings of the store of
+     * its order. A card whose email fails stays scheduled, so the next call tries it again.
+     */
+    public function sendScheduledEmails(int $limit = 50): void
+    {
+        $collection = Mage::getResourceModel('giftcard/giftcard_collection')
+            ->addFieldToFilter('email_scheduled_at', ['lteq' => Mage::app()->getLocale()->formatDateForDb('now')])
+            ->addFieldToFilter('email_sent_at', ['null' => true])
+            ->addFieldToFilter('recipient_email', ['neq' => ''])
+            ->setOrder('email_scheduled_at', Maho\Data\Collection::SORT_ORDER_ASC)
+            ->setPageSize($limit);
+        $collection->getSelect()->joinLeft(
+            ['purchase_order' => $collection->getTable('sales/order')],
+            'purchase_order.entity_id = main_table.purchase_order_id',
+            ['purchase_store_id' => 'store_id'],
+        );
+
+        /** @var Maho_Giftcard_Model_Giftcard $giftcard */
+        foreach ($collection as $giftcard) {
+            $storeId = $giftcard->getData('purchase_store_id');
+            $this->sendToRecipient($giftcard, $storeId === null ? null : (int) $storeId);
+        }
+    }
+
+    /**
+     * Return the start of $deliveryDate in the timezone of the store $storeId, in UTC. Return null when the date
+     * is not valid or is not after today in that timezone.
+     */
+    private function getScheduledTime(?string $deliveryDate, ?int $storeId): ?DateTimeImmutable
+    {
+        if ($deliveryDate === null || !Mage::helper('giftcard')->isValidDeliveryDate($deliveryDate)) {
+            return null;
+        }
+        $locale = Mage::app()->getLocale();
+        if ($deliveryDate <= $locale->utcToStore($storeId)->format(Mage_Core_Model_Locale::DATE_FORMAT)) {
+            return null;
+        }
+        return $locale->storeToUtc($storeId, $deliveryDate . ' 00:00:00');
     }
 }
