@@ -461,29 +461,13 @@ class Mage_Checkout_Model_Type_Onepage
     }
 
     /**
-     * Prepare quote for customer registration and customer order submit
+     * Prepare quote for customer registration and customer order submit. Mage_Sales_Service_Order::submit() adds the
+     * addresses to the address book.
      */
     protected function _prepareNewCustomerQuote()
     {
-        $quote      = $this->getQuote();
-        $billing    = $quote->getBillingAddress();
-        $shipping   = $quote->isVirtual() ? null : $quote->getShippingAddress();
-
-        //$customer = Mage::getModel('customer/customer');
+        $quote = $this->getQuote();
         $customer = $quote->getCustomer();
-        /** @var Mage_Customer_Model_Customer $customer */
-        $customerBilling = $billing->exportCustomerAddress();
-        $customer->addAddress($customerBilling);
-        $billing->setCustomerAddress($customerBilling);
-        $customerBilling->setIsDefaultBilling();
-        if ($shipping && !$shipping->getSameAsBilling()) {
-            $customerShipping = $shipping->exportCustomerAddress();
-            $customer->addAddress($customerShipping);
-            $shipping->setCustomerAddress($customerShipping);
-            $customerShipping->setIsDefaultShipping();
-        } else {
-            $customerBilling->setIsDefaultShipping();
-        }
 
         Mage::helper('core')->copyFieldset('checkout_onepage_quote', 'to_customer', $quote, $customer);
         $customer->setPassword($customer->decryptPassword($quote->getPasswordHash()));
@@ -493,38 +477,15 @@ class Mage_Checkout_Model_Type_Onepage
     }
 
     /**
-     * Prepare quote for customer order submit
+     * Prepare quote for customer order submit. Mage_Sales_Service_Order::submit() adds the addresses to the address
+     * book.
      */
     protected function _prepareCustomerQuote()
     {
-        $quote      = $this->getQuote();
-        $billing    = $quote->getBillingAddress();
-        $shipping   = $quote->isVirtual() ? null : $quote->getShippingAddress();
-
+        $quote = $this->getQuote();
         $customer = $this->getCustomerSession()->getCustomer();
         if (!$customer->getId() && $quote->getCustomerId()) {
             $customer = Mage::getModel('customer/customer')->load($quote->getCustomerId());
-        }
-        if (!$billing->getCustomerId() || $billing->getSaveInAddressBook()) {
-            $customerBilling = $billing->exportCustomerAddress();
-            $customer->addAddress($customerBilling);
-            $billing->setCustomerAddress($customerBilling);
-        }
-        if ($shipping && !$shipping->getSameAsBilling()
-            && (!$shipping->getCustomerId() || $shipping->getSaveInAddressBook())
-        ) {
-            $customerShipping = $shipping->exportCustomerAddress();
-            $customer->addAddress($customerShipping);
-            $shipping->setCustomerAddress($customerShipping);
-        }
-
-        if (isset($customerBilling) && !$customer->getDefaultBilling()) {
-            $customerBilling->setIsDefaultBilling();
-        }
-        if ($shipping && isset($customerShipping) && !$customer->getDefaultShipping()) {
-            $customerShipping->setIsDefaultShipping();
-        } elseif (isset($customerBilling) && !$customer->getDefaultShipping()) {
-            $customerBilling->setIsDefaultShipping();
         }
         $quote->setCustomer($customer);
     }

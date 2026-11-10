@@ -209,8 +209,9 @@ class Mage_Sales_Service_Order
     /**
      * Place the order of $quote, in the store of $quote, or in the admin scope when the caller is in it. The checks
      * of validateQuote() run first. Then, under a lock on the cart, the gift cards and the totals are checked again,
-     * the order is saved, and the cart is closed. A guest order gets an access token. The new order email follows
-     * $sendConfirmation, and checkout_submit_all_after fires once.
+     * the addresses go to the address book as addToAddressBook() tells, the order is saved, and the cart is closed.
+     * A guest order gets an access token. The new order email follows $sendConfirmation, and
+     * checkout_submit_all_after fires once.
      *
      * @param list<int|string>|null $agreementIds the agreements that a Customer accepted, or null when the flow of
      *                                            the caller has no agreements step
@@ -237,6 +238,8 @@ class Mage_Sales_Service_Order
             return $this->withQuoteLock($quote, function () use ($quote, $actor, $orderData, $sendConfirmation, $convertor): Order {
                 if (!$quote->getCustomerId() && !$quote->getCustomerIsNew()) {
                     $orderData['guest_access_token'] = $this->generateAccessToken();
+                } else {
+                    $this->addToAddressBook($quote);
                 }
                 $order = $this->convert($quote, $actor, $orderData, $convertor ?? Mage::getModel('sales/convert_quote'));
                 $this->recordCashTendered($quote, $order);
@@ -281,6 +284,58 @@ class Mage_Sales_Service_Order
                 }
             }
         }
+    }
+
+    /**
+     * Add each address of $quote that has save_in_address_book to the address book of the customer of $quote, which
+     * the order transaction saves. An address that the customer picked from the address book updates that saved
+     * address instead. A shipping address that is the same as the billing address is not added again. When the
+     * customer has no default billing address, the billing address becomes it. When the customer has no default
+     * shipping address, the shipping address becomes it, or the billing address when it is also the shipping address.
+     */
+    private function addToAddressBook(\Mage_Sales_Model_Quote $quote): void
+    {
+        $customer = $quote->getCustomer();
+        $billing = $quote->getBillingAddress();
+        $shipping = $quote->isVirtual() ? null : $quote->getShippingAddress();
+        $savedBilling = $this->saveInAddressBook($customer, $billing);
+        $savedShipping = $shipping && !$shipping->getSameAsBilling() ? $this->saveInAddressBook($customer, $shipping) : null;
+
+        if ($savedBilling && !$customer->getDefaultBilling()) {
+            $savedBilling->setIsDefaultBilling(true);
+        }
+        if (!$customer->getDefaultShipping()) {
+            if ($savedShipping) {
+                $savedShipping->setIsDefaultShipping(true);
+            } elseif ($savedBilling && (!$shipping || $shipping->getSameAsBilling())) {
+                $savedBilling->setIsDefaultShipping(true);
+            }
+        }
+    }
+
+    /**
+     * Return the address of the address book of $customer that $address adds or updates, or null when $address does
+     * not go to the address book, or a caller already linked it to an address of the address book.
+     */
+    private function saveInAddressBook(\Mage_Customer_Model_Customer $customer, \Mage_Sales_Model_Quote_Address $address): ?\Mage_Customer_Model_Address
+    {
+        if (!$address->getSaveInAddressBook() || $address->getCustomerAddress()) {
+            return null;
+        }
+
+        $exported = $address->exportCustomerAddress();
+        $saved = $customer->getId() && $address->getCustomerAddressId()
+            ? $customer->getAddressItemById($address->getCustomerAddressId())
+            : null;
+        if ($saved) {
+            $saved->addData($exported->getData());
+        } else {
+            $customer->addAddress($exported);
+            $saved = $exported;
+        }
+        $address->setCustomerAddress($saved);
+
+        return $saved;
     }
 
     /**
