@@ -32,9 +32,9 @@ class Mage_Directory_Model_Observer
         $rates = null;
         $usedService = null;
 
-        foreach ($this->_getImportServiceChain() as $service) {
+        foreach ($this->_getImportServiceChain() as $code => $service) {
             $serviceWarnings = [];
-            $rates = $this->_fetchRatesFromService($service['model'], $serviceWarnings);
+            $rates = $this->_fetchRatesFromService((string) $code, $serviceWarnings);
 
             if ($rates !== null) {
                 $usedService = $service['name'];
@@ -95,29 +95,25 @@ class Mage_Directory_Model_Observer
     }
 
     /**
+     * @param string $code The code of an enabled import service
      * @param array $warnings Filled with whatever went wrong, when the import did not go through
      * @return array|null Rates, or null when this service could not deliver a complete set
      */
-    protected function _fetchRatesFromService(string $model, array &$warnings): ?array
+    protected function _fetchRatesFromService(string $code, array &$warnings): ?array
     {
-        $importModel = Mage::getModel($model);
-
-        if (!$importModel instanceof Mage_Directory_Model_Currency_Import_Abstract) {
-            $warnings[] = Mage::helper('directory')->__('Unable to initialize the import model.');
-            return null;
-        }
-
         try {
-            $rates = $importModel->fetchRates();
+            /** @var Mage_Directory_Service_Currency $service */
+            $service = Mage::getService('directory/currency');
+            $result = $service->fetchRates($code);
         } catch (Exception $e) {
             Mage::logException($e);
             $warnings[] = $e->getMessage();
             return null;
         }
 
-        $warnings = array_merge($warnings, $importModel->getMessages());
+        $warnings = array_merge($warnings, $result['warnings']);
 
-        return $warnings === [] && $rates !== [] ? $rates : null;
+        return $warnings === [] && $result['rates'] !== [] ? $result['rates'] : null;
     }
 
     protected function _sendImportWarnings(array $importWarnings): void
