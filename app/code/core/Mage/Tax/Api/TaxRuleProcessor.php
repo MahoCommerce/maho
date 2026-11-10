@@ -17,20 +17,20 @@ use Maho\ApiPlatform\CrudProcessor;
 final class TaxRuleProcessor extends CrudProcessor
 {
     #[\Override]
-    protected function loadOrFail(string $modelAlias, int|string $id, string $notFoundMessage): \Mage_Tax_Model_Calculation_Rule
+    protected function loadModel(int $id): \Mage_Tax_Model_Calculation_Rule
     {
-        return $this->service()->getById((int) $id);
+        return $this->service()->getById($id);
     }
 
     #[\Override]
-    protected function safeSave(\Mage_Core_Model_Abstract $model, string $entityLabel): void
+    protected function saveModel(\Mage_Core_Model_Abstract $model): void
     {
         /** @var \Mage_Tax_Model_Calculation_Rule $model */
         $this->service()->save($model);
     }
 
     #[\Override]
-    protected function safeDelete(\Mage_Core_Model_Abstract $model, string $entityLabel): void
+    protected function deleteModel(\Mage_Core_Model_Abstract $model): void
     {
         /** @var \Mage_Tax_Model_Calculation_Rule $model */
         $this->service()->delete($model);

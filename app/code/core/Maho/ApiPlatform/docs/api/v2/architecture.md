@@ -71,7 +71,7 @@ final class MyProvider extends \Maho\ApiPlatform\Provider
 
 #### Processor
 
-Base class for all state processors. Bundles authentication (via `AuthenticationTrait`) and model persistence (via `ModelPersistenceTrait`). Provides `safeSave()`, `safeDelete()`, `secureAreaDelete()`, and `loadOrFail()`.
+Base class for all state processors. It bundles authentication (via `AuthenticationTrait`), the store scope of the token and the activity log. Its default `process()` creates, updates or deletes the model of `$modelAlias` with `loadModel()`, `saveModel()` and `deleteModel()`. A processor whose resource has a service overrides these three methods to call the service, as `Mage\Tax\Api\TaxClassProcessor` does. A processor with other writes overrides `process()` and calls its service: the service holds the rules, so that the admin and the CLI apply them too.
 
 ```php
 final class MyProcessor extends \Maho\ApiPlatform\Processor
@@ -79,12 +79,12 @@ final class MyProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
     {
-        $user = $this->getAuthorizedUser();
-        $this->requirePermission($user, 'myresource/write');
-
-        $model = Mage::getModel('mymodule/entity');
-        $model->setData([...]);
-        $this->safeSave($model, 'create entity');
+        /** @var My_Module_Service_Entity $service */
+        $service = Mage::getService('mymodule/entity');
+        $model = $service->getById((int) $uriVariables['id']);
+        $model->setName($data->name);
+        $service->save($model);
+        return MyResource::fromModel($model);
     }
 }
 ```
