@@ -363,7 +363,11 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $args = $context['args']['input'] ?? [];
         $quote = $this->resolveAndVerify($context, $uriVariables);
         CustomAttributes::applyToCartAddress($quote->getShippingAddress(), $args['customAttributes'] ?? null);
-        $quote = $this->cartService->setShippingAddress($quote, $this->cartService->mapAddressInput($args));
+        try {
+            $quote = $this->cartService->setShippingAddress($quote, $this->cartService->mapAddressInput($args));
+        } catch (\Mage_Core_Exception_Input $e) {
+            throw $e->withFieldNames(\Mage_Checkout_Service_Cart::ADDRESS_API_FIELDS);
+        }
 
         return $this->cartMapper->mapQuoteToCart($quote);
     }
@@ -387,7 +391,11 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         } else {
             CustomAttributes::applyToCartAddress($quote->getBillingAddress(), $args['customAttributes'] ?? null);
         }
-        $quote = $this->cartService->setBillingAddress($quote, $addressData, $sameAsShipping);
+        try {
+            $quote = $this->cartService->setBillingAddress($quote, $addressData, $sameAsShipping);
+        } catch (\Mage_Core_Exception_Input $e) {
+            throw $e->withFieldNames(\Mage_Checkout_Service_Cart::ADDRESS_API_FIELDS);
+        }
 
         return $this->cartMapper->mapQuoteToCart($quote);
     }

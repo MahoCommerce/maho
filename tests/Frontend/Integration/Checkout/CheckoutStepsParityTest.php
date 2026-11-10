@@ -117,6 +117,24 @@ it('refuses an incomplete address with the same messages', function () {
         ->and(array_unique($api['fields']))->toBe(['city']);
 });
 
+it('names the fields of an address error as the API client sends them', function () {
+    $api = checkoutStepsApi($this->carts[1], 'set_guest_billing_address', 'billing-address', checkoutStepsApiAddress(['firstName' => '', 'lastName' => '']));
+
+    expect($api['status'])->toBe(422)
+        ->and(array_values(array_unique($api['fields'])))->toBe(['firstName', 'lastName']);
+});
+
+it('stores the prefix, the middle name, the suffix and the VAT number of an API address', function () {
+    $api = checkoutStepsApi($this->carts[1], 'set_guest_shipping_address', 'shipping-address', checkoutStepsApiAddress([
+        'prefix' => 'Dr.', 'middleName' => 'Quinn', 'suffix' => 'Jr.', 'vatId' => 'IT12345678901',
+    ]));
+
+    $address = checkoutStepsReload($this->carts[1])->getShippingAddress();
+    expect($api['status'])->toBe(200)
+        ->and([$address->getPrefix(), $address->getMiddlename(), $address->getSuffix(), $address->getVatId()])
+        ->toBe(['Dr.', 'Quinn', 'Jr.', 'IT12345678901']);
+});
+
 it('stores the address text without HTML tags on both transports', function () {
     [$webCart, $apiCart] = $this->carts;
 

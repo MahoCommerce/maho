@@ -557,9 +557,12 @@ class Mage_Checkout_Model_Type_Onepage
     /**
      * Create order based on checkout type. Create customer if necessary.
      *
+     * @param list<int|string>|null $agreementIds the agreements that the customer accepted, or null when the flow
+     *                                            of the caller has no agreements step
      * @return $this
+     * @throws Mage_Core_Exception
      */
-    public function saveOrder()
+    public function saveOrder(?array $agreementIds = null)
     {
         $this->validate();
         $isNewCustomer = false;
@@ -576,8 +579,7 @@ class Mage_Checkout_Model_Type_Onepage
                 break;
         }
 
-        $service = Mage::getModel('sales/service_quote', $this->getQuote());
-        $service->submitAll();
+        $order = Mage::getService('sales/order')->submit($this->getQuote(), Mage_Checkout_Model_Actor::Customer, $agreementIds);
 
         if ($isNewCustomer) {
             try {
@@ -591,45 +593,21 @@ class Mage_Checkout_Model_Type_Onepage
             ->setLastSuccessQuoteId($this->getQuote()->getId())
             ->clearHelperData();
 
-        $order = $service->getOrder();
-        if ($order) {
-            Mage::dispatchEvent(
-                'checkout_type_onepage_save_order_after',
-                ['order' => $order, 'quote' => $this->getQuote()],
-            );
-
-            /**
-             * a flag to set that there will be redirect to third party after confirmation
-             * eg: paypal standard ipn
-             */
-            $redirectUrl = $this->getQuote()->getPayment()->getOrderPlaceRedirectUrl();
-            /**
-             * we only want to send to customer about new order when there is no redirect to third party
-             */
-            if (!$redirectUrl && $order->getCanSendNewEmailFlag()) {
-                try {
-                    $order->queueNewOrderEmail();
-                } catch (Exception $e) {
-                    Mage::logException($e);
-                }
-            }
-
-            // add order information to the session
-            $this->_checkoutSession->setLastOrderId($order->getId())
-                ->setRedirectUrl($redirectUrl)
-                ->setLastRealOrderId($order->getIncrementId());
-
-            // as well a billing agreement can be created
-            $agreement = $order->getPayment()->getBillingAgreement();
-            if ($agreement) {
-                $this->_checkoutSession->setLastBillingAgreementId($agreement->getId());
-            }
-        }
-
         Mage::dispatchEvent(
-            'checkout_submit_all_after',
+            'checkout_type_onepage_save_order_after',
             ['order' => $order, 'quote' => $this->getQuote()],
         );
+
+        // A payment method that redirects to a third party gives the URL, and the order email waits for its answer
+        $this->_checkoutSession->setLastOrderId($order->getId())
+            ->setRedirectUrl($this->getQuote()->getPayment()->getOrderPlaceRedirectUrl())
+            ->setLastRealOrderId($order->getIncrementId());
+
+        // as well a billing agreement can be created
+        $agreement = $order->getPayment()->getBillingAgreement();
+        if ($agreement) {
+            $this->_checkoutSession->setLastBillingAgreementId($agreement->getId());
+        }
 
         return $this;
     }

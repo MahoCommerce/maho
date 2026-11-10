@@ -103,6 +103,9 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $isPrivileged = $this->isPrivilegedOrderActor();
         $cashTendered = ($isPrivileged && isset($args['cashTendered'])) ? (float) $args['cashTendered'] : null;
         $employeeId = ($isPrivileged && isset($args['employeeId'])) ? (int) $args['employeeId'] : null;
+        $actor = $isPrivileged ? \Mage_Checkout_Model_Actor::Staff : \Mage_Checkout_Model_Actor::Customer;
+        $agreementIds = $actor === \Mage_Checkout_Model_Actor::Customer ? $this->readAgreementIds($args) : null;
+        $sendConfirmation = ($isPrivileged && isset($args['sendConfirmation'])) ? (bool) filter_var($args['sendConfirmation'], FILTER_VALIDATE_BOOLEAN) : null;
         $paymentMethod = $args['paymentMethod'] ?? null;
         $shippingMethod = $args['shippingMethod'] ?? null;
         // Scope, not authorization: a caller in the admin scope (store 0) places a backend
@@ -121,13 +124,19 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // Frontend callers send the full checkout state in the body. Apply any
         // provided addresses in-memory; the single collection below prices them
         // together with the shipping method, and the final save persists them.
-        if (isset($args['shippingAddress']) && is_array($args['shippingAddress'])) {
-            CustomAttributes::applyToCartAddress($quote->getShippingAddress(), $args['shippingAddress']['customAttributes'] ?? null);
-            $this->cartService->applyShippingAddress($quote, $this->cartService->mapAddressInput($args['shippingAddress']));
-        }
-        if (isset($args['billingAddress']) && is_array($args['billingAddress'])) {
-            CustomAttributes::applyToCartAddress($quote->getBillingAddress(), $args['billingAddress']['customAttributes'] ?? null);
-            $this->cartService->applyBillingAddress($quote, $this->cartService->mapAddressInput($args['billingAddress']));
+        foreach (['shippingAddress' => $quote->getShippingAddress(), 'billingAddress' => $quote->getBillingAddress()] as $key => $address) {
+            if (!isset($args[$key]) || !is_array($args[$key])) {
+                continue;
+            }
+            CustomAttributes::applyToCartAddress($address, $args[$key]['customAttributes'] ?? null);
+            $addressData = $this->cartService->mapAddressInput($args[$key]);
+            try {
+                $key === 'shippingAddress'
+                    ? $this->cartService->applyShippingAddress($quote, $addressData)
+                    : $this->cartService->applyBillingAddress($quote, $addressData);
+            } catch (\Mage_Core_Exception_Input $e) {
+                throw $e->withFieldNames(array_map(fn(string $field): string => "{$key}.{$field}", \Mage_Checkout_Service_Cart::ADDRESS_API_FIELDS));
+            }
         }
 
         // A guest sends the fields of the Checkout Registration form, which a customer order takes from the account
@@ -185,7 +194,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             $this->cartService->collectAndVerifyTotals($quote);
         }
 
-        $placeOrder = function () use ($quote, $paymentMethod, $shippingMethod, $guestEmail, $orderNote, $cashTendered, $employeeId): array {
+        $placeOrder = function () use ($quote, $paymentMethod, $shippingMethod, $guestEmail, $orderNote, $cashTendered, $employeeId, $actor, $agreementIds, $sendConfirmation): array {
             $quote->save();
 
             // Allow modules to prepare the quote before order placement
@@ -202,6 +211,9 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
                 $orderNote,
                 $cashTendered,
                 $employeeId,
+                $actor,
+                $agreementIds,
+                $sendConfirmation,
             );
         };
 
@@ -223,6 +235,21 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             $dto->changeAmount = $changeAmount;
         }
         return $dto;
+    }
+
+    /**
+     * Return the agreement IDs of the body. A Customer sends them when the store asks to accept its agreements.
+     *
+     * @return list<int>
+     */
+    private function readAgreementIds(array $args): array
+    {
+        $agreementIds = $args['agreementIds'] ?? [];
+        if (!is_array($agreementIds) || !array_is_list($agreementIds)) {
+            throw new BadRequestHttpException('agreementIds must be a list of agreement IDs');
+        }
+
+        return array_map(intval(...), $agreementIds);
     }
 
     /**

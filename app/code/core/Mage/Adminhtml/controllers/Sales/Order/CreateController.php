@@ -523,6 +523,11 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
                 $this->_getSession()->addError($message);
             }
             $this->_redirect('*/*/');
+        } catch (Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $this->_getSession()->addError($error['message']);
+            }
+            $this->_redirect('*/*/');
         } catch (Mage_Core_Exception $e) {
             $message = $e->getMessage();
             if (!empty($message)) {

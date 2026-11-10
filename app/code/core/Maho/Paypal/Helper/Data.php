@@ -296,7 +296,7 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
 
         $quote->collectTotals();
 
-        Mage::getModel('sales/service_quote', $quote)->validate();
+        Mage::getService('sales/order')->validateQuote($quote, Mage_Checkout_Model_Actor::Customer);
     }
 
     public function saveVaultToken(array $paypalResult, Mage_Sales_Model_Quote $quote): void

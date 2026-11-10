@@ -27,6 +27,24 @@ class Mage_Checkout_Service_Cart
     /** The coupon codes and the gift card codes that one shopper can try in this number of seconds have a limit. */
     public const CODE_RATE_LIMIT_WINDOW = 60;
 
+    /** The field of the quote address => the field of an API address, as mapAddressInput() reads it. */
+    public const ADDRESS_API_FIELDS = [
+        'prefix' => 'prefix',
+        'firstname' => 'firstName',
+        'middlename' => 'middleName',
+        'lastname' => 'lastName',
+        'suffix' => 'suffix',
+        'company' => 'company',
+        'street' => 'street',
+        'city' => 'city',
+        'region' => 'region',
+        'region_id' => 'regionId',
+        'postcode' => 'postcode',
+        'country_id' => 'countryId',
+        'telephone' => 'telephone',
+        'vat_id' => 'vatId',
+    ];
+
     public function isValidMaskedId(mixed $maskedId): bool
     {
         return is_string($maskedId) && preg_match('/^' . self::MASKED_ID_PATTERN . '$/i', $maskedId) === 1;
@@ -1116,9 +1134,7 @@ class Mage_Checkout_Service_Cart
     {
         $billing = $quote->getBillingAddress();
         $shipping = $quote->getShippingAddress();
-        $eavConfig = \Mage::getSingleton('eav/config');
-        $fields = [...$eavConfig->getEntityAttributeCodes($eavConfig->getEntityType('customer_address')), 'customer_address_id', 'email'];
-        foreach ($fields as $field) {
+        foreach ($this->getBillingCopyFields() as $field) {
             $shipping->setData($field, $billing->getData($field));
         }
         $shipping->setSameAsBilling(true)
@@ -1127,6 +1143,34 @@ class Mage_Checkout_Service_Cart
         $this->collectAndSave($quote);
 
         return $quote;
+    }
+
+    /**
+     * Return true when the shipping address of $quote is marked as the same as the billing address, and has each
+     * field that useBillingForShipping() copies.
+     */
+    public function isShippingSameAsBilling(\Mage_Sales_Model_Quote $quote): bool
+    {
+        $billing = $quote->getBillingAddress();
+        $shipping = $quote->getShippingAddress();
+        if (!$shipping->getSameAsBilling()) {
+            return false;
+        }
+        return array_all($this->getBillingCopyFields(), fn(string $field): bool => $shipping->getData($field) == $billing->getData($field));
+    }
+
+    /**
+     * @return list<string> the fields of the billing address that useBillingForShipping() copies. The VAT check of
+     *                      the customer group can read the result of the VAT number check on the shipping address.
+     */
+    private function getBillingCopyFields(): array
+    {
+        $eavConfig = \Mage::getSingleton('eav/config');
+
+        return [
+            ...$eavConfig->getEntityAttributeCodes($eavConfig->getEntityType('customer_address')),
+            'customer_address_id', 'email', 'vat_is_valid', 'vat_request_id', 'vat_request_date', 'vat_request_success',
+        ];
     }
 
     /**
@@ -1230,8 +1274,11 @@ class Mage_Checkout_Service_Cart
         }
 
         return [
+            'prefix' => $input['prefix'] ?? null,
             'firstname' => $input['firstName'] ?? '',
+            'middlename' => $input['middleName'] ?? null,
             'lastname' => $input['lastName'] ?? '',
+            'suffix' => $input['suffix'] ?? null,
             'company' => $input['company'] ?? null,
             'street' => $input['street'] ?? [],
             'city' => $input['city'] ?? '',
@@ -1240,6 +1287,7 @@ class Mage_Checkout_Service_Cart
             'postcode' => $input['postcode'] ?? '',
             'country_id' => $countryId,
             'telephone' => $input['telephone'] ?? '',
+            'vat_id' => $input['vatId'] ?? null,
         ];
     }
 

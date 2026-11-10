@@ -129,7 +129,7 @@ class Orders extends AbstractImporter
     private function place(array $row): \Mage_Sales_Model_Order
     {
         $storeId = (int) $row['store_id'];
-        $quote = Mage::getModel('sales/quote')->setStoreId($storeId)->setIsActive(false);
+        $quote = Mage::getModel('sales/quote')->setStoreId($storeId)->setIsActive(true);
         $customer = Mage::getModel('customer/customer')
             ->setWebsiteId((int) Mage::app()->getStore($storeId)->getWebsiteId())
             ->loadByEmail($row['email']);
@@ -167,14 +167,18 @@ class Orders extends AbstractImporter
         }
         $quote->collectTotals()->save();
 
-        $service = new \Mage_Sales_Model_Service_Quote($quote);
-        $service->setOrderData(['ext_order_id' => $row['reference']]);
-        $service->submitAll();
-        $order = $service->getOrder();
-        if (!$order instanceof \Mage_Sales_Model_Order || !$order->getId()) {
-            throw new \Mage_Core_Exception('the quote service placed no order');
+        try {
+            return Mage::getService('sales/order')->submit(
+                $quote,
+                \Mage_Checkout_Model_Actor::Staff,
+                orderData: ['ext_order_id' => $row['reference']],
+                sendConfirmation: false,
+            );
+        } catch (\Throwable $e) {
+            // A quote without an order must not become the cart of its customer
+            $quote->setIsActive(false)->save();
+            throw $e;
         }
-        return $order;
     }
 
     /**
