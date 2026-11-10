@@ -1134,9 +1134,7 @@ class Mage_Checkout_Service_Cart
     {
         $billing = $quote->getBillingAddress();
         $shipping = $quote->getShippingAddress();
-        $eavConfig = \Mage::getSingleton('eav/config');
-        $fields = [...$eavConfig->getEntityAttributeCodes($eavConfig->getEntityType('customer_address')), 'customer_address_id', 'email'];
-        foreach ($fields as $field) {
+        foreach ($this->getBillingCopyFields() as $field) {
             $shipping->setData($field, $billing->getData($field));
         }
         $shipping->setSameAsBilling(true)
@@ -1145,6 +1143,34 @@ class Mage_Checkout_Service_Cart
         $this->collectAndSave($quote);
 
         return $quote;
+    }
+
+    /**
+     * Return true when the shipping address of $quote is marked as the same as the billing address, and has each
+     * field that useBillingForShipping() copies.
+     */
+    public function isShippingSameAsBilling(\Mage_Sales_Model_Quote $quote): bool
+    {
+        $billing = $quote->getBillingAddress();
+        $shipping = $quote->getShippingAddress();
+        if (!$shipping->getSameAsBilling()) {
+            return false;
+        }
+        return array_all($this->getBillingCopyFields(), fn(string $field): bool => $shipping->getData($field) == $billing->getData($field));
+    }
+
+    /**
+     * @return list<string> the fields of the billing address that useBillingForShipping() copies. The VAT check of
+     *                      the customer group can read the result of the VAT number check on the shipping address.
+     */
+    private function getBillingCopyFields(): array
+    {
+        $eavConfig = \Mage::getSingleton('eav/config');
+
+        return [
+            ...$eavConfig->getEntityAttributeCodes($eavConfig->getEntityType('customer_address')),
+            'customer_address_id', 'email', 'vat_is_valid', 'vat_request_id', 'vat_request_date', 'vat_request_success',
+        ];
     }
 
     /**

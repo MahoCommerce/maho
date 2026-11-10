@@ -1204,9 +1204,12 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
 
     public function setShippingAsBilling($flag)
     {
-        if ($flag) {
-            Mage::getService('checkout/cart')->useBillingForShipping($this->getQuote());
-        } else {
+        /** @var Mage_Checkout_Service_Cart $cartService */
+        $cartService = Mage::getService('checkout/cart');
+        // The form sends the flag on each reload, and a copy without a change needs no save of the cart
+        if ($flag && !$cartService->isShippingSameAsBilling($this->getQuote())) {
+            $cartService->useBillingForShipping($this->getQuote());
+        } elseif (!$flag) {
             $this->getShippingAddress()->setSameAsBilling(false);
         }
         $this->setRecollect(true);
