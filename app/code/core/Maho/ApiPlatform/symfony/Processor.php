@@ -139,7 +139,15 @@ abstract class Processor implements ProcessorInterface
      */
     protected function loadModel(int $id): \Mage_Core_Model_Abstract
     {
-        $model = \Mage::getModel($this->modelAlias)->load($id);
+        $model = \Mage::getModel($this->modelAlias);
+        try {
+            $model->load($id);
+        } catch (\Doctrine\DBAL\Exception\DriverException $e) {
+            // PostgreSQL refuses an ID above the range of the column (SQLSTATE 22003), and such an ID matches no row
+            if ($e->getSQLState() !== '22003') {
+                throw $e;
+            }
+        }
         if (!$model->getId()) {
             throw new \Mage_Core_Exception_NoSuchEntity(ucfirst((string) $this->entityLabel) . ' not found');
         }
