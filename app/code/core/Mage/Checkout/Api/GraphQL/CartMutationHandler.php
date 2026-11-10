@@ -167,18 +167,9 @@ class CartMutationHandler
             throw NotFoundException::cart($cartId);
         }
 
-        // The POS code box takes a gift card code or a coupon code
-        /** @var \Maho_Giftcard_Model_Giftcard $giftcard */
-        $giftcard = \Mage::getModel('giftcard/giftcard');
-        if (trim($couponCode) !== '') {
-            $giftcard->loadByCode(trim($couponCode));
-        }
+        // The POS code box takes a coupon code or a gift card code
         try {
-            if ($giftcard->getId() && $giftcard->isValid()) {
-                $this->cartService->applyGiftcard($quote, $couponCode, null, \Mage_Checkout_Model_Actor::Staff);
-            } else {
-                $this->cartService->applyCoupon($quote, $couponCode, \Mage_Checkout_Model_Actor::Staff);
-            }
+            $this->cartService->applyCode($quote, $couponCode, \Mage_Checkout_Model_Actor::Staff);
         } catch (\Mage_Core_Exception $e) {
             throw ValidationException::invalidValue('couponCode', $e->getMessage());
         }

@@ -127,10 +127,11 @@ class Maho_Giftcard_Service_Giftcard
     }
 
     /**
-     * Change the balance and the status of $giftcard together: when one change fails, neither is saved.
-     * An explicit status wins over the status that the new balance gives.
+     * Save the balance, the status and the other changes of the existing card $giftcard together: when one
+     * change fails, nothing is saved. An explicit status wins over the status that the new balance gives.
      *
      * @throws Mage_Core_Exception_Input
+     * @throws Mage_Core_Exception_Conflict when another card has the code
      */
     public function update(Maho_Giftcard_Model_Giftcard $giftcard, ?float $balance, ?string $status, ?string $comment = null): Maho_Giftcard_Model_Giftcard
     {
@@ -141,8 +142,9 @@ class Maho_Giftcard_Service_Giftcard
                 $this->adjustBalance($giftcard, $balance, $comment);
             }
             if ($status !== null && $status !== $giftcard->getStatus()) {
-                $this->save($giftcard->setStatus($status));
+                $giftcard->setStatus($status);
             }
+            $this->save($giftcard);
             $resource->commit();
         } catch (Throwable $e) {
             $resource->rollBack();
@@ -157,15 +159,16 @@ class Maho_Giftcard_Service_Giftcard
     }
 
     /**
-     * Email $giftcard to its recipient, once. A failed email does not fail the action that created the card.
+     * Email $giftcard to its recipient, once, with the settings of the store $storeId or of the current store.
+     * A failed email does not fail the action that created the card.
      */
-    public function sendToRecipient(Maho_Giftcard_Model_Giftcard $giftcard): void
+    public function sendToRecipient(Maho_Giftcard_Model_Giftcard $giftcard, ?int $storeId = null): void
     {
         if (!$giftcard->getRecipientEmail() || $giftcard->getEmailSentAt()) {
             return;
         }
         try {
-            Mage::helper('giftcard')->sendGiftcardEmail($giftcard);
+            Mage::helper('giftcard')->sendGiftcardEmail($giftcard, $storeId);
         } catch (Exception $e) {
             Mage::logException($e);
         }

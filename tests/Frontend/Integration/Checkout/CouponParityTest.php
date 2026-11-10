@@ -183,6 +183,31 @@ it('keeps the coupon of the cart when the promo code box applies a gift card', f
         ->and((string) $stored->getGiftcardCodes())->toContain((string) $giftcard->getCode());
 });
 
+it('applies the coupon of a code that is also a gift card, on the cart page and in the POS', function () {
+    $code = (string) $this->rule->getCouponCode();
+    $this->carts = [$webCart = CartParity::cart(), $posCart = CartParity::cart()];
+    $giftcard = Mage::getModel('giftcard/giftcard')
+        ->setCode($code)
+        ->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE)
+        ->setWebsiteIds([(int) Mage::app()->getStore()->getWebsiteId()])
+        ->setBalance(5.00)
+        ->setInitialBalance(5.00);
+    $giftcard->save();
+
+    try {
+        $web = couponViaWeb($webCart, $code);
+        new Mage\Checkout\Api\GraphQL\CartMutationHandler(new Mage\Checkout\Api\CartMapper())
+            ->handleApplyCoupon(['cartId' => (int) $posCart->getId(), 'couponCode' => $code]);
+    } finally {
+        $giftcard->delete();
+    }
+
+    $stored = Mage::getModel('sales/quote')->loadByIdWithoutStore($posCart->getId());
+    expect($web['success'])->toBe(["Coupon code \"{$code}\" was applied."])
+        ->and((string) $stored->getCouponCode())->toBe($code)
+        ->and($stored->getGiftcardCodes())->toBeNull();
+});
+
 describe('the limit of codes', function () {
     it('counts the codes of the cart page and of the API together', function () {
         Mage::app()->getStore()->setConfig(Mage_SalesRule_Service_Rule::XML_PATH_CHECK_RATE_LIMIT, '2');

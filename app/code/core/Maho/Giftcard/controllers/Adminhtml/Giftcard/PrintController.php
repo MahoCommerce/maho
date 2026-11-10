@@ -89,13 +89,15 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
     #[Maho\Config\Route('/admin/giftcard_print/email')]
     public function emailAction(): void
     {
-        $id = $this->getRequest()->getParam('id');
+        $id = (int) $this->getRequest()->getParam('id');
         $scheduleAt = $this->getRequest()->getParam('schedule_at');
 
-        $giftcard = Mage::getModel('giftcard/giftcard')->load($id);
-
-        if (!$giftcard->getId()) {
-            $this->_getSession()->addError('Gift card not found.');
+        try {
+            /** @var Maho_Giftcard_Service_Giftcard $service */
+            $service = Mage::getService('giftcard/giftcard');
+            $giftcard = $service->getById($id);
+        } catch (Mage_Core_Exception_NoSuchEntity $e) {
+            $this->_getSession()->addError($e->getMessage());
             $this->_redirect('*/giftcard/index');
             return;
         }

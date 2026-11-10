@@ -245,3 +245,105 @@ describe('the balance check', function (): void {
             ->and(giftcardParityApiBalance('PEST-NONE')['status'])->toBe(429);
     });
 });
+
+it('saves neither the status nor the balance when the admin page gives a refused balance', function (): void {
+    $giftcard = giftcardParityCard('ATOMIC', ['balance' => 50.0]);
+    giftcardParityMaxBalance('100');
+
+    $admin = TransportParity::admin(Maho_Giftcard_Adminhtml_GiftcardController::class, 'save', [
+        'id' => $giftcard->getId(), 'giftcard_id' => $giftcard->getId(), 'code' => $giftcard->getCode(),
+        'status' => Maho_Giftcard_Model_Giftcard::STATUS_DISABLED, 'balance' => 200, 'website_ids' => [$this->websiteId],
+    ]);
+
+    $stored = Mage::getModel('giftcard/giftcard')->load($giftcard->getId());
+    expect($admin['errors'])->toBe(['Gift card balance cannot exceed 100'])
+        ->and($stored->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE)
+        ->and((float) $stored->getBalance())->toBe(50.0);
+});
+
+it('emails a purchased card through the service, which records the email', function (): void {
+    $order = Mage::getModel('sales/order')->setStoreId(1)->setBaseToOrderRate(1.0)
+        ->setIncrementId('PEST-GC-' . uniqid())->setBaseCurrencyCode('USD')->setOrderCurrencyCode('USD');
+    $order->save();
+    $orderItem = Mage::getModel('sales/order_item')->setOrderId($order->getId())->setProductType('giftcard')
+        ->setSku('PEST-GC')->setName('Gift Card')->setQtyOrdered(1)
+        ->setProductOptions(['info_buyRequest' => ['giftcard_amount' => 30, 'giftcard_recipient_email' => 'friend@example.com']]);
+    $orderItem->save();
+    $invoice = new class extends Mage_Sales_Model_Order_Invoice {
+        /** @var list<Mage_Sales_Model_Order_Invoice_Item> */
+        public array $items = [];
+
+        #[\Override]
+        public function getAllItems()
+        {
+            return $this->items;
+        }
+    };
+    $invoice->setOrder($order)->setState(Mage_Sales_Model_Order_Invoice::STATE_PAID);
+    $invoice->items = [Mage::getModel('sales/order_invoice_item')->setOrderItem($orderItem)->setQty(1)];
+
+    try {
+        Mage::getModel('giftcard/observer')->createGiftcardsOnInvoicePaid(new \Maho\Event\Observer([
+            'event' => new \Maho\Event(['invoice' => $invoice]),
+        ]));
+
+        $giftcard = Mage::getModel('giftcard/giftcard')->getCollection()->addFieldToFilter('purchase_order_id', $order->getId())->getFirstItem();
+        expect($giftcard->getId())->not->toBeNull()
+            ->and($giftcard->getEmailSentAt())->not->toBeNull();
+    } finally {
+        foreach (Mage::getModel('giftcard/giftcard')->getCollection()->addFieldToFilter('purchase_order_id', $order->getId()) as $giftcard) {
+            $giftcard->delete();
+        }
+        $order->delete();
+    }
+});
+
+/**
+ * Post the gift card box of the admin order page for $quote.
+ *
+ * @return array{success: list<string>, errors: list<string>}
+ */
+function giftcardParityAdminOrder(Mage_Sales_Model_Quote $quote, string $code, string $action): array
+{
+    $session = Mage::getSingleton('adminhtml/session_quote');
+    $session->getMessages(true);
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('http://localhost/admin/sales_order_create/loadBlock', 'POST', [
+        'order' => ['giftcard' => ['code' => $code, 'action' => $action]],
+    ]));
+    Mage::getModel('giftcard/observer')->processAdminOrderGiftcard(new \Maho\Event\Observer([
+        'event' => new \Maho\Event(['request_model' => $request, 'order_create_model' => new \Maho\DataObject(['quote' => $quote])]),
+    ]));
+
+    $messages = ['success' => [], 'errors' => []];
+    foreach ($session->getMessages(true)->getItems() as $message) {
+        $messages[$message->getType() === Mage_Core_Model_Message::SUCCESS ? 'success' : 'errors'][] = $message->getText();
+    }
+    return $messages;
+}
+
+describe('the admin order page', function (): void {
+    beforeEach(function (): void {
+        $this->quote = Mage::getModel('sales/quote')->setStoreId(1);
+        $this->quote->save();
+    });
+
+    afterEach(fn() => $this->quote->delete());
+
+    it('applies a card, and removes it when the admin types the code in another case', function (): void {
+        $giftcard = giftcardParityCard('ORDER');
+
+        $apply = giftcardParityAdminOrder($this->quote, strtolower((string) $giftcard->getCode()), 'apply');
+        expect($apply['errors'])->toBe([])
+            ->and(json_decode((string) $this->quote->getGiftcardCodes(), true))->toHaveKey((string) $giftcard->getCode());
+
+        $remove = giftcardParityAdminOrder($this->quote, strtolower((string) $giftcard->getCode()), 'remove');
+        expect($remove)->toBe(['success' => ['Gift card was removed.'], 'errors' => []])
+            ->and($this->quote->getGiftcardCodes())->toBeNull();
+    });
+
+    it('gives the error of the cart service for a card that is not applied', function (): void {
+        $remove = giftcardParityAdminOrder($this->quote, GIFTCARD_PARITY_PREFIX . 'NONE', 'remove');
+
+        expect($remove['errors'])->toBe(['Gift card "' . GIFTCARD_PARITY_PREFIX . 'NONE" is not applied to this cart']);
+    });
+});

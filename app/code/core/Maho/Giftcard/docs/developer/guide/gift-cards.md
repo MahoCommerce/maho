@@ -301,8 +301,9 @@ $barcodeDataUrl = $helper->getBarcodeDataUrl($code);
 ### Email
 
 ```php
-// Send email immediately
+// Send email immediately, with the settings of the current store or of $storeId
 $helper->sendGiftcardEmail($giftcard);
+$helper->sendGiftcardEmail($giftcard, $storeId);
 
 // Schedule email for later
 $helper->scheduleGiftcardEmail($giftcard, $scheduledDateTime);
@@ -351,8 +352,8 @@ Executes when invoice is marked as paid:
 
 - Creates one gift card per invoiced quantity
 - Sets initial balance from purchase amount
-- Sends email to recipient if email provided
 - Records creation history
+- Sends the email of **Email Settings** to the recipient, in the store of the order, through `Maho_Giftcard_Service_Giftcard::sendToRecipient()`
 
 #### `refundGiftcardBalance`
 

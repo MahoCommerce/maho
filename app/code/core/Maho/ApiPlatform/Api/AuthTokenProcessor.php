@@ -99,30 +99,10 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         try {
             $token = $this->jwtService->generateCustomerToken($customer);
 
-            $guestCartMaskedId = $data['maskedId'] ?? $data['cartId'] ?? $data['guestCartId'] ?? null;
-            $cartId = null;
-            $customerCart = null;
-
-            if ($this->cartService->isValidMaskedId($guestCartMaskedId)) {
-                try {
-                    // Delegate to \Mage_Checkout_Service_Cart::merge, which enforces the full
-                    // guest-cart ownership guard (rejecting a masked ID resolving
-                    // to another customer's cart), re-collects totals correctly
-                    // (setTotalsCollectedFlag(false) before collectTotals), and
-                    // deactivates the guest cart atomically.
-                    $customerCart = $this->cartService->merge($guestCartMaskedId, (int) $customer->getId());
-                    $cartId = (int) $customerCart->getId();
-                } catch (\Exception $e) {
-                    \Mage::log('Cart merge failed: ' . $e->getMessage(), \Mage::LOG_WARNING);
-                }
-            }
-
-            if (!$cartId) {
-                $customerCart = \Mage::getModel('sales/quote')
-                    ->setSharedStoreIds([\Mage::app()->getStore()->getId()])
-                    ->loadByCustomer((int) $customer->getId());
-                $cartId = $customerCart->getId() ? (int) $customerCart->getId() : null;
-            }
+            $customerCart = $this->cartService->mergeAtLogin(
+                $data['maskedId'] ?? $data['cartId'] ?? $data['guestCartId'] ?? null,
+                (int) $customer->getId(),
+            );
 
             $dto = new AuthToken();
             $dto->token = $token;
@@ -134,7 +114,7 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
                 'firstName' => $customer->getFirstname(),
                 'lastName' => $customer->getLastname(),
             ];
-            $dto->cartId = $cartId;
+            $dto->cartId = $customerCart ? (int) $customerCart->getId() : null;
             $dto->cartMaskedId = $customerCart?->getData('masked_quote_id');
             $dto->cartItemsQty = $customerCart ? (float) $customerCart->getItemsQty() : 0;
 

@@ -91,26 +91,8 @@ class SocialAuthProcessor extends \Maho\ApiPlatform\Processor
         $dto->isNewCustomer = $result['is_new'];
         $dto->profileIncomplete = $result['is_new'] ? $result['profile_incomplete'] : null;
 
-        $guestCartMaskedId = $data->cartId;
-        $cartId = null;
-        $customerCart = null;
-        if ($this->cartService->isValidMaskedId($guestCartMaskedId)) {
-            try {
-                // \Mage_Checkout_Service_Cart::merge enforces the guest-cart ownership guard,
-                // re-collects totals, and deactivates the guest cart atomically.
-                $customerCart = $this->cartService->merge($guestCartMaskedId, (int) $customer->getId());
-                $cartId = (int) $customerCart->getId();
-            } catch (\Exception $e) {
-                \Mage::log('Cart merge failed: ' . $e->getMessage(), \Mage::LOG_WARNING);
-            }
-        }
-        if (!$cartId) {
-            $customerCart = \Mage::getModel('sales/quote')
-                ->setSharedStoreIds([\Mage::app()->getStore()->getId()])
-                ->loadByCustomer((int) $customer->getId());
-            $cartId = $customerCart->getId() ? (int) $customerCart->getId() : null;
-        }
-        $dto->cartId = $cartId;
+        $customerCart = $this->cartService->mergeAtLogin($data->cartId, (int) $customer->getId());
+        $dto->cartId = $customerCart ? (int) $customerCart->getId() : null;
         $dto->cartMaskedId = $customerCart?->getData('masked_quote_id');
         $dto->cartItemsQty = $customerCart ? (float) $customerCart->getItemsQty() : 0;
 

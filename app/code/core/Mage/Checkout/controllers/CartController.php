@@ -644,24 +644,22 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         $code = trim((string) ($this->getRequest()->getParam('promo_code') ?: $this->getRequest()->getParam('coupon_code')));
 
         try {
-            Mage::getService('checkout/cart')->applyCoupon($this->_getQuote(), $code);
+            $type = Mage::getService('checkout/cart')->applyCode($this->_getQuote(), $code);
+        } catch (Mage_Core_Exception $e) {
+            $this->_sendPromoResult($isAjax, false, $e->getMessage());
+            return;
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $this->_sendPromoResult($isAjax, false, $this->__('Promo code "%s" is not valid.', $code));
+            return;
+        }
+
+        if ($type === 'coupon') {
             $this->_getSession()->setCartCouponCode($code);
             $this->_sendPromoResult($isAjax, true, $this->__('Coupon code "%s" was applied.', $code), ['type' => 'coupon', 'code' => $code]);
             return;
-        } catch (Mage_Core_Exception_Input|Mage_Core_Exception_Conflict|Mage_Core_Exception_TooManyRequests $e) {
-            $this->_sendPromoResult($isAjax, false, $e->getMessage());
-            return;
-        } catch (Mage_Core_Exception) {
-            // The code is not a coupon of this cart, so it can be a gift card
         }
-
-        $giftcardResult = $this->_tryApplyGiftcard($code);
-        if ($giftcardResult['success']) {
-            $this->_sendPromoResult($isAjax, true, $this->__('Gift card "%s" was applied.', $code), ['type' => 'giftcard', 'code' => $code]);
-            return;
-        }
-
-        $this->_sendPromoResult($isAjax, false, $giftcardResult['message'] ?: $this->__('Promo code "%s" is not valid.', $code));
+        $this->_sendPromoResult($isAjax, true, $this->__('Gift card "%s" was applied.', $code), ['type' => 'giftcard', 'code' => $code]);
     }
 
     /**
@@ -686,36 +684,6 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             $this->_getSession()->addError($message);
         }
         $this->_goBack();
-    }
-
-    /**
-     * Try to apply code as a gift card
-     *
-     * @return array{success: bool, message: string}
-     */
-    protected function _tryApplyGiftcard(string $code): array
-    {
-        $quote = $this->_getQuote();
-
-        // Check if giftcard module is available
-        if (!Mage::helper('core')->isModuleEnabled('Maho_Giftcard')) {
-            return ['success' => false, 'message' => ''];
-        }
-
-        try {
-            // A code that is not a gift card of this website gets the message of the promo code box
-            Mage::getService('giftcard/giftcard')->getByCode($code, (int) $quote->getStore()->getWebsiteId());
-            Mage::getService('checkout/cart')->applyGiftcard($quote, $code);
-
-            return ['success' => true, 'message' => ''];
-        } catch (Mage_Core_Exception_NoSuchEntity) {
-            return ['success' => false, 'message' => ''];
-        } catch (Mage_Core_Exception $e) {
-            return ['success' => false, 'message' => $e->getMessage()];
-        } catch (Exception $e) {
-            Mage::logException($e);
-            return ['success' => false, 'message' => ''];
-        }
     }
 
     /**

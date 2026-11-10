@@ -296,20 +296,19 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Send gift card email to recipient via core email queue
+     * Send gift card email to recipient via core email queue. The email takes the settings, the currency and
+     * the URL of the store $storeId, or of the current store when it is null.
      *
      * @throws Mage_Core_Exception
      */
-    public function sendGiftcardEmail(Maho_Giftcard_Model_Giftcard $giftcard): bool
+    public function sendGiftcardEmail(Maho_Giftcard_Model_Giftcard $giftcard, ?int $storeId = null): bool
     {
         if (!$giftcard->getRecipientEmail()) {
             throw new Mage_Core_Exception('No recipient email address.');
         }
 
-        $storeId = Mage::app()->getStore()->getId();
-
-        // Prepare template variables
         $store = Mage::app()->getStore($storeId);
+        $storeId = (int) $store->getId();
         $storeCurrencyCode = $store->getCurrentCurrencyCode();
         $vars = [
             'giftcard' => $giftcard,
@@ -321,7 +320,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
             'qr_url' => $this->getQrCodeDataUrl($giftcard->getCode(), 300),
             'barcode_url' => $this->getBarcodeDataUrl($giftcard->getCode()),
             'store_name' => Mage::getStoreConfig('general/store_information/name', $storeId),
-            'store_url' => Mage::getBaseUrl(),
+            'store_url' => $store->getBaseUrl(),
         ];
 
         if ($giftcard->getExpiresAt()) {
