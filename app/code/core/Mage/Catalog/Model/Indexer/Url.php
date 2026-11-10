@@ -99,8 +99,13 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
 
         $entity = $event->getEntity();
         if ($entity == Mage_Catalog_Model_Product::ENTITY && $event->getType() === Mage_Index_Model_Event::TYPE_MASS_ACTION) {
-            // Of the mass actions, only a change of the categories changes the URL rewrites of a product
-            $result = (bool) $event->getDataObject()?->hasData('category_ids');
+            // A mass action changes the URL rewrites of a product as a product save does: with its categories, its websites or its URL key
+            $action = $event->getDataObject();
+            $result = $action instanceof \Maho\DataObject && (
+                $action->hasData('category_ids')
+                || $action->hasData('website_ids')
+                || array_key_exists('url_key', (array) $action->getData('attributes_data'))
+            );
         } elseif ($entity == Mage_Core_Model_Store::ENTITY) {
             $store = $event->getDataObject();
             if ($store && ($store->isObjectNew() || $store->dataHasChangedFor('group_id'))) {

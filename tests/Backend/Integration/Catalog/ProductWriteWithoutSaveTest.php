@@ -29,7 +29,10 @@ function writeWithoutSaveCleanup(): void
     Mage::unregister('isSecureArea');
 }
 
-function writeWithoutSaveProduct(): Mage_Catalog_Model_Product
+/**
+ * @param list<int> $websiteIds
+ */
+function writeWithoutSaveProduct(array $websiteIds = [1]): Mage_Catalog_Model_Product
 {
     /** @var Mage_Catalog_Service_Product $service */
     $service = Mage::getService('catalog/product');
@@ -41,7 +44,7 @@ function writeWithoutSaveProduct(): Mage_Catalog_Model_Product
         ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
         ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
         ->setTaxClassId(0)
-        ->setWebsiteIds([1])
+        ->setWebsiteIds($websiteIds)
         ->setUrlKey('pest-write-without-save-' . uniqid())
         ->setStockData(['qty' => 5, 'is_in_stock' => 1]);
     return $service->save($product);
@@ -59,6 +62,22 @@ function writeWithoutSaveCategory(): Mage_Catalog_Model_Category
         ->setIsAnchor(1)
         ->setIncludeInMenu(1);
     return $service->save($category);
+}
+
+/**
+ * Return the request path of the URL rewrite without a category of the product $productId in the store view 1.
+ */
+function writeWithoutSaveProductPath(int $productId): ?string
+{
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+    $path = $adapter->fetchOne(
+        $adapter->select()
+            ->from(Mage::getSingleton('core/resource')->getTableName('core/url_rewrite'), 'request_path')
+            ->where('product_id = ?', $productId)
+            ->where('category_id IS NULL')
+            ->where('store_id = ?', 1),
+    );
+    return $path === false ? null : (string) $path;
 }
 
 function writeWithoutSaveApiCacheIsClean(): bool
@@ -125,5 +144,31 @@ describe('a category assignment without a product save', function (): void {
 
         Mage::getService('catalog/product')->setCategoryIds($productId, []);
         expect($indexRows())->toBe(0);
+    });
+});
+
+describe('a store value removal without a product save', function (): void {
+    it('gives the store view the URL rewrite of the default URL key', function (): void {
+        $product = writeWithoutSaveProduct();
+        $productId = (int) $product->getId();
+        $defaultKey = (string) $product->getUrlKey();
+        $storeKey = 'pest-wws-store-' . uniqid();
+        Mage::getService('catalog/product')->updateAttributes([$productId], ['url_key' => $storeKey], 1);
+        expect(writeWithoutSaveProductPath($productId))->toStartWith($storeKey);
+
+        Mage::getService('catalog/product')->deleteStoreValues($productId, ['url_key'], 1);
+
+        expect(writeWithoutSaveProductPath($productId))->toStartWith($defaultKey);
+    });
+});
+
+describe('a website change without a product save', function (): void {
+    it('gives the product the URL rewrites of the new website', function (): void {
+        $productId = (int) writeWithoutSaveProduct([])->getId();
+        expect(writeWithoutSaveProductPath($productId))->toBeNull();
+
+        Mage::getService('catalog/product')->changeWebsites([$productId], [1], []);
+
+        expect(writeWithoutSaveProductPath($productId))->not->toBeNull();
     });
 });

@@ -123,6 +123,46 @@ class Mage_Catalog_Model_Product_Action extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Delete the values of the store view $storeId of each attribute in $attributes for the product $productId,
+     * without a save of the product. The indexes and the URL rewrites of the product follow, as for updateAttributes().
+     *
+     * @param list<Mage_Catalog_Model_Resource_Eav_Attribute> $attributes
+     */
+    public function deleteStoreValues(int $productId, array $attributes, int $storeId): static
+    {
+        if ($attributes === []) {
+            return $this;
+        }
+        $write = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $attrData = [];
+        foreach ($attributes as $attribute) {
+            $write->delete($attribute->getBackend()->getTable(), [
+                'entity_id = ?' => $productId,
+                'attribute_id = ?' => (int) $attribute->getId(),
+                'store_id = ?' => $storeId,
+            ]);
+            $attrData[$attribute->getAttributeCode()] = null;
+        }
+
+        $this->setData([
+            'product_ids' => [$productId],
+            'attributes_data' => $attrData,
+            'store_id' => $storeId,
+        ]);
+        Mage::getSingleton('index/indexer')->processEntityAction(
+            $this,
+            Mage_Catalog_Model_Product::ENTITY,
+            Mage_Index_Model_Event::TYPE_MASS_ACTION,
+        );
+        Mage::dispatchEvent('catalog_product_attribute_update_after', [
+            'product_ids' => [$productId],
+        ]);
+        $this->_cleanProductCache([$productId]);
+
+        return $this;
+    }
+
+    /**
      * Update websites for product action
      *
      * allowed types:

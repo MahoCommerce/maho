@@ -229,18 +229,8 @@ class Mage_Catalog_Service_Product
      */
     public function deleteStoreValues(int $productId, array $codes, int $storeId): void
     {
-        $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
-        $attributes = $this->getStoreAttributes($codes, $storeId);
-        foreach ($attributes as $attribute) {
-            $adapter->delete($attribute->getBackend()->getTable(), [
-                'entity_id = ?' => $productId,
-                'attribute_id = ?' => (int) $attribute->getId(),
-                'store_id = ?' => $storeId,
-            ]);
-        }
-        if ($attributes !== []) {
-            Mage::dispatchEvent('catalog_product_attribute_update_after', ['product_ids' => [$productId]]);
-        }
+        Mage::getSingleton('catalog/product_action')
+            ->deleteStoreValues($productId, $this->getStoreAttributes($codes, $storeId), $storeId);
     }
 
     /**
