@@ -54,7 +54,7 @@ function creditmemoShippingDiscountRefund(Mage_Sales_Model_Order $order, ?float 
     if ($shippingAmount !== null) {
         $data['shipping_amount'] = $shippingAmount;
     }
-    $creditmemo = Mage::getModel('sales/service_order', $order)->prepareCreditmemo($data);
+    $creditmemo = Mage::getService('sales/order')->buildCreditmemo($order, $data);
     $creditmemo->setPaymentRefundDisallowed(true)->refund();
 
     return $creditmemo;
@@ -70,8 +70,8 @@ describe('Credit memo shipping discount', function () {
 
     test('deducts the shipping discount when no shipping amount is given', function () {
         $order = creditmemoShippingDiscountOrder();
-        $creditmemo = Mage::getModel('sales/service_order', $order)
-            ->prepareCreditmemo(['qtys' => creditmemoShippingDiscountQty($order, 1)]);
+        $creditmemo = Mage::getService('sales/order')
+            ->buildCreditmemo($order, ['qtys' => creditmemoShippingDiscountQty($order, 1)]);
 
         // One item (50 - 5 discount) and the whole shipping (10 - 1 discount).
         expect((float) $creditmemo->getBaseShippingAmount())->toBe(10.0)
@@ -81,8 +81,8 @@ describe('Credit memo shipping discount', function () {
 
     test('gives the same totals as an explicit shipping amount', function () {
         $order = creditmemoShippingDiscountOrder();
-        $creditmemo = Mage::getModel('sales/service_order', $order)
-            ->prepareCreditmemo(['qtys' => creditmemoShippingDiscountQty($order, 1), 'shipping_amount' => 10]);
+        $creditmemo = Mage::getService('sales/order')
+            ->buildCreditmemo($order, ['qtys' => creditmemoShippingDiscountQty($order, 1), 'shipping_amount' => 10]);
 
         expect((float) $creditmemo->getBaseDiscountAmount())->toBe(-6.0)
             ->and((float) $creditmemo->getBaseGrandTotal())->toBe(54.0);
@@ -90,8 +90,8 @@ describe('Credit memo shipping discount', function () {
 
     test('deducts the share of the shipping discount for a partial shipping refund', function () {
         $order = creditmemoShippingDiscountOrder();
-        $creditmemo = Mage::getModel('sales/service_order', $order)
-            ->prepareCreditmemo(['qtys' => creditmemoShippingDiscountQty($order, 1), 'shipping_amount' => 5]);
+        $creditmemo = Mage::getService('sales/order')
+            ->buildCreditmemo($order, ['qtys' => creditmemoShippingDiscountQty($order, 1), 'shipping_amount' => 5]);
 
         expect((float) $creditmemo->getBaseDiscountAmount())->toBe(-5.5)
             ->and((float) $creditmemo->getBaseGrandTotal())->toBe(49.5);
@@ -100,8 +100,8 @@ describe('Credit memo shipping discount', function () {
     test('rounds the shipping discount of a partial shipping refund', function () {
         $order = creditmemoShippingDiscountOrder();
         $order->getAllItems()[0]->setDiscountInvoiced(10.01)->setBaseDiscountInvoiced(10.01);
-        $creditmemo = Mage::getModel('sales/service_order', $order)
-            ->prepareCreditmemo(['qtys' => creditmemoShippingDiscountQty($order, 1), 'shipping_amount' => 3.33]);
+        $creditmemo = Mage::getService('sales/order')
+            ->buildCreditmemo($order, ['qtys' => creditmemoShippingDiscountQty($order, 1), 'shipping_amount' => 3.33]);
 
         // The item discount is 5.005 and the shipping discount is 0.333: 5.338 rounds to 5.34.
         expect(round((float) $creditmemo->getBaseDiscountAmount(), 4))->toBe(-5.34)
@@ -109,8 +109,8 @@ describe('Credit memo shipping discount', function () {
     });
 
     test('refunds the whole order for what the customer paid', function () {
-        $creditmemo = Mage::getModel('sales/service_order', creditmemoShippingDiscountOrder())
-            ->prepareCreditmemo();
+        $creditmemo = Mage::getService('sales/order')
+            ->buildCreditmemo(creditmemoShippingDiscountOrder());
 
         expect((float) $creditmemo->getBaseDiscountAmount())->toBe(-11.0)
             ->and((float) $creditmemo->getBaseGrandTotal())->toBe(99.0);
@@ -150,7 +150,7 @@ describe('Credit memo shipping discount', function () {
         $order->save();
 
         $itemDiscount = function (float $shippingAmount) use ($order): float {
-            $creditmemo = Mage::getModel('sales/service_order', $order)->prepareCreditmemo([
+            $creditmemo = Mage::getService('sales/order')->buildCreditmemo($order, [
                 'qtys' => creditmemoShippingDiscountQty($order, 1),
                 'shipping_amount' => $shippingAmount,
             ]);

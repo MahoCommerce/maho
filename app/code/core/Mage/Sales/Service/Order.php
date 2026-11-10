@@ -15,6 +15,7 @@ use Mage_Checkout_Model_Actor as Actor;
 use Mage_Sales_Model_Order as Order;
 use Mage_Sales_Model_Order_Creditmemo as Creditmemo;
 use Mage_Sales_Model_Order_Invoice as Invoice;
+use Mage_Sales_Model_Order_Item as OrderItem;
 use Mage_Sales_Model_Order_Shipment as Shipment;
 use Mage_Sales_Model_Resource_Order_Collection as OrderCollection;
 
@@ -1151,9 +1152,7 @@ class Mage_Sales_Service_Order
             throw new Mage_Core_Exception_Conflict(Mage::helper('sales')->__('Order cannot be invoiced (already fully invoiced or not in an invoiceable state)'));
         }
 
-        /** @var Mage_Sales_Model_Service_Order $service */
-        $service = Mage::getModel('sales/service_order', $order);
-        $service->updateLocaleNumbers($qtys);
+        $qtys = $this->parseLocaleNumbers($qtys);
         foreach ($qtys as $orderItemId => $qty) {
             $orderItem = $order->getItemById($orderItemId);
             // Dummy (bundle/configurable parent) items take their qty from the order, so neither check applies to them
@@ -1168,7 +1167,7 @@ class Mage_Sales_Service_Order
             }
         }
 
-        $invoice = $service->prepareInvoice($qtys);
+        $invoice = $this->buildInvoice($order, $qtys);
         if (!$invoice->getTotalQty()) {
             throw new Mage_Core_Exception(Mage::helper('sales')->__('Cannot create invoice: no items to invoice'));
         }
@@ -1229,7 +1228,7 @@ class Mage_Sales_Service_Order
 
             $shipment = null;
             if ($ship || $order->getForcedDoShipmentWithInvoice()) {
-                $shipment = Mage::getModel('sales/service_order', $invoice->getOrder())->prepareShipment($qtys);
+                $shipment = $this->buildShipment($invoice->getOrder(), $qtys);
                 if ($shipment->getTotalQty()) {
                     $shipment->register();
                     foreach ($tracks as $track) {
@@ -1331,7 +1330,7 @@ class Mage_Sales_Service_Order
             throw new Mage_Core_Exception_Conflict(Mage::helper('sales')->__('Order cannot be shipped (already fully shipped or not in a shippable state)'));
         }
 
-        $shipment = Mage::getModel('sales/service_order', $order)->prepareShipment($qtys);
+        $shipment = $this->buildShipment($order, $qtys);
         if (!$shipment->getTotalQty()) {
             throw new Mage_Core_Exception(Mage::helper('sales')->__('Cannot create shipment: no items to ship'));
         }
@@ -1540,10 +1539,10 @@ class Mage_Sales_Service_Order
      * the items in $backToStockItemIds and the children of an item in it. With null, return every item when the store
      * returns refunded items to stock.
      *
-     * @param array<string, mixed> $data Credit memo data for prepareCreditmemo(): qtys, shipping_amount, adjustment_positive, adjustment_negative
+     * @param array<string, mixed> $data Credit memo data for buildCreditmemo(): qtys, shipping_amount, adjustment_positive, adjustment_negative
      * @param array<int, bool>|null $backToStockItemIds Order item id => true.
      * @throws Mage_Core_Exception_Conflict when the state of the order does not allow a refund
-     * @throws Mage_Core_Exception when the shipping amount is negative, or the credit memo has no items
+     * @throws Mage_Core_Exception when the shipping amount is negative
      */
     public function prepareCreditmemo(Order $order, array $data, ?array $backToStockItemIds = null, ?Invoice $invoice = null): Creditmemo
     {
@@ -1554,12 +1553,7 @@ class Mage_Sales_Service_Order
             throw new Mage_Core_Exception(Mage::helper('sales')->__('Shipping amount must be >= 0'));
         }
 
-        /** @var Mage_Sales_Model_Service_Order $service */
-        $service = Mage::getModel('sales/service_order', $order);
-        $creditmemo = $invoice ? $service->prepareInvoiceCreditmemo($invoice, $data) : $service->prepareCreditmemo($data);
-        if (!$creditmemo) {
-            throw new Mage_Core_Exception(Mage::helper('sales')->__('Cannot create credit memo: no items to refund'));
-        }
+        $creditmemo = $this->buildCreditmemo($order, $data, $invoice);
 
         $autoReturn = Mage::helper('cataloginventory')->isAutoReturnEnabled();
         foreach ($creditmemo->getAllItems() as $creditmemoItem) {
@@ -1570,6 +1564,371 @@ class Mage_Sales_Service_Order
         }
 
         return $creditmemo;
+    }
+
+    /**
+     * Build an invoice of the order $order and add it to the invoices of the order, which nothing saves yet. Unlike
+     * prepareInvoice(), do not check the state of the order or the qtys.
+     *
+     * @param array<int|string, mixed> $qtys Order item id => qty to invoice. An empty map invoices every item.
+     */
+    public function buildInvoice(Order $order, array $qtys = [], ?Mage_Sales_Model_Convert_Order $convertor = null): Invoice
+    {
+        $qtys = $this->parseLocaleNumbers($qtys);
+        $convertor ??= $this->getConvertor();
+        $invoice = $convertor->toInvoice($order);
+        $totalQty = 0;
+        foreach ($order->getAllItems() as $orderItem) {
+            if (!$this->canInvoiceItem($orderItem)) {
+                continue;
+            }
+            $item = $convertor->itemToInvoiceItem($orderItem);
+            if ($orderItem->isDummy()) {
+                $qty = $orderItem->getQtyOrdered() ?: 1;
+            } elseif (isset($qtys[$orderItem->getId()])) {
+                $qty = (float) $qtys[$orderItem->getId()];
+            } elseif (!count($qtys)) {
+                $qty = $orderItem->getQtyToInvoice();
+            } else {
+                $qty = 0;
+            }
+
+            $totalQty += $qty;
+            $item->setQty($qty);
+            $invoice->addItem($item);
+        }
+
+        $invoice->setTotalQty($totalQty);
+        $invoice->collectTotals();
+        $order->getInvoiceCollection()->addItem($invoice);
+
+        return $invoice;
+    }
+
+    /**
+     * Build a shipment of the order $order, which nothing saves yet. Unlike prepareShipment(), do not check the state
+     * of the order.
+     *
+     * @param array<int|string, mixed> $qtys Order item id => qty to ship. An empty map ships every item.
+     */
+    public function buildShipment(Order $order, array $qtys = [], ?Mage_Sales_Model_Convert_Order $convertor = null): Shipment
+    {
+        $qtys = $this->parseLocaleNumbers($qtys);
+        $convertor ??= $this->getConvertor();
+        $totalQty = 0;
+        $shipment = $convertor->toShipment($order);
+        foreach ($order->getAllItems() as $orderItem) {
+            if (!$this->canShipItem($orderItem, $qtys)) {
+                continue;
+            }
+
+            $item = $convertor->itemToShipmentItem($orderItem);
+
+            if ($orderItem->isDummy(true)) {
+                $qty = 0;
+                if (isset($qtys[$orderItem->getParentItemId()])) {
+                    $productOptions = $orderItem->getProductOptions();
+                    if (isset($productOptions['bundle_selection_attributes'])) {
+                        $bundleSelectionAttributes = Mage::helper('core/string')->unserialize($productOptions['bundle_selection_attributes']);
+
+                        if ($bundleSelectionAttributes) {
+                            $qty = $bundleSelectionAttributes['qty'] * $qtys[$orderItem->getParentItemId()];
+                            $qty = min($qty, $orderItem->getSimpleQtyToShip());
+
+                            $item->setQty($qty);
+                            $shipment->addItem($item);
+                            continue;
+                        }
+                        $qty = 1;
+                    }
+                } else {
+                    $qty = 1;
+                }
+            } elseif (isset($qtys[$orderItem->getId()])) {
+                $qty = min($qtys[$orderItem->getId()], $orderItem->getQtyToShip());
+            } elseif (empty($qtys)) {
+                $qty = $orderItem->getQtyToShip();
+            } else {
+                continue;
+            }
+            $totalQty += $qty;
+            $item->setQty($qty);
+            $shipment->addItem($item);
+        }
+
+        $shipment->setTotalQty($totalQty);
+        return $shipment;
+    }
+
+    /**
+     * Build a credit memo of the order $order, or of its invoice $invoice, which nothing saves yet. Unlike
+     * prepareCreditmemo(), do not check the state of the order or the shipping amount. Without a shipping amount in
+     * $data, the credit memo of an invoice refunds the shipping of that invoice that is not refunded yet.
+     *
+     * @param array<string, mixed> $data qtys (order item id => qty), shipping_amount, adjustment_positive, adjustment_negative
+     */
+    public function buildCreditmemo(
+        Order $order,
+        array $data = [],
+        ?Invoice $invoice = null,
+        ?Mage_Sales_Model_Convert_Order $convertor = null,
+    ): Creditmemo {
+        $convertor ??= $this->getConvertor();
+        $qtys = $this->parseLocaleNumbers($data['qtys'] ?? []);
+        $creditmemo = $convertor->toCreditmemo($order);
+        if ($invoice) {
+            $creditmemo->setInvoice($invoice);
+            $this->addInvoiceCreditmemoItems($creditmemo, $invoice, $qtys, $convertor);
+        } else {
+            $this->addOrderCreditmemoItems($creditmemo, $order, $qtys, $convertor);
+        }
+
+        $this->setCreditmemoAmounts($creditmemo, $data);
+        if ($invoice && !isset($data['shipping_amount'])) {
+            $invoiceOrder = $invoice->getOrder();
+            if ((float) $invoice->getBaseShippingAmount() == 0) {
+                $creditmemo->setBaseShippingAmount(0);
+            } elseif (!Mage::getSingleton('tax/config')->displaySalesShippingInclTax($invoiceOrder->getStoreId())) {
+                // Incl. tax, the shipping total offers the shipping left. It counts the shipping hidden tax refunded.
+                $baseAllowedAmount = $invoiceOrder->getBaseShippingAmount() - $invoiceOrder->getBaseShippingRefunded();
+                $creditmemo->setBaseShippingAmount(min($baseAllowedAmount, $invoice->getBaseShippingAmount()));
+            }
+        }
+
+        $creditmemo->collectTotals();
+        return $creditmemo;
+    }
+
+    /**
+     * Set the shipping amount and the adjustments of $data on the credit memo $creditmemo.
+     *
+     * @param array<string, mixed> $data shipping_amount, adjustment_positive, adjustment_negative
+     */
+    public function setCreditmemoAmounts(Creditmemo $creditmemo, array $data): void
+    {
+        $data = $this->parseLocaleNumbers($data);
+        if (isset($data['shipping_amount'])) {
+            $creditmemo->setBaseShippingAmount((float) $data['shipping_amount']);
+        }
+        if (isset($data['adjustment_positive'])) {
+            $creditmemo->setAdjustmentPositive($data['adjustment_positive']);
+        }
+        if (isset($data['adjustment_negative'])) {
+            $creditmemo->setAdjustmentNegative($data['adjustment_negative']);
+        }
+    }
+
+    /**
+     * @param array<int|string, mixed> $qtys
+     */
+    private function addOrderCreditmemoItems(Creditmemo $creditmemo, Order $order, array $qtys, Mage_Sales_Model_Convert_Order $convertor): void
+    {
+        $totalQty = 0;
+        foreach ($order->getAllItems() as $orderItem) {
+            if (!$this->canRefundItem($orderItem, $qtys)) {
+                continue;
+            }
+
+            $item = $convertor->itemToCreditmemoItem($orderItem);
+            if ($orderItem->isDummy()) {
+                $qty = 1;
+                $orderItem->setLockedDoShip();
+            } elseif (isset($qtys[$orderItem->getId()])) {
+                $qty = (float) $qtys[$orderItem->getId()];
+            } elseif (!count($qtys)) {
+                $qty = $orderItem->getQtyToRefund();
+            } else {
+                continue;
+            }
+            $totalQty += $qty;
+            $item->setQty($qty);
+            $creditmemo->addItem($item);
+        }
+        $creditmemo->setTotalQty($totalQty);
+    }
+
+    /**
+     * Refund at most the qty of each item of $invoice that the other credit memos of the invoice do not refund yet.
+     *
+     * @param array<int|string, mixed> $qtys
+     */
+    private function addInvoiceCreditmemoItems(Creditmemo $creditmemo, Invoice $invoice, array $qtys, Mage_Sales_Model_Convert_Order $convertor): void
+    {
+        $invoiceQtysRefunded = [];
+        foreach ($invoice->getOrder()->getCreditmemosCollection() as $createdCreditmemo) {
+            if ($createdCreditmemo->getState() != Creditmemo::STATE_CANCELED
+                && $createdCreditmemo->getInvoiceId() == $invoice->getId()
+            ) {
+                foreach ($createdCreditmemo->getAllItems() as $createdCreditmemoItem) {
+                    $orderItemId = $createdCreditmemoItem->getOrderItem()->getId();
+                    $invoiceQtysRefunded[$orderItemId] = ($invoiceQtysRefunded[$orderItemId] ?? 0) + $createdCreditmemoItem->getQty();
+                }
+            }
+        }
+
+        $invoiceQtysRefundLimits = [];
+        foreach ($invoice->getAllItems() as $invoiceItem) {
+            $orderItemId = $invoiceItem->getOrderItem()->getId();
+            $invoiceQtysRefundLimits[$orderItemId] = $invoiceItem->getQty() - ($invoiceQtysRefunded[$orderItemId] ?? 0);
+        }
+
+        $totalQty = 0;
+        foreach ($invoice->getAllItems() as $invoiceItem) {
+            $orderItem = $invoiceItem->getOrderItem();
+
+            if (!$this->canRefundItem($orderItem, $qtys, $invoiceQtysRefundLimits)) {
+                continue;
+            }
+
+            $item = $convertor->itemToCreditmemoItem($orderItem);
+            if ($orderItem->isDummy()) {
+                $qty = 1;
+            } else {
+                if (isset($qtys[$orderItem->getId()])) {
+                    $qty = (float) $qtys[$orderItem->getId()];
+                } elseif (!count($qtys)) {
+                    $qty = $orderItem->getQtyToRefund();
+                } else {
+                    continue;
+                }
+                if (isset($invoiceQtysRefundLimits[$orderItem->getId()])) {
+                    $qty = min($qty, $invoiceQtysRefundLimits[$orderItem->getId()]);
+                }
+            }
+            $qty = min($qty, $invoiceItem->getQty());
+            $totalQty += $qty;
+            $item->setQty($qty);
+            $creditmemo->addItem($item);
+        }
+        $creditmemo->setTotalQty($totalQty);
+    }
+
+    /**
+     * Tell if the order item $item goes on an invoice. A dummy item goes on it with its children, or with its parent.
+     *
+     * @param array<int|string, mixed> $qtys Order item id => qty to invoice. An empty map invoices every item.
+     */
+    public function canInvoiceItem(OrderItem $item, array $qtys = []): bool
+    {
+        if ($item->getLockedDoInvoice()) {
+            return false;
+        }
+        if (!$item->isDummy()) {
+            return $item->getQtyToInvoice() > 0;
+        }
+        $qtys = $this->parseLocaleNumbers($qtys);
+        if ($item->getHasChildren()) {
+            foreach ($item->getChildrenItems() as $child) {
+                if (empty($qtys) ? $child->getQtyToInvoice() > 0 : ($qtys[$child->getId()] ?? 0) > 0) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if ($parent = $item->getParentItem()) {
+            return empty($qtys) ? $parent->getQtyToInvoice() > 0 : ($qtys[$parent->getId()] ?? 0) > 0;
+        }
+        return false;
+    }
+
+    /**
+     * Tell if the order item $item goes on a shipment. A dummy item goes on it with its children, or with its parent.
+     *
+     * @param array<int|string, mixed> $qtys Order item id => qty to ship. An empty map ships every item.
+     */
+    public function canShipItem(OrderItem $item, array $qtys = []): bool
+    {
+        if ($item->getIsVirtual() || $item->getLockedDoShip()) {
+            return false;
+        }
+        if (!$item->isDummy(true)) {
+            return $item->getQtyToShip() > 0;
+        }
+        $qtys = $this->parseLocaleNumbers($qtys);
+        if ($item->getHasChildren()) {
+            if ($item->isShipSeparately()) {
+                return true;
+            }
+            foreach ($item->getChildrenItems() as $child) {
+                if ($child->getIsVirtual()) {
+                    continue;
+                }
+                if (empty($qtys) ? $child->getQtyToShip() > 0 : ($qtys[$child->getId()] ?? 0) > 0) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if ($parent = $item->getParentItem()) {
+            return empty($qtys) ? $parent->getQtyToShip() > 0 : ($qtys[$parent->getId()] ?? 0) > 0;
+        }
+        return false;
+    }
+
+    /**
+     * Tell if the order item $item goes on a credit memo. A dummy item goes on it with its children, or with its
+     * parent.
+     *
+     * @param array<int|string, mixed> $qtys Order item id => qty to refund. An empty map refunds every item.
+     * @param array<int|string, float> $invoiceQtysRefundLimits Order item id => qty of the invoice that is not refunded yet.
+     */
+    public function canRefundItem(OrderItem $item, array $qtys = [], array $invoiceQtysRefundLimits = []): bool
+    {
+        if (!$item->isDummy()) {
+            return $this->hasQtyToRefund($item, $invoiceQtysRefundLimits);
+        }
+        $qtys = $this->parseLocaleNumbers($qtys);
+        if ($item->getHasChildren()) {
+            foreach ($item->getChildrenItems() as $child) {
+                if (empty($qtys) ? $this->hasQtyToRefund($child, $invoiceQtysRefundLimits) : ($qtys[$child->getId()] ?? 0) > 0) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if ($parent = $item->getParentItem()) {
+            return empty($qtys) ? $this->hasQtyToRefund($parent, $invoiceQtysRefundLimits) : ($qtys[$parent->getId()] ?? 0) > 0;
+        }
+        return false;
+    }
+
+    /**
+     * Tell if the order item $item has a qty to refund, without a look at its parent or its children.
+     *
+     * @param array<int|string, float> $invoiceQtysRefundLimits Order item id => qty of the invoice that is not refunded yet.
+     */
+    public function hasQtyToRefund(OrderItem $item, array $invoiceQtysRefundLimits = []): bool
+    {
+        if ($item->getQtyToRefund() < 0) {
+            return false;
+        }
+        if (isset($invoiceQtysRefundLimits[$item->getId()])) {
+            return $invoiceQtysRefundLimits[$item->getId()] > 0;
+        }
+        return true;
+    }
+
+    /**
+     * Turn each string and number of $values into a float, with the decimal separator that the value uses. Keep the
+     * other values.
+     *
+     * @param array<array-key, mixed> $values
+     * @return array<array-key, mixed>
+     */
+    public function parseLocaleNumbers(array $values): array
+    {
+        $locale = Mage::app()->getLocale();
+        foreach ($values as $key => $value) {
+            if (is_string($value) || is_numeric($value)) {
+                $values[$key] = $locale->getNumber($value);
+            }
+        }
+        return $values;
+    }
+
+    private function getConvertor(): Mage_Sales_Model_Convert_Order
+    {
+        return Mage::getModel('sales/convert_order');
     }
 
     /**

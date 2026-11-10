@@ -110,7 +110,6 @@
 "Cannot add order history.","Cannot add order history."
 "Cannot cancel the shipment.","Cannot cancel the shipment."
 "Cannot create an empty shipment.","Cannot create an empty shipment."
-"Cannot create credit memo: no items to refund","Cannot create credit memo: no items to refund"
 "Cannot create invoice: no items to invoice","Cannot create invoice: no items to invoice"
 "Cannot create shipment: no items to ship","Cannot create shipment: no items to ship"
 "Cannot create temporary file for shipping labels archive.","Cannot create temporary file for shipping labels archive."

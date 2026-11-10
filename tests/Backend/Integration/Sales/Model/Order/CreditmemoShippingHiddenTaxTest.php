@@ -83,7 +83,7 @@ function creditmemoShippingHiddenTaxRefund(Mage_Sales_Model_Order $order, ?float
     if ($shippingAmount !== null) {
         $data['shipping_amount'] = $shippingAmount;
     }
-    $creditmemo = Mage::getModel('sales/service_order', $order)->prepareCreditmemo($data);
+    $creditmemo = Mage::getService('sales/order')->buildCreditmemo($order, $data);
     $creditmemo->setPaymentRefundDisallowed(true)->refund();
 
     return $creditmemo;
@@ -104,8 +104,8 @@ function creditmemoShippingHiddenTaxInvoice(Mage_Sales_Model_Order $order): Mage
 describe('Credit memo shipping hidden tax', function () {
     test('refunds the shipping hidden tax with the shipping', function () {
         $order = creditmemoShippingHiddenTaxOrder();
-        $creditmemo = Mage::getModel('sales/service_order', $order)
-            ->prepareCreditmemo(['qtys' => creditmemoShippingHiddenTaxQty($order, 1), 'shipping_amount' => 10]);
+        $creditmemo = Mage::getService('sales/order')
+            ->buildCreditmemo($order, ['qtys' => creditmemoShippingHiddenTaxQty($order, 1), 'shipping_amount' => 10]);
 
         expect(round((float) $creditmemo->getBaseHiddenTaxAmount(), 4))->toBe(2.42)
             ->and(round((float) $creditmemo->getBaseGrandTotal(), 4))->toBe(120.78);
@@ -115,8 +115,8 @@ describe('Credit memo shipping hidden tax', function () {
         $order = creditmemoShippingHiddenTaxOrder();
         creditmemoShippingHiddenTaxRefundFirst($order);
 
-        $creditmemo = Mage::getModel('sales/service_order', $order)
-            ->prepareCreditmemo(['qtys' => creditmemoShippingHiddenTaxQty($order, 1)]);
+        $creditmemo = Mage::getService('sales/order')
+            ->buildCreditmemo($order, ['qtys' => creditmemoShippingHiddenTaxQty($order, 1)]);
 
         expect((float) $creditmemo->getBaseShippingAmount())->toBe(0.0)
             ->and(round((float) $creditmemo->getBaseHiddenTaxAmount(), 4))->toBe(2.2)
@@ -131,8 +131,8 @@ describe('Credit memo shipping hidden tax', function () {
         $order->setHiddenTaxRefunded(0.11)->setBaseHiddenTaxRefunded(0.11);
         $order->save();
 
-        $creditmemo = Mage::getModel('sales/service_order', $order)
-            ->prepareCreditmemo(['qtys' => [0 => 0], 'shipping_amount' => 5]);
+        $creditmemo = Mage::getService('sales/order')
+            ->buildCreditmemo($order, ['qtys' => [0 => 0], 'shipping_amount' => 5]);
 
         expect(round((float) $creditmemo->getBaseHiddenTaxAmount(), 4))->toBe(0.11);
     });
@@ -165,7 +165,7 @@ describe('Credit memo shipping hidden tax', function () {
             if ($shippingAmount !== null) {
                 $data['shipping_amount'] = $shippingAmount;
             }
-            $creditmemo = Mage::getModel('sales/service_order', $order)->prepareInvoiceCreditmemo($invoice, $data);
+            $creditmemo = Mage::getService('sales/order')->buildCreditmemo($order, $data, $invoice);
             $creditmemo->setPaymentRefundDisallowed(true)->refund();
             $tax[] = round((float) $creditmemo->getBaseTaxAmount(), 4);
             $hiddenTax[] = round((float) $creditmemo->getBaseHiddenTaxAmount(), 4);

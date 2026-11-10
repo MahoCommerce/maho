@@ -38,7 +38,7 @@ function creditmemoShippingInclTaxOrder(): Mage_Sales_Model_Order
 // The API and the admin form refund no item with this qty map.
 function creditmemoShippingInclTaxMemo(Mage_Sales_Model_Order $order, array $data = []): Mage_Sales_Model_Order_Creditmemo
 {
-    return Mage::getModel('sales/service_order', $order)->prepareCreditmemo(['qtys' => [0 => 0]] + $data);
+    return Mage::getService('sales/order')->buildCreditmemo($order, ['qtys' => [0 => 0]] + $data);
 }
 
 // Refunds a shipping-only credit memo without a payment, as an offline refund records it on the order.
@@ -187,11 +187,11 @@ describe('Credit memo shipping displayed incl. tax', function () {
         // counts the 0.11 of hidden tax already refunded, and converts to more shipping than is left.
         $order = creditmemoShippingInclTaxOrder();
         $invoice = creditmemoShippingInclTaxInvoice($order);
-        $service = Mage::getModel('sales/service_order', $order);
-        $first = $service->prepareInvoiceCreditmemo($invoice, ['qtys' => [0 => 0], 'shipping_amount' => 6.1]);
+        $service = Mage::getService('sales/order');
+        $first = $service->buildCreditmemo($order, ['qtys' => [0 => 0], 'shipping_amount' => 6.1], $invoice);
         $first->setPaymentRefundDisallowed(true)->refund();
 
-        $second = $service->prepareInvoiceCreditmemo($invoice, ['qtys' => [0 => 0]]);
+        $second = $service->buildCreditmemo($order, ['qtys' => [0 => 0]], $invoice);
 
         expect((float) $second->getBaseShippingInclTax())->toBe(6.1)
             ->and((float) $second->getBaseShippingAmount())->toBe(5.0)
@@ -205,8 +205,8 @@ describe('Credit memo shipping displayed incl. tax', function () {
         $invoice->setShippingTaxAmount(0.0)->setBaseShippingTaxAmount(0.0);
         $invoice->setShippingHiddenTaxAmount(0.0)->setBaseShippingHiddenTaxAmount(0.0);
 
-        $creditmemo = Mage::getModel('sales/service_order', $order)
-            ->prepareInvoiceCreditmemo($invoice, ['qtys' => [0 => 0]]);
+        $creditmemo = Mage::getService('sales/order')
+            ->buildCreditmemo($order, ['qtys' => [0 => 0]], $invoice);
 
         expect((float) $creditmemo->getBaseShippingAmount())->toBe(0.0)
             ->and((float) $creditmemo->getBaseGrandTotal())->toBe(0.0);
