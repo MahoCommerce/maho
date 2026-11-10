@@ -12,17 +12,12 @@ namespace Mage\Catalog\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Mage_Catalog_Model_Product;
+use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 
 final class ProductLinkProvider extends \Maho\ApiPlatform\Provider
 {
     use ProductLoaderTrait;
-
-    private const LINK_COLLECTION_MAP = [
-        'related' => 'getRelatedProductCollection',
-        'cross_sell' => 'getCrossSellProductCollection',
-        'up_sell' => 'getUpSellProductCollection',
-    ];
 
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
@@ -30,12 +25,11 @@ final class ProductLinkProvider extends \Maho\ApiPlatform\Provider
         $productId = (int) ($uriVariables['productId'] ?? 0);
         $linkType = self::extractLinkType($context);
 
-        /** @var \Mage_Catalog_Service_Product_Link $service */
-        $service = \Mage::getService('catalog/product_link');
-        $service->assertType($linkType);
+        self::linkService()->assertType($linkType);
 
         $product = $this->loadProductForRead($productId);
-        return $this->getLinks($product, $linkType);
+        // A guest and a customer see the links that the storefront lists. A backend reader manages all links.
+        return $this->getLinks($product, $linkType, visibleOnly: !$this->canReadBackendProducts());
     }
 
     /**
@@ -80,10 +74,11 @@ final class ProductLinkProvider extends \Maho\ApiPlatform\Provider
     /**
      * @return ProductLink[]
      */
-    public function getLinks(Mage_Catalog_Model_Product $product, string $linkType): array
+    public function getLinks(Mage_Catalog_Model_Product $product, string $linkType, bool $visibleOnly = false): array
     {
-        $method = self::LINK_COLLECTION_MAP[$linkType];
-        $collection = $product->$method();
+        $collection = $visibleOnly
+            ? self::linkService()->getVisibleLinkCollection($product, $linkType, StoreContext::getStoreId())
+            : self::linkService()->getLinkCollection($product, $linkType);
         $collection->addAttributeToSelect(['name', 'sku']);
 
         $result = [];
@@ -98,5 +93,11 @@ final class ProductLinkProvider extends \Maho\ApiPlatform\Provider
         }
 
         return $result;
+    }
+
+    private static function linkService(): \Mage_Catalog_Service_Product_Link
+    {
+        /** @var \Mage_Catalog_Service_Product_Link */
+        return \Mage::getService('catalog/product_link');
     }
 }

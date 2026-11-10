@@ -119,21 +119,16 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Whether a category is active (or the caller is a backend reader) and lives
-     * under the current store's root category tree. Mirrors the scoping the
-     * collection path applies so single lookups (by id / url key) cannot leak
-     * disabled or cross-store categories.
+     * Whether the caller may read a category: a guest or a customer reads what the storefront of the current store
+     * shows. A backend caller also reads inactive categories, in the trees that scope=all gives it, as the admin
+     * category tree shows them.
      */
     private function isAccessibleCategory(\Mage_Catalog_Model_Category $category): bool
     {
-        if (!$category->getId() || (!$category->getIsActive() && !$this->backendCategoriesAccess())) {
-            return false;
+        if (!$this->backendCategoriesAccess()) {
+            return $this->service()->isVisibleInStore($category, StoreContext::getStoreId());
         }
-
-        // A backend caller reads the trees that scope=all gives it, as the admin category
-        // tree shows them; a guest or a customer reads the tree of the current store only.
-        $rootIds = $this->backendCategoriesAccess() ? $this->readableRootIds() : [(int) StoreContext::getRootCategoryId()];
-        return $this->service()->isInTrees($category, $rootIds);
+        return $category->getId() && $this->service()->isInTrees($category, $this->readableRootIds());
     }
 
     /**

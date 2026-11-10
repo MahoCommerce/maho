@@ -100,11 +100,12 @@ class ProductQueryHandler
         // test runner) the layer/helper singletons retain state across requests,
         // so a previous request's query text or current category would leak in.
         if (!empty($search)) {
+            // An admin search is not counted in the Search Terms report, as in the admin product grid
+            /** @var \Mage_CatalogSearch_Service_Query $searchService */
+            $searchService = \Mage::getService('catalogsearch/query');
             \Mage::unregister('_helper/catalogsearch');
-            $searchHelper = \Mage::helper('catalogsearch');
-            \Mage::app()->getRequest()->setParam($searchHelper->getQueryParamName(), $search);
-            $searchHelper->getQuery()->setStoreId((int) \Mage::app()->getStore()->getId());
-            $searchHelper->getQuery()->setQueryText($search);
+            \Mage::app()->getRequest()->setParam(\Mage::helper('catalogsearch')->getQueryParamName(), $search);
+            $searchService->prepare(StoreContext::getStoreId());
             $layer = \Mage::getModel('catalogsearch/layer');
         } else {
             $layer = \Mage::getModel('catalog/layer');

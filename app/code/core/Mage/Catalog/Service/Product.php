@@ -64,6 +64,19 @@ class Mage_Catalog_Service_Product
     }
 
     /**
+     * Keep in $collection only the products that the storefront of the store view $storeId shows: enabled, visible
+     * in the catalog or the search, and in the website of the store. getVisibleById() applies the same rule to one
+     * product.
+     */
+    public function addVisibleFilter(Mage_Catalog_Model_Resource_Product_Collection $collection, int $storeId): void
+    {
+        $collection->setStoreId($storeId)
+            ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+            ->setVisibility(Mage::getSingleton('catalog/product_visibility')->getVisibleInSiteIds())
+            ->addStoreFilter($storeId);
+    }
+
+    /**
      * Return a new product of the type $typeId and the attribute set $attributeSetId, or the default attribute set,
      * with the values of the admin scope. save() checks the type and the attribute set.
      */
@@ -217,12 +230,16 @@ class Mage_Catalog_Service_Product
     public function deleteStoreValues(int $productId, array $codes, int $storeId): void
     {
         $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
-        foreach ($this->getStoreAttributes($codes, $storeId) as $attribute) {
+        $attributes = $this->getStoreAttributes($codes, $storeId);
+        foreach ($attributes as $attribute) {
             $adapter->delete($attribute->getBackend()->getTable(), [
                 'entity_id = ?' => $productId,
                 'attribute_id = ?' => (int) $attribute->getId(),
                 'store_id = ?' => $storeId,
             ]);
+        }
+        if ($attributes !== []) {
+            Mage::dispatchEvent('catalog_product_attribute_update_after', ['product_ids' => [$productId]]);
         }
     }
 
@@ -318,25 +335,14 @@ class Mage_Catalog_Service_Product
 
     /**
      * Put the product $productId in the categories $categoryIds only, without a save of the product. A category
-     * that does not exist is skipped.
+     * that does not exist is skipped. The category product index and the URL rewrites of the product follow.
      *
      * @param array<int|string> $categoryIds
      */
     public function setCategoryIds(int $productId, array $categoryIds): void
     {
         $categoryIds = array_map(intval(...), Mage::getResourceSingleton('catalog/category')->verifyIds(array_map(intval(...), $categoryIds)));
-        $resource = Mage::getSingleton('core/resource');
-        $write = $resource->getConnection('core_write');
-        $table = $resource->getTableName('catalog/category_product');
-
-        $existing = array_map(intval(...), $write->fetchCol("SELECT category_id FROM {$table} WHERE product_id = ?", [$productId]));
-        foreach (array_diff($categoryIds, $existing) as $categoryId) {
-            $write->insertOnDuplicate($table, ['category_id' => $categoryId, 'product_id' => $productId, 'position' => 0]);
-        }
-        $removed = array_diff($existing, $categoryIds);
-        if ($removed !== []) {
-            $write->delete($table, ['product_id = ?' => $productId, 'category_id IN (?)' => $removed]);
-        }
+        Mage::getSingleton('catalog/product_action')->updateCategories($productId, $categoryIds);
     }
 
     /**

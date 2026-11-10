@@ -33,11 +33,10 @@ class Mage_Catalog_Block_Product_List_Upsell extends Mage_Catalog_Block_Product_
     {
         $product = Mage::registry('product');
         /** @var Mage_Catalog_Model_Product $product */
-        $this->_itemCollection = $product->getUpSellProductCollection()
-            ->setPositionOrder()
-            ->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds())
-            ->addStoreFilter()
-        ;
+        /** @var Mage_Catalog_Service_Product_Link $service */
+        $service = Mage::getService('catalog/product_link');
+        $this->_itemCollection = $service->getVisibleLinkCollection($product, Mage_Catalog_Service_Product_Link::TYPE_UP_SELL, (int) Mage::app()->getStore()->getId())
+            ->setPositionOrder();
         if ($this->isModuleEnabled('Mage_Checkout', 'catalog')) {
             Mage::getResourceSingleton('checkout/cart')->addExcludeProductFilter(
                 $this->_itemCollection,
@@ -45,10 +44,6 @@ class Mage_Catalog_Block_Product_List_Upsell extends Mage_Catalog_Block_Product_
             );
 
             $this->_addProductAttributesAndPrices($this->_itemCollection);
-        }
-
-        if (!Mage::helper('cataloginventory')->isShowOutOfStock()) {
-            Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($this->_itemCollection);
         }
 
         if ($this->getItemLimit('upsell') > 0) {

@@ -59,15 +59,28 @@ class Mage_Catalog_Service_Product_Link
             return $links;
         }
 
-        $collection = match ($type) {
-            self::TYPE_RELATED => $product->getRelatedProductCollection(),
-            self::TYPE_UP_SELL => $product->getUpSellProductCollection(),
-            default => $product->getCrossSellProductCollection(),
-        };
-        foreach ($collection as $linked) {
+        foreach ($this->getLinkCollection($product, $type) as $linked) {
             $links[(int) $linked->getId()] = ['position' => (int) $linked->getPosition()];
         }
         return $links;
+    }
+
+    /**
+     * Return the products of the links of $type of $product that the storefront of the store view $storeId lists:
+     * enabled, visible in the catalog, in the website of the store, and in stock when the store hides the products
+     * that are out of stock.
+     */
+    public function getVisibleLinkCollection(Product $product, string $type, int $storeId): Mage_Catalog_Model_Resource_Product_Link_Product_Collection
+    {
+        $collection = $this->getLinkCollection($product, $type);
+        $collection->setStoreId($storeId)
+            ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+            ->setVisibility(Mage::getSingleton('catalog/product_visibility')->getVisibleInCatalogIds())
+            ->addStoreFilter($storeId);
+        if (!Mage::getStoreConfigFlag(Mage_CatalogInventory_Helper_Data::XML_PATH_SHOW_OUT_OF_STOCK, $storeId)) {
+            Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($collection);
+        }
+        return $collection;
     }
 
     /**
@@ -157,5 +170,17 @@ class Mage_Catalog_Service_Product_Link
         $setter = self::SETTERS[$type];
         $product->$setter($links);
         $product->save();
+    }
+
+    /**
+     * Return the products of the links of $type of $product, in every status and visibility.
+     */
+    public function getLinkCollection(Product $product, string $type): Mage_Catalog_Model_Resource_Product_Link_Product_Collection
+    {
+        return match ($type) {
+            self::TYPE_RELATED => $product->getRelatedProductCollection(),
+            self::TYPE_UP_SELL => $product->getUpSellProductCollection(),
+            default => $product->getCrossSellProductCollection(),
+        };
     }
 }
