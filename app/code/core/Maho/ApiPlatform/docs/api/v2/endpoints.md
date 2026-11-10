@@ -161,13 +161,16 @@ The checkout sub-resources mirror the guest-cart flow so a logged-in customer ca
 | PUT / DELETE | `/guest-carts/{id}/items/{itemId}/gift-message` | None | Set / remove a per-item gift message |
 | POST | `/guest-carts/{id}/place-order` | None | Place order from guest cart |
 
-The cart page of the storefront and the API use the same rules for an item, a shipping estimate, a coupon, a gift card, a gift message and a guest order:
+The cart page and the checkout of the storefront and the API use the same rules for an item, a shipping estimate, an address, a shipping method, a payment method, a coupon, a gift card, a gift message and a guest order:
 
 - An item must be a product that is enabled and in the website of the cart. A guest or customer token can add only a product that the storefront shows. An admin token and an API token with the `carts/write` grant can also add a product that the storefront does not show, as the admin order create does. A product that is not available gives a 422.
 - A simple product that the storefront does not show, a variant of a configurable product, goes to the cart as its configurable parent, on the storefront, in the admin order create and on the API.
 - Without `qty`, the item gets the default qty of the product. A qty must be above 0 and at most 10,000, else the API gives a 422. A new line below the minimum sale qty of its product gets the minimum.
 - Only an admin token or an API token with the `carts/write` grant can send `customPrice`. A guest or customer token gets a 403.
 - A `shipping-methods` request with an `address` keeps only the country, the region, the postcode and the city of the address on the cart, as the estimate of the cart page does. An unknown country gives a 422 with `countryId` in `details.errors`. Set the full address with `shipping-address`.
+- A `shipping-address`, a `billing-address` and the addresses of a place-order body get the checks of the address form of the checkout: each field that the store makes required, and the length and the format of each field. An address that is not valid gives a 422 with one entry in `details.errors` for each problem. The cart keeps the text of an address without HTML tags.
+- A `shipping-method` needs a rate of the address of the cart, and the carrier of the rate must not give an error, else the API gives a 422.
+- A `payment-method` must be available for the cart and must accept the `additionalData`, as on the checkout of the storefront. The API refuses a card method, and drops each `cc_*` key, each PayPal ID and each value that is not a string or a number from `additionalData`.
 - A coupon needs a cart with items: an empty cart gives a 409. An empty code gives a 422 with `couponCode` in `details.errors`. A code that does not exist or does not apply gives a 422, and the cart keeps the coupon that it had.
 - Each client can try `system/rate_limit/coupon_validate` coupon codes and `system/rate_limit/giftcard_balance` gift card codes in one minute, on the cart page and on the API together. A client over a limit gets a 429 with a `Retry-After` header. An admin token and an API token with the `carts/write` grant have no limit.
 - A gift message that the store does not allow gives a 422. The checkout of the storefront leaves such a message out and goes on.

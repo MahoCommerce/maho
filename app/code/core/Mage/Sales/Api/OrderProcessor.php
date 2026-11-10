@@ -122,12 +122,12 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // provided addresses in-memory; the single collection below prices them
         // together with the shipping method, and the final save persists them.
         if (isset($args['shippingAddress']) && is_array($args['shippingAddress'])) {
-            $this->cartService->applyShippingAddress($quote, $this->cartService->mapAddressInput($args['shippingAddress']));
             CustomAttributes::applyToCartAddress($quote->getShippingAddress(), $args['shippingAddress']['customAttributes'] ?? null);
+            $this->cartService->applyShippingAddress($quote, $this->cartService->mapAddressInput($args['shippingAddress']));
         }
         if (isset($args['billingAddress']) && is_array($args['billingAddress'])) {
-            $this->cartService->applyBillingAddress($quote, $this->cartService->mapAddressInput($args['billingAddress']));
             CustomAttributes::applyToCartAddress($quote->getBillingAddress(), $args['billingAddress']['customAttributes'] ?? null);
+            $this->cartService->applyBillingAddress($quote, $this->cartService->mapAddressInput($args['billingAddress']));
         }
 
         // A guest sends the fields of the Checkout Registration form, which a customer order takes from the account

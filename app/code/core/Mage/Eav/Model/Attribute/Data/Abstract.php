@@ -375,7 +375,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
      *
      * @param array|string $value
      * @throws Mage_Core_Exception
-     * @return bool
+     * @return true|array<string>
      */
     abstract public function validateValue($value);
 

@@ -362,10 +362,8 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     {
         $args = $context['args']['input'] ?? [];
         $quote = $this->resolveAndVerify($context, $uriVariables);
-        $addressData = $this->cartService->mapAddressInput($args);
-        $this->cartService->assertCompleteAddressInput($addressData);
         CustomAttributes::applyToCartAddress($quote->getShippingAddress(), $args['customAttributes'] ?? null);
-        $quote = $this->cartService->setShippingAddress($quote, $addressData);
+        $quote = $this->cartService->setShippingAddress($quote, $this->cartService->mapAddressInput($args));
 
         return $this->cartMapper->mapQuoteToCart($quote);
     }
@@ -387,7 +385,6 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
                 $quote->getBillingAddress()->setData($code, $quote->getShippingAddress()->getData($code));
             }
         } else {
-            $this->cartService->assertCompleteAddressInput($addressData);
             CustomAttributes::applyToCartAddress($quote->getBillingAddress(), $args['customAttributes'] ?? null);
         }
         $quote = $this->cartService->setBillingAddress($quote, $addressData, $sameAsShipping);

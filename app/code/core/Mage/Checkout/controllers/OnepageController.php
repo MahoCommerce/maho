@@ -435,29 +435,23 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         if ($customerAddress) {
             $billingAddress->importCustomerAddress($customerAddress)->setSaveInAddressBook(false);
         } else {
-            $billingAddress->addData($data);
+            /** @var Mage_Customer_Model_Form $addressForm */
+            $addressForm = Mage::getModel('customer/form');
+            $addressForm->setFormCode('customer_address_edit')
+                ->setEntityType('customer_address')
+                ->setEntity($billingAddress);
+            $addressForm->restoreData($addressForm->extractData($addressForm->prepareRequest($data)));
         }
         $billingAddress->implodeStreetAddress();
 
         // `billing[use_for_shipping]` lives outside the hidden form and is always posted.
-        $useForShipping = $data['use_for_shipping'] ?? 1;
-        if ($useForShipping && !$quote->isVirtual()) {
-            $shippingAddress = $quote->getShippingAddress();
-            if ($customerAddress) {
-                $shippingAddress->importCustomerAddress($customerAddress)->setSaveInAddressBook(false);
-            } else {
-                $shippingData = $data;
-                unset($shippingData['address_id']);
-                $shippingAddress->addData($shippingData);
-            }
-            $shippingAddress->setSameAsBilling()
-                ->implodeStreetAddress()
-                ->setCollectShippingRates(true);
+        /** @var Mage_Checkout_Service_Cart $cartService */
+        $cartService = Mage::getService('checkout/cart');
+        if (($data['use_for_shipping'] ?? 1) && !$quote->isVirtual()) {
+            $cartService->useBillingForShipping($quote);
+        } else {
+            $cartService->collectAndSave($quote);
         }
-
-        // collectTotals() runs all total collectors including shipping,
-        // which properly calculates item qty before collecting rates
-        $quote->collectTotals()->save();
 
         $result = [
             'success' => true,
@@ -646,9 +640,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
 
                 $data = $this->getRequest()->getPost('payment', []);
                 if ($data) {
-                    // A client must not choose its own checks mask
-                    unset($data['checks']);
-                    $this->getOnepage()->getQuote()->getPayment()->importData($data);
+                    Mage::getService('checkout/cart')->selectPaymentMethod($this->getOnepage()->getQuote(), $data);
                 }
 
                 $this->getOnepage()->saveOrder();

@@ -10507,12 +10507,6 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Form.php
 
 		-
-			rawMessage: 'Parameter #2 ...$arrays of function array_merge expects array, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Form.php
-
-		-
 			rawMessage: 'Method Mage_Eav_Model_Observer::cleanOrphanedRecords() has no return type specified.'
 			identifier: missingType.return
 			count: 1
