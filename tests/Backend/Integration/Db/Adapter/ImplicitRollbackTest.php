@@ -21,6 +21,9 @@ beforeEach(function () {
 
 afterEach(function () {
     if ($this->adapter instanceof Mysql) {
+        while ($this->adapter->getTransactionLevel() > 0) {
+            $this->adapter->rollBack();
+        }
         $this->adapter->query('DROP PROCEDURE IF EXISTS test_raise_error');
     }
 });
@@ -37,6 +40,7 @@ it('drops every transaction level when the server rolls the transaction back', f
 
     expect(fn() => $this->adapter->query('CALL test_raise_error()'))->toThrow(DeadlockException::class);
     expect($this->adapter->getTransactionLevel())->toBe(0);
+    expect($this->adapter->getConnection()->isTransactionActive())->toBeFalse();
 })->with([
     'deadlock' => [1213, '40001'],
     'MariaDB snapshot isolation conflict' => [1020, 'HY000'],
@@ -52,7 +56,4 @@ it('keeps the transaction open after a lock wait timeout', function () {
 
     expect(fn() => $this->adapter->query('CALL test_raise_error()'))->toThrow(Exception::class);
     expect($this->adapter->getTransactionLevel())->toBe(2);
-
-    $this->adapter->rollBack();
-    $this->adapter->rollBack();
 });
