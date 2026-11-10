@@ -108,6 +108,10 @@ class Mage_Sales_Model_Service_Quote
         $transaction->addObject($quote);
 
         $quote->reserveOrderId();
+        // A transport can change an address after the last save of the cart
+        foreach ($quote->getAllAddresses() as $address) {
+            $address->sanitizeText();
+        }
         if ($isVirtual) {
             $order = $this->_convertor->addressToOrder($quote->getBillingAddress());
         } else {

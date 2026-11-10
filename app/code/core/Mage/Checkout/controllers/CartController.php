@@ -592,9 +592,18 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         $code = (string) $this->getRequest()->getParam('estimate_method');
         $isAjax = (bool) $this->getRequest()->getParam('isAjax');
 
-        if (!empty($code)) {
-            $this->_getQuote()->getShippingAddress()->setShippingMethod($code)->save();
-            $this->_getQuote()->collectTotals()->save();
+        if ($code !== '') {
+            try {
+                Mage::getService('checkout/cart')->selectShippingMethod($this->_getQuote(), $code);
+            } catch (Mage_Core_Exception $e) {
+                if ($isAjax) {
+                    $this->getResponse()->setBodyJson(['success' => false, 'error' => true, 'message' => $e->getMessage()]);
+                    return;
+                }
+                $this->_getSession()->addError(Mage::helper('core')->escapeHtml($e->getMessage()));
+                $this->_goBack();
+                return;
+            }
         }
 
         if ($isAjax) {

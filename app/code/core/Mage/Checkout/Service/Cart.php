@@ -1042,16 +1042,164 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
+     * Check $address with the rules of the address form of the storefront, then with the rules of the address model.
+     * An address that a flow marks with should_ignore_validation passes.
+     *
+     * @throws \Mage_Core_Exception_Input one error for each problem
+     */
+    public function validateAddress(\Mage_Sales_Model_Quote_Address $address): void
+    {
+        if ($address->getShouldIgnoreValidation()) {
+            return;
+        }
+
+        $errors = new \Mage_Core_Exception_Input();
+        /** @var \Mage_Customer_Model_Form $form */
+        $form = \Mage::getModel('customer/form')
+            ->setFormCode('customer_address_edit')
+            ->setEntityType('customer_address')
+            ->setEntity($address);
+        $data = ['street' => $address->getStreet()] + $address->getData();
+        foreach ($form->getAttributes() as $code => $attribute) {
+            if (!$attribute->getIsVisible()) {
+                continue;
+            }
+            $result = \Mage_Eav_Model_Attribute_Data::factory($attribute, $address)
+                ->setExtractedData($data)
+                ->validateValue($data[$code] ?? null);
+            foreach ($result === true ? [] : $result as $message) {
+                $errors->addError((string) $code, (string) $message);
+            }
+        }
+        $errors->throwIfErrors();
+
+        $result = $address->validate();
+        foreach ($result === true ? [] : $result as $message) {
+            $errors->addError('address', (string) $message);
+        }
+        $errors->throwIfErrors();
+    }
+
+    /**
+     * Copy the saved address $customerAddressId of the customer of $quote into the $addressType address of $quote,
+     * and save the cart.
+     *
+     * @throws \Mage_Core_Exception when the saved address is not an address of the customer of $quote
+     * @throws \Mage_Core_Exception_Input when the saved address is not valid
+     */
+    public function useCustomerAddress(\Mage_Sales_Model_Quote $quote, string $addressType, int $customerAddressId): \Mage_Sales_Model_Quote
+    {
+        $customerAddress = \Mage::getModel('customer/address')->load($customerAddressId);
+        if (!$customerAddress->getId() || !$quote->getCustomerId()
+            || (int) $customerAddress->getCustomerId() !== (int) $quote->getCustomerId()
+        ) {
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('Customer Address is not valid.'));
+        }
+        $address = $addressType === \Mage_Sales_Model_Quote_Address::TYPE_BILLING
+            ? $quote->getBillingAddress()
+            : $quote->getShippingAddress()->setCollectShippingRates(true);
+        $address->importCustomerAddress($customerAddress)->setSaveInAddressBook(false);
+
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $address): \Mage_Sales_Model_Quote {
+            $this->validateAddress($address);
+            $this->collectAndSave($quote);
+
+            return $quote;
+        });
+    }
+
+    /**
+     * Give the shipping address of $quote the fields of the billing address, mark it as the same as the billing
+     * address, and save the cart. The shipping method stays.
+     */
+    public function useBillingForShipping(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
+    {
+        $billing = $quote->getBillingAddress();
+        $shipping = $quote->getShippingAddress();
+        $eavConfig = \Mage::getSingleton('eav/config');
+        $fields = [...$eavConfig->getEntityAttributeCodes($eavConfig->getEntityType('customer_address')), 'customer_address_id', 'email'];
+        foreach ($fields as $field) {
+            $shipping->setData($field, $billing->getData($field));
+        }
+        $shipping->setSameAsBilling(true)
+            ->setSaveInAddressBook(false)
+            ->setCollectShippingRates(true);
+        $this->collectAndSave($quote);
+
+        return $quote;
+    }
+
+    /**
+     * Give the shipping address of $quote the shipping method $code ("carrier_method"), and save the cart.
+     *
+     * @throws \Mage_Core_Exception_Input when $code is empty
+     * @throws \Mage_Core_Exception when the address has no rate for $code, or the rate has an error
+     */
+    public function selectShippingMethod(\Mage_Sales_Model_Quote $quote, string $code): \Mage_Sales_Model_Quote
+    {
+        if ($code === '') {
+            throw new \Mage_Core_Exception_Input()->addError('shipping_method', \Mage::helper('checkout')->__('Invalid shipping method.'));
+        }
+
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $code): \Mage_Sales_Model_Quote {
+            $address = $quote->getShippingAddress();
+            $address->collectShippingRates();
+            $this->assertShippingMethodAvailable($quote, $code);
+            $address->setShippingMethod($code);
+            $this->collectAndSave($quote);
+
+            return $quote;
+        });
+    }
+
+    /**
+     * Give $quote the payment method and the data of $paymentData, and save the cart. The method must be available
+     * for the cart and must accept the data. The client cannot choose the checks of the method.
+     *
+     * @param array<string, mixed> $paymentData the code of the method in "method", and the fields of its form
+     * @throws \Mage_Core_Exception
+     */
+    public function selectPaymentMethod(\Mage_Sales_Model_Quote $quote, array $paymentData): \Mage_Sales_Model_Quote
+    {
+        // Resolve the checks in the scope of the caller, before the switch to the store of the cart
+        $paymentData['checks'] = \Mage_Payment_Model_Method_Abstract::checksForCurrentScope();
+        $import = fn() => $this->importPayment($quote, $paymentData);
+        // The admin order create imports in the admin scope, in which it also places the order
+        \Mage::app()->getStore()->isAdmin() ? $import() : $this->inQuoteStoreScope($quote, $import);
+        $this->collectAndSave($quote);
+
+        return $quote;
+    }
+
+    /**
+     * @param array<string, mixed> $paymentData
+     * @throws \Mage_Core_Exception
+     */
+    private function importPayment(\Mage_Sales_Model_Quote $quote, array $paymentData): void
+    {
+        $methodCode = (string) ($paymentData['method'] ?? '');
+        if (empty(\Mage::helper('payment')->getPaymentMethods($quote->getStoreId())[$methodCode]['model'])) {
+            throw new \Mage_Core_Exception(\Mage::helper('sales')->__('The requested Payment Method is not available.'));
+        }
+        if ($quote->isVirtual()) {
+            $quote->getBillingAddress()->setPaymentMethod($methodCode);
+        } else {
+            // A payment method can change the shipping rates
+            $quote->getShippingAddress()->setPaymentMethod($methodCode)->setCollectShippingRates(true);
+        }
+        $quote->getPayment()->importData($paymentData);
+    }
+
+    /**
      * Reject a partial payload on the checkout address setters. GraphQL declares
      * these fields non-null; the REST bodies carry no schema, so without this a
      * `{}` PUT blanks an already-valid address and only fails at order placement.
+     *
+     * @throws \Mage_Core_Exception_Input
      */
     public function assertCompleteAddressInput(array $addressData): void
     {
-        $errors = \Mage::getModel('sales/quote_address')->addData($addressData)->validate();
-        if ($errors !== true) {
-            throw new \Mage_Core_Exception(implode(' ', $errors));
-        }
+        $this->validateAddress(\Mage::getModel('sales/quote_address')->addData($addressData));
     }
 
     /**
@@ -1096,13 +1244,16 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Apply a shipping address in-memory, for callers that batch several
-     * checkout fields and collect once afterwards (order placement).
+     * Give the shipping address of $quote the fields of $addressData and check it, without a save, for callers that
+     * batch several checkout fields and collect once afterwards (order placement).
+     *
+     * @throws \Mage_Core_Exception_Input when the address is not valid
      */
     public function applyShippingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): void
     {
         $address = $quote->getShippingAddress();
-        $address->addData(StoreDefaults::filterAddressKeys($this->sanitizeAddressData($addressData)));
+        $address->addData(StoreDefaults::filterAddressKeys($addressData));
+        $this->inQuoteStoreScope($quote, fn() => $this->validateAddress($address));
 
         // Flag to trigger shipping rate collection
         $address->setCollectShippingRates();
@@ -1112,15 +1263,21 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Apply a billing address in-memory without recollecting or saving
+     * Give the billing address of $quote the fields of $addressData and check it, without a save.
+     *
+     * @throws \Mage_Core_Exception_Input when the address is not valid
      */
     public function applyBillingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): void
     {
         $address = $quote->getBillingAddress();
-        $address->addData(StoreDefaults::filterAddressKeys($this->sanitizeAddressData($addressData)));
+        $address->addData(StoreDefaults::filterAddressKeys($addressData));
+        $this->inQuoteStoreScope($quote, fn() => $this->validateAddress($address));
         $quote->setTotalsCollectedFlag(false);
     }
 
+    /**
+     * @throws \Mage_Core_Exception_Input when the address is not valid
+     */
     public function setShippingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): \Mage_Sales_Model_Quote
     {
         $this->applyShippingAddress($quote, $addressData);
@@ -1130,11 +1287,11 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Set billing address
+     * Give the billing address of $quote the fields of $addressData, or the fields of the shipping address when
+     * $sameAsShipping is true, and save the cart.
      *
-     * @param \Mage_Sales_Model_Quote $quote Quote
-     * @param array $addressData Address data
-     * @param bool $sameAsShipping Same as shipping
+     * @throws \Mage_Core_Exception_Conflict when $sameAsShipping is true and the cart has no shipping address
+     * @throws \Mage_Core_Exception_Input when the address is not valid
      */
     public function setBillingAddress(\Mage_Sales_Model_Quote $quote, array $addressData, bool $sameAsShipping = false): \Mage_Sales_Model_Quote
     {
@@ -1153,11 +1310,11 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Set shipping method
+     * Give the shipping address of $quote the shipping method of $carrierCode and $methodCode, and save the cart.
+     * $skipValidation sets the method without the check of selectShippingMethod().
      *
-     * @param \Mage_Sales_Model_Quote $quote Quote
-     * @param string $carrierCode Carrier code
-     * @param string $methodCode Method code
+     * @throws \Mage_Core_Exception_Input when a code is empty
+     * @throws \Mage_Core_Exception when the address has no rate for the method, or the rate has an error
      */
     public function setShippingMethod(\Mage_Sales_Model_Quote $quote, string $carrierCode, string $methodCode, bool $skipValidation = false): \Mage_Sales_Model_Quote
     {
@@ -1168,20 +1325,14 @@ class Mage_Checkout_Service_Cart
             );
         }
         $shippingMethod = $carrierCode . '_' . $methodCode;
+        if (!$skipValidation) {
+            return $this->selectShippingMethod($quote, $shippingMethod);
+        }
 
-        return $this->inQuoteStoreScope($quote, function () use ($quote, $shippingMethod, $skipValidation): \Mage_Sales_Model_Quote {
-            $address = $quote->getShippingAddress();
+        $quote->getShippingAddress()->setShippingMethod($shippingMethod);
+        $this->collectAndSave($quote);
 
-            if (!$skipValidation) {
-                $address->collectShippingRates();
-                $this->assertShippingMethodAvailable($quote, $shippingMethod);
-            }
-
-            $address->setShippingMethod($shippingMethod);
-            $this->collectAndSave($quote);
-
-            return $quote;
-        });
+        return $quote;
     }
 
     /**
@@ -1194,16 +1345,16 @@ class Mage_Checkout_Service_Cart
     {
         $rate = $quote->getShippingAddress()->getShippingRateByCode($shippingMethod);
         if (!$rate || $rate->getErrorMessage()) {
-            throw new \Mage_Core_Exception('Shipping method is not available for this address');
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('Shipping method is not available for this address'));
         }
     }
 
     /**
-     * Set payment method
+     * Give $quote the payment method $methodCode with the flat scalar keys of $additionalData, and save the cart. The
+     * API refuses a card method and the keys that buildPaymentImportData() removes.
      *
-     * @param \Mage_Sales_Model_Quote $quote Quote
-     * @param string $methodCode Method code
-     * @param array|null $additionalData Additional payment data
+     * @throws \Mage_Core_Exception_Input when $methodCode is empty
+     * @throws \Mage_Core_Exception when the method is not available for the cart, or refuses the data
      */
     public function setPaymentMethod(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData = null): \Mage_Sales_Model_Quote
     {
@@ -1226,15 +1377,20 @@ class Mage_Checkout_Service_Cart
         });
     }
 
-    /** Import sanitized client payment data onto the quote payment and keep the backup copy. */
+    /**
+     * Import the client payment data that buildPaymentImportData() accepts onto the payment of $quote, as
+     * selectPaymentMethod() does, without a save, and keep the backup copy.
+     *
+     * @throws \Mage_Core_Exception when the method is not available for the cart, or refuses the data
+     */
     public function importPaymentData(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData, int $checks): void
     {
         $paymentData = $this->buildPaymentImportData($methodCode, $additionalData, $checks);
         // Only a Mage_Core_Exception is the client's fault; anything else must surface as a 500
         try {
-            $quote->getPayment()->importData($paymentData);
+            $this->importPayment($quote, $paymentData);
         } catch (\Mage_Core_Exception $e) {
-            throw new \Mage_Core_Exception('Payment method is not available: ' . $e->getMessage());
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('Payment method is not available: %s', $e->getMessage()));
         }
         $this->backupPaymentAdditionalData($quote->getPayment(), $paymentData);
     }
@@ -1306,59 +1462,6 @@ class Mage_Checkout_Service_Cart
         if (!$method->isAvailable($quote)) {
             throw new \Mage_Core_Exception('Payment method is not available for this cart');
         }
-    }
-
-    /**
-     * Sanitize address data to prevent stored XSS
-     *
-     * Strips HTML tags and limits field lengths for all string address fields.
-     * Called before passing user-supplied address data to quote address models.
-     *
-     * @param array $addressData Raw address data from API input
-     * @return array Sanitized address data
-     */
-    private function sanitizeAddressData(array $addressData): array
-    {
-        $maxLengths = [
-            'firstname' => 255,
-            'lastname' => 255,
-            'company' => 255,
-            'city' => 255,
-            'region' => 255,
-            'postcode' => 20,
-            'telephone' => 50,
-            'fax' => 50,
-            'email' => 255,
-            'prefix' => 40,
-            'suffix' => 40,
-            'middlename' => 255,
-            'vat_id' => 50,
-        ];
-
-        foreach ($addressData as $key => $value) {
-            if ($key === 'street') {
-                if (is_array($value)) {
-                    $addressData[$key] = array_map(fn($line) => mb_substr(strip_tags((string) $line), 0, 255), $value);
-                } elseif (is_string($value)) {
-                    // Quote addresses store street as one newline-joined string;
-                    // cap per line like the array branch, or copying a multi-line
-                    // street (sameAsShipping) silently truncates it
-                    $addressData[$key] = implode("\n", array_map(
-                        fn($line) => mb_substr(strip_tags($line), 0, 255),
-                        preg_split('/\r\n|\r|\n/', $value) ?: [$value],
-                    ));
-                }
-                continue;
-            }
-
-            if (is_string($value)) {
-                $value = strip_tags($value);
-                $maxLen = $maxLengths[$key] ?? 255;
-                $addressData[$key] = mb_substr($value, 0, $maxLen);
-            }
-        }
-
-        return $addressData;
     }
 
     /**

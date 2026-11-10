@@ -1304,10 +1304,15 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         return $this;
     }
 
+    /**
+     * Give the quote the payment method and the payment data of $data, and save the quote.
+     *
+     * @throws Mage_Core_Exception when the method is not available for the quote, or refuses the data
+     */
     public function setPaymentData($data)
     {
         $data['method'] ??= $this->getQuote()->getPayment()->getMethod();
-        $this->getQuote()->getPayment()->importData($data);
+        Mage::getService('checkout/cart')->selectPaymentMethod($this->getQuote(), $data);
         return $this;
     }
 
