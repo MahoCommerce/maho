@@ -43,6 +43,7 @@ class Mage_Checkout_Service_Cart
         'country_id' => 'countryId',
         'telephone' => 'telephone',
         'vat_id' => 'vatId',
+        'save_in_address_book' => 'saveInAddressBook',
     ];
 
     /**
@@ -1334,19 +1335,23 @@ class Mage_Checkout_Service_Cart
             'country_id' => $countryId,
             'telephone' => $input['telephone'] ?? '',
             'vat_id' => $input['vatId'] ?? null,
+            'save_in_address_book' => filter_var($input['saveInAddressBook'] ?? false, FILTER_VALIDATE_BOOLEAN),
         ];
     }
 
     /**
      * Give the shipping address of $quote the fields of $addressData and check it, without a save, for callers that
-     * batch several checkout fields and collect once afterwards (order placement).
+     * batch several checkout fields and collect once afterwards (order placement). The save_in_address_book field
+     * applies to a customer cart only. The address is no longer the same as the billing address, as on the shipping
+     * step of the checkout, so that the order adds it to the address book on its own.
      *
      * @throws \Mage_Core_Exception_Input when the address is not valid
      */
     public function applyShippingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): void
     {
         $address = $quote->getShippingAddress();
-        $address->addData(StoreDefaults::filterAddressKeys($addressData));
+        $address->addData(StoreDefaults::filterAddressKeys($addressData))->setSameAsBilling(false);
+        $this->applySaveInAddressBook($quote, $address, $addressData);
         $this->inQuoteStoreScope($quote, fn() => $this->validateAddress($address));
 
         // Flag to trigger shipping rate collection
@@ -1357,7 +1362,8 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Give the billing address of $quote the fields of $addressData and check it, without a save.
+     * Give the billing address of $quote the fields of $addressData and check it, without a save. The
+     * save_in_address_book field applies to a customer cart only.
      *
      * @throws \Mage_Core_Exception_Input when the address is not valid
      */
@@ -1365,8 +1371,18 @@ class Mage_Checkout_Service_Cart
     {
         $address = $quote->getBillingAddress();
         $address->addData(StoreDefaults::filterAddressKeys($addressData));
+        $this->applySaveInAddressBook($quote, $address, $addressData);
         $this->inQuoteStoreScope($quote, fn() => $this->validateAddress($address));
         $quote->setTotalsCollectedFlag(false);
+    }
+
+    /**
+     * Mark $address for the address book of the customer when $addressData asks for it, as the Save in Address Book
+     * checkbox of the checkout and of the admin order create does. Mage_Sales_Service_Order::submit() adds it.
+     */
+    private function applySaveInAddressBook(\Mage_Sales_Model_Quote $quote, \Mage_Sales_Model_Quote_Address $address, array $addressData): void
+    {
+        $address->setSaveInAddressBook($quote->getCustomerId() && !empty($addressData['save_in_address_book']));
     }
 
     /**
@@ -1382,7 +1398,9 @@ class Mage_Checkout_Service_Cart
 
     /**
      * Give the billing address of $quote the fields of $addressData, or the fields of the shipping address when
-     * $sameAsShipping is true, and save the cart.
+     * $sameAsShipping is true, and save the cart. With $sameAsShipping, only save_in_address_book of $addressData
+     * applies, and the shipping address becomes the same as the billing address, so that the order adds the address
+     * to the address book once.
      *
      * @throws \Mage_Core_Exception_Conflict when $sameAsShipping is true and the cart has no shipping address
      * @throws \Mage_Core_Exception_Input when the address is not valid
@@ -1394,7 +1412,9 @@ class Mage_Checkout_Service_Cart
             if (!$shippingAddress->getCountryId()) {
                 throw new \Mage_Core_Exception_Conflict('Cart has no shipping address to copy');
             }
-            $addressData = StoreDefaults::extractAddressFields($shippingAddress);
+            $addressData = ['save_in_address_book' => $addressData['save_in_address_book'] ?? false]
+                + StoreDefaults::extractAddressFields($shippingAddress);
+            $shippingAddress->setSameAsBilling(true);
         }
 
         $this->applyBillingAddress($quote, $addressData);

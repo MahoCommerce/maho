@@ -27,6 +27,8 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
         return match (true) {
             $operation->getName() === 'create' => $this->create($user, $args, null),
             $operation->getName() === 'adjustBalance' => $this->adjustBalance($user, $args),
+            $operation->getName() === 'giftcard_send_email' => $this->sendEmail($user, (int) $uriVariables['id']),
+            $operation->getName() === 'sendEmail' => $this->sendEmail($user, (int) ($args['giftCardId'] ?? 0)),
             isset($uriVariables['id']) => $this->update($user, (int) $uriVariables['id'], $data),
             default => $this->create($user, [], $data),
         };
@@ -65,7 +67,6 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
         /** @var \Maho_Giftcard_Service_Giftcard $service */
         $service = \Mage::getService('giftcard/giftcard');
         $service->save($giftcard);
-        $service->sendToRecipient($giftcard);
         $this->logApiActivity('gift_card', 'create', null, $giftcard);
 
         return GiftCard::fromModel($service->getById((int) $giftcard->getId()));
@@ -90,6 +91,17 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
 
         $service->update($giftcard, $data->balance, $data->status, $data->comment ?? 'API balance adjustment');
         $this->logApiActivity('gift_card', 'update', $oldData, $giftcard);
+
+        return GiftCard::fromModel($service->getById($id));
+    }
+
+    private function sendEmail(ApiUser $user, int $id): GiftCard
+    {
+        /** @var \Maho_Giftcard_Service_Giftcard $service */
+        $service = \Mage::getService('giftcard/giftcard');
+        $giftcard = $service->getById($id);
+        $this->assertAllWebsitesAllowed($giftcard->getWebsiteIds(), $user, 'gift card');
+        $service->sendEmail($giftcard);
 
         return GiftCard::fromModel($service->getById($id));
     }

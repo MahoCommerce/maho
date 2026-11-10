@@ -334,6 +334,8 @@ class Mage_Sales_Service_Order
             $saved = $exported;
         }
         $address->setCustomerAddress($saved);
+        // The customer saves its addresses only when the save of the customer runs, and it skips a customer without changes
+        $customer->setDataChanges(true);
 
         return $saved;
     }

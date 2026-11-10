@@ -33,8 +33,8 @@ Stores gift card records.
 | `expires_at` | DATETIME | Expiration timestamp (UTC) |
 | `created_at` | DATETIME | Creation timestamp |
 | `updated_at` | DATETIME | Last modified |
-| `email_scheduled_at` | DATETIME | When to send email |
-| `email_sent_at` | DATETIME | When actually sent |
+| `email_scheduled_at` | DATETIME | When the cron sends the email. Only `scheduleGiftcardEmail()` sets it |
+| `email_sent_at` | DATETIME | When the last email was sent |
 
 !!! info "v26.9+"
     The `website_id` column was removed. A card is associated with any number of
@@ -300,6 +300,21 @@ $barcodeDataUrl = $helper->getBarcodeDataUrl($code);
 
 ### Email
 
+`Maho_Giftcard_Service_Giftcard` sends the email for the admin pages and the API:
+
+```php
+$service = Mage::getService('giftcard/giftcard');
+
+// The admin Send Email button and the API send-email operation: send now, also when the card got the email
+// before. A card without a recipient email gives a Mage_Core_Exception_Input on recipient_email
+$service->sendEmail($giftcard);
+
+// A purchased card when the invoice is paid: send once, and log a failure instead of throwing it
+$service->sendToRecipient($giftcard, $storeId);
+```
+
+The helper builds and queues the email. Both service methods call it:
+
 ```php
 // Send email immediately, with the settings of the current store or of $storeId
 $helper->sendGiftcardEmail($giftcard);
@@ -308,6 +323,8 @@ $helper->sendGiftcardEmail($giftcard, $storeId);
 // Schedule email for later
 $helper->scheduleGiftcardEmail($giftcard, $scheduledDateTime);
 ```
+
+A card that the admin or the API creates gets no email. The admin or the API client sends it with `sendEmail()`.
 
 ### Additional Options
 
@@ -353,7 +370,7 @@ Executes when invoice is marked as paid:
 - Creates one gift card per invoiced quantity
 - Sets initial balance from purchase amount
 - Records creation history
-- Sends the email of **Email Settings** to the recipient, in the store of the order, through `Maho_Giftcard_Service_Giftcard::sendToRecipient()`
+- Sends the email of **Email Settings** to the recipient at once, in the store of the order, through `Maho_Giftcard_Service_Giftcard::sendToRecipient()`. The `giftcard_delivery_date` of the order item does not delay it
 
 #### `refundGiftcardBalance`
 
@@ -433,7 +450,7 @@ When a gift card is added to cart, these options are stored:
 | `giftcard_sender_name` | Sender name |
 | `giftcard_sender_email` | Sender email |
 | `giftcard_message` | Custom message |
-| `giftcard_delivery_date` | Scheduled delivery date |
+| `giftcard_delivery_date` | The delivery date that the shopper selects (`Y-m-d`). The order item keeps it, and the cart, the order and the order emails show it. No code schedules the email on it |
 
 ## Quote Total Collector
 
@@ -487,7 +504,7 @@ Two scheduled tasks are registered with `#[Maho\Config\CronJob]` attributes on `
 - **Schedule**: Every 5 minutes (`*/5 * * * *`)
 - **Handler**: `Maho_Giftcard_Model_Cron::processScheduledEmails()`
 - **Behavior**:
-  - Finds gift cards with `email_scheduled_at` <= now and `email_sent_at` IS NULL
+  - Finds gift cards with `email_scheduled_at` <= now and `email_sent_at` IS NULL. Only `scheduleGiftcardEmail()` sets `email_scheduled_at`: a purchase does not
   - Processes up to 50 per run
   - Sends email and updates `email_sent_at`
 

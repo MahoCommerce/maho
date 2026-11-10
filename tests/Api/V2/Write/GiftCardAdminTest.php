@@ -270,6 +270,43 @@ describe('GraphQL adjustBalanceGiftCard', function (): void {
 
 });
 
+describe('POST /api/rest/v2/giftcards/{id}/send-email', function (): void {
+
+    it('creates a card without the email, and sends it on request over REST and GraphQL', function (): void {
+        $create = apiPost('/api/rest/v2/giftcards', [
+            'initialBalance' => 20.0,
+            'recipientEmail' => 'friend@example.com',
+        ], adminToken());
+        expect($create['status'])->toBeSuccessful();
+        trackAdminGiftCard($create['json']['code']);
+        expect($create['json']['emailSentAt'] ?? null)->toBeNull();
+        $id = (int) $create['json']['id'];
+
+        $rest = apiPost("/api/rest/v2/giftcards/{$id}/send-email", [], adminToken());
+        expect($rest['status'])->toBe(200);
+        expect($rest['json']['emailSentAt'])->not->toBeEmpty();
+
+        $response = gqlQuery("mutation { sendEmailGiftCard(input: {giftCardId: {$id}}) { giftCard { emailSentAt } } }", [], adminToken());
+        expect($response['json'])->not->toHaveKey('errors');
+        expect($response['json']['data']['sendEmailGiftCard']['giftCard']['emailSentAt'])->not->toBeEmpty();
+    });
+
+    it('refuses a card without a recipient email with a 422 on recipientEmail', function (): void {
+        $create = apiPost('/api/rest/v2/giftcards', ['initialBalance' => 20.0], adminToken());
+        expect($create['status'])->toBeSuccessful();
+        trackAdminGiftCard($create['json']['code']);
+
+        $response = apiPost("/api/rest/v2/giftcards/{$create['json']['id']}/send-email", [], adminToken());
+        expect($response['status'])->toBe(422);
+        expect(array_column($response['json']['details']['errors'] ?? [], 'field'))->toBe(['recipientEmail']);
+    });
+
+    it('needs authentication', function (): void {
+        expect(apiPost('/api/rest/v2/giftcards/1/send-email', [])['status'])->toBeUnauthorized();
+    });
+
+});
+
 describe('Gift card public/customer path stays read-only and masked', function (): void {
 
     it('masks the code on the public balance check and omits history', function (): void {
