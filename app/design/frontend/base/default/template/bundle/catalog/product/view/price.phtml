@@ -23,6 +23,33 @@ if ($_product->getPriceType() == 1) {
 }
 $isMAPTypeOnGesture = Mage::helper('catalog')->isShowPriceOnGesture($_product);
 $canApplyMAP  = Mage::helper('catalog')->canApplyMsrp($_product);
+if (!$canApplyMAP && $_product->getCanShowPrice() !== false && !$this->getWithoutPrice()
+    && $_product->getPriceType() == Mage_Bundle_Model_Product_Price::PRICE_TYPE_FIXED
+) {
+    $_store = $_product->getStore();
+    $_finalPrice = $this->helper('tax')->getPrice(
+        $_product,
+        $_store->roundPrice($_finalPrice),
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+    );
+    $_finalPriceInclTax = $this->helper('tax')->getPrice(
+        $_product,
+        $_store->roundPrice($_finalPriceInclTax),
+        true,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+    );
+}
 ?>
 <?php if ($_product->getCanShowPrice() !== false): ?>
 <div class="price-box">
