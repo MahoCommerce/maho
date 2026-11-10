@@ -50,7 +50,7 @@ final class ProductGroupPriceProcessor extends \Maho\ApiPlatform\Processor
 
         /** @var \Mage_Catalog_Service_Product_Price $service */
         $service = \Mage::getService('catalog/product_price');
-        $service->setGroupPrices($product, $rows, $this->getAllowedWebsiteIds($user));
+        $service->setGroupPrices($product, $rows, $this->allowedWebsiteIds($user));
 
         return $operation instanceof DeleteOperationInterface
             ? null

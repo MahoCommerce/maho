@@ -137,12 +137,12 @@ trait StoreRestrictionTrait
             return null;
         }
 
+        // The loaded store views: getStore() queries an unknown ID, and PostgreSQL fails an ID out of the column range
+        $stores = \Mage::app()->getStores(true);
         $websiteIds = [];
         foreach ($allowedStoreIds as $storeId) {
-            try {
-                $websiteIds[] = (int) \Mage::app()->getStore($storeId)->getWebsiteId();
-            } catch (\Mage_Core_Model_Store_Exception) {
-                // deleted or unknown store: grants access to no website
+            if (isset($stores[$storeId])) {
+                $websiteIds[] = (int) $stores[$storeId]->getWebsiteId();
             }
         }
 

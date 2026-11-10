@@ -79,16 +79,6 @@ trait ProductLoaderTrait
     }
 
     /**
-     * Return the websites of the store views of a store-restricted user, or null for an unrestricted user.
-     *
-     * @return int[]|null
-     */
-    protected function getAllowedWebsiteIds(ApiUser $user): ?array
-    {
-        return self::productService()->getWebsiteIds($user->getAllowedStoreIds());
-    }
-
-    /**
      * @throws \Mage_Core_Exception_Forbidden when the product is in no website of the store views of the user
      */
     protected function assertProductWebsitesAllowed(Mage_Catalog_Model_Product $product, ApiUser $user): void

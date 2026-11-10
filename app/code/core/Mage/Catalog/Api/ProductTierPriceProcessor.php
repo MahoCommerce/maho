@@ -49,7 +49,7 @@ final class ProductTierPriceProcessor extends \Maho\ApiPlatform\Processor
 
         /** @var \Mage_Catalog_Service_Product_Price $service */
         $service = \Mage::getService('catalog/product_price');
-        $service->setTierPrices($product, $rows, $this->getAllowedWebsiteIds($user));
+        $service->setTierPrices($product, $rows, $this->allowedWebsiteIds($user));
 
         return $operation instanceof DeleteOperationInterface
             ? null
