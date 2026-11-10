@@ -386,6 +386,15 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Return true when $value is a real date in the format Y-m-d, such as 2026-12-24.
+     */
+    public function isValidDeliveryDate(string $value): bool
+    {
+        $date = DateTimeImmutable::createFromFormat('!' . Mage_Core_Model_Locale::DATE_FORMAT, $value);
+        return $date !== false && $date->format(Mage_Core_Model_Locale::DATE_FORMAT) === $value;
+    }
+
+    /**
      * Return the gift card amount of the invoices of $order that are not canceled.
      *
      * The query bypasses the invoice collection that the order caches.
