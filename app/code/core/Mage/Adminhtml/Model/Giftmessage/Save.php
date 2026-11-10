@@ -113,7 +113,7 @@ class Mage_Adminhtml_Model_Giftmessage_Save extends \Maho\DataObject
     /**
      * Save the gift message of the quote, or of its item $itemId, through the cart service.
      *
-     * @param array{sender?: string, recipient?: string, message?: string} $giftmessage
+     * @param array{sender?: string, recipient?: string, message?: string, ...} $giftmessage
      * @return $this
      */
     protected function _saveOneInQuote(?int $itemId, array $giftmessage)

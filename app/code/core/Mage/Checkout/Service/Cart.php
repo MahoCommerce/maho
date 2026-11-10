@@ -46,7 +46,7 @@ class Mage_Checkout_Service_Cart
     ];
 
     /**
-     * @phpstan-assert-if-true string $maskedId
+     * @phpstan-assert-if-true non-empty-string $maskedId
      */
     public function isValidMaskedId(mixed $maskedId): bool
     {
