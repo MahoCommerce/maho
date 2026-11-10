@@ -363,7 +363,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
         $this->_getSession()->clear();
         $orderId = $this->getRequest()->getParam('order_id');
         $order = Mage::getModel('sales/order')->load($orderId);
-        if (!Mage::helper('sales/reorder')->canReorder($order)) {
+        if (!Mage::getService('sales/order')->canReorder($order, Mage_Checkout_Model_Actor::Staff)) {
             return $this->_forward('noRoute');
         }
 

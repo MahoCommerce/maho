@@ -169,6 +169,20 @@ class Mage_Sales_Service_Order
     }
 
     /**
+     * Tell if the items of $order can go to a cart again: the store of the order allows reorders, the order is not on
+     * hold or in payment review, and each of its products exists. A Customer also needs one catalog line, because the
+     * storefront cart takes no custom line.
+     */
+    public function canReorder(Order $order, Actor $actor): bool
+    {
+        if (!Mage::helper('sales/reorder')->isAllowed($order->getStore())) {
+            return false;
+        }
+
+        return $actor === Actor::Staff ? $order->canReorderIgnoreSalable() : $order->canReorder();
+    }
+
+    /**
      * Return the message of the minimum order amount when the subtotal of $quote is below it, or null.
      */
     public function getMinimumAmountError(\Mage_Sales_Model_Quote $quote): ?string

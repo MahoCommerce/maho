@@ -105,7 +105,7 @@ abstract class Mage_Sales_Controller_Abstract extends Mage_Core_Controller_Front
             return;
         }
         $order = Mage::registry('current_order');
-        if (!Mage::helper('sales/reorder')->canReorder($order)) {
+        if (!Mage::getService('sales/order')->canReorder($order, Mage_Checkout_Model_Actor::Customer)) {
             $this->_redirect('*/*/view', ['order_id' => $order->getId()]);
             return;
         }

@@ -39,15 +39,11 @@ class Mage_Sales_Helper_Reorder extends Mage_Core_Helper_Data
 
     /**
      * @return bool
+     * @see Mage_Sales_Service_Order::canReorder()
      */
     public function canReorder(Mage_Sales_Model_Order $order)
     {
-        if (!$this->isAllowed($order->getStore())) {
-            return false;
-        }
-        if (Mage::getSingleton('customer/session')->isLoggedIn()) {
-            return $order->canReorder();
-        }
-        return true;
+        $actor = Mage::app()->getStore()->isAdmin() ? Mage_Checkout_Model_Actor::Staff : Mage_Checkout_Model_Actor::Customer;
+        return Mage::getService('sales/order')->canReorder($order, $actor);
     }
 }
