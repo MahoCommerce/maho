@@ -61,12 +61,14 @@ class Mage_Cron_Service_Job
     /**
      * Set each running schedule whose run is stale to ERROR, and return these schedules. A run is stale when it
      * started more than system/cron/max_running_time minutes ago, or at any time when $all is true. A schedule
-     * of a job that a process runs now, and so holds the lock of the job, is not stale.
+     * of a job that a process runs now, and so holds the lock of the job, is not stale. $message goes into the
+     * messages of each schedule, in place of the message of cron:unlock.
      *
      * @return list<Schedule>
      */
-    public function unlock(?string $jobCode = null, bool $all = false): array
+    public function unlock(?string $jobCode = null, bool $all = false, ?string $message = null): array
     {
+        $message ??= Mage::helper('cron')->__('Manually reset via cron:unlock: job never completed.');
         $threshold = null;
         if (!$all) {
             $maxRunningTime = (int) Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_MAX_RUNNING_TIME);
@@ -93,7 +95,7 @@ class Mage_Cron_Service_Job
                 continue;
             }
             $schedule->setStatus(Schedule::STATUS_ERROR)
-                ->setMessages(Mage::helper('cron')->__('Manually reset via cron:unlock: job never completed.'))
+                ->setMessages($message)
                 ->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->save();
             $unlocked[] = $schedule;

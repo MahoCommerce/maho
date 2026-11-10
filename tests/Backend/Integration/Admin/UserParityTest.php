@@ -119,9 +119,11 @@ function adminUserParityResetPassword(Mage_Admin_Model_User $user, string $secre
     }
     $messages = AdminApiParity::adminMessages();
     // The form of the page takes the errors out of the session
-    foreach ($controller->getLayout()->getMessagesBlock()->getMessageCollection()->getErrors() as $error) {
+    $layoutMessages = $controller->getLayout()->getMessagesBlock()->getMessageCollection();
+    foreach ($layoutMessages->getErrors() as $error) {
         $messages['errors'][] = $error->getText();
     }
+    $layoutMessages->clear();
     return $messages;
 }
 
@@ -131,6 +133,7 @@ beforeEach(function (): void {
 });
 
 afterEach(function (): void {
+    Mage::getSingleton('adminhtml/session')->getMessages(true);
     AdminRoleFixture::delete($this->admin);
     foreach (Mage::getResourceModel('admin/user_collection')->addFieldToFilter('username', ['like' => 'parity_%']) as $user) {
         $user->delete();

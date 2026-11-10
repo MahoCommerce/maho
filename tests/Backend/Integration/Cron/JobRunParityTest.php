@@ -19,7 +19,7 @@ uses(Tests\MahoBackendTestCase::class);
 /**
  * The Run Now action of System > Tools > Cron Jobs and cron:run <job_code> run a job through Mage_Cron_Service_Job
  * (#1348). The job holds a lock while it runs, so that two runs of one job never overlap: not from the admin, the
- * CLI or the scheduler. cron:unlock leaves the schedule of a job that holds its lock.
+ * CLI or the scheduler. cron:unlock and the reaper leave the schedule of a job that holds its lock.
  */
 
 const CRON_PARITY_JOB = 'cron_parity_job';
@@ -250,4 +250,31 @@ it('lets cron:unlock reset a stale schedule, but not the schedule of a job that 
     $afterRun = cronParityCli(new CronUnlock(), ['job_code' => CRON_PARITY_JOB, '--all' => true]);
     expect($afterRun['code'])->toBe(Command::SUCCESS)
         ->and(Mage::getModel('cron/schedule')->load($stale->getId())->getStatus())->toBe(Mage_Cron_Model_Schedule::STATUS_ERROR);
+});
+
+it('lets the reaper reset a stuck schedule, but not the schedule of a job that runs', function (): void {
+    $startedAt = Mage::app()->getLocale()->formatDateForDb(time() - 3 * 3600);
+    /** @var Mage_Cron_Model_Schedule $stuck */
+    $stuck = Mage::getModel('cron/schedule');
+    $stuck->setJobCode(CRON_PARITY_JOB)
+        ->setStatus(Mage_Cron_Model_Schedule::STATUS_RUNNING)
+        ->setCreatedAt($startedAt)
+        ->setScheduledAt($startedAt)
+        ->setExecutedAt($startedAt)
+        ->save();
+    Mage::app()->getStore()->setConfig(Mage_Cron_Model_Observer::XML_PATH_MAX_RUNNING_TIME, '60');
+
+    $lock = cronParityHoldLock(CRON_PARITY_JOB);
+    try {
+        new Mage_Cron_Model_Observer()->reapStuckJobs();
+    } finally {
+        flock($lock, LOCK_UN);
+        fclose($lock);
+    }
+    expect(Mage::getModel('cron/schedule')->load($stuck->getId())->getStatus())->toBe(Mage_Cron_Model_Schedule::STATUS_RUNNING);
+
+    new Mage_Cron_Model_Observer()->reapStuckJobs();
+    $reaped = Mage::getModel('cron/schedule')->load($stuck->getId());
+    expect($reaped->getStatus())->toBe(Mage_Cron_Model_Schedule::STATUS_ERROR)
+        ->and($reaped->getMessages())->toContain('did not complete');
 });

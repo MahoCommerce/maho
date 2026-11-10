@@ -333,24 +333,12 @@ class Mage_Cron_Model_Observer
             return $this;
         }
 
-        $threshold = time() - $maxRunningTime * 60;
-
-        /** @var Mage_Cron_Model_Resource_Schedule_Collection $stuck */
-        $stuck = Mage::getModel('cron/schedule')->getCollection()
-            ->addFieldToFilter('status', Mage_Cron_Model_Schedule::STATUS_RUNNING)
-            ->load();
-
-        /** @var Mage_Cron_Model_Schedule $schedule */
-        foreach ($stuck->getIterator() as $schedule) {
-            $referenceTime = (string) ($schedule->getExecutedAt() ?: $schedule->getScheduledAt() ?: $schedule->getCreatedAt());
-            if ($referenceTime === '' || strtotime($referenceTime) >= $threshold) {
-                continue;
-            }
-            $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
-                ->setMessages(Mage::helper('cron')->__('Job did not complete: the process died or exceeded the maximum running time (%s minutes).', $maxRunningTime))
-                ->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'))
-                ->save();
-        }
+        /** @var Mage_Cron_Service_Job $jobService */
+        $jobService = Mage::getService('cron/job');
+        $jobService->unlock(message: Mage::helper('cron')->__(
+            'Job did not complete: the process died or exceeded the maximum running time (%s minutes).',
+            $maxRunningTime,
+        ));
 
         return $this;
     }
