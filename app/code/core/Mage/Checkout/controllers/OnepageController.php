@@ -167,10 +167,9 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
             $this->_redirect('checkout/cart');
             return;
         }
-        if (!$quote->validateMinimumAmount()) {
-            $error = Mage::getStoreConfig('sales/minimum_order/error_message') ?: Mage::helper('checkout')->__('Subtotal must exceed minimum order amount');
-
-            Mage::getSingleton('checkout/session')->addError($error);
+        $minimumAmountError = Mage::getService('sales/order')->getMinimumAmountError($quote);
+        if ($minimumAmountError !== null) {
+            Mage::getSingleton('checkout/session')->addError($minimumAmountError);
             $this->_redirect('checkout/cart');
             return;
         }
@@ -625,25 +624,12 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
 
         try {
             try {
-                $requiredAgreements = Mage::helper('checkout')->getRequiredAgreementIds();
-                if ($requiredAgreements) {
-                    $postedAgreements = array_keys($this->getRequest()->getPost('agreement', []));
-                    $diff = array_diff($requiredAgreements, $postedAgreements);
-                    if ($diff) {
-                        $result['success'] = false;
-                        $result['error'] = true;
-                        $result['error_messages'] = $this->__('Please agree to all the terms and conditions before placing the order.');
-                        $this->_prepareDataJSON($result);
-                        return;
-                    }
-                }
-
                 $data = $this->getRequest()->getPost('payment', []);
                 if ($data) {
                     Mage::getService('checkout/cart')->selectPaymentMethod($this->getOnepage()->getQuote(), $data);
                 }
 
-                $this->getOnepage()->saveOrder();
+                $this->getOnepage()->saveOrder(array_keys((array) $this->getRequest()->getPost('agreement', [])));
 
                 $redirectUrl = $this->getOnepage()->getCheckout()->getRedirectUrl();
                 $result['success'] = true;
@@ -659,8 +645,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
                     'html' => $this->_getPaymentMethodsHtml(),
                 ];
             } catch (Mage_Core_Exception $e) {
-                Mage::logException($e);
-                Mage::helper('checkout')->sendPaymentFailedEmail($this->getOnepage()->getQuote(), $e->getMessage());
                 $result['success'] = false;
                 $result['error'] = true;
                 $result['error_messages'] = $e->getMessage();
@@ -683,7 +667,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
                 }
             } catch (Exception $e) {
                 Mage::logException($e);
-                Mage::helper('checkout')->sendPaymentFailedEmail($this->getOnepage()->getQuote(), $e->getMessage());
                 $result['success']  = false;
                 $result['error']    = true;
                 $result['error_messages'] = $this->__('There was an error processing your order. Please contact us or try again later.');

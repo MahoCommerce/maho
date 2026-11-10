@@ -48,36 +48,24 @@ class OrderMutationHandler
 
         $quote = $this->loadAdminQuote((int) $cartId);
 
-        $paymentMethod = $variables['paymentMethod'] ?? null;
-        $shippingMethod = $variables['shippingMethod'] ?? null;
-
-        if ($paymentMethod) {
-            $quote->getPayment()->setMethod($paymentMethod);
+        $cartService = \Mage::getService('checkout/cart');
+        $shippingMethod = (string) ($variables['shippingMethod'] ?? '');
+        if ($shippingMethod !== '' && !$quote->isVirtual()) {
+            $cartService->selectShippingMethod($quote, $shippingMethod);
         }
-        if ($shippingMethod && !$quote->isVirtual()) {
-            $shippingAddress = $quote->getShippingAddress();
-            $shippingAddress->setShippingMethod($shippingMethod);
-            $shippingAddress->setCollectShippingRates();
-        }
-
-        if ($paymentMethod || $shippingMethod) {
-            $quote->collectTotals()->save();
-        }
-
-        // Reject a method the client made up: after rates are collected the
-        // chosen code must resolve to a real rate, otherwise a caller could
-        // claim e.g. free shipping that the store does not actually offer.
-        if ($shippingMethod && !$quote->isVirtual()
-            && !$quote->getShippingAddress()->getShippingRateByCode($shippingMethod)) {
-            throw ValidationException::invalidValue('shippingMethod', 'is not available for this address');
+        $paymentMethod = (string) ($variables['paymentMethod'] ?? '');
+        if ($paymentMethod !== '') {
+            $cartService->selectPaymentMethod($quote, ['method' => $paymentMethod]);
         }
 
         $result = $this->orderService->place(
             $quote,
             $variables['guestEmail'] ?? null,
             $variables['orderNote'] ?? null,
-            $variables['cashTendered'] ?? null,
+            isset($variables['cashTendered']) ? (float) $variables['cashTendered'] : null,
             $context['admin_user_id'] ?? null,
+            \Mage_Checkout_Model_Actor::Staff,
+            sendConfirmation: isset($variables['sendConfirmation']) ? (bool) $variables['sendConfirmation'] : null,
         );
 
         $order = $result['order'];
@@ -93,7 +81,7 @@ class OrderMutationHandler
             ],
             'invoice' => $invoiceAndShipment['invoice'],
             'shipment' => $invoiceAndShipment['shipment'],
-            'changeAmount' => $result['changeAmount'] ?? null,
+            'changeAmount' => $result['changeAmount'],
         ]];
     }
 

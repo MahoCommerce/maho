@@ -139,7 +139,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             if ($vaultPaypalTokenId) {
                 $quote->getPayment()->setMethod($methodCode);
                 $quote->collectTotals();
-                Mage::getModel('sales/service_quote', $quote)->validate();
+                Mage::getService('sales/order')->validateQuote($quote, Mage_Checkout_Model_Actor::Customer);
             }
 
             /** @var Maho_Paypal_Model_Api_Client $client */

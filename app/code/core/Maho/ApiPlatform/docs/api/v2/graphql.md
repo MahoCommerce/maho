@@ -65,6 +65,8 @@ Item queries take a node IRI (`id: "/api/rest/v2/products/123"`); collection que
 
 Gift messages have no separate resource - they are the `setGiftMessageOnCart` / `removeGiftMessageFromCart` mutations above.
 
+`setShippingAddressOnCart` and `setBillingAddressOnCart` take `prefix`, `middleName`, `suffix` and `vatId` next to the other fields of the address.
+
 ### Customers
 
 | Resource | Queries | Mutations |
@@ -81,6 +83,8 @@ Gift messages have no separate resource - they are the `setGiftMessageOnCart` / 
 | Shipment | `shipment(id:)`, `shipments`, `orderShipments(orderId:)` | `createShipment`, `addTrackShipment`, `removeTrackShipment` |
 | Credit memo | `creditMemo(id:)`, `creditMemos`, `orderCreditMemos(orderId:)` | `createCreditMemo` |
 | Revocation request | `revocationRequest(id:)`, `revocationRequests` *(admin)*, `myRevocationRequests` | `submitRevocationRequest` |
+
+`placeOrder` applies the rules of the place-order endpoints (see [Orders](endpoints.md#orders)). It takes `agreementIds`, the terms and conditions that the customer accepted, and `sendConfirmation` for an admin or an API token with the grant to create orders. The `placeOrder` mutation of the admin GraphQL endpoint takes `sendConfirmation` too.
 
 ### Inventory & promotions
 

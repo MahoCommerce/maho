@@ -158,11 +158,6 @@ class Mage_Checkout_Model_Cart_Api extends Mage_Checkout_Model_Api_Resource
                     Mage::logException($e);
                 }
             }
-
-            Mage::dispatchEvent(
-                'checkout_submit_all_after',
-                ['order' => $order, 'quote' => $quote],
-            );
         } catch (Mage_Core_Exception $e) {
             $this->_fault('create_order_fault', $e->getMessage());
         }

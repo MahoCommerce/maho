@@ -11,6 +11,7 @@ declare(strict_types=1);
 use Maho\ApiPlatform\Trait\DateRangeFilterTrait;
 use Maho\ApiPlatform\Trait\FilterValueTrait;
 use Maho\Security\RateLimitScope;
+use Mage_Checkout_Model_Actor as Actor;
 use Mage_Sales_Model_Order as Order;
 use Mage_Sales_Model_Order_Creditmemo as Creditmemo;
 use Mage_Sales_Model_Order_Invoice as Invoice;
@@ -31,6 +32,9 @@ class Mage_Sales_Service_Order
 
     public const CAPTURE_CASES = [Invoice::CAPTURE_ONLINE, Invoice::CAPTURE_OFFLINE, Invoice::NOT_CAPTURE];
 
+    /** The quote field of the cash that the customer of a POS order gives, which place() sets. */
+    private const CASH_TENDERED_KEY = 'cash_tendered';
+
     /**
      * Refuse the order of $quote when it has no customer and its store does not allow guest checkout. The admin
      * scope places a guest order in any store, as the admin order form does.
@@ -47,14 +51,12 @@ class Mage_Sales_Service_Order
     }
 
     /**
-     * Place order from quote
+     * Place the order of $quote through submit(), for the API. $guestEmail is the email of a guest order, $orderNote
+     * the note of the customer, and $cashTendered and $employeeId the fields of a POS order.
      *
-     * @param \Mage_Sales_Model_Quote $quote Quote to convert to order
-     * @param string|null $guestEmail Guest email (for guest checkout)
-     * @param string|null $orderNote Order notes
-     * @param float|null $cashTendered Cash tendered (for POS)
-     * @param int|null $employeeId Employee ID (for POS)
-     * @return array [order, changeAmount]
+     * @param list<int|string>|null $agreementIds see submit()
+     * @return array{order: Order, accessToken: ?string, changeAmount: ?float}
+     * @throws Mage_Core_Exception
      */
     public function place(
         \Mage_Sales_Model_Quote $quote,
@@ -62,163 +64,387 @@ class Mage_Sales_Service_Order
         ?string $orderNote = null,
         ?float $cashTendered = null,
         ?int $employeeId = null,
+        Actor $actor = Actor::Customer,
+        ?array $agreementIds = null,
+        ?bool $sendConfirmation = null,
     ): array {
-        // Validate quote
-        if (!$quote->getId() || !$quote->getIsActive()) {
-            throw new \Mage_Core_Exception('Cart is not active or does not exist');
+        if ($guestEmail && !$quote->getCustomerId()) {
+            $quote->setCustomerEmail($guestEmail);
+        }
+        if ($orderNote) {
+            $quote->setCustomerNote($orderNote)->setCustomerNoteNotify(false);
+        }
+        if ($employeeId) {
+            $quote->setData('employee_id', $employeeId);
+        }
+        $quote->setData(self::CASH_TENDERED_KEY, $cashTendered);
+
+        $order = $this->submit($quote, $actor, $agreementIds, sendConfirmation: $sendConfirmation);
+        $changeAmount = $order->getPayment()->getAdditionalInformation('change_amount');
+
+        return [
+            'order' => $order,
+            'accessToken' => $order->getData('guest_access_token') ?: null,
+            'changeAmount' => $changeAmount === null ? null : (float) $changeAmount,
+        ];
+    }
+
+    /**
+     * Check that $quote can become an order. A Customer must reach the minimum order amount, and must accept each
+     * required agreement in $agreementIds.
+     *
+     * @param list<int|string>|null $agreementIds null when the flow of the caller has no agreements step
+     * @throws Mage_Core_Exception when the cart is not active or is empty
+     * @throws Mage_Core_Exception_Input one error for each other rule that $quote breaks
+     */
+    public function validateQuote(\Mage_Sales_Model_Quote $quote, Actor $actor, ?array $agreementIds = null): void
+    {
+        $helper = Mage::helper('sales');
+        // The admin order create keeps its cart inactive, so that the storefront does not show it
+        if ($quote->getIsActive() === false && !$quote->getIsSuperMode()) {
+            throw new Mage_Core_Exception($helper->__('Cart is not active or does not exist'));
+        }
+        if (!$quote->getAllVisibleItems()) {
+            throw new Mage_Core_Exception($helper->__('Cart is empty'));
         }
 
-        // Validate quote has items
-        if ($quote->getItemsCount() == 0) {
-            throw new \Mage_Core_Exception('Cart is empty');
+        $errors = new Mage_Core_Exception_Input();
+        foreach ($quote->getAllItems() as $item) {
+            $messages = $item->getHasError() ? $item->getMessage(false) : [];
+            foreach (is_array($messages) ? $messages : [] as $message) {
+                $errors->addError('items', (string) $message);
+            }
         }
-
-        // A cart assigned to a customer before its guest flag was cleared still carries it
-        $quote->setCustomerIsGuest(!$quote->getCustomerId());
-        // The cart keeps the email the account had when the customer was set on it
-        $accountEmail = $quote->getCustomerId() ? $quote->getCustomer()->getEmail() : null;
-        if ($accountEmail) {
-            $quote->setCustomerEmail($accountEmail);
-        }
-
-        // Validate addresses
-        if (!$quote->isVirtual()) {
-            $shippingAddress = $quote->getShippingAddress();
-            if (!$shippingAddress->getShippingMethod()) {
-                throw new \Mage_Core_Exception('Shipping method is not set');
+        if ($quote->getHasError() && $errors->getErrors() === []) {
+            foreach ($quote->getErrors() as $message) {
+                $errors->addError('items', $message->getText());
             }
         }
 
-        $billingAddress = $quote->getBillingAddress();
-        if (!$billingAddress->getFirstname()) {
-            throw new \Mage_Core_Exception('Billing address is not set');
+        if ($actor === Actor::Customer) {
+            $minimumAmountError = $this->getMinimumAmountError($quote);
+            if ($minimumAmountError !== null) {
+                $errors->addError('subtotal', $minimumAmountError);
+            }
+            if ($agreementIds !== null && array_diff(Mage::helper('checkout')->getRequiredAgreementIds(), $agreementIds) !== []) {
+                $errors->addError('agreement_ids', Mage::helper('checkout')->__('Please agree to all the terms and conditions before placing the order.'));
+            }
         }
 
-        // Validate payment method
-        $payment = $quote->getPayment();
-        if (!$payment->getMethod()) {
-            throw new \Mage_Core_Exception('Payment method is not set');
+        $cart = $this->getCartService();
+        $addresses = ['billing_address' => $quote->getBillingAddress()];
+        if (!$quote->isVirtual()) {
+            $addresses['shipping_address'] = $quote->getShippingAddress();
+        }
+        foreach ($addresses as $field => $address) {
+            try {
+                $cart->validateAddress($address);
+            } catch (Mage_Core_Exception_Input $e) {
+                foreach ($e->getErrors() as $error) {
+                    $errors->addError($field, $field === 'billing_address'
+                        ? $helper->__('Please check billing address information. %s', $error['message'])
+                        : $helper->__('Please check shipping address information. %s', $error['message']));
+                }
+            }
         }
 
-        // Set guest email if provided
-        if ($guestEmail && $quote->getCustomerIsGuest()) {
-            $quote->setCustomerEmail($guestEmail);
+        if (!$quote->isVirtual()) {
+            $shippingMethod = (string) $quote->getShippingAddress()->getShippingMethod();
+            try {
+                if ($shippingMethod === '') {
+                    Mage::throwException($helper->__('Please specify a shipping method.'));
+                }
+                $cart->assertShippingMethodAvailable($quote, $shippingMethod);
+            } catch (Mage_Core_Exception $e) {
+                $errors->addError('shipping_method', $e->getMessage());
+            }
         }
 
-        // Prefer the account name, so an API order matches the storefront and the admin.
+        // Mage_Checkout_Service_Cart::selectPaymentMethod() checks the method. A PayPal order is paid before it is placed
+        if (!$quote->getPayment()->getMethod()) {
+            $errors->addError('payment_method', $helper->__('Please select a valid payment method.'));
+        }
+
+        $errors->throwIfErrors();
+    }
+
+    /**
+     * Return the message of the minimum order amount when the subtotal of $quote is below it, or null.
+     */
+    public function getMinimumAmountError(\Mage_Sales_Model_Quote $quote): ?string
+    {
+        if ($quote->validateMinimumAmount()) {
+            return null;
+        }
+
+        return Mage::getStoreConfig('sales/minimum_order/error_message', $quote->getStoreId())
+            ?: Mage::helper('checkout')->__('Subtotal must exceed minimum order amount');
+    }
+
+    /**
+     * Place the order of $quote, in the store of $quote, or in the admin scope when the caller is in it. The checks
+     * of validateQuote() run first. Then, under a lock on the cart, the gift cards and the totals are checked again,
+     * the order is saved, and the cart is closed. A guest order gets an access token. The new order email follows
+     * $sendConfirmation, and checkout_submit_all_after fires once.
+     *
+     * @param list<int|string>|null $agreementIds the agreements that a Customer accepted, or null when the flow of
+     *                                            the caller has no agreements step
+     * @param array<string, mixed> $orderData the fields that the order gets before its save, such as the relation
+     *                                        of an order edit
+     * @param bool|null $sendConfirmation null: Staff sends the email, and a Customer sends it when the payment
+     *                                    method does not redirect to a third party
+     * @throws Mage_Core_Exception_Conflict another placement of $quote is in progress, or $quote has an order
+     * @throws Mage_Core_Exception_Input see validateQuote()
+     * @throws Mage_Core_Exception
+     */
+    public function submit(
+        \Mage_Sales_Model_Quote $quote,
+        Actor $actor,
+        ?array $agreementIds = null,
+        array $orderData = [],
+        ?bool $sendConfirmation = null,
+        ?Mage_Sales_Model_Convert_Quote $convertor = null,
+    ): Order {
+        $submit = function () use ($quote, $actor, $agreementIds, $orderData, $sendConfirmation, $convertor): Order {
+            $this->prepareCustomerData($quote);
+            $this->validateQuote($quote, $actor, $agreementIds);
+
+            return $this->withQuoteLock($quote, function () use ($quote, $actor, $orderData, $sendConfirmation, $convertor): Order {
+                if (!$quote->getCustomerId() && !$quote->getCustomerIsNew()) {
+                    $orderData['guest_access_token'] = $this->generateAccessToken();
+                }
+                $order = $this->convert($quote, $actor, $orderData, $convertor ?? Mage::getModel('sales/convert_quote'));
+                $this->recordCashTendered($quote, $order);
+                $quote->save();
+
+                $redirects = (bool) $quote->getPayment()->getOrderPlaceRedirectUrl();
+                if ($sendConfirmation ?? ($actor === Actor::Staff || (!$redirects && $order->getCanSendNewEmailFlag()))) {
+                    $this->sendNewOrderEmail($order);
+                }
+                Mage::dispatchEvent('checkout_submit_all_after', ['order' => $order, 'quote' => $quote]);
+
+                return $order;
+            });
+        };
+
+        // The admin scope places a backend order, so that a payment method applies MOTO handling (issue #1337)
+        return Mage::app()->getStore()->isAdmin() ? $submit() : $this->getCartService()->inQuoteStoreScope($quote, $submit);
+    }
+
+    /**
+     * Give a customer order the email of the account and no guest flag, and give an order without a customer name
+     * the name of the account or of the billing address.
+     */
+    private function prepareCustomerData(\Mage_Sales_Model_Quote $quote): void
+    {
+        if ($quote->getCustomerId()) {
+            // A cart assigned to a customer before its guest flag was cleared still carries it
+            $quote->setCustomerIsGuest(false);
+            // The cart keeps the email the account had when the customer was set on it
+            $accountEmail = $quote->getCustomer()->getEmail();
+            if ($accountEmail) {
+                $quote->setCustomerEmail($accountEmail);
+            }
+        }
+
         if (!$quote->getCustomerFirstname()) {
-            $nameSource = $quote->getCustomer()->getFirstname() ? $quote->getCustomer() : $billingAddress;
-            foreach (\Mage::getConfig()->getFieldset('customer_account') as $code => $node) {
+            $nameSource = $quote->getCustomer()->getFirstname() ? $quote->getCustomer() : $quote->getBillingAddress();
+            foreach (Mage::getConfig()->getFieldset('customer_account') as $code => $node) {
                 if ($node->is('name') && $node->to_quote) {
                     $targetCode = (string) $node->to_quote;
                     $quote->setDataUsingMethod($targetCode === '*' ? $code : $targetCode, $nameSource->getDataUsingMethod($code));
                 }
             }
         }
+    }
 
-        // Set employee ID for POS orders
-        if ($employeeId) {
-            $quote->setData('employee_id', $employeeId);
+    /**
+     * Run $operation while this request holds the placement lock of $quote, and refuse a cart that has an order. The
+     * lock releases on disconnect, so a crashed worker does not block the cart.
+     *
+     * @param callable(): Order $operation
+     * @throws Mage_Core_Exception_Conflict
+     */
+    private function withQuoteLock(\Mage_Sales_Model_Quote $quote, callable $operation): Order
+    {
+        if (!$quote->getId()) {
+            return $operation();
         }
 
-        // Serialize concurrent placement attempts on the same quote. Without
-        // this, two simultaneous POSTs both pass the is_active check above and
-        // submit the same cart twice, duplicate orders, double inventory
-        // decrement. The lock gives us a per-quote critical section that
-        // releases on disconnect, so a crashed worker can't deadlock the cart.
-        $resource = \Mage::getSingleton('core/resource');
+        $resource = Mage::getSingleton('core/resource');
         $write = $resource->getConnection('core_write');
         $lockName = 'maho_quote_place_order:' . (int) $quote->getId();
         if (!$write->getLock($lockName, 5)) {
-            throw new \Mage_Core_Exception_Conflict('Order placement is already in progress for this cart');
+            throw new Mage_Core_Exception_Conflict(Mage::helper('sales')->__('Order placement is already in progress for this cart.'));
         }
 
         try {
-            // Re-read is_active under the lock, another request may have
-            // converted this quote while we were waiting.
-            $stillActive = (int) $write->fetchOne(
-                $write->select()
-                    ->from($resource->getTableName('sales/quote'), ['is_active'])
-                    ->where('entity_id = ?', (int) $quote->getId()),
-            );
-            if ($stillActive !== 1) {
-                throw new \Mage_Core_Exception_Conflict('Cart is no longer active');
+            $placed = $write->fetchOne($write->select()
+                ->from($resource->getTableName('sales/order'), ['entity_id'])
+                ->where('quote_id = ?', (int) $quote->getId())
+                ->limit(1));
+            if ($placed) {
+                throw new Mage_Core_Exception_Conflict(Mage::helper('sales')->__('An order was already placed from this cart.'));
             }
 
-            // Re-validate gift-card balances against the live DB under the lock,
-            // immediately before consuming them, a card spent elsewhere since
-            // apply time must not discount this order. Collect totals once more
-            // so submitAll() converts the freshly revalidated amounts.
-            \Mage::getService('checkout/cart')->revalidateGiftcards($quote);
-            // Restated together: submitAll() copies the currency off the quote,
-            // and the totals were just converted at the live one.
-            $quote->collectTotals()->refreshCurrencyStamp();
-
-            // Validate cash tendered covers the total BEFORE creating the order.
-            // Checking after submitAll() would place the order and decrement
-            // inventory, then throw, leaving an orphaned order that a retry can't
-            // recover (the quote is already inactive).
-            if ($cashTendered !== null
-                && $payment->getMethod() === 'cashondelivery'
-                && $cashTendered < (float) $quote->getGrandTotal()
-            ) {
-                throw new \Mage_Core_Exception('Insufficient cash tendered');
-            }
-
-            // Convert quote to order
-            $service = \Mage::getModel('sales/service_quote', $quote);
-            $service->submitAll();
-
-            $order = $service->getOrder();
-
-            if (!$order || !$order->getId()) {
-                throw new \RuntimeException('Failed to create order');
-            }
-
-            // Generate access token for guest orders
-            $accessToken = null;
-            if (!$order->getCustomerId()) {
-                $accessToken = $this->generateAccessToken();
-                $order->setData('guest_access_token', $accessToken);
-                $order->save();
-            }
-
-            // Persist the note both as the readable customer_note snapshot and
-            // as a status-history entry, so the placement orderNote round-trips
-            // through the order read surface.
-            if ($orderNote) {
-                $order->setCustomerNote($orderNote);
-                $order->save();
-                $order->addStatusHistoryComment($orderNote, false)
-                    ->setIsCustomerNotified(false)
-                    ->save();
-            }
-
-            // Calculate change and persist cash details on the ORDER payment.
-            // $payment above is the quote's payment, which is discarded once the
-            // quote is deactivated; receipts read $order->getPayment(). Sufficiency
-            // was already validated before submitAll(), so change is never negative.
-            $changeAmount = null;
-            if ($cashTendered !== null && $payment->getMethod() === 'cashondelivery') {
-                $changeAmount = $cashTendered - (float) $order->getGrandTotal();
-                $orderPayment = $order->getPayment();
-                $orderPayment->setAdditionalInformation('cash_tendered', $cashTendered);
-                $orderPayment->setAdditionalInformation('change_amount', $changeAmount);
-                $orderPayment->save();
-            }
-
-            // Deactivate quote
-            $quote->setIsActive(false);
-            $quote->save();
-
-            return [
-                'order' => $order,
-                'accessToken' => $accessToken,
-                'changeAmount' => $changeAmount,
-            ];
+            return $operation();
         } finally {
             $write->releaseLock($lockName);
         }
+    }
+
+    /**
+     * Check the gift cards and the cash of a POS order again, collect the totals again, and save the order of $quote.
+     * When the save of a Customer order fails, the store gets the payment failed email.
+     *
+     * @param array<string, mixed> $orderData
+     * @throws Mage_Core_Exception
+     */
+    private function convert(\Mage_Sales_Model_Quote $quote, Actor $actor, array $orderData, Mage_Sales_Model_Convert_Quote $convertor): Order
+    {
+        try {
+            // A card spent elsewhere since it was applied must not discount this order
+            $this->getCartService()->revalidateGiftcards($quote);
+            // The conversion copies the currency of the quote, and the totals were just converted at the live rate
+            $quote->collectTotals()->refreshCurrencyStamp();
+
+            // A saved order has taken the stock, so the cash is checked before the save
+            $cashTendered = $quote->getData(self::CASH_TENDERED_KEY);
+            if ($cashTendered !== null
+                && $quote->getPayment()->getMethod() === 'cashondelivery'
+                && (float) $cashTendered < (float) $quote->getGrandTotal()
+            ) {
+                throw new Mage_Core_Exception(Mage::helper('sales')->__('Insufficient cash tendered'));
+            }
+
+            return $this->saveOrder($quote, $orderData, $convertor);
+        } catch (Throwable $e) {
+            if ($actor === Actor::Customer && !$e instanceof Mage_Payment_Model_Info_Exception) {
+                $this->sendPaymentFailedEmail($quote, $e->getMessage());
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * Create the order of $quote and save it, with a new customer of $quote, in one transaction.
+     *
+     * @param array<string, mixed> $orderData
+     */
+    private function saveOrder(\Mage_Sales_Model_Quote $quote, array $orderData, Mage_Sales_Model_Convert_Quote $convertor): Order
+    {
+        $isVirtual = $quote->isVirtual();
+
+        $transaction = Mage::getModel('core/resource_transaction');
+        $newCustomer = null;
+        if ($quote->getCustomerId() || $quote->getCustomerIsNew()) {
+            $customer = $quote->getCustomer();
+            $transaction->addObject($customer);
+            // A customer that registers in the checkout gets its ID from the save below
+            $newCustomer = $customer->getId() ? null : $customer;
+        }
+        $transaction->addObject($quote);
+
+        $quote->reserveOrderId();
+        // A transport can change an address after the last save of the cart
+        foreach ($quote->getAllAddresses() as $address) {
+            $address->sanitizeText();
+        }
+        $order = $convertor->addressToOrder($isVirtual ? $quote->getBillingAddress() : $quote->getShippingAddress());
+        $order->setBillingAddress($convertor->addressToOrderAddress($quote->getBillingAddress()));
+        if ($quote->getBillingAddress()->getCustomerAddress()) {
+            $order->getBillingAddress()->setCustomerAddress($quote->getBillingAddress()->getCustomerAddress());
+        }
+        if (!$isVirtual) {
+            $order->setShippingAddress($convertor->addressToOrderAddress($quote->getShippingAddress()));
+            if ($quote->getShippingAddress()->getCustomerAddress()) {
+                $order->getShippingAddress()->setCustomerAddress($quote->getShippingAddress()->getCustomerAddress());
+            }
+        }
+        $order->setPayment($convertor->paymentToOrderPayment($quote->getPayment()));
+
+        foreach ($orderData as $key => $value) {
+            $order->setData($key, $value);
+        }
+
+        foreach ($quote->getAllItems() as $item) {
+            $orderItem = $convertor->itemToOrderItem($item);
+            if ($item->getParentItem()) {
+                $orderItem->setParentItem($order->getItemByQuoteItemId($item->getParentItem()->getId()));
+            }
+            $order->addItem($orderItem);
+        }
+
+        $order->setQuote($quote);
+
+        $transaction->addObject($order);
+        $transaction->addCommitCallback($order->place(...));
+        $transaction->addCommitCallback($order->save(...));
+
+        Mage::unregister('current_order');
+        Mage::register('current_order', $order);
+
+        // An observer can give the new order its status
+        Mage::dispatchEvent('checkout_type_onepage_save_order', ['order' => $order, 'quote' => $quote]);
+        Mage::dispatchEvent('sales_model_service_quote_submit_before', ['order' => $order, 'quote' => $quote]);
+        try {
+            $transaction->save();
+        } catch (Exception $e) {
+            // The rollback removed the new customer, so it must not keep the ID of the failed save
+            $newCustomer?->setId(null);
+
+            // The order is not saved, so it and its items keep no ID
+            $order->setId(null);
+            /** @var Mage_Sales_Model_Order_Item $item */
+            foreach ($order->getItemsCollection() as $item) {
+                $item->setOrderId(null);
+                $item->setItemId(null);
+            }
+
+            Mage::dispatchEvent('sales_model_service_quote_submit_failure', ['order' => $order, 'quote' => $quote]);
+            throw $e;
+        }
+        $quote->setIsActive(false);
+        Mage::dispatchEvent('sales_model_service_quote_submit_success', ['order' => $order, 'quote' => $quote]);
+        Mage::dispatchEvent('sales_model_service_quote_submit_after', ['order' => $order, 'quote' => $quote]);
+
+        return $order;
+    }
+
+    /**
+     * Keep the cash that the customer of a POS order gave, and the change, on the payment of $order.
+     */
+    private function recordCashTendered(\Mage_Sales_Model_Quote $quote, Order $order): void
+    {
+        $cashTendered = $quote->getData(self::CASH_TENDERED_KEY);
+        if ($cashTendered === null || $quote->getPayment()->getMethod() !== 'cashondelivery') {
+            return;
+        }
+        $orderPayment = $order->getPayment();
+        $orderPayment->setAdditionalInformation('cash_tendered', (float) $cashTendered);
+        $orderPayment->setAdditionalInformation('change_amount', (float) $cashTendered - (float) $order->getGrandTotal());
+        $orderPayment->save();
+    }
+
+    /**
+     * Queue the new order email of $order. A failure is logged, because the order is saved.
+     */
+    protected function sendNewOrderEmail(Order $order): void
+    {
+        $this->sendSafely(fn() => $order->queueNewOrderEmail());
+    }
+
+    /**
+     * Send the payment failed email of $quote to the store. A failure is logged.
+     */
+    protected function sendPaymentFailedEmail(\Mage_Sales_Model_Quote $quote, string $message): void
+    {
+        $this->sendSafely(fn() => Mage::helper('checkout')->sendPaymentFailedEmail($quote, $message));
+    }
+
+    private function getCartService(): Mage_Checkout_Service_Cart
+    {
+        return Mage::getService('checkout/cart');
     }
 
     /**

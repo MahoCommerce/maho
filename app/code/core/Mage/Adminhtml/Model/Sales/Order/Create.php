@@ -1144,8 +1144,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
     }
 
     /**
-     * Set and validate Quote address
-     * All errors added to _errors
+     * Put the fields of the address form of $data into $address.
      *
      * @return $this
      */
@@ -1167,21 +1166,9 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         }
         $request        = $addressForm->prepareRequest($requestData);
         $addressData    = $addressForm->extractData($request, $requestScope);
+        // Mage_Sales_Service_Order::validateQuote() checks the address when the order is placed
         if ($this->getIsValidate()) {
-            $errors = $addressForm->validateData($addressData);
-            if ($errors !== true) {
-                if ($address->getAddressType() == Mage_Sales_Model_Quote_Address::TYPE_SHIPPING) {
-                    $typeName = Mage::helper('adminhtml')->__('Shipping Address: ');
-                } else {
-                    $typeName = Mage::helper('adminhtml')->__('Billing Address: ');
-                }
-                foreach ($errors as $error) {
-                    $this->_errors[] = $typeName . $error;
-                }
-                $addressForm->restoreData($addressData);
-            } else {
-                $addressForm->compactData($addressData);
-            }
+            $addressForm->compactData($addressData);
         } else {
             $addressForm->restoreData($addressData);
         }
@@ -1218,15 +1205,10 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
     public function setShippingAsBilling($flag)
     {
         if ($flag) {
-            $tmpAddress = clone $this->getBillingAddress();
-            $tmpAddress->unsAddressId()
-                ->unsAddressType();
-            $data = $tmpAddress->getData();
-            $data['save_in_address_book'] = 0; // Do not duplicate address (billing address will do saving too)
-            unset($data['shipping_method']); // Do not reset shipping method to be able to recollect totals
-            $this->getShippingAddress()->addData($data);
+            Mage::getService('checkout/cart')->useBillingForShipping($this->getQuote());
+        } else {
+            $this->getShippingAddress()->setSameAsBilling(false);
         }
-        $this->getShippingAddress()->setSameAsBilling((bool) $flag);
         $this->setRecollect(true);
         return $this;
     }
@@ -1597,6 +1579,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
      * Create new order
      *
      * @return Mage_Sales_Model_Order
+     * @throws Mage_Core_Exception
      */
     public function createOrder()
     {
@@ -1605,7 +1588,9 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         $quote = $this->getQuote();
         $this->_prepareQuoteItems();
 
-        $service = Mage::getModel('sales/service_quote', $quote);
+        /** @var Mage_Sales_Service_Order $orderService */
+        $orderService = Mage::getService('sales/order');
+        $orderData = [];
         /** @var Mage_Sales_Model_Order $oldOrder */
         $oldOrder = $this->getSession()->getOrder();
         if ($oldOrder->getId()) {
@@ -1621,8 +1606,9 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                 'increment_id'              => $originalId . '-' . ($oldOrder->getEditIncrement() + 1),
             ];
             $quote->setReservedOrderId($orderData['increment_id']);
-            $service->setOrderData($orderData);
 
+            // The old order stays when the new order cannot be placed
+            $orderService->validateQuote($quote, Mage_Checkout_Model_Actor::Staff);
             $oldOrder->cancel();
 
             if (!$oldOrder->isCanceled()) {
@@ -1630,8 +1616,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             }
         }
 
-        /** @var Mage_Sales_Model_Order $order */
-        $order = $service->submitOrder();
+        $order = $orderService->submit($quote, Mage_Checkout_Model_Actor::Staff, null, $orderData, (bool) $this->getSendConfirmation());
         $customer = $quote->getCustomer();
         if ((!$customer->getId() || !$customer->isInStore($this->getSession()->getStore()))
             && !$quote->getCustomerIsGuest()
@@ -1650,17 +1635,12 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             $oldOrder->save();
             $order->save();
         }
-        if ($this->getSendConfirmation()) {
-            $order->queueNewOrderEmail();
-        }
-
-        Mage::dispatchEvent('checkout_submit_all_after', ['order' => $order, 'quote' => $quote]);
 
         return $order;
     }
 
     /**
-     * Validate quote data before order creation
+     * Check the customer and the store of the order. Mage_Sales_Service_Order::validateQuote() checks the cart.
      *
      * @return $this
      */
@@ -1673,43 +1653,6 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
 
         if (!$this->getSession()->getStore()->getId()) {
             Mage::throwException(Mage::helper('adminhtml')->__('Please select a store.'));
-        }
-        $items = $this->getQuote()->getAllItems();
-
-        if (count($items) == 0) {
-            $this->_errors[] = Mage::helper('adminhtml')->__('You need to specify order items.');
-        }
-
-        foreach ($items as $item) {
-            $messages = $item->getMessage(false);
-            if ($item->getHasError() && is_array($messages) && !empty($messages)) {
-                $this->_errors = array_merge($this->_errors, $messages);
-            }
-        }
-
-        if (!$this->getQuote()->isVirtual()) {
-            if (!$this->getQuote()->getShippingAddress()->getShippingMethod()) {
-                $this->_errors[] = Mage::helper('adminhtml')->__('Shipping method must be specified.');
-            }
-        }
-
-        if (!$this->getQuote()->getPayment()->getMethod()) {
-            $this->_errors[] = Mage::helper('adminhtml')->__('Payment method must be specified.');
-        } else {
-            $method = $this->getQuote()->getPayment()->getMethodInstance();
-            if (!$method) {
-                $this->_errors[] = Mage::helper('adminhtml')->__('Payment method instance is not available.');
-            } else {
-                if (!$method->isAvailable($this->getQuote())) {
-                    $this->_errors[] = Mage::helper('adminhtml')->__('Payment method is not available.');
-                } else {
-                    try {
-                        $method->validate();
-                    } catch (Mage_Core_Exception $e) {
-                        $this->_errors[] = $e->getMessage();
-                    }
-                }
-            }
         }
 
         if (!empty($this->_errors)) {
