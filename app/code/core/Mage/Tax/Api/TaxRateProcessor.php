@@ -50,7 +50,11 @@ final class TaxRateProcessor extends CrudProcessor
     protected function saveModel(\Mage_Core_Model_Abstract $model): void
     {
         /** @var \Mage_Tax_Model_Calculation_Rate $model */
-        $this->service()->save($model);
+        try {
+            $this->service()->save($model);
+        } catch (\Mage_Core_Exception_Input $e) {
+            throw $e->withFieldNames(['title' => 'titles']);
+        }
     }
 
     #[\Override]

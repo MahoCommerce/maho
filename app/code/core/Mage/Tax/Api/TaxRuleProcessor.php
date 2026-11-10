@@ -26,7 +26,11 @@ final class TaxRuleProcessor extends CrudProcessor
     protected function saveModel(\Mage_Core_Model_Abstract $model): void
     {
         /** @var \Mage_Tax_Model_Calculation_Rule $model */
-        $this->service()->save($model);
+        try {
+            $this->service()->save($model);
+        } catch (\Mage_Core_Exception_Input $e) {
+            throw $e->withFieldNames(['tax_customer_class' => 'customerTaxClassIds', 'tax_product_class' => 'productTaxClassIds', 'tax_rate' => 'taxRateIds']);
+        }
     }
 
     #[\Override]

@@ -56,7 +56,11 @@ final class CmsPageProcessor extends CrudProcessor
     protected function saveModel(\Mage_Core_Model_Abstract $model): void
     {
         /** @var \Mage_Cms_Model_Page $model */
-        $this->service()->save($model);
+        try {
+            $this->service()->save($model);
+        } catch (\Mage_Core_Exception_Input $e) {
+            throw $e->withFieldNames(['root_template' => 'pageLayout']);
+        }
     }
 
     #[\Override]
