@@ -52,14 +52,15 @@ class FeedGenerateAll extends BaseMahoCommand
         $totalStartTime = microtime(true);
         $successCount = 0;
         $failureCount = 0;
+        /** @var \Maho_FeedManager_Service_Feed $service */
+        $service = Mage::getService('feedmanager/feed');
 
         foreach ($collection as $feed) {
             $output->write(sprintf('  [%d] %s... ', $feed->getId(), $feed->getName()));
             $startTime = microtime(true);
 
             try {
-                $generator = new \Maho_FeedManager_Model_Generator();
-                $log = $generator->generate($feed);
+                $log = $service->generate($feed);
 
                 $duration = round(microtime(true) - $startTime, 2);
 
