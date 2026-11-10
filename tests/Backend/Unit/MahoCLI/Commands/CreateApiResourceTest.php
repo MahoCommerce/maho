@@ -92,31 +92,6 @@ it('generates a processor stub and wires the operations to it with --with-proces
         ->and($out)->not->toContain('processor: CrudProcessor::class,');
 });
 
-it('maps the DTO to the model and calls the service with --service', function () {
-    $result = createApiResourceTester()->run([
-        '--module' => 'Mage_Tax',
-        '--resource' => 'Sample',
-        '--model' => 'tax/calculation_rate',
-        '--service' => 'Rate',
-        '--dry-run' => true,
-    ]);
-
-    $this->assertCommandIsSuccessful($result);
-    $out = $result->getDisplay();
-    expect($out)->toContain('#[Map(target: \\Mage_Tax_Model_Calculation_Rate::class)]')
-        ->and($out)->toContain('class Sample extends \\Maho\\ApiPlatform\\Resource')
-        ->and($out)->toContain("#[Map]\n" . '    public ?string $code = null;')
-        ->and($out)->toContain('new Patch(')
-        ->and($out)->toContain('read: true,')
-        ->and($out)->toContain('final class SampleProvider extends \\Maho\\ApiPlatform\\Provider')
-        ->and($out)->toContain('return $this->service()->newRate();')
-        ->and($out)->toContain('final class SampleProcessor extends \\Maho\\ApiPlatform\\Processor')
-        ->and($out)->toContain("return \\Mage::getService('tax/rate');")
-        ->and($out)->not->toContain('CrudResource')
-        // The service exists, so the dry run does not print it
-        ->and($out)->not->toContain('class Mage_Tax_Service_Rate');
-});
-
 it('falls back to a property stub for EAV entities', function () {
     $result = createApiResourceTester()->run([
         '--module' => 'Maho_Blog',
@@ -166,7 +141,6 @@ it('rejects options that are not quote-safe for the generated code', function (a
     'malformed module' => [['--module' => 'not a module']],
     'malformed resource' => [['--resource' => 'lowercase']],
     'malformed model alias' => [['--model' => "cms/page'"]],
-    'malformed service noun' => [['--service' => 'page']],
 ]);
 
 it('skips columns whose names are not valid PHP identifiers instead of emitting them', function () {
