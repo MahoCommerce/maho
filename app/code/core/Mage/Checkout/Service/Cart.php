@@ -489,10 +489,10 @@ class Mage_Checkout_Service_Cart
     /**
      * Add item to cart
      *
-     * @deprecated since 27.1, use getProductBySku() and addProduct()
      * @param array $options Custom options (option_id => value), or the structured keys of the GraphQL input
      * @param float|null $customPrice Unit price override in quote currency (caller must authorize)
      */
+    #[\Deprecated(message: 'use getProductBySku() and addProduct()', since: '27.1')]
     public function addItem(\Mage_Sales_Model_Quote $quote, string $sku, float $qty, array $options = [], ?float $customPrice = null): \Mage_Sales_Model_Quote
     {
         $buyRequest = new \Maho\DataObject(['qty' => $qty]);
