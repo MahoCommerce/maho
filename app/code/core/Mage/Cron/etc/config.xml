@@ -14,6 +14,11 @@ SPDX-License-Identifier: AFL-3.0
         <docs>
             <sysadmin>docs/sysadmin</sysadmin>
         </docs>
+        <services>
+            <cron>
+                <class>Mage_Cron_Service</class>
+            </cron>
+        </services>
         <models>
             <cron>
                 <class>Mage_Cron_Model</class>
