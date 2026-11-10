@@ -66,7 +66,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             uriTemplate: '/orders',
             name: 'place_order',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/create')",
-            description: 'Place a new order from an authenticated customer cart. Body: cartId, plus the full checkout state in one shot: shippingAddress, billingAddress (each with an optional customAttributes map that follows the Address Book and Checkout form), guestEmail, customerCustomAttributes (a guest order only: the values of the Checkout Registration form, with each required attribute of it), paymentMethod, paymentData, shippingMethod (carrier_method), orderNote',
+            description: 'Place a new order from an authenticated customer cart. Body: cartId, plus the full checkout state in one shot: shippingAddress, billingAddress (each with the fields of the shipping-address body of a cart, and an optional customAttributes map that follows the Address Book and Checkout form), guestEmail, customerCustomAttributes (a guest order only: the values of the Checkout Registration form, with each required attribute of it), paymentMethod, paymentData, shippingMethod (carrier_method), orderNote',
         ),
         new Post(
             // The placeholder is named `maskedQuoteId` rather than `id` so
@@ -80,7 +80,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             ],
             requirements: ['maskedQuoteId' => \Mage_Checkout_Service_Cart::MASKED_ID_PATTERN],
             security: 'true',
-            description: 'Place order from guest cart. Body carries the full checkout state in one shot: shippingAddress, billingAddress (each with an optional customAttributes map that follows the Address Book and Checkout form), guestEmail, customerCustomAttributes (a guest order only: the values of the Checkout Registration form, with each required attribute of it), paymentMethod, paymentData, shippingMethod (carrier_method), orderNote',
+            description: 'Place order from guest cart. Body carries the full checkout state in one shot: shippingAddress, billingAddress (each with the fields of the shipping-address body of a cart, and an optional customAttributes map that follows the Address Book and Checkout form), guestEmail, customerCustomAttributes (a guest order only: the values of the Checkout Registration form, with each required attribute of it), paymentMethod, paymentData, shippingMethod (carrier_method), orderNote',
         ),
         new Post(
             // Authenticated counterpart to place_guest_order: place an order from
@@ -92,7 +92,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             name: 'place_customer_order',
             requirements: ['id' => '\d+'],
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/create')",
-            description: 'Place order from the authenticated customer cart. Body carries the full checkout state in one shot: shippingAddress, billingAddress (each with an optional customAttributes map that follows the Address Book and Checkout form), guestEmail, customerCustomAttributes (a guest order only: the values of the Checkout Registration form, with each required attribute of it), paymentMethod, paymentData, shippingMethod (carrier_method), orderNote',
+            description: 'Place order from the authenticated customer cart. Body carries the full checkout state in one shot: shippingAddress, billingAddress (each with the fields of the shipping-address body of a cart, and an optional customAttributes map that follows the Address Book and Checkout form), guestEmail, customerCustomAttributes (a guest order only: the values of the Checkout Registration form, with each required attribute of it), paymentMethod, paymentData, shippingMethod (carrier_method), orderNote',
         ),
         // Order lifecycle actions. hold/unhold and comments are management
         // operations (admin or orders/write grant); cancel additionally lets a

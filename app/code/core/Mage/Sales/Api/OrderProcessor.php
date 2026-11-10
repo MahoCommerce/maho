@@ -121,13 +121,19 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // Frontend callers send the full checkout state in the body. Apply any
         // provided addresses in-memory; the single collection below prices them
         // together with the shipping method, and the final save persists them.
-        if (isset($args['shippingAddress']) && is_array($args['shippingAddress'])) {
-            CustomAttributes::applyToCartAddress($quote->getShippingAddress(), $args['shippingAddress']['customAttributes'] ?? null);
-            $this->cartService->applyShippingAddress($quote, $this->cartService->mapAddressInput($args['shippingAddress']));
-        }
-        if (isset($args['billingAddress']) && is_array($args['billingAddress'])) {
-            CustomAttributes::applyToCartAddress($quote->getBillingAddress(), $args['billingAddress']['customAttributes'] ?? null);
-            $this->cartService->applyBillingAddress($quote, $this->cartService->mapAddressInput($args['billingAddress']));
+        foreach (['shippingAddress' => $quote->getShippingAddress(), 'billingAddress' => $quote->getBillingAddress()] as $key => $address) {
+            if (!isset($args[$key]) || !is_array($args[$key])) {
+                continue;
+            }
+            CustomAttributes::applyToCartAddress($address, $args[$key]['customAttributes'] ?? null);
+            $addressData = $this->cartService->mapAddressInput($args[$key]);
+            try {
+                $key === 'shippingAddress'
+                    ? $this->cartService->applyShippingAddress($quote, $addressData)
+                    : $this->cartService->applyBillingAddress($quote, $addressData);
+            } catch (\Mage_Core_Exception_Input $e) {
+                throw $e->withFieldNames(array_map(fn(string $field): string => "{$key}.{$field}", \Mage_Checkout_Service_Cart::ADDRESS_API_FIELDS));
+            }
         }
 
         // A guest sends the fields of the Checkout Registration form, which a customer order takes from the account

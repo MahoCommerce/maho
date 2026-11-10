@@ -20,9 +20,9 @@ class StoreDefaults
      * Allowed address fields for addData() whitelisting
      */
     public const ADDRESS_FIELDS = [
-        'firstname', 'lastname', 'company', 'street', 'city',
+        'prefix', 'firstname', 'middlename', 'lastname', 'suffix', 'company', 'street', 'city',
         'region', 'region_id', 'postcode', 'country_id',
-        'telephone', 'fax', 'email',
+        'telephone', 'fax', 'email', 'vat_id',
     ];
 
     /**
