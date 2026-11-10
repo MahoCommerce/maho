@@ -73,7 +73,7 @@ it('saves a review with no vote when the REST body has no rating, as the storefr
     trackCreated('review', $reviewId);
 
     expect(reviewSubmitVoteValues($reviewId))->toBe([])
-        ->and($response['json']['rating'])->toBeNull();
+        ->and($response['json']['rating'] ?? null)->toBeNull();
 
     $read = apiGet('/api/rest/v2/reviews/' . $reviewId, adminToken());
     expect($read['status'])->toBe(200)
