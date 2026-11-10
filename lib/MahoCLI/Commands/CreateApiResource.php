@@ -11,6 +11,7 @@ namespace MahoCLI\Commands;
 
 use Mage;
 use Maho\ComposerPlugin\ApiPermissionCompiler;
+use MahoCLI\Helper\ServiceScaffold;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
@@ -38,6 +39,8 @@ class CreateApiResource extends BaseMahoCommand
         ?string $section = null,
         #[Option(description: 'Also generate a custom Processor stub instead of reusing the shared CrudProcessor')]
         bool $withProcessor = false,
+        #[Option(description: 'Noun of a service of the module (e.g., Segment). The provider and the processor call the service, and the DTO maps to the model. The command creates the service when it does not exist', name: 'service', shortcut: 's')]
+        ?string $serviceNoun = null,
         #[Option(description: 'Overwrite existing files', shortcut: 'f')]
         bool $force = false,
         #[Option(description: 'Print the generated files to stdout instead of writing them')]
@@ -105,6 +108,19 @@ class CreateApiResource extends BaseMahoCommand
             return Command::FAILURE;
         }
 
+        $service = null;
+        if ($serviceNoun !== null) {
+            try {
+                $service = new ServiceScaffold($module, $serviceNoun, $modelAlias);
+            } catch (\InvalidArgumentException $e) {
+                $io->error($e->getMessage());
+                return Command::INVALID;
+            } catch (\RuntimeException $e) {
+                $io->error($e->getMessage());
+                return Command::FAILURE;
+            }
+        }
+
         // ---- Derived names ----
         $namespace = str_replace('_', '\\', $module) . '\\Api';
         $providerClass = $resourceName . 'Provider';
@@ -128,25 +144,18 @@ class CreateApiResource extends BaseMahoCommand
             return Command::INVALID;
         }
         // ---- Introspect the model to pre-fill typed properties ----
-        [$properties, $note] = $this->buildProperties($model, $modelAlias);
+        [$properties, $note] = $this->buildProperties($model, $modelAlias, $service !== null);
         if ($note) {
             $io->note($note);
         }
 
         // ---- Render ----
+        $withProcessor = $withProcessor || $service !== null;
         $processorRef = $withProcessor ? $processorClass : 'CrudProcessor';
         $processorImport = $withProcessor ? '' : "use Maho\\ApiPlatform\\CrudProcessor;\n";
 
-        // Copyright holder for the generated headers: first-party modules
-        // (Maho_*/Mage_*) get the canonical 'Maho <https://mahocommerce.com>'
-        // holder used across the codebase; third-party modules keep the vendor
-        // segment of the module name ('Acme_Blog' → 'Acme') — there is no URL
-        // to invent for them. A bare year is not a valid SPDX-FileCopyrightText.
-        $vendor = substr($module, 0, (int) strpos($module, '_'));
-        $holder = in_array($vendor, ['Maho', 'Mage'], true) ? 'Maho <https://mahocommerce.com>' : $vendor;
-
         $tokens = [
-            '{{COPYRIGHT}}' => date('Y') . ' ' . $holder,
+            '{{COPYRIGHT}}' => date('Y') . ' ' . ServiceScaffold::copyrightHolder($module),
             '{{PACKAGE}}' => $module,
             '{{NAMESPACE}}' => $namespace,
             '{{SHORT_NAME}}' => $resourceName,
@@ -159,14 +168,26 @@ class CreateApiResource extends BaseMahoCommand
             '{{PROCESSOR_CLASS}}' => $processorRef,
             '{{PROCESSOR_IMPORT}}' => $processorImport,
             '{{PROPERTIES}}' => $properties,
+            '{{MODEL_CLASS}}' => (string) $service?->modelClass,
+            '{{SERVICE_CLASS}}' => (string) $service?->className,
+            '{{SERVICE_ALIAS}}' => (string) $service?->alias,
+            '{{NEW_METHOD}}' => (string) $service?->newMethod,
         ];
 
-        $files = [
-            "{$resourceName}.php" => strtr($this->resourceTemplate(), $tokens),
-            "{$providerClass}.php" => strtr($this->providerTemplate(), $tokens),
-        ];
-        if ($withProcessor) {
-            $files["{$processorClass}.php"] = strtr($this->processorTemplate(), $tokens);
+        if ($service !== null) {
+            $files = [
+                "{$resourceName}.php" => strtr($this->serviceResourceTemplate(), $tokens),
+                "{$providerClass}.php" => strtr($this->serviceProviderTemplate(), $tokens),
+                "{$processorClass}.php" => strtr($this->serviceProcessorTemplate(), $tokens),
+            ];
+        } else {
+            $files = [
+                "{$resourceName}.php" => strtr($this->resourceTemplate(), $tokens),
+                "{$providerClass}.php" => strtr($this->providerTemplate(), $tokens),
+            ];
+            if ($withProcessor) {
+                $files["{$processorClass}.php"] = strtr($this->processorTemplate(), $tokens);
+            }
         }
 
         $apiDir = rtrim($moduleDir, '/') . '/Api';
@@ -175,6 +196,10 @@ class CreateApiResource extends BaseMahoCommand
             foreach ($files as $name => $content) {
                 $io->section($apiDir . '/' . $name);
                 $output->writeln($content);
+            }
+            if ($service !== null && !$service->exists()) {
+                $io->section($service->file);
+                $output->writeln($service->render());
             }
             return Command::SUCCESS;
         }
@@ -204,6 +229,29 @@ class CreateApiResource extends BaseMahoCommand
             $io->writeln("  <info>created</info> {$path}");
         }
 
+        if ($service !== null) {
+            try {
+                if ($service->exists()) {
+                    $missing = array_filter(
+                        ['getById', 'save', 'delete', $service->newMethod],
+                        fn(string $method): bool => !method_exists($service->className, $method),
+                    );
+                    if ($missing !== []) {
+                        $io->warning("The service {$service->className} has no method " . implode(', ', $missing) . '. Add it, or change the provider and the processor.');
+                    }
+                } else {
+                    $service->write();
+                    $io->writeln("  <info>created</info> {$service->file}");
+                }
+                if ($service->declareGroup()) {
+                    $io->writeln("  <info>updated</info> {$service->configFile}");
+                }
+            } catch (\RuntimeException $e) {
+                $io->error($e->getMessage());
+                return Command::FAILURE;
+            }
+        }
+
         $io->success("API resource '{$resourceName}' scaffolded in {$module}.");
         $io->section('Next steps');
         $io->listing([
@@ -211,11 +259,18 @@ class CreateApiResource extends BaseMahoCommand
             './maho cache:flush       (refreshes API resource discovery)',
         ]);
         $io->text([
-            "Then the resource is live at REST <comment>{$route}</comment> and via GraphQL,",
+            "Then the resource is live at REST <comment>{$route}</comment>" . ($service === null ? ' and via GraphQL,' : ','),
             "with ACL entries under the <comment>{$section}</comment> section of the admin role editor.",
             "Reads are gated behind <comment>{$mahoId}/read</comment> by default; change the read",
             "operations' security to <comment>'true'</comment> to make them public.",
         ]);
+        if ($service !== null) {
+            $io->note([
+                "The DTO maps to {$service->modelClass} through the typed getters and setters of the model.",
+                'Add a typed accessor for each mapped property that the model does not have yet.',
+                "Add \"{$service->notFoundMessage}\" to the locale CSV file of {$module} in app/locale/en_US/, if the service is new.",
+            ]);
+        }
 
         return Command::SUCCESS;
     }
@@ -226,10 +281,13 @@ class CreateApiResource extends BaseMahoCommand
      *
      * @return array{0: string, 1: ?string}
      */
-    private function buildProperties(object $model, string $modelAlias): array
+    private function buildProperties(object $model, string $modelAlias, bool $map = false): array
     {
+        $mapLine = $map ? "    // #[Map]\n" : '';
         $stub = "    // TODO: declare typed public properties, e.g.:\n"
+              . $mapLine
               . "    // public string \$title = '';\n"
+              . $mapLine
               . '    // public ?string $description = null;';
 
         $resource = null;
@@ -281,7 +339,17 @@ class CreateApiResource extends BaseMahoCommand
             $phpType = $this->mapType((string) $col['DATA_TYPE']);
             $readOnly = in_array($name, ['created_at', 'updated_at'], true);
 
-            if ($readOnly) {
+            if ($map) {
+                // A new model holds no data, so each property takes the null of its getter
+                if ($lines !== []) {
+                    $lines[] = '';
+                }
+                if ($readOnly) {
+                    $lines[] = '    #[ApiProperty(writable: false)]';
+                }
+                $lines[] = $readOnly ? '    #[Map(if: new TargetClass(self::class))]' : '    #[Map]';
+                $lines[] = sprintf('    public ?%s $%s = null;', $phpType, $prop);
+            } elseif ($readOnly) {
                 $lines[] = '    #[ApiProperty(writable: false)]';
                 $lines[] = sprintf('    public ?%s $%s = null;', $phpType, $prop);
             } elseif (!empty($col['NULLABLE'])) {
@@ -491,6 +559,198 @@ use Maho\ApiPlatform\CrudProcessor;
 final class {{SHORT_NAME}}Processor extends CrudProcessor
 {
     // Override process() (or the persist hooks) for custom write logic.
+}
+
+TPL;
+    }
+
+    private function serviceResourceTemplate(): string
+    {
+        return <<<'TPL'
+<?php
+
+/**
+ * SPDX-FileCopyrightText: {{COPYRIGHT}}
+ * SPDX-License-Identifier: OSL-3.0
+ * @package {{PACKAGE}}
+ */
+
+declare(strict_types=1);
+
+namespace {{NAMESPACE}};
+
+use ApiPlatform\Metadata\ApiProperty;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use Maho\Config\ApiResource;
+use Symfony\Component\ObjectMapper\Attribute\Map;
+use Symfony\Component\ObjectMapper\Condition\TargetClass;
+
+#[ApiResource(
+    shortName: '{{SHORT_NAME}}',
+    description: '{{DESCRIPTION}}',
+    mahoSection: '{{SECTION}}',
+    provider: {{PROVIDER_CLASS}}::class,
+    processor: {{PROCESSOR_CLASS}}::class,
+    denormalizationContext: ['allow_extra_attributes' => false, 'collect_denormalization_errors' => true],
+    operations: [
+        new GetCollection(
+            uriTemplate: '{{ROUTE}}',
+            security: "is_granted('ROLE_ADMIN') or is_granted('{{ID}}/read')",
+            description: 'Get {{SHORT_NAME}} collection',
+        ),
+        new Get(
+            uriTemplate: '{{ROUTE}}/{id}',
+            requirements: ['id' => '\d+'],
+            security: "is_granted('ROLE_ADMIN') or is_granted('{{ID}}/read')",
+            description: 'Get a {{SHORT_NAME}} by ID',
+        ),
+        new Post(
+            uriTemplate: '{{ROUTE}}',
+            // The provider gives a new model from the service, and the body fills it
+            read: true,
+            security: "is_granted('ROLE_ADMIN') or is_granted('{{ID}}/write')",
+            description: 'Create a {{SHORT_NAME}}',
+        ),
+        // Before Put: the MCP update tool comes from the first update operation
+        new Patch(
+            uriTemplate: '{{ROUTE}}/{id}',
+            requirements: ['id' => '\d+'],
+            security: "is_granted('ROLE_ADMIN') or is_granted('{{ID}}/write')",
+            description: 'Change some fields of a {{SHORT_NAME}}',
+        ),
+        new Put(
+            uriTemplate: '{{ROUTE}}/{id}',
+            requirements: ['id' => '\d+'],
+            security: "is_granted('ROLE_ADMIN') or is_granted('{{ID}}/write')",
+            description: 'Replace a {{SHORT_NAME}}',
+        ),
+        new Delete(
+            uriTemplate: '{{ROUTE}}/{id}',
+            requirements: ['id' => '\d+'],
+            security: "is_granted('ROLE_ADMIN') or is_granted('{{ID}}/delete')",
+            description: 'Delete a {{SHORT_NAME}}',
+        ),
+    ],
+    graphQlOperations: [],
+)]
+#[Map(target: \{{MODEL_CLASS}}::class)]
+class {{SHORT_NAME}} extends \Maho\ApiPlatform\Resource
+{
+    #[ApiProperty(identifier: true, writable: false)]
+    #[Map(if: new TargetClass(self::class))]
+    public ?int $id = null;
+
+{{PROPERTIES}}
+}
+
+TPL;
+    }
+
+    private function serviceProviderTemplate(): string
+    {
+        return <<<'TPL'
+<?php
+
+/**
+ * SPDX-FileCopyrightText: {{COPYRIGHT}}
+ * SPDX-License-Identifier: OSL-3.0
+ * @package {{PACKAGE}}
+ */
+
+declare(strict_types=1);
+
+namespace {{NAMESPACE}};
+
+use ApiPlatform\Metadata\CollectionOperationInterface;
+use ApiPlatform\Metadata\Operation;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\State\Pagination\TraversablePaginator;
+use Maho\ApiPlatform\Service\StoreContext;
+
+final class {{PROVIDER_CLASS}} extends \Maho\ApiPlatform\Provider
+{
+    /**
+     * @return TraversablePaginator<\{{MODEL_CLASS}}>|\{{MODEL_CLASS}}
+     */
+    #[\Override]
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): TraversablePaginator|\{{MODEL_CLASS}}
+    {
+        StoreContext::ensureStore();
+
+        if ($operation instanceof CollectionOperationInterface) {
+            return $this->collection($context);
+        }
+        if ($operation instanceof Post && !isset($uriVariables['id'])) {
+            return $this->service()->{{NEW_METHOD}}();
+        }
+        return $this->service()->getById((int) ($uriVariables['id'] ?? 0));
+    }
+
+    /**
+     * @return TraversablePaginator<\{{MODEL_CLASS}}>
+     */
+    private function collection(array $context): TraversablePaginator
+    {
+        $collection = \Mage::getModel('{{MODEL}}')->getCollection();
+        ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, $this->defaultPageSize, $this->maxPageSize);
+        $collection->setPageSize($pageSize)->setCurPage($page);
+
+        return new TraversablePaginator(new \ArrayIterator(array_values($collection->getItems())), $page, $pageSize, (int) $collection->getSize());
+    }
+
+    private function service(): \{{SERVICE_CLASS}}
+    {
+        /** @var \{{SERVICE_CLASS}} */
+        return \Mage::getService('{{SERVICE_ALIAS}}');
+    }
+}
+
+TPL;
+    }
+
+    private function serviceProcessorTemplate(): string
+    {
+        return <<<'TPL'
+<?php
+
+/**
+ * SPDX-FileCopyrightText: {{COPYRIGHT}}
+ * SPDX-License-Identifier: OSL-3.0
+ * @package {{PACKAGE}}
+ */
+
+declare(strict_types=1);
+
+namespace {{NAMESPACE}};
+
+use ApiPlatform\Metadata\DeleteOperationInterface;
+use ApiPlatform\Metadata\Operation;
+
+final class {{PROCESSOR_CLASS}} extends \Maho\ApiPlatform\Processor
+{
+    #[\Override]
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?\{{MODEL_CLASS}}
+    {
+        if (!$data instanceof \{{MODEL_CLASS}}) {
+            throw new \LogicException('The {{SHORT_NAME}} resource maps to {{MODEL_CLASS}}');
+        }
+        if ($operation instanceof DeleteOperationInterface) {
+            $this->service()->delete($data);
+            return null;
+        }
+        return $this->service()->save($data);
+    }
+
+    private function service(): \{{SERVICE_CLASS}}
+    {
+        /** @var \{{SERVICE_CLASS}} */
+        return \Mage::getService('{{SERVICE_ALIAS}}');
+    }
 }
 
 TPL;

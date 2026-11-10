@@ -24,9 +24,33 @@ $ ./maho dev:api:resource:create --module=MyVendor_Widgets --resource=WidgetType
 - For EAV entities (whose attributes are not plain table columns) it emits a property stub to fill in manually, pointing at `Mage/Catalog/Api/ProductProvider.php` as the custom-provider reference.
 - Full CRUD + GraphQL operations are generated with admin-gated `security:` expressions. The permission ids in those expressions are derived by the same compiler code that builds the permission registry, so they can never drift from the registered ids.
 
-Options: `--route` (REST URI base, defaults to the kebab-cased plural of the resource), `--section` (admin permission section, defaults to the module name), `--with-processor` (generate a custom processor stub instead of reusing the shared `CrudProcessor`), `--force` (overwrite existing files), `--dry-run` (print the files instead of writing them).
+Options: `--route` (REST URI base, defaults to the kebab-cased plural of the resource), `--section` (admin permission section, defaults to the module name), `--with-processor` (generate a custom processor stub instead of reusing the shared `CrudProcessor`), `--service` (see below), `--force` (overwrite existing files), `--dry-run` (print the files instead of writing them).
 
 After generating, run `composer dump-autoload` (compiles the permission registry from the attribute) and `./maho cache:flush` (refreshes API resource discovery). The resource is then live over REST and GraphQL, with ACL entries in the admin role editor. Reads are gated behind `<resource>/read` by default; change the read operations' `security:` to `'true'` to make them public.
+
+#### Writes through a service
+
+Use `--service=<Noun>` when the admin or a CLI command also changes the records. The rules then stay in one service
+class that every transport calls:
+
+```bash
+$ ./maho dev:api:resource:create --module=MyVendor_Widgets --resource=WidgetType --model=widgets/type --service=Type
+```
+
+- The command writes a DTO, a provider and a processor. The DTO maps to the model with the Symfony ObjectMapper:
+  `#[Map(target: Model::class)]` on the class and `#[Map]` on each property. Each property is nullable, because a new
+  model holds no data.
+- The provider returns models. A `POST` gets a new model from the service, a `GET` loads the model with `getById()`,
+  and a collection lists the models of the model collection.
+- The processor receives the model with the body in it, and calls `save()` or `delete()` of the service.
+- The service is `MyVendor_Widgets_Service_Type`, from `Mage::getService()`. When the class does not exist, the
+  command writes it, as `./maho dev:service:create` does, and declares its class group in the `config.xml` of the
+  module. The command never writes over a service that exists.
+- The operations are `GET`, `POST`, `PATCH`, `PUT` and `DELETE`, with no GraphQL operations.
+
+The ObjectMapper reads and writes the fields through the typed getters and setters of the model. Add a typed
+accessor for each mapped property that the model does not have. `Maho\CustomerSegmentation\Api\CustomerSegment`
+is a complete example.
 
 To audit the resources discovered across your installation, with REST routes, HTTP methods, GraphQL availability, access level and permission ids:
 
