@@ -84,7 +84,6 @@ Available commands:
   dev:mcp:start                 Start the MCP (Model Context Protocol) server for AI agent integration
   dev:module:list               List installed modules with declared and core_resource versions
   dev:paypal:webhook:simulate   Simulate a PayPal webhook event for testing
-  dev:service:create            Create a service class in a module, and declare its class group in the config.xml of the module
   dev:translations:missing      Display used translations strings that are missing from csv files
   dev:translations:unused       Display defined translations strings that are not used in templates
  email
@@ -234,26 +233,6 @@ delete a default address, the customer has no default address of that type until
 ./maho customer:address:list jane@example.com
 ./maho customer:address:delete 12
 ```
-
-## Create a service
-
-A service keeps the rules of a flow that two or more transports start, such as an admin page, the API and a CLI
-command. `dev:service:create` writes the class `<Module>_Service_<Noun>` in the `Service/` folder of the module. It also
-adds the class group under `<global><services>` in the `config.xml` of the module, if the group is not there.
-
-```bash
-./maho dev:service:create Mage_Tax Rate --model=tax/calculation_rate
-./maho dev:service:create Acme_Widgets Widget_Option
-```
-
-- The noun is in StudlyCase. A `_` in the noun makes a subfolder: `Widget_Option` gives `Service/Widget/Option.php`
-  and the alias `<group>/widget_option`.
-- With `--model`, the class gets `new<Noun>()`, `getById()`, `save()` and `delete()` for that model. `getById()`
-  throws `Mage_Core_Exception_NoSuchEntity`, which the API gives as 404. Without `--model`, the class is empty.
-- The command stops when the class exists. Add `--force` to write it again.
-
-Get the service with `Mage::getService('<group>/<noun>')`, never with `new`. Then run `./maho cache:flush`, and add the
-message of `getById()` to the locale CSV file of the module.
 
 ## Add your custom commands
 

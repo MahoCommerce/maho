@@ -44,7 +44,7 @@ $ ./maho dev:api:resource:create --module=MyVendor_Widgets --resource=WidgetType
   and a collection lists the models of the model collection.
 - The processor receives the model with the body in it, and calls `save()` or `delete()` of the service.
 - The service is `MyVendor_Widgets_Service_Type`, from `Mage::getService()`. When the class does not exist, the
-  command writes it, as `./maho dev:service:create` does, and declares its class group in the `config.xml` of the
+  command writes it and declares its class group in the `config.xml` of the
   module. The command never writes over a service that exists.
 - The operations are `GET`, `POST`, `PATCH`, `PUT` and `DELETE`, with no GraphQL operations.
 

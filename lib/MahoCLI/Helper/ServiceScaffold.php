@@ -24,7 +24,7 @@ class ServiceScaffold
     public readonly string $alias;
     public readonly string $file;
     public readonly string $configFile;
-    public readonly ?string $modelClass;
+    public readonly string $modelClass;
     public readonly string $newMethod;
     public readonly string $notFoundMessage;
     private readonly string $classPrefix;
@@ -38,7 +38,7 @@ class ServiceScaffold
     public function __construct(
         public readonly string $module,
         public readonly string $noun,
-        public readonly ?string $modelAlias = null,
+        public readonly string $modelAlias,
     ) {
         if (!preg_match(self::MODULE_PATTERN, $module)) {
             throw new \InvalidArgumentException('The module name must have the form Vendor_Module (e.g., Mage_Contacts).');
@@ -46,7 +46,7 @@ class ServiceScaffold
         if (!preg_match(self::NOUN_PATTERN, $noun)) {
             throw new \InvalidArgumentException('The noun must be StudlyCase, with _ between folders (e.g., Message or Product_Option).');
         }
-        if ($modelAlias !== null && !preg_match(self::MODEL_PATTERN, $modelAlias)) {
+        if (!preg_match(self::MODEL_PATTERN, $modelAlias)) {
             throw new \InvalidArgumentException('The model alias must have the form group/model (e.g., contacts/message).');
         }
 
@@ -61,15 +61,11 @@ class ServiceScaffold
             throw new \RuntimeException("The file {$this->configFile} does not exist or is not valid XML.");
         }
 
-        if ($modelAlias !== null) {
-            $modelClass = $config->getModelClassName($modelAlias);
-            if (!class_exists($modelClass) || !is_subclass_of($modelClass, \Mage_Core_Model_Abstract::class)) {
-                throw new \RuntimeException("The model alias {$modelAlias} does not give a model class.");
-            }
-            $this->modelClass = $modelClass;
-        } else {
-            $this->modelClass = null;
+        $modelClass = $config->getModelClassName($modelAlias);
+        if (!class_exists($modelClass) || !is_subclass_of($modelClass, \Mage_Core_Model_Abstract::class)) {
+            throw new \RuntimeException("The model alias {$modelAlias} does not give a model class.");
         }
+        $this->modelClass = $modelClass;
 
         $this->classPrefix = $module . '_Service';
         $short = strtolower(substr($module, strpos($module, '_') + 1));
@@ -102,12 +98,6 @@ class ServiceScaffold
         return is_file($this->file);
     }
 
-    public function isDeclared(): bool
-    {
-        $xml = simplexml_load_file($this->configFile);
-        return $xml !== false && self::findGroup($xml, 'services', $this->classPrefix) !== null;
-    }
-
     public function render(): string
     {
         $header = <<<PHP
@@ -125,10 +115,6 @@ class ServiceScaffold
             {
 
             PHP;
-
-        if ($this->modelClass === null || $this->modelAlias === null) {
-            return $header . "}\n";
-        }
 
         $model = $this->modelClass;
         $var = '$' . lcfirst((string) substr($this->newMethod, 3));
@@ -178,14 +164,14 @@ class ServiceScaffold
     }
 
     /**
-     * Write the service class. Overwrite an existing class only with $force.
+     * Write the service class. Never overwrite an existing class.
      *
-     * @throws \RuntimeException when the class exists and $force is false, or when a write fails
+     * @throws \RuntimeException when the class exists, or when a write fails
      */
-    public function write(bool $force = false): void
+    public function write(): void
     {
-        if ($this->exists() && !$force) {
-            throw new \RuntimeException("The service class exists: {$this->file}. Use --force to write it again.");
+        if ($this->exists()) {
+            throw new \RuntimeException("The service class exists: {$this->file}.");
         }
         $dir = dirname($this->file);
         if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {

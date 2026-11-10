@@ -15,7 +15,6 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use MahoCLI\Commands\CreateApiResource;
-use MahoCLI\Commands\CreateService;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -26,7 +25,7 @@ use Symfony\Component\ObjectMapper\Attribute\Map;
 uses(Tests\MahoBackendTestCase::class, ConsoleAssertionsTrait::class);
 
 /**
- * dev:service:create and dev:api:resource:create --service write into a temporary module in the local code pool.
+ * dev:api:resource:create --service writes into a temporary module in the local code pool.
  * The test declares the module in the loaded config, and deletes the folder and the declaration after each test.
  */
 const SERVICE_SCAFFOLD_MODULE = 'Acme_ScaffoldTest';
@@ -126,102 +125,6 @@ beforeEach(function (): void {
 
 afterEach(function (): void {
     serviceScaffoldCleanup();
-});
-
-describe('dev:service:create', function () {
-    it('writes a service for a model, declares its class group, and the service resolves', function () {
-        $result = serviceScaffoldRun(CreateService::class, [
-            'module' => SERVICE_SCAFFOLD_MODULE,
-            'noun' => 'Config_Entry',
-            '--model' => 'core/config_data',
-        ]);
-        $this->assertCommandIsSuccessful($result);
-        expect($result->getDisplay())->toContain("Mage::getService('scaffoldtest/config_entry')");
-
-        $file = serviceScaffoldDir() . '/Service/Config/Entry.php';
-        serviceScaffoldLint($file);
-        $code = (string) file_get_contents($file);
-        expect($code)->toContain('SPDX-FileCopyrightText: ' . date('Y') . ' Acme')
-            ->and($code)->toContain('SPDX-License-Identifier: OSL-3.0')
-            ->and($code)->toContain("declare(strict_types=1);\n\nclass Acme_ScaffoldTest_Service_Config_Entry\n")
-            ->and($code)->toContain('public function newEntry(): Mage_Core_Model_Config_Data')
-            ->and($code)->toContain('public function getById(int $id): Mage_Core_Model_Config_Data')
-            ->and($code)->toContain('public function save(Mage_Core_Model_Config_Data $entry): Mage_Core_Model_Config_Data')
-            ->and($code)->toContain('public function delete(Mage_Core_Model_Config_Data $entry): void');
-
-        $xml = simplexml_load_file(serviceScaffoldDir() . '/etc/config.xml');
-        expect((string) $xml->global->services->scaffoldtest->class)->toBe('Acme_ScaffoldTest_Service')
-            ->and((string) $xml->global->models->scaffoldtest->class)->toBe('Acme_ScaffoldTest_Model');
-
-        require_once $file;
-        serviceScaffoldLoadConfig();
-        $service = Mage::getService('scaffoldtest/config_entry');
-        expect($service)->toBeInstanceOf('Acme_ScaffoldTest_Service_Config_Entry');
-
-        $entry = $service->newEntry()
-            ->setScope('default')
-            ->setScopeId(0)
-            ->setPath(SERVICE_SCAFFOLD_PATH_PREFIX . 'a/b')
-            ->setValue('1');
-        $service->save($entry);
-        expect($service->getById((int) $entry->getId())->getPath())->toBe(SERVICE_SCAFFOLD_PATH_PREFIX . 'a/b');
-
-        $service->delete($entry);
-        expect(fn() => $service->getById((int) $entry->getId()))
-            ->toThrow(Mage_Core_Exception_NoSuchEntity::class, 'This entry no longer exists.');
-    });
-
-    it('refuses a service that exists, unless --force, and declares the group once', function () {
-        $input = ['module' => SERVICE_SCAFFOLD_MODULE, 'noun' => 'Config_Entry'];
-        $this->assertCommandIsSuccessful(serviceScaffoldRun(CreateService::class, $input));
-        $file = serviceScaffoldDir() . '/Service/Config/Entry.php';
-        file_put_contents($file, '<?php // changed');
-
-        $result = serviceScaffoldRun(CreateService::class, $input);
-        $this->assertCommandFailed($result);
-        expect($result->getDisplay())->toContain('--force')
-            ->and(file_get_contents($file))->toBe('<?php // changed');
-
-        $this->assertCommandIsSuccessful(serviceScaffoldRun(CreateService::class, $input + ['--force' => true]));
-        serviceScaffoldLint($file);
-        expect(file_get_contents($file))->toContain('class Acme_ScaffoldTest_Service_Config_Entry')
-            ->and(substr_count((string) file_get_contents(serviceScaffoldDir() . '/etc/config.xml'), '<services>'))->toBe(1);
-    });
-
-    it('writes an empty service without a model, and adds a group to an existing services node', function () {
-        file_put_contents(serviceScaffoldDir() . '/etc/config.xml', str_replace(
-            '        <models>',
-            "        <services>\n            <other>\n                <class>Acme_Other_Service</class>\n            </other>\n        </services>\n        <models>",
-            SERVICE_SCAFFOLD_CONFIG,
-        ));
-
-        $this->assertCommandIsSuccessful(serviceScaffoldRun(CreateService::class, [
-            'module' => SERVICE_SCAFFOLD_MODULE,
-            'noun' => 'Message',
-        ]));
-
-        $file = serviceScaffoldDir() . '/Service/Message.php';
-        serviceScaffoldLint($file);
-        expect((string) file_get_contents($file))->toEndWith("class Acme_ScaffoldTest_Service_Message\n{\n}\n");
-
-        $xml = simplexml_load_file(serviceScaffoldDir() . '/etc/config.xml');
-        expect((string) $xml->global->services->other->class)->toBe('Acme_Other_Service')
-            ->and((string) $xml->global->services->scaffoldtest->class)->toBe('Acme_ScaffoldTest_Service')
-            ->and(count($xml->global->services))->toBe(1);
-    });
-
-    it('refuses an input of the wrong form, an unknown module and an unknown model', function (array $input, int $status) {
-        $result = serviceScaffoldRun(CreateService::class, $input + ['module' => SERVICE_SCAFFOLD_MODULE, 'noun' => 'Message']);
-        expect($result->statusCode)->toBe($status)
-            ->and(is_dir(serviceScaffoldDir() . '/Service'))->toBeFalse();
-    })->with([
-        'module of the wrong form' => [['module' => 'acme'], Command::INVALID],
-        'noun of the wrong form' => [['noun' => 'message'], Command::INVALID],
-        'noun with a path' => [['noun' => '../Message'], Command::INVALID],
-        'model alias of the wrong form' => [['--model' => "core/config_data'"], Command::INVALID],
-        'module that is not declared' => [['module' => 'Acme_Missing'], Command::FAILURE],
-        'model that does not exist' => [['--model' => 'scaffoldtest/missing'], Command::FAILURE],
-    ]);
 });
 
 describe('dev:api:resource:create --service', function () {

@@ -137,7 +137,6 @@ $application->addCommand(new \MahoCLI\Commands\TranslationsUnused());
 
 $application->addCommand(new \MahoCLI\Commands\CreateCommand());
 $application->addCommand(new \MahoCLI\Commands\CreateApiResource());
-$application->addCommand(new \MahoCLI\Commands\CreateService());
 $application->addCommand(new \MahoCLI\Commands\ListApiResources());
 
 $application->addCommand(new \MahoCLI\Commands\DevModuleList());
