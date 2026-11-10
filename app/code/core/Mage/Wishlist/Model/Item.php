@@ -307,11 +307,11 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
     /**
      * Add the product of the item to the cart of $cart, and delete the item when $delete is true.
      *
-     * @deprecated since 27.1, use Mage_Wishlist_Service_Wishlist::moveToCart()
      * @param bool $delete
      * @return true
      * @throws Mage_Core_Exception see Mage_Checkout_Service_Cart::addProduct()
      */
+    #[\Deprecated(message: 'use Mage_Wishlist_Service_Wishlist::moveToCart()', since: '27.1')]
     public function addToCart(Mage_Checkout_Model_Cart $cart, $delete = false)
     {
         $wishlist = Mage::getModel('wishlist/wishlist')->load($this->getWishlistId());
