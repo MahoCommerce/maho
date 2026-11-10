@@ -69,9 +69,9 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
         // Without a backToStock flag on any item, the store setting decides the return to stock.
         $backToStock = null;
         foreach ($items ?? [] as $itemData) {
-            $entry = $this->parseOrderItemEntry($itemData, $order, allowZeroQty: true);
-            $orderItemId = (int) $entry['item']->getId();
-            if ($entry['qty'] > 0) {
+            $entry = $this->parseOrderItemEntry($itemData);
+            $orderItemId = $entry['orderItemId'];
+            if ($entry['qty'] !== 0.0) {
                 $data['qtys'][$orderItemId] = $entry['qty'];
             }
             if (array_key_exists('backToStock', $itemData)) {

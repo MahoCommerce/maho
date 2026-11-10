@@ -63,8 +63,8 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
 
         $qtys = [];
         foreach ($items ?? [] as $itemData) {
-            $entry = $this->parseOrderItemEntry($itemData, $order);
-            $qtys[(int) $entry['item']->getId()] = $entry['qty'];
+            $entry = $this->parseOrderItemEntry($itemData);
+            $qtys[$entry['orderItemId']] = $entry['qty'];
         }
 
         return Invoice::fromModel($service->invoice($order, $qtys, $captureCase, $comment, (bool) $notifyCustomer));

@@ -1153,6 +1153,7 @@ class Mage_Sales_Service_Order
         }
 
         $qtys = $this->parseLocaleNumbers($qtys);
+        $this->assertOrderItemQtys($order, $qtys);
         foreach ($qtys as $orderItemId => $qty) {
             $orderItem = $order->getItemById($orderItemId);
             // Dummy (bundle/configurable parent) items take their qty from the order, so neither check applies to them
@@ -1329,6 +1330,7 @@ class Mage_Sales_Service_Order
         if (!$order->canShip()) {
             throw new Mage_Core_Exception_Conflict(Mage::helper('sales')->__('Order cannot be shipped (already fully shipped or not in a shippable state)'));
         }
+        $this->assertOrderItemQtys($order, $this->parseLocaleNumbers($qtys));
 
         $shipment = $this->buildShipment($order, $qtys);
         if (!$shipment->getTotalQty()) {
@@ -1552,6 +1554,7 @@ class Mage_Sales_Service_Order
         if (isset($data['shipping_amount']) && (float) $data['shipping_amount'] < 0) {
             throw new Mage_Core_Exception(Mage::helper('sales')->__('Shipping amount must be >= 0'));
         }
+        $this->assertOrderItemQtys($order, $this->parseLocaleNumbers($data['qtys'] ?? []));
 
         $creditmemo = $this->buildCreditmemo($order, $data, $invoice);
 
@@ -1924,6 +1927,27 @@ class Mage_Sales_Service_Order
             }
         }
         return $values;
+    }
+
+    /**
+     * Refuse a negative qty, and a qty above 0 for an ID that is not an item of $order. A qty of 0 names no item.
+     *
+     * @param array<array-key, mixed> $qtys Order item id => qty, after parseLocaleNumbers()
+     * @throws Mage_Core_Exception
+     */
+    private function assertOrderItemQtys(Order $order, array $qtys): void
+    {
+        foreach ($qtys as $orderItemId => $qty) {
+            if (!is_float($qty)) {
+                continue;
+            }
+            if ($qty < 0) {
+                throw new Mage_Core_Exception(Mage::helper('sales')->__('The qty of order item %s cannot be negative', $orderItemId));
+            }
+            if ($qty > 0 && !$order->getItemById($orderItemId)) {
+                throw new Mage_Core_Exception(Mage::helper('sales')->__('Order item %s does not belong to this order', $orderItemId));
+            }
+        }
     }
 
     private function getConvertor(): Mage_Sales_Model_Convert_Order

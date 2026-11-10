@@ -269,3 +269,45 @@ describe('credit memos', function (): void {
             ->and(Mage::getModel('sales/order')->load($order->getId())->getCreditmemosCollection()->getSize())->toBe(0);
     });
 });
+
+describe('order items', function (): void {
+    it('refuses an item of another order on both transports', function (string $document): void {
+        $this->orders[] = $order = salesParityOrder([
+            'total_paid' => 10, 'base_total_paid' => 10, 'total_invoiced' => 10, 'base_total_invoiced' => 10,
+            'store_to_base_rate' => 1, 'store_to_order_rate' => 1,
+        ]);
+        $order->getItemsCollection()->getFirstItem()->setQtyInvoiced(1)->save();
+        $this->orders[] = $other = salesParityOrder();
+        $itemId = salesParityItemId($other);
+        $message = "Order item {$itemId} does not belong to this order";
+
+        [$controller, $fields, $processor, $operation] = match ($document) {
+            'invoice' => [Mage_Adminhtml_Sales_Order_InvoiceController::class, ['invoice' => ['items' => [$itemId => 1]]], InvoiceProcessor::class, 'order_invoice_create'],
+            'shipment' => [Mage_Adminhtml_Sales_Order_ShipmentController::class, ['shipment' => ['items' => [$itemId => 1]]], ShipmentProcessor::class, 'order_shipment_create'],
+            'credit memo' => [Mage_Adminhtml_Sales_Order_CreditmemoController::class, ['creditmemo' => ['items' => [$itemId => ['qty' => 1]], 'do_offline' => 1]], CreditMemoProcessor::class, 'order_creditmemo_create'],
+        };
+        $admin = AdminApiParity::admin($controller, 'save', ['order_id' => $order->getId()] + $fields);
+        $api = salesParityApi($processor, $operation, ['orderId' => $order->getId()], ['items' => [['orderItemId' => $itemId, 'qty' => 1]]]);
+
+        expect($admin['errors'])->toBe([$message])
+            ->and($api)->toMatchArray(['status' => 422, 'errors' => [$message]]);
+    })->with(['invoice', 'shipment', 'credit memo']);
+
+    it('refuses a negative qty on both transports', function (): void {
+        $this->orders[] = $order = salesParityOrder();
+        $itemId = salesParityItemId($order);
+        $message = "The qty of order item {$itemId} cannot be negative";
+
+        $admin = AdminApiParity::admin(Mage_Adminhtml_Sales_Order_ShipmentController::class, 'save', [
+            'order_id' => $order->getId(),
+            'shipment' => ['items' => [$itemId => -1]],
+        ]);
+        $api = salesParityApi(ShipmentProcessor::class, 'order_shipment_create', ['orderId' => $order->getId()], [
+            'items' => [['orderItemId' => $itemId, 'qty' => -1]],
+        ]);
+
+        expect($admin['errors'])->toBe([$message])
+            ->and($api)->toMatchArray(['status' => 422, 'errors' => [$message]])
+            ->and(Mage::getModel('sales/order')->load($order->getId())->getShipmentsCollection()->getSize())->toBe(0);
+    });
+});
