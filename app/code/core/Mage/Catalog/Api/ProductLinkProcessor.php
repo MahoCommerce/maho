@@ -40,7 +40,7 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
         $linkType = ProductLinkProvider::extractLinkType($context);
         $service->assertType($linkType);
         $product = $this->loadProductForWrite($productId, $user);
-        $websiteIds = $this->getAllowedWebsiteIds($user);
+        $websiteIds = $this->allowedWebsiteIds($user);
 
         if ($operation instanceof DeleteOperationInterface) {
             $service->removeLink($product, $linkType, ProductLinkProvider::extractLinkedProductId($context));

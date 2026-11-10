@@ -19,9 +19,9 @@ use Maho\ApiPlatform\Security\ApiUser;
 final class CmsBlockProcessor extends CrudProcessor
 {
     #[\Override]
-    protected function loadOrFail(string $modelAlias, int|string $id, string $notFoundMessage): \Mage_Cms_Model_Block
+    protected function loadModel(int $id): \Mage_Cms_Model_Block
     {
-        return $this->service()->getById((int) $id);
+        return $this->service()->getById($id);
     }
 
     #[\Override]
@@ -39,14 +39,14 @@ final class CmsBlockProcessor extends CrudProcessor
     }
 
     #[\Override]
-    protected function safeSave(\Mage_Core_Model_Abstract $model, string $entityLabel): void
+    protected function saveModel(\Mage_Core_Model_Abstract $model): void
     {
         /** @var \Mage_Cms_Model_Block $model */
         $this->service()->save($model);
     }
 
     #[\Override]
-    protected function safeDelete(\Mage_Core_Model_Abstract $model, string $entityLabel): void
+    protected function deleteModel(\Mage_Core_Model_Abstract $model): void
     {
         /** @var \Mage_Cms_Model_Block $model */
         $this->service()->delete($model);

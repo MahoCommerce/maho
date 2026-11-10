@@ -40,7 +40,7 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
 
         /** @var LinkService $service */
         $service = \Mage::getService('catalog/product_link');
-        $websiteIds = $this->getAllowedWebsiteIds($user);
+        $websiteIds = $this->allowedWebsiteIds($user);
 
         if ($operation instanceof DeleteOperationInterface) {
             $path = ($context['request'] ?? null)?->getPathInfo() ?? '';

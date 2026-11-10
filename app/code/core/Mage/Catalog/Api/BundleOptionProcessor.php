@@ -49,7 +49,7 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
             $option->setType((string) ($body['type'] ?? 'select'));
             $option->setRequired((bool) ($body['required'] ?? true));
             $option->setPosition((int) ($body['position'] ?? 0));
-            $option = $service->save($product, $option, $this->parseSelections($body['selections'] ?? []), $this->getAllowedWebsiteIds($user));
+            $option = $service->save($product, $option, $this->parseSelections($body['selections'] ?? []), $this->allowedWebsiteIds($user));
 
             $dto = new BundleOption();
             $dto->id = (int) $option->getId();

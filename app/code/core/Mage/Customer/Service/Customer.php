@@ -415,13 +415,71 @@ class Mage_Customer_Service_Customer
         #[\SensitiveParameter]
         ?string $twofaCode = null,
     ): Customer {
+        $this->checkLoginLimits($email);
+        return $this->authenticateInWebsite($email, $password, $websiteId, $twofaCode);
+    }
+
+    /**
+     * Check the email and the password as authenticate() does, in the website $websiteId first and then in each other
+     * website, for a client that does not name its store. A wrong 2FA code stops the search: the password was right.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests when the client or the email is over the login limit
+     * @throws Mage_Core_Exception_Forbidden when no website accepts the login and an account is not confirmed
+     * @throws Mage_Core_Exception
+     */
+    public function authenticateInAnyWebsite(
+        #[\SensitiveParameter]
+        string $email,
+        #[\SensitiveParameter]
+        string $password,
+        int $websiteId,
+        #[\SensitiveParameter]
+        ?string $twofaCode = null,
+    ): Customer {
+        $this->checkLoginLimits($email);
+        $websiteIds = array_unique([$websiteId, ...array_map(intval(...), array_keys(Mage::app()->getWebsites()))]);
+        $notConfirmed = $error = null;
+        foreach ($websiteIds as $id) {
+            try {
+                return $this->authenticateInWebsite($email, $password, $id, $twofaCode);
+            } catch (Mage_Core_Exception_Forbidden $e) {
+                $notConfirmed ??= $e;
+            } catch (Mage_Core_Exception $e) {
+                if ($e->getCode() === Customer::EXCEPTION_2FA_INVALID) {
+                    throw $e;
+                }
+                $error = $e;
+            }
+        }
+        throw $notConfirmed ?? $error;
+    }
+
+    /**
+     * @throws Mage_Core_Exception_TooManyRequests when the client or the email is over the login limit
+     */
+    private function checkLoginLimits(#[\SensitiveParameter] string $email): void
+    {
         $core = Mage::helper('core');
         // The limit of the client comes first: a client that tries many addresses gets past the limit of one address
         $ipLimit = (int) Mage::getStoreConfig(self::XML_PATH_LOGIN_IP_RATE_LIMIT);
         $this->attempt($core->rateLimiter('customer_login', $ipLimit, self::LOGIN_RATE_LIMIT_WINDOW, RateLimitScope::Ip), self::LOGIN_RATE_LIMIT_WINDOW);
         $limit = (int) Mage::getStoreConfig(self::XML_PATH_LOGIN_RATE_LIMIT);
         $this->attempt($core->rateLimiterBy('customer_login', 'customer_login:email:' . strtolower($email), $limit, self::LOGIN_RATE_LIMIT_WINDOW), self::LOGIN_RATE_LIMIT_WINDOW);
+    }
 
+    /**
+     * @throws Mage_Core_Exception_Forbidden when the account is not confirmed, with the code EXCEPTION_EMAIL_NOT_CONFIRMED
+     * @throws Mage_Core_Exception
+     */
+    private function authenticateInWebsite(
+        #[\SensitiveParameter]
+        string $email,
+        #[\SensitiveParameter]
+        string $password,
+        int $websiteId,
+        #[\SensitiveParameter]
+        ?string $twofaCode,
+    ): Customer {
         $customer = Mage::getModel('customer/customer')->setWebsiteId($websiteId);
         try {
             $customer->authenticate($email, $password, $twofaCode);

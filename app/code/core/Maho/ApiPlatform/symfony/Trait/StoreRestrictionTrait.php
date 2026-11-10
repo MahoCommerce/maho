@@ -39,19 +39,6 @@ trait StoreRestrictionTrait
     }
 
     /**
-     * Restrict a collection to the websites of the user's allowed stores.
-     */
-    protected function applyAllowedWebsiteFilter(object $collection, ApiUser $user, string $field = 'main_table.website_id'): void
-    {
-        $websiteIds = $this->allowedWebsiteIds($user);
-        if ($websiteIds === null) {
-            return;
-        }
-
-        $collection->getSelect()->where("{$field} IN (?)", $websiteIds === [] ? [-1] : $websiteIds);
-    }
-
-    /**
      * Deny access when the entity's store is outside the user's allowlist. An
      * entity without a store (null/0) is denied for restricted tokens: it
      * cannot be attributed to any allowed store.
@@ -137,12 +124,12 @@ trait StoreRestrictionTrait
             return null;
         }
 
+        // The loaded store views: getStore() queries an unknown ID, and PostgreSQL fails an ID out of the column range
+        $stores = \Mage::app()->getStores(true);
         $websiteIds = [];
         foreach ($allowedStoreIds as $storeId) {
-            try {
-                $websiteIds[] = (int) \Mage::app()->getStore($storeId)->getWebsiteId();
-            } catch (\Mage_Core_Model_Store_Exception) {
-                // deleted or unknown store: grants access to no website
+            if (isset($stores[$storeId])) {
+                $websiteIds[] = (int) $stores[$storeId]->getWebsiteId();
             }
         }
 

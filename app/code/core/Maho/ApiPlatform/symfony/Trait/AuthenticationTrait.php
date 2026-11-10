@@ -74,20 +74,6 @@ trait AuthenticationTrait
             : \Mage_Customer_Model_Group::NOT_LOGGED_IN_ID;
     }
 
-    protected function getAuthenticatedAdminId(): ?int
-    {
-        if ($this->security === null) {
-            return null;
-        }
-
-        $user = $this->security->getUser();
-        if ($user instanceof ApiUser) {
-            return $user->getAdminId();
-        }
-
-        return null;
-    }
-
     protected function isAdmin(): bool
     {
         return $this->security !== null && $this->security->isGranted('ROLE_ADMIN');
@@ -144,16 +130,6 @@ trait AuthenticationTrait
         if ($authenticatedCustomerId === null || $authenticatedCustomerId !== $customerId) {
             throw new AccessDeniedHttpException($message);
         }
-    }
-
-    protected function canAccessCustomer(int $customerId): bool
-    {
-        if ($this->isAdmin()) {
-            return true;
-        }
-
-        $authenticatedCustomerId = $this->getAuthenticatedCustomerId();
-        return $authenticatedCustomerId !== null && $authenticatedCustomerId === $customerId;
     }
 
     /**

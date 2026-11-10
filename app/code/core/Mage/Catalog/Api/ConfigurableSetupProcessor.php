@@ -38,7 +38,7 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
 
         /** @var \Mage_Catalog_Service_Product_Configurable $service */
         $service = \Mage::getService('catalog/product_configurable');
-        $websiteIds = $this->getAllowedWebsiteIds($user);
+        $websiteIds = $this->allowedWebsiteIds($user);
 
         if ($operation instanceof DeleteOperationInterface) {
             $path = ($context['request'] ?? null)?->getPathInfo() ?? '';

@@ -17,20 +17,20 @@ use Maho\ApiPlatform\CrudProcessor;
 final class CustomerGroupProcessor extends CrudProcessor
 {
     #[\Override]
-    protected function loadOrFail(string $modelAlias, int|string $id, string $notFoundMessage): \Mage_Customer_Model_Group
+    protected function loadModel(int $id): \Mage_Customer_Model_Group
     {
-        return $this->groupService()->getById((int) $id);
+        return $this->groupService()->getById($id);
     }
 
     #[\Override]
-    protected function safeSave(\Mage_Core_Model_Abstract $model, string $entityLabel): void
+    protected function saveModel(\Mage_Core_Model_Abstract $model): void
     {
         /** @var \Mage_Customer_Model_Group $model */
         $this->groupService()->save($model);
     }
 
     #[\Override]
-    protected function safeDelete(\Mage_Core_Model_Abstract $model, string $entityLabel): void
+    protected function deleteModel(\Mage_Core_Model_Abstract $model): void
     {
         /** @var \Mage_Customer_Model_Group $model */
         $this->groupService()->delete($model);
