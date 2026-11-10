@@ -284,15 +284,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
 
             $buyRequest = new \Maho\DataObject($this->getRequest()->getPost());
             $buyRequest->unsFormKey();
-
-            $wishlist
-                ->updateItem($item->getId(), $buyRequest)
-                ->save();
-
-            Mage::helper('wishlist')->calculate();
-            Mage::dispatchEvent('wishlist_update_item', [
-                'wishlist' => $wishlist, 'product' => $product, 'item' => $wishlist->getItemById($id)]);
-
+            $this->wishlistService()->updateItem($wishlist, $item, $buyRequest);
             Mage::helper('wishlist')->calculate();
 
             $message = $this->__('%1$s has been updated in your wishlist.', $product->getName());
@@ -322,67 +314,27 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
 
         $post = $this->getRequest()->getPost();
         if ($post && isset($post['description']) && is_array($post['description'])) {
-            $updatedItems = 0;
-
+            $changes = [];
             foreach ($post['description'] as $itemId => $description) {
-                $item = Mage::getModel('wishlist/item')->load($itemId);
-                if ($item->getWishlistId() != $wishlist->getId()) {
-                    continue;
-                }
-
-                // Extract new values
-                $description = (string) $description;
-
-                if ($description == Mage::helper('wishlist')->defaultCommentString()) {
-                    $description = '';
-                } elseif (!strlen($description)) {
-                    $description = $item->getDescription();
-                }
-
-                $qty = null;
-                if (isset($post['qty'][$itemId])) {
-                    $qty = $this->_processLocalizedQty($post['qty'][$itemId]);
-                }
-                if (is_null($qty)) {
-                    $qty = $item->getQty();
-                    if (!$qty) {
-                        $qty = 1;
-                    }
-                } elseif ($qty == 0) {
-                    try {
-                        $item->delete();
-                    } catch (Exception $e) {
-                        Mage::logException($e);
-                        Mage::getSingleton('customer/session')->addError(
-                            $this->__('Can\'t delete item from wishlist'),
-                        );
-                    }
-                }
-
-                // Check that we need to save
-                if (($item->getDescription() == $description) && ($item->getQty() == $qty)) {
-                    continue;
-                }
-                try {
-                    $item->setDescription($description)
-                        ->setQty($qty)
-                        ->save();
-                    $updatedItems++;
-                } catch (Exception) {
-                    Mage::getSingleton('customer/session')->addError(
-                        $this->__('Can\'t save description %s', $description),
-                    );
-                }
+                $changes[(int) $itemId] = [
+                    // The placeholder of an empty comment clears it, and an empty field keeps it
+                    'description' => match ((string) $description) {
+                        Mage::helper('wishlist')->defaultCommentString() => '',
+                        '' => null,
+                        default => (string) $description,
+                    },
+                    'qty' => isset($post['qty'][$itemId]) ? $this->_processLocalizedQty($post['qty'][$itemId]) : null,
+                ];
             }
-
-            // save wishlist model for setting date of last update
-            if ($updatedItems) {
-                try {
-                    $wishlist->save();
+            try {
+                if ($this->wishlistService()->updateItems($wishlist, $changes)) {
                     Mage::helper('wishlist')->calculate();
-                } catch (Exception) {
-                    Mage::getSingleton('customer/session')->addError($this->__('Can\'t update wishlist'));
                 }
+            } catch (Mage_Core_Exception $e) {
+                Mage::getSingleton('customer/session')->addError($e->getMessage());
+            } catch (Exception $e) {
+                Mage::logException($e);
+                Mage::getSingleton('customer/session')->addError($this->__('Can\'t update wishlist'));
             }
 
             if (isset($post['save_and_share'])) {
@@ -458,15 +410,11 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
             return $this->_redirect('*/*');
         }
 
-        // Set qty
         $qty = $this->getRequest()->getParam('qty');
         if (is_array($qty)) {
             $qty = $qty[$itemId] ?? 1;
         }
-        $qty = (float) $qty;
-        if ($qty && $qty > 0) {
-            $item->setQty($qty);
-        }
+        $qty = (float) $qty > 0 ? (float) $qty : null;
 
         /** @var Mage_Wishlist_Model_Session $session */
         $session    = Mage::getSingleton('wishlist/session');
@@ -475,23 +423,17 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
         $redirectUrl = Mage::getUrl('*/*');
 
         try {
-            $buyRequest = Mage::helper('catalog/product')->addParamsToBuyRequest(
+            $item->mergeBuyRequest(Mage::helper('catalog/product')->addParamsToBuyRequest(
                 $this->getRequest()->getParams(),
                 ['current_config' => $item->getBuyRequest()],
-            );
-
-            $item->mergeBuyRequest($buyRequest);
-            if ($item->addToCart($cart, true)) {
-                $cart->save()->getQuote()->collectTotals();
-            }
-
-            $wishlist->save();
-            Mage::helper('wishlist')->calculate();
+            ));
+            $this->wishlistService()->moveToCart($wishlist, $item, $cart->getQuote(), $qty);
+            $cart->save();
+            Mage::getSingleton('checkout/session')->setLastAddedProductId((int) $item->getProductId());
 
             if (Mage::helper('checkout/cart')->getShouldRedirectToCart()) {
                 $redirectUrl = Mage::helper('checkout/cart')->getCartUrl();
             }
-            Mage::helper('wishlist')->calculate();
 
             $product = Mage::getModel('catalog/product')
                 ->setStoreId(Mage::app()->getStore()->getId())
@@ -499,14 +441,12 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
             $message = $this->__('%s was added to your shopping cart.', $product->getName());
             Mage::getSingleton('catalog/session')->addSuccess($message);
         } catch (Mage_Core_Exception $e) {
-            if ($e->getCode() == Mage_Wishlist_Model_Item::EXCEPTION_CODE_NOT_SALABLE) {
-                $session->addError($this->__('This product(s) is currently out of stock'));
-            } elseif ($e->getCode() == Mage_Wishlist_Model_Item::EXCEPTION_CODE_HAS_REQUIRED_OPTIONS) {
+            // A notice asks for an option that the shopper chooses on the configure page
+            if ($e->getMessages(Mage_Core_Model_Message::NOTICE)) {
                 Mage::getSingleton('catalog/session')->addNotice($e->getMessage());
                 $redirectUrl = Mage::getUrl('*/*/configure/', ['id' => $item->getId()]);
             } else {
-                Mage::getSingleton('catalog/session')->addNotice($e->getMessage());
-                $redirectUrl = Mage::getUrl('*/*/configure/', ['id' => $item->getId()]);
+                $session->addError($e->getMessage());
             }
         } catch (Exception $e) {
             Mage::logException($e);
