@@ -347,3 +347,108 @@ describe('the admin order page', function (): void {
         expect($remove['errors'])->toBe(['Gift card "' . GIFTCARD_PARITY_PREFIX . 'NONE" is not applied to this cart']);
     });
 });
+
+/**
+ * Click Send Email on the admin page of the card $id.
+ *
+ * @return array{success: list<string>, errors: list<string>}
+ */
+function giftcardParityAdminEmail(int $id): array
+{
+    return AdminApiParity::admin(Maho_Giftcard_Adminhtml_Giftcard_PrintController::class, 'email', ['id' => $id]);
+}
+
+/**
+ * Post to /api/rest/v2/giftcards/{id}/send-email.
+ *
+ * @return array{status: int, result: mixed, errors: list<string>, fields: list<string>}
+ */
+function giftcardParityApiEmail(int $id): array
+{
+    $request = AdminApiParity::jsonRequest('POST', "/api/rest/v2/giftcards/{$id}/send-email");
+    return AdminApiParity::api($request, fn() => new GiftCardProcessor(AdminApiParity::adminSecurity())
+        ->process(null, new Post(name: 'giftcard_send_email'), ['id' => $id], ['request' => $request]));
+}
+
+/**
+ * @return list<array{subject: string, recipients: array<mixed>, event: ?string}> the emails of the card $id in the queue
+ */
+function giftcardParityEmails(int $id): array
+{
+    $emails = [];
+    foreach (fetchQueueRows() as $row) {
+        if ($row['message_class'] !== Mage_Core_Model_Email_SendMessage::class) {
+            continue;
+        }
+        $message = \Maho\Queue\QueueManager::serializer()->decode([
+            'body' => (string) $row['body'],
+            'headers' => ['type' => (string) $row['message_class']],
+        ])->getMessage();
+        if ($message->entityType === 'giftcard' && $message->entityId === $id) {
+            $emails[] = ['subject' => $message->subject, 'recipients' => $message->recipients, 'event' => $message->eventType];
+        }
+    }
+    return $emails;
+}
+
+describe('the gift card email', function (): void {
+    it('goes out from the Send Email button of the admin and from the API, with the same email and email_sent_at', function (): void {
+        $recipient = ['recipient_email' => 'friend@example.com', 'recipient_name' => 'Friend'];
+        $adminCard = giftcardParityCard('EMAIL-ADMIN', $recipient);
+        $apiCard = giftcardParityCard('EMAIL-API', $recipient);
+
+        $admin = giftcardParityAdminEmail((int) $adminCard->getId());
+        $api = giftcardParityApiEmail((int) $apiCard->getId());
+
+        $adminEmails = giftcardParityEmails((int) $adminCard->getId());
+        expect($admin)->toBe(['success' => ['Gift card email sent successfully.'], 'errors' => []])
+            ->and($api['status'])->toBe(200)
+            ->and($api['result']->emailSentAt)->not->toBeNull()
+            ->and(Mage::getModel('giftcard/giftcard')->load($adminCard->getId())->getEmailSentAt())->not->toBeNull()
+            ->and($adminEmails)->toHaveCount(1)
+            ->and($adminEmails[0]['recipients'])->toBe([['friend@example.com', 'Friend', Mage_Core_Model_Email_Queue::EMAIL_TYPE_TO]])
+            ->and($adminEmails[0]['event'])->toBe('giftcard_notification')
+            ->and(giftcardParityEmails((int) $apiCard->getId()))->toBe($adminEmails);
+    });
+
+    it('sends the email again on the admin page and in the API when the card got it before', function (): void {
+        $card = giftcardParityCard('EMAIL-AGAIN', ['recipient_email' => 'friend@example.com']);
+
+        giftcardParityAdminEmail((int) $card->getId());
+        giftcardParityApiEmail((int) $card->getId());
+
+        expect(giftcardParityEmails((int) $card->getId()))->toHaveCount(2);
+    });
+
+    it('refuses a card without a recipient email on the admin page and in the API', function (): void {
+        $card = giftcardParityCard('EMAIL-NONE');
+
+        $admin = giftcardParityAdminEmail((int) $card->getId());
+        $api = giftcardParityApiEmail((int) $card->getId());
+
+        expect($admin['errors'])->toBe(['No recipient email address set.'])
+            ->and($api['status'])->toBe(422)
+            ->and($api['errors'])->toBe($admin['errors'])
+            ->and($api['fields'])->toBe(['recipientEmail'])
+            ->and(giftcardParityEmails((int) $card->getId()))->toBe([]);
+    });
+
+    it('does not go out when the API creates a card, as on the admin page', function (): void {
+        $api = giftcardParityApi([
+            'code' => GIFTCARD_PARITY_PREFIX . 'EMAIL-CREATE', 'initialBalance' => 10.0,
+            'websiteIds' => [$this->websiteId], 'recipientEmail' => 'friend@example.com',
+        ]);
+        $admin = TransportParity::admin(Maho_Giftcard_Adminhtml_GiftcardController::class, 'save', [
+            'code' => GIFTCARD_PARITY_PREFIX . 'EMAIL-CREATE-ADMIN', 'balance' => 10, 'website_ids' => [$this->websiteId],
+            'recipient_email' => 'friend@example.com',
+        ]);
+        $adminCard = Mage::getModel('giftcard/giftcard')->loadByCode(GIFTCARD_PARITY_PREFIX . 'EMAIL-CREATE-ADMIN');
+
+        expect($api['status'])->toBe(200)
+            ->and($api['result']->emailSentAt)->toBeNull()
+            ->and(giftcardParityEmails((int) $api['result']->id))->toBe([])
+            ->and($admin['errors'])->toBe([])
+            ->and($adminCard->getEmailSentAt())->toBeNull()
+            ->and(giftcardParityEmails((int) $adminCard->getId()))->toBe([]);
+    });
+});

@@ -159,6 +159,22 @@ class Maho_Giftcard_Service_Giftcard
     }
 
     /**
+     * Email $giftcard to its recipient now, also when the card got the email before, and record the time in
+     * email_sent_at. The admin Send Email button and the API use this method.
+     *
+     * @throws Mage_Core_Exception_Input when the card has no recipient email
+     * @throws Mage_Core_Exception when the store cannot send the email
+     */
+    public function sendEmail(Maho_Giftcard_Model_Giftcard $giftcard, ?int $storeId = null): Maho_Giftcard_Model_Giftcard
+    {
+        if (!$giftcard->getRecipientEmail()) {
+            throw new Mage_Core_Exception_Input()->addError('recipient_email', Mage::helper('giftcard')->__('No recipient email address set.'));
+        }
+        Mage::helper('giftcard')->sendGiftcardEmail($giftcard, $storeId);
+        return $giftcard;
+    }
+
+    /**
      * Email $giftcard to its recipient, once, with the settings of the store $storeId or of the current store.
      * A failed email does not fail the action that created the card.
      */
