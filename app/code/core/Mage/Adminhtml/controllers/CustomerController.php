@@ -485,16 +485,15 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $this->_initCustomer();
         $websiteId = $this->getRequest()->getParam('website_id');
 
-        // delete an item from cart
-        $deleteItemId = $this->getRequest()->getPost('delete');
+        $deleteItemId = (int) $this->getRequest()->getPost('delete');
         if ($deleteItemId) {
             $quote = Mage::getModel('sales/quote')
                 ->setWebsite(Mage::app()->getWebsite($websiteId))
                 ->loadByCustomer(Mage::registry('current_customer'));
-            $item = $quote->getItemById($deleteItemId);
-            if ($item && $item->getId()) {
-                $quote->removeItem($deleteItemId);
-                $quote->collectTotals()->save();
+            try {
+                Mage::getService('checkout/cart')->removeItem($quote, $deleteItemId);
+            } catch (Mage_Core_Exception_NoSuchEntity) {
+                // The grid shows the cart as it is, so a line that is gone needs no message
             }
         }
 
