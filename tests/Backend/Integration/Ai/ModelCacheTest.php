@@ -31,7 +31,12 @@ it('keeps the fetched model list under the cache path that the model dropdown re
 
     $models = $fetcher->cacheModels('openai');
     Mage::app()->getStore()->resetConfig();
+    $stored = Mage::getResourceModel('core/config_data_collection')
+        ->addFieldToFilter('path', 'ai/models_cache/openai')
+        ->addFieldToFilter('scope', 'default')
+        ->getFirstItem()
+        ->getValue();
 
     expect($models)->toBe([['value' => 'gpt-test', 'label' => 'gpt-test']])
-        ->and(Mage::helper('core')->jsonDecode((string) Mage::getStoreConfig('ai/models_cache/openai')))->toBe($models);
+        ->and(Mage::helper('core')->jsonDecode((string) $stored))->toBe($models);
 });
