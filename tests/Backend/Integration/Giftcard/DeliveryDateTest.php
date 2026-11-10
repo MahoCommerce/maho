@@ -163,6 +163,17 @@ describe('a card with a delivery date after today', function (): void {
 
         expect(giftcardDeliveryEmails($giftcard))->toHaveCount(1);
     });
+
+    it('gets no email from the cron when an admin disabled the card before the date', function (): void {
+        $giftcard = giftcardDeliveryInvoice(['giftcard_delivery_date' => giftcardDeliveryStoreDate('+1 day')]);
+        giftcardDeliveryReload($giftcard)->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_DISABLED)->save();
+        giftcardDeliveryMakeDue($giftcard);
+
+        Mage::getModel('giftcard/cron')->processScheduledEmails();
+
+        expect(giftcardDeliveryEmails($giftcard))->toBe([])
+            ->and(giftcardDeliveryReload($giftcard)->getEmailSentAt())->toBeNull();
+    });
 });
 
 it('emails the card at invoice when the delivery date is not after today', function (?string $modify): void {

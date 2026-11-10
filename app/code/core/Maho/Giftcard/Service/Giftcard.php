@@ -207,6 +207,8 @@ class Maho_Giftcard_Service_Giftcard
             ->addFieldToFilter('email_scheduled_at', ['lteq' => Mage::app()->getLocale()->formatDateForDb('now')])
             ->addFieldToFilter('email_sent_at', ['null' => true])
             ->addFieldToFilter('recipient_email', ['neq' => ''])
+            // A card that an admin disabled before its date, for example after a refund, gets no email
+            ->addFieldToFilter('main_table.status', Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE)
             ->setOrder('email_scheduled_at', Maho\Data\Collection::SORT_ORDER_ASC)
             ->setPageSize($limit);
         $collection->getSelect()->joinLeft(
