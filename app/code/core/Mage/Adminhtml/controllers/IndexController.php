@@ -295,56 +295,38 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
 
         try {
             $this->_validateResetPasswordLinkToken($userId, $resetPasswordLinkToken);
-        } catch (Exception $exception) {
+        } catch (Exception) {
             $this->_getSession()->addError(Mage::helper('adminhtml')->__('Your password reset link has expired.'));
             $this->_redirect('*/*/');
             return;
         }
 
-        $errorMessages = [];
-        if (iconv_strlen($password) <= 0) {
-            $errorMessages[] = Mage::helper('adminhtml')->__('New password field cannot be empty.');
-        }
-        /** @var Mage_Admin_Model_User $user */
-        $user = Mage::getModel('admin/user')->load($userId);
-
-        $user->setNewPassword($password);
-        $user->setPasswordConfirmation($passwordConfirmation);
-        $validationErrorMessages = $user->validate();
-        if (is_array($validationErrorMessages)) {
-            $errorMessages = array_merge($errorMessages, $validationErrorMessages);
-        }
-
-        if (!empty($errorMessages)) {
-            foreach ($errorMessages as $errorMessage) {
-                $this->_getSession()->addError($errorMessage);
-            }
-            $data = [
-                'userId' => $userId,
-                'resetPasswordLinkToken' => $resetPasswordLinkToken,
-                'minAdminPasswordLength' => Mage::getModel('admin/user')->getMinAdminPasswordLength(),
-            ];
-            $this->_outTemplate('resetforgottenpassword', $data);
-            return;
-        }
-
+        $errors = [];
         try {
-            // Empty current reset password token i.e. invalidate it
-            $user->setRpToken(null);
-            $user->setRpTokenCreatedAt(null);
-            $user->save();
+            /** @var Mage_Admin_Service_User $service */
+            $service = Mage::getService('admin/user');
+            $service->changePassword($service->getById($userId), $password, $passwordConfirmation);
+        } catch (Mage_Core_Exception_Input $e) {
+            $errors = array_column($e->getErrors(), 'message');
+        } catch (Mage_Core_Exception $e) {
+            $errors = [$e->getMessage()];
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $errors = [Mage::helper('adminhtml')->__('An error occurred while saving account.')];
+        }
+        if ($errors === []) {
             $this->_getSession()->addSuccess(Mage::helper('adminhtml')->__('Your password has been updated.'));
             $this->_redirect('*/*/login');
-        } catch (Exception $exception) {
-            $this->_getSession()->addError($exception->getMessage());
-            $data = [
-                'userId' => $userId,
-                'resetPasswordLinkToken' => $resetPasswordLinkToken,
-                'minAdminPasswordLength' => Mage::getModel('admin/user')->getMinAdminPasswordLength(),
-            ];
-            $this->_outTemplate('resetforgottenpassword', $data);
             return;
         }
+        foreach ($errors as $error) {
+            $this->_getSession()->addError($error);
+        }
+        $this->_outTemplate('resetforgottenpassword', [
+            'userId' => $userId,
+            'resetPasswordLinkToken' => $resetPasswordLinkToken,
+            'minAdminPasswordLength' => Mage::getModel('admin/user')->getMinAdminPasswordLength(),
+        ]);
     }
 
     /**

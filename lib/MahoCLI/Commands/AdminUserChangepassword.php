@@ -37,8 +37,9 @@ class AdminUserChangepassword extends BaseMahoCommand
 
         return $this->runUserAction(
             $output,
-            fn(\Mage_Admin_Service_User $service) => $service->save(
-                $service->getByUsername(trim($username))->setNewPassword(trim($password)),
+            fn(\Mage_Admin_Service_User $service) => $service->changePassword(
+                $service->getByUsername(trim($username)),
+                trim($password),
             ),
             "Password changed for user {$username}",
         );

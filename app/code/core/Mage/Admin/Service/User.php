@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Load, save, enable, disable and delete the admin users of System > Permissions > Users, for the admin and the CLI.
+ * Load, save, enable, disable and delete the admin users, and change their password, for the admin and the CLI.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -73,6 +73,29 @@ class Mage_Admin_Service_User
             }
         }
         return $user;
+    }
+
+    /**
+     * Give $user the new password $password and save it with save(). $confirmation, when set, must be the same.
+     *
+     * @throws Mage_Core_Exception_Input when $password is empty, or with the errors of validate()
+     */
+    public function changePassword(
+        User $user,
+        #[\SensitiveParameter]
+        string $password,
+        #[\SensitiveParameter]
+        ?string $confirmation = null,
+    ): User {
+        if ($password === '') {
+            throw new Mage_Core_Exception_Input()
+                ->addError('new_password', Mage::helper('adminhtml')->__('New password field cannot be empty.'));
+        }
+        $user->setNewPassword($password);
+        if ($confirmation !== null) {
+            $user->setPasswordConfirmation($confirmation);
+        }
+        return $this->save($user);
     }
 
     public function enable(User $user): void
