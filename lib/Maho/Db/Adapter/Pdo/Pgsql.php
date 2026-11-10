@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Maho\Db\Adapter\Pdo;
 
+use Doctrine\DBAL\Exception\DeadlockException;
 use Maho\Db\Adapter\AbstractPdoAdapter;
 use Maho\Db\Helper;
 
@@ -288,10 +289,7 @@ class Pgsql extends AbstractPdoAdapter
 
             $span?->setStatus('error', $e::class . ': ' . ($e->getCode() ?: 'unknown'));
 
-            // Detect implicit rollback - PostgreSQL deadlock detection
-            if ($this->_transactionLevel > 0
-                && str_contains($e->getMessage(), 'deadlock detected')
-            ) {
+            if ($this->_transactionLevel > 0 && $e instanceof DeadlockException) {
                 if ($this->_debug) {
                     $this->_debugWriteToFile('IMPLICIT ROLLBACK AFTER DEADLOCK');
                 }
