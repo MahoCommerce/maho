@@ -217,7 +217,7 @@ class Orders extends AbstractImporter
             $order->cancel()->save();
             return;
         }
-        $invoice = Mage::getModel('sales/service_order', $order)->prepareInvoice();
+        $invoice = Mage::getService('sales/order')->buildInvoice($order);
         $invoice->setRequestedCaptureCase(\Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE)->register();
         $order->setIsInProcess(true);
         Mage::getModel('core/resource_transaction')->addObject($invoice)->addObject($order)->save();
@@ -229,7 +229,7 @@ class Orders extends AbstractImporter
             Mage::getModel('core/resource_transaction')->addObject($shipment)->addObject($order)->save();
         }
         if ($status === 'closed') {
-            $creditmemo = Mage::getModel('sales/service_order', $order)->prepareCreditmemo();
+            $creditmemo = Mage::getService('sales/order')->buildCreditmemo($order);
             $creditmemo->setOfflineRequested(true)->register();
             $order->setIsInProcess(true);
             Mage::getModel('core/resource_transaction')->addObject($creditmemo)->addObject($order)->save();
