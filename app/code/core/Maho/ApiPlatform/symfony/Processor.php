@@ -17,7 +17,6 @@ use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Trait\ActivityLogTrait;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Maho\ApiPlatform\Trait\ModelPersistenceTrait;
-use Maho\ApiPlatform\Trait\RateLimitTrait;
 use Maho\ApiPlatform\Trait\RawResponseTrait;
 use Maho\ApiPlatform\Trait\StoreAccessTrait;
 use Maho\ApiPlatform\Trait\StoreRestrictionTrait;
@@ -46,7 +45,6 @@ abstract class Processor implements ProcessorInterface
     use RawResponseTrait;
     use StoreAccessTrait;
     use StoreRestrictionTrait;
-    use RateLimitTrait;
 
     protected ?string $modelAlias = null;
     protected ?string $entityType = null;

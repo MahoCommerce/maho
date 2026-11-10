@@ -44,10 +44,7 @@ const LAYERING_SERVICE_INPUT_ALLOWLIST = [];
 const LAYERING_SERVICE_INPUT_PERMANENT = [];
 
 /** Transport files that call a rate limiter or a honeypot check themselves, and must stop. */
-const LAYERING_TRANSPORT_GATE_ALLOWLIST = [
-    // The customer grant keeps its own login limit, apart from Mage_Customer_Service_Customer::authenticate()
-    'app/code/core/Maho/ApiPlatform/Api/AuthTokenProcessor.php' => 1,
-];
+const LAYERING_TRANSPORT_GATE_ALLOWLIST = [];
 
 /** Transport files that call a rate limiter or a honeypot check themselves for a reason that stays. */
 const LAYERING_TRANSPORT_GATE_PERMANENT = [

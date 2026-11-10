@@ -74,7 +74,7 @@ SPDX-License-Identifier: AFL-3.0
                         </auth_token_ip>
                         <customer_login translate="label comment" module="api">
                             <label>Customer login</label>
-                            <comment>Per credential. Covers /auth/token (customer + api_user grants) and the GraphQL customerLogin mutation. Default 5 per minute. 0 to disable.</comment>
+                            <comment>Per email or credential. Covers the storefront login, the GraphQL customerLogin mutation and each grant of /auth/token. Default 5 per minute. 0 to disable.</comment>
                             <sort_order>190</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>

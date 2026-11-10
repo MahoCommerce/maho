@@ -95,6 +95,8 @@ The endpoint dispatches by `grant_type`. Supported grants: `customer` (default),
 
 `token_type` and `expires_in` follow the OAuth 2.0 (RFC 6749) snake_case convention; the other fields use the API's usual camelCase. `customer` is populated for the `customer` grant; `apiUser` and `permissions` are populated for `client_credentials` / `api_user` grants. There is no separate `refresh_token` field, call `/auth/refresh` with the existing JWT in the `Authorization` header to get a new token.
 
+The `customer` grant checks the login as the storefront login does. It tries the website of the store of the request first, then the other websites. A wrong email or password gives a 401 with the error `invalid_credentials`. A customer account that is not confirmed gives a 403. The grant counts in the login limits of the storefront, under **System > Configuration > Advanced > System > Rate limit**, so a client over a limit gets a 429 with a `Retry-After` header.
+
 **Use the token:**
 
 === "curl"
