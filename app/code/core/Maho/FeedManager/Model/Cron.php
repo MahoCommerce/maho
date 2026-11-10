@@ -50,30 +50,9 @@ class Maho_FeedManager_Model_Cron
 
         foreach ($feeds as $feed) {
             if ($this->_shouldGenerateFeed($feed, $currentHour)) {
-                // Check if feed is already running
-                if ($this->_isFeedRunning($feed)) {
-                    Mage::log(
-                        "FeedManager Cron: Skipping feed '{$feed->getName()}' - already running",
-                        Mage::LOG_INFO,
-                    );
-                    continue;
-                }
                 $this->_generateFeed($feed);
             }
         }
-    }
-
-    /**
-     * Check if a feed is currently running
-     */
-    protected function _isFeedRunning(Maho_FeedManager_Model_Feed $feed): bool
-    {
-        $runningLog = Mage::getResourceModel('feedmanager/log_collection')
-            ->addFeedFilter((int) $feed->getId())
-            ->addStatusFilter(Maho_FeedManager_Model_Log::STATUS_RUNNING)
-            ->getFirstItem();
-
-        return (bool) $runningLog->getId();
     }
 
     /**
@@ -173,8 +152,9 @@ class Maho_FeedManager_Model_Cron
             );
 
             $autoUpload = $feed->getAutoUpload() && $feed->getDestinationId();
-            $generator = new Maho_FeedManager_Model_Generator();
-            $log = $generator->generate(
+            /** @var Maho_FeedManager_Service_Feed $service */
+            $service = Mage::getService('feedmanager/feed');
+            $log = $service->generate(
                 $feed,
                 $autoUpload ? fn(string $localPath, Maho_FeedManager_Model_Log $log) => $this->_uploadFeed($feed, $log, $localPath) : null,
             );
@@ -196,6 +176,8 @@ class Maho_FeedManager_Model_Cron
                     Mage::LOG_ERROR,
                 );
             }
+        } catch (Mage_Core_Exception_Conflict) {
+            Mage::log("FeedManager Cron: Skipping feed '{$feed->getName()}' - already running", Mage::LOG_INFO);
         } catch (Exception $e) {
             Mage::logException($e);
             Mage::log(

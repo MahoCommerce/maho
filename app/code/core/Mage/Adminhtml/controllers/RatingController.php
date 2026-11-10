@@ -67,36 +67,15 @@ class Mage_Adminhtml_RatingController extends Mage_Adminhtml_Controller_Action
         if ($this->getRequest()->getPost()) {
             try {
                 $ratingModel = Mage::getModel('rating/rating');
-
-                $stores = $this->getRequest()->getParam('stores');
-                $position = (int) $this->getRequest()->getParam('position');
-                $stores[] = 0;
                 $ratingModel->setRatingCode($this->getRequest()->getParam('rating_code'))
                     ->setRatingCodes($this->getRequest()->getParam('rating_codes'))
-                    ->setStores($stores)
-                    ->setPosition($position)
+                    ->setStores((array) $this->getRequest()->getParam('stores'))
+                    ->setPosition((int) $this->getRequest()->getParam('position'))
                     ->setId($this->getRequest()->getParam('id'))
-                    ->setEntityId(Mage::registry('entityId'))
-                    ->save();
-
-                $options = $this->getRequest()->getParam('option_title');
-
-                if (is_array($options)) {
-                    $i = 1;
-                    foreach ($options as $key => $optionCode) {
-                        $optionModel = Mage::getModel('rating/rating_option');
-                        if (!preg_match('/^add_([0-9]*?)$/', $key)) {
-                            $optionModel->setId($key);
-                        }
-
-                        $optionModel->setCode($optionCode)
-                            ->setValue($i)
-                            ->setRatingId($ratingModel->getId())
-                            ->setPosition($i)
-                            ->save();
-                        $i++;
-                    }
-                }
+                    ->setEntityId(Mage::registry('entityId'));
+                /** @var Mage_Rating_Service_Rating $service */
+                $service = Mage::getService('rating/rating');
+                $service->save($ratingModel);
 
                 Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('adminhtml')->__('The rating has been saved.'));
                 Mage::getSingleton('adminhtml/session')->setRatingData(false);

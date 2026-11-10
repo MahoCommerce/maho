@@ -165,7 +165,6 @@
 "Fallback image URL when product has no image","Fallback image URL when product has no image"
 "Feed '%s' generation failed: %s","Feed '%s' generation failed: %s"
 "Feed '%s' is already being generated","Feed '%s' is already being generated"
-"Feed '%s' is already being generated, skipped.","Feed '%s' is already being generated, skipped."
 "Feed Attributes","Feed Attributes"
 "Feed Configuration","Feed Configuration"
 "Feed Content","Feed Content"

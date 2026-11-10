@@ -33,6 +33,11 @@ SPDX-License-Identifier: AFL-3.0
                 </entities>
             </accessibilityscan_resource>
         </models>
+        <services>
+            <accessibilityscan>
+                <class>Maho_AccessibilityScan_Service</class>
+            </accessibilityscan>
+        </services>
         <helpers>
             <accessibilityscan>
                 <class>Maho_AccessibilityScan_Helper</class>

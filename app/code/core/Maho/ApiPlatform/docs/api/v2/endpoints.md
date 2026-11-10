@@ -671,6 +671,7 @@ curl -X PUT /api/rest/v2/revocation-requests/1234 \
   -d '{"processedStatus": "accepted", "adminNote": "Refund issued"}'
 ```
 - `processedStatus` must be one of `accepted`, `rejected`, `info_requested`; anything else returns `422`. Setting it stamps `processedAt`.
+- A change to `accepted` or `rejected` adds a note to the history of the matched order, as the **Accept** and **Reject** buttons of the admin do. The status and the state of the order do not change.
 
 ---
 

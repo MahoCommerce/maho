@@ -169,15 +169,15 @@ Next to the **Search** button, the **All** and **Email Suppressed** buttons sele
 <figcaption>The revocation queue under Sales > Revocation Requests</figcaption>
 </figure>
 
-!!! note "Mass actions mark requests only"
-    Bulk Accept/Reject updates the request rows but does **not** change the matched orders. Order-level actions (status note, refund) are applied one at a time from the detail view, where you can see the matched order.
+!!! note "Mass actions add the same order note"
+    Bulk Accept/Reject records the decision on each request and adds the same audit comment to each matched order as the **Accept** and **Reject** buttons of the detail view. It does not change the status or the state of an order. You issue each refund from the detail view, where you can see the matched order.
 
 ### The detail view
 
 From a single request you can:
 
 - **Save an internal note**, without touching the order or the request's status.
-- **Accept or Reject** the revocation. This records the decision on the request and adds an audit comment to the matched order's history; it does **not** change the order's status, state, or issue any refund. After you accept, if the order can still be credit-memoed, the view shows a link to **create a credit memo** through Maho's standard refund flow.
+- **Accept or Reject** the revocation. This records the decision on the request and adds an audit comment to the matched order's history; it does **not** change the order's status, state, or issue any refund. After you accept, if the order can still be credit-memoed, the view shows a link to **create a credit memo** through Maho's standard refund flow. A decision that you set through the API adds the same comment. A second accept or reject with the same status adds no new comment.
 - **Link an order** manually after triage when the automatic match did not resolve (by entering the order increment ID).
 - **Resend the receipt email**, which also clears a rate-limit suppression and records the resend in the note log.
 

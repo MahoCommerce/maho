@@ -29,13 +29,12 @@ final class RevocationRequestProcessor extends Processor
 
         if (isset($uriVariables['id'])) {
             $model = $service->getById((int) $uriVariables['id']);
-            if ($dto?->processedStatus !== null && $dto->processedStatus !== '') {
-                $model->setProcessedStatus($dto->processedStatus);
-            }
             if ($dto?->adminNote !== null) {
                 $model->setAdminNote($dto->adminNote);
             }
-            return RevocationRequest::fromModel($service->save($model));
+            return RevocationRequest::fromModel($dto?->processedStatus !== null && $dto->processedStatus !== ''
+                ? $service->decide($model, $dto->processedStatus)
+                : $service->save($model));
         }
 
         $args = $context['args']['input'] ?? [];

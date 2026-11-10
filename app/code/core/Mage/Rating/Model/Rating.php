@@ -38,6 +38,20 @@ class Mage_Rating_Model_Rating extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Add the admin store 0 to the stores of the rating. A review is always in store 0 too, and the admin
+     * shows the rating summaries of store 0.
+     */
+    #[\Override]
+    protected function _beforeSave()
+    {
+        $stores = $this->getStores();
+        if ($stores !== null && !in_array(Mage_Core_Model_App::ADMIN_STORE_ID, array_map(intval(...), $stores), true)) {
+            $this->setStores([...$stores, Mage_Core_Model_App::ADMIN_STORE_ID]);
+        }
+        return parent::_beforeSave();
+    }
+
+    /**
      * @param int $optionId
      * @param int|string $entityPkValue
      * @param int $customerId

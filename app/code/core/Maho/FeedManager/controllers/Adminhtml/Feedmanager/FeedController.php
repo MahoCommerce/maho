@@ -863,6 +863,8 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         }
 
         $generated = 0;
+        /** @var Maho_FeedManager_Service_Feed $service */
+        $service = Mage::getService('feedmanager/feed');
 
         foreach ($feedIds as $feedId) {
             try {
@@ -871,23 +873,16 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                     continue;
                 }
 
-                if (Maho_FeedManager_Model_Generator::isGenerating((int) $feedId)) {
-                    $this->_getSession()->addNotice(
-                        $this->__("Feed '%s' is already being generated, skipped.", $feed->getName()),
-                    );
-                    continue;
-                }
-
-                $generator = new Maho_FeedManager_Model_Generator();
-                $log = $generator->generate($feed);
-
-                if ($log->getStatus() === 'completed') {
+                $log = $service->generate($feed);
+                if ($log->getStatus() === Maho_FeedManager_Model_Log::STATUS_COMPLETED) {
                     $generated++;
                 } else {
                     $this->_getSession()->addError(
                         $this->__("Feed '%s' generation failed: %s", $feed->getName(), $log->getErrorMessage()),
                     );
                 }
+            } catch (Mage_Core_Exception_Conflict $e) {
+                $this->_getSession()->addNotice($e->getMessage());
             } catch (Exception $e) {
                 $this->_getSession()->addError(
                     $this->__('Failed to generate feed %s: %s', $feedId, $e->getMessage()),
