@@ -111,28 +111,14 @@ trait StoreRestrictionTrait
     }
 
     /**
-     * Map a restricted user's allowed store ids to their website ids; null for
-     * unrestricted users, meaning "no website restriction". An allowlisted
-     * store that no longer exists grants nothing.
+     * Return the websites of the store views of a store-restricted user, or null for an unrestricted user.
      *
-     * @return int[]|null
+     * @return list<int>|null
      */
     protected function allowedWebsiteIds(ApiUser $user): ?array
     {
-        $allowedStoreIds = $user->getAllowedStoreIds();
-        if ($allowedStoreIds === null) {
-            return null;
-        }
-
-        // The loaded store views: getStore() queries an unknown ID, and PostgreSQL fails an ID out of the column range
-        $stores = \Mage::app()->getStores(true);
-        $websiteIds = [];
-        foreach ($allowedStoreIds as $storeId) {
-            if (isset($stores[$storeId])) {
-                $websiteIds[] = (int) $stores[$storeId]->getWebsiteId();
-            }
-        }
-
-        return array_values(array_unique($websiteIds));
+        /** @var \Mage_Catalog_Service_Product $service */
+        $service = \Mage::getService('catalog/product');
+        return $service->getWebsiteIds($user->getAllowedStoreIds());
     }
 }
