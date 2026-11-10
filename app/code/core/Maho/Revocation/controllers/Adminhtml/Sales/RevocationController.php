@@ -202,10 +202,6 @@ class Maho_Revocation_Adminhtml_Sales_RevocationController extends Mage_Adminhtm
         $this->_prepareDownloadResponse('revocation_requests.csv', $content);
     }
 
-    /**
-     * Mass actions only mark the request rows; order statuses are applied one by one
-     * from the detail view where the merchant sees the matched order.
-     */
     protected function _massProcess(string $processedStatus): void
     {
         $requestIds = $this->getRequest()->getParam('request');
@@ -220,7 +216,7 @@ class Maho_Revocation_Adminhtml_Sales_RevocationController extends Mage_Adminhtm
             foreach ($requestIds as $requestId) {
                 $model = Mage::getModel('revocation/request')->load((int) $requestId);
                 if ($model->getId()) {
-                    $this->_getService()->save($model->setProcessedStatus($processedStatus));
+                    $this->_getService()->decide($model, $processedStatus);
                     $processed++;
                 }
             }

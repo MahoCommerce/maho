@@ -15,7 +15,7 @@ use Tests\Helpers\TransportParity;
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * The Accept and Reject buttons of the admin view and PUT /api/rest/v2/revocation-requests/{id} save the decision
+ * The Accept and Reject buttons of the admin view and of the grid, and PUT /api/rest/v2/revocation-requests/{id} save the decision
  * of the merchant through Maho_Revocation_Service_Request::decide() (#1348). The model checks the status and stamps
  * processed_at, and the service adds a note to the matched order.
  */
@@ -93,16 +93,21 @@ afterEach(function () {
     }
 });
 
-it('sets the status, stamps processed_at and notes the matched order on both transports', function (string $decision, string $status) {
+it('sets the status, stamps processed_at and notes the matched order on every transport', function (string $decision, string $status) {
     $viaAdmin = revocationProcessingFixture(withOrder: true);
+    $viaMass = revocationProcessingFixture(withOrder: true);
     $viaApi = revocationProcessingFixture(withOrder: true);
 
     $admin = revocationProcessingViaAdmin((int) $viaAdmin->getId(), $decision);
+    $mass = TransportParity::admin(Maho_Revocation_Adminhtml_Sales_RevocationController::class, 'mass' . ucfirst($decision), [
+        'request' => [(int) $viaMass->getId()],
+    ]);
     $api = revocationProcessingViaApi($viaApi, $status);
 
     expect($admin['errors'])->toBe([])
+        ->and($mass['errors'])->toBe([])
         ->and($api['status'])->toBe(200);
-    foreach ([$viaAdmin, $viaApi] as $request) {
+    foreach ([$viaAdmin, $viaMass, $viaApi] as $request) {
         $reloaded = Mage::getModel('revocation/request')->load($request->getId());
         expect($reloaded->getProcessedStatus())->toBe($status)
             ->and($reloaded->getProcessedAt())->not->toBeNull()

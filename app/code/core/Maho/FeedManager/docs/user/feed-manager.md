@@ -692,7 +692,7 @@ FeedManager provides command-line tools for automation and debugging.
 ./maho feed:validate 4
 ```
 
-A feed that is already being generated, from the admin, the cron or another command, is not generated a second time. The command shows the error "Feed '...' is already being generated" and ends with a failure exit code. A generation that runs for more than 30 minutes counts as stuck and does not block a new one.
+A feed that is already being generated, from the admin, the cron or another command, is not generated a second time. `feed:generate` shows the error "Feed '...' is already being generated" and ends with a failure exit code. `feed:generate:all` skips the feed with the same message and does not count it as a failure. A generation that runs for more than 30 minutes counts as stuck and does not block a new one.
 
 !!! example "Cron Script for Custom Scheduling"
     Add to your system crontab for custom generation times:

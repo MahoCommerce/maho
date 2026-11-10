@@ -52,6 +52,7 @@ class FeedGenerateAll extends BaseMahoCommand
         $totalStartTime = microtime(true);
         $successCount = 0;
         $failureCount = 0;
+        $skippedCount = 0;
         /** @var \Maho_FeedManager_Service_Feed $service */
         $service = Mage::getService('feedmanager/feed');
 
@@ -82,6 +83,10 @@ class FeedGenerateAll extends BaseMahoCommand
                     }
                     $failureCount++;
                 }
+            } catch (\Mage_Core_Exception_Conflict $e) {
+                $output->writeln('<comment>skipped</comment>');
+                $output->writeln('      - ' . $e->getMessage());
+                $skippedCount++;
             } catch (\Exception $e) {
                 $output->writeln('<error>error!</error>');
                 $output->writeln('      - ' . $e->getMessage());
@@ -92,12 +97,13 @@ class FeedGenerateAll extends BaseMahoCommand
         $totalDuration = round(microtime(true) - $totalStartTime, 2);
         $output->writeln('');
 
-        if ($failureCount === 0) {
+        if ($failureCount === 0 && $skippedCount === 0) {
             $output->writeln(sprintf('<info>All %d feeds generated successfully in %.2fs</info>', $successCount, $totalDuration));
         } else {
             $output->writeln(sprintf(
-                '<comment>Completed: %d successful, %d failed (%.2fs)</comment>',
+                '<comment>Completed: %d successful, %d skipped, %d failed (%.2fs)</comment>',
                 $successCount,
+                $skippedCount,
                 $failureCount,
                 $totalDuration,
             ));

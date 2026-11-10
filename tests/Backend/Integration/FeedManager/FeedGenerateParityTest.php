@@ -20,6 +20,8 @@ uses(Tests\MahoBackendTestCase::class);
 /**
  * The admin grid, feed:generate, feed:generate:all and the cron generate a feed through
  * Maho_FeedManager_Service_Feed::generate() (#1348). The service refuses a feed that another generation holds.
+ * The admin grid, feed:generate:all and the cron skip such a feed. feed:generate fails, because it did not
+ * generate the one feed that it was asked for.
  */
 
 /**
@@ -108,8 +110,9 @@ it('refuses a feed that another generation holds on the admin, the CLI and the c
     expect($admin)->toBe([Mage_Core_Model_Message::NOTICE . ': ' . $message])
         ->and($one['status'])->toBe(Command::FAILURE)
         ->and($one['output'])->toContain("Error: {$message}")
-        ->and($all['status'])->toBe(Command::FAILURE)
-        ->and($all['output'])->toContain($message)
+        ->and($all['status'])->toBe(Command::SUCCESS)
+        ->and($all['output'])->toContain("skipped\n      - {$message}")
+        ->and($all['output'])->toMatch('/Completed: \d+ successful, 1 skipped, 0 failed/')
         ->and(array_count_values($spy->feedIds)[(int) $this->feed->getId()])->toBe(4);
 
     $logs = Mage::getResourceModel('feedmanager/log_collection')->addFeedFilter((int) $this->feed->getId());

@@ -169,8 +169,8 @@ Next to the **Search** button, the **All** and **Email Suppressed** buttons sele
 <figcaption>The revocation queue under Sales > Revocation Requests</figcaption>
 </figure>
 
-!!! note "Mass actions mark requests only"
-    Bulk Accept/Reject updates the request rows but does **not** change the matched orders. Order-level actions (status note, refund) are applied one at a time from the detail view, where you can see the matched order.
+!!! note "Mass actions add the same order note"
+    Bulk Accept/Reject records the decision on each request and adds the same audit comment to each matched order as the **Accept** and **Reject** buttons of the detail view. It does not change the status or the state of an order. You issue each refund from the detail view, where you can see the matched order.
 
 ### The detail view
 
