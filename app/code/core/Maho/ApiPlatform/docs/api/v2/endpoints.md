@@ -737,6 +737,8 @@ The `honeypotField` value is **deterministic per install** (derived from the enc
 | GET | `/countries` | None | List countries |
 | GET | `/countries/{id}` | None | Get country (with regions) |
 
+`/countries` lists the countries that the store allows (**General > Countries Options > Allow Countries**). `/countries/{id}` gives any country, so that a client can show an address in a country that the store no longer allows. The country and region names are in the locale of the store, as in the address forms of the storefront.
+
 ---
 
 ### Tax
