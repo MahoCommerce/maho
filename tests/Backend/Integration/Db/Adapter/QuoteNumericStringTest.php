@@ -55,6 +55,9 @@ it('quotes a string with a leading zero as text', function () {
 });
 
 it('keeps the quoting of an int, a float, a bool, null and an expression', function () {
+    if (!$this->adapter instanceof Maho\Db\Adapter\Pdo\Sqlite) {
+        $this->markTestSkipped('The quoted form of a value depends on the adapter. This test covers the SQLite adapter.');
+    }
     expect($this->adapter->quote(2))->toBe('2')
         ->and($this->adapter->quote(-7))->toBe('-7')
         ->and(trim($this->adapter->quote(true), "'"))->toBe('1')
@@ -85,8 +88,11 @@ it('finds a code with digits only', function () {
     $select = $this->adapter->select()->from($this->tableName, ['id'])->where('code = ?', '7');
     expect(quoteNumericStringIds($this->adapter, $select))->toBe([4]);
 
-    $select = $this->adapter->select()->from($this->tableName, ['id'])->where('code = ?', 7);
-    expect(quoteNumericStringIds($this->adapter, $select))->toBe([4]);
+    if ($this->adapter instanceof Maho\Db\Adapter\Pdo\Sqlite) {
+        // MySQL compares a text column with an integer as numbers, so there 7 also matches '007'
+        $select = $this->adapter->select()->from($this->tableName, ['id'])->where('code = ?', 7);
+        expect(quoteNumericStringIds($this->adapter, $select))->toBe([4]);
+    }
 });
 
 it('matches an integer column with a numeric string', function () {

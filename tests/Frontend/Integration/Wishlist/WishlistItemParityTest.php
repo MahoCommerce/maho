@@ -62,6 +62,11 @@ function wishlistItemSecurity(int $customerId): Security
 function wishlistItemViaPage(string $action, array $params, string $controller = 'index'): array
 {
     Mage::unregister('wishlist');
+    $sessions = ['customer/session', 'wishlist/session', 'catalog/session', 'checkout/session'];
+    // An earlier test in the process can leave messages in these sessions
+    foreach ($sessions as $session) {
+        Mage::getSingleton($session)->getMessages(true);
+    }
     $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create("/wishlist/{$controller}/{$action}", 'POST', $params));
     $request->setRouteName('wishlist')->setControllerName($controller)->setActionName($action)->setDispatched(true);
     Mage::app()->setRequest($request);
@@ -69,7 +74,7 @@ function wishlistItemViaPage(string $action, array $params, string $controller =
     new $class($request, new Mage_Core_Controller_Response_Http())->{$action . 'Action'}();
 
     $messages = [];
-    foreach (['customer/session', 'wishlist/session', 'catalog/session', 'checkout/session'] as $session) {
+    foreach ($sessions as $session) {
         foreach (Mage::getSingleton($session)->getMessages(true)->getItems() as $message) {
             $messages[] = $message->getText();
         }
