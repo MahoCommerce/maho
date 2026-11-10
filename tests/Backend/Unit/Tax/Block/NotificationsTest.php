@@ -40,7 +40,7 @@ class TaxNotificationsWrongDiscountBlock extends Mage_Tax_Block_Adminhtml_Notifi
     }
 }
 
-it('links the tax notification to the user guide page that explains rounding', function () {
+it('links the tax notices to the tax calculation guide', function () {
     Mage::getDesign()->setArea('adminhtml')->setPackageName('default')->setTheme('default');
     $block = Mage::app()->getLayout()
         ->createBlock(TaxNotificationsWrongDiscountBlock::class, '', ['factory' => new TaxNotificationsFactory()])
