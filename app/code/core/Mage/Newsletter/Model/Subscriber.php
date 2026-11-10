@@ -401,18 +401,16 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
 
         $this->setStatus($status);
 
-        if (!$this->getId()) {
-            $storeId = $customer->getStoreId();
-            if ($customer->getStoreId() == 0) {
-                $storeId = Mage::app()->getWebsite($customer->getWebsiteId())->getDefaultStore()->getId();
-            }
-            $this->setStoreId($storeId)
-                ->setCustomerId($customer->getId())
-                ->setEmail($customer->getEmail());
-        } else {
-            $this->setStoreId($customer->getStoreId())
-                ->setEmail($customer->getEmail());
+        // A customer that an admin created has the store 0, and its subscription takes the default store view of its website
+        $storeId = (int) $customer->getStoreId();
+        if ($storeId === Mage_Core_Model_App::ADMIN_STORE_ID) {
+            $storeId = (int) Mage::app()->getWebsite($customer->getWebsiteId())->getDefaultStore()->getId();
         }
+        if (!$this->getId()) {
+            $this->setCustomerId($customer->getId());
+        }
+        $this->setStoreId($storeId)
+            ->setEmail($customer->getEmail());
 
         $this->save();
         $sendSubscription = $customer->getData('sendSubscription') || $sendInformationEmail;
