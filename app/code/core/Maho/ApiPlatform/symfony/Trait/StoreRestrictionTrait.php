@@ -39,19 +39,6 @@ trait StoreRestrictionTrait
     }
 
     /**
-     * Restrict a collection to the websites of the user's allowed stores.
-     */
-    protected function applyAllowedWebsiteFilter(object $collection, ApiUser $user, string $field = 'main_table.website_id'): void
-    {
-        $websiteIds = $this->allowedWebsiteIds($user);
-        if ($websiteIds === null) {
-            return;
-        }
-
-        $collection->getSelect()->where("{$field} IN (?)", $websiteIds === [] ? [-1] : $websiteIds);
-    }
-
-    /**
      * Deny access when the entity's store is outside the user's allowlist. An
      * entity without a store (null/0) is denied for restricted tokens: it
      * cannot be attributed to any allowed store.
