@@ -53,7 +53,7 @@ describe('The order service refund of a credit memo without an invoice', functio
         $order = onlineRefundPaidOrder();
 
         try {
-            expect(fn() => \Mage::getService('sales/order')->refund($order, ['qtys' => []], null, false))
+            expect(fn() => \Mage::getService('sales/order')->refund($order, [], null, false))
                 ->toThrow(Mage_Core_Exception::class, 'Cannot refund online');
 
             $reloaded = Mage::getModel('sales/order')->load($order->getId());
@@ -69,7 +69,7 @@ describe('The order service refund of a credit memo without an invoice', functio
         $order = onlineRefundPaidOrder();
 
         try {
-            $creditmemo = \Mage::getService('sales/order')->refund($order, ['qtys' => []], null, true);
+            $creditmemo = \Mage::getService('sales/order')->refund($order, [], null, true);
 
             $reloaded = Mage::getModel('sales/order')->load($order->getId());
             expect((float) $creditmemo->getBaseGrandTotal())->toBe(100.0)

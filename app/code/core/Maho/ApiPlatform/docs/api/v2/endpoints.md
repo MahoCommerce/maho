@@ -234,7 +234,8 @@ An admin token or an API token with the `customers/create` grant creates an acco
 
 - A guest token or a customer token places the order as the customer. The subtotal must reach the minimum order amount of the store (**Sales > Minimum Order Amount**). When the store asks the customer to accept its terms and conditions, the body sends `agreementIds`, with the ID of each required one. A problem gives a 422 with `subtotal` or `agreementIds` in `details.errors`.
 - An admin token or an API token with the `orders/create` grant places the order as staff, as the admin order create does: the minimum order amount and the terms and conditions do not apply.
-- A line with an error, an address that is not valid, a shipping method without a rate of the address and a missing payment method give a 422, with `items`, `billingAddress`, `shippingAddress`, `shippingMethod` or `paymentMethod` in `details.errors`.
+- A line with an error, an address that is not valid, a shipping method without a rate of the address and a missing payment method give a 422, with `items`, `billingAddress`, `shippingAddress`, `shippingMethod` or `paymentMethod` in `details.errors`. A `guestEmail` that is not a valid email address gives a 422 with `guestEmail` in `details.errors`.
+- An address of a customer order goes to the address book of the customer only when the checkout or the admin order form asks for it (**Save in Address Book**). The API has no field for this yet, so an address of an API order does not go to the address book.
 - A second placement of a cart while the first one runs gives a 409. A gift card of the cart that is spent or no longer valid at the time of the placement gives a 422.
 - The customer gets the new order email, as on the storefront, unless the payment method sends the customer to a third party. Staff sends `"sendConfirmation": false` to place an order without the email.
 - A guest order gets a one-time access token for `GET /orders/{incrementId}/details`, also when the storefront places it.
@@ -407,7 +408,8 @@ Omit `items` to ship every remaining item on the order. Each track entry needs a
 ```
 
 **Parameters:**
-- `items[]`, Array of items to refund. Each requires `orderItemId` and `qty`. Optional: `backToStock` (boolean, returns qty to inventory).
+- `items[]`, Array of items to refund. Each requires `orderItemId` and `qty`. Optional: `backToStock` (boolean, returns qty to inventory). Without `items`, the credit memo refunds every item that the order can refund. With `items`, it refunds only the items with a `qty` above 0. An empty list, or a list of zeros, refunds no item and no shipping, so it refunds the adjustments only.
+- `shippingAmount`, Optional shipping amount to refund. Without it, a credit memo that refunds items refunds the shipping that the order did not refund yet, as the admin form does.
 - `comment`, Optional refund note.
 - `adjustmentPositive`, Additional positive adjustment (add to refund).
 - `adjustmentNegative`, Negative adjustment (reduce refund).

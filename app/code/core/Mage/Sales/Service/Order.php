@@ -53,10 +53,12 @@ class Mage_Sales_Service_Order
 
     /**
      * Place the order of $quote through submit(), for the API. $guestEmail is the email of a guest order, $orderNote
-     * the note of the customer, and $cashTendered and $employeeId the fields of a POS order.
+     * the note of the customer, and $cashTendered and $employeeId the fields of a POS order. Before submit(),
+     * sales_api_place_order_before lets a module prepare the cart, such as a POS module that sets a default method.
      *
      * @param list<int|string>|null $agreementIds see submit()
      * @return array{order: Order, accessToken: ?string, changeAmount: ?float}
+     * @throws Mage_Core_Exception_Input when $guestEmail is not a valid email address
      * @throws Mage_Core_Exception
      */
     public function place(
@@ -70,6 +72,9 @@ class Mage_Sales_Service_Order
         ?bool $sendConfirmation = null,
     ): array {
         if ($guestEmail && !$quote->getCustomerId()) {
+            if (!Mage::helper('core')->isValidEmail($guestEmail)) {
+                throw new Mage_Core_Exception_Input()->addError('guest_email', Mage::helper('core')->__('Invalid email address.'));
+            }
             $quote->setCustomerEmail($guestEmail);
         }
         if ($orderNote) {
@@ -80,6 +85,11 @@ class Mage_Sales_Service_Order
         }
         $quote->setData(self::CASH_TENDERED_KEY, $cashTendered);
 
+        Mage::dispatchEvent('sales_api_place_order_before', [
+            'quote' => $quote,
+            'payment_method' => $quote->getPayment()->getMethod() ?: null,
+            'shipping_method' => $quote->isVirtual() ? null : ($quote->getShippingAddress()->getShippingMethod() ?: null),
+        ]);
         $order = $this->submit($quote, $actor, $agreementIds, sendConfirmation: $sendConfirmation);
         $changeAmount = $order->getPayment()->getAdditionalInformation('change_amount');
 
@@ -199,8 +209,9 @@ class Mage_Sales_Service_Order
     /**
      * Place the order of $quote, in the store of $quote, or in the admin scope when the caller is in it. The checks
      * of validateQuote() run first. Then, under a lock on the cart, the gift cards and the totals are checked again,
-     * the order is saved, and the cart is closed. A guest order gets an access token. The new order email follows
-     * $sendConfirmation, and checkout_submit_all_after fires once.
+     * the addresses go to the address book as addToAddressBook() tells, the order is saved, and the cart is closed.
+     * A guest order gets an access token. The new order email follows $sendConfirmation, and
+     * checkout_submit_all_after fires once.
      *
      * @param list<int|string>|null $agreementIds the agreements that a Customer accepted, or null when the flow of
      *                                            the caller has no agreements step
@@ -227,6 +238,8 @@ class Mage_Sales_Service_Order
             return $this->withQuoteLock($quote, function () use ($quote, $actor, $orderData, $sendConfirmation, $convertor): Order {
                 if (!$quote->getCustomerId() && !$quote->getCustomerIsNew()) {
                     $orderData['guest_access_token'] = $this->generateAccessToken();
+                } else {
+                    $this->addToAddressBook($quote);
                 }
                 $order = $this->convert($quote, $actor, $orderData, $convertor ?? Mage::getModel('sales/convert_quote'));
                 $this->recordCashTendered($quote, $order);
@@ -271,6 +284,58 @@ class Mage_Sales_Service_Order
                 }
             }
         }
+    }
+
+    /**
+     * Add each address of $quote that has save_in_address_book to the address book of the customer of $quote, which
+     * the order transaction saves. An address that the customer picked from the address book updates that saved
+     * address instead. A shipping address that is the same as the billing address is not added again. When the
+     * customer has no default billing address, the billing address becomes it. When the customer has no default
+     * shipping address, the shipping address becomes it, or the billing address when it is also the shipping address.
+     */
+    private function addToAddressBook(\Mage_Sales_Model_Quote $quote): void
+    {
+        $customer = $quote->getCustomer();
+        $billing = $quote->getBillingAddress();
+        $shipping = $quote->isVirtual() ? null : $quote->getShippingAddress();
+        $savedBilling = $this->saveInAddressBook($customer, $billing);
+        $savedShipping = $shipping && !$shipping->getSameAsBilling() ? $this->saveInAddressBook($customer, $shipping) : null;
+
+        if ($savedBilling && !$customer->getDefaultBilling()) {
+            $savedBilling->setIsDefaultBilling(true);
+        }
+        if (!$customer->getDefaultShipping()) {
+            if ($savedShipping) {
+                $savedShipping->setIsDefaultShipping(true);
+            } elseif ($savedBilling && (!$shipping || $shipping->getSameAsBilling())) {
+                $savedBilling->setIsDefaultShipping(true);
+            }
+        }
+    }
+
+    /**
+     * Return the address of the address book of $customer that $address adds or updates, or null when $address does
+     * not go to the address book, or a caller already linked it to an address of the address book.
+     */
+    private function saveInAddressBook(\Mage_Customer_Model_Customer $customer, \Mage_Sales_Model_Quote_Address $address): ?\Mage_Customer_Model_Address
+    {
+        if (!$address->getSaveInAddressBook() || $address->getCustomerAddress()) {
+            return null;
+        }
+
+        $exported = $address->exportCustomerAddress();
+        $saved = $customer->getId() && $address->getCustomerAddressId()
+            ? $customer->getAddressItemById($address->getCustomerAddressId())
+            : null;
+        if ($saved) {
+            $saved->addData($exported->getData());
+        } else {
+            $customer->addAddress($exported);
+            $saved = $exported;
+        }
+        $address->setCustomerAddress($saved);
+
+        return $saved;
     }
 
     /**
@@ -2020,8 +2085,10 @@ class Mage_Sales_Service_Order
      * Create a credit memo for an order, or for its invoice $invoice. Email it when $sendEmail is true, and put the
      * comment in the email when $notifyCustomer is true.
      *
-     * A memo that refunds nothing is not a refund. The credit memo model refuses a refund above the refundable balance
-     * of the order.
+     * Without qtys in $data, refund every item that the order can refund. With qtys, refund only the qtys above 0: an
+     * empty map or a map of zeros refunds no item, and then no shipping unless $data gives shipping_amount. A memo
+     * that refunds nothing is not a refund. The credit memo model refuses a refund above the refundable balance of
+     * the order.
      *
      * @param array<string, mixed> $data Credit memo data for prepareCreditmemo().
      * @param array<int, bool>|null $backToStockItemIds Order item ids to return to stock, see prepareCreditmemo().
@@ -2040,6 +2107,15 @@ class Mage_Sales_Service_Order
         bool $sendEmail = false,
         ?Invoice $invoice = null,
     ): Creditmemo {
+        if (isset($data['qtys'])) {
+            $data['qtys'] = array_filter($this->parseLocaleNumbers($data['qtys']), fn($qty) => $qty !== 0.0);
+            if ($data['qtys'] === []) {
+                // prepareCreditmemo() refunds every item for an empty map, so give it a key that names no order item
+                $data['qtys'] = [0 => 0.0];
+                // Without an amount, the credit memo refunds the shipping that the order did not refund yet
+                $data['shipping_amount'] ??= 0.0;
+            }
+        }
         $creditmemo = $this->withOrderLock((int) $order->getId(), function () use ($order, $data, $comment, $offlineRefund, $backToStockItemIds, $notifyCustomer, $visibleOnFront, $sendEmail, $invoice): Creditmemo {
             // Re-read under the lock so canCreditmemo() sees the live
             // total_refunded, not a value another request changed while we waited.

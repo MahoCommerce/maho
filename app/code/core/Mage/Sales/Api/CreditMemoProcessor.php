@@ -57,39 +57,28 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
         // its single collectTotals() pass. Setting them afterwards and collecting
         // again would double every total (the creditmemo collectors accumulate
         // into grand total and never reset), over-refunding the order.
-        $data = ['qtys' => []];
+        $data = [];
         foreach (['adjustmentPositive' => 'adjustment_positive', 'adjustmentNegative' => 'adjustment_negative', 'shippingAmount' => 'shipping_amount'] as $field => $key) {
             if (isset($args[$field])) {
                 $data[$key] = (float) $args[$field];
             }
         }
 
-        // An absent items key refunds every refundable item. A present items key
-        // refunds exactly the listed quantities, so an empty list refunds no item.
         // Without a backToStock flag on any item, the store setting decides the return to stock.
         $backToStock = null;
-        foreach ($items ?? [] as $itemData) {
-            $entry = $this->parseOrderItemEntry($itemData);
-            $orderItemId = $entry['orderItemId'];
-            if ($entry['qty'] !== 0.0) {
+        if ($items !== null) {
+            $data['qtys'] = [];
+            foreach ($items as $itemData) {
+                $entry = $this->parseOrderItemEntry($itemData);
+                $orderItemId = $entry['orderItemId'];
                 $data['qtys'][$orderItemId] = $entry['qty'];
-            }
-            if (array_key_exists('backToStock', $itemData)) {
-                $backToStock ??= [];
-                if ($itemData['backToStock']) {
-                    $backToStock[$orderItemId] = true;
+                if (array_key_exists('backToStock', $itemData)) {
+                    $backToStock ??= [];
+                    if ($itemData['backToStock']) {
+                        $backToStock[$orderItemId] = true;
+                    }
                 }
             }
-        }
-
-        // An empty qty map makes prepareCreditmemo() refund every item, so use a
-        // key that matches no order item.
-        if ($items !== null && $data['qtys'] === []) {
-            $data['qtys'][0] = 0.0;
-            // The shipping collector refunds the order's whole remaining shipping
-            // unless an amount is given, so a memo that refunds no item would still
-            // carry the delivery charge.
-            $data['shipping_amount'] ??= 0.0;
         }
 
         $creditmemo = $this->orderService->refund(

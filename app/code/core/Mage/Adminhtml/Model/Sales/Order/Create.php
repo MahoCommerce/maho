@@ -1459,9 +1459,8 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         $store = $this->getSession()->getStore();
 
         $customerIsInStore = $this->_customerIsInStore($store);
-        $customerBillingAddress = null;
-        $customerShippingAddress = null;
 
+        // Mage_Sales_Service_Order::submit() adds the addresses to the address book
         if ($customer->getId()) {
             // Create new customer if customer is not registered in specified store
             if (!$customerIsInStore) {
@@ -1472,67 +1471,12 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                     ->setDefaultShipping(null);
                 $this->_setCustomerData($customer);
             }
-
-            if ($this->getBillingAddress()->getSaveInAddressBook()) {
-                $customerBillingAddress = $this->getBillingAddress()->exportCustomerAddress();
-                $customerAddressId = $this->getBillingAddress()->getCustomerAddressId();
-                if ($customerAddressId && $customer->getId()) {
-                    $customer->getAddressItemById($customerAddressId)->addData($customerBillingAddress->getData());
-                } else {
-                    $customer->addAddress($customerBillingAddress);
-                }
-            }
-
-            if (!$this->getQuote()->isVirtual() && $this->getShippingAddress()->getSaveInAddressBook()) {
-                $customerShippingAddress = $this->getShippingAddress()->exportCustomerAddress();
-                $customerAddressId = $this->getShippingAddress()->getCustomerAddressId();
-                if ($customerAddressId && $customer->getId()) {
-                    $customer->getAddressItemById($customerAddressId)->addData($customerShippingAddress->getData());
-                } elseif (!empty($customerAddressId)
-                    && $customerBillingAddress !== null
-                    && $this->getBillingAddress()->getCustomerAddressId() == $customerAddressId
-                ) {
-                    $customerBillingAddress->setIsDefaultShipping();
-                } else {
-                    $customer->addAddress($customerShippingAddress);
-                }
-            }
-
-            if (is_null($customer->getDefaultBilling()) && $customerBillingAddress) {
-                $customerBillingAddress->setIsDefaultBilling();
-            }
-
-            if (is_null($customer->getDefaultShipping())) {
-                if ($this->getShippingAddress()->getSameAsBilling() && $customerBillingAddress) {
-                    $customerBillingAddress->setIsDefaultShipping();
-                } elseif ($customerShippingAddress) {
-                    $customerShippingAddress->setIsDefaultShipping();
-                }
-            }
         } else {
             // Prepare new customer
-            $customerBillingAddress = $this->getBillingAddress()->exportCustomerAddress();
-            $customer->addData($customerBillingAddress->getData())
+            $customer->addData($this->getBillingAddress()->exportCustomerAddress()->getData())
                 ->setStore($store);
             $customer->setEmail($this->_getNewCustomerEmail($customer));
             $this->_setCustomerData($customer);
-
-            if ($this->getBillingAddress()->getSaveInAddressBook()) {
-                $customerBillingAddress->setIsDefaultBilling();
-                $customer->addAddress($customerBillingAddress);
-            }
-
-            $shippingAddress = $this->getShippingAddress();
-            if (!$this->getQuote()->isVirtual()
-                && !$shippingAddress->getSameAsBilling()
-                && $shippingAddress->getSaveInAddressBook()
-            ) {
-                $customerShippingAddress = $shippingAddress->exportCustomerAddress();
-                $customerShippingAddress->setIsDefaultShipping();
-                $customer->addAddress($customerShippingAddress);
-            } else {
-                $customerBillingAddress->setIsDefaultShipping();
-            }
         }
 
         // Set quote customer data to customer

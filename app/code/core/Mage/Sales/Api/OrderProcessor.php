@@ -146,11 +146,6 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             throw new \Mage_Core_Exception_Input()->addError('customer_custom_attributes', 'customerCustomAttributes is for a guest order. A customer order takes the values of the customer account');
         }
 
-        // Set customer email from the body if provided (guest checkout)
-        if ($guestEmail && !$quote->getCustomerId() && \Mage::helper('core')->isValidEmail($guestEmail)) {
-            $quote->setCustomerEmail($guestEmail);
-        }
-
         // Set shipping method directly on the in-memory address. The frontend
         // sends a composite carrier_method string in the body, and we preserve
         // the in-memory quote state through to place() rather than
@@ -194,16 +189,8 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             $this->cartService->collectAndVerifyTotals($quote);
         }
 
-        $placeOrder = function () use ($quote, $paymentMethod, $shippingMethod, $guestEmail, $orderNote, $cashTendered, $employeeId, $actor, $agreementIds, $sendConfirmation): array {
+        $placeOrder = function () use ($quote, $guestEmail, $orderNote, $cashTendered, $employeeId, $actor, $agreementIds, $sendConfirmation): array {
             $quote->save();
-
-            // Allow modules to prepare the quote before order placement
-            // (e.g. POS module sets default address, shipping, payment for admin orders)
-            \Mage::dispatchEvent('sales_api_place_order_before', [
-                'quote' => $quote,
-                'payment_method' => $paymentMethod,
-                'shipping_method' => $shippingMethod,
-            ]);
 
             return $this->orderService->place(
                 $quote,

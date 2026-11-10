@@ -173,8 +173,6 @@ class OrderMutationHandler
         AdminAcl::checkResource(CreditMemo::class);
         $orderId = $variables['orderId'] ?? null;
         $items = $variables['items'] ?? [];
-        $adjustmentPositive = (float) ($variables['adjustmentPositive'] ?? 0);
-        $adjustmentNegative = (float) ($variables['adjustmentNegative'] ?? 0);
         $comment = $variables['comment'] ?? 'Return';
 
         if (!$orderId) {
@@ -187,37 +185,29 @@ class OrderMutationHandler
             throw ValidationException::invalidValue('refundToStoreCredit', 'store credit refunds are not supported');
         }
 
-        return $this->buildProcessReturn($this->orderService->requireById((int) $orderId), $items, $comment, $adjustmentPositive, $adjustmentNegative);
+        return $this->buildProcessReturn($this->orderService->requireById((int) $orderId), $items, $comment, $variables);
     }
 
     /**
      * @param array<int, array<string, mixed>> $items
+     * @param array<string, mixed> $variables
      * @return array<string, mixed>
      */
-    private function buildProcessReturn(
-        \Mage_Sales_Model_Order $order,
-        array $items,
-        ?string $comment,
-        float $adjustmentPositive,
-        float $adjustmentNegative,
-    ): array {
-        $creditmemoData = [
-            'qtys' => [],
-            'shipping_amount' => 0,
-            'adjustment_positive' => $adjustmentPositive,
-            'adjustment_negative' => $adjustmentNegative,
-        ];
-
+    private function buildProcessReturn(\Mage_Sales_Model_Order $order, array $items, ?string $comment, array $variables): array
+    {
+        $creditmemoData = ['qtys' => []];
+        foreach (['adjustmentPositive' => 'adjustment_positive', 'adjustmentNegative' => 'adjustment_negative', 'shippingAmount' => 'shipping_amount'] as $field => $key) {
+            if (isset($variables[$field])) {
+                $creditmemoData[$key] = (float) $variables[$field];
+            }
+        }
         foreach ($items as $itemData) {
             $orderItemId = $itemData['orderItemId'] ?? null;
-            $qty = $itemData['qty'] ?? 0;
-            if ($orderItemId && $qty > 0) {
-                $creditmemoData['qtys'][$orderItemId] = $qty;
+            if ($orderItemId) {
+                $creditmemoData['qtys'][$orderItemId] = $itemData['qty'] ?? 0;
             }
         }
 
-        // Refunds run through the order service so this path and the REST/GraphQL
-        // CreditMemo resource apply the same money rules and the same lock.
         $creditmemo = $this->orderService->refund(
             $order,
             $creditmemoData,
