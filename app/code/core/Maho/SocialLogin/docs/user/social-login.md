@@ -82,7 +82,7 @@ The match in step 4 follows this order:
 
 - A previously linked identity signs the customer straight in.
 - Otherwise, a provider-verified email that matches an existing account links the identity to that account.
-- Otherwise, Maho creates a new account with the name and email from the provider.
+- Otherwise, Maho creates a new account with the name and email from the provider. The account follows the rules of the registration form: the default customer group, the welcome email, and the customer registration limit (**Customer registration** under **Rate limit**, default 10 per hour for each IP address). It needs no email confirmation, because the provider verified the email.
 
 If the registration form has required fields beyond name and email, a new customer is sent to the account edit page to complete them. If **Allow New Accounts via Social Sign-In** is disabled, unknown customers get an error instead of a new account.
 

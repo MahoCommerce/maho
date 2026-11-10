@@ -38,7 +38,8 @@ class Maho_SocialLogin_Service_Identity
      *        (Apple sends them only in the first authorization response); used only when a new
      *        account is created, never for existing accounts
      * @return array{customer: Mage_Customer_Model_Customer, is_new: bool, profile_incomplete: bool}
-     * @throws Mage_Core_Exception_TooManyRequests when the client is over its limit
+     * @throws Mage_Core_Exception_TooManyRequests when the client is over its limit, or over the registration limit
+     *                                              of Mage_Customer_Service_Customer::register() for a new account
      * @throws Maho_SocialLogin_Model_ProviderUnavailableException when the provider does not answer
      * @throws Mage_Core_Exception With a user-facing message on any failure
      */
@@ -190,30 +191,20 @@ class Maho_SocialLogin_Service_Identity
      */
     protected function createCustomer(array $claims, array $nameHints, int $storeId): Mage_Customer_Model_Customer
     {
-        $store = Mage::app()->getStore($storeId);
         $firstname = $claims['given_name'] ?? trim((string) ($nameHints['firstname'] ?? ''));
         $lastname = $claims['family_name'] ?? trim((string) ($nameHints['lastname'] ?? ''));
 
-        $customer = Mage::getModel('customer/customer');
-        $customer->setWebsiteId((int) $store->getWebsiteId());
-        $customer->setStore($store);
-        $customer->setEmail($claims['email']);
-        $customer->setFirstname($firstname !== '' ? $firstname : 'Customer');
-        $customer->setLastname($lastname !== '' ? $lastname : '.');
-        $customer->getGroupId();
+        $customer = Mage::getModel('customer/customer')
+            ->setEmail($claims['email'])
+            ->setFirstname($firstname !== '' ? $firstname : 'Customer')
+            ->setLastname($lastname !== '' ? $lastname : '.')
+            // The provider verified the email, so the account needs no confirmation
+            ->setForceConfirmed()
+            // The customer fills the required profile fields after the sign-up, see finish()
+            ->setDeferRequiredProfile();
         $customer->setPassword(Mage::helper('core')->getRandomString(32));
-        // The provider verified the email; without this the resource model still
-        // generates a confirmation key and the new account cannot log in
-        $customer->setForceConfirmed();
-        Mage::getService('customer/customer')->save($customer);
 
-        try {
-            $customer->sendNewAccountEmail('registered', '', $storeId);
-        } catch (Throwable $e) {
-            Mage::log("Welcome email failed for customer {$customer->getId()}: {$e->getMessage()}", Mage::LOG_WARNING, self::LOG_FILE);
-        }
-
-        return $customer;
+        return Mage::getService('customer/customer')->register($customer, $storeId);
     }
 
     protected function assertUsable(Mage_Customer_Model_Customer $customer): void

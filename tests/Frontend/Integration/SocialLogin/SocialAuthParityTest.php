@@ -192,3 +192,46 @@ describe('kept differences: each transport has its own nonce rule', function () 
             ->and($api['status'])->toBe(200);
     });
 });
+
+it('registers a new account through the customer service on both transports, with the rules of a social sign-up', function () {
+    $store = Mage::app()->getStore();
+    $store->setConfig('customer/create_account/confirm', '1');
+    $store->setConfig('system/smtp/enabled', '');
+    $spy = new class extends Mage_Customer_Service_Customer {
+        /** @var list<array{string, string}> */
+        public array $emails = [];
+
+        #[\Override]
+        protected function sendNewAccountEmail(Mage_Customer_Model_Customer $customer, string $type, int $storeId, string $backUrl = ''): void
+        {
+            $this->emails[] = [$type, (string) $customer->getEmail()];
+        }
+    };
+    Mage::unregister('_service/customer/customer');
+    Mage::register('_service/customer/customer', $spy);
+    // The provider gives no date of birth, so a store that requires it still gets the account
+    $dob = Mage::getModel('customer/attribute')->loadByCode('customer', 'dob');
+    $wasRequired = (int) $dob->getIsRequired();
+    $dob->setIsRequired(1)->save();
+
+    try {
+        $webEmail = 'social-register-' . uniqid() . '@example.com';
+        $apiEmail = 'social-register-' . uniqid() . '@example.com';
+        $webNonce = Mage::getModel('sociallogin/nonce')->issue();
+        $web = socialViaWeb('google', socialParityToken($webEmail, 'sub-' . uniqid(), $webNonce), $webNonce);
+        $api = socialViaApi('google', socialParityToken($apiEmail, 'sub-' . uniqid()), null);
+    } finally {
+        $dob->setIsRequired($wasRequired)->save();
+        Mage::unregister('_service/customer/customer');
+    }
+
+    $webCustomer = Mage::getModel('customer/customer')->load($web['customer_id']);
+    $apiCustomer = Mage::getModel('customer/customer')->load($api['customer_id']);
+    expect($web['status'])->toBe(200)
+        ->and($api['status'])->toBe(200)
+        ->and($webCustomer->getEmail())->toBe($webEmail)
+        ->and($apiCustomer->getEmail())->toBe($apiEmail)
+        ->and($webCustomer->getConfirmation())->toBeNull()
+        ->and($apiCustomer->getConfirmation())->toBeNull()
+        ->and($spy->emails)->toBe([['registered', $webEmail], ['registered', $apiEmail]]);
+});

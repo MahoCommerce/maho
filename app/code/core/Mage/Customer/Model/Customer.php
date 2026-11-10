@@ -1135,18 +1135,20 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
             $errors[] = Mage::helper('customer')->__('Please make sure your passwords match.');
         }
 
-        $entityType = Mage::getSingleton('eav/config')->getEntityType('customer');
-        $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'dob');
-        if ($attribute->getIsRequired() && trim((string) $this->getDob()) == '') {
-            $errors[] = Mage::helper('customer')->__('The Date of Birth is required.');
-        }
-        $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'taxvat');
-        if ($attribute->getIsRequired() && trim((string) $this->getTaxvat()) == '') {
-            $errors[] = Mage::helper('customer')->__('The TAX/VAT number is required.');
-        }
-        $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'gender');
-        if ($attribute->getIsRequired() && !$this->getGender()) {
-            $errors[] = Mage::helper('customer')->__('Gender is required.');
+        if (!$this->getDeferRequiredProfile()) {
+            $entityType = Mage::getSingleton('eav/config')->getEntityType('customer');
+            $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'dob');
+            if ($attribute->getIsRequired() && trim((string) $this->getDob()) == '') {
+                $errors[] = Mage::helper('customer')->__('The Date of Birth is required.');
+            }
+            $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'taxvat');
+            if ($attribute->getIsRequired() && trim((string) $this->getTaxvat()) == '') {
+                $errors[] = Mage::helper('customer')->__('The TAX/VAT number is required.');
+            }
+            $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'gender');
+            if ($attribute->getIsRequired() && !$this->getGender()) {
+                $errors[] = Mage::helper('customer')->__('Gender is required.');
+            }
         }
 
         if (empty($errors)) {
@@ -1853,6 +1855,21 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     public function setForceConfirmed(?bool $value = true): static
     {
         return $this->setData('force_confirmed', $value);
+    }
+
+    /**
+     * Whether validate() lets the date of birth, the tax/VAT number and the gender stay empty when the store requires
+     * them. A social sign-up sets it: the provider does not give these fields, and the customer fills them later.
+     */
+    public function getDeferRequiredProfile(): ?bool
+    {
+        $value = $this->getData('defer_required_profile');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setDeferRequiredProfile(?bool $value = true): static
+    {
+        return $this->setData('defer_required_profile', $value);
     }
 
     public function getGender(): ?int
