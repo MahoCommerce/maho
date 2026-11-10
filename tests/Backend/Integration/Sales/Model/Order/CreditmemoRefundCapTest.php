@@ -89,7 +89,7 @@ it('refuses a refund above the refundable balance before the refund_before obser
 });
 
 it('refuses the same refund through the order service, and saves nothing', function (): void {
-    expect(fn() => Mage::getService('sales/order')->refund($this->order, ['qtys' => [], 'adjustment_positive' => 50]))
+    expect(fn() => Mage::getService('sales/order')->refund($this->order, ['adjustment_positive' => 50]))
         ->toThrow(Mage_Core_Exception::class, "Refund amount exceeds the order's refundable balance");
 
     $reloaded = Mage::getModel('sales/order')->load($this->order->getId());
@@ -99,7 +99,7 @@ it('refuses the same refund through the order service, and saves nothing', funct
 });
 
 it('runs the refund_before observers for a refund within the balance', function (): void {
-    Mage::getService('sales/order')->refund($this->order, ['qtys' => []]);
+    Mage::getService('sales/order')->refund($this->order, []);
 
     expect($this->spy->calls)->toBe(1)
         ->and((float) Mage::getModel('sales/order')->load($this->order->getId())->getBaseTotalRefunded())->toBe(100.0);

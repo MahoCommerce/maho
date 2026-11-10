@@ -405,7 +405,8 @@ Omit `items` to ship every remaining item on the order. Each track entry needs a
 ```
 
 **Parameters:**
-- `items[]`, Array of items to refund. Each requires `orderItemId` and `qty`. Optional: `backToStock` (boolean, returns qty to inventory).
+- `items[]`, Array of items to refund. Each requires `orderItemId` and `qty`. Optional: `backToStock` (boolean, returns qty to inventory). Without `items`, the credit memo refunds every item that the order can refund. With `items`, it refunds only the items with a `qty` above 0. An empty list, or a list of zeros, refunds no item and no shipping, so it refunds the adjustments only.
+- `shippingAmount`, Optional shipping amount to refund. Without it, a credit memo that refunds items refunds the shipping that the order did not refund yet, as the admin form does.
 - `comment`, Optional refund note.
 - `adjustmentPositive`, Additional positive adjustment (add to refund).
 - `adjustmentNegative`, Negative adjustment (reduce refund).

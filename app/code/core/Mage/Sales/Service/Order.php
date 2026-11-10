@@ -2020,8 +2020,10 @@ class Mage_Sales_Service_Order
      * Create a credit memo for an order, or for its invoice $invoice. Email it when $sendEmail is true, and put the
      * comment in the email when $notifyCustomer is true.
      *
-     * A memo that refunds nothing is not a refund. The credit memo model refuses a refund above the refundable balance
-     * of the order.
+     * Without qtys in $data, refund every item that the order can refund. With qtys, refund only the qtys above 0: an
+     * empty map or a map of zeros refunds no item, and then no shipping unless $data gives shipping_amount. A memo
+     * that refunds nothing is not a refund. The credit memo model refuses a refund above the refundable balance of
+     * the order.
      *
      * @param array<string, mixed> $data Credit memo data for prepareCreditmemo().
      * @param array<int, bool>|null $backToStockItemIds Order item ids to return to stock, see prepareCreditmemo().
@@ -2040,6 +2042,15 @@ class Mage_Sales_Service_Order
         bool $sendEmail = false,
         ?Invoice $invoice = null,
     ): Creditmemo {
+        if (isset($data['qtys'])) {
+            $data['qtys'] = array_filter($this->parseLocaleNumbers($data['qtys']), fn($qty) => $qty !== 0.0);
+            if ($data['qtys'] === []) {
+                // prepareCreditmemo() refunds every item for an empty map, so give it a key that names no order item
+                $data['qtys'] = [0 => 0.0];
+                // Without an amount, the credit memo refunds the shipping that the order did not refund yet
+                $data['shipping_amount'] ??= 0.0;
+            }
+        }
         $creditmemo = $this->withOrderLock((int) $order->getId(), function () use ($order, $data, $comment, $offlineRefund, $backToStockItemIds, $notifyCustomer, $visibleOnFront, $sendEmail, $invoice): Creditmemo {
             // Re-read under the lock so canCreditmemo() sees the live
             // total_refunded, not a value another request changed while we waited.
