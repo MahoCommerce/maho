@@ -177,7 +177,7 @@ Next to the **Search** button, the **All** and **Email Suppressed** buttons sele
 From a single request you can:
 
 - **Save an internal note**, without touching the order or the request's status.
-- **Accept or Reject** the revocation. This records the decision on the request and adds an audit comment to the matched order's history; it does **not** change the order's status, state, or issue any refund. After you accept, if the order can still be credit-memoed, the view shows a link to **create a credit memo** through Maho's standard refund flow.
+- **Accept or Reject** the revocation. This records the decision on the request and adds an audit comment to the matched order's history; it does **not** change the order's status, state, or issue any refund. After you accept, if the order can still be credit-memoed, the view shows a link to **create a credit memo** through Maho's standard refund flow. A decision that you set through the API adds the same comment. A second accept or reject with the same status adds no new comment.
 - **Link an order** manually after triage when the automatic match did not resolve (by entering the order increment ID).
 - **Resend the receipt email**, which also clears a rate-limit suppression and records the resend in the note log.
 

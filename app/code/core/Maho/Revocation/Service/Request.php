@@ -45,6 +45,26 @@ class Maho_Revocation_Service_Request
     }
 
     /**
+     * Save the processing status $status of $request. When the status changes to accepted or rejected, add a
+     * note to the history of the matched order. The status and the state of the order do not change.
+     *
+     * @throws Mage_Core_Exception_Input when the processing status is not valid
+     */
+    public function decide(Maho_Revocation_Model_Request $request, string $status): Maho_Revocation_Model_Request
+    {
+        $changed = $request->setProcessedStatus($status)->dataHasChangedFor('processed_status');
+        $this->save($request);
+        if ($changed) {
+            try {
+                $this->_addDecisionComment($request);
+            } catch (Throwable $e) {
+                Mage::logException($e);
+            }
+        }
+        return $request;
+    }
+
+    /**
      * Record the declaration in $input and send its emails. Return null and record nothing when the
      * web form fills the honeypot or comes back too fast, so that a bot cannot detect the trap.
      *
@@ -278,6 +298,23 @@ class Maho_Revocation_Service_Request
         );
         $history->setIsVisibleOnFront();
         $history->setIsCustomerNotified(false);
+        $order->save();
+    }
+
+    protected function _addDecisionComment(Maho_Revocation_Model_Request $request): void
+    {
+        $helper = Mage::helper('revocation');
+        $comment = match ($request->getProcessedStatus()) {
+            Maho_Revocation_Model_Request::PROCESSED_STATUS_ACCEPTED => $helper->__('Revocation request #%s accepted.', $request->getId()),
+            Maho_Revocation_Model_Request::PROCESSED_STATUS_REJECTED => $helper->__('Revocation request #%s rejected.', $request->getId()),
+            default => null,
+        };
+        $order = $comment === null ? null : $request->getOrder();
+        if (!$order) {
+            return;
+        }
+
+        $order->addStatusHistoryComment($comment)->setIsCustomerNotified(false);
         $order->save();
     }
 }

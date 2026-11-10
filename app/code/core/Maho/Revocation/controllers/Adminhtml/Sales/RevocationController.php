@@ -70,7 +70,7 @@ class Maho_Revocation_Adminhtml_Sales_RevocationController extends Mage_Adminhtm
     }
 
     /**
-     * Save the internal note (and optionally the processed status) without touching the order.
+     * Save the internal note. The status and the order do not change.
      */
     #[Maho\Config\Route('/admin/sales_revocation/save')]
     public function saveAction(): void
@@ -82,12 +82,7 @@ class Maho_Revocation_Adminhtml_Sales_RevocationController extends Mage_Adminhtm
         }
 
         try {
-            $model->setAdminNote((string) $this->getRequest()->getParam('admin_note'));
-            $processedStatus = (string) $this->getRequest()->getParam('processed_status');
-            if ($processedStatus !== '') {
-                $model->setProcessedStatus($processedStatus);
-            }
-            $this->_getService()->save($model);
+            $this->_getService()->save($model->setAdminNote((string) $this->getRequest()->getParam('admin_note')));
             Mage::getSingleton('adminhtml/session')->addSuccess($this->__('The revocation request has been saved.'));
         } catch (Exception $e) {
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
@@ -97,10 +92,7 @@ class Maho_Revocation_Adminhtml_Sales_RevocationController extends Mage_Adminhtm
     }
 
     /**
-     * Accept or reject the revocation. Applies the corresponding order status to the
-     * matched order (status only, never the order state). Accepting redirects to the
-     * creditmemo creation page so the merchant can process the refund via the
-     * existing flow.
+     * Accept or reject the revocation. The order gets a note, and its status and state do not change.
      */
     #[Maho\Config\Route('/admin/sales_revocation/process')]
     public function processAction(): void
@@ -119,26 +111,11 @@ class Maho_Revocation_Adminhtml_Sales_RevocationController extends Mage_Adminhtm
         }
 
         $accepted = $decision === 'accept';
-        $order = $model->getOrder();
 
         try {
-            $this->_getService()->save($model->setProcessedStatus($accepted
+            $this->_getService()->decide($model, $accepted
                 ? Maho_Revocation_Model_Request::PROCESSED_STATUS_ACCEPTED
-                : Maho_Revocation_Model_Request::PROCESSED_STATUS_REJECTED));
-
-            // Audit note only: the revocation outcome lives on the request, never on the
-            // order's status/state. A revocation can target an order in any state, and the
-            // refund (when accepted) is handled through the normal credit memo flow, which
-            // the detail view links to.
-            if ($order) {
-                $history = $order->addStatusHistoryComment(
-                    $accepted
-                        ? $this->__('Revocation request #%s accepted.', $model->getId())
-                        : $this->__('Revocation request #%s rejected.', $model->getId()),
-                );
-                $history->setIsCustomerNotified(false);
-                $order->save();
-            }
+                : Maho_Revocation_Model_Request::PROCESSED_STATUS_REJECTED);
 
             Mage::getSingleton('adminhtml/session')->addSuccess($accepted
                 ? $this->__('The revocation has been marked as accepted.')
