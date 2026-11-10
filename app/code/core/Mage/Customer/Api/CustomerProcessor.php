@@ -297,8 +297,10 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         if ($tokenData['action'] !== 'create_account') {
             throw new \Mage_Core_Exception('Invalid token action.');
         }
-        $order = \Mage::getModel('sales/order')->load($tokenData['orderId']);
-        if (!$order->getId() || $order->getCustomerEmail() !== $tokenData['email']) {
+        /** @var \Mage_Sales_Service_Order $orderService */
+        $orderService = \Mage::getService('sales/order');
+        $order = $orderService->getById((int) $tokenData['orderId']);
+        if (!$order || $order->getCustomerEmail() !== $tokenData['email']) {
             throw new \Mage_Core_Exception('Order not found.');
         }
 
@@ -319,12 +321,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             $customer->addAddress($address->setShouldIgnoreValidation(true));
         }
         $this->getService()->register($customer, (int) $order->getStoreId());
-
-        $order->setCustomerId($customer->getId());
-        $order->setCustomerIsGuest(false);
-        $order->setCustomerFirstname($customer->getFirstname());
-        $order->setCustomerLastname($customer->getLastname());
-        $order->save();
+        $orderService->assignToCustomer($order, $customer);
 
         return Customer::fromModel($customer);
     }

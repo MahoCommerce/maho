@@ -57,51 +57,25 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
     }
 
     /**
-     * Associate guest orders with current customer
+     * Give the logged-in customer the guest orders of the store that have the email of the customer
      */
     #[Maho\Config\Route('/sales/order/associateGuestOrders', name: 'sales.order.associateguestorders', methods: ['POST'])]
     public function associateGuestOrdersAction(): void
     {
         $session = Mage::getSingleton('customer/session');
-        $customer = $session->getCustomer();
-        $customerHelper = Mage::helper('customer');
-
-        if (!$customer || !$customer->getId()) {
-            $session->addError($this->__('Please log in to associate orders.'));
-            $this->_redirect('customer/account/login');
-            return;
-        }
-
-        if (!$customerHelper->isCustomerEligibleForGuestOrderAssociation($customer)) {
-            $session->addError($this->__('Please confirm your email address before associating guest orders.'));
-            $this->_redirect('customer/account');
-            return;
-        }
+        /** @var Mage_Sales_Service_Order $orderService */
+        $orderService = Mage::getService('sales/order');
 
         try {
-            // Find all guest orders with the same email and store
-            $guestOrders = Mage::getResourceModel('sales/order_collection')
-                ->addFieldToFilter('customer_id', ['null' => true])
-                ->addFieldToFilter('customer_email', $customer->getEmail())
-                ->addFieldToFilter('store_id', Mage::app()->getStore()->getId());
-
-            $associatedCount = 0;
-            foreach ($guestOrders as $order) {
-                // Associate the order with the customer
-                $order->setCustomerId($customer->getId())
-                      ->setCustomerIsGuest(0)
-                      ->setCustomerGroupId($customer->getGroupId())
-                      ->save();
-                $associatedCount++;
-            }
-
-            if ($associatedCount > 0) {
-                $session->addSuccess($this->__('Successfully associated %d guest order(s) with your account.', $associatedCount));
+            $count = $orderService->assignGuestOrders($session->getCustomer(), (int) Mage::app()->getStore()->getId());
+            if ($count > 0) {
+                $session->addSuccess($this->__('Successfully associated %d guest order(s) with your account.', $count));
             } else {
                 $session->addNotice($this->__('No guest orders found for your email address.'));
             }
-
-        } catch (Exception $e) {
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+        } catch (Throwable $e) {
             Mage::logException($e);
             $session->addError($this->__('An error occurred while associating orders. Please try again.'));
         }

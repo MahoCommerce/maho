@@ -605,6 +605,53 @@ class Mage_Sales_Service_Order
     }
 
     /**
+     * Give $customer each guest order of the store $storeId that has the email of the customer, and return the number
+     * of orders. The email is the only proof that the orders are of the customer, so a store that requires a
+     * confirmed email refuses a customer who has not confirmed it.
+     *
+     * @throws Mage_Core_Exception_Forbidden when the customer must confirm the email first
+     */
+    public function assignGuestOrders(\Mage_Customer_Model_Customer $customer, int $storeId): int
+    {
+        if (!Mage::helper('customer')->isCustomerEligibleForGuestOrderAssociation($customer, $storeId)) {
+            throw new Mage_Core_Exception_Forbidden(Mage::helper('sales')->__('Please confirm your email address before associating guest orders.'));
+        }
+        $orders = Mage::getResourceModel('sales/order_collection')
+            ->addFieldToFilter('customer_id', ['null' => true])
+            ->addFieldToFilter('customer_email', $customer->getEmail())
+            ->addFieldToFilter('store_id', $storeId);
+        foreach ($orders as $order) {
+            $this->assignToCustomer($order, $customer);
+        }
+        return count($orders);
+    }
+
+    /**
+     * Give the guest order $order to $customer, who has the email of the order and can use its store. The order gets
+     * the customer and the group of the customer, and keeps the name that it was placed with.
+     *
+     * @throws Mage_Core_Exception_Conflict when the order has a customer
+     * @throws Mage_Core_Exception when the customer does not have the email of the order or cannot use its store
+     */
+    public function assignToCustomer(Order $order, \Mage_Customer_Model_Customer $customer): Order
+    {
+        if ($order->getCustomerId()) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('sales')->__('This order already belongs to a customer.'));
+        }
+        if (strtolower((string) $order->getCustomerEmail()) !== strtolower((string) $customer->getEmail())
+            || !$customer->isInStore($order->getStoreId())
+        ) {
+            throw new Mage_Core_Exception(Mage::helper('sales')->__('This order cannot be added to this account.'));
+        }
+        $order->setCustomerId((int) $customer->getId())
+            ->setCustomerIsGuest(false)
+            ->setCustomerGroupId((int) $customer->getGroupId())
+            ->save();
+
+        return $order;
+    }
+
+    /**
      * Find the guest order $incrementId for the guest order form. The billing last name must match, and the email or
      * the billing postcode, whichever is given. Count each failed lookup against the limit of the client.
      *
