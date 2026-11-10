@@ -76,15 +76,15 @@ class CmsPages extends AbstractCmsImporter
     protected function write(CsvFile $file, array $rows, array $options, Reporter $reporter): Result
     {
         $result = new Result();
-        $config = Mage::getModel('core/config');
-        $configTouched = false;
+        /** @var \Mage_Cms_Service_Page $service */
+        $service = Mage::getService('cms/page');
+        $homePages = [];
         foreach ($rows as $row) {
-            $page = Mage::getModel('cms/page');
             if ($row['page_id'] !== null) {
-                $page->load($row['page_id']);
+                $page = Mage::getModel('cms/page')->load($row['page_id']);
                 $result->updated++;
             } else {
-                $page->setRootTemplate('one_column');
+                $page = $service->newPage();
                 $result->created++;
             }
             $page->setIdentifier($row['identifier'])->setStores($row['store_ids'])->setIsActive((bool) $row['is_active']);
@@ -99,15 +99,15 @@ class CmsPages extends AbstractCmsImporter
             foreach ($row['custom'] as $code => $value) {
                 $page->setData($code, $value);
             }
-            Mage::getService('cms/page')->save($page);
+            $service->save($page);
             if ($row['is_home']) {
                 foreach ($row['store_ids'] as $storeId) {
-                    $config->saveConfig(\Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE, $row['identifier'], $storeId === 0 ? 'default' : 'stores', $storeId);
+                    $homePages[] = [\Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE, $row['identifier'], $storeId === 0 ? 'default' : 'stores', $storeId];
                 }
-                $configTouched = true;
             }
         }
-        if ($configTouched) {
+        if ($homePages !== []) {
+            Mage::getService('core/config')->saveAll($homePages);
             Mage::app()->getCache()->cleanType('config');
         }
         $reporter->info(count($rows) . ' pages');

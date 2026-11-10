@@ -68,7 +68,7 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
              ->_title($this->__('Manage Content'));
 
         $id = $this->getRequest()->getParam('page_id');
-        $model = Mage::getModel('cms/page');
+        $model = $this->pageService()->newPage();
         if ($id) {
             try {
                 $model = $this->pageService()->getById((int) $id);

@@ -19,6 +19,12 @@ use Maho\ApiPlatform\Security\ApiUser;
 final class CmsPageProcessor extends CrudProcessor
 {
     #[\Override]
+    protected function newModel(): \Mage_Cms_Model_Page
+    {
+        return $this->service()->newPage();
+    }
+
+    #[\Override]
     protected function loadModel(int $id): \Mage_Cms_Model_Page
     {
         return $this->service()->getById($id);
@@ -35,19 +41,6 @@ final class CmsPageProcessor extends CrudProcessor
             }
             if ($data->metaRobots !== null) {
                 $model->setData('meta_robots', strtoupper(str_replace(' ', '', $data->metaRobots)));
-            }
-        }
-
-        // An omitted field is null on the DTO, so that an update leaves it alone. A new page is enabled, for every store view
-        if (!$model->getId()) {
-            if ($model->getData('is_active') === null) {
-                $model->setData('is_active', 1);
-            }
-            if ($model->getData('stores') === null) {
-                $model->setData('stores', [0]);
-            }
-            if (!$model->getData('root_template')) {
-                $model->setData('root_template', \Mage::getSingleton('page/source_layout')->getDefaultValue());
             }
         }
     }

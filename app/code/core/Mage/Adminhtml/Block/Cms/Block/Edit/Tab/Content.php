@@ -82,9 +82,6 @@ class Mage_Adminhtml_Block_Cms_Block_Edit_Tab_Content extends Mage_Adminhtml_Blo
                 '0' => Mage::helper('cms')->__('Disabled'),
             ],
         ]);
-        if (!$model->getId()) {
-            $model->setData('is_active', '1');
-        }
 
         $fieldset->addField('content', 'editor', [
             'name' => 'content',

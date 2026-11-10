@@ -36,6 +36,17 @@ class Mage_Cms_Service_Block
     }
 
     /**
+     * Return a new block with the defaults of the admin form: enabled, in all store views.
+     */
+    public function newBlock(): Mage_Cms_Model_Block
+    {
+        /** @var Mage_Cms_Model_Block $block */
+        $block = Mage::getModel('cms/block');
+        return $block->setIsActive()
+            ->setData('stores', [Mage_Core_Model_App::ADMIN_STORE_ID]);
+    }
+
+    /**
      * Save $block. The transport puts its input into the block first.
      * The model refuses a block that shows itself. The resource model sanitizes the content and checks the identifier.
      *

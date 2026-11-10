@@ -100,7 +100,7 @@ abstract class Processor implements ProcessorInterface
 
     protected function processCreate(mixed $data, ApiUser $user): mixed
     {
-        $model = \Mage::getModel($this->modelAlias);
+        $model = $this->newModel();
         $this->applyData($model, $data, $user);
         // Authorize after applyData so store-scoped defaults (e.g. an omitted
         // `stores` defaulting to all-stores) are validated, not just raw input.
@@ -129,6 +129,15 @@ abstract class Processor implements ProcessorInterface
         $this->deleteModel($model);
         $this->logApiActivity($this->entityType, 'delete', $oldData, null);
         return null;
+    }
+
+    /**
+     * Return a new model of $modelAlias for a create. A processor whose service gives a new record its defaults
+     * overrides it.
+     */
+    protected function newModel(): \Mage_Core_Model_Abstract
+    {
+        return \Mage::getModel($this->modelAlias);
     }
 
     /**
