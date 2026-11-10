@@ -287,7 +287,7 @@ class AdminGraphQlController
             'customer', 'getCustomer', 'GetCustomer'
                 => $this->customerHandler->handleGetCustomer($variables),
             'createCustomer', 'CreateCustomer'
-                => $this->customerHandler->handleCreateCustomer($variables),
+                => $this->customerHandler->handleCreateCustomer($variables, $context),
             'updateCustomerAddress', 'UpdateCustomerAddress', 'updateAddress', 'UpdateAddress'
                 => $this->customerHandler->handleUpdateCustomerAddress($variables),
 

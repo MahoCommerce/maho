@@ -246,9 +246,10 @@ class Mage_Customer_Service_Customer
 
     /**
      * Create $customer for an admin, the CLI or an API integration, on the store $storeId. The account needs no
-     * confirmation. When the transport sets no password, the customer gets a random one and sets their own with
-     * a password reset. With $welcomeEmailStoreId, send the welcome email from that store. $save saves the
-     * customer: the admin order create gives the placement of its order, as register() describes.
+     * confirmation. When the transport sets no password, the customer gets a random one. With $welcomeEmailStoreId,
+     * send the welcome email from that store. When the password is random, the welcome email has the link to set
+     * a password. $save saves the customer: the admin order create gives the placement of its order, as register()
+     * describes.
      *
      * @param (Closure(): void)|null $save
      * @throws Mage_Core_Exception_Input with one error for each problem of the customer and of its new addresses
@@ -256,7 +257,8 @@ class Mage_Customer_Service_Customer
      */
     public function create(Customer $customer, int $storeId, ?int $welcomeEmailStoreId = null, ?Closure $save = null): Customer
     {
-        if ($customer->getPassword() === '') {
+        $isPasswordRandom = $customer->getPassword() === '';
+        if ($isPasswordRandom) {
             $password = $customer->generatePassword(16);
             $customer->setPassword($password)->setPasswordConfirmation($password);
         }
@@ -265,12 +267,41 @@ class Mage_Customer_Service_Customer
 
         if ($welcomeEmailStoreId !== null) {
             try {
-                $this->sendNewAccountEmail($customer, 'registered', $welcomeEmailStoreId);
+                if ($isPasswordRandom) {
+                    $this->sendPasswordLinkEmail($customer, $welcomeEmailStoreId);
+                } else {
+                    $this->sendNewAccountEmail($customer, 'registered', $welcomeEmailStoreId);
+                }
             } catch (Exception $e) {
                 Mage::logException($e);
             }
         }
         return $customer;
+    }
+
+    /**
+     * Create $customer for a point of sale, on the store $storeId, with a random password and the welcome email
+     * with the link to set a password. $address gets the name of the customer and becomes the default billing and
+     * shipping address. It skips the validation, because a point of sale asks only some of the fields, such as the
+     * telephone. Without a country, it gets the default country of the store.
+     *
+     * @throws Mage_Core_Exception_Input with one error for each problem of the customer
+     * @throws Mage_Core_Exception_Conflict when another customer has the email
+     */
+    public function quickCreate(Customer $customer, int $storeId, ?Mage_Customer_Model_Address $address = null): Customer
+    {
+        if ($address !== null) {
+            $address->setFirstname($customer->getFirstname())
+                ->setLastname($customer->getLastname())
+                ->setIsDefaultBilling(true)
+                ->setIsDefaultShipping(true)
+                ->setShouldIgnoreValidation(true);
+            if (!$address->getCountryId()) {
+                $address->setCountryId((string) Mage::helper('core')->getDefaultCountry($storeId));
+            }
+            $customer->addAddress($address);
+        }
+        return $this->create($customer->setPassword(''), $storeId, $storeId);
     }
 
     /**
@@ -456,6 +487,28 @@ class Mage_Customer_Service_Customer
             }
         }
         throw $notConfirmed ?? $error;
+    }
+
+    /**
+     * Check the 2FA code of $customer, whose identity another step proved: a magic link, a confirmation link or a
+     * social login. A customer who does not use 2FA needs no code. Each check counts in the login limits, as a
+     * login with the password does.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests when the client or the email is over the login limit
+     * @throws Mage_Core_Exception with the code EXCEPTION_2FA_INVALID when the code is empty or wrong
+     */
+    public function verifySecondFactor(
+        Customer $customer,
+        #[\SensitiveParameter]
+        string $code,
+    ): void {
+        if (!$customer->isTwofaRequired()) {
+            return;
+        }
+        $this->checkLoginLimits((string) $customer->getEmail());
+        if (!$customer->verifyTwofaCode($code)) {
+            throw new Mage_Core_Exception(Mage::helper('customer')->__('2FA verification code is invalid.'), Customer::EXCEPTION_2FA_INVALID);
+        }
     }
 
     /**
@@ -725,6 +778,14 @@ class Mage_Customer_Service_Customer
     protected function sendNewAccountEmail(Customer $customer, string $type, int $storeId, string $backUrl = ''): void
     {
         $customer->sendNewAccountEmail($type, $backUrl, $storeId);
+    }
+
+    /**
+     * Send the welcome email with the link to set a password to $customer, from the store $storeId.
+     */
+    protected function sendPasswordLinkEmail(Customer $customer, int $storeId): void
+    {
+        $customer->sendPasswordLinkEmail(true, $storeId);
     }
 
     /**

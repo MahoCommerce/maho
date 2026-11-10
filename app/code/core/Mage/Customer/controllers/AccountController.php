@@ -1060,13 +1060,16 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         }
 
         $code = (string) $this->getRequest()->getPost('twofa_verification_code');
-        if ($session->completeTwofaChallenge($code)) {
-            $session->addSuccess($this->__('You have been successfully logged in.'));
-            $this->_loginPostRedirect();
-            return;
+        try {
+            if ($session->completeTwofaChallenge($code)) {
+                $session->addSuccess($this->__('You have been successfully logged in.'));
+                $this->_loginPostRedirect();
+                return;
+            }
+            $session->addError($this->__('2FA verification code is invalid.'));
+        } catch (Mage_Core_Exception_TooManyRequests $e) {
+            $session->addError($e->getMessage());
         }
-
-        $session->addError($this->__('2FA verification code is invalid.'));
         $this->_redirect('*/*/twofaChallenge');
     }
 

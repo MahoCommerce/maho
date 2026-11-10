@@ -128,6 +128,12 @@ beforeEach(function () {
         {
             $this->emails[] = [$type, (string) $customer->getEmail()];
         }
+
+        #[\Override]
+        protected function sendPasswordLinkEmail(Mage_Customer_Model_Customer $customer, int $storeId): void
+        {
+            $this->emails[] = ['password_link', (string) $customer->getEmail()];
+        }
     };
     Mage::unregister('_service/customer/customer');
     Mage::register('_service/customer/customer', $this->spy);
@@ -156,6 +162,7 @@ afterEach(function () {
 });
 
 it('saves the new customer with the order and sends the welcome email, in the checkout and the admin order create', function () {
+    // The admin gives the new customer no password, so the welcome email has the link to set one
     [$webEmail, $adminEmail] = $this->emails;
     $this->carts = [$webCart = checkoutRegistrationCart($webEmail), $adminCart = checkoutRegistrationCart($adminEmail)];
 
@@ -170,7 +177,7 @@ it('saves the new customer with the order and sends the welcome email, in the ch
         ->and($webCustomer?->getId())->not->toBeNull()
         ->and($adminCustomer?->getId())->not->toBeNull()
         ->and(Mage::getSingleton('customer/session')->getCustomerId())->toBe((int) $webCustomer?->getId())
-        ->and($this->spy->emails)->toBe([['registered', $webEmail], ['registered', $adminEmail]]);
+        ->and($this->spy->emails)->toBe([['registered', $webEmail], ['password_link', $adminEmail]]);
 });
 
 it('refuses a new customer that the customer service refuses, before the order, in the checkout and the admin order create', function () {
@@ -226,6 +233,6 @@ describe('a store that requires a confirmed email', function () {
             ->and(checkoutRegistrationCustomer($webEmail)?->getConfirmation())->not->toBeNull()
             ->and(Mage::getSingleton('customer/session')->isLoggedIn())->toBeFalse()
             ->and(checkoutRegistrationCustomer($adminEmail)?->getConfirmation())->toBeNull()
-            ->and($this->spy->emails)->toBe([['confirmation', $webEmail], ['registered', $adminEmail]]);
+            ->and($this->spy->emails)->toBe([['confirmation', $webEmail], ['password_link', $adminEmail]]);
     });
 });

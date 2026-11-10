@@ -194,6 +194,8 @@ The cart page and the checkout of the storefront and the API use the same rules 
 | POST | `/customers/reset-password` | None | Reset password with token |
 | POST | `/customers/create-from-order` | None | Create a customer account from a placed guest order |
 
+An admin token or an API token with the `customers/create` grant creates an account that needs no confirmation. The customer gets the welcome email from the store of the request. Without a `password`, the account gets a random password, and the welcome email has the link to set a password, as **Email Link to Set Password** does in the admin. The GraphQL `quickCreateCustomer` mutation and the createCustomer operation of the admin GraphQL endpoint always give a random password and this email.
+
 **Addresses** (`Address` resource, same DTO is exposed under three URL families):
 
 | Method | Endpoint | Auth | Description |
