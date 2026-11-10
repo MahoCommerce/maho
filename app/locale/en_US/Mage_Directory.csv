@@ -24,6 +24,7 @@
 "Country","Country"
 "Country and Format Type combination should be unique","Country and Format Type combination should be unique"
 "Country API","Country API"
+"Country code '%s' not found in database","Country code '%s' not found in database"
 "Country ID","Country ID"
 "Country ID cannot be changed after creation","Country ID cannot be changed after creation"
 "Country ID is required.","Country ID is required."

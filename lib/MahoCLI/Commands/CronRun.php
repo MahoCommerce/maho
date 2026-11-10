@@ -9,9 +9,7 @@ declare(strict_types=1);
 
 namespace MahoCLI\Commands;
 
-use Maho;
 use Mage;
-use Mage_Cron_Model_Observer;
 use Mage_Cron_Model_Schedule;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -53,101 +51,28 @@ class CronRun extends BaseMahoCommand
             return Command::SUCCESS;
         }
 
-        // If the job is in the cron_schedule table, we execute it and "burn" that record
         $jobCode = $modeOrJobCode;
-
         if (!Mage::helper('cron')->isJobEnabled($jobCode)) {
             $output->writeln("<comment>{$jobCode} is disabled in admin. Running anyway via CLI.</comment>");
         }
 
-        $runModel = $this->getJobRunModel($jobCode);
-        if ($runModel === null) {
-            $output->writeln("<error>Unknown mode/job: {$modeOrJobCode}</error>");
-            return Command::FAILURE;
-        }
-        if (!preg_match(Mage_Cron_Model_Observer::REGEX_RUN_MODEL, $runModel, $run)) {
-            $output->writeln('<error>Invalid model/method definition, expecting "model/class::method"</error>');
-            return Command::FAILURE;
-        }
-        if (!($model = Mage::getModel($run[1])) || !method_exists($model, $run[2])) {
-            $output->writeln("<error>Invalid callback: {$run[1]}::{$run[2]} does not exist</error>");
-            return Command::FAILURE;
-        }
-
-        /** @var Mage_Cron_Model_Schedule $schedule */
-        $schedule = Mage::getModel('cron/schedule')->getCollection()
-            ->addFieldToFilter('status', Mage_Cron_Model_Schedule::STATUS_PENDING)
-            ->addFieldToFilter('job_code', $jobCode)
-            ->orderByScheduledAt()
-            ->getFirstItem();
-        $hasPersistentSchedule = (bool) $schedule->getId();
-
-        if ($hasPersistentSchedule) {
-            if (!$schedule->tryLockJob()) {
-                $output->writeln("<error>{$jobCode} is already running</error>");
-                return Command::INVALID;
-            }
-
-            $schedule
-                ->setStatus(Mage_Cron_Model_Schedule::STATUS_RUNNING)
-                ->setExecutedAt(\Mage::app()->getLocale()->formatDateForDb('now'))
-                ->save();
-        } else {
-            $schedule = Mage::getModel('cron/schedule');
-            $schedule->setJobCode($jobCode);
-        }
-
         try {
-            $model->{$run[2]}($schedule);
-        } catch (\Exception $e) {
-            if ($hasPersistentSchedule) {
-                $schedule
-                    ->setFinishedAt(\Mage::app()->getLocale()->formatDateForDb('now'))
-                    ->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
-                    ->setMessages($e->__toString())
-                    ->save();
-            }
-
+            /** @var \Mage_Cron_Service_Job $service */
+            $service = Mage::getService('cron/job');
+            $schedule = $service->run($jobCode);
+        } catch (\Mage_Core_Exception_Conflict $e) {
+            $output->writeln("<error>{$e->getMessage()}</error>");
+            return Command::INVALID;
+        } catch (\Mage_Core_Exception $e) {
             $output->writeln("<error>{$e->getMessage()}</error>");
             return Command::FAILURE;
         }
 
-        if ($hasPersistentSchedule) {
-            $schedule
-                ->setStatus(Mage_Cron_Model_Schedule::STATUS_SUCCESS)
-                ->setFinishedAt(\Mage::app()->getLocale()->formatDateForDb('now'))
-                ->save();
+        if ($schedule->getStatus() === Mage_Cron_Model_Schedule::STATUS_ERROR) {
+            $output->writeln("<error>{$schedule->getMessages()}</error>");
+            return Command::FAILURE;
         }
-
         $output->writeln("<info>{$jobCode} executed successfully</info>");
         return Command::SUCCESS;
     }
-
-    /**
-     * Resolve the "model/class::method" run definition for a job_code.
-     *
-     * Looks up attribute-registered (compiled) cron jobs first, then falls back to
-     * legacy XML-declared jobs under crontab/jobs and default/crontab/jobs.
-     */
-    protected function getJobRunModel(string $jobCode): ?string
-    {
-        $compiledJobs = Maho::getCompiledAttributes()['crontab'] ?? [];
-        if (isset($compiledJobs[$jobCode])) {
-            $jobDef = $compiledJobs[$jobCode];
-            if (!empty($jobDef['module']) && !Mage::helper('core')->isModuleEnabled($jobDef['module'])) {
-                return null;
-            }
-            return $jobDef['alias'] . '::' . $jobDef['method'];
-        }
-
-        foreach (['crontab/jobs', 'default/crontab/jobs'] as $path) {
-            $node = Mage::getConfig()->getNode("{$path}/{$jobCode}");
-            if ($node && $node->run && (string) $node->run->model !== '') {
-                return (string) $node->run->model;
-            }
-        }
-
-        return null;
-    }
-
 }

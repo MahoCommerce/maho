@@ -100,6 +100,9 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             // Change user password
             $data['password'] = $this->_getEncodedPassword($this->getNewPassword());
             $data['new_password'] = $data['password'];
+            // A new password ends the password reset link that the user asked for before
+            $data['rp_token'] = null;
+            $data['rp_token_created_at'] = null;
             $sessionUser = $this->getSession()->getUser();
             if ($sessionUser && $sessionUser->getId() == $this->getId()) {
                 $this->getSession()->setUserPasswordChanged();

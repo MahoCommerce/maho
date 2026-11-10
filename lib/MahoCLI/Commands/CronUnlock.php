@@ -10,8 +10,6 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Mage;
-use Mage_Cron_Model_Observer;
-use Mage_Cron_Model_Schedule;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
@@ -33,50 +31,18 @@ class CronUnlock extends BaseMahoCommand
     ): int {
         $this->initMaho();
 
-        $jobCode = trim((string) $jobCode);
-
-        $threshold = null;
-        if (!$unlockAll) {
-            $maxRunningTime = (int) Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_MAX_RUNNING_TIME);
-            if ($maxRunningTime <= 0) {
-                $maxRunningTime = 60;
-            }
-            $threshold = time() - $maxRunningTime * 60;
-        }
-
-        /** @var \Mage_Cron_Model_Resource_Schedule_Collection $collection */
-        $collection = Mage::getModel('cron/schedule')->getCollection()
-            ->addFieldToFilter('status', Mage_Cron_Model_Schedule::STATUS_RUNNING);
-        if ($jobCode !== '') {
-            $collection->addFieldToFilter('job_code', $jobCode);
-        }
-        $collection->load();
-
-        $count = 0;
-        /** @var Mage_Cron_Model_Schedule $schedule */
-        foreach ($collection->getIterator() as $schedule) {
-            if ($threshold !== null) {
-                $referenceTime = (string) ($schedule->getExecutedAt() ?: $schedule->getScheduledAt() ?: $schedule->getCreatedAt());
-                if ($referenceTime === '' || strtotime($referenceTime) >= $threshold) {
-                    continue;
-                }
-            }
-
-            $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
-                ->setMessages(Mage::helper('cron')->__('Manually reset via cron:unlock: job never completed.'))
-                ->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'))
-                ->save();
-
+        /** @var \Mage_Cron_Service_Job $service */
+        $service = Mage::getService('cron/job');
+        $unlocked = $service->unlock(trim((string) $jobCode), $unlockAll);
+        foreach ($unlocked as $schedule) {
             $output->writeln("<info>Unlocked schedule #{$schedule->getId()} ({$schedule->getJobCode()})</info>");
-            $count++;
         }
 
-        if ($count === 0) {
+        if ($unlocked === []) {
             $output->writeln('<comment>No stale running schedules found</comment>');
         } else {
-            $output->writeln("<info>{$count} schedule(s) unlocked</info>");
+            $output->writeln('<info>' . count($unlocked) . ' schedule(s) unlocked</info>');
         }
-
         return Command::SUCCESS;
     }
 }

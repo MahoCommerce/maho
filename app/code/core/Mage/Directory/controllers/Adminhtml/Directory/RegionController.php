@@ -351,106 +351,53 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
     #[Maho\Config\Route('/admin/directory_region/import')]
     public function importAction(): void
     {
-        try {
-            $countries = $this->getRequest()->getParam('countries');
-            $locales = $this->getRequest()->getParam('locales', 'en_US');
-            $updateExisting = $this->getRequest()->getParam('updateExisting') === 'true';
-            $dryRun = $this->getRequest()->getParam('dryRun') === 'true';
-
-            if (empty($countries)) {
-                throw new Exception('Countries parameter is required');
-            }
-
-            // Use the import command
-            $importCommand = new \MahoCLI\Commands\SysDirectoryRegionsImport();
-
-            $outputBuffer = '';
-            $logger = function ($message, $level = 'info') use (&$outputBuffer) {
-                $prefix = match ($level) {
-                    'error' => '❌ ',
-                    'comment' => 'ℹ️  ',
-                    default => '✅ ',
-                };
-                $outputBuffer .= $prefix . $message . "\n";
-            };
-
-            $totalResults = [
-                'success' => true,
-                'updated' => 0,
-                'skipped' => 0,
-                'total' => 0,
-                'updateRecords' => [],
-                'error' => null,
-            ];
-
-            // Process each country
-            $countriesArray = explode(',', $countries);
-
-            foreach ($countriesArray as $country) {
-                $country = trim($country);
-                if (empty($country)) {
-                    continue;
-                }
-
-                $outputBuffer .= "\n🌍 Processing country: {$country}\n";
-
-                $result = $importCommand->importRegionsData($country, [
-                    'locales' => $locales,
-                    'updateExisting' => $updateExisting,
-                    'dryRun' => $dryRun,
-                    'verbose' => true,
-                ], $logger);
-
-                if (!$result['success']) {
-                    $totalResults['success'] = false;
-                    $totalResults['error'] = $result['error'] ?? 'Unknown error';
-                    break;
-                }
-
-                $totalResults['updated'] += $result['updated'] ?? 0;
-                $totalResults['skipped'] += $result['skipped'] ?? 0;
-                $totalResults['total'] += $result['total'] ?? 0;
-                $totalResults['updateRecords'] = array_merge($totalResults['updateRecords'], $result['updateRecords'] ?? []);
-            }
-
-            // Add summary to output
-            if ($totalResults['success']) {
-                $outputBuffer .= "\n📊 SUMMARY\n";
-                $outputBuffer .= '🏁 Countries processed: ' . count($countriesArray) . "\n";
-                $outputBuffer .= "📝 Updated: {$totalResults['updated']}\n";
-                $outputBuffer .= "⏭️  Skipped: {$totalResults['skipped']}\n";
-                $outputBuffer .= "📦 Total: {$totalResults['total']}\n";
-
-                if ($dryRun) {
-                    $outputBuffer .= "\n⚠️  This was a DRY RUN - no changes were made.\n";
-                } else {
-                    $outputBuffer .= "\n✨ Import completed successfully!\n";
-                }
-            }
-
-            if ($totalResults['success']) {
-                // Ensure we always have some output
-                if (empty($outputBuffer)) {
-                    $outputBuffer = "✅ Import process completed\n📦 Total processed: {$totalResults['total']}";
-                }
-
-                $response = [
-                    'success' => true,
-                    'output' => $outputBuffer,
-                ];
-            } else {
-                // For mahoFetch compatibility, use 'error' field which will cause mahoFetch to throw
-                $response = [
-                    'error' => $totalResults['error'] ?? 'Unknown error',
-                ];
-            }
-
-            $this->getResponse()->setBodyJson($response);
-        } catch (Exception $e) {
-            Mage::logException($e);
-            $this->getResponse()->setBodyJson([
-                'error' => $e->getMessage(),
-            ]);
+        $request = $this->getRequest();
+        $countries = array_filter(array_map(trim(...), explode(',', (string) $request->getParam('countries'))));
+        $locales = array_map(trim(...), explode(',', (string) $request->getParam('locales', 'en_US')));
+        $updateExisting = $request->getParam('updateExisting') === 'true';
+        $dryRun = $request->getParam('dryRun') === 'true';
+        if ($countries === []) {
+            // mahoFetch throws on the error field
+            $this->getResponse()->setBodyJson(['error' => 'Countries parameter is required']);
+            return;
         }
+
+        $output = '';
+        $log = function (string $message, string $level) use (&$output): void {
+            $output .= match ($level) {
+                'error' => '❌ ',
+                'comment', 'debug' => 'ℹ️  ',
+                default => '✅ ',
+            } . $message . "\n";
+        };
+        $totals = ['imported' => 0, 'updated' => 0, 'skipped' => 0, 'total' => 0];
+        try {
+            /** @var Mage_Directory_Service_Region $service */
+            $service = Mage::getService('directory/region');
+            foreach ($countries as $country) {
+                $output .= "\n🌍 Processing country: {$country}\n";
+                $result = $service->import($country, $locales, $updateExisting, $dryRun, $log);
+                foreach ($totals as $key => $count) {
+                    $totals[$key] = $count + $result[$key];
+                }
+            }
+        } catch (Mage_Core_Exception $e) {
+            $this->getResponse()->setBodyJson(['error' => $e->getMessage()]);
+            return;
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $this->getResponse()->setBodyJson(['error' => $e->getMessage()]);
+            return;
+        }
+
+        $output .= "\n📊 SUMMARY\n";
+        $output .= '🏁 Countries processed: ' . count($countries) . "\n";
+        $output .= "📥 Imported: {$totals['imported']}\n";
+        $output .= "📝 Updated: {$totals['updated']}\n";
+        $output .= "⏭️  Skipped: {$totals['skipped']}\n";
+        $output .= "📦 Total: {$totals['total']}\n";
+        $output .= $dryRun ? "\n⚠️  This was a DRY RUN - no changes were made.\n" : "\n✨ Import completed successfully!\n";
+
+        $this->getResponse()->setBodyJson(['success' => true, 'output' => $output]);
     }
 }

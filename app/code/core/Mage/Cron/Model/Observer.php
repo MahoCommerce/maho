@@ -333,24 +333,12 @@ class Mage_Cron_Model_Observer
             return $this;
         }
 
-        $threshold = time() - $maxRunningTime * 60;
-
-        /** @var Mage_Cron_Model_Resource_Schedule_Collection $stuck */
-        $stuck = Mage::getModel('cron/schedule')->getCollection()
-            ->addFieldToFilter('status', Mage_Cron_Model_Schedule::STATUS_RUNNING)
-            ->load();
-
-        /** @var Mage_Cron_Model_Schedule $schedule */
-        foreach ($stuck->getIterator() as $schedule) {
-            $referenceTime = (string) ($schedule->getExecutedAt() ?: $schedule->getScheduledAt() ?: $schedule->getCreatedAt());
-            if ($referenceTime === '' || strtotime($referenceTime) >= $threshold) {
-                continue;
-            }
-            $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
-                ->setMessages(Mage::helper('cron')->__('Job did not complete: the process died or exceeded the maximum running time (%s minutes).', $maxRunningTime))
-                ->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'))
-                ->save();
-        }
+        /** @var Mage_Cron_Service_Job $jobService */
+        $jobService = Mage::getService('cron/job');
+        $jobService->unlock(message: Mage::helper('cron')->__(
+            'Job did not complete: the process died or exceeded the maximum running time (%s minutes).',
+            $maxRunningTime,
+        ));
 
         return $this;
     }
@@ -483,57 +471,69 @@ class Mage_Cron_Model_Observer
             }
         }
 
-        $errorStatus = Mage_Cron_Model_Schedule::STATUS_ERROR;
+        /** @var Mage_Cron_Service_Job $jobService */
+        $jobService = Mage::getService('cron/job');
+        $jobCode = (string) $schedule->getJobCode();
+        if (!$jobService->acquireLock($jobCode)) {
+            // A run of this job from the admin, the CLI or another worker is in progress
+            return $this;
+        }
+
         try {
-            if (!$isAlways) {
-                if ($time < $now - $scheduleLifetime) {
-                    $errorStatus = Mage_Cron_Model_Schedule::STATUS_MISSED;
-                    Mage::throwException(Mage::helper('cron')->__('Too late for the schedule.'));
-                }
-            }
-
-            if (!$isAlways) {
-                if (!$schedule->tryLockJob()) {
-                    // another cron started this job intermittently, so skip it
-                    return $this;
-                }
-                /**
-                though running status is set in tryLockJob we must set it here because the object
-                was loaded with a pending status and will set it back to pending if we don't set it here
-                 */
-                $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_RUNNING);
-            }
-
-            $schedule
-                ->setExecutedAt(Mage::app()->getLocale()->formatDateForDb('now'))
-                ->save();
-
-            // Record fatal errors (OOM, max_execution_time, E_ERROR) that no try/catch can reach,
-            // but which still allow PHP to run shutdown functions.
-            $this->_registerJobShutdownHandler($schedule);
-
-            \Maho\Profiler::start('cron.job.execute', [
-                'cron.job_code' => $schedule->getJobCode(),
-            ]);
+            $errorStatus = Mage_Cron_Model_Schedule::STATUS_ERROR;
             try {
-                call_user_func_array($callback, [$schedule]);
-            } finally {
-                \Maho\Profiler::stop('cron.job.execute');
+                if (!$isAlways) {
+                    if ($time < $now - $scheduleLifetime) {
+                        $errorStatus = Mage_Cron_Model_Schedule::STATUS_MISSED;
+                        Mage::throwException(Mage::helper('cron')->__('Too late for the schedule.'));
+                    }
+                }
+
+                if (!$isAlways) {
+                    if (!$schedule->tryLockJob()) {
+                        // another cron started this job intermittently, so skip it
+                        return $this;
+                    }
+                    /**
+                    though running status is set in tryLockJob we must set it here because the object
+                    was loaded with a pending status and will set it back to pending if we don't set it here
+                     */
+                    $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_RUNNING);
+                }
+
+                $schedule
+                    ->setExecutedAt(Mage::app()->getLocale()->formatDateForDb('now'))
+                    ->save();
+
+                // Record fatal errors (OOM, max_execution_time, E_ERROR) that no try/catch can reach,
+                // but which still allow PHP to run shutdown functions.
+                $this->_registerJobShutdownHandler($schedule);
+
+                \Maho\Profiler::start('cron.job.execute', [
+                    'cron.job_code' => $schedule->getJobCode(),
+                ]);
+                try {
+                    call_user_func_array($callback, [$schedule]);
+                } finally {
+                    \Maho\Profiler::stop('cron.job.execute');
+                }
+
+                $schedule
+                    ->setStatus(Mage_Cron_Model_Schedule::STATUS_SUCCESS)
+                    ->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'));
+            } catch (\Throwable $e) {
+                $schedule->setStatus($errorStatus)
+                    ->setMessages($e->__toString());
             }
 
-            $schedule
-                ->setStatus(Mage_Cron_Model_Schedule::STATUS_SUCCESS)
-                ->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'));
-        } catch (\Throwable $e) {
-            $schedule->setStatus($errorStatus)
-                ->setMessages($e->__toString());
-        }
+            if ($schedule->getIsError()) {
+                $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR);
+            }
 
-        if ($schedule->getIsError()) {
-            $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR);
+            $schedule->save();
+        } finally {
+            $jobService->releaseLock($jobCode);
         }
-
-        $schedule->save();
 
         return $this;
     }

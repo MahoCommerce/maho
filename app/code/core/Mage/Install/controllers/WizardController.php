@@ -448,15 +448,12 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
 
         if (!empty($localization['import_regions'])) {
             try {
-                $importer = new \MahoCLI\Commands\SysDirectoryRegionsImport();
-                $result = $importer->importRegionsData($countryCode, [
-                    'locales' => $locale,
-                ]);
-
-                if (!$result['success']) {
-                    Mage::log('Failed to import regions: ' . ($result['error'] ?? 'Unknown error'), Mage::LOG_WARNING);
-                }
-            } catch (Exception $e) {
+                /** @var Mage_Directory_Service_Region $service */
+                $service = Mage::getService('directory/region');
+                $service->import($countryCode, [$locale]);
+            } catch (Mage_Core_Exception $e) {
+                Mage::log('Failed to import regions: ' . $e->getMessage(), Mage::LOG_WARNING);
+            } catch (Throwable $e) {
                 Mage::logException($e);
             }
         }
