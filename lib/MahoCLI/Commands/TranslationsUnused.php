@@ -24,6 +24,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class TranslationsUnused extends BaseMahoCommand
 {
+    private bool $scanIncomplete = false;
+
     public function __invoke(
         OutputInterface $output,
         #[Argument(description: 'Specify which language pack to check in app/locale, default is en_US')]
@@ -36,6 +38,11 @@ class TranslationsUnused extends BaseMahoCommand
         $definedFileMap = $this->getDefinedStrings($lang);
         $usedFileMap = $this->getUsedStrings();
 
+        if ($this->scanIncomplete) {
+            fwrite(STDERR, "ERROR: Translation scan incomplete; no translations were removed. Review the warnings above.\n");
+            return Command::FAILURE;
+        }
+
         $usedFlat = array_unique(array_merge(...array_values($usedFileMap)));
 
         $totalRemoved = 0;
@@ -46,6 +53,10 @@ class TranslationsUnused extends BaseMahoCommand
 
                 if ($remove) {
                     $removedCount = $this->removeUnusedFromFile($file, $unused);
+                    if ($removedCount === false) {
+                        $output->writeln("<error>Failed to update translations in $file</error>");
+                        return Command::FAILURE;
+                    }
                     $totalRemoved += $removedCount;
                     $output->writeln("Removed $removedCount unused translations from $file");
                 }
@@ -106,6 +117,7 @@ class TranslationsUnused extends BaseMahoCommand
      */
     protected function getUsedStrings(): array
     {
+        $this->scanIncomplete = false;
         $map = [];
         $files = $this->getFiles();
         foreach ($files as $file) {
@@ -114,6 +126,7 @@ class TranslationsUnused extends BaseMahoCommand
 
             if ($contents === false) {
                 echo "ERROR: File not found $file\n";
+                $this->scanIncomplete = true;
                 continue;
             }
 
@@ -132,7 +145,20 @@ class TranslationsUnused extends BaseMahoCommand
                     $matches = array_merge($matches, str_replace("\'", "'", $_matches[1]));
                 }
             } elseif ($ext === 'xml') {
-                $xml = new \SimpleXMLElement($contents);
+                $previousErrorMode = libxml_use_internal_errors(true);
+                libxml_clear_errors();
+                try {
+                    $xml = new \SimpleXMLElement($contents);
+                } catch (\Throwable $e) {
+                    $this->scanIncomplete = true;
+                    $parseErrors = libxml_get_errors();
+                    $detail = $parseErrors[0]->message ?? $e->getMessage();
+                    fwrite(STDERR, "WARNING: Skipping malformed translation XML $file: " . trim($detail) . "\n");
+                    continue;
+                } finally {
+                    libxml_clear_errors();
+                    libxml_use_internal_errors($previousErrorMode);
+                }
                 // Get all nodes with translate="" attribute
                 $nodes = $xml->xpath('//*[@translate]');
                 foreach ($nodes as $node) {
@@ -162,38 +188,58 @@ class TranslationsUnused extends BaseMahoCommand
      * Remove unused translation strings from a CSV file
      *
      * @param array<int, string> $unused
+     * @return int|false Number of removed records, or false when the CSV could not be read or written fully
      */
-    protected function removeUnusedFromFile(string $file, array $unused): int
+    protected function removeUnusedFromFile(string $file, array $unused): int|false
     {
         if (!file_exists($file)) {
-            return 0;
+            return false;
         }
 
-        $parser = new \Maho\File\Csv();
-        $parser->setDelimiter(',');
-        $data = $parser->getDataPairs($file);
+        $csvData = file_get_contents($file);
+        if ($csvData === false) {
+            return false;
+        }
 
-        $originalCount = count($data);
-        $unusedSet = array_flip($unused);
+        $unusedSet = array_fill_keys($unused, true);
+        $stream = fopen('php://temp', 'r+');
+        if ($stream === false) {
+            return false;
+        }
+        if (fwrite($stream, $csvData) !== strlen($csvData)) {
+            fclose($stream);
+            return false;
+        }
+        rewind($stream);
 
-        // Remove unused translations
-        foreach ($data as $key => $value) {
-            if (isset($unusedSet[$key])) {
-                unset($data[$key]);
+        $updatedCsv = '';
+        $removedCount = 0;
+        $recordStart = 0;
+        while (($row = fgetcsv($stream, 0, ',', '"', '\\')) !== false) {
+            $recordEnd = ftell($stream);
+            $record = substr($csvData, $recordStart, $recordEnd - $recordStart);
+            $recordStart = $recordEnd;
+
+            if (array_key_exists(1, $row) && isset($row[0]) && isset($unusedSet[$row[0]])) {
+                $removedCount++;
+                continue;
             }
-        }
 
-        $removedCount = $originalCount - count($data);
+            $updatedCsv .= $record;
+        }
+        fclose($stream);
 
         if ($removedCount > 0) {
-            // Write the updated data back to the file
-            $csvData = [];
-            foreach ($data as $key => $value) {
-                $csvData[] = [$key, $value];
+            $writtenBytes = $this->writeCsvFile($file, $updatedCsv);
+            if ($writtenBytes === false || $writtenBytes !== strlen($updatedCsv)) {
+                return false;
             }
-            $parser->saveData($file, $csvData);
         }
-
         return $removedCount;
+    }
+
+    protected function writeCsvFile(string $file, string $contents): int|false
+    {
+        return file_put_contents($file, $contents);
     }
 }

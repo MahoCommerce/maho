@@ -104,25 +104,13 @@ class DBConnect extends BaseMahoCommand
         $descriptorspec = [
             0 => STDIN,
             1 => STDOUT,
-            2 => ['pipe', 'w'],
+            2 => STDERR,
         ];
 
         $process = proc_open($command, $descriptorspec, $pipes);
         if (is_resource($process)) {
-            stream_set_blocking($pipes[2], false);
-
-            while (true) {
-                $status = proc_get_status($process);
-                if (!$status['running']) {
-                    break;
-                }
-                usleep(100000);
-            }
-
-            fclose($pipes[2]);
-            proc_close($process);
-
-            return Command::SUCCESS;
+            $exitCode = proc_close($process);
+            return $exitCode >= 0 ? $exitCode : Command::FAILURE;
         }
 
         return Command::FAILURE;
