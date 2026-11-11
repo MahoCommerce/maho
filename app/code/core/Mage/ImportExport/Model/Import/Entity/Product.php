@@ -219,6 +219,11 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     public const ERROR_INVALID_PRODUCT_SKU          = 'invalidSku';
 
     /**
+     * A stock value or a date range that the stock service or the product model refuses
+     */
+    public const ERROR_INVALID_VALUE                = 'invalidValue';
+
+    /**
      * Pairs of attribute set ID-to-name.
      *
      * @var array
@@ -308,6 +313,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
         self::ERROR_SKU_NOT_FOUND_FOR_DELETE     => 'Product with specified SKU not found',
         self::ERROR_SUPER_PRODUCTS_SKU_NOT_FOUND => 'Product with specified super products SKU not found',
         self::ERROR_INVALID_PRODUCT_SKU          => 'Invalid value in SKU column. HTML tags are not allowed',
+        self::ERROR_INVALID_VALUE                => '%s',
     ];
 
     /**
@@ -2126,6 +2132,63 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
         $this->_isGroupPriceValid($rowData, $rowNum);
         $this->_isSuperProductsSkuValid($rowData, $rowNum);
         $this->_isProductSkuValid($rowData, $rowNum);
+        $this->_isStockDataValid($rowData, $rowNum);
+        $this->_isDateRangeValid($rowData, $rowNum);
+    }
+
+    /**
+     * Check the stock columns of the row with the rules of the stock service.
+     *
+     * @param int $rowNum
+     */
+    protected function _isStockDataValid(array $rowData, $rowNum): bool
+    {
+        if (self::SCOPE_DEFAULT != $this->getRowScope($rowData)) {
+            return true;
+        }
+        $stockData = array_filter(
+            array_intersect_key($rowData, Mage_CatalogInventory_Service_Stock::COLUMNS),
+            static fn(mixed $value): bool => $value !== null && $value !== '',
+        );
+        if ($stockData === []) {
+            return true;
+        }
+        try {
+            /** @var Mage_CatalogInventory_Service_Stock $stock */
+            $stock = Mage::getService('cataloginventory/stock');
+            $stock->prepare($stockData);
+        } catch (Mage_Core_Exception_Input $e) {
+            return $this->_addInputErrors($e, $rowNum);
+        }
+        return true;
+    }
+
+    /**
+     * Check that no date range of the row starts after it ends, as the product model does.
+     *
+     * @param int $rowNum
+     */
+    protected function _isDateRangeValid(array $rowData, $rowNum): bool
+    {
+        try {
+            Mage_Catalog_Model_Product::assertDateRanges($rowData);
+        } catch (Mage_Core_Exception_Input $e) {
+            return $this->_addInputErrors($e, $rowNum);
+        }
+        return true;
+    }
+
+    /**
+     * Make each error of $e an error of the row.
+     *
+     * @param int $rowNum
+     */
+    protected function _addInputErrors(Mage_Core_Exception_Input $e, $rowNum): bool
+    {
+        foreach ($e->getErrors() as $error) {
+            $this->addRowError(self::ERROR_INVALID_VALUE, $rowNum, $error['message']);
+        }
+        return false;
     }
 
     /**

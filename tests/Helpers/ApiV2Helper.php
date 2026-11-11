@@ -1166,6 +1166,7 @@ class ApiV2Helper
             $product = \Mage::getModel('catalog/product')->getCollection()
                 ->addFieldToFilter('type_id', \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
                 ->addFieldToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+                ->addFieldToFilter('visibility', ['neq' => \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE])
                 ->setOrder('entity_id', 'ASC')
                 ->setPageSize(1)
                 ->getFirstItem();
@@ -1438,7 +1439,7 @@ class ApiV2Helper
             if (!$order->canInvoice()) {
                 return;
             }
-            $invoice = \Mage::getModel('sales/service_order', $order)->prepareInvoice();
+            $invoice = \Mage::getService('sales/order_document')->buildInvoice($order);
             if (!$invoice->getTotalQty()) {
                 return;
             }

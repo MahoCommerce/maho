@@ -41,6 +41,11 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Mage_CatalogSearch_Block</class>
             </catalogsearch>
         </blocks>
+        <services>
+            <catalogsearch>
+                <class>Mage_CatalogSearch_Service</class>
+            </catalogsearch>
+        </services>
         <index>
             <indexer>
                 <catalogsearch_fulltext>

@@ -183,8 +183,8 @@ describe('Tax rates', function (): void {
             ],
         ], adminToken());
 
-        expect($response['status'])->toBeGreaterThanOrEqual(400);
-        expect($response['status'])->toBeLessThan(500);
+        expect($response['status'])->toBe(422)
+            ->and(array_column($response['json']['details']['errors'] ?? [], 'field'))->toBe(['titles']);
     });
 
     it('rejects a rate with no country', function (): void {
@@ -261,8 +261,9 @@ describe('Tax rules', function (): void {
             'code' => 'Empty ' . uniqid(),
         ], adminToken());
 
-        expect($response['status'])->toBeGreaterThanOrEqual(400);
-        expect($response['status'])->toBeLessThan(500);
+        expect($response['status'])->toBe(422)
+            ->and(array_column($response['json']['details']['errors'] ?? [], 'field'))
+            ->toBe(['customerTaxClassIds', 'productTaxClassIds', 'taxRateIds']);
     });
 
 });

@@ -475,20 +475,16 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
         return $expiration > 0 ? $expiration : 10; // Default: 10 minutes
     }
 
-    /**
-     * Get magic link rate limit for email
-     */
+    #[\Deprecated(message: 'the limit is the setting system/rate_limit/magic_link_email, which Mage_Customer_Service_Authentication::sendMagicLink() reads', since: '26.11')]
     public function getMagicLinkRateLimitEmail(): int
     {
-        return (int) Mage::getStoreConfig('customer/login/magic_link_rate_limit_email') ?: 3;
+        return (int) Mage::getStoreConfig(Mage_Customer_Service_Authentication::XML_PATH_MAGIC_LINK_EMAIL_RATE_LIMIT);
     }
 
-    /**
-     * Get magic link rate limit for IP
-     */
+    #[\Deprecated(message: 'the limit is the setting system/rate_limit/magic_link_ip, which Mage_Customer_Service_Authentication::sendMagicLink() reads', since: '26.11')]
     public function getMagicLinkRateLimitIp(): int
     {
-        return (int) Mage::getStoreConfig('customer/login/magic_link_rate_limit_ip') ?: 10;
+        return (int) Mage::getStoreConfig(Mage_Customer_Service_Authentication::XML_PATH_MAGIC_LINK_IP_RATE_LIMIT);
     }
 
     /**
@@ -643,7 +639,13 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getGroupAttributeSetId(int $groupId, string $entityTypeCode): int
     {
-        $group = Mage::getModel('customer/group')->load($groupId);
+        try {
+            /** @var Mage_Customer_Service_Group $service */
+            $service = Mage::getService('customer/group');
+            $group = $service->getById($groupId);
+        } catch (Mage_Core_Exception_NoSuchEntity) {
+            $group = Mage::getModel('customer/group');
+        }
         $setId = match ($entityTypeCode) {
             'customer' => $group->getCustomerAttributeSetId(),
             'customer_address' => $group->getCustomerAddressAttributeSetId(),
@@ -653,31 +655,26 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Retrieve forgot password flow secure type
-     *
-     * @return int
+     * Return how the store limits the requests for a password reset email: a FLOW_* constant of
+     * Mage_Customer_Model_Config_Forgotpassword.
      */
-    public function getCustomerForgotPasswordFlowSecure()
+    public function getCustomerForgotPasswordFlowSecure(): int
     {
         return Mage::getStoreConfigAsInt(self::XML_PATH_CUSTOMER_FORGOT_PASSWORD_FLOW_SECURE);
     }
 
     /**
-     * Retrieve forgot password requests to times per 24 hours from 1 e-mail
-     *
-     * @return int
+     * Return how many password reset emails one email address can ask for in 24 hours.
      */
-    public function getCustomerForgotPasswordEmailTimes()
+    public function getCustomerForgotPasswordEmailTimes(): int
     {
         return Mage::getStoreConfigAsInt(self::XML_PATH_CUSTOMER_FORGOT_PASSWORD_EMAIL_TIMES);
     }
 
     /**
-     * Retrieve forgot password requests to times per hour from 1 IP
-     *
-     * @return int
+     * Return how many password reset emails one IP address can ask for in one hour.
      */
-    public function getCustomerForgotPasswordIpTimes()
+    public function getCustomerForgotPasswordIpTimes(): int
     {
         return Mage::getStoreConfigAsInt(self::XML_PATH_CUSTOMER_FORGOT_PASSWORD_IP_TIMES);
     }

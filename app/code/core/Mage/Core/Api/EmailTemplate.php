@@ -76,7 +76,7 @@ use Maho\Config\ApiResource;
             requirements: ['id' => '\d+'],
             processor: EmailTemplateProcessor::class,
             security: "is_granted('ROLE_ADMIN') or is_granted('email-templates/delete')",
-            description: 'Delete an email template',
+            description: 'Delete an email template. Each config path that uses it goes back to its default template.',
         ),
     ],
     graphQlOperations: [

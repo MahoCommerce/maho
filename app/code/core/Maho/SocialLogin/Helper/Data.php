@@ -19,7 +19,6 @@ class Maho_SocialLogin_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_FACEBOOK_APP_ID = 'customer/social_login/facebook_app_id';
     public const XML_PATH_FACEBOOK_APP_SECRET = 'customer/social_login/facebook_app_secret';
     public const XML_PATH_ALLOW_REGISTRATION = 'customer/social_login/allow_registration';
-    public const XML_PATH_IP_RATE_LIMIT = 'customer/social_login/ip_rate_limit_per_hour';
     public const XML_PATH_NONCE_TTL = 'customer/social_login/nonce_ttl';
 
     #[\Override]
@@ -153,16 +152,13 @@ class Maho_SocialLogin_Helper_Data extends Mage_Core_Helper_Abstract
         };
     }
 
-    /**
-     * Failed-attempt limiter: check tooManyAttempts() up front, hit() only on a
-     * failed login, so page views and successful sign-ins keep the budget intact.
-     */
+    #[\Deprecated(message: 'Maho_SocialLogin_Service_Identity::authenticate() counts each sign-in in the limit system/rate_limit/auth_token_ip', since: '26.11')]
     public function getIpRateLimiter(?int $storeId = null): \Maho\Security\RateLimiter
     {
         return Mage::helper('core')->rateLimiter(
-            'sociallogin_auth',
-            (int) Mage::getStoreConfig(self::XML_PATH_IP_RATE_LIMIT, $storeId),
-            3600,
+            'social_auth',
+            (int) Mage::getStoreConfig(Maho_SocialLogin_Service_Identity::XML_PATH_RATE_LIMIT, $storeId),
+            Maho_SocialLogin_Service_Identity::RATE_LIMIT_WINDOW,
             \Maho\Security\RateLimitScope::Ip,
         );
     }

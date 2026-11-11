@@ -12,9 +12,6 @@ namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
@@ -45,7 +42,7 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
         $args = $context['args']['input'] ?? [];
         $orderId = (int) ($uriVariables['orderId'] ?? $args['orderId'] ?? 0);
         if (!$orderId) {
-            throw new UnprocessableEntityHttpException('Order ID is required');
+            throw new \Mage_Core_Exception_Input()->addError('order_id', 'Order ID is required');
         }
 
         $items = $args['items'] ?? null;
@@ -53,95 +50,48 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Items must be a list of {orderItemId, qty} objects');
         }
 
-        $shippingAmount = isset($args['shippingAmount']) ? (float) $args['shippingAmount'] : null;
-        if ($shippingAmount !== null && $shippingAmount < 0) {
-            throw new UnprocessableEntityHttpException('Shipping amount must be >= 0');
-        }
-
-        return $this->doCreateCreditMemo(
-            $orderId,
-            $items,
-            $args['comment'] ?? null,
-            isset($args['adjustmentPositive']) ? (float) $args['adjustmentPositive'] : null,
-            isset($args['adjustmentNegative']) ? (float) $args['adjustmentNegative'] : null,
-            $shippingAmount,
-            (bool) ($args['offlineRefund'] ?? true),
-        );
-    }
-
-    private function doCreateCreditMemo(
-        int $orderId,
-        ?array $items,
-        ?string $comment,
-        ?float $adjustmentPositive,
-        ?float $adjustmentNegative,
-        ?float $shippingAmount,
-        bool $offlineRefund,
-    ): CreditMemo {
-        /** @var \Mage_Sales_Model_Order $order */
-        $order = \Mage::getModel('sales/order');
-        $order->load($orderId);
-
-        if (!$order->getId()) {
-            throw new NotFoundHttpException('Order not found');
-        }
-
+        $order = $this->orderService->getById($orderId);
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
-        // Report an unrefundable order before the item input. The order service
-        // checks this again under the lock, where the answer is authoritative.
-        if (!$order->canCreditmemo()) {
-            throw new ConflictHttpException('Order cannot be refunded (already fully refunded or not in a refundable state)');
-        }
-
-        // Build qty data array: ['qtys' => [orderItemId => qty]]
         // Adjustments go through $data so prepareCreditmemo() applies them before
         // its single collectTotals() pass. Setting them afterwards and collecting
         // again would double every total (the creditmemo collectors accumulate
         // into grand total and never reset), over-refunding the order.
-        $data = ['qtys' => []];
-        if ($adjustmentPositive !== null) {
-            $data['adjustment_positive'] = $adjustmentPositive;
+        $data = [];
+        foreach (['adjustmentPositive' => 'adjustment_positive', 'adjustmentNegative' => 'adjustment_negative', 'shippingAmount' => 'shipping_amount'] as $field => $key) {
+            if (isset($args[$field])) {
+                $data[$key] = (float) $args[$field];
+            }
         }
-        if ($adjustmentNegative !== null) {
-            $data['adjustment_negative'] = $adjustmentNegative;
-        }
-        $backToStockItems = [];
 
-        // An absent items key refunds every refundable item. A present items key
-        // refunds exactly the listed quantities, so an empty list refunds no item.
+        // Without a backToStock flag on any item, the store setting decides the return to stock.
+        $backToStock = null;
         if ($items !== null) {
+            $data['qtys'] = [];
             foreach ($items as $itemData) {
-                $entry = $this->parseOrderItemEntry($itemData, $order, allowZeroQty: true);
-                $orderItemId = (int) $entry['item']->getId();
-
-                if ($entry['qty'] > 0) {
-                    $data['qtys'][$orderItemId] = $entry['qty'];
-                }
-
-                if (!empty($itemData['backToStock'])) {
-                    $backToStockItems[$orderItemId] = true;
+                $entry = $this->parseOrderItemEntry($itemData);
+                $orderItemId = $entry['orderItemId'];
+                $data['qtys'][$orderItemId] = $entry['qty'];
+                if (array_key_exists('backToStock', $itemData)) {
+                    $backToStock ??= [];
+                    if ($itemData['backToStock']) {
+                        $backToStock[$orderItemId] = true;
+                    }
                 }
             }
         }
 
-        // An empty qty map makes prepareCreditmemo() refund every item, so use a
-        // key that matches no order item.
-        $refundsNoItem = $items !== null && $data['qtys'] === [];
-        if ($refundsNoItem) {
-            $data['qtys'][0] = 0.0;
-        }
+        // refund() refuses an invoice that does not exist or is not an invoice of the order
+        $invoice = isset($args['invoiceId']) ? \Mage::getModel('sales/order_invoice')->load((int) $args['invoiceId']) : null;
 
-        // The shipping collector refunds the order's whole remaining shipping
-        // unless an amount is given, so a memo that refunds no item would still
-        // carry the delivery charge.
-        if ($shippingAmount !== null) {
-            $data['shipping_amount'] = $shippingAmount;
-        } elseif ($refundsNoItem) {
-            $data['shipping_amount'] = 0.0;
-        }
-
-        $creditmemo = $this->orderService->refund($order, $data, $comment, $offlineRefund, $backToStockItems);
+        $creditmemo = \Mage::getService('sales/order_document')->refund(
+            $order,
+            $data,
+            $args['comment'] ?? null,
+            (bool) ($args['offlineRefund'] ?? true),
+            $backToStock,
+            invoice: $invoice,
+        );
 
         return CreditMemo::fromModel($creditmemo);
     }

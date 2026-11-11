@@ -206,7 +206,69 @@ class Maho_Blog_Model_Resource_Post extends Maho_Blog_Model_Resource_Abstract
             $object->setData('url_key', $urlkey);
         }
 
+        if ($object instanceof Maho_Blog_Model_Post) {
+            $this->_validate($object);
+        }
+
         return parent::_beforeSave($object);
+    }
+
+    /**
+     * A post that was saved before these checks keeps its URL key, so only a new or a changed URL key is checked.
+     *
+     * @throws Mage_Core_Exception_Input with one error for each invalid field
+     * @throws Mage_Core_Exception_Conflict when another post of the same store view has the URL key
+     */
+    protected function _validate(Maho_Blog_Model_Post $object): void
+    {
+        $helper = Mage::helper('blog');
+        $errors = new Mage_Core_Exception_Input();
+        if ((!$object->getId() || $object->hasData('title')) && (string) $object->getData('title') === '') {
+            $errors->addError('title', $helper->__('The post title is required.'));
+        }
+
+        $urlKey = (string) $object->getData('url_key');
+        $urlKeyChanged = !$object->getId() || $object->dataHasChangedFor('url_key');
+        if ($urlKeyChanged && !preg_match(Maho_Blog_Model_Post::URL_KEY_PATTERN, $urlKey)) {
+            $errors->addError('url_key', $helper->__('The URL key "%s" must have only lowercase letters, digits and dashes.', $urlKey));
+        }
+
+        $categoryIds = $object->hasData('categories') ? array_map(intval(...), (array) $object->getData('categories')) : [];
+        if ($categoryIds !== []) {
+            $known = Mage::getResourceModel('blog/category_collection')->addFieldToFilter('entity_id', ['in' => $categoryIds])->getAllIds();
+            $unknown = array_diff($categoryIds, array_map(intval(...), $known));
+            if ($unknown !== []) {
+                $errors->addError('category_ids', $helper->__('Unknown blog category ID(s): %s', implode(', ', $unknown)));
+            }
+        }
+        $errors->throwIfErrors();
+
+        if (($urlKeyChanged || $object->dataHasChangedFor('stores')) && $this->_isUrlKeyUsed($urlKey, $object)) {
+            throw new Mage_Core_Exception_Conflict($helper->__('Another post of the same store view has the URL key "%s".', $urlKey));
+        }
+    }
+
+    /**
+     * Return whether another post with $urlKey shares a store view with $post. A post of all store views shares every store view.
+     */
+    protected function _isUrlKeyUsed(string $urlKey, \Maho\DataObject $post): bool
+    {
+        $stores = array_map(intval(...), $post->hasData('stores') ? (array) $post->getData('stores') : $this->lookupStoreIds((int) $post->getId()));
+        if ($stores === []) {
+            return false;
+        }
+        $select = $this->_getReadAdapter()->select()
+            ->from(['bp' => $this->getEntityTable()], ['entity_id'])
+            ->join(['bps' => $this->_storeTable], 'bp.entity_id = bps.post_id', [])
+            ->where('bp.url_key = ?', $urlKey)
+            ->limit(1);
+        if (!in_array(Mage_Core_Model_App::ADMIN_STORE_ID, $stores, true)) {
+            $select->where('bps.store_id IN (?)', [Mage_Core_Model_App::ADMIN_STORE_ID, ...$stores]);
+        }
+        if ($post->getId()) {
+            $select->where('bp.entity_id != ?', (int) $post->getId());
+        }
+        return (bool) $this->_getReadAdapter()->fetchOne($select);
     }
 
     /**

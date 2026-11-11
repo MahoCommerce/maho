@@ -130,6 +130,9 @@ class RevocationRequest extends Resource
     #[ApiProperty(description: 'Email on the declaration', writable: false)]
     public ?string $email = null;
 
+    #[ApiProperty(description: 'CAPTCHA token from client-side widget', writable: true, readable: false)]
+    public ?string $captchaToken = null;
+
     #[ApiProperty(description: 'Whether the declaration was submitted from an authenticated, order-owning session', writable: false)]
     public bool $verified = false;
 

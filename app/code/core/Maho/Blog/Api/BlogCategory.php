@@ -135,17 +135,6 @@ class BlogCategory extends CrudResource
         if ($customAttributes !== null || !$model->getId()) {
             CustomAttributes::apply($model, $customAttributes ?? []);
         }
-
-        // On create, apply sensible defaults for fields omitted from the request.
-        // On update these stay untouched, so an enabled or store-restricted category is not reset.
-        if (!$model->getId()) {
-            if ($this->isActive === null) {
-                $model->setData('is_active', 1);
-            }
-            if ($this->stores === null) {
-                $model->setData('stores', [0]);
-            }
-        }
     }
 
     public static function afterLoad(self $dto, object $model): void

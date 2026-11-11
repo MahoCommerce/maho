@@ -269,7 +269,7 @@ class AdminGraphQlController
 
             // Order operations (camelCase)
             'placeOrder', 'PlaceOrder'
-                => $this->orderHandler->handlePlaceOrder($variables, $context),
+                => $this->orderHandler->handlePlaceOrder($variables),
             'lookupOrder', 'getOrderByIncrementId', 'LookupOrder'
                 => $this->orderHandler->handleLookupOrder($variables),
             'customerOrders', 'getCustomerOrders', 'CustomerOrders'
@@ -278,8 +278,8 @@ class AdminGraphQlController
                 => $this->orderHandler->handleRecentOrders($variables),
             'searchOrders', 'SearchOrders'
                 => $this->orderHandler->handleSearchOrders($variables),
-            'processReturn', 'createCreditMemo', 'ProcessReturn'
-                => $this->orderHandler->handleProcessReturn($variables, $context),
+            'createCreditMemo', 'CreateCreditMemo'
+                => $this->orderHandler->handleCreateCreditMemo($variables, $context),
 
             // Customer operations (camelCase)
             'customers', 'searchCustomers', 'getCustomers', 'GetCustomers', 'SearchCustomers'
@@ -287,7 +287,7 @@ class AdminGraphQlController
             'customer', 'getCustomer', 'GetCustomer'
                 => $this->customerHandler->handleGetCustomer($variables),
             'createCustomer', 'CreateCustomer'
-                => $this->customerHandler->handleCreateCustomer($variables),
+                => $this->customerHandler->handleCreateCustomer($variables, $context),
             'updateCustomerAddress', 'UpdateCustomerAddress', 'updateAddress', 'UpdateAddress'
                 => $this->customerHandler->handleUpdateCustomerAddress($variables),
 

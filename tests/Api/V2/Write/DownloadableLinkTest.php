@@ -63,7 +63,7 @@ describe('Downloadable Links, CRUD Lifecycle', function (): void {
         expect($linkId)->not->toBeNull();
 
         // Read back
-        $read = apiGet("/api/rest/v2/products/{$productId}/downloadable-links");
+        $read = apiGet("/api/rest/v2/products/{$productId}/downloadable-links", $token);
         expect($read['status'])->toBe(200);
         $links = getItems($read);
         expect(count($links))->toBe(1);
@@ -87,6 +87,45 @@ describe('Downloadable Links, CRUD Lifecycle', function (): void {
         expect($empty['status'])->toBe(200);
         $emptyLinks = getItems($empty);
         expect(count($emptyLinks))->toBe(0);
+    });
+
+    it('gives the URL of the paid download only to a caller with backend access', function (): void {
+        $token = serviceToken(['products/write', 'products/delete']);
+        $suffix = substr(uniqid(), -6);
+        $product = apiPost('/api/rest/v2/products', [
+            'sku' => "PEST-DWNLD-GATE-{$suffix}",
+            'name' => 'Pest Downloadable Gate',
+            'type' => 'downloadable',
+            'price' => 9.99,
+        ], $token);
+        expect($product['status'])->toBeIn([200, 201]);
+        $productId = $product['json']['id'];
+        trackCreated('product', $productId);
+
+        $add = apiPost("/api/rest/v2/products/{$productId}/downloadable-links", [
+            'title' => 'Paid File',
+            'linkType' => 'url',
+            'linkUrl' => 'https://example.com/paid-file.zip',
+            'sampleType' => 'url',
+            'sampleUrl' => 'https://example.com/sample-file.zip',
+        ], $token);
+        expect($add['status'])->toBeIn([200, 201]);
+
+        $guest = apiGet("/api/rest/v2/products/{$productId}/downloadable-links");
+        expect($guest['status'])->toBe(200);
+        $guestLinks = getItems($guest);
+        expect($guestLinks)->toHaveCount(1);
+        expect($guestLinks[0]['linkUrl'] ?? null)->toBeNull();
+        expect($guestLinks[0]['sampleUrl'])->toBe('https://example.com/sample-file.zip');
+        expect(json_encode($guest['json']))->not->toContain('paid-file.zip');
+
+        $customer = apiGet("/api/rest/v2/products/{$productId}/downloadable-links", customerToken());
+        expect($customer['status'])->toBe(200);
+        expect(json_encode($customer['json']))->not->toContain('paid-file.zip');
+
+        $admin = apiGet("/api/rest/v2/products/{$productId}/downloadable-links", adminToken());
+        expect($admin['status'])->toBe(200);
+        expect(getItems($admin)[0]['linkUrl'])->toBe('https://example.com/paid-file.zip');
     });
 
     it('rejects downloadable operations on a simple product', function (): void {

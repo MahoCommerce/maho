@@ -56,7 +56,7 @@ describe('Gift card amount currency', function (): void {
             expect($quote->getQuoteCurrencyCode())->toBe('EUR');
 
             // 20.00 in the advertised USD, not in the stamped EUR.
-            \Mage::getService('checkout/cart')->applyGiftcard($quote, $giftcard->getCode(), 20.00);
+            \Mage::getService('giftcard/giftcard')->applyToCart($quote, $giftcard->getCode(), 20.00);
 
             expect($quote->getGiftcardCodes())->not->toBeEmpty();
         } finally {

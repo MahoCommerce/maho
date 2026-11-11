@@ -300,7 +300,7 @@ describe('Customer segment fields', function (): void {
 
         expect($response['status'])->toBe(422)
             ->and($response['json']['message'])->toContain('999', 'auto, manual')
-            ->and(array_column($response['json']['details']['errors'], 'field'))->toBe(['name', 'websiteIds', 'refreshMode']);
+            ->and(array_column($response['json']['details']['errors'], 'field'))->toEqualCanonicalizing(['name', 'websiteIds', 'refreshMode']);
     });
 });
 

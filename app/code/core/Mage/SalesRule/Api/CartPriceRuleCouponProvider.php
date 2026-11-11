@@ -29,8 +29,7 @@ final class CartPriceRuleCouponProvider extends \Maho\ApiPlatform\Provider
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): TraversablePaginator
     {
-        $rule = $this->ruleProvider->loadRule((int) ($uriVariables['ruleId'] ?? 0));
-        $this->ruleProvider->assertRuleReadable($rule, $this->requireUser());
+        $rule = $this->ruleProvider->loadRule((int) ($uriVariables['ruleId'] ?? 0), $this->requireUser());
 
         /** @var \Mage_SalesRule_Model_Resource_Coupon_Collection $collection */
         $collection = \Mage::getResourceModel('salesrule/coupon_collection');

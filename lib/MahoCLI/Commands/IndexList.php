@@ -27,11 +27,10 @@ class IndexList extends BaseMahoCommand
         $table = new Table($output);
         $table->setHeaders(['indexer_code', 'status', 'started_at', 'ended_at', 'mode']);
 
-        $indexCollection = Mage::getResourceModel('index/process_collection');
-        foreach ($indexCollection as $index) {
-            $indexData = $index->debug();
-            unset($indexData['process_id']);
-            $table->addRow($indexData);
+        /** @var \Mage_Index_Service_Process $service */
+        $service = Mage::getService('index/process');
+        foreach ($service->getList() as $process) {
+            $table->addRow([$process->getIndexerCode(), $process->getStatus(), $process->getStartedAt(), $process->getEndedAt(), $process->getMode()]);
         }
         $table->render();
 

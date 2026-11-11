@@ -210,8 +210,11 @@ class Mage_Install_Model_Installer extends Maho\DataObject
 
         //run time flag to force saving entered password
         $data->setForceNewPassword(true);
-        $data->save();
-        $data->setRoleIds([1])->saveRelations();
+        /** @var Mage_Admin_Service_User $service */
+        $service = Mage::getService('admin/user');
+        $roleId = $service->getDefaultRoleId()
+            ?? throw new Exception(Mage::helper('install')->__('No admin role found'));
+        $service->save($data, $roleId);
 
         return true;
     }

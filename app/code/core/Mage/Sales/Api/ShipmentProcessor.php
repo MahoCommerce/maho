@@ -11,8 +11,6 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Shipment State Processor - Handles shipment creation for API Platform.
@@ -45,17 +43,12 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
      */
     private function resolveShipment(array $uriVariables, array $context): \Mage_Sales_Model_Order_Shipment
     {
-        $args = $context['args']['input'] ?? [];
-        $shipmentId = (int) ($uriVariables['id'] ?? $args['shipmentId'] ?? 0);
+        $shipmentId = (int) ($uriVariables['id'] ?? $context['args']['input']['shipmentId'] ?? 0);
         if (!$shipmentId) {
-            throw new UnprocessableEntityHttpException('Shipment ID is required');
+            throw new \Mage_Core_Exception_Input()->addError('shipment_id', 'Shipment ID is required');
         }
 
-        $shipment = \Mage::getModel('sales/order_shipment')->load($shipmentId);
-        if (!$shipment->getId()) {
-            throw new NotFoundHttpException('Shipment not found');
-        }
-
+        $shipment = \Mage::getService('sales/order_document')->requireShipment($shipmentId);
         $this->assertStoreAllowed($shipment->getStoreId(), $this->requireUser(), 'shipment');
 
         return $shipment;
@@ -67,21 +60,8 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
     private function addTrack(array $uriVariables, array $context): Shipment
     {
         $args = $context['args']['input'] ?? [];
-        $trackNumber = trim((string) ($args['trackNumber'] ?? ''));
-        if ($trackNumber === '') {
-            throw new UnprocessableEntityHttpException('Track number is required');
-        }
-        $carrierCode = $args['carrierCode'] ?? 'custom';
-        $title = $args['title'] ?? $carrierCode;
-
         $shipment = $this->resolveShipment($uriVariables, $context);
-
-        $track = \Mage::getModel('sales/order_shipment_track');
-        $track->setCarrierCode($carrierCode);
-        $track->setTitle($title);
-        $track->setTrackNumber($trackNumber);
-        $shipment->addTrack($track);
-        $shipment->save();
+        \Mage::getService('sales/order_document')->addTrack($shipment, $this->buildTrack($args));
 
         return Shipment::fromModel($shipment->load($shipment->getId()));
     }
@@ -92,20 +72,12 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
     private function addComment(array $uriVariables, array $context): Shipment
     {
         $args = $context['args']['input'] ?? [];
-        $comment = trim((string) ($args['comment'] ?? ''));
-        if ($comment === '') {
-            throw new UnprocessableEntityHttpException('Comment text is required');
-        }
-        $notifyCustomer = (bool) ($args['notifyCustomer'] ?? false);
-        $visibleOnFront = (bool) ($args['visibleOnFront'] ?? false);
-
-        $shipment = $this->resolveShipment($uriVariables, $context);
-
-        $shipment->addComment($comment, $notifyCustomer, $visibleOnFront);
-        $shipment->save();
-        if ($notifyCustomer) {
-            $shipment->sendUpdateEmail(true, $comment);
-        }
+        $shipment = \Mage::getService('sales/order_document')->addComment(
+            $this->resolveShipment($uriVariables, $context),
+            (string) ($args['comment'] ?? ''),
+            (bool) ($args['notifyCustomer'] ?? false),
+            (bool) ($args['visibleOnFront'] ?? false),
+        );
 
         return Shipment::fromModel(\Mage::getModel('sales/order_shipment')->load($shipment->getId()));
     }
@@ -116,101 +88,74 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
      */
     private function removeTrack(array $uriVariables, array $context): Shipment
     {
-        $args = $context['args']['input'] ?? [];
         // The {trackId} URI placeholder isn't in the operation's uriVariables map,
         // so recover it from the route params when absent.
-        $trackId = (int) ($uriVariables['trackId'] ?? $args['trackId'] ?? 0);
+        $request = $context['request'] ?? null;
+        $trackId = (int) ($uriVariables['trackId'] ?? $context['args']['input']['trackId']
+            ?? ($request instanceof \Symfony\Component\HttpFoundation\Request ? $request->attributes->get('_route_params')['trackId'] ?? 0 : 0));
         if (!$trackId) {
-            $request = $context['request'] ?? null;
-            if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
-                $trackId = (int) ($request->attributes->get('_route_params')['trackId'] ?? 0);
-            }
-        }
-        if (!$trackId) {
-            throw new UnprocessableEntityHttpException('Track ID is required');
+            throw new \Mage_Core_Exception_Input()->addError('track_id', 'Track ID is required');
         }
 
-        $shipment = $this->resolveShipment($uriVariables, $context);
-
-        $track = \Mage::getModel('sales/order_shipment_track')->load($trackId);
-        if (!$track->getId() || (int) $track->getParentId() !== (int) $shipment->getId()) {
-            throw new NotFoundHttpException('Tracking entry not found for this shipment');
-        }
-
-        $track->delete();
+        $shipment = \Mage::getService('sales/order_document')->removeTrack($this->resolveShipment($uriVariables, $context), $trackId);
 
         return Shipment::fromModel(\Mage::getModel('sales/order_shipment')->load($shipment->getId()));
     }
 
     private function createShipmentFromRest(array $uriVariables, array $context): Shipment
     {
-        $orderId = (int) ($uriVariables['orderId'] ?? 0);
-
         $body = $context['request']?->toArray() ?? [];
 
-        return $this->doCreateShipment(
-            $orderId,
-            $body['items'] ?? null,
-            $body['tracks'] ?? [],
-            $body['comment'] ?? null,
-            (bool) ($body['notifyCustomer'] ?? false),
-        );
+        return $this->doCreateShipment((int) ($uriVariables['orderId'] ?? 0), $body);
     }
 
     private function createShipment(array $context): Shipment
     {
         $args = $context['args']['input'] ?? [];
         $orderId = (int) ($args['orderId'] ?? 0);
-
         if (!$orderId) {
-            throw new UnprocessableEntityHttpException('Order ID is required');
+            throw new \Mage_Core_Exception_Input()->addError('order_id', 'Order ID is required');
         }
 
-        return $this->doCreateShipment(
-            $orderId,
-            $args['items'] ?? null,
-            $args['tracks'] ?? [],
-            $args['comment'] ?? null,
-            (bool) ($args['notifyCustomer'] ?? false),
-        );
+        return $this->doCreateShipment($orderId, $args);
     }
 
-    private function doCreateShipment(
-        int $orderId,
-        ?array $items,
-        array $tracks,
-        ?string $comment,
-        bool $notifyCustomer,
-    ): Shipment {
-        $order = \Mage::getModel('sales/order')->load($orderId);
-        if (!$order->getId()) {
-            throw new NotFoundHttpException('Order not found');
-        }
-
+    /**
+     * @param array<string, mixed> $input items, tracks, comment and notifyCustomer
+     */
+    private function doCreateShipment(int $orderId, array $input): Shipment
+    {
+        $service = \Mage::getService('sales/order_document');
+        $order = \Mage::getService('sales/order')->getById($orderId);
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         $qtys = [];
-        foreach ($items ?? [] as $itemData) {
-            $entry = $this->parseOrderItemEntry($itemData, $order);
-            $qtys[(int) $entry['item']->getId()] = $entry['qty'];
+        foreach ($input['items'] ?? [] as $itemData) {
+            $entry = $this->parseOrderItemEntry($itemData);
+            $qtys[$entry['orderItemId']] = $entry['qty'];
         }
 
-        $trackModels = [];
-        foreach ($tracks as $trackData) {
-            $carrierCode = $trackData['carrierCode'] ?? 'custom';
-            $trackNumber = $trackData['trackNumber'] ?? '';
-            if (empty($trackNumber)) {
-                throw new UnprocessableEntityHttpException('Track number is required for each tracking entry');
-            }
-
-            $trackModels[] = \Mage::getModel('sales/order_shipment_track')
-                ->setCarrierCode($carrierCode)
-                ->setTitle($trackData['title'] ?? $carrierCode)
-                ->setTrackNumber($trackNumber);
-        }
-
-        $shipment = \Mage::getService('sales/order')->ship($order, $qtys, $trackModels, $comment, $notifyCustomer);
+        $shipment = $service->ship(
+            $order,
+            $qtys,
+            array_map($this->buildTrack(...), $input['tracks'] ?? []),
+            $input['comment'] ?? null,
+            (bool) ($input['notifyCustomer'] ?? false),
+        );
 
         return Shipment::fromModel($shipment);
+    }
+
+    /**
+     * @param array<string, mixed> $trackData trackNumber, carrierCode and title. The carrier defaults to custom, the title to the carrier.
+     */
+    private function buildTrack(array $trackData): \Mage_Sales_Model_Order_Shipment_Track
+    {
+        $carrierCode = (string) ($trackData['carrierCode'] ?? \Mage_Sales_Model_Order_Shipment_Track::CUSTOM_CARRIER_CODE);
+
+        return \Mage::getModel('sales/order_shipment_track')
+            ->setCarrierCode($carrierCode)
+            ->setTitle((string) ($trackData['title'] ?? $carrierCode))
+            ->setNumber((string) ($trackData['trackNumber'] ?? ''));
     }
 }

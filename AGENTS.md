@@ -187,14 +187,16 @@ public function getTailwindContent(): iterable {}
   `denormalizationContext: ['allow_extra_attributes' => false, 'collect_denormalization_errors' => true]`
   so an unknown field is a 400 and every type error comes back at once. Many older resources still
   use PUT as a partial update; they move one at a time.
-- Pick the status code by what went wrong (RFC 9110). 400 (`BadRequestHttpException`): the request
-  cannot be read, such as invalid JSON, a value of the wrong type or shape, or a bad query string or
-  header. 404: the record in the URL does not exist. 409 (`ConflictHttpException`): the state of the
-  record does not allow the action. 422 (`UnprocessableEntityHttpException`, `ValidationException`):
-  any other problem in the body, such as a missing field, a value out of range or an unknown ID. The
-  OAuth token endpoints keep the 400 of RFC 6749. Never catch an exception only to throw it again with
-  another status: `ApiExceptionListener` maps `Mage_Core_Exception` and its subclasses, and an
-  unexpected exception must stay a 500
+- Pick the status code by what went wrong (RFC 9110). 400: the request cannot be read, such as
+  invalid JSON, a value of the wrong type or shape, or a bad query string or header. 401: the client
+  did not prove who it is. 403: the client is known and may not do the action. 404: the record in
+  the URL does not exist. 409: the state of the record does not allow the action. 422: any other
+  problem in the body, such as a missing field, a value out of range or an unknown ID. An API class
+  outside `Maho_ApiPlatform` throws only two exceptions of its own, both for a request that it
+  cannot read: `BadRequestHttpException` and `ValidationException::requiredField()`. Every other
+  status comes from a `Mage_Core_Exception` subclass (see Services), which `ApiExceptionListener`
+  maps. The OAuth token endpoints keep the 400 of RFC 6749. Never catch an exception only to throw
+  it again with another status, and an unexpected exception must stay a 500
 - A resource whose writes go through a service maps to its model with the Symfony ObjectMapper: a
   class `#[Map(target: Model::class)]` and a `#[Map]` on each DTO property (a model keeps its data
   in `_data`, so implicit mapping finds nothing and writes nothing). A read-only property takes
@@ -298,24 +300,53 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   reads or deletes that file checks the stored name with `\Maho\Io::getPathWithinMount()` first
 - **Services** (#1348): a flow that two or more transports start (an admin controller, the API, a CLI
   command) keeps its rules in one service class under `<Module>/Service/`, declared under
-  `<global><services>` and resolved with `Mage::getService('group/name')`, never `new`. No interface
-  and no base class: a `<rewrite>` extends the service, so the class is the contract. Name the methods
-  `getById()`, `save()`, `delete()`, plus one verb for each other action (`refresh()`). A service
-  takes and returns models, never a request or a session: the transport writes its input into the
-  model through the typed setters, and the service checks and saves it. It never throws an HTTP
+  `<global><services>` and resolved with `Mage::getService('group/name')`, never `new`. A write that
+  the API offers as an operation of its own (a tier price, a bundle option, a downloadable link) gets
+  a service too, when the API is its only transport. No interface,
+  no base class, no constructor and no property: a `<rewrite>` extends the service, so the class is
+  the contract, and one instance serves every call. Name the methods `getById()` (it throws when the
+  record does not exist), `save()`, `delete()`, plus one verb for each other action (`refresh()`). A
+  service takes and returns models, never a request or a session: the transport writes its input into
+  the model through the typed setters, and the service checks and saves it. A service does not know
+  which transport calls it: no `isAdmin()`, no enum of transports, no helper of the API module. A rule
+  that depends on the role of the caller takes `Mage_Checkout_Model_Actor` (`Customer`, `Staff`). A
+  gate takes the fields that the client sent and runs for every transport, never a value that is
+  null "when the transport already did the check": `Mage::helper('core')->assertCaptcha($fields)`,
+  `isHoneypotTriggered($fields)`. The switch that turns one endpoint on or off stays in its transport.
+  Put each rule in its layer. A model or a resource model holds an invariant of one record, so that
+  an importer that saves the model gets it. A service holds a gate, a rule over several models and a
+  side effect (an email, an event, a reindex). A rule of the admin form, such as a list of values
+  that an extension can add to, stays out of `_beforeSave()`: read the list from the configuration.
+  Use the shared code, not a copy: `load()` of a model finds no row for an ID that the column cannot
+  hold, so a service needs no guard; `Mage_Core_Exception_Input::assertValid()` and
+  `addValidationResult()` turn the result of `validate()` into field errors; `attemptOrThrow()` and
+  `throwIfTooManyAttempts()` of the rate limiter throw the 429. A service never throws an HTTP
   exception. Pick the exception by what went wrong (RFC 9110):
+  `Mage_Core_Exception_Unauthorized` (401, with an error code) when the client did not prove who it
+  is (a wrong password, a missing second factor),
   `Mage_Core_Exception_NoSuchEntity` (404) when the record that the URL names does not exist,
   `Mage_Core_Exception_Conflict` (409) when the current state of the record does not allow the action
   (an order that is already canceled, an email that another customer uses, a lock that another request
-  holds), `Mage_Core_Exception_Input` (422 with `details.errors`) for errors of named fields, and a
+  holds), `Mage_Core_Exception_Forbidden` (403) when the store does not allow this client to do the action
+  (a guest where only customers can subscribe), `Mage_Core_Exception_Input` (422 with `details.errors`)
+  for errors of named fields,
+  `Mage_Core_Exception_TooManyRequests` (429 with `Retry-After`) when a rate limit refuses the client, and a
   plain `Mage_Core_Exception` (422) for any other content that the service cannot accept, such as an
   unknown SKU in the body. 400 is for a malformed request only, which the transport detects. A
   `\RuntimeException` is a server fault (500), so a transport never turns it into a client error, and
   a transport never catches a `Mage_Core_Exception` only to throw it again with another status.
-  `ApiExceptionListener` maps these for REST and `MageExceptionNormalizer` for GraphQL. Code that
-  reads the request (a path, a body, the API Platform context) stays in the transport, as
-  `Mage\Checkout\Api\CartRequest` does. `tests/Backend/Unit/Maho/ServiceLayoutTest.php` enforces the
-  layout
+  `ApiExceptionListener` maps these for REST and `MageExceptionNormalizer` for GraphQL, with the same
+  `details` and retry delay. Code that reads the request (a path, a body, the API Platform context)
+  stays in the transport, as `Mage\Checkout\Api\CartRequest` does. The store restriction of an API
+  token is checked at the API edge, and a service that needs the allowed stores takes them as data.
+  `tests/Backend/Unit/Maho/ServiceLayoutTest.php` enforces the layout. `LayeringConventionTest.php`
+  beside it fails on a status that a transport decides (an HTTP exception outside the API), on a
+  `save()` or a `delete()` of a model in a transport, on a rate limit or a honeypot check in a
+  transport, and on the request, the session, the area or the API module in a service. Each rule has
+  two lists. The allowlist is debt and only shrinks: the pull request that fixes a file lowers or
+  removes the entry of that file. The permanent list holds what stays, each entry with its reason,
+  and a new entry needs a decision of a maintainer. A flow that only one transport starts can keep
+  its write in that transport, with an entry in the list
 - **Docs**: a module keeps the pages about its feature in its own folder and declares them in its
   `config.xml`, one folder for each audience: `<global><docs><user>docs/user</user></docs></global>`.
   `user` is the person who works in the admin, `developer` writes code, `sysadmin` runs the

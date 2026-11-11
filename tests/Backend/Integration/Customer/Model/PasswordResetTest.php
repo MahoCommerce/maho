@@ -81,7 +81,7 @@ describe('Customer password reset', function (): void {
             $token = $giveResetLink($customer);
             $before = time();
 
-            expect(Mage::getService('customer/customer')->resetPassword($customer->getEmail(), $token, 'NewPassword1'))->toBeTrue();
+            expect(Mage::getService('customer/authentication')->resetPassword($customer->getEmail(), $token, 'NewPassword1'))->toBeTrue();
 
             $reloaded = $reload($customer);
             expect($reloaded->validatePassword('NewPassword1'))->toBeTrue()
@@ -101,7 +101,7 @@ describe('Customer password reset', function (): void {
             $token = $giveResetLink($customer);
             $tooLong = str_repeat('a1', 150);
 
-            expect(fn() => Mage::getService('customer/customer')->resetPassword($customer->getEmail(), $token, $tooLong))
+            expect(fn() => Mage::getService('customer/authentication')->resetPassword($customer->getEmail(), $token, $tooLong))
                 ->toThrow(Mage_Core_Exception::class, 'Please enter a password with at most 256 characters.');
 
             $reloaded = $reload($customer);

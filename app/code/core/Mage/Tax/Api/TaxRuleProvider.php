@@ -24,6 +24,14 @@ final class TaxRuleProvider extends CrudProvider
     protected array $defaultSort = ['priority' => 'ASC', 'position' => 'ASC'];
 
     #[\Override]
+    protected function provideItem(int|string $id): \Maho\ApiPlatform\Resource
+    {
+        /** @var \Mage_Tax_Service_Rule $service */
+        $service = \Mage::getService('tax/rule');
+        return $this->toDto($service->getById((int) $id));
+    }
+
+    #[\Override]
     protected function applyCollectionFilters(object $collection, array $filters): void
     {
         parent::applyCollectionFilters($collection, $filters);

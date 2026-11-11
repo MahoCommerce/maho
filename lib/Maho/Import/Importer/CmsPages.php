@@ -42,8 +42,9 @@ class CmsPages extends AbstractCmsImporter
         }
         foreach ($file as $line => $row) {
             $identifier = $this->requireValue($file, $line, $row, 'identifier');
-            if (!preg_match('/^[a-z0-9][a-z0-9_\/-]*$/', $identifier)) {
-                $this->fail($file, $line, "identifier '$identifier' must be lowercase letters, digits, dashes, underscores or slashes");
+            $error = Mage::getResourceSingleton('cms/page')->getIdentifierError($identifier);
+            if ($error !== null) {
+                $this->fail($file, $line, "identifier '$identifier': $error");
             }
             $row['store_ids'] = $this->storeIds($file, $line, $row);
             $row['is_active'] = $this->at($file, $line, fn() => CsvFile::bool($row['is_active'] ?? '', true));
@@ -75,15 +76,15 @@ class CmsPages extends AbstractCmsImporter
     protected function write(CsvFile $file, array $rows, array $options, Reporter $reporter): Result
     {
         $result = new Result();
-        $config = Mage::getModel('core/config');
-        $configTouched = false;
+        /** @var \Mage_Cms_Service_Page $service */
+        $service = Mage::getService('cms/page');
+        $homePages = [];
         foreach ($rows as $row) {
-            $page = Mage::getModel('cms/page');
             if ($row['page_id'] !== null) {
-                $page->load($row['page_id']);
+                $page = Mage::getModel('cms/page')->load($row['page_id']);
                 $result->updated++;
             } else {
-                $page->setRootTemplate('one_column');
+                $page = $service->newPage();
                 $result->created++;
             }
             $page->setIdentifier($row['identifier'])->setStores($row['store_ids'])->setIsActive((bool) $row['is_active']);
@@ -98,15 +99,15 @@ class CmsPages extends AbstractCmsImporter
             foreach ($row['custom'] as $code => $value) {
                 $page->setData($code, $value);
             }
-            $page->save();
+            $service->save($page);
             if ($row['is_home']) {
                 foreach ($row['store_ids'] as $storeId) {
-                    $config->saveConfig(\Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE, $row['identifier'], $storeId === 0 ? 'default' : 'stores', $storeId);
+                    $homePages[] = [\Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE, $row['identifier'], $storeId === 0 ? 'default' : 'stores', $storeId];
                 }
-                $configTouched = true;
             }
         }
-        if ($configTouched) {
+        if ($homePages !== []) {
+            Mage::getService('core/config')->saveAll($homePages);
             Mage::app()->getCache()->cleanType('config');
         }
         $reporter->info(count($rows) . ' pages');

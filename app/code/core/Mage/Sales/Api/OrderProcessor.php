@@ -14,16 +14,25 @@ use Mage\Checkout\Api\CartRequest;
 use Mage\Customer\Api\CustomAttributes;
 use ApiPlatform\Metadata\Operation;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Order State Processor - Handles order mutations for API Platform.
  */
 final class OrderProcessor extends \Maho\ApiPlatform\Processor
 {
+    /** The fields of guestCustomer in a place-order body, each with its cart column. */
+    private const GUEST_CUSTOMER_FIELDS = [
+        'prefix' => 'customer_prefix',
+        'firstname' => 'customer_firstname',
+        'middlename' => 'customer_middlename',
+        'lastname' => 'customer_lastname',
+        'suffix' => 'customer_suffix',
+        'dob' => 'customer_dob',
+        'taxvat' => 'customer_taxvat',
+        'gender' => 'customer_gender',
+    ];
+
     private \Mage_Checkout_Service_Cart $cartService;
     private OrderProvider $orderProvider;
     private \Mage_Sales_Service_Order $orderService;
@@ -64,56 +73,68 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
 
     /**
      * Resolve the target order from the request: numeric {id} in the REST URI,
-     * or orderId / incrementId in the GraphQL/body args. Enforces that a plain
-     * customer caller owns the order; admin and orders/write service tokens are
-     * trusted (gated upstream by the operation security expression).
+     * or orderId / incrementId in the GraphQL/body args. A customer finds only
+     * the orders that the storefront shows them; admin and orders/write service
+     * tokens are trusted (gated upstream by the operation security expression).
      */
     private function resolveManagedOrder(array $context, array $uriVariables): \Mage_Sales_Model_Order
     {
         $args = $context['args']['input'] ?? [];
-        $orderId = $uriVariables['id'] ?? $args['orderId'] ?? null;
+        $orderId = (int) ($uriVariables['id'] ?? $args['orderId'] ?? 0);
         $incrementId = $args['incrementId'] ?? null;
-
-        $order = match (true) {
-            (int) $orderId > 0 => $this->orderService->getById((int) $orderId),
-            is_string($incrementId) && $incrementId !== '' => $this->orderService->getByIncrementId($incrementId),
-            default => null,
-        };
-        if (!$order) {
-            throw new NotFoundHttpException('Order not found');
-        }
+        $byId = $orderId > 0 || !is_string($incrementId);
 
         if (!$this->isAdmin() && !$this->isApiUser()) {
             $customerId = $this->getAuthenticatedCustomerId();
-            if (!$customerId || (int) $order->getCustomerId() !== $customerId) {
-                // Don't disclose existence to a non-owner.
-                throw new NotFoundHttpException('Order not found');
-            }
-        } else {
-            $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
+            return $byId
+                ? $this->orderService->requireVisibleToCustomer($orderId, $customerId)
+                : $this->orderService->requireVisibleToCustomerByIncrementId($incrementId, $customerId);
         }
+
+        $order = $byId ? $this->orderService->getById($orderId) : $this->orderService->getByIncrementId($incrementId);
+        $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         return $order;
     }
 
     /**
+     * Write the fields of $values, the guestCustomer of the body, into the customer columns of $quote.
+     */
+    private function applyGuestCustomer(\Mage_Sales_Model_Quote $quote, mixed $values): void
+    {
+        if ($values === null) {
+            return;
+        }
+        if (!is_array($values)) {
+            throw new BadRequestHttpException('guestCustomer must be an object');
+        }
+        foreach (self::GUEST_CUSTOMER_FIELDS as $field => $column) {
+            if (!array_key_exists($field, $values)) {
+                continue;
+            }
+            if ($values[$field] !== null && !is_scalar($values[$field])) {
+                throw new BadRequestHttpException("guestCustomer.{$field} must be a single value");
+            }
+            $value = $values[$field] === null ? null : trim((string) $values[$field]);
+            $quote->setData($column, $value === '' ? null : $value);
+        }
+    }
+
+    /**
      * Place order from cart. CartRequest::resolve() finds the cart that the URI
      * (e.g. /guest-carts/{id}/place-order) or the request body (cartId / maskedId) names.
-     * Also applies shipping/billing address, customer email, and payment data
-     * from the request body, frontend callers send the full checkout state in
-     * one shot rather than pre-mutating the cart. paymentData reaches assignData() flat, with
-     * a copy under \Mage_Checkout_Service_Cart::PAYMENT_ADDITIONAL_DATA_KEY so no key is lost at save time.
+     * The body can hold the addresses, the shipping method and the payment data of the order:
+     * \Mage_Checkout_Service_Cart::applyCheckoutState() applies them before the order is placed.
      */
     private function placeOrder(array $uriVariables, array $context): Order
     {
         $args = $context['args']['input'] ?? $context['request_data'] ?? [];
         $guestEmail = $args['guestEmail'] ?? $args['email'] ?? null;
         $orderNote = $args['orderNote'] ?? null;
-        // POS-only fields: only trust them from admin/api callers so a guest
-        // cannot stamp an arbitrary employee id or cash amount onto the order.
         $isPrivileged = $this->isPrivilegedOrderActor();
-        $cashTendered = ($isPrivileged && isset($args['cashTendered'])) ? (float) $args['cashTendered'] : null;
-        $employeeId = ($isPrivileged && isset($args['employeeId'])) ? (int) $args['employeeId'] : null;
+        $actor = $isPrivileged ? \Mage_Checkout_Model_Actor::Staff : \Mage_Checkout_Model_Actor::Customer;
+        $agreementIds = $actor === \Mage_Checkout_Model_Actor::Customer ? $this->readAgreementIds($args) : null;
+        $sendConfirmation = ($isPrivileged && isset($args['sendConfirmation'])) ? (bool) filter_var($args['sendConfirmation'], FILTER_VALIDATE_BOOLEAN) : null;
         $paymentMethod = $args['paymentMethod'] ?? null;
         $shippingMethod = $args['shippingMethod'] ?? null;
         // Scope, not authorization: a caller in the admin scope (store 0) places a backend
@@ -121,111 +142,53 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $isAdminOrder = \Mage::app()->getStore()->isAdmin();
 
         ['quote' => $quote, 'accessedByMaskedId' => $accessedByMaskedId] = CartRequest::resolve($uriVariables, $context);
-
-        if (!$quote) {
-            throw new NotFoundHttpException('Cart not found');
-        }
-
-        // Verify cart ownership
-        $this->verifyCartOwnership($quote, $accessedByMaskedId);
-
-        // The admin places guest orders for any product, as in the admin order form
-        if (!$isAdminOrder && !$quote->getCustomerId() && !$quote->isAllowedGuestCheckout()) {
-            // The error code keeps a call without a token from reading as a missing login (401)
-            throw new AccessDeniedHttpException('Guest checkout is not allowed for this cart', null, 0, ['X-Api-Error-Code' => 'forbidden']);
-        }
-
-        // Frontend callers send the full checkout state in the body. Apply any
-        // provided addresses in-memory; the single collection below prices them
-        // together with the shipping method, and the final save persists them.
-        if (isset($args['shippingAddress']) && is_array($args['shippingAddress'])) {
-            $this->cartService->applyShippingAddress($quote, $this->cartService->mapAddressInput($args['shippingAddress']));
-            CustomAttributes::applyToCartAddress($quote->getShippingAddress(), $args['shippingAddress']['customAttributes'] ?? null);
-        }
-        if (isset($args['billingAddress']) && is_array($args['billingAddress'])) {
-            $this->cartService->applyBillingAddress($quote, $this->cartService->mapAddressInput($args['billingAddress']));
-            CustomAttributes::applyToCartAddress($quote->getBillingAddress(), $args['billingAddress']['customAttributes'] ?? null);
-        }
+        $quote = $this->cartService->requireAccessible(
+            $quote,
+            $accessedByMaskedId,
+            $this->getAuthenticatedCustomerId(),
+            $isPrivileged,
+        );
 
         // A guest sends the fields of the Checkout Registration form, which a customer order takes from the account
         if (!$quote->getCustomerId()) {
+            $this->applyGuestCustomer($quote, $args['guestCustomer'] ?? null);
             CustomAttributes::applyToGuestQuote($quote, $args['customerCustomAttributes'] ?? null, $isAdminOrder);
         } elseif (isset($args['customerCustomAttributes'])) {
-            throw new UnprocessableEntityHttpException('customerCustomAttributes is for a guest order. A customer order takes the values of the customer account');
+            throw new \Mage_Core_Exception_Input()->addError('customer_custom_attributes', 'customerCustomAttributes is for a guest order. A customer order takes the values of the customer account');
         }
 
-        // Set customer email from the body if provided (guest checkout)
-        if ($guestEmail && !$quote->getCustomerId() && \Mage::helper('core')->isValidEmail($guestEmail)) {
-            $quote->setCustomerEmail($guestEmail);
-        }
-
-        // Set shipping method directly on the in-memory address. The frontend
-        // sends a composite carrier_method string in the body, and we preserve
-        // the in-memory quote state through to place() rather than
-        // save + reload through cartService->setShippingMethod.
-        $validateShippingMethod = false;
-        if ($shippingMethod && !$quote->isVirtual()) {
-            $shippingAddress = $quote->getShippingAddress();
-            $shippingAddress->setShippingMethod($shippingMethod);
-            $shippingAddress->setCollectShippingRates();
-            $validateShippingMethod = true;
-        }
-        // Collect once: this prices the applied addresses and shipping method,
-        // and gives the payment gate below fresh totals
-        $this->cartService->collectAndVerifyTotals($quote);
-
-        // Reject a method the client made up: after rates are collected the
-        // chosen code must resolve to a real rate, otherwise a caller could
-        // claim e.g. free shipping that the store does not actually offer.
-        // Validate before persisting so a bogus method never lands on the saved
-        // quote's shipping address (which would corrupt later loads of the cart).
-        if ($validateShippingMethod) {
-            $rate = $quote->getShippingAddress()->getShippingRateByCode($shippingMethod);
-            // A carrier failure produces a rate whose code is the carrier's
-            // error entry; it must not be orderable (it would price at 0)
-            if (!$rate || $rate->getErrorMessage()) {
-                throw new UnprocessableEntityHttpException('Shipping method is not available for this address');
+        // The client sends the checkout data with the order, and the cart service applies it in one pass
+        $addresses = [];
+        foreach (['shippingAddress' => $quote->getShippingAddress(), 'billingAddress' => $quote->getBillingAddress()] as $key => $address) {
+            if (!isset($args[$key]) || !is_array($args[$key])) {
+                $addresses[$key] = null;
+                continue;
             }
+            CustomAttributes::applyToCartAddress($address, $args[$key]['customAttributes'] ?? null);
+            $addresses[$key] = CartRequest::mapAddress($args[$key]);
         }
-
-        // Gate the method pre-fee: setMethod() alone accepts any configured
-        // code, so without this a client could force e.g. "free" on a paid
-        // cart and place an unpaid order.
-        if ($paymentMethod) {
-            $this->cartService->assertPaymentMethodAvailable($quote, $paymentMethod);
-
-            // Caller-scope read; must stay outside the store-scope switch below
-            $this->cartService->importPaymentData(
+        try {
+            $this->cartService->applyCheckoutState(
                 $quote,
-                $paymentMethod,
+                $addresses['shippingAddress'],
+                $addresses['billingAddress'],
+                is_string($shippingMethod) ? $shippingMethod : null,
+                is_string($paymentMethod) ? $paymentMethod : null,
                 (isset($args['paymentData']) && is_array($args['paymentData'])) ? $args['paymentData'] : null,
-                \Mage_Payment_Model_Method_Abstract::checksForCurrentScope(),
+                CartRequest::backOfficeActor($isPrivileged),
             );
-
-            // Recollect so payment-dependent totals (e.g. payment fees) land on
-            // the order; the consumed rates flag keeps the validated rates.
-            $this->cartService->collectAndVerifyTotals($quote);
+        } catch (\Mage_Core_Exception_Input $e) {
+            throw CartRequest::withAddressFieldNames($e, ['shipping_address' => 'shippingAddress', 'billing_address' => 'billingAddress']);
         }
 
-        $placeOrder = function () use ($quote, $paymentMethod, $shippingMethod, $guestEmail, $orderNote, $cashTendered, $employeeId): array {
-            $quote->save();
-
-            // Allow modules to prepare the quote before order placement
-            // (e.g. POS module sets default address, shipping, payment for admin orders)
-            \Mage::dispatchEvent('sales_api_place_order_before', [
-                'quote' => $quote,
-                'payment_method' => $paymentMethod,
-                'shipping_method' => $shippingMethod,
-            ]);
-
-            return $this->orderService->place(
-                $quote,
-                $guestEmail,
-                $orderNote,
-                $cashTendered,
-                $employeeId,
-            );
-        };
+        $placeOrder = fn(): array => $this->orderService->place(
+            $quote,
+            $guestEmail,
+            $orderNote,
+            $actor,
+            $agreementIds,
+            $sendConfirmation,
+        );
 
         // An admin-scoped caller places in admin scope so payment methods apply
         // MOTO handling (issue #1337). Any other caller places in the quote's
@@ -236,15 +199,22 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             ? $placeOrder()
             : $this->cartService->inQuoteStoreScope($quote, $placeOrder);
 
-        $order = $result['order'];
-        $accessToken = $result['accessToken'];
-        $changeAmount = $result['changeAmount'];
+        return $this->orderProvider->mapToDto($result['order'], $result['accessToken']);
+    }
 
-        $dto = $this->orderProvider->mapToDto($order, $accessToken);
-        if ($changeAmount !== null) {
-            $dto->changeAmount = $changeAmount;
+    /**
+     * Return the agreement IDs of the body. A Customer sends them when the store asks to accept its agreements.
+     *
+     * @return list<int>
+     */
+    private function readAgreementIds(array $args): array
+    {
+        $agreementIds = $args['agreementIds'] ?? [];
+        if (!is_array($agreementIds) || !array_is_list($agreementIds)) {
+            throw new BadRequestHttpException('agreementIds must be a list of agreement IDs');
         }
-        return $dto;
+
+        return array_map(intval(...), $agreementIds);
     }
 
     /**
@@ -289,56 +259,25 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
 
     /**
      * Add a status-history comment to an order (admin / orders-write only).
-     * An optional status is validated against the statuses assigned to the
-     * order's current state, the same constraint the admin comment form
-     * enforces, and applied via addStatusHistoryComment().
      */
     private function addOrderComment(array $context, array $uriVariables = []): Order
     {
         $args = $context['args']['input'] ?? [];
-        $comment = trim((string) ($args['comment'] ?? $args['note'] ?? ''));
-        if ($comment === '') {
-            throw new UnprocessableEntityHttpException('Comment text is required');
-        }
-        $notifyCustomer = (bool) ($args['notifyCustomer'] ?? false);
-        $visibleOnFront = (bool) ($args['visibleOnFront'] ?? false);
         $status = $args['status'] ?? null;
         if ($status !== null && !is_string($status)) {
             throw new BadRequestHttpException('Status must be a string');
         }
-        $status = $status !== null ? trim($status) : null;
-        if ($status === '') {
-            $status = null;
-        }
+        $status = trim((string) $status);
 
-        $order = $this->resolveManagedOrder($context, $uriVariables);
-        if ($status !== null) {
-            $allowed = $order->getConfig()->getStateStatuses($order->getState(), false);
-            if (!in_array($status, $allowed, true)) {
-                throw new UnprocessableEntityHttpException(sprintf(
-                    'Status "%s" is not assigned to the order\'s current state "%s"; allowed: %s',
-                    $status,
-                    (string) $order->getState(),
-                    implode(', ', $allowed),
-                ));
-            }
-        }
-        $order = $this->orderService->addNote($order, $comment, $notifyCustomer, $visibleOnFront, $status);
+        $order = $this->orderService->addNote(
+            $this->resolveManagedOrder($context, $uriVariables),
+            (string) ($args['comment'] ?? $args['note'] ?? ''),
+            (bool) ($args['notifyCustomer'] ?? false),
+            (bool) ($args['visibleOnFront'] ?? false),
+            $status !== '' ? $status : null,
+        );
 
         return $this->orderProvider->mapToDto($order);
-    }
-
-    /**
-     * Verify the current user has access to place an order for this cart
-     */
-    private function verifyCartOwnership(\Mage_Sales_Model_Quote $quote, bool $accessedByMaskedId): void
-    {
-        $this->cartService->verifyAccess(
-            $quote,
-            $accessedByMaskedId,
-            $this->getAuthenticatedCustomerId(),
-            $this->isPrivilegedOrderActor(),
-        );
     }
 
     /**

@@ -54,7 +54,7 @@ class Maho_Ai_Model_System_Config_Backend_ApiKey extends Mage_Adminhtml_Model_Sy
         }
 
         if (preg_match('#^ai/general/([a-z]+)_api_key$#', (string) $this->getPath(), $m)) {
-            Mage::getModel('ai/platform_modelFetcher')->refreshCache($m[1]);
+            Mage::getSingleton('ai/platform_modelFetcher')->refreshCache($m[1]);
         }
 
         return $this;

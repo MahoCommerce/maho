@@ -179,7 +179,9 @@ class Install extends BaseMahoCommand
             // Mage::reset() then leaves a clean slate for the installer's own
             // bootstrap.
             try {
-                Mage::app()->getCache()->flush();
+                // The command did not start the application yet, and getService() reads its configuration
+                Mage::app();
+                Mage::getService('core/cache')->flush();
                 $output->writeln('<info>Flushed existing cache</info>');
             } catch (\Throwable) {
                 // ignore: the prior install may be unbootable

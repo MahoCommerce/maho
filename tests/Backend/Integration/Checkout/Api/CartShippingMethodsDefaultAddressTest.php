@@ -13,7 +13,7 @@ use Mage\Checkout\Api\GraphQL\CartMutationHandler;
 
 uses(Tests\MahoBackendTestCase::class);
 
-it('lists the shipping methods of a cart without a shipping country with no PHP warning', function (): void {
+it('lists no shipping method for a cart without a shipping country, with no PHP warning', function (): void {
     $quote = Mage::getModel('sales/quote')->setStoreId(1);
     $quote->addProduct(loadSimplePricedProduct(), 1);
     $quote->save();
@@ -25,7 +25,7 @@ it('lists the shipping methods of a cart without a shipping country with no PHP 
     try {
         $result = new CartMutationHandler(new CartMapper())->handleShippingMethods(['cartId' => (int) $quote->getId()]);
 
-        expect(array_column($result['availableShippingMethods'], 'carrierCode'))->toContain('flatrate');
+        expect($result['availableShippingMethods'])->toBe([]);
     } finally {
         restore_error_handler();
         $quote->delete();

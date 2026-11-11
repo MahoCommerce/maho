@@ -265,8 +265,8 @@ describe('Integration: Quote → Order → Admin Totals with Gift Card', functio
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
         $giftcard->setWebsiteIds([1]);
-        $giftcard->setBalance(99999.00);
-        $giftcard->setInitialBalance(99999.00);
+        $giftcard->setBalance(9999.00);
+        $giftcard->setInitialBalance(9999.00);
         $giftcard->save();
 
         // Create quote with single product

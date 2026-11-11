@@ -491,18 +491,15 @@ class Sqlite extends AbstractPdoAdapter
     /**
      * Quote a value for safe use in SQL - SQLite-specific implementation
      *
-     * SQLite has strict type affinity in certain contexts (like CASE WHEN expressions).
-     * When comparing CASE WHEN results (which preserve the original column type) against
-     * quoted values, type mismatches can cause comparisons to fail.
-     *
-     * This override ensures integers are not quoted as strings, allowing proper
-     * comparisons in SQLite's type system.
+     * SQLite gives no type affinity to a CASE, IFNULL or function result, so the integer 1
+     * in such a result does not equal the text '1'. This method writes an int, and a string
+     * that is the exact decimal form of an int, as a number. Any other string stays text, so
+     * the code '02' does not become 2.
      */
     #[\Override]
     public function quote(\Maho\Db\Select|\Maho\Db\Expr|array|int|string|float|bool|null $value, string|int|null $type = null): string
     {
-        // Handle integers without quoting for SQLite's strict type comparisons
-        if (is_int($value) || (is_numeric($value) && !str_contains((string) $value, '.') && !str_contains((string) $value, 'e'))) {
+        if (is_int($value) || (is_string($value) && $value === (string) (int) $value)) {
             return (string) (int) $value;
         }
 
@@ -2824,6 +2821,15 @@ class Sqlite extends AbstractPdoAdapter
             return ($conditionKey == 'seq') ? 'null' : 'notnull';
         }
         return ($conditionKey == 'seq') ? 'eq' : 'neq';
+    }
+
+    /**
+     * SQLite stores a SMALLINT, an INTEGER and a BIGINT column of the schema as INTEGER, which holds 64 bits.
+     */
+    #[\Override]
+    protected function _getIntegerColumnBits(array $column): ?int
+    {
+        return parent::_getIntegerColumnBits($column) === null ? null : 64;
     }
 
     /**

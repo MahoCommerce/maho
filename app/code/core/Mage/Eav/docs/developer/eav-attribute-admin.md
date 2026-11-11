@@ -75,6 +75,12 @@ The attribute model can also change the save and the texts of the set page:
 - `saveAdminData()` saves the posted values that the attribute does not save itself.
 - `_getInputTypes()` gives the input types of the type. The event
   `eav_attribute_input_types_prepare` lets another module add or remove a type.
+- `getValidationErrors()` returns the errors of the values that the admin form and the API refuse.
+  The attribute service calls it, and a direct save of the model does not. A subclass adds the
+  rules of its type: the catalog attribute checks the reserved codes of products, the scope, the
+  layered navigation value, the position and the product types of **Apply To**.
+- `getAllowedOptionTags()` returns the HTML tags that an option label keeps when the attribute
+  allows HTML on the storefront. By default, it returns `allowedTags` of the settings.
 - `getAttributeSummary()` returns a summary that the attribute page shows above the properties,
   in a section of its own. Each row names a setting and lists its values as badges. A value that
   does not show the attribute has a line through it. The customer types list the forms, the
@@ -89,6 +95,29 @@ The attribute model can also change the save and the texts of the set page:
   takes user-defined attributes out of the set, or `null` for no question. By default, it names
   each attribute and the number of records of the set that have a value. The customer types say
   that the values stay, and CMS pages say that the pages keep their values.
+
+## The attribute service
+
+`Mage::getService('eav/attribute')` returns `Mage_Eav_Service_Attribute`. The admin pages of every
+entity type, the product attribute API and the `import:attributes` command save, delete and change
+the options of an attribute through it:
+
+- `newAttribute($entityTypeCode)`, `getById($id, $entityTypeCode)` and `getByCode($code, $entityTypeCode)`
+  give the attribute model of the type. An ID or a code of another type is not found.
+- `save($attribute)` removes the HTML tags from the labels and checks the attribute. A new attribute
+  gets the backend, source and frontend models of its input type and becomes user-defined.
+- `saveOptions($attribute, $changes)` changes some options of a Dropdown or a Multiple Select and
+  keeps the others, with their default flag.
+- `delete($attribute)` deletes a user-defined attribute.
+
+The model keeps the rules of one attribute, so a save in code gets them too:
+
+- The code of a new attribute starts with a letter a-z and holds only letters a-z, digits and
+  underscores, from 2 to 64 characters. Another attribute of the type cannot have the same code.
+- A saved attribute keeps its code and its input type.
+- A saved attribute keeps the locked fields that `global/eav_attributes/<type code>` gives for its
+  code, and a system attribute keeps its **Unique Value** flag.
+- A system attribute cannot be deleted. The resource model reads the stored flag.
 
 ## How the core entity types use them
 
@@ -204,7 +233,7 @@ of its record. It reads the `attribute_set_id` column of the entity table. For t
   not have. `Mage_Eav_Helper_Data::getSetChangeQuestions()` builds the questions, and
   `Mage_Eav_Model_Resource_Entity_Attribute_Set::getMissingAttributeLabels()` finds the attributes.
 - The set page refuses to remove a system attribute from a set, and to delete a group that still
-  holds one. `Mage_Adminhtml_Controller_Eav_Set::checkSystemAttributes()` makes the same check on
-  the server. The check also covers the system attributes that the editor hides.
+  holds one. `Mage_Eav_Service_Attribute_Set::saveTree()` makes the same check on the server, for the
+  admin and for the API. The check also covers the system attributes that the editor hides.
 - Customers and customer addresses keep `attribute_set_id` 0 in their rows, so the cron does not
   delete their values.

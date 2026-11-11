@@ -119,7 +119,7 @@ it('fails to create a customer group with a code longer than the model saves', f
     $result = customerGroupRun(new CustomerGroupCreate('customer:group:create'), ['code' => $code, 'tax_class_id' => (string) $this->taxClass->getId()]);
 
     expect($result->statusCode)->toBe(Command::INVALID);
-    expect($result->getDisplay())->toContain('Code cannot be longer than 32 bytes');
+    expect($result->getDisplay())->toContain('Customer group code must not exceed 32 characters.');
     expect(Mage::getModel('customer/group')->load(substr($code, 0, Mage_Customer_Model_Group::GROUP_CODE_MAX_LENGTH), 'customer_group_code')->getId())->toBeNull();
 });
 

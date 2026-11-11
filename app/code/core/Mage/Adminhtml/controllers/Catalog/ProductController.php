@@ -19,7 +19,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     /**
      * The greatest value which could be stored in CatalogInventory Qty field
      */
-    public const MAX_QTY_VALUE = 99999999.9999;
+    public const MAX_QTY_VALUE = Mage_CatalogInventory_Service_Stock::MAX_QTY;
 
     /**
      * Array of actions which can be processed without secret key validation
@@ -542,19 +542,15 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
             $productData = $this->_filterDates($productData, $dateFields);
             $product->addData($productData);
 
-            /* set restrictions for date ranges */
-            $resource = $product->getResource();
-            $resource->getAttribute('special_from_date')
-                ->setMaxValue($product->getSpecialToDate());
-            $resource->getAttribute('news_from_date')
-                ->setMaxValue($product->getNewsToDate());
-            $resource->getAttribute('custom_design_from')
-                ->setMaxValue($product->getCustomDesignTo());
-
-            $product->validate();
-        } catch (Mage_Eav_Model_Entity_Attribute_Exception $e) {
+            $this->_getService()->validate($product);
+        } catch (Mage_Core_Exception_Input $e) {
             $response->setError(true);
-            $response->setAttribute($e->getAttributeCode());
+            $response->setAttribute($e->getErrors()[0]['field'] ?? null);
+            $response->setMessage(Mage::helper('core')->escapeHtml($e->getMessage()));
+        } catch (Mage_Core_Exception_Conflict $e) {
+            // The validation gives a conflict only for a SKU that another product has
+            $response->setError(true);
+            $response->setAttribute('sku');
             $response->setMessage(Mage::helper('core')->escapeHtml($e->getMessage()));
         } catch (Mage_Core_Exception $e) {
             $response->setError(true);
@@ -595,10 +591,6 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
             $product->lockAttribute('media');
         }
 
-        if (Mage::app()->isSingleStoreMode()) {
-            $product->setWebsiteIds([Mage::app()->getStore(true)->getWebsite()->getId()]);
-        }
-
         /**
          * Create Permanent Redirect for old URL key
          */
@@ -609,11 +601,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
         /**
          * Check "Use Default Value" checkboxes values
          */
-        if ($useDefaults = $this->getRequest()->getPost('use_default')) {
-            foreach ($useDefaults as $attributeCode) {
-                $product->setData($attributeCode, false);
-            }
-        }
+        $this->_getService()->useDefault($product, array_map(strval(...), (array) $this->getRequest()->getPost('use_default', [])));
 
         /**
          * Init product links data (related, upsell, crosssel)
@@ -693,16 +681,8 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
         if (is_null($stockData)) {
             return;
         }
+        // The form posts no use_config_manage_stock when its checkbox is clear
         $stockData['use_config_manage_stock'] ??= 0;
-        if (isset($stockData['qty']) && (float) $stockData['qty'] > self::MAX_QTY_VALUE) {
-            $stockData['qty'] = self::MAX_QTY_VALUE;
-        }
-        if (isset($stockData['min_qty']) && (int) $stockData['min_qty'] < 0) {
-            $stockData['min_qty'] = 0;
-        }
-        if (!isset($stockData['is_decimal_divided']) || $stockData['is_qty_decimal'] == 0) {
-            $stockData['is_decimal_divided'] = 0;
-        }
     }
 
     #[Maho\Config\Route('/admin/catalog_product/categoriesJson')]
@@ -731,25 +711,13 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
         if ($data) {
             $this->_filterStockData($data['product']['stock_data']);
 
-            $product = $this->_initProductSave();
-            // check sku attribute
-            $productSku = $product->getSku();
-            if ($productSku && $productSku != Mage::helper('core')->stripTags($productSku)) {
-                $this->_getSession()->addError($this->__('HTML tags are not allowed in SKU attribute.'));
-                $this->_redirect('*/*/edit', [
-                    'id' => $productId,
-                    '_current' => true,
-                ]);
-                return;
-            }
-
             try {
-                $product->validate();
-                $product->save();
+                $product = $this->_initProductSave();
+                $this->_getService()->save($product);
                 $productId = $product->getId();
 
                 if (isset($data['copy_to_stores'])) {
-                    $this->_copyAttributesBetweenStores($data['copy_to_stores'], $product);
+                    $this->_getService()->copyToStores($product, (array) $data['copy_to_stores']);
                 }
 
                 $this->_getSession()->addSuccess($this->__('The product has been saved.'));
@@ -757,7 +725,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
                 $this->_getSession()->addError($e->getMessage())
                     ->setProductData($data);
                 $redirectBack = true;
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
                 Mage::logException($e);
                 $this->_getSession()->addError($e->getMessage());
                 $redirectBack = true;
@@ -781,25 +749,14 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     }
 
     /**
-     * Duplicates product attributes between stores.
-     * @param array $stores list of store pairs: [fromStore => toStore, fromStore => toStore,..]
+     * @param array $stores list of store pairs: [toStore => fromStore, ...]
      * @param Mage_Catalog_Model_Product $product whose attributes should be copied
      * @return $this
-     * @throws Throwable
      */
+    #[\Deprecated('Use Mage_Catalog_Service_Product::copyToStores()')]
     protected function _copyAttributesBetweenStores(array $stores, Mage_Catalog_Model_Product $product)
     {
-        foreach ($stores as $storeTo => $storeFrom) {
-            $productInStore = Mage::getModel('catalog/product')
-                ->setStoreId($storeFrom)
-                ->load($product->getId());
-            Mage::dispatchEvent('product_duplicate_attributes', [
-                'product' => $productInStore,
-                'storeTo' => $storeTo,
-                'storeFrom' => $storeFrom,
-            ]);
-            $productInStore->setStoreId($storeTo)->save();
-        }
+        $this->_getService()->copyToStores($product, $stores);
         return $this;
     }
 
@@ -813,7 +770,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
         $product = $this->_initProduct();
         try {
             $duplicateImages = (bool) $this->getRequest()->getParam('duplicate_images', true);
-            $newProduct = $product->duplicate($duplicateImages);
+            $newProduct = $this->_getService()->duplicate($product, $duplicateImages);
             $this->_getSession()->addSuccess($this->__('The product has been duplicated.'));
             $this->_redirect('*/*/edit', ['_current' => true, 'id' => $newProduct->getId()]);
         } catch (Exception $e) {
@@ -829,13 +786,14 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     #[Maho\Config\Route('/admin/catalog_product/delete')]
     public function deleteAction(): void
     {
-        if ($id = $this->getRequest()->getParam('id')) {
-            $product = Mage::getModel('catalog/product')
-                ->load($id);
+        if ($id = (int) $this->getRequest()->getParam('id')) {
             try {
-                $product->delete();
+                $this->_getService()->delete($this->_getService()->getById($id));
                 $this->_getSession()->addSuccess($this->__('The product has been deleted.'));
-            } catch (Exception $e) {
+            } catch (Mage_Core_Exception $e) {
+                $this->_getSession()->addError($e->getMessage());
+            } catch (Throwable $e) {
+                Mage::logException($e);
                 $this->_getSession()->addError($e->getMessage());
             }
         }
@@ -898,14 +856,15 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
             if (!empty($productIds)) {
                 try {
                     foreach ($productIds as $productId) {
-                        $product = Mage::getSingleton('catalog/product')->load($productId);
-                        Mage::dispatchEvent('catalog_controller_product_delete', ['product' => $product]);
-                        $product->delete();
+                        $this->_getService()->delete($this->_getService()->getById((int) $productId));
                     }
                     $this->_getSession()->addSuccess(
                         $this->__('Total of %d record(s) have been deleted.', count($productIds)),
                     );
-                } catch (Exception $e) {
+                } catch (Mage_Core_Exception $e) {
+                    $this->_getSession()->addError($e->getMessage());
+                } catch (Throwable $e) {
+                    Mage::logException($e);
                     $this->_getSession()->addError($e->getMessage());
                 }
             }
@@ -924,10 +883,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
         $status     = (int) $this->getRequest()->getParam('status');
 
         try {
-            $this->_validateMassStatus($productIds, $status);
-            Mage::getSingleton('catalog/product_action')
-                ->updateAttributes($productIds, ['status' => $status], $storeId);
-            Mage::dispatchEvent('catalog_controller_product_mass_status', ['product_ids' => $productIds]);
+            $this->_getService()->updateStatus($productIds, $status, $storeId);
 
             $this->_getSession()->addSuccess(
                 $this->__('Total of %d record(s) have been updated.', count($productIds)),
@@ -943,19 +899,14 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     }
 
     /**
-     * Validate batch of products before theirs status will be set
-     *
+     * @param int $status
      * @throws Mage_Core_Exception
-     * @param  int $status
      */
-    public function _validateMassStatus(array $productIds, $status)
+    #[\Deprecated('Mage_Catalog_Service_Product::updateStatus() makes this check')]
+    public function _validateMassStatus(array $productIds, $status): void
     {
         if ($status == Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
-            if (!Mage::getModel('catalog/product')->isProductsHasSku($productIds)) {
-                throw new Mage_Core_Exception(
-                    $this->__('Some of the processed products have no SKU value defined. Please fill it prior to performing operations on these products.'),
-                );
-            }
+            $this->_getService()->assertHaveSku($productIds);
         }
     }
 
@@ -1010,15 +961,6 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
         }
 
         $product->addData($this->getRequest()->getParam('simple_product', []));
-
-        $productSku = $product->getSku();
-        if ($productSku && $productSku != Mage::helper('core')->stripTags($productSku)) {
-            $this->getResponse()->setBodyJson([
-                'error' => ['message' => $this->__('HTML tags are not allowed in SKU attribute.')],
-            ]);
-            return;
-        }
-
         $product->setWebsiteIds($configurableProduct->getWebsiteIds());
 
         $autogenerateOptions = [];
@@ -1064,8 +1006,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
         }
 
         try {
-            $product->validate();
-            $product->save();
+            $this->_getService()->save($product);
             $result['product_id'] = $product->getId();
             $this->_getSession()->addSuccess(Mage::helper('catalog')->__('The product has been created.'));
             $this->_initLayoutMessages('adminhtml/session');
@@ -1077,7 +1018,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
                     'sku'  =>  $product->getSku(),
                 ],
             ];
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             Mage::logException($e);
             $result['error'] = [
                 'message'   =>  $this->__('An error occurred while saving the product. ') . $e->getMessage(),
@@ -1085,5 +1026,11 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
         }
 
         $this->getResponse()->setBodyJson($result);
+    }
+
+    protected function _getService(): Mage_Catalog_Service_Product
+    {
+        /** @var Mage_Catalog_Service_Product */
+        return Mage::getService('catalog/product');
     }
 }

@@ -23,6 +23,9 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
 {
     public const ENTITY    = 'core_website';
     public const CACHE_TAG = 'website';
+
+    /** A website code: letters (a-z), digits (0-9) and underscores, starting with a letter. */
+    public const CODE_PATTERN = '/^[a-z]+[a-z0-9_]*$/';
     #[\Override]
     protected $_cacheTag = true;
 

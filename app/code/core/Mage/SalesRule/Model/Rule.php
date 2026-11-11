@@ -50,6 +50,12 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     public const CART_FIXED_ACTION = 'cart_fixed';
     public const BUY_X_GET_Y_ACTION = 'buy_x_get_y';
 
+    /** The core actions of a cart price rule. getSimpleActions() returns the list that a store accepts. */
+    public const SIMPLE_ACTIONS = [self::BY_PERCENT_ACTION, self::BY_FIXED_ACTION, self::CART_FIXED_ACTION, self::BUY_X_GET_Y_ACTION];
+
+    /** Each child node is the code of an action that a rule accepts. A module adds a node for its action. */
+    public const XML_PATH_SIMPLE_ACTIONS = 'global/salesrule/rule/simple_actions';
+
     /**
      * Store coupon code generator instance
      *
@@ -122,6 +128,69 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     public static function getCouponMassGenerator()
     {
         return Mage::getSingleton('salesrule/coupon_massgenerator');
+    }
+
+    /**
+     * @throws Mage_Core_Exception_Input with one error for each problem of the rule
+     */
+    #[\Override]
+    protected function _beforeSave()
+    {
+        $this->validateRecord()->throwIfErrors();
+        return parent::_beforeSave();
+    }
+
+    /**
+     * Add an error to $errors for each problem of the rule, and return $errors. The coupon resource model
+     * refuses a code that is too long or that another coupon uses. The coupon is a second record, so the
+     * service requires its code: other code saves the rule first and creates the coupon after.
+     */
+    public function validateRecord(Mage_Core_Exception_Input $errors = new Mage_Core_Exception_Input()): Mage_Core_Exception_Input
+    {
+        $helper = Mage::helper('salesrule');
+        $this->_validateScope($errors);
+
+        $actions = $this->getSimpleActions();
+        if (!in_array($this->getData('simple_action') ?? self::BY_PERCENT_ACTION, $actions, true)) {
+            $this->_addRecordError($errors, 'simple_action', $helper->__('The action must be one of: %s.', implode(', ', $actions)));
+        }
+        $amount = (float) $this->getDiscountAmount();
+        if ($amount < 0) {
+            $this->_addRecordError($errors, 'discount_amount', $helper->__('The discount amount must be 0 or more.'));
+        } elseif ($amount > 100 && $this->getSimpleAction() === self::BY_PERCENT_ACTION) {
+            $this->_addRecordError($errors, 'discount_amount', $helper->__('The discount amount must not be more than 100 for a percent discount.'), ['simple_action']);
+        }
+        $counts = [
+            'discount_qty' => 'Maximum Qty Discount is Applied To',
+            'discount_step' => 'Discount Qty Step (Buy X)',
+            'uses_per_coupon' => 'Uses per Coupon',
+            'uses_per_customer' => 'Uses per Customer',
+            'sort_order' => 'Priority',
+        ];
+        foreach ($counts as $field => $label) {
+            if ((float) $this->getData($field) < 0) {
+                $this->_addRecordError($errors, $field, $helper->__('%s must be 0 or more.', $helper->__($label)));
+            }
+        }
+        if (!in_array((int) $this->getSimpleFreeShipping(), [0, self::FREE_SHIPPING_ITEM, self::FREE_SHIPPING_ADDRESS], true)) {
+            $this->_addRecordError($errors, 'simple_free_shipping', $helper->__('The free shipping option must be 0, 1 or 2.'));
+        }
+
+        if (!in_array((int) ($this->getCouponType() ?? self::COUPON_TYPE_NO_COUPON), [self::COUPON_TYPE_NO_COUPON, self::COUPON_TYPE_SPECIFIC, self::COUPON_TYPE_AUTO], true)) {
+            $this->_addRecordError($errors, 'coupon_type', $helper->__('The coupon type is not valid.'));
+        }
+        return $errors;
+    }
+
+    /**
+     * Return the codes of the actions that a rule accepts: the child nodes of global/salesrule/rule/simple_actions.
+     *
+     * @return list<string>
+     */
+    public function getSimpleActions(): array
+    {
+        $node = Mage::getConfig()->getNode(self::XML_PATH_SIMPLE_ACTIONS);
+        return $node ? array_map(strval(...), array_keys($node->asArray())) : self::SIMPLE_ACTIONS;
     }
 
     /**

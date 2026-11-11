@@ -94,6 +94,11 @@ SPDX-License-Identifier: AFL-3.0
         <docs>
             <user>docs/user</user>
         </docs>
+        <services>
+            <cms>
+                <class>Mage_Cms_Service</class>
+            </cms>
+        </services>
         <models>
             <cms>
                 <class>Mage_Cms_Model</class>

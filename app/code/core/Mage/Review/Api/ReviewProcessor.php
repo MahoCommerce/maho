@@ -12,18 +12,11 @@ namespace Mage\Review\Api;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Put;
-use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
- * Review Processor, handles review submission with custom logic.
- *
- * Reviews have a non-standard write flow (submit only, no generic CRUD update/delete),
- * so this extends the base Processor rather than CrudProcessor. It uses
- * CrudResource::fromModel() for building responses.
+ * Give a review submission or a moderation to the review service, and return the review.
  */
 final class ReviewProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -41,16 +34,16 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
     {
         StoreContext::ensureStore();
-        $operationName = $operation->getName();
 
-        if ($operationName === 'submit') {
+        if ($operation->getName() === 'submit') {
             $args = $context['args']['input'] ?? [];
             return $this->submitReview(
                 (int) $args['productId'],
                 $args['title'],
                 $args['detail'],
                 $args['nickname'],
-                (int) $args['rating'],
+                isset($args['rating']) ? (int) $args['rating'] : null,
+                isset($args['captchaToken']) ? (string) $args['captchaToken'] : null,
             );
         }
 
@@ -60,13 +53,7 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
 
         $productId = (int) ($uriVariables['productId'] ?? 0);
         if ($productId && $data instanceof Review) {
-            return $this->submitReview(
-                $productId,
-                $data->title,
-                $data->detail,
-                $data->nickname,
-                $data->rating,
-            );
+            return $this->submitReview($productId, $data->title, $data->detail, $data->nickname, $data->rating, $data->captchaToken);
         }
 
         throw new BadRequestHttpException('Invalid review operation');
@@ -79,18 +66,12 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
      */
     private function moderateReview(int $reviewId, Review $data): Review
     {
-        if ($data->status === null && ($data->stores === null || $data->stores === [])) {
-            throw new UnprocessableEntityHttpException('Provide a status and/or stores to moderate');
-        }
         if ($data->status !== null && !isset(self::STATUS_MAP[$data->status])) {
-            throw new UnprocessableEntityHttpException('status must be one of: ' . implode(', ', array_keys(self::STATUS_MAP)));
+            throw new \Mage_Core_Exception('status must be one of: ' . implode(', ', array_keys(self::STATUS_MAP)));
         }
 
-        /** @var \Mage_Review_Model_Review $review */
-        $review = \Mage::getModel('review/review')->load($reviewId);
-        if (!$review->getId()) {
-            throw new NotFoundHttpException('Review not found');
-        }
+        $service = \Mage::getService('review/review');
+        $review = $service->getById($reviewId);
 
         // A store-restricted token may only moderate reviews assigned to a
         // store on its allowlist. Store 0 is a marker row every save adds, so
@@ -102,43 +83,19 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         ));
         $this->validateEntityStoreAccess($reviewStoreIds === [] ? [0] : $reviewStoreIds, $user, 'review');
 
-        if ($data->status !== null) {
-            $review->setStatusId(self::STATUS_MAP[$data->status]);
+        $storeIds = null;
+        if ($data->stores) {
+            try {
+                $storeIds = $this->resolveStoreIds(array_map(strval(...), $data->stores), $user);
+            } catch (\Mage_Core_Model_Store_Exception) {
+                throw new \Mage_Core_Exception('stores contains an unknown store');
+            }
         }
-        if ($data->stores !== null && $data->stores !== []) {
-            $review->setStores($this->resolveModerationStores($data->stores, $user));
-        }
-        $review->save();
-        $review->aggregate();
+        $service->moderate($review, $data->status === null ? null : self::STATUS_MAP[$data->status], $storeIds);
 
-        // Approved-review lists are cached (see ReviewProvider); a status flip must show up.
-        \Mage::app()->cleanCache(['API_REVIEWS']);
-
-        $review = \Mage::getModel('review/review')->load($reviewId);
-        $dto = Review::fromModel($review);
-
-        $product = \Mage::getModel('catalog/product')->load((int) $review->getEntityPkValue());
-        if ($product->getId()) {
-            $dto->productName = $product->getName();
-        }
-
+        $dto = Review::fromModel($service->getById($reviewId));
+        $dto->productName = \Mage::getModel('catalog/product')->load((int) $review->getEntityPkValue())->getName();
         return $dto;
-    }
-
-    /**
-     * Resolve the moderation Put's stores payload (store ids, codes, or
-     * ['all']) into store ids, enforcing the token's store allowlist.
-     *
-     * @param array<int|string> $stores
-     * @return array<int>
-     */
-    private function resolveModerationStores(array $stores, ApiUser $user): array
-    {
-        try {
-            return $this->resolveStoreIds(array_map(strval(...), $stores), $user);
-        } catch (\Mage_Core_Model_Store_Exception) {
-            throw new UnprocessableEntityHttpException('stores contains an unknown store');
-        }
     }
 
     private function submitReview(
@@ -146,127 +103,31 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         string $title,
         string $detail,
         string $nickname,
-        int $rating,
+        ?int $rating,
+        ?string $captchaToken,
     ): Review {
         $customerId = $this->requireCustomerId();
-
-        // Limit by IP and by account: the IP check is skipped when the client IP
-        // is unknown and can be sidestepped by IP rotation, so a per-customer
-        // bucket backstops review flooding from a single account.
-        $this->checkRateLimitByIp('review_submit', 'review_submit', 3600);
-        $this->checkRateLimit('review_submit:customer:' . $customerId, 'review_submit', 3600);
-
-        /** @var \Mage_Catalog_Model_Product $product */
-        $product = \Mage::getModel('catalog/product')->load($productId);
-        if (!$product->getId()) {
-            throw new NotFoundHttpException('Product not found');
-        }
-
-        $title = trim($title);
-        $detail = trim($detail);
-        $nickname = trim($nickname);
-
-        if (empty($title)) {
-            throw new UnprocessableEntityHttpException('Review title is required');
-        }
-        if (strlen($title) > 255) {
-            throw new UnprocessableEntityHttpException('Review title cannot exceed 255 characters');
-        }
-        if (empty($detail)) {
-            throw new UnprocessableEntityHttpException('Review detail is required');
-        }
-        if (strlen($detail) > 65535) {
-            throw new UnprocessableEntityHttpException('Review detail is too long');
-        }
-        if (empty($nickname)) {
-            throw new UnprocessableEntityHttpException('Nickname is required');
-        }
-        if (strlen($nickname) > 255) {
-            throw new UnprocessableEntityHttpException('Nickname cannot exceed 255 characters');
-        }
-        if ($rating < 1 || $rating > 5) {
-            throw new UnprocessableEntityHttpException('Rating must be between 1 and 5');
-        }
-
         $storeId = StoreContext::getStoreId();
+        $service = \Mage::getService('review/review');
 
-        /** @var \Mage_Review_Model_Review $review */
-        $review = \Mage::getModel('review/review');
-        $review->setEntityPkValue($productId);
-        $review->setTitle($title);
-        $review->setDetail($detail);
-        $review->setNickname($nickname);
-        $review->setCustomerId($customerId);
-        $review->setStoreId($storeId);
-        $review->setStores([$storeId]);
-        $review->setStatusId(\Mage_Review_Model_Review::STATUS_PENDING);
-        $review->setEntityId($review->getEntityIdByCode(\Mage_Review_Model_Review::ENTITY_PRODUCT_CODE));
-
-        $validate = $review->validate();
-        if ($validate !== true && is_array($validate)) {
-            throw new UnprocessableEntityHttpException(implode(', ', $validate));
-        }
-
-        $review->save();
-
-        $this->addRatingVote($review, $rating, $productId, $customerId);
-        $review->aggregate();
+        $review = \Mage::getModel('review/review')
+            ->setEntityPkValue($productId)
+            ->setTitle($title)
+            ->setDetail($detail)
+            ->setNickname($nickname);
+        $service->submit(
+            $review,
+            $rating === null ? [] : $service->getStarVotes($rating, $storeId),
+            $storeId,
+            $customerId,
+            ['captchaToken' => $captchaToken],
+        );
 
         $dto = Review::fromModel($review);
-        $dto->productName = $product->getName();
-        $dto->rating = $rating;
+        $dto->productName = $service->getProduct($productId, $storeId)->getName();
+        $dto->rating = $rating ?? $dto->rating;
         $dto->status = 'pending';
 
         return $dto;
-    }
-
-    private function addRatingVote(
-        \Mage_Review_Model_Review $review,
-        int $rating,
-        int $productId,
-        int $customerId,
-    ): void {
-        /** @var \Mage_Rating_Model_Resource_Rating_Collection $ratingCollection */
-        $ratingCollection = \Mage::getModel('rating/rating')->getCollection()
-            ->addEntityFilter('product');
-
-        $ratingModel = $ratingCollection->getFirstItem();
-
-        if (!$ratingModel->getId()) {
-            $ratingModel = \Mage::getModel('rating/rating')->load(1);
-        }
-
-        if ($ratingModel->getId()) {
-            $optionId = $this->getRatingOptionId($ratingModel->getId(), $rating);
-
-            if ($optionId) {
-                /** @var \Mage_Rating_Model_Rating $ratingVote */
-                $ratingVote = \Mage::getModel('rating/rating');
-                $ratingVote->setRatingId($ratingModel->getId())
-                    ->setReviewId($review->getId())
-                    ->setCustomerId($customerId)
-                    ->addOptionVote($optionId, (string) $productId);
-            }
-        }
-    }
-
-    private function getRatingOptionId(int $ratingId, int $starValue): ?int
-    {
-        /** @var \Mage_Rating_Model_Resource_Rating_Option_Collection $optionCollection */
-        $optionCollection = \Mage::getModel('rating/rating_option')->getCollection();
-        $optionCollection->addRatingFilter($ratingId);
-        $optionCollection->setPositionOrder();
-
-        $options = $optionCollection->getItems();
-
-        $index = 0;
-        foreach ($options as $option) {
-            $index++;
-            if ($index === $starValue) {
-                return (int) $option->getId();
-            }
-        }
-
-        return null;
     }
 }

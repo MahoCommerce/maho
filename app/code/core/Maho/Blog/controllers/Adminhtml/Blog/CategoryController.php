@@ -49,23 +49,19 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
     {
         $this->_title($this->__('Blog Category'));
 
-        $id = $this->getRequest()->getParam('id');
-        $model = Mage::getModel('blog/category');
-
-        if ($id) {
-            $model->load($id);
-            if (!$model->getId()) {
-                Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('blog')->__('This category no longer exists.'),
-                );
-                $this->_redirect('*/*/');
-                return;
-            }
+        $id = (int) $this->getRequest()->getParam('id');
+        $session = Mage::getSingleton('adminhtml/session');
+        try {
+            $model = $id ? $this->getService()->getById($id) : $this->getService()->newCategory();
+        } catch (Mage_Core_Exception_NoSuchEntity $e) {
+            $session->addError($e->getMessage());
+            $this->_redirect('*/*/');
+            return;
         }
 
         $this->_title($model->getId() ? $model->getName() : $this->__('New Category'));
 
-        $data = Mage::getSingleton('adminhtml/session')->getFormData(true);
+        $data = $session->getFormData(true);
         if (!empty($data)) {
             $model->setData($data);
         }
@@ -84,79 +80,60 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
 
         Mage::register('blog_category', $model);
 
-        $this->_initAction()
-            ->_addBreadcrumb(
-                $id ? Mage::helper('blog')->__('Edit Category') : Mage::helper('blog')->__('New Category'),
-                $id ? Mage::helper('blog')->__('Edit Category') : Mage::helper('blog')->__('New Category'),
-            )
-            ->renderLayout();
+        $label = $id ? Mage::helper('blog')->__('Edit Category') : Mage::helper('blog')->__('New Category');
+        $this->_initAction()->_addBreadcrumb($label, $label)->renderLayout();
     }
 
     #[Maho\Config\Route('/admin/blog_category/save')]
     public function saveAction(): void
     {
-        if ($data = $this->getRequest()->getPost('category')) {
-            $model = Mage::getModel('blog/category');
-            $id = $this->getRequest()->getParam('id');
-
-            if ($id) {
-                $model->load($id);
-            }
-
-            // Process post_ids from grid serializer (simplified format: "3&5&7")
-            $postIds = $this->getRequest()->getPost('post_ids');
-            if (is_string($postIds)) {
-                $data['post_ids'] = Mage::helper('adminhtml/js')->decodeGridSerializedInput($postIds);
-            } elseif (!isset($postIds)) {
-                $data['post_ids'] = [];
-            }
-
-            try {
-                $model->addData($data)
-                    ->save();
-
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('blog')->__('Category was successfully saved'),
-                );
-                Mage::getSingleton('adminhtml/session')->setFormData(false);
-
-                if ($this->getRequest()->getParam('back')) {
-                    $this->_redirect('*/*/edit', ['id' => $model->getId()]);
-                    return;
-                }
-                $this->_redirect('*/*/');
-                return;
-
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                Mage::getSingleton('adminhtml/session')->setFormData($data);
-                $this->_redirect('*/*/edit', ['id' => $this->getRequest()->getParam('id')]);
-                return;
-            }
+        $data = $this->getRequest()->getPost('category');
+        if (!$data) {
+            $this->_redirect('*/*/');
+            return;
         }
-        $this->_redirect('*/*/');
+
+        // The grid serializer posts the post IDs as "3&5&7"
+        $postIds = $this->getRequest()->getPost('post_ids');
+        if (is_string($postIds)) {
+            $data['post_ids'] = Mage::helper('adminhtml/js')->decodeGridSerializedInput($postIds);
+        } elseif ($postIds === null) {
+            $data['post_ids'] = [];
+        }
+
+        $session = Mage::getSingleton('adminhtml/session');
+        $id = (int) $this->getRequest()->getParam('id');
+        try {
+            $model = $id ? $this->getService()->getById($id) : $this->getService()->newCategory();
+            $this->getService()->save($model->addData($data));
+            $session->addSuccess(Mage::helper('blog')->__('Category was successfully saved'));
+            $session->setFormData(false);
+            $this->getRequest()->getParam('back') ? $this->_redirect('*/*/edit', ['id' => $model->getId()]) : $this->_redirect('*/*/');
+            return;
+        } catch (Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $session->addError($error['message']);
+            }
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $session->addError(Mage::helper('blog')->__('Unable to save the category.'));
+        }
+        $session->setFormData($data);
+        $this->_redirect('*/*/edit', ['id' => $id]);
     }
 
     #[Maho\Config\Route('/admin/blog_category/delete')]
     public function deleteAction(): void
     {
-        if ($id = $this->getRequest()->getParam('id')) {
-            try {
-                $model = Mage::getModel('blog/category');
-                $model->load($id);
-
-                // Delete all descendant categories first
-                Mage::getResourceSingleton('blog/category')->deleteDescendants((int) $model->getId());
-                $model->delete();
-
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('blog')->__('Category was successfully deleted'),
-                );
-                $this->_redirect('*/*/');
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                $this->_redirect('*/*/edit', ['id' => $id]);
-            }
+        $id = (int) $this->getRequest()->getParam('id');
+        $session = Mage::getSingleton('adminhtml/session');
+        try {
+            $this->getService()->delete($this->getService()->getById($id));
+            $session->addSuccess(Mage::helper('blog')->__('Category was successfully deleted'));
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
         }
         $this->_redirect('*/*/');
     }
@@ -165,28 +142,27 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
     public function massDeleteAction(): void
     {
         $categoryIds = $this->getRequest()->getParam('category');
+        $session = Mage::getSingleton('adminhtml/session');
         if (!is_array($categoryIds)) {
-            Mage::getSingleton('adminhtml/session')->addError(
-                Mage::helper('blog')->__('Please select category(s)'),
-            );
-        } else {
-            try {
-                $deleted = 0;
-                foreach ($categoryIds as $categoryId) {
-                    $category = Mage::getModel('blog/category')->load($categoryId);
-                    if (!$category->getId()) {
-                        continue;
-                    }
-                    Mage::getResourceSingleton('blog/category')->deleteDescendants((int) $category->getId());
-                    $category->delete();
-                    $deleted++;
+            $session->addError(Mage::helper('blog')->__('Please select category(s)'));
+            $this->_redirect('*/*/index');
+            return;
+        }
+        $deleted = 0;
+        try {
+            foreach ($categoryIds as $categoryId) {
+                // A category of a deleted subtree is gone already
+                try {
+                    $category = $this->getService()->getById((int) $categoryId);
+                } catch (Mage_Core_Exception_NoSuchEntity) {
+                    continue;
                 }
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('blog')->__('Total of %d category(s) were deleted', $deleted),
-                );
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+                $this->getService()->delete($category);
+                $deleted++;
             }
+            $session->addSuccess(Mage::helper('blog')->__('Total of %d category(s) were deleted', $deleted));
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
         }
         $this->_redirect('*/*/index');
     }
@@ -215,6 +191,11 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
         $this->getLayout()->getBlock('blog_category_edit_tab_posts')
             ->setPostsCategory($this->getRequest()->getPost('posts_category', []));
         $this->renderLayout();
+    }
+
+    private function getService(): Maho_Blog_Service_Category
+    {
+        return Mage::getService('blog/category');
     }
 
     #[\Override]

@@ -14,7 +14,8 @@ use Maho\Security\RateLimitScope;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 /**
- * Request throttling helpers shared by API providers and processors.
+ * The limits of the token endpoint and of the grants that only the API has. A flow that another transport also
+ * starts keeps its limit in its service, as Mage_Customer_Service_Customer::authenticate() does for the customer grant.
  *
  * Limits are read from `system/rate_limit/{configKey}`; a value of 0 disables
  * the check. Ship a non-zero default in config.xml for any key you rely on,

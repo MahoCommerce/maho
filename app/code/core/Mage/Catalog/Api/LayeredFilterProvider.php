@@ -72,8 +72,11 @@ final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
      */
     private function buildFilters(int $categoryId): array
     {
-        $category = \Mage::getModel('catalog/category')->load($categoryId);
-        if (!$category->getId()) {
+        /** @var \Mage_Catalog_Service_Category $service */
+        $service = \Mage::getService('catalog/category');
+        try {
+            $category = $service->getVisibleById($categoryId, StoreContext::getStoreId());
+        } catch (\Mage_Core_Exception_NoSuchEntity) {
             return [];
         }
 

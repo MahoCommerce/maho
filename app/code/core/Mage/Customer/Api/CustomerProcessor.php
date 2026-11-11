@@ -15,55 +15,12 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Customer State Processor - Handles customer mutations for API Platform.
  */
 final class CustomerProcessor extends \Maho\ApiPlatform\Processor
 {
-    /**
-     * Upper bound for ids stored in a SMALLINT key column (customer_group.customer_group_id,
-     * core_website.website_id). PostgreSQL has no unsigned integers, so comparing such a column
-     * against a larger value is a query error rather than a non-match: out-of-range ids must be
-     * rejected before they reach SQL.
-     */
-    private const MAX_SMALLINT = 32767;
-
-    private readonly \Mage_Customer_Service_Customer $customerService;
-
-    public function __construct(Security $security)
-    {
-        parent::__construct($security);
-        $this->customerService = \Mage::getService('customer/customer');
-    }
-
-    /**
-     * Ensure no customer exists with the given email in the specified website
-     *
-     * @throws ConflictHttpException if a customer with this email already exists
-     */
-    private function ensureEmailUnique(#[\SensitiveParameter]
-        string $email, int $websiteId): void
-    {
-        $existingCustomer = \Mage::getModel('customer/customer')
-            ->setWebsiteId($websiteId)
-            ->loadByEmail($email);
-
-        if ($existingCustomer->getId()) {
-            throw new ConflictHttpException('A customer with this email already exists');
-        }
-    }
-
-    /**
-     * Process customer mutations
-     */
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Customer
     {
@@ -74,155 +31,63 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         // for REST callers API Platform does not populate that key, so the JSON body is
         // injected here to keep those endpoints working over REST.
         $this->normalizeGraphQlInput($context);
+        $args = $context['args']['input'] ?? [];
 
-        // Handle REST PUT /customers/me (update profile)
-        if ($operationName === 'update_profile') {
-            return $this->updateProfile($data);
-        }
-
-        // Handle REST PUT /customers/{id} (admin / service-token update)
-        if ($operation instanceof Put && isset($uriVariables['id'])) {
-            return $this->updateCustomerAdmin((int) $uriVariables['id'], $data);
-        }
-
-        // Handle REST POST /customers/me/password (change password)
-        if ($operationName === 'change_password') {
-            return $this->changePassword($data);
-        }
-
-        // Handle REST POST aliases for auth routes
-        if ($operationName === 'forgot_password_rest') {
-            return $this->forgotPassword($context);
-        }
-        if ($operationName === 'reset_password_rest') {
-            return $this->resetPassword($context);
-        }
-        if ($operationName === 'create_from_order') {
-            return $this->createAccountFromOrder($context);
-        }
-
-        // Handle REST POST /customers (create customer / registration)
-        if ($operation instanceof Post && !in_array($operationName, ['change_password', 'forgot_password_rest', 'reset_password_rest', 'create_from_order'])) {
-            return $this->createCustomer($data);
-        }
-
-        // Handle GraphQL mutations
-        return match ($operationName) {
-            'quickCreate' => $this->createCustomerQuick($context),
-            'login' => $this->customerLogin($context),
-            'logout' => $this->customerLogout(),
-            'update' => $this->updateCustomerGraphQl($context),
-            'changePassword' => $this->changePasswordGraphQl($context),
-            'forgotPassword' => $this->forgotPassword($context),
-            'resetPassword' => $this->resetPassword($context),
+        return match (true) {
+            $operationName === 'update_profile' => $this->updateProfile($data->firstname, $data->lastname, $data->email !== '' ? $data->email : null, $this->extractProfileFields($data), $data->customAttributes, $data->currentPassword),
+            $operation instanceof Put && isset($uriVariables['id']) => $this->updateCustomerAdmin((int) $uriVariables['id'], $data),
+            $operationName === 'change_password' => $this->changePassword($data->currentPassword ?? '', $data->newPassword ?? ''),
+            $operationName === 'forgot_password_rest', $operationName === 'forgotPassword' => $this->forgotPassword($args),
+            $operationName === 'reset_password_rest', $operationName === 'resetPassword' => $this->resetPassword($args),
+            $operationName === 'create_from_order' => $this->createAccountFromOrder($args),
+            $operationName === 'magic_link_rest', $operationName === 'requestMagicLink' => $this->requestMagicLink($args),
+            $operationName === 'confirm_rest', $operationName === 'confirm' => $this->confirm($args),
+            $operationName === 'confirmation_link_rest', $operationName === 'sendConfirmationLink' => $this->sendConfirmationLink($args),
+            $operationName === 'two_factor_rest', $operationName === 'setTwoFactor' => $this->setTwoFactor($args),
+            $operationName === 'two_factor_secret_rest', $operationName === 'createTwoFactorSecret' => $this->createTwoFactorSecret(),
+            $operation instanceof Post => $this->createCustomer($data),
+            $operationName === 'login' => $this->customerLogin($args),
+            $operationName === 'update' => $this->updateProfile($args['firstName'] ?? null, $args['lastName'] ?? null, $args['email'] ?? null, customAttributes: $args['customAttributes'] ?? null, currentPassword: $args['currentPassword'] ?? null),
+            $operationName === 'changePassword' => $this->changePassword($args['currentPassword'] ?? '', $args['newPassword'] ?? ''),
+            // A stateless API has no session: the client logs out when it drops its tokens
+            $operationName === 'logout' => new Customer(),
             default => $data instanceof Customer ? $data : new Customer(),
         };
     }
 
     /**
-     * Update current customer profile (REST entry point).
-     *
-     * Admin-only fields (groupId, isActive, websiteId, taxvat,
-     * disableAutoGroupChange) are deliberately never read here, so a
-     * customer's own token cannot touch them.
-     */
-    private function updateProfile(Customer $data): Customer
-    {
-        return $this->doUpdateProfile(
-            firstName: $data->firstname,
-            lastName: $data->lastname,
-            email: $data->email !== '' ? $data->email : null,
-            profile: $this->extractProfileFields($data),
-            customAttributes: $data->customAttributes,
-        );
-    }
-
-    /**
-     * Change current customer password (REST entry point)
-     */
-    private function changePassword(Customer $data): Customer
-    {
-        return $this->doChangePassword(
-            currentPassword: $data->currentPassword ?? '',
-            newPassword: $data->newPassword ?? '',
-        );
-    }
-
-    /**
-     * Create a new customer (registration)
+     * Register a customer (POST /customers). An admin or a service token holding customers/create creates an
+     * account that needs no confirmation, and may set the admin-only fields; the securityPostDenormalize gate of
+     * those fields has already reset them for any other caller. Any other caller sends the CAPTCHA token, as the
+     * registration form of the storefront does. The service makes a new customer active.
      */
     private function createCustomer(Customer $data): Customer
     {
         StoreContext::ensureStore();
-
-        // POST /customers is public (registration); the admin-only fields carry
-        // their own securityPostDenormalize gate, which has already reset them
-        // to their defaults for an unprivileged caller by the time we get here.
         $isPrivileged = $this->canWriteAdminFields('customers/create');
-        if (!$isPrivileged) {
-            $this->checkRateLimitByIp('create_customer', 'customer_register', 3600);
-        }
-
         $storeId = StoreContext::getStoreId();
-        $websiteId = \Mage::app()->getStore($storeId)->getWebsiteId();
+        $customer = \Mage::getModel('customer/customer');
 
-        // websiteId is honored on create only: pick which website the account
-        // lives on, defaulting the store to that website's default store.
+        // The account lives on the website of the request, and its store is the default store of that website
         if ($data->websiteId !== null) {
-            if ($data->websiteId < 0 || $data->websiteId > self::MAX_SMALLINT) {
-                throw new UnprocessableEntityHttpException("Website {$data->websiteId} does not exist");
-            }
-            try {
-                $website = \Mage::app()->getWebsite($data->websiteId);
-            } catch (\Throwable) {
-                throw new UnprocessableEntityHttpException("Website {$data->websiteId} does not exist");
-            }
-            $websiteId = (int) $website->getId();
+            $website = $this->getWebsite($data->websiteId);
+            $customer->setWebsiteId((int) $website->getId());
             $defaultStore = $website->getDefaultStore();
             if ($defaultStore) {
                 $storeId = (int) $defaultStore->getId();
             }
             // websiteId only survives denormalization for a privileged caller,
             // so the authenticated ApiUser is guaranteed to exist.
-            $this->assertWebsiteAllowed($websiteId, $this->requireUser(), 'customer');
+            $this->assertWebsiteAllowed($website->getId(), $this->requireUser(), 'customer');
         }
 
-        $coreHelper = \Mage::helper('core');
-
-        // Validate required fields using Maho validation helpers
-        if (!$coreHelper->isValidNotBlank($data->email)) {
-            throw new UnprocessableEntityHttpException('Email is required');
-        }
-        if (!$coreHelper->isValidEmail($data->email)) {
-            throw new UnprocessableEntityHttpException('Invalid email address');
-        }
-        if (!$coreHelper->isValidNotBlank($data->password ?? '')) {
-            throw new UnprocessableEntityHttpException('Password is required');
-        }
-
-        $minPasswordLength = \Mage::getModel('customer/customer')->getMinPasswordLength();
-        if (!$coreHelper->isValidLength($data->password, $minPasswordLength)) {
-            throw new UnprocessableEntityHttpException("Password must be at least {$minPasswordLength} characters");
-        }
-
-        $this->ensureEmailUnique($data->email, $websiteId);
-
-        // Create customer
-        $customer = \Mage::getModel('customer/customer');
-        $customer->setWebsiteId($websiteId);
-        $customer->setStoreId($storeId);
-        $customer->setEmail($data->email);
-        $customer->setFirstname($data->firstname ?? '');
-        $customer->setLastname($data->lastname ?? '');
-        $customer->setPassword($data->password);
-
-        $groupId = (int) (\Mage::getStoreConfig('customer/create_account/default_group') ?: 1);
+        $customer->setEmail($data->email)
+            ->setFirstname($data->firstname ?? '')
+            ->setLastname($data->lastname ?? '')
+            ->setPassword($data->password ?? '');
         if ($data->groupId !== null) {
-            $this->validateGroupExists($data->groupId);
-            $groupId = $data->groupId;
+            $customer->setGroupId($data->groupId);
         }
-        $customer->setGroupId($groupId);
-
         foreach ($this->extractProfileFields($data) as $field => $value) {
             $customer->setData($field, $value);
         }
@@ -233,221 +98,61 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             $isPrivileged ? 'adminhtml_customer' : 'customer_account_create',
             $data->customAttributes ?? [],
         );
-        if ($data->isActive === null) {
-            $customer->setData('is_active', 1);
-        }
 
-        // Email confirmation protects self-registration; accounts created by an
-        // admin or service token are trusted, mirroring the admin backend.
         if ($isPrivileged) {
-            $customer->setForceConfirmed();
+            $this->getService()->create($customer, $storeId, $storeId);
+        } else {
+            $this->getService()->register($customer, $storeId, captchaFields: ['captchaToken' => $data->captchaToken]);
         }
 
-        try {
-            $customer->save();
-        } catch (\Exception $e) {
-            // Some admin observers may fail in API context - check if customer was actually saved
-            if ($customer->getId()) {
-                // Customer was saved successfully, observer error is non-critical
-                \Mage::log('Non-critical observer error during customer save: ' . $e->getMessage(), \Mage::LOG_WARNING);
-            } else {
-                \Mage::logException($e);
-                throw new \RuntimeException('Failed to create customer');
-            }
-        }
-
-        // Send the registration email, mirroring Mage_Customer_AccountController: the confirmation
-        // link when confirmation is required, otherwise the welcome ("registered") email — without
-        // it a confirmation-required store leaves the account unconfirmed and unable to log in. The
-        // password is intentionally not passed: the new-account templates don't render it. The
-        // account is already persisted, so a mail failure must not fail an otherwise-successful
-        // creation — log it and continue. A force-confirmed (privileged) create has no pending
-        // confirmation key, so it gets the welcome email even on confirmation-required stores.
-        try {
-            $emailType = $customer->isConfirmationRequired() && $customer->getConfirmation() ? 'confirmation' : 'registered';
-            $customer->sendNewAccountEmail($emailType, '', $storeId);
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-        }
-
-        // Return the created customer (without password)
         return Customer::fromModel($customer);
     }
 
     /**
-     * Quick customer creation for POS (GraphQL mutation)
+     * Check the email and the password of a customer (GraphQL login), in the website of the request first and then
+     * in the others, as the token endpoint does. The service answers a wrong email, password or 2FA code with a 401.
      */
-    private function createCustomerQuick(array $context): Customer
+    private function customerLogin(array $args): Customer
     {
-        // With explicit args, values come directly in args (not nested under input)
-        $args = $context['args']['input'] ?? $context['args'] ?? [];
+        $email = (string) ($args['email'] ?? '');
+        $password = (string) ($args['password'] ?? '');
+        if ($email === '' || $password === '') {
+            throw new \Mage_Core_Exception_Input()->addError('email', 'Email and password are required');
+        }
 
         StoreContext::ensureStore();
-        $this->checkRateLimitByIp('create_customer', 'customer_register', 3600);
-        $storeId = StoreContext::getStoreId();
-        $websiteId = \Mage::app()->getStore($storeId)->getWebsiteId();
+        $websiteId = (int) \Mage::app()->getStore(StoreContext::getStoreId())->getWebsiteId();
+        $twofaCode = $args['twofaCode'] ?? null;
 
-        $email = $args['email'] ?? '';
-        $firstName = $args['firstname'] ?? '';
-        $lastName = $args['lastname'] ?? '';
-        $telephone = $args['telephone'] ?? null;
-
-        if (empty($email)) {
-            throw new UnprocessableEntityHttpException('Email is required');
-        }
-
-        if (!\Mage::helper('core')->isValidEmail($email)) {
-            throw new UnprocessableEntityHttpException('A valid email address is required');
-        }
-
-        $this->ensureEmailUnique($email, $websiteId);
-
-        // Create customer with random password
-        $customer = \Mage::getModel('customer/customer');
-        $customer->setWebsiteId($websiteId);
-        $customer->setStoreId($storeId);
-        $customer->setEmail($email);
-        $customer->setFirstname($firstName);
-        $customer->setLastname($lastName);
-        $customer->setPassword(\Mage::helper('core')->getRandomString(16));
-
-        try {
-            $customer->save();
-
-            // Add address with telephone if provided
-            if ($telephone) {
-                $address = \Mage::getModel('customer/address');
-                $address->setCustomerId($customer->getId());
-                $address->setFirstname($firstName);
-                $address->setLastname($lastName);
-                $address->setTelephone($telephone);
-                $address->setStreet(['']);
-                $address->setCity('');
-                $address->setPostcode('');
-                $address->setCountryId(\Mage::getStoreConfig('general/country/default', $storeId) ?: 'US');
-                $address->setIsDefaultBilling();
-                $address->setIsDefaultShipping();
-                $address->save();
-            }
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            throw new \RuntimeException('Failed to create customer');
-        }
-
-        // Same registration email as createCustomer(): confirmation link when confirmation is
-        // required, otherwise the welcome ("registered") email — without it a confirmation-required
-        // store leaves the POS-created account stuck and unable to log in. The random POS password
-        // is never emailed (the templates don't render it anyway); the customer sets their own via
-        // password reset. A mail failure must not fail the already-created account.
-        try {
-            $emailType = $customer->isConfirmationRequired() ? 'confirmation' : 'registered';
-            $customer->sendNewAccountEmail($emailType, '', $storeId);
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-        }
-
-        return Customer::fromModel($customer);
+        return Customer::fromModel($this->getAuthentication()->authenticateInAnyWebsite(
+            $email,
+            $password,
+            $websiteId,
+            is_scalar($twofaCode) ? trim((string) $twofaCode) : null,
+        ));
     }
 
     /**
-     * Customer login (GraphQL mutation)
-     */
-    private function customerLogin(array $context): Customer
-    {
-        $args = $context['args']['input'] ?? [];
-        $email = $args['email'] ?? '';
-        $password = $args['password'] ?? '';
-
-        if (empty($email) || empty($password)) {
-            throw new UnprocessableEntityHttpException('Email and password are required');
-        }
-
-        // Per-IP cap first (matches the REST /auth/token endpoint), so an
-        // attacker rotating email addresses can't spray the login mutation
-        // beyond the IP allowance; then the tighter per-email cap.
-        $this->checkRateLimitByIp('graphql_login', 'auth_token_ip', 60);
-        $this->checkRateLimit('graphql_login:email:' . strtolower($email), 'customer_login', 60);
-
-        StoreContext::ensureStore();
-        $storeId = StoreContext::getStoreId();
-        $websiteId = \Mage::app()->getStore($storeId)->getWebsiteId();
-
-        $customer = \Mage::getModel('customer/customer')
-            ->setWebsiteId($websiteId);
-
-        try {
-            $customer->authenticate($email, $password);
-        } catch (\Mage_Core_Exception $e) {
-            // Surface unconfirmed-email distinctly (matches the REST /auth/token
-            // path) so the customer knows to confirm rather than seeing a
-            // misleading "wrong password" error.
-            if ($e->getCode() === \Mage_Customer_Model_Customer::EXCEPTION_EMAIL_NOT_CONFIRMED) {
-                throw new HttpException(403, 'This account is not confirmed. Please check your email for the confirmation link.');
-            }
-            throw new UnauthorizedHttpException('Bearer', 'Invalid email or password', null, 0, ['X-Api-Error-Code' => 'invalid_credentials']);
-        }
-
-        return Customer::fromModel($customer);
-    }
-
-    /**
-     * Customer logout (GraphQL mutation)
-     */
-    private function customerLogout(): Customer
-    {
-        // For stateless API, logout is handled client-side by clearing tokens
-        // Return empty customer to indicate logged out state
-        return new Customer();
-    }
-
-    /**
-     * Update customer profile via GraphQL mutation
-     */
-    private function updateCustomerGraphQl(array $context): Customer
-    {
-        $args = $context['args']['input'] ?? [];
-
-        return $this->doUpdateProfile(
-            firstName: $args['firstName'] ?? null,
-            lastName: $args['lastName'] ?? null,
-            email: $args['email'] ?? null,
-            customAttributes: $args['customAttributes'] ?? null,
-        );
-    }
-
-    /**
-     * Change password via GraphQL mutation
-     */
-    private function changePasswordGraphQl(array $context): Customer
-    {
-        $args = $context['args']['input'] ?? [];
-
-        return $this->doChangePassword(
-            currentPassword: $args['currentPassword'] ?? '',
-            newPassword: $args['newPassword'] ?? '',
-        );
-    }
-
-    /**
-     * Shared logic for updating customer profile (used by both REST and GraphQL)
+     * Save the changes of the customer of the token to their own account (REST PUT /customers/me and GraphQL update).
+     * Admin-only fields (groupId, isActive, websiteId, taxvat, disableAutoGroupChange) are never read here,
+     * so a customer's own token cannot touch them.
      *
      * @param array<string, mixed> $profile Optional name-part/gender/dob fields; a null
      *                                      value clears the attribute, an absent key is untouched
      * @param array<string, mixed>|null $customAttributes the values of the Customer Account Edit form
+     * @param string|null $currentPassword required when the email changes, and checked when given
      */
-    private function doUpdateProfile(?string $firstName, ?string $lastName, #[\SensitiveParameter]
-        ?string $email, array $profile = [], ?array $customAttributes = null): Customer
-    {
-        $customerId = $this->getAuthenticatedCustomerId();
-        if (!$customerId) {
-            throw new AccessDeniedHttpException('Authentication required');
-        }
-
-        $customer = $this->customerService->getById($customerId);
-        if (!$customer) {
-            throw new AccessDeniedHttpException('Customer not found');
-        }
-
+    private function updateProfile(
+        ?string $firstName,
+        ?string $lastName,
+        #[\SensitiveParameter]
+        ?string $email,
+        array $profile = [],
+        ?array $customAttributes = null,
+        #[\SensitiveParameter]
+        ?string $currentPassword = null,
+    ): Customer {
+        $customer = $this->getService()->getById($this->requireCustomerId());
         if ($firstName !== null) {
             $customer->setFirstname($firstName);
         }
@@ -464,9 +169,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             CustomAttributes::apply($customer, 'customer_account_edit', $customAttributes);
         }
 
-        $customer = $this->customerService->save($customer);
-
-        return Customer::fromModel($customer);
+        // The API asks the current password for a new email only, and checks it when the client sends it
+        return Customer::fromModel($this->getService()->updateAccount($customer, $currentPassword, requirePassword: false));
     }
 
     /**
@@ -475,25 +179,15 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
      */
     private function updateCustomerAdmin(int $customerId, Customer $data): Customer
     {
-        $customer = $this->customerService->getById($customerId);
-        if (!$customer) {
-            throw new NotFoundHttpException('Customer not found');
+        $customer = $this->getService()->getById($customerId);
+        $this->assertCustomerReachable($customer);
+
+        if ($data->websiteId !== null) {
+            $customer->setWebsiteId($data->websiteId);
         }
-
-        $this->assertWebsiteAllowed($customer->getWebsiteId(), $this->requireUser(), 'customer');
-
-        if ($data->websiteId !== null && $data->websiteId !== (int) $customer->getWebsiteId()) {
-            throw new UnprocessableEntityHttpException('websiteId can only be set when creating a customer');
-        }
-
-        if ($data->email !== '' && $data->email !== $customer->getEmail()) {
-            if (!\Mage::helper('core')->isValidEmail($data->email)) {
-                throw new UnprocessableEntityHttpException('Invalid email address');
-            }
-            $this->ensureEmailUnique($data->email, (int) $customer->getWebsiteId());
+        if ($data->email !== '') {
             $customer->setEmail($data->email);
         }
-
         if ($data->firstname !== null) {
             $customer->setFirstname($data->firstname);
         }
@@ -504,7 +198,6 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             $customer->setData($field, $value);
         }
         if ($data->groupId !== null) {
-            $this->validateGroupExists($data->groupId);
             $customer->setGroupId($data->groupId);
         }
         $this->applyAdminOnlyFields($customer, $data);
@@ -512,9 +205,158 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             CustomAttributes::apply($customer, 'adminhtml_customer', $data->customAttributes);
         }
 
-        $customer->save();
+        return Customer::fromModel($this->getService()->save($customer));
+    }
+
+    private function changePassword(
+        #[\SensitiveParameter]
+        string $currentPassword,
+        #[\SensitiveParameter]
+        string $newPassword,
+    ): Customer {
+        $customer = $this->getService()->getById($this->requireCustomerId());
+        $this->getService()->changePassword($customer, $currentPassword, $newPassword);
 
         return Customer::fromModel($customer);
+    }
+
+    /**
+     * Email a password reset link. The answer is the same whether an account has the email or not.
+     */
+    private function forgotPassword(array $args): Customer
+    {
+        StoreContext::ensureStore();
+        $email = (string) ($args['email'] ?? '');
+        if ($this->hasBackendAccess('customers')) {
+            $this->getAuthentication()->sendPasswordResetLinkByStaff($email, $this->getWebsiteId());
+        } else {
+            $this->getAuthentication()->sendPasswordResetLink($email, $this->getWebsiteId(), $args);
+        }
+
+        $dto = new Customer();
+        $dto->email = $email;
+        return $dto;
+    }
+
+    /**
+     * Email a login link. The answer is the same whether an active account has the email or not.
+     */
+    private function requestMagicLink(array $args): Customer
+    {
+        StoreContext::ensureStore();
+        $email = (string) ($args['email'] ?? '');
+        $this->getAuthentication()->sendMagicLink($email, $this->getWebsiteId());
+
+        $dto = new Customer();
+        $dto->email = $email;
+        return $dto;
+    }
+
+    /**
+     * Confirm an account with the customer ID and the key of the confirmation email.
+     */
+    private function confirm(array $args): Customer
+    {
+        StoreContext::ensureStore();
+        $customerId = $this->parseGraphQlId($args['customerId'] ?? null);
+        $key = $args['key'] ?? null;
+        if (!$customerId || !is_string($key) || $key === '') {
+            throw new \Mage_Core_Exception_Input()->addError('key', 'customerId and key are required');
+        }
+
+        // The key proves nothing for an account that is already confirmed, so the answer has no customer data
+        $this->getAuthentication()->confirm($customerId, $key);
+        $dto = new Customer();
+        $dto->id = $customerId;
+        $dto->isConfirmed = true;
+        return $dto;
+    }
+
+    /**
+     * Email the confirmation link again. The answer is the same whether an account waits for a confirmation or not.
+     */
+    private function sendConfirmationLink(array $args): Customer
+    {
+        StoreContext::ensureStore();
+        $email = (string) ($args['email'] ?? '');
+        if ($this->hasBackendAccess('customers')) {
+            $this->getAuthentication()->sendConfirmationLinkByStaff($email, $this->getWebsiteId());
+        } else {
+            $this->getAuthentication()->sendConfirmationLink($email, $this->getWebsiteId(), $args);
+        }
+
+        $dto = new Customer();
+        $dto->email = $email;
+        return $dto;
+    }
+
+    /**
+     * Turn 2FA on or off for the customer of the token.
+     */
+    private function setTwoFactor(array $args): Customer
+    {
+        if (!is_bool($args['twofaEnabled'] ?? null)) {
+            throw new \Mage_Core_Exception_Input()->addError('twofaEnabled', 'twofaEnabled is required: true or false');
+        }
+        $code = $args['twofaCode'] ?? null;
+        $customer = $this->getService()->getById($this->requireCustomerId());
+        $this->getAuthentication()->setSecondFactor(
+            $customer,
+            (string) ($args['currentPassword'] ?? ''),
+            $args['twofaEnabled'],
+            is_scalar($code) ? trim((string) $code) : null,
+        );
+
+        return Customer::fromModel($customer);
+    }
+
+    /**
+     * Return the secret that the customer of the token puts into an authenticator app before 2FA is turned on.
+     */
+    private function createTwoFactorSecret(): Customer
+    {
+        $customer = $this->getService()->getById($this->requireCustomerId());
+        $secret = $this->getAuthentication()->getSecondFactorSecret($customer);
+
+        $dto = Customer::fromModel($customer);
+        $dto->twofaSecret = $secret;
+        return $dto;
+    }
+
+    private function getWebsiteId(): int
+    {
+        return (int) \Mage::app()->getStore(StoreContext::getStoreId())->getWebsiteId();
+    }
+
+    private function resetPassword(array $args): Customer
+    {
+        StoreContext::ensureStore();
+        $email = (string) ($args['email'] ?? '');
+        $resetToken = (string) ($args['resetToken'] ?? '');
+        $newPassword = (string) ($args['newPassword'] ?? '');
+        if ($email === '' || $resetToken === '' || $newPassword === '') {
+            throw new \Mage_Core_Exception_Input()->addError('reset_token', 'Email, reset token, and new password are required');
+        }
+
+        $this->getAuthentication()->resetPassword($email, $resetToken, $newPassword);
+
+        $dto = new Customer();
+        $dto->email = $email;
+        return $dto;
+    }
+
+    /**
+     * Create a customer account from a placed guest order, with the HMAC-signed accountToken of the order.
+     */
+    private function createAccountFromOrder(array $args): Customer
+    {
+        $accountToken = (string) ($args['accountToken'] ?? '');
+        $password = (string) ($args['password'] ?? '');
+        if ($accountToken === '' || $password === '') {
+            throw new \Mage_Core_Exception_Input()->addError('account_token', 'Account token and password are required.');
+        }
+
+        return Customer::fromModel($this->getService()->registerFromOrder($accountToken, $password));
     }
 
     /**
@@ -532,6 +374,19 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
+     * @throws \Mage_Core_Exception_Input
+     */
+    private function getWebsite(int $websiteId): \Mage_Core_Model_Website
+    {
+        try {
+            $website = \Mage::app()->getWebsite($websiteId);
+        } catch (\Mage_Core_Exception) {
+            $website = null;
+        }
+        return $website ?? throw new \Mage_Core_Exception_Input()->addError('website_id', "Website {$websiteId} does not exist");
+    }
+
+    /**
      * Self-service-safe profile fields with a non-null value on the DTO,
      * normalized and keyed by model attribute; a null value clears the attribute.
      *
@@ -540,19 +395,12 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     private function extractProfileFields(Customer $data): array
     {
         $profile = [];
-        if ($data->prefix !== null) {
-            $profile['prefix'] = $data->prefix;
-        }
-        if ($data->middlename !== null) {
-            $profile['middlename'] = $data->middlename;
-        }
-        if ($data->suffix !== null) {
-            $profile['suffix'] = $data->suffix;
+        foreach (['prefix', 'middlename', 'suffix'] as $field) {
+            if ($data->{$field} !== null) {
+                $profile[$field] = $data->{$field};
+            }
         }
         if ($data->gender !== null) {
-            if ($data->gender !== 0) {
-                $this->validateGenderOption($data->gender);
-            }
             $profile['gender'] = $data->gender ?: null;
         }
         if ($data->dob !== null) {
@@ -575,32 +423,6 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
-    private function validateGroupExists(int $groupId): void
-    {
-        if ($groupId < 0 || $groupId > self::MAX_SMALLINT || !\Mage::getModel('customer/group')->load($groupId)->getId()) {
-            throw new UnprocessableEntityHttpException("Customer group {$groupId} does not exist");
-        }
-    }
-
-    /** Gender is a select attribute: only its own option ids are storable */
-    private function validateGenderOption(int $genderId): void
-    {
-        $attribute = \Mage::getSingleton('eav/config')->getAttribute('customer', 'gender');
-        $options = $attribute && $attribute->usesSource() ? $attribute->getSource()->getAllOptions() : [];
-
-        // The source prepends an empty option; only positive ids are real values.
-        $optionIds = array_values(array_filter(
-            array_map(intval(...), array_column($options, 'value')),
-            fn(int $id): bool => $id > 0,
-        ));
-
-        if (!in_array($genderId, $optionIds, true)) {
-            throw new UnprocessableEntityHttpException(
-                "Invalid gender {$genderId}; allowed: " . implode(', ', $optionIds) . ' (0 clears)',
-            );
-        }
-    }
-
     /**
      * Normalize a dob input to the midnight 'Y-m-d H:i:s' form the admin
      * stores; empty string clears the value (returns null).
@@ -619,198 +441,19 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $value, new \DateTimeZone('UTC'));
         $errors = \DateTimeImmutable::getLastErrors();
         if ($date === false || ($errors && ($errors['warning_count'] || $errors['error_count']))) {
-            throw new UnprocessableEntityHttpException('Invalid date for dob; use Y-m-d format.');
-        }
-        if ($date > new \DateTimeImmutable('now', new \DateTimeZone('UTC'))) {
-            throw new UnprocessableEntityHttpException('Date of birth cannot be in the future.');
+            throw new \Mage_Core_Exception_Input()->addError('dob', 'Invalid date for dob; use Y-m-d format.');
         }
 
         return $date->format(\Mage_Core_Model_Locale::DATETIME_FORMAT);
     }
 
-    /**
-     * Shared logic for changing customer password (used by both REST and GraphQL)
-     */
-    private function doChangePassword(string $currentPassword, #[\SensitiveParameter]
-        string $newPassword): Customer
+    private function getService(): \Mage_Customer_Service_Customer
     {
-        $customerId = $this->getAuthenticatedCustomerId();
-        if (!$customerId) {
-            throw new AccessDeniedHttpException('Authentication required');
-        }
-
-        $coreHelper = \Mage::helper('core');
-
-        if (!$coreHelper->isValidNotBlank($currentPassword)) {
-            throw new UnprocessableEntityHttpException('Current password is required');
-        }
-        if (!$coreHelper->isValidNotBlank($newPassword)) {
-            throw new UnprocessableEntityHttpException('New password is required');
-        }
-
-        $minPasswordLength = \Mage::getModel('customer/customer')->getMinPasswordLength();
-        if (!$coreHelper->isValidLength($newPassword, $minPasswordLength)) {
-            throw new UnprocessableEntityHttpException("New password must be at least {$minPasswordLength} characters");
-        }
-
-        // Per-IP cap first (matches the login flow), then a tighter per-customer
-        // cap so a stolen session token can't brute-force the current password
-        // to escalate the account takeover.
-        $this->checkRateLimitByIp('change_password', 'change_password', 3600);
-        $this->checkRateLimit('change_password:customer:' . $customerId, 'change_password', 3600);
-
-        $customer = $this->customerService->getById($customerId);
-        if (!$customer) {
-            throw new AccessDeniedHttpException('Customer not found');
-        }
-
-        $this->customerService->changePassword($customer, $currentPassword, $newPassword);
-
-        return Customer::fromModel($customer);
+        return \Mage::getService('customer/customer');
     }
 
-    /**
-     * Send forgot password email
-     */
-    private function forgotPassword(array $context): Customer
+    private function getAuthentication(): \Mage_Customer_Service_Authentication
     {
-        StoreContext::ensureStore();
-        $args = $context['args']['input'] ?? [];
-        $email = $args['email'] ?? '';
-
-        if (empty($email)) {
-            throw new UnprocessableEntityHttpException('Email is required');
-        }
-
-        // Per-IP cap first so an attacker can't bypass the per-email bucket by
-        // rotating addresses to enumerate accounts or flood the mail relay.
-        $this->checkRateLimitByIp('forgot_password', 'forgot_password', 3600);
-        $this->checkRateLimit('forgot_password:email:' . strtolower($email), 'forgot_password', 3600);
-
-        $storeId = StoreContext::getStoreId();
-        $websiteId = \Mage::app()->getStore($storeId)->getWebsiteId();
-
-        $customer = \Mage::getModel('customer/customer')
-            ->setWebsiteId($websiteId)
-            ->loadByEmail($email);
-
-        // Always return success to prevent email enumeration
-        if ($customer->getId()) {
-            try {
-                $customer->sendPasswordResetLinkEmail();
-            } catch (\Exception $e) {
-                \Mage::logException($e);
-            }
-        }
-
-        // Return empty customer DTO (no customer data leaked)
-        $dto = new Customer();
-        $dto->email = $email;
-        return $dto;
-    }
-
-    /**
-     * Reset password with token
-     */
-    private function resetPassword(array $context): Customer
-    {
-        StoreContext::ensureStore();
-        $args = $context['args']['input'] ?? [];
-        $email = $args['email'] ?? '';
-        $resetToken = $args['resetToken'] ?? '';
-        $newPassword = $args['newPassword'] ?? '';
-
-        if (empty($email) || empty($resetToken) || empty($newPassword)) {
-            throw new UnprocessableEntityHttpException('Email, reset token, and new password are required');
-        }
-
-        $this->checkRateLimitByIp('reset_password', 'reset_password', 3600);
-
-        $this->customerService->resetPassword($email, $resetToken, $newPassword);
-
-        $dto = new Customer();
-        $dto->email = $email;
-        return $dto;
-    }
-
-    /**
-     * Create customer account from a placed guest order using HMAC-signed accountToken
-     */
-    private function createAccountFromOrder(array $context): Customer
-    {
-        $args = $context['args']['input'] ?? [];
-
-        $accountToken = $args['accountToken'] ?? '';
-        $password = $args['password'] ?? '';
-
-        if (!$accountToken || !$password) {
-            throw new UnprocessableEntityHttpException('Account token and password are required.');
-        }
-
-        $minPasswordLength = \Mage::getModel('customer/customer')->getMinPasswordLength();
-        if (!\Mage::helper('core')->isValidLength($password, $minPasswordLength)) {
-            throw new UnprocessableEntityHttpException("Password must be at least {$minPasswordLength} characters");
-        }
-
-        $tokenData = \Mage::helper('sales/accountToken')->verify($accountToken, 3600);
-
-        if ($tokenData['action'] !== 'create_account') {
-            throw new UnprocessableEntityHttpException('Invalid token action.');
-        }
-
-        $orderId = $tokenData['orderId'];
-        $email = $tokenData['email'];
-
-        $order = \Mage::getModel('sales/order')->load($orderId);
-        if (!$order->getId() || $order->getCustomerEmail() !== $email) {
-            throw new NotFoundHttpException('Order not found.');
-        }
-
-        $websiteId = (int) \Mage::app()->getStore($order->getStoreId())->getWebsiteId();
-        $existingCustomer = \Mage::getModel('customer/customer')
-            ->setWebsiteId($websiteId)
-            ->loadByEmail($email);
-
-        if ($existingCustomer->getId()) {
-            throw new HttpException(409, 'An account with this email already exists. Please log in.');
-        }
-
-        // Virtual/incomplete orders may have no billing address
-        $billingAddress = $order->getBillingAddress();
-
-        $customer = \Mage::getModel('customer/customer');
-        $customer->setWebsiteId($websiteId);
-        $customer->setStoreId($order->getStoreId());
-        $customer->setEmail($email);
-        $customer->setFirstname($billingAddress ? $billingAddress->getFirstname() : '');
-        $customer->setLastname($billingAddress ? $billingAddress->getLastname() : '');
-        $customer->setPassword($password);
-        $customer->save();
-
-        if ($billingAddress) {
-            $customerAddress = \Mage::getModel('customer/address');
-            $customerAddress->setCustomerId($customer->getId());
-            $customerAddress->setFirstname($billingAddress->getFirstname());
-            $customerAddress->setLastname($billingAddress->getLastname());
-            $customerAddress->setCompany($billingAddress->getCompany());
-            $customerAddress->setStreet($billingAddress->getStreet());
-            $customerAddress->setCity($billingAddress->getCity());
-            $customerAddress->setRegionId($billingAddress->getRegionId());
-            $customerAddress->setRegion($billingAddress->getRegion());
-            $customerAddress->setPostcode($billingAddress->getPostcode());
-            $customerAddress->setCountryId($billingAddress->getCountryId());
-            $customerAddress->setTelephone($billingAddress->getTelephone());
-            $customerAddress->setIsDefaultBilling();
-            $customerAddress->setIsDefaultShipping();
-            $customerAddress->save();
-        }
-
-        $order->setCustomerId($customer->getId());
-        $order->setCustomerIsGuest(false);
-        $order->setCustomerFirstname($customer->getFirstname());
-        $order->setCustomerLastname($customer->getLastname());
-        $order->save();
-
-        return Customer::fromModel($customer);
+        return \Mage::getService('customer/authentication');
     }
 }

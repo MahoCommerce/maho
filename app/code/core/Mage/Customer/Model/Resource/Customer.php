@@ -51,6 +51,30 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
             throw Mage::exception('Mage_Customer', Mage::helper('customer')->__('Customer email is required'));
         }
 
+        $this->assertEmailNotInUse($customer);
+
+        // set confirmation key logic
+        if ($customer->getForceConfirmed()) {
+            $customer->setConfirmation(null);
+        } elseif (!$customer->getId() && $customer->isConfirmationRequired()) {
+            $customer->setConfirmation($customer->getRandomConfirmationKey());
+        }
+        // remove customer confirmation key from database, if empty
+        if (!$customer->getConfirmation()) {
+            $customer->setConfirmation(null);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Refuse the email of $customer when another customer uses it, in the same website when the accounts are
+     * for each website.
+     *
+     * @throws Mage_Core_Exception_Conflict
+     */
+    public function assertEmailNotInUse(Mage_Customer_Model_Customer $customer): void
+    {
         $adapter = $this->_getWriteAdapter();
         $bind    = ['email' => $customer->getEmail()];
 
@@ -68,25 +92,11 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
 
         $result = $adapter->fetchOne($select, $bind);
         if ($result) {
-            throw Mage::exception(
-                'Mage_Customer',
-                Mage::helper('customer')->__('This customer email already exists'),
+            throw new Mage_Core_Exception_Conflict(
+                Mage::helper('customer')->__('This email is already in use.'),
                 Mage_Customer_Model_Customer::EXCEPTION_EMAIL_EXISTS,
             );
         }
-
-        // set confirmation key logic
-        if ($customer->getForceConfirmed()) {
-            $customer->setConfirmation(null);
-        } elseif (!$customer->getId() && $customer->isConfirmationRequired()) {
-            $customer->setConfirmation($customer->getRandomConfirmationKey());
-        }
-        // remove customer confirmation key from database, if empty
-        if (!$customer->getConfirmation()) {
-            $customer->setConfirmation(null);
-        }
-
-        return $this;
     }
 
     /**

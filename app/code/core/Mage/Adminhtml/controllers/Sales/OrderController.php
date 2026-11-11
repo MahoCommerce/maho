@@ -48,11 +48,10 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
      */
     protected function _initOrder()
     {
-        $id = $this->getRequest()->getParam('order_id');
-        $order = Mage::getModel('sales/order')->load($id);
-
-        if (!$order->getId()) {
-            $this->_getSession()->addError($this->__('This order no longer exists.'));
+        try {
+            $order = Mage::getService('sales/order')->getById((int) $this->getRequest()->getParam('order_id'));
+        } catch (Mage_Core_Exception_NoSuchEntity $e) {
+            $this->_getSession()->addError($e->getMessage());
             $this->_redirect('*/*/');
             $this->setFlag('', self::FLAG_NO_DISPATCH, true);
             return false;
@@ -117,15 +116,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     {
         if ($order = $this->_initOrder()) {
             try {
-                // FIX. Enable re-sending again - http://magento.stackexchange.com/a/37690/78
-                $order->setEmailSent(false);
-                $order->sendNewOrderEmail();
-                $historyItem = Mage::getResourceModel('sales/order_status_history_collection')
-                    ->getUnnotifiedForInstance($order, Mage_Sales_Model_Order::HISTORY_ENTITY_NAME);
-                if ($historyItem) {
-                    $historyItem->setIsCustomerNotified(1);
-                    $historyItem->save();
-                }
+                Mage::getService('sales/order')->resendEmail($order);
                 $this->_getSession()->addSuccess($this->__('The order email has been sent.'));
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
@@ -142,21 +133,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     #[Maho\Config\Route('/admin/sales_order/cancel')]
     public function cancelAction(): void
     {
-        if ($order = $this->_initOrder()) {
-            try {
-                $order->cancel()
-                    ->save();
-                $this->_getSession()->addSuccess(
-                    $this->__('The order has been cancelled.'),
-                );
-            } catch (Mage_Core_Exception $e) {
-                $this->_getSession()->addError($e->getMessage());
-            } catch (Exception $e) {
-                $this->_getSession()->addError($this->__('The order has not been cancelled.'));
-                Mage::logException($e);
-            }
-            $this->_redirect('*/sales_order/view', ['order_id' => $order->getId()]);
-        }
+        $this->_changeState('cancel', $this->__('The order has been cancelled.'), $this->__('The order has not been cancelled.'));
     }
 
     /**
@@ -165,20 +142,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     #[Maho\Config\Route('/admin/sales_order/hold')]
     public function holdAction(): void
     {
-        if ($order = $this->_initOrder()) {
-            try {
-                $order->hold()
-                    ->save();
-                $this->_getSession()->addSuccess(
-                    $this->__('The order has been put on hold.'),
-                );
-            } catch (Mage_Core_Exception $e) {
-                $this->_getSession()->addError($e->getMessage());
-            } catch (Exception) {
-                $this->_getSession()->addError($this->__('The order was not put on hold.'));
-            }
-            $this->_redirect('*/sales_order/view', ['order_id' => $order->getId()]);
-        }
+        $this->_changeState('hold', $this->__('The order has been put on hold.'), $this->__('The order was not put on hold.'));
     }
 
     /**
@@ -187,17 +151,23 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     #[Maho\Config\Route('/admin/sales_order/unhold')]
     public function unholdAction(): void
     {
+        $this->_changeState('unhold', $this->__('The order has been released from holding status.'), $this->__('The order was not unheld.'));
+    }
+
+    /**
+     * Run the action $action (cancel, hold or unhold) of the order service on the order of the request.
+     */
+    protected function _changeState(string $action, string $success, string $failure): void
+    {
         if ($order = $this->_initOrder()) {
             try {
-                $order->unhold()
-                    ->save();
-                $this->_getSession()->addSuccess(
-                    $this->__('The order has been released from holding status.'),
-                );
+                Mage::getService('sales/order')->{$action}($order);
+                $this->_getSession()->addSuccess($success);
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
-            } catch (Exception) {
-                $this->_getSession()->addError($this->__('The order was not unheld.'));
+            } catch (Exception $e) {
+                $this->_getSession()->addError($failure);
+                Mage::logException($e);
             }
             $this->_redirect('*/sales_order/view', ['order_id' => $order->getId()]);
         }
@@ -252,37 +222,25 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     {
         if ($order = $this->_initOrder()) {
             try {
-                $response = false;
-                $data = $this->getRequest()->getPost('history');
-                $notify = $data['is_customer_notified'] ?? false;
-                $visible = $data['is_visible_on_front'] ?? false;
-
-                $order->addStatusHistoryComment($data['comment'], $data['status'])
-                    ->setIsVisibleOnFront($visible)
-                    ->setIsCustomerNotified($notify);
-
-                $comment = trim(strip_tags($data['comment']));
-
-                $order->save();
-                $order->sendOrderUpdateEmail($notify, $comment);
+                $data = (array) $this->getRequest()->getPost('history');
+                Mage::getService('sales/order')->addNote(
+                    $order,
+                    (string) ($data['comment'] ?? ''),
+                    !empty($data['is_customer_notified']),
+                    !empty($data['is_visible_on_front']),
+                    ($data['status'] ?? '') !== '' ? (string) $data['status'] : null,
+                );
 
                 $this->loadLayout('empty');
                 $this->renderLayout();
+                return;
             } catch (Mage_Core_Exception $e) {
-                $response = [
-                    'error'     => true,
-                    'message'   => $e->getMessage(),
-                ];
-            } catch (Exception) {
-                $response = [
-                    'error'     => true,
-                    'message'   => $this->__('Cannot add order history.'),
-                ];
+                $message = $e->getMessage();
+            } catch (Exception $e) {
+                Mage::logException($e);
+                $message = $this->__('Cannot add order history.');
             }
-            if (is_array($response)) {
-                $response = Mage::helper('core')->jsonEncode($response);
-                $this->getResponse()->setBody($response);
-            }
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $message]);
         }
     }
 
@@ -339,28 +297,14 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     #[Maho\Config\Route('/admin/sales_order/massCancel')]
     public function massCancelAction(): void
     {
-        $orderIds = $this->getRequest()->getPost('order_ids', []);
-        $countCancelOrder = 0;
-        $countNonCancelOrder = 0;
-        foreach ($orderIds as $orderId) {
-            $order = Mage::getModel('sales/order')->load($orderId);
-            if ($order->canCancel()) {
-                $order->cancel()
-                    ->save();
-                $countCancelOrder++;
-            } else {
-                $countNonCancelOrder++;
-            }
+        [$done, $refused] = $this->_massChangeState('cancel');
+        if ($refused) {
+            $this->_getSession()->addError($done
+                ? $this->__('%s order(s) cannot be canceled', $refused)
+                : $this->__('The order(s) cannot be canceled'));
         }
-        if ($countNonCancelOrder) {
-            if ($countCancelOrder) {
-                $this->_getSession()->addError($this->__('%s order(s) cannot be canceled', $countNonCancelOrder));
-            } else {
-                $this->_getSession()->addError($this->__('The order(s) cannot be canceled'));
-            }
-        }
-        if ($countCancelOrder) {
-            $this->_getSession()->addSuccess($this->__('%s order(s) have been canceled.', $countCancelOrder));
+        if ($done) {
+            $this->_getSession()->addSuccess($this->__('%s order(s) have been canceled.', $done));
         }
         $this->_redirect('*/*/');
     }
@@ -371,31 +315,15 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     #[Maho\Config\Route('/admin/sales_order/massHold')]
     public function massHoldAction(): void
     {
-        $orderIds = $this->getRequest()->getPost('order_ids', []);
-        $countHoldOrder = 0;
-
-        foreach ($orderIds as $orderId) {
-            $order = Mage::getModel('sales/order')->load($orderId);
-            if ($order->canHold()) {
-                $order->hold()
-                    ->save();
-                $countHoldOrder++;
-            }
+        [$done, $refused] = $this->_massChangeState('hold');
+        if ($refused) {
+            $this->_getSession()->addError($done
+                ? $this->__('%s order(s) were not put on hold.', $refused)
+                : $this->__('No order(s) were put on hold.'));
         }
-
-        $countNonHoldOrder = count($orderIds) - $countHoldOrder;
-
-        if ($countNonHoldOrder) {
-            if ($countHoldOrder) {
-                $this->_getSession()->addError($this->__('%s order(s) were not put on hold.', $countNonHoldOrder));
-            } else {
-                $this->_getSession()->addError($this->__('No order(s) were put on hold.'));
-            }
+        if ($done) {
+            $this->_getSession()->addSuccess($this->__('%s order(s) have been put on hold.', $done));
         }
-        if ($countHoldOrder) {
-            $this->_getSession()->addSuccess($this->__('%s order(s) have been put on hold.', $countHoldOrder));
-        }
-
         $this->_redirect('*/*/');
     }
 
@@ -405,31 +333,45 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     #[Maho\Config\Route('/admin/sales_order/massUnhold')]
     public function massUnholdAction(): void
     {
-        $orderIds = $this->getRequest()->getPost('order_ids', []);
-        $countUnholdOrder = 0;
-        $countNonUnholdOrder = 0;
-
-        foreach ($orderIds as $orderId) {
-            $order = Mage::getModel('sales/order')->load($orderId);
-            if ($order->canUnhold()) {
-                $order->unhold()
-                    ->save();
-                $countUnholdOrder++;
-            } else {
-                $countNonUnholdOrder++;
-            }
+        [$done, $refused] = $this->_massChangeState('unhold');
+        if ($refused) {
+            $this->_getSession()->addError($done
+                ? $this->__('%s order(s) were not released from holding status.', $refused)
+                : $this->__('No order(s) were released from holding status.'));
         }
-        if ($countNonUnholdOrder) {
-            if ($countUnholdOrder) {
-                $this->_getSession()->addError($this->__('%s order(s) were not released from holding status.', $countNonUnholdOrder));
-            } else {
-                $this->_getSession()->addError($this->__('No order(s) were released from holding status.'));
-            }
-        }
-        if ($countUnholdOrder) {
-            $this->_getSession()->addSuccess($this->__('%s order(s) have been released from holding status.', $countUnholdOrder));
+        if ($done) {
+            $this->_getSession()->addSuccess($this->__('%s order(s) have been released from holding status.', $done));
         }
         $this->_redirect('*/*/');
+    }
+
+    /**
+     * Run the action $action (cancel, hold or unhold) of the order service on each selected order. An order that
+     * fails for another reason than its state, such as an error of the payment gateway, adds its message.
+     *
+     * @return array{int, int} the count of the changed orders and the count of the orders that refused the action
+     */
+    protected function _massChangeState(string $action): array
+    {
+        $service = Mage::getService('sales/order');
+        $done = 0;
+        $orderIds = (array) $this->getRequest()->getPost('order_ids', []);
+        foreach ($orderIds as $orderId) {
+            try {
+                $order = $service->getById((int) $orderId);
+            } catch (Mage_Core_Exception_NoSuchEntity) {
+                continue;
+            }
+            try {
+                $service->{$action}($order);
+                $done++;
+            } catch (Mage_Core_Exception_Conflict) {
+                // The state of the order refuses the action
+            } catch (Mage_Core_Exception $e) {
+                $this->_getSession()->addError($this->__('Order #%s: %s', $order->getIncrementId(), $e->getMessage()));
+            }
+        }
+        return [$done, count($orderIds) - $done];
     }
 
     /**
@@ -720,21 +662,15 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
         if ($data && $address->getId()) {
             // The form sends no region_id for a country without regions, so clear the old one
             $address->addData($data + ['region_id' => null]);
-            Mage::getModel('sales/observer_addressAttributes')->refreshOptionLabels($address);
             try {
-                $address->implodeStreetAddress();
-                $errors = $address->getFormatErrors();
-                if ($errors) {
-                    foreach ($errors as $error) {
-                        $this->_getSession()->addError($error);
-                    }
-                    $this->_redirect('*/*/address', ['address_id' => $address->getId()]);
-                    return;
-                }
-                $address->save();
+                Mage::getService('sales/order')->saveAddress($address);
                 $this->_getSession()->addSuccess(Mage::helper('sales')->__('The order address has been updated.'));
                 $this->_redirect('*/*/view', ['order_id' => $address->getParentId()]);
                 return;
+            } catch (Mage_Core_Exception_Input $e) {
+                foreach ($e->getErrors() as $error) {
+                    $this->_getSession()->addError($error['message']);
+                }
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
             } catch (Exception $e) {
@@ -756,43 +692,17 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     public function guestOrderEmailChangeAction(): void
     {
         $orderId = $this->getRequest()->getParam('order_id');
-        $newEmail = trim($this->getRequest()->getParam('email'));
 
         try {
-            $order = Mage::getModel('sales/order')->load($orderId);
-            if (!$order->getId()) {
-                throw new Mage_Core_Exception($this->__('This order no longer exists.'));
-            }
-            if (!$order->getCustomerIsGuest()) {
-                throw new Mage_Core_Exception($this->__('Email can only be changed for guest orders.'));
-            }
-
-            // Check if email hasn't changed
-            if ($newEmail === $order->getCustomerEmail()) {
-                $this->_redirect('*/*/view', ['order_id' => $orderId]);
-                return;
-            }
-
-            // Validate email
-            $coreHelper = Mage::helper('core');
-            if (!$coreHelper->isValidNotBlank($newEmail) || !$coreHelper->isValidEmail($newEmail)) {
-                throw new Mage_Core_Exception($this->__('Please enter a valid email address. For example johndoe@domain.com.'));
-            }
-
-            // Update the email
-            $oldEmail = $order->getCustomerEmail();
-            $order->setCustomerEmail($newEmail);
-            $order->addStatusHistoryComment(
-                $this->__(
-                    'Customer email address changed from %s to %s by %s.',
-                    $oldEmail,
-                    $newEmail,
-                    Mage::getSingleton('admin/session')->getUser()->getUsername(),
-                ),
+            $service = Mage::getService('sales/order');
+            $changed = $service->changeGuestEmail(
+                $service->getById((int) $orderId),
+                (string) $this->getRequest()->getParam('email'),
+                (string) Mage::getSingleton('admin/session')->getUser()->getUsername(),
             );
-            $order->save();
-
-            $this->_getSession()->addSuccess($this->__('The email address has been updated successfully.'));
+            if ($changed) {
+                $this->_getSession()->addSuccess($this->__('The email address has been updated successfully.'));
+            }
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
         } catch (Exception $e) {

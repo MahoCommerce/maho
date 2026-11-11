@@ -225,13 +225,7 @@ class Maho_Ai_Adminhtml_AiController extends Mage_Adminhtml_Controller_Action
         try {
             /** @var Maho_Ai_Model_Platform_ModelFetcher $fetcher */
             $fetcher = Mage::getModel('ai/platform_modelFetcher');
-            $models = $fetcher->fetchForProvider($provider, $capability);
-
-            Mage::getModel('core/config')->saveConfig(
-                "ai/models_cache/{$provider}",
-                Mage::helper('core')->jsonEncode($models),
-            );
-            Mage::app()->getCache()->cleanType('config');
+            $models = $fetcher->cacheModels($provider, $capability);
 
             $this->getResponse()->setBodyJson(['models' => $models]);
         } catch (Mage_Core_Exception $e) {

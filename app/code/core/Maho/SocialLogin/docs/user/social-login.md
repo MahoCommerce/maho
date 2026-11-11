@@ -35,7 +35,6 @@ Go to **System → Configuration → Customers → Customer Configuration → So
 | **Facebook App ID** | App ID from the Meta developer portal | - |
 | **Facebook App Secret** | App secret, stored encrypted | - |
 | **Allow New Accounts via Social Sign-In** | When disabled, only existing customers can sign in with a provider | Enabled |
-| **Failed Attempts Allowed per IP per Hour** | Rate limit for failed sign-in attempts, 0 disables it | 30 |
 | **Sign-In Nonce Lifetime (Seconds)** | How long an issued sign-in nonce stays valid | 600 |
 
 A provider button appears only when the provider is enabled **and** its credentials are filled in.
@@ -83,7 +82,7 @@ The match in step 4 follows this order:
 
 - A previously linked identity signs the customer straight in.
 - Otherwise, a provider-verified email that matches an existing account links the identity to that account.
-- Otherwise, Maho creates a new account with the name and email from the provider.
+- Otherwise, Maho creates a new account with the name and email from the provider. The account follows the rules of the registration form: the default customer group, the welcome email, and the customer registration limit (**Customer registration** under **Rate limit**, default 10 per hour for each IP address). It needs no email confirmation, because the provider verified the email.
 
 If the registration form has required fields beyond name and email, a new customer is sent to the account edit page to complete them. If **Allow New Accounts via Social Sign-In** is disabled, unknown customers get an error instead of a new account.
 
@@ -121,3 +120,5 @@ POST /api/customers/social-auth
 ```
 
 The response contains the JWT (`token`, `token_type`, `expires_in`), the customer info, and the customer cart. Customers with 2FA enabled must also send `twofaCode`.
+
+The storefront buttons and the API share one limit: **Auth-token endpoint and social sign-in (per IP)** in **System → Configuration → Advanced → System → Rate limit** (default 20 per minute). Each sign-in attempt counts, on a counter of its own. Over the limit, the API answers 429 with a `Retry-After` header.

@@ -16,6 +16,48 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Set extends Mage_Core_Model_Resou
         $this->_init('eav/attribute_set', 'attribute_set_id');
     }
 
+    /**
+     * Strip the tags from the name, and refuse an empty name, a name of more than 255 characters and the name of
+     * another set of the entity type.
+     *
+     * @param Mage_Eav_Model_Entity_Attribute_Set $object
+     * @throws Mage_Core_Exception_Input
+     * @throws Mage_Core_Exception_Conflict
+     */
+    #[\Override]
+    protected function _beforeSave(Mage_Core_Model_Abstract $object)
+    {
+        $name = trim(strip_tags((string) $object->getAttributeSetName()));
+        $object->setAttributeSetName($name);
+        if ($name === '' || mb_strlen($name) > 255) {
+            new Mage_Core_Exception_Input()
+                ->addError('attribute_set_name', Mage::helper('eav')->__('The name of an attribute set must have 1 to 255 characters.'))
+                ->throwIfErrors();
+        }
+        $object->validate();
+        return parent::_beforeSave($object);
+    }
+
+    /**
+     * Refuse to delete the default set of an entity type.
+     *
+     * @throws Mage_Core_Exception_Conflict
+     */
+    #[\Override]
+    protected function _beforeDelete(Mage_Core_Model_Abstract $object)
+    {
+        $adapter = $this->_getReadAdapter();
+        $isDefault = $adapter->fetchOne(
+            $adapter->select()
+                ->from($this->getTable('eav/entity_type'), ['entity_type_id'])
+                ->where('default_attribute_set_id = ?', (int) $object->getId()),
+        );
+        if ($isDefault) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('eav')->__('The default attribute set cannot be deleted.'));
+        }
+        return parent::_beforeDelete($object);
+    }
+
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {

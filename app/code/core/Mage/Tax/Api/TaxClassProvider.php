@@ -23,6 +23,14 @@ final class TaxClassProvider extends CrudProvider
     protected array $defaultSort = ['class_name' => 'ASC'];
 
     #[\Override]
+    protected function provideItem(int|string $id): \Maho\ApiPlatform\Resource
+    {
+        /** @var \Mage_Tax_Service_Class $service */
+        $service = \Mage::getService('tax/class');
+        return $this->toDto($service->getById((int) $id));
+    }
+
+    #[\Override]
     protected function applyCollectionFilters(object $collection, array $filters): void
     {
         parent::applyCollectionFilters($collection, $filters);

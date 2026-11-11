@@ -66,6 +66,63 @@ class Mage_Tax_Model_Calculation_Rule extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Check the code, the priority, the position, and the classes and the rates of the rule.
+     * A save without classes and rates keeps the stored ones. The resource model refuses a code that another rule uses.
+     * Mage_Tax_Service_Rule refuses a combination of the rates and the classes that another rule has.
+     *
+     * @throws Mage_Core_Exception_Input with one error for each invalid field
+     */
+    #[\Override]
+    protected function _beforeSave()
+    {
+        $helper = Mage::helper('tax');
+        $errors = new Mage_Core_Exception_Input();
+        if (trim((string) $this->getCode()) === '') {
+            $errors->addError('code', $helper->__('Tax rule code is required.'));
+        }
+        foreach (['priority', 'position'] as $field) {
+            if ((int) $this->getData($field) < 0) {
+                $errors->addError($field, $helper->__('Please enter a number 0 or greater in this field.'));
+            }
+        }
+
+        if ($this->isObjectNew() || $this->hasCalculationData()) {
+            $classTypes = [
+                'tax_customer_class' => [Mage_Tax_Model_Class::TAX_CLASS_TYPE_CUSTOMER, $helper->__('At least one customer tax class is required.')],
+                'tax_product_class' => [Mage_Tax_Model_Class::TAX_CLASS_TYPE_PRODUCT, $helper->__('At least one product tax class is required.')],
+            ];
+            foreach ($classTypes as $field => [$type, $required]) {
+                $ids = array_map(intval(...), (array) $this->getData($field));
+                $known = Mage::getResourceModel('tax/class_collection')->setClassTypeFilter($type)->getAllIds();
+                if ($ids === []) {
+                    $errors->addError($field, $required);
+                } elseif ($unknown = array_diff($ids, array_map(intval(...), $known))) {
+                    $errors->addError($field, $helper->__('Tax class not found with ID: %s', implode(', ', $unknown)));
+                }
+            }
+            $rateIds = array_map(intval(...), (array) $this->getData('tax_rate'));
+            if ($rateIds === []) {
+                $errors->addError('tax_rate', $helper->__('At least one tax rate is required.'));
+            } elseif ($unknown = array_diff($rateIds, array_map(intval(...), Mage::getResourceModel('tax/calculation_rate_collection')->getAllIds()))) {
+                $errors->addError('tax_rate', $helper->__('Tax rate not found with ID: %s', implode(', ', $unknown)));
+            }
+        }
+        $errors->throwIfErrors();
+
+        return parent::_beforeSave();
+    }
+
+    /**
+     * Whether the rule holds its customer tax classes, its product tax classes and its rates, which a save writes.
+     */
+    public function hasCalculationData(): bool
+    {
+        return $this->getData('tax_customer_class') !== null
+            || $this->getData('tax_product_class') !== null
+            || $this->getData('tax_rate') !== null;
+    }
+
+    /**
      * After save rule
      * Re - declared for populate rate calculations
      *
@@ -75,7 +132,9 @@ class Mage_Tax_Model_Calculation_Rule extends Mage_Core_Model_Abstract
     protected function _afterSave()
     {
         parent::_afterSave();
-        $this->saveCalculationData();
+        if ($this->hasCalculationData()) {
+            $this->saveCalculationData();
+        }
         Mage::dispatchEvent('tax_settings_change_after');
         return $this;
     }
@@ -206,14 +265,38 @@ class Mage_Tax_Model_Calculation_Rule extends Mage_Core_Model_Abstract
         return $this->getData('tax_customer_class');
     }
 
+    /**
+     * @param list<int>|null $value the IDs of the customer tax classes
+     */
+    public function setTaxCustomerClass(?array $value): static
+    {
+        return $this->setData('tax_customer_class', $value);
+    }
+
     public function getTaxProductClass(): ?array
     {
         return $this->getData('tax_product_class');
     }
 
+    /**
+     * @param list<int>|null $value the IDs of the product tax classes
+     */
+    public function setTaxProductClass(?array $value): static
+    {
+        return $this->setData('tax_product_class', $value);
+    }
+
     public function getTaxRate(): ?array
     {
         return $this->getData('tax_rate');
+    }
+
+    /**
+     * @param list<int>|null $value the IDs of the tax rates
+     */
+    public function setTaxRate(?array $value): static
+    {
+        return $this->setData('tax_rate', $value);
     }
 
 }

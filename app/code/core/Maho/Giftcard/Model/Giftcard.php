@@ -18,11 +18,22 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     public const STATUS_EXPIRED = 'expired';
     public const STATUS_DISABLED = 'disabled';
 
+    public const STATUSES = [self::STATUS_ACTIVE, self::STATUS_USED, self::STATUS_EXPIRED, self::STATUS_DISABLED];
+
     public const ACTION_CREATED = 'created';
     public const ACTION_USED = 'used';
     public const ACTION_REFUNDED = 'refunded';
     public const ACTION_ADJUSTED = 'adjusted';
     public const ACTION_EXPIRED = 'expired';
+
+    public const XML_PATH_MAX_BALANCE = 'giftcard/general/max_balance';
+
+    /** True while refund() saves the card: a refund gives back money that the card held, so the cap does not apply. */
+    private bool $isRefund = false;
+
+    private bool $isCreation = false;
+
+    private ?string $creationComment = null;
 
     #[\Override]
     protected function _construct()
@@ -37,6 +48,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         // resets it, so isObjectNew() keeps returning true on subsequent saves. Use
         // !getId() instead so the creation defaults below run exactly once.
         if (!$this->getId()) {
+            $this->isCreation = true;
             $helper = Mage::helper('giftcard');
 
             if (!$this->getCode()) {
@@ -74,7 +86,56 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
         $this->setData('updated_at', Mage::app()->getLocale()->formatDateForDb('now'));
 
+        $helper = Mage::helper('giftcard');
+        $errors = new Mage_Core_Exception_Input();
+        if (!in_array($this->getStatus(), self::STATUSES, true)) {
+            $errors->addError('status', $helper->__('Invalid gift card status; allowed: %s', implode(', ', self::STATUSES)));
+        }
+        if ((float) $this->getData('balance') < 0) {
+            $errors->addError('balance', $helper->__('Gift card balance cannot be negative'));
+        }
+        // A used card can be created with a balance of zero, but a new card holds money at the start
+        if ($this->isCreation && (float) $this->getData('initial_balance') <= 0) {
+            $errors->addError('initial_balance', $helper->__('Gift card balance must be greater than zero'));
+        }
+        $maxBalance = $this->isRefund ? null : $this->getMaxBalance();
+        if ($maxBalance !== null) {
+            $fields = $this->getId() ? [] : ['initial_balance'];
+            if ($this->getId() ? $this->dataHasChangedFor('balance') : $this->getData('balance') != $this->getData('initial_balance')) {
+                $fields[] = 'balance';
+            }
+            foreach ($fields as $field) {
+                if ((float) $this->getData($field) > $maxBalance) {
+                    $errors->addError($field, $helper->__('Gift card balance cannot exceed %s', $maxBalance));
+                }
+            }
+        }
+        $errors->throwIfErrors();
+
         return parent::_beforeSave();
+    }
+
+    /**
+     * The highest balance that this card can get from an admin, the API or an import, in the base currency, or
+     * null for no limit. A purchased card has no limit. A card of several websites gets the lowest limit of them.
+     */
+    public function getMaxBalance(): ?float
+    {
+        if ($this->getPurchaseOrderId()) {
+            return null;
+        }
+        $websites = Mage::app()->getWebsites();
+        $limits = [];
+        foreach ($this->getWebsiteIds() as $websiteId) {
+            if (isset($websites[$websiteId])) {
+                $limits[] = (float) $websites[$websiteId]->getConfig(self::XML_PATH_MAX_BALANCE);
+            }
+        }
+        if ($limits === []) {
+            $limits[] = (float) Mage::getStoreConfig(self::XML_PATH_MAX_BALANCE, Mage_Core_Model_App::ADMIN_STORE_ID);
+        }
+        $limits = array_filter($limits, fn(float $limit) => $limit > 0);
+        return $limits === [] ? null : min($limits);
     }
 
     /**
@@ -272,12 +333,27 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Drop the pending-change key (already synced by the resource) so a
-     * second save of this instance does not re-run the junction sync.
+     * Set the comment of the "created" history entry, which the first save of this card writes.
+     */
+    public function setCreationComment(?string $comment): static
+    {
+        $this->creationComment = $comment;
+        return $this;
+    }
+
+    /**
+     * Write the "created" history entry of a new card. Drop the pending-change key (already synced by the
+     * resource) so a second save of this instance does not re-run the junction sync.
      */
     #[\Override]
     protected function _afterSave()
     {
+        if ($this->isCreation) {
+            $this->isCreation = false;
+            $balance = (float) $this->getData('balance');
+            $orderId = $this->getPurchaseOrderId();
+            $this->_addHistory(self::ACTION_CREATED, $balance, 0.0, $balance, $orderId ?: null, $this->creationComment);
+        }
         if (is_array($this->getData('website_ids'))) {
             $this->unsetData('website_ids');
             $this->loadedWebsiteIds = null;
@@ -392,7 +468,12 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             $this->setStatus(self::STATUS_ACTIVE);
         }
 
-        $this->save();
+        $this->isRefund = true;
+        try {
+            $this->save();
+        } finally {
+            $this->isRefund = false;
+        }
 
         // Record history
         $this->_addHistory(
@@ -482,9 +563,11 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
      */
     public function getHistoryCollection()
     {
+        // Two entries of the same second keep the order in which they were written
         return Mage::getResourceModel('giftcard/history_collection')
             ->addFieldToFilter('giftcard_id', $this->getId())
-            ->setOrder('created_at', 'DESC');
+            ->setOrder('created_at', 'DESC')
+            ->setOrder('history_id', 'DESC');
     }
 
     #[\Override]

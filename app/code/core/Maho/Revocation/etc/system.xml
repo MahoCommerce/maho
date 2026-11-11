@@ -103,7 +103,7 @@ SPDX-License-Identifier: OSL-3.0
                 </email>
                 <abuse translate="label comment" module="revocation">
                     <label>Abuse Protection</label>
-                    <comment><![CDATA[Only invisible background measures are used (honeypot, submit timing, invisible captcha, rate limits).<br>Manual CAPTCHAs and email verification links are legally inadmissible for the revocation form. Do not tune these limits so strictly that legitimate customers are blocked.]]></comment>
+                    <comment><![CDATA[Only invisible background measures are used (honeypot, submit timing, invisible captcha).<br>Manual CAPTCHAs and email verification links are legally inadmissible for the revocation form. The limits of the form are under System > Configuration > Advanced > System > Rate limit.]]></comment>
                     <frontend_type>text</frontend_type>
                     <sort_order>30</sort_order>
                     <show_in_default>1</show_in_default>
@@ -128,36 +128,44 @@ SPDX-License-Identifier: OSL-3.0
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </min_submit_seconds>
-                        <ip_rate_limit_per_hour translate="label comment">
-                            <label>Submissions per IP per Hour</label>
-                            <comment>0 disables the limit.</comment>
-                            <validate>validate-digits</validate>
-                            <sort_order>20</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </ip_rate_limit_per_hour>
-                        <recipient_rate_limit_per_day translate="label comment">
-                            <label>Receipt Emails per Recipient per Day</label>
-                            <comment>Further requests are still recorded, but the customer receipt email is suppressed (visible and resendable in the admin grid). Defeats email-bombing of third parties. 0 disables the limit.</comment>
-                            <validate>validate-digits</validate>
-                            <sort_order>30</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </recipient_rate_limit_per_day>
-                        <merchant_notification_rate_limit_per_hour translate="label comment">
-                            <label>Merchant Notifications per Store per Hour</label>
-                            <comment>0 disables the limit.</comment>
-                            <validate>validate-digits</validate>
-                            <sort_order>40</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </merchant_notification_rate_limit_per_hour>
                     </fields>
                 </abuse>
             </groups>
         </revocation>
+        <system>
+            <groups>
+                <rate_limit>
+                    <fields>
+                        <revocation_submit translate="label comment" module="revocation">
+                            <label>Revocation form</label>
+                            <comment>Per IP address. Default 5 per hour. 0 to disable.</comment>
+                            <sort_order>220</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </revocation_submit>
+                        <revocation_receipt translate="label comment" module="revocation">
+                            <label>Revocation receipt email</label>
+                            <comment>Per recipient address. A request over the limit is still recorded, but the customer gets no receipt email (the admin grid can resend it). Default 1 per day. 0 to disable.</comment>
+                            <sort_order>221</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </revocation_receipt>
+                        <revocation_merchant_notification translate="label comment" module="revocation">
+                            <label>Revocation merchant notification</label>
+                            <comment>Per store view. Default 100 per hour. 0 to disable.</comment>
+                            <sort_order>222</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </revocation_merchant_notification>
+                    </fields>
+                </rate_limit>
+            </groups>
+        </system>
     </sections>
 </config>

@@ -13,15 +13,11 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
-use Mage;
 use Mage_Catalog_Model_Product_Type;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Component\HttpFoundation\Request;
 
-/**
- */
 final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
 {
     use ProductLoaderTrait;
@@ -38,153 +34,48 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
     {
         $user = $this->requireUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);
-
-        // Enforce website scope for store-restricted API users on every
-        // sub-resource write/delete (mirrors ProductProcessor's main CRUD check).
         $this->assertProductWebsitesAllowed($this->loadProduct($productId), $user);
+        $product = $this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_BUNDLE);
 
         $request = $context['request'] ?? null;
         $body = $this->parseRequestBody($request);
-
-        // The PUT/DELETE routes carry the option id in {id}, but the operation's
-        // uriVariables only declare the productId Link, so API Platform doesn't
-        // reliably surface {id}. Recover it from the request path as a fallback.
-        $pathOptionId = 0;
-        if ($request instanceof \Symfony\Component\HttpFoundation\Request
-            && preg_match('#/bundle-options/(\d+)#', $request->getPathInfo(), $m)) {
-            $pathOptionId = (int) $m[1];
-        }
-
-        if ($operation instanceof DeleteOperationInterface) {
-            $optionId = (int) ($uriVariables['id'] ?? $body['optionId'] ?? $body['option_id'] ?? 0) ?: $pathOptionId;
-            return $this->handleDelete($productId, $optionId);
-        }
+        /** @var \Mage_Bundle_Service_Option $service */
+        $service = \Mage::getService('bundle/option');
 
         if ($operation instanceof Post) {
-            return $this->handleCreate($productId, $body);
+            /** @var \Mage_Bundle_Model_Option $option */
+            $option = \Mage::getModel('bundle/option');
+            $option->setData('title', (string) ($body['title'] ?? ''));
+            $option->setType((string) ($body['type'] ?? 'select'));
+            $option->setRequired((bool) ($body['required'] ?? true));
+            $option->setPosition((int) ($body['position'] ?? 0));
+            $option = $service->save($product, $option, $this->parseSelections($body['selections'] ?? []), $this->allowedWebsiteIds($user));
+
+            $dto = new BundleOption();
+            $dto->id = (int) $option->getId();
+            $dto->title = (string) ($body['title'] ?? '');
+            $dto->type = (string) $option->getType();
+            $dto->required = (bool) $option->getRequired();
+            $dto->position = (int) $option->getPosition();
+            $dto->selections = $body['selections'] ?? [];
+            return $dto;
         }
 
-        return $this->handleUpdate($productId, $body, $pathOptionId);
-    }
+        // The routes carry the option ID in {id}, but API Platform declares only the productId link
+        $pathOptionId = $request instanceof Request && preg_match('#/bundle-options/(\d+)#', $request->getPathInfo(), $m) ? (int) $m[1] : 0;
+        $optionId = (int) ($uriVariables['id'] ?? $body['optionId'] ?? $body['option_id'] ?? $body['id'] ?? 0) ?: $pathOptionId;
+        $option = $service->getById($product, $optionId);
 
-    private function handleCreate(int $productId, array $body): BundleOption
-    {
-        $product = $this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_BUNDLE);
-
-        $title = (string) ($body['title'] ?? '');
-        $type = (string) ($body['type'] ?? 'select');
-        $required = (bool) ($body['required'] ?? true);
-        $position = (int) ($body['position'] ?? 0);
-        $selections = $body['selections'] ?? [];
-
-        if ($title === '') {
-            throw new UnprocessableEntityHttpException('title is required');
-        }
-
-        $validTypes = ['select', 'radio', 'checkbox', 'multi'];
-        if (!in_array($type, $validTypes, true)) {
-            throw new UnprocessableEntityHttpException("Invalid type: {$type}. Valid: " . implode(', ', $validTypes));
-        }
-
-        /** @var \Mage_Bundle_Model_Option $option */
-        $option = Mage::getModel('bundle/option');
-        $option->setStoreId(0);
-        $option->setParentId($productId);
-        $option->setTitle($title);
-        $option->setDefaultTitle($title);
-        $option->setType($type);
-        $option->setRequired((bool) $required);
-        $option->setPosition($position);
-
-        $this->safeSave($option, 'create bundle option');
-
-        // Register product in Mage registry, Selection::_afterSave() requires it.
-        // Force the correct product (a stale entry from a prior operation in the
-        // same process would otherwise leak the wrong store scope into the
-        // selection price save), then restore the previous registry state.
-        $previousProduct = Mage::registry('product');
-        if ($previousProduct !== null) {
-            Mage::unregister('product');
-        }
-        Mage::register('product', $product);
-
-        try {
-            // Add selections
-            foreach ($selections as $sel) {
-                $selProductId = (int) ($sel['productId'] ?? $sel['product_id'] ?? 0);
-                if ($selProductId <= 0) {
-                    continue;
-                }
-
-                $this->authorizeAssociatedProductWebsites($selProductId);
-
-                $qty = (float) ($sel['qty'] ?? 1);
-                if ($qty <= 0) {
-                    throw new UnprocessableEntityHttpException('Quantity must be greater than 0');
-                }
-                $price = (float) ($sel['price'] ?? 0);
-                if ($price < 0) {
-                    throw new UnprocessableEntityHttpException('Price must not be negative');
-                }
-
-                /** @var \Mage_Bundle_Model_Selection $selection */
-                $selection = Mage::getModel('bundle/selection');
-                $selection->setOptionId($option->getId());
-                $selection->setParentProductId($productId);
-                $selection->setProductId($selProductId);
-                $selection->setSelectionQty($qty);
-                $selection->setSelectionCanChangeQty((bool) ($sel['canChangeQty'] ?? $sel['can_change_qty'] ?? 1));
-                $selection->setIsDefault((bool) ($sel['isDefault'] ?? $sel['is_default'] ?? 0));
-                $selection->setSelectionPriceType(($sel['priceType'] ?? $sel['price_type'] ?? 'fixed') === 'percent' ? 1 : 0);
-                $selection->setSelectionPriceValue($price);
-                $selection->setPosition((int) ($sel['position'] ?? 0));
-
-                $this->safeSave($selection, 'create selection');
-            }
-        } finally {
-            Mage::unregister('product');
-            if ($previousProduct !== null) {
-                Mage::register('product', $previousProduct);
-            }
-        }
-
-        // Return the created option
-        $dto = new BundleOption();
-        $dto->id = (int) $option->getId();
-        $dto->title = $title;
-        $dto->type = $type;
-        $dto->required = $required;
-        $dto->position = $position;
-        $dto->selections = $selections;
-
-        return $dto;
-    }
-
-    private function handleUpdate(int $productId, array $body, int $pathOptionId = 0): array
-    {
-        $this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_BUNDLE);
-
-        $optionId = (int) ($body['optionId'] ?? $body['option_id'] ?? $body['id'] ?? 0) ?: $pathOptionId;
-        if ($optionId <= 0) {
-            throw new UnprocessableEntityHttpException('optionId is required');
-        }
-
-        /** @var \Mage_Bundle_Model_Option $option */
-        $option = Mage::getModel('bundle/option')->load($optionId);
-        if (!$option->getId() || (int) $option->getParentId() !== $productId) {
-            throw new NotFoundHttpException('Bundle option not found');
+        if ($operation instanceof DeleteOperationInterface) {
+            $service->delete($product, $option);
+            return null;
         }
 
         if (isset($body['title'])) {
-            $option->setTitle($body['title']);
-            $option->setDefaultTitle($body['title']);
+            $option->setData('title', (string) $body['title']);
         }
         if (isset($body['type'])) {
-            $validTypes = ['select', 'radio', 'checkbox', 'multi'];
-            if (!in_array($body['type'], $validTypes, true)) {
-                throw new UnprocessableEntityHttpException("Invalid type: {$body['type']}. Valid: " . implode(', ', $validTypes));
-            }
-            $option->setType($body['type']);
+            $option->setType((string) $body['type']);
         }
         if (isset($body['required'])) {
             $option->setRequired((bool) $body['required']);
@@ -192,43 +83,33 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
         if (isset($body['position'])) {
             $option->setPosition((int) $body['position']);
         }
-
-        $this->safeSave($option, 'update option');
+        $service->save($product, $option);
 
         return $this->provider->getBundleOptions($this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_BUNDLE));
     }
 
-    private function handleDelete(int $productId, int $optionId): null
-    {
-        $this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_BUNDLE);
-
-        if ($optionId <= 0) {
-            throw new UnprocessableEntityHttpException('optionId is required');
-        }
-
-        /** @var \Mage_Bundle_Model_Option $option */
-        $option = Mage::getModel('bundle/option')->load($optionId);
-        if (!$option->getId() || (int) $option->getParentId() !== $productId) {
-            throw new NotFoundHttpException('Bundle option not found');
-        }
-
-        $this->safeDelete($option, 'delete option');
-
-        return null;
-    }
-
     /**
-     * Guard against pulling a foreign-website product into a bundle selection: a
-     * store-restricted token may only add selections within its own website
-     * scope. No-op for unrestricted users (skips the selection-product load).
+     * @return list<array{product_id: int, selection_qty: float, selection_price_value: float, selection_price_type: int, selection_can_change_qty: int, is_default: int, position: int}>
      */
-    private function authorizeAssociatedProductWebsites(int $selProductId): void
+    private function parseSelections(mixed $selections): array
     {
-        $user = $this->requireUser();
-        if ($this->getAllowedWebsiteIds($user) === null) {
-            return;
+        $result = [];
+        foreach ((array) $selections as $selection) {
+            $selection = is_array($selection) ? $selection : [];
+            $productId = (int) ($selection['productId'] ?? $selection['product_id'] ?? 0);
+            if ($productId <= 0) {
+                continue;
+            }
+            $result[] = [
+                'product_id' => $productId,
+                'selection_qty' => (float) ($selection['qty'] ?? 1),
+                'selection_price_value' => (float) ($selection['price'] ?? 0),
+                'selection_price_type' => ($selection['priceType'] ?? $selection['price_type'] ?? 'fixed') === 'percent' ? 1 : 0,
+                'selection_can_change_qty' => (int) (bool) ($selection['canChangeQty'] ?? $selection['can_change_qty'] ?? 1),
+                'is_default' => (int) (bool) ($selection['isDefault'] ?? $selection['is_default'] ?? 0),
+                'position' => (int) ($selection['position'] ?? 0),
+            ];
         }
-        $this->assertProductWebsitesAllowed($this->loadProduct($selProductId), $user);
+        return $result;
     }
-
 }

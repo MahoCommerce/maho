@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Create, rename and delete product attribute sets, and manage their groups and attributes.
+ * Give the writes of product attribute sets, their groups and their attributes to the attribute set service.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -14,24 +14,22 @@ namespace Mage\Catalog\Api;
 
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
-use Maho\ApiPlatform\Exception\ValidationException;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Serializer\Exception\ExtraAttributesException;
+use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 
 final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
 {
     private const IGNORED_FIELDS = ['extensions', '@context', '@id', '@type'];
 
-    private \Mage_Core_Exception_Input $errors;
+    /** The request body sends the name of a set or of a group as "name", so an error of that name gives this field */
+    private const ERROR_FIELDS = ['attribute_set_name' => 'name', 'attribute_group_name' => 'name'];
 
     public function __construct(
         Security $security,
         private readonly AttributeSetProvider $provider,
     ) {
         parent::__construct($security);
-        $this->errors = new \Mage_Core_Exception_Input();
     }
 
     #[\Override]
@@ -42,21 +40,29 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         $name = (string) $operation->getName();
 
         if ($operation instanceof DeleteOperationInterface) {
+            $set = $this->setService()->getById($id, \Mage_Catalog_Model_Product::ENTITY);
+            $oldData = $set->getData();
             if ($name === 'attribute_set_attribute_unassign') {
-                $this->unassignAttribute($id, (int) ($uriVariables['attributeId'] ?? 0));
+                $this->setService()->unassignAttribute($set, (int) ($uriVariables['attributeId'] ?? 0));
+                $this->logApiActivity('attribute_set', 'update', $oldData, $set);
             } else {
-                $this->delete($id);
+                $this->setService()->delete($set);
+                $this->logApiActivity('attribute_set', 'delete', $oldData, null);
             }
             return null;
         }
 
         $body = $this->parseRequestBody($context['request'] ?? null);
 
-        return match ($name) {
-            'attribute_set_group_create' => $this->createGroup($id, $body),
-            'attribute_set_attribute_assign' => $this->assignAttribute($id, $body),
-            default => $id > 0 ? $this->rename($id, $body) : $this->create($body),
-        };
+        try {
+            return match ($name) {
+                'attribute_set_group_create' => $this->createGroup($id, $body),
+                'attribute_set_attribute_assign' => $this->assignAttribute($id, $body),
+                default => $id > 0 ? $this->rename($id, $body) : $this->create($body),
+            };
+        } catch (\Mage_Core_Exception_Input $e) {
+            throw $e->withFieldNames(self::ERROR_FIELDS);
+        }
     }
 
     /**
@@ -64,38 +70,13 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
      */
     private function create(array $body): AttributeSet
     {
-        $this->errors = new \Mage_Core_Exception_Input();
         $this->rejectUnknownFields($body, ['name', 'skeletonId']);
-        $name = $this->readName($body, true);
-
-        $entityTypeId = $this->productEntityTypeId();
-        $skeletonId = $this->defaultSetId();
-        if (array_key_exists('skeletonId', $body) && $body['skeletonId'] !== null) {
-            $skeletonId = $this->readInteger($body['skeletonId']) ?? 0;
-            if ($this->setEntityTypeId($skeletonId) !== $entityTypeId) {
-                $this->addError('skeletonId', 'skeletonId must be the ID of a product attribute set');
-            }
-        }
-        $this->errors->throwIfErrors();
-
-        /** @var \Mage_Eav_Model_Entity_Attribute_Set $set */
-        $set = \Mage::getModel('eav/entity_attribute_set');
-        $set->setEntityTypeId($entityTypeId)->setAttributeSetName($name);
-        $this->validateName($set);
-
-        $this->safeSave($set, 'create attribute set');
-        try {
-            $set->initFromSkeleton($skeletonId);
-            $set->save();
-        } catch (\Throwable $e) {
-            // The copy of the skeleton failed, so do not leave an empty set behind
-            $set->delete();
-            throw $e;
-        }
-        $this->clearEavCache();
+        $set = $this->setService()->newSet(\Mage_Catalog_Model_Product::ENTITY)
+            ->setAttributeSetName($this->readString($body, 'name'));
+        $this->setService()->save($set, $this->readInteger($body, 'skeletonId'));
         $this->logApiActivity('attribute_set', 'create', null, $set);
 
-        return $this->provider->setDto($this->loadSet((int) $set->getId()));
+        return $this->toDto((int) $set->getId());
     }
 
     /**
@@ -103,33 +84,13 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
      */
     private function rename(int $id, array $body): AttributeSet
     {
-        $set = $this->loadSet($id);
-        $oldData = $set->getData();
-
-        $this->errors = new \Mage_Core_Exception_Input();
         $this->rejectUnknownFields($body, ['name', 'skeletonId']);
-        $name = $this->readName($body, true);
-        $this->errors->throwIfErrors();
-
-        $set->setAttributeSetName($name);
-        $this->validateName($set);
-        $this->safeSave($set, 'rename attribute set');
-        $this->clearEavCache();
+        $set = $this->setService()->getById($id, \Mage_Catalog_Model_Product::ENTITY);
+        $oldData = $set->getData();
+        $this->setService()->save($set->setAttributeSetName($this->readString($body, 'name')));
         $this->logApiActivity('attribute_set', 'update', $oldData, $set);
 
-        return $this->provider->setDto($this->loadSet($id));
-    }
-
-    private function delete(int $id): void
-    {
-        $set = $this->loadSet($id);
-        if ($id === $this->defaultSetId()) {
-            throw new ConflictHttpException('The default attribute set of products cannot be deleted');
-        }
-        $oldData = $set->getData();
-        $this->safeDelete($set, 'delete attribute set');
-        $this->clearEavCache();
-        $this->logApiActivity('attribute_set', 'delete', $oldData, null);
+        return $this->toDto($id);
     }
 
     /**
@@ -137,27 +98,17 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
      */
     private function createGroup(int $id, array $body): AttributeSet
     {
-        $set = $this->loadSet($id);
-
-        $this->errors = new \Mage_Core_Exception_Input();
         $this->rejectUnknownFields($body, ['name', 'sortOrder']);
-        $name = $this->readName($body, true);
-        $sortOrder = $this->readSortOrder($body);
-        $this->errors->throwIfErrors();
-
+        $set = $this->setService()->getById($id, \Mage_Catalog_Model_Product::ENTITY);
         /** @var \Mage_Eav_Model_Entity_Attribute_Group $group */
         $group = \Mage::getModel('eav/entity_attribute_group');
-        $group->setAttributeSetId($id)->setAttributeGroupName($name)->setSortOrder($sortOrder);
-        if ($group->itemExists()) {
-            throw self::duplicateName("A group named '{$name}' already exists in this attribute set");
-        }
-
+        $group->setAttributeGroupName($this->readString($body, 'name'))
+            ->setSortOrder($this->readInteger($body, 'sortOrder') ?? 0);
         $oldData = $set->getData();
-        $this->safeSave($group, 'create attribute group');
-        $this->clearEavCache();
+        $this->setService()->addGroup($set, $group);
         $this->logApiActivity('attribute_set', 'update', $oldData, $set);
 
-        return $this->provider->setDto($this->loadSet($id));
+        return $this->toDto($id);
     }
 
     /**
@@ -165,195 +116,23 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
      */
     private function assignAttribute(int $id, array $body): AttributeSet
     {
-        $set = $this->loadSet($id);
-
-        $this->errors = new \Mage_Core_Exception_Input();
         $this->rejectUnknownFields($body, ['attributeId', 'attributeCode', 'groupId', 'groupName', 'sortOrder']);
-        $attribute = $this->readAttribute($body);
-        $groupId = $this->readGroupId($id, $body);
-        $sortOrder = $this->readSortOrder($body);
-        $this->errors->throwIfErrors();
-
+        $set = $this->setService()->getById($id, \Mage_Catalog_Model_Product::ENTITY);
         $oldData = $set->getData();
-        $attribute->setAttributeSetId($id)->setAttributeGroupId($groupId)->setSortOrder($sortOrder);
-        $attribute->getResource()->saveInSetIncluding($attribute);
-        $this->clearEavCache();
+        $this->setService()->assignAttribute(
+            $set,
+            $this->readInteger($body, 'attributeId') ?? $this->readString($body, 'attributeCode'),
+            $this->readInteger($body, 'groupId') ?? $this->readString($body, 'groupName'),
+            $this->readInteger($body, 'sortOrder') ?? 0,
+        );
         $this->logApiActivity('attribute_set', 'update', $oldData, $set);
 
-        return $this->provider->setDto($this->loadSet($id));
+        return $this->toDto($id);
     }
 
-    private function unassignAttribute(int $id, int $attributeId): void
+    private function toDto(int $id): AttributeSet
     {
-        $set = $this->loadSet($id);
-
-        $resource = \Mage::getSingleton('core/resource');
-        $adapter = $resource->getConnection('core_read');
-        $select = $adapter->select()
-            ->from($resource->getTableName('eav/entity_attribute'), ['entity_attribute_id'])
-            ->where('attribute_set_id = ?', $id)
-            ->where('attribute_id = ?', $attributeId);
-        $entityAttributeId = (int) $adapter->fetchOne($select);
-        if ($entityAttributeId === 0) {
-            throw new NotFoundHttpException('The attribute is not in this attribute set');
-        }
-
-        /** @var \Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
-        $attribute = \Mage::getModel('catalog/resource_eav_attribute')->load($attributeId);
-        if (!$attribute->getIsUserDefined()) {
-            throw new ConflictHttpException('A system attribute cannot be removed from an attribute set');
-        }
-        if ($attribute->getResource()->isUsedBySuperProducts($attribute, $id)) {
-            throw new ConflictHttpException('Configurable products of this attribute set use the attribute, so it cannot be removed');
-        }
-
-        $oldData = $set->getData();
-        \Mage::getModel('eav/entity_attribute')->setEntityAttributeId($entityAttributeId)->deleteEntity();
-        $this->clearEavCache();
-        $this->logApiActivity('attribute_set', 'update', $oldData, $set);
-    }
-
-    /**
-     * @param array<string, mixed> $body
-     */
-    private function readAttribute(array $body): \Mage_Catalog_Model_Resource_Eav_Attribute
-    {
-        /** @var \Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
-        $attribute = \Mage::getModel('catalog/resource_eav_attribute');
-
-        if (array_key_exists('attributeId', $body) && $body['attributeId'] !== null) {
-            $attributeId = $this->readInteger($body['attributeId']);
-            if ($attributeId === null || $attributeId <= 0) {
-                $this->addError('attributeId', 'attributeId must be a positive integer');
-                return $attribute;
-            }
-            $attribute->load($attributeId);
-            if (!$attribute->getId() || (int) $attribute->getEntityTypeId() !== $this->productEntityTypeId()) {
-                $this->addError('attributeId', "No product attribute has the ID {$attributeId}");
-            }
-            return $attribute;
-        }
-
-        $code = $body['attributeCode'] ?? null;
-        if (!is_string($code) || $code === '') {
-            $this->addError('attributeId', 'attributeId or attributeCode is required');
-            return $attribute;
-        }
-        $attribute->loadByCode(\Mage_Catalog_Model_Product::ENTITY, $code);
-        if (!$attribute->getId()) {
-            $this->addError('attributeCode', "No product attribute has the code '{$code}'");
-        }
-        return $attribute;
-    }
-
-    /**
-     * @param array<string, mixed> $body
-     */
-    private function readGroupId(int $setId, array $body): int
-    {
-        $collection = \Mage::getResourceModel('eav/entity_attribute_group_collection')->setAttributeSetFilter($setId);
-
-        if (array_key_exists('groupId', $body) && $body['groupId'] !== null) {
-            $groupId = $this->readInteger($body['groupId']);
-            if ($groupId === null || $groupId <= 0) {
-                $this->addError('groupId', 'groupId must be a positive integer');
-                return 0;
-            }
-            // An integer literal: PostgreSQL refuses a quoted value above the range of the SMALLINT column
-            $collection->getSelect()->where('main_table.attribute_group_id = ' . $groupId);
-            if (!$collection->getSize()) {
-                $this->addError('groupId', "No group of this attribute set has the ID {$groupId}");
-            }
-            return $groupId;
-        }
-
-        $name = $body['groupName'] ?? null;
-        if (!is_string($name) || trim($name) === '') {
-            $this->addError('groupId', 'groupId or groupName is required');
-            return 0;
-        }
-        $collection->addFieldToFilter('attribute_group_name', trim($name));
-        $group = $collection->getFirstItem();
-        if (!$group->getId()) {
-            $this->addError('groupName', "No group of this attribute set is named '{$name}'");
-            return 0;
-        }
-        return (int) $group->getId();
-    }
-
-    /**
-     * @param array<string, mixed> $body
-     */
-    private function readName(array $body, bool $required): string
-    {
-        if (!array_key_exists('name', $body)) {
-            if ($required) {
-                $this->addError('name', 'name is required');
-            }
-            return '';
-        }
-        $name = is_string($body['name']) ? trim(\Mage::helper('adminhtml')->stripTags($body['name'])) : '';
-        if ($name === '' || mb_strlen($name) > 255) {
-            $this->addError('name', 'name must be a text of 1 to 255 characters');
-        }
-        return $name;
-    }
-
-    /**
-     * @param array<string, mixed> $body
-     */
-    private function readSortOrder(array $body): int
-    {
-        if (!array_key_exists('sortOrder', $body) || $body['sortOrder'] === null) {
-            return 0;
-        }
-        $value = $this->readInteger($body['sortOrder']);
-        if ($value === null || $value < 0) {
-            $this->addError('sortOrder', 'sortOrder must be an integer of 0 or more');
-            return 0;
-        }
-        return $value;
-    }
-
-    /**
-     * The set resource refuses a name that another set of the entity type has.
-     */
-    private function validateName(\Mage_Eav_Model_Entity_Attribute_Set $set): void
-    {
-        try {
-            $set->validate();
-        } catch (\Mage_Core_Exception $e) {
-            throw self::duplicateName($e->getMessage());
-        }
-    }
-
-    /**
-     * Load a product attribute set or answer 404.
-     */
-    public function loadSet(int $id): \Mage_Eav_Model_Entity_Attribute_Set
-    {
-        /** @var \Mage_Eav_Model_Entity_Attribute_Set $set */
-        $set = $this->loadOrFail('eav/entity_attribute_set', $id, 'Attribute set not found');
-        if ((int) $set->getEntityTypeId() !== $this->productEntityTypeId()) {
-            throw new NotFoundHttpException('Attribute set not found');
-        }
-        return $set;
-    }
-
-    private function productEntityTypeId(): int
-    {
-        return (int) \Mage::getSingleton('eav/config')->getEntityType(\Mage_Catalog_Model_Product::ENTITY)->getId();
-    }
-
-    private function defaultSetId(): int
-    {
-        return (int) \Mage::getSingleton('eav/config')->getEntityType(\Mage_Catalog_Model_Product::ENTITY)->getDefaultAttributeSetId();
-    }
-
-    private function clearEavCache(): void
-    {
-        \Mage::getSingleton('eav/config')->clear();
-        \Mage::app()->cleanCache([\Mage_Eav_Model_Entity_Attribute::CACHE_TAG]);
+        return $this->provider->setDto($this->setService()->getById($id, \Mage_Catalog_Model_Product::ENTITY));
     }
 
     /**
@@ -368,39 +147,49 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
-    private function readInteger(mixed $value): ?int
+    /**
+     * Return the integer in $body[$field], or null when the field is missing or null. Refuse another type with a 400.
+     *
+     * @param array<string, mixed> $body
+     */
+    private function readInteger(array $body, string $field): ?int
     {
-        if (is_bool($value) || !is_scalar($value)) {
+        $value = $body[$field] ?? null;
+        if ($value === null) {
             return null;
         }
-        $number = filter_var($value, FILTER_VALIDATE_INT);
-        return $number === false ? null : $number;
-    }
-
-    private function addError(string $field, string $message): void
-    {
-        $this->errors->addError($field, $message);
+        $number = is_bool($value) || !is_scalar($value) ? false : filter_var($value, FILTER_VALIDATE_INT);
+        return $number === false ? throw self::wrongType($field, 'int', $value) : $number;
     }
 
     /**
-     * Compare the ID as an integer literal: PostgreSQL refuses a quoted value above the range of the SMALLINT column.
+     * Return the text in $body[$field], or null when the field is missing or null. Refuse another type with a 400.
+     *
+     * @param array<string, mixed> $body
      */
-    private function setEntityTypeId(int $setId): ?int
+    private function readString(array $body, string $field): ?string
     {
-        $resource = \Mage::getSingleton('core/resource');
-        $adapter = $resource->getConnection('core_read');
-        $value = $adapter->fetchOne(
-            $adapter->select()
-                ->from($resource->getTableName('eav/attribute_set'), ['entity_type_id'])
-                ->where('attribute_set_id = ' . $setId),
+        $value = $body[$field] ?? null;
+        if ($value !== null && !is_string($value)) {
+            throw self::wrongType($field, 'string', $value);
+        }
+        return $value;
+    }
+
+    private static function wrongType(string $field, string $type, mixed $value): NotNormalizableValueException
+    {
+        return NotNormalizableValueException::createForUnexpectedDataType(
+            sprintf('The type of the "%s" attribute must be "%s", "%s" given.', $field, $type, get_debug_type($value)),
+            $value,
+            [$type],
+            $field,
+            true,
         );
-
-        return $value === false || $value === null ? null : (int) $value;
     }
 
-    private static function duplicateName(string $message): ValidationException
+    private function setService(): \Mage_Eav_Service_Attribute_Set
     {
-        return new ValidationException($message, 'name', 'Duplicate', ['errors' => [['field' => 'name', 'message' => $message]]]);
+        /** @var \Mage_Eav_Service_Attribute_Set */
+        return \Mage::getService('eav/attribute_set');
     }
-
 }

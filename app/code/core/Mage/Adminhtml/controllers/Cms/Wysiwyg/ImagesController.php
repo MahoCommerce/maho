@@ -149,9 +149,10 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             $helper = Mage::helper('cms/wysiwyg_images');
             $path = $helper->getCurrentPath();
             foreach ($files as $file) {
-                $filePath = $this->_resolveFileInCurrentPath($helper->idDecode($file), $path);
-                if ($filePath !== null) {
-                    $this->getStorage()->deleteFile($filePath);
+                try {
+                    $this->mediaService()->delete($path, (string) $helper->idDecode($file));
+                } catch (Mage_Core_Exception_NoSuchEntity) {
+                    // Another admin deleted the file first
                 }
             }
             $this->getResponse()->setBodyJson([]);
@@ -161,15 +162,19 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     }
 
     /**
-     * Files upload processing
+     * Save the file of the upload field "image" in the current folder. The "type" parameter names the list of
+     * allowed extensions: an image is saved in the image type of the configuration, a video as it is.
      */
     #[Maho\Config\Route('/admin/cms_wysiwyg_images/upload')]
     public function uploadAction(): void
     {
         try {
-            $this->_initAction();
-            $targetPath = Mage::helper('cms/wysiwyg_images')->getCurrentPath();
-            $result = $this->getStorage()->uploadFile($targetPath, $this->getRequest()->getParam('type'));
+            $type = $this->getRequest()->getParam('type');
+            $result = $this->mediaService()->upload(
+                Mage::helper('cms/wysiwyg_images')->getCurrentPath(),
+                'image',
+                type: is_string($type) && $type !== '' ? $type : 'image',
+            );
             $this->getResponse()->setBodyJson($result);
         } catch (Exception $e) {
             $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
@@ -253,12 +258,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
                 throw new Exception('File ID is required.');
             }
 
-            /** @var Mage_Cms_Helper_Wysiwyg_Images $helper */
-            $helper = Mage::helper('cms/wysiwyg_images');
-            $filePath = $this->_resolveFileInCurrentPath($fileId, $helper->getCurrentPath());
-            if ($filePath === null) {
-                throw new Exception('File not found.');
-            }
+            $filePath = $this->mediaService()->getFile(Mage::helper('cms/wysiwyg_images')->getCurrentPath(), $fileId);
 
             $this->getResponse()->setBodyJson([
                 'success' => true,
@@ -306,10 +306,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             $currentPath = $helper->getCurrentPath();
             $mount = Mage::getStorage('media');
 
-            $originalFilePath = $this->_resolveFileInCurrentPath($fileId, $currentPath);
-            if ($originalFilePath === null) {
-                throw new Exception('Original file not found.');
-            }
+            $originalFilePath = $this->mediaService()->getFile($currentPath, $fileId);
 
             // Get new filename from request or use original
             $newFilename = $this->getRequest()->getParam('new_filename');
@@ -355,22 +352,9 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         }
     }
 
-    /**
-     * The mount path of a file name inside $currentPath, or null when the name
-     * holds a directory part, leaves the directory, or names no file.
-     */
-    protected function _resolveFileInCurrentPath(string|false $fileName, string $currentPath): ?string
+    protected function mediaService(): Mage_Cms_Service_Media
     {
-        if ($fileName === false || $fileName === '' || basename(str_replace('\\', '/', $fileName)) !== $fileName) {
-            return null;
-        }
-        $mount = Mage::getStorage('media');
-        $filePath = \Maho\Io::getPathWithinMount($mount, $currentPath, $fileName);
-        if ($filePath === null || !$mount->fileExists($filePath)) {
-            return null;
-        }
-
-        return $filePath;
+        return Mage::getService('cms/media');
     }
 
     /**

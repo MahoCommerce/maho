@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * One request for a password reset email. The rows are the durable counter of the forgot password limit.
+ *
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
@@ -10,15 +12,16 @@
 
 declare(strict_types=1);
 
+use Mage_Customer_Model_Config_Forgotpassword as Flow;
+
 /**
- * Customer flow password info Model
- *
- * @package    Mage_Customer
- *
  * @method Mage_Customer_Model_Resource_Flowpassword_Collection getCollection()
  */
 class Mage_Customer_Model_Flowpassword extends Mage_Core_Model_Abstract
 {
+    public const EMAIL_WINDOW = 86400;
+    public const IP_WINDOW = 3600;
+
     #[\Override]
     protected function _construct()
     {
@@ -33,136 +36,94 @@ class Mage_Customer_Model_Flowpassword extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Prepare customer flow password data
+     * Set the address of the client and the date of the request.
      *
      * @return $this
      */
     protected function _prepareData()
     {
-        $validatorData = Mage::getSingleton('customer/session')->getValidatorData();
-        $this->setIp($validatorData[Mage_Customer_Model_Session::VALIDATOR_REMOTE_ADDR_KEY])
-            ->setRequestedDate(Mage::app()->getLocale()->formatDateForDb('now'));
+        if ($this->getIp() === null) {
+            $this->setIp((string) Mage::helper('core/http')->getRemoteAddr());
+        }
+        $this->setRequestedDate(Mage::app()->getLocale()->formatDateForDb('now'));
         return $this;
     }
 
     /**
-     * Check forgot password requests to times per 24 hours from 1 e-mail
-     *
-     * @param string $email
-     * @return bool
+     * Return false when $email has more requests in the last 24 hours than the store allows.
+     * The request to check must be saved first, so that it counts.
      */
-    public function checkCustomerForgotPasswordFlowEmail(#[\SensitiveParameter] $email)
+    public function checkCustomerForgotPasswordFlowEmail(#[\SensitiveParameter] string $email): bool
     {
         $helper = Mage::helper('customer');
-        $checkForgotPasswordFlowTypes = [
-            Mage_Adminhtml_Model_System_Config_Source_Customer_Forgotpassword::FORGOTPASS_FLOW_IP_EMAIL,
-            Mage_Adminhtml_Model_System_Config_Source_Customer_Forgotpassword::FORGOTPASS_FLOW_EMAIL,
-        ];
-
-        if (in_array($helper->getCustomerForgotPasswordFlowSecure(), $checkForgotPasswordFlowTypes)) {
-            $forgotPassword = $this->getCollection()
-                ->addFieldToFilter('email', ['eq' => $email])
-                ->addFieldToFilter(
-                    'requested_date',
-                    ['gt' => Mage::app()->getLocale()->formatDateForDb('-1 day')],
-                );
-
-            if ($forgotPassword->getSize() > $helper->getCustomerForgotPasswordEmailTimes()) {
-                return false;
-            }
+        if (!in_array($helper->getCustomerForgotPasswordFlowSecure(), [Flow::FLOW_IP_EMAIL, Flow::FLOW_EMAIL], true)) {
+            return true;
         }
-        return true;
+        return $this->countRequests('email', $email, self::EMAIL_WINDOW) <= $helper->getCustomerForgotPasswordEmailTimes();
     }
 
     /**
-     * Check forgot password requests to times per hour from 1 IP
-     *
-     * @return bool
+     * Return false when the address of the client has more requests in the last hour than the store allows.
+     * The request to check must be saved first, so that it counts.
      */
-    public function checkCustomerForgotPasswordFlowIp()
+    public function checkCustomerForgotPasswordFlowIp(): bool
     {
-        $helper        = Mage::helper('customer');
-        $validatorData = Mage::getSingleton('customer/session')->getValidatorData();
-        $remoteAddr    = $validatorData[Mage_Customer_Model_Session::VALIDATOR_REMOTE_ADDR_KEY];
-        $checkForgotPasswordFlowTypes = [
-            Mage_Adminhtml_Model_System_Config_Source_Customer_Forgotpassword::FORGOTPASS_FLOW_IP_EMAIL,
-            Mage_Adminhtml_Model_System_Config_Source_Customer_Forgotpassword::FORGOTPASS_FLOW_IP,
-        ];
-
-        if (in_array($helper->getCustomerForgotPasswordFlowSecure(), $checkForgotPasswordFlowTypes) && $remoteAddr) {
-            $forgotPassword = $this->getCollection()
-                ->addFieldToFilter('ip', ['eq' => $remoteAddr])
-                ->addFieldToFilter(
-                    'requested_date',
-                    ['gt' => Mage::app()->getLocale()->formatDateForDb('-1 hour')],
-                );
-
-            if ($forgotPassword->getSize() > $helper->getCustomerForgotPasswordIpTimes()) {
-                return false;
-            }
+        $helper = Mage::helper('customer');
+        $ip = $this->getIp() ?? (string) Mage::helper('core/http')->getRemoteAddr();
+        if ($ip === '' || !in_array($helper->getCustomerForgotPasswordFlowSecure(), [Flow::FLOW_IP_EMAIL, Flow::FLOW_IP], true)) {
+            return true;
         }
-        return true;
+        return $this->countRequests('ip', $ip, self::IP_WINDOW) <= $helper->getCustomerForgotPasswordIpTimes();
     }
 
-    /**
-     * Check magic link requests to times per hour from 1 e-mail
-     */
+    #[\Deprecated(message: 'Mage_Customer_Service_Authentication::sendMagicLink() counts the requests with the limit system/rate_limit/magic_link_email', since: '26.11')]
     public function checkMagicLinkFlowEmail(#[\SensitiveParameter] string $email): bool
     {
-        $helper = Mage::helper('customer');
-        $limit = $helper->getMagicLinkRateLimitEmail();
+        return !Mage::helper('core')->rateLimiterBy(
+            'magic_link',
+            'magic_link:email:' . strtolower($email),
+            (int) Mage::getStoreConfig(Mage_Customer_Service_Authentication::XML_PATH_MAGIC_LINK_EMAIL_RATE_LIMIT),
+            Mage_Customer_Service_Authentication::RATE_LIMIT_WINDOW,
+        )->tooManyAttempts();
+    }
 
-        if ($limit <= 0) {
-            return true; // No limit
-        }
-
-        $magicLinkRequests = $this->getCollection()
-            ->addFieldToFilter('email', ['eq' => $email])
-            ->addFieldToFilter(
-                'requested_date',
-                ['gt' => Mage::app()->getLocale()->formatDateForDb('-1 hour')],
-            );
-
-        if ($magicLinkRequests->getSize() >= $limit) {
-            return false;
-        }
-
-        return true;
+    #[\Deprecated(message: 'Mage_Customer_Service_Authentication::sendMagicLink() counts the requests with the limit system/rate_limit/magic_link_ip', since: '26.11')]
+    public function checkMagicLinkFlowIp(): bool
+    {
+        return !Mage::helper('core')->rateLimiter(
+            'magic_link',
+            (int) Mage::getStoreConfig(Mage_Customer_Service_Authentication::XML_PATH_MAGIC_LINK_IP_RATE_LIMIT),
+            Mage_Customer_Service_Authentication::RATE_LIMIT_WINDOW,
+            \Maho\Security\RateLimitScope::Ip,
+        )->tooManyAttempts();
     }
 
     /**
-     * Check magic link requests to times per hour from 1 IP
+     * Count the requests of the last $seconds seconds whose $field is $value.
      */
-    public function checkMagicLinkFlowIp(): bool
+    protected function countRequests(string $field, #[\SensitiveParameter] string $value, int $seconds): int
     {
-        $helper = Mage::helper('customer');
-        $validatorData = Mage::getSingleton('customer/session')->getValidatorData();
-        $remoteAddr    = $validatorData[Mage_Customer_Model_Session::VALIDATOR_REMOTE_ADDR_KEY];
-        $limit = $helper->getMagicLinkRateLimitIp();
-
-        if ($limit <= 0) {
-            return true; // No limit
-        }
-
-        if ($remoteAddr) {
-            $magicLinkRequests = $this->getCollection()
-                ->addFieldToFilter('ip', ['eq' => $remoteAddr])
-                ->addFieldToFilter(
-                    'requested_date',
-                    ['gt' => Mage::app()->getLocale()->formatDateForDb('-1 hour')],
-                );
-
-            if ($magicLinkRequests->getSize() >= $limit) {
-                return false;
-            }
-        }
-
-        return true;
+        return $this->getCollection()
+            ->addFieldToFilter($field, ['eq' => $value])
+            ->addFieldToFilter('requested_date', ['gt' => Mage::app()->getLocale()->formatDateForDb("-{$seconds} seconds")])
+            ->getSize();
     }
 
-    public function setEmail(?string $value): static
+    public function getEmail(): ?string
+    {
+        $value = $this->getData('email');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setEmail(#[\SensitiveParameter] ?string $value): static
     {
         return $this->setData('email', $value);
+    }
+
+    public function getIp(): ?string
+    {
+        $value = $this->getData('ip');
+        return $value === null ? null : (string) $value;
     }
 
     public function setIp(?string $value): static
@@ -170,9 +131,14 @@ class Mage_Customer_Model_Flowpassword extends Mage_Core_Model_Abstract
         return $this->setData('ip', $value);
     }
 
+    public function getRequestedDate(): ?string
+    {
+        $value = $this->getData('requested_date');
+        return $value === null ? null : (string) $value;
+    }
+
     public function setRequestedDate(?string $value): static
     {
         return $this->setData('requested_date', $value);
     }
-
 }

@@ -4531,12 +4531,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Catalog/ProductController.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Catalog_ProductController::_validateMassStatus() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Catalog/ProductController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Catalog_SearchController::_initAction() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -4723,12 +4717,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/CreateController.php
 
 		-
-			rawMessage: 'Call to an undefined method Mage_Sales_Model_Order_Creditmemo::void().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/CreditmemoController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Sales_Order_CreditmemoController::_getItemData() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -4765,12 +4753,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_System_ConfigController::_saveAdvanced() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/System/ConfigController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_System_ConfigController::_saveSection() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -4805,12 +4787,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/TagController.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Tax_RateController::_importRates() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Tax/RateController.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Tax_RuleController::saveAction() has no return type specified.'
@@ -5732,12 +5708,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Observer::catalogCheckIsUsingStaticUrlsAllowed() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Observer.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Observer::checkReservedAttributeCodes() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Observer.php
@@ -8809,12 +8779,6 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Observer.php
 
 		-
-			rawMessage: 'Method Mage_Customer_Model_Observer::deleteCustomerFlowPassword() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Observer.php
-
-		-
 			rawMessage: 'Method Mage_Customer_Model_Observer::quoteSubmitAfter() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -8851,12 +8815,6 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Resource/Customer/Collection.php
 
 		-
-			rawMessage: 'Method Mage_Customer_Model_Resource_Flowpassword::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Resource/Flowpassword.php
-
-		-
 			rawMessage: 'Method Mage_Customer_Model_Resource_Form_Attribute::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -8882,12 +8840,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Customer_AccountController::_addSessionError() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Customer/controllers/AccountController.php
-
-		-
-			rawMessage: 'Method Mage_Customer_AccountController::_dispatchRegisterSuccess() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Customer/controllers/AccountController.php
@@ -10549,12 +10501,6 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Form.php
 
 		-
-			rawMessage: 'Parameter #2 ...$arrays of function array_merge expects array, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Form.php
-
-		-
 			rawMessage: 'Method Mage_Eav_Model_Observer::cleanOrphanedRecords() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -11243,18 +11189,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Paygate/Model/Authorizenet/Cards.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Payment_Model_Method_Abstract::cancelPartialAuthorization().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Paygate/controllers/Adminhtml/Paygate/Authorizenet/PaymentController.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Payment_Model_Method_Abstract::cancelPartialAuthorization().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Paygate/controllers/Authorizenet/PaymentController.php
 
 		-
 			rawMessage: Property Mage_Payment_Block_Info_Checkmo::$_mailingAddress has no type specified.
@@ -12600,17 +12534,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Resource/Report/Shipping.php
 
-		-
-			rawMessage: 'Method Mage_Sales_Model_Service_Order::_initCreditmemoData() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Service/Order.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Service_Quote::submitAll() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Service/Quote.php
 
 		-
 			rawMessage: 'Method Mage_SalesRule_Model_Observer::_removeAttributeFromConditions() has no return type specified.'

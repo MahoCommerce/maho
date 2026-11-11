@@ -28,7 +28,11 @@ Go to **Catalog > Products**, open the product, and open the **Inventory** tab.
 | Stock Availability | In Stock or Out of Stock |
 
 Each field with a **Use Config Settings** checkbox takes the store-wide value from
-**System > Configuration > Catalog > Inventory** while the checkbox is selected. Stock values are
+**System > Configuration > Catalog > Inventory** while the checkbox is selected. A value that you
+enter, or that the API sends, without this checkbox clears it.
+
+The store refuses a negative **Qty**, a **Qty** above 99999999.9999, and a negative value in the
+other quantity fields. Only an order can take the quantity below zero, when backorders are on. Stock values are
 global: they are the same in every website and store view.
 
 Configurable, grouped and bundle products have no **Qty** field. Their stock comes from their
@@ -36,8 +40,9 @@ children (see [Configurable products](#configurable-products)).
 
 ## How the store decides the stock availability
 
-When you save a product that has a **Qty** field, or when an order changes its quantity, the store
-sets the stock availability with these rules, in this order:
+When you save a product that has a **Qty** field, when the product API or the stock API changes its
+stock, or when an order changes its quantity, the store sets the stock availability with these
+rules, in this order:
 
 1. If **Manage Stock** is No, the store treats the product as in stock. The other rules have no
    effect.
@@ -52,6 +57,10 @@ raise its quantity, until you also set **Stock Availability** to In Stock.
 
 With **Backorders** set to **Allow Qty Below 0** or **Allow Qty Below 0 and Notify Customer**,
 rule 2 never applies. The quantity can go below zero and the product stays in stock.
+
+You can also enter a quantity below zero yourself, in the admin, the API or an import. With
+backorders, it is the number of units that customers ordered and that you do not have yet. Without
+backorders, rule 2 sets the product to Out of Stock.
 
 ## Store-wide stock settings
 

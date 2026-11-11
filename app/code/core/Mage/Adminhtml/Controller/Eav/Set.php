@@ -138,15 +138,11 @@ abstract class Mage_Adminhtml_Controller_Eav_Set extends Mage_Adminhtml_Controll
      */
     protected function loadAttributeSet(int $setId): ?Mage_Eav_Model_Entity_Attribute_Set
     {
-        if (!$setId) {
+        try {
+            return $this->setService()->getById($setId, (string) $this->getEntityType()->getEntityTypeCode());
+        } catch (Mage_Core_Exception_NoSuchEntity) {
             return null;
         }
-        /** @var Mage_Eav_Model_Entity_Attribute_Set $attributeSet */
-        $attributeSet = Mage::getModel('eav/entity_attribute_set')->load($setId);
-        if (!$attributeSet->getId() || (int) $attributeSet->getEntityTypeId() !== (int) $this->getEntityType()->getId()) {
-            return null;
-        }
-        return $attributeSet;
     }
 
     /**
@@ -158,214 +154,94 @@ abstract class Mage_Adminhtml_Controller_Eav_Set extends Mage_Adminhtml_Controll
     public function saveAction(): void
     {
         $isNewSet = $this->getRequest()->getParam('gotoEdit', false) == '1';
-
-        /** @var Mage_Eav_Model_Entity_Attribute_Set $model */
-        $model = Mage::getModel('eav/entity_attribute_set')
-            ->setEntityTypeId((int) $this->getEntityType()->getId());
-
-        $helper = Mage::helper('adminhtml');
+        $service = $this->setService();
+        $entityTypeCode = (string) $this->getEntityType()->getEntityTypeCode();
 
         try {
             if ($isNewSet) {
-                if (!$this->canManageSets()) {
-                    Mage::throwException(Mage::helper('eav')->__('This entity type has one attribute set.'));
-                }
-                $name = $helper->stripTags($this->getRequest()->getParam('attribute_set_name'));
-                $model->setAttributeSetName(trim($name));
-                $skeleton = $this->loadAttributeSet((int) $this->getRequest()->getParam('skeleton_set'));
-                if (!$skeleton) {
-                    Mage::throwException(Mage::helper('eav')->__('This attribute set no longer exists.'));
-                }
-            } else {
-                $model = $this->loadAttributeSet((int) $this->getRequest()->getParam('id'));
-                if (!$model) {
-                    Mage::throwException(Mage::helper('eav')->__('This attribute set no longer exists.'));
-                }
-                $data = $this->filterSetData($model, Mage::helper('core')->jsonDecode($this->getRequest()->getPost('data')));
-                $data['attribute_set_name'] = $helper->stripTags($data['attribute_set_name']);
-                $this->checkSystemAttributes($model, $data);
-                if (!$this->getRequest()->getPost('confirmed')) {
-                    $question = Mage::helper('eav')->getSetRemoveQuestion($model, $this->getRemovedAttributes($model, $data));
-                    if ($question !== null) {
-                        $this->getResponse()->setBodyJson(['confirm' => $question]);
-                        return;
-                    }
-                }
-                $model->organizeData($data);
+                $set = $service->newSet($entityTypeCode)
+                    ->setAttributeSetName((string) $this->getRequest()->getParam('attribute_set_name'));
+                $service->save($set, (int) $this->getRequest()->getParam('skeleton_set'));
+                $this->_getSession()->addSuccess(Mage::helper('eav')->__('The attribute set has been saved.'));
+                $this->_redirect('*/*/edit', ['id' => $set->getId()]);
+                return;
             }
 
-            $model->validate();
-            if ($isNewSet) {
-                $model->save();
-                $model->initFromSkeleton($skeleton->getId());
+            $set = $service->getById((int) $this->getRequest()->getParam('id'), $entityTypeCode);
+            $tree = Mage::helper('core')->jsonDecode((string) $this->getRequest()->getPost('data'));
+            if (!$this->getRequest()->getPost('confirmed')) {
+                $question = Mage::helper('eav')->getSetRemoveQuestion($set, $service->getRemovedAttributes($set, $tree));
+                if ($question !== null) {
+                    $this->getResponse()->setBodyJson(['confirm' => $question]);
+                    return;
+                }
             }
-            $model->save();
+            $service->saveTree($set, $tree);
             $this->_getSession()->addSuccess(Mage::helper('eav')->__('The attribute set has been saved.'));
-
-            if ($isNewSet) {
-                $this->_redirect('*/*/edit', ['id' => $model->getId()]);
-            } else {
-                $this->getResponse()->setBodyJson(['url' => $this->getUrl('*/*/')]);
-            }
+            $this->getResponse()->setBodyJson(['url' => $this->getUrl('*/*/')]);
             return;
+        } catch (Mage_Core_Exception_Input $e) {
+            $errors = array_column($e->getErrors(), 'message');
         } catch (Mage_Core_Exception $e) {
-            $error = $e->getMessage();
-        } catch (Exception $e) {
-            $error = Mage::helper('eav')->__('An error occurred while saving the attribute set.');
+            $errors = [$e->getMessage()];
+        } catch (Throwable $e) {
             Mage::logException($e);
+            $errors = [Mage::helper('eav')->__('An error occurred while saving the attribute set.')];
         }
 
         if ($isNewSet) {
-            $this->_getSession()->addError($error);
+            foreach ($errors as $error) {
+                $this->_getSession()->addError($error);
+            }
             $this->_redirect('*/*/add');
         } else {
-            $this->getResponse()->setBodyJson(['error' => true, 'message' => $error]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => implode("\n", $errors)]);
         }
-    }
-
-    /**
-     * Remove the groups and the attributes of other sets and of other entity types from the posted data.
-     */
-    protected function filterSetData(Mage_Eav_Model_Entity_Attribute_Set $set, array $data): array
-    {
-        $resource = Mage::getSingleton('core/resource');
-        $adapter = $resource->getConnection('core_read');
-        $ids = fn(string $table, string $column, string $field, int $value): array => array_map(intval(...), $adapter->fetchCol(
-            $adapter->select()->from($resource->getTableName($table), [$column])->where("$field = ?", $value),
-        ));
-        $groupIds = $ids('eav/attribute_group', 'attribute_group_id', 'attribute_set_id', (int) $set->getId());
-        $rowIds = $ids('eav/entity_attribute', 'entity_attribute_id', 'attribute_set_id', (int) $set->getId());
-        $attributeIds = $ids('eav/attribute', 'attribute_id', 'entity_type_id', (int) $set->getEntityTypeId());
-        $keep = fn(string $key, callable $check): array => array_values(array_filter((array) ($data[$key] ?? []), $check));
-
-        // A group id that is not a number is a group that the editor added
-        $data['groups'] = $keep('groups', fn($group) => !is_numeric($group[0] ?? null) || in_array((int) $group[0], $groupIds, true));
-        $data['attributes'] = $keep('attributes', fn($attribute) => in_array((int) ($attribute[0] ?? 0), $attributeIds, true));
-        $data['not_attributes'] = $keep('not_attributes', fn($id) => in_array((int) $id, $rowIds, true));
-        $data['removeGroups'] = $keep('removeGroups', fn($id) => in_array((int) $id, $groupIds, true));
-        return $data;
-    }
-
-    /**
-     * Refuse posted data that takes a system attribute out of the set. The nightly
-     * eav_clean_orphaned_records job deletes the values of an attribute that is not in the set.
-     *
-     * @throws Mage_Core_Exception
-     */
-    protected function checkSystemAttributes(Mage_Eav_Model_Entity_Attribute_Set $set, array $data): void
-    {
-        $resource = Mage::getSingleton('core/resource');
-        $adapter = $resource->getConnection('core_read');
-        $rows = $adapter->fetchAll(
-            $adapter->select()
-                ->from(['ea' => $resource->getTableName('eav/entity_attribute')], ['entity_attribute_id', 'attribute_id', 'attribute_group_id'])
-                ->join(['a' => $resource->getTableName('eav/attribute')], 'a.attribute_id = ea.attribute_id', [])
-                ->where('ea.attribute_set_id = ?', (int) $set->getId())
-                ->where('a.is_user_defined = ?', 0),
-        );
-        $removedRows = array_map(intval(...), $data['not_attributes']);
-        $removedGroups = array_map(intval(...), $data['removeGroups']);
-        $postedAttributes = array_map(fn($attribute) => (int) $attribute[0], $data['attributes']);
-        foreach ($rows as $row) {
-            if (in_array((int) $row['entity_attribute_id'], $removedRows, true)) {
-                Mage::throwException(Mage::helper('eav')->__('Cannot unassign system attribute'));
-            }
-            if (in_array((int) $row['attribute_group_id'], $removedGroups, true)
-                && !in_array((int) $row['attribute_id'], $postedAttributes, true)
-            ) {
-                Mage::throwException(Mage::helper('eav')->__('Cannot delete group. Please move system attributes to another group and try again.'));
-            }
-        }
-    }
-
-    /**
-     * Return the user-defined attributes that the posted data takes out of the set: the removed
-     * attributes, and the attributes of a removed group that no other group holds now.
-     *
-     * @return list<Mage_Eav_Model_Entity_Attribute_Abstract>
-     */
-    protected function getRemovedAttributes(Mage_Eav_Model_Entity_Attribute_Set $set, array $data): array
-    {
-        $resource = Mage::getSingleton('core/resource');
-        $adapter = $resource->getConnection('core_read');
-        $rows = $adapter->fetchAll(
-            $adapter->select()
-                ->from(['ea' => $resource->getTableName('eav/entity_attribute')], ['entity_attribute_id', 'attribute_id', 'attribute_group_id'])
-                ->join(['a' => $resource->getTableName('eav/attribute')], 'a.attribute_id = ea.attribute_id', [])
-                ->where('ea.attribute_set_id = ?', (int) $set->getId())
-                ->where('a.is_user_defined = ?', 1),
-        );
-        $removedRows = array_map(intval(...), $data['not_attributes']);
-        $removedGroups = array_map(intval(...), $data['removeGroups']);
-        $postedAttributes = array_map(fn($attribute) => (int) $attribute[0], $data['attributes']);
-        $attributes = [];
-        foreach ($rows as $row) {
-            $attributeId = (int) $row['attribute_id'];
-            if (in_array($attributeId, $postedAttributes, true)) {
-                continue;
-            }
-            if (in_array((int) $row['entity_attribute_id'], $removedRows, true)
-                || in_array((int) $row['attribute_group_id'], $removedGroups, true)
-            ) {
-                $attribute = Mage::getSingleton('eav/config')->getAttribute($this->getEntityType(), $attributeId);
-                if ($attribute && $attribute->getId()) {
-                    $attributes[] = $attribute;
-                }
-            }
-        }
-        return $attributes;
     }
 
     public function deleteAction(): void
     {
-        $attributeSet = $this->loadAttributeSet((int) $this->getRequest()->getParam('id'));
-        if (!$attributeSet || !$this->canManageSets()
-            || (int) $attributeSet->getId() === (int) $this->getEntityType()->getDefaultAttributeSetId()
-        ) {
-            $this->_getSession()->addError($this->__('This attribute set cannot be deleted.'));
-            $this->_redirectReferer();
-            return;
-        }
-
-        // The records leave the set only when the set goes too
-        $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
-        $adapter->beginTransaction();
+        $service = $this->setService();
         try {
-            $this->beforeSetDelete($attributeSet);
-            $attributeSet->delete();
-            $adapter->commit();
-        } catch (Exception $e) {
-            $adapter->rollBack();
+            $service->delete($service->getById(
+                (int) $this->getRequest()->getParam('id'),
+                (string) $this->getEntityType()->getEntityTypeCode(),
+            ));
+            $this->_getSession()->addSuccess($this->__('The attribute set has been removed.'));
+            $this->getResponse()->setRedirect($this->getUrl('*/*/'));
+            return;
+        } catch (Mage_Core_Exception $e) {
+            $this->_getSession()->addError($e->getMessage());
+        } catch (Throwable $e) {
             Mage::logException($e);
             $this->_getSession()->addError($this->__('An error occurred while deleting this set.'));
-            $this->_redirectReferer();
-            return;
         }
-        $this->_getSession()->addSuccess($this->__('The attribute set has been removed.'));
-        $this->getResponse()->setRedirect($this->getUrl('*/*/'));
+        $this->_redirectReferer();
+    }
+
+    protected function setService(): Mage_Eav_Service_Attribute_Set
+    {
+        return Mage::getService('eav/attribute_set');
     }
 
     /**
-     * Move the records of a set to the default set before the set is deleted.
-     *
-     * Only the product table deletes its rows with the set, through a foreign key.
+     * @throws Mage_Core_Exception_Conflict
      */
-    protected function beforeSetDelete(Mage_Eav_Model_Entity_Attribute_Set $attributeSet): void
+    #[\Deprecated('Mage_Eav_Service_Attribute_Set::saveTree() makes this check')]
+    protected function checkSystemAttributes(Mage_Eav_Model_Entity_Attribute_Set $set, array $data): void
     {
-        $table = $this->getEntityType()->getEntityTable();
-        if (!$table) {
-            return;
-        }
-        $resource = Mage::getSingleton('core/resource');
-        $table = $resource->getTableName($table);
-        $adapter = $resource->getConnection('core_write');
-        if (!$adapter->tableColumnExists($table, 'attribute_set_id')) {
-            return;
-        }
-        $adapter->update(
-            $table,
-            ['attribute_set_id' => (int) $this->getEntityType()->getDefaultAttributeSetId()],
-            ['attribute_set_id = ?' => (int) $attributeSet->getId()],
-        );
+        $this->setService()->getRemovedAttributes($set, $data);
     }
+
+    /**
+     * @return list<Mage_Eav_Model_Entity_Attribute_Abstract>
+     */
+    #[\Deprecated('Use Mage_Eav_Service_Attribute_Set::getRemovedAttributes()')]
+    protected function getRemovedAttributes(Mage_Eav_Model_Entity_Attribute_Set $set, array $data): array
+    {
+        return $this->setService()->getRemovedAttributes($set, $data);
+    }
+
+    #[\Deprecated('Mage_Eav_Service_Attribute_Set::delete() moves the records of the set')]
+    protected function beforeSetDelete(Mage_Eav_Model_Entity_Attribute_Set $attributeSet): void {}
 }

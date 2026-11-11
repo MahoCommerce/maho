@@ -39,16 +39,41 @@ trait StoreRestrictionTrait
     }
 
     /**
-     * Restrict a collection to the websites of the user's allowed stores.
+     * Refuse a store that the client names in the URL, the body or the variables, when the token cannot use it.
+     * The listeners of the request check ?store= and X-Store-Code only. A request with no token passes.
+     *
+     * @throws \Mage_Core_Exception_Forbidden
      */
-    protected function applyAllowedWebsiteFilter(object $collection, ApiUser $user, string $field = 'main_table.website_id'): void
+    protected function assertRequestedStoreAllowed(int $storeId, ?ApiUser $user): void
     {
-        $websiteIds = $this->allowedWebsiteIds($user);
-        if ($websiteIds === null) {
-            return;
+        if ($user !== null && !$user->canAccessStore($storeId)) {
+            throw new \Mage_Core_Exception_Forbidden("Token is not authorized for store: {$storeId}");
         }
+    }
 
-        $collection->getSelect()->where("{$field} IN (?)", $websiteIds === [] ? [-1] : $websiteIds);
+    /**
+     * Refuse a website that the client names in the URL, the body or the variables, when the token cannot use it.
+     *
+     * @throws \Mage_Core_Exception_Forbidden
+     */
+    protected function assertRequestedWebsiteAllowed(int $websiteId, ?ApiUser $user): void
+    {
+        $websiteIds = $user === null ? null : $this->allowedWebsiteIds($user);
+        if ($websiteIds !== null && !in_array($websiteId, $websiteIds, true)) {
+            throw new \Mage_Core_Exception_Forbidden("Token is not authorized for website: {$websiteId}");
+        }
+    }
+
+    /**
+     * Refuse an action that changes all stores, when the token has a store restriction.
+     *
+     * @throws \Mage_Core_Exception_Forbidden
+     */
+    protected function assertUnrestricted(ApiUser $user): void
+    {
+        if ($user->getAllowedStoreIds() !== null) {
+            throw new \Mage_Core_Exception_Forbidden('This action changes all stores. A token with a store restriction cannot do it.');
+        }
     }
 
     /**
@@ -124,28 +149,14 @@ trait StoreRestrictionTrait
     }
 
     /**
-     * Map a restricted user's allowed store ids to their website ids; null for
-     * unrestricted users, meaning "no website restriction". An allowlisted
-     * store that no longer exists grants nothing.
+     * Return the websites of the store views of a store-restricted user, or null for an unrestricted user.
      *
-     * @return int[]|null
+     * @return list<int>|null
      */
     protected function allowedWebsiteIds(ApiUser $user): ?array
     {
-        $allowedStoreIds = $user->getAllowedStoreIds();
-        if ($allowedStoreIds === null) {
-            return null;
-        }
-
-        $websiteIds = [];
-        foreach ($allowedStoreIds as $storeId) {
-            try {
-                $websiteIds[] = (int) \Mage::app()->getStore($storeId)->getWebsiteId();
-            } catch (\Mage_Core_Model_Store_Exception) {
-                // deleted or unknown store: grants access to no website
-            }
-        }
-
-        return array_values(array_unique($websiteIds));
+        /** @var \Mage_Catalog_Service_Product $service */
+        $service = \Mage::getService('catalog/product');
+        return $service->getWebsiteIds($user->getAllowedStoreIds());
     }
 }

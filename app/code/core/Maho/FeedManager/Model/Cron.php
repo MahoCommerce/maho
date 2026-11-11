@@ -15,10 +15,7 @@ declare(strict_types=1);
  *
  * Error Handling Pattern:
  * - generateScheduledFeeds(): Catches all exceptions per-feed, continues with remaining feeds
- * - _generateFeed(): Wraps Generator call in try/catch, logs errors to system.log
- * - _uploadFeed(): Catches upload exceptions, records failure in Log model
- * - _cleanupHungFeeds(): Marks stuck feeds as failed, never throws
- * - resetHungFeed(): Returns boolean success, never throws
+ * - _generateFeed(): Wraps the service call in try/catch, logs errors to system.log
  */
 class Maho_FeedManager_Model_Cron
 {
@@ -35,6 +32,7 @@ class Maho_FeedManager_Model_Cron
     #[Maho\Config\CronJob('feedmanager_generate_scheduled', schedule: '0 * * * *')]
     public function generateScheduledFeeds(): void
     {
+        // The service refuses a generation while the module is off. The cron returns first, so it logs no error each hour
         if (!Mage::helper('feedmanager')->isEnabled()) {
             return;
         }
@@ -50,93 +48,28 @@ class Maho_FeedManager_Model_Cron
 
         foreach ($feeds as $feed) {
             if ($this->_shouldGenerateFeed($feed, $currentHour)) {
-                // Check if feed is already running
-                if ($this->_isFeedRunning($feed)) {
-                    Mage::log(
-                        "FeedManager Cron: Skipping feed '{$feed->getName()}' - already running",
-                        Mage::LOG_INFO,
-                    );
-                    continue;
-                }
                 $this->_generateFeed($feed);
             }
         }
     }
 
     /**
-     * Check if a feed is currently running
-     */
-    protected function _isFeedRunning(Maho_FeedManager_Model_Feed $feed): bool
-    {
-        $runningLog = Mage::getResourceModel('feedmanager/log_collection')
-            ->addFeedFilter((int) $feed->getId())
-            ->addStatusFilter(Maho_FeedManager_Model_Log::STATUS_RUNNING)
-            ->getFirstItem();
-
-        return (bool) $runningLog->getId();
-    }
-
-    /**
-     * Clean up hung feeds (running for too long)
+     * Reset the generations that run for longer than the timeout
      */
     protected function _cleanupHungFeeds(): void
     {
-        $cutoffTime = new DateTime()->modify('-' . self::HUNG_FEED_TIMEOUT_MINUTES . ' minutes')->format('Y-m-d H:i:s');
-
-        $hungLogs = Mage::getResourceModel('feedmanager/log_collection')
+        $feedIds = Mage::getResourceModel('feedmanager/log_collection')
             ->addStatusFilter(Maho_FeedManager_Model_Log::STATUS_RUNNING)
-            ->addFieldToFilter('started_at', ['lt' => $cutoffTime]);
+            ->getColumnValues('feed_id');
 
-        foreach ($hungLogs as $log) {
-            $log->setStatus(Maho_FeedManager_Model_Log::STATUS_FAILED)
-                ->setCompletedAt(Mage::app()->getLocale()->formatDateForDb('now'))
-                ->addError('Feed generation timed out (exceeded ' . self::HUNG_FEED_TIMEOUT_MINUTES . ' minutes)')
-                ->save();
-
-            Mage::log(
-                "FeedManager: Marked hung feed log #{$log->getId()} as failed",
-                Mage::LOG_WARNING,
-            );
-
-            // Send failure notification for hung feed
-            $feed = Mage::getModel('feedmanager/feed')->load($log->getFeedId());
+        /** @var Maho_FeedManager_Service_Feed $service */
+        $service = Mage::getService('feedmanager/feed');
+        foreach (array_unique($feedIds) as $feedId) {
+            $feed = Mage::getModel('feedmanager/feed')->load($feedId);
             if ($feed->getId()) {
-                $notifier = new Maho_FeedManager_Model_Notifier();
-                $notifier->notify($feed, ['Feed generation timed out'], 'timeout');
+                $service->reset($feed);
             }
         }
-    }
-
-    /**
-     * Check and reset hung feed by ID
-     *
-     * @return bool True if a hung feed was reset
-     */
-    public function resetHungFeed(int $feedId): bool
-    {
-        $runningLog = Mage::getResourceModel('feedmanager/log_collection')
-            ->addFeedFilter($feedId)
-            ->addStatusFilter(Maho_FeedManager_Model_Log::STATUS_RUNNING)
-            ->setOrder('started_at', 'DESC')
-            ->getFirstItem();
-
-        /** @var Maho_FeedManager_Model_Log $runningLog */
-        if (!$runningLog->getId()) {
-            return false;
-        }
-
-        $startedAt = strtotime($runningLog->getStartedAt());
-        $hungThreshold = strtotime('-' . self::HUNG_FEED_TIMEOUT_MINUTES . ' minutes');
-
-        if ($startedAt < $hungThreshold) {
-            $runningLog->setStatus(Maho_FeedManager_Model_Log::STATUS_FAILED)
-                ->setCompletedAt(Mage::app()->getLocale()->formatDateForDb('now'))
-                ->addError('Manually reset - feed was stuck')
-                ->save();
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -172,92 +105,29 @@ class Maho_FeedManager_Model_Cron
                 Mage::LOG_INFO,
             );
 
-            $autoUpload = $feed->getAutoUpload() && $feed->getDestinationId();
-            $generator = new Maho_FeedManager_Model_Generator();
-            $log = $generator->generate(
-                $feed,
-                $autoUpload ? fn(string $localPath, Maho_FeedManager_Model_Log $log) => $this->_uploadFeed($feed, $log, $localPath) : null,
-            );
+            /** @var Maho_FeedManager_Service_Feed $service */
+            $service = Mage::getService('feedmanager/feed');
+            $log = $service->generate($feed);
 
             if ($log->getStatus() === Maho_FeedManager_Model_Log::STATUS_COMPLETED) {
                 Mage::log(
                     "FeedManager Cron: Completed feed '{$feed->getName()}' with {$log->getProductCount()} products",
                     Mage::LOG_INFO,
                 );
-
-                if (!$autoUpload) {
-                    $log->recordUploadSkipped(
-                        $feed->getAutoUpload() ? 'No destination configured' : 'Auto-upload disabled',
-                    );
-                }
             } else {
                 Mage::log(
                     "FeedManager Cron: Feed '{$feed->getName()}' generation failed",
                     Mage::LOG_ERROR,
                 );
             }
+        } catch (Mage_Core_Exception_Conflict) {
+            Mage::log("FeedManager Cron: Skipping feed '{$feed->getName()}' - already running", Mage::LOG_INFO);
         } catch (Exception $e) {
             Mage::logException($e);
             Mage::log(
                 "FeedManager Cron: Exception generating feed '{$feed->getName()}': {$e->getMessage()}",
                 Mage::LOG_ERROR,
             );
-        }
-    }
-
-    /**
-     * Upload feed to configured destination
-     *
-     * @param string $localPath A local copy of the published feed
-     */
-    protected function _uploadFeed(Maho_FeedManager_Model_Feed $feed, Maho_FeedManager_Model_Log $log, string $localPath): void
-    {
-        $destinationId = (int) $feed->getDestinationId();
-
-        try {
-            $destination = Mage::getModel('feedmanager/destination')->load($destinationId);
-
-            if (!$destination->getId() || !$destination->isEnabled()) {
-                $message = 'Destination not found or disabled';
-                Mage::log(
-                    "FeedManager: {$message} for feed '{$feed->getName()}'",
-                    Mage::LOG_WARNING,
-                );
-                $log->recordUploadFailure($destinationId, $message);
-                return;
-            }
-
-            $uploader = new Maho_FeedManager_Model_Uploader($destination);
-            $remoteName = $feed->getOutputFilename();
-
-            $success = $uploader->upload($localPath, $remoteName);
-
-            $destination->setLastUploadAt(Mage::app()->getLocale()->formatDateForDb('now'))
-                ->setLastUploadStatus($success ? 'success' : 'failed')
-                ->save();
-
-            if ($success) {
-                $message = "Uploaded to {$destination->getName()} as {$remoteName}";
-                Mage::log(
-                    "FeedManager: Successfully uploaded feed '{$feed->getName()}' to destination '{$destination->getName()}'",
-                    Mage::LOG_INFO,
-                );
-                $log->recordUploadSuccess($destinationId, $message);
-            } else {
-                $message = 'Upload returned false';
-                Mage::log(
-                    "FeedManager: Failed to upload feed '{$feed->getName()}' to destination '{$destination->getName()}'",
-                    Mage::LOG_ERROR,
-                );
-                $log->recordUploadFailure($destinationId, $message);
-            }
-        } catch (\Throwable $e) {
-            Mage::logException($e);
-            $log->recordUploadFailure($destinationId, $e->getMessage());
-
-            // Send failure notification
-            $notifier = new Maho_FeedManager_Model_Notifier();
-            $notifier->notify($feed, [$e->getMessage()], 'upload');
         }
     }
 
@@ -290,5 +160,24 @@ class Maho_FeedManager_Model_Cron
         if ($deleted > 0) {
             Mage::log("FeedManager: Cleaned {$deleted} log entries older than {$retentionDays} days", Mage::LOG_INFO);
         }
+    }
+
+    #[\Deprecated(message: 'Use Maho_FeedManager_Model_Generator::isGenerating() instead')]
+    protected function _isFeedRunning(Maho_FeedManager_Model_Feed $feed): bool
+    {
+        return Maho_FeedManager_Model_Generator::isGenerating((int) $feed->getId());
+    }
+
+    #[\Deprecated(message: 'Use Maho_FeedManager_Service_Feed::reset() instead')]
+    public function resetHungFeed(int $feedId): bool
+    {
+        $feed = Mage::getModel('feedmanager/feed')->load($feedId);
+        return $feed->getId() && Mage::getService('feedmanager/feed')->reset($feed) > 0;
+    }
+
+    #[\Deprecated(message: 'Use Maho_FeedManager_Service_Feed::upload() instead')]
+    protected function _uploadFeed(Maho_FeedManager_Model_Feed $feed, Maho_FeedManager_Model_Log $log, string $localPath): void
+    {
+        Mage::getService('feedmanager/feed')->upload($feed, $log, $localPath);
     }
 }
