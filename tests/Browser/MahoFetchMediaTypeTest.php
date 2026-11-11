@@ -68,6 +68,17 @@ JS;
 
 it('recognises JSON media types with parameters while preserving fetch behaviour', function (): void {
     $page = waitForPageLoad(visit(MahoServer::baseUrl() . '/admin'), '#username');
+    // The standalone login page does not load the shared helper used by admin pages.
+    $page->script(<<<'JS'
+        new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = '/js/varien/js.js';
+            script.onload = () => resolve(true);
+            script.onerror = () => reject(new Error('Could not load the shared mahoFetch helper'));
+            document.head.append(script);
+        })
+        JS);
+    expect($page->script('typeof mahoFetch'))->toBe('function');
     $result = $page->script(MAHO_FETCH_MEDIA_TYPE_SCENARIO);
     expect($result)->toBe([
         'exact' => ['value' => 1], 'parameterized' => ['value' => 2], 'mixed' => ['value' => 3],
