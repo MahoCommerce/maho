@@ -56,11 +56,12 @@ final class CartRequest
      * the lookup tries it first, then the name. When a region matches, the text becomes its name.
      *
      * @param array<string, mixed> $input
+     * @param string $path where $input sits in the request, for its errors
      * @return array<string, mixed>
      */
-    public static function mapAddress(array $input): array
+    public static function mapAddress(array $input, string $path = ''): array
     {
-        $fields = RequestInput::of($input);
+        $fields = RequestInput::of($input, $path);
         $regionId = ($input['regionId'] ?? '') === '' ? null : $fields->int('regionId');
         $regionText = $fields->string('region');
         $countryId = $fields->string('countryId') ?? '';

@@ -412,7 +412,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->resolveAndVerify($context, $uriVariables);
 
         if (is_array($address) && $address !== []) {
-            $estimate = \Mage::getModel('sales/quote_address')->addData(CartRequest::mapAddress($address));
+            $estimate = \Mage::getModel('sales/quote_address')->addData(CartRequest::mapAddress($address, 'address'));
             $quote = $this->cartService->estimateShipping($quote, $estimate);
         } else {
             // No address in the body: the saved rates can be older than the last change of the cart

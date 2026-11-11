@@ -77,7 +77,7 @@ class AdminBridgeListener
     {
         if ($requested !== null) {
             $requestedId = RequestInput::toInt($requested);
-            if ($requestedId !== null && $requestedId > 0) {
+            if ($requestedId > 0) {
                 try {
                     $store = \Mage::app()->getStore($requestedId);
                     if ($store->getId() && $store->getIsActive()) {

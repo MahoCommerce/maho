@@ -12,6 +12,7 @@ use GraphQL\Error\Error;
 use GraphQL\Error\UserError;
 use Maho\ApiPlatform\GraphQl\InternalErrorNormalizer;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 use Symfony\Component\Validator\ConstraintViolationList;
 
 uses(Tests\MahoBackendTestCase::class);
@@ -33,6 +34,7 @@ describe('InternalErrorNormalizer', function (): void {
         'HTTP exception' => [new NotFoundHttpException('Not Found')],
         'validation exception' => [new ValidationException(new ConstraintViolationList())],
         'Mage_Core_Exception' => [new Mage_Core_Exception('Quantity must be greater than zero')],
+        'value of the wrong type' => [new NotNormalizableValueException('The type of the "qty" attribute must be "float", "array" given.')],
         'exception that GraphQL marks as safe' => [new UserError('Unknown field')],
     ]);
 
