@@ -25,15 +25,6 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Maho_SpeculationRules_Model</class>
             </speculationrules>
         </models>
-        <translate>
-            <modules>
-                <Maho_SpeculationRules>
-                    <files>
-                        <default>Maho_SpeculationRules.csv</default>
-                    </files>
-                </Maho_SpeculationRules>
-            </modules>
-        </translate>
     </global>
     <frontend>
         <layout>
@@ -58,4 +49,16 @@ SPDX-License-Identifier: AFL-3.0
             </speculation_rules>
         </dev>
     </default>
+
+    <adminhtml>
+        <translate>
+            <modules>
+                <Maho_SpeculationRules>
+                    <files>
+                        <default>Maho_SpeculationRules.csv</default>
+                    </files>
+                </Maho_SpeculationRules>
+            </modules>
+        </translate>
+    </adminhtml>
 </config>

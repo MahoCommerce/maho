@@ -36,6 +36,15 @@ SPDX-License-Identifier: AFL-3.0
         </blocks>
     </global>
     <adminhtml>
+        <translate>
+            <modules>
+                <Maho_ContentVersion>
+                    <files>
+                        <default>Maho_ContentVersion.csv</default>
+                    </files>
+                </Maho_ContentVersion>
+            </modules>
+        </translate>
         <layout>
             <updates>
                 <contentversion>
