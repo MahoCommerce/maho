@@ -197,6 +197,9 @@ public function getTailwindContent(): iterable {}
   status comes from a `Mage_Core_Exception` subclass (see Services), which `ApiExceptionListener`
   maps. The OAuth token endpoints keep the 400 of RFC 6749. Never catch an exception only to throw
   it again with another status, and an unexpected exception must stay a 500
+- A processor reads a value that the serializer does not type (an alias, a key that no property declares, an entry of an
+  array, a GraphQL variable) through `Maho\ApiPlatform\Http\RequestInput`, never with an `(int)` or `(bool)` cast. A value of
+  the wrong type then answers 400 with the name of the field
 - A resource whose writes go through a service maps to its model with the Symfony ObjectMapper: a
   class `#[Map(target: Model::class)]` and a `#[Map]` on each DTO property (a model keeps its data
   in `_data`, so implicit mapping finds nothing and writes nothing). A read-only property takes

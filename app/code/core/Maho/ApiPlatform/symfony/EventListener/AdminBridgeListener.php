@@ -76,8 +76,8 @@ class AdminBridgeListener
     private function resolveStoreId(mixed $requested): int
     {
         if ($requested !== null) {
-            $requestedId = (int) $requested;
-            if ($requestedId > 0) {
+            $requestedId = RequestInput::toInt($requested);
+            if ($requestedId !== null && $requestedId > 0) {
                 try {
                     $store = \Mage::app()->getStore($requestedId);
                     if ($store->getId() && $store->getIsActive()) {

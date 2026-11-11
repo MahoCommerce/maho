@@ -89,15 +89,19 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         $values = [];
         foreach (array_keys($input) as $key) {
             $column = self::stock()->columnOf((string) $key);
-            if ($column !== null) {
-                $values[$column] = match (Mage_CatalogInventory_Service_Stock::COLUMNS[$column]) {
-                    'float' => $request->float((string) $key),
-                    'int' => $request->int((string) $key),
-                    default => $request->bool((string) $key),
-                };
+            if ($column === null) {
+                continue;
+            }
+            $value = match (Mage_CatalogInventory_Service_Stock::COLUMNS[$column]) {
+                'float' => $request->float((string) $key),
+                'int' => $request->int((string) $key),
+                default => $request->bool((string) $key),
+            };
+            if ($value !== null) {
+                $values[$column] = is_bool($value) ? (int) $value : $value;
             }
         }
-        return self::stock()->toColumns($values);
+        return $values;
     }
 
     /**
@@ -112,10 +116,10 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
             throw new Mage_Core_Exception('Maximum ' . self::MAX_BULK_ITEMS . ' items per bulk update');
         }
 
-        RequestInput::rowsOf($items, 'items');
+        $rows = RequestInput::rowsOf($items, 'items');
         $changes = [];
         foreach ($items as $index => $item) {
-            $sku = RequestInput::of($item, "items[{$index}]")->string('sku') ?? '';
+            $sku = $rows[$index]->string('sku') ?? '';
             if ($sku === '') {
                 throw new Mage_Core_Exception("Item at index {$index}: SKU is required");
             }

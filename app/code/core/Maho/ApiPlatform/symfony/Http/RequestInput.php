@@ -73,7 +73,7 @@ final class RequestInput
     }
 
     /**
-     * A string, or a number as its string. Shared with the readers that report a wrong type their own way.
+     * Return $value as a string. A number becomes its string. Any other type gives null.
      */
     public static function toString(mixed $value): ?string
     {
@@ -85,7 +85,7 @@ final class RequestInput
     }
 
     /**
-     * An integer, or a string of one. Shared with the readers that collect their errors instead of throwing.
+     * Return $value as an integer. A string of an integer reads too. Any other value gives null.
      */
     public static function toInt(mixed $value): ?int
     {
@@ -253,7 +253,7 @@ final class RequestInput
     }
 
     /**
-     * Reads each entry of a list with $read; $type names the type of an entry in the error of a null one.
+     * Read each entry of a list with $read. When $read returns null, the error names $type as the expected type.
      *
      * @param array<string> $keys
      * @param \Closure(mixed): ?T $read
