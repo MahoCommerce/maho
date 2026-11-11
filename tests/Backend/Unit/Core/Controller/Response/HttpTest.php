@@ -513,6 +513,22 @@ describe('Mage_Core_Controller_Response_Http', function () {
                 ->and($html)->toContain('<script type="text/plain" data-maho-script="1">var a = 1;</script>');
         });
 
+        it('defers an inline script of 200 KB', function () {
+            $body = 'var x = "' . str_repeat('a', 200 * 1024) . '";';
+            $html = ($this->defer)('<html><head><script>' . $body . '</script></head><body></body></html>');
+
+            expect($html)->toContain('<script type="text/plain" data-maho-script="0">' . $body . '</script>')
+                ->and($html)->not->toContain('<head><script>');
+        });
+
+        it('keeps a script body that holds other tags and a closing tag in a string', function () {
+            $body = 'var a = "<b>x</b>"; if (1 < 2) { var s = "<\/script>"; }';
+            $html = ($this->defer)('<html><body><script-x>q</script-x><script>' . $body . '</script></body></html>');
+
+            expect($html)->toContain('<script-x>q</script-x>')
+                ->and($html)->toContain('data-maho-script="0">' . $body . '</script>');
+        });
+
         it('keeps JSON-LD and speculation rules untouched', function () {
             $jsonLd = "<script\n    type=\"application/ld+json\"\n>{\"@context\":\"https://schema.org/\"}</script>";
             $rules = '<script type="speculationrules">{"prefetch":[]}</script>';
