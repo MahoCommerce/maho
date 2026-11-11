@@ -188,6 +188,15 @@
     </default>
 
     <frontend>
+        <translate>
+            <modules>
+                <Maho_Giftcard>
+                    <files>
+                        <default>Maho_Giftcard.csv</default>
+                    </files>
+                </Maho_Giftcard>
+            </modules>
+        </translate>
         <layout>
             <updates>
                 <giftcard>
@@ -198,6 +207,15 @@
     </frontend>
 
     <adminhtml>
+        <translate>
+            <modules>
+                <Maho_Giftcard>
+                    <files>
+                        <default>Maho_Giftcard.csv</default>
+                    </files>
+                </Maho_Giftcard>
+            </modules>
+        </translate>
         <layout>
             <updates>
                 <giftcard>
