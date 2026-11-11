@@ -574,6 +574,23 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     }
 
     /**
+     * Return the value that the unique check compares with a column. A column that cannot hold the value
+     * stores its default, so the check uses the default. Return null when no row can hold the value.
+     *
+     * @param array<string, mixed> $column the description of the column, from describeTable()
+     */
+    protected function _getUniqueCheckValue(array $column, mixed $value): ?string
+    {
+        $value = trim((string) $value);
+        $adapter = $this->_getWriteAdapter();
+        if ($column === [] || $adapter->canColumnHoldValue($column, $value)) {
+            return $value;
+        }
+        $default = $column['DEFAULT'] ?? null;
+        return $default !== null && $adapter->canColumnHoldValue($column, (string) $default) ? (string) $default : null;
+    }
+
+    /**
      * Check for unique values existence
      *
      * @return $this
@@ -597,15 +614,17 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
             $select = $this->_getWriteAdapter()->select()
                 ->from($this->getMainTable());
 
+            $columns = $this->_getWriteAdapter()->describeTable($this->getMainTable());
+
             foreach ($fields as $unique) {
                 $select->reset(Maho\Db\Select::WHERE);
 
-                if (is_array($unique['field'])) {
-                    foreach ($unique['field'] as $field) {
-                        $select->where($field . '=?', trim((string) $data->getData($field)));
+                foreach ((array) $unique['field'] as $field) {
+                    $value = $this->_getUniqueCheckValue($columns[$field] ?? [], $data->getData($field));
+                    if ($value === null) {
+                        continue 2;
                     }
-                } else {
-                    $select->where($unique['field'] . '=?', trim((string) $data->getData($unique['field'])));
+                    $select->where($field . '=?', $value);
                 }
 
                 if ($object->getId() || $object->getId() === '0') {

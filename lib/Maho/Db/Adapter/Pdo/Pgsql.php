@@ -1941,8 +1941,11 @@ class Pgsql extends AbstractPdoAdapter
         if ($mode == self::INSERT_IGNORE) {
             $query .= ' ON CONFLICT DO NOTHING';
         } elseif ($mode == self::INSERT_ON_DUPLICATE) {
-            if (!$fields) {
+            if ($fields) {
+                $insertCols = array_values(array_filter($fields, is_string(...)));
+            } else {
                 $describe = $this->describeTable($table);
+                $insertCols = array_keys($describe);
                 foreach ($describe as $column) {
                     if ($column['PRIMARY'] === false) {
                         $fields[] = $column['COLUMN_NAME'];
@@ -1950,7 +1953,11 @@ class Pgsql extends AbstractPdoAdapter
                 }
             }
 
+            // MySQL reacts to each unique key. A select that gives no primary key can only hit a unique index.
             $primaryKeys = $this->_getPrimaryKeyColumns($table);
+            if ($primaryKeys === [] || array_diff($primaryKeys, $insertCols)) {
+                $primaryKeys = $this->_getConflictColumns($table, $insertCols, []) ?: $primaryKeys;
+            }
             if (!empty($primaryKeys)) {
                 $update = [];
                 foreach ($fields as $k => $v) {
