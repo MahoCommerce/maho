@@ -648,57 +648,19 @@ class Mysql extends AbstractPdoAdapter
      */
     protected function _splitMultiQuery($sql)
     {
-        $parts = preg_split(
-            '#(;|\'|"|\\\\|//|--|\n|/\*|\*/)#',
-            $sql,
-            -1,
-            PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE,
-        );
+        return \Maho\Db\Sql\StatementSplitter::split($sql, 'mysql', $this->getSessionSqlMode());
+    }
 
-        $q      = false;
-        $c      = false;
-        $stmts  = [];
-        $s      = '';
-
-        foreach ($parts as $i => $part) {
-            // strings
-            if (($part === "'" || $part === '"') && ($i === 0 || $parts[$i - 1] !== '\\')) {
-                if ($q === false) {
-                    $q = $part;
-                } elseif ($q === $part) {
-                    $q = false;
-                }
-            }
-
-            // single line comments
-            if (($part === '//' || $part === '--') && ($i === 0 || $parts[$i - 1] === "\n")) {
-                $c = $part;
-            } elseif ($part === "\n" && ($c === '//' || $c === '--')) {
-                $c = false;
-            }
-
-            // multi line comments
-            if ($part === '/*' && $c === false) {
-                $c = '/*';
-            } elseif ($part === '*/' && $c === '/*') {
-                $c = false;
-            }
-
-            // statements
-            if ($part === ';' && $q === false && $c === false) {
-                if (trim($s) !== '') {
-                    $stmts[] = trim($s);
-                    $s = '';
-                }
-            } else {
-                $s .= $part;
-            }
+    /**
+     * The sql_mode of the session, which decides how MySQL reads a backslash or a double quote.
+     */
+    public function getSessionSqlMode(): string
+    {
+        if ($this->_connection === null) {
+            // _connect() sets this mode when it opens the session.
+            return (string) ($this->_config['sql_mode'] ?? '');
         }
-        if (trim($s) !== '') {
-            $stmts[] = trim($s);
-        }
-
-        return $stmts;
+        return (string) $this->fetchOne('SELECT @@SESSION.sql_mode');
     }
 
     /**
