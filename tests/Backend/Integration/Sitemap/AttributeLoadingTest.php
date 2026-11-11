@@ -105,11 +105,17 @@ it('reads the attribute rows without fetchAll', function (string $class): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_read');
     $adapter = $this->createMock(Maho\Db\Adapter\AdapterInterface::class);
     foreach (new ReflectionClass(Maho\Db\Adapter\AdapterInterface::class)->getMethods() as $method) {
-        if ($method->getName() !== 'fetchAll') {
+        if (!in_array($method->getName(), ['fetchAll', 'query'], true)) {
             $adapter->method($method->getName())->willReturnCallback($connection->{$method->getName()}(...));
         }
     }
     $adapter->method('fetchAll')->willThrowException(new LogicException('fetchAll'));
+    $attributeId = (int) Mage::getSingleton('eav/config')->getAttribute('catalog_' . $class, 'name')->getId();
+    $statement = $this->createMock(Maho\Db\Statement\StatementInterface::class);
+    $statement->method('fetchAll')->willThrowException(new LogicException('fetchAll'));
+    $rows = [['entity_id' => 5, 'attribute_id' => $attributeId, 'value' => 'Name', 'store_id' => 0]];
+    $statement->expects($this->exactly(2))->method('fetch')->willReturnCallback(static fn() => array_shift($rows) ?? false);
+    $adapter->method('query')->willReturn($statement);
     $subclass = $class === 'product'
         ? new class ($adapter) extends Mage_Sitemap_Model_Resource_Catalog_Product {
             public function __construct(private Maho\Db\Adapter\AdapterInterface $adapter)
@@ -136,5 +142,5 @@ it('reads the attribute rows without fetchAll', function (string $class): void {
         }
     };
 
-    expect($subclass->loadAttributesForIds([2147483647], 0))->toBe([]);
+    expect($subclass->loadAttributesForIds([5], 0))->toBe([5 => ['name' => 'Name']]);
 })->with(['product', 'category']);
