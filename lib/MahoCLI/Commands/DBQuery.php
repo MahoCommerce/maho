@@ -64,7 +64,7 @@ class DBQuery extends BaseMahoCommand
                     $binary !== '' ? $binary : $engine,
                 ));
             }
-            return $this->executeViaAdapter($output, $query, $this->isClientBinaryAvailable($engine));
+            return $this->executeViaAdapter($output, $query, $engine, $this->isClientBinaryAvailable($engine));
         }
 
         return match ($engine) {
@@ -75,12 +75,30 @@ class DBQuery extends BaseMahoCommand
         };
     }
 
-    private function executeViaAdapter(OutputInterface $output, string $query, bool $clientAvailable): int
-    {
+    private function executeViaAdapter(
+        OutputInterface $output,
+        string $query,
+        string $engine,
+        bool $clientAvailable,
+    ): int {
+        if (!in_array($engine, \Maho\Db\Sql\StatementSplitter::ENGINES, true)) {
+            $this->writeError($output, "Unsupported database engine: {$engine}");
+            return Command::FAILURE;
+        }
+
+        // Write connection: it can both read and run DML, so a single path serves SELECT and
+        // INSERT/UPDATE/DELETE/DDL without choosing a connection per statement type.
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+        if (!$connection instanceof \Maho\Db\Adapter\AdapterInterface) {
+            $this->writeError($output, 'Unable to resolve the framework database connection.');
+            return Command::FAILURE;
+        }
+        $sqlMode = $connection instanceof \Maho\Db\Adapter\Pdo\Mysql ? $connection->getSessionSqlMode() : '';
+
         // query() runs a single statement, so trailing statements in a multi-statement string
         // would be silently dropped. Refuse them and point to a path that actually works here:
         // the native client only when its binary exists, otherwise one statement per call.
-        if ($this->containsMultipleStatements($query)) {
+        if ($this->containsMultipleStatements($query, $engine, $sqlMode)) {
             $hint = $clientAvailable
                 ? 'run them with --driver=client or db:connect.'
                 : 'run each statement in a separate db:query call '
@@ -90,14 +108,6 @@ class DBQuery extends BaseMahoCommand
                 'Multiple SQL statements are not supported on the framework connection; ' . $hint,
             );
             return Command::INVALID;
-        }
-
-        // Write connection: it can both read and run DML, so a single path serves SELECT and
-        // INSERT/UPDATE/DELETE/DDL without choosing a connection per statement type.
-        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
-        if (!$connection instanceof \Maho\Db\Adapter\AdapterInterface) {
-            $this->writeError($output, 'Unable to resolve the framework database connection.');
-            return Command::FAILURE;
         }
 
         try {
