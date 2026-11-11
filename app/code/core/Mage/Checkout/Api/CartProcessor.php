@@ -379,9 +379,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function setBillingAddressOnCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        // FILTER_VALIDATE_BOOLEAN also normalizes stringly-typed clients
-        // ("true"/"false"/"1"/"0"), which strict_types would otherwise 500 on
-        $sameAsShipping = filter_var($args['sameAsShipping'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $sameAsShipping = RequestInput::of($args)->bool('sameAsShipping') ?? false;
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $addressData = CartRequest::mapAddress($args);

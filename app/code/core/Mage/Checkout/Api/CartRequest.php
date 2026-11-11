@@ -60,34 +60,37 @@ final class CartRequest
      */
     public static function mapAddress(array $input): array
     {
-        $regionId = $input['regionId'] ?? null;
-        $regionText = $input['region'] ?? null;
-        $countryId = $input['countryId'] ?? '';
+        $fields = RequestInput::of($input);
+        $regionId = ($input['regionId'] ?? '') === '' ? null : $fields->int('regionId');
+        $regionText = $fields->string('region');
+        $countryId = $fields->string('countryId') ?? '';
 
         if (!$regionId && $regionText && $countryId !== '') {
-            $region = \Mage::getModel('directory/region')->loadByCodeOrName((string) $regionText, (string) $countryId);
+            $region = \Mage::getModel('directory/region')->loadByCodeOrName($regionText, $countryId);
             if ($region->getId()) {
                 $regionId = (int) $region->getId();
                 $regionText = $region->getName();
             }
         }
 
+        $street = is_string($input['street'] ?? null) ? [$input['street']] : ($fields->stringList('street') ?? []);
+
         return [
-            'prefix' => $input['prefix'] ?? null,
-            'firstname' => $input['firstName'] ?? '',
-            'middlename' => $input['middleName'] ?? null,
-            'lastname' => $input['lastName'] ?? '',
-            'suffix' => $input['suffix'] ?? null,
-            'company' => $input['company'] ?? null,
-            'street' => $input['street'] ?? [],
-            'city' => $input['city'] ?? '',
+            'prefix' => $fields->string('prefix'),
+            'firstname' => $fields->string('firstName') ?? '',
+            'middlename' => $fields->string('middleName'),
+            'lastname' => $fields->string('lastName') ?? '',
+            'suffix' => $fields->string('suffix'),
+            'company' => $fields->string('company'),
+            'street' => $street,
+            'city' => $fields->string('city') ?? '',
             'region' => $regionText,
             'region_id' => $regionId,
-            'postcode' => $input['postcode'] ?? '',
+            'postcode' => $fields->string('postcode') ?? '',
             'country_id' => $countryId,
-            'telephone' => $input['telephone'] ?? '',
-            'vat_id' => $input['vatId'] ?? null,
-            'save_in_address_book' => filter_var($input['saveInAddressBook'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            'telephone' => $fields->string('telephone') ?? '',
+            'vat_id' => $fields->string('vatId'),
+            'save_in_address_book' => $fields->bool('saveInAddressBook') ?? false,
         ];
     }
 
