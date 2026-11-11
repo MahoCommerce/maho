@@ -43,7 +43,6 @@ beforeEach(function (): void {
         public mixed $previous = null;
         public ?string $badPath = null;
         public bool $rejectBatchOnce = false;
-        public ?Closure $beforeBatchFailure = null;
         public int $batches = 0;
         public array $singlePaths = [];
         public Throwable $batchError;
@@ -74,9 +73,6 @@ beforeEach(function (): void {
                 throw $this->batchError;
             }
             if ($this->badPath !== null && in_array($this->badPath, $bind, true)) {
-                if (!$single && $this->beforeBatchFailure) {
-                    ($this->beforeBatchFailure)();
-                }
                 throw $single ? $this->rowError : $this->batchError;
             }
         }
