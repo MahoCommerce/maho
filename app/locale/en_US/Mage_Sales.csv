@@ -810,7 +810,6 @@
 "This order cannot be edited.","This order cannot be edited."
 "This order contains (%s) items and therefore cannot be edited through the admin interface at this time, if you wish to continue editing the (%s) items will be removed, the order will be canceled and a new order will be placed.","This order contains (%s) items and therefore cannot be edited through the admin interface at this time, if you wish to continue editing the (%s) items will be removed, the order will be canceled and a new order will be placed."
 "This order does not accept comments","This order does not accept comments"
-"This order no longer exists.","This order no longer exists."
 "This product does not have any configurable options","This product does not have any configurable options"
 "This will create an offline refund. To create an online refund, open an invoice and create credit memo for it. Do you wish to proceed?","This will create an offline refund. To create an online refund, open an invoice and create credit memo for it. Do you wish to proceed?"
 "Tier Pricing","Tier Pricing"
