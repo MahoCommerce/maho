@@ -58,6 +58,15 @@ SPDX-License-Identifier: AFL-3.0
         </browser>
     </global>
     <adminhtml>
+        <translate>
+            <modules>
+                <Maho_AccessibilityScan>
+                    <files>
+                        <default>Maho_AccessibilityScan.csv</default>
+                    </files>
+                </Maho_AccessibilityScan>
+            </modules>
+        </translate>
         <layout>
             <updates>
                 <accessibilityscan>
