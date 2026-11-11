@@ -23,15 +23,6 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Maho_ContentNegotiation_Model</class>
             </contentnegotiation>
         </models>
-        <translate>
-            <modules>
-                <Maho_ContentNegotiation>
-                    <files>
-                        <default>Maho_ContentNegotiation.csv</default>
-                    </files>
-                </Maho_ContentNegotiation>
-            </modules>
-        </translate>
         <contentnegotiation>
             <renderers>
                 <product>
@@ -80,4 +71,16 @@ blog/index/category</allowed_routes>
             </markdown>
         </crawlers>
     </default>
+
+    <frontend>
+        <translate>
+            <modules>
+                <Maho_ContentNegotiation>
+                    <files>
+                        <default>Maho_ContentNegotiation.csv</default>
+                    </files>
+                </Maho_ContentNegotiation>
+            </modules>
+        </translate>
+    </frontend>
 </config>
