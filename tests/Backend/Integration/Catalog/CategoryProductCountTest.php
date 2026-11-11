@@ -171,13 +171,13 @@ it('retains custom model and resource results and exceptions', function (string 
         ->and($item->getProductCount())->toBe($throws ? 123 : 0);
 })->with([['model', false], ['model', true], ['resource', false], ['resource', true]]);
 
-it('retains descendant loading for a custom collection', function (): void {
+it('skips descendant loading for core categories in a custom collection', function (): void {
     $collection = new class extends Mage_Catalog_Model_Resource_Category_Collection {};
     $collection->setProductStoreId(0);
     $queries = categoryCountQueries(fn() => $collection->loadProductCount($this->items));
     expect(array_map(static fn($item): int => (int) $item->getProductCount(), $this->items))
         ->toBe([2, 2, 1, 0])
-        ->and($queries)->toBe(7);
+        ->and($queries)->toBe(4);
 });
 
 it('retains the descendant check for an anchor without an ID', function (mixed $id): void {

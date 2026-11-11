@@ -100,3 +100,41 @@ it('preserves sitemap attribute fallback and ordered entity keys', function (str
     'category store fallback' => ['category', false],
     'category default store' => ['category', true],
 ]);
+
+it('reads the attribute rows without fetchAll', function (string $class): void {
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_read');
+    $adapter = $this->createMock(Maho\Db\Adapter\AdapterInterface::class);
+    foreach (new ReflectionClass(Maho\Db\Adapter\AdapterInterface::class)->getMethods() as $method) {
+        if ($method->getName() !== 'fetchAll') {
+            $adapter->method($method->getName())->willReturnCallback($connection->{$method->getName()}(...));
+        }
+    }
+    $adapter->method('fetchAll')->willThrowException(new LogicException('fetchAll'));
+    $subclass = $class === 'product'
+        ? new class ($adapter) extends Mage_Sitemap_Model_Resource_Catalog_Product {
+            public function __construct(private Maho\Db\Adapter\AdapterInterface $adapter)
+            {
+                parent::__construct();
+            }
+
+            #[\Override]
+            protected function _getReadAdapter()
+            {
+                return $this->adapter;
+            }
+        }
+    : new class ($adapter) extends Mage_Sitemap_Model_Resource_Catalog_Category {
+        public function __construct(private Maho\Db\Adapter\AdapterInterface $adapter)
+        {
+            parent::__construct();
+        }
+
+        #[\Override]
+        protected function _getReadAdapter()
+        {
+            return $this->adapter;
+        }
+    };
+
+    expect($subclass->loadAttributesForIds([2147483647], 0))->toBe([]);
+})->with(['product', 'category']);

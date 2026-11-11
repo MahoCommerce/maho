@@ -169,7 +169,11 @@ class Maho_MediaCleaner_Model_Scanner
         $table = $resource->getTableName('mediacleaner/image');
 
         $db->delete($table, ['type = ?' => $type]);
-        // Bound both the UNION terms and the bind parameters for every supported database.
+        // 100 paths in a batch keep the UNION terms and the bind parameters low enough for every database.
+        $term = $db->select()->columns([
+            'type' => new Maho\Db\Expr('?'),
+            'path' => new Maho\Db\Expr('?'),
+        ])->assemble();
         $unusedCount = count($unusedImages);
         for ($offset = 0; $offset < $unusedCount; $offset += 100) {
             $paths = array_slice($unusedImages, $offset, 100);
@@ -178,13 +182,9 @@ class Maho_MediaCleaner_Model_Scanner
                 continue;
             }
 
-            $selects = [];
+            $selects = array_fill(0, count($paths), $term);
             $bind = [];
             foreach ($paths as $path) {
-                $selects[] = $db->select()->columns([
-                    'type' => new Maho\Db\Expr('?'),
-                    'path' => new Maho\Db\Expr('?'),
-                ])->assemble();
                 $bind[] = $type;
                 $bind[] = $path;
             }
@@ -205,14 +205,7 @@ class Maho_MediaCleaner_Model_Scanner
                 if (!$canRetry) {
                     throw $exception;
                 }
-                $connection = $db->getConnection();
-                $native = $connection->getNativeConnection();
-                if ($db->getTransactionLevel() !== 0 || $connection->isTransactionActive()
-                    || !($native instanceof PDO) || $native->inTransaction()
-                ) {
-                    throw $exception;
-                }
-                // Recover the old valid prefix, stopping at the first rejected path.
+                // Insert the paths one by one. The paths before the first rejected path stay in the table.
                 foreach ($paths as $path) {
                     $db->insertIgnore($table, ['type' => $type, 'path' => $path]);
                 }
