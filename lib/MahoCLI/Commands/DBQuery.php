@@ -221,31 +221,12 @@ class DBQuery extends BaseMahoCommand
         $descriptorspec = [
             0 => STDIN,
             1 => STDOUT,
-            2 => ['pipe', 'w'],
+            2 => STDERR,
         ];
 
         $process = proc_open($command, $descriptorspec, $pipes);
         if (is_resource($process)) {
-            stream_set_blocking($pipes[2], false);
-
-            while (true) {
-                $status = proc_get_status($process);
-                if (!$status['running']) {
-                    break;
-                }
-                usleep(100000);
-            }
-
-            $stderr = stream_get_contents($pipes[2]);
-            fclose($pipes[2]);
-
-            $exitCode = proc_close($process);
-
-            if ($exitCode !== 0 && $stderr) {
-                fwrite(STDERR, $stderr);
-            }
-
-            return $exitCode === 0 ? Command::SUCCESS : Command::FAILURE;
+            return proc_close($process) === 0 ? Command::SUCCESS : Command::FAILURE;
         }
 
         return Command::FAILURE;
