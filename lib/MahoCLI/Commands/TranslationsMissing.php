@@ -22,7 +22,7 @@ use Symfony\Component\Console\Helper\Table;
 )]
 class TranslationsMissing extends BaseMahoCommand
 {
-    private bool $scanIncomplete = false;
+    use TranslationScanTrait;
 
     public function __invoke(
         #[Argument(description: 'Specify which language pack to check in app/locale, default is en_US')]
@@ -71,22 +71,7 @@ class TranslationsMissing extends BaseMahoCommand
         }
 
         if (count($files) === 0) {
-            foreach ([
-                // Grep for all files that might call the __ function
-                "grep -Frl --exclude-dir='.git' --include=*.php --include=*.phtml '__' .",
-                // Grep for all XML files that might use the translate attribute
-                "grep -Frl --exclude-dir='.git' --include=*.xml 'translate=' .",
-            ] as $search) {
-                $matches = [];
-                $status = 0;
-                $result = exec($search, $matches, $status);
-                // Grep returns 1 for a complete search without matches.
-                if ($result === false || ($status !== 0 && $status !== 1)) {
-                    $this->scanIncomplete = true;
-                    fwrite(STDERR, "WARNING: Translation source discovery failed (exit $status): $search\n");
-                }
-                $files = array_merge($files, $matches);
-            }
+            $files = $this->searchSourceFiles();
         }
 
         return array_filter(array_map(trim(...), $files));
@@ -156,19 +141,9 @@ class TranslationsMissing extends BaseMahoCommand
                     $matches = array_merge($matches, str_replace("\'", "'", $_matches[1]));
                 }
             } elseif ($ext === 'xml') {
-                $previousErrorMode = libxml_use_internal_errors(true);
-                libxml_clear_errors();
-                try {
-                    $xml = new \SimpleXMLElement($contents);
-                } catch (\Throwable $e) {
-                    $this->scanIncomplete = true;
-                    $parseErrors = libxml_get_errors();
-                    $detail = $parseErrors[0]->message ?? $e->getMessage();
-                    fwrite(STDERR, "WARNING: Skipping malformed translation XML $file: " . trim($detail) . "\n");
+                $xml = $this->parseSourceXml($contents, $file);
+                if ($xml === null) {
                     continue;
-                } finally {
-                    libxml_clear_errors();
-                    libxml_use_internal_errors($previousErrorMode);
                 }
                 // Get all nodes with translate="" attribute
                 $nodes = $xml->xpath('//*[@translate]');
