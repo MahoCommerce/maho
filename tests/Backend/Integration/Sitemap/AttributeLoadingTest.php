@@ -114,7 +114,7 @@ it('reads the attribute rows without fetchAll', function (string $class): void {
     $statement = $this->createMock(Maho\Db\Statement\StatementInterface::class);
     $statement->method('fetchAll')->willThrowException(new LogicException('fetchAll'));
     $rows = [['entity_id' => 5, 'attribute_id' => $attributeId, 'value' => 'Name', 'store_id' => 0]];
-    $statement->expects($this->exactly(2))->method('fetch')->willReturnCallback(static fn() => array_shift($rows) ?? false);
+    $statement->expects($this->exactly(2))->method('fetch')->willReturn($rows[0], false);
     $adapter->method('query')->willReturn($statement);
     $subclass = $class === 'product'
         ? new class ($adapter) extends Mage_Sitemap_Model_Resource_Catalog_Product {
