@@ -521,6 +521,19 @@ describe('Mage_Core_Controller_Response_Http', function () {
                 ->and($html)->not->toContain('<head><script>');
         });
 
+        it('returns the page unchanged when the script match fails', function () {
+            $limit = ini_get('pcre.backtrack_limit');
+            ini_set('pcre.backtrack_limit', '1');
+            try {
+                $input = '<html><body><script>var a = 1;</script></body></html>';
+                $html = ($this->defer)($input);
+            } finally {
+                ini_set('pcre.backtrack_limit', $limit);
+            }
+
+            expect($html)->toBe($input);
+        });
+
         it('keeps a script body that holds other tags and a closing tag in a string', function () {
             $body = 'var a = "<b>x</b>"; if (1 < 2) { var s = "<\/script>"; }';
             $html = ($this->defer)('<html><body><script-x>q</script-x><script>' . $body . '</script></body></html>');

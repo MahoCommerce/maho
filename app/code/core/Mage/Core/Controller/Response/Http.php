@@ -851,7 +851,6 @@ class Mage_Core_Controller_Response_Http implements \Stringable
                         return '';
                     }
 
-                    // Remove existing type attribute more efficiently
                     $attrs = preg_replace('/\stype\s*=\s*["\']?[^"\'>\s]+["\']?/i', '', $matches[1]);
 
                     $scripts[] = '<script type="text/plain" data-maho-script="' . $scriptIndex++ . '"' . $attrs . '>' . $matches[2] . '</script>';
@@ -867,7 +866,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
         );
 
         if ($deferred === null) {
-            Mage::log('JavaScript deferral skipped, the page is sent unchanged: ' . preg_last_error_msg(), Mage::LOG_WARNING);
+            Mage::log('Maho did not defer JavaScript on this page because the script regex failed: ' . preg_last_error_msg(), Mage::LOG_WARNING);
             return $html;
         }
 
