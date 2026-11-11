@@ -506,10 +506,10 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Add welcome message and send new account email.
-     * Returns success URL
+     * Add the welcome message and return the success URL. Mage_Customer_Service_Customer sends the welcome email:
+     * register() for a new account and confirm() for a confirmed account.
      *
-     * @param bool $isJustConfirmed
+     * @param bool $isJustConfirmed not used
      * @return string
      * @throws Mage_Core_Model_Store_Exception
      * @throws Mage_Core_Exception
@@ -532,11 +532,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 $userPrompt,
                 new \Maho\Message\Link($this->__('click here'), $this->_getUrl('customer/address/edit')),
             );
-        }
-
-        // Mage_Customer_Service_Customer::register() sends the welcome email of a new account
-        if ($isJustConfirmed) {
-            $customer->sendNewAccountEmail('confirmed', '', Mage::app()->getStore()->getId());
         }
 
         $successUrl = $this->_getUrl('*/*/index', ['_secure' => true]);
@@ -596,30 +591,24 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/customer/account/confirmation', name: 'customer.account.confirmation')]
     public function confirmationAction(): void
     {
-        $customer = Mage::getModel('customer/customer');
         if ($this->_getSession()->isLoggedIn()) {
             $this->_redirect('*/*/');
             return;
         }
 
-        // try to confirm by email
-        $email = $this->getRequest()->getPost('email');
-        if ($email) {
+        $email = (string) $this->getRequest()->getPost('email');
+        if ($email !== '') {
             try {
-                $customer->setWebsiteId(Mage::app()->getStore()->getWebsiteId())->loadByEmail($email);
-                if (!$customer->getId()) {
-                    throw new Exception('');
-                }
-                if ($customer->getConfirmation()) {
-                    $customer->sendNewAccountEmail('confirmation', '', Mage::app()->getStore()->getId());
-                    $this->_getSession()->addSuccess($this->__('Please, check your email for confirmation key.'));
-                } else {
-                    $this->_getSession()->addSuccess($this->__('This email does not require confirmation.'));
-                }
+                $this->getService()->sendConfirmationLink($email, (int) Mage::app()->getStore()->getWebsiteId());
+                // The same answer for each address, so that it does not show which addresses have an account
+                $this->_getSession()->addSuccess($this->__(
+                    'If an account with %s waits for a confirmation, you will receive an email with the confirmation link.',
+                    $email,
+                ));
                 $this->_getSession()->setUsername($email);
                 $this->_redirectSuccess($this->_getUrl('*/*/index', ['_secure' => true]));
-            } catch (Exception $e) {
-                $this->_getSession()->addException($e, $this->__('Wrong email.'));
+            } catch (Mage_Core_Exception $e) {
+                $this->_getSession()->addError($e->getMessage());
                 $this->_redirectError($this->_getUrl('*/*/*', ['email' => $email, '_secure' => true]));
             }
             return;
@@ -942,7 +931,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 
         try {
             if ($errors === []) {
-                $this->getService()->updateAccount($customer, (string) $this->getRequest()->getPost('current_password'));
+                $this->getService()->updateAccount($customer, (string) $this->getRequest()->getPost('current_password'), requirePassword: true);
                 $session->setCustomer($customer)->addSuccess($this->__('The account information has been saved.'));
                 $this->_redirect('customer/account');
                 return;
@@ -988,37 +977,23 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/customer/account/twofaPost', name: 'customer.account.twofaPost', methods: ['POST'])]
     public function twofaPostAction(): void
     {
-        if (!Mage::getStoreConfigFlag('customer/password/allow_2fa')) {
-            $this->norouteAction();
-            return;
-        }
-
         $session = $this->_getSession();
         $customer = $session->getCustomer();
 
         try {
-            // Dedicated confirmation step: re-verify the current password
-            if (!$customer->validatePassword((string) $this->getRequest()->getPost('current_password'))) {
-                Mage::throwException($this->__('Invalid current password'));
-            }
-
-            $action = $this->getRequest()->getPost('action');
-            if ($action === 'disable') {
-                if (Mage::getStoreConfigFlag('customer/password/require_2fa')) {
-                    Mage::throwException($this->__('Two-factor authentication is required and cannot be disabled.'));
-                }
-                $customer->setTwofaEnabled(false)
-                    ->setTwofaSecret(null)
-                    ->save();
-                $session->addSuccess($this->__('Two-factor authentication has been disabled.'));
-            } else {
-                $code = (string) $this->getRequest()->getPost('twofa_verification_code');
-                if (!Mage::helper('core/security')->verifyTotpCode($customer->getTwofaSecret() ?? '', $code)) {
-                    Mage::throwException($this->__('Invalid 2FA verification code'));
-                }
-                $customer->setTwofaEnabled()->save();
-                $session->addSuccess($this->__('Two-factor authentication has been enabled.'));
-            }
+            $enable = $this->getRequest()->getPost('action') !== 'disable';
+            $this->getService()->setSecondFactor(
+                $customer,
+                (string) $this->getRequest()->getPost('current_password'),
+                $enable,
+                (string) $this->getRequest()->getPost('twofa_verification_code'),
+            );
+            $session->addSuccess($enable
+                ? $this->__('Two-factor authentication has been enabled.')
+                : $this->__('Two-factor authentication has been disabled.'));
+        } catch (Mage_Core_Exception_NoSuchEntity) {
+            $this->norouteAction();
+            return;
         } catch (Mage_Core_Exception $e) {
             $session->addError($e->getMessage());
         } catch (Exception $e) {

@@ -19,7 +19,7 @@ use Maho\ApiPlatform\Service\StoreContext;
  * Address State Processor - Handles address mutations.
  *
  * SECURITY: Customers can only modify their own addresses.
- * Admins can modify any customer's addresses.
+ * An admin token or a service token can modify the addresses of a customer of a website in its allowlist.
  */
 final class AddressProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -42,12 +42,13 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
             }
             $address = $service->getById($addressId);
             $customerId = (int) $address->getCustomerId();
-            $this->assertCustomerAccess($customerId);
+            $customer = $this->getCustomerService()->requireById($customerId);
+            $this->assertCustomerReachable($customer);
             if ($operationName === 'delete') {
                 $service->delete($address);
                 return null;
             }
-            $dto = Address::fromCustomerAddress($address, $this->getCustomerService()->requireById($customerId));
+            $dto = Address::fromCustomerAddress($address, $customer);
             return $this->save($this->fromGraphQlArgs($dto, $args), $customerId, $address);
         }
 
@@ -59,7 +60,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
             $address !== null => (int) $address->getCustomerId(),
             default => $this->requireCustomerId(),
         };
-        $this->assertCustomerAccess($customerId);
+        $this->assertCustomerReachable($this->getCustomerService()->requireById($customerId));
         if ($address !== null) {
             $address = $service->getByCustomer($addressId, $customerId);
         }

@@ -71,6 +71,7 @@
 "If %s %s %s for a subselection of items in cart matching %s of these conditions:","If %s %s %s for a subselection of items in cart matching %s of these conditions:"
 "If an item is %s in the cart with %s of these conditions true:","If an item is %s in the cart with %s of these conditions true:"
 "If empty no separation.","If empty no separation."
+"Leave empty to use the default of the configuration.","Leave empty to use the default of the configuration."
 "If you select and save the rule you will be able to generate multiple coupon codes.","If you select and save the rule you will be able to generate multiple coupon codes."
 "Inactive","Inactive"
 "is assigned","is assigned"

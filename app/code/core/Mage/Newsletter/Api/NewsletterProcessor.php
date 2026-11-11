@@ -53,19 +53,22 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
 
         $service = \Mage::getService('newsletter/subscriber');
         $customerId = $this->getAuthenticatedCustomerId();
-        // A customer subscribes the address of the account only, so that a token cannot subscribe the address of somebody else
         $email = (string) ($data->email ?: ($input['email'] ?? ''));
         $captchaToken = $data->captchaToken ?? (isset($input['captchaToken']) ? (string) $input['captchaToken'] : null);
-        $subscriber = $customerId === null
-            ? $service->subscribe($email, $storeId, null, $this->getGuestChannel(), $captchaToken)
-            : $service->subscribeCustomer($customerId, $storeId, \Mage_Newsletter_Model_Channel::Api, $captchaToken);
+        // A customer token that sends no email asks for the address of the account
+        $subscriber = match (true) {
+            $customerId === null => $service->subscribe($email, $storeId, null, $this->getGuestChannel(), $captchaToken),
+            $email === '' => $service->subscribeCustomer($customerId, $storeId, \Mage_Newsletter_Model_Channel::Api, $captchaToken),
+            default => $service->subscribe($email, $storeId, $customerId, \Mage_Newsletter_Model_Channel::Api, $captchaToken),
+        };
         $confirmationPending = $service->isConfirmationPending($subscriber, $customerId, $storeId);
         $message = $confirmationPending
             ? 'A confirmation email has been sent. Please check your inbox.'
             : 'You have been successfully subscribed to the newsletter.';
 
-        // A guest gets no data of the subscriber, so that the answer does not show whether the address has an account
-        if ($customerId === null) {
+        // Only the customer of the address gets the data of the subscriber, so that the answer does not show whether
+        // an address of somebody else has an account or a subscription
+        if (!$service->isAccountAddress((string) $subscriber->getSubscriberEmail(), $storeId, $customerId)) {
             $dto = new NewsletterSubscription();
             $dto->email = $email;
             $dto->message = $message;

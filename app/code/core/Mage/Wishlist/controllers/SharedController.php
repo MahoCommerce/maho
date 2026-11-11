@@ -18,13 +18,10 @@ class Mage_Wishlist_SharedController extends Mage_Wishlist_Controller_Abstract
     #[\Override]
     protected function _getWishlist()
     {
-        $code     = (string) $this->getRequest()->getParam('code');
-        if (empty($code)) {
-            return false;
-        }
-
-        $wishlist = Mage::getModel('wishlist/wishlist')->loadByCode($code);
-        if (!$wishlist->getId()) {
+        $code = (string) $this->getRequest()->getParam('code');
+        try {
+            $wishlist = Mage::getService('wishlist/wishlist')->getByCode($code, (int) Mage::app()->getStore()->getId());
+        } catch (Mage_Core_Exception_NoSuchEntity) {
             return false;
         }
 
@@ -40,9 +37,13 @@ class Mage_Wishlist_SharedController extends Mage_Wishlist_Controller_Abstract
     public function indexAction(): void
     {
         $wishlist   = $this->_getWishlist();
+        if (!$wishlist) {
+            $this->norouteAction();
+            return;
+        }
         $customerId = Mage::getSingleton('customer/session')->getCustomerId();
 
-        if ($wishlist && $wishlist->getCustomerId() && $wishlist->getCustomerId() == $customerId) {
+        if ($wishlist->getCustomerId() && $wishlist->getCustomerId() == $customerId) {
             $this->_redirectUrl(Mage::helper('wishlist')->getListUrl($wishlist->getId()));
             return;
         }
@@ -79,8 +80,8 @@ class Mage_Wishlist_SharedController extends Mage_Wishlist_Controller_Abstract
         $redirectUrl = Mage::getUrl('*/*/index', ['code' => $code]);
 
         $service = Mage::getService('wishlist/wishlist');
-        $wishlist = Mage::getModel('wishlist/wishlist')->loadByCode($code);
         try {
+            $wishlist = $service->getByCode((string) $code, (int) Mage::app()->getStore()->getId());
             $item = $service->getItem($wishlist, $itemId);
         } catch (Mage_Core_Exception_NoSuchEntity) {
             return $this->_redirectUrl($redirectUrl);

@@ -30,65 +30,35 @@ class Mage_ProductAlert_AddController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/productalert/add/price', name: 'productalert.add.price', methods: ['POST'])]
     public function priceAction(): void
     {
-        $session = Mage::getSingleton('catalog/session');
-        $backUrl    = $this->getRequest()->getParam(Mage_Core_Controller_Front_Action::PARAM_NAME_URL_ENCODED);
-        $productId  = (int) $this->getRequest()->getParam('product_id');
-        if (!$backUrl || !$productId) {
-            $this->_redirect('/');
-            return ;
-        }
-
-        $product = Mage::getModel('catalog/product')->load($productId);
-        if (!$product->getId()) {
-            /** @var Mage_Catalog_Model_Product $product */
-            $session->addError($this->__('Not enough parameters.'));
-            if ($this->_isUrlInternal($backUrl)) {
-                $this->_redirectUrl($backUrl);
-            } else {
-                $this->_redirect('/');
-            }
-            return ;
-        }
-
-        try {
-            $model  = Mage::getModel('productalert/price')
-                ->setCustomerId(Mage::getSingleton('customer/session')->getId())
-                ->setProductId($product->getId())
-                ->setPrice($product->getFinalPrice())
-                ->setWebsiteId(Mage::app()->getStore()->getWebsiteId());
-            $model->save();
-            $session->addSuccess($this->__('The alert subscription has been saved.'));
-        } catch (Exception $e) {
-            $session->addException($e, $this->__('Unable to update the alert subscription.'));
-        }
-        $this->_redirectReferer();
+        $this->subscribe(Mage_ProductAlert_Model_Type::Price, $this->__('The alert subscription has been saved.'));
     }
 
     #[Maho\Config\Route('/productalert/add/stock', name: 'productalert.add.stock', methods: ['POST'])]
     public function stockAction(): void
     {
+        $this->subscribe(Mage_ProductAlert_Model_Type::Stock, $this->__('Alert subscription has been saved.'));
+    }
+
+    private function subscribe(Mage_ProductAlert_Model_Type $type, string $success): void
+    {
         $session = Mage::getSingleton('catalog/session');
-        /** @var Mage_Catalog_Model_Session $session */
         $backUrl    = $this->getRequest()->getParam(Mage_Core_Controller_Front_Action::PARAM_NAME_URL_ENCODED);
         $productId  = (int) $this->getRequest()->getParam('product_id');
         if (!$backUrl || !$productId) {
             $this->_redirect('/');
-            return ;
-        }
-
-        if (!$product = Mage::getModel('catalog/product')->load($productId)) {
-            $session->addError($this->__('Not enough parameters.'));
-            $this->_redirectUrl($backUrl);
-            return ;
+            return;
         }
 
         try {
-            $model = Mage::getModel('productalert/stock')
-                ->setCustomerId(Mage::getSingleton('customer/session')->getId())
-                ->setProductId($product->getId())
-                ->setWebsiteId(Mage::app()->getStore()->getWebsiteId());
-            $model->save();
-            $session->addSuccess($this->__('Alert subscription has been saved.'));
+            Mage::getService('productalert/alert')->subscribe(
+                $type,
+                (int) Mage::getSingleton('customer/session')->getCustomerId(),
+                $productId,
+                (int) Mage::app()->getStore()->getId(),
+            );
+            $session->addSuccess($success);
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
         } catch (Exception $e) {
             $session->addException($e, $this->__('Unable to update the alert subscription.'));
         }

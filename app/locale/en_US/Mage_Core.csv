@@ -92,6 +92,7 @@
 "Corner radius of buttons, inputs and selects. 999px gives pill controls, and anything taller than a field is capped so it does not become a capsule.","Corner radius of buttons, inputs and selects. 999px gives pill controls, and anything taller than a field is capped so it does not become a capsule."
 "Corner radius of cards, dropdowns and dialogs.","Corner radius of cards, dropdowns and dialogs."
 "Corner radius of swatches and badges.","Corner radius of swatches and badges."
+"Could not add the test email to the queue. Please check the error logs.","Could not add the test email to the queue. Please check the error logs."
 "Could not open a connection for ""%s"".","Could not open a connection for ""%s""."
 "Could not write sanitized SVG file.","Could not write sanitized SVG file."
 "Countries Options","Countries Options"

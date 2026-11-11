@@ -194,9 +194,13 @@ class Mage_CatalogInventory_Service_Stock
      * @param array<string, mixed> $data the columns of the change
      * @return list<int> the products whose stock changed
      * @throws Mage_Core_Exception_Input
+     * @throws Mage_Core_Exception when a product has no SKU
      */
     public function updateProducts(array $productIds, array $data): array
     {
+        /** @var Mage_Catalog_Service_Product $products */
+        $products = Mage::getService('catalog/product');
+        $products->assertHaveSku($productIds);
         $data = $this->prepare($data);
         $columns = [...array_keys($data), ...array_values(array_intersect_key(self::USE_CONFIG_FLAGS, $data))];
         $changed = [];

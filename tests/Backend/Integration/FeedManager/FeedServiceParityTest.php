@@ -226,3 +226,19 @@ it('gives the manual upload the same checks and the same log record as the gener
         ->and($log->getUploadStatus())->toBe(Maho_FeedManager_Model_Log::UPLOAD_STATUS_FAILED)
         ->and($log->getUploadMessage())->toBe('Destination is disabled');
 });
+
+it('refuses a generation in one run and in batches while the Enable Module switch is off', function (): void {
+    $feed = ($this->createFeed)();
+    /** @var Maho_FeedManager_Service_Feed $service */
+    $service = Mage::getService('feedmanager/feed');
+    Mage::app()->getStore()->setConfig('feedmanager/general/enabled', '0');
+
+    try {
+        expect(fn() => $service->generate($feed))->toThrow(Mage_Core_Exception_Conflict::class)
+            ->and(fn() => $service->startBatch($feed))->toThrow(Mage_Core_Exception_Conflict::class)
+            ->and(fn() => $service->startBatch($feed, true))->toThrow(Mage_Core_Exception_Conflict::class)
+            ->and(Mage::getResourceModel('feedmanager/log_collection')->addFieldToFilter('feed_id', (int) $feed->getId())->getSize())->toBe(0);
+    } finally {
+        Mage::app()->getStore()->setConfig('feedmanager/general/enabled', '1');
+    }
+});

@@ -67,22 +67,68 @@ class Mage_Cms_Service_Media
         $result = $helper->getStorage()->uploadFile($directory, 'image', $field);
         $uploadedPath = $result['path'] . '/' . $result['file'];
 
+        $baseName = $filename
+            ? $this->getBaseName($filename)
+            : pathinfo($result['file'], PATHINFO_FILENAME);
+
+        return $this->writeImage($result['path'], $mount->read($uploadedPath), $baseName, $uploadedPath);
+    }
+
+    /**
+     * Save the image in $bytes in the folder $folder, with the checks and in the image type of an upload.
+     * $name is the name of the new file without its extension. A number follows a name that another file has.
+     *
+     * @return array{path: string, file: string, size: int, width: int, height: int}
+     * @throws Mage_Core_Exception_Input
+     * @throws Mage_Core_Exception when $bytes is not an image
+     */
+    public function saveImage(string $folder, string $bytes, string $name): array
+    {
+        $directory = $this->getFolder($folder);
+
+        // The image validator reads and writes a file
+        $tempFile = tempnam(sys_get_temp_dir(), 'cms_media_');
+        if ($tempFile === false) {
+            throw new RuntimeException('Cannot create a temporary file for the image.');
+        }
+        try {
+            file_put_contents($tempFile, $bytes);
+            Mage::getModel('core/file_validator_image')->validate($tempFile);
+            $bytes = (string) file_get_contents($tempFile);
+        } finally {
+            @unlink($tempFile);
+        }
+
+        return $this->writeImage($directory, $bytes, $this->getBaseName($name));
+    }
+
+    private function getBaseName(string $name): string
+    {
+        return pathinfo(Mage_Core_Model_File_Uploader::getCorrectFileName($name . '.x'), PATHINFO_FILENAME);
+    }
+
+    /**
+     * Write $bytes as $baseName in the folder $directory, in the image type and the quality of the configuration.
+     * $replacePath is the file that held $bytes: the new file can take its name, and it is deleted.
+     *
+     * @return array{path: string, file: string, size: int, width: int, height: int}
+     */
+    private function writeImage(string $directory, string $bytes, string $baseName, ?string $replacePath = null): array
+    {
+        $mount = Mage::helper('cms/wysiwyg_images')->getMount();
         $targetType = Mage::getStoreConfigAsInt('system/media_storage_configuration/image_file_type') ?: IMAGETYPE_WEBP;
         $extension = image_type_to_extension($targetType, false);
-        $baseName = $filename
-            ? pathinfo(Mage_Core_Model_File_Uploader::getCorrectFileName($filename . '.' . $extension), PATHINFO_FILENAME)
-            : pathinfo($result['file'], PATHINFO_FILENAME);
         $targetFile = $baseName . '.' . $extension;
-        for ($counter = 1; $result['path'] . '/' . $targetFile !== $uploadedPath && $mount->fileExists($result['path'] . '/' . $targetFile); $counter++) {
+        for ($counter = 1; $directory . '/' . $targetFile !== $replacePath && $mount->fileExists($directory . '/' . $targetFile); $counter++) {
             $targetFile = $baseName . '_' . $counter . '.' . $extension;
         }
-        $targetPath = $result['path'] . '/' . $targetFile;
+        $targetPath = $directory . '/' . $targetFile;
 
-        $image = \Maho::getImageManager()->decodeBinary($mount->read($uploadedPath));
+        $image = \Maho::getImageManager()->decodeBinary($bytes);
         $encoded = (string) $image->encodeUsingPath($targetPath, quality: Mage::getStoreConfigAsInt('system/media_storage_configuration/image_quality'));
         $mount->write($targetPath, $encoded);
-        if ($uploadedPath !== $targetPath) {
-            $mount->delete($uploadedPath);
+        if ($replacePath !== null && $replacePath !== $targetPath) {
+            $mount->delete($replacePath);
         }
 
         return ['path' => $targetPath, 'file' => $targetFile, 'size' => strlen($encoded), 'width' => $image->width(), 'height' => $image->height()];

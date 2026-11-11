@@ -74,6 +74,35 @@ class Mage_Core_Service_Email_Template
         string $recipient,
     ): void {
         $helper = Mage::helper('core');
+        if (!$this->sendTemplate($this->newTestTemplate($recipient), $recipient)) {
+            throw new Mage_Core_Exception($helper->__('Failed to send test email. Please check your email configuration and error logs.'));
+        }
+    }
+
+    /**
+     * Put the test email of sendTest() for $recipient in the email queue, with the same checks. A queue worker sends it.
+     *
+     * @throws Mage_Core_Exception_Input when $recipient is not a valid email address
+     * @throws Mage_Core_Exception when the store has no mail transport, or the queue does not take the email
+     */
+    public function queueTest(
+        #[\SensitiveParameter]
+        string $recipient,
+    ): void {
+        if (!$this->queueTemplate($this->newTestTemplate($recipient), $recipient)) {
+            throw new Mage_Core_Exception(Mage::helper('core')->__('Could not add the test email to the queue. Please check the error logs.'));
+        }
+    }
+
+    /**
+     * @throws Mage_Core_Exception_Input when $recipient is not a valid email address
+     * @throws Mage_Core_Exception when the store has no mail transport
+     */
+    private function newTestTemplate(
+        #[\SensitiveParameter]
+        string $recipient,
+    ): Mage_Core_Model_Email_Template {
+        $helper = Mage::helper('core');
         if (!$helper->isValidNotBlank($recipient) || !$helper->isValidEmail($recipient)) {
             throw new Mage_Core_Exception_Input()->addError('recipient', $helper->__('Invalid email address.'));
         }
@@ -83,14 +112,22 @@ class Mage_Core_Service_Email_Template
 
         /** @var Mage_Core_Model_Email_Template $template */
         $template = Mage::getModel('core/email_template');
-        $template->setSenderName(Mage::getStoreConfig('trans_email/ident_general/name'))
+        return $template->setSenderName(Mage::getStoreConfig('trans_email/ident_general/name'))
             ->setSenderEmail(Mage::getStoreConfig('trans_email/ident_general/email'))
             ->setTemplateType(Mage_Core_Model_Template::TYPE_TEXT)
             ->setTemplateText($helper->__('This is a test email from Maho.'))
             ->setTemplateSubject($helper->__('Maho Test Email'));
-        if (!$this->sendTemplate($template, $recipient)) {
-            throw new Mage_Core_Exception($helper->__('Failed to send test email. Please check your email configuration and error logs.'));
-        }
+    }
+
+    /**
+     * Give $template for $recipient to the email queue, and return whether the queue took it.
+     */
+    protected function queueTemplate(
+        Mage_Core_Model_Email_Template $template,
+        #[\SensitiveParameter]
+        string $recipient,
+    ): bool {
+        return $template->setQueue(Mage::getModel('core/email_queue'))->send($recipient);
     }
 
     /**

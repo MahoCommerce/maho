@@ -68,6 +68,9 @@ async function generateCouponCodes(idPrefix, generateUrl, grid) {
         const el = document.getElementById(extra);
         formData.append(el.name, el.value);
     }
+    if (document.getElementById('rule_use_auto_generation')?.checked) {
+        formData.append('use_auto_generation', '1');
+    }
 
     clearMessagesDiv();
 

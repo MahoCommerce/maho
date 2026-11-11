@@ -61,13 +61,18 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
             $args = $context['args']['input'] ?? [];
             return $this->moveToCart(
                 (int) $args['itemId'],
-                (int) ($args['qty'] ?? 1),
+                isset($args['qty']) ? (float) $args['qty'] : null,
             );
         }
 
         if ($operationName === 'sync') {
             $args = $context['args']['input'] ?? [];
             return $this->syncWishlist($args['productIds'] ?? []);
+        }
+
+        if ($operationName === 'share') {
+            $args = $context['args']['input'] ?? [];
+            return $this->shareWishlist($args['emails'] ?? [], (string) ($args['message'] ?? ''));
         }
 
         // REST operations
@@ -79,7 +84,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         if ($operationName === 'move_to_cart') {
             $itemId = (int) ($uriVariables['id'] ?? 0);
             $body = $context['request']?->toArray() ?? [];
-            $qty = (int) ($body['qty'] ?? $data->qty);
+            $qty = isset($body['qty']) ? (float) $body['qty'] : null;
             // JSON numbers arrive as int; moveToCart types $cartId as ?string.
             $cartId = isset($body['cartId']) ? (string) $body['cartId'] : null;
             return $this->moveToCart($itemId, $qty, $cartId);
@@ -88,6 +93,14 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         if ($operationName === 'sync_wishlist') {
             $body = $context['request']?->toArray() ?? [];
             return $this->syncWishlist($body['productIds'] ?? []);
+        }
+
+        if ($operationName === 'share_wishlist') {
+            $body = $context['request']?->toArray() ?? [];
+            if (!is_array($body['emails'] ?? [])) {
+                throw new BadRequestHttpException('emails must be a list of email addresses');
+            }
+            return $this->shareWishlist($body['emails'] ?? [], (string) ($body['message'] ?? ''));
         }
 
         // Default POST - add to wishlist
@@ -134,8 +147,10 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
 
     /**
      * Add the item to the cart with the options of its buy request, then remove it from the wishlist.
+     *
+     * @param float|null $qty null takes the qty of the item
      */
-    private function moveToCart(int $itemId, int $qty = 1, ?string $cartId = null): WishlistItem
+    private function moveToCart(int $itemId, ?float $qty = null, ?string $cartId = null): WishlistItem
     {
         $customerId = $this->requireCustomerId();
         $wishlist = $this->getWishlist();
@@ -168,9 +183,24 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
 
         // Build the response before the move deletes the item
         $dto = $this->toDto($item);
-        $this->wishlistService->moveToCart($wishlist, $item, $quote, (float) $qty);
+        $this->wishlistService->moveToCart($wishlist, $item, $quote, $qty);
 
         return $dto;
+    }
+
+    /**
+     * Send the wishlist to $emails. Return a placeholder with the ID of the wishlist, because the operation
+     * returns one resource.
+     *
+     * @param array<mixed> $emails
+     */
+    private function shareWishlist(array $emails, string $message): WishlistItem
+    {
+        $wishlist = $this->wishlistService->share($this->getWishlist(), $emails, $message, StoreContext::getStoreId());
+
+        $placeholder = new WishlistItem();
+        $placeholder->id = (int) $wishlist->getId();
+        return $placeholder;
     }
 
     /**

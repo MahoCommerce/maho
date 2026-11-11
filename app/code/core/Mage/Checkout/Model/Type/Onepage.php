@@ -299,15 +299,21 @@ class Mage_Checkout_Model_Type_Onepage
         $customerRequest = $customerForm->prepareRequest($data);
         $customerData = $customerForm->extractData($customerRequest);
 
-        $customerErrors = $customerForm->validateData($customerData);
-        if ($customerErrors !== true) {
+        $customerForm->compactData($customerData);
+        if ($quote->getCheckoutMethod() != self::METHOD_REGISTER) {
+            // set NOT LOGGED IN group id explicitly,
+            // otherwise copyFieldset('customer_account', 'to_quote') will fill it with default group id value
+            $customer->setGroupId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
+        }
+        Mage::helper('core')->copyFieldset('customer_account', 'to_quote', $customer, $quote);
+        try {
+            Mage::getService('sales/order')->validateCustomerData($quote);
+        } catch (Mage_Core_Exception_Input $e) {
             return [
                 'error'     => -1,
-                'message'   => implode(', ', $customerErrors),
+                'message'   => implode(', ', array_column($e->getErrors(), 'message')),
             ];
         }
-
-        $customerForm->compactData($customerData);
 
         if ($quote->getCheckoutMethod() == self::METHOD_REGISTER) {
             // set customer password
@@ -318,9 +324,6 @@ class Mage_Checkout_Model_Type_Onepage
             $password = $customer->generatePassword();
             $customer->setPassword($password);
             $customer->setPasswordConfirmation($password);
-            // set NOT LOGGED IN group id explicitly,
-            // otherwise copyFieldset('customer_account', 'to_quote') will fill it with default group id value
-            $customer->setGroupId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
         }
 
         $result = $customer->validate();
@@ -338,9 +341,6 @@ class Mage_Checkout_Model_Type_Onepage
 
         // copy customer/guest email to address
         $quote->getBillingAddress()->setEmail($customer->getEmail());
-
-        // copy customer data to quote
-        Mage::helper('core')->copyFieldset('customer_account', 'to_quote', $customer, $quote);
 
         return true;
     }
@@ -433,17 +433,10 @@ class Mage_Checkout_Model_Type_Onepage
     }
 
     /**
-     * Validate quote state to be integrated with one page checkout process
+     * Mage_Sales_Service_Order::validateQuote() checks the quote when the order is placed. A subclass can add a check
+     * of the one page checkout here.
      */
-    public function validate()
-    {
-        $quote  = $this->getQuote();
-
-        // A shopper who registers in the checkout gets a customer before the order is placed
-        if ($quote->getCheckoutMethod() == self::METHOD_GUEST) {
-            Mage::getService('sales/order')->assertGuestCheckoutAllowed($quote);
-        }
-    }
+    public function validate() {}
 
     /**
      * Prepare quote for guest checkout order submit

@@ -84,6 +84,10 @@ class Maho_Blog_Model_Observer
         $date = $observer->getEvent()->getDate();
         $maxUrlsPerFile = (int) $observer->getEvent()->getMaxUrlsPerFile();
 
+        // The storefront answers 404 for each blog URL of a store view where the blog is off
+        if (!Mage::getService('blog/post')->isEnabled($storeId)) {
+            return;
+        }
 
         // Get blog posts collection for sitemap
         $posts = $this->getBlogPostsForSitemap($storeId);

@@ -217,6 +217,53 @@ it('generates coupons with the same settings and refuses the same settings on bo
         ->and($apiGenerate(['qty' => 1, 'length' => 250, 'format' => 'num', 'prefix' => 'PREFIX', 'dash' => 0]))->toMatchArray(['status' => 422, 'fields' => ['code'], 'errors' => [$message]]);
 });
 
+it('generates in the admin only with auto generation on, and with the configured defaults for an empty field', function (): void {
+    expect(cartRuleParityApi(['couponType' => 'specific', 'couponCode' => cartRuleParityCode()])['status'])->toBe(200);
+    $rule = Mage::getModel('salesrule/rule')->load(CART_RULE_PARITY_NAME, 'name');
+    $adminGenerate = function (array $params) use ($rule): array {
+        Mage::unregister('current_promo_quote_rule');
+        $request = new Mage_Core_Controller_Request_Http(
+            Symfony\Component\HttpFoundation\Request::create('/admin/promo_quote/generate', 'POST', $params + ['id' => $rule->getId(), 'isAjax' => '1']),
+        );
+        $response = new Mage_Core_Controller_Response_Http();
+        Mage::app()->setRequest($request);
+        new Mage_Adminhtml_Promo_QuoteController($request, $response)->generateAction();
+        AdminApiParity::adminMessages();
+        return json_decode((string) $response->getBody(), true);
+    };
+    $request = AdminApiParity::jsonRequest('POST', "/api/rest/v2/cart-price-rules/{$rule->getId()}/coupons/generate", ['qty' => 1]);
+    $security = AdminApiParity::adminSecurity();
+    $api = AdminApiParity::api($request, fn() => new CartPriceRuleCouponProcessor($security, new CartPriceRuleProvider($security))
+        ->process(null, new Post(name: 'cart_price_rule_coupons_generate'), ['ruleId' => $rule->getId()], ['request' => $request]));
+    $store = Mage::app()->getStore();
+    $paths = [
+        Mage_SalesRule_Helper_Coupon::XML_PATH_SALES_RULE_COUPON_PREFIX => 'DEF-',
+        Mage_SalesRule_Helper_Coupon::XML_PATH_SALES_RULE_COUPON_SUFFIX => '-END',
+        Mage_SalesRule_Helper_Coupon::XML_PATH_SALES_RULE_COUPON_DASH_INTERVAL => '2',
+    ];
+    $before = array_map(fn(string $path): mixed => $store->getConfig($path), array_combine(array_keys($paths), array_keys($paths)));
+
+    $message = 'Only a rule with generated coupons can generate coupons.';
+    $refused = $adminGenerate(['qty' => '1', 'length' => '4', 'format' => 'num']);
+    try {
+        foreach ($paths as $path => $value) {
+            $store->setConfig($path, $value);
+        }
+        $generated = $adminGenerate(['qty' => '1', 'length' => '4', 'format' => 'num', 'prefix' => '', 'suffix' => '', 'dash' => '', 'use_auto_generation' => '1']);
+    } finally {
+        foreach ($before as $path => $value) {
+            $store->setConfig($path, $value);
+        }
+    }
+    $codes = Mage::getResourceModel('salesrule/coupon_collection')->addRuleToFilter($rule)->addGeneratedCouponsFilter()->getColumnValues('code');
+
+    expect($refused)->toBe(['error' => $message])
+        ->and($api)->toMatchArray(['status' => 409, 'errors' => [$message]])
+        ->and($generated)->not->toHaveKey('error')
+        ->and($codes)->toHaveCount(1)
+        ->and(preg_match('/^DEF-\d{2}-\d{2}-END$/', (string) ($codes[0] ?? '')))->toBe(1);
+});
+
 it('deletes only the generated coupons of the rule from the admin coupon grid', function (): void {
     expect(cartRuleParityApi(['couponType' => 'auto'])['status'])->toBe(200)
         ->and(cartRuleParityApi(['couponType' => 'specific', 'couponCode' => cartRuleParityCode()])['status'])->toBe(200);

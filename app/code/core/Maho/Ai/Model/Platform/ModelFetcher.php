@@ -16,6 +16,9 @@ class Maho_Ai_Model_Platform_ModelFetcher
 {
     private ?HttpClientInterface $httpClient = null;
 
+    /** @var array<string, int|null> */
+    private array $refreshResults = [];
+
     public function setHttpClient(HttpClientInterface $httpClient): static
     {
         $this->httpClient = $httpClient;
@@ -62,29 +65,39 @@ class Maho_Ai_Model_Platform_ModelFetcher
     }
 
     /**
-     * Cache the model list of $provider after a save of its API key or base URL, and tell the admin the result.
+     * Cache the model list of $provider after a save of its API key or base URL.
      * It never throws: a provider error must not fail the config save.
+     *
+     * @return int|null the number of models, or null when the provider gave no list
      */
-    public function refreshCache(string $provider): void
+    public function refreshCache(string $provider): ?int
     {
         // The Generic OpenAI-compatible provider doesn't have a known
         // /models endpoint shape; skip silently.
         if ($provider === 'generic') {
-            return;
+            return null;
         }
 
         try {
-            $models = $this->cacheModels($provider);
-
-            Mage::getSingleton('adminhtml/session')->addSuccess(
-                Mage::helper('ai')->__('AI: refreshed %d models for %s.', count($models), $provider),
-            );
+            $count = count($this->cacheModels($provider));
         } catch (\Throwable $e) {
             Mage::logException($e);
-            Mage::getSingleton('adminhtml/session')->addWarning(
-                Mage::helper('ai')->__('AI: could not refresh models for %s. See exception.log.', $provider),
-            );
+            $count = null;
         }
+        $this->refreshResults[$provider] = $count;
+        return $count;
+    }
+
+    /**
+     * Return the result of each refreshCache() since the last call, and forget them.
+     *
+     * @return array<string, int|null> the number of models by provider, or null for a provider that gave no list
+     */
+    public function takeRefreshResults(): array
+    {
+        $results = $this->refreshResults;
+        $this->refreshResults = [];
+        return $results;
     }
 
     private function getConfig(string $path): string

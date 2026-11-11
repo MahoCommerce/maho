@@ -71,6 +71,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     public const ERROR_IMAGE_NOT_FOUND = 'imageNotFound';
     public const ERROR_INVALID_ATTRIBUTE_SET = 'invalidAttributeSet';
     public const ERROR_ATTRIBUTE_NOT_IN_SET = 'attributeNotInSet';
+    public const ERROR_INVALID_SORT_BY = 'invalidSortBy';
 
     /**
      * Columns that are not attributes, or attributes that the tree sets and an import never writes.
@@ -171,6 +172,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
         self::ERROR_IMAGE_NOT_FOUND => 'Image "%s" not found, or not an image file',
         self::ERROR_INVALID_ATTRIBUTE_SET => 'Attribute set "%s" is not a set of categories',
         self::ERROR_ATTRIBUTE_NOT_IN_SET => 'Attribute "%s" is not in the attribute set of the category',
+        self::ERROR_INVALID_SORT_BY => '%s',
     ];
 
     public function __construct()
@@ -479,6 +481,22 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
         ];
         if ($displayMode !== '' && !in_array($displayMode, $displayModes, true)) {
             $this->addRowError(self::ERROR_INVALID_ATTRIBUTE_TYPE, $rowNum, 'display_mode');
+            return false;
+        }
+        $available = $this->_value($rowData, 'available_sort_by');
+        /** @var Mage_Catalog_Service_Category $service */
+        $service = Mage::getService('catalog/category');
+        // An export gives the label of one sort order, so a label counts as its code
+        $toCode = fn(string $attrCode, string $value): string => (string) $this->_convertLabelToValue($attrCode, trim($value));
+        $sortByErrors = $service->getSortByErrors(
+            $available === '' ? [] : array_map(
+                static fn(string $value): string => $toCode('available_sort_by', $value),
+                explode(',', $toCode('available_sort_by', $available)),
+            ),
+            $toCode('default_sort_by', $this->_value($rowData, 'default_sort_by')),
+        );
+        foreach ($sortByErrors as $message) {
+            $this->addRowError(self::ERROR_INVALID_SORT_BY, $rowNum, $message);
             return false;
         }
         $landingPage = $this->_value($rowData, 'landing_page');

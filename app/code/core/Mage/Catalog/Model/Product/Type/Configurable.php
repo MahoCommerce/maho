@@ -419,6 +419,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
                 array_values(array_diff(array_map(intval(...), array_keys($data)), array_map(intval(...), $existing))),
                 array_keys((array) Mage::getConfig()->getNode(Mage_Catalog_Helper_Product_Configuration::XML_PATH_CONFIGURABLE_ALLOWED_TYPES)?->asArray()),
                 'child_product_ids',
+                (int) $product->getAttributeSetId(),
             );
         }
     }

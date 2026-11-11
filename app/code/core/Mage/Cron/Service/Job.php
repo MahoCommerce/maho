@@ -45,17 +45,39 @@ class Mage_Cron_Service_Job
                 $started($schedule);
             }
 
-            try {
-                $callback($schedule);
-                $schedule->setStatus($schedule->getIsError() ? Schedule::STATUS_ERROR : Schedule::STATUS_SUCCESS);
-            } catch (Throwable $e) {
-                $schedule->setStatus(Schedule::STATUS_ERROR)->setMessages($e->getMessage());
-            }
-            $schedule->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'))->save();
+            $this->execute($schedule, $callback);
+            $schedule->save();
             return $schedule;
         } finally {
             $this->releaseLock($jobCode);
         }
+    }
+
+    /**
+     * Call $callback for $schedule, for a run now and for a run of the scheduler. Set the schedule to SUCCESS, or to
+     * ERROR when the job throws or calls setIsError() on the schedule. The caller saves the schedule.
+     */
+    public function execute(Schedule $schedule, callable $callback): void
+    {
+        \Maho\Profiler::start('cron.job.execute', ['cron.job_code' => $schedule->getJobCode()]);
+        try {
+            $callback($schedule);
+            $schedule->setStatus($schedule->getIsError() ? Schedule::STATUS_ERROR : Schedule::STATUS_SUCCESS);
+        } catch (Throwable $e) {
+            $this->recordError($schedule, $e);
+        } finally {
+            \Maho\Profiler::stop('cron.job.execute');
+        }
+        $schedule->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'));
+    }
+
+    /**
+     * Set $schedule to ERROR with the message of $e. The exception log gets the stack trace. The caller saves the schedule.
+     */
+    public function recordError(Schedule $schedule, Throwable $e): void
+    {
+        Mage::logException($e);
+        $schedule->setStatus(Schedule::STATUS_ERROR)->setMessages($e->getMessage());
     }
 
     /**
@@ -142,7 +164,18 @@ class Mage_Cron_Service_Job
         if ($job === null) {
             throw new Mage_Core_Exception_NoSuchEntity($helper->__('Unknown cron job: %s', $jobCode));
         }
-        if (!preg_match(Mage_Cron_Model_Observer::REGEX_RUN_MODEL, (string) $job['model_method'], $run)) {
+        return $this->resolveCallback((string) $job['model_method']);
+    }
+
+    /**
+     * Return the callback that the "model/class::method" definition $modelMethod names.
+     *
+     * @throws Mage_Core_Exception when the definition is not valid or the callback does not exist
+     */
+    public function resolveCallback(string $modelMethod): callable
+    {
+        $helper = Mage::helper('cron');
+        if (!preg_match(Mage_Cron_Model_Observer::REGEX_RUN_MODEL, $modelMethod, $run)) {
             throw new Mage_Core_Exception($helper->__('Invalid model/method definition, expecting "model/class::method".'));
         }
         $model = Mage::getModel($run[1]);

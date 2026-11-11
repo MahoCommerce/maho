@@ -206,6 +206,16 @@ it('keeps the request and the session out of every service', function () {
     expect($messages)->toBe([], implode("\n", $messages));
 });
 
+it('keeps the classes of the API module out of every service', function () {
+    $found = layeringMatches(
+        '#^app/code/core/(?!Maho/ApiPlatform/).*/Service/#',
+        '#\bMaho\\\\ApiPlatform\\\\#',
+    );
+    $messages = layeringRatchet($found, [], [], 'Move the shared code to the module that owns it or to lib/Maho.');
+
+    expect($messages)->toBe([], implode("\n", $messages));
+});
+
 it('leaves rate limits and honeypot checks to the services', function () {
     // checkRateLimit() and checkRateLimitByIp() of RateLimitTrait call the rate limiter for the API classes.
     $found = layeringMatches(

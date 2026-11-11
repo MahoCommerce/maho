@@ -109,4 +109,4 @@ Live under `app/code/core/Maho/ApiPlatform/symfony/Service/`:
 | `StoreContext` | Store scope management, `ensureStore()`, `getStoreId()`, `getStore()`, `setStore()`, `isAvailableForStore()` |
 | `JwtService` | JWT issuance/validation for customer and API-user tokens |
 | `TokenBlacklist` | Tracks revoked JWT IDs (used by `/auth/logout` and on password change) |
-| `StoreDefaults` | Resolves default values per store (currency, locale, etc.) used during DTO building |
+| `StoreDefaults` | Gives the default country, currency and POS address of a store |

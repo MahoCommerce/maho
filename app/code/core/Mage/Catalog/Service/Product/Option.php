@@ -50,6 +50,7 @@ class Mage_Catalog_Service_Product_Option
      * data "values" replaces the values of the option. Without this list, the values stay.
      *
      * @throws Mage_Core_Exception_Input for an invalid title, type or value
+     * @throws Mage_Core_Exception_Conflict when the product cannot have custom options, as a bundle with a dynamic price
      * @throws Mage_Core_Exception for a forbidden file extension
      */
     public function save(Product $product, Option $option): Option
@@ -131,6 +132,9 @@ class Mage_Catalog_Service_Product_Option
     private function write(Product $product, Option $target, bool $delete): Product
     {
         $product = Mage::getService('catalog/product')->getById((int) $product->getId());
+        if (!$delete && !$product->getTypeInstance(true)->allowsCustomOptions($product)) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('catalog')->__('This product cannot have custom options.'));
+        }
         $options = [];
         foreach ($product->getProductOptionsCollection() as $option) {
             if ((int) $option->getId() !== (int) $target->getId()) {

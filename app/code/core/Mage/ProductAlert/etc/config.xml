@@ -28,6 +28,11 @@ SPDX-License-Identifier: AFL-3.0
                 </entities>
             </productalert_resource>
         </models>
+        <services>
+            <productalert>
+                <class>Mage_ProductAlert_Service</class>
+            </productalert>
+        </services>
         <helpers>
             <productalert>
                 <class>Mage_ProductAlert_Helper</class>

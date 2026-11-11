@@ -226,6 +226,28 @@ it('lets the scheduler skip a pending schedule while a run of its job holds the 
         ->and(Mage::getModel('cron/schedule')->load($pending->getId())->getStatus())->toBe(Mage_Cron_Model_Schedule::STATUS_SUCCESS);
 });
 
+it('stores the message of the exception for a run of the scheduler, as for a run now', function (): void {
+    $now = Mage::app()->getLocale()->formatDateForDb('now');
+    /** @var Mage_Cron_Model_Schedule $pending */
+    $pending = Mage::getModel('cron/schedule');
+    $pending->setJobCode(CRON_PARITY_JOB)
+        ->setStatus(Mage_Cron_Model_Schedule::STATUS_PENDING)
+        ->setCreatedAt($now)
+        ->setScheduledAt($now)
+        ->save();
+    CronParity_Model_Job::$onRun = function (): void {
+        throw new RuntimeException('cron parity failure');
+    };
+
+    new CronParityObserver()->runScheduled($pending, Mage::getService('cron/job')->resolveCallback('cronparity/job::execute'));
+    $runNow = Mage::getService('cron/job')->run(CRON_PARITY_JOB);
+
+    $scheduled = Mage::getModel('cron/schedule')->load($pending->getId());
+    expect($scheduled->getStatus())->toBe(Mage_Cron_Model_Schedule::STATUS_ERROR)
+        ->and($scheduled->getMessages())->toBe('cron parity failure')
+        ->and($runNow->getMessages())->toBe($scheduled->getMessages());
+});
+
 it('lets cron:unlock reset a stale schedule, but not the schedule of a job that runs', function (): void {
     $now = Mage::app()->getLocale()->formatDateForDb('now');
     /** @var Mage_Cron_Model_Schedule $stale */

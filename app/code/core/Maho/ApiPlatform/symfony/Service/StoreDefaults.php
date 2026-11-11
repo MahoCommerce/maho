@@ -17,15 +17,6 @@ namespace Maho\ApiPlatform\Service;
 class StoreDefaults
 {
     /**
-     * Allowed address fields for addData() whitelisting
-     */
-    public const ADDRESS_FIELDS = [
-        'prefix', 'firstname', 'middlename', 'lastname', 'suffix', 'company', 'street', 'city',
-        'region', 'region_id', 'postcode', 'country_id',
-        'telephone', 'fax', 'email', 'vat_id',
-    ];
-
-    /**
      * Get the default country for the given store
      */
     public static function getCountryId(?int $storeId = null): string
@@ -58,28 +49,5 @@ class StoreDefaults
                 ?: self::getCountryId($storeId),
             'telephone' => \Mage::getStoreConfig('general/store_information/phone', $storeId) ?: '0000000000',
         ];
-    }
-
-    /**
-     * Filter address data to only allowed keys
-     */
-    public static function filterAddressKeys(array $data): array
-    {
-        return array_intersect_key($data, array_flip(self::ADDRESS_FIELDS));
-    }
-
-    /**
-     * Pick only address fields from a model's getData() (for sameAsShipping etc.)
-     */
-    public static function extractAddressFields(\Mage_Customer_Model_Address_Abstract $address): array
-    {
-        $data = [];
-        foreach (self::ADDRESS_FIELDS as $key) {
-            $value = $address->getData($key);
-            if ($value !== null) {
-                $data[$key] = $value;
-            }
-        }
-        return $data;
     }
 }

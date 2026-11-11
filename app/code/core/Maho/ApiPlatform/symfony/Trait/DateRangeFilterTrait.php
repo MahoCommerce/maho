@@ -47,23 +47,8 @@ trait DateRangeFilterTrait
         }
     }
 
-    /**
-     * Normalize a client-supplied bound to a UTC `Y-m-d H:i:s` string.
-     *
-     * A date with no time is the whole day, so an upper bound has to become 23:59:59:
-     * `createdTo=2026-07-29` compared against a bare `2026-07-29` would exclude every
-     * order placed that day, which is precisely the range a caller asking for "today"
-     * means to include.
-     */
     protected function normalizeBoundary(string $value, bool $isUpperBound): string
     {
-        $locale = \Mage::app()->getLocale();
-        $dateOnly = preg_match('/^\d{4}-\d{2}-\d{2}$/', trim($value)) === 1;
-
-        if ($dateOnly && $isUpperBound) {
-            return $locale->formatDateForDb(trim($value) . ' 23:59:59');
-        }
-
-        return $locale->formatDateForDb($value);
+        return \Mage::app()->getLocale()->formatDateBoundaryForDb($value, $isUpperBound);
     }
 }

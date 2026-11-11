@@ -148,6 +148,13 @@ Magic link tokens are:
 !!! warning "Token Storage"
     Like password reset tokens, magic link tokens are stored unhashed because they must be sent via email. This is the same security model used by password reset functionality and is industry standard for email-based authentication.
 
+## API
+
+A headless storefront uses the same magic link. `POST /customers/magic-link` sends the email, with the same
+rate limits and the same answer for each address. The storefront reads the `token` value of the link and sends it
+to `POST /auth/token` with the grant type `magic_link`. A customer who uses two-factor authentication sends
+the code in the same request. See [Authentication](../api/v2/authentication.md).
+
 ## Email Template
 
 The magic link email uses the template: **customer_magic_link_email_template**

@@ -56,7 +56,7 @@ Go to **System > Configuration > Catalog > Feed Manager** to configure:
 
 | Setting | Description | Default |
 |---|---|---|
-| Enable Module | Turn FeedManager on/off | Yes |
+| Enable Module | Turn FeedManager on/off. When it is off, the schedule generates no feed, and the Generate buttons and the `feed:generate` commands refuse to generate one | Yes |
 | Output Directory | Where feed files are saved (relative to `media/`) | `feeds` |
 | Batch Size | Products processed per batch (lower = less memory) | 500 |
 | Log Retention (Days) | How long to keep generation logs | 30 |

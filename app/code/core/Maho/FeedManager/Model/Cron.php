@@ -32,6 +32,7 @@ class Maho_FeedManager_Model_Cron
     #[Maho\Config\CronJob('feedmanager_generate_scheduled', schedule: '0 * * * *')]
     public function generateScheduledFeeds(): void
     {
+        // The service refuses a generation while the module is off. The cron returns first, so it logs no error each hour
         if (!Mage::helper('feedmanager')->isEnabled()) {
             return;
         }

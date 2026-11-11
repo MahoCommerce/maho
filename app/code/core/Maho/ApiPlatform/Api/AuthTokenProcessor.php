@@ -69,9 +69,10 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
 
         return match ($grantType) {
             'customer' => $this->handleCustomerGrant($body),
+            'magic_link' => $this->handleMagicLinkGrant($body),
             'client_credentials' => $this->handleClientCredentialsGrant($body),
             'api_user' => $this->handleApiUserGrant($body),
-            default => throw new BadRequestHttpException('Unsupported grant type. Use: customer, client_credentials, api_user', null, 0, ['X-Api-Error-Code' => 'unsupported_grant_type']),
+            default => throw new BadRequestHttpException('Unsupported grant type. Use: customer, magic_link, client_credentials, api_user', null, 0, ['X-Api-Error-Code' => 'unsupported_grant_type']),
         };
     }
 
@@ -94,8 +95,35 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         $rawTwofaCode = $data['twofa_code'] ?? null;
         $twofaCode = is_scalar($rawTwofaCode) ? trim((string) $rawTwofaCode) : null;
 
-        $customer = $this->authenticateCustomer($email, $password, $twofaCode);
+        return $this->generateCustomerTokenResponse($this->authenticateCustomer($email, $password, $twofaCode), $data);
+    }
 
+    /**
+     * Give a customer token for the token of a magic login link. A customer who uses 2FA sends the code with the
+     * same link: the link stays valid until the code is right.
+     */
+    private function handleMagicLinkGrant(array $data): AuthToken
+    {
+        $token = $data['token'] ?? '';
+        if (!is_string($token) || trim($token) === '') {
+            throw new BadRequestHttpException('token is required', null, 0, ['X-Api-Error-Code' => 'invalid_request']);
+        }
+        $rawTwofaCode = $data['twofa_code'] ?? null;
+        $twofaCode = is_scalar($rawTwofaCode) ? trim((string) $rawTwofaCode) : null;
+
+        /** @var \Mage_Customer_Service_Customer $service */
+        $service = \Mage::getService('customer/customer');
+        try {
+            $customer = $service->authenticateByMagicLink(trim($token), $twofaCode);
+        } catch (\Mage_Core_Exception $e) {
+            throw $e->getCode() === \Mage_Customer_Model_Customer::EXCEPTION_2FA_INVALID ? $this->twofaException($e, $twofaCode) : $e;
+        }
+
+        return $this->generateCustomerTokenResponse($customer, $data);
+    }
+
+    private function generateCustomerTokenResponse(\Mage_Customer_Model_Customer $customer, array $data): AuthToken
+    {
         try {
             $token = $this->jwtService->generateCustomerToken($customer);
 
@@ -146,12 +174,17 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         } catch (\Mage_Core_Exception $e) {
             throw match ($e->getCode()) {
                 \Mage_Customer_Model_Customer::EXCEPTION_INVALID_EMAIL_OR_PASSWORD => new UnauthorizedHttpException('Bearer', 'Invalid email or password', $e, 0, ['X-Api-Error-Code' => 'invalid_credentials']),
-                \Mage_Customer_Model_Customer::EXCEPTION_2FA_INVALID => $twofaCode === null || $twofaCode === ''
-                    ? new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is required', $e, 0, ['X-Api-Error-Code' => 'twofa_required'])
-                    : new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is invalid', $e, 0, ['X-Api-Error-Code' => 'twofa_invalid']),
+                \Mage_Customer_Model_Customer::EXCEPTION_2FA_INVALID => $this->twofaException($e, $twofaCode),
                 default => $e,
             };
         }
+    }
+
+    private function twofaException(\Mage_Core_Exception $e, #[\SensitiveParameter] ?string $twofaCode): UnauthorizedHttpException
+    {
+        return $twofaCode === null || $twofaCode === ''
+            ? new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is required', $e, 0, ['X-Api-Error-Code' => 'twofa_required'])
+            : new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is invalid', $e, 0, ['X-Api-Error-Code' => 'twofa_invalid']);
     }
 
     private function handleClientCredentialsGrant(array $data): AuthToken
@@ -286,15 +319,15 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
                 throw new UnauthorizedHttpException('Bearer', 'Token refresh is only supported for customer tokens; re-authenticate to obtain a new token');
             }
 
-            $customer = \Mage::getModel('customer/customer')->load($payload->customer_id);
-            if (!$customer->getId()) {
+            // The service refuses a customer that an admin deleted or set to not active after the token was issued.
+            // A token endpoint answers each refused token with a 401.
+            /** @var \Mage_Customer_Service_Customer $service */
+            $service = \Mage::getService('customer/customer');
+            try {
+                $customer = $service->requireActiveById((int) $payload->customer_id);
+            } catch (\Mage_Core_Exception_NoSuchEntity) {
                 throw new UnauthorizedHttpException('Bearer', 'Customer not found');
-            }
-
-            // Honour deactivation between issuance and refresh, without this,
-            // a banned/disabled customer can keep refreshing tokens indefinitely
-            // until the original token's expiry.
-            if (!$customer->getIsActive()) {
+            } catch (\Mage_Core_Exception_Forbidden) {
                 throw new UnauthorizedHttpException('Bearer', 'Customer account is inactive');
             }
 

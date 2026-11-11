@@ -346,9 +346,12 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
             try {
                 $request = $this->getRequest();
                 $number = fn(string $field): ?int => ($request->getParam($field) ?? '') === '' ? null : (int) $request->getParam($field);
+                $text = fn(string $field): ?string => ($request->getParam($field) ?? '') === '' ? null : (string) $request->getParam($field);
                 // The tab generates when the form has auto generation on, before its save too, with the uses of the form
-                $rule->setUseAutoGeneration()
-                    ->setUsesPerCoupon((int) $request->getParam('uses_per_coupon', $rule->getUsesPerCoupon()))
+                if ($request->getParam('use_auto_generation')) {
+                    $rule->setUseAutoGeneration();
+                }
+                $rule->setUsesPerCoupon((int) $request->getParam('uses_per_coupon', $rule->getUsesPerCoupon()))
                     ->setUsesPerCustomer((int) $request->getParam('uses_per_customer', $rule->getUsesPerCustomer()));
                 /** @var Mage_SalesRule_Service_Rule $service */
                 $service = Mage::getService('salesrule/rule');
@@ -356,10 +359,10 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
                     $rule,
                     (int) $request->getParam('qty', 0),
                     $number('length'),
-                    ($request->getParam('format') ?? '') === '' ? null : (string) $request->getParam('format'),
-                    (string) $request->getParam('prefix', ''),
-                    (string) $request->getParam('suffix', ''),
-                    $number('dash') ?? 0,
+                    $text('format'),
+                    $text('prefix'),
+                    $text('suffix'),
+                    $number('dash'),
                 );
                 $this->_getSession()->addSuccess(Mage::helper('salesrule')->__('%s Coupon(s) have been generated', $generated));
                 $this->_initLayoutMessages('adminhtml/session');

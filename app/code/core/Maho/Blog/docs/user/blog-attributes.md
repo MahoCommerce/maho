@@ -82,6 +82,22 @@ storefront. You can give the table a different title in each language.
    row empty, the store view shows the **Admin** name.
 4. Click **Save** in the window, then click **Save** on the set page.
 
+## The URL key of a post
+
+The **URL Key** of a post is the last part of its address. The admin form, the import and the API
+use the same rules:
+
+- The URL key has only lowercase letters, digits and dashes, for example `summer-sale-2026`. It
+  does not start or end with a dash, and it has no two dashes in sequence. A save with another
+  URL key shows "The URL key ... must have only lowercase letters, digits and dashes." The API
+  answers 422.
+- Two posts that share a store view cannot have the same URL key. A post in **All Store Views**
+  shares each store view. A save shows "Another post of the same store view has the URL key ...".
+  The API answers 409.
+- When you leave the URL key empty, the store makes it from the title.
+- A post that was saved before these rules keeps its URL key. The store checks the URL key again
+  only when you change it.
+
 ## Import
 
 The blog post import reads two more kinds of columns:

@@ -198,6 +198,33 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
     }
 
     /**
+     * A bundle with a dynamic price takes its price from its children, so it has no custom options.
+     *
+     * @param Mage_Catalog_Model_Product|null $product
+     */
+    #[\Override]
+    public function allowsCustomOptions($product = null): bool
+    {
+        $priceType = $this->getProduct($product)->getPriceType();
+        return $priceType === null || (int) $priceType !== Mage_Bundle_Model_Product_Price::PRICE_TYPE_DYNAMIC;
+    }
+
+    /**
+     * Give $product an option list that deletes each custom option that it has.
+     */
+    protected function _deleteCustomOptions(Mage_Catalog_Model_Product $product): void
+    {
+        $options = [];
+        if ($product->getId()) {
+            foreach ($product->getProductOptionsCollection() as $option) {
+                $options[] = ['option_id' => (string) $option->getId(), 'is_require' => '0', 'is_delete' => '1'];
+            }
+        }
+        $product->setProductOptions($options);
+        $product->setCanSaveCustomOptions(true);
+    }
+
+    /**
      * Before save type related data
      *
      * @param Mage_Catalog_Model_Product $product
@@ -221,6 +248,10 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
             );
             $product->unsetData('msrp');
             $product->unsetData('msrp_display_actual_price_type');
+        }
+
+        if (!$this->allowsCustomOptions($product) && !$product->getOptionsReadonly()) {
+            $this->_deleteCustomOptions($product);
         }
 
         $this->_validateBundleData($product);

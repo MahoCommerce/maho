@@ -487,10 +487,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             $collection->addAttributeToSelect('*');
             $this->applyBackendFilters($collection, $requestFilters, $search);
         } elseif (!empty($search)) {
-            // A new helper, so that the text of an earlier request in the same process does not stay
-            \Mage::unregister('_helper/catalogsearch');
-            \Mage::app()->getRequest()->setParam(\Mage::helper('catalogsearch')->getQueryParamName(), $search);
-            $searchQuery = self::searchService()->prepare(StoreContext::getStoreId());
+            $searchQuery = self::searchService()->prepare(StoreContext::getStoreId(), (string) $search);
             $layer = \Mage::getModel('catalogsearch/layer');
         } elseif (!empty($requestFilters['categoryId'])) {
             $layer = \Mage::getModel('catalog/layer');

@@ -85,14 +85,8 @@ class Mage_Review_Service_Review
             ->setDetail(trim((string) $review->getDetail()))
             ->setNickname(trim((string) $review->getNickname()));
         $errors = $this->validate($review);
-        $options = $this->getRatingOptions($storeId);
-        foreach ($votes as $ratingId => $optionId) {
-            // A store shows only its own ratings, so it takes a vote only for them
-            if (!in_array((int) $optionId, $options[(int) $ratingId] ?? [], true)) {
-                $errors->addError('ratings', $helper->__('Please select a valid rating.'));
-                break;
-            }
-        }
+        // A store shows only its own ratings, so it takes a vote only for them
+        $this->validateVotes($votes, $storeId, $errors);
         $errors->throwIfErrors();
 
         $review->setEntityId((int) $review->getEntityIdByCode(Review::ENTITY_PRODUCT_CODE))
@@ -131,12 +125,13 @@ class Mage_Review_Service_Review
      *
      * @param array<int|string, int|string> $votes
      * @throws Mage_Core_Exception_NoSuchEntity when the product of a new review does not exist
-     * @throws Mage_Core_Exception_Input with one error for each invalid field
+     * @throws Mage_Core_Exception_Input with one error for each invalid field, or for an option of another rating
      */
     public function save(Review $review, array $votes = []): Review
     {
         $errors = $this->validate($review);
         $this->validateStatus($review->getStatusId(), $errors);
+        $this->validateVotes($votes, null, $errors);
         $errors->throwIfErrors();
         if (!$review->getId()) {
             if (!Mage::getModel('catalog/product')->load((int) $review->getEntityPkValue())->getId()) {
@@ -203,6 +198,26 @@ class Mage_Review_Service_Review
     }
 
     /**
+     * Check that each option of $votes is an option of its rating. With $storeId, the rating must be a rating of
+     * that store.
+     *
+     * @param array<int|string, int|string> $votes the option ID by the rating ID
+     */
+    private function validateVotes(array $votes, ?int $storeId, Mage_Core_Exception_Input $errors): void
+    {
+        if ($votes === []) {
+            return;
+        }
+        $options = $this->getRatingOptions($storeId);
+        foreach ($votes as $ratingId => $optionId) {
+            if (!in_array((int) $optionId, $options[(int) $ratingId] ?? [], true)) {
+                $errors->addError('ratings', Mage::helper('review')->__('Please select a valid rating.'));
+                return;
+            }
+        }
+    }
+
+    /**
      * The limit of one account backs up the limit of the IP address, which a client can change.
      *
      * @throws Mage_Core_Exception_TooManyRequests
@@ -226,15 +241,16 @@ class Mage_Review_Service_Review
     }
 
     /**
-     * @return array<int, list<int>> the option IDs of each product rating of the store, by rating ID, in the order of the positions
+     * @return array<int, list<int>> the option IDs of each product rating, by rating ID, in the order of the positions. With $storeId, only the ratings of that store
      */
-    private function getRatingOptions(int $storeId): array
+    private function getRatingOptions(?int $storeId): array
     {
-        $ratings = Mage::getModel('rating/rating')->getResourceCollection()
-            ->addEntityFilter(Review::ENTITY_PRODUCT_CODE)
-            ->setStoreFilter($storeId)
-            ->load()
-            ->addOptionToItems();
+        $collection = Mage::getModel('rating/rating')->getResourceCollection()
+            ->addEntityFilter(Review::ENTITY_PRODUCT_CODE);
+        if ($storeId !== null) {
+            $collection->setStoreFilter($storeId);
+        }
+        $ratings = $collection->load()->addOptionToItems();
         $options = [];
         foreach ($ratings as $rating) {
             foreach ((array) $rating->getOptions() as $option) {

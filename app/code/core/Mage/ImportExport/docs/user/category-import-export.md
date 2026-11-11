@@ -261,6 +261,7 @@ The second row takes the **Brand** set of its parent, so it can hold a **Brand S
 4. **Invalid store code**: Store view doesn't exist
 5. **Missing required attributes**: Required fields are empty
 6. **Invalid data types**: Wrong format for boolean/integer fields
+7. **Invalid sort order**: `available_sort_by` or `default_sort_by` has a code that is not an attribute that a product listing can sort by. Separate the codes of `available_sort_by` with a comma, for example `name,price`
 
 ### Error Messages
 

@@ -12,7 +12,7 @@ All paths below are relative to the **`/api/rest/v2`** prefix: `GET /products` m
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| POST | `/auth/token` | None | Get JWT token (`grant_type`: `customer`/`client_credentials`/`api_user`) |
+| POST | `/auth/token` | None | Get JWT token (`grant_type`: `customer`/`magic_link`/`client_credentials`/`api_user`) |
 | POST | `/auth/refresh` | Bearer JWT | Refresh JWT token (current token sent via `Authorization` header) |
 | POST | `/auth/logout` | Bearer JWT | Revoke the current token |
 
@@ -59,7 +59,7 @@ Country listings live under [Directory](#directory) (`/countries`).
 | GET / PUT | `/products/{productId}/configurable` | GET=None, PUT=Admin/API | Read super-attributes + child IDs / set them all |
 | POST | `/products/{productId}/configurable/children` | Admin/API | Add a child product (body: `{childId: int}`) |
 | DELETE | `/products/{productId}/configurable/children/{childId}` | Admin/API | Remove a child product |
-| GET / POST / PUT / DELETE | `/products/{productId}/downloadable-links` | GET=None, writes=Admin/API | Downloadable links |
+| GET / POST / PUT / DELETE | `/products/{productId}/downloadable-links` | GET=None, writes=Admin/API | Downloadable links. `linkUrl` is null without an admin or API token that can read products |
 | GET / POST / PUT | `/products/{productId}/grouped` | GET=None, writes=Admin/API | Grouped product links (PUT replaces all) |
 | DELETE | `/products/{productId}/grouped/{childProductId}` | Admin/API | Remove a grouped child |
 | GET / POST / PUT | `/products/{productId}/links/related` | GET=None, writes=Admin/API | Related products (POST adds one, PUT replaces all) |
@@ -195,6 +195,27 @@ The cart page and the checkout of the storefront and the API use the same rules 
 | POST | `/customers/forgot-password` | None | Request password reset email |
 | POST | `/customers/reset-password` | None | Reset password with token |
 | POST | `/customers/create-from-order` | None | Create a customer account from a placed guest order |
+| POST | `/customers/magic-link` | None | Request an email with a login link (`email`) |
+| POST | `/customers/confirm` | None | Confirm an account with the values of the confirmation email (`customerId`, `key`) |
+| POST | `/customers/confirmation-link` | None | Send the confirmation email again (`email`, `captchaToken`) |
+| POST | `/customers/me/two-factor/secret` | Customer | Get the secret for the authenticator app (`twofaSecret` in the answer) |
+| POST | `/customers/me/two-factor` | Customer | Turn two-factor authentication on or off (`currentPassword`, `twofaEnabled`, `twofaCode`) |
+
+**CAPTCHA:** `POST /customers` (registration), `POST /customers/forgot-password` and `POST /customers/confirmation-link`, and the `forgotPasswordCustomer` and `sendConfirmationLinkCustomer` mutations, use the same CAPTCHA as the forms of the storefront. When the CAPTCHA of the store is on, send the solved token in `captchaToken`. An admin token, or a service token with a `customers` permission, needs no token, because the admin asks no CAPTCHA. A missing or refused token gives a 422 with an entry for `captchaToken` in `details.errors`. `GET /contact/config` gives the provider and the challenge URL for the widget (see [Contact](#contact)). Each of these operations also has the rate limit of the storefront form, so a client over a limit gets a 429 with a `Retry-After` header.
+
+**Customer accounts turned off:** when **System > Configuration > Customers > Customer Configuration > Enable Customer Accounts in Frontend** is **No**, the customer flows of the API give a 403: the registration, the `customer` and `magic_link` grants of `/auth/token`, the GraphQL login, the magic link request and the social sign-in. An admin token or a service token still creates and updates customers. An observer of the `customer_registration_is_allowed` event that refuses a registration gives a 403 on `POST /customers` too.
+
+**Account that is not active:** a customer with `isActive` set to `false` cannot log in. The `customer` and `magic_link` grants, the GraphQL login and the social sign-in give a 403, and `/auth/refresh` gives a 401.
+
+**Profile update:** `PUT /customers/me` and the `updateCustomer` mutation need `currentPassword` when the request changes the email. Without it, the answer is a 422 with an entry for `current_password` in `details.errors`. When the request sends `currentPassword` for another change, the API checks it too. A store that registers customers without a password does not ask for it.
+
+**Staff update:** `PUT /customers/{id}` applies the checks of the admin customer form: the first name, the last name and the email must not be empty, and a required date of birth, tax number or gender must have a value. A problem gives a 422 with the messages in `details.errors`.
+
+**Confirmation:** on a store that requires an email confirmation, the registration sends an email with a link that has the customer ID (`id`) and the key (`key`). `POST /customers/confirm` takes both values. It sends the welcome email of a confirmed account, and the answer has only the `id` of the customer. A wrong key gives a 422, and each wrong key counts in the **Reset password** rate limit. `POST /customers/confirmation-link` sends the email again. Its answer is the same whether an account waits for a confirmation or not.
+
+**Magic link:** `POST /customers/magic-link` emails a login link when **Magic Link Login** is enabled, and gives a 404 when it is not. The answer is the same whether an active account has the email or not. The link in the email opens the storefront with a `token` parameter. A headless storefront reads that value and sends it to `/auth/token` with `grant_type` `magic_link` (see [Authentication](authentication.md)).
+
+**Two-factor authentication:** the operations give a 404 when the store does not allow 2FA for customers. To turn 2FA on, call `POST /customers/me/two-factor/secret`, put `twofaSecret` into the authenticator app, then call `POST /customers/me/two-factor` with `currentPassword`, `twofaEnabled: true` and the current code in `twofaCode`. To turn it off, send `currentPassword` and `twofaEnabled: false`: a store that requires 2FA gives a 403. A wrong password or a wrong code gives a 422, and each request counts in the **Change password** rate limit. A customer who already uses 2FA gets a 409 from the secret operation.
 
 An admin token or an API token with the `customers/create` grant creates an account that needs no confirmation. The customer gets the welcome email from the store of the request. Without a `password`, the account gets a random password, and the welcome email has the link to set a password, as **Email Link to Set Password** does in the admin. The GraphQL `quickCreateCustomer` mutation and the createCustomer operation of the admin GraphQL endpoint always give a random password and this email.
 
@@ -215,6 +236,8 @@ An admin token or an API token with the `customers/create` grant creates an acco
 | GET | `/customers/{customerId}/addresses` | Admin/API | List a customer's addresses |
 | POST | `/customers/{customerId}/addresses` | Admin/API | Create an address for a customer |
 
+An admin token or a service token with an `addresses` permission reads and writes the addresses of each customer of a website that the token can access. A token with a store restriction gets a 403 for a customer of another website, as `GET /customers/{id}` gives.
+
 ---
 
 ### Orders
@@ -231,6 +254,8 @@ An admin token or an API token with the `customers/create` grant creates an acco
 **Orders of a customer token:** a customer reads the orders that the storefront shows under **My Orders**. An order in a state that the storefront hides (`pending_payment` in a new store) is not in `/customers/me/orders`, and `/orders/{id}`, its invoices, their PDFs and `POST /orders/{id}/cancel` (and the GraphQL `cancelOrder` mutation) answer `404`, as for an order of another customer. An admin or an API user token reads and cancels every order.
 
 **Customer fields of a guest order** <span class="version-badge">v27.1+</span>: the place-order body of a guest takes `customerCustomAttributes`, the values of the custom attributes of the **Checkout Registration** form (`{attribute_code: value}`), and must send each required one. The order keeps them in `customerCustomAttributes`. A customer order takes the values of the customer account and refuses the field with a 422. The GraphQL `placeOrder` mutation takes the same argument.
+
+A guest order needs a valid email, and each field that the **Checkout Registration** form makes required. The name comes from the billing address. The place-order body takes the other fields in `guestCustomer`: `prefix`, `firstname`, `middlename`, `lastname`, `suffix`, `dob`, `taxvat` and `gender`. A missing required field gives a 422 with the field in `details.errors`.
 
 **Order placement** <span class="version-badge">v27.1+</span>: the place-order endpoints, the storefront checkout and the admin order create place an order with the same rules.
 
@@ -415,7 +440,8 @@ Omit `items` to ship every remaining item on the order. Each track entry needs a
 - `comment`, Optional refund note.
 - `adjustmentPositive`, Additional positive adjustment (add to refund).
 - `adjustmentNegative`, Negative adjustment (reduce refund).
-- `offlineRefund`, `true` (default) for offline refund. An online refund needs the invoice of the capture, which the API cannot name yet, so `false` is refused with a 422 asking for an offline refund.
+- `offlineRefund`, `true` (default) for offline refund. With `false`, the payment method refunds the money online. An online refund needs `invoiceId`, the invoice of the capture: without it, `false` is refused with a 422 asking for an offline refund.
+- `invoiceId`, Optional ID of an invoice of the order. The credit memo then refunds that invoice. An ID that is not an invoice of the order is refused with a 422.
 
 ---
 
@@ -704,7 +730,9 @@ curl -X PUT /api/rest/v2/revocation-requests/1234 \
 
 **Guest subscription control:** Guest (unauthenticated) subscribe is controlled by the Maho config flag `newsletter/subscription/allow_guest_subscribe` (**System > Config > Newsletter > Subscription Options > Allow Guest Subscription**). When disabled, only authenticated customers can subscribe, and a guest subscribe returns `403`. Recommended: set to **No** for API use to prevent abuse.
 
-**Confirmation emails:** When `newsletter/subscription/confirm` is enabled, new subscriptions receive a confirmation email and remain inactive until confirmed (double opt-in). A customer token subscribes the address of the account, which needs no confirmation.
+**Confirmation emails:** When `newsletter/subscription/confirm` is enabled, new subscriptions receive a confirmation email and remain inactive until confirmed (double opt-in). A customer token that sends no `email`, or the address of the account, subscribes the address of the account, which needs no confirmation.
+
+**Another address with a customer token:** a customer has no proof that another address is theirs. So the API and the footer form handle it as a guest subscription: the guest switch applies (a `403` when it is off), and the address always gets the confirmation email, also when `newsletter/subscription/confirm` is off. The answer has no data of the subscriber, and it is the same for an address that is already subscribed.
 
 The API, the footer form and the newsletter page of the customer account use the same rules. An empty or invalid `email` gives a 422 with an entry in `details.errors`. A guest gets the same answer for an address that is already subscribed as for a new one. The limit `system/rate_limit/newsletter_subscribe` counts the subscriptions of one client and of one address on the API and the footer form together, and `system/rate_limit/newsletter_unsubscribe` counts the unsubscriptions of the API and the account page. A client over a limit gets a 429 with a `Retry-After` header. A customer token for a customer that does not exist gives a 404.
 
@@ -788,6 +816,25 @@ Admin-only. Used for group-based pricing and tax-class assignment.
 | DELETE | `/customers/me/wishlist/{id}` | Customer/API | Remove from wishlist |
 | POST | `/customers/me/wishlist/{id}/move-to-cart` | Customer/API | Move item to cart, with the options of the item |
 | POST | `/customers/me/wishlist/sync` | Customer/API | Sync a guest (localStorage) wishlist into the customer's wishlist |
+| POST | `/customers/me/wishlist/share` | Customer | Send the wishlist by email (`{emails: [...], message}`) |
+
+`move-to-cart` takes an optional `qty`. Without `qty`, the cart gets the qty of the wishlist item, as on the wishlist page.
+
+`share` sends the items and the link of the shared wishlist to 1 to 5 addresses, with the optional `message` of the customer, as the share form of the wishlist page does. No address, more than 5 addresses or an address that is not valid gives a 422 with an entry for `emails` in `details.errors`. The limit `system/rate_limit/wishlist_share` counts the shares of one customer on the API and the page together, and a customer over the limit gets a 429 with a `Retry-After` header. The answer is an item with only `id`, which is the ID of the wishlist. The API cannot add the RSS link of the share form.
+
+---
+
+### Product Alerts
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/customers/me/product-alerts` | Customer | List the price alerts and the stock alerts of the customer |
+| POST | `/customers/me/product-alerts` | Customer | Subscribe to an alert (`{type: price\|stock, productId}`) |
+| DELETE | `/customers/me/product-alerts/{id}` | Customer | Unsubscribe from an alert |
+
+The `id` of an alert is its type, a hyphen and the product ID, for example `price-42`. A price alert keeps the `price` of the product for the group of the customer at the time of the subscription, and the store sends the email when the price goes below it. A stock alert sends the email when the product is in stock again. A second subscription to the same alert keeps one alert.
+
+The API and the product page use the same rules. `POST` gives a 404 when the store has the alert of this type off (**System > Configuration > Catalog > Product Alerts > Allow Alert When Product Price Changes** and **Allow Alert When Product Comes Back in Stock**), and a 422 for a product that the store does not show or for a `type` that is not `price` or `stock`. `DELETE` gives a 404 when the customer has no such alert. `GET` and `DELETE` work also when the alerts are off, so that a customer can remove an old alert.
 
 ---
 

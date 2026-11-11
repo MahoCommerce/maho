@@ -17,6 +17,10 @@ use Mage_Wishlist_Model_Wishlist as Wishlist;
 class Mage_Wishlist_Service_Wishlist
 {
     public const XML_PATH_ENABLED = 'wishlist/general/active';
+    public const XML_PATH_SHARE_RATE_LIMIT = 'system/rate_limit/wishlist_share';
+
+    public const SHARE_RATE_LIMIT_WINDOW = 3600;
+    public const SHARE_MAX_RECIPIENTS = 5;
 
     public function isEnabled(int $storeId): bool
     {
@@ -37,6 +41,27 @@ class Mage_Wishlist_Service_Wishlist
         }
         $wishlist = Mage::getModel('wishlist/wishlist')->loadByCustomer($customerId, true);
         if ($wishlistId !== null && $wishlistId !== (int) $wishlist->getId()) {
+            throw new Mage_Core_Exception_NoSuchEntity($helper->__("Requested wishlist doesn't exist"));
+        }
+        return $wishlist;
+    }
+
+    /**
+     * Return the wishlist that the owner shared with the code $code.
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity when the store has no wishlist, or no shared wishlist has this code
+     */
+    public function getByCode(string $code, int $storeId): Wishlist
+    {
+        $helper = Mage::helper('wishlist');
+        if (!$this->isEnabled($storeId)) {
+            throw new Mage_Core_Exception_NoSuchEntity($helper->__('The wishlist is not available.'));
+        }
+        $wishlist = Mage::getModel('wishlist/wishlist');
+        if ($code !== '') {
+            $wishlist->loadByCode($code);
+        }
+        if (!$wishlist->getId()) {
             throw new Mage_Core_Exception_NoSuchEntity($helper->__("Requested wishlist doesn't exist"));
         }
         return $wishlist;
@@ -205,6 +230,48 @@ class Mage_Wishlist_Service_Wishlist
     }
 
     /**
+     * Add the product of the cart line $itemId of $quote to $wishlist with the options of the line, then remove the
+     * line and save the cart. The item gets no value of a file option, because the file belongs to the cart line.
+     * The cart line stays when the wishlist refuses the product.
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity when the cart has no line $itemId
+     * @throws Mage_Core_Exception see addProduct()
+     */
+    public function moveFromCart(Wishlist $wishlist, \Mage_Sales_Model_Quote $quote, int $itemId): Item
+    {
+        $cartItem = $quote->getItemById($itemId);
+        if (!$cartItem) {
+            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('wishlist')->__("Requested cart item doesn't exist"));
+        }
+
+        $buyRequest = $cartItem->getBuyRequest();
+        $options = $buyRequest->getOptions();
+        if (is_array($options)) {
+            foreach ($cartItem->getProduct()->getOptions() as $option) {
+                if ($option->getType() === Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE) {
+                    unset($options[$option->getId()]);
+                }
+            }
+            $buyRequest->setOptions($options);
+        }
+
+        $item = $this->addProduct($wishlist, (int) $cartItem->getProductId(), $buyRequest, (int) $quote->getStoreId());
+        Mage::getService('checkout/cart')->removeItem($quote, $itemId);
+        return $item;
+    }
+
+    /**
+     * Return whether $product has a custom option of the type file.
+     */
+    public function hasFileOption(Mage_Catalog_Model_Product $product): bool
+    {
+        return array_any(
+            $product->getOptions(),
+            fn(Mage_Catalog_Model_Product_Option $option): bool => $option->getType() === Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE,
+        );
+    }
+
+    /**
      * @throws Mage_Core_Exception_NoSuchEntity when $item is not an item of $wishlist
      */
     public function removeItem(Wishlist $wishlist, Item $item): void
@@ -212,6 +279,81 @@ class Mage_Wishlist_Service_Wishlist
         $this->assertItemOf($wishlist, $item);
         $item->delete();
         $wishlist->save();
+    }
+
+    /**
+     * Send the link and the items of $wishlist to each address of $emails, with $message of the customer, and mark
+     * the wishlist as shared. With $withRssLink, the email also has the link to the RSS feed of the wishlist.
+     *
+     * @param array<string> $emails 1 to 5 addresses
+     * @throws Mage_Core_Exception_Input when $emails is empty, has more than 5 addresses, or has an address that is not valid
+     * @throws Mage_Core_Exception_NoSuchEntity when the customer of the wishlist does not exist
+     * @throws Mage_Core_Exception_TooManyRequests when the customer is over the limit
+     */
+    public function share(Wishlist $wishlist, array $emails, string $message, int $storeId, bool $withRssLink = false): Wishlist
+    {
+        $helper = Mage::helper('wishlist');
+        $core = Mage::helper('core');
+
+        $emails = array_values(array_unique(array_filter(array_map(fn(#[\SensitiveParameter]
+            mixed $email): string => trim((string) $email), $emails))));
+        $error = match (true) {
+            $emails === [] => $helper->__("Email address can't be empty."),
+            count($emails) > self::SHARE_MAX_RECIPIENTS => $helper->__('Please enter no more than 5 email addresses.'),
+            !array_all($emails, $core->isValidEmail(...)) => $helper->__('Please input a valid email address.'),
+            default => null,
+        };
+        if ($error !== null) {
+            throw new Mage_Core_Exception_Input()->addError('emails', $error);
+        }
+
+        $customerId = (int) $wishlist->getCustomerId();
+        $customer = Mage::getService('customer/customer')->getById($customerId)
+            ?? throw new Mage_Core_Exception_NoSuchEntity($helper->__('Customer not found'));
+
+        $limit = (int) Mage::getStoreConfig(self::XML_PATH_SHARE_RATE_LIMIT, $storeId);
+        $limiter = $core->rateLimiterBy('wishlist_share', "customer:{$customerId}", $limit, self::SHARE_RATE_LIMIT_WINDOW);
+        if (!$limiter->attempt()) {
+            throw new Mage_Core_Exception_TooManyRequests(
+                $helper->__('Too many requests. Please try again later.'),
+                self::SHARE_RATE_LIMIT_WINDOW,
+            );
+        }
+
+        $message = nl2br(htmlspecialchars($message));
+        $emulation = Mage::getSingleton('core/app_emulation');
+        $environment = $emulation->startEnvironmentEmulation($storeId);
+        try {
+            $layout = Mage::app()->getLayout();
+            if ($withRssLink) {
+                $helper->setCustomer($customer);
+                $message .= $layout->createBlock('wishlist/share_email_rss')->setWishlistId((int) $wishlist->getId())->toHtml();
+            }
+            $variables = [
+                'customer' => $customer,
+                'items' => $layout->createBlock('wishlist/share_email_items')->setWishlist($wishlist)->toHtml(),
+                'viewOnSiteLink' => Mage::getUrl('wishlist/shared/index', ['code' => $wishlist->getSharingCode()]),
+                'message' => $message,
+            ];
+        } finally {
+            $emulation->stopEnvironmentEmulation($environment);
+        }
+
+        $template = Mage::getModel('core/email_template');
+        foreach ($emails as $email) {
+            $template->sendTransactional(
+                Mage::getStoreConfig('wishlist/email/email_template', $storeId),
+                Mage::getStoreConfig('wishlist/email/email_identity', $storeId),
+                $email,
+                null,
+                $variables,
+                $storeId,
+            );
+        }
+
+        $wishlist->setShared()->save();
+        Mage::dispatchEvent('wishlist_share', ['wishlist' => $wishlist]);
+        return $wishlist;
     }
 
     private function isRemoval(mixed $qty): bool

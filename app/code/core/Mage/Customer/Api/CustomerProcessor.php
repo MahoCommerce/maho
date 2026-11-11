@@ -41,6 +41,11 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             $operationName === 'forgot_password_rest', $operationName === 'forgotPassword' => $this->forgotPassword($args),
             $operationName === 'reset_password_rest', $operationName === 'resetPassword' => $this->resetPassword($args),
             $operationName === 'create_from_order' => $this->createAccountFromOrder($args),
+            $operationName === 'magic_link_rest', $operationName === 'requestMagicLink' => $this->requestMagicLink($args),
+            $operationName === 'confirm_rest', $operationName === 'confirm' => $this->confirm($args),
+            $operationName === 'confirmation_link_rest', $operationName === 'sendConfirmationLink' => $this->sendConfirmationLink($args),
+            $operationName === 'two_factor_rest', $operationName === 'setTwoFactor' => $this->setTwoFactor($args),
+            $operationName === 'two_factor_secret_rest', $operationName === 'createTwoFactorSecret' => $this->createTwoFactorSecret(),
             $operation instanceof Post => $this->createCustomer($data),
             $operationName === 'quickCreate' => $this->createCustomerQuick($context['args']['input'] ?? $context['args'] ?? []),
             $operationName === 'login' => $this->customerLogin($args),
@@ -55,7 +60,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Register a customer (POST /customers). An admin or a service token holding customers/create creates an
      * account that needs no confirmation, and may set the admin-only fields; the securityPostDenormalize gate of
-     * those fields has already reset them for any other caller.
+     * those fields has already reset them for any other caller. Any other caller sends the CAPTCHA token, as the
+     * registration form of the storefront does.
      */
     private function createCustomer(Customer $data): Customer
     {
@@ -102,7 +108,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         if ($isPrivileged) {
             $this->getService()->create($customer, $storeId, $storeId);
         } else {
-            $this->getService()->register($customer, $storeId);
+            $this->getService()->register($customer, $storeId, channel: \Mage_Customer_Model_Channel::Api, captchaToken: $data->captchaToken);
         }
 
         return Customer::fromModel($customer);
@@ -187,7 +193,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             CustomAttributes::apply($customer, 'customer_account_edit', $customAttributes);
         }
 
-        return Customer::fromModel($this->getService()->updateAccount($customer, $currentPassword));
+        // The API asks the current password for a new email only, and checks it when the client sends it
+        return Customer::fromModel($this->getService()->updateAccount($customer, $currentPassword, requirePassword: false));
     }
 
     /**
@@ -197,7 +204,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     private function updateCustomerAdmin(int $customerId, Customer $data): Customer
     {
         $customer = $this->getService()->requireById($customerId);
-        $this->assertWebsiteAllowed($customer->getWebsiteId(), $this->requireUser(), 'customer');
+        $this->assertCustomerReachable($customer);
 
         if ($data->websiteId !== null && $data->websiteId !== (int) $customer->getWebsiteId()) {
             throw new \Mage_Core_Exception_Input()->addError('website_id', 'websiteId can only be set when creating a customer');
@@ -244,11 +251,109 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     {
         StoreContext::ensureStore();
         $email = (string) ($args['email'] ?? '');
-        $this->getService()->sendPasswordResetLink($email, (int) \Mage::app()->getStore(StoreContext::getStoreId())->getWebsiteId());
+        $this->getService()->sendPasswordResetLink($email, $this->getWebsiteId(), $this->getChannel(), $this->getCaptchaToken($args));
 
         $dto = new Customer();
         $dto->email = $email;
         return $dto;
+    }
+
+    /**
+     * Email a login link. The answer is the same whether an active account has the email or not.
+     */
+    private function requestMagicLink(array $args): Customer
+    {
+        StoreContext::ensureStore();
+        $email = (string) ($args['email'] ?? '');
+        $this->getService()->sendMagicLink($email, $this->getWebsiteId());
+
+        $dto = new Customer();
+        $dto->email = $email;
+        return $dto;
+    }
+
+    /**
+     * Confirm an account with the customer ID and the key of the confirmation email.
+     */
+    private function confirm(array $args): Customer
+    {
+        StoreContext::ensureStore();
+        $customerId = $this->parseGraphQlId($args['customerId'] ?? null);
+        $key = $args['key'] ?? null;
+        if (!$customerId || !is_string($key) || $key === '') {
+            throw new \Mage_Core_Exception_Input()->addError('key', 'customerId and key are required');
+        }
+
+        // The key proves nothing for an account that is already confirmed, so the answer has no customer data
+        $dto = new Customer();
+        $dto->id = (int) $this->getService()->confirm($customerId, $key)->getId();
+        $dto->isConfirmed = true;
+        return $dto;
+    }
+
+    /**
+     * Email the confirmation link again. The answer is the same whether an account waits for a confirmation or not.
+     */
+    private function sendConfirmationLink(array $args): Customer
+    {
+        StoreContext::ensureStore();
+        $email = (string) ($args['email'] ?? '');
+        $this->getService()->sendConfirmationLink($email, $this->getWebsiteId(), $this->getChannel(), $this->getCaptchaToken($args));
+
+        $dto = new Customer();
+        $dto->email = $email;
+        return $dto;
+    }
+
+    /**
+     * Turn 2FA on or off for the customer of the token.
+     */
+    private function setTwoFactor(array $args): Customer
+    {
+        if (!is_bool($args['twofaEnabled'] ?? null)) {
+            throw new \Mage_Core_Exception_Input()->addError('twofaEnabled', 'twofaEnabled is required: true or false');
+        }
+        $code = $args['twofaCode'] ?? null;
+        $customer = $this->getService()->requireById($this->requireCustomerId());
+        $this->getService()->setSecondFactor(
+            $customer,
+            (string) ($args['currentPassword'] ?? ''),
+            $args['twofaEnabled'],
+            is_scalar($code) ? trim((string) $code) : null,
+        );
+
+        return Customer::fromModel($customer);
+    }
+
+    /**
+     * Return the secret that the customer of the token puts into an authenticator app before 2FA is turned on.
+     */
+    private function createTwoFactorSecret(): Customer
+    {
+        $customer = $this->getService()->requireById($this->requireCustomerId());
+        $secret = $this->getService()->getSecondFactorSecret($customer);
+
+        $dto = Customer::fromModel($customer);
+        $dto->twofaSecret = $secret;
+        return $dto;
+    }
+
+    private function getWebsiteId(): int
+    {
+        return (int) \Mage::app()->getStore(StoreContext::getStoreId())->getWebsiteId();
+    }
+
+    /**
+     * An admin token or a service token with access to the customers is the admin on the API, which asks no CAPTCHA.
+     */
+    private function getChannel(): \Mage_Customer_Model_Channel
+    {
+        return $this->hasBackendAccess('customers') ? \Mage_Customer_Model_Channel::Admin : \Mage_Customer_Model_Channel::Api;
+    }
+
+    private function getCaptchaToken(array $args): ?string
+    {
+        return isset($args['captchaToken']) && is_string($args['captchaToken']) ? $args['captchaToken'] : null;
     }
 
     private function resetPassword(array $args): Customer

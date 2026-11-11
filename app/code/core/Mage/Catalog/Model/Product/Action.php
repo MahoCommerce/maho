@@ -64,6 +64,44 @@ class Mage_Catalog_Model_Product_Action extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Move the products $productIds to the attribute set $setId, without a save of each product. The indexes and
+     * the product cache follow, as for updateAttributes().
+     *
+     * @param list<int> $productIds
+     * @return int the number of products
+     */
+    public function updateAttributeSet(array $productIds, int $setId): int
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        $count = 0;
+        foreach (array_chunk($productIds, 1000) as $chunk) {
+            $count += (int) $write->update(
+                $resource->getTableName('catalog/product'),
+                ['attribute_set_id' => $setId, 'updated_at' => Mage::app()->getLocale()->formatDateForDb('now')],
+                ['entity_id IN (?)' => $chunk],
+            );
+        }
+
+        $this->setData([
+            'product_ids' => $productIds,
+            'attributes_data' => ['attribute_set_id' => $setId],
+            'store_id' => Mage_Core_Model_App::ADMIN_STORE_ID,
+        ]);
+        Mage::getSingleton('index/indexer')->processEntityAction(
+            $this,
+            Mage_Catalog_Model_Product::ENTITY,
+            Mage_Index_Model_Event::TYPE_MASS_ACTION,
+        );
+        Mage::dispatchEvent('catalog_product_attribute_update_after', [
+            'product_ids' => $productIds,
+        ]);
+        $this->_cleanProductCache($productIds);
+
+        return $count;
+    }
+
+    /**
      * A mass update bypasses the product model, so its cache tags are cleaned here.
      *
      * @param array<int, int|string> $productIds

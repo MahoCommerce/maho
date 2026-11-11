@@ -56,12 +56,22 @@ function testEmailSpy(bool $sent): object
         /** @var list<array{recipient: string, subject: string}> */
         public array $sentTo = [];
 
+        /** @var list<array{recipient: string, subject: string}> */
+        public array $queued = [];
+
         public function __construct(private readonly bool $sent) {}
 
         #[\Override]
         protected function sendTemplate(Mage_Core_Model_Email_Template $template, string $recipient): bool
         {
             $this->sentTo[] = ['recipient' => $recipient, 'subject' => (string) $template->getTemplateSubject()];
+            return $this->sent;
+        }
+
+        #[\Override]
+        protected function queueTemplate(Mage_Core_Model_Email_Template $template, string $recipient): bool
+        {
+            $this->queued[] = ['recipient' => $recipient, 'subject' => (string) $template->getTemplateSubject()];
             return $this->sent;
         }
     };
@@ -151,4 +161,33 @@ it('sends the test email without the queue and restores the developer mode', fun
     // Nothing listens on the port, so a direct send fails. A queued send would succeed
     expect($service->deliver($template, 'parity@example.test'))->toBeFalse()
         ->and(Mage::getIsDeveloperMode())->toBeFalse();
+});
+
+/**
+ * @return array{code: int, output: string}
+ */
+function testEmailViaQueueCli(string $recipient): array
+{
+    $command = new \MahoCLI\Commands\EmailTestQueue();
+    new Application()->addCommand($command);
+    $tester = new CommandTester($command);
+    $code = $tester->execute(['recipient' => $recipient], ['interactive' => false]);
+    return ['code' => $code, 'output' => $tester->getDisplay()];
+}
+
+it('queues the test email of email:test:queue with the checks and the text of email:test:send', function (): void {
+    $spy = testEmailSpy(true);
+
+    $invalid = testEmailViaQueueCli('not-an-address');
+    $queued = testEmailViaQueueCli('queue@example.test');
+    testEmailViaCli('queue@example.test');
+    Mage::app()->getStore()->setConfig('system/smtp/enabled', 'disabled');
+    $noTransport = testEmailViaQueueCli('queue@example.test');
+
+    expect($invalid['code'])->toBe(Command::INVALID)
+        ->and($invalid['output'])->toContain('Invalid email address.')
+        ->and($queued['code'])->toBe(Command::SUCCESS)
+        ->and($spy->queued)->toBe($spy->sentTo)
+        ->and($spy->queued)->toHaveCount(1)
+        ->and($noTransport['code'])->toBe(Command::FAILURE);
 });

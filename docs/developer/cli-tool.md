@@ -185,6 +185,30 @@ On MySQL, `db:export` and `db:import` give the password to the client in the `MY
 variable. A `password=` line in an option file such as `~/.my.cnf` has priority over it. If the
 commands fail with "Access denied", remove that line or make it match `local.xml`.
 
+### Configuration values
+
+`config:set` saves one value, and `import:config` saves each row of a CSV file. The two commands
+save through the field of **System > Configuration**, as the admin page and the API do. Thus
+the backend model of the field runs: a password field is encrypted, and a value that the
+field does not accept is refused. The commands also refuse a scope where the admin page does not
+show the field.
+
+```bash
+./maho config:set general/store_information/name "My Store" --scope default --scope-id 0
+./maho import:config var/import/config.csv
+```
+
+A path that no field of **System > Configuration** declares is refused, for example the path of an
+extension that has no `system.xml`. To save such a path, add `--undeclared`. The command then
+writes the value as it is, with no check:
+
+```bash
+./maho config:set mymodule/internal/flag 1 --scope default --scope-id 0 --undeclared
+./maho import:config var/import/config.csv --undeclared
+```
+
+With `--undeclared`, a path that a field declares still goes through its field.
+
 ## Give the input on the command line
 
 Each command takes its input as arguments and options. Run `./maho help <command>` to see them. If you

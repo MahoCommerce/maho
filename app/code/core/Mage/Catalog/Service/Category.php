@@ -310,21 +310,17 @@ class Mage_Catalog_Service_Category
     }
 
     /**
-     * Check the sort orders, the landing page and the image name, when they changed.
+     * Check that each code of the available sort orders $available and the default sort order $default is an
+     * attribute that a product listing can sort by.
      *
-     * @return array<string, string> the message for each invalid attribute
+     * @param array<array-key, mixed> $available
+     * @return array<string, string> the message for available_sort_by and for default_sort_by, when it is invalid
      */
-    private function getValueErrors(Category $category): array
+    public function getSortByErrors(array $available, ?string $default): array
     {
         $errors = [];
         $sortBy = array_keys(Mage::getSingleton('catalog/config')->getAttributeUsedForSortByArray());
-        $codes = match (true) {
-            !$category->dataHasChangedFor('available_sort_by') => [],
-            is_array($category->getData('available_sort_by')) => $category->getData('available_sort_by'),
-            default => [],
-        };
-        $default = $category->dataHasChangedFor('default_sort_by') ? $category->getData('default_sort_by') : null;
-        foreach (['available_sort_by' => $codes, 'default_sort_by' => is_string($default) && $default !== '' ? [$default] : []] as $field => $values) {
+        foreach (['available_sort_by' => $available, 'default_sort_by' => $default !== null && $default !== '' ? [$default] : []] as $field => $values) {
             foreach ($values as $value) {
                 if (!is_string($value) || !in_array($value, $sortBy, true)) {
                     $errors[$field] = Mage::helper('catalog')->__('Invalid sort-by code "%s". Valid: %s', is_scalar($value) ? (string) $value : gettype($value), implode(', ', $sortBy));
@@ -332,6 +328,23 @@ class Mage_Catalog_Service_Category
                 }
             }
         }
+        return $errors;
+    }
+
+    /**
+     * Check the sort orders, the landing page and the image name, when they changed.
+     *
+     * @return array<string, string> the message for each invalid attribute
+     */
+    private function getValueErrors(Category $category): array
+    {
+        $codes = match (true) {
+            !$category->dataHasChangedFor('available_sort_by') => [],
+            is_array($category->getData('available_sort_by')) => $category->getData('available_sort_by'),
+            default => [],
+        };
+        $default = $category->dataHasChangedFor('default_sort_by') ? $category->getData('default_sort_by') : null;
+        $errors = $this->getSortByErrors($codes, is_string($default) ? $default : null);
 
         $landingPage = $category->getData('landing_page');
         if ($category->dataHasChangedFor('landing_page') && is_numeric($landingPage) && (int) $landingPage > 0

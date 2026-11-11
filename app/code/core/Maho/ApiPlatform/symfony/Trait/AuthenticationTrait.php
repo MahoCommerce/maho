@@ -133,6 +133,27 @@ trait AuthenticationTrait
     }
 
     /**
+     * Refuse a caller that may not reach the data of $customer, such as its addresses. A customer token reaches
+     * its own customer. A backend token (an admin token or a service token, whose permission the operation
+     * checks) reaches a customer of a website in its allowlist.
+     */
+    protected function assertCustomerReachable(\Mage_Customer_Model_Customer $customer, string $message = 'You can only access your own data'): void
+    {
+        $user = $this->security?->getUser();
+        if ($user instanceof ApiUser && ($this->isAdmin() || $user->isApiUser())) {
+            /** @var \Mage_Catalog_Service_Product $catalog */
+            $catalog = \Mage::getService('catalog/product');
+            $websiteIds = $catalog->getWebsiteIds($user->getAllowedStoreIds());
+            if ($websiteIds !== null && !in_array((int) $customer->getWebsiteId(), $websiteIds, true)) {
+                throw new AccessDeniedHttpException("Access denied for this customer's website");
+            }
+            return;
+        }
+
+        $this->assertCustomerAccess((int) $customer->getId(), $message);
+    }
+
+    /**
      * The authenticated principal. No principal means the caller is
      * unauthenticated, so absence is a 401, never a 403.
      */

@@ -19,12 +19,13 @@ const ORDERS_HEADER = ['reference', 'store_code', 'hours_ago', 'status', 'email'
 
 /**
  * @param list<list<string>> $rows
+ * @param list<string> $extraColumns columns after the columns of ORDERS_HEADER
  */
-function ordersCsv(array $rows): string
+function ordersCsv(array $rows, array $extraColumns = []): string
 {
     $path = tempnam(sys_get_temp_dir(), 'orders') . '.csv';
     $handle = fopen($path, 'w');
-    foreach ([ORDERS_HEADER, ...$rows] as $row) {
+    foreach ([[...ORDERS_HEADER, ...$extraColumns], ...$rows] as $row) {
         fputcsv($handle, $row, escape: '\\');
     }
     fclose($handle);
@@ -171,4 +172,82 @@ it('rejects an unknown sku, a bad item, a bad status and a missing region before
     ]);
     expect(fn() => $importer->validate($path))->toThrow(RowException::class, "line 3: reference 'IMP-ORD-7' is also on line 2");
     expect(Mage::getResourceModel('sales/order_collection')->addFieldToFilter('ext_order_id', ['like' => 'IMP-ORD-%'])->getSize())->toBe(0);
+});
+
+it('reports a row with a coupon code that does not apply as failed, and places no order for it', function (): void {
+    $item = loadSimplePricedProduct()->getSku() . ':1';
+    $path = ordersCsv([[...ordersRow('IMP-ORD-8', 'processing', 1, 'imp.guest@example.org', $item), 'NO-SUCH-COUPON']], ['coupon_code']);
+
+    expect(fn() => (new Orders())->import($path, [Orders::OPTION_SKIP_STATISTICS => true]))
+        ->toThrow(RowException::class, "Coupon code 'NO-SUCH-COUPON' is not valid");
+    expect(Mage::getResourceModel('sales/order_collection')->addFieldToFilter('ext_order_id', 'IMP-ORD-8')->getSize())->toBe(0);
+    unlink($path);
+});
+
+it('reports a row with a disabled product as failed, and places no order for it', function (): void {
+    $product = Mage::getModel('catalog/product')->setStoreId(0)
+        ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+        ->setAttributeSetId(Mage::getModel('catalog/product')->getDefaultAttributeSetId())
+        ->setSku('pest-import-order-' . uniqid())->setName('Pest import order product')->setPrice(10.0)->setWeight(1)
+        ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_DISABLED)
+        ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
+        ->setTaxClassId(0)->setWebsiteIds([1])
+        ->setStockData(['use_config_manage_stock' => 0, 'manage_stock' => 0, 'is_in_stock' => 1]);
+    $product->save();
+    $path = ordersCsv([ordersRow('IMP-ORD-9', 'processing', 1, 'imp.guest@example.org', $product->getSku() . ':1')]);
+
+    try {
+        expect(fn() => (new Orders())->import($path, [Orders::OPTION_SKIP_STATISTICS => true]))
+            ->toThrow(RowException::class, "Product '{$product->getSku()}' is not available");
+        expect(Mage::getResourceModel('sales/order_collection')->addFieldToFilter('ext_order_id', 'IMP-ORD-9')->getSize())->toBe(0);
+    } finally {
+        $product->delete();
+        unlink($path);
+    }
+});
+
+it('moves an order to its status through the order service, with no email to the customer', function (): void {
+    $spy = new class extends Mage_Sales_Service_Order {
+        /** @var list<string> */
+        public array $calls = [];
+
+        #[\Override]
+        public function cancel(Mage_Sales_Model_Order $order, ?string $reason = null): Mage_Sales_Model_Order
+        {
+            $this->calls[] = 'cancel';
+            return parent::cancel($order, $reason);
+        }
+
+        #[\Override]
+        public function invoice(
+            Mage_Sales_Model_Order $order,
+            array $qtys = [],
+            ?string $captureCase = null,
+            ?string $comment = null,
+            bool $notifyCustomer = false,
+            bool $visibleOnFront = false,
+            ?bool $sendEmail = null,
+            bool $ship = false,
+            array $tracks = [],
+        ): Mage_Sales_Model_Order_Invoice {
+            $this->calls[] = 'invoice:' . $captureCase . ':' . var_export($sendEmail, true);
+            return parent::invoice($order, $qtys, $captureCase, $comment, $notifyCustomer, $visibleOnFront, $sendEmail, $ship, $tracks);
+        }
+    };
+    Mage::unregister('_service/sales/order');
+    Mage::register('_service/sales/order', $spy);
+    $item = loadSimplePricedProduct()->getSku() . ':1';
+    $path = ordersCsv([
+        ordersRow('IMP-ORD-10', 'canceled', 5, 'imp.guest@example.org', $item),
+        ordersRow('IMP-ORD-11', 'processing', 5, 'imp.guest@example.org', $item),
+    ]);
+
+    try {
+        (new Orders())->import($path, [Orders::OPTION_SKIP_STATISTICS => true]);
+    } finally {
+        Mage::unregister('_service/sales/order');
+        unlink($path);
+    }
+
+    expect($spy->calls)->toBe(['cancel', 'invoice:offline:false']);
 });

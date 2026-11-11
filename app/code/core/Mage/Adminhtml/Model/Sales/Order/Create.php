@@ -300,9 +300,10 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                 }
 
                 if ($qty > 0) {
-                    $item = $this->initFromOrderItem($orderItem, $qty);
-                    if (is_string($item)) {
-                        Mage::throwException($item);
+                    try {
+                        $this->initFromOrderItem($orderItem, $qty);
+                    } catch (Mage_Core_Exception $e) {
+                        $session->addError($e->getMessage());
                     }
                 }
             }
@@ -403,10 +404,11 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
     }
 
     /**
-     * Initialize creation data from existing order Item
+     * Add the product of $orderItem to the quote, with the options of the order item.
      *
      * @param int $qty
-     * @return Mage_Sales_Model_Quote_Item|string|$this
+     * @return Mage_Sales_Model_Quote_Item|$this
+     * @throws Mage_Core_Exception when the cart refuses the product
      */
     public function initFromOrderItem(Mage_Sales_Model_Order_Item $orderItem, $qty = null)
     {
@@ -445,10 +447,13 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             if (is_numeric($qty)) {
                 $buyRequest->setQty($qty);
             }
-            $item = $this->getQuote()->addProduct($product, $buyRequest);
-            if (is_string($item)) {
-                return $item;
-            }
+            $item = Mage::getService('checkout/cart')->addProduct(
+                $this->getQuote(),
+                $product,
+                $buyRequest,
+                Mage_Checkout_Model_Actor::Staff,
+                save: false,
+            );
 
             if ($additionalOptions = $orderItem->getProductOptionByCode('additional_options')) {
                 $item->addOption(new \Maho\DataObject(
@@ -575,11 +580,13 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                         ->load($item->getProduct()->getId());
 
                     $product->setSkipCheckRequiredOption();
-                    $newItem = $this->getQuote()->addProduct($product, $info);
-
-                    if (is_string($newItem)) {
-                        Mage::throwException($newItem);
-                    }
+                    $newItem = Mage::getService('checkout/cart')->addProduct(
+                        $this->getQuote(),
+                        $product,
+                        $info,
+                        Mage_Checkout_Model_Actor::Staff,
+                        save: false,
+                    );
                     $product->unsSkipCheckRequiredOption();
                     $newItem->checkData();
                     $this->_needCollectCart = true;
@@ -607,14 +614,18 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                             ]);
                         }
 
-                        $cartItem = $cart->addProduct($product, $info);
-                        if (is_string($cartItem)) {
-                            Mage::throwException($cartItem);
-                        }
+                        $cartItem = Mage::getService('checkout/cart')->addProduct(
+                            $cart,
+                            $product,
+                            $info,
+                            Mage_Checkout_Model_Actor::Staff,
+                            save: false,
+                        );
                         if ($cartItem->getParentItem()) {
                             $cartItem = $cartItem->getParentItem();
                         }
                         $cartItem->setPrice($item->getProduct()->getPrice());
+                        $cart->setTotalsCollectedFlag(false);
                         $this->_needCollectCart = true;
                         $removeItem = true;
                     }
@@ -667,9 +678,10 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             foreach ($data['add_order_item'] as $orderItemId => $value) {
                 /** @var Mage_Sales_Model_Order_Item $orderItem */
                 $orderItem = Mage::getModel('sales/order_item')->load($orderItemId);
-                $item = $this->initFromOrderItem($orderItem);
-                if (is_string($item)) {
-                    Mage::throwException($item);
+                try {
+                    $this->initFromOrderItem($orderItem);
+                } catch (Mage_Core_Exception $e) {
+                    $this->getSession()->addError($e->getMessage());
                 }
             }
         }
@@ -677,7 +689,12 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             foreach ($data['add_cart_item'] as $itemId => $qty) {
                 $item = $this->getCustomerCart()->getItemById($itemId);
                 if ($item) {
-                    $this->moveQuoteItem($item, 'order', $qty);
+                    try {
+                        $this->moveQuoteItem($item, 'order', $qty);
+                    } catch (Mage_Core_Exception $e) {
+                        $this->getSession()->addError($e->getMessage());
+                        continue;
+                    }
                     $this->removeItem($itemId, 'cart');
                 }
             }
@@ -1553,11 +1570,8 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             ];
             $quote->setReservedOrderId($orderData['increment_id']);
 
-            // The old order stays when the new order cannot be placed
             $orderService->validateQuote($quote, Mage_Checkout_Model_Actor::Staff);
-            $oldOrder->cancel();
-
-            if (!$oldOrder->isCanceled()) {
+            if (!$oldOrder->canCancel()) {
                 Mage::throwException('Could not cancel the old order during order edit.');
             }
         }
@@ -1576,6 +1590,19 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         }
         /** @var Mage_Sales_Model_Order $order */
         if ($oldOrder->getId()) {
+            // The old order and its payment stay as they are when the new order cannot be placed. The new order
+            // exists now, so a cancel that fails must not stop the link between the two orders
+            try {
+                $orderService->cancel($oldOrder);
+            } catch (Exception $e) {
+                Mage::logException($e);
+                $this->getSession()->addError(Mage::helper('adminhtml')->__(
+                    'The new order #%s was created, but the old order #%s was not canceled: %s',
+                    $order->getIncrementId(),
+                    $oldOrder->getIncrementId(),
+                    $e->getMessage(),
+                ));
+            }
             $oldOrder->setRelationChildId((string) $order->getId());
             $oldOrder->setRelationChildRealId($order->getIncrementId());
 

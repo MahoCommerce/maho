@@ -430,17 +430,71 @@ describe('the answers that each transport keeps (see #1348)', function () {
         expect(fn() => Mage::getService('newsletter/subscriber')->subscribe($email, (int) Mage::app()->getStore()->getId(), null, Mage_Newsletter_Model_Channel::Web))
             ->toThrow(Mage_Core_Exception_Forbidden::class, 'Guest subscription is not allowed. Please login first.');
     });
+});
 
-    it('subscribes the address of the account on the API and the address of the form on the footer', function () {
-        Mage::app()->getStore()->setConfig(Mage_Newsletter_Model_Subscriber::XML_PATH_CONFIRMATION_FLAG, '1');
+describe('a customer who gives an address that is not the address of the account', function () {
+    it('gets the confirmation request on both transports, also when the store asks no confirmation', function () {
+        $this->customer = newsletterParityCustomer();
+        $customerId = (int) $this->customer->getId();
+        Mage::getSingleton('customer/session')->setCustomer($this->customer);
+        $webEmail = newsletterParityEmail();
+        $apiEmail = newsletterParityEmail();
+
+        $api = newsletterViaApi('subscribe', $apiEmail, $customerId);
+        expect(newsletterViaFooter($webEmail))->toBe(['accepted' => true, 'messages' => ['Confirmation request has been sent.']])
+            ->and($api['messages'])->toBe(['A confirmation email has been sent. Please check your inbox.'])
+            ->and($api['dto']->email)->toBe($apiEmail)
+            ->and($api['dto']->customerId)->toBeNull()
+            ->and($api['dto']->subscriberId)->toBeNull();
+
+        foreach ([$webEmail, $apiEmail] as $email) {
+            $subscriber = newsletterParitySubscriber($email);
+            expect($subscriber->getStatus())->toBe(Mage_Newsletter_Model_Subscriber::STATUS_NOT_ACTIVE)
+                ->and($subscriber->getCustomerId())->toBe(0);
+        }
+        expect(newsletterParitySubscriber((string) $this->customer->getEmail())->getId())->toBeNull();
+    });
+
+    it('is refused on both transports when guests may not subscribe', function () {
+        Mage::app()->getStore()->setConfig(Mage_Newsletter_Model_Subscriber::XML_PATH_ALLOW_GUEST_SUBSCRIBE_FLAG, '0');
         $this->customer = newsletterParityCustomer();
         Mage::getSingleton('customer/session')->setCustomer($this->customer);
-        $other = newsletterParityEmail();
+        $email = newsletterParityEmail();
+        $message = 'You can subscribe only the email address of your account.';
 
-        expect(newsletterViaFooter($other)['messages'])->toBe(['Confirmation request has been sent.'])
-            ->and(newsletterParitySubscriber($other)->getCustomerId())->toBe(0)
-            ->and(newsletterViaApi('subscribe', newsletterParityEmail(), (int) $this->customer->getId())['dto']->email)
-            ->toBe($this->customer->getEmail());
+        $api = newsletterViaApi('subscribe', $email, (int) $this->customer->getId());
+        expect(newsletterViaFooter($email))->toBe(['accepted' => false, 'messages' => ["There was a problem with the subscription: {$message}"]])
+            ->and($api['status'])->toBe(403)
+            ->and($api['messages'])->toBe([$message])
+            ->and(newsletterParitySubscriber($email)->getId())->toBeNull();
+    });
+
+    it('gets the answer of a new address for an address that is already subscribed', function () {
+        $this->customer = newsletterParityCustomer();
+        Mage::getSingleton('customer/session')->setCustomer($this->customer);
+        $email = newsletterParityEmail();
+        Mage::getModel('newsletter/subscriber')
+            ->setEmail($email)
+            ->setStoreId((int) Mage::app()->getStore()->getId())
+            ->setSubscriberStatus(Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED)
+            ->save();
+
+        $api = newsletterViaApi('subscribe', $email, (int) $this->customer->getId());
+        expect(newsletterViaFooter($email))->toBe(['accepted' => true, 'messages' => ['Confirmation request has been sent.']])
+            ->and($api['messages'])->toBe(['A confirmation email has been sent. Please check your inbox.'])
+            ->and($api['dto']->subscriberId)->toBeNull()
+            ->and(newsletterParitySubscriber($email)->getStatus())->toBe(Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED);
+    });
+
+    it('subscribes the address of the account on the API when the body has this address', function () {
+        $this->customer = newsletterParityCustomer();
+        $customerId = (int) $this->customer->getId();
+
+        $api = newsletterViaApi('subscribe', (string) $this->customer->getEmail(), $customerId);
+        expect($api['messages'])->toBe(['You have been successfully subscribed to the newsletter.'])
+            ->and($api['dto']->customerId)->toBe($customerId)
+            ->and(newsletterParitySubscriber((string) $this->customer->getEmail())->getStatus())
+            ->toBe(Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED);
     });
 });
 

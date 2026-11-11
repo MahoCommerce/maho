@@ -39,6 +39,8 @@ class CustomerChangepassword extends BaseMahoCommand
         string $password,
         #[Option(description: 'The code of the website, when customers of more websites have the email')]
         ?string $website = null,
+        #[Option(description: 'Email the customer that the password changed')]
+        bool $notify = false,
     ): int {
         $this->initMaho();
 
@@ -63,7 +65,7 @@ class CustomerChangepassword extends BaseMahoCommand
             // The search loads a few attributes only, and a save writes only the attributes that the model loaded
             /** @var \Mage_Customer_Service_Customer $service */
             $service = Mage::getService('customer/customer');
-            $service->setPassword($service->requireById((int) $customer->getId()), trim($password));
+            $service->setPassword($service->requireById((int) $customer->getId()), trim($password), $notify);
         } catch (\Mage_Core_Exception_Input $e) {
             foreach ($e->getErrors() as $error) {
                 $io->writeln("<error>{$error['message']}</error>");

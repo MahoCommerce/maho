@@ -86,7 +86,7 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
             ) {
                 continue;
             }
-            if (!$this->isSectionAllowed($field['section'], $user)) {
+            if ($this->deniedSection($field, $user) !== null) {
                 continue;
             }
             $matching[] = $field;
@@ -251,15 +251,30 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
+     * A field that stores its value in another section needs access to the two sections, as in the admin.
+     *
      * @param FieldInfo $field
      */
     public function assertSectionAllowed(array $field, ApiUser $user): void
     {
-        if (!$this->isSectionAllowed($field['section'], $user)) {
+        $section = $this->deniedSection($field, $user);
+        if ($section !== null) {
             throw new AccessDeniedHttpException(
-                sprintf('Your admin role does not grant access to the configuration section "%s".', $field['section']),
+                sprintf('Your admin role does not grant access to the configuration section "%s".', $section),
             );
         }
+    }
+
+    /**
+     * @param FieldInfo $field
+     * @return string|null the first section of $field that the admin role of $user does not allow
+     */
+    private function deniedSection(array $field, ApiUser $user): ?string
+    {
+        return array_find(
+            $this->service()->getAclSections($field),
+            fn(string $section): bool => !$this->isSectionAllowed($section, $user),
+        );
     }
 
     public function service(): \Mage_Core_Service_Config

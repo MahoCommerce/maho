@@ -48,15 +48,12 @@ class AdminUserCreate extends BaseMahoCommand
         $this->initMaho();
 
         // A new user gets the first top-level role, which an install names Administrators
-        $role = Mage::getModel('admin/roles')->getCollection()
-            ->addFieldToFilter('role_type', 'G')
-            ->addFieldToFilter('tree_level', 1)
-            ->setOrder('role_id', 'ASC')
-            ->getFirstItem();
-        if (!$role->getId()) {
+        $roleId = Mage::getService('admin/user')->getDefaultRoleId();
+        if ($roleId === null) {
             $output->writeln('<error>No admin role found</error>');
             return Command::FAILURE;
         }
+        $role = Mage::getModel('admin/roles')->load($roleId);
 
         $user = Mage::getModel('admin/user')
             ->setUsername(trim($username))
@@ -68,7 +65,7 @@ class AdminUserCreate extends BaseMahoCommand
 
         return $this->runUserAction(
             $output,
-            fn(\Mage_Admin_Service_User $service) => $service->save($user, (int) $role->getId()),
+            fn(\Mage_Admin_Service_User $service) => $service->save($user, $roleId),
             "User {$user->getUsername()} created with {$role->getName()} role",
         );
     }

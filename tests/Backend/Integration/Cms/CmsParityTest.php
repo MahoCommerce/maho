@@ -364,6 +364,28 @@ describe('media upload', function (): void {
             ->and(Mage::getStorage('media')->fileExists($admin['path']))->toBeTrue();
     });
 
+    it('saves image bytes with the image type and the name rule of an upload', function (): void {
+        $tmp = (string) tempnam(sys_get_temp_dir(), 'cms');
+        imagepng(imagecreatetruecolor(3, 2), $tmp);
+        $bytes = (string) file_get_contents($tmp);
+        unlink($tmp);
+        $extension = cmsParityImageExtension();
+        /** @var Mage_Cms_Service_Media $service */
+        $service = Mage::getService('cms/media');
+
+        $first = $service->saveImage($this->root, $bytes, 'cms-parity-api');
+        $second = $service->saveImage($this->root, $bytes, 'cms-parity-api');
+        $service->delete($this->root, $second['file']);
+
+        expect($first['file'])->toBe('cms-parity-api' . $extension)
+            ->and($first['width'])->toBe(3)
+            ->and($first['height'])->toBe(2)
+            ->and($second['file'])->toBe('cms-parity-api_1' . $extension)
+            ->and(Mage::getStorage('media')->fileExists($first['path']))->toBeTrue()
+            ->and(fn() => $service->saveImage($this->root, 'not an image', 'cms-parity-admin'))
+            ->toThrow(Mage_Core_Exception::class);
+    });
+
     it('refuses a file that is not an image on the admin page and in the API', function (): void {
         foreach (['image' => 'cms-parity-admin.png', 'file' => 'cms-parity-api.png'] as $field => $name) {
             $tmp = (string) tempnam(sys_get_temp_dir(), 'cms');

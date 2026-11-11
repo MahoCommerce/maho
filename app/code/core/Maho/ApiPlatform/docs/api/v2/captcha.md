@@ -14,6 +14,8 @@ The frontend uses this to load the right widget (Turnstile, reCAPTCHA, etc.) and
 
 **Verification**, on form submission, include the solved token as `captchaToken` in the request body. The API dispatches `api_verify_captcha` and the active module verifies it.
 
+These operations check the token: `POST /contact`, `POST /newsletter/subscribe`, `POST /products/{productId}/reviews`, `POST /customers` (registration), `POST /customers/forgot-password` and `POST /customers/confirmation-link`, and the GraphQL mutations of the same actions. A missing or refused token gives a 422 with an entry for `captchaToken` in `details.errors`. An admin token, or a service token with a permission on the resource, needs no token on the newsletter and customer operations.
+
 ### Events
 
 | Event | Purpose | Observer parameters |

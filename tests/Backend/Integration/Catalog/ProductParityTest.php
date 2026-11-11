@@ -82,6 +82,23 @@ function productViaApi(array $body, ?int $id = null, bool $delete = false, ?arra
         ->process($delete ? null : $dto, $operation, $id ? ['id' => $id] : [], ['request' => $request]));
 }
 
+/**
+ * Send a fast update of the product $id: the attribute values, without a save of the product.
+ *
+ * @param array<string, mixed> $body the JSON body
+ * @return array{status: int, result: mixed, errors: list<string>, fields: list<string>}
+ */
+function productViaApiFast(array $body, int $id): array
+{
+    $request = AdminApiParity::jsonRequest('PUT', "/api/rest/v2/products/{$id}?fast=true", $body);
+    $dto = new Product();
+    foreach ($body as $property => $value) {
+        $dto->{$property} = $value;
+    }
+    return AdminApiParity::api($request, fn() => new ProductProcessor(AdminApiParity::adminSecurity())
+        ->process($dto, new Put(), ['id' => $id], ['request' => $request]));
+}
+
 function productParityCreate(string $sku): Mage_Catalog_Model_Product
 {
     /** @var Mage_Catalog_Service_Product $service */
@@ -237,5 +254,119 @@ describe('a store-restricted API token', function () {
         expect($api['status'])->toBe(403)
             ->and($api['errors'])->toBe(["Access denied for this product's websites"])
             ->and(Mage::getModel('catalog/product')->load($product->getId())->getId())->not->toBeNull();
+    });
+});
+
+describe('the change of the attribute set', function () {
+    it('refuses a set that does not exist on both transports', function () {
+        $product = productParityCreate('PEST-PARITY-SET');
+        $setId = (int) $product->getAttributeSetId();
+
+        $admin = AdminApiParity::admin(Mage_Adminhtml_Catalog_Product_Action_SetController::class, 'save', ['attribute_set' => 999999, 'product' => [(int) $product->getId()]]);
+        $api = productViaApi(['attributeSetId' => 999999], (int) $product->getId());
+
+        expect($admin['errors'])->toBe(['Attribute set 999999 not found'])
+            ->and($api['status'])->toBe(422)
+            ->and($api['errors'])->toBe($admin['errors'])
+            ->and((int) Mage::getModel('catalog/product')->load($product->getId())->getAttributeSetId())->toBe($setId);
+    });
+
+    it('refuses the attribute set of another entity type in the mass action of the admin', function () {
+        $product = productParityCreate('PEST-PARITY-SET-TYPE');
+        $setId = (int) $product->getAttributeSetId();
+        $categorySetId = (int) Mage::getModel('catalog/category')->getDefaultAttributeSetId();
+
+        $admin = AdminApiParity::admin(Mage_Adminhtml_Catalog_Product_Action_SetController::class, 'save', ['attribute_set' => $categorySetId, 'product' => [(int) $product->getId()]]);
+
+        expect($admin['errors'])->toBe(["Attribute set {$categorySetId} not found"])
+            ->and((int) Mage::getModel('catalog/product')->load($product->getId())->getAttributeSetId())->toBe($setId);
+    });
+});
+
+describe('a fast update of the API', function () {
+    it('writes the tax class', function () {
+        $product = productParityCreate('PEST-PARITY-FAST-TAX');
+
+        $api = productViaApiFast(['taxClassId' => 2], (int) $product->getId());
+
+        expect($api['status'])->toBe(200)
+            ->and((int) Mage::getModel('catalog/product')->load($product->getId())->getTaxClassId())->toBe(2);
+    });
+
+    it('saves the product for a change of the SKU, as an update without the fast flag does', function () {
+        $product = productParityCreate('PEST-PARITY-FAST-SKU');
+
+        $api = productViaApiFast(['sku' => 'PEST-PARITY-FAST-SKU-NEW'], (int) $product->getId());
+
+        expect($api['status'])->toBe(200)
+            ->and(Mage::getModel('catalog/product')->load($product->getId())->getSku())->toBe('PEST-PARITY-FAST-SKU-NEW');
+    });
+
+    it('refuses an attribute set that does not exist, as an update without the fast flag does', function () {
+        $product = productParityCreate('PEST-PARITY-FAST-SET');
+
+        $full = productViaApi(['attributeSetId' => 999999], (int) $product->getId());
+        $fast = productViaApiFast(['attributeSetId' => 999999], (int) $product->getId());
+
+        expect($fast['status'])->toBe(422)
+            ->and($fast['errors'])->toBe($full['errors']);
+    });
+
+    it('stores the URL key in the format of an update without the fast flag', function () {
+        $full = productParityCreate('PEST-PARITY-FAST-KEY-A');
+        $fast = productParityCreate('PEST-PARITY-FAST-KEY-B');
+
+        productViaApi(['urlKey' => 'Pest Parity KEY one'], (int) $full->getId());
+        $api = productViaApiFast(['urlKey' => 'Pest Parity KEY one'], (int) $fast->getId());
+
+        $fullKey = Mage::getModel('catalog/product')->load($full->getId())->getUrlKey();
+        expect($api['status'])->toBe(200)
+            ->and($fullKey)->not->toContain(' ')
+            ->and(Mage::getModel('catalog/product')->load($fast->getId())->getUrlKey())->toBe($fullKey);
+    });
+});
+
+describe('a mass change of products', function () {
+    it('refuses the attributes, the stock and the websites when a product has no SKU', function () {
+        $product = productParityCreate('PEST-PARITY-NO-SKU');
+        $productId = (int) $product->getId();
+        $resource = Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        $write->update($resource->getTableName('catalog/product'), ['sku' => ''], ['entity_id = ?' => $productId]);
+        $message = 'Some of the processed products have no SKU value defined. Please fill it prior to performing operations on these products.';
+
+        try {
+            /** @var Mage_Catalog_Service_Product $service */
+            $service = Mage::getService('catalog/product');
+            /** @var Mage_CatalogInventory_Service_Stock $stock */
+            $stock = Mage::getService('cataloginventory/stock');
+
+            expect(fn() => $service->updateAttributes([$productId], ['name' => 'Pest Parity Renamed'], 0))->toThrow(Mage_Core_Exception::class, $message)
+                ->and(fn() => $stock->updateProducts([$productId], ['qty' => 3]))->toThrow(Mage_Core_Exception::class, $message)
+                ->and(fn() => $service->changeWebsites([$productId], [], [1]))->toThrow(Mage_Core_Exception::class, $message)
+                ->and(Mage::getModel('catalog/product')->load($productId)->getName())->toBe('Pest Parity Existing');
+        } finally {
+            $write->update($resource->getTableName('catalog/product'), ['sku' => 'PEST-PARITY-NO-SKU'], ['entity_id = ?' => $productId]);
+        }
+    });
+});
+
+describe('single store mode', function () {
+    it('puts a product of the API in the one website, as the admin product page does', function () {
+        $app = Mage::app();
+        $property = new ReflectionProperty(Mage_Core_Model_App::class, '_isSingleStore');
+        $before = $property->getValue($app);
+        $property->setValue($app, true);
+
+        try {
+            $api = productViaApi(['sku' => 'PEST-PARITY-SINGLE', 'name' => 'Pest Parity Product', 'price' => 10.0, 'websiteIds' => []]);
+            $productId = Mage::getService('catalog/product')->getIdBySku('PEST-PARITY-SINGLE');
+
+            expect($api['status'])->toBe(200)
+                ->and(array_map(intval(...), Mage::getModel('catalog/product')->load($productId)->getWebsiteIds()))
+                ->toBe([(int) Mage::app()->getStore(true)->getWebsiteId()]);
+        } finally {
+            $property->setValue($app, $before);
+        }
     });
 });

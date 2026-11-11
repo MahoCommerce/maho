@@ -14,8 +14,14 @@ Go to **System > Configuration > Sales > Checkout**, group **Checkout Options**,
 **Allow Guest Checkout**. With Yes (the default), a customer can check out as a guest. With No,
 the customer must register or log in.
 
-The storefront checkout and the API apply the same setting: with No, the API refuses an order
-from a guest cart. An order that you create in the admin can be a guest order in any store view.
+The storefront checkout and the API apply the same setting: with No, the store refuses an order
+from a guest cart, also when the customer pays with PayPal. An order that you create in the admin
+can be a guest order in any store view. The same is true for an order of the point of sale, and of
+an API client that has the permission to write orders.
+
+A guest order needs a valid email address. It also needs each field that the **Checkout
+Registration** form makes required, such as the date of birth or the tax/VAT number. The
+storefront checkout and the API apply the same rule.
 
 The setting has the scope **[STORE VIEW]**, so each store view can have its own value (see
 [Scope](scope.md)). When guest checkout seems on in **Default Config** but a store view still asks

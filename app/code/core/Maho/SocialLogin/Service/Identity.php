@@ -40,6 +40,8 @@ class Maho_SocialLogin_Service_Identity
      * @return array{customer: Mage_Customer_Model_Customer, is_new: bool, profile_incomplete: bool}
      * @throws Mage_Core_Exception_TooManyRequests when the client is over its limit, or over the registration limit
      *                                              of Mage_Customer_Service_Customer::register() for a new account
+     * @throws Mage_Core_Exception_Forbidden when the store has the customer accounts turned off, or when the account
+     *                                        is not active
      * @throws Maho_SocialLogin_Model_ProviderUnavailableException when the provider does not answer
      * @throws Mage_Core_Exception With a user-facing message on any failure
      */
@@ -56,6 +58,10 @@ class Maho_SocialLogin_Service_Identity
         if (!$this->getRateLimiter($storeId)->attempt()) {
             throw new Mage_Core_Exception_TooManyRequests($helper->__('Too many requests. Please try again later.'), self::RATE_LIMIT_WINDOW);
         }
+
+        /** @var Mage_Customer_Service_Customer $customers */
+        $customers = Mage::getService('customer/customer');
+        $customers->assertAccountsEnabled($storeId);
 
         $providerModel = $this->getProvider($provider);
         if (!$providerModel->isEnabled($storeId) || $token === '') {
@@ -87,11 +93,11 @@ class Maho_SocialLogin_Service_Identity
             $isWebsiteScope ? $websiteId : null,
         );
         if ($identity->getId()) {
-            $customer = Mage::getService('customer/customer')->getById($identity->getCustomerId());
+            $customer = $customers->getById($identity->getCustomerId());
             if (!$customer) {
                 Mage::throwException($helper->__('The linked customer account no longer exists.'));
             }
-            $this->assertUsable($customer);
+            $customers->assertActive($customer);
             if ($identity->getProviderEmail() !== $claims['email']) {
                 $identity->setProviderEmail($claims['email'])->save();
             }
@@ -100,12 +106,10 @@ class Maho_SocialLogin_Service_Identity
 
         $customer = $this->loadCustomerByEmail($claims['email'], $isWebsiteScope ? $websiteId : null);
         if ($customer->getId()) {
-            $this->assertUsable($customer);
+            $customers->assertActive($customer);
             // The provider proved ownership of this address, which is exactly what a
             // pending email confirmation would prove; clear it so login can proceed.
-            if ($customer->getConfirmation()) {
-                Mage::getService('customer/customer')->save($customer->setConfirmation(null));
-            }
+            $customers->confirmVerified($customer);
             $this->createLink($customer, $websiteId, $provider, $claims);
             Mage::log(
                 "Auto-linked {$provider} identity to customer {$customer->getId()} by verified email",
@@ -205,13 +209,6 @@ class Maho_SocialLogin_Service_Identity
         $customer->setPassword(Mage::helper('core')->getRandomString(32));
 
         return Mage::getService('customer/customer')->register($customer, $storeId);
-    }
-
-    protected function assertUsable(Mage_Customer_Model_Customer $customer): void
-    {
-        if (!$customer->getIsActive()) {
-            Mage::throwException(Mage::helper('sociallogin')->__('This account is not active.'));
-        }
     }
 
     /** The token endpoint has its own counter. */

@@ -16,6 +16,7 @@ use Mage_Adminhtml_Model_Config_Data as ConfigData;
  * @phpstan-type FieldInfo array{
  *     path: string,
  *     section: string,
+ *     targetSection: string,
  *     group: string,
  *     field: string,
  *     label: string,
@@ -86,6 +87,41 @@ class Mage_Core_Service_Config
             ConfigData::SCOPE_STORES => $field['showInStore'],
             default => $field['showInDefault'],
         };
+    }
+
+    /**
+     * Whether the field node $fieldNode of system.xml shows at $scope. A node without a label counts too:
+     * the admin form sends it.
+     */
+    public function isNodeShownAtScope(\Maho\Simplexml\Element $fieldNode, string $scope): bool
+    {
+        return (bool) (int) match ($scope) {
+            ConfigData::SCOPE_WEBSITES => $fieldNode->show_in_website,
+            ConfigData::SCOPE_STORES => $fieldNode->show_in_store,
+            default => $fieldNode->show_in_default,
+        };
+    }
+
+    /**
+     * @return string|null the path that the field node $fieldNode names in config_path, when it stores its
+     *                     value outside its own group
+     */
+    public function getConfigPath(\Maho\Simplexml\Element $fieldNode): ?string
+    {
+        $configPath = isset($fieldNode->config_path) ? trim((string) $fieldNode->config_path, '/') : '';
+        return str_contains($configPath, '/') ? $configPath : null;
+    }
+
+    /**
+     * The sections that a client needs access to for $field: the section that shows the field, and the
+     * section that holds its value when config_path names another one.
+     *
+     * @param FieldInfo $field
+     * @return list<string>
+     */
+    public function getAclSections(array $field): array
+    {
+        return array_values(array_unique([$field['section'], $field['targetSection']]));
     }
 
     /**
@@ -273,6 +309,7 @@ class Mage_Core_Service_Config
         return [
             'path' => $path,
             'section' => $sectionCode,
+            'targetSection' => $sectionCode,
             'group' => $groupCode,
             'field' => $fieldCode,
             'label' => $fieldCode,
@@ -319,14 +356,12 @@ class Mage_Core_Service_Config
                 continue;
             }
 
-            $configPath = isset($fieldNode->config_path) ? trim((string) $fieldNode->config_path, '/') : '';
-            $path = $configPath !== '' && str_contains($configPath, '/')
-                ? $configPath
-                : $section . '/' . $group . '/' . $fieldCode;
+            $path = $this->getConfigPath($fieldNode) ?? $section . '/' . $group . '/' . $fieldCode;
 
             $fields[$path] = [
                 'path' => $path,
                 'section' => $section,
+                'targetSection' => explode('/', $path)[0],
                 'group' => $group,
                 'field' => (string) $fieldCode,
                 'label' => $this->label($fieldNode),
@@ -336,9 +371,9 @@ class Mage_Core_Service_Config
                 'frontendType' => isset($fieldNode->frontend_type) ? (string) $fieldNode->frontend_type : 'text',
                 'backendModel' => isset($fieldNode->backend_model) ? (string) $fieldNode->backend_model : null,
                 'sourceModel' => isset($fieldNode->source_model) ? (string) $fieldNode->source_model : null,
-                'showInDefault' => (bool) (int) $fieldNode->show_in_default,
-                'showInWebsite' => (bool) (int) $fieldNode->show_in_website,
-                'showInStore' => (bool) (int) $fieldNode->show_in_store,
+                'showInDefault' => $this->isNodeShownAtScope($fieldNode, ConfigData::SCOPE_DEFAULT),
+                'showInWebsite' => $this->isNodeShownAtScope($fieldNode, ConfigData::SCOPE_WEBSITES),
+                'showInStore' => $this->isNodeShownAtScope($fieldNode, ConfigData::SCOPE_STORES),
             ];
         }
     }

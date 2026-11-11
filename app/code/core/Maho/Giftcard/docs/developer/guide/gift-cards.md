@@ -196,17 +196,9 @@ $giftcard->setData([
     'expires_at' => $helper->calculateExpirationDate(),
 ]);
 $giftcard->setWebsiteIds([$websiteId]);
+// The first save writes the "created" history entry, with this comment
+$giftcard->setCreationComment('Programmatically created');
 $giftcard->save();
-
-// Record creation in history
-Mage::getModel('giftcard/history')->setData([
-    'giftcard_id' => $giftcard->getId(),
-    'action' => 'created',
-    'base_amount' => $giftcard->getBalance(),
-    'balance_before' => 0,
-    'balance_after' => $giftcard->getBalance(),
-    'comment' => 'Programmatically created',
-])->save();
 ```
 
 `save()` refuses a new card, or a changed balance, above `getMaxBalance()` with a `Mage_Core_Exception_Input`.

@@ -130,3 +130,27 @@ it('moves an item to the cart with its options on both transports', function () 
         ->and(wishlistMoveOptionValues($webQuote, $this->optionId))->toBe(['For Jane'])
         ->and(wishlistMoveOptionValues($apiQuote, $this->optionId))->toBe(['For Jane']);
 });
+
+it('moves the qty of the item when the API client sends no qty, as the wishlist page does', function (string $transport) {
+    $itemId = (int) Mage::getService('wishlist/wishlist')
+        ->addProduct($this->wishlist, (int) $this->product->getId(), new Maho\DataObject(['qty' => 3]), 1)
+        ->getId();
+    $request = Symfony\Component\HttpFoundation\Request::create(
+        "/api/rest/v2/customers/me/wishlist/{$itemId}/move-to-cart",
+        'POST',
+        server: ['CONTENT_TYPE' => 'application/json'],
+        content: '{}',
+    );
+    $processor = new WishlistProcessor(wishlistMoveSecurity((int) $this->customer->getId()));
+
+    $api = AdminApiParity::api($request, fn() => $transport === 'REST'
+        ? $processor->process(new Mage\Wishlist\Api\WishlistItem(), new Post(name: 'move_to_cart'), ['id' => $itemId], ['request' => $request])
+        : $processor->process(null, new Post(name: 'moveToCart'), [], ['request' => $request, 'args' => ['input' => ['itemId' => $itemId]]]));
+    $quote = Mage::getService('checkout/cart')->getForCustomer((int) $this->customer->getId(), 1);
+    $this->quotes[] = $quote;
+
+    $lines = Mage::getModel('sales/quote')->loadByIdWithoutStore($quote->getId())->getAllVisibleItems();
+    expect($api['errors'])->toBe([])
+        ->and($lines)->toHaveCount(1)
+        ->and((float) $lines[0]->getQty())->toBe(3.0);
+})->with(['REST', 'GraphQL']);

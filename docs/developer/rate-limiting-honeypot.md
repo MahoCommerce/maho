@@ -79,6 +79,40 @@ Do not use `ipRateLimiter()`. It is deprecated since 26.9. It allows one request
 
 A public endpoint reads its budget from `system/rate_limit/<key>`. Add a positive default in `config.xml`, and add a field under "Per-endpoint Limits" in `system.xml`. Without a default, the limit is off.
 
+### The keys of the core modules
+
+Each key is a field under **System > Configuration > Advanced > System > Rate limit > Per-endpoint
+Limits**. The module that owns the feature adds the field, so a disabled module has no field.
+A value of `0` turns the limit off.
+
+| Key (`system/rate_limit/...`) | Module | Default | What it counts |
+|---|---|---|---|
+| `admin_reset_password` | Mage_Admin | 10 per hour | Per client. Counts only a rejected admin password reset link. |
+| `auth_token_ip` | Mage_Api | 20 per minute | Per IP address. Counts each request to `/api/rest/v2/auth/token` and each social sign-in attempt on the storefront. |
+| `customer_login` | Mage_Api | 5 per minute | Per email or credential. Covers the storefront login, the GraphQL `customerLogin` mutation and each grant of `/auth/token`. |
+| `contact` | Mage_Contacts | 3 per hour | Per client and per email address. Covers the contact form and `POST /contact`. |
+| `contact_auto_reply` | Mage_Contacts | 3 per hour | Per recipient address. Counts the auto-reply emails. The store still gets each message. |
+| `customer_register` | Mage_Customer | 10 per hour | Per IP address. |
+| `forgot_password` | Mage_Customer | 3 per hour | Per email address. |
+| `confirmation_link` | Mage_Customer | 3 per hour | Per IP address and per email address. Counts each request to send the confirmation link again. |
+| `magic_link_email` | Mage_Customer | 3 per hour | Per email address. |
+| `magic_link_ip` | Mage_Customer | 10 per hour | Per IP address. Higher than the email limit, for customers on a shared network. |
+| `reset_password` | Mage_Customer | 10 per hour | Per client. Counts only a rejected password reset link, account confirmation key or magic login link. |
+| `change_password` | Mage_Customer | 10 per hour | Per IP address and per customer. |
+| `downloadable_link` | Mage_Downloadable | 300 per hour | Per IP address. Counts only a hash that matches nothing. |
+| `newsletter_subscribe` | Mage_Newsletter | 3 per hour | Per email address. |
+| `newsletter_unsubscribe` | Mage_Newsletter | 30 per hour | Per IP address. |
+| `reports_refresh` | Mage_Reports | 10 per minute | Per admin user or API caller. |
+| `review_submit` | Mage_Review | 5 per hour | Per IP address. |
+| `guest_order_lookup` | Mage_Sales | 30 per hour | Per IP address. Counts only a failed lookup, on the guest order form and the API. |
+| `coupon_validate` | Mage_SalesRule | 60 per minute | Per IP address and per customer. |
+| `shipping_tracking` | Mage_Shipping | 60 per hour | Per IP address. Counts only a lookup that finds nothing. |
+| `wishlist_share` | Mage_Wishlist | 10 per hour | Per customer. Each share sends up to 5 emails. |
+| `giftcard_balance` | Maho_Giftcard | 10 per minute | Per IP address. |
+| `revocation_submit` | Maho_Revocation | 5 per hour | Per IP address. |
+| `revocation_receipt` | Maho_Revocation | 1 per day | Per recipient address. A request over the limit is still recorded, but the customer gets no receipt email. |
+| `revocation_merchant_notification` | Maho_Revocation | 100 per hour | Per store view. |
+
 ### The RateLimiter API
 
 | Method               | Behaviour |

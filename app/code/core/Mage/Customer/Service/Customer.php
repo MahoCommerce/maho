@@ -8,8 +8,8 @@
 
 declare(strict_types=1);
 
-use Maho\ApiPlatform\Trait\FilterValueTrait;
 use Maho\Security\RateLimitScope;
+use Mage_Customer_Model_Channel as Channel;
 use Mage_Customer_Model_Customer as Customer;
 
 /**
@@ -18,8 +18,6 @@ use Mage_Customer_Model_Customer as Customer;
  */
 class Mage_Customer_Service_Customer
 {
-    use FilterValueTrait;
-
     /**
      * Get customer by ID
      */
@@ -58,6 +56,11 @@ class Mage_Customer_Service_Customer
     public const XML_PATH_CHANGE_PASSWORD_RATE_LIMIT = 'system/rate_limit/change_password';
     /** Counts only a rejected token: a password reset link, an account confirmation key or a magic login link */
     public const XML_PATH_TOKEN_RATE_LIMIT = 'system/rate_limit/reset_password';
+    public const XML_PATH_CONFIRMATION_LINK_RATE_LIMIT = 'system/rate_limit/confirmation_link';
+
+    public const XML_PATH_ACCOUNTS_ENABLED = 'customer/account/enabled_in_frontend';
+    public const XML_PATH_ALLOW_2FA = 'customer/password/allow_2fa';
+    public const XML_PATH_REQUIRE_2FA = 'customer/password/require_2fa';
 
     public const RATE_LIMIT_WINDOW = 3600;
     public const LOGIN_RATE_LIMIT_WINDOW = 60;
@@ -72,11 +75,50 @@ class Mage_Customer_Service_Customer
     }
 
     /**
+     * Return the customer $id for a client that already has a login, such as a token to refresh.
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity
+     * @throws Mage_Core_Exception_Forbidden when the account is not active
+     */
+    public function requireActiveById(int $id): Customer
+    {
+        $customer = $this->requireById($id);
+        $this->assertActive($customer);
+        return $customer;
+    }
+
+    /**
+     * Refuse a customer that an admin set to not active. Each login calls this: the password, a magic link,
+     * a social sign-in and a token refresh.
+     *
+     * @throws Mage_Core_Exception_Forbidden
+     */
+    public function assertActive(Customer $customer): void
+    {
+        if (!$customer->getIsActive()) {
+            throw new Mage_Core_Exception_Forbidden(Mage::helper('customer')->__('This account is not active.'));
+        }
+    }
+
+    /**
+     * Refuse a customer flow (register, log in) on a store that has the customer accounts turned off.
+     * $storeId defaults to the current store. A flow of the staff does not call this.
+     *
+     * @throws Mage_Core_Exception_Forbidden
+     */
+    public function assertAccountsEnabled(?int $storeId = null): void
+    {
+        if (!Mage::getStoreConfigFlag(self::XML_PATH_ACCOUNTS_ENABLED, $storeId)) {
+            throw new Mage_Core_Exception_Forbidden(Mage::helper('customer')->__('Customer accounts are not available in this store.'));
+        }
+    }
+
+    /**
      * Search customers like the admin customer grid, newest first.
      *
      * Every word of $search must appear in the email, the first name, the last name,
      * or the telephone of an address of the customer. The match ignores case.
-     * Only the first MAX_SEARCH_WORDS words count.
+     * Only the first Mage_Core_Helper_String::MAX_SEARCH_WORDS words count.
      * $email is an exact match and $telephone matches the start of an address telephone.
      *
      * @param int[]|null $websiteIds Restrict matches to these websites; null means unrestricted
@@ -125,7 +167,7 @@ class Mage_Customer_Service_Customer
             );
         }
 
-        $words = $this->searchWords($search);
+        $words = \Mage::helper('core/string')->splitSearchWords($search);
         if ($words !== []) {
             $eavConfig = \Mage::getSingleton('eav/config');
             $varcharTable = $resource->getTableName('customer_entity_varchar');
@@ -211,14 +253,32 @@ class Mage_Customer_Service_Customer
      * the magic login link in the passwordless mode, and the welcome email otherwise. $backUrl goes into the
      * confirmation link. $save saves the customer: a checkout gives the placement of its order, which saves the
      * customer with the order, so that a failed order leaves no account and sends no email.
+     * The API channel sends the solved CAPTCHA in $captchaToken. Maho_Captcha checks the storefront form before the
+     * controller.
      *
      * @param (Closure(): void)|null $save
+     * @throws Mage_Core_Exception_Forbidden when the store has the customer accounts turned off, or when an observer
+     *                                        of customer_registration_is_allowed refuses the registration
      * @throws Mage_Core_Exception_TooManyRequests when the client is over the registration limit
-     * @throws Mage_Core_Exception_Input with one error for each problem of the customer and of its new addresses
+     * @throws Mage_Core_Exception_Input with one error for each problem of the customer and of its new addresses,
+     *                                    or when the CAPTCHA refuses the token
      * @throws Mage_Core_Exception_Conflict when another customer has the email
      */
-    public function register(Customer $customer, int $storeId, string $backUrl = '', ?Closure $save = null): Customer
-    {
+    public function register(
+        Customer $customer,
+        int $storeId,
+        string $backUrl = '',
+        ?Closure $save = null,
+        Channel $channel = Channel::Web,
+        ?string $captchaToken = null,
+    ): Customer {
+        $this->assertAccountsEnabled($storeId);
+        if (!Mage::helper('customer')->isRegistrationAllowed()) {
+            throw new Mage_Core_Exception_Forbidden(Mage::helper('customer')->__('The registration of new customers is not allowed.'));
+        }
+        if ($channel === Channel::Api) {
+            Mage::helper('apiplatform')->assertCaptcha(['captchaToken' => $captchaToken]);
+        }
         $limit = (int) Mage::getStoreConfig(self::XML_PATH_REGISTER_RATE_LIMIT, $storeId);
         $this->attempt(Mage::helper('core')->rateLimiter('create_customer', $limit, self::RATE_LIMIT_WINDOW, RateLimitScope::Ip));
 
@@ -305,29 +365,47 @@ class Mage_Customer_Service_Customer
     }
 
     /**
-     * Save a customer for an admin, the CLI or an API integration. Another customer of the same website must not
-     * use its email: the resource model throws Mage_Core_Exception_Conflict.
+     * Save a customer for an admin, the CLI or an API integration. The customer must pass the checks of
+     * Mage_Customer_Model_Customer::validate(): the names, the email and the required profile fields. Another
+     * customer of the same website must not use its email: the resource model throws Mage_Core_Exception_Conflict.
+     * A caller that changes only the group or the newsletter subscription of many customers gives $validateProfile
+     * false: such a change must not fail on a customer whose stored profile has no value for a field that the
+     * store made required later.
+     * With $welcomeEmailStoreId, send the "confirmed" welcome email from that store when this save confirms
+     * an account that waited for its confirmation.
      *
-     * @throws Mage_Core_Exception_Input when the new email is not valid or the customer group does not exist
+     * @throws Mage_Core_Exception_Input with one error for each problem of the customer, or when the customer
+     *                                    group does not exist
      * @throws Mage_Core_Exception_Conflict when another customer has the email
      */
-    public function save(Customer $customer): Customer
+    public function save(Customer $customer, ?int $welcomeEmailStoreId = null, bool $validateProfile = true): Customer
     {
         $errors = new Mage_Core_Exception_Input();
-        if ($customer->dataHasChangedFor('email') && !Mage::helper('core')->isValidEmail((string) $customer->getEmail())) {
-            $errors->addError('email', Mage::helper('customer')->__('Invalid email address "%s".', $customer->getEmail()));
+        $emailError = Mage::helper('customer')->__('Invalid email address "%s".', $customer->getEmail());
+        if (!Mage::helper('core')->isValidEmail((string) $customer->getEmail())) {
+            $errors->addError('email', $emailError);
+        }
+        $result = $validateProfile ? $customer->validate() : true;
+        if (is_array($result)) {
+            $this->addModelErrors($errors, 'customer', array_diff($result, [$emailError]));
         }
         $this->checkGroup($customer, $errors);
         $errors->throwIfErrors();
 
+        $isConfirmation = $customer->getId() && $customer->getOrigData('confirmation') && !$customer->getConfirmation();
         $customer->save();
 
+        if ($isConfirmation && $welcomeEmailStoreId !== null) {
+            $this->sendConfirmedEmail($customer, $welcomeEmailStoreId);
+        }
         return $customer;
     }
 
     /**
-     * Save the changes that the customer made to their own account. With $currentPassword, check it first, unless
-     * the store registers customers without a password. A new email needs $currentPassword in that case too.
+     * Save the changes that the customer made to their own account. Check $currentPassword first when
+     * $requirePassword is true, when the customer changes the email, or when the transport gives a password. The
+     * storefront form requires the password for each change. The API requires it for a new email only. A store that
+     * registers customers without a password does not check it.
      * A new email or a new password, set with its confirmation,
      * ends the other sessions of the customer and invalidates the password reset link, and the customer gets an
      * email about the change at the old address.
@@ -342,13 +420,14 @@ class Mage_Customer_Service_Customer
         Customer $customer,
         #[\SensitiveParameter]
         ?string $currentPassword = null,
+        bool $requirePassword = false,
     ): Customer {
         $oldEmail = (string) $customer->getOrigData('email');
         $isChangeEmail = $oldEmail !== '' && $oldEmail !== (string) $customer->getEmail();
 
         if (!$this->isPasswordless()) {
-            if ($currentPassword !== null) {
-                $this->verifyPassword($customer, $currentPassword);
+            if ($requirePassword || $currentPassword !== null) {
+                $this->verifyPassword($customer, (string) $currentPassword);
             } elseif ($isChangeEmail) {
                 throw new Mage_Core_Exception_Input()
                     ->addError('current_password', Mage::helper('customer')->__('Enter your current password to change your email.'));
@@ -411,6 +490,7 @@ class Mage_Customer_Service_Customer
 
     /**
      * Set the password that an admin or the CLI chose for $customer. The other sessions of the customer end.
+     * With $notify, email the customer that the password changed.
      *
      * @throws Mage_Core_Exception_Input when the password is not valid
      */
@@ -418,10 +498,93 @@ class Mage_Customer_Service_Customer
         Customer $customer,
         #[\SensitiveParameter]
         string $password,
+        bool $notify = false,
     ): Customer {
         $this->applyPassword($customer, $password, null);
         $customer->save();
+        if ($notify) {
+            try {
+                $this->sendPasswordChangedEmail($customer);
+            } catch (Exception $e) {
+                Mage::logException($e);
+            }
+        }
         return $customer;
+    }
+
+    /**
+     * Email $customer a link to set a password, for an admin who does not choose the password. $isNew selects the
+     * welcome email of a new account.
+     */
+    public function sendPasswordLink(Customer $customer, bool $isNew = false): void
+    {
+        $customer->sendPasswordLinkEmail($isNew);
+    }
+
+    /**
+     * Return the secret of $customer for an authenticator app. Create and save it when the customer has none.
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity when the store does not allow 2FA
+     * @throws Mage_Core_Exception_Conflict when the customer already uses 2FA
+     */
+    public function getSecondFactorSecret(Customer $customer): string
+    {
+        $this->assertSecondFactorAllowed();
+        if ($customer->getTwofaEnabled()) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('customer')->__('Two-factor authentication is already enabled.'));
+        }
+        $secret = $customer->getTwofaSecret();
+        if ($secret === null) {
+            $secret = Mage::helper('core/security')->generateTotpSecret();
+            $customer->setTwofaSecret($secret)->save();
+        }
+        return $secret;
+    }
+
+    /**
+     * Turn 2FA on or off for $customer, who gives the current password. To turn it on, the customer also gives
+     * the $code of the authenticator app, which proves that the app has the secret.
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity when the store does not allow 2FA
+     * @throws Mage_Core_Exception_TooManyRequests when the client or the customer is over the password change limit
+     * @throws Mage_Core_Exception_Forbidden when the store requires 2FA and $enable is false
+     * @throws Mage_Core_Exception when $currentPassword is wrong, or with the code EXCEPTION_2FA_INVALID when $code
+     *                             is wrong
+     */
+    public function setSecondFactor(
+        Customer $customer,
+        #[\SensitiveParameter]
+        string $currentPassword,
+        bool $enable,
+        #[\SensitiveParameter]
+        ?string $code = null,
+    ): Customer {
+        $helper = Mage::helper('customer');
+        $this->assertSecondFactorAllowed();
+        $this->verifyPassword($customer, $currentPassword);
+
+        if (!$enable) {
+            if (Mage::getStoreConfigFlag(self::XML_PATH_REQUIRE_2FA)) {
+                throw new Mage_Core_Exception_Forbidden($helper->__('Two-factor authentication is required and cannot be disabled.'));
+            }
+            $customer->setTwofaEnabled(false)->setTwofaSecret(null)->save();
+            return $customer;
+        }
+        if ($customer->getTwofaSecret() === null || !$customer->verifyTwofaCode((string) $code)) {
+            throw new Mage_Core_Exception($helper->__('Invalid 2FA verification code'), Customer::EXCEPTION_2FA_INVALID);
+        }
+        $customer->setTwofaEnabled()->save();
+        return $customer;
+    }
+
+    /**
+     * @throws Mage_Core_Exception_NoSuchEntity
+     */
+    private function assertSecondFactorAllowed(): void
+    {
+        if (!Mage::getStoreConfigFlag(self::XML_PATH_ALLOW_2FA)) {
+            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('customer')->__('Two-factor authentication is not available.'));
+        }
     }
 
     /**
@@ -438,7 +601,8 @@ class Mage_Customer_Service_Customer
      * Mage_Customer_Model_Customer::authenticate(), with its code.
      *
      * @throws Mage_Core_Exception_TooManyRequests when the client or the email is over the login limit
-     * @throws Mage_Core_Exception_Forbidden when the account is not confirmed, with the code EXCEPTION_EMAIL_NOT_CONFIRMED
+     * @throws Mage_Core_Exception_Forbidden when the store has the customer accounts turned off, when the account is
+     *                                        not active, or when it is not confirmed (code EXCEPTION_EMAIL_NOT_CONFIRMED)
      * @throws Mage_Core_Exception
      */
     public function authenticate(
@@ -450,6 +614,7 @@ class Mage_Customer_Service_Customer
         #[\SensitiveParameter]
         ?string $twofaCode = null,
     ): Customer {
+        $this->assertAccountsEnabled();
         $this->checkLoginLimits($email);
         return $this->authenticateInWebsite($email, $password, $websiteId, $twofaCode);
     }
@@ -459,7 +624,8 @@ class Mage_Customer_Service_Customer
      * website, for a client that does not name its store. A wrong 2FA code stops the search: the password was right.
      *
      * @throws Mage_Core_Exception_TooManyRequests when the client or the email is over the login limit
-     * @throws Mage_Core_Exception_Forbidden when no website accepts the login and an account is not confirmed
+     * @throws Mage_Core_Exception_Forbidden when the store has the customer accounts turned off, or when no website
+     *                                        accepts the login and an account is not confirmed or not active
      * @throws Mage_Core_Exception
      */
     public function authenticateInAnyWebsite(
@@ -471,14 +637,15 @@ class Mage_Customer_Service_Customer
         #[\SensitiveParameter]
         ?string $twofaCode = null,
     ): Customer {
+        $this->assertAccountsEnabled();
         $this->checkLoginLimits($email);
         $websiteIds = array_unique([$websiteId, ...array_map(intval(...), array_keys(Mage::app()->getWebsites()))]);
-        $notConfirmed = $error = null;
+        $forbidden = $error = null;
         foreach ($websiteIds as $id) {
             try {
                 return $this->authenticateInWebsite($email, $password, $id, $twofaCode);
             } catch (Mage_Core_Exception_Forbidden $e) {
-                $notConfirmed ??= $e;
+                $forbidden ??= $e;
             } catch (Mage_Core_Exception $e) {
                 if ($e->getCode() === Customer::EXCEPTION_2FA_INVALID) {
                     throw $e;
@@ -486,7 +653,7 @@ class Mage_Customer_Service_Customer
                 $error = $e;
             }
         }
-        throw $notConfirmed ?? $error;
+        throw $forbidden ?? $error;
     }
 
     /**
@@ -525,7 +692,8 @@ class Mage_Customer_Service_Customer
     }
 
     /**
-     * @throws Mage_Core_Exception_Forbidden when the account is not confirmed, with the code EXCEPTION_EMAIL_NOT_CONFIRMED
+     * @throws Mage_Core_Exception_Forbidden when the account is not confirmed, with the code
+     *                                        EXCEPTION_EMAIL_NOT_CONFIRMED, or when it is not active
      * @throws Mage_Core_Exception
      */
     private function authenticateInWebsite(
@@ -550,21 +718,26 @@ class Mage_Customer_Service_Customer
             }
             throw $e;
         }
+        // After the password: only the owner of the account learns that it is not active
+        $this->assertActive($customer);
         return $customer;
     }
 
     /**
      * Email a password reset link to the customer of the website $websiteId that has $email. Throw nothing when
      * no customer has the email, or when the email fails, so that the answer does not show which addresses have
-     * an account.
+     * an account. The API channel sends the solved CAPTCHA in $captchaToken. Maho_Captcha checks the storefront
+     * form before the controller, and the admin channel asks no CAPTCHA.
      *
-     * @throws Mage_Core_Exception_Input when the email is empty or not valid
+     * @throws Mage_Core_Exception_Input when the email is empty or not valid, or when the CAPTCHA refuses the token
      * @throws Mage_Core_Exception_TooManyRequests when the client or the email is over its limit
      */
     public function sendPasswordResetLink(
         #[\SensitiveParameter]
         string $email,
         int $websiteId,
+        Channel $channel = Channel::Web,
+        ?string $captchaToken = null,
     ): void {
         $helper = Mage::helper('customer');
         $core = Mage::helper('core');
@@ -573,6 +746,9 @@ class Mage_Customer_Service_Customer
         }
         if (!$core->isValidEmail($email)) {
             throw new Mage_Core_Exception_Input()->addError('email', $helper->__('Invalid email address.'));
+        }
+        if ($channel === Channel::Api) {
+            Mage::helper('apiplatform')->assertCaptcha(['captchaToken' => $captchaToken]);
         }
 
         // The limit of the client comes first: a client that sends many addresses gets past the limit of one address
@@ -591,10 +767,54 @@ class Mage_Customer_Service_Customer
     }
 
     /**
+     * Email the confirmation link again to the customer of the website $websiteId that has $email and waits for
+     * a confirmation. Throw nothing when no such customer has the email, or when the email fails, so that the
+     * answer does not show which addresses have an account. The API channel sends the solved CAPTCHA in
+     * $captchaToken, and the admin channel asks no CAPTCHA.
+     *
+     * @throws Mage_Core_Exception_Input when the email is empty or not valid, or when the CAPTCHA refuses the token
+     * @throws Mage_Core_Exception_TooManyRequests when the client or the email is over its limit
+     */
+    public function sendConfirmationLink(
+        #[\SensitiveParameter]
+        string $email,
+        int $websiteId,
+        Channel $channel = Channel::Web,
+        ?string $captchaToken = null,
+    ): void {
+        $helper = Mage::helper('customer');
+        $core = Mage::helper('core');
+        if (!$core->isValidNotBlank($email)) {
+            throw new Mage_Core_Exception_Input()->addError('email', $helper->__('Please enter your email.'));
+        }
+        if (!$core->isValidEmail($email)) {
+            throw new Mage_Core_Exception_Input()->addError('email', $helper->__('Invalid email address.'));
+        }
+        if ($channel === Channel::Api) {
+            Mage::helper('apiplatform')->assertCaptcha(['captchaToken' => $captchaToken]);
+        }
+
+        // The limit of the client comes first: a client that sends many addresses gets past the limit of one address
+        $limit = (int) Mage::getStoreConfig(self::XML_PATH_CONFIRMATION_LINK_RATE_LIMIT);
+        $this->attempt($core->rateLimiter('confirmation_link', $limit, self::RATE_LIMIT_WINDOW, RateLimitScope::Ip));
+        $this->attempt($core->rateLimiterBy('confirmation_link', 'confirmation_link:email:' . strtolower($email), $limit, self::RATE_LIMIT_WINDOW));
+
+        $customer = Mage::getModel('customer/customer')->setWebsiteId($websiteId)->loadByEmail($email);
+        if ($customer->getId() && $customer->getConfirmation()) {
+            try {
+                $this->sendNewAccountEmail($customer, 'confirmation', (int) $customer->getStoreId());
+            } catch (Exception $e) {
+                Mage::logException($e);
+            }
+        }
+    }
+
+    /**
      * Email a login link to the active customer of the website $websiteId that has $email. Throw nothing when
      * no active customer has the email, or when the email fails, so that the answer does not show which
      * addresses have an account.
      *
+     * @throws Mage_Core_Exception_Forbidden when the store has the customer accounts turned off
      * @throws Mage_Core_Exception_NoSuchEntity when the magic link login is disabled
      * @throws Mage_Core_Exception_Input when the email is empty or not valid
      * @throws Mage_Core_Exception_TooManyRequests when the client or the email is over its limit
@@ -606,6 +826,7 @@ class Mage_Customer_Service_Customer
     ): void {
         $helper = Mage::helper('customer');
         $core = Mage::helper('core');
+        $this->assertAccountsEnabled();
         if (!$helper->isMagicLinkEnabled()) {
             throw new Mage_Core_Exception_NoSuchEntity($helper->__('This sign-in method is not available.'));
         }
@@ -705,7 +926,8 @@ class Mage_Customer_Service_Customer
 
     /**
      * Confirm the account $customerId with the key of the confirmation link. Return the customer, with
-     * getIsJustConfirmed() true when the account was waiting for this confirmation.
+     * getIsJustConfirmed() true when the account was waiting for this confirmation. The customer then gets the
+     * "confirmed" welcome email.
      *
      * @throws Mage_Core_Exception_TooManyRequests when the client is over the limit of rejected tokens
      * @throws Mage_Core_Exception when the account or the key is wrong
@@ -727,9 +949,20 @@ class Mage_Customer_Service_Customer
             return $customer;
         });
 
+        return $this->confirmVerified($customer);
+    }
+
+    /**
+     * Confirm the account of $customer, whose email another step proved: the key of the confirmation link, or
+     * a social sign-in with this email. An account that waited for the confirmation gets getIsJustConfirmed() true
+     * and the "confirmed" welcome email.
+     */
+    public function confirmVerified(Customer $customer): Customer
+    {
         if ($customer->getConfirmation()) {
             $customer->setConfirmation(null)->save();
             $customer->setIsJustConfirmed(true);
+            $this->sendConfirmedEmail($customer, (int) $customer->getStoreId());
         }
         return $customer;
     }
@@ -738,12 +971,56 @@ class Mage_Customer_Service_Customer
      * Return the customer of the magic login link $token, and invalidate the link.
      *
      * @throws Mage_Core_Exception_TooManyRequests when the client is over the limit of rejected tokens
-     * @throws Mage_Core_Exception when the link is not valid or the account is not active
+     * @throws Mage_Core_Exception_Forbidden when the store has the customer accounts turned off, or when the
+     *                                        account is not active
+     * @throws Mage_Core_Exception when the link is not valid
      */
     public function getByMagicLinkToken(
         #[\SensitiveParameter]
         string $token,
     ): Customer {
+        $customer = $this->findByMagicLinkToken($token);
+        $customer->clearMagicLinkToken()->save();
+        return $customer;
+    }
+
+    /**
+     * Log in the customer of the magic login link $token, for a client that has no session to keep the customer
+     * between two requests. Check the 2FA code before the link becomes invalid, so that the client can send the
+     * same link again with the code.
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity when the magic link login is disabled
+     * @throws Mage_Core_Exception_TooManyRequests when the client is over the limit of rejected tokens or of logins
+     * @throws Mage_Core_Exception_Forbidden when the store has the customer accounts turned off, or when the
+     *                                        account is not active
+     * @throws Mage_Core_Exception when the link is not valid, or with the code EXCEPTION_2FA_INVALID when the
+     *                             customer uses 2FA and $twofaCode is empty or wrong
+     */
+    public function authenticateByMagicLink(
+        #[\SensitiveParameter]
+        string $token,
+        #[\SensitiveParameter]
+        ?string $twofaCode = null,
+    ): Customer {
+        if (!Mage::helper('customer')->isMagicLinkEnabled()) {
+            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('customer')->__('This sign-in method is not available.'));
+        }
+        $customer = $this->findByMagicLinkToken($token);
+        $this->verifySecondFactor($customer, (string) $twofaCode);
+        $customer->clearMagicLinkToken()->save();
+        return $customer;
+    }
+
+    /**
+     * @throws Mage_Core_Exception_TooManyRequests
+     * @throws Mage_Core_Exception_Forbidden
+     * @throws Mage_Core_Exception
+     */
+    private function findByMagicLinkToken(
+        #[\SensitiveParameter]
+        string $token,
+    ): Customer {
+        $this->assertAccountsEnabled();
         $helper = Mage::helper('customer');
         $customer = $this->checkToken(function () use ($token, $helper): Customer {
             /** @var Customer $customer */
@@ -760,10 +1037,7 @@ class Mage_Customer_Service_Customer
             return $customer;
         });
 
-        if (!$customer->getIsActive()) {
-            throw new Mage_Core_Exception($helper->__('This account is not active.'));
-        }
-        $customer->clearMagicLinkToken()->save();
+        $this->assertActive($customer);
         return $customer;
     }
 
@@ -778,6 +1052,27 @@ class Mage_Customer_Service_Customer
     protected function sendNewAccountEmail(Customer $customer, string $type, int $storeId, string $backUrl = ''): void
     {
         $customer->sendNewAccountEmail($type, $backUrl, $storeId);
+    }
+
+    /**
+     * Tell $customer by email that staff changed the password.
+     */
+    protected function sendPasswordChangedEmail(Customer $customer): void
+    {
+        $customer->sendPasswordReminderEmail();
+    }
+
+    /**
+     * Send the "confirmed" welcome email to $customer from the store $storeId. A failed email does not undo
+     * the confirmation.
+     */
+    private function sendConfirmedEmail(Customer $customer, int $storeId): void
+    {
+        try {
+            $this->sendNewAccountEmail($customer, 'confirmed', $storeId);
+        } catch (Exception $e) {
+            Mage::logException($e);
+        }
     }
 
     /**

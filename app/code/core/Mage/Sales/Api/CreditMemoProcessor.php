@@ -81,12 +81,22 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
+        $invoice = null;
+        if (isset($args['invoiceId'])) {
+            $invoice = \Mage::getModel('sales/order_invoice')->load((int) $args['invoiceId']);
+            if (!$invoice->getId() || (int) $invoice->getOrderId() !== (int) $order->getId()) {
+                throw new \Mage_Core_Exception_Input()->addError('invoice_id', \Mage::helper('sales')->__('Invoice not found'));
+            }
+            $invoice->setOrder($order);
+        }
+
         $creditmemo = $this->orderService->refund(
             $order,
             $data,
             $args['comment'] ?? null,
             (bool) ($args['offlineRefund'] ?? true),
             $backToStock,
+            invoice: $invoice,
         );
 
         return CreditMemo::fromModel($creditmemo);

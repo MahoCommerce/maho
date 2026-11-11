@@ -231,6 +231,16 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     }
 
     /**
+     * Return the one website of a store in single store mode, or null when the store has more than one store view.
+     *
+     * @return list<int>|null
+     */
+    public static function getSingleStoreWebsiteIds(): ?array
+    {
+        return Mage::app()->isSingleStoreMode() ? [(int) Mage::app()->getStore(true)->getWebsiteId()] : null;
+    }
+
+    /**
      * Get product name
      *
      * @return string|null
@@ -572,6 +582,11 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         $this->cleanCache();
         $this->setTypeHasOptions(false);
         $this->setTypeHasRequiredOptions(false);
+
+        $singleStoreWebsiteIds = self::getSingleStoreWebsiteIds();
+        if ($singleStoreWebsiteIds !== null) {
+            $this->setWebsiteIds($singleStoreWebsiteIds);
+        }
 
         $this->getTypeInstance(true)->beforeSave($this);
 

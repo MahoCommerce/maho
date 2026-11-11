@@ -370,7 +370,8 @@ class Attributes extends AbstractImporter
         }
         $ids = array_values(array_unique($ids));
         sort($ids);
-        Mage::getModel('core/config')->saveConfig(self::SWATCH_CONFIG_PATH, implode(',', $ids));
+        // The field does not exist when the swatches module is off
+        Mage::getService('core/config')->save(self::SWATCH_CONFIG_PATH, implode(',', $ids), allowUndeclared: true);
         Mage::app()->getCache()->cleanType('config');
     }
 

@@ -10,14 +10,22 @@ declare(strict_types=1);
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use Mage\Catalog\Api\BundleOptionProcessor;
+use Mage\Catalog\Api\BundleOptionProvider;
 use Mage\Catalog\Api\ConfigurableSetupProcessor;
 use Mage\Catalog\Api\ConfigurableSetupProvider;
+use Mage\Catalog\Api\DownloadableLinkProcessor;
+use Mage\Catalog\Api\DownloadableLinkProvider;
 use Mage\Catalog\Api\GroupedProductLinkProcessor;
 use Mage\Catalog\Api\GroupedProductLinkProvider;
 use Mage\Catalog\Api\ProductCustomOptionProcessor;
 use Mage\Catalog\Api\ProductCustomOptionProvider;
+use Mage\Catalog\Api\ProductGroupPriceProcessor;
+use Mage\Catalog\Api\ProductGroupPriceProvider;
 use Mage\Catalog\Api\ProductLinkProcessor;
 use Mage\Catalog\Api\ProductLinkProvider;
+use Mage\Catalog\Api\ProductMediaProcessor;
+use Mage\Catalog\Api\ProductMediaProvider;
 use Mage\Catalog\Api\ProductTierPriceProcessor;
 use Mage\Catalog\Api\ProductTierPriceProvider;
 use Tests\Helpers\AdminApiParity;
@@ -83,6 +91,27 @@ function productPartsProduct(string $sku, string $typeId = Mage_Catalog_Model_Pr
         ->setWebsiteIds([1])
         ->save();
     return $product;
+}
+
+/**
+ * Return a simple product with one required custom option.
+ */
+function productPartsProductWithRequiredOption(string $sku): Mage_Catalog_Model_Product
+{
+    $product = productPartsProduct($sku);
+    productPartsViaAdmin($product, function (Mage_Catalog_Model_Product $p): void {
+        $p->setProductOptions([['option_id' => '0', 'is_delete' => '', 'title' => 'Note', 'type' => 'field', 'is_require' => 1, 'price' => 0, 'price_type' => 'fixed']]);
+        $p->setCanSaveCustomOptions(true);
+    });
+    return $product;
+}
+
+/**
+ * @return list<int> the IDs of the custom options of the product $productId
+ */
+function productPartsOptionIds(int $productId): array
+{
+    return array_map(intval(...), Mage::getResourceModel('catalog/product_option_collection')->addProductToFilter($productId)->getAllIds());
 }
 
 beforeEach(function () {
@@ -197,5 +226,178 @@ describe('related links', function () {
 
         expect($api['status'])->toBe(404)
             ->and($api['errors'])->toBe(['Link not found']);
+    });
+});
+
+describe('group prices', function () {
+    it('refuses a negative price on both transports', function () {
+        $this->products[] = $product = productPartsProduct('parts-group-negative');
+        $row = ['website_id' => 0, 'cust_group' => 1, 'price' => -1];
+
+        $admin = productPartsViaAdmin($product, fn(Mage_Catalog_Model_Product $p) => $p->setGroupPrice([$row]));
+        $api = productPartsViaApi(ProductGroupPriceProcessor::class, ProductGroupPriceProvider::class, 'PUT', "/api/rest/v2/products/{$product->getId()}/group-prices", [['customerGroupId' => 1, 'price' => -1]], ['productId' => (int) $product->getId()]);
+
+        expect($admin)->toBe(['Price must not be negative'])
+            ->and($api['status'])->toBe(422)
+            ->and($api['errors'])->toBe($admin);
+    });
+});
+
+describe('bundle options', function () {
+    it('refuses an option without a title on both transports', function () {
+        $this->products[] = $bundle = productPartsProduct('parts-bundle-title', Mage_Catalog_Model_Product_Type::TYPE_BUNDLE);
+
+        $admin = productPartsViaAdmin($bundle, function (Mage_Catalog_Model_Product $p): void {
+            $p->setBundleOptionsData([['option_id' => '', 'delete' => '', 'title' => '', 'type' => 'select', 'required' => 1, 'position' => 0]]);
+            $p->setBundleSelectionsData([[]]);
+            $p->setCanSaveBundleSelections(true);
+        });
+        $api = productPartsViaApi(BundleOptionProcessor::class, BundleOptionProvider::class, 'POST', "/api/rest/v2/products/{$bundle->getId()}/bundle-options", ['title' => '', 'type' => 'select'], ['productId' => (int) $bundle->getId()]);
+
+        expect($admin)->toBe(['title is required'])
+            ->and($api['status'])->toBe(422)
+            ->and($api['errors'])->toBe($admin);
+    });
+
+    it('refuses a selection with a required custom option on both transports', function () {
+        $this->products[] = $bundle = productPartsProduct('parts-bundle-required', Mage_Catalog_Model_Product_Type::TYPE_BUNDLE);
+        $this->products[] = $child = productPartsProductWithRequiredOption('parts-bundle-required-child');
+        $childId = (int) $child->getId();
+
+        $admin = productPartsViaAdmin($bundle, function (Mage_Catalog_Model_Product $p) use ($childId): void {
+            $p->setBundleOptionsData([['option_id' => '', 'delete' => '', 'title' => 'Part', 'type' => 'select', 'required' => 1, 'position' => 0]]);
+            $p->setBundleSelectionsData([[[
+                'selection_id' => '', 'delete' => '', 'product_id' => $childId, 'selection_qty' => 1, 'selection_price_value' => 0,
+                'selection_price_type' => 0, 'selection_can_change_qty' => 1, 'is_default' => 0, 'position' => 0,
+            ]]]);
+            $p->setCanSaveBundleSelections(true);
+        });
+        $api = productPartsViaApi(BundleOptionProcessor::class, BundleOptionProvider::class, 'POST', "/api/rest/v2/products/{$bundle->getId()}/bundle-options", ['title' => 'Part', 'type' => 'select', 'selections' => [['productId' => $childId]]], ['productId' => (int) $bundle->getId()]);
+
+        expect($admin)->toBe(["Product {$childId} has a required custom option."])
+            ->and($api['status'])->toBe(422)
+            ->and($api['errors'])->toBe($admin);
+    });
+
+    it('deletes the custom options of a bundle that gets a dynamic price, and refuses a new one', function () {
+        $this->products[] = $bundle = productPartsProduct('parts-bundle-dynamic', Mage_Catalog_Model_Product_Type::TYPE_BUNDLE);
+        $bundleId = (int) $bundle->getId();
+        productPartsViaAdmin($bundle, function (Mage_Catalog_Model_Product $p): void {
+            $p->setData('price_type', Mage_Bundle_Model_Product_Price::PRICE_TYPE_FIXED);
+            $p->setProductOptions([['option_id' => '0', 'is_delete' => '', 'title' => 'Note', 'type' => 'field', 'is_require' => 0, 'price' => 1, 'price_type' => 'fixed']]);
+            $p->setCanSaveCustomOptions(true);
+        });
+        expect(productPartsOptionIds($bundleId))->toHaveCount(1);
+
+        // A save that does not come from the admin product page, so the observer of that page does not run
+        $admin = productPartsViaAdmin($bundle, fn(Mage_Catalog_Model_Product $p) => $p->setData('price_type', Mage_Bundle_Model_Product_Price::PRICE_TYPE_DYNAMIC));
+        expect($admin)->toBe([])
+            ->and(productPartsOptionIds($bundleId))->toBe([]);
+
+        $api = productPartsViaApi(ProductCustomOptionProcessor::class, ProductCustomOptionProvider::class, 'POST', "/api/rest/v2/products/{$bundleId}/custom-options", ['title' => 'Note', 'type' => 'field'], ['productId' => $bundleId]);
+        expect($api['status'])->toBe(409)
+            ->and($api['errors'])->toBe(['This product cannot have custom options.'])
+            ->and(productPartsOptionIds($bundleId))->toBe([]);
+    });
+});
+
+describe('children with a required custom option or another attribute set', function () {
+    it('refuses a grouped child with a required custom option on both transports', function () {
+        $this->products[] = $grouped = productPartsProduct('parts-grouped-required', Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
+        $this->products[] = $child = productPartsProductWithRequiredOption('parts-grouped-required-child');
+        $childId = (int) $child->getId();
+
+        $admin = productPartsViaAdmin($grouped, fn(Mage_Catalog_Model_Product $p) => $p->setGroupedLinkData([$childId => ['qty' => 1, 'position' => 0]]));
+        $api = productPartsViaApi(GroupedProductLinkProcessor::class, GroupedProductLinkProvider::class, 'POST', "/api/rest/v2/products/{$grouped->getId()}/grouped", ['childProductId' => $childId], ['productId' => (int) $grouped->getId()]);
+
+        expect($admin)->toBe(["Product {$childId} has a required custom option."])
+            ->and($api['status'])->toBe(422)
+            ->and($api['errors'])->toBe($admin);
+    });
+
+    it('refuses a configurable child with a required custom option on both transports', function () {
+        $this->products[] = $configurable = productPartsProduct('parts-configurable-required', Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
+        $this->products[] = $child = productPartsProductWithRequiredOption('parts-configurable-required-child');
+        $childId = (int) $child->getId();
+
+        $admin = productPartsViaAdmin($configurable, fn(Mage_Catalog_Model_Product $p) => $p->setConfigurableProductsData([$childId => []]));
+        $api = productPartsViaApi(ConfigurableSetupProcessor::class, ConfigurableSetupProvider::class, 'POST', "/api/rest/v2/products/{$configurable->getId()}/configurable/children", ['childProductId' => $childId], ['productId' => (int) $configurable->getId()]);
+
+        expect($admin)->toBe(["Product {$childId} has a required custom option."])
+            ->and($api['status'])->toBe(422)
+            ->and($api['errors'])->toBe($admin);
+    });
+
+    it('refuses a configurable child of another attribute set on both transports', function () {
+        /** @var Mage_Eav_Model_Entity_Attribute_Set $set */
+        $set = Mage::getModel('eav/entity_attribute_set');
+        $set->setEntityTypeId((int) Mage::getResourceSingleton('catalog/product')->getTypeId())
+            ->setAttributeSetName('Pest parts set ' . uniqid())
+            ->save();
+        $set->initFromSkeleton(4)->save();
+
+        try {
+            $this->products[] = $configurable = productPartsProduct('parts-configurable-set', Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
+            $this->products[] = $child = productPartsProduct('parts-configurable-set-child');
+            $childId = (int) $child->getId();
+            Mage::getModel('catalog/product')->load($childId)->setAttributeSetId((int) $set->getId())->save();
+
+            $admin = productPartsViaAdmin($configurable, fn(Mage_Catalog_Model_Product $p) => $p->setConfigurableProductsData([$childId => []]));
+            $api = productPartsViaApi(ConfigurableSetupProcessor::class, ConfigurableSetupProvider::class, 'POST', "/api/rest/v2/products/{$configurable->getId()}/configurable/children", ['childProductId' => $childId], ['productId' => (int) $configurable->getId()]);
+
+            expect($admin)->toBe(["Product {$childId} is not in the attribute set of the product."])
+                ->and($api['status'])->toBe(422)
+                ->and($api['errors'])->toBe($admin);
+        } finally {
+            Mage::register('isSecureArea', true, true);
+            foreach (array_reverse($this->products) as $product) {
+                Mage::getModel('catalog/product')->load($product->getId())->delete();
+            }
+            Mage::unregister('isSecureArea');
+            $this->products = [];
+            $set->delete();
+        }
+    });
+});
+
+describe('downloadable links', function () {
+    it('refuses a URL link without a title and without a URL on both transports', function () {
+        $this->products[] = $product = productPartsProduct('parts-downloadable', Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE);
+
+        $admin = productPartsViaAdmin($product, fn(Mage_Catalog_Model_Product $p) => $p->setDownloadableData(['link' => [[
+            'link_id' => '', 'is_delete' => '', 'title' => '', 'type' => 'url', 'link_url' => '', 'price' => 0,
+            'number_of_downloads' => 0, 'is_shareable' => Mage_Downloadable_Model_Link::LINK_SHAREABLE_CONFIG, 'sort_order' => 0,
+        ]]]));
+        $api = productPartsViaApi(DownloadableLinkProcessor::class, DownloadableLinkProvider::class, 'POST', "/api/rest/v2/products/{$product->getId()}/downloadable-links", ['title' => '', 'linkType' => 'url'], ['productId' => (int) $product->getId()]);
+
+        expect($admin)->toBe(['title is required', 'linkUrl is required for url type links'])
+            ->and($api['status'])->toBe(422)
+            ->and($api['errors'])->toBe($admin)
+            ->and(Mage::getResourceModel('downloadable/link_collection')->addProductToFilter($product->getId())->getAllIds())->toBe([]);
+    });
+});
+
+describe('gallery images', function () {
+    it('refuses a file that is not an image in the admin upload and in the API', function () {
+        $this->products[] = $product = productPartsProduct('parts-media');
+        $content = 'This is not an image';
+        $path = tempnam(sys_get_temp_dir(), 'pest_media_') . '.jpg';
+        file_put_contents($path, $content);
+
+        // The admin upload gives each file to this validator of its uploader
+        try {
+            Mage::getService('catalog/product_media')->validateImage($path);
+            $admin = [];
+        } catch (Mage_Core_Exception $e) {
+            $admin = [$e->getMessage()];
+        } finally {
+            @unlink($path);
+        }
+        $api = productPartsViaApi(ProductMediaProcessor::class, ProductMediaProvider::class, 'POST', "/api/rest/v2/products/{$product->getId()}/media", ['base64' => base64_encode($content), 'filename' => 'note.jpg'], ['productId' => (int) $product->getId()]);
+
+        expect($admin)->toHaveCount(1)
+            ->and($api['status'])->toBe(422)
+            ->and($api['errors'])->toBe($admin)
+            ->and(Mage::getModel('catalog/product')->load($product->getId())->getData('media_gallery')['images'] ?? [])->toBe([]);
     });
 });

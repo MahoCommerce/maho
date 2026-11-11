@@ -19,7 +19,7 @@ use Maho\ApiPlatform\Service\StoreContext;
  * Address State Provider - Fetches customer address data.
  *
  * SECURITY: Customers can only access their own addresses.
- * Admins can access any customer's addresses.
+ * An admin token or a service token can access the addresses of a customer of a website in its allowlist.
  */
 final class AddressProvider extends \Maho\ApiPlatform\Provider
 {
@@ -34,22 +34,26 @@ final class AddressProvider extends \Maho\ApiPlatform\Provider
         // Item lookups: ownership is not checked here. The read operations'
         // `is_owner(object, 'customerId')` expression denies post-read (and maps
         // to 404), and the write processor re-verifies ownership itself.
+        // A backend token passes that expression for each customer, so its website allowlist applies here.
         if ($operation->getName() !== 'my' && !$operation instanceof CollectionOperationInterface) {
             try {
                 $address = \Mage::getService('customer/address')->getById((int) ($uriVariables['id'] ?? 0));
-                return $this->mapToDto($address, $this->getCustomers()->requireById((int) $address->getCustomerId()));
+                $customer = $this->getCustomers()->requireById((int) $address->getCustomerId());
             } catch (\Mage_Core_Exception_NoSuchEntity) {
                 return null;
             }
+            if ($this->isAdmin() || $this->isApiUser()) {
+                $this->assertCustomerReachable($customer);
+            }
+            return $this->mapToDto($address, $customer);
         }
 
         // Collections: derive the target customer and verify access, which is
         // their only guard (a paginator can't be ownership-checked post-read).
         $customerId = $operation->getName() === 'my' ? 0 : (int) ($uriVariables['customerId'] ?? 0);
         $customerId = $customerId ?: $this->requireCustomerId();
-        $this->assertCustomerAccess($customerId);
-
         $customer = $this->getCustomers()->requireById($customerId);
+        $this->assertCustomerReachable($customer);
         $addresses = [];
         foreach ($customer->getAddresses() as $address) {
             $addresses[] = $this->mapToDto($address, $customer);

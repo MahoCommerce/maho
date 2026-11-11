@@ -268,6 +268,9 @@ return [
         'thumbnailLabel', 'thumbnailUrl', 'tierPrices', 'type', 'updatedAt', 'upsellProducts', 'urlKey',
         'urlPath', 'variants', 'visibility', 'websiteIds', 'weight', 'weightType',
     ],
+    'ProductAlert' => [
+        'addedAt', 'extensions', 'id', 'price', 'productId', 'type',
+    ],
     'ProductAttribute' => [
         'applyTo', 'attributeCode', 'backendType', 'defaultValue', 'extensions', 'frontendClass',
         'frontendInput', 'frontendLabel', 'id', 'isComparable', 'isConfigurable', 'isFilterable',

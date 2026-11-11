@@ -21,6 +21,18 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  */
 final class OrderProcessor extends \Maho\ApiPlatform\Processor
 {
+    /** The fields of guestCustomer in a place-order body, each with its cart column. */
+    private const GUEST_CUSTOMER_FIELDS = [
+        'prefix' => 'customer_prefix',
+        'firstname' => 'customer_firstname',
+        'middlename' => 'customer_middlename',
+        'lastname' => 'customer_lastname',
+        'suffix' => 'customer_suffix',
+        'dob' => 'customer_dob',
+        'taxvat' => 'customer_taxvat',
+        'gender' => 'customer_gender',
+    ];
+
     private \Mage_Checkout_Service_Cart $cartService;
     private OrderProvider $orderProvider;
     private \Mage_Sales_Service_Order $orderService;
@@ -93,6 +105,29 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
      * one shot rather than pre-mutating the cart. paymentData reaches assignData() flat, with
      * a copy under \Mage_Checkout_Service_Cart::PAYMENT_ADDITIONAL_DATA_KEY so no key is lost at save time.
      */
+    /**
+     * Write the fields of $values, the guestCustomer of the body, into the customer columns of $quote.
+     */
+    private function applyGuestCustomer(\Mage_Sales_Model_Quote $quote, mixed $values): void
+    {
+        if ($values === null) {
+            return;
+        }
+        if (!is_array($values)) {
+            throw new BadRequestHttpException('guestCustomer must be an object');
+        }
+        foreach (self::GUEST_CUSTOMER_FIELDS as $field => $column) {
+            if (!array_key_exists($field, $values)) {
+                continue;
+            }
+            if ($values[$field] !== null && !is_scalar($values[$field])) {
+                throw new BadRequestHttpException("guestCustomer.{$field} must be a single value");
+            }
+            $value = $values[$field] === null ? null : trim((string) $values[$field]);
+            $quote->setData($column, $value === '' ? null : $value);
+        }
+    }
+
     private function placeOrder(array $uriVariables, array $context): Order
     {
         $args = $context['args']['input'] ?? $context['request_data'] ?? [];
@@ -119,7 +154,6 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             $this->getAuthenticatedCustomerId(),
             $isPrivileged,
         );
-        $this->orderService->assertGuestCheckoutAllowed($quote);
 
         // Frontend callers send the full checkout state in the body. Apply any
         // provided addresses in-memory; the single collection below prices them
@@ -141,6 +175,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
 
         // A guest sends the fields of the Checkout Registration form, which a customer order takes from the account
         if (!$quote->getCustomerId()) {
+            $this->applyGuestCustomer($quote, $args['guestCustomer'] ?? null);
             CustomAttributes::applyToGuestQuote($quote, $args['customerCustomAttributes'] ?? null, $isAdminOrder);
         } elseif (isset($args['customerCustomAttributes'])) {
             throw new \Mage_Core_Exception_Input()->addError('customer_custom_attributes', 'customerCustomAttributes is for a guest order. A customer order takes the values of the customer account');

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sales orders placed through the quote service, keyed by reference, dated back from now by hours_ago.
+ * Sales orders placed through the cart service and the order service, keyed by reference, dated back from now by hours_ago.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -142,8 +142,28 @@ class Orders extends AbstractImporter
                 ->setCustomerFirstname($row['firstname'])
                 ->setCustomerLastname($row['lastname']);
         }
+        try {
+            return $this->submit($quote, $storeId, $row);
+        } catch (\Throwable $e) {
+            // A quote without an order must not become the cart of its customer
+            if ($quote->getId()) {
+                $quote->setIsActive(false)->save();
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * Fill $quote through the cart service, as staff, and place its order through the order service.
+     *
+     * @param array<string, mixed> $row
+     */
+    private function submit(\Mage_Sales_Model_Quote $quote, int $storeId, array $row): \Mage_Sales_Model_Order
+    {
+        /** @var \Mage_Checkout_Service_Cart $cart */
+        $cart = Mage::getService('checkout/cart');
         foreach ($row['lines'] as $orderLine) {
-            $this->addLine($quote, $storeId, $orderLine);
+            $this->addLine($cart, $quote, $storeId, $orderLine);
         }
         $address = [
             'firstname' => $row['firstname'],
@@ -162,23 +182,17 @@ class Orders extends AbstractImporter
             ->setCollectShippingRates(true)
             ->setShippingMethod($row['shipping_method']);
         $quote->getPayment()->importData(['method' => $row['payment_method']]);
+        $cart->collectAndSave($quote);
         if (($row['coupon_code'] ?? '') !== '') {
-            $quote->setCouponCode($row['coupon_code']);
+            $cart->applyCoupon($quote, $row['coupon_code'], \Mage_Checkout_Model_Actor::Staff);
         }
-        $quote->collectTotals()->save();
 
-        try {
-            return Mage::getService('sales/order')->submit(
-                $quote,
-                \Mage_Checkout_Model_Actor::Staff,
-                orderData: ['ext_order_id' => $row['reference']],
-                sendConfirmation: false,
-            );
-        } catch (\Throwable $e) {
-            // A quote without an order must not become the cart of its customer
-            $quote->setIsActive(false)->save();
-            throw $e;
-        }
+        return Mage::getService('sales/order')->submit(
+            $quote,
+            \Mage_Checkout_Model_Actor::Staff,
+            orderData: ['ext_order_id' => $row['reference']],
+            sendConfirmation: false,
+        );
     }
 
     /**
@@ -186,7 +200,7 @@ class Orders extends AbstractImporter
      *
      * @param array{product_id: int, parent_id: int|null, qty: int} $orderLine
      */
-    private function addLine(\Mage_Sales_Model_Quote $quote, int $storeId, array $orderLine): void
+    private function addLine(\Mage_Checkout_Service_Cart $cart, \Mage_Sales_Model_Quote $quote, int $storeId, array $orderLine): void
     {
         $request = ['qty' => $orderLine['qty']];
         $productId = $orderLine['product_id'];
@@ -202,37 +216,33 @@ class Orders extends AbstractImporter
             $productId = $orderLine['parent_id'];
         }
         $product = Mage::getModel('catalog/product')->setStoreId($storeId)->load($productId);
-        $item = $quote->addProduct($product, new \Maho\DataObject($request));
-        if (is_string($item)) {
-            throw new \Mage_Core_Exception("sku '{$product->getSku()}': $item");
-        }
+        $cart->addProduct($quote, $product, new \Maho\DataObject($request), \Mage_Checkout_Model_Actor::Staff, save: false);
     }
 
+    /**
+     * Move $order to $status through the order service, with no email to the customer. The service refuses a step
+     * that the state of the order does not allow.
+     *
+     * @throws \Mage_Core_Exception
+     */
     private function applyStatus(\Mage_Sales_Model_Order $order, string $status): void
     {
         if ($status === 'pending') {
             return;
         }
+        /** @var \Mage_Sales_Service_Order $service */
+        $service = Mage::getService('sales/order');
         if ($status === 'canceled') {
-            $order->cancel()->save();
+            $service->cancel($order);
             return;
         }
-        $invoice = Mage::getService('sales/order')->buildInvoice($order);
-        $invoice->setRequestedCaptureCase(\Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE)->register();
-        $order->setIsInProcess(true);
-        Mage::getModel('core/resource_transaction')->addObject($invoice)->addObject($order)->save();
+        $service->invoice($order, captureCase: \Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE, sendEmail: false);
+        // An order of virtual products only has nothing to ship
         if ($status === 'complete' && $order->canShip()) {
-            $shipment = $order->prepareShipment();
-            $shipment->register();
-            // The order must carry a change of its own, or its save skips the shipped items too.
-            $order->setIsInProcess(true);
-            Mage::getModel('core/resource_transaction')->addObject($shipment)->addObject($order)->save();
+            $service->ship($order, sendEmail: false);
         }
         if ($status === 'closed') {
-            $creditmemo = Mage::getService('sales/order')->buildCreditmemo($order);
-            $creditmemo->setOfflineRequested(true)->register();
-            $order->setIsInProcess(true);
-            Mage::getModel('core/resource_transaction')->addObject($creditmemo)->addObject($order)->save();
+            $service->refund($order, [], offlineRefund: true, sendEmail: false);
         }
     }
 

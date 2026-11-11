@@ -31,6 +31,10 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     /** True while refund() saves the card: a refund gives back money that the card held, so the cap does not apply. */
     private bool $isRefund = false;
 
+    private bool $isCreation = false;
+
+    private ?string $creationComment = null;
+
     #[\Override]
     protected function _construct()
     {
@@ -44,6 +48,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         // resets it, so isObjectNew() keeps returning true on subsequent saves. Use
         // !getId() instead so the creation defaults below run exactly once.
         if (!$this->getId()) {
+            $this->isCreation = true;
             $helper = Mage::helper('giftcard');
 
             if (!$this->getCode()) {
@@ -324,12 +329,27 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Drop the pending-change key (already synced by the resource) so a
-     * second save of this instance does not re-run the junction sync.
+     * Set the comment of the "created" history entry, which the first save of this card writes.
+     */
+    public function setCreationComment(?string $comment): static
+    {
+        $this->creationComment = $comment;
+        return $this;
+    }
+
+    /**
+     * Write the "created" history entry of a new card. Drop the pending-change key (already synced by the
+     * resource) so a second save of this instance does not re-run the junction sync.
      */
     #[\Override]
     protected function _afterSave()
     {
+        if ($this->isCreation) {
+            $this->isCreation = false;
+            $balance = (float) $this->getData('balance');
+            $orderId = $this->getPurchaseOrderId();
+            $this->_addHistory(self::ACTION_CREATED, $balance, 0.0, $balance, $orderId ?: null, $this->creationComment);
+        }
         if (is_array($this->getData('website_ids'))) {
             $this->unsetData('website_ids');
             $this->loadedWebsiteIds = null;
@@ -539,9 +559,11 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
      */
     public function getHistoryCollection()
     {
+        // Two entries of the same second keep the order in which they were written
         return Mage::getResourceModel('giftcard/history_collection')
             ->addFieldToFilter('giftcard_id', $this->getId())
-            ->setOrder('created_at', 'DESC');
+            ->setOrder('created_at', 'DESC')
+            ->setOrder('history_id', 'DESC');
     }
 
     #[\Override]

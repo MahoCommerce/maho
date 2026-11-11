@@ -94,7 +94,10 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
         }
         $service->save($product, $link);
 
-        return $this->provider->getLinks($this->loadProduct($productId, Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE));
+        return $this->provider->getLinks(
+            $this->loadProduct($productId, Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE),
+            withLinkUrl: true,
+        );
     }
 
     private function mapToDto(Mage_Downloadable_Model_Link $link): DownloadableLink

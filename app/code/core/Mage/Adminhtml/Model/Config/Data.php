@@ -148,21 +148,18 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
                 /**
                  * Look for custom defined field path
                  */
-                if (is_object($fieldConfig)) {
-                    $configPath = (string) $fieldConfig->config_path;
-                    if (!empty($configPath) && strrpos($configPath, '/') > 0) {
-                        $parts = explode('/', $configPath);
-                        if (!$this->_isSectionAllowed($parts[0])) {
-                            Mage::throwException('Access denied.');
-                        }
-                        // Extend old data with specified section group
-                        $groupPath = substr($configPath, 0, strrpos($configPath, '/'));
-                        if (!isset($oldConfigAdditionalGroups[$groupPath])) {
-                            $oldConfig = $this->extendConfig($groupPath, true, $oldConfig);
-                            $oldConfigAdditionalGroups[$groupPath] = true;
-                        }
-                        $path = $configPath;
+                $configPath = is_object($fieldConfig) ? Mage::getService('core/config')->getConfigPath($fieldConfig) : null;
+                if ($configPath !== null) {
+                    if (!$this->_isSectionAllowed(explode('/', $configPath)[0])) {
+                        Mage::throwException('Access denied.');
                     }
+                    // Extend old data with specified section group
+                    $groupPath = substr($configPath, 0, strrpos($configPath, '/'));
+                    if (!isset($oldConfigAdditionalGroups[$groupPath])) {
+                        $oldConfig = $this->extendConfig($groupPath, true, $oldConfig);
+                        $oldConfigAdditionalGroups[$groupPath] = true;
+                    }
+                    $path = $configPath;
                 }
 
                 $inherit = !empty($fieldData['inherit']);
@@ -524,12 +521,11 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
         if (!$field) {
             return false;
         }
-        return match ($this->getScope()) {
-            self::SCOPE_DEFAULT => (bool) (int) $field->show_in_default,
-            self::SCOPE_WEBSITES => (bool) (int) $field->show_in_website,
-            self::SCOPE_STORES => (bool) (int) $field->show_in_store,
-            default => true,
-        };
+        $scope = $this->getScope();
+        if (!in_array($scope, [self::SCOPE_DEFAULT, self::SCOPE_WEBSITES, self::SCOPE_STORES], true)) {
+            return true;
+        }
+        return Mage::getService('core/config')->isNodeShownAtScope($field, $scope);
     }
 
     /**

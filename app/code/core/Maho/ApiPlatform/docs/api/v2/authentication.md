@@ -10,7 +10,7 @@ All authenticated endpoints require a Bearer token in the `Authorization` header
 
 **Get a token:**
 
-The endpoint dispatches by `grant_type`. Supported grants: `customer` (default), `client_credentials`, `api_user`.
+The endpoint dispatches by `grant_type`. Supported grants: `customer` (default), `magic_link`, `client_credentials`, `api_user`.
 
 !!! note "Which grant should I use?"
     Use `client_credentials` for new integrations. The `api_user` grant is a **transitional bridge**: it authenticates the API user accounts defined in the admin under **System > Web Services** (the accounts used by the SOAP-era APIs, part of the now-deprecated `Mage_Api` module) and issues a JWT carrying that user's ACL role permissions. It lets existing integrations move to the v2 API without re-provisioning credentials, but it will be retired together with the legacy API modules - plan to migrate those accounts to `client_credentials` service accounts.
@@ -95,7 +95,9 @@ The endpoint dispatches by `grant_type`. Supported grants: `customer` (default),
 
 `token_type` and `expires_in` follow the OAuth 2.0 (RFC 6749) snake_case convention; the other fields use the API's usual camelCase. `customer` is populated for the `customer` grant; `apiUser` and `permissions` are populated for `client_credentials` / `api_user` grants. There is no separate `refresh_token` field, call `/auth/refresh` with the existing JWT in the `Authorization` header to get a new token.
 
-The `customer` grant checks the login as the storefront login does. It tries the website of the store of the request first, then the other websites. The GraphQL `loginCustomer` mutation tries the websites in the same order. A wrong email or password gives a 401 with the error `invalid_credentials`. A customer account that is not confirmed gives a 403. The grant counts in the login limits of the storefront, under **System > Configuration > Advanced > System > Rate limit**, so a client over a limit gets a 429 with a `Retry-After` header.
+The `customer` grant checks the login as the storefront login does. It tries the website of the store of the request first, then the other websites. The GraphQL `loginCustomer` mutation tries the websites in the same order. A wrong email or password gives a 401 with the error `invalid_credentials`. A customer account that is not confirmed or not active gives a 403, and so does a store that has the customer accounts turned off. The grant counts in the login limits of the storefront, under **System > Configuration > Advanced > System > Rate limit**, so a client over a limit gets a 429 with a `Retry-After` header.
+
+The `magic_link` grant logs in a customer with the token of a login link, which `POST /customers/magic-link` sends by email: `{"grant_type": "magic_link", "token": "..."}`. The answer has the same fields as the `customer` grant, and `cartId` merges a guest cart in the same way. A token that is wrong or expired gives a 422, and each rejected token counts in the **Reset password** rate limit. A customer who uses two-factor authentication sends the code in `twofa_code`: without it the answer is a 401 with the error `twofa_required`, and the link stays valid for the next request with the code. A link logs in one time.
 
 **Use the token:**
 

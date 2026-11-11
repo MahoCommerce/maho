@@ -37,6 +37,30 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
     }
 
     /**
+     * Return the credit memo data and the "return to stock" flags of the form, for
+     * Mage_Sales_Service_Order::prepareCreditmemo().
+     *
+     * @return array{0: array<string, mixed>, 1: array<int, bool>|null}
+     */
+    protected function _getCreditmemoInput(): array
+    {
+        $savedData = $this->_getItemData();
+        $data = (array) $this->getRequest()->getParam('creditmemo');
+        $data['qtys'] = [];
+        $backToStock = $savedData ? [] : null;
+        foreach ($savedData as $orderItemId => $itemData) {
+            if (isset($itemData['qty'])) {
+                $data['qtys'][$orderItemId] = $itemData['qty'];
+            }
+            if (isset($itemData['back_to_stock'])) {
+                $backToStock[$orderItemId] = true;
+            }
+        }
+
+        return [$data, $backToStock];
+    }
+
+    /**
      * Initialize creditmemo model instance
      *
      * @return Mage_Sales_Model_Order_Creditmemo|false
@@ -53,18 +77,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
                 $creditmemo = $service->requireCreditmemo($creditmemoId);
             } else {
                 $order = $service->requireById((int) $this->getRequest()->getParam('order_id'));
-                $savedData = $this->_getItemData();
-                $data = (array) $this->getRequest()->getParam('creditmemo');
-                $data['qtys'] = [];
-                $backToStock = $savedData ? [] : null;
-                foreach ($savedData as $orderItemId => $itemData) {
-                    if (isset($itemData['qty'])) {
-                        $data['qtys'][$orderItemId] = $itemData['qty'];
-                    }
-                    if (isset($itemData['back_to_stock'])) {
-                        $backToStock[$orderItemId] = true;
-                    }
-                }
+                [$data, $backToStock] = $this->_getCreditmemoInput();
                 $creditmemo = $service->prepareCreditmemo($order, $data, $backToStock, $this->_initInvoice($order) ?: null);
             }
         } catch (Mage_Core_Exception_NoSuchEntity|Mage_Core_Exception_Conflict $e) {
@@ -197,26 +210,49 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
             Mage::getSingleton('adminhtml/session')->setCommentText($data['comment_text']);
         }
 
+        $orderId = (int) $this->getRequest()->getParam('order_id');
         try {
-            $creditmemo = $this->_initCreditmemo();
-            if ($creditmemo) {
-                if (isset($data['do_refund'])) {
-                    $creditmemo->setRefundRequested(true);
-                }
-                Mage::getService('sales/order')->saveCreditmemo(
-                    $creditmemo,
-                    ($data['comment_text'] ?? '') !== '' ? (string) $data['comment_text'] : null,
-                    !empty($data['do_offline']),
-                    isset($data['comment_customer_notify']),
-                    isset($data['is_visible_on_front']),
-                    !empty($data['send_email']),
-                );
-                $this->_getSession()->addSuccess($this->__('The credit memo has been created.'));
-                Mage::getSingleton('adminhtml/session')->getCommentText(true);
-                $this->_redirect('*/sales_order/view', ['order_id' => $creditmemo->getOrderId()]);
+            if ($this->getRequest()->getParam('creditmemo_id')) {
+                $this->_forward('noRoute');
                 return;
             }
-            $this->_forward('noRoute');
+            $service = Mage::getService('sales/order');
+            $order = $service->requireById($orderId);
+            [$input, $backToStock] = $this->_getCreditmemoInput();
+            if ($input['qtys'] === []) {
+                // Without qtys, the service refunds every item, as the form without item rows does
+                unset($input['qtys']);
+            }
+            // The service prepares the credit memo under the order lock, so the event runs there
+            $service->refund(
+                $order,
+                $input,
+                ($data['comment_text'] ?? '') !== '' ? (string) $data['comment_text'] : null,
+                !empty($data['do_offline']),
+                $backToStock,
+                isset($data['comment_customer_notify']),
+                isset($data['is_visible_on_front']),
+                !empty($data['send_email']),
+                $this->_initInvoice($order) ?: null,
+                function (Mage_Sales_Model_Order_Creditmemo $creditmemo) use ($data): void {
+                    Mage::dispatchEvent('adminhtml_sales_order_creditmemo_register_before', [
+                        'creditmemo' => $creditmemo,
+                        'request' => $this->getRequest(),
+                    ]);
+                    Mage::register('current_creditmemo', $creditmemo, true);
+                    if (isset($data['do_refund'])) {
+                        $creditmemo->setRefundRequested(true);
+                    }
+                },
+            );
+            $this->_getSession()->addSuccess($this->__('The credit memo has been created.'));
+            Mage::getSingleton('adminhtml/session')->getCommentText(true);
+            $this->_redirect('*/sales_order/view', ['order_id' => $orderId]);
+            return;
+        } catch (Mage_Core_Exception_NoSuchEntity|Mage_Core_Exception_Conflict $e) {
+            // The new credit memo page cannot open for this order, so show the message on the order
+            $this->_getSession()->addError($e->getMessage());
+            $this->_redirect('*/sales_order/view', ['order_id' => $orderId]);
             return;
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());

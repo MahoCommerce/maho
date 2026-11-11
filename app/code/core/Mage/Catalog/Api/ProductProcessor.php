@@ -29,7 +29,8 @@ use Maho\ApiPlatform\Service\StoreContext;
  * Give a product write to the product service. Requires the products/write or the products/delete permission.
  *
  * A fast update (the X-Fast-Update header or ?fast=true) writes the attribute values without a save of the
- * product, so it skips the observers and the URL rewrites of a save.
+ * product, so it skips the observers of a save. A request that changes the SKU or the attribute set always saves
+ * the product.
  */
 final class ProductProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -111,7 +112,9 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         $request = $context['request'] ?? null;
         // The DTO default of categoryIds is [], so only the body tells an empty list from an absent field
         $categoryIdsSent = array_key_exists('categoryIds', $this->parseRequestBody($request));
-        if ($request?->headers->get('X-Fast-Update') === 'true' || $request?->query->get('fast') === 'true') {
+        $fast = $request?->headers->get('X-Fast-Update') === 'true' || $request?->query->get('fast') === 'true';
+        // The fast path writes attribute values only, so a change of the SKU or the attribute set takes the full path
+        if ($fast && $data->sku === '' && $data->attributeSetId === null) {
             return $this->fastUpdate((int) $uriVariables['id'], $data, $user, $categoryIdsSent);
         }
         return $this->update((int) $uriVariables['id'], $data, $user, $categoryIdsSent);
@@ -218,6 +221,9 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         }
         if ($data->isActive !== null) {
             $attrData['status'] = $data->isActive ? Mage_Catalog_Model_Product_Status::STATUS_ENABLED : Mage_Catalog_Model_Product_Status::STATUS_DISABLED;
+        }
+        if ($data->taxClassId !== null) {
+            $attrData['tax_class_id'] = $data->taxClassId;
         }
         $service->updateAttributes([$id], $attrData, $storeId);
         // The activity log records the new values

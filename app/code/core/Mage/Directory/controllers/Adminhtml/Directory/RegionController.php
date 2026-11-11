@@ -128,13 +128,7 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
             }
 
             $model->addData($data);
-
-            $errors = $model->validate();
-            if (is_array($errors)) {
-                Mage::throwException(implode(' ', $errors));
-            }
-
-            $model->save();
+            Mage::getService('directory/region')->save($model);
 
             Mage::getSingleton('adminhtml/session')->addSuccess(
                 Mage::helper('directory')->__('The region has been saved.'),
@@ -175,19 +169,15 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
                 );
             }
 
-            if ($model->hasTranslation()) {
-                Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('directory')->__('Cannot delete region with existing region names. Please delete all region names first.'),
-                );
-                $this->_redirect('*/*/edit', ['_current' => true]);
-                return;
-            }
-
-            $model->delete();
+            Mage::getService('directory/region')->delete($model);
 
             Mage::getSingleton('adminhtml/session')->addSuccess(
                 Mage::helper('directory')->__('The region has been deleted.'),
             );
+        } catch (Mage_Core_Exception_Conflict $e) {
+            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+            $this->_redirect('*/*/edit', ['_current' => true]);
+            return;
         } catch (Mage_Core_Exception $e) {
             $error = $e->getMessage();
         } catch (Exception $e) {
@@ -220,11 +210,15 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
             foreach ($regionIds as $regionId) {
                 $model = Mage::getModel('directory/region')->load($regionId);
 
-                if (!$model->getId() || $model->hasTranslation()) {
+                if (!$model->getId()) {
                     $skippedCount++;
-                } else {
-                    $model->delete();
+                    continue;
+                }
+                try {
+                    Mage::getService('directory/region')->delete($model);
                     $deletedCount++;
+                } catch (Mage_Core_Exception_Conflict) {
+                    $skippedCount++;
                 }
             }
 
@@ -274,12 +268,7 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
                 Mage::throwException(Mage::helper('directory')->__('This region no longer exists.'));
             }
 
-            $errors = $model->validateTranslation($data);
-            if (is_array($errors)) {
-                Mage::throwException(implode(' ', $errors));
-            }
-
-            $model->saveTranslation($data);
+            Mage::getService('directory/region')->saveTranslation($model, (string) ($data['locale'] ?? ''), (string) ($data['name'] ?? ''));
             $this->getResponse()->setBodyJson(['success' => true]);
 
         } catch (Mage_Core_Exception $e) {

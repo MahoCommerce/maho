@@ -41,6 +41,19 @@ class Mage_Admin_Service_User
     }
 
     /**
+     * @return int|null the ID of the first top-level role, which an install names Administrators
+     */
+    public function getDefaultRoleId(): ?int
+    {
+        $role = Mage::getModel('admin/roles')->getCollection()
+            ->addFieldToFilter('role_type', Mage_Admin_Model_Acl::ROLE_TYPE_GROUP)
+            ->addFieldToFilter('tree_level', 1)
+            ->setOrder('role_id', 'ASC')
+            ->getFirstItem();
+        return $role->getId() ? (int) $role->getId() : null;
+    }
+
+    /**
      * Check $user with validate(), save it, and give it the role $roleId when it is set. A new user
      * triggers the new admin user notification when admin/security/crate_admin_user_notification is on.
      * $actingUserId is the admin user who makes the request. This user cannot deactivate the own account.

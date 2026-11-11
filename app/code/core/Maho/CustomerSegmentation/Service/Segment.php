@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 class Maho_CustomerSegmentation_Service_Segment
 {
+    public const REFRESH_WAIT_SECONDS = 3600;
+
     public const REFRESH_MODES = [
         Maho_CustomerSegmentation_Model_Segment::MODE_AUTO,
         Maho_CustomerSegmentation_Model_Segment::MODE_MANUAL,
@@ -126,14 +128,18 @@ class Maho_CustomerSegmentation_Service_Segment
 
     /**
      * Calculate the customers of $segment again from its conditions. An inactive segment has no customers.
+     * When another refresh of the segment runs, wait for it for up to $waitSeconds. A request passes 0,
+     * a queue worker and the cron pass REFRESH_WAIT_SECONDS.
+     *
+     * @throws Mage_Core_Exception_Conflict when the other refresh still runs after the wait
      */
-    public function refresh(Maho_CustomerSegmentation_Model_Segment $segment): Maho_CustomerSegmentation_Model_Segment
+    public function refresh(Maho_CustomerSegmentation_Model_Segment $segment, int $waitSeconds = 0): Maho_CustomerSegmentation_Model_Segment
     {
         // Two refreshes of one segment at once read and change the same members
         $lock = Mage::getSingleton('core/lock');
         $lockName = 'customersegmentation_refresh_' . (int) $segment->getId();
-        if (!$lock->acquireWithin($lockName, 3600)) {
-            throw new RuntimeException(Mage::helper('customersegmentation')->__('Another refresh of the segment is in progress.'));
+        if (!$lock->acquireWithin($lockName, $waitSeconds)) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('customersegmentation')->__('Another refresh of the segment is in progress.'));
         }
         try {
             $segment->refreshCustomers();

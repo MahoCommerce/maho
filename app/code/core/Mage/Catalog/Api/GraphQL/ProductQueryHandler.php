@@ -103,9 +103,7 @@ class ProductQueryHandler
             // An admin search is not counted in the Search Terms report, as in the admin product grid
             /** @var \Mage_CatalogSearch_Service_Query $searchService */
             $searchService = \Mage::getService('catalogsearch/query');
-            \Mage::unregister('_helper/catalogsearch');
-            \Mage::app()->getRequest()->setParam(\Mage::helper('catalogsearch')->getQueryParamName(), $search);
-            $searchService->prepare(StoreContext::getStoreId());
+            $searchService->prepare(StoreContext::getStoreId(), (string) $search);
             $layer = \Mage::getModel('catalogsearch/layer');
         } else {
             $layer = \Mage::getModel('catalog/layer');

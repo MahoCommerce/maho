@@ -8,8 +8,6 @@
 
 declare(strict_types=1);
 
-use Maho\ApiPlatform\Trait\DateRangeFilterTrait;
-use Maho\ApiPlatform\Trait\FilterValueTrait;
 use Maho\Security\RateLimitScope;
 use Mage_Checkout_Model_Actor as Actor;
 use Mage_Sales_Model_Order as Order;
@@ -25,9 +23,6 @@ use Mage_Sales_Model_Resource_Order_Collection as OrderCollection;
  */
 class Mage_Sales_Service_Order
 {
-    use DateRangeFilterTrait;
-    use FilterValueTrait;
-
     public const XML_PATH_GUEST_LOOKUP_RATE_LIMIT = 'system/rate_limit/guest_order_lookup';
     public const GUEST_LOOKUP_WINDOW = 3600;
 
@@ -37,17 +32,83 @@ class Mage_Sales_Service_Order
     private const CASH_TENDERED_KEY = 'cash_tendered';
 
     /**
-     * Refuse the order of $quote when it has no customer and its store does not allow guest checkout. The admin
-     * scope places a guest order in any store, as the admin order form does.
+     * Refuse the order of $quote when it is a guest order and its store does not allow guest checkout. A shopper who
+     * registers in the checkout gets a customer before the order is placed, so that order is not a guest order.
      *
      * @throws Mage_Core_Exception_Forbidden
      */
-    public function assertGuestCheckoutAllowed(\Mage_Sales_Model_Quote $quote): void
+    private function assertGuestCheckoutAllowed(\Mage_Sales_Model_Quote $quote): void
     {
-        if (!$quote->getCustomerId() && !Mage::app()->getStore()->isAdmin() && !$quote->isAllowedGuestCheckout()) {
+        if ($quote->getCustomerId()
+            || $quote->getCustomerIsNew()
+            || $quote->getCheckoutMethod(true) === Mage_Checkout_Model_Type_Onepage::METHOD_REGISTER
+        ) {
+            return;
+        }
+        if (!$quote->isAllowedGuestCheckout()) {
             throw new Mage_Core_Exception_Forbidden(
                 Mage::helper('checkout')->__('Sorry, guest checkout is not enabled. Please try again or contact store owner.'),
             );
+        }
+    }
+
+    /**
+     * Check the customer fields of $quote, a cart with no customer: the email, and each field of the Checkout
+     * Registration form. The one page checkout calls it at the billing step, and validateQuote() calls it for each
+     * Customer order.
+     *
+     * @throws Mage_Core_Exception_Input one error for each field, which has the name of the cart field
+     */
+    public function validateCustomerData(\Mage_Sales_Model_Quote $quote): void
+    {
+        $errors = new Mage_Core_Exception_Input();
+        $this->addCustomerDataErrors($quote, $errors);
+        $errors->throwIfErrors();
+    }
+
+    private function addCustomerDataErrors(\Mage_Sales_Model_Quote $quote, Mage_Core_Exception_Input $errors): void
+    {
+        $email = trim((string) $quote->getCustomerEmail());
+        if ($email === '' || !Mage::helper('core')->isValidEmail($email)) {
+            $errors->addError('customer_email', Mage::helper('sales')->__('Please enter a valid email address.'));
+        }
+
+        $customer = Mage::getModel('customer/customer')->setStoreId((int) $quote->getStoreId());
+        $form = Mage::getModel('customer/form')->setFormCode('checkout_register')->setEntity($customer);
+        $columns = [];
+        foreach (Mage::getConfig()->getFieldset('customer_account') ?? [] as $code => $node) {
+            if (!empty($node->to_quote) && (string) $node->to_quote !== '*') {
+                $columns[$code] = (string) $node->to_quote;
+            }
+        }
+        $fields = [];
+        $values = [];
+        $attributes = [];
+        foreach ($form->getAttributes() as $code => $attribute) {
+            $input = (string) $attribute->getFrontendInput();
+            if ($code === 'email' || !$attribute->getIsVisible() || in_array($input, ['file', 'image'], true)) {
+                continue;
+            }
+            $fields[$code] = $columns[$code] ?? Mage_Sales_Model_Observer_CustomerAttributes::COLUMN_PREFIX . $code;
+            $attributes[$code] = $attribute;
+            $value = $quote->getData($fields[$code]);
+            if (is_string($value) && $value !== '') {
+                $value = match ($input) {
+                    'date' => substr($value, 0, 10),
+                    'multiselect' => explode(',', $value),
+                    'multiline' => explode("\n", $value),
+                    default => $value,
+                };
+            }
+            $values[$code] = $value;
+        }
+        foreach ($fields as $code => $field) {
+            $result = Mage_Eav_Model_Attribute_Data::factory($attributes[$code], $customer)
+                ->setExtractedData($values)
+                ->validateValue($values[$code]);
+            foreach (is_array($result) ? $result : [] as $message) {
+                $errors->addError($field, (string) $message);
+            }
         }
     }
 
@@ -102,10 +163,13 @@ class Mage_Sales_Service_Order
 
     /**
      * Check that $quote can become an order. A Customer must reach the minimum order amount, and must accept each
-     * required agreement in $agreementIds.
+     * required agreement in $agreementIds. A Customer order of a cart with no customer needs a store that allows
+     * guest checkout, a valid email and the fields of the Checkout Registration form. Staff places a guest order in
+     * any store.
      *
      * @param list<int|string>|null $agreementIds null when the flow of the caller has no agreements step
      * @throws Mage_Core_Exception when the cart is not active or is empty
+     * @throws Mage_Core_Exception_Forbidden when the store does not allow the guest order of a Customer
      * @throws Mage_Core_Exception_Input one error for each other rule that $quote breaks
      */
     public function validateQuote(\Mage_Sales_Model_Quote $quote, Actor $actor, ?array $agreementIds = null): void
@@ -117,6 +181,9 @@ class Mage_Sales_Service_Order
         }
         if (!$quote->getAllVisibleItems()) {
             throw new Mage_Core_Exception($helper->__('Cart is empty'));
+        }
+        if ($actor === Actor::Customer) {
+            $this->assertGuestCheckoutAllowed($quote);
         }
 
         $errors = new Mage_Core_Exception_Input();
@@ -133,6 +200,11 @@ class Mage_Sales_Service_Order
         }
 
         if ($actor === Actor::Customer) {
+            if (!$quote->getCustomerId() && !$quote->getCustomerIsNew()) {
+                // A caller that checks before submit(), such as PayPal, has the email and the name on the billing address only
+                $this->prepareCustomerData($quote);
+                $this->addCustomerDataErrors($quote, $errors);
+            }
             $minimumAmountError = $this->getMinimumAmountError($quote);
             if ($minimumAmountError !== null) {
                 $errors->addError('subtotal', $minimumAmountError);
@@ -260,8 +332,9 @@ class Mage_Sales_Service_Order
     }
 
     /**
-     * Give a customer order the email of the account and no guest flag, and give an order without a customer name
-     * the name of the account or of the billing address.
+     * Give a customer order the email of the account and no guest flag, give a guest order without an email the
+     * email of the billing address, and give an order without a customer name the name of the account or of the
+     * billing address.
      */
     private function prepareCustomerData(\Mage_Sales_Model_Quote $quote): void
     {
@@ -273,6 +346,8 @@ class Mage_Sales_Service_Order
             if ($accountEmail) {
                 $quote->setCustomerEmail($accountEmail);
             }
+        } elseif (!$quote->getCustomerEmail() && $quote->getBillingAddress()->getEmail()) {
+            $quote->setCustomerEmail($quote->getBillingAddress()->getEmail());
         }
 
         if (!$quote->getCustomerFirstname()) {
@@ -851,7 +926,7 @@ class Mage_Sales_Service_Order
     /**
      * Get all orders with billing address joined (no N+1 queries).
      *
-     * @param array<string, mixed> $filters status, state, storeId, customerId, email,
+     * @param array<string, string|int|null> $filters Single values, which the transport checks: status, state, storeId, customerId, email,
      *   emailLike, incrementId, search, createdFrom, createdTo, updatedSince (`since` is
      *   accepted as the legacy name for the last)
      * @param int[]|null $allowedStoreIds Token store allowlist; null means unrestricted
@@ -864,7 +939,7 @@ class Mage_Sales_Service_Order
         array $filters = [],
         ?array $allowedStoreIds = null,
     ): array {
-        $collection = $this->buildOrderCollection($this->intFilter($filters, 'customerId'), $filters);
+        $collection = $this->buildOrderCollection(isset($filters['customerId']) ? (int) $filters['customerId'] : null, $filters);
 
         if ($allowedStoreIds !== null) {
             $collection->getSelect()->where(
@@ -873,15 +948,15 @@ class Mage_Sales_Service_Order
             );
         }
 
-        $email = $this->stringFilter($filters, 'email');
-        $emailLike = $this->stringFilter($filters, 'emailLike');
+        $email = $this->filterValue($filters, 'email');
+        $emailLike = $this->filterValue($filters, 'emailLike');
         if ($email !== null) {
             $collection->addFieldToFilter('customer_email', $email);
         } elseif ($emailLike !== null && mb_strlen($emailLike) >= 3) {
             $collection->addFieldToFilter('customer_email', ['like' => '%' . $emailLike . '%']);
         }
 
-        $incrementId = $this->stringFilter($filters, 'incrementId');
+        $incrementId = $this->filterValue($filters, 'incrementId');
         if ($incrementId !== null) {
             $collection->addFieldToFilter('increment_id', $incrementId);
         }
@@ -889,7 +964,7 @@ class Mage_Sales_Service_Order
         // Free-text search, like the admin order grid: every word must appear in the
         // order number, the email, the customer name, or the billing name (the only
         // name a guest order has). The billing address is joined by buildOrderCollection.
-        $words = $this->searchWords($this->stringFilter($filters, 'search'));
+        $words = \Mage::helper('core/string')->splitSearchWords($this->filterValue($filters, 'search'));
         if ($words !== []) {
             $adapter = $collection->getConnection();
             foreach ($words as $word) {
@@ -987,10 +1062,21 @@ class Mage_Sales_Service_Order
     }
 
     /**
+     * Return the filter $key as a string, or null when it is absent or empty.
+     *
+     * @param array<string, string|int|null> $filters
+     */
+    private function filterValue(array $filters, string $key): ?string
+    {
+        $value = $filters[$key] ?? null;
+        return $value === null || $value === '' ? null : (string) $value;
+    }
+
+    /**
      * Build an order collection with billing address joined and common filters applied.
      *
      * @param int|null $customerId When set, restrict to this customer's orders
-     * @param array<string, mixed> $filters
+     * @param array<string, string|int|null> $filters
      */
     private function buildOrderCollection(
         ?int $customerId = null,
@@ -1003,27 +1089,39 @@ class Mage_Sales_Service_Order
             $collection->addFieldToFilter('customer_id', $customerId);
         }
 
-        $status = $this->stringFilter($filters, 'status');
+        $status = $this->filterValue($filters, 'status');
         if ($status !== null) {
             $collection->addFieldToFilter('status', $status);
         }
 
         // Status is the merchant-visible label and can be renamed per install; state is
         // the fixed lifecycle stage behind it. Both are worth filtering on.
-        $state = $this->stringFilter($filters, 'state');
+        $state = $this->filterValue($filters, 'state');
         if ($state !== null) {
             $collection->addFieldToFilter('state', $state);
         }
 
-        $storeId = $this->intFilter($filters, 'storeId');
+        $storeId = $this->filterValue($filters, 'storeId');
         if ($storeId !== null) {
-            $collection->addFieldToFilter('store_id', $storeId);
+            $collection->addFieldToFilter('store_id', (int) $storeId);
         }
 
         // `since` predates the createdFrom/createdTo/updatedSince set and means the same
         // as updatedSince; keep honouring it.
         $filters['updatedSince'] ??= $filters['since'] ?? null;
-        $this->applyDateRangeFilters($collection, $filters);
+        $locale = \Mage::app()->getLocale();
+        foreach ([
+            ['created_at', 'createdFrom', 'gteq'],
+            ['created_at', 'createdTo', 'lteq'],
+            ['updated_at', 'updatedSince', 'gteq'],
+        ] as [$column, $key, $operator]) {
+            $value = $this->filterValue($filters, $key);
+            if ($value !== null) {
+                $collection->addFieldToFilter($column, [
+                    $operator => $locale->formatDateBoundaryForDb($value, $operator === 'lteq'),
+                ]);
+            }
+        }
 
         $resource = \Mage::getSingleton('core/resource');
         $collection->getSelect()->joinLeft(
@@ -2092,10 +2190,17 @@ class Mage_Sales_Service_Order
      * that refunds nothing is not a refund. The credit memo model refuses a refund above the refundable balance of
      * the order.
      *
+     * The order and the invoice are loaded again under the order lock, and the credit memo is prepared from them. So
+     * two requests at the same time cannot both refund the same amount.
+     *
      * @param array<string, mixed> $data Credit memo data for prepareCreditmemo().
      * @param array<int, bool>|null $backToStockItemIds Order item ids to return to stock, see prepareCreditmemo().
+     * @param (callable(Creditmemo): void)|null $beforeRegister Gets the prepared credit memo under the lock, before
+     *                                                          the checks of the total. A transport uses it to
+     *                                                          dispatch its event, so that an observer can change
+     *                                                          the credit memo.
      * @throws \Mage_Core_Exception_Conflict When the state of the order does not allow a refund, or another request holds the order lock.
-     * @throws \Mage_Core_Exception When the refund breaks a money rule.
+     * @throws \Mage_Core_Exception When the refund breaks a money rule, or $invoice is not an invoice of the order.
      * @throws \Exception When the refund itself fails, for example at the payment gateway.
      */
     public function refund(
@@ -2108,6 +2213,7 @@ class Mage_Sales_Service_Order
         bool $visibleOnFront = false,
         bool $sendEmail = false,
         ?Invoice $invoice = null,
+        ?callable $beforeRegister = null,
     ): Creditmemo {
         if (isset($data['qtys'])) {
             $data['qtys'] = array_filter($this->parseLocaleNumbers($data['qtys']), fn($qty) => $qty !== 0.0);
@@ -2118,37 +2224,19 @@ class Mage_Sales_Service_Order
                 $data['shipping_amount'] ??= 0.0;
             }
         }
-        $creditmemo = $this->withOrderLock((int) $order->getId(), function () use ($order, $data, $comment, $offlineRefund, $backToStockItemIds, $notifyCustomer, $visibleOnFront, $sendEmail, $invoice): Creditmemo {
+        $creditmemo = $this->withOrderLock((int) $order->getId(), function () use ($order, $data, $comment, $offlineRefund, $backToStockItemIds, $notifyCustomer, $visibleOnFront, $sendEmail, $invoice, $beforeRegister): Creditmemo {
             // Re-read under the lock so canCreditmemo() sees the live
             // total_refunded, not a value another request changed while we waited.
             $order->load((int) $order->getId());
+            if ($invoice) {
+                if ((int) $invoice->getOrderId() !== (int) $order->getId()) {
+                    throw new Mage_Core_Exception(Mage::helper('sales')->__('The invoice does not belong to this order'));
+                }
+                $invoice->load((int) $invoice->getId())->setOrder($order);
+            }
             $creditmemo = $this->prepareCreditmemo($order, $data, $backToStockItemIds, $invoice);
-            return $this->registerCreditmemo($creditmemo, $comment, $offlineRefund, $notifyCustomer, $visibleOnFront, $sendEmail);
-        });
-        $this->sendSafely(fn() => $creditmemo->sendEmail($sendEmail, $notifyCustomer ? (string) $comment : ''));
-
-        return $creditmemo;
-    }
-
-    /**
-     * Save the credit memo $creditmemo that prepareCreditmemo() returned, for a transport that changes it first.
-     * See refund().
-     *
-     * @throws \Mage_Core_Exception_Conflict When the state of the order does not allow a refund, or another request holds the order lock.
-     * @throws \Mage_Core_Exception When the refund breaks a money rule.
-     * @throws \Exception When the refund itself fails, for example at the payment gateway.
-     */
-    public function saveCreditmemo(
-        Creditmemo $creditmemo,
-        ?string $comment = null,
-        bool $offlineRefund = true,
-        bool $notifyCustomer = false,
-        bool $visibleOnFront = false,
-        bool $sendEmail = false,
-    ): Creditmemo {
-        $this->withOrderLock((int) $creditmemo->getOrderId(), function () use ($creditmemo, $comment, $offlineRefund, $notifyCustomer, $visibleOnFront, $sendEmail): Creditmemo {
-            if (!$creditmemo->getOrder()->canCreditmemo()) {
-                throw new Mage_Core_Exception_Conflict(Mage::helper('sales')->__('Order cannot be refunded (already fully refunded or not in a refundable state)'));
+            if ($beforeRegister !== null) {
+                $beforeRegister($creditmemo);
             }
             return $this->registerCreditmemo($creditmemo, $comment, $offlineRefund, $notifyCustomer, $visibleOnFront, $sendEmail);
         });

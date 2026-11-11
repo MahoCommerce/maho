@@ -24,13 +24,15 @@ final class DownloadableLinkProvider extends \Maho\ApiPlatform\Provider
     {
         $productId = (int) ($uriVariables['productId'] ?? 0);
         $product = $this->loadProductForRead($productId, Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE);
-        return $this->getLinks($product);
+        return $this->getLinks($product, withLinkUrl: $this->canReadBackendProducts());
     }
 
     /**
+     * The link URL is the paid download, so only a caller with backend access to the products gets it.
+     *
      * @return DownloadableLink[]
      */
-    public function getLinks(Mage_Catalog_Model_Product $product): array
+    public function getLinks(Mage_Catalog_Model_Product $product, bool $withLinkUrl = false): array
     {
         /** @var \Mage_Downloadable_Model_Product_Type $typeInstance */
         $typeInstance = $product->getTypeInstance(true);
@@ -46,7 +48,7 @@ final class DownloadableLinkProvider extends \Maho\ApiPlatform\Provider
             $dto->numberOfDownloads = (int) $link->getNumberOfDownloads();
             $dto->isShareable = (int) $link->getIsShareable();
             $dto->linkType = (string) $link->getLinkType();
-            $dto->linkUrl = $link->getLinkUrl();
+            $dto->linkUrl = $withLinkUrl ? $link->getLinkUrl() : null;
             $dto->sampleUrl = $link->getSampleUrl();
             $dto->sampleType = $link->getSampleType();
             $result[] = $dto;

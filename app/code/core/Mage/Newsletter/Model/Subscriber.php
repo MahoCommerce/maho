@@ -289,25 +289,43 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Return whether $email is the address of the account of the customer $customerId on the website of the store $storeId.
+     */
+    public function isAccountEmail(#[\SensitiveParameter] string $email, int $storeId, ?int $customerId): bool
+    {
+        if ($customerId === null) {
+            return false;
+        }
+        $ownerId = Mage::getModel('customer/customer')
+            ->setWebsiteId(Mage::app()->getStore($storeId)->getWebsiteId())
+            ->loadByEmail($email)
+            ->getId();
+        return (int) $ownerId === $customerId;
+    }
+
+    /**
      * Subscribe $email on the store $storeId and return the new status. $customerId is the customer who asks,
      * or null for a guest. A customer who subscribes the address of the account needs no confirmation, and the
-     * subscription gets the ID of the customer.
+     * subscription gets the ID of the customer. With $alwaysConfirm, an address that is not the address of the
+     * account gets the confirmation email also when the store asks no confirmation.
      *
      * @throws Mage_Core_Exception when the address is already subscribed
      */
-    public function subscribeEmail(#[\SensitiveParameter] string $email, int $storeId, ?int $customerId = null): int
-    {
+    public function subscribeEmail(
+        #[\SensitiveParameter]
+        string $email,
+        int $storeId,
+        ?int $customerId = null,
+        bool $alwaysConfirm = false,
+    ): int {
         $this->loadByEmail($email);
         if (!$this->getId()) {
             $this->setSubscriberConfirmCode($this->randomSequence());
         }
 
-        $ownerId = Mage::getModel('customer/customer')
-            ->setWebsiteId(Mage::app()->getStore($storeId)->getWebsiteId())
-            ->loadByEmail($email)
-            ->getId();
-        $isOwnEmail = $customerId !== null && (int) $ownerId === $customerId;
-        $needsConfirmation = Mage::getStoreConfigFlag(self::XML_PATH_CONFIRMATION_FLAG, $storeId) && !$isOwnEmail;
+        $isOwnEmail = $this->isAccountEmail($email, $storeId, $customerId);
+        $needsConfirmation = !$isOwnEmail
+            && ($alwaysConfirm || Mage::getStoreConfigFlag(self::XML_PATH_CONFIRMATION_FLAG, $storeId));
 
         if (!$this->getId() || in_array($this->getStatus(), [self::STATUS_UNSUBSCRIBED, self::STATUS_NOT_ACTIVE], true)) {
             $this->setStatus($needsConfirmation ? self::STATUS_NOT_ACTIVE : self::STATUS_SUBSCRIBED);

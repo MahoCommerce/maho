@@ -14,10 +14,11 @@ class Maho_FeedManager_Service_Feed
      * Generate $feed in one run and return the log of the generation. The log tells if the generation failed.
      * A feed with auto upload on goes to its destination after the generation.
      *
-     * @throws Mage_Core_Exception_Conflict when a generation of the feed is running
+     * @throws Mage_Core_Exception_Conflict when the Enable Module switch is off, or a generation of the feed is running
      */
     public function generate(Maho_FeedManager_Model_Feed $feed): Maho_FeedManager_Model_Log
     {
+        $this->_checkEnabled();
         $this->_checkNotGenerating($feed);
 
         /** @var Maho_FeedManager_Model_Generator $generator */
@@ -34,10 +35,12 @@ class Maho_FeedManager_Service_Feed
      * Start a generation of $feed in batches. With $force, reset a running generation of the feed first.
      *
      * @return array{job_id: string, log_id: int, total_products: int, batch_size: int, batches_total: int}
-     * @throws Mage_Core_Exception_Conflict when a generation of the feed is running and $force is false
+     * @throws Mage_Core_Exception_Conflict when the Enable Module switch is off, or a generation of the feed is
+     *                                      running and $force is false
      */
     public function startBatch(Maho_FeedManager_Model_Feed $feed, bool $force = false): array
     {
+        $this->_checkEnabled();
         if ($force) {
             $this->reset($feed, true);
         } else {
@@ -45,6 +48,18 @@ class Maho_FeedManager_Service_Feed
         }
 
         return $this->_getBatch()->initBatch($feed);
+    }
+
+    /**
+     * @throws Mage_Core_Exception_Conflict when the Enable Module switch of the configuration is off
+     */
+    protected function _checkEnabled(): void
+    {
+        if (!Mage::helper('feedmanager')->isEnabled()) {
+            throw new Mage_Core_Exception_Conflict(
+                Mage::helper('feedmanager')->__('Feed Manager is disabled. Enable it in the configuration to generate a feed.'),
+            );
+        }
     }
 
     /**

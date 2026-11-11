@@ -336,7 +336,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         $this->getResponse()->setHeader('Content-Type', 'application/json', true);
 
         try {
-            Mage::app()->getCache()->flush();
+            Mage::getService('core/cache')->flush();
 
             $this->getResponse()->setBody(Mage::helper('core')->jsonEncode(['success' => true]));
         } catch (Exception $e) {

@@ -478,56 +478,13 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
         $session = Mage::getSingleton('checkout/session');
 
         try {
-            $item = $cart->getQuote()->getItemById($itemId);
-            if (!$item) {
-                Mage::throwException(
-                    Mage::helper('wishlist')->__("Requested cart item doesn't exist"),
-                );
-            }
-
-            $productId  = $item->getProductId();
-            $buyRequest = $item->getBuyRequest();
-
-            // Check if product has file options and clean them from buy request
-            $product = $item->getProduct();
-            $hasFileOptions = false;
-            $options = $product->getOptions();
-            if ($options) {
-                foreach ($options as $option) {
-                    if ($option->getType() === Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE) {
-                        $hasFileOptions = true;
-                        // Remove file option data from buy request
-                        if ($buyRequest->hasOptions()) {
-                            $requestOptions = $buyRequest->getOptions();
-                            if (isset($requestOptions[$option->getId()])) {
-                                unset($requestOptions[$option->getId()]);
-                                $buyRequest->setOptions($requestOptions);
-                            }
-                        }
-                    }
-                }
-            }
-
-            $wishlist->addNewItem($productId, $buyRequest);
-
-            $cart->getQuote()->removeItem($itemId);
+            $product = $this->wishlistService()->moveFromCart($wishlist, $cart->getQuote(), $itemId)->getProduct();
             $cart->save();
             Mage::helper('wishlist')->calculate();
-            $productName = $item->getProduct()->getName();
-            $wishlistName = $wishlist->getName();
 
-            // Add appropriate success message
-            if ($hasFileOptions) {
-                $session->addSuccess(
-                    Mage::helper('wishlist')->__('%s has been moved to wishlist %s. Please note that uploaded files will need to be re-uploaded when adding to cart.', $productName, $wishlistName),
-                );
-            } else {
-                $session->addSuccess(
-                    Mage::helper('wishlist')->__('%s has been moved to wishlist %s', $productName, $wishlistName),
-                );
-            }
-
-            $wishlist->save();
+            $session->addSuccess($this->wishlistService()->hasFileOption($product)
+                ? Mage::helper('wishlist')->__('%s has been moved to wishlist %s. Please note that uploaded files will need to be re-uploaded when adding to cart.', $product->getName(), $wishlist->getName())
+                : Mage::helper('wishlist')->__('%s has been moved to wishlist %s', $product->getName(), $wishlist->getName()));
         } catch (Mage_Core_Exception $e) {
             $session->addError($e->getMessage());
         } catch (Exception $e) {
@@ -564,67 +521,14 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
             return;
         }
 
-        $emails  = array_filter(explode(',', $this->getRequest()->getPost('emails', '')));
-        $message = nl2br(htmlspecialchars((string) $this->getRequest()->getPost('message')));
-        $error   = false;
-        if (empty($emails)) {
-            $error = $this->__('Email address can\'t be empty.');
-        } elseif (count($emails) > 5) {
-            $error = $this->__('Please enter no more than 5 email addresses.');
-        } else {
-            foreach ($emails as $index => $email) {
-                $email = trim($email);
-                if (!Mage::helper('core')->isValidEmail($email)) {
-                    $error = $this->__('Please input a valid email address.');
-                    break;
-                }
-                $emails[$index] = $email;
-            }
-        }
-        if ($error) {
-            Mage::getSingleton('wishlist/session')->addError($error);
-            Mage::getSingleton('wishlist/session')->setSharingForm($this->getRequest()->getPost());
-            $this->_redirect('*/*/share');
-            return;
-        }
-
         try {
-            $customer = Mage::getSingleton('customer/session')->getCustomer();
-
-            /*if share rss added rss feed to email template*/
-            if ($this->getRequest()->getParam('rss_url')) {
-                $rssUrl = $this->getLayout()
-                    ->createBlock('wishlist/share_email_rss')
-                    ->setWishlistId($wishlist->getId())
-                    ->toHtml();
-                $message .= $rssUrl;
-            }
-            $wishlistBlock = $this->getLayout()->createBlock('wishlist/share_email_items')->toHtml();
-
-            $emails = array_unique($emails);
-            /** @var Mage_Core_Model_Email_Template $emailModel */
-            $emailModel = Mage::getModel('core/email_template');
-
-            $sharingCode = $wishlist->getSharingCode();
-            foreach ($emails as $email) {
-                $emailModel->sendTransactional(
-                    Mage::getStoreConfig('wishlist/email/email_template'),
-                    Mage::getStoreConfig('wishlist/email/email_identity'),
-                    $email,
-                    null,
-                    [
-                        'customer'       => $customer,
-                        'items'          => $wishlistBlock,
-                        'viewOnSiteLink' => Mage::getUrl('*/shared/index', ['code' => $sharingCode]),
-                        'message'        => $message,
-                    ],
-                );
-            }
-
-            $wishlist->setShared();
-            $wishlist->save();
-
-            Mage::dispatchEvent('wishlist_share', ['wishlist' => $wishlist]);
+            $this->wishlistService()->share(
+                $wishlist,
+                explode(',', (string) $this->getRequest()->getPost('emails', '')),
+                (string) $this->getRequest()->getPost('message'),
+                (int) Mage::app()->getStore()->getId(),
+                (bool) $this->getRequest()->getParam('rss_url'),
+            );
             Mage::getSingleton('customer/session')->addSuccess(
                 $this->__('Your Wishlist has been shared.'),
             );

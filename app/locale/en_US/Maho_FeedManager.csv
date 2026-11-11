@@ -176,6 +176,7 @@
 "Feed has been duplicated. You are now editing the copy.","Feed has been duplicated. You are now editing the copy."
 "Feed ID required","Feed ID required"
 "Feed Information","Feed Information"
+"Feed Manager is disabled. Enable it in the configuration to generate a feed.","Feed Manager is disabled. Enable it in the configuration to generate a feed."
 "Feed Manager","Feed Manager"
 "Feed Name","Feed Name"
 "Feed not found","Feed not found"

@@ -40,3 +40,29 @@ it('keeps the fetched model list under the cache path that the model dropdown re
     expect($models)->toBe([['value' => 'gpt-test', 'label' => 'gpt-test']])
         ->and(Mage::helper('core')->jsonDecode((string) $stored))->toBe($models);
 });
+
+it('gives the result of a refresh to the admin observer, and writes no session message in the model', function (): void {
+    Mage::app()->getStore()->setConfig('ai/general/openai_api_key', Mage::helper('core')->encrypt('sk-test'));
+    $fetcher = Mage::getSingleton('ai/platform_modelFetcher');
+    $fetcher->takeRefreshResults();
+    $session = Mage::getSingleton('adminhtml/session');
+    $session->getMessages(true);
+
+    $fetcher->setHttpClient(new MockHttpClient(new MockResponse((string) json_encode(['data' => [['id' => 'gpt-test']]]))));
+    $count = $fetcher->refreshCache('openai');
+    $fetcher->setHttpClient(new MockHttpClient(new MockResponse('', ['http_code' => 500])));
+    $failed = $fetcher->refreshCache('mistral');
+    Mage::app()->getStore()->resetConfig();
+    Mage::getModel('core/config')->deleteConfig('ai/models_cache/mistral');
+
+    expect($count)->toBe(1)
+        ->and($failed)->toBeNull()
+        ->and($fetcher->refreshCache('generic'))->toBeNull()
+        ->and($session->getMessages()->count())->toBe(0);
+
+    new Maho_Ai_Model_Observer()->addModelRefreshMessages(new \Maho\Event\Observer());
+    $texts = array_map(static fn($message) => $message->getText(), $session->getMessages(true)->getItems());
+
+    expect($texts)->toBe(['AI: refreshed 1 models for openai.', 'AI: could not refresh models for mistral. See exception.log.'])
+        ->and($fetcher->takeRefreshResults())->toBe([]);
+});

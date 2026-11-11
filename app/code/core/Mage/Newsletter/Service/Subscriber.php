@@ -56,26 +56,43 @@ class Mage_Newsletter_Service_Subscriber
     }
 
     /**
+     * Return whether $email is the address of the account of the customer $customerId on the website of the store
+     * $storeId. A guest has no account, so the answer is false for a null $customerId.
+     */
+    public function isAccountAddress(#[\SensitiveParameter] string $email, int $storeId, ?int $customerId): bool
+    {
+        return Mage::getModel('newsletter/subscriber')->isAccountEmail($email, $storeId, $customerId);
+    }
+
+    /**
      * Return whether the answer to subscribe() tells the client to confirm the subscription by email.
-     * A guest gets the answer of the store config, whatever the state of the address, so that the answer
-     * does not show whether the address is subscribed.
+     * A guest gets the answer of the store config, and a customer who gives an address that is not the address of
+     * the account always gets "confirm". These answers do not change with the state of the address, so that they
+     * do not show whether the address is subscribed.
      */
     public function isConfirmationPending(Subscriber $subscriber, ?int $customerId, int $storeId): bool
     {
-        return $customerId === null
-            ? Mage::getStoreConfigFlag(Subscriber::XML_PATH_CONFIRMATION_FLAG, $storeId)
-            : $subscriber->getStatus() === Subscriber::STATUS_NOT_ACTIVE;
+        if ($customerId === null) {
+            return Mage::getStoreConfigFlag(Subscriber::XML_PATH_CONFIRMATION_FLAG, $storeId);
+        }
+        if (!$this->isAccountAddress((string) $subscriber->getSubscriberEmail(), $storeId, $customerId)) {
+            return true;
+        }
+        return $subscriber->getStatus() === Subscriber::STATUS_NOT_ACTIVE;
     }
 
     /**
      * Subscribe $email on the store $storeId. $customerId is the customer who is logged in, or null for a guest.
-     * A customer who subscribes the address of the account needs no confirmation.
+     * A customer who subscribes the address of the account needs no confirmation. A customer who gives another
+     * address has no proof that the address is theirs: the guest switch applies, and the address always gets the
+     * confirmation email, also when the store asks no confirmation.
      * When the address is already subscribed, return its subscriber unchanged: getIsStatusChanged() is false.
      * The API channel sends the solved CAPTCHA in $captchaToken. Maho_Captcha checks the footer form before the
      * controller, and the admin channel asks no CAPTCHA.
      *
      * @throws Mage_Core_Exception_Input when the email is empty or not valid, or when the CAPTCHA refuses the token
-     * @throws Mage_Core_Exception_Forbidden when the store does not accept guests and $customerId is null
+     * @throws Mage_Core_Exception_Forbidden when the store does not accept guests, and $customerId is null or $email
+     *                                       is not the address of the account
      * @throws Mage_Core_Exception_TooManyRequests when the client or the address is over its limit
      */
     public function subscribe(
@@ -88,8 +105,11 @@ class Mage_Newsletter_Service_Subscriber
     ): Subscriber {
         $helper = Mage::helper('newsletter');
         $core = Mage::helper('core');
-        if ($customerId === null && !$this->isGuestSubscriptionAllowed($storeId)) {
-            throw new Mage_Core_Exception_Forbidden($helper->__('Guest subscription is not allowed. Please login first.'));
+        $isAccountAddress = $this->isAccountAddress($email, $storeId, $customerId);
+        if (!$isAccountAddress && !$this->isGuestSubscriptionAllowed($storeId)) {
+            throw new Mage_Core_Exception_Forbidden($customerId === null
+                ? $helper->__('Guest subscription is not allowed. Please login first.')
+                : $helper->__('You can subscribe only the email address of your account.'));
         }
         if ($channel === Channel::Api) {
             Mage::helper('apiplatform')->assertCaptcha(['captchaToken' => $captchaToken]);
@@ -101,7 +121,7 @@ class Mage_Newsletter_Service_Subscriber
 
         $subscriber = Mage::getModel('newsletter/subscriber')->loadByEmail($email);
         if (!$subscriber->isSubscribed()) {
-            $subscriber->subscribeEmail($email, $storeId, $customerId);
+            $subscriber->subscribeEmail($email, $storeId, $customerId, alwaysConfirm: $customerId !== null);
         }
         return $subscriber;
     }

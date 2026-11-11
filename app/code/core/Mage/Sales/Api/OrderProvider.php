@@ -21,6 +21,13 @@ use Symfony\Bundle\SecurityBundle\Security;
  */
 final class OrderProvider extends \Maho\ApiPlatform\Provider
 {
+    private const STRING_FILTERS = [
+        'status', 'state', 'email', 'emailLike', 'incrementId', 'search',
+        'createdFrom', 'createdTo', 'updatedSince', 'since',
+    ];
+
+    private const INT_FILTERS = ['customerId', 'storeId'];
+
     private \Mage_Sales_Service_Order $orderService;
 
     public function __construct(Security $security)
@@ -147,10 +154,18 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
     private function getCollection(array $context): TraversablePaginator
     {
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context);
+        $input = $context['filters'] ?? [];
+        $filters = [];
+        foreach (self::STRING_FILTERS as $key) {
+            $filters[$key] = $this->stringFilter($input, $key);
+        }
+        foreach (self::INT_FILTERS as $key) {
+            $filters[$key] = $this->intFilter($input, $key);
+        }
         $result = $this->orderService->getList(
             $page,
             $pageSize,
-            $context['filters'] ?? [],
+            $filters,
             $this->requireUser()->getAllowedStoreIds(),
         );
 

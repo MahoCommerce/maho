@@ -18,23 +18,32 @@ uses(Tests\MahoFrontendTestCase::class);
 
 /**
  * The one page checkout and POST /guest-carts/{id}/place-order refuse a guest order through
- * Mage_Sales_Service_Order::assertGuestCheckoutAllowed() when the store does not allow guest checkout (#1348).
+ * Mage_Sales_Service_Order::validateQuote() when the store does not allow guest checkout (#1348). No transport has
+ * its own gate. A staff actor has no gate.
  */
 
 const GUEST_CHECKOUT_REFUSED = 'Sorry, guest checkout is not enabled. Please try again or contact store owner.';
 
 /**
- * Validate $quote as the one page checkout does before it places the order.
+ * Place the order of $quote as the one page checkout does for a guest. For another checkout method or for staff,
+ * run the check of the order service. The cart has no address, so an order that passes the guest checkout gate
+ * stops at the next rule.
  *
- * @return string the error, or an empty string when the checkout accepts the order
+ * @return string the message of the gate, or an empty string when the gate accepts the order
  */
-function guestCheckoutViaWeb(Mage_Sales_Model_Quote $quote, string $method): string
+function guestCheckoutViaWeb(Mage_Sales_Model_Quote $quote, string $method, Mage_Checkout_Model_Actor $actor = Mage_Checkout_Model_Actor::Customer): string
 {
     $quote->setCheckoutMethod($method);
     try {
-        Mage::getModel('checkout/type_onepage')->setQuote($quote)->validate();
-    } catch (Mage_Core_Exception $e) {
+        if ($actor === Mage_Checkout_Model_Actor::Customer && $method === Mage_Checkout_Model_Type_Onepage::METHOD_GUEST) {
+            Mage::getModel('checkout/type_onepage')->setQuote($quote)->saveOrder();
+        } else {
+            Mage::getService('sales/order')->validateQuote($quote, $actor);
+        }
+    } catch (Mage_Core_Exception_Forbidden $e) {
         return $e->getMessage();
+    } catch (Mage_Core_Exception) {
+        return '';
     }
     return '';
 }
@@ -81,6 +90,19 @@ it('lets a shopper who registers in the checkout go on when the store does not a
     Mage::app()->getStore()->setConfig(Mage_Checkout_Helper_Data::XML_PATH_GUEST_CHECKOUT, '0');
 
     expect(guestCheckoutViaWeb($this->cart, Mage_Checkout_Model_Type_Onepage::METHOD_REGISTER))->toBe('');
+});
+
+it('has no guest checkout gate for a staff actor', function () {
+    Mage::app()->getStore()->setConfig(Mage_Checkout_Helper_Data::XML_PATH_GUEST_CHECKOUT, '0');
+
+    expect(guestCheckoutViaWeb($this->cart, Mage_Checkout_Model_Type_Onepage::METHOD_GUEST, Mage_Checkout_Model_Actor::Staff))->toBe('');
+});
+
+it('refuses the guest order of a customer actor in the order service, before any transport', function () {
+    Mage::app()->getStore()->setConfig(Mage_Checkout_Helper_Data::XML_PATH_GUEST_CHECKOUT, '0');
+
+    expect(fn() => Mage::getService('sales/order')->validateQuote($this->cart, Mage_Checkout_Model_Actor::Customer))
+        ->toThrow(Mage_Core_Exception_Forbidden::class, GUEST_CHECKOUT_REFUSED);
 });
 
 it('accepts a guest order on both transports when the store allows guest checkout', function () {

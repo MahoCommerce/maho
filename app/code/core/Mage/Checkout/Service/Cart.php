@@ -8,7 +8,6 @@
 
 declare(strict_types=1);
 
-use Maho\ApiPlatform\Service\StoreDefaults;
 use Maho\Security\RateLimitScope;
 
 /**
@@ -17,6 +16,13 @@ use Maho\Security\RateLimitScope;
 class Mage_Checkout_Service_Cart
 {
     private const MAX_ITEM_QTY = 10000;
+
+    /** The address fields that a client can write. */
+    private const ADDRESS_FIELDS = [
+        'prefix', 'firstname', 'middlename', 'lastname', 'suffix', 'company', 'street', 'city',
+        'region', 'region_id', 'postcode', 'country_id',
+        'telephone', 'fax', 'email', 'vat_id',
+    ];
 
     /** The shape of a masked cart id, bare of delimiters so a route requirement can reuse it. */
     public const MASKED_ID_PATTERN = '[a-f0-9]{32}';
@@ -260,7 +266,8 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Add $product to $quote with $buyRequest, and save the cart. A simple product that the storefront does not show
+     * Add $product to $quote with $buyRequest, and save the cart. A caller that adds many products gives $save false,
+     * and collects the totals and saves the cart one time after the last product. A simple product that the storefront does not show
      * goes to the cart as its configurable parent. A buy request without a qty gets the default qty of the product,
      * and a new line gets at least the minimum sale qty. Only staff can set $customPrice.
      *
@@ -276,6 +283,7 @@ class Mage_Checkout_Service_Cart
         \Maho\DataObject $buyRequest,
         \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
         ?float $customPrice = null,
+        bool $save = true,
     ): \Mage_Sales_Model_Quote_Item {
         $this->assertCustomPrice($customPrice, $actor);
         $storeId = (int) $quote->getStoreId();
@@ -285,7 +293,7 @@ class Mage_Checkout_Service_Cart
         $this->assertAvailable($product, $storeId, $actor, $sku);
         $this->prepareOptions($product, $buyRequest);
 
-        return $this->inQuoteStoreScope($quote, function () use ($quote, $product, $buyRequest, $customPrice): \Mage_Sales_Model_Quote_Item {
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $product, $buyRequest, $customPrice, $save): \Mage_Sales_Model_Quote_Item {
             \Mage::dispatchEvent('checkout_cart_product_add_before', ['request' => $buyRequest, 'product' => $product]);
 
             if (!$buyRequest->hasQty()) {
@@ -318,7 +326,9 @@ class Mage_Checkout_Service_Cart
             }
 
             \Mage::dispatchEvent('checkout_cart_product_add_after', ['quote_item' => $item, 'product' => $product]);
-            $this->saveWithShippingRates($quote);
+            if ($save) {
+                $this->saveWithShippingRates($quote);
+            }
 
             return $item;
         });
@@ -1350,7 +1360,7 @@ class Mage_Checkout_Service_Cart
     public function applyShippingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): void
     {
         $address = $quote->getShippingAddress();
-        $address->addData(StoreDefaults::filterAddressKeys($addressData))->setSameAsBilling(false);
+        $address->addData(array_intersect_key($addressData, array_flip(self::ADDRESS_FIELDS)))->setSameAsBilling(false);
         $this->applySaveInAddressBook($quote, $address, $addressData);
         $this->inQuoteStoreScope($quote, fn() => $this->validateAddress($address));
 
@@ -1370,7 +1380,7 @@ class Mage_Checkout_Service_Cart
     public function applyBillingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): void
     {
         $address = $quote->getBillingAddress();
-        $address->addData(StoreDefaults::filterAddressKeys($addressData));
+        $address->addData(array_intersect_key($addressData, array_flip(self::ADDRESS_FIELDS)));
         $this->applySaveInAddressBook($quote, $address, $addressData);
         $this->inQuoteStoreScope($quote, fn() => $this->validateAddress($address));
         $quote->setTotalsCollectedFlag(false);
@@ -1413,7 +1423,10 @@ class Mage_Checkout_Service_Cart
                 throw new \Mage_Core_Exception_Conflict('Cart has no shipping address to copy');
             }
             $addressData = ['save_in_address_book' => $addressData['save_in_address_book'] ?? false]
-                + StoreDefaults::extractAddressFields($shippingAddress);
+                + array_filter(
+                    array_combine(self::ADDRESS_FIELDS, array_map($shippingAddress->getData(...), self::ADDRESS_FIELDS)),
+                    static fn(mixed $value): bool => $value !== null,
+                );
             $shippingAddress->setSameAsBilling(true);
         }
 

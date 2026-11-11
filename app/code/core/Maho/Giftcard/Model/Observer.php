@@ -123,21 +123,9 @@ class Maho_Giftcard_Model_Observer
         // Purchased cards start valid only on the website they were bought on
         $giftcard->setWebsiteIds([(int) $website->getId()]);
 
+        // The first save of the card writes its "created" history entry
+        $giftcard->setCreationComment("Created from order #{$order->getIncrementId()}");
         $giftcard->save();
-
-        // Add history entry
-        $history = Mage::getModel('giftcard/history');
-        $history->setData([
-            'giftcard_id' => $giftcard->getId(),
-            'action' => Maho_Giftcard_Model_Giftcard::ACTION_CREATED,
-            'base_amount' => $baseAmount,
-            'balance_before' => 0,
-            'balance_after' => $baseAmount,
-            'order_id' => $order->getId(),
-            'comment' => "Created from order #{$order->getIncrementId()}",
-            'created_at' => Mage::app()->getLocale()->formatDateForDb('now'),
-        ]);
-        $history->save();
 
         return $giftcard;
     }

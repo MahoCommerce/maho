@@ -119,7 +119,8 @@ Gift messages have no separate resource - they are the `setGiftMessageOnCart` / 
 | Resource | Queries | Mutations |
 |---|---|---|
 | Newsletter | `newsletter(id:)` *(admin)*, `newsletters` *(admin)*, `statusNewsletter` | `subscribeNewsletter`, `unsubscribeNewsletter` |
-| Wishlist item | `wishlistItem(id:)` *(admin)*, `wishlistItems` *(admin)*, `myWishlistItems` | `addWishlistItem`, `removeWishlistItem`, `moveToCartWishlistItem`, `syncWishlistItem` |
+| Wishlist item | `wishlistItem(id:)` *(admin)*, `wishlistItems` *(admin)*, `myWishlistItems` | `addWishlistItem`, `removeWishlistItem`, `moveToCartWishlistItem`, `syncWishlistItem`, `shareWishlistItem` |
+| Product alert | `productAlert(id:)`, `productAlerts`, `myProductAlerts` | `subscribeProductAlert`, `unsubscribeProductAlert` |
 
 ### Store, directory & tax
 

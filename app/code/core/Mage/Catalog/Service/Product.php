@@ -170,7 +170,7 @@ class Mage_Catalog_Service_Product
     }
 
     /**
-     * Put $product in the websites $websiteIds.
+     * Put $product in the websites $websiteIds. In single store mode, the product goes in the one website.
      *
      * @param array<int|string> $websiteIds
      * @param list<int>|null $storeIds with a list, each website must have a store view of the list
@@ -178,21 +178,30 @@ class Mage_Catalog_Service_Product
      */
     public function setWebsiteIds(Product $product, array $websiteIds, ?array $storeIds = null): void
     {
+        $websiteIds = Product::getSingleStoreWebsiteIds() ?? $websiteIds;
         $this->assertWebsitesAllowed($websiteIds, $storeIds);
         $product->setWebsiteIds(array_map(intval(...), $websiteIds));
     }
 
     /**
-     * Add the products $productIds to the websites $addIds and remove them from the websites $removeIds.
+     * Add the products $productIds to the websites $addIds and remove them from the websites $removeIds. In single
+     * store mode, the products stay in the one website.
      *
      * @param list<int> $productIds
      * @param array<int|string> $addIds
      * @param array<int|string> $removeIds
      * @param list<int>|null $storeIds with a list, each website must have a store view of the list
      * @throws Mage_Core_Exception_Forbidden
+     * @throws Mage_Core_Exception when a product has no SKU
      */
     public function changeWebsites(array $productIds, array $addIds, array $removeIds, ?array $storeIds = null): void
     {
+        $this->assertHaveSku($productIds);
+        $singleStoreWebsiteIds = Product::getSingleStoreWebsiteIds();
+        if ($singleStoreWebsiteIds !== null) {
+            $addIds = $addIds === [] && $removeIds === [] ? [] : $singleStoreWebsiteIds;
+            $removeIds = [];
+        }
         $this->assertWebsitesAllowed([...$addIds, ...$removeIds], $storeIds);
         /** @var Mage_Catalog_Model_Product_Action $action */
         $action = Mage::getSingleton('catalog/product_action');
@@ -273,7 +282,7 @@ class Mage_Catalog_Service_Product
      *
      * @param list<int|string> $productIds
      * @throws Mage_Core_Exception_Input for an unknown status
-     * @throws Mage_Core_Exception when a product to enable has no SKU
+     * @throws Mage_Core_Exception when a product has no SKU
      */
     public function updateStatus(array $productIds, int $status, int $storeId): void
     {
@@ -287,20 +296,18 @@ class Mage_Catalog_Service_Product
     /**
      * Write the attribute values $data of the products $productIds in the store view $storeId, without a save of
      * each product. An unknown attribute and a static attribute are skipped. The backend of each attribute checks
-     * its value, and a date range cannot start after it ends.
+     * its value, and a date range cannot start after it ends. A URL key gets the format of a product save. An empty
+     * URL key becomes the name of the product for one product, and is skipped for more than one.
      *
      * @param list<int|string> $productIds
      * @param array<string, mixed> $data the value of each attribute, by attribute code
      * @throws Mage_Core_Exception_Input
-     * @throws Mage_Core_Exception when a product to enable has no SKU
+     * @throws Mage_Core_Exception when a product has no SKU
      */
     public function updateAttributes(array $productIds, array $data, int $storeId): void
     {
-        if (isset($data['status']) && (int) $data['status'] === Mage_Catalog_Model_Product_Status::STATUS_ENABLED
-            && !Mage::getModel('catalog/product')->isProductsHasSku($productIds)
-        ) {
-            throw new Mage_Core_Exception(Mage::helper('catalog')->__('Some of the processed products have no SKU value defined. Please fill it prior to performing operations on these products.'));
-        }
+        $this->assertHaveSku($productIds);
+        $data = $this->formatUrlKey($productIds, $data, $storeId);
 
         $values = new \Maho\DataObject();
         foreach ($data as $code => $value) {
@@ -321,6 +328,69 @@ class Mage_Catalog_Service_Product
         }
         $this->assertDateRanges($productIds, $data, $storeId);
         Mage::getSingleton('catalog/product_action')->updateAttributes($productIds, $data, $storeId);
+    }
+
+    /**
+     * Refuse a mass change when one of the products $productIds has no SKU.
+     *
+     * @param array<int|string> $productIds
+     * @throws Mage_Core_Exception
+     */
+    public function assertHaveSku(array $productIds): void
+    {
+        if ($productIds !== [] && Mage::getModel('catalog/product')->isProductsHasSku($productIds) === false) {
+            throw new Mage_Core_Exception(Mage::helper('catalog')->__('Some of the processed products have no SKU value defined. Please fill it prior to performing operations on these products.'));
+        }
+    }
+
+    /**
+     * Move the products $productIds to the attribute set $setId, without a save of each product. The indexes and
+     * the product cache follow.
+     *
+     * @param array<int|string> $productIds
+     * @return int the number of products
+     * @throws Mage_Core_Exception_Input when the set is not a product attribute set
+     * @throws Mage_Core_Exception_Conflict when the set does not have an attribute that a configurable product uses
+     */
+    public function changeAttributeSet(array $productIds, int $setId): int
+    {
+        $helper = Mage::helper('catalog');
+        $productIds = array_values(array_unique(array_filter(array_map(intval(...), $productIds))));
+        /** @var Mage_Catalog_Model_Resource_Product $resource */
+        $resource = Mage::getResourceSingleton('catalog/product');
+        $set = Mage::getModel('eav/entity_attribute_set')->load($setId);
+        if (!$set->getId() || (int) $set->getEntityTypeId() !== (int) $resource->getTypeId()) {
+            throw new Mage_Core_Exception_Input()->addError('attribute_set_id', $helper->__('Attribute set %s not found', $setId));
+        }
+        if ($productIds === []) {
+            return 0;
+        }
+
+        $adapter = $resource->getReadConnection();
+        $setAttributeIds = array_map(intval(...), $adapter->fetchCol(
+            $adapter->select()
+                ->from($resource->getTable('eav/entity_attribute'), ['attribute_id'])
+                ->where('attribute_set_id = ?', $setId),
+        ));
+        $superAttributes = $adapter->fetchAll(
+            $adapter->select()
+                ->from(['sa' => $resource->getTable('catalog/product_super_attribute')], ['attribute_id'])
+                ->join(['e' => $resource->getTable('catalog/product')], 'e.entity_id = sa.product_id', ['sku'])
+                ->where('sa.product_id IN (?)', $productIds)
+                ->where('e.attribute_set_id != ?', $setId),
+        );
+        foreach ($superAttributes as $row) {
+            if (!in_array((int) $row['attribute_id'], $setAttributeIds, true)) {
+                $attribute = Mage::getSingleton('eav/config')->getAttribute(Product::ENTITY, (int) $row['attribute_id']);
+                throw new Mage_Core_Exception_Conflict($helper->__(
+                    "The attribute set does not have the attribute '%s' that the configurable product %s uses.",
+                    $attribute ? $attribute->getAttributeCode() : $row['attribute_id'],
+                    $row['sku'],
+                ));
+            }
+        }
+
+        return Mage::getSingleton('catalog/product_action')->updateAttributeSet($productIds, $setId);
     }
 
     /**
@@ -387,6 +457,30 @@ class Mage_Catalog_Service_Product
             $stored = $resource->getAttributeRawValue((int) $productId, $codes, $storeId);
             Product::assertDateRanges(array_merge(is_array($stored) ? $stored : [], array_intersect_key($data, array_flip($codes))));
         }
+    }
+
+    /**
+     * @param list<int|string> $productIds
+     * @param array<string, mixed> $data
+     * @return array<string, mixed> $data with the URL key in the format of the URL key backend
+     */
+    private function formatUrlKey(array $productIds, array $data, int $storeId): array
+    {
+        if (!array_key_exists('url_key', $data)) {
+            return $data;
+        }
+        $urlKey = (string) $data['url_key'];
+        if ($urlKey === '' && count($productIds) === 1) {
+            $urlKey = (string) ($data['name']
+                ?? Mage::getResourceSingleton('catalog/product')->getAttributeRawValue((int) reset($productIds), 'name', $storeId));
+        }
+        if ($urlKey === '') {
+            unset($data['url_key']);
+            return $data;
+        }
+        $locale = Mage::getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_LOCALE, $storeId);
+        $data['url_key'] = Mage::getSingleton('catalog/product_url')->formatUrlKey($urlKey, $locale);
+        return $data;
     }
 
     /**

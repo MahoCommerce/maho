@@ -116,3 +116,64 @@ it('refuses a quote without a shipping method with the message of the order serv
         ->and($this->events->count)->toBe(0)
         ->and(Mage::getModel('sales/order')->load($quote->getId(), 'quote_id')->getId())->toBeNull();
 });
+
+/**
+ * Make $order the order that the admin edits, or no order with null.
+ */
+function orderCreatePlacementEdit(?Mage_Sales_Model_Order $order): void
+{
+    $session = Mage::getSingleton('adminhtml/session_quote');
+    (function () use ($order): void {
+        $this->_order = $order;
+    })->call($session);
+}
+
+it('leaves the old order of an order edit and its payment as they are when the new order cannot be placed', function () {
+    $this->quotes = [$first = orderCreatePlacementQuote(), $second = orderCreatePlacementQuote()];
+    $old = orderCreatePlacementModel($first, false)->createOrder();
+    $failing = new class extends Mage_Sales_Service_Order {
+        #[\Override]
+        public function submit(
+            Mage_Sales_Model_Quote $quote,
+            Mage_Checkout_Model_Actor $actor,
+            ?array $agreementIds = null,
+            array $orderData = [],
+            ?bool $sendConfirmation = null,
+            ?Mage_Sales_Model_Convert_Quote $convertor = null,
+        ): Mage_Sales_Model_Order {
+            throw new Mage_Core_Exception('The payment of the new order failed');
+        }
+    };
+    Mage::unregister('_service/sales/order');
+    Mage::register('_service/sales/order', $failing);
+    $create = orderCreatePlacementModel($second, false);
+    orderCreatePlacementEdit($old);
+
+    try {
+        expect(fn() => $create->createOrder())->toThrow(Mage_Core_Exception::class, 'The payment of the new order failed');
+    } finally {
+        orderCreatePlacementEdit(null);
+    }
+
+    expect($old->isCanceled())->toBeFalse()
+        ->and(Mage::getModel('sales/order')->load($old->getId())->isCanceled())->toBeFalse();
+});
+
+it('cancels the old order of an order edit after the new order is saved', function () {
+    $this->quotes = [$first = orderCreatePlacementQuote(), $second = orderCreatePlacementQuote()];
+    $old = orderCreatePlacementModel($first, false)->createOrder();
+    $create = orderCreatePlacementModel($second, false);
+    orderCreatePlacementEdit($old);
+
+    try {
+        $new = $create->createOrder();
+    } finally {
+        orderCreatePlacementEdit(null);
+    }
+
+    $reloaded = Mage::getModel('sales/order')->load($old->getId());
+    expect($reloaded->isCanceled())->toBeTrue()
+        ->and((int) $reloaded->getRelationChildId())->toBe((int) $new->getId())
+        ->and((int) $new->getRelationParentId())->toBe((int) $old->getId())
+        ->and($new->getIncrementId())->toBe($old->getIncrementId() . '-1');
+});

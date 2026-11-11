@@ -156,8 +156,14 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
         $productIds = $this->_getHelper()->getProductIds();
         if (!is_array($productIds)) {
             $error = $this->__('Please select products for attributes update');
-        } elseif (!Mage::getModel('catalog/product')->isProductsHasSku($productIds)) {
-            $error = $this->__('Some of the processed products have no SKU value defined. Please fill it prior to performing operations on these products.');
+        } else {
+            try {
+                /** @var Mage_Catalog_Service_Product $service */
+                $service = Mage::getService('catalog/product');
+                $service->assertHaveSku($productIds);
+            } catch (Mage_Core_Exception $e) {
+                $error = $e->getMessage();
+            }
         }
 
         if ($error) {

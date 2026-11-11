@@ -591,10 +591,6 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
             $product->lockAttribute('media');
         }
 
-        if (Mage::app()->isSingleStoreMode()) {
-            $product->setWebsiteIds([Mage::app()->getStore(true)->getWebsite()->getId()]);
-        }
-
         /**
          * Create Permanent Redirect for old URL key
          */
