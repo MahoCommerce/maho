@@ -169,3 +169,33 @@ it('counts the shares of one customer on the page and on the API together', func
         ->and(wishlistShareViaPage('friend@example.com'))
         ->toBe(['accepted' => false, 'messages' => ['Too many requests. Please try again later.']]);
 });
+
+it('lists the items of the shared wishlist in the email when no customer session has it, as in an API request', function () {
+    $sku = 'wishlist-share-' . uniqid();
+    $product = Mage::getModel('catalog/product')->setStoreId(0)
+        ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+        ->setAttributeSetId(Mage::getModel('catalog/product')->getDefaultAttributeSetId())
+        ->setSku($sku)->setName('Shared wishlist product')->setUrlKey($sku)->setPrice(10.0)
+        ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+        ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
+        ->setTaxClassId(0)->setWebsiteIds([(int) Mage::app()->getStore()->getWebsiteId()])
+        ->setStockData(['use_config_manage_stock' => 0, 'manage_stock' => 0, 'is_in_stock' => 1, 'qty' => 100]);
+    $product->save();
+
+    try {
+        $wishlist = Mage::getModel('wishlist/wishlist')->loadByCustomer((int) $this->customer->getId(), true);
+        $wishlist->addNewItem(Mage::getModel('catalog/product')->setStoreId((int) Mage::app()->getStore()->getId())->load($product->getId()));
+        $wishlist->save();
+        Mage::getSingleton('customer/session')->logout();
+        Mage::unregister('wishlist');
+        $wishlist = Mage::getModel('wishlist/wishlist')->load($wishlist->getId());
+
+        $html = Mage::app()->getLayout()->createBlock('wishlist/share_email_items')->setWishlist($wishlist)->toHtml();
+
+        expect($html)->toContain('Shared wishlist product');
+    } finally {
+        Mage::register('isSecureArea', true, true);
+        $product->delete();
+        Mage::unregister('isSecureArea');
+    }
+});
