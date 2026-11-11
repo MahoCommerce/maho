@@ -49,8 +49,12 @@
             if (script.src) {
                 // Create a link element to start preloading
                 const link = document.createElement("link");
-                link.rel = "preload";
-                link.as = "script";
+                if (script.element.dataset.mahoType) {
+                    link.rel = "modulepreload";
+                } else {
+                    link.rel = "preload";
+                    link.as = "script";
+                }
                 link.href = script.src;
                 document.head.appendChild(link);
             }

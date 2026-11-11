@@ -855,7 +855,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
                     $attrs = preg_replace_callback(
                         '/"[^"]*"(*SKIP)(*FAIL)|\'[^\']*\'(*SKIP)(*FAIL)|\stype\s*=\s*("[^"]*"|\'[^\']*\'|[^\s"\'>]+)/i',
                         function ($typeMatch) use (&$type) {
-                            $type = trim($typeMatch[1], '"\'');
+                            $type = trim($typeMatch[1], " \t\n\r\f\"'");
                             return '';
                         },
                         $matches[1],

@@ -543,7 +543,10 @@ describe('Mage_Core_Controller_Response_Http', function () {
         it('keeps the module type of a deferred script', function () {
             $html = ($this->defer)('<html><body><script type="module" src="a.js"></script></body></html>');
 
-            expect($html)->toContain('<script type="text/plain" data-maho-script="0" src="a.js" data-maho-type="module"></script>');
+            $padded = ($this->defer)('<html><body><script type=" module ">var a = 1;</script></body></html>');
+
+            expect($html)->toContain('<script type="text/plain" data-maho-script="0" src="a.js" data-maho-type="module"></script>')
+                ->and($padded)->toContain('data-maho-type="module"');
         });
 
         it('keeps a script body that holds other tags and a closing tag in a string', function () {
