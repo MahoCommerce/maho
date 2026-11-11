@@ -71,3 +71,49 @@ it('rejects a billing postcode that does not match the format of the country', f
 
     $quote->delete();
 });
+
+it('keeps the email of a guest in the billing estimate, so that an order with no billing step has it', function () {
+    $quote = Mage::getModel('sales/quote')->setStoreId((int) Mage::app()->getStore()->getId());
+    $quote->addProduct(loadSimplePricedProduct(), 1);
+    $quote->collectTotals()->save();
+    Mage::getSingleton('checkout/session')->setQuoteId($quote->getId());
+
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/checkout/onepage/estimateBilling', 'POST', [
+        'form_key' => Mage::getSingleton('core/session')->getFormKey(),
+        'billing' => [
+            'firstname' => 'Test',
+            'lastname' => 'Buyer',
+            'email' => ' buyer-test@example.com ',
+            'street' => ['1 Infinite Loop'],
+            'city' => 'Cupertino',
+            'country_id' => 'US',
+            'region_id' => '12',
+            'postcode' => '95014',
+            'telephone' => '5551234567',
+            'use_for_shipping' => '1',
+            'customer_id' => '1',
+        ],
+    ]));
+    $request->setRouteName('checkout')
+        ->setControllerName('onepage')
+        ->setActionName('estimateBilling')
+        ->setDispatched(true);
+    Mage::app()->setRequest($request);
+    new Mage_Checkout_OnepageController($request, new Mage_Core_Controller_Response_Http())->dispatch('estimateBilling');
+
+    $saved = Mage::getModel('sales/quote')->loadByIdWithoutStore($quote->getId());
+    try {
+        Mage::getService('sales/order')->validateQuote($saved, Mage_Checkout_Model_Actor::Customer);
+        $fields = [];
+    } catch (Mage_Core_Exception_Input $e) {
+        $fields = array_column($e->getErrors(), 'field');
+    }
+
+    expect($saved->getBillingAddress()->getEmail())->toBe('buyer-test@example.com')
+        // A key of the POST that is not a field of the address form does not reach the address
+        ->and($saved->getBillingAddress()->getCustomerId())->toBeNull()
+        ->and($fields)->not->toContain('customer_email')
+        ->and($fields)->not->toContain('customer_firstname');
+
+    $quote->delete();
+});

@@ -344,6 +344,19 @@ class Mage_Catalog_Service_Product
     }
 
     /**
+     * Return whether $setId is the ID of an attribute set of products.
+     */
+    private function isProductSet(int $setId): bool
+    {
+        // PostgreSQL refuses a value above the range of the SMALLINT column eav_attribute_set.attribute_set_id
+        if ($setId < 1 || $setId > 32767) {
+            return false;
+        }
+        $set = Mage::getModel('eav/entity_attribute_set')->load($setId);
+        return $set->getId() && (int) $set->getEntityTypeId() === (int) Mage::getResourceSingleton('catalog/product')->getTypeId();
+    }
+
+    /**
      * Move the products $productIds to the attribute set $setId, without a save of each product. The indexes and
      * the product cache follow.
      *
@@ -358,8 +371,7 @@ class Mage_Catalog_Service_Product
         $productIds = array_values(array_unique(array_filter(array_map(intval(...), $productIds))));
         /** @var Mage_Catalog_Model_Resource_Product $resource */
         $resource = Mage::getResourceSingleton('catalog/product');
-        $set = Mage::getModel('eav/entity_attribute_set')->load($setId);
-        if (!$set->getId() || (int) $set->getEntityTypeId() !== (int) $resource->getTypeId()) {
+        if (!$this->isProductSet($setId)) {
             throw new Mage_Core_Exception_Input()->addError('attribute_set_id', $helper->__('Attribute set %s not found', $setId));
         }
         if ($productIds === []) {
@@ -427,8 +439,7 @@ class Mage_Catalog_Service_Product
             }
         }
         if (!$product->getId() || $product->dataHasChangedFor('attribute_set_id')) {
-            $set = Mage::getModel('eav/entity_attribute_set')->load((int) $product->getAttributeSetId());
-            if (!$set->getId() || (int) $set->getEntityTypeId() !== (int) $product->getResource()->getTypeId()) {
+            if (!$this->isProductSet((int) $product->getAttributeSetId())) {
                 $errors->addError('attribute_set_id', $helper->__('Attribute set %s not found', (int) $product->getAttributeSetId()));
             }
         }

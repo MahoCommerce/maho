@@ -441,6 +441,11 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
                 ->setEntity($billingAddress);
             $addressForm->restoreData($addressForm->extractData($addressForm->prepareRequest($data)));
         }
+        // The address form has no email. A payment such as PayPal places the order of a guest from this cart
+        // with no billing step, so the cart keeps the email here. The order service checks it.
+        if (!$quote->getCustomerId() && is_string($data['email'] ?? null)) {
+            $billingAddress->setEmail(mb_substr(trim($data['email']), 0, 255));
+        }
         $billingAddress->implodeStreetAddress();
 
         // `billing[use_for_shipping]` lives outside the hidden form and is always posted.
