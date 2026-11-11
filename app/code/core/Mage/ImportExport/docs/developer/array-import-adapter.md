@@ -232,6 +232,15 @@ $data = [
 ];
 ```
 
+Column names come from the first row. Later named-column rows are matched by key,
+so their key order does not matter. A missing column becomes an empty string,
+without shifting another value into it. Keys added only in later named-column rows
+are ignored; include every column to import in the first row. A later empty row
+produces empty values for those columns and does not stop iteration before later rows.
+
+The existing format detection checks the first key: a row starting with a numeric
+key uses positional values, even if it also contains named keys.
+
 ### Indexed Arrays
 First row contains column headers:
 
