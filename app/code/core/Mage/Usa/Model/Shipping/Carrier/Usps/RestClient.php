@@ -226,18 +226,21 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_RestClient
 
             // A rejected HTTP status throws our own exception, so retain the response too.
             $errorMessage = null;
-            if (isset($response) || method_exists($e, 'getResponse')) {
-                try {
-                    $errorResponse = $response ?? $e->getResponse();
+            try {
+                $errorResponse = $response ?? null;
+                if ($errorResponse === null && method_exists($e, 'getResponse')) {
+                    $errorResponse = $e->getResponse();
+                }
+                if ($errorResponse !== null) {
                     $errorContent = $errorResponse->getContent(false);
                     $debugData['error']['response_body'] = $errorContent;
                     $errorData = Mage::helper('core')->jsonDecode($errorContent);
                     if (isset($errorData['error'])) {
                         $errorMessage = $this->extractErrorMessage($errorData);
                     }
-                } catch (Exception) {
-                    // Keep the original exception when the response is unavailable or not JSON.
                 }
+            } catch (Exception) {
+                // Keep the original exception when the response is unavailable or not JSON.
             }
 
             if ($this->debugMode) {
