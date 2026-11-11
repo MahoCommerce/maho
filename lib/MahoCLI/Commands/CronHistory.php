@@ -26,7 +26,7 @@ class CronHistory extends BaseMahoCommand
         $this->initMaho();
         $table = new Table($output);
         $table->setHeaders(['schedule_id', 'job_code', 'status', 'messages',
-            'messages', 'scheduled_at', 'executed_at', 'finished_at']);
+            'created_at', 'scheduled_at', 'executed_at', 'finished_at']);
 
         $jobs = Mage::getResourceModel('cron/schedule_collection');
         foreach ($jobs as $job) {
