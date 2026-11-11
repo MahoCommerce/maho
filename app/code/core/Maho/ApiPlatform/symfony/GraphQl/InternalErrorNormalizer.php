@@ -23,9 +23,9 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 /**
  * An HTTP exception, a validation exception, a Mage_Core_Exception, a NotNormalizableValueException (a value of
  * the wrong type) and an exception that GraphQL marks as safe for the client are client faults. Other normalizers
- * show them. Any other exception is a server fault. This normalizer logs it, as ApiExceptionListener does for REST, and gives the same error as the ErrorNormalizer
- * of API Platform. It runs before the RuntimeExceptionNormalizer of API Platform, which shows the message of a
- * RuntimeException to the client and does not log it.
+ * show them. Any other exception is a server fault. This normalizer logs it, as ApiExceptionListener does for REST,
+ * and gives the same error as the ErrorNormalizer of API Platform. It runs before the RuntimeExceptionNormalizer of
+ * API Platform, which shows the message of a RuntimeException to the client and does not log it.
  */
 final class InternalErrorNormalizer implements NormalizerInterface
 {
