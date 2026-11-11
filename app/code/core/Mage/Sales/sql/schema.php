@@ -159,6 +159,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('shipping_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
             ->addColumn(Schema::column('base_shipping_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
             ->addColumn(Schema::column('coupon_rule_name', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('customer_attribute_labels', Types::TEXT, length: 65535, notNull: false, comment: 'Labels of the custom customer attribute options, as JSON'))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('status'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('state'))
@@ -284,6 +285,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('vat_request_id', Types::TEXT, length: 65535, notNull: false))
             ->addColumn(Schema::column('vat_request_date', Types::TEXT, length: 65535, notNull: false))
             ->addColumn(Schema::column('vat_request_success', Types::SMALLINT, notNull: false))
+            ->addColumn(Schema::column('custom_attribute_labels', Types::TEXT, length: 65535, notNull: false, comment: 'Labels of the custom address attribute options, as JSON'))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('parent_id'))
             ->addForeignKeyConstraint(

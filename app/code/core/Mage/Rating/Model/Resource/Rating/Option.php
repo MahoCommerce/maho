@@ -199,8 +199,9 @@ class Mage_Rating_Model_Resource_Rating_Option extends Mage_Core_Model_Resource_
                 'entity_pk_value'  => $entityPkValue,
                 'vote_count'       => $row['vote_count'],
                 'vote_value_sum'   => $row['vote_value_sum'],
-                'percent'          => (($row['vote_value_sum'] / $row['vote_count']) / 5) * 100,
-                'percent_approved' => ($row['app_vote_count'] ? ((($row['app_vote_value_sum'] / $row['app_vote_count']) / 5) * 100) : 0),
+                // The percent columns are SMALLINT, and PostgreSQL refuses a fraction
+                'percent'          => (int) round((($row['vote_value_sum'] / $row['vote_count']) / 5) * 100),
+                'percent_approved' => $row['app_vote_count'] ? (int) round((($row['app_vote_value_sum'] / $row['app_vote_count']) / 5) * 100) : 0,
                 'store_id'         => $row['store_id'],
             ];
 

@@ -106,6 +106,6 @@ it('stops a client that subscribes more addresses than the budget allows', funct
 
     subscribeFromFooter($blocked);
 
-    expect(footerMessages())->toContain('Too Soon');
+    expect(footerMessages())->toContain('Too many requests. Please try again later.');
     expect((int) Mage::getModel('newsletter/subscriber')->loadByEmail($blocked)->getId())->toBe(0);
 });

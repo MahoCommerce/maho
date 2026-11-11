@@ -116,7 +116,7 @@ describe('Bundle Options, CRUD Lifecycle', function (): void {
         $response = apiPost("/api/rest/v2/products/{$bundleId}/bundle-options", [
             'title' => 'Pest rejected',
             'type' => 'radio',
-            'selections' => [['productId' => $childId, 'qty' => 0]],
+            'selections' => [['productId' => $childId, 'price' => -1]],
         ], $token);
         expect($response['status'])->toBe(422);
 

@@ -193,8 +193,7 @@ describe('cart service store scope (issue #1337)', function (): void {
             $handler = new CartMutationHandler(new CartMapper());
             $result = $handler->handleShippingMethods(['cartId' => (int) $quote->getId()]);
 
-            // A real carrier must have produced a rate; the handler always
-            // injects a synthetic freeshipping row, so not-empty proves nothing
+            // A carrier of the store of the cart must give a rate
             $carriers = array_column($result['availableShippingMethods'], 'carrierCode');
             expect((int) Mage::app()->getStore()->getId())->toBe(0)
                 ->and($carriers)->toContain('flatrate');

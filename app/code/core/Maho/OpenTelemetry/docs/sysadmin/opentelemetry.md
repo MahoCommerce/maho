@@ -97,7 +97,7 @@ PII:
 | Event | Fires on | Attributes |
 |---|---|---|
 | `maho.order.placed` | `sales_order_place_after` | `maho.order.increment_id`, `maho.order.grand_total`, `maho.order.currency`, `maho.order.items_count`, `maho.payment.method` |
-| `maho.cart.add` | `checkout_cart_product_add_after` | `maho.product.id`, `maho.product.sku` |
+| `maho.cart.add` | `checkout_cart_product_add_after`, for an add on the storefront, the API and the admin order create | `maho.product.id`, `maho.product.sku` |
 | `maho.checkout.success` | checkout success page | `maho.order.ids` |
 | `maho.customer.login` | `customer_login` | none (sets `enduser.id` on the root span) |
 

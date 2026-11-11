@@ -11,13 +11,13 @@ declare(strict_types=1);
 namespace Mage\Catalog\Api;
 
 use ApiPlatform\Metadata\DeleteOperationInterface;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Operation;
-use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Maho\ApiPlatform\Http\RequestInput;
+use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class ProductGroupPriceProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -35,132 +35,48 @@ final class ProductGroupPriceProcessor extends \Maho\ApiPlatform\Processor
     {
         $user = $this->requireUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);
+        $product = $this->loadProduct($productId);
+        $this->assertProductWebsitesAllowed($product, $user);
 
-        // Enforce website scope for store-restricted API users on every
-        // sub-resource write/delete (mirrors ProductProcessor's main CRUD check).
-        $this->assertProductWebsitesAllowed($this->loadProduct($productId), $user);
-
-        if ($operation instanceof DeleteOperationInterface) {
-            return $this->handleDeleteAll($productId, $user);
-        }
-
-        return $this->handleReplace($productId, $context, $user);
-    }
-
-    private function handleReplace(int $productId, array $context, \Maho\ApiPlatform\Security\ApiUser $user): array
-    {
-        // Load in the admin/default (store 0) scope: the group-price backend
-        // only reconciles (deletes removed rows) against the scope the product
-        // is loaded in, so a store-view load would leave global rows behind and
-        // a "replace" would silently accumulate instead of replacing.
-        $product = $this->loadProductForGlobalPrice($productId);
-
-        // Store-restricted tokens may only price websites they're scoped to;
-        // null means unrestricted (any website, including 0 = all).
-        $allowedWebsiteIds = $this->getAllowedWebsiteIds($user);
-
-        // The body is a JSON list of group prices; an object would be taken as rows under its keys
-        $body = $this->parseRequestBody($context['request'] ?? null);
-        if (!array_is_list($body)) {
-            throw new BadRequestHttpException('Request body must be an array of group prices');
-        }
-
-        $groupPrices = [];
-        foreach (RequestInput::rowsOf($body) as $input) {
-            $groupId = ($input->string('customerGroupId', 'customer_group_id') ?? 'all') === 'all'
-                ? \Mage_Customer_Model_Group::CUST_GROUP_ALL
-                : $input->int('customerGroupId', 'customer_group_id');
-
-            $price = $input->float('price') ?? 0.0;
-            if ($price < 0) {
-                throw new UnprocessableEntityHttpException('Price must not be negative');
+        $rows = [];
+        if (!$operation instanceof DeleteOperationInterface) {
+            foreach (self::parsePriceRows($context['request'] ?? null, 'group price') as $row) {
+                $rows[] = [
+                    'website_id' => $row->int('websiteId', 'website_id') ?? 0,
+                    'cust_group' => self::parseGroupId($row),
+                    'price' => $row->float('price') ?? 0.0,
+                ];
             }
-
-            $websiteId = $input->int('websiteId', 'website_id') ?? 0;
-            if ($allowedWebsiteIds !== null && !in_array($websiteId, $allowedWebsiteIds, true)) {
-                throw new AccessDeniedHttpException('Access denied for the requested group-price website');
-            }
-
-            $groupPrices[] = [
-                'website_id' => $websiteId,
-                'cust_group' => (int) $groupId,
-                'price' => $price,
-            ];
         }
 
-        $this->replaceGroupPrices($product, $groupPrices, $allowedWebsiteIds);
+        /** @var \Mage_Catalog_Service_Product_Price $service */
+        $service = \Mage::getService('catalog/product_price');
+        $service->setGroupPrices($product, $rows, $this->allowedWebsiteIds($user));
 
-        // Re-read and return
-        return $this->provider->provide(
-            new \ApiPlatform\Metadata\GetCollection(),
-            ['productId' => $productId],
-            [],
-        );
-    }
-
-    private function handleDeleteAll(int $productId, \Maho\ApiPlatform\Security\ApiUser $user): null
-    {
-        $product = $this->loadProductForGlobalPrice($productId);
-        $this->replaceGroupPrices($product, [], $this->getAllowedWebsiteIds($user));
-
-        return null;
+        return $operation instanceof DeleteOperationInterface
+            ? null
+            : $this->provider->provide(new GetCollection(), ['productId' => $productId], []);
     }
 
     /**
-     * True replace scoped to the caller's websites. The backend's afterLoad sets
-     * both data and origData to the full existing rows (price_id included), so
-     * one save reconciles insert/update/delete; rows outside a restricted token's
-     * website allowlist are carried into the new set instead of wiped.
+     * Read the body of a price endpoint: a JSON array of objects, not the object that parseRequestBody() reads.
      *
-     * @param array<array<string, mixed>> $groupPrices
-     * @param array<int>|null $allowedWebsiteIds
+     * @return list<RequestInput>
+     * @throws BadRequestHttpException when the body is not a JSON array
      */
-    private function replaceGroupPrices(\Mage_Catalog_Model_Product $product, array $groupPrices, ?array $allowedWebsiteIds): void
+    public static function parsePriceRows(?Request $request, string $label): array
     {
-        $existing = $this->loadExistingGroupPrices($product);
-
-        if ($allowedWebsiteIds !== null) {
-            $preserved = array_values(array_filter(
-                $existing,
-                static fn(array $row): bool => !in_array((int) ($row['website_id'] ?? 0), $allowedWebsiteIds, true),
-            ));
-            $groupPrices = array_merge($preserved, $groupPrices);
+        $body = RequestInput::decode($request);
+        if (!array_is_list($body)) {
+            throw new BadRequestHttpException("Request body must be an array of {$label}s");
         }
-
-        $product->setData('group_price', $groupPrices);
-        $this->safeSave($product, 'save group prices');
+        return RequestInput::rowsOf($body);
     }
 
-    /**
-     * @return array<array<string, mixed>>
-     */
-    private function loadExistingGroupPrices(\Mage_Catalog_Model_Product $product): array
+    public static function parseGroupId(RequestInput $row): int
     {
-        $rows = $product->getData('group_price');
-        if ($rows === null) {
-            $attribute = $product->getResource()->getAttribute('group_price');
-            if ($attribute) {
-                $attribute->getBackend()->afterLoad($product);
-                $rows = $product->getData('group_price');
-            }
-        }
-
-        return is_array($rows) ? $rows : [];
-    }
-
-    /**
-     * Load a product in the admin/default (store 0) scope so global group-price
-     * reconciliation deletes removed rows on save (see handleReplace).
-     */
-    private function loadProductForGlobalPrice(int $productId): \Mage_Catalog_Model_Product
-    {
-        /** @var \Mage_Catalog_Model_Product $product */
-        $product = \Mage::getModel('catalog/product');
-        $product->setStoreId(0);
-        $product->load($productId);
-        if (!$product->getId()) {
-            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('Product not found');
-        }
-        return $product;
+        return ($row->string('customerGroupId', 'customer_group_id') ?? 'all') === 'all'
+            ? \Mage_Customer_Model_Group::CUST_GROUP_ALL
+            : (int) $row->int('customerGroupId', 'customer_group_id');
     }
 }

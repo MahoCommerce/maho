@@ -19,9 +19,9 @@ class Maho_Revocation_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_MERCHANT_TEMPLATE = 'revocation/email/merchant_template';
     public const XML_PATH_HONEYPOT_ENABLED = 'revocation/abuse/honeypot_enabled';
     public const XML_PATH_MIN_SUBMIT_SECONDS = 'revocation/abuse/min_submit_seconds';
-    public const XML_PATH_IP_RATE_LIMIT = 'revocation/abuse/ip_rate_limit_per_hour';
-    public const XML_PATH_RECIPIENT_RATE_LIMIT = 'revocation/abuse/recipient_rate_limit_per_day';
-    public const XML_PATH_MERCHANT_RATE_LIMIT = 'revocation/abuse/merchant_notification_rate_limit_per_hour';
+    public const XML_PATH_IP_RATE_LIMIT = 'system/rate_limit/revocation_submit';
+    public const XML_PATH_RECIPIENT_RATE_LIMIT = 'system/rate_limit/revocation_receipt';
+    public const XML_PATH_MERCHANT_RATE_LIMIT = 'system/rate_limit/revocation_merchant_notification';
 
     #[\Override]
     protected $_moduleName = 'Maho_Revocation';

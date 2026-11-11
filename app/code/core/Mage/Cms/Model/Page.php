@@ -22,6 +22,9 @@ class Mage_Cms_Model_Page extends Mage_Core_Model_Abstract
 {
     public const NOROUTE_PAGE_ID = 'no-route';
 
+    /** The EAV entity type that holds the custom attributes of CMS pages. */
+    public const ENTITY = 'cms_page';
+
     /**
      * Page's Statuses
      */
@@ -44,6 +47,29 @@ class Mage_Cms_Model_Page extends Mage_Core_Model_Abstract
     protected function _construct()
     {
         $this->_init('cms/page');
+    }
+
+    /**
+     * Return the custom attributes of CMS pages, keyed by code, in the order of the attribute set.
+     *
+     * @return array<string, Mage_Eav_Model_Entity_Attribute_Abstract>
+     */
+    public function getAttributes(): array
+    {
+        return $this->getResource()->getCustomAttributes();
+    }
+
+    /**
+     * Return the attribute set of the custom attributes. Every page uses the default set of the
+     * cms_page entity type, so the groups of the set split the storefront table.
+     */
+    public function getAttributeSetId(): ?int
+    {
+        try {
+            return (int) Mage::getSingleton('eav/config')->getEntityType(self::ENTITY)->getDefaultAttributeSetId() ?: null;
+        } catch (Mage_Core_Exception) {
+            return null;
+        }
     }
 
     #[\Override]
@@ -203,6 +229,16 @@ class Mage_Cms_Model_Page extends Mage_Core_Model_Abstract
     public function setIdentifier(?string $value): static
     {
         return $this->setData('identifier', $value);
+    }
+
+    /**
+     * Tell whether a visitor of the store view $storeId can read the page: it is enabled, and it is in that
+     * store view or in all store views.
+     */
+    public function isVisibleInStore(int $storeId): bool
+    {
+        return $this->getIsActive()
+            && array_intersect([Mage_Core_Model_App::ADMIN_STORE_ID, $storeId], array_map(intval(...), (array) $this->getStoreId())) !== [];
     }
 
     public function getIsActive(): ?bool

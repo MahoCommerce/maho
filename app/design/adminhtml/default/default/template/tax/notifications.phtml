@@ -8,7 +8,7 @@
  */
 /** @var Mage_Tax_Block_Adminhtml_Notifications $this */
 ?>
-<?php $messageDetails = $this->helper('tax')->__('Please see <a href="%s">source</a> for more details.', $this->getInfoUrl())
+<?php $messageDetails = $this->helper('tax')->__('Read the <a href="%s">tax calculation guide</a> for more details.', $this->getInfoUrl())
     . $this->helper('tax')->__('Click here to go to <a href="%s">Tax configuration</a> and change your settings.', $this->getManageUrl());
 ?>
 <?php $discountStores = $this->getWebsitesWithWrongDiscountSettings() ?>

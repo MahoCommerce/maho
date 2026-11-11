@@ -90,6 +90,8 @@ Start with `p=none` to observe reports without affecting delivery, then move to 
 
 Maho ships several CLI commands to test and manage email. See the [CLI tool](../developer/cli-tool.md) page for the full command reference.
 
+The **Send** button of **Test Email Settings** under **System > Configuration > System > Mail Sending Settings** and `./maho email:test:send` send the same test email. Both send it directly, not through the queue, so an error of the transport shows at once.
+
 ```bash
 # Show current email configuration
 ./maho email:config:show

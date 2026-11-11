@@ -15,8 +15,8 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\State\Pagination\TraversablePaginator;
+use Maho\ApiPlatform\Service\CustomAttributes;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Category State Provider - Fetches category data for API Platform.
@@ -63,9 +63,9 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
      */
     private function getItem(int $id, bool $checkVisibility = true): ?Category
     {
-        $mahoCategory = \Mage::getModel('catalog/category')->load($id);
-
-        if (!$mahoCategory->getId()) {
+        try {
+            $mahoCategory = $this->service()->getById($id, StoreContext::getStoreId());
+        } catch (\Mage_Core_Exception_NoSuchEntity) {
             return null;
         }
 
@@ -118,25 +118,16 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Whether a category is active (or the caller is a backend reader) and lives
-     * under the current store's root category tree. Mirrors the scoping the
-     * collection path applies so single lookups (by id / url key) cannot leak
-     * disabled or cross-store categories.
+     * Whether the caller may read a category: a guest or a customer reads what the storefront of the current store
+     * shows. A backend caller also reads inactive categories, in the trees that scope=all gives it, as the admin
+     * category tree shows them.
      */
     private function isAccessibleCategory(\Mage_Catalog_Model_Category $category): bool
     {
-        if (!$category->getId() || (!$category->getIsActive() && !$this->backendCategoriesAccess())) {
-            return false;
+        if (!$this->backendCategoriesAccess()) {
+            return $this->service()->isVisibleInStore($category, StoreContext::getStoreId());
         }
-
-        // A backend caller reads the trees that scope=all gives it, as the admin category
-        // tree shows them; a guest or a customer reads the tree of the current store only.
-        $rootIds = $this->backendCategoriesAccess() ? $this->readableRootIds() : [(int) StoreContext::getRootCategoryId()];
-
-        // The store root and every descendant carry the root id in their path
-        // ("1/<root>/..."). Anchoring with slashes prevents substring matches.
-        $pathIds = array_map(intval(...), explode('/', (string) $category->getPath()));
-        return array_intersect($rootIds, $pathIds) !== [];
+        return $category->getId() && $this->service()->isInTrees($category, $this->readableRootIds());
     }
 
     /**
@@ -173,7 +164,8 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
             return false;
         }
         if (!$this->backendCategoriesAccess()) {
-            throw new AccessDeniedHttpException('scope=all requires a backend token');
+            $this->requireUser();
+            throw new \Mage_Core_Exception_Forbidden('scope=all requires a backend token');
         }
 
         return true;
@@ -187,19 +179,16 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
      */
     private function readableRootIds(): array
     {
-        $allowed = $this->requireUser()->getAllowedStoreIds();
-        if ($allowed === null) {
-            return [\Mage_Catalog_Model_Category::TREE_ROOT_ID];
-        }
-        $rootIds = [];
-        foreach (\Mage::app()->getStores() as $store) {
-            if (in_array((int) $store->getId(), $allowed, true)) {
-                $rootIds[] = (int) $store->getRootCategoryId();
-            }
-        }
+        $rootIds = $this->service()->getRootIds($this->requireUser()->getAllowedStoreIds()) ?? [\Mage_Catalog_Model_Category::TREE_ROOT_ID];
 
         // A token without a store view reads no tree: -1 matches no path.
         return $rootIds === [] ? [-1] : $rootIds;
+    }
+
+    private function service(): \Mage_Catalog_Service_Category
+    {
+        /** @var \Mage_Catalog_Service_Category */
+        return \Mage::getService('catalog/category');
     }
 
     /**
@@ -256,10 +245,11 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         $collection->setCurPage($page);
 
         $total = (int) $collection->getSize();
+        $children = $this->preloadCountsAndChildIds($collection);
 
         $categories = [];
         foreach ($collection as $mahoCategory) {
-            $categories[] = $this->mapToDto($mahoCategory, false);
+            $categories[] = $this->mapToDto($mahoCategory, false, childrenIds: $children[$mahoCategory->getId()] ?? null);
         }
 
         return new TraversablePaginator(new \ArrayIterator($categories), $page, $pageSize, $total);
@@ -268,8 +258,10 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
     /**
      * Map Maho category model to Category DTO. $withStoreOverrides fills storeOverrides
      * for backend callers; single-category reads and write responses set it.
+     *
+     * @param list<int>|null $childrenIds Preloaded active children, or null to query them.
      */
-    public function mapToDto(\Mage_Catalog_Model_Category $category, bool $includeChildren = false, bool $withStoreOverrides = false): Category
+    public function mapToDto(\Mage_Catalog_Model_Category $category, bool $includeChildren = false, bool $withStoreOverrides = false, ?array $childrenIds = null): Category
     {
         $dto = new Category();
         $dto->id = (int) $category->getId();
@@ -326,6 +318,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         $dto->childrenCount = (int) $category->getData('children_count');
         $dto->createdAt = $category->getCreatedAt();
         $dto->updatedAt = $category->getUpdatedAt();
+        $dto->attributeSetId = $category->getAttributeSetId() ?: null;
 
         // Get image URL
         $dto->image = $category->getImageUrl() ?: null;
@@ -334,10 +327,11 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         $dto->productCount = (int) $category->getProductCount();
 
         // Get children IDs
-        $childrenIds = $category->getChildren();
-        if ($childrenIds) {
-            $dto->childrenIds = array_map(intval(...), explode(',', $childrenIds));
+        if ($childrenIds === null) {
+            $childrenList = $category->getChildren();
+            $childrenIds = $childrenList ? array_map(intval(...), explode(',', $childrenList)) : [];
         }
+        $dto->childrenIds = $childrenIds;
 
         // Include children categories if requested
         if ($includeChildren && !empty($dto->childrenIds)) {
@@ -350,18 +344,79 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
                 $childCollection->addAttributeToFilter('is_active', 1);
             }
 
+            $childIdsByCategory = $this->preloadCountsAndChildIds($childCollection);
             foreach ($childCollection as $childCategory) {
-                $dto->children[] = $this->mapToDto($childCategory, false);
+                $dto->children[] = $this->mapToDto($childCategory, false, childrenIds: $childIdsByCategory[$childCategory->getId()] ?? null);
             }
         }
 
         if ($withStoreOverrides && $this->backendCategoriesAccess()) {
             $dto->storeOverrides = StoreOverrides::forModel($category);
+            $dto->customAttributes = CustomAttributes::read(
+                $category,
+                array_filter($category->getAttributes(), fn($attribute) => $attribute->getIsUserDefined()),
+            );
         }
 
         \Mage::dispatchEvent('api_category_dto_build', ['category' => $category, 'dto' => $dto]);
 
         return $dto;
+    }
+
+    /**
+     * Set product_count on each item and return the active child IDs for each category ID.
+     * Return null when a model, resource or collection is rewritten: those keep their own getters.
+     *
+     * @return array<int, list<int>>|null
+     */
+    private function preloadCountsAndChildIds(\Mage_Catalog_Model_Resource_Category_Collection $collection): ?array
+    {
+        $resource = \Mage::getResourceSingleton('catalog/category');
+        if ($collection::class !== \Mage_Catalog_Model_Resource_Category_Collection::class
+            || $collection->getResource()::class !== \Mage_Catalog_Model_Resource_Category::class
+            || $resource::class !== \Mage_Catalog_Model_Resource_Category::class
+        ) {
+            return null;
+        }
+
+        $items = $collection->getItems();
+        foreach ($items as $category) {
+            if ($category::class !== \Mage_Catalog_Model_Category::class
+                || $category->getResource()::class !== \Mage_Catalog_Model_Resource_Category::class
+            ) {
+                return null;
+            }
+        }
+
+        $this->loadProductCounts($collection);
+        return $resource->getChildrenForCategories($items);
+    }
+
+    /**
+     * Load direct product assignments, matching Category::getProductCount() for every store and anchor.
+     */
+    private function loadProductCounts(\Mage_Catalog_Model_Resource_Category_Collection $collection): void
+    {
+        $items = $collection->getItems();
+        if ($items === []) {
+            return;
+        }
+
+        $connection = $collection->getConnection();
+        $select = $connection->select()
+            ->from($collection->getTable('catalog/category_product'), [
+                'category_id',
+                'product_count' => new \Maho\Db\Expr('COUNT(product_id)'),
+            ])
+            ->where('category_id IN (?)', array_keys($items))
+            ->group('category_id');
+        $counts = $connection->fetchPairs($select);
+
+        foreach ($items as $category) {
+            if (!$category->hasProductCount()) {
+                $category->setData('product_count', (int) ($counts[$category->getId()] ?? 0));
+            }
+        }
     }
 
     /**

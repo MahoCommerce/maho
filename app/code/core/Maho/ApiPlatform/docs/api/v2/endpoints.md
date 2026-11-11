@@ -12,7 +12,7 @@ All paths below are relative to the **`/api/rest/v2`** prefix: `GET /products` m
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| POST | `/auth/token` | None | Get JWT token (`grant_type`: `customer`/`client_credentials`/`api_user`) |
+| POST | `/auth/token` | None | Get JWT token (`grant_type`: `customer`/`magic_link`/`client_credentials`/`api_user`) |
 | POST | `/auth/refresh` | Bearer JWT | Refresh JWT token (current token sent via `Authorization` header) |
 | POST | `/auth/logout` | Bearer JWT | Revoke the current token |
 
@@ -53,13 +53,13 @@ Country listings live under [Directory](#directory) (`/countries`).
 | GET / POST / DELETE | `/products/{productId}/tier-prices` | Admin/API | Tier pricing (POST replaces, DELETE clears all) |
 | GET / POST | `/products/{productId}/custom-options` | GET=None, POST=Admin/API | Custom options |
 | PUT / DELETE | `/products/{productId}/custom-options/{id}` | Admin/API | Update/remove a custom option |
-| GET | `/custom-option-file/{optionId}/{key}` | None | Download a customer-uploaded option file |
+| GET | `/custom-option-file/{optionId}/{key}` | None | Download the file that a shopper uploaded for a file option. A wrong key gives a 403, an option that is not a file option a 404 |
 | GET / POST / PUT / DELETE | `/products/{productId}/bundle-options` | GET=None, writes=Admin/API | Bundle product options |
 | PUT / DELETE | `/products/{productId}/bundle-options/{id}` | Admin/API | Update/remove a bundle option |
 | GET / PUT | `/products/{productId}/configurable` | GET=None, PUT=Admin/API | Read super-attributes + child IDs / set them all |
 | POST | `/products/{productId}/configurable/children` | Admin/API | Add a child product (body: `{childId: int}`) |
 | DELETE | `/products/{productId}/configurable/children/{childId}` | Admin/API | Remove a child product |
-| GET / POST / PUT / DELETE | `/products/{productId}/downloadable-links` | GET=None, writes=Admin/API | Downloadable links |
+| GET / POST / PUT / DELETE | `/products/{productId}/downloadable-links` | GET=None, writes=Admin/API | Downloadable links. `linkUrl` is null without an admin or API token that can read products |
 | GET / POST / PUT | `/products/{productId}/grouped` | GET=None, writes=Admin/API | Grouped product links (PUT replaces all) |
 | DELETE | `/products/{productId}/grouped/{childProductId}` | Admin/API | Remove a grouped child |
 | GET / POST / PUT | `/products/{productId}/links/related` | GET=None, writes=Admin/API | Related products (POST adds one, PUT replaces all) |
@@ -69,6 +69,10 @@ Country listings live under [Directory](#directory) (`/countries`).
 | GET / POST / PUT | `/products/{productId}/links/up-sell` | GET=None, writes=Admin/API | Up-sell links (POST adds one, PUT replaces all) |
 | DELETE | `/products/{productId}/links/up-sell/{linkedProductId}` | Admin/API | Remove an up-sell link |
 | GET / POST | `/products/{productId}/reviews` | GET=None, POST=Customer | Reviews for a product |
+
+The product sub-resources and the admin product page use the same rules. A tier price or a group price needs a price of 0 or more, a website and a customer group that exist, and one row for each website, group and quantity. A tier price needs a quantity above 0. An uploaded image goes through the checks of the admin upload: a known image type, the maximum size of `catalog/product_image/max_dimension`, and a new copy of the pixels. A grouped child, a configurable child and a bundle selection need a product of an allowed type. A super attribute needs the global scope, a list of options and "Use To Create Configurable Product", and it must be in the attribute set of the product. A problem in the body gives a 422 with `details.errors`. A DELETE of a link, a grouped child or a configurable child that does not exist gives a 404. A token restricted to some stores keeps the prices of the other websites when it replaces or deletes tier prices or group prices.
+
+A guest and a customer read what the storefront of the store shows. A product by `urlKey` must be enabled, visible in the catalog or the search, and in the website of the store. A `categoryId` filter of `/products` and of `/layered-filters` needs a category that is active and in the tree of the root category of the store; for another category the list is empty. The links of a product and its embedded `relatedProducts`, `crosssellProducts` and `upsellProducts` list only the linked products that are enabled, visible in the catalog and in the website of the store, and in stock when the store hides products that are out of stock. The reviews of a product, and one review, give a 404 when the storefront does not show the product, except to the author of the review. An admin token or a token with the products grant reads all the links of a product. A product search with `search` counts the term in the Search Terms report, as the search of the storefront does.
 
 **Layered navigation:**
 
@@ -85,7 +89,17 @@ Country listings live under [Directory](#directory) (`/countries`).
 | GET | `/attribute-sets` | Admin/API | List product attribute sets |
 | GET | `/attribute-sets/{id}` | Admin/API | Get an attribute set and its attribute codes |
 
-The product write endpoints additionally accept `attributeSetId`, `taxClassId`, and a generic `customAttributesWrite` map (`{attribute_code: value}`) for any catalog_product EAV attribute without a dedicated field; system columns (`sku`, `type_id`, `status`, …) are rejected.
+The product write endpoints additionally accept `attributeSetId`, `taxClassId`, and a `customAttributes` map (`{attribute_code: value}`) of the user-defined attributes without a dedicated field, in the attribute set of the product. A system attribute or an unknown code is a 422. A read returns the same map.
+
+**Custom attributes of other entity types** (read-only) <span class="version-badge">v27.1+</span>:
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/custom-attributes?entityType=…` | Admin/API | List the attributes that an admin added to `catalog_category`, `customer`, `customer_address`, `cms_page`, `blog_post` or `blog_category`: code, input type, options and the attribute sets that hold them |
+| GET | `/custom-attributes/{id}` | Admin/API | Get one custom attribute |
+| GET | `/customer-forms/{form}` | Public | List the custom fields that a storefront form (`customer_account_create`, `customer_account_edit`, `checkout_register`, `customer_address_edit` or `customer_register_address`) shows to the customer group of the caller: label in the store view, input type, options, required flag and group title |
+
+The `customAttributes` field of products, categories, customers, addresses, CMS pages, blog posts and blog categories holds the user-defined attributes only, and a read returns the same shape that a write takes: a dropdown is an option ID, a multiselect a list of option IDs, a Yes/No a boolean, a number an integer or a float, and a date `Y-m-d`. An error of a value names the field `customAttributes.<code>`. The OpenAPI document and the MCP tools list each attribute of the entity type as a typed property of `customAttributes`, with the option IDs of a dropdown as an enum. An order address also has the read-only `customAttributeLabels`: the option labels that the customer saw. On customers, addresses and carts, a customer token or a guest reads and writes only the attributes of the storefront forms: registration, account edit, and address book and checkout. The cart address setters and the addresses in the place-order body take `customAttributes` too, and must send each required attribute of the Address Book and Checkout form.
 
 ---
 
@@ -149,6 +163,21 @@ The checkout sub-resources mirror the guest-cart flow so a logged-in customer ca
 | PUT / DELETE | `/guest-carts/{id}/items/{itemId}/gift-message` | None | Set / remove a per-item gift message |
 | POST | `/guest-carts/{id}/place-order` | None | Place order from guest cart |
 
+The cart page and the checkout of the storefront and the API use the same rules for an item, a shipping estimate, an address, a shipping method, a payment method, a coupon, a gift card, a gift message and a guest order:
+
+- An item must be a product that is enabled and in the website of the cart. A guest or customer token can add only a product that the storefront shows. An admin token and an API token with the `carts/write` grant can also add a product that the storefront does not show, as the admin order create does. A product that is not available gives a 422.
+- A simple product that the storefront does not show, a variant of a configurable product, goes to the cart as its configurable parent, on the storefront, in the admin order create and on the API.
+- Without `qty`, the item gets the default qty of the product. A qty must be above 0 and at most the maximum sale qty of the product, else the API gives a 422. A new line below the minimum sale qty of its product gets the minimum.
+- Only an admin token or an API token with the `carts/write` grant can send `customPrice`. A guest or customer token gets a 403.
+- A `shipping-methods` request with an `address` keeps only the country, the region, the postcode and the city of the address on the cart, as the estimate of the cart page does. An unknown country gives a 422 with `countryId` in `details.errors`. Set the full address with `shipping-address`.
+- A `shipping-address`, a `billing-address` and the addresses of a place-order body take `firstName`, `lastName`, `street`, `city`, `region` or `regionId`, `postcode`, `countryId`, `telephone`, `company`, `prefix`, `middleName`, `suffix`, `vatId` and `saveInAddressBook`. They get the checks of the address form of the checkout: each field that the store makes required, and the length and the format of each field. An address that is not valid gives a 422 with one entry in `details.errors` for each problem. The entry names the field as the body names it, such as `firstName`, or `shippingAddress.firstName` in a place-order body. A problem of the whole address names the field `address`. The cart keeps the text of an address without HTML tags.
+- A `shipping-method` needs a rate of the address of the cart, and the carrier of the rate must not give an error, else the API gives a 422.
+- A `payment-method` must be available for the cart and must accept the `additionalData`, as on the checkout of the storefront. The API refuses a card method, and drops each `cc_*` key, each PayPal ID and each value that is not a string or a number from `additionalData`.
+- A coupon needs a cart with items: an empty cart gives a 409. An empty code gives a 422 with `couponCode` in `details.errors`. A code that does not exist or does not apply gives a 422, and the cart keeps the coupon that it had.
+- Each client can try `system/rate_limit/coupon_validate` coupon codes and `system/rate_limit/giftcard_balance` gift card codes in one minute, on the cart page and on the API together. A client over a limit gets a 429 with a `Retry-After` header. An admin token and an API token with the `carts/write` grant have no limit.
+- A gift message that the store does not allow gives a 422. The checkout of the storefront leaves such a message out and goes on.
+- A guest order in a store that does not allow guest checkout gives a 403.
+
 ---
 
 ### Customers
@@ -166,6 +195,29 @@ The checkout sub-resources mirror the guest-cart flow so a logged-in customer ca
 | POST | `/customers/forgot-password` | None | Request password reset email |
 | POST | `/customers/reset-password` | None | Reset password with token |
 | POST | `/customers/create-from-order` | None | Create a customer account from a placed guest order |
+| POST | `/customers/magic-link` | None | Request an email with a login link (`email`) |
+| POST | `/customers/confirm` | None | Confirm an account with the values of the confirmation email (`customerId`, `key`) |
+| POST | `/customers/confirmation-link` | None | Send the confirmation email again (`email`, `captchaToken`) |
+| POST | `/customers/me/two-factor/secret` | Customer | Get the secret for the authenticator app (`twofaSecret` in the answer) |
+| POST | `/customers/me/two-factor` | Customer | Turn two-factor authentication on or off (`currentPassword`, `twofaEnabled`, `twofaCode`) |
+
+**CAPTCHA:** `POST /customers` (registration), `POST /customers/forgot-password` and `POST /customers/confirmation-link`, and the `forgotPasswordCustomer` and `sendConfirmationLinkCustomer` mutations, use the same CAPTCHA as the forms of the storefront. When the CAPTCHA of the store is on, send the solved token in `captchaToken`. An admin token, or a service token with a `customers` permission, needs no token, because the admin asks no CAPTCHA. A missing or refused token gives a 422 with an entry for `captchaToken` in `details.errors`. `GET /contact/config` gives the provider and the challenge URL for the widget (see [Contact](#contact)). Each of these operations also has the rate limit of the storefront form, so a client over a limit gets a 429 with a `Retry-After` header.
+
+**Customer accounts turned off:** when **System > Configuration > Customers > Customer Configuration > Enable Customer Accounts in Frontend** is **No**, the customer flows of the API give a 403: the registration, the `customer` and `magic_link` grants of `/auth/token`, the GraphQL login, the magic link request and the social sign-in. An admin token or a service token still creates and updates customers. An observer of the `customer_registration_is_allowed` event that refuses a registration gives a 403 on `POST /customers` too.
+
+**Account that is not active:** a customer with `isActive` set to `false` cannot log in. The `customer` and `magic_link` grants, the GraphQL login and the social sign-in give a 403, and `/auth/refresh` gives a 401.
+
+**Profile update:** `PUT /customers/me` and the `updateCustomer` mutation need `currentPassword` when the request changes the email. Without it, the answer is a 422 with an entry for `current_password` in `details.errors`. When the request sends `currentPassword` for another change, the API checks it too. A store that registers customers without a password does not ask for it.
+
+**Staff update:** `PUT /customers/{id}` applies the checks of the admin customer form: the first name, the last name and the email must not be empty, and a required date of birth, tax number or gender must have a value. A problem gives a 422 with the messages in `details.errors`.
+
+**Confirmation:** on a store that requires an email confirmation, the registration sends an email with a link that has the customer ID (`id`) and the key (`key`). `POST /customers/confirm` takes both values. It sends the welcome email of a confirmed account, and the answer has only the `id` of the customer. A wrong key gives a 422, and each wrong key counts in the **Reset password** rate limit. `POST /customers/confirmation-link` sends the email again. Its answer is the same whether an account waits for a confirmation or not.
+
+**Magic link:** `POST /customers/magic-link` emails a login link when **Magic Link Login** is enabled, and gives a 404 when it is not. The answer is the same whether an active account has the email or not. The link in the email opens the storefront with a `token` parameter. A headless storefront reads that value and sends it to `/auth/token` with `grant_type` `magic_link` (see [Authentication](authentication.md)).
+
+**Two-factor authentication:** the operations give a 404 when the store does not allow 2FA for customers. To turn 2FA on, call `POST /customers/me/two-factor/secret`, put `twofaSecret` into the authenticator app, then call `POST /customers/me/two-factor` with `currentPassword`, `twofaEnabled: true` and the current code in `twofaCode`. To turn it off, send `currentPassword` and `twofaEnabled: false`: a store that requires 2FA gives a 403. A wrong password or a wrong code gives a 422, and each request counts in the **Change password** rate limit. A customer who already uses 2FA gets a 409 from the secret operation.
+
+An admin token or an API token with the `customers/create` grant creates an account that needs no confirmation. The customer gets the welcome email from the store of the request. Without a `password`, the account gets a random password, and the welcome email has the link to set a password, as **Email Link to Set Password** does in the admin. The createCustomer operation of the admin GraphQL endpoint always gives a random password and this email. When its input has address fields, they become the default address, which must be complete.
 
 **Addresses** (`Address` resource, same DTO is exposed under three URL families):
 
@@ -184,6 +236,8 @@ The checkout sub-resources mirror the guest-cart flow so a logged-in customer ca
 | GET | `/customers/{customerId}/addresses` | Admin/API | List a customer's addresses |
 | POST | `/customers/{customerId}/addresses` | Admin/API | Create an address for a customer |
 
+An admin token or a service token with an `addresses` permission reads and writes the addresses of each customer of a website that the token can access. A token with a store restriction gets a 403 for a customer of another website, as `GET /customers/{id}` gives.
+
 ---
 
 ### Orders
@@ -191,15 +245,31 @@ The checkout sub-resources mirror the guest-cart flow so a logged-in customer ca
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | GET | `/orders` | Admin/API | List orders (paginated) |
-| GET | `/orders/{id}` | Customer/Admin/API | Get order by ID (customers see only their own) |
+| GET | `/orders/{id}` | Customer/Admin/API | Get order by ID (customers see only their own, see below) |
 | GET | `/orders/{incrementId}/details` | Order token | Read a guest order via the per-order one-time `X-Order-Token` header |
 | POST | `/orders` | None | Place an order from a customer or guest cart |
 | POST | `/carts/{id}/place-order` | Customer/Admin/API | Place an order from the authenticated customer cart |
 | POST | `/guest-carts/{id}/place-order` | None | Place an order from a guest cart |
 
+**Orders of a customer token:** a customer reads the orders that the storefront shows under **My Orders**. An order in a state that the storefront hides (`pending_payment` in a new store) is not in `/customers/me/orders`, and `/orders/{id}`, its invoices, their PDFs and `POST /orders/{id}/cancel` (and the GraphQL `cancelOrder` mutation) answer `404`, as for an order of another customer. An admin or an API user token reads and cancels every order.
+
+**Customer fields of a guest order** <span class="version-badge">v27.1+</span>: the place-order body of a guest takes `customerCustomAttributes`, the values of the custom attributes of the **Checkout Registration** form (`{attribute_code: value}`), and must send each required one. The order keeps them in `customerCustomAttributes`. A customer order takes the values of the customer account and refuses the field with a 422. The GraphQL `placeOrder` mutation takes the same argument.
+
+A guest order needs a valid email, and each field that the **Checkout Registration** form makes required. The name comes from the billing address. The place-order body takes the other fields in `guestCustomer`: `prefix`, `firstname`, `middlename`, `lastname`, `suffix`, `dob`, `taxvat` and `gender`. A missing required field gives a 422 with the field in `details.errors`.
+
+**Order placement** <span class="version-badge">v27.1+</span>: the place-order endpoints, the storefront checkout and the admin order create place an order with the same rules.
+
+- A guest token or a customer token places the order as the customer. The subtotal must reach the minimum order amount of the store (**Sales > Minimum Order Amount**). When the store asks the customer to accept its terms and conditions, the body sends `agreementIds`, with the ID of each required one. A problem gives a 422 with `subtotal` or `agreementIds` in `details.errors`.
+- An admin token or an API token with the `orders/create` grant places the order as staff, as the admin order create does: the minimum order amount and the terms and conditions do not apply.
+- A line with an error, an address that is not valid, a shipping method without a rate of the address and a missing payment method give a 422, with `items`, `billingAddress`, `shippingAddress`, `shippingMethod` or `paymentMethod` in `details.errors`. A `guestEmail` that is not a valid email address gives a 422 with `guestEmail` in `details.errors`.
+- An address of a customer order goes to the address book of the customer only when the checkout or the admin order form asks for it (**Save in Address Book**). On the API, an address asks for it with `"saveInAddressBook": true` <span class="version-badge">v27.1+</span>, on `shipping-address`, `billing-address` and the addresses of a place-order body, and on the `setShippingAddressOnCart` and `setBillingAddressOnCart` mutations. Without the field, or with `false`, the address does not go to the address book. Each address write sets the field again. A guest cart ignores it. When the customer has no default billing or shipping address, the new address becomes it. A `billing-address` with `sameAsShipping` adds the address once, when its own `saveInAddressBook` is true. A shipping address that the client sends is no longer marked as the same as the billing address.
+- A second placement of a cart while the first one runs gives a 409. A gift card of the cart that is spent or no longer valid at the time of the placement gives a 422.
+- The customer gets the new order email, as on the storefront, unless the payment method sends the customer to a third party. Staff sends `"sendConfirmation": false` to place an order without the email.
+- A guest order gets a one-time access token for `GET /orders/{incrementId}/details`, also when the storefront places it.
+
 **Checkout addresses:** the `shippingAddress` / `billingAddress` objects in the place-order body accept either a numeric `regionId` **or** a region `region` name - for countries with a fixed region list (US, CA, ...) the API resolves the `region_id` from the code (or name) against `countryId` when `regionId` is omitted, so a client can send `"region": "California"` without looking the ID up first. On a match the returned address carries the canonical region name.
 
-**Guest order lookup** (`GET /orders/{incrementId}/details`): a public, unauthenticated endpoint for rendering order-confirmation views in headless/guest checkouts. The per-order token is passed in the `X-Order-Token` header (never the query string, which would leak into access logs). The token is **single-use**: it's cleared on the first successful read, so refreshing the page won't replay the lookup. The endpoint is IP rate-limited to prevent brute-forcing a token against a known increment ID. A missing/invalid token or unknown increment ID returns `404`. If no customer account exists for the order's email, the response includes an `accountToken` the frontend can use with `POST /customers/create-from-order`.
+**Guest order lookup** (`GET /orders/{incrementId}/details`): a public, unauthenticated endpoint for rendering order-confirmation views in headless/guest checkouts. The per-order token is passed in the `X-Order-Token` header (never the query string, which would leak into access logs). The token is **single-use**: it's cleared on the first successful read, so refreshing the page won't replay the lookup. The endpoint is IP rate-limited to prevent brute-forcing a token against a known increment ID. A missing/invalid token or unknown increment ID returns `404`. If no customer account exists for the order's email, the response includes an `accountToken` the frontend can use with `POST /customers/create-from-order`. That call registers the account and gives it the order, with the customer group of the account.
 
 ```bash
 curl /api/rest/v2/orders/100000123/details \
@@ -365,11 +435,13 @@ Omit `items` to ship every remaining item on the order. Each track entry needs a
 ```
 
 **Parameters:**
-- `items[]`, Array of items to refund. Each requires `orderItemId` and `qty`. Optional: `backToStock` (boolean, returns qty to inventory).
+- `items[]`, Array of items to refund. Each requires `orderItemId` and `qty`. Optional: `backToStock` (boolean, returns qty to inventory). Without `items`, the credit memo refunds every item that the order can refund. With `items`, it refunds only the items with a `qty` above 0. An empty list, or a list of zeros, refunds no item and no shipping, so it refunds the adjustments only.
+- `shippingAmount`, Optional shipping amount to refund. Without it, a credit memo that refunds items refunds the shipping that the order did not refund yet, as the admin form does.
 - `comment`, Optional refund note.
 - `adjustmentPositive`, Additional positive adjustment (add to refund).
 - `adjustmentNegative`, Negative adjustment (reduce refund).
-- `offlineRefund`, `true` (default) for offline refund. An online refund needs the invoice of the capture, which the API cannot name yet, so `false` is refused with a 422 asking for an offline refund.
+- `offlineRefund`, `true` (default) for offline refund. With `false`, the payment method refunds the money online. An online refund needs `invoiceId`, the invoice of the capture: without it, `false` is refused with a 422 asking for an offline refund.
+- `invoiceId`, Optional ID of an invoice of the order. The credit memo then refunds that invoice. An ID that is not an invoice of the order is refused with a 422.
 
 ---
 
@@ -388,7 +460,8 @@ There is no standalone collection endpoint or write endpoint for invoices, they 
 
 ### Inventory / Stock Updates
 
-Fast direct-SQL stock updates, no model overhead, no observers.
+Stock updates by SKU. They save the stock item as the admin product page does, so the store applies
+the same stock rules (see the Stock Status page of the user guide).
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
@@ -435,10 +508,14 @@ curl -X PUT /api/rest/v2/inventory/bulk \
 ```
 
 **Notes:**
-- `isInStock` auto-sets to `qty > 0` if not provided.
-- `manageStock` defaults to `true` if not provided.
-- Qty must be 0-99,999,999.
+- `isInStock` auto-sets to `qty > 0` if not provided. The store then applies its own rules: a product at or
+  below its out-of-stock threshold goes out of stock, and **Sync Stock Availability with Qty** puts a
+  product above the threshold back in stock.
+- A field such as `manageStock` or `minQty` sent without its `useConfig...` flag stops the product from
+  taking the store-wide value.
+- Qty must be 0-99,999,999.9999.
 - Bulk limit: 100 items per request (validated upfront, executed in a DB transaction).
+- A stock change updates the Stock Status index when the index runs on save.
 
 ---
 
@@ -518,8 +595,12 @@ GET /api/rest/v2/coupons?page=2&itemsPerPage=50
 |--------|----------|------|-------------|
 | GET | `/giftcards/{id}` | Admin/API | Get a gift card by numeric ID |
 | POST | `/giftcards` | Admin/API | Create a new gift card |
+| PUT | `/giftcards/{id}` | Admin/API | Update the status and adjust the balance |
+| POST | `/giftcards/{id}/send-email` | Admin/API | Email the gift card to its recipient |
 
 REST `GET /giftcards/{id}` is **admin-only and keyed by numeric ID**. A public **balance check by code** (no recipient/sender PII) is exposed over GraphQL only - see the [GraphQL reference](graphql.md#inventory-promotions).
+
+**Gift card email** <span class="version-badge">v27.1+</span>: `POST /giftcards` sends no email, as a card that the admin creates gets none. To send it, call `POST /giftcards/{id}/send-email` with an empty body, which does what the **Send Email** button of the admin does. It sends the email now, also when the card got it before, and the card in the response has the time in `emailSentAt`. A card without `recipientEmail` gives a 422 with `recipientEmail` in `details.errors`. The operation needs an admin token or the `giftcards/write` grant. A card that a customer buys still gets the email when the invoice is paid.
 
 !!! warning "v26.9+ breaking change"
     A gift card is now associated with a set of websites instead of one. Responses
@@ -567,6 +648,13 @@ REST `GET /giftcards/{id}` is **admin-only and keyed by numeric ID**. A public *
 | GET | `/blog-categories` | None | List blog categories |
 | GET | `/blog-categories/{id}` | None | Get blog category |
 
+A read without a backend token follows the storefront. It gives 404 when the output of `Maho_Blog` is
+disabled for the store view (System > Configuration > Advanced > Advanced). A category read also gives 404
+when "Enable Categories" is off for the store view. An admin token, or a token with read or write access
+to the resource, reads every post and category, so the admin can manage the blog while the storefront
+blog is off. The same rule applies to the GraphQL queries `blogPost`, `blogPosts`, `blogCategory` and
+`blogCategories`.
+
 ---
 
 ### Media
@@ -587,6 +675,10 @@ REST `GET /giftcards/{id}` is **admin-only and keyed by numeric ID**. A public *
 | GET | `/products/{productId}/reviews` | None | List reviews for product |
 | POST | `/products/{productId}/reviews` | Customer/API | Submit a review (requires authentication) |
 | GET | `/customers/me/reviews` | Customer/API | List own reviews |
+
+The body of `POST /products/{productId}/reviews` and the input of `submitReview` take `title`, `detail`, `nickname` and an optional `rating`: the stars from 1 to 5, which become the vote for the first rating of the store. A `rating` outside 1 to 5 gives a 422 with an entry for `rating` in `details.errors`. Without a `rating`, the review has no vote, as on the storefront form. On a read, `rating` is the average of the votes, rounded to whole stars, or `null` when the review has no vote.
+
+`POST /products/{productId}/reviews` and the `submitReview` mutation use the same CAPTCHA as the review form of the storefront. When the CAPTCHA of the store is on, send the solved token in `captchaToken`. A missing or refused token gives a 422 with an entry for `captchaToken` in `details.errors`. `GET /contact/config` gives the provider and the challenge URL for the widget (see [Contact](#contact)).
 
 ---
 
@@ -610,10 +702,10 @@ curl -X POST /api/rest/v2/customers/me/revocation-requests \
   -d '{"orderId": 1234, "reason": "I changed my mind"}'
 ```
 - `orderId` (int) or `orderReference` (order increment ID) identifies the order; one is required.
-- Ownership is re-checked server-side: an order that isn't the authenticated customer's returns `404`.
-- Because the customer is authenticated and owns the order, the recorded declaration is **verified** (`verified: true`), the same trust level as the my-account web link. The declaration row is the legal receipt and is always written, even if the receipt/notification emails are suppressed.
-- The submission is gated by the store's cooling-off window; an order past it returns `422`.
+- The API records every declaration, as the public form does: the merchant decides in the admin.
+- An order of the authenticated customer gives a **verified** declaration (`verified: true`), the same trust level as the my-account web link, also after the cooling-off window. Any other order reference is recorded **unverified**, and it is not linked to an order. The declaration row is the legal receipt and is always written, even if the receipt/notification emails are suppressed.
 - Disabled revocation (`revocation/general/enabled = 0`) returns `404`.
+- When the CAPTCHA of the store is on, send the solved token in `captchaToken`, as the form of the storefront does. The CAPTCHA is invisible, so it adds no step for the consumer. A missing or refused token gives a 422.
 
 **Response fields:** `id`, `orderId`, `orderReference`, `reason`, `customerName`, `email`, `verified`, `storeId`, `receivedAt`, `processedStatus`, `processedAt`, `suppressedAt`, `suppressedReason`. The internal-only fields `adminNote`, `ip`, and `userAgent` are returned **only** to admins.
 
@@ -625,6 +717,7 @@ curl -X PUT /api/rest/v2/revocation-requests/1234 \
   -d '{"processedStatus": "accepted", "adminNote": "Refund issued"}'
 ```
 - `processedStatus` must be one of `accepted`, `rejected`, `info_requested`; anything else returns `422`. Setting it stamps `processedAt`.
+- A change to `accepted` or `rejected` adds a note to the history of the matched order, as the **Accept** and **Reject** buttons of the admin do. The status and the state of the order do not change.
 
 ---
 
@@ -633,12 +726,18 @@ curl -X PUT /api/rest/v2/revocation-requests/1234 \
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | POST | `/newsletter/subscribe` | None | Subscribe to newsletter (gated by `newsletter/subscription/allow_guest_subscribe`) |
-| POST | `/newsletter/unsubscribe` | None | Unsubscribe by email |
+| POST | `/newsletter/unsubscribe` | Customer | Unsubscribe the address of the customer |
 | GET | `/newsletter/status` | Customer/API | Get subscription status |
 
 **Guest subscription control:** Guest (unauthenticated) subscribe is controlled by the Maho config flag `newsletter/subscription/allow_guest_subscribe` (**System > Config > Newsletter > Subscription Options > Allow Guest Subscription**). When disabled, only authenticated customers can subscribe, and a guest subscribe returns `403`. Recommended: set to **No** for API use to prevent abuse.
 
-**Confirmation emails:** When `newsletter/subscription/confirm` is enabled, new subscriptions receive a confirmation email and remain inactive until confirmed (double opt-in).
+**Confirmation emails:** When `newsletter/subscription/confirm` is enabled, new subscriptions receive a confirmation email and remain inactive until confirmed (double opt-in). A customer token that sends no `email`, or the address of the account, subscribes the address of the account, which needs no confirmation.
+
+**Another address with a customer token:** a customer has no proof that another address is theirs. So the API and the footer form handle it as a guest subscription: the guest switch applies (a `403` when it is off), and the address always gets the confirmation email, also when `newsletter/subscription/confirm` is off. The answer has no data of the subscriber, and it is the same for an address that is already subscribed.
+
+The API, the footer form and the newsletter page of the customer account use the same rules. An empty or invalid `email` gives a 422 with an entry in `details.errors`. A guest gets the same answer for an address that is already subscribed as for a new one. The limit `system/rate_limit/newsletter_subscribe` counts the subscriptions of one client and of one address on the API and the footer form together, and `system/rate_limit/newsletter_unsubscribe` counts the unsubscriptions of the API and the account page. A client over a limit gets a 429 with a `Retry-After` header. A customer token for a customer that does not exist gives a 404.
+
+`POST /newsletter/subscribe` and the `subscribeNewsletter` mutation use the same CAPTCHA as the footer form, for a guest and for a customer token. When the CAPTCHA of the store is on, send the solved token in `captchaToken`. An admin token, or a service token with a `newsletter` permission, needs no token, because the admin asks no CAPTCHA. A missing or refused token gives a 422 with an entry for `captchaToken` in `details.errors`. `GET /contact/config` gives the provider and the challenge URL for the widget (see [Contact](#contact)).
 
 ---
 
@@ -655,15 +754,18 @@ curl -X PUT /api/rest/v2/revocation-requests/1234 \
 {
   "id": "contact",
   "enabled": true,
-  "captchaProvider": "turnstile",
-  "captchaSiteKey": "0x4AAA...",
+  "captchaProvider": "altcha",
+  "captchaSiteKey": null,
+  "captchaChallengeUrl": "https://example.com/captcha/index/challenge",
   "honeypotField": "_h_a4b2c1d3"
 }
 ```
 
-`captchaProvider` is one of `none`, `turnstile`, `recaptcha_v3` (or anything an installed third-party module registers). `captchaSiteKey` is `null` when the provider is `none`. Frontends use these two fields to load the matching widget client-side; for richer per-provider config the helper-based event flow described under [CAPTCHA](captcha.md) is used instead.
+The CAPTCHA fields come from the CAPTCHA module of the store, through the `api_captcha_config` event (see [CAPTCHA](captcha.md)). `captchaProvider` is `none` when no module is active, `altcha` for the built-in `Maho_Captcha`, or the name that a third-party module gives. `captchaSiteKey` and `captchaChallengeUrl` are `null` when the provider does not use them. When a provider is active, `POST /contact` needs the solved token in `captchaToken`. The storefront form and the API use the same CAPTCHA setup.
 
-The `honeypotField` value is **deterministic per install** (derived from the encryption key) and **opaque** to the frontend, render it as a hidden input and don't expose its value, e.g. `<input type="text" name="{honeypotField}" style="display:none" tabindex="-1" autocomplete="off" />`. If a request body arrives with a non-empty value in that field, the API silently treats it as spam (returns success without sending the email). When honeypot is disabled in admin, `honeypotField` is `null` and the frontend can skip it.
+The `honeypotField` value is **deterministic per install** (derived from the encryption key) and **opaque** to the frontend, render it as a hidden input and don't expose its value, e.g. `<input type="text" name="{honeypotField}" style="display:none" tabindex="-1" autocomplete="off" />`. If a request body arrives with a non-empty value in that field, the API silently treats it as spam (returns success without sending the email). One switch controls the honeypot of the storefront form and of the API: System > Configuration > General > Contacts > Abuse Protection > Honeypot Field. When it is off, `honeypotField` is `null` and the frontend can skip it.
+
+`POST /contact` and the storefront contact form use the same rules. A field that is not valid gives a 422, with one entry for each field in `details.errors` (`name`, `email`, `comment`, `captchaToken`). A client or an email address over its limit gets a 429 with a `Retry-After` header. The email limit (`system/rate_limit/contact`) counts the messages of the storefront form and of the API together. A disabled contact API gives a 404.
 
 ---
 
@@ -673,6 +775,8 @@ The `honeypotField` value is **deterministic per install** (derived from the enc
 |--------|----------|------|-------------|
 | GET | `/countries` | None | List countries |
 | GET | `/countries/{id}` | None | Get country (with regions) |
+
+`/countries` lists the countries that the store allows (**General > Countries Options > Allow Countries**). `/countries/{id}` gives any country, so that a client can show an address in a country that the store no longer allows. The country and region names are in the locale of the store, as in the address forms of the storefront.
 
 ---
 
@@ -711,8 +815,27 @@ Admin-only. Used for group-based pricing and tax-class assignment.
 | GET | `/customers/me/wishlist` | Customer/API | Get wishlist items |
 | POST | `/customers/me/wishlist` | Customer/API | Add to wishlist |
 | DELETE | `/customers/me/wishlist/{id}` | Customer/API | Remove from wishlist |
-| POST | `/customers/me/wishlist/{id}/move-to-cart` | Customer/API | Move item to cart |
+| POST | `/customers/me/wishlist/{id}/move-to-cart` | Customer/API | Move item to cart, with the options of the item |
 | POST | `/customers/me/wishlist/sync` | Customer/API | Sync a guest (localStorage) wishlist into the customer's wishlist |
+| POST | `/customers/me/wishlist/share` | Customer | Send the wishlist by email (`{emails: [...], message, captchaToken}`) |
+
+`move-to-cart` takes an optional `qty`. Without `qty`, the cart gets the qty of the wishlist item, as on the wishlist page.
+
+`share` sends the items and the link of the shared wishlist to 1 to 5 addresses, with the optional `message` of the customer, as the share form of the wishlist page does. When the CAPTCHA of the store is on, send the solved token in `captchaToken`, as the share form does. No address, more than 5 addresses or an address that is not valid gives a 422 with an entry for `emails` in `details.errors`. The limit `system/rate_limit/wishlist_share` counts the shares of one customer on the API and the page together, and a customer over the limit gets a 429 with a `Retry-After` header. The answer is an item with only `id`, which is the ID of the wishlist. The API cannot add the RSS link of the share form.
+
+---
+
+### Product Alerts
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/customers/me/product-alerts` | Customer | List the price alerts and the stock alerts of the customer |
+| POST | `/customers/me/product-alerts` | Customer | Subscribe to an alert (`{type: price\|stock, productId}`) |
+| DELETE | `/customers/me/product-alerts/{id}` | Customer | Unsubscribe from an alert |
+
+The `id` of an alert is its type, a hyphen and the product ID, for example `price-42`. A price alert keeps the `price` of the product for the group of the customer at the time of the subscription, and the store sends the email when the price goes below it. A stock alert sends the email when the product is in stock again. A second subscription to the same alert keeps one alert.
+
+The API and the product page use the same rules. `POST` gives a 404 when the store has the alert of this type off (**System > Configuration > Catalog > Product Alerts > Allow Alert When Product Price Changes** and **Allow Alert When Product Comes Back in Stock**), and a 422 for a product that the store does not show or for a `type` that is not `price` or `stock`. `DELETE` gives a 404 when the customer has no such alert. `GET` and `DELETE` work also when the alerts are off, so that a customer can remove an old alert.
 
 ---
 
@@ -721,3 +844,5 @@ Admin-only. Used for group-based pricing and tax-class assignment.
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | GET | `/url-resolver?path=/some-page` | None | Resolve URL to entity |
+
+A product or a category that the storefront does not show resolves to `not_found`: a disabled product, a product that is not visible or not in the website of the store, an inactive category and a category outside the tree of the store.

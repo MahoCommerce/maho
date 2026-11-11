@@ -30,6 +30,16 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     public const DEFAULT_DEST_STREET = -1;
 
     /**
+     * The text fields that sanitizeText() cleans, with the maximum length of each. Each line of the street has the
+     * length of the street.
+     */
+    public const TEXT_FIELD_LENGTHS = [
+        'firstname' => 255, 'middlename' => 40, 'lastname' => 255, 'prefix' => 40, 'suffix' => 40,
+        'company' => 255, 'street' => 255, 'city' => 255, 'region' => 255, 'postcode' => 20,
+        'telephone' => 50, 'fax' => 50, 'email' => 255, 'vat_id' => 50,
+    ];
+
+    /**
      * Prefix of model events
      *
      * @var string
@@ -123,7 +133,32 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     protected function _beforeSave()
     {
         parent::_beforeSave();
+        $this->sanitizeText();
         $this->_populateBeforeSaveData();
+        return $this;
+    }
+
+    /**
+     * Remove the HTML tags from the text fields, and cut each field to its maximum length.
+     */
+    public function sanitizeText(): static
+    {
+        $strip = fn(mixed $text, int $length): string => mb_substr(strip_tags((string) $text), 0, $length);
+        foreach (self::TEXT_FIELD_LENGTHS as $field => $length) {
+            $value = $this->getData($field);
+            if ($field === 'street' && is_array($value)) {
+                $clean = array_map(fn(mixed $line): string => $strip($line, $length), $value);
+            } elseif ($field === 'street' && is_string($value)) {
+                $clean = implode("\n", array_map(fn(string $line): string => $strip($line, $length), preg_split('/\r\n|\r|\n/', $value) ?: []));
+            } elseif (is_string($value)) {
+                $clean = $strip($value, $length);
+            } else {
+                continue;
+            }
+            if ($clean !== $value) {
+                $this->setData($field, $clean);
+            }
+        }
         return $this;
     }
 

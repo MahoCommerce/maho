@@ -12,14 +12,19 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\GraphQl;
 
+use ApiPlatform\Validator\Exception\ConstraintViolationListAwareExceptionInterface;
+use GraphQL\Error\ClientAware;
 use GraphQL\Error\Error;
 use GraphQL\Error\FormattedError;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 /**
- * The normalizers of priority -780 handle an HTTP exception, a RuntimeException and a Mage_Core_Exception.
- * Any other exception is a server fault. This normalizer logs it, as ApiExceptionListener does for REST,
- * and gives the same error as the ErrorNormalizer of API Platform.
+ * An HTTP exception, a validation exception, a Mage_Core_Exception and an exception that GraphQL marks as safe
+ * for the client are client faults, and other normalizers show them. Any other exception is a server fault.
+ * This normalizer logs it, as ApiExceptionListener does for REST, and gives the same error as the ErrorNormalizer
+ * of API Platform. It runs before the RuntimeExceptionNormalizer of API Platform, which shows the message of a
+ * RuntimeException to the client and does not log it.
  */
 final class InternalErrorNormalizer implements NormalizerInterface
 {
@@ -38,7 +43,15 @@ final class InternalErrorNormalizer implements NormalizerInterface
     #[\Override]
     public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
-        return $data instanceof Error && $data->getPrevious() !== null;
+        if (!$data instanceof Error) {
+            return false;
+        }
+        $exception = $data->getPrevious();
+        return $exception !== null
+            && !$exception instanceof HttpExceptionInterface
+            && !$exception instanceof ConstraintViolationListAwareExceptionInterface
+            && !$exception instanceof \Mage_Core_Exception
+            && !($exception instanceof ClientAware && $exception->isClientSafe());
     }
 
     #[\Override]

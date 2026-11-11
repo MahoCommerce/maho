@@ -21,8 +21,9 @@ afterAll(function (): void {
 describe('Product Media Gallery, Read', function (): void {
 
     it('lists gallery images for existing product', function (): void {
-        // Product 421 should have images
-        $read = apiGet('/api/rest/v2/products/421/media');
+        // A public read needs a product that is visible on the storefront: 421 is "Not Visible Individually"
+        $productId = fixtures('product_id');
+        $read = apiGet("/api/rest/v2/products/{$productId}/media");
         expect($read['status'])->toBe(200);
         $images = getItems($read);
         // May or may not have images, just verify format

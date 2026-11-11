@@ -82,6 +82,8 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
     /**
      * Prepare product for cart
      * Set custom price based on gift card amount
+     *
+     * @throws Mage_Core_Exception_Input when the delivery date is not a date in the format Y-m-d
      */
     #[\Override]
     public function prepareForCartAdvanced(Maho\DataObject $buyRequest, $product = null, $processMode = null)
@@ -90,6 +92,16 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
 
         if (is_string($result)) {
             return $result; // Error message
+        }
+
+        $deliveryDate = $buyRequest->getData('giftcard_delivery_date');
+        if ($deliveryDate !== null && $deliveryDate !== ''
+            && (!is_string($deliveryDate) || !Mage::helper('giftcard')->isValidDeliveryDate($deliveryDate))
+        ) {
+            throw new Mage_Core_Exception_Input()->addError(
+                'giftcard_delivery_date',
+                Mage::helper('giftcard')->__('Please enter the delivery date in the format YYYY-MM-DD.'),
+            );
         }
 
         // Validate and set the price to the gift card amount

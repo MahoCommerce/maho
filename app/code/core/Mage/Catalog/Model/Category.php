@@ -198,6 +198,13 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
             Mage::throwException(
                 Mage::helper('catalog')->__('Parent category is equal to child category.'),
             );
+        } elseif (in_array((string) $this->getId(), $parent->getPathIds(), true)) {
+            Mage::throwException(
+                Mage::helper('catalog')->__('A category cannot be moved under one of its own subcategories.'),
+            );
+        }
+        if ((int) $this->getLevel() <= 1 || in_array((int) $this->getId(), $this->getResource()->getRootIds(), true)) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('catalog')->__('A root category cannot be moved.'));
         }
 
         /**
@@ -270,7 +277,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     }
 
     /**
-     * Retrieve all customer attributes
+     * Retrieve the attributes of the attribute set of the category
      *
      * @param bool $noDesignAttributes
      * @return array
@@ -279,7 +286,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     {
         $result = $this->getResource()
             ->loadAllAttributes($this)
-            ->getSortedAttributes();
+            ->getSortedAttributes($this->getAttributeSetId() ?: null);
 
         if ($noDesignAttributes) {
             foreach (array_keys($result) as $k) {
@@ -853,8 +860,8 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     protected function _beforeDelete()
     {
         $this->_protectFromNonAdmin();
-        if ($this->getResource()->isForbiddenToDelete($this->getId())) {
-            Mage::throwException("Can't delete root category.");
+        if ((int) $this->getId() === self::TREE_ROOT_ID || $this->getResource()->isForbiddenToDelete($this->getId())) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('catalog')->__("Can't delete root category."));
         }
         return parent::_beforeDelete();
     }
@@ -1033,14 +1040,15 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     }
 
     /**
-     * Validate attribute values
+     * Validate the values of the attributes of the attribute set of the category
      *
      * @throws Mage_Eav_Model_Entity_Attribute_Exception
      * @return true|array
      */
     public function validate()
     {
-        return $this->_getResource()->validate($this);
+        $result = $this->_getResource()->validate($this);
+        return $result === true ? true : (array_intersect_key($result, $this->getAttributes()) ?: true);
     }
 
     /**
@@ -1080,9 +1088,33 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
         return $this->setData('affected_product_ids', $value);
     }
 
+    public function getAttributeSetId(): ?int
+    {
+        $value = $this->getData('attribute_set_id');
+        return $value === null ? null : (int) $value;
+    }
+
     public function setAttributeSetId(?int $value): static
     {
         return $this->setData('attribute_set_id', $value);
+    }
+
+    /**
+     * Set the attribute set $setId. Without $setId, a category with no set takes the set of its parent.
+     *
+     * @throws Mage_Core_Exception when $setId is a set of another entity type
+     */
+    public function assignAttributeSet(?int $setId): static
+    {
+        if ($setId) {
+            Mage::helper('eav')->assertSetOfType($setId, $this->getResource()->getEntityType());
+            return $this->setAttributeSetId($setId);
+        }
+        if ($this->getAttributeSetId()) {
+            return $this;
+        }
+        $parent = Mage::getModel('catalog/category')->load($this->getParentId());
+        return $this->setAttributeSetId($parent->getAttributeSetId() ?: (int) $this->getDefaultAttributeSetId());
     }
 
     public function getCategoryPath(): ?string

@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * Give a tax rate write to the tax rate service.
+ *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Tax
@@ -14,76 +16,57 @@ use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class TaxRateProcessor extends CrudProcessor
 {
     #[\Override]
-    protected function validate(CrudResource $data, object $model, bool $isNew): void
+    protected function loadModel(int $id): \Mage_Tax_Model_Calculation_Rate
     {
-        /** @var TaxRate $data */
-
-        // Code, country and rate are required on create; on update an omitted
-        // value arrives as null and leaves the existing one untouched.
-        if ($isNew) {
-            if (trim((string) $data->code) === '') {
-                throw new UnprocessableEntityHttpException('Tax rate code is required.');
-            }
-            if (trim((string) $data->taxCountryId) === '') {
-                throw new UnprocessableEntityHttpException('Tax country is required.');
-            }
-            if ($data->rate === null) {
-                throw new UnprocessableEntityHttpException('Rate is required.');
-            }
-        }
-
-        if ($data->rate !== null && $data->rate < 0) {
-            throw new UnprocessableEntityHttpException('Rate must be a number greater than or equal to zero.');
-        }
+        return $this->service()->getById($id);
     }
 
     /**
-     * The rate model's _afterSave() rewrites tax_calculation_rate_title from the
-     * `title` field on every save, so it must always be populated: the submitted
-     * titles when present, otherwise the existing ones to preserve them.
+     * A body without titles keeps the stored ones.
      */
     #[\Override]
     protected function beforeSave(object $model, CrudResource $data, ApiUser $user): void
     {
         /** @var TaxRate $data */
         /** @var \Mage_Tax_Model_Calculation_Rate $model */
-        if ($data->titles !== null) {
-            $model->setTitle($this->normalizeTitles($data->titles));
+        if ($data->titles === null) {
             return;
         }
-
-        if ($model->getId()) {
-            $existing = [];
-            foreach ($model->getTitles() as $title) {
-                $existing[(int) $title->getStoreId()] = (string) $title->getValue();
-            }
-            $model->setTitle($existing);
-        }
-    }
-
-    /**
-     * @param array<mixed> $titles
-     * @return array<int, string>
-     */
-    private function normalizeTitles(array $titles): array
-    {
-        $stores = \Mage::app()->getStores();
-        $normalized = [];
-        foreach ($titles as $entry) {
+        $titles = [];
+        foreach ($data->titles as $entry) {
             if (!is_array($entry) || !isset($entry['storeId']) || !is_numeric($entry['storeId']) || !array_key_exists('title', $entry)) {
                 throw new BadRequestHttpException('titles must be a list of {storeId, title} objects.');
             }
-            $storeId = (int) $entry['storeId'];
-            if (!isset($stores[$storeId])) {
-                throw new UnprocessableEntityHttpException("Unknown store ID: {$storeId}");
-            }
-            $normalized[$storeId] = (string) $entry['title'];
+            $titles[(int) $entry['storeId']] = (string) $entry['title'];
         }
-        return $normalized;
+        $model->setTitle($titles);
+    }
+
+    #[\Override]
+    protected function saveModel(\Mage_Core_Model_Abstract $model): void
+    {
+        /** @var \Mage_Tax_Model_Calculation_Rate $model */
+        try {
+            $this->service()->save($model);
+        } catch (\Mage_Core_Exception_Input $e) {
+            throw $e->withFieldNames(['title' => 'titles']);
+        }
+    }
+
+    #[\Override]
+    protected function deleteModel(\Mage_Core_Model_Abstract $model): void
+    {
+        /** @var \Mage_Tax_Model_Calculation_Rate $model */
+        $this->service()->delete($model);
+    }
+
+    private function service(): \Mage_Tax_Service_Rate
+    {
+        /** @var \Mage_Tax_Service_Rate */
+        return \Mage::getService('tax/rate');
     }
 }

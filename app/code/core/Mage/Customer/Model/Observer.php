@@ -254,15 +254,16 @@ class Mage_Customer_Model_Observer
     }
 
     /**
-     * Clear customer flow password table
+     * Delete the requests for a password reset email that are too old to count in the forgot password limit.
      */
     #[Maho\Config\CronJob('customer_flowpassword', schedule: '0 0 1 * *')]
-    public function deleteCustomerFlowPassword()
+    public function deleteCustomerFlowPassword(): void
     {
-        $resource   = Mage::getSingleton('core/resource');
-        $connection = $resource->getConnection('write');
-        $condition  = ['requested_date < ?' => Mage::app()->getLocale()->formatDateForDb('-1 day')];
-        $connection->delete($resource->getTableName('customer_flowpassword'), $condition);
+        $resource = Mage::getSingleton('core/resource');
+        $resource->getConnection('core_write')->delete(
+            $resource->getTableName('customer/flowpassword'),
+            ['requested_date < ?' => Mage::app()->getLocale()->formatDateForDb('-1 day')],
+        );
     }
 
     /**

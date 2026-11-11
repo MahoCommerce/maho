@@ -170,11 +170,8 @@ class Mage_Adminhtml_Block_Sales_Order_View extends Mage_Adminhtml_Block_Widget_
             ]);
         }
 
-        /** @var Mage_Sales_Helper_Reorder $helper */
-        $helper = $this->helper('sales/reorder');
         if ($this->_isAllowedAction('reorder')
-            && $helper->isAllowed($order->getStore())
-            && $order->canReorderIgnoreSalable()
+            && Mage::getService('sales/order')->canReorder($order, Mage_Checkout_Model_Actor::Staff)
         ) {
             $this->_addButton('order_reorder', [
                 'label'     => Mage::helper('sales')->__('Reorder'),

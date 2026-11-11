@@ -45,15 +45,7 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
         }
 
         try {
-            $model  = Mage::getModel('productalert/price')
-                ->setCustomerId(Mage::getSingleton('customer/session')->getCustomerId())
-                ->setProductId($product->getId())
-                ->setWebsiteId(Mage::app()->getStore()->getWebsiteId())
-                ->loadByParam();
-            if ($model->getId()) {
-                $model->delete();
-            }
-
+            $this->unsubscribe(Mage_ProductAlert_Model_Type::Price, $productId);
             $session->addSuccess($this->__('The alert subscription has been deleted.'));
         } catch (Exception $e) {
             $session->addException($e, $this->__('Unable to update the alert subscription.'));
@@ -68,9 +60,10 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
         /** @var Mage_Customer_Model_Session $session */
 
         try {
-            Mage::getModel('productalert/price')->deleteCustomer(
-                $session->getCustomerId(),
-                Mage::app()->getStore()->getWebsiteId(),
+            Mage::getService('productalert/alert')->unsubscribeAll(
+                Mage_ProductAlert_Model_Type::Price,
+                (int) $session->getCustomerId(),
+                (int) Mage::app()->getStore()->getId(),
             );
             $session->addSuccess($this->__('You will no longer receive price alerts for this product.'));
         } catch (Exception $e) {
@@ -99,14 +92,7 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
         }
 
         try {
-            $model  = Mage::getModel('productalert/stock')
-                ->setCustomerId(Mage::getSingleton('customer/session')->getCustomerId())
-                ->setProductId($product->getId())
-                ->setWebsiteId(Mage::app()->getStore()->getWebsiteId())
-                ->loadByParam();
-            if ($model->getId()) {
-                $model->delete();
-            }
+            $this->unsubscribe(Mage_ProductAlert_Model_Type::Stock, $productId);
             $session->addSuccess($this->__('You will no longer receive stock alerts for this product.'));
         } catch (Exception $e) {
             $session->addException($e, $this->__('Unable to update the alert subscription.'));
@@ -120,14 +106,33 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
         $session = Mage::getSingleton('customer/session');
 
         try {
-            Mage::getModel('productalert/stock')->deleteCustomer(
-                $session->getCustomerId(),
-                Mage::app()->getStore()->getWebsiteId(),
+            Mage::getService('productalert/alert')->unsubscribeAll(
+                Mage_ProductAlert_Model_Type::Stock,
+                (int) $session->getCustomerId(),
+                (int) Mage::app()->getStore()->getId(),
             );
             $session->addSuccess($this->__('You will no longer receive stock alerts.'));
         } catch (Exception $e) {
             $session->addException($e, $this->__('Unable to update the alert subscription.'));
         }
         $this->_redirect('customer/account/');
+    }
+
+    /**
+     * Delete the alert of $type that the customer has for the product $productId. A link that the customer opens a
+     * second time finds no alert, and gets the same answer.
+     */
+    private function unsubscribe(Mage_ProductAlert_Model_Type $type, int $productId): void
+    {
+        try {
+            Mage::getService('productalert/alert')->unsubscribe(
+                $type,
+                (int) Mage::getSingleton('customer/session')->getCustomerId(),
+                $productId,
+                (int) Mage::app()->getStore()->getId(),
+            );
+        } catch (Mage_Core_Exception_NoSuchEntity) {
+            return;
+        }
     }
 }

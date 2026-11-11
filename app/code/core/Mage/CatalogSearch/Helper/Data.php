@@ -26,7 +26,7 @@ class Mage_CatalogSearch_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Query object
      *
-     * @var Mage_CatalogSearch_Model_Query
+     * @var Mage_CatalogSearch_Model_Query|null
      */
     protected $_query;
 
@@ -127,31 +127,48 @@ class Mage_CatalogSearch_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getQueryText()
     {
-        if (!isset($this->_queryText)) {
-            $this->_queryText = $this->_getRequest()->getParam($this->getQueryParamName());
-            if ($this->_queryText === null) {
-                $this->_queryText = '';
-            } else {
-                /** @var Mage_Core_Helper_String $stringHelper */
-                $stringHelper = Mage::helper('core/string');
-                $this->_queryText = is_array($this->_queryText) ? ''
-                    : $stringHelper->cleanString(trim($this->_queryText));
-
-                // No search needs 4-byte characters such as emoji. Before ./maho migrate, the
-                // utf8mb3 query column also refuses them, and the failed insert shows an error page.
-                $stripped = preg_replace('/[\x{10000}-\x{10FFFF}]/u', '', $this->_queryText);
-                if ($stripped !== null) {
-                    $this->_queryText = trim($stripped);
-                }
-
-                $maxQueryLength = $this->getMaxQueryLength();
-                if ($maxQueryLength !== '' && $stringHelper->strlen($this->_queryText) > $maxQueryLength) {
-                    $this->_queryText = $stringHelper->substr($this->_queryText, 0, $maxQueryLength);
-                    $this->_isMaxLength = true;
-                }
-            }
-        }
+        $this->_queryText ??= $this->_cleanQueryText($this->_getRequest()->getParam($this->getQueryParamName()));
         return $this->_queryText;
+    }
+
+    /**
+     * Search for $text, and not for the text of the request. A caller without a search request, such as the API,
+     * gives its text here.
+     */
+    public function setQueryText(string $text): static
+    {
+        $this->_query = null;
+        $this->_isMaxLength = false;
+        $this->_queryText = $this->_cleanQueryText($text);
+        return $this;
+    }
+
+    /**
+     * Return the text $text without the characters that a search cannot use, and not longer than the maximum
+     * length.
+     */
+    protected function _cleanQueryText(mixed $text): string
+    {
+        if ($text === null || is_array($text)) {
+            return '';
+        }
+        /** @var Mage_Core_Helper_String $stringHelper */
+        $stringHelper = Mage::helper('core/string');
+        $text = $stringHelper->cleanString(trim((string) $text));
+
+        // No search needs 4-byte characters such as emoji. Before ./maho migrate, the
+        // utf8mb3 query column also refuses them, and the failed insert shows an error page.
+        $stripped = preg_replace('/[\x{10000}-\x{10FFFF}]/u', '', $text);
+        if ($stripped !== null) {
+            $text = trim($stripped);
+        }
+
+        $maxQueryLength = $this->getMaxQueryLength();
+        if ($maxQueryLength !== '' && $stringHelper->strlen($text) > $maxQueryLength) {
+            $text = $stringHelper->substr($text, 0, $maxQueryLength);
+            $this->_isMaxLength = true;
+        }
+        return $text;
     }
 
     /**

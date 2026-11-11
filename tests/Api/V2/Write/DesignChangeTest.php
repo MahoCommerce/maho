@@ -142,7 +142,7 @@ describe('Design change CRUD lifecycle', function (): void {
                 'dateFrom' => '2090-01-15',
                 'dateTo' => '2090-02-15',
             ], $writeToken);
-            expect($overlap['status'])->toBe(422);
+            expect($overlap['status'])->toBe(409);
 
             $update = apiPut("/api/rest/v2/design-changes/{$id}", [
                 'dateTo' => '2090-02-28',

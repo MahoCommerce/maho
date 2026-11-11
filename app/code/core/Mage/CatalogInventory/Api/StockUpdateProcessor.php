@@ -11,302 +11,159 @@ declare(strict_types=1);
 namespace Mage\CatalogInventory\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Maho\ApiPlatform\Trait\ProductLoaderTrait;
-use Maho\ApiPlatform\Trait\StockWriterTrait;
+use Mage;
+use Mage_Catalog_Service_Product;
+use Mage_CatalogInventory_Model_Stock_Item;
+use Mage_CatalogInventory_Service_Stock;
+use Mage_Core_Exception;
 use Maho\ApiPlatform\Http\RequestInput;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
- * Stock Update Processor - Fast direct SQL stock updates.
+ * Give a stock update of one product or of up to 100 products, by SKU, to the stock service.
  */
 final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
 {
-    use ProductLoaderTrait;
-    use StockWriterTrait;
+    private const MAX_BULK_ITEMS = 100;
 
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): StockUpdate
     {
-        $operationName = $operation->getName();
-
-        return match ($operationName) {
-            'update' => $this->updateStockFromGraphQl($context),
-            'bulkUpdate' => $this->updateStockBulkFromGraphQl($context),
-            default => $this->handleRestRequest($operation, $context),
+        $name = (string) $operation->getName();
+        $input = match ($name) {
+            'update', 'bulkUpdate' => $context['args']['input'] ?? [],
+            default => $this->parseRequestBody($context['request'] ?? null),
         };
+
+        return $name === 'bulkUpdate' || str_contains($name, 'bulk')
+            ? $this->updateMany(RequestInput::of($input)->list('items') ?? [])
+            : $this->updateOne($input);
     }
 
-    private function handleRestRequest(Operation $operation, array $context): StockUpdate
+    private static function stock(): Mage_CatalogInventory_Service_Stock
     {
-        $operationName = $operation->getName();
-        $body = $this->parseRequestBody($context['request'] ?? null);
-
-        if (str_contains($operationName, 'bulk')) {
-            return $this->doBulkUpdate(RequestInput::of($body)->list('items') ?? []);
-        }
-
-        return $this->doSingleUpdate(...$this->readStockFields($body), extended: $this->extractExtendedStockColumns($body));
+        /** @var Mage_CatalogInventory_Service_Stock */
+        return Mage::getService('cataloginventory/stock');
     }
 
-    private function updateStockFromGraphQl(array $context): StockUpdate
+    private static function products(): Mage_Catalog_Service_Product
     {
-        $args = $context['args']['input'] ?? [];
-
-        return $this->doSingleUpdate(...$this->readStockFields($args), extended: $this->extractExtendedStockColumns($args));
-    }
-
-    private function updateStockBulkFromGraphQl(array $context): StockUpdate
-    {
-        $args = $context['args']['input'] ?? [];
-        return $this->doBulkUpdate(RequestInput::of($args)->list('items') ?? []);
+        /** @var Mage_Catalog_Service_Product */
+        return Mage::getService('catalog/product');
     }
 
     /**
-     * @param array<array-key, mixed> $data
-     * @param string $path where $data sits in the request, for its errors
-     * @return array{sku: string, qty: ?float, isInStock: ?bool, manageStock: ?bool}
+     * @param array<string, mixed> $input
      */
-    private function readStockFields(array $data, string $path = ''): array
+    private function updateOne(array $input): StockUpdate
     {
-        $input = RequestInput::of($data, $path);
-        return [
-            'sku' => $input->string('sku') ?? '',
-            'qty' => $input->float('qty'),
-            'isInStock' => $input->bool('isInStock'),
-            'manageStock' => $input->bool('manageStock'),
-        ];
+        $sku = RequestInput::of($input)->string('sku') ?? '';
+        if ($sku === '') {
+            throw new \Mage_Core_Exception_Input()->addError('sku', 'SKU is required');
+        }
+        // A missing qty leaves the stored quantity as it is, so a request that only changes the flags keeps the stock
+        $columns = self::readColumns($input);
+        if ($columns === []) {
+            throw new Mage_Core_Exception('At least one stock field must be provided');
+        }
+        $productId = self::products()->getIdBySku($sku)
+            ?? throw new \Mage_Core_Exception_NoSuchEntity("Product not found for SKU: {$sku}");
+        self::products()->assertIdsInStores([$productId], $this->requireUser()->getAllowedStoreIds());
+
+        $item = self::stock()->getByProductId($productId);
+        $previousQty = (float) $item->getQty();
+        self::stock()->update($item, $columns);
+
+        return $this->toDto($sku, $item, $previousQty, $columns);
     }
 
     /**
-     * @param array<string, int|float> $extended from extractExtendedStockColumns()
-     */
-    private function doSingleUpdate(string $sku, ?float $qty, ?bool $isInStock, ?bool $manageStock, array $extended = []): StockUpdate
-    {
-        if (empty($sku)) {
-            throw new UnprocessableEntityHttpException('SKU is required');
-        }
-
-        // A missing qty must leave the stored quantity untouched (partial update
-        // of availability/manage flags). Coercing it to 0 would silently wipe a
-        // product's stock when the caller only flips isInStock/manageStock.
-        if ($qty === null && $isInStock === null && $manageStock === null && $extended === []) {
-            throw new UnprocessableEntityHttpException('At least one stock field must be provided');
-        }
-
-        if ($qty !== null) {
-            $this->validateStockQty($qty);
-        }
-
-        /** @var \Mage_Catalog_Model_Resource_Product $productResource */
-        $productResource = \Mage::getResourceSingleton('catalog/product');
-        $productId = $productResource->getIdBySku($sku);
-
-        if (!$productId) {
-            throw new NotFoundHttpException("Product not found for SKU: {$sku}");
-        }
-
-        $this->authorizeStockWebsites([(int) $productId]);
-
-        $stockData = array_merge($this->buildStockData($qty, $isInStock, $manageStock), $extended);
-        $upsert = $this->upsertStockItemRow((int) $productId, $stockData);
-
-        // Invalidate cache
-        \Mage::app()->cleanCache(["API_PRODUCT_{$productId}"]);
-
-        // Keep the stock_status index in sync. Direct SQL writes bypass the stock
-        // item model's afterCommit reindex, so catalog listings and layered nav
-        // would otherwise show stale availability until a manual reindex.
-        $this->reindexStockStatus((int) $productId);
-
-        $dto = new StockUpdate();
-        $dto->sku = $sku;
-        // Report the persisted qty: the new value when set, otherwise the value
-        // that was already stored (an untouched partial update).
-        $dto->qty = $qty ?? $upsert['previousQty'];
-        $dto->isInStock = $this->resolveIsInStock($stockData, (int) $productId);
-        $dto->manageStock = (bool) $upsert['manageStock'];
-        $dto->previousQty = $upsert['previousQty'];
-        $this->reflectExtendedColumns($dto, $extended);
-        $dto->success = true;
-
-        return $dto;
-    }
-
-    /**
-     * Echo the extended columns this write set back onto the DTO's camelCase
-     * properties, cast to the property types.
+     * Return the stock change in $input as the stock service reads it. A value of the wrong type is a 400.
      *
-     * @param array<string, int|float> $extended
+     * @param array<array-key, mixed> $input
+     * @param string $path where $input sits in the request, for its errors
+     * @return array<string, float|int>
      */
-    private function reflectExtendedColumns(StockUpdate $dto, array $extended): void
+    private static function readColumns(array $input, string $path = ''): array
     {
-        foreach ($extended as $column => $value) {
-            $property = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $column))));
-            if (property_exists($dto, $property)) {
-                $dto->$property = self::STOCK_ITEM_EXTENDED_COLUMNS[$column] === 'bool' ? (bool) $value : $value;
+        $request = RequestInput::of($input, $path);
+        $values = [];
+        foreach (array_keys($input) as $key) {
+            $column = self::stock()->columnOf((string) $key);
+            if ($column !== null) {
+                $values[$column] = match (Mage_CatalogInventory_Service_Stock::COLUMNS[$column]) {
+                    'float' => $request->float((string) $key),
+                    'int' => $request->int((string) $key),
+                    default => $request->bool((string) $key),
+                };
             }
         }
+        return self::stock()->toColumns($values);
     }
 
     /**
-     * Availability to report back: the value this write set, or the row's
-     * current value when neither qty nor isInStock was provided (a manage_stock-
-     * only update leaves is_in_stock out of the column map).
-     *
-     * @param array<string, mixed> $stockData
+     * @param list<mixed> $items
      */
-    private function resolveIsInStock(array $stockData, int $productId): bool
+    private function updateMany(array $items): StockUpdate
     {
-        if (array_key_exists('is_in_stock', $stockData)) {
-            return (bool) $stockData['is_in_stock'];
+        if ($items === []) {
+            throw new Mage_Core_Exception('Items array is required and cannot be empty');
+        }
+        if (count($items) > self::MAX_BULK_ITEMS) {
+            throw new Mage_Core_Exception('Maximum ' . self::MAX_BULK_ITEMS . ' items per bulk update');
         }
 
-        $resource = \Mage::getSingleton('core/resource');
-        $table = $resource->getTableName('cataloginventory/stock_item');
-        return (bool) $resource->getConnection('core_read')->fetchOne(
-            "SELECT is_in_stock FROM {$table} WHERE product_id = ? AND stock_id = 1",
-            [$productId],
-        );
-    }
-
-    private function doBulkUpdate(array $items): StockUpdate
-    {
-        if (empty($items)) {
-            throw new UnprocessableEntityHttpException('Items array is required and cannot be empty');
-        }
-
-        if (count($items) > 100) {
-            throw new UnprocessableEntityHttpException('Maximum 100 items per bulk update');
-        }
-
-        // Validate all SKUs first
-        /** @var \Mage_Catalog_Model_Resource_Product $productResource */
-        $productResource = \Mage::getResourceSingleton('catalog/product');
-        $skuToProductId = [];
-        $extendedByIndex = [];
-        $fieldsByIndex = [];
-
+        RequestInput::rowsOf($items, 'items');
+        $changes = [];
         foreach ($items as $index => $item) {
-            if (!is_array($item)) {
-                throw new BadRequestHttpException("Item at index {$index} must be an object");
+            $sku = RequestInput::of($item, "items[{$index}]")->string('sku') ?? '';
+            if ($sku === '') {
+                throw new Mage_Core_Exception("Item at index {$index}: SKU is required");
             }
-            $fieldsByIndex[$index] = $this->readStockFields($item, "items[{$index}]");
-            $sku = $fieldsByIndex[$index]['sku'];
-            if (empty($sku)) {
-                throw new UnprocessableEntityHttpException("Item at index {$index}: SKU is required");
-            }
-            if ($fieldsByIndex[$index]['qty'] !== null) {
-                $this->validateStockQty($fieldsByIndex[$index]['qty']);
-            }
-            // Extract (and thereby validate) before the transaction opens, so a
-            // rejected value 400s cleanly instead of aborting a partial write.
-            $extendedByIndex[$index] = $this->extractExtendedStockColumns($item);
-
-            $productId = $productResource->getIdBySku($sku);
-            if (!$productId) {
-                throw new UnprocessableEntityHttpException("Item at index {$index}: Product not found for SKU: {$sku}");
-            }
-            $skuToProductId[$sku] = $productId;
+            $productId = self::products()->getIdBySku($sku)
+                ?? throw new Mage_Core_Exception("Item at index {$index}: Product not found for SKU: {$sku}");
+            $changes[$index] = ['sku' => $sku, 'id' => $productId, 'data' => self::readColumns($item, "items[{$index}]")];
         }
+        self::products()->assertIdsInStores(array_column($changes, 'id'), $this->requireUser()->getAllowedStoreIds());
 
-        $this->authorizeStockWebsites(array_map(intval(...), array_values($skuToProductId)));
-
-        $write = \Mage::getSingleton('core/resource')->getConnection('core_write');
-
-        $results = [];
-        $cacheTags = [];
-
-        $write->beginTransaction();
-        try {
-            foreach (array_keys($items) as $index) {
-                ['sku' => $sku, 'qty' => $qty, 'isInStock' => $isInStock, 'manageStock' => $manageStock] = $fieldsByIndex[$index];
-                $extended = $extendedByIndex[$index];
-                $productId = $skuToProductId[$sku];
-
-                $stockData = array_merge($this->buildStockData($qty, $isInStock, $manageStock), $extended);
-                $upsert = $this->upsertStockItemRow((int) $productId, $stockData);
-
-                $cacheTags[] = "API_PRODUCT_{$productId}";
-
-                $result = new StockUpdate();
-                $result->sku = $sku;
-                $result->qty = $qty ?? $upsert['previousQty'];
-                $result->isInStock = $this->resolveIsInStock($stockData, (int) $productId);
-                $result->manageStock = (bool) $upsert['manageStock'];
-                $result->previousQty = $upsert['previousQty'];
-                $this->reflectExtendedColumns($result, $extended);
-                $result->success = true;
-                $results[] = $result;
-            }
-
-            $write->commit();
-        } catch (\Throwable $e) {
-            $write->rollBack();
-            throw $e;
+        $stockItems = [];
+        $previousQty = [];
+        foreach ($changes as $index => $change) {
+            $stockItems[$index] = self::stock()->getByProductId($change['id']);
+            $previousQty[$index] = (float) $stockItems[$index]->getQty();
         }
+        self::stock()->updateAll(array_map(
+            fn(int|string $index): array => [$stockItems[$index], $changes[$index]['data']],
+            array_keys($changes),
+        ));
 
-        // Invalidate cache for all updated products
-        \Mage::app()->cleanCache($cacheTags);
-
-        // Keep the stock_status index in sync for every updated product (see
-        // doSingleUpdate). Runs after commit so updateStatus() reads the persisted
-        // values.
-        foreach ($skuToProductId as $productId) {
-            $this->reindexStockStatus((int) $productId);
-        }
-
-        // Return wrapper DTO with results
         $dto = new StockUpdate();
         $dto->sku = 'bulk';
         $dto->success = true;
-        $dto->results = $results;
-
+        $dto->results = array_map(
+            fn(int|string $index): StockUpdate => $this->toDto($changes[$index]['sku'], $stockItems[$index], $previousQty[$index], $changes[$index]['data']),
+            array_keys($changes),
+        );
         return $dto;
     }
 
     /**
-     * Same website gate as every other product write path
-     * (assertProductWebsitesAllowed), without loading full product models.
-     *
-     * @param int[] $productIds
+     * @param array<string, mixed> $data the columns that the update wrote
      */
-    private function authorizeStockWebsites(array $productIds): void
+    private function toDto(string $sku, Mage_CatalogInventory_Model_Stock_Item $item, float $previousQty, array $data): StockUpdate
     {
-        $allowedWebsiteIds = $this->getAllowedWebsiteIds($this->requireUser());
-        if ($allowedWebsiteIds === null) {
-            return;
-        }
-
-        /** @var \Mage_Catalog_Model_Resource_Product $productResource */
-        $productResource = \Mage::getResourceSingleton('catalog/product');
-        $websiteIdsByProduct = $productResource->getWebsiteIdsByProductIds($productIds);
-        foreach ($productIds as $productId) {
-            $websiteIds = array_map(intval(...), $websiteIdsByProduct[$productId] ?? []);
-            if (array_intersect($websiteIds, $allowedWebsiteIds) === []) {
-                throw new AccessDeniedHttpException("Access denied for this product's websites");
+        $dto = new StockUpdate();
+        $dto->sku = $sku;
+        $dto->qty = (float) $item->getQty();
+        $dto->isInStock = (bool) $item->getData('is_in_stock');
+        $dto->manageStock = (bool) $item->getData('manage_stock');
+        $dto->previousQty = $previousQty;
+        foreach (array_diff_key($data, ['qty' => true, 'is_in_stock' => true, 'manage_stock' => true]) as $column => $value) {
+            $property = lcfirst(str_replace('_', '', ucwords((string) $column, '_')));
+            if (property_exists($dto, $property)) {
+                $dto->$property = Mage_CatalogInventory_Service_Stock::COLUMNS[$column] === 'bool' ? (bool) $value : $value;
             }
         }
-    }
-
-    /**
-     * Recompute the cataloginventory_stock_status index for a product (and its
-     * configurable/grouped parents and children). The stock data is already
-     * persisted at this point, so a reindex failure is logged but not fatal.
-     */
-    private function reindexStockStatus(int $productId): void
-    {
-        try {
-            /** @var \Mage_CatalogInventory_Model_Stock_Status $stockStatus */
-            $stockStatus = \Mage::getSingleton('cataloginventory/stock_status');
-            $stockStatus->updateStatus($productId);
-        } catch (\Exception $e) {
-            \Mage::log(
-                "StockUpdateProcessor: failed to reindex stock status for product {$productId}: " . $e->getMessage(),
-                \Mage::LOG_ERROR,
-            );
-        }
+        $dto->success = true;
+        return $dto;
     }
 }

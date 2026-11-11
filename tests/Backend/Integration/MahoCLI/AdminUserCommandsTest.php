@@ -52,20 +52,20 @@ it('creates an admin user from the arguments or from the answers in the terminal
     $user = adminUserLoad();
     expect($user->getId())->not->toBeNull()
         ->and($user->getEmail())->toBe('cli-admin@example.com')
-        ->and(Mage::helper('core')->validateHash('Password123!', $user->getPassword()))->toBeTrue();
+        ->and(Mage::helper('core')->validateHash('LongPassword123!', $user->getPassword()))->toBeTrue();
 })->with([
-    'arguments' => [['username' => ADMIN_USER_CLI_USERNAME, 'password' => 'Password123!', 'email' => 'cli-admin@example.com', 'firstname' => 'Cli', 'lastname' => 'Admin'], []],
-    'answers' => [[], [ADMIN_USER_CLI_USERNAME, 'Password123!', 'cli-admin@example.com', 'Cli', 'Admin']],
+    'arguments' => [['username' => ADMIN_USER_CLI_USERNAME, 'password' => 'LongPassword123!', 'email' => 'cli-admin@example.com', 'firstname' => 'Cli', 'lastname' => 'Admin'], []],
+    'answers' => [[], [ADMIN_USER_CLI_USERNAME, 'LongPassword123!', 'cli-admin@example.com', 'Cli', 'Admin']],
 ]);
 
 it('changes the password, disables, enables and resets 2FA of the admin user that the argument names', function (): void {
     $this->assertCommandIsSuccessful(adminUserRun(new AdminUserCreate('admin:user:create'), [
-        'username' => ADMIN_USER_CLI_USERNAME, 'password' => 'Password123!', 'email' => 'cli-admin@example.com', 'firstname' => 'Cli', 'lastname' => 'Admin',
+        'username' => ADMIN_USER_CLI_USERNAME, 'password' => 'LongPassword123!', 'email' => 'cli-admin@example.com', 'firstname' => 'Cli', 'lastname' => 'Admin',
     ]));
     adminUserLoad()->setTwofaEnabled(true)->setTwofaSecret('SECRET')->save();
 
-    $this->assertCommandIsSuccessful(adminUserRun(new AdminUserChangepassword('admin:user:change-password'), ['username' => ADMIN_USER_CLI_USERNAME, 'password' => 'Changed456!']));
-    expect(Mage::helper('core')->validateHash('Changed456!', adminUserLoad()->getPassword()))->toBeTrue();
+    $this->assertCommandIsSuccessful(adminUserRun(new AdminUserChangepassword('admin:user:change-password'), ['username' => ADMIN_USER_CLI_USERNAME, 'password' => 'ChangedPassword456!']));
+    expect(Mage::helper('core')->validateHash('ChangedPassword456!', adminUserLoad()->getPassword()))->toBeTrue();
 
     $this->assertCommandIsSuccessful(adminUserRun(new AdminUserDisable('admin:user:disable'), ['username' => ADMIN_USER_CLI_USERNAME]));
     expect(adminUserLoad()->getIsActive())->toBeFalse();
@@ -75,6 +75,15 @@ it('changes the password, disables, enables and resets 2FA of the admin user tha
 
     $this->assertCommandIsSuccessful(adminUserRun(new AdminUserTwofaReset('admin:user:twofa-reset'), ['username' => ADMIN_USER_CLI_USERNAME]));
     expect(adminUserLoad()->getTwofaEnabled())->toBeFalse();
+});
+
+it('refuses a password that is shorter than the admin minimum length', function (): void {
+    $result = adminUserRun(new AdminUserCreate('admin:user:create'), [
+        'username' => ADMIN_USER_CLI_USERNAME, 'password' => 'Short123!', 'email' => 'cli-admin@example.com', 'firstname' => 'Cli', 'lastname' => 'Admin',
+    ]);
+
+    expect($result->statusCode)->toBe(Command::INVALID)
+        ->and(adminUserLoad()->getId())->toBeNull();
 });
 
 it('fails without asking when the username is missing', function (): void {

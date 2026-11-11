@@ -8,21 +8,32 @@
 
 declare(strict_types=1);
 
-use Maho\ApiPlatform\Service\StoreDefaults;
+use Maho\Security\RateLimitScope;
 
 /**
  * Creates and finds carts, changes their items, codes, addresses, shipping and payment, and merges them.
  */
 class Mage_Checkout_Service_Cart
 {
-    private const MAX_ITEM_QTY = 10000;
+    /** The address fields that a client can write. */
+    private const ADDRESS_FIELDS = [
+        'prefix', 'firstname', 'middlename', 'lastname', 'suffix', 'company', 'street', 'city',
+        'region', 'region_id', 'postcode', 'country_id',
+        'telephone', 'fax', 'email', 'vat_id',
+    ];
 
     /** The shape of a masked cart id, bare of delimiters so a route requirement can reuse it. */
     public const MASKED_ID_PATTERN = '[a-f0-9]{32}';
 
-    /** additional_information key that holds the client payment data the API accepted. */
+    /** The additional_information key that holds the payment data of the client that setPaymentMethod() accepted. */
     public const PAYMENT_ADDITIONAL_DATA_KEY = 'api_additional_data';
 
+    /** The coupon codes that one shopper can try in this number of seconds have a limit. */
+    public const CODE_RATE_LIMIT_WINDOW = 60;
+
+    /**
+     * @phpstan-assert-if-true non-empty-string $maskedId
+     */
     public function isValidMaskedId(mixed $maskedId): bool
     {
         return is_string($maskedId) && preg_match('/^' . self::MASKED_ID_PATTERN . '$/i', $maskedId) === 1;
@@ -69,8 +80,19 @@ class Mage_Checkout_Service_Cart
     /**
      * Get a cart by its id, in the scope of its own store. Never collects totals: mutations recollect
      * in their service methods, reads collect at the mapping boundary (CartMapper).
+     *
+     * @throws \Mage_Core_Exception_NoSuchEntity
      */
-    public function getById(int $cartId): ?\Mage_Sales_Model_Quote
+    public function getById(int $cartId): \Mage_Sales_Model_Quote
+    {
+        return $this->findById($cartId) ?? throw new \Mage_Core_Exception_NoSuchEntity('Cart not found');
+    }
+
+    /**
+     * Return the cart $cartId as getById() does, or null when there is none, for a caller that has its own answer
+     * for that case.
+     */
+    public function findById(int $cartId): ?\Mage_Sales_Model_Quote
     {
         // loadByIdWithoutStore() also finds a cart of another store than the current one, for example from the admin
         /** @var \Mage_Sales_Model_Quote $quote */
@@ -88,13 +110,13 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Get an active cart by its masked id.
+     * Get an active cart by its masked id, or null when no cart has it.
      */
     public function getByMaskedId(string $maskedId): ?\Mage_Sales_Model_Quote
     {
         $cartId = $this->getCartIdFromMaskedId($maskedId);
 
-        return $cartId ? $this->getById($cartId) : null;
+        return $cartId ? $this->findById($cartId) : null;
     }
 
     /**
@@ -162,7 +184,7 @@ class Mage_Checkout_Service_Cart
         ?int $authenticatedCustomerId,
         bool $isPrivileged = false,
     ): void {
-        // Admins, POS users, API users can access any cart
+        // Staff (an admin token or an API user) can access any cart
         if ($isPrivileged) {
             return;
         }
@@ -186,259 +208,249 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Add item to cart
+     * Return $quote when the caller can use it. A cart that does not exist gets the same error as a cart of
+     * another caller, see verifyAccess().
      *
-     * @param \Mage_Sales_Model_Quote $quote Quote
-     * @param string $sku Product SKU
-     * @param float $qty Quantity
-     * @param array $options Custom options (option_id => value)
-     * @param float|null $customPrice Unit price override in quote currency (caller must authorize)
+     * @throws \Mage_Core_Exception_NoSuchEntity
      */
-    public function addItem(\Mage_Sales_Model_Quote $quote, string $sku, float $qty, array $options = [], ?float $customPrice = null): \Mage_Sales_Model_Quote
+    public function requireAccessible(
+        ?\Mage_Sales_Model_Quote $quote,
+        bool $accessedByMaskedId,
+        ?int $authenticatedCustomerId,
+        bool $isPrivileged = false,
+    ): \Mage_Sales_Model_Quote {
+        if ($quote === null) {
+            throw new \Mage_Core_Exception_NoSuchEntity('Cart not found');
+        }
+        $this->verifyAccess($quote, $accessedByMaskedId, $authenticatedCustomerId, $isPrivileged);
+
+        return $quote;
+    }
+
+    /**
+     * @throws \Mage_Core_Exception when the product does not exist
+     */
+    public function getProductById(int $productId, int $storeId): \Mage_Catalog_Model_Product
     {
-        // Validate quantity
-        if ($qty <= 0) {
-            throw new \Mage_Core_Exception('Quantity must be greater than zero');
-        }
-        if ($qty > self::MAX_ITEM_QTY) {
-            throw new \Mage_Core_Exception('Quantity cannot exceed 10,000');
-        }
-        if ($customPrice !== null && $customPrice < 0) {
-            throw new \Mage_Core_Exception('Custom price cannot be negative');
-        }
-
-        // First find product ID by SKU
-        $productId = \Mage::getResourceModel('catalog/product')->getIdBySku($sku);
-
-        if (!$productId) {
-            throw new \Mage_Core_Exception("Product with SKU '{$sku}' not found");
-        }
-
-        $this->logDebug("Adding product {$sku} (ID: {$productId}) to quote {$quote->getId()}, quote store_id: {$quote->getStoreId()}");
-
-        // Load product in the quote's store context to get correct prices
-        $product = \Mage::getModel('catalog/product')
-            ->setStoreId($quote->getStoreId())
-            ->load($productId);
-
+        $product = \Mage::getModel('catalog/product')->setStoreId($storeId)->load($productId);
         if (!$product->getId()) {
-            throw new \Mage_Core_Exception("Product with SKU '{$sku}' not found");
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('The product could not be found.'));
+        }
+        return $product;
+    }
+
+    /**
+     * @throws \Mage_Core_Exception when no product has $sku
+     */
+    public function getProductBySku(string $sku, int $storeId): \Mage_Catalog_Model_Product
+    {
+        $productId = $sku === '' ? false : \Mage::getResourceModel('catalog/product')->getIdBySku($sku);
+        $product = \Mage::getModel('catalog/product')->setStoreId($storeId);
+        if ($productId) {
+            $product->load((int) $productId);
+        }
+        if (!$product->getId()) {
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__("Product with SKU '%s' not found", $sku));
+        }
+        return $product;
+    }
+
+    /**
+     * Add the product that a client asks for to $quote with $buyRequest, and save the cart. A caller that adds many
+     * products gives $save false, and collects the totals and saves the cart one time after the last product.
+     * getRequestedProduct() has the checks of the product. A buy request without a qty gets the default qty of the
+     * product, and a new line gets at least the minimum sale qty. Only staff can set $customPrice.
+     *
+     * @throws \Mage_Core_Exception_Forbidden when a customer sets a custom price
+     * @throws \Mage_Core_Exception_Conflict when the custom price would change the price of units already in the cart
+     * @throws \Mage_Core_Exception when the product or the qty is not valid, or the product type refuses the buy
+     *                              request. Then the exception has a notice message for an option to fix, or an error
+     *                              message for another reason.
+     */
+    public function addProduct(
+        \Mage_Sales_Model_Quote $quote,
+        \Mage_Catalog_Model_Product $product,
+        \Maho\DataObject $buyRequest,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+        ?float $customPrice = null,
+        bool $save = true,
+    ): \Mage_Sales_Model_Quote_Item {
+        $this->assertCustomPrice($customPrice, $actor);
+        $product = $this->getRequestedProduct($quote, $product, $buyRequest, $actor);
+
+        return $this->addToQuote($quote, $product, $buyRequest, $customPrice, $save);
+    }
+
+    /**
+     * Add $product to $quote with $buyRequest without the checks of getRequestedProduct(), and save the cart unless
+     * $save is false. It is for PHP code that selects the product by itself, such as a gift or a fee that the
+     * storefront does not show. Never give it a product that a client names: use addProduct() for that.
+     *
+     * @throws \Mage_Core_Exception when the product type refuses the buy request, see addProduct()
+     */
+    public function addProductUnchecked(
+        \Mage_Sales_Model_Quote $quote,
+        \Mage_Catalog_Model_Product $product,
+        \Maho\DataObject $buyRequest,
+        bool $save = true,
+    ): \Mage_Sales_Model_Quote_Item {
+        return $this->addToQuote($quote, $product, $buyRequest, null, $save);
+    }
+
+    /**
+     * Return the product that goes to the cart when a client asks to add $product to $quote. The product must be
+     * enabled and in the website of the cart. A simple product that the storefront does not show becomes its
+     * configurable parent, see getCartProduct(). A customer can add only a product that the storefront shows.
+     * A qty in $buyRequest must be above 0 and not above the maximum sale qty of the product.
+     *
+     * @throws \Mage_Core_Exception
+     */
+    public function getRequestedProduct(
+        \Mage_Sales_Model_Quote $quote,
+        \Mage_Catalog_Model_Product $product,
+        \Maho\DataObject $buyRequest,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+    ): \Mage_Catalog_Model_Product {
+        $storeId = (int) $quote->getStoreId();
+        $sku = (string) $product->getSku();
+        $this->assertSellable($product, $storeId, $sku);
+        $product = $this->getCartProduct($product, $buyRequest, $storeId);
+        $this->assertAvailable($product, $storeId, $actor, $sku);
+        $this->prepareOptions($product, $buyRequest);
+        if ($buyRequest->hasQty()) {
+            $this->assertQty((float) $buyRequest->getQty(), $quote, $product);
         }
 
-        // Status gate, addProduct does not check this itself, so without an
-        // explicit guard a disabled SKU is addable through the public API.
-        if ((int) $product->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
-            throw new \Mage_Core_Exception("Product '{$sku}' is not available");
-        }
+        return $product;
+    }
 
-        // Visibility gate: refuse 'not_visible_individually' simples that
-        // aren't part of a configurable. Variants of a configurable are
-        // legitimately not-visible-individually and are auto-promoted to the
-        // configurable parent below.
-        $visibility = (int) $product->getVisibility();
-        if ($visibility === \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE
-            && $product->getTypeId() !== \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
-        ) {
-            throw new \Mage_Core_Exception("Product '{$sku}' is not available");
-        }
+    private function addToQuote(
+        \Mage_Sales_Model_Quote $quote,
+        \Mage_Catalog_Model_Product $product,
+        \Maho\DataObject $buyRequest,
+        ?float $customPrice,
+        bool $save,
+    ): \Mage_Sales_Model_Quote_Item {
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $product, $buyRequest, $customPrice, $save): \Mage_Sales_Model_Quote_Item {
+            \Mage::dispatchEvent('checkout_cart_product_add_before', ['request' => $buyRequest, 'product' => $product]);
 
-        // Check if this simple product is a child of a configurable
-        // If so, add the configurable parent with the proper super_attribute options
-        $buyRequest = new \Maho\DataObject(['qty' => $qty]);
-
-        // Add custom options, downloadable links, grouped, and bundle params if provided
-        // Supports two formats:
-        //   Structured: ['options' => [...], 'links' => [...], 'super_group' => [...], 'bundle_option' => [...]] (from GraphQL CartProcessor)
-        //   Flat: [optionId => valueId, ...] (from REST GuestCartController)
-        if (!empty($options)) {
-            if (isset($options['options']) || isset($options['links']) || isset($options['super_group']) || isset($options['bundle_option']) || isset($options['giftcard_amount'])) {
-                // Structured format
-                if (!empty($options['options'])) {
-                    $buyRequest->setData('options', $options['options']);
-                }
-                if (!empty($options['links'])) {
-                    $buyRequest->setData('links', $options['links']);
-                }
-                if (!empty($options['super_group'])) {
-                    $buyRequest->setData('super_group', $options['super_group']);
-                }
-                if (!empty($options['bundle_option'])) {
-                    $buyRequest->setData('bundle_option', $options['bundle_option']);
-                }
-                if (!empty($options['bundle_option_qty'])) {
-                    $buyRequest->setData('bundle_option_qty', $options['bundle_option_qty']);
-                }
-                foreach ([
-                    'giftcard_amount', 'giftcard_sender_name', 'giftcard_sender_email',
-                    'giftcard_recipient_name', 'giftcard_recipient_email',
-                    'giftcard_message', 'giftcard_delivery_date',
-                ] as $gcKey) {
-                    if (!empty($options[$gcKey])) {
-                        $buyRequest->setData($gcKey, $options[$gcKey]);
-                    }
-                }
-            } else {
-                // Flat custom options format (REST)
-                $buyRequest->setData('options', $options);
+            if (!$buyRequest->hasQty()) {
+                $buyRequest->setQty(\Mage::helper('catalog/product')->getDefaultQty($product));
             }
-        }
+            $this->raiseToMinimumSaleQty($quote, $product, $buyRequest);
 
-        // Only auto-promote a simple to its configurable parent when the simple
-        // is not individually visible. A simple that *is* visible on its own
-        // (e.g. POS adding a specific variant SKU) is sold as-is; otherwise we
-        // resolve to the parent so the cart shows the configurable, matching
-        // storefront behaviour.
-        if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
-            && (int) $product->getVisibility() === \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE
-        ) {
-            $parentIds = \Mage::getModel('catalog/product_type_configurable')
-                ->getParentIdsByChild((int) $productId);
-
-            if (!empty($parentIds)) {
-                $parentId = $parentIds[0];
-                $this->logDebug("Simple product {$productId} has configurable parent {$parentId}, adding as configurable");
-
-                // Load the configurable parent
-                $configurableProduct = \Mage::getModel('catalog/product')
-                    ->setStoreId($quote->getStoreId())
-                    ->load($parentId);
-
-                if ($configurableProduct->getId()) {
-                    // The originally-loaded simple passed the status gate, but the
-                    // product actually added to the cart is the configurable parent.
-                    // A disabled parent with an enabled child must not be addable.
-                    if ((int) $configurableProduct->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
-                        throw new \Mage_Core_Exception("Product '{$sku}' is not available");
-                    }
-
-                    // Get the super_attribute values for this simple product
-                    $superAttributes = $this->getSuperAttributesForSimple($configurableProduct, $product);
-
-                    if (!empty($superAttributes)) {
-                        // Build buy request with super_attribute
-                        $buyRequest->setData('product', $parentId);
-                        $buyRequest->setData('super_attribute', $superAttributes);
-
-                        // Use the configurable product instead
-                        $product = $configurableProduct;
-                        $this->logDebug("Using configurable product {$parentId} with super_attributes: " . \Mage::helper('core')->jsonEncode($superAttributes));
-                    }
-                }
+            // Mage_Checkout_Model_Cart and the wishlist pages read these messages: a notice is an option to fix
+            $messages = \Mage::getSingleton('core/message');
+            try {
+                $item = $quote->addProduct($product, $buyRequest);
+            } catch (\Mage_Core_Exception $e) {
+                throw $e->addMessage($messages->error($e->getMessage()));
             }
-        }
-
-        // If the product is still a not-visible simple at this point, it was not
-        // promoted to a configurable parent (no parent, or super-attributes could
-        // not be resolved). Such a SKU must not be added directly, as that would
-        // bypass the visibility gate. Only genuine configurable variants reach the
-        // cart, and always as their configurable parent.
-        if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
-            && (int) $product->getVisibility() === \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE
-        ) {
-            throw new \Mage_Core_Exception("Product '{$sku}' is not available");
-        }
-
-        $this->logDebug("Product loaded: ID={$product->getId()}, StoreId={$product->getStoreId()}, Price={$product->getPrice()}, FinalPrice={$product->getFinalPrice()}");
-        // Convert flat date/datetime values to the array format Magento expects
-        $currentOptions = $buyRequest->getData('options') ?: [];
-        if (!empty($currentOptions)) {
-            foreach ($product->getOptions() as $opt) {
-                $optId = (string) $opt->getId();
-                if (!isset($currentOptions[$optId])) {
-                    continue;
-                }
-                $val = $currentOptions[$optId];
-                if (is_string($val) && in_array($opt->getType(), [
-                    \Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE,
-                    \Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME,
-                    \Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME,
-                ], true)) {
-                    if ($opt->getType() === \Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE) {
-                        $currentOptions[$optId] = ['date' => $val];
-                    } elseif ($opt->getType() === \Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME) {
-                        $currentOptions[$optId] = ['datetime' => $val];
-                    } elseif ($opt->getType() === \Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME) {
-                        $currentOptions[$optId] = ['time' => $val];
-                    }
-                }
-            }
-            $buyRequest->setData('options', $currentOptions);
-        }
-
-        // Inject API file uploads into buyRequest (prevents forgery, uses DataObject pattern)
-        if (!empty($options['options_files'])) {
-            $optionsFiles = [];
-            foreach ($options['options_files'] as $optionId => $fileData) {
-                $optionId = (int) $optionId;
-                // Verify this option ID belongs to a file-type option on this product
-                $productOption = $product->getOptionById((string) $optionId);
-                if (!$productOption || $productOption->getType() !== \Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE) {
-                    throw new \Mage_Core_Exception("Option ID {$optionId} is not a valid file-type option for this product");
-                }
-                if (!is_array($fileData) || empty($fileData['base64_encoded_data']) || empty($fileData['name'])) {
-                    throw new \Mage_Core_Exception("File option {$optionId} requires 'name' and 'base64_encoded_data'");
-                }
-                $optionsFiles[$optionId] = $fileData;
-            }
-            if (!empty($optionsFiles)) {
-                $buyRequest->setData('options_files', $optionsFiles);
-            }
-        }
-        return $this->inQuoteStoreScope($quote, function () use ($quote, $product, $buyRequest, $customPrice): \Mage_Sales_Model_Quote {
-            $result = $quote->addProduct($product, $buyRequest);
-
-            // addProduct returns a string error message on failure
-            if (is_string($result)) {
-                $this->logDebug("Failed to add product: {$result}");
-                throw new \Mage_Core_Exception("Failed to add product: {$result}");
+            if (is_string($item)) {
+                throw new \Mage_Core_Exception($item)->addMessage($messages->notice($item));
             }
 
             if ($customPrice !== null) {
                 // A persisted id means addProduct() merged into an existing line, and the
                 // override would apply to units already in the cart at another price
                 // (compared at the column's DECIMAL(12,4) scale, so a re-add of the same value passes)
-                $existingOverride = $result->getOriginalCustomPrice();
-                if ($result->getId() && ($existingOverride === null || round((float) $existingOverride, 4) !== round($customPrice, 4))) {
-                    throw new \Mage_Core_Exception_Conflict('customPrice would reprice units already in the cart; update the existing item instead');
+                $existingOverride = $item->getOriginalCustomPrice();
+                if ($item->getId() && ($existingOverride === null || round((float) $existingOverride, 4) !== round($customPrice, 4))) {
+                    throw new \Mage_Core_Exception_Conflict(\Mage::helper('checkout')->__('customPrice would reprice units already in the cart; update the existing item instead'));
                 }
-                $result->setCustomPrice($customPrice);
-                $result->setOriginalCustomPrice($customPrice);
+                $item->setCustomPrice($customPrice);
+                $item->setOriginalCustomPrice($customPrice);
             }
 
-            $this->collectAndSave($quote);
+            \Mage::dispatchEvent('checkout_cart_product_add_after', ['quote_item' => $item, 'product' => $product]);
+            if ($save) {
+                $this->refreshShippingRates($quote);
+            }
+
+            return $item;
+        });
+    }
+
+    /**
+     * Give the cart line $itemId the options and the qty of $buyRequest, and save the cart.
+     *
+     * @param array<string, mixed>|\Maho\DataObject|null $params see Mage_Sales_Model_Quote::updateItem()
+     * @throws \Mage_Core_Exception_Input when $itemId is empty
+     * @throws \Mage_Core_Exception_NoSuchEntity when the cart has no line $itemId
+     * @throws \Mage_Core_Exception
+     */
+    public function reconfigureItem(
+        \Mage_Sales_Model_Quote $quote,
+        int $itemId,
+        \Maho\DataObject $buyRequest,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+        array|\Maho\DataObject|null $params = null,
+    ): \Mage_Sales_Model_Quote_Item {
+        $storeId = (int) $quote->getStoreId();
+        $product = $this->getProductById((int) $this->requireItem($quote, $itemId)->getProduct()->getId(), $storeId);
+        $this->assertAvailable($product, $storeId, $actor, (string) $product->getSku());
+        $this->prepareOptions($product, $buyRequest);
+        if ($buyRequest->hasQty()) {
+            $this->assertQty((float) $buyRequest->getQty(), $quote, $product);
+        }
+
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $itemId, $product, $buyRequest, $params): \Mage_Sales_Model_Quote_Item {
+            $item = $quote->updateItem($itemId, $buyRequest, $params);
+            \Mage::dispatchEvent('checkout_cart_product_update_after', ['quote_item' => $item, 'product' => $product]);
+            $this->refreshShippingRates($quote);
+
+            return $item;
+        });
+    }
+
+    /**
+     * Give each cart line of $qtyByItemId its new qty, and save the cart once.
+     *
+     * @param array<int, float> $qtyByItemId
+     * @throws \Mage_Core_Exception_Input when an item ID is empty
+     * @throws \Mage_Core_Exception_NoSuchEntity when the cart has no such line
+     * @throws \Mage_Core_Exception when a qty is not above 0 or is above the maximum sale qty of its product
+     */
+    public function updateItems(\Mage_Sales_Model_Quote $quote, array $qtyByItemId): \Mage_Sales_Model_Quote
+    {
+        $items = [];
+        foreach ($qtyByItemId as $itemId => $qty) {
+            $item = $this->requireItem($quote, (int) $itemId);
+            $this->assertQty((float) $qty, $quote, $item->getProduct());
+            $items[] = [$item, (float) $qty];
+        }
+
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $items): \Mage_Sales_Model_Quote {
+            foreach ($items as [$item, $qty]) {
+                $item->setQty($qty);
+            }
+            $this->refreshShippingRates($quote);
 
             return $quote;
         });
     }
 
     /**
-     * Update cart item
+     * Change the qty and the custom price of the cart line $itemId, and save the cart once. A null value keeps the
+     * current one. Only staff can set $customPrice.
      *
-     * @param \Mage_Sales_Model_Quote $quote Quote
-     * @param int $itemId Item ID
-     * @param float|null $qty New quantity, null keeps the current one
-     * @param float|null $customPrice New unit price override in quote currency (caller must authorize)
+     * @throws \Mage_Core_Exception_Forbidden when a customer sets a custom price
+     * @throws \Mage_Core_Exception_NoSuchEntity when the cart has no line $itemId
+     * @throws \Mage_Core_Exception
      */
-    public function updateItem(\Mage_Sales_Model_Quote $quote, int $itemId, ?float $qty, ?float $customPrice = null): \Mage_Sales_Model_Quote
-    {
-        if ($customPrice !== null && $customPrice < 0) {
-            throw new \Mage_Core_Exception('Custom price cannot be negative');
-        }
-
-        $item = $quote->getItemById($itemId);
-
-        if (!$item) {
-            throw new \Mage_Core_Exception_NoSuchEntity("Cart item with ID '{$itemId}' not found");
-        }
-
-        $qty ??= (float) $item->getQty();
-
-        // Validate quantity
-        if ($qty <= 0) {
-            throw new \Mage_Core_Exception('Quantity must be greater than zero');
-        }
-        if ($qty > self::MAX_ITEM_QTY) {
-            throw new \Mage_Core_Exception('Quantity cannot exceed 10,000');
+    public function updateItem(
+        \Mage_Sales_Model_Quote $quote,
+        int $itemId,
+        ?float $qty,
+        ?float $customPrice = null,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Staff,
+    ): \Mage_Sales_Model_Quote {
+        $this->assertCustomPrice($customPrice, $actor);
+        $item = $this->requireItem($quote, $itemId);
+        if ($qty === null) {
+            $qty = (float) $item->getQty();
+        } else {
+            $this->assertQty($qty, $quote, $item->getProduct());
         }
 
         return $this->inQuoteStoreScope($quote, function () use ($quote, $item, $qty, $customPrice): \Mage_Sales_Model_Quote {
@@ -447,60 +459,372 @@ class Mage_Checkout_Service_Cart
                 $item->setCustomPrice($customPrice);
                 $item->setOriginalCustomPrice($customPrice);
             }
-
-            $this->collectAndSave($quote);
+            $this->refreshShippingRates($quote);
 
             return $quote;
         });
     }
 
     /**
-     * Remove item from cart
+     * Give the cart line $itemId the unit price $price in the currency of the cart, or its catalog price again when
+     * $price is null. Only staff can change the price of a line.
      *
-     * @param \Mage_Sales_Model_Quote $quote Quote
-     * @param int $itemId Item ID
+     * @throws \Mage_Core_Exception_Forbidden when $actor is a customer
+     * @throws \Mage_Core_Exception_NoSuchEntity when the cart has no line $itemId
+     * @throws \Mage_Core_Exception when $price is negative
+     */
+    public function setCustomPrice(
+        \Mage_Sales_Model_Quote $quote,
+        int $itemId,
+        ?float $price,
+        \Mage_Checkout_Model_Actor $actor,
+    ): \Mage_Sales_Model_Quote {
+        $this->assertCustomPrice($price ?? 0.0, $actor);
+        $item = $this->requireItem($quote, $itemId);
+        $item->setCustomPrice($price);
+        $item->setOriginalCustomPrice($price);
+        $this->refreshShippingRates($quote);
+
+        return $quote;
+    }
+
+    /**
+     * @throws \Mage_Core_Exception_Input when $itemId is empty
+     * @throws \Mage_Core_Exception_NoSuchEntity when the cart has no line $itemId
      */
     public function removeItem(\Mage_Sales_Model_Quote $quote, int $itemId): \Mage_Sales_Model_Quote
     {
-        // removeItem() is a silent no-op for an unknown ID, so guard explicitly
-        // to return a 404 instead of a false-positive 200 (mirrors updateItem()).
-        if (!$quote->getItemById($itemId)) {
-            throw new \Mage_Core_Exception_NoSuchEntity("Cart item with ID '{$itemId}' not found");
-        }
+        $this->requireItem($quote, $itemId);
 
         return $this->inQuoteStoreScope($quote, function () use ($quote, $itemId): \Mage_Sales_Model_Quote {
             $quote->removeItem($itemId);
-            $this->collectAndSave($quote);
+            $this->refreshShippingRates($quote);
 
             return $quote;
         });
     }
 
-    /**
-     * Apply coupon code
-     *
-     * @param \Mage_Sales_Model_Quote $quote Quote
-     * @param string $couponCode Coupon code
-     */
-    public function applyCoupon(\Mage_Sales_Model_Quote $quote, string $couponCode): \Mage_Sales_Model_Quote
+    public function truncate(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
     {
-        // Validate coupon exists in the database before applying
-        /** @var \Mage_SalesRule_Model_Coupon $coupon */
-        $coupon = \Mage::getModel('salesrule/coupon')->load($couponCode, 'code');
-        if (!$coupon->getId()) {
-            throw new \Mage_Core_Exception("Coupon code '{$couponCode}' is not valid");
+        $quote->removeAllItems();
+        $this->refreshShippingRates($quote);
+
+        return $quote;
+    }
+
+    /**
+     * Give the shipping address of $quote the country, the region, the postcode and the city of $estimate, and save the
+     * cart with the shipping rates of this place.
+     *
+     * @throws \Mage_Core_Exception_Input when the country does not exist
+     */
+    public function estimateShipping(\Mage_Sales_Model_Quote $quote, \Mage_Sales_Model_Quote_Address $estimate): \Mage_Sales_Model_Quote
+    {
+        $countryId = (string) $estimate->getCountryId();
+        try {
+            $country = \Mage::getModel('directory/country')->loadByCode($countryId);
+        } catch (\Mage_Core_Exception) {
+            $country = null;
+        }
+        if (!$country?->getId()) {
+            throw new \Mage_Core_Exception_Input()->addError('country_id', \Mage::helper('directory')->__('Invalid country code: %s', $countryId));
         }
 
-        $quote->setCouponCode($couponCode);
+        $quote->getShippingAddress()
+            ->setCountryId($countryId)
+            ->setCity($estimate->getCity())
+            ->setPostcode($estimate->getPostcode())
+            ->setRegionId($estimate->getRegionId())
+            ->setRegion($estimate->getRegion());
+        $this->refreshShippingRates($quote);
 
-        return $this->inQuoteStoreScope($quote, function () use ($quote, $couponCode, $coupon): \Mage_Sales_Model_Quote {
+        return $quote;
+    }
+
+    /**
+     * Add item to cart
+     *
+     * @param array $options Custom options (option_id => value), or the keys of a buy request
+     * @param float|null $customPrice the unit price in the currency of the cart, which only staff can set
+     */
+    #[\Deprecated(message: 'use getProductBySku() and addProduct()', since: '27.1')]
+    public function addItem(
+        \Mage_Sales_Model_Quote $quote,
+        string $sku,
+        float $qty,
+        array $options = [],
+        ?float $customPrice = null,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+    ): \Mage_Sales_Model_Quote {
+        $buyRequest = new \Maho\DataObject(['qty' => $qty]);
+        $structuredKeys = [
+            'options', 'options_files', 'links', 'super_group', 'bundle_option', 'bundle_option_qty',
+            'giftcard_amount', 'giftcard_sender_name', 'giftcard_sender_email', 'giftcard_recipient_name',
+            'giftcard_recipient_email', 'giftcard_message', 'giftcard_delivery_date',
+        ];
+        if (array_intersect_key($options, array_flip(['options', 'links', 'super_group', 'bundle_option', 'giftcard_amount', 'options_files']))) {
+            $buyRequest->addData(array_filter(array_intersect_key($options, array_flip($structuredKeys))));
+        } elseif ($options !== []) {
+            $buyRequest->setData('options', $options);
+        }
+
+        $product = $this->getProductBySku($sku, (int) $quote->getStoreId());
+        $this->addProduct($quote, $product, $buyRequest, $actor, $customPrice);
+
+        return $quote;
+    }
+
+    /**
+     * @throws \Mage_Core_Exception_Input when $itemId is empty
+     * @throws \Mage_Core_Exception_NoSuchEntity when the cart has no line $itemId
+     */
+    private function requireItem(\Mage_Sales_Model_Quote $quote, int $itemId): \Mage_Sales_Model_Quote_Item
+    {
+        $helper = \Mage::helper('checkout');
+        if ($itemId <= 0) {
+            throw new \Mage_Core_Exception_Input()->addError('item_id', $helper->__('Item ID is required'));
+        }
+        $item = $quote->getItemById($itemId);
+        if (!$item) {
+            throw new \Mage_Core_Exception_NoSuchEntity($helper->__("Cart item with ID '%s' not found", $itemId));
+        }
+        return $item;
+    }
+
+    /**
+     * The stock check of a cart line marks a qty above the maximum sale qty as an error of the line, and does not
+     * run for a cart in super mode (the admin order create). Refuse such a qty before it goes to the cart.
+     *
+     * @throws \Mage_Core_Exception when $qty is not above 0 or is above the maximum sale qty of $product
+     */
+    private function assertQty(float $qty, \Mage_Sales_Model_Quote $quote, \Mage_Catalog_Model_Product $product): void
+    {
+        if ($qty <= 0) {
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('Quantity must be greater than zero'));
+        }
+        $stockItem = $quote->getIsSuperMode() ? null : $product->getStockItem();
+        $maximumQty = $stockItem instanceof \Mage_CatalogInventory_Model_Stock_Item ? $stockItem->getMaxSaleQty() : 0.0;
+        if ($maximumQty > 0 && $qty > $maximumQty) {
+            throw new \Mage_Core_Exception(
+                \Mage::helper('cataloginventory')->__('The maximum quantity allowed for purchase is %s.', $maximumQty * 1),
+            );
+        }
+    }
+
+    /**
+     * @throws \Mage_Core_Exception_Forbidden when a customer sets a price
+     * @throws \Mage_Core_Exception when $price is negative
+     */
+    private function assertCustomPrice(?float $price, \Mage_Checkout_Model_Actor $actor): void
+    {
+        if ($price === null) {
+            return;
+        }
+        if ($actor !== \Mage_Checkout_Model_Actor::Staff) {
+            throw new \Mage_Core_Exception_Forbidden(\Mage::helper('checkout')->__('customPrice requires admin or carts/write authorization'));
+        }
+        if ($price < 0) {
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('Custom price cannot be negative'));
+        }
+    }
+
+    /**
+     * @throws \Mage_Core_Exception when $product is disabled or is not in the website of $storeId
+     */
+    private function assertSellable(\Mage_Catalog_Model_Product $product, int $storeId, string $sku): void
+    {
+        $websiteId = (int) \Mage::app()->getStore($storeId)->getWebsiteId();
+        if ((int) $product->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED
+            || !in_array($websiteId, array_map(intval(...), (array) $product->getWebsiteIds()), true)
+        ) {
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__("Product '%s' is not available", $sku));
+        }
+    }
+
+    /**
+     * Staff can add any product of the website that is enabled. A customer can add only a product that the
+     * storefront shows.
+     *
+     * @throws \Mage_Core_Exception
+     */
+    private function assertAvailable(\Mage_Catalog_Model_Product $product, int $storeId, \Mage_Checkout_Model_Actor $actor, string $sku): void
+    {
+        $this->assertSellable($product, $storeId, $sku);
+        if ($actor === \Mage_Checkout_Model_Actor::Customer && !\Mage::helper('catalog/product')->isVisibleInStore($product, $storeId)) {
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__("Product '%s' is not available", $sku));
+        }
+    }
+
+    /**
+     * Return the product that goes to the cart for $product: the configurable parent when $product is a simple product
+     * that the storefront does not show, else $product. For a parent, point $buyRequest at it with the values of
+     * $product. A caller that adds a product without addProduct() uses it, so that a variant goes to the cart as its
+     * parent on every path.
+     *
+     * @throws \Mage_Core_Exception when the parent is disabled or is not in the website of $storeId
+     */
+    public function getCartProduct(
+        \Mage_Catalog_Model_Product $product,
+        \Maho\DataObject $buyRequest,
+        int $storeId,
+    ): \Mage_Catalog_Model_Product {
+        if ($product->getTypeId() !== \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
+            || (int) $product->getVisibility() !== \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE
+        ) {
+            return $product;
+        }
+
+        $parentId = \Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild((int) $product->getId())[0] ?? null;
+        if (!$parentId) {
+            return $product;
+        }
+        $parent = \Mage::getModel('catalog/product')->setStoreId($storeId)->load($parentId);
+        if (!$parent->getId()) {
+            return $product;
+        }
+        $superAttributes = $this->getSuperAttributesForSimple($parent, $product);
+        if ($superAttributes === []) {
+            return $product;
+        }
+        $this->assertSellable($parent, $storeId, (string) $product->getSku());
+
+        $buyRequest->setData('product', (int) $parent->getId());
+        $buyRequest->setData('super_attribute', $superAttributes);
+        $this->logDebug("Simple product {$product->getId()} goes to the cart as its configurable parent {$parent->getId()}");
+
+        return $parent;
+    }
+
+    /**
+     * Check the uploaded files of the buy request, and give a date, date and time, or time option that the buy request
+     * holds as one string the array shape of the product form.
+     *
+     * @throws \Mage_Core_Exception when a file is not for a file option of $product, or has no name or no data
+     */
+    private function prepareOptions(\Mage_Catalog_Model_Product $product, \Maho\DataObject $buyRequest): void
+    {
+        $files = $buyRequest->getData('options_files');
+        if (!empty($files)) {
+            $optionsFiles = [];
+            foreach ((array) $files as $optionId => $fileData) {
+                $optionId = (int) $optionId;
+                $productOption = $product->getOptionById((string) $optionId);
+                if (!$productOption || $productOption->getType() !== \Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE) {
+                    throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('Option ID %s is not a valid file-type option for this product', $optionId));
+                }
+                if (!is_array($fileData) || empty($fileData['base64_encoded_data']) || empty($fileData['name'])) {
+                    throw new \Mage_Core_Exception(\Mage::helper('checkout')->__("File option %s requires 'name' and 'base64_encoded_data'", $optionId));
+                }
+                $optionsFiles[$optionId] = $fileData;
+            }
+            $buyRequest->setData('options_files', $optionsFiles);
+        }
+
+        $options = $buyRequest->getData('options');
+        if (!is_array($options) || $options === []) {
+            return;
+        }
+        $shapes = [
+            \Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE => 'date',
+            \Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME => 'datetime',
+            \Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME => 'time',
+        ];
+        foreach ($product->getOptions() as $option) {
+            $optionId = (string) $option->getId();
+            if (is_string($options[$optionId] ?? null) && isset($shapes[$option->getType()])) {
+                $options[$optionId] = [$shapes[$option->getType()] => $options[$optionId]];
+            }
+        }
+        $buyRequest->setData('options', $options);
+    }
+
+    /**
+     * A new line below the minimum sale qty of its product gets the minimum. The stock check does not run for a cart
+     * in super mode (the admin order create), so its qty stays.
+     */
+    private function raiseToMinimumSaleQty(\Mage_Sales_Model_Quote $quote, \Mage_Catalog_Model_Product $product, \Maho\DataObject $buyRequest): void
+    {
+        $stockItem = $product->getStockItem();
+        if ($quote->getIsSuperMode() || $product->isConfigurable() || !$stockItem) {
+            return;
+        }
+        $minimumQty = (float) $stockItem->getMinSaleQty();
+        if ($minimumQty > 0 && (float) $buyRequest->getQty() < $minimumQty && !$quote->hasProductId($product->getId())) {
+            $buyRequest->setQty($minimumQty);
+        }
+    }
+
+    /**
+     * Collect the shipping rates of $quote again and save the cart. A change of the items can change the rates, and
+     * a later choice of a shipping method is checked against the saved rates.
+     */
+    public function refreshShippingRates(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
+    {
+        $quote->getShippingAddress()->setCollectShippingRates(true);
+        $this->collectAndSave($quote);
+
+        return $quote;
+    }
+
+    /**
+     * Apply the coupon $couponCode to $quote. A coupon that applies tells that its code exists, so a shopper
+     * has a limit of codes per minute. Staff has no limit.
+     * When the coupon does not apply, the cart keeps its previous coupon and nothing is saved.
+     *
+     * @throws \Mage_Core_Exception_Input when the code is empty
+     * @throws \Mage_Core_Exception_Conflict when the cart has no items
+     * @throws \Mage_Core_Exception_TooManyRequests when the shopper is over the limit
+     * @throws \Mage_Core_Exception when the code does not exist or its rule does not apply to the cart
+     */
+    public function applyCoupon(
+        \Mage_Sales_Model_Quote $quote,
+        string $couponCode,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+    ): \Mage_Sales_Model_Quote {
+        $helper = \Mage::helper('checkout');
+        $couponCode = trim($couponCode);
+        if ($couponCode === '') {
+            throw new \Mage_Core_Exception_Input()->addError('coupon_code', \Mage::helper('salesrule')->__('Coupon code is required'));
+        }
+        if (!$quote->getItemsCount()) {
+            throw new \Mage_Core_Exception_Conflict($helper->__('Your shopping cart is empty.'));
+        }
+        if ($actor === \Mage_Checkout_Model_Actor::Customer) {
+            \Mage::helper('core')->rateLimiter(
+                'cart_coupon',
+                (int) \Mage::getStoreConfig(\Mage_SalesRule_Service_Rule::XML_PATH_CHECK_RATE_LIMIT),
+                self::CODE_RATE_LIMIT_WINDOW,
+                RateLimitScope::Ip,
+            )->attemptOrThrow();
+        }
+
+        // A code that is longer than a coupon code can be does not exist
+        /** @var \Mage_SalesRule_Model_Coupon $coupon */
+        $coupon = \Mage::getModel('salesrule/coupon');
+        if (strlen($couponCode) <= \Mage_Checkout_Helper_Cart::COUPON_CODE_MAX_LENGTH) {
+            $coupon->load($couponCode, 'code');
+        }
+        if (!$coupon->getId()) {
+            throw new \Mage_Core_Exception($helper->__("Coupon code '%s' is not valid", $couponCode));
+        }
+
+        $previousCode = (string) $quote->getCouponCode();
+
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $couponCode, $coupon, $previousCode, $helper): \Mage_Sales_Model_Quote {
+            // A coupon can give free shipping, so the rates must follow it
+            $quote->getShippingAddress()->setCollectShippingRates(true);
+            $quote->setCouponCode($couponCode);
             self::collectTotalsInCurrentScope($quote);
 
             // setCouponCode() keeps the string even when the rule does not fire
             // (inactive/expired/exhausted/wrong website), so confirm the rule id
             // landed on a quote address before persisting anything
             if ($quote->getCouponCode() !== $couponCode || !$this->isCouponRuleApplied($quote, (int) $coupon->getRuleId())) {
-                throw new \Mage_Core_Exception("Coupon code '{$couponCode}' could not be applied");
+                // The caller can still show or save this cart, so give it back its coupon and its totals
+                $quote->getShippingAddress()->setCollectShippingRates(true);
+                $quote->setCouponCode($previousCode);
+                self::collectTotalsInCurrentScope($quote);
+                throw new \Mage_Core_Exception($helper->__("Coupon code '%s' could not be applied", $couponCode));
             }
 
             $quote->save();
@@ -536,6 +860,7 @@ class Mage_Checkout_Service_Cart
      */
     public function removeCoupon(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
     {
+        $quote->getShippingAddress()->setCollectShippingRates(true);
         $quote->setCouponCode('');
         $this->collectAndSave($quote);
 
@@ -543,165 +868,38 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Apply gift card to cart
+     * Apply $code, the input of the one code box, to $quote: as a coupon when it is one, else as a gift card of the
+     * website of the cart. Return the type that applied.
      *
+     * @return 'coupon'|'giftcard'
+     * @throws \Mage_Core_Exception_TooManyRequests when the shopper is over the limit
      * @throws \Mage_Core_Exception
      */
-    public function applyGiftcard(\Mage_Sales_Model_Quote $quote, string $giftcardCode, ?float $amount = null): \Mage_Sales_Model_Quote
-    {
-        $giftcard = $this->validateGiftcard($quote, $giftcardCode);
-        $giftcardCode = (string) $giftcard->getCode();
-
-        $appliedCodes = $quote->getGiftcardCodes();
-        $appliedCodes = $appliedCodes ? \Mage::helper('core')->jsonDecode($appliedCodes, true) : [];
-
-        // giftcard_codes is a base-currency map: convert the requested amount back to base
-        // with the same rate the cart's own prices were converted by
-        $baseCurrency = $quote->getStore()->getBaseCurrencyCode();
-        $cartCurrency = $quote->getStore()->getCurrentCurrencyCode();
-        if ($amount !== null && $cartCurrency !== $baseCurrency) {
-            $amount /= $quote->getStore()->getCurrentCurrencyRate();
-        }
-        $balance = (float) $giftcard->getBalance($baseCurrency);
-        $appliedCodes[$giftcardCode] = $amount === null ? $balance : min($amount, $balance);
-
-        $quote->setGiftcardCodes(\Mage::helper('core')->jsonEncode($appliedCodes));
-        $this->collectAndSave($quote);
-
-        return $quote;
-    }
-
-    /**
-     * Return the gift card of $giftcardCode when $quote can take it.
-     *
-     * The admin order page calls this without applyGiftcard(), because it collects the totals itself.
-     *
-     * @throws \Mage_Core_Exception when the card does not exist, cannot pay for this cart, or is already applied
-     */
-    public function validateGiftcard(\Mage_Sales_Model_Quote $quote, string $giftcardCode): \Maho_Giftcard_Model_Giftcard
-    {
-        $helper = \Mage::helper('giftcard');
-        if (!$giftcardCode) {
-            throw new \Mage_Core_Exception($helper->__('Please enter a gift card code.'));
+    public function applyCode(
+        \Mage_Sales_Model_Quote $quote,
+        string $code,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+    ): string {
+        $code = trim($code);
+        try {
+            $this->applyCoupon($quote, $code, $actor);
+            return 'coupon';
+        } catch (\Mage_Core_Exception_Input|\Mage_Core_Exception_Conflict|\Mage_Core_Exception_TooManyRequests $e) {
+            throw $e;
+        } catch (\Mage_Core_Exception) {
+            // The code is not a coupon of this cart, so it can be a gift card
         }
 
-        foreach ($quote->getAllItems() as $item) {
-            if ($item->getProductType() === 'giftcard') {
-                throw new \Mage_Core_Exception($helper->__('Gift cards cannot be used to purchase gift card products.'));
+        if (\Mage::helper('core')->isModuleEnabled('Maho_Giftcard')) {
+            try {
+                \Mage::getService('giftcard/giftcard')->getByCode($code, (int) $quote->getStore()->getWebsiteId());
+            } catch (\Mage_Core_Exception_NoSuchEntity) {
+                throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('Promo code "%s" is not valid.', $code));
             }
+            \Mage::getService('giftcard/giftcard')->applyToCart($quote, $code, null, $actor);
+            return 'giftcard';
         }
-
-        // A card of another website gets the same message as an unknown code
-        $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($giftcardCode);
-        if (!$giftcard->getId() || !$giftcard->isAvailableOnWebsite((int) $quote->getStore()->getWebsiteId())) {
-            throw new \Mage_Core_Exception($helper->__('Gift card "%s" is not valid.', $giftcardCode));
-        }
-        $giftcardCode = (string) $giftcard->getCode();
-
-        if (!$giftcard->isValid()) {
-            throw new \Mage_Core_Exception(match ($giftcard->getStatus()) {
-                \Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED => $helper->__('Gift card "%s" has expired.', $giftcardCode),
-                \Maho_Giftcard_Model_Giftcard::STATUS_USED => $helper->__('Gift card "%s" has been fully used.', $giftcardCode),
-                default => $helper->__('Gift card "%s" is not active.', $giftcardCode),
-            });
-        }
-
-        $appliedCodes = $quote->getGiftcardCodes();
-        $appliedCodes = $appliedCodes ? \Mage::helper('core')->jsonDecode($appliedCodes, true) : [];
-        // A cart saved before the code was stored in its own case can hold it as the customer typed it
-        if (array_find_key($appliedCodes, fn($amount, $code) => strcasecmp((string) $code, $giftcardCode) === 0) !== null) {
-            throw new \Mage_Core_Exception_Conflict($helper->__('Gift card "%s" is already applied.', $giftcardCode));
-        }
-
-        return $giftcard;
-    }
-
-    /**
-     * Re-validate every applied gift card against the live DB balance
-     * immediately before order placement. The amount stored on the quote is
-     * a snapshot from applyGiftcard(); without this re-check, a card that has
-     * been spent elsewhere between apply and place would still discount the
-     * order at its original (now stale) balance and the store would eat the
-     * difference.
-     *
-     * @throws \Mage_Core_Exception when an applied card is no longer redeemable
-     */
-    public function revalidateGiftcards(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
-    {
-        $applied = $quote->getGiftcardCodes();
-        $applied = $applied ? \Mage::helper('core')->jsonDecode($applied, true) : [];
-        if (!$applied) {
-            return $quote;
-        }
-
-        $changed = false;
-        // The snapshot map is base currency; compare live balances in base too.
-        $baseCurrency = $quote->getStore()->getBaseCurrencyCode();
-        $websiteId = (int) $quote->getStore()->getWebsiteId();
-
-        foreach ($applied as $code => $snapshotBalance) {
-            $card = \Mage::getModel('giftcard/giftcard')->loadByCode((string) $code);
-            if (!$card->getId() || !$card->isValidForWebsite($websiteId)) {
-                throw new \Mage_Core_Exception('Gift card "' . $code . '" is no longer valid');
-            }
-
-            $live = (float) $card->getBalance($baseCurrency);
-            if ($live <= 0) {
-                throw new \Mage_Core_Exception('Gift card "' . $code . '" has no remaining balance');
-            }
-
-            // Cap the applied amount at the live balance
-            if ($live < (float) $snapshotBalance) {
-                $applied[$code] = $live;
-                $changed = true;
-            }
-        }
-
-        if ($changed) {
-            $quote->setGiftcardCodes(\Mage::helper('core')->jsonEncode($applied));
-            $this->collectAndSave($quote);
-        }
-
-        return $quote;
-    }
-
-    /**
-     * Remove gift card from cart
-     *
-     * @throws \Mage_Core_Exception
-     */
-    public function removeGiftcard(\Mage_Sales_Model_Quote $quote, string $giftcardCode): \Mage_Sales_Model_Quote
-    {
-        if (!$giftcardCode) {
-            throw new \Mage_Core_Exception('Gift card code is required');
-        }
-
-        // Get currently applied codes
-        $appliedCodes = $quote->getGiftcardCodes();
-        $appliedCodes = $appliedCodes ? \Mage::helper('core')->jsonDecode($appliedCodes, true) : [];
-        $giftcardCode = (string) (array_find_key($appliedCodes, fn($amount, $code) => strcasecmp((string) $code, $giftcardCode) === 0) ?? $giftcardCode);
-
-        // Check if gift card is applied
-        if (!isset($appliedCodes[$giftcardCode])) {
-            throw new \Mage_Core_Exception_NoSuchEntity('Gift card "' . $giftcardCode . '" is not applied to this cart');
-        }
-
-        // Remove the code
-        unset($appliedCodes[$giftcardCode]);
-
-        if (empty($appliedCodes)) {
-            $quote->setGiftcardCodes(null);
-            $quote->setGiftcardAmount(0);
-            $quote->setBaseGiftcardAmount(0);
-        } else {
-            $quote->setGiftcardCodes(\Mage::helper('core')->jsonEncode($appliedCodes));
-        }
-
-        // Force a fresh totals pass, otherwise an already-collected quote in the
-        // same request leaves a stale giftcard_amount on the saved quote.
-        $this->collectAndSave($quote);
-
-        return $quote;
+        throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('Promo code "%s" is not valid.', $code));
     }
 
     /**
@@ -740,8 +938,8 @@ class Mage_Checkout_Service_Cart
         if ($entity->getGiftMessageId()) {
             $giftMessage->load($entity->getGiftMessageId());
         }
-        $giftMessage->setSender($sender)
-            ->setRecipient($recipient)
+        $giftMessage->setSender(trim($sender))
+            ->setRecipient(trim($recipient))
             ->setMessage($message)
             ->save();
 
@@ -786,67 +984,273 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Reject a partial payload on the checkout address setters. GraphQL declares
-     * these fields non-null; the REST bodies carry no schema, so without this a
-     * `{}` PUT blanks an already-valid address and only fails at order placement.
+     * Check $address with the rules of the address form of $actor, then with the rules of the address model. Staff
+     * has the address form of the admin, with the fields that the storefront does not show. A customer has the
+     * address form of the storefront. An address that a flow marks with should_ignore_validation passes.
+     *
+     * @throws \Mage_Core_Exception_Input one error for each problem
      */
-    public function assertCompleteAddressInput(array $addressData): void
-    {
-        $errors = \Mage::getModel('sales/quote_address')->addData($addressData)->validate();
-        if ($errors !== true) {
-            throw new \Mage_Core_Exception(implode(' ', $errors));
+    public function validateAddress(
+        \Mage_Sales_Model_Quote_Address $address,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+    ): void {
+        if ($address->getShouldIgnoreValidation()) {
+            return;
         }
+
+        $isStaff = $actor === \Mage_Checkout_Model_Actor::Staff;
+        $errors = new \Mage_Core_Exception_Input();
+        /** @var \Mage_Customer_Model_Form $form */
+        $form = \Mage::getModel('customer/form')
+            ->setFormCode($isStaff ? 'adminhtml_customer_address' : 'customer_address_edit')
+            ->setEntityType('customer_address')
+            ->setEntity($address);
+        $data = ['street' => $address->getStreet()] + $address->getData();
+        foreach ($form->getAttributes() as $code => $attribute) {
+            if (!$isStaff && !$attribute->getIsVisible()) {
+                continue;
+            }
+            $result = \Mage_Eav_Model_Attribute_Data::factory($attribute, $address)
+                ->setExtractedData($data)
+                ->validateValue($data[$code] ?? null);
+            $errors->addValidationResult(is_array($result) ? array_values($result) : $result, (string) $code);
+        }
+        $errors->throwIfErrors();
+
+        $result = $address->validate();
+        $errors->addValidationResult(is_array($result) ? array_values($result) : $result, 'address');
+        $errors->throwIfErrors();
     }
 
     /**
-     * Map a storefront address payload (camelCase) into the snake_case keys
-     * the quote address model expects, resolving region_id from region text
-     * when the client didn't send one.
+     * Copy the saved address $customerAddressId of the customer of $quote into the $addressType address of $quote,
+     * and save the cart.
      *
-     * Single source of truth for every API address write (cart addresses and
-     * place-order, REST and GraphQL), so all paths share the same lookup
-     * precedence: region codes are the more precise identifier, so try
-     * loadByCode first, then loadByName; on a match the region text is
-     * normalised to the canonical name. Countries with a fixed region list
-     * (US, CA, ...) reject an address without a numeric region_id, and
-     * storefront clients commonly send only the region name/code.
+     * @throws \Mage_Core_Exception when the saved address is not an address of the customer of $quote
+     * @throws \Mage_Core_Exception_Input when the saved address is not valid
      */
-    public function mapAddressInput(array $input): array
+    public function useCustomerAddress(\Mage_Sales_Model_Quote $quote, string $addressType, int $customerAddressId): \Mage_Sales_Model_Quote
     {
-        $regionId = $input['regionId'] ?? null;
-        $regionText = $input['region'] ?? null;
-        $countryId = $input['countryId'] ?? '';
-
-        if (!$regionId && $regionText && $countryId !== '') {
-            $region = \Mage::getModel('directory/region')->loadByCodeOrName((string) $regionText, (string) $countryId);
-            if ($region->getId()) {
-                $regionId = (int) $region->getId();
-                $regionText = $region->getName();
-            }
+        $customerAddress = \Mage::getModel('customer/address')->load($customerAddressId);
+        if (!$customerAddress->getId() || !$quote->getCustomerId()
+            || (int) $customerAddress->getCustomerId() !== (int) $quote->getCustomerId()
+        ) {
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('Customer Address is not valid.'));
         }
+        $address = $addressType === \Mage_Sales_Model_Quote_Address::TYPE_BILLING
+            ? $quote->getBillingAddress()
+            : $quote->getShippingAddress()->setCollectShippingRates(true);
+        $address->importCustomerAddress($customerAddress)->setSaveInAddressBook(false);
+
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $address): \Mage_Sales_Model_Quote {
+            $this->validateAddress($address);
+            $this->collectAndSave($quote);
+
+            return $quote;
+        });
+    }
+
+    /**
+     * Give the shipping address of $quote the fields of the billing address, mark it as the same as the billing
+     * address, and save the cart. The shipping method stays.
+     */
+    public function useBillingForShipping(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
+    {
+        $billing = $quote->getBillingAddress();
+        $shipping = $quote->getShippingAddress();
+        foreach ($this->getBillingCopyFields() as $field) {
+            $shipping->setData($field, $billing->getData($field));
+        }
+        $shipping->setSameAsBilling(true)
+            ->setSaveInAddressBook(false)
+            ->setCollectShippingRates(true);
+        $this->collectAndSave($quote);
+
+        return $quote;
+    }
+
+    /**
+     * Return true when the shipping address of $quote is marked as the same as the billing address, and has each
+     * field that useBillingForShipping() copies.
+     */
+    public function isShippingSameAsBilling(\Mage_Sales_Model_Quote $quote): bool
+    {
+        $billing = $quote->getBillingAddress();
+        $shipping = $quote->getShippingAddress();
+        if (!$shipping->getSameAsBilling()) {
+            return false;
+        }
+        return array_all($this->getBillingCopyFields(), fn(string $field): bool => $shipping->getData($field) == $billing->getData($field));
+    }
+
+    /**
+     * @return list<string> the fields of the billing address that useBillingForShipping() copies. The VAT check of
+     *                      the customer group can read the result of the VAT number check on the shipping address.
+     */
+    private function getBillingCopyFields(): array
+    {
+        $eavConfig = \Mage::getSingleton('eav/config');
 
         return [
-            'firstname' => $input['firstName'] ?? '',
-            'lastname' => $input['lastName'] ?? '',
-            'company' => $input['company'] ?? null,
-            'street' => $input['street'] ?? [],
-            'city' => $input['city'] ?? '',
-            'region' => $regionText,
-            'region_id' => $regionId,
-            'postcode' => $input['postcode'] ?? '',
-            'country_id' => $countryId,
-            'telephone' => $input['telephone'] ?? '',
+            ...$eavConfig->getEntityAttributeCodes($eavConfig->getEntityType('customer_address')),
+            'customer_address_id', 'email', 'vat_is_valid', 'vat_request_id', 'vat_request_date', 'vat_request_success',
         ];
     }
 
     /**
-     * Apply a shipping address in-memory, for callers that batch several
-     * checkout fields and collect once afterwards (order placement).
+     * Give the shipping address of $quote the shipping method $code ("carrier_method"), and save the cart.
+     *
+     * @throws \Mage_Core_Exception_Input when $code is empty
+     * @throws \Mage_Core_Exception when the address has no rate for $code, or the rate has an error
      */
-    public function applyShippingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): void
+    public function selectShippingMethod(\Mage_Sales_Model_Quote $quote, string $code): \Mage_Sales_Model_Quote
     {
+        if ($code === '') {
+            throw new \Mage_Core_Exception_Input()->addError('shipping_method', \Mage::helper('checkout')->__('Invalid shipping method.'));
+        }
+
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $code): \Mage_Sales_Model_Quote {
+            $address = $quote->getShippingAddress();
+            $address->collectShippingRates();
+            $this->assertShippingMethodAvailable($quote, $code);
+            $address->setShippingMethod($code);
+            $this->collectAndSave($quote);
+
+            return $quote;
+        });
+    }
+
+    /**
+     * Return the checks of a payment method for $actor. Staff enters an order in the back office, with the
+     * methods for internal use. A customer has the methods of the checkout.
+     */
+    public function getPaymentChecks(\Mage_Checkout_Model_Actor $actor): int
+    {
+        return $actor === \Mage_Checkout_Model_Actor::Staff
+            ? \Mage_Payment_Model_Method_Abstract::CHECKS_INTERNAL
+            : \Mage_Payment_Model_Method_Abstract::CHECKS_CHECKOUT;
+    }
+
+    /**
+     * Give $quote the payment method and the data of $paymentData, and save the cart. The method must be available
+     * for the cart and must accept the data. $actor gives the checks of the method, see getPaymentChecks(): the
+     * client cannot choose them.
+     *
+     * @param array<string, mixed> $paymentData the code of the method in "method", and the fields of its form
+     * @throws \Mage_Core_Exception
+     */
+    public function selectPaymentMethod(
+        \Mage_Sales_Model_Quote $quote,
+        array $paymentData,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+    ): \Mage_Sales_Model_Quote {
+        $paymentData['checks'] = $this->getPaymentChecks($actor);
+        $import = fn() => $this->importPayment($quote, $paymentData);
+        // Staff imports in the scope of the caller, in which Mage_Sales_Service_Order::submit() also places the order
+        $actor === \Mage_Checkout_Model_Actor::Staff ? $import() : $this->inQuoteStoreScope($quote, $import);
+        $this->collectAndSave($quote);
+
+        return $quote;
+    }
+
+    /**
+     * Give $quote the checkout data that a client sends with its order, in one pass: the addresses, the shipping
+     * method, and the payment method with its data. A null value keeps what the cart has. The totals are collected
+     * for the addresses and the shipping method, then again for the payment method, and the cart is saved once at
+     * the end. When a step fails, nothing is saved.
+     *
+     * @param array<string, mixed>|null $shippingAddress the fields of the address model, see applyShippingAddress()
+     * @param array<string, mixed>|null $billingAddress the fields of the address model, see applyBillingAddress()
+     * @param string|null $shippingMethod "carrier_method"
+     * @param array<string, mixed>|null $paymentData see setPaymentMethod()
+     * @throws \Mage_Core_Exception_Input when an address is not valid. The name of each field starts with
+     *                                    "shipping_address." or "billing_address."
+     * @throws \Mage_Core_Exception when the shipping method or the payment method is not available for the cart
+     */
+    public function applyCheckoutState(
+        \Mage_Sales_Model_Quote $quote,
+        ?array $shippingAddress = null,
+        ?array $billingAddress = null,
+        ?string $shippingMethod = null,
+        ?string $paymentMethod = null,
+        ?array $paymentData = null,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+    ): \Mage_Sales_Model_Quote {
+        $addresses = ['shipping_address' => $shippingAddress, 'billing_address' => $billingAddress];
+        foreach ($addresses as $prefix => $addressData) {
+            if ($addressData === null) {
+                continue;
+            }
+            try {
+                $prefix === 'shipping_address'
+                    ? $this->applyShippingAddress($quote, $addressData, $actor)
+                    : $this->applyBillingAddress($quote, $addressData, $actor);
+            } catch (\Mage_Core_Exception_Input $e) {
+                $fields = array_unique(array_column($e->getErrors(), 'field'));
+                throw $e->withFieldNames(array_combine($fields, array_map(fn(string $field): string => "{$prefix}.{$field}", $fields)));
+            }
+        }
+
+        $hasShippingMethod = (string) $shippingMethod !== '' && !$quote->isVirtual();
+        if ($hasShippingMethod) {
+            $quote->getShippingAddress()->setShippingMethod($shippingMethod)->setCollectShippingRates(true);
+        }
+        // One collection gives the prices of the addresses and of the shipping method, and the totals that the
+        // payment method checks
+        $this->collectAndVerifyTotals($quote);
+        if ($hasShippingMethod) {
+            // A method that the client made up has no rate, and must not go to the saved cart
+            $this->assertShippingMethodAvailable($quote, (string) $shippingMethod);
+        }
+
+        if ((string) $paymentMethod !== '') {
+            $this->assertPaymentMethodAvailable($quote, (string) $paymentMethod);
+            $this->importPaymentData($quote, (string) $paymentMethod, $paymentData, $this->getPaymentChecks($actor));
+            // The payment method can add a total, such as a payment fee
+            $this->collectAndVerifyTotals($quote);
+        }
+        $this->inQuoteStoreScope($quote, fn() => $quote->save());
+
+        return $quote;
+    }
+
+    /**
+     * @param array<string, mixed> $paymentData
+     * @throws \Mage_Core_Exception
+     */
+    private function importPayment(\Mage_Sales_Model_Quote $quote, array $paymentData): void
+    {
+        $methodCode = (string) ($paymentData['method'] ?? '');
+        if (empty(\Mage::helper('payment')->getPaymentMethods($quote->getStoreId())[$methodCode]['model'])) {
+            throw new \Mage_Core_Exception(\Mage::helper('sales')->__('The requested Payment Method is not available.'));
+        }
+        if ($quote->isVirtual()) {
+            $quote->getBillingAddress()->setPaymentMethod($methodCode);
+        } else {
+            // A payment method can change the shipping rates
+            $quote->getShippingAddress()->setPaymentMethod($methodCode)->setCollectShippingRates(true);
+        }
+        $quote->getPayment()->importData($paymentData);
+    }
+
+    /**
+     * Give the shipping address of $quote the fields of $addressData and check it, without a save, for callers that
+     * batch several checkout fields and collect once afterwards, as applyCheckoutState() does. $actor gives the address
+     * form of the check, see validateAddress(). The save_in_address_book field
+     * applies to a customer cart only. The address is no longer the same as the billing address, as on the shipping
+     * step of the checkout, so that the order adds it to the address book on its own.
+     *
+     * @throws \Mage_Core_Exception_Input when the address is not valid
+     */
+    public function applyShippingAddress(
+        \Mage_Sales_Model_Quote $quote,
+        array $addressData,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+    ): void {
         $address = $quote->getShippingAddress();
-        $address->addData(StoreDefaults::filterAddressKeys($this->sanitizeAddressData($addressData)));
+        $address->addData(array_intersect_key($addressData, array_flip(self::ADDRESS_FIELDS)))->setSameAsBilling(false);
+        $this->applySaveInAddressBook($quote, $address, $addressData);
+        $this->inQuoteStoreScope($quote, fn() => $this->validateAddress($address, $actor));
 
         // Flag to trigger shipping rate collection
         $address->setCollectShippingRates();
@@ -856,15 +1260,35 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Apply a billing address in-memory without recollecting or saving
+     * Give the billing address of $quote the fields of $addressData and check it, without a save. The
+     * save_in_address_book field applies to a customer cart only.
+     *
+     * @throws \Mage_Core_Exception_Input when the address is not valid
      */
-    public function applyBillingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): void
-    {
+    public function applyBillingAddress(
+        \Mage_Sales_Model_Quote $quote,
+        array $addressData,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+    ): void {
         $address = $quote->getBillingAddress();
-        $address->addData(StoreDefaults::filterAddressKeys($this->sanitizeAddressData($addressData)));
+        $address->addData(array_intersect_key($addressData, array_flip(self::ADDRESS_FIELDS)));
+        $this->applySaveInAddressBook($quote, $address, $addressData);
+        $this->inQuoteStoreScope($quote, fn() => $this->validateAddress($address, $actor));
         $quote->setTotalsCollectedFlag(false);
     }
 
+    /**
+     * Mark $address for the address book of the customer when $addressData asks for it, as the Save in Address Book
+     * checkbox of the checkout and of the admin order create does. Mage_Sales_Service_Order::submit() adds it.
+     */
+    private function applySaveInAddressBook(\Mage_Sales_Model_Quote $quote, \Mage_Sales_Model_Quote_Address $address, array $addressData): void
+    {
+        $address->setSaveInAddressBook($quote->getCustomerId() && !empty($addressData['save_in_address_book']));
+    }
+
+    /**
+     * @throws \Mage_Core_Exception_Input when the address is not valid
+     */
     public function setShippingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): \Mage_Sales_Model_Quote
     {
         $this->applyShippingAddress($quote, $addressData);
@@ -874,11 +1298,13 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Set billing address
+     * Give the billing address of $quote the fields of $addressData, or the fields of the shipping address when
+     * $sameAsShipping is true, and save the cart. With $sameAsShipping, only save_in_address_book of $addressData
+     * applies, and the shipping address becomes the same as the billing address, so that the order adds the address
+     * to the address book once.
      *
-     * @param \Mage_Sales_Model_Quote $quote Quote
-     * @param array $addressData Address data
-     * @param bool $sameAsShipping Same as shipping
+     * @throws \Mage_Core_Exception_Conflict when $sameAsShipping is true and the cart has no shipping address
+     * @throws \Mage_Core_Exception_Input when the address is not valid
      */
     public function setBillingAddress(\Mage_Sales_Model_Quote $quote, array $addressData, bool $sameAsShipping = false): \Mage_Sales_Model_Quote
     {
@@ -887,7 +1313,12 @@ class Mage_Checkout_Service_Cart
             if (!$shippingAddress->getCountryId()) {
                 throw new \Mage_Core_Exception_Conflict('Cart has no shipping address to copy');
             }
-            $addressData = StoreDefaults::extractAddressFields($shippingAddress);
+            $addressData = ['save_in_address_book' => $addressData['save_in_address_book'] ?? false]
+                + array_filter(
+                    array_combine(self::ADDRESS_FIELDS, array_map($shippingAddress->getData(...), self::ADDRESS_FIELDS)),
+                    static fn(mixed $value): bool => $value !== null,
+                );
+            $shippingAddress->setSameAsBilling(true);
         }
 
         $this->applyBillingAddress($quote, $addressData);
@@ -897,46 +1328,55 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Set shipping method
+     * Give the shipping address of $quote the shipping method of $carrierCode and $methodCode, and save the cart.
      *
-     * @param \Mage_Sales_Model_Quote $quote Quote
-     * @param string $carrierCode Carrier code
-     * @param string $methodCode Method code
+     * @throws \Mage_Core_Exception_Input when a code is empty
+     * @throws \Mage_Core_Exception when the address has no rate for the method, or the rate has an error
      */
-    public function setShippingMethod(\Mage_Sales_Model_Quote $quote, string $carrierCode, string $methodCode, bool $skipValidation = false): \Mage_Sales_Model_Quote
+    public function setShippingMethod(\Mage_Sales_Model_Quote $quote, string $carrierCode, string $methodCode): \Mage_Sales_Model_Quote
     {
-        $shippingMethod = $carrierCode . '_' . $methodCode;
+        if ($carrierCode === '' || $methodCode === '') {
+            throw new \Mage_Core_Exception_Input()->addError(
+                $carrierCode === '' ? 'carrier_code' : 'method_code',
+                \Mage::helper('checkout')->__('Carrier code and method code are required'),
+            );
+        }
 
-        return $this->inQuoteStoreScope($quote, function () use ($quote, $shippingMethod, $skipValidation): \Mage_Sales_Model_Quote {
-            $address = $quote->getShippingAddress();
-
-            // Same gate as OrderProcessor: a carrier error entry would price the shipment at 0
-            if (!$skipValidation) {
-                $address->collectShippingRates();
-                $rate = $address->getShippingRateByCode($shippingMethod);
-                if (!$rate || $rate->getErrorMessage()) {
-                    throw new \Mage_Core_Exception('Shipping method is not available for this address');
-                }
-            }
-
-            $address->setShippingMethod($shippingMethod);
-            $this->collectAndSave($quote);
-
-            return $quote;
-        });
+        return $this->selectShippingMethod($quote, $carrierCode . '_' . $methodCode);
     }
 
     /**
-     * Set payment method
+     * Refuse a shipping method for which the shipping address of $quote has no rate. Collect the rates first.
+     * A carrier that fails gives a rate with an error, which would price the shipment at 0.
      *
-     * @param \Mage_Sales_Model_Quote $quote Quote
-     * @param string $methodCode Method code
-     * @param array|null $additionalData Additional payment data
+     * @throws \Mage_Core_Exception
      */
-    public function setPaymentMethod(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData = null): \Mage_Sales_Model_Quote
+    public function assertShippingMethodAvailable(\Mage_Sales_Model_Quote $quote, string $shippingMethod): void
     {
-        // Resolve the checks in the caller's scope, before entering the quote's store scope
-        $checks = \Mage_Payment_Model_Method_Abstract::checksForCurrentScope();
+        $rate = $quote->getShippingAddress()->getShippingRateByCode($shippingMethod);
+        if (!$rate || $rate->getErrorMessage()) {
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('Shipping method is not available for this address'));
+        }
+    }
+
+    /**
+     * Give $quote the payment method $methodCode with the flat scalar keys of $additionalData, and save the cart. It
+     * is for a client that cannot send card data: it refuses a card method and removes the keys that
+     * buildPaymentImportData() lists. $actor gives the checks of the method, see getPaymentChecks().
+     *
+     * @throws \Mage_Core_Exception_Input when $methodCode is empty
+     * @throws \Mage_Core_Exception when the method is not available for the cart, or refuses the data
+     */
+    public function setPaymentMethod(
+        \Mage_Sales_Model_Quote $quote,
+        string $methodCode,
+        ?array $additionalData = null,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+    ): \Mage_Sales_Model_Quote {
+        if ($methodCode === '') {
+            throw new \Mage_Core_Exception_Input()->addError('method_code', \Mage::helper('checkout')->__('Payment method code is required'));
+        }
+        $checks = $this->getPaymentChecks($actor);
 
         return $this->inQuoteStoreScope($quote, function () use ($quote, $methodCode, $additionalData, $checks): \Mage_Sales_Model_Quote {
             $this->assertPaymentMethodAvailable($quote, $methodCode);
@@ -951,15 +1391,20 @@ class Mage_Checkout_Service_Cart
         });
     }
 
-    /** Import sanitized client payment data onto the quote payment and keep the backup copy. */
+    /**
+     * Import the client payment data that buildPaymentImportData() accepts onto the payment of $quote, as
+     * selectPaymentMethod() does, without a save, and keep the backup copy.
+     *
+     * @throws \Mage_Core_Exception when the method is not available for the cart, or refuses the data
+     */
     public function importPaymentData(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData, int $checks): void
     {
         $paymentData = $this->buildPaymentImportData($methodCode, $additionalData, $checks);
         // Only a Mage_Core_Exception is the client's fault; anything else must surface as a 500
         try {
-            $quote->getPayment()->importData($paymentData);
+            $this->importPayment($quote, $paymentData);
         } catch (\Mage_Core_Exception $e) {
-            throw new \Mage_Core_Exception('Payment method is not available: ' . $e->getMessage());
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('Payment method is not available: %s', $e->getMessage()));
         }
         $this->backupPaymentAdditionalData($quote->getPayment(), $paymentData);
     }
@@ -1009,88 +1454,45 @@ class Mage_Checkout_Service_Cart
         }
     }
 
-    /** buildPaymentImportData() strips every cc_* key, so a card method always fails validate(). */
-    public function isMethodUsableOverApi(\Mage_Payment_Model_Method_Abstract $method): bool
+    /**
+     * Tell if $method can take a payment without card data. buildPaymentImportData() removes each cc_* key, so a
+     * card method then always fails its validate().
+     */
+    public function isUsableWithoutCardData(\Mage_Payment_Model_Method_Abstract $method): bool
     {
         return !$method instanceof \Mage_Payment_Model_Method_Cc;
     }
 
     /**
-     * Gate a payment method on availability for this quote;
-     * importData()/setMethod() alone accept any configured code.
+     * Refuse a payment method that is not available for $quote, or that needs card data. importData() and
+     * setMethod() alone accept any configured code.
+     *
+     * @throws \Mage_Core_Exception
      */
     public function assertPaymentMethodAvailable(\Mage_Sales_Model_Quote $quote, string $methodCode): void
     {
         $model = \Mage::helper('payment')->getPaymentMethods($quote->getStoreId())[$methodCode]['model'] ?? null;
         $method = $model ? \Mage::getModel($model) : null;
-        if (!$method instanceof \Mage_Payment_Model_Method_Abstract || !$this->isMethodUsableOverApi($method)) {
-            throw new \Mage_Core_Exception('Payment method is not available for this cart');
+        if (!$method instanceof \Mage_Payment_Model_Method_Abstract || !$this->isUsableWithoutCardData($method)) {
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('Payment method is not available for this cart'));
         }
 
         $method->setStore($quote->getStoreId());
         if (!$method->isAvailable($quote)) {
-            throw new \Mage_Core_Exception('Payment method is not available for this cart');
+            throw new \Mage_Core_Exception(\Mage::helper('checkout')->__('Payment method is not available for this cart'));
         }
-    }
-
-    /**
-     * Sanitize address data to prevent stored XSS
-     *
-     * Strips HTML tags and limits field lengths for all string address fields.
-     * Called before passing user-supplied address data to quote address models.
-     *
-     * @param array $addressData Raw address data from API input
-     * @return array Sanitized address data
-     */
-    private function sanitizeAddressData(array $addressData): array
-    {
-        $maxLengths = [
-            'firstname' => 255,
-            'lastname' => 255,
-            'company' => 255,
-            'city' => 255,
-            'region' => 255,
-            'postcode' => 20,
-            'telephone' => 50,
-            'fax' => 50,
-            'email' => 255,
-            'prefix' => 40,
-            'suffix' => 40,
-            'middlename' => 255,
-            'vat_id' => 50,
-        ];
-
-        foreach ($addressData as $key => $value) {
-            if ($key === 'street') {
-                if (is_array($value)) {
-                    $addressData[$key] = array_map(fn($line) => mb_substr(strip_tags((string) $line), 0, 255), $value);
-                } elseif (is_string($value)) {
-                    // Quote addresses store street as one newline-joined string;
-                    // cap per line like the array branch, or copying a multi-line
-                    // street (sameAsShipping) silently truncates it
-                    $addressData[$key] = implode("\n", array_map(
-                        fn($line) => mb_substr(strip_tags($line), 0, 255),
-                        preg_split('/\r\n|\r|\n/', $value) ?: [$value],
-                    ));
-                }
-                continue;
-            }
-
-            if (is_string($value)) {
-                $value = strip_tags($value);
-                $maxLen = $maxLengths[$key] ?? 255;
-                $addressData[$key] = mb_substr($value, 0, $maxLen);
-            }
-        }
-
-        return $addressData;
     }
 
     /**
      * Assignment changes the quote's customer group, so totals must be recollected.
+     *
+     * @throws \Mage_Core_Exception_Input when $customer does not exist
      */
     public function assignCustomer(\Mage_Sales_Model_Quote $quote, \Mage_Customer_Model_Customer $customer): \Mage_Sales_Model_Quote
     {
+        if (!$customer->getId()) {
+            throw new \Mage_Core_Exception_Input()->addError('customer_id', \Mage::helper('checkout')->__('Customer not found'));
+        }
         $quote->assignCustomer($customer);
         $quote->setCustomerIsGuest(false);
         $this->collectAndSave($quote);
@@ -1099,14 +1501,19 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Merge guest cart into customer cart
+     * Merge the guest cart $guestMaskedId into the cart of the customer $customerId in the store $storeId, and close
+     * the guest cart. A caller in a store view gives its store, so that its later cart lookups find the merged cart.
+     * A caller with no store view gives null: then the cart of the store of the guest cart takes the items, so
+     * that their prices stay.
      *
-     * @param string $guestMaskedId Guest cart masked ID
-     * @param int $customerId Customer ID
-     * @return \Mage_Sales_Model_Quote Customer cart with merged items
+     * @throws \Mage_Core_Exception_Input when $guestMaskedId is empty
+     * @throws \Mage_Core_Exception_NoSuchEntity when the guest cart does not exist or is the cart of another customer
      */
-    public function merge(string $guestMaskedId, int $customerId): \Mage_Sales_Model_Quote
+    public function merge(string $guestMaskedId, int $customerId, ?int $storeId = null): \Mage_Sales_Model_Quote
     {
+        if ($guestMaskedId === '') {
+            throw new \Mage_Core_Exception_Input()->addError('masked_id', \Mage::helper('checkout')->__('Masked cart ID is required'));
+        }
         $guestCartId = $this->getCartIdFromMaskedId($guestMaskedId);
         if (!$guestCartId) {
             throw new \Mage_Core_Exception_NoSuchEntity('Guest cart not found');
@@ -1129,13 +1536,9 @@ class Mage_Checkout_Service_Cart
             throw new \Mage_Core_Exception_NoSuchEntity('Guest cart not found');
         }
 
-        // The merge uses the customer cart of the current store. An admin-scoped
-        // caller must not land the merge in an admin-store cart (repricing the
-        // items), so it merges in the guest cart's store. A storefront caller keeps
-        // its own scope: its later customer-cart lookups are ambient-scoped, and a
-        // merge pinned to another store view would leave the merged cart invisible.
-        $merge = function () use ($guestCart, $customerId): \Mage_Sales_Model_Quote {
-            $customerCart = $this->getForCustomer($customerId, (int) \Mage::app()->getStore()->getId());
+        $storeId = $storeId ?: (int) $guestCart->getStoreId() ?: (int) \Mage::app()->getStore()->getId();
+        $customerCart = \Mage::app()->withStore($storeId, function () use ($guestCart, $customerId, $storeId): \Mage_Sales_Model_Quote {
+            $customerCart = $this->getForCustomer($customerId, $storeId);
             $customerCart->merge($guestCart);
 
             // Import customer default addresses onto the cart so shipping quotes work
@@ -1162,16 +1565,34 @@ class Mage_Checkout_Service_Cart
             $this->collectAndSave($customerCart);
 
             return $customerCart;
-        };
-        $customerCart = \Mage::app()->getStore()->isAdmin()
-            ? $this->inQuoteStoreScope($guestCart, $merge)
-            : $merge();
+        });
 
         // Deactivate guest cart
         $guestCart->setIsActive(false);
         $guestCart->save();
 
         return $customerCart;
+    }
+
+    /**
+     * Return the cart of the customer $customerId after a login. A valid $guestMaskedId merges that guest cart into
+     * the customer cart of the current store. A merge that fails does not fail the login: the customer then gets the active cart of the
+     * current store, or null when there is none.
+     */
+    public function mergeAtLogin(mixed $guestMaskedId, int $customerId): ?\Mage_Sales_Model_Quote
+    {
+        if ($this->isValidMaskedId($guestMaskedId)) {
+            try {
+                return $this->merge($guestMaskedId, $customerId, (int) \Mage::app()->getStore()->getId());
+            } catch (\Exception $e) {
+                \Mage::log('Cart merge failed: ' . $e->getMessage(), \Mage::LOG_WARNING);
+            }
+        }
+
+        $customerCart = \Mage::getModel('sales/quote')
+            ->setSharedStoreIds([\Mage::app()->getStore()->getId()])
+            ->loadByCustomer($customerId);
+        return $customerCart->getId() ? $customerCart : null;
     }
 
     /**

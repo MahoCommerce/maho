@@ -304,6 +304,19 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
     }
 
     /**
+     * Breakpoint directive: {{breakpoint code=mobile}}
+     *
+     * Write the media query of a breakpoint preset, for the media attribute of a <source>. An
+     * unknown preset gets a query that matches no device.
+     */
+    public function breakpointDirective(array $construction): string
+    {
+        $params = $this->_getIncludeParameters($construction[2]);
+        return Mage::getSingleton('core/design_breakpoints')
+            ->getMediaQuery((string) ($params['code'] ?? ''), $this->getStoreId());
+    }
+
+    /**
      * Retrieve media file URL directive
      *
      * @param array $construction

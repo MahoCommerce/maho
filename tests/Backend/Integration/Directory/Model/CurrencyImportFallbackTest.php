@@ -155,4 +155,27 @@ describe('currency import fallback', function () {
 
         expect(testRateExists())->toBeFalse();
     });
+
+    it('lets the admin fetch only from a service that the store has switched on, as the cron does (#1348)', function () {
+        registerFakeService('testgood', 'directory/currency_import_testgood', 10);
+        $fetch = function (): array {
+            $session = Mage::getSingleton('adminhtml/session');
+            $session->getMessages(true);
+            $session->unsetData('rates');
+            $request = new Mage_Core_Controller_Request_Http(
+                Symfony\Component\HttpFoundation\Request::create('/admin/system_currency/fetchRates', 'POST', ['rate_services' => 'testgood']),
+            );
+            new Mage_Adminhtml_System_CurrencyController($request, new Mage_Core_Controller_Response_Http())->fetchRatesAction();
+            $messages = array_map(fn($message) => $message->getText(), $session->getMessages(true)->getItems());
+            return [$messages, $session->getData('rates')];
+        };
+
+        $enabled = $fetch();
+        $this->store->setConfig('currency/testgood/active', '0');
+        $disabled = $fetch();
+
+        expect($enabled)->toBe([['All rates were fetched, please click on "Save" to apply'], ['XTS' => ['XTS' => 1.0]]])
+            ->and($disabled)->toBe([['Invalid Import Service specified.'], null])
+            ->and(Mage_Directory_Model_Currency_Import_Testgood::$calls)->toBe(1);
+    });
 });

@@ -98,62 +98,48 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
 
     /**
      * Save action
-     *
-     * @throws Mage_Core_Exception
      */
     #[Maho\Config\Route('/admin/system_email_template/save')]
     public function saveAction(): void
     {
         $request = $this->getRequest();
-        $id = $this->getRequest()->getParam('id');
-
-        $template = $this->_initTemplate('id');
-        if (!$template->getId() && $id) {
-            Mage::getSingleton('adminhtml/session')->addError(
-                Mage::helper('adminhtml')->__('This Email template no longer exists.'),
-            );
-            $this->_redirect('*/*/');
-            return;
-        }
+        $session = Mage::getSingleton('adminhtml/session');
+        $service = $this->getEmailTemplateService();
 
         try {
-            $allowedHtmlTags = ['template_text', 'styles', 'variables'];
-            if (Mage::helper('adminhtml')->hasTags($request->getParams(), $allowedHtmlTags)) {
-                Mage::throwException(Mage::helper('adminhtml')->__('Invalid template data.'));
-            }
-
+            $id = (int) $request->getParam('id');
+            $template = $id ? $service->getById($id) : $service->newTemplate();
             $template->setTemplateSubject($request->getParam('template_subject'))
                 ->setTemplateCode($request->getParam('template_code'))
                 ->setTemplateText($request->getParam('template_text'))
                 ->setTemplateStyles($request->getParam('template_styles'))
-                ->setModifiedAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->setOrigTemplateCode($request->getParam('orig_template_code'))
                 ->setOrigTemplateVariables($request->getParam('orig_template_variables'));
-
-            if (!$template->getId()) {
-                $template->setAddedAt(Mage::app()->getLocale()->formatDateForDb('now'));
-                $template->setTemplateType(Mage_Core_Model_Email_Template::TYPE_HTML);
-            }
-
             if ($request->getParam('_change_type_flag')) {
                 $template->setTemplateType(Mage_Core_Model_Email_Template::TYPE_TEXT);
-                $template->setTemplateStyles('');
             }
 
-            $template->save();
-            Mage::getSingleton('adminhtml/session')->setFormData(false);
-            Mage::getSingleton('adminhtml/session')->addSuccess(
-                Mage::helper('adminhtml')->__('The email template has been saved.'),
-            );
+            $service->save($template);
+            $session->setFormData(false);
+            $session->addSuccess(Mage::helper('adminhtml')->__('The email template has been saved.'));
             $this->_redirect('*/*');
+            return;
+        } catch (Mage_Core_Exception_NoSuchEntity) {
+            $session->addError(Mage::helper('adminhtml')->__('This Email template no longer exists.'));
+            $this->_redirect('*/*/');
+            return;
+        } catch (Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $session->addError($error['message']);
+            }
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
         } catch (Exception $e) {
-            Mage::getSingleton('adminhtml/session')->setData(
-                'email_template_form_data',
-                $this->getRequest()->getParams(),
-            );
-            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-            $this->_forward('new');
+            Mage::logException($e);
+            $session->addError(Mage::helper('adminhtml')->__('An error occurred while saving email template data. Please review log and try again.'));
         }
+        $session->setData('email_template_form_data', $request->getParams());
+        $this->_forward('new');
     }
 
     /**
@@ -162,29 +148,28 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
     #[Maho\Config\Route('/admin/system_email_template/delete')]
     public function deleteAction(): void
     {
-        $template = $this->_initTemplate('id');
-        if ($template->getId()) {
+        $session = $this->_getSession();
+        if ($id = (int) $this->getRequest()->getParam('id')) {
             try {
-                $template->delete();
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('adminhtml')->__('The email template has been deleted.'),
-                );
+                $service = $this->getEmailTemplateService();
+                $service->delete($service->getById($id));
+                $session->addSuccess(Mage::helper('adminhtml')->__('The email template has been deleted.'));
                 $this->_redirect('*/*/');
                 return;
+            } catch (Mage_Core_Exception_NoSuchEntity) {
+                // The message below covers a template that no longer exists
             } catch (Mage_Core_Exception $e) {
-                $this->_getSession()->addError($e->getMessage());
+                $session->addError($e->getMessage());
             } catch (Exception $e) {
-                $this->_getSession()->addError(
+                $session->addError(
                     Mage::helper('adminhtml')->__('An error occurred while deleting email template data. Please review log and try again.'),
                 );
                 Mage::logException($e);
-                $this->_redirect('*/*/edit', ['id' => $template]);
+                $this->_redirect('*/*/edit', ['id' => $id]);
                 return;
             }
         }
-        Mage::getSingleton('adminhtml/session')->addError(
-            Mage::helper('adminhtml')->__('Unable to find a Email Template to delete.'),
-        );
+        $session->addError(Mage::helper('adminhtml')->__('Unable to find a Email Template to delete.'));
         $this->_redirect('*/*/');
     }
 
@@ -239,5 +224,10 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
             Mage::register('current_email_template', $model);
         }
         return $model;
+    }
+
+    protected function getEmailTemplateService(): Mage_Core_Service_Email_Template
+    {
+        return Mage::getService('core/email_template');
     }
 }

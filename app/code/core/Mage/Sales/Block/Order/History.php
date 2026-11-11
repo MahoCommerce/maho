@@ -17,12 +17,10 @@ class Mage_Sales_Block_Order_History extends Mage_Core_Block_Template
         parent::__construct();
         $this->setTemplate('sales/order/history.phtml');
 
-        $orders = Mage::getResourceModel('sales/order_collection')
-            ->addFieldToSelect('*')
-            ->addFieldToFilter('customer_id', Mage::getSingleton('customer/session')->getCustomer()->getId())
-            ->addFieldToFilter('state', ['in' => Mage::getSingleton('sales/order_config')->getVisibleOnFrontStates()])
-            ->setOrder('created_at', 'desc')
-        ;
+        $orders = Mage::getService('sales/order')->addVisibleToCustomerFilter(
+            Mage::getResourceModel('sales/order_collection')->addFieldToSelect('*'),
+            Mage::getSingleton('customer/session')->getCustomerId(),
+        )->setOrder('created_at', 'desc');
 
         $this->setOrders($orders);
 

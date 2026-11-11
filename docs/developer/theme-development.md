@@ -456,6 +456,40 @@ On a bucket, run the command before the store opens, or the images are missing u
 created them: see [resized images](../hosting/storage.md#resized-images). Then
 `./maho storage:image:clean` deletes the files that no store view uses.
 
+## Breakpoints <span class="version-badge">v27.1+</span> { #breakpoints }
+
+The `<breakpoints>` node of `theme.xml` gives the widest screen in px of the mobile and the tablet
+layout of the theme:
+
+```xml
+<theme>
+    <parent>base/default</parent>
+    <breakpoints>
+        <mobile>770</mobile>
+        <tablet>1023</tablet>
+    </breakpoints>
+</theme>
+```
+
+Three parts of the store read these values:
+
+- CMS content names a preset with `{{breakpoint code=mobile}}`, such as the mobile image of a
+  slideshow slide (see [Slideshow images](../user-guide/slideshow-images.md)). The store writes
+  `(max-width: 770px)` in its place.
+- The head block writes them as `BREAKPOINTS` before the scripts, in `getCssJsHtml()`, so a theme
+  with its own `head.phtml` gets them too. `app.js` reads `mobile` as `bp.medium` and `tablet` as
+  `bp.large`.
+- The content editor shows the width of each preset, from the theme of the store view of the page or
+  the block.
+
+The CSS of the theme is compiled, so it cannot read `theme.xml`. Keep the two in step: in
+`base/default`, the `nav:` variant starts at 771px and the desktop rules at 1024px. A theme that
+does not set a value takes the value of its parent theme. `tablet` must be wider than `mobile`.
+
+On the storefront, the values come from the active skin theme, so a design change or the custom
+design of a page also changes them. The content editor uses the theme in the store config of the
+store view.
+
 ## Adding your own setting
 
 A theme that needs a field of its own in Theme Settings ships a small module. No PHP class is needed:

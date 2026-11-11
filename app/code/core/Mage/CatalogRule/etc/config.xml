@@ -21,6 +21,11 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Mage_CatalogRule_Helper</class>
             </catalogrule>
         </helpers>
+        <services>
+            <catalogrule>
+                <class>Mage_CatalogRule_Service</class>
+            </catalogrule>
+        </services>
         <models>
             <catalogrule>
                 <class>Mage_CatalogRule_Model</class>
@@ -60,6 +65,14 @@ SPDX-License-Identifier: AFL-3.0
             <related_cache_types>
                 <block_html/>
             </related_cache_types>
+            <rule>
+                <simple_actions>
+                    <by_percent/>
+                    <by_fixed/>
+                    <to_percent/>
+                    <to_fixed/>
+                </simple_actions>
+            </rule>
         </catalogrule>
     </global>
     <frontend>

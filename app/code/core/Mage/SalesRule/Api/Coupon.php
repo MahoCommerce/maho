@@ -106,9 +106,9 @@ use Maho\Config\ApiResource;
         ),
         new Mutation(
             name: 'update',
-            description: 'Update a coupon and its price rule',
+            description: 'Update a coupon and its price rule. The id is the coupon ID or its IRI',
             args: [
-                'id' => ['type' => 'Int!'],
+                'id' => ['type' => 'ID!'],
                 'code' => ['type' => 'String'],
                 'discountType' => ['type' => 'String'],
                 'discountAmount' => ['type' => 'Float'],
@@ -130,11 +130,14 @@ use Maho\Config\ApiResource;
                 'applyToShipping' => ['type' => 'Boolean'],
             ],
             security: "is_granted('ROLE_ADMIN') or is_granted('coupons/write')",
+            // The processor loads the coupon, so the id can be a plain ID and not only an IRI
+            read: false,
         ),
         new DeleteMutation(
             name: 'delete',
-            description: 'Delete a coupon. The delete of the primary coupon of a rule also deletes the rule',
+            description: 'Delete a coupon. The delete of the primary coupon of a rule also deletes the rule. The id is the coupon ID or its IRI',
             security: "is_granted('ROLE_ADMIN') or is_granted('coupons/delete')",
+            read: false,
         ),
         new Mutation(
             name: 'validate',
@@ -169,6 +172,7 @@ class Coupon extends CrudResource
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 
+    #[ApiProperty(description: 'The code, at most 255 characters')]
     public ?string $code = null;
 
     #[ApiProperty(writable: false)]

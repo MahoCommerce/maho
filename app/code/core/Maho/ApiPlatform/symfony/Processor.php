@@ -17,8 +17,6 @@ use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Trait\ActivityLogTrait;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
-use Maho\ApiPlatform\Trait\ModelPersistenceTrait;
-use Maho\ApiPlatform\Trait\RateLimitTrait;
 use Maho\ApiPlatform\Trait\RawResponseTrait;
 use Maho\ApiPlatform\Trait\StoreAccessTrait;
 use Maho\ApiPlatform\Trait\StoreRestrictionTrait;
@@ -31,7 +29,7 @@ use Symfony\Component\HttpFoundation\Request;
  * Provides a default process() implementation that handles the common pattern:
  * - Auth + permission check
  * - Delete/Update/Create routing
- * - Model persistence with activity logging
+ * - Model persistence (loadModel(), saveModel(), deleteModel()) with activity logging
  *
  * Simple processors only need to set properties and implement applyData() + buildResponse().
  * Complex processors can override process() entirely.
@@ -41,12 +39,10 @@ use Symfony\Component\HttpFoundation\Request;
 abstract class Processor implements ProcessorInterface
 {
     use AuthenticationTrait;
-    use ModelPersistenceTrait;
     use ActivityLogTrait;
     use RawResponseTrait;
     use StoreAccessTrait;
     use StoreRestrictionTrait;
-    use RateLimitTrait;
 
     protected ?string $modelAlias = null;
     protected ?string $entityType = null;
@@ -104,35 +100,77 @@ abstract class Processor implements ProcessorInterface
 
     protected function processCreate(mixed $data, ApiUser $user): mixed
     {
-        $model = \Mage::getModel($this->modelAlias);
+        $model = $this->newModel();
         $this->applyData($model, $data, $user);
         // Authorize after applyData so store-scoped defaults (e.g. an omitted
         // `stores` defaulting to all-stores) are validated, not just raw input.
         $this->authorizeEntity($model, $user);
-        $this->safeSave($model, "create {$this->entityLabel}");
+        $this->saveModel($model);
         $this->logApiActivity($this->entityType, 'create', null, $model);
         return $this->buildResponse($model, $data);
     }
 
     protected function processUpdate(int $id, mixed $data, ApiUser $user): mixed
     {
-        $model = $this->loadOrFail($this->modelAlias, $id, ucfirst($this->entityLabel) . ' not found');
+        $model = $this->loadModel($id);
         $this->authorizeEntity($model, $user);
         $oldData = $model->getData();
         $this->applyData($model, $data, $user);
-        $this->safeSave($model, "update {$this->entityLabel}");
+        $this->saveModel($model);
         $this->logApiActivity($this->entityType, 'update', $oldData, $model);
         return $this->buildResponse($model, $data);
     }
 
     protected function processDelete(int $id, ApiUser $user): null
     {
-        $model = $this->loadOrFail($this->modelAlias, $id, ucfirst($this->entityLabel) . ' not found');
+        $model = $this->loadModel($id);
         $this->authorizeEntity($model, $user);
         $oldData = $model->getData();
-        $this->safeDelete($model, "delete {$this->entityLabel}");
+        $this->deleteModel($model);
         $this->logApiActivity($this->entityType, 'delete', $oldData, null);
         return null;
+    }
+
+    /**
+     * Return a new model of $modelAlias for a create. A processor whose service gives a new record its defaults
+     * overrides it.
+     */
+    protected function newModel(): \Mage_Core_Model_Abstract
+    {
+        return \Mage::getModel($this->modelAlias);
+    }
+
+    /**
+     * Load the model of $modelAlias for an update or a delete. A processor whose resource has a service overrides
+     * loadModel(), saveModel() and deleteModel() to call the service.
+     *
+     * @throws \Mage_Core_Exception_NoSuchEntity
+     */
+    protected function loadModel(int $id): \Mage_Core_Model_Abstract
+    {
+        $model = \Mage::getModel($this->modelAlias);
+        try {
+            $model->load($id);
+        } catch (\Doctrine\DBAL\Exception\DriverException $e) {
+            // PostgreSQL refuses an ID above the range of the column (SQLSTATE 22003), and such an ID matches no row
+            if ($e->getSQLState() !== '22003') {
+                throw $e;
+            }
+        }
+        if (!$model->getId()) {
+            throw new \Mage_Core_Exception_NoSuchEntity(ucfirst((string) $this->entityLabel) . ' not found');
+        }
+        return $model;
+    }
+
+    protected function saveModel(\Mage_Core_Model_Abstract $model): void
+    {
+        $model->save();
+    }
+
+    protected function deleteModel(\Mage_Core_Model_Abstract $model): void
+    {
+        $model->delete();
     }
 
     /** Hook: entity-level authorization after load (e.g. store access checks). */
@@ -167,6 +205,19 @@ abstract class Processor implements ProcessorInterface
         }
 
         $context['args']['input'] = $this->parseRequestBody($context['request'] ?? null);
+    }
+
+    /**
+     * Return the ID in a GraphQL id argument: a plain ID ("5") or an IRI ("/api/rest/v2/addresses/5").
+     * Return 0 for any other value.
+     */
+    protected function parseGraphQlId(mixed $value): int
+    {
+        if (is_int($value)) {
+            return $value;
+        }
+
+        return is_string($value) && preg_match('#(?:^|/)(\d+)$#', $value, $matches) ? (int) $matches[1] : 0;
     }
 
 }

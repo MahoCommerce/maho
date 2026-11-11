@@ -126,11 +126,73 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
         return $this;
     }
 
+    /**
+     * Check the code and the tax class. A code that another group uses is a conflict of the resource model.
+     *
+     * @throws Mage_Core_Exception_Input with one error for each invalid field
+     * @throws Mage_Core_Exception_Conflict when the change renames NOT LOGGED IN
+     */
     #[\Override]
     protected function _beforeSave()
     {
+        $helper = Mage::helper('customer');
+        $errors = new Mage_Core_Exception_Input();
+
+        $code = trim((string) $this->getCode());
+        if ($code === '') {
+            $errors->addError('code', $helper->__('Customer group code is required.'));
+        } elseif (mb_strlen($code) > self::GROUP_CODE_MAX_LENGTH) {
+            $errors->addError('code', $helper->__('Customer group code must not exceed %d characters.', self::GROUP_CODE_MAX_LENGTH));
+        }
+        $this->setCode($code);
+        // The admin form does not let an admin rename the group of the guests, so no other write may
+        if ($this->getOrigData('customer_group_id') !== null
+            && (int) $this->getId() === self::NOT_LOGGED_IN_ID
+            && $this->dataHasChangedFor('customer_group_code')
+        ) {
+            throw new Mage_Core_Exception_Conflict($helper->__('The NOT LOGGED IN group cannot be renamed.'));
+        }
+
+        // Accept a stored tax class, because an admin can delete it after the group is saved
+        $taxClassId = (int) $this->getData('tax_class_id');
+        if ($this->getId() === null || $this->dataHasChangedFor('tax_class_id')) {
+            $taxClass = $taxClassId === 0 ? null : Mage::getModel('tax/class')->load($taxClassId);
+            if ($taxClass === null) {
+                $errors->addError('tax_class_id', $helper->__('Customer tax class is required.'));
+            } elseif ($taxClass->getClassType() !== Mage_Tax_Model_Class::TAX_CLASS_TYPE_CUSTOMER) {
+                $errors->addError('tax_class_id', $helper->__('Customer tax class not found with ID: %s', $taxClassId));
+            }
+        }
+
+        $this->addAttributeSetError($errors, 'customer_attribute_set_id', $this->getCustomerAttributeSetId(), 'customer');
+        $this->addAttributeSetError($errors, 'customer_address_attribute_set_id', $this->getCustomerAddressAttributeSetId(), 'customer_address');
+        $errors->throwIfErrors();
+
         $this->_prepareData();
         return parent::_beforeSave();
+    }
+
+    /**
+     * Add an error for $field to $errors when $setId is not a set of the entity type.
+     */
+    protected function addAttributeSetError(Mage_Core_Exception_Input $errors, string $field, ?int $setId, string $entityTypeCode): void
+    {
+        if (!$setId) {
+            return;
+        }
+        try {
+            Mage::helper('eav')->assertSetOfType($setId, Mage::getSingleton('eav/config')->getEntityType($entityTypeCode));
+        } catch (Mage_Core_Exception $e) {
+            $errors->addError($field, $e->getMessage());
+        }
+    }
+
+    #[\Deprecated(message: 'use addAttributeSetError(), which records the problem of each attribute set', since: '26.11')]
+    protected function validateAttributeSet(?int $setId, string $entityTypeCode): void
+    {
+        if ($setId) {
+            Mage::helper('eav')->assertSetOfType($setId, Mage::getSingleton('eav/config')->getEntityType($entityTypeCode));
+        }
     }
 
     /**
@@ -141,7 +203,7 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
     protected function _prepareData()
     {
         $this->setCode(
-            substr($this->getCode(), 0, self::GROUP_CODE_MAX_LENGTH),
+            mb_substr((string) $this->getCode(), 0, self::GROUP_CODE_MAX_LENGTH),
         );
         return $this;
     }
@@ -162,4 +224,25 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
         return $this->setData('tax_class_id', $value);
     }
 
+    public function getCustomerAttributeSetId(): ?int
+    {
+        $value = $this->getData('customer_attribute_set_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerAttributeSetId(?int $value): static
+    {
+        return $this->setData('customer_attribute_set_id', $value);
+    }
+
+    public function getCustomerAddressAttributeSetId(): ?int
+    {
+        $value = $this->getData('customer_address_attribute_set_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerAddressAttributeSetId(?int $value): static
+    {
+        return $this->setData('customer_address_attribute_set_id', $value);
+    }
 }

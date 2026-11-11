@@ -125,6 +125,7 @@ describe('Refund Flow - Single Gift Card', function () {
         $latestHistory = Mage::getResourceModel('giftcard/history_collection')
             ->addFieldToFilter('giftcard_id', $this->giftcard->getId())
             ->setOrder('created_at', 'DESC')
+            ->setOrder('history_id', 'DESC')
             ->getFirstItem();
 
         expect($latestHistory->getAction())->toBe(Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED);
@@ -923,6 +924,7 @@ describe('Refund Flow - Expired Card Expiration Extension', function () {
             ->addFieldToFilter('giftcard_id', $giftcard->getId())
             ->addFieldToFilter('action', Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED)
             ->setOrder('created_at', 'DESC')
+            ->setOrder('history_id', 'DESC')
             ->getFirstItem();
 
         expect($latestHistory->getComment())->toContain('expiration extended to 30 days from now');

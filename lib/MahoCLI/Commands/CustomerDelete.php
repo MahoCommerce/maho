@@ -59,7 +59,7 @@ class CustomerDelete extends BaseMahoCommand
         }
 
         foreach ($customers as $customer) {
-            $customer->delete();
+            \Mage::getService('customer/customer')->delete($customer);
         }
         $io->writeln(count($customers) === 1 ? "<info>Customer $email deleted.</info>" : '<info>Customers deleted.</info>');
         return Command::SUCCESS;

@@ -17,33 +17,20 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
     }
 
     /**
+     * Check the dates of $object, and the overlap with the other changes of its store view.
+     * An empty date removes that bound, and a date is stored as Y-m-d.
+     *
      * @param Mage_Core_Model_Design $object
+     * @throws Mage_Core_Exception_Input with one error for each invalid field
+     * @throws Mage_Core_Exception_Conflict when the dates overlap another change of the same store view
      */
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
-        $dateFrom = $object->getDateFrom();
-        $dateTo = $object->getDateTo();
-        if (!empty($dateFrom) && !empty($dateTo)) {
-            $helper = Mage::helper('core');
-            if ((!$helper->isValidDate($dateFrom) && !$helper->isValidDateTime($dateFrom))
-                || (!$helper->isValidDate($dateTo) && !$helper->isValidDateTime($dateTo))) {
-                Mage::throwException(Mage::helper('core')->__('Invalid date'));
-            }
-            if (strtotime($dateFrom) > strtotime($dateTo)) {
-                Mage::throwException(Mage::helper('core')->__('Start date cannot be greater than end date.'));
-            }
-        }
+        $this->addDateErrors($object, new Mage_Core_Exception_Input())->throwIfErrors();
 
-        $check = $this->_checkIntersection(
-            $object->getStoreId(),
-            $dateFrom,
-            $dateTo,
-            $object->getId(),
-        );
-
-        if ($check) {
-            Mage::throwException(
+        if ($this->_checkIntersection((int) $object->getStoreId(), $object->getDateFrom(), $object->getDateTo(), (int) $object->getId())) {
+            throw new Mage_Core_Exception_Conflict(
                 Mage::helper('core')->__('Your design change for the specified store intersects with another one, please specify another date range.'),
             );
         }
@@ -52,13 +39,49 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
     }
 
     /**
-     * Check intersections
+     * Write each date of $object as Y-m-d, or null when it is empty. Add an error to $errors for a value
+     * that is not a date, and for a start date after the end date. Return $errors.
+     */
+    public function addDateErrors(Mage_Core_Model_Design $object, Mage_Core_Exception_Input $errors): Mage_Core_Exception_Input
+    {
+        $dateFrom = $this->readDate($object, 'date_from', $errors);
+        $dateTo = $this->readDate($object, 'date_to', $errors);
+        if ($dateFrom !== null && $dateTo !== null && $dateFrom > $dateTo) {
+            $errors->addError('date_from', Mage::helper('core')->__('Start date cannot be greater than end date.'));
+        }
+        return $errors;
+    }
+
+    /**
+     * Write the date in $field of $object as Y-m-d, or null when it is empty, and return it.
+     * Add an error to $errors and return null when it is not a date.
+     */
+    private function readDate(Mage_Core_Model_Design $object, string $field, Mage_Core_Exception_Input $errors): ?string
+    {
+        $helper = Mage::helper('core');
+        $value = trim((string) $object->getData($field));
+        if ($value === '') {
+            $object->setData($field);
+            return null;
+        }
+        if (!$helper->isValidDate($value) && !$helper->isValidDateTime($value)) {
+            $errors->addError($field, $helper->__('The date "%s" is not valid. Use the format Y-m-d.', $value));
+            return null;
+        }
+        $date = substr($value, 0, 10);
+        $object->setData($field, $date);
+        return $date;
+    }
+
+    /**
+     * Return whether another change of $storeId applies on a day between $dateFrom and $dateTo.
+     * A null date is an open bound. The change $currentId does not count.
      *
      * @param int $storeId
-     * @param string $dateFrom
-     * @param string $dateTo
+     * @param string|null $dateFrom
+     * @param string|null $dateTo
      * @param int $currentId
-     * @return string
+     * @return bool
      */
     protected function _checkIntersection($storeId, $dateFrom, $dateTo, $currentId)
     {
@@ -118,7 +141,7 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
             $bind['date_from'] = $dateFrom;
         }
 
-        return $adapter->fetchOne($select, $bind);
+        return (bool) $adapter->fetchOne($select, $bind);
     }
 
     /**

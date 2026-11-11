@@ -24,6 +24,8 @@ class Mage_SalesRule_Model_Resource_Coupon extends Mage_Core_Model_Resource_Db_A
      * Perform actions before object save
      *
      * @return Mage_Core_Model_Resource_Db_Abstract
+     * @throws Mage_Core_Exception_Input when the new code is too long
+     * @throws Mage_Core_Exception_Conflict when another coupon has the new code
      */
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
@@ -33,7 +35,33 @@ class Mage_SalesRule_Model_Resource_Coupon extends Mage_Core_Model_Resource_Db_A
         // maintain single primary coupon per rule
         $object->setIsPrimary($object->getIsPrimary() ? 1 : null);
 
+        $code = (string) $object->getCode();
+        if ($object->isObjectNew() || $object->dataHasChangedFor('code')) {
+            // The cart refuses a longer code, so the coupon cannot apply
+            if (strlen($code) > Mage_Checkout_Helper_Cart::COUPON_CODE_MAX_LENGTH) {
+                throw new Mage_Core_Exception_Input()->addError('code', Mage::helper('salesrule')->__('The coupon code must have at most %d characters.', Mage_Checkout_Helper_Cart::COUPON_CODE_MAX_LENGTH));
+            }
+            if ($this->isCodeTaken($code, (int) $object->getId())) {
+                throw new Mage_Core_Exception_Conflict(Mage::helper('salesrule')->__('Coupon code \'%s\' already exists', $code));
+            }
+        }
+
         return parent::_beforeSave($object);
+    }
+
+    /**
+     * Tell whether a coupon other than $exceptCouponId has the code $code. Letter case does not matter, because
+     * the comparison of codes depends on the collation on MySQL.
+     */
+    public function isCodeTaken(string $code, int $exceptCouponId = 0): bool
+    {
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from($this->getMainTable(), ['coupon_id'])
+            ->where((string) $adapter->getCaseInsensitiveEqualsSql('code', '?'), $code)
+            ->where('coupon_id <> ?', $exceptCouponId)
+            ->limit(1);
+        return $adapter->fetchOne($select) !== false;
     }
 
     /**

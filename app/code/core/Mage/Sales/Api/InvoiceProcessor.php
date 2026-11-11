@@ -15,18 +15,10 @@ namespace Mage\Sales\Api;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
 {
     use \Maho\ApiPlatform\Trait\OrderItemsTrait;
-
-    private const CAPTURE_CASES = [
-        \Mage_Sales_Model_Order_Invoice::CAPTURE_ONLINE,
-        \Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE,
-        \Mage_Sales_Model_Order_Invoice::NOT_CAPTURE,
-    ];
 
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Invoice
@@ -36,20 +28,19 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
         $this->normalizeGraphQlInput($context);
 
         return match ($operationName) {
-            'invoice_capture' => $this->executeLifecycleAction('capture', $uriVariables),
-            'invoice_void' => $this->executeLifecycleAction('void', $uriVariables),
-            'invoice_cancel' => $this->executeLifecycleAction('cancel', $uriVariables),
+            'invoice_capture' => $this->executeLifecycleAction('captureInvoice', $uriVariables),
+            'invoice_void' => $this->executeLifecycleAction('voidInvoice', $uriVariables),
+            'invoice_cancel' => $this->executeLifecycleAction('cancelInvoice', $uriVariables),
             default => $this->createInvoice($uriVariables, $context),
         };
     }
 
     private function createInvoice(array $uriVariables, array $context): Invoice
     {
-        $orderId = (int) ($uriVariables['orderId'] ?? 0);
         $args = $context['args']['input'] ?? [];
         $captureCase = $args['capture'] ?? null;
-        if ($captureCase !== null && !in_array($captureCase, self::CAPTURE_CASES, true)) {
-            throw new UnprocessableEntityHttpException('Invalid capture mode; expected one of: ' . implode(', ', self::CAPTURE_CASES));
+        if ($captureCase !== null && !is_string($captureCase)) {
+            throw new BadRequestHttpException('capture must be a string');
         }
 
         $items = $args['items'] ?? null;
@@ -64,44 +55,28 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
 
         $notifyCustomer = RequestInput::of($args)->bool('notifyCustomer') ?? false;
 
-        $order = \Mage::getModel('sales/order')->load($orderId);
-        if (!$order->getId()) {
-            throw new NotFoundHttpException('Order not found');
-        }
-
+        $service = \Mage::getService('sales/order_document');
+        $order = \Mage::getService('sales/order')->getById((int) ($uriVariables['orderId'] ?? 0));
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         $qtys = [];
         foreach ($items ?? [] as $itemData) {
-            $entry = $this->parseOrderItemEntry($itemData, $order);
-            $qtys[(int) $entry['item']->getId()] = $entry['qty'];
+            $entry = $this->parseOrderItemEntry($itemData);
+            $qtys[$entry['orderItemId']] = $entry['qty'];
         }
 
-        $invoice = \Mage::getService('sales/order')->invoice($order, $qtys, $captureCase, $comment, $notifyCustomer);
-
-        return Invoice::fromModel($invoice);
+        return Invoice::fromModel($service->invoice($order, $qtys, $captureCase, $comment, $notifyCustomer));
     }
 
     /**
-     * @param 'capture'|'void'|'cancel' $action
+     * @param 'captureInvoice'|'voidInvoice'|'cancelInvoice' $method
      */
-    private function executeLifecycleAction(string $action, array $uriVariables): Invoice
+    private function executeLifecycleAction(string $method, array $uriVariables): Invoice
     {
-        $invoiceId = (int) ($uriVariables['id'] ?? 0);
-        $invoice = \Mage::getModel('sales/order_invoice')->load($invoiceId);
-        if (!$invoice->getId()) {
-            throw new NotFoundHttpException('Invoice not found');
-        }
-
+        $service = \Mage::getService('sales/order_document');
+        $invoice = $service->requireInvoice((int) ($uriVariables['id'] ?? 0));
         $this->assertStoreAllowed($invoice->getStoreId(), $this->requireUser(), 'invoice');
 
-        $service = \Mage::getService('sales/order');
-        $invoice = match ($action) {
-            'capture' => $service->captureInvoice($invoice),
-            'void' => $service->voidInvoice($invoice),
-            'cancel' => $service->cancelInvoice($invoice),
-        };
-
-        return Invoice::fromModel($invoice);
+        return Invoice::fromModel($service->{$method}($invoice));
     }
 }

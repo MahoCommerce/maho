@@ -36,6 +36,11 @@ class Mage_Review_Model_Review extends Mage_Core_Model_Abstract
     public const STATUS_PENDING        = 2;
     public const STATUS_NOT_APPROVED   = 3;
 
+    /** The longest values that the columns of review_detail hold. */
+    public const MAX_TITLE_LENGTH = 255;
+    public const MAX_NICKNAME_LENGTH = 128;
+    public const MAX_DETAIL_LENGTH = 65535;
+
     #[\Override]
     protected function _construct()
     {
@@ -96,31 +101,46 @@ class Mage_Review_Model_Review extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @return array|bool
+     * Refuse a new review, or a new title, detail or nickname, that validate() refuses. A stored review stays valid.
+     *
+     * @throws Mage_Core_Exception_Input
+     */
+    #[\Override]
+    protected function _beforeSave()
+    {
+        if (!$this->getId() || array_any(['title', 'detail', 'nickname'], $this->dataHasChangedFor(...))) {
+            Mage_Core_Exception_Input::assertValid($this->validate(), 'review');
+        }
+        return parent::_beforeSave();
+    }
+
+    /**
+     * Return true, or the message of each invalid field by the name of the field.
+     *
+     * @return array<string, string>|true
      */
     public function validate()
     {
+        $core = Mage::helper('core');
+        $helper = Mage::helper('review');
         $errors = [];
-
-        // Validate title
-        if (!Mage::helper('core')->isValidNotBlank($this->getTitle())) {
-            $errors[] = Mage::helper('review')->__('Review summary can\'t be empty');
+        if (!$core->isValidNotBlank($this->getTitle())) {
+            $errors['title'] = $helper->__('Review summary can\'t be empty');
+        } elseif (mb_strlen((string) $this->getTitle()) > self::MAX_TITLE_LENGTH) {
+            $errors['title'] = $helper->__('Review title cannot exceed %d characters', self::MAX_TITLE_LENGTH);
+        }
+        if (!$core->isValidNotBlank($this->getNickname())) {
+            $errors['nickname'] = $helper->__('Nickname can\'t be empty');
+        } elseif (mb_strlen((string) $this->getNickname()) > self::MAX_NICKNAME_LENGTH) {
+            $errors['nickname'] = $helper->__('Nickname cannot exceed %d characters', self::MAX_NICKNAME_LENGTH);
+        }
+        if (!$core->isValidNotBlank($this->getDetail())) {
+            $errors['detail'] = $helper->__('Review can\'t be empty');
+        } elseif (strlen((string) $this->getDetail()) > self::MAX_DETAIL_LENGTH) {
+            $errors['detail'] = $helper->__('Review detail is too long');
         }
 
-        // Validate nickname
-        if (!Mage::helper('core')->isValidNotBlank($this->getNickname())) {
-            $errors[] = Mage::helper('review')->__('Nickname can\'t be empty');
-        }
-
-        // Validate detail
-        if (!Mage::helper('core')->isValidNotBlank($this->getDetail())) {
-            $errors[] = Mage::helper('review')->__('Review can\'t be empty');
-        }
-
-        if (empty($errors)) {
-            return true;
-        }
-        return $errors;
+        return $errors === [] ? true : $errors;
     }
 
     /**
@@ -307,6 +327,21 @@ class Mage_Review_Model_Review extends Mage_Core_Model_Abstract
     {
         $value = $this->getData('title');
         return $value === null ? null : (string) $value;
+    }
+
+    public function setTitle(?string $value): static
+    {
+        return $this->setData('title', $value);
+    }
+
+    public function setDetail(?string $value): static
+    {
+        return $this->setData('detail', $value);
+    }
+
+    public function setNickname(?string $value): static
+    {
+        return $this->setData('nickname', $value);
     }
 
 }

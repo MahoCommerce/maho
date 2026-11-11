@@ -210,6 +210,30 @@ class Mage_Catalog_Model_Product_Type_Grouped extends Mage_Catalog_Model_Product
     }
 
     /**
+     * Check the products that the grouped link data adds: each must exist and have an allowed type.
+     *
+     * @param Mage_Catalog_Model_Product|null $product
+     * @return $this
+     * @throws Mage_Core_Exception_Input
+     */
+    #[\Override]
+    public function beforeSave($product = null)
+    {
+        parent::beforeSave($product);
+        $product = $this->getProduct($product);
+        $data = $product->getGroupedLinkData();
+        if (is_array($data)) {
+            $existing = $product->getId() ? ($this->getChildrenIds($product->getId(), false)[Mage_Catalog_Model_Product_Link::LINK_TYPE_GROUPED] ?? []) : [];
+            $this->_validateChildProducts(
+                array_values(array_diff(array_map(intval(...), array_keys($data)), array_map(intval(...), $existing))),
+                array_keys((array) Mage::getConfig()->getNode('global/catalog/product/type/grouped/allow_product_types')?->asArray()),
+                'child_product_id',
+            );
+        }
+        return $this;
+    }
+
+    /**
      * Retrieve related products identifiers
      *
      * @param Mage_Catalog_Model_Product $product

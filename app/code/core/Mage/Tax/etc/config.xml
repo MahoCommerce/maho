@@ -14,6 +14,11 @@ SPDX-License-Identifier: AFL-3.0
         <docs>
             <user>docs/user</user>
         </docs>
+        <services>
+            <tax>
+                <class>Mage_Tax_Service</class>
+            </tax>
+        </services>
         <models>
             <tax>
                 <class>Mage_Tax_Model</class>
@@ -228,7 +233,7 @@ SPDX-License-Identifier: AFL-3.0
                 <zero_tax>0</zero_tax>
             </sales_display>
             <notification>
-                <url>https://web.archive.org/web/20150315064836/https://www.magentocommerce.com/knowledge-base/entry/magento-ce-18-ee-113-tax-calc</url>
+                <url>https://mahocommerce.com/user-guide/tax-calculation/</url>
             </notification>
         </tax>
         <reports>

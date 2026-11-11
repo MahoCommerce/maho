@@ -20,6 +20,21 @@ class Mage_Wishlist_Block_Share_Email_Items extends Mage_Wishlist_Block_Abstract
     }
 
     /**
+     * Show the items of $wishlist, and not the wishlist of the customer session.
+     */
+    public function setWishlist(Mage_Wishlist_Model_Wishlist $wishlist): static
+    {
+        $this->_wishlist = $wishlist;
+        return $this;
+    }
+
+    #[\Override]
+    protected function _getWishlist()
+    {
+        return $this->_wishlist ?? parent::_getWishlist();
+    }
+
+    /**
      * Retrieve Product View URL
      *
      * @param Mage_Catalog_Model_Product $product
@@ -55,6 +70,9 @@ class Mage_Wishlist_Block_Share_Email_Items extends Mage_Wishlist_Block_Abstract
      */
     public function getSharedWishlistUrl($item): string
     {
+        if ($this->_wishlist) {
+            return Mage::getUrl('wishlist/shared/index', ['code' => $this->_wishlist->getSharingCode()]);
+        }
         return Mage::helper('wishlist')->getSharedWishlistUrl($item);
     }
 

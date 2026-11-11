@@ -8,35 +8,48 @@
 
 declare(strict_types=1);
 
+/**
+ * @method Maho_Blog_Model_Resource_Post getResource()
+ * @method Maho_Blog_Model_Resource_Post _getResource()
+ */
 class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
 {
     public const ENTITY = 'blog_post';
+
+    /** Lowercase letters and digits, in groups that one dash separates. */
+    public const URL_KEY_PATTERN = '/^[a-z0-9]+(-[a-z0-9]+)*$/';
 
     #[\Override]
     protected $_eventPrefix = 'blog_post';
     #[\Override]
     protected $_cacheTag = self::ENTITY;
 
-    /**
-     * Static attributes that are stored directly in the main entity table
-     */
-    protected array $_staticAttributes = [
-        'title',
-        'url_key',
-        'is_active',
-        'publish_date',
-        'content',
-        'short_content',
-        'meta_description',
-        'meta_keywords',
-        'meta_title',
-        'meta_robots',
-    ];
 
     #[\Override]
     protected function _construct()
     {
         $this->_init('blog/post');
+    }
+
+    /**
+     * Tell whether a visitor of the store view $storeId can read the post: it is active and published, and it is in
+     * that store view or in all store views.
+     */
+    public function isVisibleInStore(int $storeId): bool
+    {
+        return $this->getIsActive()
+            && $this->isPublished($storeId)
+            && array_intersect([Mage_Core_Model_App::ADMIN_STORE_ID, $storeId], array_map(intval(...), $this->getStores())) !== [];
+    }
+
+    /**
+     * publish_date is a date of the store view, so a post published today shows from 00:00 in the time zone of the store.
+     */
+    public function isPublished(int $storeId): bool
+    {
+        $publishDate = $this->getPublishDate();
+        return empty($publishDate)
+            || $publishDate <= Mage::app()->getLocale()->utcToStore($storeId)->format(Mage_Core_Model_Locale::DATE_FORMAT);
     }
 
     public function getStores(): array
@@ -86,7 +99,7 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
      */
     public function isStaticAttribute(string $attributeCode): bool
     {
-        return in_array($attributeCode, $this->_staticAttributes, true);
+        return in_array($attributeCode, $this->getStaticAttributes(), true);
     }
 
     /**
@@ -94,7 +107,30 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
      */
     public function getStaticAttributes(): array
     {
-        return $this->_staticAttributes;
+        return $this->_getResource()->getStaticAttributeCodes();
+    }
+
+    public function getAttributeSetId(): ?int
+    {
+        $value = $this->getData('attribute_set_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAttributeSetId(?int $value): static
+    {
+        return $this->setData('attribute_set_id', $value);
+    }
+
+    /**
+     * The attributes of the set of this record, keyed by code.
+     *
+     * @return array<string, Maho_Blog_Model_Resource_Eav_Attribute>
+     */
+    public function getAttributes(): array
+    {
+        return $this->_getResource()
+            ->loadAllAttributes($this)
+            ->getSortedAttributes($this->getAttributeSetId() ?: null);
     }
 
     /**

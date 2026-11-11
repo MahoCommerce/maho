@@ -494,8 +494,8 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     public function getDateFormatByPeriodType(?string $period = null): string
     {
         return match ($period) {
-            'month' => 'Y-m',     // Simple year-month format
-            'year' => 'Y',        // Just year
+            'month' => 'yyyy-MM',
+            'year' => 'yyyy',
             default => $this->getDateFormat(self::FORMAT_TYPE_MEDIUM),
         };
     }
@@ -871,6 +871,19 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
         }
 
         return gmdate($format, (int) $date);
+    }
+
+    /**
+     * Return the UTC `Y-m-d H:i:s` string for $value, a bound of a date range.
+     * A date with no time is the whole day, so an upper bound gets the time 23:59:59.
+     */
+    public function formatDateBoundaryForDb(string $value, bool $isUpperBound): string
+    {
+        $value = trim($value);
+        if ($isUpperBound && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) === 1) {
+            $value .= ' 23:59:59';
+        }
+        return (string) $this->formatDateForDb($value);
     }
 
     /**

@@ -87,6 +87,44 @@ class Mage_Eav_Model_Entity_Attribute_Group extends Mage_Core_Model_Abstract
         return $this->setData('default_id', $value);
     }
 
+    /**
+     * Return the labels of the group for each store view, by store id. A store view with no label
+     * uses the group name.
+     *
+     * @return array<int, string>
+     */
+    public function getStoreLabels(): array
+    {
+        if (!$this->hasData('store_labels')) {
+            $this->setData('store_labels', $this->getId() ? $this->_getResource()->getStoreLabels((int) $this->getId()) : []);
+        }
+        return $this->getData('store_labels');
+    }
+
+    /**
+     * Set the labels of the group for each store view, by store id. The save replaces all labels.
+     *
+     * @param array<int, string>|null $value
+     */
+    public function setStoreLabels(?array $value): static
+    {
+        return $this->setData('store_labels', $value);
+    }
+
+    /**
+     * Return the label of the group in $storeId as plain text, or the group name when the store
+     * view has no label. The set editor saves the group name with HTML entities, so this decodes it.
+     */
+    public function getStoreLabel(?int $storeId = null): string
+    {
+        $storeId ??= (int) Mage::app()->getStore()->getId();
+        $label = $this->hasData('store_label') ? $this->getData('store_label') : ($this->getStoreLabels()[$storeId] ?? null);
+        if ($label !== null && $label !== '') {
+            return (string) $label;
+        }
+        return html_entity_decode((string) $this->getAttributeGroupName(), ENT_QUOTES | ENT_HTML5);
+    }
+
     public function getSortOrder(): ?int
     {
         $value = $this->getData('sort_order');

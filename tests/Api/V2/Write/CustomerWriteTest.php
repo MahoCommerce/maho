@@ -101,7 +101,7 @@ describe('POST /api/rest/v2/customers (extended fields)', function (): void {
 
         $read = apiGet('/api/rest/v2/customers/' . (int) $response['json']['id'], adminToken());
         expect($read['json']['groupId'])->toBe(1)
-            ->and($read['json']['taxvat'])->toBeNull();
+            ->and($read['json']['taxvat'] ?? null)->toBeNull();
     });
 
     it('rejects a non-existent groupId', function (): void {
@@ -264,10 +264,23 @@ describe('Customer service errors', function (): void {
         [, $secondEmail] = createTestCustomer();
         $firstId = (int) $first['json']['id'];
 
-        $response = apiPut('/api/rest/v2/customers/me', ['email' => $secondEmail], customerToken($firstId));
+        $response = apiPut('/api/rest/v2/customers/me', ['email' => $secondEmail, 'currentPassword' => 'PestWrite1234!'], customerToken($firstId));
 
         expect($response['status'])->toBe(409);
         expect($response['json']['message'])->toBe('This email is already in use.');
+    });
+
+    it('returns 422 when a customer changes their email without the current password', function (): void {
+        [$create, $email] = createTestCustomer();
+        $id = (int) $create['json']['id'];
+
+        $response = apiPut('/api/rest/v2/customers/me', ['email' => 'new-' . $email], customerToken($id));
+
+        expect($response['status'])->toBe(422);
+        expect($response['json']['details']['errors'])->toBe([
+            ['field' => 'currentPassword', 'message' => 'Enter your current password to change your email.'],
+        ]);
+        expect(apiGet("/api/rest/v2/customers/{$id}", adminToken())['json']['email'])->toBe($email);
     });
 
     it('returns 422 for a wrong current password', function (): void {
@@ -404,6 +417,101 @@ describe('Customer address postcode', function (): void {
 
         expect($created['status'])->toBe(422);
         expect($created['json']['message'])->toContain('Please enter the zip/postal code.');
+    });
+
+});
+
+describe('GraphQL address mutations', function (): void {
+
+    $createAddress = function (int $customerId): int {
+        $created = apiPost('/api/rest/v2/customers/me/addresses', [
+            'firstname' => 'Pest',
+            'lastname' => 'Writer',
+            'street' => ['Via Roma 3'],
+            'city' => 'Milano',
+            'postcode' => '20121',
+            'countryId' => 'IT',
+            'telephone' => '+39 02 7654321',
+        ], customerToken($customerId));
+        expect($created['status'])->toBeSuccessful();
+
+        return (int) $created['json']['id'];
+    };
+
+    it('updates an address that the id names as a plain ID', function () use ($createAddress): void {
+        [$create] = createTestCustomer();
+        $customerId = (int) $create['json']['id'];
+        $addressId = $createAddress($customerId);
+
+        $response = gqlQuery(
+            'mutation { updateAddress(input: {id: "' . $addressId . '", city: "Torino"}) { address { city } } }',
+            [],
+            customerToken($customerId),
+        );
+
+        expect($response['json']['errors'] ?? [])->toBeEmpty()
+            ->and($response['json']['data']['updateAddress']['address']['city'] ?? null)->toBe('Torino')
+            ->and(Mage::getModel('customer/address')->load($addressId)->getCity())->toBe('Torino');
+    });
+
+    it('updates an address that the id names as an IRI', function () use ($createAddress): void {
+        [$create] = createTestCustomer();
+        $customerId = (int) $create['json']['id'];
+        $addressId = $createAddress($customerId);
+
+        $response = gqlQuery(
+            'mutation { updateAddress(input: {id: "/api/rest/v2/addresses/' . $addressId . '", city: "Genova"}) { address { city } } }',
+            [],
+            customerToken($customerId),
+        );
+
+        expect($response['json']['errors'] ?? [])->toBeEmpty()
+            ->and($response['json']['data']['updateAddress']['address']['city'] ?? null)->toBe('Genova');
+    });
+
+    it('refuses to update the address of another customer', function () use ($createAddress): void {
+        [$owner] = createTestCustomer();
+        $addressId = $createAddress((int) $owner['json']['id']);
+        [$other] = createTestCustomer();
+
+        $response = gqlQuery(
+            'mutation { updateAddress(input: {id: "' . $addressId . '", city: "Torino"}) { address { city } } }',
+            [],
+            customerToken((int) $other['json']['id']),
+        );
+
+        expect($response['json']['errors'] ?? [])->not->toBeEmpty()
+            ->and(Mage::getModel('customer/address')->load($addressId)->getCity())->toBe('Milano');
+    });
+
+    it('refuses to delete the address of another customer', function () use ($createAddress): void {
+        [$owner] = createTestCustomer();
+        $addressId = $createAddress((int) $owner['json']['id']);
+        [$other] = createTestCustomer();
+
+        $response = gqlQuery(
+            'mutation { deleteAddress(input: {id: "' . $addressId . '"}) { address { id } } }',
+            [],
+            customerToken((int) $other['json']['id']),
+        );
+
+        expect($response['json']['errors'] ?? [])->not->toBeEmpty()
+            ->and(Mage::getModel('customer/address')->load($addressId)->getId())->not->toBeNull();
+    });
+
+    it('deletes an address that the id names as an IRI', function () use ($createAddress): void {
+        [$create] = createTestCustomer();
+        $customerId = (int) $create['json']['id'];
+        $addressId = $createAddress($customerId);
+
+        $response = gqlQuery(
+            'mutation { deleteAddress(input: {id: "/api/rest/v2/addresses/' . $addressId . '"}) { address { id } } }',
+            [],
+            customerToken($customerId),
+        );
+
+        expect($response['json']['errors'] ?? [])->toBeEmpty()
+            ->and(Mage::getModel('customer/address')->load($addressId)->getId())->toBeNull();
     });
 
 });

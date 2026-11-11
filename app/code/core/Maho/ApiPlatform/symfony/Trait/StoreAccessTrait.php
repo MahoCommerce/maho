@@ -48,7 +48,7 @@ trait StoreAccessTrait
     /**
      * Convert store codes from API input to store IDs, enforcing the user's allowed stores.
      *
-     * @param array<string> $stores  Store codes or ['all']
+     * @param array<int|string> $stores  Store IDs, store codes or ['all']
      * @return array<int>
      * @throws AccessDeniedHttpException If the user cannot access a requested store
      */

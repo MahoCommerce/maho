@@ -23,6 +23,14 @@ final class CustomerGroupProvider extends CrudProvider
     protected array $defaultSort = ['customer_group_code' => 'ASC'];
 
     #[\Override]
+    protected function provideItem(int|string $id): \Maho\ApiPlatform\Resource
+    {
+        /** @var \Mage_Customer_Service_Group $service */
+        $service = \Mage::getService('customer/group');
+        return $this->toDto($service->getById((int) $id));
+    }
+
+    #[\Override]
     protected function applyCollectionFilters(object $collection, array $filters): void
     {
         parent::applyCollectionFilters($collection, $filters);
