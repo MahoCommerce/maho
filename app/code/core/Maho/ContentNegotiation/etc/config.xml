@@ -83,4 +83,16 @@ blog/index/category</allowed_routes>
             </modules>
         </translate>
     </frontend>
+
+    <adminhtml>
+        <translate>
+            <modules>
+                <Maho_ContentNegotiation>
+                    <files>
+                        <default>Maho_ContentNegotiation.csv</default>
+                    </files>
+                </Maho_ContentNegotiation>
+            </modules>
+        </translate>
+    </adminhtml>
 </config>

@@ -11,7 +11,7 @@ use Tests\MahoBackendTestCase;
 
 /**
  * Mage_Core_Model_Translate::getModulesConfig() reads <translate><modules> from the node of the
- * current area only: frontend or adminhtml. A module CSV that is declared nowhere else is never loaded.
+ * current area only: frontend or adminhtml. The translator ignores a CSV that only the global node declares.
  */
 
 uses(MahoBackendTestCase::class);
@@ -32,6 +32,16 @@ it('declares the CSV of every Maho module in the frontend or adminhtml area', fu
     $missing = array_filter(
         mahoModulesWithCsv(),
         fn(string $module): bool => Mage::getConfig()->getNode("frontend/translate/modules/$module") === false
+            && Mage::getConfig()->getNode("adminhtml/translate/modules/$module") === false,
+    );
+
+    expect(array_values($missing))->toBe([]);
+});
+
+it('declares the CSV of every Maho module that has admin configuration in the adminhtml area', function () {
+    $missing = array_filter(
+        mahoModulesWithCsv(),
+        fn(string $module): bool => is_file(Mage::getBaseDir() . '/app/code/core/Maho/' . substr($module, 5) . '/etc/system.xml')
             && Mage::getConfig()->getNode("adminhtml/translate/modules/$module") === false,
     );
 
