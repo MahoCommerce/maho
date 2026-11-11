@@ -16,6 +16,11 @@ use Tests\MahoBackendTestCase;
 
 uses(MahoBackendTestCase::class);
 
+function mahoDeclaresCsv(string $area, string $module): bool
+{
+    return (string) Mage::getConfig()->getNode("$area/translate/modules/$module/files/default") === "$module.csv";
+}
+
 /**
  * @return list<string> the module names that have a CSV in app/locale/en_US
  */
@@ -31,8 +36,7 @@ function mahoModulesWithCsv(): array
 it('declares the CSV of every Maho module in the frontend or adminhtml area', function () {
     $missing = array_filter(
         mahoModulesWithCsv(),
-        fn(string $module): bool => Mage::getConfig()->getNode("frontend/translate/modules/$module") === false
-            && Mage::getConfig()->getNode("adminhtml/translate/modules/$module") === false,
+        fn(string $module): bool => !mahoDeclaresCsv('frontend', $module) && !mahoDeclaresCsv('adminhtml', $module),
     );
 
     expect(array_values($missing))->toBe([]);
@@ -42,10 +46,14 @@ it('declares the CSV of every Maho module that has admin configuration in the ad
     $missing = array_filter(
         mahoModulesWithCsv(),
         fn(string $module): bool => is_file(Mage::getBaseDir() . '/app/code/core/Maho/' . substr($module, 5) . '/etc/system.xml')
-            && Mage::getConfig()->getNode("adminhtml/translate/modules/$module") === false,
+            && !mahoDeclaresCsv('adminhtml', $module),
     );
 
     expect(array_values($missing))->toBe([]);
+});
+
+it('loads the ContentNegotiation CSV on the storefront', function () {
+    expect(mahoDeclaresCsv('frontend', 'Maho_ContentNegotiation'))->toBeTrue();
 });
 
 it('declares no translate file in the global area', function () {
@@ -55,7 +63,5 @@ it('declares no translate file in the global area', function () {
 });
 
 it('loads the Gift Card CSV on the storefront', function () {
-    $node = Mage::getConfig()->getNode('frontend/translate/modules/Maho_Giftcard/files/default');
-
-    expect((string) $node)->toBe('Maho_Giftcard.csv');
+    expect(mahoDeclaresCsv('frontend', 'Maho_Giftcard'))->toBeTrue();
 });
