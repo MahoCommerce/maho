@@ -87,6 +87,12 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     {
         $this->_app->dispatchEvent('catalogrule_before_apply', ['resource' => $this->_resource]);
 
+        $productId = $this->_getProduct();
+        $this->_addAffectedProductsFromRulePrices($productId);
+        if ($productId !== null) {
+            $this->_addAffectedProductId($productId);
+        }
+
         $timestamp = time();
 
         foreach ($this->_app->getWebsites(false) as $website) {
@@ -96,7 +102,40 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
         }
 
         $this->_prepareGroupWebsite($timestamp);
+        $this->_addAffectedProductsFromRulePrices($productId);
         $this->_prepareAffectedProduct();
+    }
+
+    /**
+     * Add products with existing or rebuilt rule prices to the affected set.
+     */
+    protected function _addAffectedProductsFromRulePrices(?int $productId): void
+    {
+        $select = $this->_connection->select()
+            ->from($this->_resource->getTable('catalogrule/rule_product_price'), ['product_id'])
+            ->distinct();
+
+        if ($productId !== null) {
+            $select->where('product_id = ?', $productId);
+        }
+
+        $this->_connection->query($this->_connection->insertFromSelect(
+            $select,
+            $this->_resource->getTable('catalogrule/affected_product'),
+            ['product_id'],
+            Maho\Db\Adapter\AdapterInterface::INSERT_IGNORE,
+        ));
+    }
+
+    /**
+     * Keep a row refresh affected even when its previous and new prices are absent.
+     */
+    protected function _addAffectedProductId(int $productId): void
+    {
+        $this->_connection->insertIgnore(
+            $this->_resource->getTable('catalogrule/affected_product'),
+            ['product_id' => $productId],
+        );
     }
 
     /**
