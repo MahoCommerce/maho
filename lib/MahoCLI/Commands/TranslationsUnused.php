@@ -77,12 +77,23 @@ class TranslationsUnused extends BaseMahoCommand
      */
     protected function getFiles(): array
     {
-        $files = array_merge(
+        $files = [];
+        foreach ([
             // Grep for all files that might call the __ function
-            explode("\n", (string) shell_exec("grep -Frl --exclude-dir='.git' --include=*.php --include=*.phtml '__' .")),
+            "grep -Frl --exclude-dir='.git' --include=*.php --include=*.phtml '__' .",
             // Grep for all XML files that might use the translate attribute
-            explode("\n", (string) shell_exec("grep -Frl --exclude-dir='.git' --include=*.xml 'translate=' .")),
-        );
+            "grep -Frl --exclude-dir='.git' --include=*.xml 'translate=' .",
+        ] as $search) {
+            $matches = [];
+            $status = 0;
+            $result = exec($search, $matches, $status);
+            // Grep returns 1 for a complete search without matches.
+            if ($result === false || ($status !== 0 && $status !== 1)) {
+                $this->scanIncomplete = true;
+                fwrite(STDERR, "WARNING: Translation source discovery failed (exit $status): $search\n");
+            }
+            $files = array_merge($files, $matches);
+        }
         return array_filter(array_map(trim(...), $files));
     }
 
