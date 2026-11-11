@@ -28,10 +28,7 @@ class Maho_Blog_Service_Post
     public function getById(int $id): Maho_Blog_Model_Post
     {
         /** @var Maho_Blog_Model_Post $post */
-        $post = Mage::getModel('blog/post');
-        if ($id > 0) {
-            $post->load($id);
-        }
+        $post = Mage::getModel('blog/post')->load($id);
         if (!$post->getId()) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('blog')->__('This post no longer exists.'));
         }
@@ -43,8 +40,7 @@ class Maho_Blog_Service_Post
      */
     public function isEnabled(int $storeId): bool
     {
-        return Mage::helper('blog')->isModuleEnabled()
-            && !Mage::getStoreConfigFlag('advanced/modules_disable_output/Maho_Blog', $storeId);
+        return Mage::helper('blog')->isEnabled($storeId);
     }
 
     /**
@@ -56,9 +52,7 @@ class Maho_Blog_Service_Post
     {
         $this->checkEnabled($storeId);
         $post = $this->getById($id);
-        if (!$post->getIsActive() || !$this->isPublished($post, $storeId)
-            || array_intersect([Mage_Core_Model_App::ADMIN_STORE_ID, $storeId], array_map(intval(...), $post->getStores())) === []
-        ) {
+        if (!$post->isVisibleInStore($storeId)) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('blog')->__('This post no longer exists.'));
         }
         return $post;
@@ -74,16 +68,6 @@ class Maho_Blog_Service_Post
     {
         $this->checkEnabled($storeId);
         return $collection->addPublishedFilter($storeId);
-    }
-
-    /**
-     * publish_date is a date of the store view, so a post published today shows from 00:00 in the time zone of the store.
-     */
-    public function isPublished(Maho_Blog_Model_Post $post, int $storeId): bool
-    {
-        $publishDate = $post->getPublishDate();
-        return empty($publishDate)
-            || $publishDate <= Mage::app()->getLocale()->utcToStore($storeId)->format(Mage_Core_Model_Locale::DATE_FORMAT);
     }
 
     /**

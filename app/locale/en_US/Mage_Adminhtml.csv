@@ -967,7 +967,6 @@
 "The lifetime statistics will be updated in the background. A message in the notifications tells you when each report is updated.","The lifetime statistics will be updated in the background. A message in the notifications tells you when each report is updated."
 "The Maho cache has been flushed and updates applied.","The Maho cache has been flushed and updates applied."
 "The minified CSS/JS cache was cleaned.","The minified CSS/JS cache was cleaned."
-"The new order #%s was created, but the old order #%s was not canceled: %s","The new order #%s was created, but the old order #%s was not canceled: %s"
 "The profile has been deleted.","The profile has been deleted."
 "The profile has been saved.","The profile has been saved."
 "The profile you are trying to save no longer exists","The profile you are trying to save no longer exists"

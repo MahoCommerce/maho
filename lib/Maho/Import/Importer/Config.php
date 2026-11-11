@@ -2,7 +2,8 @@
 
 /**
  * core_config_data rows scoped by website or store code, with lookups resolved at import time. Each row goes
- * through the config service, so a path that no field declares is refused unless the undeclared option is set.
+ * through the config service. The operator of the server runs the import, so it saves any path at any scope that
+ * exists. With the strict option, it refuses a path that no field declares and a scope where the field does not show.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -51,9 +52,9 @@ class Config extends AbstractImporter
             $row['scope_id'] = $this->at($file, $line, fn() => $this->resolver->scopeId($scope, $scopeCode));
             $this->at($file, $line, fn() => $this->resolver->expand($row['value']));
             try {
-                self::service()->assertWritable($path, $scope, $row['scope_id'], !empty($options['undeclared']));
+                self::service()->assertWritable($path, $scope, $row['scope_id'], empty($options['strict']));
             } catch (\Mage_Core_Exception_NoSuchEntity) {
-                $this->fail($file, $line, "path '$path' is not a field of System > Configuration, use the undeclared option to import it");
+                $this->fail($file, $line, "path '$path' is not a field of System > Configuration");
             } catch (\Mage_Core_Exception $e) {
                 $this->fail($file, $line, $e->getMessage());
             }
@@ -87,7 +88,7 @@ class Config extends AbstractImporter
                 }
             })();
             try {
-                self::service()->saveAll($values, !empty($options['undeclared']));
+                self::service()->saveAll($values, empty($options['strict']));
             } catch (\Mage_Core_Exception $e) {
                 $this->fail($file, $line, $e->getMessage());
             }

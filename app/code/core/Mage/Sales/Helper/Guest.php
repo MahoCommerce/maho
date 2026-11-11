@@ -93,6 +93,23 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
     }
 
     /**
+     * Load the order that the cookie $cookie of the guest order form names.
+     *
+     * @param string|null $cookie
+     * @return null|Mage_Sales_Model_Order
+     */
+    #[\Deprecated('No core code calls it. Use Mage_Sales_Service_Order::findForGuestByProtectCode().', since: '27.1')]
+    protected function _loadOrderByCookie($cookie = null)
+    {
+        [$protectCode, $incrementId] = array_pad(explode(':', (string) base64_decode((string) $cookie)), 2, '');
+        $order = $protectCode !== '' && $incrementId !== ''
+            ? Mage::getService('sales/order')->findByIncrementId($incrementId)
+            : null;
+
+        return $order && hash_equals((string) $order->getProtectCode(), $protectCode) ? $order : null;
+    }
+
+    /**
      * Getter for $this->_cookieName
      *
      * @return string

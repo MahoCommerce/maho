@@ -17,12 +17,7 @@ class Mage_Customer_Service_Group
      */
     public function getById(int $id): Mage_Customer_Model_Group
     {
-        /** @var Mage_Customer_Model_Group $group */
-        $group = Mage::getModel('customer/group');
-        // A lookup in PHP: PostgreSQL refuses a query with an ID that is out of range for the column
-        if (array_key_exists($id, Mage::getResourceModel('customer/group_collection')->toOptionHash())) {
-            $group->load($id);
-        }
+        $group = Mage::getModel('customer/group')->load($id);
         if ($group->getId() === null) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('customer')->__('Customer group not found with ID: %s', $id));
         }

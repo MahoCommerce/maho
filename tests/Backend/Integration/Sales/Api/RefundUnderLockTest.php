@@ -10,7 +10,7 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * The admin saves a credit memo through Mage_Sales_Service_Order::refund(), which loads the order again under the
+ * The admin saves a credit memo through Mage_Sales_Service_Order_Document::refund(), which loads the order again under the
  * order lock and prepares the credit memo there (#1348). The admin gives its event as the $beforeRegister callback.
  * No method saves a credit memo that a transport prepared before the lock.
  */
@@ -51,7 +51,7 @@ afterEach(function (): void {
 
 it('gives the callback the credit memo of the order that it loads under the lock', function (): void {
     $seen = [];
-    $creditmemo = Mage::getService('sales/order')->refund(
+    $creditmemo = Mage::getService('sales/order_document')->refund(
         $this->order,
         [],
         beforeRegister: function (Mage_Sales_Model_Order_Creditmemo $creditmemo) use (&$seen): void {
@@ -66,9 +66,9 @@ it('gives the callback the credit memo of the order that it loads under the lock
 it('refuses a second refund from an order object that was loaded before the first refund', function (): void {
     $stale = Mage::getModel('sales/order')->load($this->order->getId());
     $calls = 0;
-    Mage::getService('sales/order')->refund($this->order, []);
+    Mage::getService('sales/order_document')->refund($this->order, []);
 
-    expect(fn() => Mage::getService('sales/order')->refund($stale, [], beforeRegister: function () use (&$calls): void {
+    expect(fn() => Mage::getService('sales/order_document')->refund($stale, [], beforeRegister: function () use (&$calls): void {
         $calls++;
     }))->toThrow(Mage_Core_Exception_Conflict::class);
 
@@ -79,5 +79,5 @@ it('refuses a second refund from an order object that was loaded before the firs
 });
 
 it('has no method that saves a credit memo that was prepared before the lock', function (): void {
-    expect(method_exists(Mage::getService('sales/order'), 'saveCreditmemo'))->toBeFalse();
+    expect(method_exists(Mage::getService('sales/order_document'), 'saveCreditmemo'))->toBeFalse();
 });

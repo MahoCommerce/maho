@@ -101,6 +101,11 @@ class Mage_Directory_Model_Observer
      */
     protected function _fetchRatesFromService(string $code, array &$warnings): ?array
     {
+        $chain = $this->_getImportServiceChain();
+        if (!isset($chain[$code])) {
+            // Before the currency service, the first argument was the model alias of the import service
+            $code = (string) (array_find_key($chain, static fn(array $service): bool => $service['model'] === $code) ?? $code);
+        }
         try {
             /** @var Mage_Directory_Service_Currency $service */
             $service = Mage::getService('directory/currency');

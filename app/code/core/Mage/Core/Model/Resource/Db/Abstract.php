@@ -347,7 +347,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
         $field ??= $this->getIdFieldName();
 
         $read = $this->_getReadAdapter();
-        if ($read && !is_null($value)) {
+        if ($read && !is_null($value) && $this->_canFieldHoldValue($field, $value)) {
             $select = $this->_getLoadSelect($field, $value, $object);
             $data = $read->fetchRow($select);
 
@@ -360,6 +360,17 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
         $this->_afterLoad($object);
 
         return $this;
+    }
+
+    /**
+     * Return false when $field is an integer column of the main table and $value is out of its range. No row has
+     * such a value, and PostgreSQL refuses the query. The check uses the value as _getLoadSelect() converts it.
+     */
+    protected function _canFieldHoldValue(string $field, mixed $value): bool
+    {
+        $read = $this->_getReadAdapter();
+        $column = $read->describeTable($this->getMainTable())[$field] ?? null;
+        return $column === null || $read->canColumnHoldValue($column, $read->prepareColumnValue($column, $value));
     }
 
     /**

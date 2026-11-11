@@ -95,12 +95,7 @@ class Mage_Reports_Service_Statistics
     private function checkRateLimit(string $caller): void
     {
         $limit = (int) Mage::getStoreConfig(self::XML_PATH_RATE_LIMIT);
-        if (!Mage::helper('core')->rateLimiterBy('reports_refresh', 'reports_refresh:' . $caller, $limit, self::RATE_LIMIT_WINDOW)->attempt()) {
-            throw new Mage_Core_Exception_TooManyRequests(
-                Mage::helper('reports')->__('Too many requests. Please try again later.'),
-                self::RATE_LIMIT_WINDOW,
-            );
-        }
+        Mage::helper('core')->rateLimiterBy('reports_refresh', 'reports_refresh:' . $caller, $limit, self::RATE_LIMIT_WINDOW)->attemptOrThrow();
     }
 
     private function statistics(): Mage_Reports_Model_Statistics

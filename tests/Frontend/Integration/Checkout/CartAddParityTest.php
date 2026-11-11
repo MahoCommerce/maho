@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Mage\Checkout\Api\CartProcessor;
@@ -296,16 +297,60 @@ it('refuses an uploaded file for an option that is not a file option', function 
         ->and(cartAddParityLines($apiCart))->toBe([]);
 });
 
-it('refuses a qty above 10,000 with the same message', function () {
-    $this->products[] = $product = cartAddParityProduct(stock: ['manage_stock' => 0]);
+it('refuses a qty above the maximum sale qty of the product with the same message', function () {
+    $this->products[] = $product = cartAddParityProduct(stock: ['manage_stock' => 0, 'use_config_max_sale_qty' => 0, 'max_sale_qty' => 5]);
     [$webCart, $apiCart] = $this->carts;
 
-    $web = cartAddViaWeb($webCart, $product, ['qty' => 10001]);
+    $web = cartAddViaWeb($webCart, $product, ['qty' => 6]);
+    $api = cartAddViaApi($apiCart, $product, ['qty' => 6]);
+
+    expect($web['errors'])->toBe(['The maximum quantity allowed for purchase is 5.'])
+        ->and($api['status'])->toBe(422)
+        ->and($api['errors'])->toBe(['The maximum quantity allowed for purchase is 5.'])
+        ->and(cartAddParityLines($webCart))->toBe([])
+        ->and(cartAddParityLines($apiCart))->toBe([]);
+});
+
+it('accepts a qty above 10,000 for a product whose maximum sale qty allows it', function () {
+    $this->products[] = $product = cartAddParityProduct(stock: ['manage_stock' => 0, 'use_config_max_sale_qty' => 0, 'max_sale_qty' => 20000]);
+    [$webCart, $apiCart] = $this->carts;
+
+    cartAddViaWeb($webCart, $product, ['qty' => 10001]);
     $api = cartAddViaApi($apiCart, $product, ['qty' => 10001]);
 
-    expect($web['errors'])->toBe(['Quantity cannot exceed 10,000'])
-        ->and($api['status'])->toBe(422)
-        ->and($api['errors'])->toBe(['Quantity cannot exceed 10,000']);
+    $line = [['product_id' => (int) $product->getId(), 'qty' => 10001.0, 'parent' => true]];
+    expect($api['status'])->toBe(200)
+        ->and(cartAddParityLines($webCart))->toBe($line)
+        ->and(cartAddParityLines($apiCart))->toBe($line);
+});
+
+describe('PHP code that adds a product through the cart model', function () {
+    it('adds a product that the storefront does not show, which a client cannot add', function () {
+        $this->products[] = $product = cartAddParityProduct(['visibility' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE]);
+        [$modelCart, $webCart] = $this->carts;
+
+        Mage::getSingleton('checkout/session')->replaceQuote(Mage::getModel('sales/quote')->loadByIdWithoutStore($modelCart->getId()));
+        $cart = Mage::getSingleton('checkout/cart');
+        $cart->unsetData('quote');
+        $cart->addProduct(Mage::getModel('catalog/product')->setStoreId(1)->load($product->getId()), ['qty' => 2])->save();
+        $web = cartAddViaWeb($webCart, $product, ['qty' => 2]);
+
+        expect(cartAddParityLines($modelCart))->toBe([['product_id' => (int) $product->getId(), 'qty' => 2.0, 'parent' => true]])
+            ->and($web['errors'])->toBe(["Product '{$product->getSku()}' is not available"])
+            ->and(cartAddParityLines($webCart))->toBe([]);
+    });
+
+    it('adds one unit for a qty of 0, as the cart line does', function () {
+        $this->products[] = $product = cartAddParityProduct();
+        [$modelCart] = $this->carts;
+
+        Mage::getSingleton('checkout/session')->replaceQuote(Mage::getModel('sales/quote')->loadByIdWithoutStore($modelCart->getId()));
+        $cart = Mage::getSingleton('checkout/cart');
+        $cart->unsetData('quote');
+        $cart->addProduct(Mage::getModel('catalog/product')->setStoreId(1)->load($product->getId()), ['qty' => 0])->save();
+
+        expect(cartAddParityLines($modelCart))->toBe([['product_id' => (int) $product->getId(), 'qty' => 1.0, 'parent' => true]]);
+    });
 });
 
 it('fires the add events for an add of the API, as for the storefront', function () {
@@ -400,6 +445,84 @@ describe('a qty of 0 on an update (D4)', function () {
         expect(cartAddParityLines($webCart))->toBe([])
             ->and($api['status'])->toBe(422)
             ->and($api['errors'])->toBe(['Quantity must be greater than zero'])
+            ->and(cartAddParityLines($apiCart))->toHaveCount(1);
+    });
+});
+
+describe('the removal of a line', function () {
+    /**
+     * Post the removal of the line $itemId to the cart page, with $quote as the cart of the session.
+     *
+     * @return list<string> the error messages of the session
+     */
+    function cartRemoveViaWeb(Mage_Sales_Model_Quote $quote, int $itemId): array
+    {
+        $session = Mage::getSingleton('checkout/session');
+        $session->replaceQuote(Mage::getModel('sales/quote')->loadByIdWithoutStore($quote->getId()));
+        $session->getMessages(true);
+        Mage::getSingleton('checkout/cart')->unsetData('quote');
+        $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/checkout/cart/delete', 'POST', ['id' => $itemId]));
+        $request->setRouteName('checkout')->setControllerName('cart')->setActionName('delete')->setDispatched(true);
+        Mage::app()->setRequest($request);
+        new Mage_Checkout_CartController($request, new Mage_Core_Controller_Response_Http())->deleteAction();
+
+        $errors = [];
+        foreach ($session->getMessages(true)->getItems() as $message) {
+            if ($message->getType() === Mage_Core_Model_Message::ERROR) {
+                $errors[] = $message->getText();
+            }
+        }
+        return $errors;
+    }
+
+    /**
+     * Call DELETE /api/rest/v2/guest-carts/{id}/items/{itemId}.
+     *
+     * @return array{status: int, result: mixed, errors: list<string>, fields: list<string>}
+     */
+    function cartRemoveViaApi(Mage_Sales_Model_Quote $quote, int $itemId): array
+    {
+        $maskedId = (string) $quote->getData('masked_quote_id');
+        $request = AdminApiParity::jsonRequest('DELETE', "/api/rest/v2/guest-carts/{$maskedId}/items/{$itemId}");
+        $processor = new CartProcessor(CartParity::guestSecurity());
+
+        return AdminApiParity::api($request, fn() => $processor->process(null, new Delete(name: 'remove_guest_item'), ['id' => $maskedId, 'itemId' => $itemId], ['request' => $request]));
+    }
+
+    beforeEach(function () {
+        $this->products[] = $product = cartAddParityProduct();
+        /** @var Mage_Checkout_Service_Cart $service */
+        $service = Mage::getService('checkout/cart');
+        $this->itemIds = [];
+        foreach ($this->carts as $cart) {
+            $this->itemIds[] = (int) $service->addProduct($cart, $service->getProductById((int) $product->getId(), 1), new Maho\DataObject(['qty' => 2]))->getId();
+        }
+    });
+
+    it('removes the line on both transports', function () {
+        [$webCart, $apiCart] = $this->carts;
+
+        $web = cartRemoveViaWeb($webCart, $this->itemIds[0]);
+        $api = cartRemoveViaApi($apiCart, $this->itemIds[1]);
+
+        expect($web)->toBe([])
+            ->and($api['status'])->toBe(200)
+            ->and(cartAddParityLines($webCart))->toBe([])
+            ->and(cartAddParityLines($apiCart))->toBe([])
+            ->and((float) Mage::getModel('sales/quote')->loadByIdWithoutStore($webCart->getId())->getGrandTotal())->toBe(0.0)
+            ->and((float) Mage::getModel('sales/quote')->loadByIdWithoutStore($apiCart->getId())->getGrandTotal())->toBe(0.0);
+    });
+
+    it('keeps the cart for a line of another cart: the cart page shows no error, and the API gives a 404', function () {
+        [$webCart, $apiCart] = $this->carts;
+
+        $web = cartRemoveViaWeb($webCart, $this->itemIds[1]);
+        $api = cartRemoveViaApi($apiCart, $this->itemIds[0]);
+
+        expect($web)->toBe([])
+            ->and($api['status'])->toBe(404)
+            ->and($api['errors'])->toBe(["Cart item with ID '{$this->itemIds[0]}' not found"])
+            ->and(cartAddParityLines($webCart))->toHaveCount(1)
             ->and(cartAddParityLines($apiCart))->toHaveCount(1);
     });
 });

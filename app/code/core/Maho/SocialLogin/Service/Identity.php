@@ -11,8 +11,6 @@
 
 declare(strict_types=1);
 
-use Maho_SocialLogin_Model_Channel as Channel;
-
 class Maho_SocialLogin_Service_Identity
 {
     public const SUPPORTED_PROVIDERS = ['google', 'apple', 'facebook'];
@@ -31,8 +29,15 @@ class Maho_SocialLogin_Service_Identity
     }
 
     /**
-     * The web channel requires $expectedNonce, which the session issued, for a provider with a nonce.
-     * On the API, a null nonce skips the check.
+     * Sign in the customer of the provider token $token, and return the customer to log in. Link the identity to
+     * the customer that has the email of the provider, or register a new customer.
+     *
+     * $expectedNonce is the nonce that the token must repeat. A caller that keeps the nonces it issued gives the
+     * nonce of this sign-in, or an empty string when its client sent no nonce that it issued: a provider that needs
+     * a nonce then refuses the sign-in. Null is for a caller that issues no nonce, such as a token exchange for a
+     * server: the token is checked without a nonce.
+     *
+     * A customer who uses 2FA gives $twofaCode. Without it, the identity is linked and the customer is not logged in.
      *
      * @param array{firstname?: string, lastname?: string} $nameHints Names forwarded by the caller
      *        (Apple sends them only in the first authorization response); used only when a new
@@ -42,6 +47,8 @@ class Maho_SocialLogin_Service_Identity
      *                                              of Mage_Customer_Service_Customer::register() for a new account
      * @throws Mage_Core_Exception_Forbidden when the store has the customer accounts turned off, or when the account
      *                                        is not active
+     * @throws Mage_Customer_Exception_SecondFactorRequired when the customer uses 2FA and $twofaCode is empty
+     * @throws Mage_Core_Exception_Unauthorized with the error code twofa_invalid when $twofaCode is wrong
      * @throws Maho_SocialLogin_Model_ProviderUnavailableException when the provider does not answer
      * @throws Mage_Core_Exception With a user-facing message on any failure
      */
@@ -50,14 +57,13 @@ class Maho_SocialLogin_Service_Identity
         #[\SensitiveParameter]
         string $token,
         int $storeId,
-        Channel $channel,
         ?string $expectedNonce = null,
         array $nameHints = [],
+        #[\SensitiveParameter]
+        ?string $twofaCode = null,
     ): array {
         $helper = Mage::helper('sociallogin');
-        if (!$this->getRateLimiter($storeId)->attempt()) {
-            throw new Mage_Core_Exception_TooManyRequests($helper->__('Too many requests. Please try again later.'), self::RATE_LIMIT_WINDOW);
-        }
+        $this->getRateLimiter($storeId)->attemptOrThrow();
 
         /** @var Mage_Customer_Service_Customer $customers */
         $customers = Mage::getService('customer/customer');
@@ -67,7 +73,7 @@ class Maho_SocialLogin_Service_Identity
         if (!$providerModel->isEnabled($storeId) || $token === '') {
             Mage::throwException($helper->__('This sign-in method is not available.'));
         }
-        if ($channel === Channel::Web && $expectedNonce === null && $providerModel->requiresNonce()) {
+        if ($expectedNonce === '' && $providerModel->requiresNonce()) {
             Mage::throwException($helper->__('Your sign-in attempt has expired. Please try again.'));
         }
 
@@ -93,7 +99,7 @@ class Maho_SocialLogin_Service_Identity
             $isWebsiteScope ? $websiteId : null,
         );
         if ($identity->getId()) {
-            $customer = $customers->getById($identity->getCustomerId());
+            $customer = $customers->findById($identity->getCustomerId());
             if (!$customer) {
                 Mage::throwException($helper->__('The linked customer account no longer exists.'));
             }
@@ -101,7 +107,7 @@ class Maho_SocialLogin_Service_Identity
             if ($identity->getProviderEmail() !== $claims['email']) {
                 $identity->setProviderEmail($claims['email'])->save();
             }
-            return $this->finish($customer, $provider, false);
+            return $this->finish($customer, $provider, false, $twofaCode);
         }
 
         $customer = $this->loadCustomerByEmail($claims['email'], $isWebsiteScope ? $websiteId : null);
@@ -109,14 +115,14 @@ class Maho_SocialLogin_Service_Identity
             $customers->assertActive($customer);
             // The provider proved ownership of this address, which is exactly what a
             // pending email confirmation would prove; clear it so login can proceed.
-            $customers->confirmVerified($customer);
+            $this->getAuthentication()->confirmVerified($customer);
             $this->createLink($customer, $websiteId, $provider, $claims);
             Mage::log(
                 "Auto-linked {$provider} identity to customer {$customer->getId()} by verified email",
                 Mage::LOG_INFO,
                 self::LOG_FILE,
             );
-            return $this->finish($customer, $provider, false);
+            return $this->finish($customer, $provider, false, $twofaCode);
         }
 
         if (!$helper->isRegistrationAllowedViaSocial($storeId) || !Mage::helper('customer')->isRegistrationAllowed()) {
@@ -125,7 +131,7 @@ class Maho_SocialLogin_Service_Identity
 
         $customer = $this->createCustomer($claims, $nameHints, $storeId);
         $this->createLink($customer, $websiteId, $provider, $claims);
-        return $this->finish($customer, $provider, true);
+        return $this->finish($customer, $provider, true, $twofaCode);
     }
 
     public function getProvider(string $code): Maho_SocialLogin_Model_Provider_ProviderInterface
@@ -208,7 +214,7 @@ class Maho_SocialLogin_Service_Identity
             ->setDeferRequiredProfile();
         $customer->setPassword(Mage::helper('core')->getRandomString(32));
 
-        return Mage::getService('customer/customer')->register($customer, $storeId);
+        return Mage::getService('customer/customer')->registerFromProvider($customer, $storeId);
     }
 
     /** The token endpoint has its own counter. */
@@ -223,21 +229,40 @@ class Maho_SocialLogin_Service_Identity
     }
 
     /**
+     * Each sign-in ends here. The second factor rule of Mage_Customer_Service_Authentication::authenticateVerified()
+     * applies after the event, so that the event also tells of a sign-in that still waits for the 2FA code.
      * The registration form was skipped, so a new account can miss a field that the admin requires.
      *
      * @return array{customer: Mage_Customer_Model_Customer, is_new: bool, profile_incomplete: bool}
+     * @throws Mage_Core_Exception_Unauthorized
      */
-    protected function finish(Mage_Customer_Model_Customer $customer, string $provider, bool $isNew): array
-    {
+    protected function finish(
+        Mage_Customer_Model_Customer $customer,
+        string $provider,
+        bool $isNew,
+        #[\SensitiveParameter]
+        ?string $twofaCode = null,
+    ): array {
         Mage::dispatchEvent('sociallogin_authenticated', [
             'customer' => $customer,
             'provider' => $provider,
             'is_new' => $isNew,
         ]);
         return [
-            'customer' => $customer,
+            'customer' => $this->getAuthentication()->authenticateVerified($customer, $twofaCode),
             'is_new' => $isNew,
             'profile_incomplete' => $isNew && Mage::helper('sociallogin')->hasIncompleteRequiredProfile($customer),
         ];
+    }
+
+    #[\Deprecated(message: 'use Mage_Customer_Service_Customer::assertActive()', since: '26.11')]
+    protected function assertUsable(Mage_Customer_Model_Customer $customer): void
+    {
+        Mage::getService('customer/customer')->assertActive($customer);
+    }
+
+    private function getAuthentication(): Mage_Customer_Service_Authentication
+    {
+        return Mage::getService('customer/authentication');
     }
 }

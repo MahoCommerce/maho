@@ -105,7 +105,8 @@ final class AdminApiParity
 
     /**
      * Post $fields to the action $action of the admin controller $controllerClass, as the admin form does.
-     * Calling the action skips preDispatch(), so the ACL and the form key are not checked.
+     * Calling the action skips preDispatch(), so the ACL and the form key are not checked. An exception
+     * that the action does not catch fails the test, because a real admin request answers it with an error page.
      *
      * @param class-string<\Mage_Adminhtml_Controller_Action> $controllerClass
      * @param array<string, mixed> $fields
@@ -113,7 +114,8 @@ final class AdminApiParity
      */
     public static function admin(string $controllerClass, string $action, array $fields = []): array
     {
-        [$route, $controller] = ['adminhtml', strtolower(substr($controllerClass, strlen('Mage_Adminhtml_'), -strlen('Controller')))];
+        // Mage_Directory_Adminhtml_Directory_RegionController is the controller directory_region of the admin route
+        [$route, $controller] = ['adminhtml', strtolower((string) preg_replace('/^.*?_Adminhtml_|Controller$/', '', $controllerClass))];
         $request = new \Mage_Core_Controller_Request_Http(
             SymfonyRequest::create("http://localhost/admin/{$controller}/{$action}", 'POST', $fields),
         );
@@ -124,8 +126,8 @@ final class AdminApiParity
 
         try {
             new $controllerClass($request, new \Mage_Core_Controller_Response_Http())->{$action . 'Action'}();
-        } catch (\Throwable) {
-            // The trailing redirect builds an admin url outside a dispatched request. The messages are the outcome
+        } catch (\Mage_Core_Controller_Varien_Exception) {
+            // The dispatcher answers this exception with a redirect or a forward. The messages are the outcome
         }
         return self::adminMessages();
     }

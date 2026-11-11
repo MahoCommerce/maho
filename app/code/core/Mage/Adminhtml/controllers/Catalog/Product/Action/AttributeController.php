@@ -193,25 +193,13 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
     {
         $response = new \Maho\DataObject();
         $response->setError(false);
-        $attributesData = $this->getRequest()->getParam('attributes', []);
-        $data = new \Maho\DataObject();
-
         try {
-            if ($attributesData) {
-                foreach ($attributesData as $attributeCode => $value) {
-                    $attribute = Mage::getSingleton('eav/config')
-                        ->getAttribute('catalog_product', $attributeCode);
-                    if (!$attribute->getAttributeId()) {
-                        unset($attributesData[$attributeCode]);
-                        continue;
-                    }
-                    $data->setData($attributeCode, $value);
-                    $attribute->getBackend()->validate($data);
-                }
-            }
-        } catch (Mage_Eav_Model_Entity_Attribute_Exception $e) {
+            /** @var Mage_Catalog_Service_Product $service */
+            $service = Mage::getService('catalog/product');
+            $service->validateAttributes((array) $this->getRequest()->getParam('attributes', []));
+        } catch (Mage_Core_Exception_Input $e) {
             $response->setError(true);
-            $response->setAttribute($e->getAttributeCode());
+            $response->setAttribute($e->getErrors()[0]['field'] ?? null);
             $response->setMessage($e->getMessage());
         } catch (Mage_Core_Exception $e) {
             $response->setError(true);

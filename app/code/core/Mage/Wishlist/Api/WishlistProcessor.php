@@ -72,7 +72,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
 
         if ($operationName === 'share') {
             $args = $context['args']['input'] ?? [];
-            return $this->shareWishlist($args['emails'] ?? [], (string) ($args['message'] ?? ''));
+            return $this->shareWishlist($args['emails'] ?? [], (string) ($args['message'] ?? ''), $args);
         }
 
         // REST operations
@@ -100,7 +100,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
             if (!is_array($body['emails'] ?? [])) {
                 throw new BadRequestHttpException('emails must be a list of email addresses');
             }
-            return $this->shareWishlist($body['emails'] ?? [], (string) ($body['message'] ?? ''));
+            return $this->shareWishlist($body['emails'] ?? [], (string) ($body['message'] ?? ''), $body);
         }
 
         // Default POST - add to wishlist
@@ -193,10 +193,11 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
      * returns one resource.
      *
      * @param array<mixed> $emails
+     * @param array<array-key, mixed> $fields the body, in which the CAPTCHA module finds its token
      */
-    private function shareWishlist(array $emails, string $message): WishlistItem
+    private function shareWishlist(array $emails, string $message, array $fields): WishlistItem
     {
-        $wishlist = $this->wishlistService->share($this->getWishlist(), $emails, $message, StoreContext::getStoreId());
+        $wishlist = $this->wishlistService->share($this->getWishlist(), $emails, $message, StoreContext::getStoreId(), $fields);
 
         $placeholder = new WishlistItem();
         $placeholder->id = (int) $wishlist->getId();

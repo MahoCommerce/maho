@@ -51,11 +51,14 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
         );
     }
 
-    public function isEnabled(): bool
+    /**
+     * The blog is on for the store view $storeId, or for the current one, when the module is enabled and its
+     * output is not disabled there.
+     */
+    public function isEnabled(?int $storeId = null): bool
     {
-        /** @var Maho_Blog_Service_Post $service */
-        $service = Mage::getService('blog/post');
-        return $service->isEnabled((int) Mage::app()->getStore()->getId());
+        return $this->isModuleEnabled()
+            && !Mage::getStoreConfigFlag('advanced/modules_disable_output/Maho_Blog', $storeId ?? (int) Mage::app()->getStore()->getId());
     }
 
     public function shouldShowInNavigation(): bool
@@ -91,11 +94,15 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
         return $postsPerPage > 0 ? $postsPerPage : 20; // Default fallback
     }
 
-    public function areCategoriesEnabled(): bool
+    /**
+     * The blog categories are on for the store view $storeId, or for the current one, when the blog is on and
+     * "Enable Categories" is set there.
+     */
+    public function areCategoriesEnabled(?int $storeId = null): bool
     {
-        /** @var Maho_Blog_Service_Category $service */
-        $service = Mage::getService('blog/category');
-        return $service->isEnabled((int) Mage::app()->getStore()->getId());
+        $storeId ??= (int) Mage::app()->getStore()->getId();
+        return $this->isEnabled($storeId)
+            && Mage::getStoreConfigFlag(Maho_Blog_Service_Category::XML_PATH_ENABLE_CATEGORIES, $storeId);
     }
 
     public function getCategoryUrlPrefix(): string

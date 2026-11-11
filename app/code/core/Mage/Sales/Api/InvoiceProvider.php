@@ -86,7 +86,7 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
 
     private function getInvoice(int $id): Invoice
     {
-        $invoice = \Mage::getService('sales/order')->requireInvoice($id);
+        $invoice = \Mage::getService('sales/order_document')->requireInvoice($id);
         $this->assertStoreAllowed($invoice->getStoreId(), $this->requireUser(), 'invoice');
 
         return $this->adminInvoiceDto($invoice);
@@ -139,7 +139,7 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
     private function downloadPdf(array $uriVariables, string $operationName): Response
     {
         $order = $this->loadAndAuthorizeOrder((int) ($uriVariables['orderId'] ?? 0), $operationName);
-        $invoice = \Mage::getService('sales/order')->requireInvoice((int) ($uriVariables['id'] ?? 0), (int) $order->getId());
+        $invoice = \Mage::getService('sales/order_document')->requireInvoice((int) ($uriVariables['id'] ?? 0), (int) $order->getId());
 
         $pdf = \Mage::getModel('sales/order_pdf_invoice')->getPdf([$invoice]);
         if (empty($pdf)) {
@@ -167,7 +167,7 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
         if (str_contains($operationName, 'my_') || (!$this->isAdmin() && !$this->isApiUser())) {
             return $service->requireVisibleToCustomer($orderId, $this->getAuthenticatedCustomerId());
         }
-        $order = $service->requireById($orderId);
+        $order = $service->getById($orderId);
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         return $order;

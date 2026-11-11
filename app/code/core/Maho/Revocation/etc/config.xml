@@ -6,7 +6,7 @@ SPDX-License-Identifier: OSL-3.0
 <config>
     <modules>
         <Maho_Revocation>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
         </Maho_Revocation>
     </modules>
     <global>

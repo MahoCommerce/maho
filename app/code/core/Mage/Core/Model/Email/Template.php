@@ -600,73 +600,35 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     }
 
     /**
-     * Return the fields that must not hold HTML tags, with their admin labels. Only the text of a template may hold HTML.
-     *
-     * @return array<string, string>
-     */
-    protected function getTagFreeFields(): array
-    {
-        $helper = Mage::helper('core');
-        return [
-            'template_code' => $helper->__('Template Name'),
-            'template_subject' => $helper->__('Template Subject'),
-            'template_styles' => $helper->__('Template Styles'),
-            'template_sender_name' => $helper->__('Sender Name'),
-            'template_sender_email' => $helper->__('Sender Email'),
-            'orig_template_code' => $helper->__('Original Template'),
-            'orig_template_variables' => $helper->__('Template Variables'),
-        ];
-    }
-
-    /**
-     * Check the template. The name must be set and unique, the subject and the text must be set, and only the text
-     * may hold HTML tags. The text keeps its template directives as they are, because only an admin user writes a
-     * template. A plain text template has no styles.
+     * The name must be set, and no other template can have it.
      *
      * @throws Mage_Core_Exception_Conflict when another template has the name
-     * @throws Mage_Core_Exception_Input with one error for each invalid field
+     * @throws Mage_Core_Exception_Input when the name is empty
      */
     #[\Override]
     protected function _beforeSave()
     {
         $helper = Mage::helper('core');
-        $errors = new Mage_Core_Exception_Input();
-
         $code = trim((string) $this->getTemplateCode());
         $this->setTemplateCode($code);
         if ($code === '') {
-            $errors->addError('template_code', $helper->__('The template Name must not be empty.'));
-        } elseif ($this->_getResource()->checkCodeUsage($this)) {
-            throw new Mage_Core_Exception_Conflict($helper->__("An email template with code '%s' already exists", $code));
+            throw new Mage_Core_Exception_Input()
+                ->addError('template_code', $helper->__('The template Name must not be empty.'));
         }
-
-        if (trim((string) $this->getTemplateText()) === '') {
-            $errors->addError('template_text', $helper->__('The template text must not be empty.'));
-        }
-        if (trim((string) $this->getTemplateSubject()) === '') {
-            $errors->addError('template_subject', $helper->__('The template subject must not be empty.'));
-        }
-        // Accept a stored type, so that an old template without one can still be saved
-        $type = (int) $this->getData('template_type');
-        if ((!$this->getId() || $this->dataHasChangedFor('template_type')) && !in_array($type, [self::TYPE_TEXT, self::TYPE_HTML], true)) {
-            $errors->addError('template_type', $helper->__('The template type must be text or html.'));
-        }
-        $senderEmail = (string) $this->getTemplateSenderEmail();
-        if ($senderEmail !== '' && !$helper->isValidEmail($senderEmail)) {
-            $errors->addError('template_sender_email', $helper->__('The sender email is not a valid email address.'));
-        }
-        foreach ($this->getTagFreeFields() as $field => $label) {
-            if ($helper->hasTags((string) $this->getData($field))) {
-                $errors->addError($field, $helper->__('%s must not contain HTML tags.', $label));
-            }
-        }
-
-        $errors->throwIfErrors();
-
-        if ($type === self::TYPE_TEXT) {
-            $this->setData('template_styles', '');
-        }
+        $this->assertCodeNotInUse();
         return parent::_beforeSave();
+    }
+
+    /**
+     * @throws Mage_Core_Exception_Conflict when another template has the name of this template
+     */
+    public function assertCodeNotInUse(): void
+    {
+        if ($this->_getResource()->checkCodeUsage($this)) {
+            throw new Mage_Core_Exception_Conflict(
+                Mage::helper('core')->__("An email template with code '%s' already exists", trim((string) $this->getTemplateCode())),
+            );
+        }
     }
 
     public function getAddedAt(): ?string

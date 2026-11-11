@@ -21,16 +21,17 @@ class Mage_Eav_Service_Attribute_Set
      */
     public function getById(int $id, string $entityTypeCode): Set
     {
-        if ($this->getSetEntityTypeId($id) !== (int) $this->getEntityType($entityTypeCode)->getId()) {
-            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('eav')->__('Attribute set not found'));
-        }
         /** @var Set $set */
         $set = Mage::getModel('eav/entity_attribute_set');
-        return $set->load($id);
+        $set->load($id);
+        if (!$set->getId() || (int) $set->getEntityTypeId() !== (int) $this->getEntityType($entityTypeCode)->getId()) {
+            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('eav')->__('Attribute set not found'));
+        }
+        return $set;
     }
 
     /**
-     * Return a new set of the entity type $entityTypeCode. The transport gives it a name, then calls create().
+     * Return a new set of the entity type $entityTypeCode. The transport gives it a name, then calls save().
      */
     public function newSet(string $entityTypeCode): Set
     {
@@ -40,24 +41,31 @@ class Mage_Eav_Service_Attribute_Set
     }
 
     /**
-     * Save the new set $set with a copy of the groups and the attributes of the set $skeletonId. Without
-     * $skeletonId, the copy comes from the default set of the entity type. A failed copy saves nothing.
+     * Save $set. A new set gets a copy of the groups and the attributes of the set $skeletonId, or of the default
+     * set of the entity type, and a failed copy saves nothing. A saved set keeps its groups: the save writes, for
+     * example, a new name. The resource model checks the name.
      *
      * @throws Mage_Core_Exception_Input when the name is empty or too long, or $skeletonId is not a set of the entity type
      * @throws Mage_Core_Exception_Conflict when another set has the name, or every record of the entity type uses one set
      */
-    public function create(Set $set, ?int $skeletonId = null): Set
+    public function save(Set $set, ?int $skeletonId = null): Set
     {
+        if ($set->getId()) {
+            $set->save();
+            $this->clearCache();
+            return $set;
+        }
+
         $helper = Mage::helper('eav');
         $entityType = Mage::getSingleton('eav/config')->getEntityType((int) $set->getEntityTypeId());
         if ($helper->getAdminPageSettings($entityType)?->singleSet) {
             throw new Mage_Core_Exception_Conflict($helper->__('This entity type has one attribute set.'));
         }
         $skeletonId ??= (int) $entityType->getDefaultAttributeSetId();
-        if ($this->getSetEntityTypeId($skeletonId) !== (int) $entityType->getId()) {
-            new Mage_Core_Exception_Input()
-                ->addError('skeleton_id', $helper->__('The skeleton must be an attribute set of the same entity type.'))
-                ->throwIfErrors();
+        $skeleton = Mage::getModel('eav/entity_attribute_set')->load($skeletonId);
+        if (!$skeleton->getId() || (int) $skeleton->getEntityTypeId() !== (int) $entityType->getId()) {
+            throw new Mage_Core_Exception_Input()
+                ->addError('skeleton_id', $helper->__('The skeleton must be an attribute set of the same entity type.'));
         }
 
         $adapter = $this->getWriteAdapter();
@@ -75,17 +83,10 @@ class Mage_Eav_Service_Attribute_Set
         return $set;
     }
 
-    /**
-     * Save $set, for example after a rename. The resource model checks the name.
-     *
-     * @throws Mage_Core_Exception_Input when the name is empty or too long
-     * @throws Mage_Core_Exception_Conflict when another set of the entity type has the name
-     */
-    public function save(Set $set): Set
+    #[\Deprecated('Use save(): it creates a set that has no ID')]
+    public function create(Set $set, ?int $skeletonId = null): Set
     {
-        $set->save();
-        $this->clearCache();
-        return $set;
+        return $this->save($set, $skeletonId);
     }
 
     /**
@@ -333,8 +334,10 @@ class Mage_Eav_Service_Attribute_Set
             ->join(['a' => $resource->getTableName('eav/attribute')], 'a.attribute_id = ea.attribute_id', ['is_user_defined'])
             ->where('ea.attribute_set_id = ?', (int) $set->getId());
         if ($attributeId !== null) {
-            // An integer literal: PostgreSQL refuses a quoted value above the range of the SMALLINT column
-            $select->where('ea.attribute_id = ' . $attributeId);
+            if (!$this->canColumnHoldId('eav/entity_attribute', 'attribute_id', $attributeId)) {
+                return [];
+            }
+            $select->where('ea.attribute_id = ?', $attributeId);
         }
         return array_map(fn(array $row): array => [
             'entity_attribute_id' => (int) $row['entity_attribute_id'],
@@ -361,9 +364,8 @@ class Mage_Eav_Service_Attribute_Set
         $select = $adapter->select()
             ->from($resource->getTableName('eav/attribute'), ['attribute_id'])
             ->where('entity_type_id = ?', (int) $set->getEntityTypeId());
-        // An integer literal: PostgreSQL refuses a quoted value above the range of the SMALLINT column
-        is_int($attribute) ? $select->where('attribute_id = ' . $attribute) : $select->where('attribute_code = ?', $attribute);
-        $id = (int) $adapter->fetchOne($select);
+        is_int($attribute) ? $select->where('attribute_id = ?', $attribute) : $select->where('attribute_code = ?', $attribute);
+        $id = is_int($attribute) && !$this->canColumnHoldId('eav/attribute', 'attribute_id', $attribute) ? 0 : (int) $adapter->fetchOne($select);
         if ($id === 0) {
             is_int($attribute)
                 ? $errors->addError('attribute_id', $helper->__('No attribute of this entity type has the ID %s.', $attribute))
@@ -389,9 +391,8 @@ class Mage_Eav_Service_Attribute_Set
         $select = $adapter->select()
             ->from($resource->getTableName('eav/attribute_group'), ['attribute_group_id'])
             ->where('attribute_set_id = ?', (int) $set->getId());
-        // An integer literal: PostgreSQL refuses a quoted value above the range of the SMALLINT column
-        is_int($group) ? $select->where('attribute_group_id = ' . $group) : $select->where('attribute_group_name = ?', $group);
-        $id = (int) $adapter->fetchOne($select);
+        is_int($group) ? $select->where('attribute_group_id = ?', $group) : $select->where('attribute_group_name = ?', $group);
+        $id = is_int($group) && !$this->canColumnHoldId('eav/attribute_group', 'attribute_group_id', $group) ? 0 : (int) $adapter->fetchOne($select);
         if ($id === 0) {
             is_int($group)
                 ? $errors->addError('group_id', $helper->__('No group of this attribute set has the ID %s.', $group))
@@ -401,22 +402,13 @@ class Mage_Eav_Service_Attribute_Set
     }
 
     /**
-     * Return the entity type of the set $setId, or null when the set does not exist.
+     * Tell whether the column $column of the table $tableAlias can hold $id. No row has an ID that it cannot hold.
      */
-    private function getSetEntityTypeId(int $setId): ?int
+    private function canColumnHoldId(string $tableAlias, string $column, int $id): bool
     {
-        if ($setId <= 0) {
-            return null;
-        }
         $resource = Mage::getSingleton('core/resource');
         $adapter = $resource->getConnection('core_read');
-        // An integer literal: PostgreSQL refuses a quoted value above the range of the SMALLINT column
-        $value = $adapter->fetchOne(
-            $adapter->select()
-                ->from($resource->getTableName('eav/attribute_set'), ['entity_type_id'])
-                ->where('attribute_set_id = ' . $setId),
-        );
-        return $value === false || $value === null ? null : (int) $value;
+        return $adapter->canColumnHoldValue($adapter->describeTable($resource->getTableName($tableAlias))[$column], $id);
     }
 
     private function getEntityType(string $entityTypeCode): Mage_Eav_Model_Entity_Type

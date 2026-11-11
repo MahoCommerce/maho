@@ -37,8 +37,8 @@ class ConfigSet extends BaseMahoCommand
         ?int $scopeId = null,
         #[Option(description: 'Encrypt the value before storing', shortcut: 'e')]
         bool $encrypt = false,
-        #[Option(description: 'Save a path that no field of System > Configuration declares, with no check of its value')]
-        bool $undeclared = false,
+        #[Option(description: 'Refuse a path that no field of System > Configuration declares, and a scope where the field does not show')]
+        bool $strict = false,
     ): int {
         $this->initMaho();
 
@@ -58,11 +58,7 @@ class ConfigSet extends BaseMahoCommand
         try {
             /** @var \Mage_Core_Service_Config $service */
             $service = Mage::getService('core/config');
-            $service->save($path, $value, $scope, $scopeId, $undeclared);
-        } catch (\Mage_Core_Exception_NoSuchEntity $e) {
-            $output->writeln('<error>Error saving configuration: ' . $e->getMessage() . '</error>');
-            $output->writeln('<comment>No field of System > Configuration declares this path. Use --undeclared to save it anyway.</comment>');
-            return Command::FAILURE;
+            $service->save($path, $value, $scope, $scopeId, allowUndeclared: !$strict);
         } catch (\Mage_Core_Exception $e) {
             $output->writeln('<error>Error saving configuration: ' . $e->getMessage() . '</error>');
             return Command::FAILURE;

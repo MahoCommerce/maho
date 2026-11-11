@@ -75,7 +75,8 @@ The attribute model can also change the save and the texts of the set page:
 - `saveAdminData()` saves the posted values that the attribute does not save itself.
 - `_getInputTypes()` gives the input types of the type. The event
   `eav_attribute_input_types_prepare` lets another module add or remove a type.
-- `getValidationErrors()` returns the errors of the values that a save refuses. A subclass adds the
+- `getValidationErrors()` returns the errors of the values that the admin form and the API refuse.
+  The attribute service calls it, and a direct save of the model does not. A subclass adds the
   rules of its type: the catalog attribute checks the reserved codes of products, the scope, the
   layered navigation value, the position and the product types of **Apply To**.
 - `getAllowedOptionTags()` returns the HTML tags that an option label keeps when the attribute
@@ -232,7 +233,7 @@ of its record. It reads the `attribute_set_id` column of the entity table. For t
   not have. `Mage_Eav_Helper_Data::getSetChangeQuestions()` builds the questions, and
   `Mage_Eav_Model_Resource_Entity_Attribute_Set::getMissingAttributeLabels()` finds the attributes.
 - The set page refuses to remove a system attribute from a set, and to delete a group that still
-  holds one. `Mage_Adminhtml_Controller_Eav_Set::checkSystemAttributes()` makes the same check on
-  the server. The check also covers the system attributes that the editor hides.
+  holds one. `Mage_Eav_Service_Attribute_Set::saveTree()` makes the same check on the server, for the
+  admin and for the API. The check also covers the system attributes that the editor hides.
 - Customers and customer addresses keep `attribute_set_id` 0 in their rows, so the cron does not
   delete their values.

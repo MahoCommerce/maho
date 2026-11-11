@@ -203,7 +203,9 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
     }
 
     /**
-     * Add product to shopping cart (quote)
+     * Add a product to the cart of the session. PHP code calls it for a product that it selects by itself, so it
+     * adds the product as it is, also a product that the storefront does not show (a gift, a fee). For a product
+     * that the shopper names, use addRequestedProduct().
      *
      * @param   int|Mage_Catalog_Model_Product $productInfo
      * @param   mixed $requestInfo
@@ -216,15 +218,14 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
         $request = $this->_getProductRequest($requestInfo);
 
         try {
-            $this->_getService()->addProduct($this->getQuote(), $product, $request);
+            // The caller saves the cart with save()
+            $this->_getService()->addProductUnchecked($this->getQuote(), $product, $request, false);
         } catch (Mage_Core_Exception $e) {
             // A message on the exception means that the product refused the buy request: the shopper fixes it on the product page
             if ($e->getMessages()) {
-                // A variant goes to the cart as its parent, so the shopper fixes the options on the page of the parent
-                $cartProduct = $this->_getService()->getCartProduct($product, $request, (int) $this->getQuote()->getStoreId());
                 $this->getCheckoutSession()->setRedirectUrl($product->hasOptionsValidationFail()
-                    ? $cartProduct->getUrlModel()->getUrl($cartProduct, ['_query' => ['startcustomization' => 1]])
-                    : $cartProduct->getProductUrl());
+                    ? $product->getUrlModel()->getUrl($product, ['_query' => ['startcustomization' => 1]])
+                    : $product->getProductUrl());
                 if (!$e->getMessages(Mage_Core_Model_Message::NOTICE)) {
                     $this->getCheckoutSession()->setUseNotice(false);
                 } elseif ($this->getCheckoutSession()->getUseNotice() === null) {
@@ -235,6 +236,24 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
         }
 
         $this->getCheckoutSession()->setLastAddedProductId($product->getId());
+        return $this;
+    }
+
+    /**
+     * Add the product that the shopper names to the cart of the session, with the checks of
+     * Mage_Checkout_Service_Cart::getRequestedProduct(). A variant goes to the cart as its configurable parent.
+     *
+     * @param int|Mage_Catalog_Model_Product $productInfo
+     * @param mixed $requestInfo
+     * @throws Mage_Core_Exception
+     */
+    public function addRequestedProduct($productInfo, $requestInfo = null): static
+    {
+        $request = $this->_getProductRequest($requestInfo);
+        $product = $this->_getService()->getRequestedProduct($this->getQuote(), $this->_getProduct($productInfo), $request);
+
+        $this->addProduct($product, $request);
+
         return $this;
     }
 

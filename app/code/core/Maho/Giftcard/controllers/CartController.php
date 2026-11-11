@@ -13,6 +13,12 @@ declare(strict_types=1);
  */
 class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 {
+    #[\Deprecated(message: 'Maho_Giftcard_Service_Giftcard::checkBalance() has the limit, so this method limits nothing', since: '27.1')]
+    protected function _isRateLimited(): bool
+    {
+        return false;
+    }
+
     /**
      * Check gift card balance (AJAX)
      */
@@ -55,7 +61,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
         $code = trim((string) $this->getRequest()->getParam('giftcard_code'));
 
         try {
-            Mage::getService('checkout/cart')->applyGiftcard($this->_getQuote(), $code);
+            Mage::getService('giftcard/giftcard')->applyToCart($this->_getQuote(), $code);
 
             Mage::getSingleton('checkout/session')->addSuccess(
                 $this->__('Gift card "%s" was applied.', $code),
@@ -82,7 +88,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
         }
 
         try {
-            Mage::getService('checkout/cart')->removeGiftcard($this->_getQuote(), (string) $code);
+            Mage::getService('giftcard/giftcard')->removeFromCart($this->_getQuote(), (string) $code);
             Mage::getSingleton('checkout/session')->addSuccess($this->__('Gift card was removed.'));
         } catch (Mage_Core_Exception_NoSuchEntity) {
             // The card is not in the cart, so there is nothing to remove
@@ -112,7 +118,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 
         try {
             $quote = $this->_getQuote();
-            Mage::getService('checkout/cart')->applyGiftcard($quote, $code);
+            Mage::getService('giftcard/giftcard')->applyToCart($quote, $code);
 
             $result['success'] = true;
             $result['message'] = $this->__('Gift card "%s" was applied.', $code);
@@ -155,7 +161,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 
         try {
             $quote = $this->_getQuote();
-            Mage::getService('checkout/cart')->removeGiftcard($quote, (string) $code);
+            Mage::getService('giftcard/giftcard')->removeFromCart($quote, (string) $code);
 
             $result['success'] = true;
             $result['message'] = $this->__('Gift card was removed.');

@@ -143,17 +143,26 @@ SPDX-License-Identifier: AFL-3.0
                     <fields>
                         <contact translate="label comment" module="contacts">
                             <label>Contact form (web + API)</label>
-                            <comment>Per client and per email address. Default 3 per hour. 0 to disable.</comment>
+                            <comment>Per email address. Default 3 per hour. 0 to disable.</comment>
                             <sort_order>110</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                             <validate>validate-digits validate-zero-or-greater</validate>
                         </contact>
+                        <contact_ip translate="label comment" module="contacts">
+                            <label>Contact form per IP (web + API)</label>
+                            <comment>Per IP address. Default 10 per hour. 0 to disable.</comment>
+                            <sort_order>111</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </contact_ip>
                         <contact_auto_reply translate="label comment" module="contacts">
                             <label>Contact form auto-reply</label>
                             <comment>Per recipient address. Counts the auto-reply emails, the store still gets each message. Default 3 per hour. 0 to disable.</comment>
-                            <sort_order>111</sort_order>
+                            <sort_order>112</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>

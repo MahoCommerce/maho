@@ -14,8 +14,6 @@ use Mage_Catalog_Model_Product as Product;
 
 class Mage_Catalog_Service_Product
 {
-    private const MAX_ENTITY_ID = 2147483647;
-
     /**
      * Load the product $id with the values of the store view $storeId.
      *
@@ -26,21 +24,11 @@ class Mage_Catalog_Service_Product
         /** @var Product $product */
         $product = Mage::getModel('catalog/product');
         $product->setStoreId($storeId);
-        if ($id > 0 && $id <= self::MAX_ENTITY_ID) {
-            $product->load($id);
-        }
+        $product->load($id);
         if (!$product->getId()) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('catalog')->__('Product not found'));
         }
         return $product;
-    }
-
-    /**
-     * @throws Mage_Core_Exception_NoSuchEntity
-     */
-    public function getBySku(string $sku, int $storeId = Mage_Core_Model_App::ADMIN_STORE_ID): Product
-    {
-        return $this->getById($this->getIdBySku($sku) ?? 0, $storeId);
     }
 
     public function getIdBySku(string $sku): ?int
@@ -78,7 +66,8 @@ class Mage_Catalog_Service_Product
 
     /**
      * Return a new product of the type $typeId and the attribute set $attributeSetId, or the default attribute set,
-     * with the values of the admin scope. save() checks the type and the attribute set.
+     * with the values of the admin scope. The product is enabled, visible in the catalog and the search, and has no
+     * tax class, until the transport sets other values. The save checks the type and the attribute set.
      */
     public function newProduct(string $typeId = Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, ?int $attributeSetId = null): Product
     {
@@ -86,7 +75,10 @@ class Mage_Catalog_Service_Product
         $product = Mage::getModel('catalog/product');
         return $product->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID)
             ->setTypeId($typeId)
-            ->setAttributeSetId($attributeSetId ?? (int) $product->getDefaultAttributeSetId());
+            ->setAttributeSetId($attributeSetId ?? (int) $product->getDefaultAttributeSetId())
+            ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+            ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
+            ->setTaxClassId(0);
     }
 
     /**
@@ -137,7 +129,10 @@ class Mage_Catalog_Service_Product
      */
     public function assertInStores(Product $product, ?array $storeIds): void
     {
-        $this->assertWebsitesInStores(array_map(intval(...), $product->getWebsiteIds()), $storeIds);
+        $allowed = $this->getWebsiteIds($storeIds);
+        if ($allowed !== null && !$product->isInWebsites($allowed)) {
+            throw new Mage_Core_Exception_Forbidden(Mage::helper('catalog')->__("Access denied for this product's websites"));
+        }
     }
 
     /**
@@ -147,12 +142,9 @@ class Mage_Catalog_Service_Product
      */
     public function assertIdsInStores(array $productIds, ?array $storeIds): void
     {
-        if ($storeIds === null) {
-            return;
-        }
-        $websiteIds = Mage::getResourceSingleton('catalog/product')->getWebsiteIdsByProductIds($productIds);
-        foreach ($productIds as $productId) {
-            $this->assertWebsitesInStores($websiteIds[$productId] ?? [], $storeIds);
+        $allowed = $this->getWebsiteIds($storeIds);
+        if ($allowed !== null && Mage::getResourceSingleton('catalog/product')->getIdsNotInWebsites($productIds, $allowed) !== []) {
+            throw new Mage_Core_Exception_Forbidden(Mage::helper('catalog')->__("Access denied for this product's websites"));
         }
     }
 
@@ -224,7 +216,7 @@ class Mage_Catalog_Service_Product
      */
     public function useDefault(Product $product, array $codes): void
     {
-        foreach ($this->getStoreAttributes($codes, (int) $product->getStoreId()) as $attribute) {
+        foreach (Mage::helper('catalog')->getStoreScopeAttributes(Product::ENTITY, $codes, (int) $product->getStoreId()) as $attribute) {
             $product->setData($attribute->getAttributeCode(), false);
         }
     }
@@ -239,7 +231,7 @@ class Mage_Catalog_Service_Product
     public function deleteStoreValues(int $productId, array $codes, int $storeId): void
     {
         Mage::getSingleton('catalog/product_action')
-            ->deleteStoreValues($productId, $this->getStoreAttributes($codes, $storeId), $storeId);
+            ->deleteStoreValues($productId, Mage::helper('catalog')->getStoreScopeAttributes(Product::ENTITY, $codes, $storeId), $storeId);
     }
 
     /**
@@ -261,35 +253,74 @@ class Mage_Catalog_Service_Product
         return $product;
     }
 
-    public function delete(Product $product): void
+    /**
+     * Save $product after a change of one of its parts: its links, its custom options, its prices, its images, its
+     * children. The product must have a SKU, as for a mass change. The save does not check the attribute values
+     * again: the caller did not send them, so an old value must not refuse the change of a part.
+     *
+     * @throws Mage_Core_Exception_Input when the product has no SKU
+     */
+    public function savePart(Product $product): Product
     {
-        Mage::dispatchEvent('catalog_controller_product_delete', ['product' => $product]);
-        $wasSecure = (bool) Mage::registry('isSecureArea');
-        if (!$wasSecure) {
-            Mage::register('isSecureArea', true);
+        if (trim((string) $product->getSku()) === '') {
+            throw new Mage_Core_Exception_Input()->addError('sku', Mage::helper('catalog')->__('SKU is required'));
         }
-        try {
-            $product->delete();
-        } finally {
-            if (!$wasSecure) {
-                Mage::unregister('isSecureArea');
-            }
+        $product->save();
+        return $product;
+    }
+
+    /**
+     * Copy the attribute values of $product between store views. For each pair of $stores, the values of the
+     * store view of the value replace the values of the store view of the key. A copy from the default values
+     * (store 0) writes nothing: the target store view keeps its own values and uses the default for the others.
+     *
+     * @param array<int|string, int|string> $stores the ID of the source store view, by the ID of the target store view
+     * @throws Mage_Core_Exception_Input
+     */
+    public function copyToStores(Product $product, array $stores): void
+    {
+        foreach ($stores as $storeTo => $storeFrom) {
+            $productInStore = $this->getById((int) $product->getId(), (int) $storeFrom);
+            Mage::dispatchEvent('product_duplicate_attributes', [
+                'product' => $productInStore,
+                'storeTo' => $storeTo,
+                'storeFrom' => $storeFrom,
+            ]);
+            $this->save($productInStore->setStoreId((int) $storeTo));
         }
     }
 
     /**
-     * Set the status $status of the products $productIds in the store view $storeId.
+     * Create a copy of $product, with its images or without them. The copy is disabled and has no SKU.
+     */
+    public function duplicate(Product $product, bool $withImages = true): Product
+    {
+        return $product->duplicate($withImages);
+    }
+
+    public function delete(Product $product): void
+    {
+        Mage::dispatchEvent('catalog_controller_product_delete', ['product' => $product]);
+        Mage::helper('catalog')->deleteInSecureArea($product);
+    }
+
+    /**
+     * Set the status $status of the products $productIds in the store view $storeId. Only a product with a SKU
+     * can become enabled.
      *
      * @param list<int|string> $productIds
      * @throws Mage_Core_Exception_Input for an unknown status
-     * @throws Mage_Core_Exception when a product has no SKU
+     * @throws Mage_Core_Exception when the status is enabled and a product has no SKU
      */
     public function updateStatus(array $productIds, int $status, int $storeId): void
     {
         if (!array_key_exists($status, Mage_Catalog_Model_Product_Status::getOptionArray())) {
             throw new Mage_Core_Exception_Input()->addError('status', Mage::helper('catalog')->__('Unknown product status: %s', $status));
         }
-        $this->updateAttributes($productIds, ['status' => $status], $storeId);
+        if ($status === Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
+            $this->assertHaveSku($productIds);
+        }
+        $this->writeAttributes($productIds, ['status' => $status], $storeId);
         Mage::dispatchEvent('catalog_controller_product_mass_status', ['product_ids' => $productIds]);
     }
 
@@ -307,8 +338,19 @@ class Mage_Catalog_Service_Product
     public function updateAttributes(array $productIds, array $data, int $storeId): void
     {
         $this->assertHaveSku($productIds);
-        $data = $this->formatUrlKey($productIds, $data, $storeId);
+        $this->writeAttributes($productIds, $data, $storeId);
+    }
 
+    /**
+     * Check the value of each attribute of $data with the backend of the attribute. An unknown attribute and a
+     * static attribute are skipped.
+     *
+     * @param array<string, mixed> $data the value of each attribute, by attribute code
+     * @return array<string, mixed> the values of $data that a mass change writes
+     * @throws Mage_Core_Exception_Input with the attribute code as the field
+     */
+    public function validateAttributes(array $data): array
+    {
         $values = new \Maho\DataObject();
         foreach ($data as $code => $value) {
             $attribute = Mage::getSingleton('eav/config')->getAttribute(Product::ENTITY, $code);
@@ -323,6 +365,62 @@ class Mage_Catalog_Service_Product
                 throw new Mage_Core_Exception_Input()->addError($code, $attribute->getFrontendLabel() . ': ' . $e->getMessage());
             }
         }
+        return $data;
+    }
+
+    /**
+     * Write a change of the product $product without a save of the product: the attribute values $attributes in
+     * the store view of the product, then the other parts. A part that is null or empty stays as it is.
+     *
+     * @param array<string, mixed> $attributes the value of each attribute, by attribute code
+     * @param list<string> $useDefault the attributes whose store view value goes back to the default value
+     * @param array<string, mixed> $stockData the fields of the stock item
+     * @param array<int|string>|null $categoryIds the only categories of the product
+     * @param array<int|string>|null $websiteIds the only websites of the product
+     * @param list<int>|null $storeIds with a list, each website that changes must have a store view of the list
+     * @throws Mage_Core_Exception_Input
+     * @throws Mage_Core_Exception_Forbidden
+     * @throws Mage_Core_Exception when the product has no SKU
+     */
+    public function updateWithoutSave(
+        Product $product,
+        array $attributes,
+        array $useDefault = [],
+        array $stockData = [],
+        ?array $categoryIds = null,
+        ?array $websiteIds = null,
+        ?array $storeIds = null,
+    ): Product {
+        $id = (int) $product->getId();
+        $storeId = (int) $product->getStoreId();
+        $this->updateAttributes([$id], $attributes, $storeId);
+        $product->addData($attributes);
+        $this->deleteStoreValues($id, $useDefault, $storeId);
+        if ($stockData !== []) {
+            /** @var Mage_CatalogInventory_Service_Stock $stock */
+            $stock = Mage::getService('cataloginventory/stock');
+            $stock->update($stock->getByProductId($id), $stockData);
+        }
+        if ($categoryIds !== null) {
+            $this->setCategoryIds($id, $categoryIds);
+        }
+        if ($websiteIds !== null) {
+            $current = array_map(intval(...), $product->getWebsiteIds());
+            $wanted = array_map(intval(...), $websiteIds);
+            $this->changeWebsites([$id], array_values(array_diff($wanted, $current)), array_values(array_diff($current, $wanted)), $storeIds);
+            $product->setWebsiteIds($wanted);
+        }
+        return $product;
+    }
+
+    /**
+     * @param list<int|string> $productIds
+     * @param array<string, mixed> $data
+     * @throws Mage_Core_Exception_Input
+     */
+    private function writeAttributes(array $productIds, array $data, int $storeId): void
+    {
+        $data = $this->validateAttributes($this->formatUrlKey($productIds, $data, $storeId));
         if ($data === []) {
             return;
         }
@@ -344,19 +442,6 @@ class Mage_Catalog_Service_Product
     }
 
     /**
-     * Return whether $setId is the ID of an attribute set of products.
-     */
-    private function isProductSet(int $setId): bool
-    {
-        // PostgreSQL refuses a value above the range of the SMALLINT column eav_attribute_set.attribute_set_id
-        if ($setId < 1 || $setId > 32767) {
-            return false;
-        }
-        $set = Mage::getModel('eav/entity_attribute_set')->load($setId);
-        return $set->getId() && (int) $set->getEntityTypeId() === (int) Mage::getResourceSingleton('catalog/product')->getTypeId();
-    }
-
-    /**
      * Move the products $productIds to the attribute set $setId, without a save of each product. The indexes and
      * the product cache follow.
      *
@@ -371,7 +456,7 @@ class Mage_Catalog_Service_Product
         $productIds = array_values(array_unique(array_filter(array_map(intval(...), $productIds))));
         /** @var Mage_Catalog_Model_Resource_Product $resource */
         $resource = Mage::getResourceSingleton('catalog/product');
-        if (!$this->isProductSet($setId)) {
+        if (!Mage::getModel('catalog/product')->isProductAttributeSet($setId)) {
             throw new Mage_Core_Exception_Input()->addError('attribute_set_id', $helper->__('Attribute set %s not found', $setId));
         }
         if ($productIds === []) {
@@ -418,7 +503,8 @@ class Mage_Catalog_Service_Product
     }
 
     /**
-     * Check the SKU, the name, the type, the attribute set, then the backend of each attribute and the date ranges.
+     * Check the SKU and the name, then the rules of the product model for the name, the type and the attribute
+     * set, then the backend of each attribute and the date ranges.
      *
      * @throws Mage_Core_Exception_Input
      * @throws Mage_Core_Exception_Conflict when another product has the SKU
@@ -430,23 +516,16 @@ class Mage_Catalog_Service_Product
         if (trim((string) $product->getSku()) === '') {
             $errors->addError('sku', $helper->__('SKU is required'));
         }
+        // In a store view, false means that the store view uses the default name
         if ($product->getName() !== false && trim((string) $product->getName()) === '') {
             $errors->addError('name', $helper->__('Name is required'));
         }
-        if (!$product->getId() || $product->dataHasChangedFor('type_id')) {
-            if (!array_key_exists((string) $product->getTypeId(), Mage_Catalog_Model_Product_Type::getTypes())) {
-                $errors->addError('type_id', $helper->__('Unknown product type: %s', (string) $product->getTypeId()));
-            }
-        }
-        if (!$product->getId() || $product->dataHasChangedFor('attribute_set_id')) {
-            if (!$this->isProductSet((int) $product->getAttributeSetId())) {
-                $errors->addError('attribute_set_id', $helper->__('Attribute set %s not found', (int) $product->getAttributeSetId()));
-            }
-        }
-        $errors->throwIfErrors();
+        $product->validateRecord($errors)->throwIfErrors();
 
         try {
             $product->validate();
+        } catch (Mage_Eav_Model_Entity_Attribute_Exception_Unique $e) {
+            throw new Mage_Core_Exception_Conflict($e->getMessage());
         } catch (Mage_Eav_Model_Entity_Attribute_Exception $e) {
             throw new Mage_Core_Exception_Input()->addError((string) $e->getAttributeCode(), $e->getMessage());
         }
@@ -507,33 +586,5 @@ class Mage_Catalog_Service_Product
                 throw new Mage_Core_Exception_Forbidden(Mage::helper('catalog')->__('Access denied for website: %s', $websiteId));
             }
         }
-    }
-
-    /**
-     * @param list<string> $codes
-     * @return list<Mage_Catalog_Model_Resource_Eav_Attribute>
-     * @throws Mage_Core_Exception_Input
-     */
-    private function getStoreAttributes(array $codes, int $storeId): array
-    {
-        $helper = Mage::helper('catalog');
-        $errors = new Mage_Core_Exception_Input();
-        if ($codes !== [] && $storeId === Mage_Core_Model_App::ADMIN_STORE_ID) {
-            $errors->addError('use_default', $helper->__('useDefault requires a store context (?store=): global values have no default to revert to.'));
-            $errors->throwIfErrors();
-        }
-        $attributes = [];
-        foreach ($codes as $code) {
-            $attribute = Mage::getSingleton('eav/config')->getAttribute(Product::ENTITY, $code);
-            if (!$attribute instanceof Mage_Catalog_Model_Resource_Eav_Attribute || !$attribute->getId() || $attribute->getBackend()->isStatic()) {
-                $errors->addError('use_default', $helper->__('Unknown attribute in useDefault: %s', $code));
-            } elseif ($attribute->isScopeGlobal()) {
-                $errors->addError('use_default', $helper->__("Attribute '%s' is global scope and has no store override to revert.", $code));
-            } else {
-                $attributes[] = $attribute;
-            }
-        }
-        $errors->throwIfErrors();
-        return $attributes;
     }
 }

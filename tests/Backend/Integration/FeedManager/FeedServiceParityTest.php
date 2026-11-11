@@ -189,6 +189,43 @@ it('refuses a batch generation of a feed that another generation holds, unless t
         ->and($running->getCompletedAt())->not->toBeNull();
 });
 
+it('runs each step of a batch generation of the admin through the service', function (): void {
+    $spy = new class extends Maho_FeedManager_Service_Feed {
+        /** @var list<string> */
+        public array $calls = [];
+
+        #[\Override]
+        public function processBatch(string $jobId): array
+        {
+            $this->calls[] = "process {$jobId}";
+            return parent::processBatch($jobId);
+        }
+
+        #[\Override]
+        public function cancelBatch(string $jobId): array
+        {
+            $this->calls[] = "cancel {$jobId}";
+            return parent::cancelBatch($jobId);
+        }
+    };
+    Mage::unregister('_service/feedmanager/feed');
+    Mage::register('_service/feedmanager/feed', $spy);
+    $feed = ($this->createFeed)(['auto_upload' => 0]);
+
+    try {
+        $init = feedServiceJson('generateInit', ['id' => $feed->getId()]);
+        $batch = feedServiceJson('generateBatch', ['job_id' => $init['job_id']]);
+        $cancel = feedServiceJson('generateCancel', ['job_id' => $init['job_id']]);
+    } finally {
+        Mage::unregister('_service/feedmanager/feed');
+    }
+
+    expect($init['success'])->toBeTrue()
+        ->and($batch)->not->toHaveKey('error')
+        ->and($cancel['status'])->toBe('cancelled')
+        ->and($spy->calls)->toBe(["process {$init['job_id']}", "cancel {$init['job_id']}"]);
+});
+
 it('resets only a generation that runs for longer than the timeout when the admin does not force it', function (): void {
     $feed = ($this->createFeed)();
     $log = fn(string $startedAt) => Mage::getModel('feedmanager/log')

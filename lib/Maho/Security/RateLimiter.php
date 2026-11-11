@@ -50,6 +50,34 @@ final class RateLimiter
     }
 
     /**
+     * Record a hit, or throw when the key is at or over its budget. The exception holds the window as the delay
+     * after which the client can try again. $message replaces the message "Too many requests. Please try again later."
+     *
+     * @throws \Mage_Core_Exception_TooManyRequests
+     */
+    public function attemptOrThrow(?string $message = null): void
+    {
+        $this->throwIfTooManyAttempts($message);
+        $this->hit();
+    }
+
+    /**
+     * Throw when the key is at or over its budget. Record nothing. Use it with hit() when only a failed attempt
+     * counts: call this method first, then call hit() when the attempt fails.
+     *
+     * @throws \Mage_Core_Exception_TooManyRequests
+     */
+    public function throwIfTooManyAttempts(?string $message = null): void
+    {
+        if ($this->tooManyAttempts()) {
+            throw new \Mage_Core_Exception_TooManyRequests(
+                $message ?? \Mage::helper('core')->__('Too many requests. Please try again later.'),
+                $this->windowSeconds,
+            );
+        }
+    }
+
+    /**
      * Record a single hit. For check-up-front / record-on-failure flows where the check and the
      * record happen at different points (see Mage_Sales_Helper_Guest).
      */

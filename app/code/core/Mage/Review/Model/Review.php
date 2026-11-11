@@ -101,6 +101,20 @@ class Mage_Review_Model_Review extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Refuse a new review, or a new title, detail or nickname, that validate() refuses. A stored review stays valid.
+     *
+     * @throws Mage_Core_Exception_Input
+     */
+    #[\Override]
+    protected function _beforeSave()
+    {
+        if (!$this->getId() || array_any(['title', 'detail', 'nickname'], $this->dataHasChangedFor(...))) {
+            Mage_Core_Exception_Input::assertValid($this->validate(), 'review');
+        }
+        return parent::_beforeSave();
+    }
+
+    /**
      * Return true, or the message of each invalid field by the name of the field.
      *
      * @return array<string, string>|true

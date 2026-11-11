@@ -69,7 +69,7 @@ class Maho_Revocation_IndexController extends Mage_Core_Controller_Front_Action
         }
 
         try {
-            $revocationRequest = Mage::getService('revocation/request')->submit($input, Maho_Revocation_Model_Channel::Web);
+            $revocationRequest = Mage::getService('revocation/request')->submit($input);
         } catch (Mage_Core_Exception_NoSuchEntity) {
             $this->_forward('noRoute');
             return;

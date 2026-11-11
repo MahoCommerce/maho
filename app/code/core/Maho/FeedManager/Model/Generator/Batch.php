@@ -542,6 +542,23 @@ class Maho_FeedManager_Model_Generator_Batch
         }
     }
 
+    #[\Deprecated(message: 'Use deleteFeedJobs() instead')]
+    protected function _cleanupStaleJobs(int $feedId): void
+    {
+        $this->deleteFeedJobs($feedId, self::STALE_JOB_SECONDS);
+    }
+
+    #[\Deprecated(message: 'Use Maho_FeedManager_Service_Feed::upload() instead')]
+    protected function _handleUpload(string $localPath): array
+    {
+        if (!$this->_feed->getAutoUpload()) {
+            $message = Mage::helper('feedmanager')->__('Auto-upload disabled');
+            $this->_log->recordUploadSkipped($message);
+            return ['status' => Maho_FeedManager_Model_Log::UPLOAD_STATUS_SKIPPED, 'message' => $message];
+        }
+        return Mage::getService('feedmanager/feed')->upload($this->_feed, $this->_log, $localPath);
+    }
+
     /**
      * Delete the jobs of a feed from the feeds mount, and return how many it deleted
      *

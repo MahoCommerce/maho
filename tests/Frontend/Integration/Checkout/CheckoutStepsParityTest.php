@@ -15,11 +15,14 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Tests\Helpers\AdminApiParity;
 use Tests\Helpers\CartParity;
 
+require_once __DIR__ . '/OnepageDriver.php';
+
 uses(Tests\MahoFrontendTestCase::class);
 
 /**
  * The one-page checkout and the guest cart API set the addresses, the shipping method and the payment method through
  * Mage_Checkout_Service_Cart (#1348). Each test gives the same input to both transports and compares the outcome.
+ * The storefront side posts to the step actions of Mage_Checkout_OnepageController.
  */
 
 /**
@@ -88,6 +91,40 @@ function checkoutStepsAddErrorRate(Mage_Sales_Model_Quote $quote, string $code):
     $address->setCollectShippingRates(false)->save();
 }
 
+/**
+ * Run $call while $callback is the only observer of $event in the global area.
+ *
+ * @param Closure(Maho\Event\Observer): void $callback
+ * @param Closure(): mixed $call
+ */
+function checkoutStepsObserve(string $event, Closure $callback, Closure $call): void
+{
+    $spy = new class {
+        public ?Closure $callback = null;
+
+        public function run(Maho\Event\Observer $observer): void
+        {
+            ($this->callback)($observer);
+        }
+    };
+    $spy->callback = $callback;
+    Mage::register('_singleton/checkout_steps_spy', $spy, true);
+    (function () use ($event): void {
+        $this->_events['global'][$event] = ['observers' => [
+            'checkout_steps_spy' => ['type' => 'singleton', 'model' => 'checkout_steps_spy', 'method' => 'run'],
+        ]];
+    })->call(Mage::app());
+
+    try {
+        $call();
+    } finally {
+        (function () use ($event): void {
+            unset($this->_events['global'][$event]);
+        })->call(Mage::app());
+        Mage::unregister('_singleton/checkout_steps_spy');
+    }
+}
+
 beforeEach(function () {
     Mage::unregister(Mage_Core_Model_Session_Abstract::REGISTRY_KEY);
     $session = new Session(new MockArraySessionStorage());
@@ -108,7 +145,7 @@ afterEach(function () {
 it('refuses an incomplete address with the same messages', function () {
     [$webCart, $apiCart] = $this->carts;
 
-    $web = checkoutStepsOnepage($webCart)->saveBilling(checkoutStepsWebAddress(['city' => '']), false);
+    $web = checkoutOnepagePost($webCart, 'saveBilling', ['billing' => checkoutStepsWebAddress(['city' => ''])]);
     $api = checkoutStepsApi($apiCart, 'set_guest_billing_address', 'billing-address', checkoutStepsApiAddress(['city' => '']));
 
     expect($web['error'])->toBe(1)
@@ -138,10 +175,10 @@ it('stores the prefix, the middle name, the suffix and the VAT number of an API 
 it('stores the address text without HTML tags on both transports', function () {
     [$webCart, $apiCart] = $this->carts;
 
-    $web = checkoutStepsOnepage($webCart)->saveBilling(checkoutStepsWebAddress(['firstname' => 'Step <b>One</b>']), false);
+    $web = checkoutOnepagePost($webCart, 'saveBilling', ['billing' => checkoutStepsWebAddress(['firstname' => 'Step <b>One</b>'])]);
     $api = checkoutStepsApi($apiCart, 'set_guest_billing_address', 'billing-address', checkoutStepsApiAddress(['firstName' => 'Step <b>One</b>']));
 
-    expect($web)->toBe([])
+    expect($web)->toBe(['goto_section' => 'shipping'])
         ->and($api['status'])->toBe(200)
         ->and(checkoutStepsReload($webCart)->getBillingAddress()->getFirstname())->toBe('Step One')
         ->and(checkoutStepsReload($apiCart)->getBillingAddress()->getFirstname())->toBe('Step One');
@@ -187,7 +224,7 @@ describe('a shipping method', function () {
         foreach ($this->carts as $cart) {
             Mage::getService('checkout/cart')->setShippingAddress(
                 checkoutStepsReload($cart),
-                Mage::getService('checkout/cart')->mapAddressInput(checkoutStepsApiAddress()),
+                \Mage\Checkout\Api\CartRequest::mapAddress(checkoutStepsApiAddress()),
             );
         }
     });
@@ -195,10 +232,11 @@ describe('a shipping method', function () {
     it('that has a rate is selected on both transports', function () {
         [$webCart, $apiCart] = $this->carts;
 
-        $web = checkoutStepsOnepage($webCart)->saveShippingMethod('flatrate_flatrate');
+        $web = checkoutOnepagePost($webCart, 'saveShippingMethod', ['shipping_method' => 'flatrate_flatrate']);
         $api = checkoutStepsApi($apiCart, 'set_guest_shipping_method', 'shipping-method', ['carrierCode' => 'flatrate', 'methodCode' => 'flatrate']);
 
-        expect($web)->toBe([])
+        expect($web['goto_section'] ?? null)->toBe('payment')
+            ->and($web)->not->toHaveKey('error')
             ->and($api['status'])->toBe(200)
             ->and(checkoutStepsReload($webCart)->getShippingAddress()->getShippingMethod())->toBe('flatrate_flatrate')
             ->and(checkoutStepsReload($apiCart)->getShippingAddress()->getShippingMethod())->toBe('flatrate_flatrate');
@@ -207,7 +245,7 @@ describe('a shipping method', function () {
     it('that has no rate is refused with the same message', function () {
         [$webCart, $apiCart] = $this->carts;
 
-        $web = checkoutStepsOnepage($webCart)->saveShippingMethod('pest_none');
+        $web = checkoutOnepagePost($webCart, 'saveShippingMethod', ['shipping_method' => 'pest_none']);
         $api = checkoutStepsApi($apiCart, 'set_guest_shipping_method', 'shipping-method', ['carrierCode' => 'pest', 'methodCode' => 'none']);
 
         expect($web)->toBe(['error' => -1, 'message' => 'Shipping method is not available for this address'])
@@ -220,7 +258,7 @@ describe('a shipping method', function () {
         checkoutStepsAddErrorRate($webCart, 'pesterror_down');
         checkoutStepsAddErrorRate($apiCart, 'pesterror_down');
 
-        $web = checkoutStepsOnepage($webCart)->saveShippingMethod('pesterror_down');
+        $web = checkoutOnepagePost($webCart, 'saveShippingMethod', ['shipping_method' => 'pesterror_down']);
         $api = checkoutStepsApi($apiCart, 'set_guest_shipping_method', 'shipping-method', ['carrierCode' => 'pesterror', 'methodCode' => 'down']);
 
         expect($web)->toBe(['error' => -1, 'message' => 'Shipping method is not available for this address'])
@@ -253,10 +291,11 @@ describe('a payment method', function () {
     it('that is available is selected on both transports', function () {
         [$webCart, $apiCart] = $this->carts;
 
-        $web = checkoutStepsOnepage($webCart)->savePayment(['method' => 'checkmo']);
+        $web = checkoutOnepagePost($webCart, 'savePayment', ['payment' => ['method' => 'checkmo']]);
         $api = checkoutStepsApi($apiCart, 'set_guest_payment_method', 'payment-method', ['methodCode' => 'checkmo']);
 
-        expect($web)->toBe([])
+        expect($web['goto_section'] ?? null)->toBe('review')
+            ->and($web)->not->toHaveKey('error')
             ->and($api['status'])->toBe(200);
         foreach ([$webCart, $apiCart] as $cart) {
             $saved = checkoutStepsReload($cart);
@@ -268,19 +307,19 @@ describe('a payment method', function () {
         [$webCart, $apiCart] = $this->carts;
         Mage::app()->getStore()->setConfig('payment/checkmo/min_order_total', '999999');
 
-        expect(fn() => checkoutStepsOnepage($webCart)->savePayment(['method' => 'checkmo']))
-            ->toThrow(Mage_Core_Exception::class, 'The requested Payment Method is not available.');
+        $web = checkoutOnepagePost($webCart, 'savePayment', ['payment' => ['method' => 'checkmo']]);
         $api = checkoutStepsApi($apiCart, 'set_guest_payment_method', 'payment-method', ['methodCode' => 'checkmo']);
 
-        expect($api['status'])->toBe(422)
+        expect($web)->toBe(['error' => 'The requested Payment Method is not available.'])
+            ->and($api['status'])->toBe(422)
             ->and($api['errors'])->toBe(['Payment method is not available: The requested Payment Method is not available.'])
             ->and(checkoutStepsReload($webCart)->getPayment()->getMethod())->toBeNull()
             ->and(checkoutStepsReload($apiCart)->getPayment()->getMethod())->toBeNull();
     });
 
     it('that the store does not have is refused on the storefront', function () {
-        expect(fn() => checkoutStepsOnepage($this->carts[0])->savePayment(['method' => 'pest_unknown']))
-            ->toThrow(Mage_Core_Exception::class, 'The requested Payment Method is not available.');
+        expect(checkoutOnepagePost($this->carts[0], 'savePayment', ['payment' => ['method' => 'pest_unknown']]))
+            ->toBe(['error' => 'The requested Payment Method is not available.']);
     });
 });
 
@@ -293,11 +332,51 @@ describe('a card method (D12)', function () {
         $store->setConfig('payment/authorizenet/useccv', '0');
         $card = ['cc_type' => 'VI', 'cc_number' => '4111111111111111', 'cc_exp_month' => '12', 'cc_exp_year' => (string) ((int) date('Y') + 2)];
 
-        checkoutStepsOnepage($webCart)->savePayment(['method' => 'authorizenet'] + $card);
+        checkoutOnepagePost($webCart, 'savePayment', ['payment' => ['method' => 'authorizenet'] + $card]);
         $api = checkoutStepsApi($apiCart, 'set_guest_payment_method', 'payment-method', ['methodCode' => 'authorizenet', 'additionalData' => $card]);
 
         expect(checkoutStepsReload($webCart)->getPayment()->getMethod())->toBe('authorizenet')
             ->and($api['status'])->toBe(422)
             ->and($api['errors'])->toBe(['Payment method is not available for this cart']);
+    });
+});
+
+describe('the shipping method step of the storefront', function () {
+    beforeEach(function () {
+        Mage::getService('checkout/cart')->setShippingAddress(
+            checkoutStepsReload($this->carts[0]),
+            \Mage\Checkout\Api\CartRequest::mapAddress(checkoutStepsApiAddress()),
+        );
+    });
+
+    it('fires its event once with the request, and saves what an observer of the event changes', function () {
+        $calls = 0;
+        checkoutStepsObserve(
+            'checkout_controller_onepage_save_shipping_method',
+            function (Maho\Event\Observer $observer) use (&$calls): void {
+                $calls++;
+                expect($observer->getEvent()->getRequest()->getPost('shipping_method'))->toBe('flatrate_flatrate');
+                $observer->getEvent()->getQuote()->setCustomerNote('Set by an observer of the step');
+            },
+            fn() => checkoutOnepagePost($this->carts[0], 'saveShippingMethod', ['shipping_method' => 'flatrate_flatrate']),
+        );
+
+        $saved = checkoutStepsReload($this->carts[0]);
+        expect($calls)->toBe(1)
+            ->and($saved->getCustomerNote())->toBe('Set by an observer of the step')
+            ->and($saved->getShippingAddress()->getShippingMethod())->toBe('flatrate_flatrate');
+    });
+
+    it('does not fire its event for a shipping method that has no rate', function () {
+        $calls = 0;
+        checkoutStepsObserve(
+            'checkout_controller_onepage_save_shipping_method',
+            function () use (&$calls): void {
+                $calls++;
+            },
+            fn() => checkoutOnepagePost($this->carts[0], 'saveShippingMethod', ['shipping_method' => 'pest_none']),
+        );
+
+        expect($calls)->toBe(0);
     });
 });

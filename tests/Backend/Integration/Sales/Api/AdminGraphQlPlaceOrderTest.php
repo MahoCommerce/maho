@@ -26,7 +26,7 @@ function adminGraphQlPlaceOrder(Mage_Sales_Model_Quote $quote, array $variables 
 {
     $handler = new OrderMutationHandler(new OrderProvider(AdminApiParity::adminSecurity()));
 
-    return $handler->handlePlaceOrder($variables + ['cartId' => (int) $quote->getId()], ['admin_user_id' => 1])['placeOrder'];
+    return $handler->handlePlaceOrder($variables + ['cartId' => (int) $quote->getId()])['placeOrder'];
 }
 
 beforeEach(function () {

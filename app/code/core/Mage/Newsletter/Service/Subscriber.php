@@ -10,7 +10,6 @@
 
 declare(strict_types=1);
 
-use Mage_Newsletter_Model_Channel as Channel;
 use Mage_Newsletter_Model_Subscriber as Subscriber;
 
 class Mage_Newsletter_Service_Subscriber
@@ -83,59 +82,76 @@ class Mage_Newsletter_Service_Subscriber
 
     /**
      * Subscribe $email on the store $storeId. $customerId is the customer who is logged in, or null for a guest.
-     * A customer who subscribes the address of the account needs no confirmation. A customer who gives another
-     * address has no proof that the address is theirs: the guest switch applies, and the address always gets the
-     * confirmation email, also when the store asks no confirmation.
+     * A customer who gives the address of the account gets the result of subscribeCustomer(). A customer who gives
+     * another address has no proof that the address is theirs: the guest switch applies, and the address always
+     * gets the confirmation email, also when the store asks no confirmation.
      * When the address is already subscribed, return its subscriber unchanged: getIsStatusChanged() is false.
-     * The API channel sends the solved CAPTCHA in $captchaToken. Maho_Captcha checks the footer form before the
-     * controller, and the admin channel asks no CAPTCHA.
      *
+     * @param array<array-key, mixed> $fields the fields that the client sent, with the token of the CAPTCHA: the form POST or the API body
      * @throws Mage_Core_Exception_Input when the email is empty or not valid, or when the CAPTCHA refuses the token
      * @throws Mage_Core_Exception_Forbidden when the store does not accept guests, and $customerId is null or $email
      *                                       is not the address of the account
-     * @throws Mage_Core_Exception_TooManyRequests when the client or the address is over its limit
+     * @throws Mage_Core_Exception_TooManyRequests when the client, the address or the customer is over its limit
      */
-    public function subscribe(
-        #[\SensitiveParameter]
-        string $email,
-        int $storeId,
-        ?int $customerId,
-        Channel $channel,
-        ?string $captchaToken = null,
-    ): Subscriber {
-        $helper = Mage::helper('newsletter');
-        $core = Mage::helper('core');
-        $isAccountAddress = $this->isAccountAddress($email, $storeId, $customerId);
-        if (!$isAccountAddress && !$this->isGuestSubscriptionAllowed($storeId)) {
-            throw new Mage_Core_Exception_Forbidden($customerId === null
-                ? $helper->__('Guest subscription is not allowed. Please login first.')
-                : $helper->__('You can subscribe only the email address of your account.'));
+    public function subscribe(#[\SensitiveParameter] string $email, int $storeId, ?int $customerId, array $fields): Subscriber
+    {
+        if ($customerId !== null && $this->isAccountAddress($email, $storeId, $customerId)) {
+            return $this->subscribeAccountAddress($email, $storeId, $customerId);
         }
-        if ($channel === Channel::Api) {
-            Mage::helper('apiplatform')->assertCaptcha(['captchaToken' => $captchaToken]);
-        }
-        // The limit of the client comes first: a client that sends many addresses gets past the limit of one address
-        $limit = (int) Mage::getStoreConfig(self::XML_PATH_SUBSCRIBE_RATE_LIMIT, $storeId);
-        $this->attempt($core->rateLimiter('newsletter_subscribe', $limit, self::RATE_LIMIT_WINDOW, \Maho\Security\RateLimitScope::Ip));
-        $this->attempt($core->rateLimiterBy('newsletter_subscribe', 'newsletter_subscribe:email:' . strtolower($email), $limit, self::RATE_LIMIT_WINDOW));
-
-        $subscriber = Mage::getModel('newsletter/subscriber')->loadByEmail($email);
-        if (!$subscriber->isSubscribed()) {
-            $subscriber->subscribeEmail($email, $storeId, $customerId, alwaysConfirm: $customerId !== null);
-        }
-        return $subscriber;
+        $this->assertGuestSubscriptionAllowed($storeId, $customerId);
+        Mage::helper('core')->assertCaptcha($fields);
+        return $this->subscribeAddress($email, $storeId, $customerId);
     }
 
     /**
-     * Subscribe the address of the account of the customer $customerId.
+     * Subscribe $email on the store $storeId for an admin user, or for an API token with access to the newsletter.
+     * An admin is not a bot, so this method asks no CAPTCHA. The guest switch and the limits of subscribe() apply.
+     *
+     * @throws Mage_Core_Exception_Input when the email is empty or not valid
+     * @throws Mage_Core_Exception_Forbidden when the store does not accept guests
+     * @throws Mage_Core_Exception_TooManyRequests when the client or the address is over its limit
+     */
+    public function subscribeByAdmin(#[\SensitiveParameter] string $email, int $storeId): Subscriber
+    {
+        $this->assertGuestSubscriptionAllowed($storeId, null);
+        return $this->subscribeAddress($email, $storeId, null);
+    }
+
+    /**
+     * Subscribe the address of the account of the customer $customerId. The customer is logged in and the address
+     * is theirs, so there is no CAPTCHA and no confirmation, and the limit counts for the customer, not for the
+     * IP address. When the customer is already subscribed, return the subscriber unchanged and count nothing.
      *
      * @throws Mage_Core_Exception_NoSuchEntity when the customer does not exist
-     * @throws Mage_Core_Exception_Input when the CAPTCHA refuses the token
-     * @throws Mage_Core_Exception_TooManyRequests
+     * @throws Mage_Core_Exception_TooManyRequests when the customer is over the limit
      */
-    public function subscribeCustomer(int $customerId, int $storeId, Channel $channel, ?string $captchaToken = null): Subscriber
+    public function subscribeCustomer(int $customerId, int $storeId): Subscriber
     {
-        return $this->subscribe((string) $this->getCustomer($customerId)->getEmail(), $storeId, $customerId, $channel, $captchaToken);
+        return $this->subscribeAccountAddress((string) $this->getCustomer($customerId)->getEmail(), $storeId, $customerId);
+    }
+
+    /**
+     * Confirm the subscriber $id with the $code of the confirmation email, and send the success email.
+     * When the subscriber is already subscribed, return it unchanged: getIsStatusChanged() is false.
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity when the subscriber does not exist or has no code
+     * @throws Mage_Core_Exception when $code is wrong
+     */
+    public function confirm(int $id, #[\SensitiveParameter] string $code): Subscriber
+    {
+        $helper = Mage::helper('newsletter');
+        $subscriber = Mage::getModel('newsletter/subscriber')->load($id);
+        if ($subscriber->isSubscribed()) {
+            return $subscriber;
+        }
+        if (!$subscriber->getId() || !$subscriber->getCode()) {
+            throw new Mage_Core_Exception_NoSuchEntity($helper->__('Invalid subscription ID.'));
+        }
+        if (!$subscriber->confirm($code)) {
+            throw new Mage_Core_Exception($helper->__('Invalid subscription confirmation code.'));
+        }
+        $subscriber->sendConfirmationSuccessEmail();
+        return $subscriber;
     }
 
     /**
@@ -158,18 +174,24 @@ class Mage_Newsletter_Service_Subscriber
     }
 
     /**
-     * Unsubscribe the customer $customerId. When the customer has no subscription, return the subscriber of getByCustomer().
+     * Unsubscribe the customer $customerId. When the customer has no subscription, return the subscriber of
+     * getByCustomer(). When the customer is already unsubscribed, return the subscriber unchanged: no save,
+     * no email, and the limit counts nothing.
      *
      * @throws Mage_Core_Exception_NoSuchEntity when the customer does not exist
      * @throws Mage_Core_Exception_TooManyRequests when the client is over its limit
      */
     public function unsubscribeCustomer(int $customerId): Subscriber
     {
-        $limit = (int) Mage::getStoreConfig(self::XML_PATH_UNSUBSCRIBE_RATE_LIMIT);
-        $this->attempt(Mage::helper('core')->rateLimiter('newsletter_unsubscribe', $limit, self::RATE_LIMIT_WINDOW, \Maho\Security\RateLimitScope::Ip));
-
         $subscriber = $this->getByCustomer($customerId);
-        return $subscriber->getId() ? $subscriber->unsubscribe() : $subscriber;
+        if (!$subscriber->getId() || (int) $subscriber->getStatus() === Subscriber::STATUS_UNSUBSCRIBED) {
+            return $subscriber;
+        }
+        $limit = (int) Mage::getStoreConfig(self::XML_PATH_UNSUBSCRIBE_RATE_LIMIT);
+        Mage::helper('core')->rateLimiter('newsletter_unsubscribe', $limit, self::RATE_LIMIT_WINDOW, \Maho\Security\RateLimitScope::Ip)
+            ->attemptOrThrow();
+
+        return $subscriber->unsubscribe();
     }
 
     public function delete(Subscriber $subscriber): void
@@ -184,20 +206,62 @@ class Mage_Newsletter_Service_Subscriber
     {
         /** @var Mage_Customer_Service_Customer $customers */
         $customers = Mage::getService('customer/customer');
-        return $customers->getById($customerId)
-            ?? throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('newsletter')->__('Customer not found'));
+        return $customers->getById($customerId);
+    }
+
+    /**
+     * @throws Mage_Core_Exception_Forbidden
+     */
+    private function assertGuestSubscriptionAllowed(int $storeId, ?int $customerId): void
+    {
+        if ($this->isGuestSubscriptionAllowed($storeId)) {
+            return;
+        }
+        $helper = Mage::helper('newsletter');
+        throw new Mage_Core_Exception_Forbidden($customerId === null
+            ? $helper->__('Guest subscription is not allowed. Please login first.')
+            : $helper->__('You can subscribe only the email address of your account.'));
+    }
+
+    /**
+     * Subscribe an address that is not the address of the account of the client.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests
+     */
+    private function subscribeAddress(#[\SensitiveParameter] string $email, int $storeId, ?int $customerId): Subscriber
+    {
+        $core = Mage::helper('core');
+        // The limit of the client comes first: a client that sends many addresses gets past the limit of one address
+        $limit = (int) Mage::getStoreConfig(self::XML_PATH_SUBSCRIBE_RATE_LIMIT, $storeId);
+        $core->rateLimiter('newsletter_subscribe', $limit, self::RATE_LIMIT_WINDOW, \Maho\Security\RateLimitScope::Ip)
+            ->attemptOrThrow();
+        $core->rateLimiterBy('newsletter_subscribe', 'newsletter_subscribe:email:' . strtolower($email), $limit, self::RATE_LIMIT_WINDOW)
+            ->attemptOrThrow();
+
+        $subscriber = Mage::getModel('newsletter/subscriber')->loadByEmail($email);
+        if (!$subscriber->isSubscribed()) {
+            $subscriber->subscribeEmail($email, $storeId, $customerId, alwaysConfirm: $customerId !== null);
+        }
+        return $subscriber;
     }
 
     /**
      * @throws Mage_Core_Exception_TooManyRequests
      */
-    private function attempt(\Maho\Security\RateLimiter $limiter): void
+    private function subscribeAccountAddress(#[\SensitiveParameter] string $email, int $storeId, int $customerId): Subscriber
     {
-        if (!$limiter->attempt()) {
-            throw new Mage_Core_Exception_TooManyRequests(
-                Mage::helper('newsletter')->__('Too many requests. Please try again later.'),
-                self::RATE_LIMIT_WINDOW,
-            );
+        $subscriber = Mage::getModel('newsletter/subscriber')->loadByEmail($email);
+        if ($subscriber->isSubscribed()) {
+            return $subscriber;
         }
+        Mage::helper('core')->rateLimiterBy(
+            'newsletter_subscribe',
+            "newsletter_subscribe:customer:{$customerId}",
+            (int) Mage::getStoreConfig(self::XML_PATH_SUBSCRIBE_RATE_LIMIT, $storeId),
+            self::RATE_LIMIT_WINDOW,
+        )->attemptOrThrow();
+
+        $subscriber->subscribeEmail($email, $storeId, $customerId, alwaysConfirm: true);
+        return $subscriber;
     }
 }

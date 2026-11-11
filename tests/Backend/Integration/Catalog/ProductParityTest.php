@@ -327,6 +327,18 @@ describe('a fast update of the API', function () {
 });
 
 describe('a mass change of products', function () {
+    it('changes the attributes on the mass update page of the admin', function () {
+        $productId = (int) productParityCreate('PEST-PARITY-MASS')->getId();
+
+        Mage::getSingleton('adminhtml/session')->setProductIds([$productId]);
+        $admin = AdminApiParity::admin(Mage_Adminhtml_Catalog_Product_Action_AttributeController::class, 'save', [
+            'attributes' => ['name' => 'Pest Parity Renamed'],
+        ]);
+
+        expect($admin['errors'])->toBe([])
+            ->and(Mage::getModel('catalog/product')->load($productId)->getName())->toBe('Pest Parity Renamed');
+    });
+
     it('refuses the attributes, the stock and the websites when a product has no SKU', function () {
         $product = productParityCreate('PEST-PARITY-NO-SKU');
         $productId = (int) $product->getId();
@@ -341,7 +353,15 @@ describe('a mass change of products', function () {
             /** @var Mage_CatalogInventory_Service_Stock $stock */
             $stock = Mage::getService('cataloginventory/stock');
 
-            expect(fn() => $service->updateAttributes([$productId], ['name' => 'Pest Parity Renamed'], 0))->toThrow(Mage_Core_Exception::class, $message)
+            // The mass update page of the admin keeps the selected products in the session
+            Mage::getSingleton('adminhtml/session')->setProductIds([$productId]);
+            $admin = AdminApiParity::admin(Mage_Adminhtml_Catalog_Product_Action_AttributeController::class, 'save', [
+                'attributes' => ['name' => 'Pest Parity Renamed'],
+            ]);
+            $api = productViaApiFast(['name' => 'Pest Parity Renamed'], $productId);
+
+            expect($admin['errors'])->toBe([$message])
+                ->and($api)->toMatchArray(['status' => 422, 'errors' => [$message]])
                 ->and(fn() => $stock->updateProducts([$productId], ['qty' => 3]))->toThrow(Mage_Core_Exception::class, $message)
                 ->and(fn() => $service->changeWebsites([$productId], [], [1]))->toThrow(Mage_Core_Exception::class, $message)
                 ->and(Mage::getModel('catalog/product')->load($productId)->getName())->toBe('Pest Parity Existing');

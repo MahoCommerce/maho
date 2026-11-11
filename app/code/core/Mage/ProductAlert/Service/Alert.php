@@ -79,8 +79,7 @@ class Mage_ProductAlert_Service_Alert
         if (!$this->isEnabled($type, $storeId)) {
             throw new Mage_Core_Exception_NoSuchEntity($helper->__('This product alert is not available.'));
         }
-        $customer = Mage::getService('customer/customer')->getById($customerId)
-            ?? throw new Mage_Core_Exception_NoSuchEntity($helper->__('Customer not found'));
+        $customer = Mage::getService('customer/customer')->getById($customerId);
         $product = Mage::getModel('catalog/product')->setStoreId($storeId)->load($productId);
         if (!Mage::helper('catalog/product')->isVisibleInStore($product, $storeId)) {
             throw new Mage_Core_Exception($helper->__('The product was not found.'));

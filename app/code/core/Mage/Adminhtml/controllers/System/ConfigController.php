@@ -249,28 +249,30 @@ class Mage_Adminhtml_System_ConfigController extends Mage_Adminhtml_Controller_A
      */
     protected function _isSectionAllowed($section)
     {
+        $session = Mage::getSingleton('admin/session');
+        $acl = $session->getData('acl');
+        if (!$acl instanceof Mage_Admin_Model_Acl) {
+            return false;
+        }
         try {
-            $session = Mage::getSingleton('admin/session');
-            $resourceLookup = "admin/system/config/{$section}";
-            if ($session->getData('acl') instanceof Mage_Admin_Model_Acl) {
-                $acl = $session->getData('acl');
-                $resource = $acl->getResource($resourceLookup);
-                $resourceId = $resource->getResourceId();
-                if (!$session->isAllowed($resourceId)) {
-                    throw new Exception('');
-                }
-                return true;
-            }
+            /** @var Mage_Core_Service_Config $service */
+            $service = Mage::getService('core/config');
+            $allowed = $service->isSectionAllowed(
+                (string) $section,
+                static fn(string $resource): bool => (bool) $session->isAllowed($acl->getResource($resource)->getResourceId()),
+            );
         } catch (\Laminas\Permissions\Acl\Exception\ExceptionInterface) {
             $this->norouteAction();
             $this->setFlag('', self::FLAG_NO_DISPATCH, true);
             return false;
         } catch (Exception) {
+            $allowed = false;
+        }
+        if (!$allowed) {
             $this->deniedAction();
             $this->setFlag('', self::FLAG_NO_DISPATCH, true);
-            return false;
         }
-        return false;
+        return $allowed;
     }
 
     /**

@@ -42,7 +42,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
             }
             $address = $service->getById($addressId);
             $customerId = (int) $address->getCustomerId();
-            $customer = $this->getCustomerService()->requireById($customerId);
+            $customer = $this->getCustomerService()->getById($customerId);
             $this->assertCustomerReachable($customer);
             if ($operationName === 'delete') {
                 $service->delete($address);
@@ -60,7 +60,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
             $address !== null => (int) $address->getCustomerId(),
             default => $this->requireCustomerId(),
         };
-        $this->assertCustomerReachable($this->getCustomerService()->requireById($customerId));
+        $this->assertCustomerReachable($this->getCustomerService()->getById($customerId));
         if ($address !== null) {
             $address = $service->getByCustomer($addressId, $customerId);
         }
@@ -84,7 +84,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
             ->setIsDefaultShipping($data->isDefaultShipping);
         $this->getService()->save($address);
 
-        return Address::fromCustomerAddress($address, $this->getCustomerService()->requireById($customerId));
+        return Address::fromCustomerAddress($address, $this->getCustomerService()->getById($customerId));
     }
 
     /**

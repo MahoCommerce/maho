@@ -122,7 +122,7 @@ final class RevocationRequestProvider extends Provider
 
     private function requireCustomerEmail(): string
     {
-        $email = (string) \Mage::getService('customer/customer')->getById($this->requireCustomerId())?->getEmail();
+        $email = (string) \Mage::getService('customer/customer')->getById($this->requireCustomerId())->getEmail();
         if ($email === '') {
             throw new \Mage_Core_Exception_NoSuchEntity('Customer not found');
         }

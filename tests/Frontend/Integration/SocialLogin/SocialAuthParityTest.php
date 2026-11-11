@@ -142,6 +142,8 @@ beforeEach(function () {
 
 afterEach(function () {
     Mage::getSingleton('customer/session')->logout();
+    // A test turns the confirmation email on, and the customer model reads the setting for each customer
+    Mage::app()->getStore()->setConfig('customer/create_account/confirm', '0');
     Mage::register('isSecureArea', true, true);
     foreach (array_unique($GLOBALS['socialParityCustomerIds']) as $customerId) {
         Mage::getModel('customer/customer')->load($customerId)->delete();
@@ -206,9 +208,9 @@ it('counts every attempt of both transports against one limit', function () {
         ->and($web['message'])->toBe($api['message']);
 });
 
-describe('kept differences: each transport has its own nonce rule', function () {
+describe('kept differences: the storefront issues the nonce, and a client of the API can sign in without one', function () {
 
-    it('requires a nonce that the session issued on the web, and skips a missing nonce on the API', function () {
+    it('refuses a token without a nonce that the session issued on the web, and skips a missing nonce on the API', function () {
         $token = socialParityToken('no-nonce-' . uniqid() . '@example.com', 'sub-' . uniqid());
 
         $web = socialViaWeb('google', $token, null);
@@ -266,7 +268,7 @@ it('registers a new account through the customer service on both transports, wit
 it('counts each 2FA code of both transports against the login limit of the email', function () {
     $store = Mage::app()->getStore();
     $store->setConfig('customer/password/allow_2fa', '1');
-    $store->setConfig(Mage_Customer_Service_Customer::XML_PATH_LOGIN_RATE_LIMIT, '2');
+    $store->setConfig(Mage_Customer_Service_Authentication::XML_PATH_LOGIN_RATE_LIMIT, '2');
     $email = 'social-twofa-' . uniqid() . '@example.com';
     $sub = 'twofa-sub-' . uniqid();
     $customer = Mage::getModel('customer/customer')
@@ -295,4 +297,78 @@ it('counts each 2FA code of both transports against the login limit of the email
         ->and($webOverLimit)->toBe(['Too many requests. Please try again later.'])
         ->and($apiOverLimit['status'])->toBe(429)
         ->and(Mage::getSingleton('customer/session')->isLoggedIn())->toBeFalse();
+});
+
+/**
+ * Save a customer who uses 2FA. Return the customer and the secret of the authenticator app.
+ *
+ * @return array{Mage_Customer_Model_Customer, string}
+ */
+function socialParityTwofaCustomer(string $email): array
+{
+    $store = Mage::app()->getStore();
+    $store->setConfig('customer/password/allow_2fa', '1');
+    $store->setConfig(Mage_Customer_Service_Authentication::XML_PATH_LOGIN_RATE_LIMIT, '0');
+    $secret = Mage::helper('core/security')->generateTotpSecret();
+    $customer = Mage::getModel('customer/customer')
+        ->setWebsiteId((int) $store->getWebsiteId())
+        ->setStoreId((int) $store->getId())
+        ->setEmail($email)
+        ->setFirstname('Social')
+        ->setLastname('Parity')
+        ->setPassword('Password123!')
+        ->setTwofaSecret($secret)
+        ->setTwofaEnabled();
+    $customer->save();
+    $GLOBALS['socialParityCustomerIds'][] = (int) $customer->getId();
+
+    return [$customer, $secret];
+}
+
+it('logs in no customer who uses 2FA without the code, on the service and on both transports', function () {
+    $email = 'social-twofa-' . uniqid() . '@example.com';
+    $sub = 'twofa-sub-' . uniqid();
+    [$customer, $secret] = socialParityTwofaCustomer($email);
+    $storeId = (int) Mage::app()->getStore()->getId();
+
+    try {
+        Mage::getService('sociallogin/identity')->authenticate('google', socialParityToken($email, $sub), $storeId);
+        $pendingId = null;
+    } catch (Mage_Customer_Exception_SecondFactorRequired $e) {
+        $pendingId = $e->getCustomerId();
+    }
+    $webNonce = Mage::getModel('sociallogin/nonce')->issue();
+    $web = socialViaWeb('google', socialParityToken($email, $sub, $webNonce), $webNonce);
+    $webPendingId = Mage::getSingleton('customer/session')->getTwofaPendingCustomerId();
+    $apiNoCode = socialViaApi('google', socialParityToken($email, $sub), null);
+    $apiEmptyCode = socialViaApi('google', socialParityToken($email, $sub), null, ' ');
+    $apiWrongCode = socialViaApi('google', socialParityToken($email, $sub), null, '000000x');
+    $api = socialViaApi('google', socialParityToken($email, $sub), null, \OTPHP\TOTP::createFromSecret($secret)->now());
+
+    expect($pendingId)->toBe((int) $customer->getId())
+        ->and($web['status'])->toBe(200)
+        ->and($web['customer_id'])->toBeNull()
+        ->and($webPendingId)->toBe((int) $customer->getId())
+        ->and($apiNoCode['status'])->toBe(401)
+        ->and($apiNoCode['message'])->toBe('Two-factor authentication code is required.')
+        ->and($apiEmptyCode['status'])->toBe(401)
+        ->and($apiEmptyCode['message'])->toBe($apiNoCode['message'])
+        ->and($apiWrongCode['status'])->toBe(401)
+        ->and($apiWrongCode['message'])->toBe('2FA verification code is invalid.')
+        ->and($api['status'])->toBe(200)
+        ->and($api['customer_id'])->toBe((int) $customer->getId());
+});
+
+it('logs in the customer of the storefront challenge with the right 2FA code', function () {
+    $email = 'social-twofa-' . uniqid() . '@example.com';
+    [$customer, $secret] = socialParityTwofaCustomer($email);
+
+    $webNonce = Mage::getModel('sociallogin/nonce')->issue();
+    socialViaWeb('google', socialParityToken($email, 'twofa-sub-' . uniqid(), $webNonce), $webNonce);
+    $errors = socialTwofaViaWeb(\OTPHP\TOTP::createFromSecret($secret)->now());
+    $session = Mage::getSingleton('customer/session');
+
+    expect($errors)->toBe([])
+        ->and($session->isLoggedIn())->toBeTrue()
+        ->and((int) $session->getCustomerId())->toBe((int) $customer->getId());
 });

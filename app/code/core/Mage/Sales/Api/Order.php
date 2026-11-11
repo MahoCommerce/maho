@@ -430,9 +430,6 @@ class Order extends CrudResource
     #[ApiProperty(writable: false, description: 'One-time HMAC token to create a customer account from a guest order (only set when looking up a guest order whose email has no account yet)', extraProperties: ['computed' => true])]
     public ?string $accountToken = null;
 
-    #[ApiProperty(writable: false, description: 'Change amount for cash payments', extraProperties: ['computed' => true])]
-    public ?float $changeAmount = null;
-
     #[ApiProperty(writable: false, description: 'Order creation date (UTC)')]
     public ?string $createdAt = null;
 

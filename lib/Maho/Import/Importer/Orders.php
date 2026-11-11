@@ -230,19 +230,19 @@ class Orders extends AbstractImporter
         if ($status === 'pending') {
             return;
         }
-        /** @var \Mage_Sales_Service_Order $service */
-        $service = Mage::getService('sales/order');
         if ($status === 'canceled') {
-            $service->cancel($order);
+            Mage::getService('sales/order')->cancel($order);
             return;
         }
-        $service->invoice($order, captureCase: \Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE, sendEmail: false);
+        /** @var \Mage_Sales_Service_Order_Document $documents */
+        $documents = Mage::getService('sales/order_document');
+        $documents->invoice($order, captureCase: \Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE, sendEmail: false);
         // An order of virtual products only has nothing to ship
         if ($status === 'complete' && $order->canShip()) {
-            $service->ship($order, sendEmail: false);
+            $documents->ship($order, sendEmail: false);
         }
         if ($status === 'closed') {
-            $service->refund($order, [], offlineRefund: true, sendEmail: false);
+            $documents->refund($order, [], offlineRefund: true, sendEmail: false);
         }
     }
 

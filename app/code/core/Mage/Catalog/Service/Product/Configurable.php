@@ -46,7 +46,7 @@ class Mage_Catalog_Service_Product_Configurable
 
         $product->setConfigurableAttributesData($data);
         $product->setCanSaveConfigurableAttributes(true);
-        $product->save();
+        Mage::getService('catalog/product')->savePart($product);
         // A later save of the same product must not insert the attributes again
         $product->unsetData('configurable_attributes_data');
         $product->setCanSaveConfigurableAttributes(false);
@@ -55,7 +55,7 @@ class Mage_Catalog_Service_Product_Configurable
     /**
      * @return list<int>
      */
-    public function getChildIds(Product $product): array
+    private function getChildIds(Product $product): array
     {
         /** @var Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
         $typeInstance = $product->getTypeInstance(true);
@@ -116,6 +116,6 @@ class Mage_Catalog_Service_Product_Configurable
         $links = Mage::getService('catalog/product_link');
         $links->assertInWebsites($checkedIds, $websiteIds);
         $product->setConfigurableProductsData(array_fill_keys(array_map(intval(...), $childIds), []));
-        $product->save();
+        Mage::getService('catalog/product')->savePart($product);
     }
 }

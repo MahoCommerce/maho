@@ -119,9 +119,6 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         try {
             Mage::dispatchEvent('adminhtml_controller_catalogrule_prepare_save', ['request' => $this->getRequest()]);
             $data = $this->getRequest()->getPost();
-            if (Mage::helper('adminhtml')->hasTags($data['rule'], ['attribute'], false)) {
-                Mage::throwException(Mage::helper('catalogrule')->__('Wrong rule specified'));
-            }
             $data = $this->_filterDates($data, ['from_date', 'to_date']);
             /** @var Mage_CatalogRule_Model_Rule $model */
             $model = $id ? $service->getById($id) : Mage::getModel('catalogrule/rule');

@@ -27,7 +27,8 @@ class Mage_CatalogSearch_ResultController extends Mage_Core_Controller_Front_Act
     {
         /** @var Mage_CatalogSearch_Service_Query $service */
         $service = Mage::getService('catalogsearch/query');
-        $query = $service->prepare((int) Mage::app()->getStore()->getId());
+        $text = $this->getRequest()->getParam(Mage::helper('catalogsearch')->getQueryParamName());
+        $query = $service->prepare((int) Mage::app()->getStore()->getId(), is_string($text) ? $text : '');
 
         if ($query->getQueryText() != '') {
             $redirect = $service->getRedirect($query);

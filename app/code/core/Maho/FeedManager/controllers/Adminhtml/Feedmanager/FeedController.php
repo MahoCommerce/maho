@@ -922,9 +922,9 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         }
 
         try {
-            /** @var Maho_FeedManager_Model_Generator_Batch $batchGenerator */
-            $batchGenerator = Mage::getModel('feedmanager/generator_batch');
-            $result = $batchGenerator->processBatch($jobId);
+            /** @var Maho_FeedManager_Service_Feed $service */
+            $service = Mage::getService('feedmanager/feed');
+            $result = $service->processBatch((string) $jobId);
 
             $this->getResponse()->setBodyJson($result);
 
@@ -980,9 +980,9 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         }
 
         try {
-            /** @var Maho_FeedManager_Model_Generator_Batch $batchGenerator */
-            $batchGenerator = Mage::getModel('feedmanager/generator_batch');
-            $result = $batchGenerator->cancel($jobId);
+            /** @var Maho_FeedManager_Service_Feed $service */
+            $service = Mage::getService('feedmanager/feed');
+            $result = $service->cancelBatch((string) $jobId);
 
             $this->getResponse()->setBodyJson($result);
 

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Load, save, enable, disable and delete the admin users, and change their password, for the admin and the CLI.
+ * Load, save, enable, disable and delete the admin users, and change or reset their password, for the admin and the CLI.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -67,12 +67,7 @@ class Mage_Admin_Service_User
         if (!$isNew && $actingUserId === (int) $user->getId() && $user->getIsActive() === false) {
             throw new Mage_Core_Exception_Conflict(Mage::helper('adminhtml')->__('You cannot deactivate your own account.'));
         }
-        $messages = $user->validate();
-        $errors = new Mage_Core_Exception_Input();
-        foreach ($messages === true ? [] : $messages as $field => $message) {
-            $errors->addError((string) $field, $message);
-        }
-        $errors->throwIfErrors();
+        Mage_Core_Exception_Input::assertValid($user->validate(), 'user');
 
         $user->save();
         if ($roleId !== null) {
@@ -109,6 +104,37 @@ class Mage_Admin_Service_User
             $user->setPasswordConfirmation($confirmation);
         }
         return $this->save($user);
+    }
+
+    /**
+     * Give the admin user with the email $email a new reset password token, and send the reset password email.
+     * An email that no admin user has is not an error, so a client cannot learn which emails exist.
+     *
+     * @throws Mage_Core_Exception_Input when $email is empty or is not an email address
+     */
+    public function requestPasswordReset(#[\SensitiveParameter]
+        string $email): void
+    {
+        if ($email === '') {
+            throw new Mage_Core_Exception_Input()
+                ->addError('email', Mage::helper('adminhtml')->__('The email address is empty.'));
+        }
+        if (!Mage::helper('core')->isValidEmail($email)) {
+            throw new Mage_Core_Exception_Input()
+                ->addError('email', Mage::helper('adminhtml')->__('Invalid email address.'));
+        }
+        /** @var User $user */
+        $user = Mage::getResourceModel('admin/user_collection')
+            ->addFieldToFilter('email', $email)
+            ->setPageSize(1)
+            ->getFirstItem();
+        if (!$user->getId()) {
+            return;
+        }
+        $user = Mage::getModel('admin/user')->load($user->getId());
+        $user->changeResetPasswordLinkToken(Mage::helper('admin')->generateResetPasswordLinkToken());
+        $user->save();
+        $user->sendPasswordResetConfirmationEmail();
     }
 
     public function enable(User $user): void

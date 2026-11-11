@@ -62,6 +62,10 @@ class Mage_Index_Service_Process
      */
     public function setMode(Mage_Index_Model_Process $process, string $mode): void
     {
+        if (!array_key_exists($mode, $process->getModesOptions())) {
+            throw new Mage_Core_Exception_Input()
+                ->addError('mode', Mage::helper('index')->__('mode must be real_time or manual'));
+        }
         $process->setMode($mode)->save();
     }
 
@@ -192,10 +196,14 @@ class Mage_Index_Service_Process
     }
 
     /**
-     * A long worker keeps the indexer singleton, and its processes keep the done flag of an earlier reindex.
+     * Read each process of the indexer again. A long worker keeps the indexer, and its processes keep the status
+     * and the done flag of an earlier reindex: reindexEverything() finds a dependency among these processes.
      */
     private function resetIndexer(): void
     {
-        Mage::unregister('_singleton/index/indexer');
+        /** @var Mage_Index_Model_Process $process */
+        foreach (Mage::getSingleton('index/indexer')->getProcessesCollection() as $process) {
+            $process->load($process->getId());
+        }
     }
 }

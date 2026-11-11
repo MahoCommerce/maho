@@ -47,11 +47,14 @@ class Mage_Downloadable_Service_Link
     /**
      * Save $link, a new link of $product or one from getById().
      *
-     * @throws Mage_Core_Exception_Input for an invalid title, link type, URL or shareable setting
+     * @throws Mage_Core_Exception_Input for a negative price, or an invalid title, link type, URL or shareable setting
      * @throws Mage_Core_Exception for a URL whose domain is not allowed
      */
     public function save(Product $product, Link $link): Link
     {
+        if ((float) $link->getPrice() < 0) {
+            throw new Mage_Core_Exception_Input()->addError('price', Mage::helper('downloadable')->__('Price must not be negative'));
+        }
         $before = $this->getLinkIds($product);
         $this->write($product, $link, false);
         $linkId = (int) $link->getId() ?: (int) max(array_diff($this->getLinkIds($product), $before) ?: [0]);
@@ -77,7 +80,7 @@ class Mage_Downloadable_Service_Link
         $items[] = ['is_delete' => $delete ? '1' : ''] + $this->toArray($target);
 
         $product->setDownloadableData(['link' => $items]);
-        $product->save();
+        Mage::getService('catalog/product')->savePart($product);
     }
 
     /**
@@ -86,6 +89,9 @@ class Mage_Downloadable_Service_Link
     private function toArray(Link $link): array
     {
         $item = array_intersect_key($link->getData(), array_flip(self::FIELDS));
+        if (isset($item['link_url'])) {
+            $item['link_url'] = $this->getUrlForSave($link, 'link_url');
+        }
         $item['link_id'] = $link->getId() ? (string) $link->getId() : '';
         $item['type'] = (string) $link->getLinkType();
         $item['is_delete'] = '';
@@ -96,11 +102,24 @@ class Mage_Downloadable_Service_Link
         if ($link->getSampleType()) {
             $item['sample'] = [
                 'type' => $link->getSampleType(),
-                'url' => (string) $link->getSampleUrl(),
+                'url' => $this->getUrlForSave($link, 'sample_url'),
                 'file' => $helper->jsonEncode($link->getSampleFile() ? [['file' => $link->getSampleFile(), 'status' => 'old']] : []),
             ];
         }
         return $item;
+    }
+
+    /**
+     * Return the URL in $field of $link as the admin form posts it. The product type escapes each URL of a save,
+     * so a URL that comes from the database loses its escape here. A URL that the caller wrote stays as it is.
+     */
+    private function getUrlForSave(Link $link, string $field): string
+    {
+        $url = (string) $link->getData($field);
+        if ($link->getId() && $url === (string) $link->getOrigData($field)) {
+            return htmlspecialchars_decode($url, ENT_QUOTES | ENT_HTML5);
+        }
+        return $url;
     }
 
     /**

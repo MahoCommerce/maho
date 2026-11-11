@@ -39,6 +39,44 @@ trait StoreRestrictionTrait
     }
 
     /**
+     * Refuse a store that the client names in the URL, the body or the variables, when the token cannot use it.
+     * The listeners of the request check ?store= and X-Store-Code only. A request with no token passes.
+     *
+     * @throws \Mage_Core_Exception_Forbidden
+     */
+    protected function assertRequestedStoreAllowed(int $storeId, ?ApiUser $user): void
+    {
+        if ($user !== null && !$user->canAccessStore($storeId)) {
+            throw new \Mage_Core_Exception_Forbidden("Token is not authorized for store: {$storeId}");
+        }
+    }
+
+    /**
+     * Refuse a website that the client names in the URL, the body or the variables, when the token cannot use it.
+     *
+     * @throws \Mage_Core_Exception_Forbidden
+     */
+    protected function assertRequestedWebsiteAllowed(int $websiteId, ?ApiUser $user): void
+    {
+        $websiteIds = $user === null ? null : $this->allowedWebsiteIds($user);
+        if ($websiteIds !== null && !in_array($websiteId, $websiteIds, true)) {
+            throw new \Mage_Core_Exception_Forbidden("Token is not authorized for website: {$websiteId}");
+        }
+    }
+
+    /**
+     * Refuse an action that changes all stores, when the token has a store restriction.
+     *
+     * @throws \Mage_Core_Exception_Forbidden
+     */
+    protected function assertUnrestricted(ApiUser $user): void
+    {
+        if ($user->getAllowedStoreIds() !== null) {
+            throw new \Mage_Core_Exception_Forbidden('This action changes all stores. A token with a store restriction cannot do it.');
+        }
+    }
+
+    /**
      * Deny access when the entity's store is outside the user's allowlist. An
      * entity without a store (null/0) is denied for restricted tokens: it
      * cannot be attributed to any allowed store.

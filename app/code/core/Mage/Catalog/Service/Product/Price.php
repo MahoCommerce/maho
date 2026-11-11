@@ -81,6 +81,6 @@ class Mage_Catalog_Service_Product_Price
 
         $product->setData($code, $rows);
         $backend->validate($product);
-        $product->save();
+        Mage::getService('catalog/product')->savePart($product);
     }
 }

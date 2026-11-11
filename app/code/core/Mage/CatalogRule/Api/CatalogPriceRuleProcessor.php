@@ -60,9 +60,7 @@ final class CatalogPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         $service = \Mage::getService('catalogrule/rule');
 
         if ($operation->getName() === 'apply_catalog_price_rules') {
-            if ($this->allowedWebsiteIds($user) !== null) {
-                throw new \Mage_Core_Exception_Forbidden('A token with a store restriction cannot apply catalog price rules');
-            }
+            $this->assertUnrestricted($user);
             set_time_limit(0);
             $service->apply();
             $this->logApiActivity('catalog_price_rule', 'apply', null, null);

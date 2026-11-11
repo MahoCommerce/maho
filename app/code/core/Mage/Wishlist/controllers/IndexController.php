@@ -527,6 +527,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
                 explode(',', (string) $this->getRequest()->getPost('emails', '')),
                 (string) $this->getRequest()->getPost('message'),
                 (int) Mage::app()->getStore()->getId(),
+                $this->getRequest()->getPost(),
                 (bool) $this->getRequest()->getParam('rss_url'),
             );
             Mage::getSingleton('customer/session')->addSuccess(

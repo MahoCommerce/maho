@@ -111,15 +111,10 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         $rawTwofaCode = $data['twofa_code'] ?? null;
         $twofaCode = is_scalar($rawTwofaCode) ? trim((string) $rawTwofaCode) : null;
 
-        /** @var \Mage_Customer_Service_Customer $service */
-        $service = \Mage::getService('customer/customer');
-        try {
-            $customer = $service->authenticateByMagicLink(trim($token), $twofaCode);
-        } catch (\Mage_Core_Exception $e) {
-            throw $e->getCode() === \Mage_Customer_Model_Customer::EXCEPTION_2FA_INVALID ? $this->twofaException($e, $twofaCode) : $e;
-        }
+        /** @var \Mage_Customer_Service_Authentication $service */
+        $service = \Mage::getService('customer/authentication');
 
-        return $this->generateCustomerTokenResponse($customer, $data);
+        return $this->generateCustomerTokenResponse($service->authenticateByMagicLink(trim($token), $twofaCode), $data);
     }
 
     private function generateCustomerTokenResponse(\Mage_Customer_Model_Customer $customer, array $data): AuthToken
@@ -167,24 +162,10 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         #[\SensitiveParameter]
         ?string $twofaCode,
     ): \Mage_Customer_Model_Customer {
-        /** @var \Mage_Customer_Service_Customer $service */
-        $service = \Mage::getService('customer/customer');
-        try {
-            return $service->authenticateInAnyWebsite($email, $password, (int) \Mage::app()->getStore()->getWebsiteId(), $twofaCode);
-        } catch (\Mage_Core_Exception $e) {
-            throw match ($e->getCode()) {
-                \Mage_Customer_Model_Customer::EXCEPTION_INVALID_EMAIL_OR_PASSWORD => new UnauthorizedHttpException('Bearer', 'Invalid email or password', $e, 0, ['X-Api-Error-Code' => 'invalid_credentials']),
-                \Mage_Customer_Model_Customer::EXCEPTION_2FA_INVALID => $this->twofaException($e, $twofaCode),
-                default => $e,
-            };
-        }
-    }
+        /** @var \Mage_Customer_Service_Authentication $service */
+        $service = \Mage::getService('customer/authentication');
 
-    private function twofaException(\Mage_Core_Exception $e, #[\SensitiveParameter] ?string $twofaCode): UnauthorizedHttpException
-    {
-        return $twofaCode === null || $twofaCode === ''
-            ? new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is required', $e, 0, ['X-Api-Error-Code' => 'twofa_required'])
-            : new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is invalid', $e, 0, ['X-Api-Error-Code' => 'twofa_invalid']);
+        return $service->authenticateInAnyWebsite($email, $password, (int) \Mage::app()->getStore()->getWebsiteId(), $twofaCode);
     }
 
     private function handleClientCredentialsGrant(array $data): AuthToken

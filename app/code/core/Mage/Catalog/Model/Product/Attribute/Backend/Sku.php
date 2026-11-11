@@ -22,7 +22,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Sku extends Mage_Eav_Model_En
      *
      * @param Mage_Catalog_Model_Product $object
      * @throws Mage_Core_Exception
-     * @throws Mage_Core_Exception_Conflict when another product has the SKU
+     * @throws Mage_Eav_Model_Entity_Attribute_Exception_Unique when another product has the SKU
      * @return bool
      */
     #[\Override]
@@ -40,7 +40,9 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Sku extends Mage_Eav_Model_En
             throw new Mage_Core_Exception_Input()->addError('sku', Mage::helper('catalog')->__('HTML tags are not allowed in SKU attribute.'));
         }
         if ($sku !== '' && !$this->getAttribute()->getEntity()->checkAttributeUniqueValue($this->getAttribute(), $object)) {
-            throw new Mage_Core_Exception_Conflict(Mage::helper('eav')->__('The value of attribute "%s" must be unique', $this->getAttribute()->getFrontend()->getLabel()));
+            throw new Mage_Eav_Model_Entity_Attribute_Exception_Unique(Mage::helper('eav')->__('The value of attribute "%s" must be unique', $this->getAttribute()->getFrontend()->getLabel()))
+                ->setAttributeCode($this->getAttribute()->getAttributeCode())
+                ->setPart('backend');
         }
         return parent::validate($object);
     }

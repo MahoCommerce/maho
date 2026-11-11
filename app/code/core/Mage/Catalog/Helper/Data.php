@@ -663,4 +663,52 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
 
         return $result;
     }
+
+    /**
+     * Return the attributes $codes of the entity type $entityType whose store view value can go back to the
+     * default value. The errors have the field use_default.
+     *
+     * @param list<string> $codes
+     * @return list<Mage_Catalog_Model_Resource_Eav_Attribute>
+     * @throws Mage_Core_Exception_Input for the default scope, an unknown attribute and a global attribute
+     */
+    public function getStoreScopeAttributes(string $entityType, array $codes, int $storeId): array
+    {
+        $errors = new Mage_Core_Exception_Input();
+        if ($codes !== [] && $storeId === Mage_Core_Model_App::ADMIN_STORE_ID) {
+            $errors->addError('use_default', $this->__('Only a store view can use the default value: the default scope holds the default value.'));
+            $errors->throwIfErrors();
+        }
+        $attributes = [];
+        foreach ($codes as $code) {
+            $attribute = Mage::getSingleton('eav/config')->getAttribute($entityType, $code);
+            if (!$attribute instanceof Mage_Catalog_Model_Resource_Eav_Attribute || !$attribute->getId() || $attribute->getBackend()->isStatic()) {
+                $errors->addError('use_default', $this->__('Unknown attribute for the default value: %s', $code));
+            } elseif ($attribute->isScopeGlobal()) {
+                $errors->addError('use_default', $this->__("The attribute '%s' has the global scope, so a store view has no value of its own.", $code));
+            } else {
+                $attributes[] = $attribute;
+            }
+        }
+        $errors->throwIfErrors();
+        return $attributes;
+    }
+
+    /**
+     * Delete $model as the admin does: a model delete outside the admin needs the secure area.
+     */
+    public function deleteInSecureArea(Mage_Core_Model_Abstract $model): void
+    {
+        $wasSecure = (bool) Mage::registry('isSecureArea');
+        if (!$wasSecure) {
+            Mage::register('isSecureArea', true);
+        }
+        try {
+            $model->delete();
+        } finally {
+            if (!$wasSecure) {
+                Mage::unregister('isSecureArea');
+            }
+        }
+    }
 }

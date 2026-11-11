@@ -41,7 +41,7 @@ class CustomerAddressDelete extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        $email = Mage::getService('customer/customer')->getById((int) $address->getCustomerId())?->getEmail();
+        $email = Mage::getService('customer/customer')->findById((int) $address->getCustomerId())?->getEmail();
         $service->delete($address);
         $io->writeln("<info>Address $addressId of customer $email deleted.</info>");
         return Command::SUCCESS;

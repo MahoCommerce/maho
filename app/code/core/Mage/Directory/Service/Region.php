@@ -16,14 +16,11 @@ use Maho\DirectoryData\Paths;
 class Mage_Directory_Service_Region
 {
     /**
-     * @throws Mage_Core_Exception when Mage_Directory_Model_Region::validate() refuses the region
+     * @throws Mage_Core_Exception_Input when Mage_Directory_Model_Region::validate() refuses the region
      */
     public function save(Mage_Directory_Model_Region $region): Mage_Directory_Model_Region
     {
-        $errors = $region->validate();
-        if ($errors !== true) {
-            throw new Mage_Core_Exception(implode(' ', $errors));
-        }
+        Mage_Core_Exception_Input::assertValid($region->validate(), 'region');
         $region->save();
         return $region;
     }
@@ -44,15 +41,12 @@ class Mage_Directory_Service_Region
     /**
      * Save $name as the name of $region in $locale. With $replaceExisting, a name that the locale already has is replaced.
      *
-     * @throws Mage_Core_Exception when the locale or the name is empty, the name is too long, or the locale has a name
+     * @throws Mage_Core_Exception_Input when the locale or the name is empty, the name is too long, or the locale has a name
      */
     public function saveTranslation(Mage_Directory_Model_Region $region, string $locale, string $name, bool $replaceExisting = false): void
     {
         $data = ['locale' => $locale, 'name' => $name];
-        $errors = $region->validateTranslation($data, $replaceExisting);
-        if ($errors !== true) {
-            throw new Mage_Core_Exception(implode(' ', $errors));
-        }
+        Mage_Core_Exception_Input::assertValid($region->validateTranslation($data, $replaceExisting), 'name');
         $region->saveTranslation($data);
     }
 
@@ -76,7 +70,7 @@ class Mage_Directory_Service_Region
      *     skipRecords: list<array{code: string, name: string, existing: string}>,
      * }
      * @throws Mage_Core_Exception_NoSuchEntity when no country has the code $countryCode
-     * @throws JsonException when the data file of the country is not valid JSON
+     * @throws RuntimeException when the data file of the country, a file of the server, is not valid JSON
      */
     public function import(
         string $countryCode,
@@ -167,9 +161,9 @@ class Mage_Directory_Service_Region
             if ($renames) {
                 $region->setCountryId($countryCode)->setCode($code)->setDefaultName($defaultName);
             }
-            $errors = $region->validate();
-            if ($errors !== true) {
-                $log("Skipping $code: " . implode(' ', $errors), 'error');
+            $errors = new Mage_Core_Exception_Input()->addValidationResult($region->validate(), 'region')->getErrors();
+            if ($errors !== []) {
+                $log("Skipping $code: " . implode(' ', array_column($errors, 'message')), 'error');
                 $result['skipped']++;
                 continue;
             }
@@ -182,7 +176,7 @@ class Mage_Directory_Service_Region
                     try {
                         $this->saveTranslation($region, $locale, $name, true);
                     } catch (Mage_Core_Exception $e) {
-                        $log("Skipping the $locale name of $code: " . $e->getMessage(), 'error');
+                        $log("Skipping the $locale name of $code: " . str_replace("\n", ' ', $e->getMessage()), 'error');
                         unset($names[$locale]);
                     }
                 }
@@ -202,7 +196,7 @@ class Mage_Directory_Service_Region
 
     /**
      * @return array<string, array<string, string>> the names of each region code, by language or locale code
-     * @throws JsonException
+     * @throws RuntimeException
      */
     protected function loadRegionData(string $countryCode): array
     {
@@ -210,9 +204,13 @@ class Mage_Directory_Service_Region
         if (!is_file($file)) {
             return [];
         }
-        $data = Mage::helper('core')->jsonDecode((string) file_get_contents($file));
+        try {
+            $data = Mage::helper('core')->jsonDecode((string) file_get_contents($file));
+        } catch (JsonException $e) {
+            throw new RuntimeException("Invalid JSON data in $file", 0, $e);
+        }
         if (!is_array($data)) {
-            throw new JsonException("Invalid JSON data in $file");
+            throw new RuntimeException("Invalid JSON data in $file");
         }
         return $data;
     }

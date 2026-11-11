@@ -50,7 +50,7 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Items must be a list of {orderItemId, qty} objects');
         }
 
-        $order = $this->orderService->requireById($orderId);
+        $order = $this->orderService->getById($orderId);
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         // Adjustments go through $data so prepareCreditmemo() applies them before
@@ -81,16 +81,10 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        $invoice = null;
-        if (isset($args['invoiceId'])) {
-            $invoice = \Mage::getModel('sales/order_invoice')->load((int) $args['invoiceId']);
-            if (!$invoice->getId() || (int) $invoice->getOrderId() !== (int) $order->getId()) {
-                throw new \Mage_Core_Exception_Input()->addError('invoice_id', \Mage::helper('sales')->__('Invoice not found'));
-            }
-            $invoice->setOrder($order);
-        }
+        // refund() refuses an invoice that does not exist or is not an invoice of the order
+        $invoice = isset($args['invoiceId']) ? \Mage::getModel('sales/order_invoice')->load((int) $args['invoiceId']) : null;
 
-        $creditmemo = $this->orderService->refund(
+        $creditmemo = \Mage::getService('sales/order_document')->refund(
             $order,
             $data,
             $args['comment'] ?? null,

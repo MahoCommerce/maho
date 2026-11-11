@@ -140,6 +140,7 @@ it('leaves the old order of an order edit and its payment as they are when the n
             array $orderData = [],
             ?bool $sendConfirmation = null,
             ?Mage_Sales_Model_Convert_Quote $convertor = null,
+            ?callable $afterSave = null,
         ): Mage_Sales_Model_Order {
             throw new Mage_Core_Exception('The payment of the new order failed');
         }
@@ -159,7 +160,7 @@ it('leaves the old order of an order edit and its payment as they are when the n
         ->and(Mage::getModel('sales/order')->load($old->getId())->isCanceled())->toBeFalse();
 });
 
-it('cancels the old order of an order edit after the new order is saved', function () {
+it('cancels the old order of an order edit and links it to the new order', function () {
     $this->quotes = [$first = orderCreatePlacementQuote(), $second = orderCreatePlacementQuote()];
     $old = orderCreatePlacementModel($first, false)->createOrder();
     $create = orderCreatePlacementModel($second, false);

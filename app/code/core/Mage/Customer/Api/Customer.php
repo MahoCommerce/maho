@@ -156,17 +156,6 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             resolver: CustomQueryResolver::class,
         ),
         new Mutation(
-            name: 'quickCreate',
-            description: 'Quick customer creation by an admin or API integration',
-            args: [
-                'email' => ['type' => 'String!', 'description' => 'Customer email'],
-                'firstname' => ['type' => 'String!', 'description' => 'First name'],
-                'lastname' => ['type' => 'String!', 'description' => 'Last name'],
-                'telephone' => ['type' => 'String', 'description' => 'Phone number'],
-            ],
-            security: "is_granted('ROLE_ADMIN') or is_granted('customers/create')",
-        ),
-        new Mutation(
             security: 'true',
             name: 'login',
             description: 'Customer login',

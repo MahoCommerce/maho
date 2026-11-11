@@ -38,7 +38,7 @@ final class AddressProvider extends \Maho\ApiPlatform\Provider
         if ($operation->getName() !== 'my' && !$operation instanceof CollectionOperationInterface) {
             try {
                 $address = \Mage::getService('customer/address')->getById((int) ($uriVariables['id'] ?? 0));
-                $customer = $this->getCustomers()->requireById((int) $address->getCustomerId());
+                $customer = $this->getCustomers()->getById((int) $address->getCustomerId());
             } catch (\Mage_Core_Exception_NoSuchEntity) {
                 return null;
             }
@@ -52,7 +52,7 @@ final class AddressProvider extends \Maho\ApiPlatform\Provider
         // their only guard (a paginator can't be ownership-checked post-read).
         $customerId = $operation->getName() === 'my' ? 0 : (int) ($uriVariables['customerId'] ?? 0);
         $customerId = $customerId ?: $this->requireCustomerId();
-        $customer = $this->getCustomers()->requireById($customerId);
+        $customer = $this->getCustomers()->getById($customerId);
         $this->assertCustomerReachable($customer);
         $addresses = [];
         foreach ($customer->getAddresses() as $address) {

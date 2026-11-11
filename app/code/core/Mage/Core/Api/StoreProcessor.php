@@ -13,7 +13,6 @@ namespace Mage\Core\Api;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class StoreProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -27,9 +26,7 @@ class StoreProcessor extends \Maho\ApiPlatform\Processor
         // The target store arrives in the URI after the request-level allowlist
         // check ran, so it must be re-validated against the token here.
         $user = $this->security?->getUser();
-        if ($user instanceof ApiUser && !$user->canAccessStore((int) $store->getId())) {
-            throw new AccessDeniedHttpException('Token is not authorized for the requested store.');
-        }
+        $this->assertRequestedStoreAllowed((int) $store->getId(), $user instanceof ApiUser ? $user : null);
 
         StoreContext::setStore((int) $store->getId());
 

@@ -142,7 +142,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $login = $this->getRequest()->getPost('login');
             if (!empty($login['username']) && !empty($login['password'])) {
                 try {
-                    $customer = $this->getService()->authenticate(
+                    $customer = $this->getAuthentication()->authenticate(
                         (string) $login['username'],
                         (string) $login['password'],
                         (int) Mage::app()->getStore()->getWebsiteId(),
@@ -199,11 +199,9 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             && !empty($login['username']) && !empty($login['password'])
         ) {
             try {
-                $this->getService()->authenticate((string) $login['username'], (string) $login['password'], (int) Mage::app()->getStore()->getWebsiteId());
-            } catch (Mage_Core_Exception $e) {
-                if ($e->getCode() === Mage_Customer_Model_Customer::EXCEPTION_2FA_INVALID) {
-                    $result['require_twofa'] = true;
-                }
+                $this->getAuthentication()->authenticate((string) $login['username'], (string) $login['password'], (int) Mage::app()->getStore()->getWebsiteId());
+            } catch (Mage_Customer_Exception_SecondFactorRequired) {
+                $result['require_twofa'] = true;
             } catch (Exception) {
                 // Mage::logException($e); // PA DSS violation: this exception log can disclose customer password
             }
@@ -335,7 +333,13 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $errors = $this->_getCustomerErrors($customer);
 
             if (empty($errors)) {
-                $this->getService()->register($customer, (int) Mage::app()->getStore()->getId(), $session->getBeforeAuthUrl());
+                $this->getService()->register(
+                    $customer,
+                    (int) Mage::app()->getStore()->getId(),
+                    $this->getRequest()->getPost(),
+                    $session->getBeforeAuthUrl(),
+                    eventData: ['account_controller' => $this],
+                );
                 $this->_successProcessRegistration($customer);
                 return;
             }
@@ -559,15 +563,8 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 throw new Mage_Core_Exception($this->__('Bad request.'));
             }
 
-            $customer = $this->getService()->confirm($id, $key);
-            if ($customer->getIsJustConfirmed()) {
-                // Customers who opted into 2FA must clear it before the session is logged in
-                if ($session->shouldChallengeTwofa($customer)) {
-                    $session->startTwofaChallenge($customer);
-                    $this->_redirect('*/*/twofaChallenge');
-                    return;
-                }
-
+            $customer = $this->getAuthentication()->authenticateByConfirmation($id, $key);
+            if ($customer !== null) {
                 // log in and send greeting email, then die happy
                 $session->setCustomerAsLoggedIn($customer);
                 $successUrl = $this->_welcomeCustomer($customer, true);
@@ -577,6 +574,11 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 
             // die happy
             $this->_redirectSuccess($this->_getUrl('*/*/index', ['_secure' => true]));
+            return;
+        } catch (Mage_Customer_Exception_SecondFactorRequired $e) {
+            // The account is confirmed. The challenge page asks for the 2FA code and logs in
+            $session->setTwofaPendingCustomerId($e->getCustomerId());
+            $this->_redirect('*/*/twofaChallenge');
             return;
         } catch (Exception $e) {
             $this->_getSession()->addError($e->getMessage());
@@ -599,7 +601,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         $email = (string) $this->getRequest()->getPost('email');
         if ($email !== '') {
             try {
-                $this->getService()->sendConfirmationLink($email, (int) Mage::app()->getStore()->getWebsiteId());
+                $this->getAuthentication()->sendConfirmationLink($email, (int) Mage::app()->getStore()->getWebsiteId(), $this->getRequest()->getPost());
                 // The same answer for each address, so that it does not show which addresses have an account
                 $this->_getSession()->addSuccess($this->__(
                     'If an account with %s waits for a confirmation, you will receive an email with the confirmation link.',
@@ -660,7 +662,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         $email = (string) $this->getRequest()->getPost('email');
         $session = $this->_getSession();
         try {
-            $this->getService()->sendPasswordResetLink($email, (int) Mage::app()->getStore()->getWebsiteId());
+            $this->getAuthentication()->sendPasswordResetLink($email, (int) Mage::app()->getStore()->getWebsiteId(), $this->getRequest()->getPost());
             $session->addSuccess($this->__(
                 'If there is an account associated with %s you will receive an email with a link to reset your password.',
                 $email,
@@ -726,7 +728,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 
         $session = $this->_getSession();
         try {
-            $this->getService()->resetPasswordById($customerId, $resetPasswordLinkToken, $password, $passwordConfirmation);
+            $this->getAuthentication()->resetPasswordById($customerId, $resetPasswordLinkToken, $password, $passwordConfirmation);
             $session->unsetData(self::TOKEN_SESSION_NAME);
             $session->unsetData(self::CUSTOMER_ID_SESSION_NAME);
             $session->addSuccess($this->__('Your password has been updated.'));
@@ -762,7 +764,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         }
 
         try {
-            Mage::getService('customer/customer')->sendMagicLink($email, (int) Mage::app()->getStore()->getWebsiteId());
+            $this->getAuthentication()->sendMagicLink($email, (int) Mage::app()->getStore()->getWebsiteId());
         } catch (Mage_Core_Exception_NoSuchEntity) {
             $this->norouteAction();
             return;
@@ -815,14 +817,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         }
 
         try {
-            $customer = $this->getService()->getByMagicLinkToken($token);
-
-            // Customers who opted into 2FA must still clear it before the session is logged in
-            if ($this->_getSession()->shouldChallengeTwofa($customer)) {
-                $this->_getSession()->startTwofaChallenge($customer);
-                $this->_redirect('*/*/twofaChallenge');
-                return;
-            }
+            $customer = $this->getAuthentication()->getByMagicLinkToken($token);
 
             // Login customer
             $this->_getSession()->setCustomerAsLoggedIn($customer);
@@ -831,6 +826,10 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 
             // Redirect using same logic as normal login
             $this->_loginPostRedirect();
+        } catch (Mage_Customer_Exception_SecondFactorRequired $e) {
+            // The link proved who the customer is. The challenge page asks for the 2FA code and logs in
+            $this->_getSession()->setTwofaPendingCustomerId($e->getCustomerId());
+            $this->_redirect('*/*/twofaChallenge');
         } catch (Exception $e) {
             $this->_getSession()->addError($e->getMessage());
             $this->_redirect('*/*/login');
@@ -865,7 +864,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      */
     protected function _validateResetPasswordLinkToken($customerId, $resetPasswordLinkToken)
     {
-        $this->getService()->getByResetToken((int) $customerId, (string) $resetPasswordLinkToken);
+        $this->getAuthentication()->getByResetToken((int) $customerId, (string) $resetPasswordLinkToken);
     }
 
     /**
@@ -982,7 +981,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 
         try {
             $enable = $this->getRequest()->getPost('action') !== 'disable';
-            $this->getService()->setSecondFactor(
+            $this->getAuthentication()->setSecondFactor(
                 $customer,
                 (string) $this->getRequest()->getPost('current_password'),
                 $enable,
@@ -1105,5 +1104,10 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     protected function getService(): Mage_Customer_Service_Customer
     {
         return Mage::getService('customer/customer');
+    }
+
+    protected function getAuthentication(): Mage_Customer_Service_Authentication
+    {
+        return Mage::getService('customer/authentication');
     }
 }

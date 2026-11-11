@@ -273,7 +273,7 @@ function seedRefundableOrder(string $shippingMethod = 'freeshipping_freeshipping
             return null;
         }
 
-        $invoice = Mage::getService('sales/order')->buildInvoice($order);
+        $invoice = Mage::getService('sales/order_document')->buildInvoice($order);
         if (!$invoice->getTotalQty()) {
             return null;
         }

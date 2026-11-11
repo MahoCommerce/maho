@@ -179,6 +179,15 @@ class Maho_FeedManager_Model_Generator
             || time() - strtotime($status['started_at']) <= Maho_FeedManager_Model_Cron::HUNG_FEED_TIMEOUT_MINUTES * 60;
     }
 
+    #[\Deprecated(message: 'Use Maho_FeedManager_Service_Feed::reset() instead')]
+    public static function markStuckJobAsFailed(int $feedId): void
+    {
+        $feed = Mage::getModel('feedmanager/feed')->load($feedId);
+        if ($feed->getId()) {
+            Mage::getService('feedmanager/feed')->reset($feed);
+        }
+    }
+
     /**
      * Get errors from last generation
      */

@@ -19,11 +19,7 @@ class Mage_Tax_Service_Rule
     {
         /** @var Mage_Tax_Model_Calculation_Rule $rule */
         $rule = Mage::getModel('tax/calculation_rule');
-        try {
-            $rule->load($id);
-        } catch (\Doctrine\DBAL\Exception\DriverException) {
-            // An ID that the column cannot hold matches no row
-        }
+        $rule->load($id);
         if (!$rule->getId()) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('tax')->__('This rule no longer exists.'));
         }
@@ -39,6 +35,15 @@ class Mage_Tax_Service_Rule
      */
     public function save(Mage_Tax_Model_Calculation_Rule $rule): Mage_Tax_Model_Calculation_Rule
     {
+        $rateIds = array_map(intval(...), (array) $rule->getTaxRate());
+        $customerClassIds = array_map(intval(...), (array) $rule->getTaxCustomerClass());
+        $productClassIds = array_map(intval(...), (array) $rule->getTaxProductClass());
+        if ($rateIds !== [] && $customerClassIds !== [] && $productClassIds !== []) {
+            $codes = array_diff($rule->fetchRuleCodes($rateIds, $customerClassIds, $productClassIds), [$rule->getOrigData('code')]);
+            if ($codes !== []) {
+                throw new Mage_Core_Exception_Conflict(Mage::helper('tax')->__('Rules (%s) already exist for the specified Tax Rate, Customer Tax Class and Product Tax Class combinations', implode(',', $codes)));
+            }
+        }
         $rule->save();
         return $rule;
     }

@@ -39,7 +39,7 @@ function blogStoreToday(): string
 
 function blogPostIsPublished(Maho_Blog_Model_Post $post): bool
 {
-    return Mage::getService('blog/post')->isPublished($post, (int) Mage::app()->getStore()->getId());
+    return $post->isPublished((int) Mage::app()->getStore()->getId());
 }
 
 describe('blog post publish cutoff', function () {

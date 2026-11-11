@@ -59,6 +59,49 @@ function indexViaAdmin(string $action, array $params): array
 }
 
 /**
+ * The controller of System > Index Management, without the detached answer and the exit of a background reindex.
+ */
+class IndexParityProcessController extends Mage_Index_Adminhtml_ProcessController
+{
+    /** @var array<string, mixed> */
+    public array $answer = [];
+
+    #[\Override]
+    protected function _sendAndDetach(array $record): void
+    {
+        $this->answer = $record;
+    }
+
+    #[\Override]
+    protected function _endRequest(): void {}
+}
+
+/**
+ * Click Reindex Data for the process $processId in System > Index Management, and wait for the background run.
+ *
+ * @return array<string, array{state: string, message: ?string}> the steps of the run, by indexer code
+ */
+function indexReindexViaAdmin(int $processId): array
+{
+    $request = new Mage_Core_Controller_Request_Http(
+        SymfonyRequest::create('http://localhost/admin/process/reindexProcess', 'POST', ['process' => $processId]),
+    );
+    $controller = new IndexParityProcessController($request, new Mage_Core_Controller_Response_Http());
+    $controller->reindexProcessAction();
+
+    /** @var Mage_Index_Model_Progress $progress */
+    $progress = Mage::getModel('index/progress');
+    $record = $progress->setToken((string) $controller->answer['token'])->read();
+    @unlink($progress->getFilePath());
+
+    $steps = [];
+    foreach ($record['steps'] as $step) {
+        $steps[(string) $step['code']] = ['state' => (string) $step['state'], 'message' => $step['message']];
+    }
+    return $steps;
+}
+
+/**
  * Run the index process operation $operation of the API. ApiExceptionListener turns an exception into the response.
  *
  * @return array{status: int, body: array<string, mixed>}
@@ -180,19 +223,38 @@ describe('reindex', function () {
         $api = indexViaApi(new Post(name: 'index_process_reindex'), (int) $this->process->getId());
         $cli = indexViaCli(INDEX_PARITY_CODE);
 
-        // The admin runs the reindex in the background through the runner
-        $queue = Mage::getService('index/process')->getQueue([(int) $this->process->getId()]);
-        /** @var Mage_Index_Model_Progress $progress */
-        $progress = Mage::getModel('index/progress');
-        $progress->init(Mage::getModel('index/runner')->getSteps($queue));
-        Mage::getModel('index/runner')->run($queue, $progress);
-        $steps = array_column($progress->toArray()['steps'], 'state', 'code');
+        $steps = indexReindexViaAdmin((int) $this->process->getId());
 
         expect($api['status'])->toBe(409)
             ->and($api['body']['message'])->toBe($message)
             ->and($cli['status'])->toBe(Command::FAILURE)
             ->and($cli['output'])->toContain($message)
-            ->and($steps[INDEX_PARITY_CODE])->toBe(StepState::Skipped->value)
+            ->and($steps[INDEX_PARITY_CODE]['state'])->toBe(StepState::Skipped->value)
             ->and(indexParityProcess()->getStartedAt())->toBe($startedAt);
+    });
+
+    it('rebuilds an index on every transport', function () {
+        $processId = (int) $this->process->getId();
+        $transports = [
+            'admin' => fn(): bool => indexReindexViaAdmin($processId)[INDEX_PARITY_CODE]['state'] === StepState::Success->value,
+            'api' => fn(): bool => indexViaApi(new Post(name: 'index_process_reindex'), $processId)['status'] === 200,
+            'cli' => fn(): bool => indexViaCli(INDEX_PARITY_CODE)['status'] === Command::SUCCESS,
+        ];
+
+        foreach ($transports as $transport => $reindex) {
+            indexParityProcess()->changeStatus(Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX);
+
+            expect($reindex())->toBeTrue("The reindex of the {$transport} did not succeed")
+                ->and(indexParityProcess()->getStatus())->toBe(Mage_Index_Model_Process::STATUS_PENDING, "The {$transport} left the index not rebuilt");
+        }
+    });
+
+    it('checks the mode in the service, so a script can save a mode of an extension', function () {
+        $process = indexParityProcess();
+        $process->setMode('pest_mode')->save();
+
+        expect(indexParityProcess()->getMode())->toBe('pest_mode')
+            ->and(fn() => Mage::getService('index/process')->setMode(indexParityProcess(), 'pest_mode'))
+            ->toThrow(Mage_Core_Exception_Input::class, 'mode must be real_time or manual');
     });
 });

@@ -15,19 +15,17 @@ use Mage_CatalogSearch_Model_Query as Query;
 class Mage_CatalogSearch_Service_Query
 {
     /**
-     * Return the search query of the catalogsearch helper in the store view $storeId. The search layer and the
-     * fulltext collection read the text from the helper. With $text, the helper is a new one that searches for
-     * $text: the API gives its text here. Without $text, the helper reads the text of the search request.
-     * A text shorter than the minimum length gets no ID: the search runs, and log() does not count it.
+     * Return the search query for $text in the store view $storeId. The transport reads the text from its request.
+     * The search layer and the fulltext collection read the text from the catalogsearch helper, so the helper is
+     * a new one that searches for $text. A text shorter than the minimum length gets no ID: the search runs, and
+     * log() does not count it.
      */
-    public function prepare(int $storeId, ?string $text = null): Query
+    public function prepare(int $storeId, string $text): Query
     {
-        if ($text !== null) {
-            // A new helper, so that the text of an earlier search in the same process does not stay
-            Mage::unregister('_helper/catalogsearch');
-            Mage::helper('catalogsearch')->setQueryText($text);
-        }
+        // A new helper, so that the text of an earlier search in the same process does not stay
+        Mage::unregister('_helper/catalogsearch');
         $helper = Mage::helper('catalogsearch');
+        $helper->setQueryText($text);
         $query = $helper->getQuery();
         $query->setStoreId($storeId);
         if ($query->getQueryText() != '' && $helper->isMinQueryLength()) {

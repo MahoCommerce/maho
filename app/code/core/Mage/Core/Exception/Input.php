@@ -26,6 +26,43 @@ class Mage_Core_Exception_Input extends Mage_Core_Exception
     }
 
     /**
+     * Record each message of $result, the result of validate() of a model: true, or the messages of the problems.
+     * A message with a text key is a problem of the field of that name. Any other message is a problem of $field.
+     * A message that this exception already holds for the same field is not recorded again.
+     * False is one problem of $field, with a general message.
+     *
+     * @param array<int|string, string|\Stringable>|bool $result
+     */
+    public function addValidationResult(array|bool $result, string $field): static
+    {
+        if ($result === true) {
+            return $this;
+        }
+        if ($result === false) {
+            $result = [Mage::helper('core')->__('The data is not valid.')];
+        }
+        foreach ($result as $key => $message) {
+            $error = ['field' => is_string($key) ? $key : $field, 'message' => (string) $message];
+            if (!in_array($error, $this->errors, true)) {
+                $this->addError($error['field'], $error['message']);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * Throw an exception with the problems of $result, the result of validate() of a model, when it is not true.
+     * See addValidationResult() for the field of each problem.
+     *
+     * @param array<int|string, string|\Stringable>|bool $result
+     * @throws self
+     */
+    public static function assertValid(array|bool $result, string $field): void
+    {
+        new self()->addValidationResult($result, $field)->throwIfErrors();
+    }
+
+    /**
      * @return list<array{field: string, message: string}>
      */
     public function getErrors(): array

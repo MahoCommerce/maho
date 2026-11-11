@@ -131,13 +131,19 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     }
 
     /**
-     * @throws Mage_Core_Exception_Input
+     * The column limits the length of the code. Mage_Eav_Service_Attribute checks the rules of the admin form
+     * and of the API with getValidationErrors(), so a setup script can save a code that the form refuses.
+     *
      * @throws Mage_Eav_Exception
      */
     #[\Override]
     protected function _beforeSave()
     {
-        $this->getValidationErrors()->throwIfErrors();
+        if (isset($this->_data['attribute_code'])
+            && !Mage::helper('core')->isValidLength($this->_data['attribute_code'], null, self::ATTRIBUTE_CODE_MAX_LENGTH)
+        ) {
+            throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Maximum length of attribute code must be less then %s symbols', self::ATTRIBUTE_CODE_MAX_LENGTH));
+        }
 
         $defaultValue   = $this->getDefaultValue();
         $hasDefaultValue = ((string) $defaultValue != '');
@@ -191,8 +197,9 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     }
 
     /**
-     * Return one error for each value that a save of this attribute refuses. A subclass adds the rules of its
-     * entity type. A saved attribute keeps its code, its input type and its locked fields.
+     * Return one error for each value that the admin form and the API refuse. A subclass adds the rules of its
+     * entity type. A saved attribute keeps its code, its input type and its locked fields. The model does not
+     * call this method when it saves: Mage_Eav_Service_Attribute does.
      */
     public function getValidationErrors(): Mage_Core_Exception_Input
     {

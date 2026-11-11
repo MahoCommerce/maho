@@ -31,7 +31,8 @@ uses(Tests\MahoFrontendTestCase::class);
 
 /**
  * The storefront and the API register customers, log them in, change their passwords and save their addresses
- * through Mage_Customer_Service_Customer and Mage_Customer_Service_Address (#1348). Each test gives the same
+ * through Mage_Customer_Service_Customer, Mage_Customer_Service_Authentication and Mage_Customer_Service_Address
+ * (#1348). Each test gives the same
  * input to the transports and compares the outcome.
  */
 
@@ -224,7 +225,7 @@ describe('registration', function () {
 describe('login', function () {
     it('counts the storefront and the GraphQL login against one limit for each email', function () {
         $customer = customerParityCustomer();
-        Mage::app()->getStore()->setConfig(Mage_Customer_Service_Customer::XML_PATH_LOGIN_RATE_LIMIT, '1');
+        Mage::app()->getStore()->setConfig(Mage_Customer_Service_Authentication::XML_PATH_LOGIN_RATE_LIMIT, '1');
 
         $web = customerParityWeb(Mage_Customer_AccountController::class, 'account', 'loginPost', [
             'login' => ['username' => $customer->getEmail(), 'password' => 'wrong-password'],

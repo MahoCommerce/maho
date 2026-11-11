@@ -44,7 +44,7 @@ function setParityCreate(string $name): Mage_Eav_Model_Entity_Attribute_Set
 {
     /** @var Mage_Eav_Service_Attribute_Set $service */
     $service = Mage::getService('eav/attribute_set');
-    return $service->create($service->newSet(Mage_Catalog_Model_Product::ENTITY)->setAttributeSetName($name));
+    return $service->save($service->newSet(Mage_Catalog_Model_Product::ENTITY)->setAttributeSetName($name));
 }
 
 /**

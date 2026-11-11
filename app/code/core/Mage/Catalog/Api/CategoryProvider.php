@@ -17,7 +17,6 @@ use ApiPlatform\Metadata\Put;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\CustomAttributes;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Category State Provider - Fetches category data for API Platform.
@@ -165,7 +164,8 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
             return false;
         }
         if (!$this->backendCategoriesAccess()) {
-            throw new AccessDeniedHttpException('scope=all requires a backend token');
+            $this->requireUser();
+            throw new \Mage_Core_Exception_Forbidden('scope=all requires a backend token');
         }
 
         return true;

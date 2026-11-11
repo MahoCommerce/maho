@@ -14,6 +14,8 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Tests\Helpers\AdminApiParity;
 use Tests\Helpers\CartParity;
 
+require_once __DIR__ . '/OnepageDriver.php';
+
 uses(Tests\MahoFrontendTestCase::class);
 
 /**
@@ -25,21 +27,23 @@ uses(Tests\MahoFrontendTestCase::class);
 const GUEST_CHECKOUT_REFUSED = 'Sorry, guest checkout is not enabled. Please try again or contact store owner.';
 
 /**
- * Place the order of $quote as the one page checkout does for a guest. For another checkout method or for staff,
- * run the check of the order service. The cart has no address, so an order that passes the guest checkout gate
- * stops at the next rule.
+ * Post the place order step of the one page checkout for $quote as a guest. For another checkout method or for
+ * staff, run the check of the order service. The cart has no address, so an order that passes the guest checkout
+ * gate stops at the next rule.
  *
  * @return string the message of the gate, or an empty string when the gate accepts the order
  */
 function guestCheckoutViaWeb(Mage_Sales_Model_Quote $quote, string $method, Mage_Checkout_Model_Actor $actor = Mage_Checkout_Model_Actor::Customer): string
 {
     $quote->setCheckoutMethod($method);
+    if ($actor === Mage_Checkout_Model_Actor::Customer && $method === Mage_Checkout_Model_Type_Onepage::METHOD_GUEST) {
+        $quote->save();
+        $message = (string) (checkoutOnepagePost($quote, 'saveOrder', [])['error_messages'] ?? '');
+
+        return $message === GUEST_CHECKOUT_REFUSED ? $message : '';
+    }
     try {
-        if ($actor === Mage_Checkout_Model_Actor::Customer && $method === Mage_Checkout_Model_Type_Onepage::METHOD_GUEST) {
-            Mage::getModel('checkout/type_onepage')->setQuote($quote)->saveOrder();
-        } else {
-            Mage::getService('sales/order')->validateQuote($quote, $actor);
-        }
+        Mage::getService('sales/order')->validateQuote($quote, $actor);
     } catch (Mage_Core_Exception_Forbidden $e) {
         return $e->getMessage();
     } catch (Mage_Core_Exception) {

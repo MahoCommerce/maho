@@ -12,7 +12,8 @@ use Tests\MahoBackendTestCase;
 /**
  * Tripwire for the service layout of #1348. A service lives in the Service/ folder of its module, its
  * module declares the class group under <global><services>, and code gets it with Mage::getService(),
- * never with new, so that a <rewrite> reaches every caller.
+ * never with new, so that a <rewrite> reaches every caller. Mage::getService() keeps one instance for
+ * each alias, so a service holds no state: a property keeps a value from one call to the next.
  */
 
 uses(MahoBackendTestCase::class);
@@ -74,6 +75,23 @@ it('never creates a service with new', function () {
         $code = (string) file_get_contents(Mage::getBaseDir() . '/app/code/core/' . $path);
         if (preg_match('#new \\\\?(Mage|Maho)_[A-Za-z]+_Service_[A-Za-z_]+\(#', $code)) {
             $offenders[] = $path;
+        }
+    }
+
+    expect($offenders)->toBe([]);
+});
+
+it('gives a service no parent class, no constructor and no property', function () {
+    $offenders = [];
+    foreach (coreFiles('#^(Mage|Maho)/[A-Za-z]+/Service/.+\.php$#') as $path) {
+        $class = new ReflectionClass(str_replace('/', '_', substr($path, 0, -4)));
+        $faults = array_keys(array_filter([
+            'a parent class' => $class->getParentClass() !== false,
+            'a constructor' => $class->getConstructor() !== null,
+            'a property' => $class->getProperties() !== [],
+        ]));
+        if ($faults !== []) {
+            $offenders[] = $class->getName() . ' has ' . implode(', ', $faults);
         }
     }
 

@@ -186,7 +186,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 return;
             }
 
-            $cart->addProduct($product, $params);
+            $cart->addRequestedProduct($product, $params);
             if (!empty($related)) {
                 $cart->addProductsByIds(explode(',', $related));
             }
@@ -698,9 +698,9 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 Mage::getService('checkout/cart')->removeCoupon($quote);
                 $message = $this->__('Coupon code was removed.');
                 $this->_getSession()->setCartCouponCode('');
-            } elseif ($type === 'giftcard') {
+            } elseif ($type === 'giftcard' && Mage::helper('core')->isModuleEnabled('Maho_Giftcard')) {
                 try {
-                    Mage::getService('checkout/cart')->removeGiftcard($quote, $code);
+                    Mage::getService('giftcard/giftcard')->removeFromCart($quote, $code);
                 } catch (Mage_Core_Exception_NoSuchEntity) {
                     // The card is not in the cart, so the outcome is the same
                 }

@@ -33,3 +33,4 @@
 "Unknown customer group ID: %s.","Unknown customer group ID: %s."
 "Unknown website ID: %s.","Unknown website ID: %s."
 "Websites must be specified.","Websites must be specified."
+"Wrong rule specified","Wrong rule specified"

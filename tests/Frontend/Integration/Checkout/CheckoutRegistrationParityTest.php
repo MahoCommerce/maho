@@ -35,7 +35,7 @@ function checkoutRegistrationCart(string $email, bool $shippingMethod = true): M
     $quote = CartParity::cart();
     /** @var Mage_Checkout_Service_Cart $service */
     $service = Mage::getService('checkout/cart');
-    $address = $service->mapAddressInput([
+    $address = \Mage\Checkout\Api\CartRequest::mapAddress([
         'firstName' => 'New', 'lastName' => 'Shopper', 'street' => ['1 Main St'], 'city' => 'Los Angeles',
         'region' => 'California', 'postcode' => '90210', 'countryId' => 'US', 'telephone' => '5550100',
     ]);

@@ -1101,9 +1101,13 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
             $errors[] = Mage::helper('customer')->__('The last name cannot be empty.');
         }
 
-        // Validate email
-        if (!Mage::helper('core')->isValidEmail($this->getEmail())) {
-            $errors[] = Mage::helper('customer')->__('Invalid email address "%s".', $this->getEmail());
+        $fieldErrors = $this->validateFields();
+        $fieldErrors = is_array($fieldErrors) ? $fieldErrors : [];
+        // A guest of the checkout is a customer of the NOT LOGGED IN group, so only a save checks the group
+        unset($fieldErrors['group_id']);
+        if (isset($fieldErrors['email'])) {
+            $errors[] = $fieldErrors['email'];
+            unset($fieldErrors['email']);
         }
 
         $password = $this->getPassword();
@@ -1150,11 +1154,61 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
                 $errors[] = Mage::helper('customer')->__('Gender is required.');
             }
         }
+        $errors = [...$errors, ...array_values($fieldErrors)];
 
         if (empty($errors)) {
             return true;
         }
         return $errors;
+    }
+
+    /**
+     * Check the fields that have a rule of their own: the email must be valid, the customer group must be a group
+     * for customers, the gender must be an option of its attribute and the date of birth must not be in the future.
+     * A stored group, gender or date of birth that did not change is accepted. validate() includes these checks,
+     * without the check of the customer group. Mage_Customer_Service_Customer checks the group before each save.
+     *
+     * @return array<string, string>|true the message of each problem, by field
+     */
+    public function validateFields(): array|bool
+    {
+        $helper = Mage::helper('customer');
+        $errors = [];
+        if (!Mage::helper('core')->isValidEmail($this->getEmail())) {
+            $errors['email'] = $helper->__('Invalid email address "%s".', $this->getEmail());
+        }
+
+        $isNew = !$this->getId();
+        if ($isNew || $this->dataHasChangedFor('group_id')) {
+            $groupId = (int) $this->getGroupId();
+            $groups = Mage::getResourceModel('customer/group_collection')->setRealGroupsFilter()->toOptionHash();
+            if (!array_key_exists($groupId, $groups)) {
+                $errors['group_id'] = $helper->__('Customer group not found with ID: %s', $groupId);
+            }
+        }
+
+        $gender = $this->getGender();
+        if ($gender && ($isNew || $this->dataHasChangedFor('gender'))) {
+            $attribute = Mage::getSingleton('eav/config')->getAttribute('customer', 'gender');
+            $options = $attribute && $attribute->usesSource() ? $attribute->getSource()->getAllOptions() : [];
+            if (!in_array($gender, array_map(intval(...), array_column($options, 'value')), true)) {
+                $errors['gender'] = $helper->__('The gender is not valid.');
+            }
+        }
+
+        $dob = trim((string) $this->getDob());
+        if ($dob !== '' && ($isNew || $this->dataHasChangedFor('dob'))) {
+            try {
+                $isFuture = new DateTimeImmutable($dob, new DateTimeZone('UTC')) > new DateTimeImmutable('now', new DateTimeZone('UTC'));
+            } catch (Exception) {
+                $isFuture = false;
+            }
+            if ($isFuture) {
+                $errors['dob'] = $helper->__('The Date of Birth cannot be in the future.');
+            }
+        }
+
+        return $errors === [] ? true : $errors;
     }
 
     /**

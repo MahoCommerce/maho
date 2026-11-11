@@ -37,7 +37,7 @@ class Mage_Catalog_Service_Product_Media
      * @param list<string> $types the roles of the image, such as image, small_image and thumbnail
      * @throws Mage_Core_Exception when the file is not an image that the gallery accepts
      */
-    public function addImage(
+    private function addImage(
         Product $product,
         string $path,
         array $types = [],
@@ -191,6 +191,6 @@ class Mage_Catalog_Service_Product_Media
     private function save(Product $product): void
     {
         $product->unsetData('stock_data');
-        $product->save();
+        Mage::getService('catalog/product')->savePart($product);
     }
 }

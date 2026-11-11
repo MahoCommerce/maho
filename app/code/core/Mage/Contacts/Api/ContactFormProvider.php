@@ -22,10 +22,9 @@ class ContactFormProvider extends \Maho\ApiPlatform\Provider
         $storeId = StoreContext::getStoreId();
         /** @var \Mage_Contacts_Service_Message $service */
         $service = \Mage::getService('contacts/message');
-        $channel = \Mage_Contacts_Model_Channel::Api;
 
         $dto = new ContactForm();
-        $dto->enabled = $service->isEnabled($channel, $storeId);
+        $dto->enabled = \Mage::helper('contacts')->isApiEnabled($storeId);
         $captcha = \Mage::helper('apiplatform')->getCaptchaConfig();
         $dto->captchaProvider = empty($captcha['enabled']) ? 'none' : (string) ($captcha['provider'] ?? 'none');
         $dto->captchaSiteKey = isset($captcha['siteKey']) ? (string) $captcha['siteKey'] : null;

@@ -20,6 +20,7 @@ use Symfony\Component\Security\Core\Authorization\AccessDecisionManager;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Core\Authorization\Voter\RoleVoter;
 use Tests\Helpers\AdminApiParity;
+use Tests\Helpers\CaptchaStub;
 
 uses(Tests\MahoFrontendTestCase::class);
 
@@ -58,10 +59,11 @@ function wishlistShareSecurity(int $customerId): Security
  *
  * @return array{accepted: bool, messages: list<string>}
  */
-function wishlistShareViaPage(string $emails, string $message = ''): array
+function wishlistShareViaPage(string $emails, string $message = '', ?string $captchaToken = null): array
 {
     Mage::unregister('wishlist');
-    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/wishlist/index/send', 'POST', ['emails' => $emails, 'message' => $message]));
+    $fields = ['emails' => $emails, 'message' => $message, 'maho_captcha' => $captchaToken];
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/wishlist/index/send', 'POST', $fields));
     $request->setRouteName('wishlist')->setControllerName('index')->setActionName('send')->setDispatched(true);
     new Mage_Wishlist_IndexController($request, new Mage_Core_Controller_Response_Http())->sendAction();
 
@@ -82,9 +84,9 @@ function wishlistShareViaPage(string $emails, string $message = ''): array
  * @param list<string> $emails
  * @return array{status: int, result: mixed, errors: list<string>, fields: list<string>}
  */
-function wishlistShareViaApi(int $customerId, array $emails, string $message = '', bool $graphQl = false): array
+function wishlistShareViaApi(int $customerId, array $emails, string $message = '', bool $graphQl = false, ?string $captchaToken = null): array
 {
-    $body = ['emails' => $emails, 'message' => $message];
+    $body = array_filter(['emails' => $emails, 'message' => $message, 'captchaToken' => $captchaToken], fn($value) => $value !== null);
     $request = AdminApiParity::jsonRequest('POST', '/api/rest/v2/customers/me/wishlist/share', $body);
     $processor = new WishlistProcessor(wishlistShareSecurity($customerId));
 
@@ -120,6 +122,7 @@ beforeEach(function () {
 });
 
 afterEach(function () {
+    CaptchaStub::uninstall();
     Mage::getSingleton('customer/session')->logout();
     Mage::unregister('wishlist');
     Mage::register('isSecureArea', true, true);
@@ -169,6 +172,33 @@ it('counts the shares of one customer on the page and on the API together', func
         ->and(wishlistShareViaPage('friend@example.com'))
         ->toBe(['accepted' => false, 'messages' => ['Too many requests. Please try again later.']]);
 });
+
+it('refuses on the page and on the API a share with a token that the CAPTCHA module refuses', function (?string $token) {
+    $captcha = CaptchaStub::install();
+    $customerId = (int) $this->customer->getId();
+
+    $api = wishlistShareViaApi($customerId, ['friend@example.com'], captchaToken: $token);
+    expect(wishlistShareViaPage('friend@example.com', captchaToken: $token))
+        ->toBe(['accepted' => false, 'messages' => [CaptchaStub::ERROR]])
+        ->and($api['status'])->toBe(422)
+        ->and($api['fields'])->toBe(['captchaToken'])
+        ->and($api['errors'])->toBe([CaptchaStub::ERROR])
+        ->and($captcha->checks)->toHaveCount(2)
+        ->and(Mage::getModel('wishlist/wishlist')->loadByCustomer($customerId)->getShared())->not->toBeTrue();
+})->with(['no token' => [null], 'a wrong token' => ['wrong']]);
+
+it('shares the wishlist on each transport with a token that the CAPTCHA module accepts', function (string $transport) {
+    CaptchaStub::install();
+    $customerId = (int) $this->customer->getId();
+
+    $accepted = match ($transport) {
+        'page' => wishlistShareViaPage('friend@example.com', captchaToken: CaptchaStub::SOLVED)['accepted'],
+        default => wishlistShareViaApi($customerId, ['friend@example.com'], graphQl: $transport === 'GraphQL', captchaToken: CaptchaStub::SOLVED)['errors'] === [],
+    };
+
+    expect($accepted)->toBeTrue()
+        ->and(Mage::getModel('wishlist/wishlist')->loadByCustomer($customerId)->getShared())->toBeTrue();
+})->with(['page', 'REST', 'GraphQL']);
 
 it('lists the items of the shared wishlist in the email when no customer session has it, as in an API request', function () {
     $sku = 'wishlist-share-' . uniqid();

@@ -63,6 +63,26 @@ class Maho_FeedManager_Service_Feed
     }
 
     /**
+     * Write the next batch of products of the batch generation $jobId.
+     *
+     * @return array<string, mixed> see Maho_FeedManager_Model_Generator_Batch::processBatch()
+     */
+    public function processBatch(string $jobId): array
+    {
+        return $this->_getBatch()->processBatch($jobId);
+    }
+
+    /**
+     * Stop the batch generation $jobId and delete its working files.
+     *
+     * @return array<string, mixed> see Maho_FeedManager_Model_Generator_Batch::cancel()
+     */
+    public function cancelBatch(string $jobId): array
+    {
+        return $this->_getBatch()->cancel($jobId);
+    }
+
+    /**
      * Finish the batch generation $jobId. A feed with auto upload on goes to its destination.
      *
      * @return array<string, mixed> see Maho_FeedManager_Model_Generator_Batch::finalize()

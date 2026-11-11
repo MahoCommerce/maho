@@ -136,7 +136,7 @@ describe('Gift card code lookups ignore letter case', function (): void {
     });
 
     test('a card applied with a code in other case is debited at checkout', function (): void {
-        Mage::getService('checkout/cart')->applyGiftcard($this->quote, strtolower($this->giftcard->getCode()));
+        Mage::getService('giftcard/giftcard')->applyToCart($this->quote, strtolower($this->giftcard->getCode()));
         (new Mage_Sales_Model_Service_Quote($this->quote))->submitOrder();
 
         $reloaded = Mage::getModel('giftcard/giftcard')->load($this->giftcard->getId());
@@ -144,10 +144,10 @@ describe('Gift card code lookups ignore letter case', function (): void {
     });
 
     test('a card that is already applied cannot be applied again in other case', function (): void {
-        $service = Mage::getService('checkout/cart');
-        $service->applyGiftcard($this->quote, $this->giftcard->getCode());
+        $service = Mage::getService('giftcard/giftcard');
+        $service->applyToCart($this->quote, $this->giftcard->getCode());
 
-        expect(fn() => $service->applyGiftcard($this->quote, strtolower($this->giftcard->getCode())))
+        expect(fn() => $service->applyToCart($this->quote, strtolower($this->giftcard->getCode())))
             ->toThrow(Mage_Core_Exception_Conflict::class);
     });
 });

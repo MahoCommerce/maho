@@ -50,8 +50,11 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     public const CART_FIXED_ACTION = 'cart_fixed';
     public const BUY_X_GET_Y_ACTION = 'buy_x_get_y';
 
-    /** The actions of a cart price rule */
+    /** The core actions of a cart price rule. getSimpleActions() returns the list that a store accepts. */
     public const SIMPLE_ACTIONS = [self::BY_PERCENT_ACTION, self::BY_FIXED_ACTION, self::CART_FIXED_ACTION, self::BUY_X_GET_Y_ACTION];
+
+    /** Each child node is the code of an action that a rule accepts. A module adds a node for its action. */
+    public const XML_PATH_SIMPLE_ACTIONS = 'global/salesrule/rule/simple_actions';
 
     /**
      * Store coupon code generator instance
@@ -139,21 +142,23 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Add an error to $errors for each problem of the rule, and return $errors. The coupon resource model
-     * refuses a code that is too long or that another coupon uses.
+     * refuses a code that is too long or that another coupon uses. The coupon is a second record, so the
+     * service requires its code: other code saves the rule first and creates the coupon after.
      */
     public function validateRecord(Mage_Core_Exception_Input $errors = new Mage_Core_Exception_Input()): Mage_Core_Exception_Input
     {
         $helper = Mage::helper('salesrule');
         $this->_validateScope($errors);
 
-        if (!in_array($this->getData('simple_action') ?? self::BY_PERCENT_ACTION, self::SIMPLE_ACTIONS, true)) {
-            $this->_addRecordError($errors, 'simple_action', $helper->__('The action must be one of: %s.', implode(', ', self::SIMPLE_ACTIONS)));
+        $actions = $this->getSimpleActions();
+        if (!in_array($this->getData('simple_action') ?? self::BY_PERCENT_ACTION, $actions, true)) {
+            $this->_addRecordError($errors, 'simple_action', $helper->__('The action must be one of: %s.', implode(', ', $actions)));
         }
         $amount = (float) $this->getDiscountAmount();
         if ($amount < 0) {
             $this->_addRecordError($errors, 'discount_amount', $helper->__('The discount amount must be 0 or more.'));
         } elseif ($amount > 100 && $this->getSimpleAction() === self::BY_PERCENT_ACTION) {
-            $this->_addRecordError($errors, 'discount_amount', $helper->__('The discount amount must not be more than 100 for a percent discount.'));
+            $this->_addRecordError($errors, 'discount_amount', $helper->__('The discount amount must not be more than 100 for a percent discount.'), ['simple_action']);
         }
         $counts = [
             'discount_qty' => 'Maximum Qty Discount is Applied To',
@@ -175,6 +180,17 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
             $this->_addRecordError($errors, 'coupon_type', $helper->__('The coupon type is not valid.'));
         }
         return $errors;
+    }
+
+    /**
+     * Return the codes of the actions that a rule accepts: the child nodes of global/salesrule/rule/simple_actions.
+     *
+     * @return list<string>
+     */
+    public function getSimpleActions(): array
+    {
+        $node = Mage::getConfig()->getNode(self::XML_PATH_SIMPLE_ACTIONS);
+        return $node ? array_map(strval(...), array_keys($node->asArray())) : self::SIMPLE_ACTIONS;
     }
 
     /**

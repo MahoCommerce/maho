@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Tests\Helpers\CaptchaStub;
 
 uses(Tests\MahoFrontendTestCase::class);
 
@@ -62,23 +63,11 @@ class ContactParitySpyService extends Mage_Contacts_Service_Message
 }
 
 /**
- * A CAPTCHA module that refuses every API token, as Maho_Captcha does for a wrong token.
- */
-class ContactParityCaptchaHelper extends Maho_ApiPlatform_Helper_Data
-{
-    #[\Override]
-    public function verifyCaptcha(array $data): ?string
-    {
-        return 'Incorrect CAPTCHA.';
-    }
-}
-
-/**
- * Post $fields to the storefront form, as the browser does.
+ * Post $fields to the storefront form, as the browser does. With $dispatch, run preDispatch() before the action.
  *
  * @return array{accepted: bool, errors: list<string>}
  */
-function contactViaWeb(array $fields): array
+function contactViaWeb(array $fields, bool $dispatch = false): array
 {
     $fields['form_key'] = Mage::getSingleton('core/session')->getFormKey();
     $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/contacts/index/post', 'POST', $fields));
@@ -90,7 +79,12 @@ function contactViaWeb(array $fields): array
     $request->setDispatched(true);
 
     $controller = new Mage_Contacts_IndexController($request, new Mage_Core_Controller_Response_Http());
-    $controller->postAction();
+    if ($dispatch) {
+        Mage::app()->setRequest($request);
+        $controller->dispatch('post');
+    } else {
+        $controller->postAction();
+    }
 
     $success = [];
     $errors = [];
@@ -167,10 +161,11 @@ beforeEach(function () {
 
     Mage::app()->setCurrentStore(Mage::app()->getDefaultStoreView());
     $store = Mage::app()->getStore();
-    $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_ENABLED, '1');
-    $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_API_ENABLED, '1');
+    $store->setConfig(Mage_Contacts_Helper_Data::XML_PATH_ENABLED, '1');
+    $store->setConfig(Mage_Contacts_Helper_Data::XML_PATH_API_ENABLED, '1');
     $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_HONEYPOT_ENABLED, '1');
     $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_RATE_LIMIT, '3');
+    $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_IP_RATE_LIMIT, '10');
     $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_RECIPIENT_RATE_LIMIT, '3');
     $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_AUTO_REPLY_ENABLED, '0');
     $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_EMAIL_RECIPIENT, CONTACT_STORE_EMAIL);
@@ -228,7 +223,7 @@ it('accepts a message that fills the honeypot on both transports and sends nothi
         ->and($this->spy->sent)->toBe([]);
 });
 
-it('shares the limit for one email address and for one client between the form and the API', function () {
+it('shares the limit for one email address between the form and the API', function () {
     Mage::app()->getStore()->setConfig(Mage_Contacts_Service_Message::XML_PATH_RATE_LIMIT, '1');
     $fields = contactFields();
 
@@ -244,6 +239,25 @@ it('shares the limit for one email address and for one client between the form a
     expect(contactViaApi($other)['accepted'])->toBeTrue()
         ->and(contactViaWeb($other))->toBe(['accepted' => false, 'errors' => $api['errors']])
         ->and($this->spy->sentToStore())->toHaveCount(2);
+});
+
+it('shares the limit for one client between the form and the API, for any email address', function () {
+    Mage::app()->getStore()->setConfig(Mage_Contacts_Service_Message::XML_PATH_IP_RATE_LIMIT, '1');
+
+    expect(contactViaWeb(contactFields())['accepted'])->toBeTrue();
+
+    $api = contactViaApi(contactFields());
+    expect($api['status'])->toBe(429)
+        ->and($api['response']?->headers->get('Retry-After'))->toBe('3600')
+        ->and(contactViaWeb(contactFields()))->toBe(['accepted' => false, 'errors' => $api['errors']])
+        ->and($this->spy->sentToStore())->toHaveCount(1);
+});
+
+it('gives one client more messages than one email address by default', function () {
+    $defaults = Mage::getConfig()->getNode('default/system/rate_limit');
+
+    expect((int) $defaults->contact)->toBe(3)
+        ->and((int) $defaults->contact_ip)->toBe(10);
 });
 
 it('limits the auto-replies to one address across both transports', function () {
@@ -285,7 +299,7 @@ it('gives the other fields of a custom form to the email template without markup
 });
 
 it('answers 404 on the API when its channel is disabled', function () {
-    Mage::app()->getStore()->setConfig(Mage_Contacts_Service_Message::XML_PATH_API_ENABLED, '0');
+    Mage::app()->getStore()->setConfig(Mage_Contacts_Helper_Data::XML_PATH_API_ENABLED, '0');
     $fields = contactFields();
 
     $api = contactViaApi($fields);
@@ -294,27 +308,32 @@ it('answers 404 on the API when its channel is disabled', function () {
         ->and(contactViaWeb($fields)['accepted'])->toBeTrue();
 });
 
-it('refuses a message of the web channel when the storefront form is disabled', function () {
-    Mage::app()->getStore()->setConfig(Mage_Contacts_Service_Message::XML_PATH_ENABLED, '0');
+it('sends nothing from the storefront form when the form is disabled, and the API still accepts', function () {
+    Mage::app()->getStore()->setConfig(Mage_Contacts_Helper_Data::XML_PATH_ENABLED, '0');
+    $fields = contactFields();
 
-    expect(fn() => Mage::getService('contacts/message')->send(contactFields(), Mage_Contacts_Model_Channel::Web, (int) Mage::app()->getStore()->getId()))
-        ->toThrow(Mage_Core_Exception_NoSuchEntity::class);
+    expect(contactViaWeb($fields, dispatch: true)['accepted'])->toBeFalse()
+        ->and($this->spy->sent)->toBe([])
+        ->and(contactViaApi($fields)['accepted'])->toBeTrue();
 });
 
 describe('the abuse checks', function () {
-    afterEach(fn() => Mage::unregister('_helper/apiplatform'));
+    afterEach(fn() => CaptchaStub::uninstall());
 
-    it('asks the CAPTCHA module of the store on the API, and leaves the form to its predispatch observer', function () {
-        Mage::unregister('_helper/apiplatform');
-        Mage::register('_helper/apiplatform', new ContactParityCaptchaHelper());
-        $fields = contactFields();
+    it('refuses on both transports a message that the CAPTCHA module of the store refuses', function () {
+        $captcha = CaptchaStub::install();
+        $fields = contactFields(['maho_captcha' => 'wrong', 'captchaToken' => 'wrong']);
 
+        $web = contactViaWeb($fields);
         $api = contactViaApi($fields);
-        expect($api['status'])->toBe(422)
+        expect($web)->toBe(['accepted' => false, 'errors' => ['Incorrect CAPTCHA.']])
+            ->and($api['status'])->toBe(422)
             ->and($api['fields'])->toBe(['captchaToken'])
-            ->and($api['errors'])->toBe(['Incorrect CAPTCHA.'])
-            ->and(contactViaWeb($fields)['accepted'])->toBeTrue()
-            ->and($this->spy->sentToStore())->toHaveCount(1);
+            ->and($api['errors'])->toBe($web['errors'])
+            ->and($this->spy->sent)->toBe([])
+            ->and($captcha->checks)->toHaveCount(2)
+            ->and($captcha->checks[0]['maho_captcha'])->toBe('wrong')
+            ->and($captcha->checks[1]['captchaToken'])->toBe('wrong');
     });
 
     it('reads one honeypot switch for both transports', function () {

@@ -661,6 +661,34 @@ SPDX-License-Identifier: AFL-3.0
             <groups>
                 <security>
                     <fields>
+                        <forgot_password_flow_secure translate="label comment" module="customer">
+                            <label>Forgot password flow secure</label>
+                            <comment>Limits the requests for a password reset email, on the storefront and on the API. The counter is in the database, so a cache flush does not reset it.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customer/config_forgotpassword</source_model>
+                            <sort_order>140</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </forgot_password_flow_secure>
+                        <forgot_password_ip_times translate="label" module="customer">
+                            <label>Forgot password requests to times per hour from 1 IP</label>
+                            <sort_order>150</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><forgot_password_flow_secure separator=",">1,2</forgot_password_flow_secure></depends>
+                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
+                        </forgot_password_ip_times>
+                        <forgot_password_email_times translate="label" module="customer">
+                            <label>Forgot password requests to times per 24 hours from 1 e-mail</label>
+                            <sort_order>160</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><forgot_password_flow_secure separator=",">1,3</forgot_password_flow_secure></depends>
+                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
+                        </forgot_password_email_times>
                         <min_admin_password_length translate="label comment">
                             <label>Minimum admin password length</label>
                             <comment>Please enter a number 7 or greater in this field.</comment>
@@ -689,15 +717,6 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>1</show_in_store>
                             <validate>validate-digits validate-zero-or-greater</validate>
                         </customer_register>
-                        <forgot_password translate="label comment" module="customer">
-                            <label>Forgot password</label>
-                            <comment>Per email address. Default 3 per hour. 0 to disable.</comment>
-                            <sort_order>150</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <validate>validate-digits validate-zero-or-greater</validate>
-                        </forgot_password>
                         <confirmation_link translate="label comment" module="customer">
                             <label>Account confirmation email</label>
                             <comment>Per IP address and per email address. Counts each request to send the confirmation link again. Default 3 per hour. 0 to disable.</comment>

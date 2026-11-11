@@ -59,6 +59,9 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
     protected function _beforeSave()
     {
         $this->setData('modulePrefix', self::MODULE_NAME);
+        if (Mage::getModel('catalog/product')->isReservedAttribute($this)) {
+            throw new Mage_Core_Exception(Mage::helper('catalog')->__('The attribute code \'%s\' is reserved by system. Please try another attribute code', $this->getAttributeCode()));
+        }
         if (isset($this->_origData['is_global'])) {
             $this->_data['is_global'] ??= self::SCOPE_GLOBAL;
             if (($this->_data['is_global'] != $this->_origData['is_global'])

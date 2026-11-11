@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Tests\Helpers\CaptchaStub;
 use Tests\Helpers\TransportParity;
 
 uses(Tests\MahoFrontendTestCase::class);
@@ -88,10 +89,11 @@ function revocationParityOrder(Mage_Customer_Model_Customer $customer, string $c
 
 /**
  * Post the storefront form as the logged-in $customer, from the "Revoke this contract" link of $order.
+ * $extraFields are more fields of the form.
  *
  * @return array{accepted: bool, errors: list<string>, request: ?Maho_Revocation_Model_Request}
  */
-function revocationViaWeb(Mage_Customer_Model_Customer $customer, Mage_Sales_Model_Order $order): array
+function revocationViaWeb(Mage_Customer_Model_Customer $customer, Mage_Sales_Model_Order $order, array $extraFields = []): array
 {
     Mage::getSingleton('customer/session')->setCustomerAsLoggedIn($customer);
     $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/revocation/submit', 'POST', [
@@ -101,6 +103,7 @@ function revocationViaWeb(Mage_Customer_Model_Customer $customer, Mage_Sales_Mod
         'order_reference' => $order->getIncrementId(),
         'session_order_id' => $order->getId(),
         'reason' => 'Changed my mind',
+        ...$extraFields,
     ]));
     $request->setRouteName('revocation')->setControllerName('index')->setActionName('submit')->setDispatched(true);
     Mage::app()->setRequest($request);
@@ -119,17 +122,24 @@ function revocationViaWeb(Mage_Customer_Model_Customer $customer, Mage_Sales_Mod
 
 /**
  * Post the same declaration to POST /api/rest/v2/customers/me/revocation-requests as $customer.
+ * $extraFields are more fields of the JSON body.
  *
  * @return array{status: int, message: string, request: ?Maho_Revocation_Model_Request}
  */
-function revocationViaApi(Mage_Customer_Model_Customer $customer, Mage_Sales_Model_Order $order): array
+function revocationViaApi(Mage_Customer_Model_Customer $customer, Mage_Sales_Model_Order $order, array $extraFields = []): array
 {
     $dto = new RevocationRequest();
     $dto->orderId = (int) $order->getId();
     $dto->reason = 'Changed my mind';
     $processor = new RevocationRequestProcessor(revocationParitySecurity((int) $customer->getId()));
+    $body = ['orderId' => (int) $order->getId(), 'reason' => 'Changed my mind', ...$extraFields];
     $result = TransportParity::api(fn() => $processor->process($dto, new Post(name: 'submit_revocation'), [], [
-        'request' => SymfonyRequest::create('/api/rest/v2/customers/me/revocation-requests', 'POST'),
+        'request' => SymfonyRequest::create(
+            '/api/rest/v2/customers/me/revocation-requests',
+            'POST',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: json_encode($body, JSON_THROW_ON_ERROR),
+        ),
     ]));
 
     $model = $result['result'] instanceof RevocationRequest ? Mage::getModel('revocation/request')->load($result['result']->id) : null;
@@ -214,13 +224,60 @@ it('counts the submissions of one client on both transports together', function 
     expect(revocationViaWeb($customer, $order)['accepted'])->toBeTrue();
     $api = revocationViaApi($customer, $order);
     expect($api['status'])->toBe(429)
-        ->and($api['message'])->toBe('Too many requests. Please try again later.');
+        ->and($api['message'])->toBe('Your request could not be processed right now. Please try again later or contact us directly.');
 
     Mage::app()->cleanCache([\Maho\Security\RateLimiter::CACHE_TAG]);
     expect(revocationViaApi($customer, $order)['status'])->toBe(200);
     $web = revocationViaWeb($customer, $order);
     expect($web['accepted'])->toBeFalse()
-        ->and($web['errors'])->toBe(['Your request could not be processed right now. Please try again later or contact us directly.']);
+        ->and($web['errors'])->toBe([$api['message']]);
+});
+
+it('records nothing and reports no error on both transports for a client that fills the honeypot', function () {
+    $customer = revocationParityCustomer();
+    $order = revocationParityOrder($customer);
+    $trap = [Mage::helper('core')->getHoneypotFieldName() => 'I am a bot'];
+    $count = fn(): int => Mage::getModel('revocation/request')->getCollection()
+        ->addFieldToFilter('email', $customer->getEmail())
+        ->getSize();
+
+    $web = revocationViaWeb($customer, $order, $trap);
+    $api = revocationViaApi($customer, $order, $trap);
+
+    expect($web['errors'])->toBe([])
+        ->and($web['request'])->toBeNull()
+        ->and($api['status'])->toBe(200)
+        ->and($api['request']?->getId())->toBeNull()
+        ->and($count())->toBe(0);
+
+    Mage::app()->getStore()->setConfig(Maho_Revocation_Helper_Data::XML_PATH_HONEYPOT_ENABLED, '0');
+    expect(revocationViaWeb($customer, $order, $trap)['request'])->not->toBeNull()
+        ->and(revocationViaApi($customer, $order, $trap)['request']?->getId())->not->toBeNull()
+        ->and($count())->toBe(2);
+});
+
+it('refuses on both transports a declaration that the CAPTCHA module of the store refuses', function () {
+    $customer = revocationParityCustomer();
+    $order = revocationParityOrder($customer);
+    $captcha = CaptchaStub::install();
+
+    try {
+        $web = revocationViaWeb($customer, $order, ['maho_captcha' => 'wrong']);
+        $api = revocationViaApi($customer, $order, ['captchaToken' => 'wrong']);
+        $solvedWeb = revocationViaWeb($customer, $order, ['maho_captcha' => CaptchaStub::SOLVED]);
+        $solvedApi = revocationViaApi($customer, $order, ['captchaToken' => CaptchaStub::SOLVED]);
+    } finally {
+        CaptchaStub::uninstall();
+    }
+
+    expect($web['errors'])->toBe([CaptchaStub::ERROR])
+        ->and($web['request'])->toBeNull()
+        ->and($api['status'])->toBe(422)
+        ->and($api['message'])->toContain(CaptchaStub::ERROR)
+        ->and($api['request'])->toBeNull()
+        ->and($solvedWeb['request'])->not->toBeNull()
+        ->and($solvedApi['request']?->getId())->not->toBeNull()
+        ->and($captcha->checks)->toHaveCount(4);
 });
 
 describe('every declaration is recorded, because the law requires it', function () {

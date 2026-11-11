@@ -136,7 +136,6 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
             return;
         }
 
-        $allowedStoreIds = $user->getAllowedStoreIds();
         $knownStoreIds = array_map(intval(...), array_keys(\Mage::app()->getStores(true)));
         $labels = [];
         foreach ($input as $index => $entry) {
@@ -149,16 +148,15 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
                 $errors->addError("{$field}.label", 'label must be a text of at most 255 characters');
             } elseif (array_key_exists($storeId, $labels)) {
                 $errors->addError("{$field}.storeId", "storeId {$storeId} is in the list more than once");
-            } elseif ($allowedStoreIds !== null && !in_array($storeId, $allowedStoreIds, true)) {
-                throw new \Mage_Core_Exception_Forbidden("Access denied for store: {$storeId}");
             } else {
+                $this->assertRequestedStoreAllowed($storeId, $user);
                 $labels[$storeId] = trim($label);
             }
         }
 
         // An empty label deletes the stored label of that store
         foreach (array_keys($rule->getId() ? (array) $rule->getStoreLabels() : []) as $storeId) {
-            if (!array_key_exists((int) $storeId, $labels) && ($allowedStoreIds === null || in_array((int) $storeId, $allowedStoreIds, true))) {
+            if (!array_key_exists((int) $storeId, $labels) && $user->canAccessStore((int) $storeId)) {
                 $labels[(int) $storeId] = '';
             }
         }

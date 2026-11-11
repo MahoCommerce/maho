@@ -97,10 +97,9 @@ class Mage_Adminhtml_RatingController extends Mage_Adminhtml_Controller_Action
     {
         if ($this->getRequest()->getParam('id') > 0) {
             try {
-                $model = Mage::getModel('rating/rating');
-                /** @var Mage_Rating_Model_Rating $model */
-                $model->load($this->getRequest()->getParam('id'))
-                    ->delete();
+                /** @var Mage_Rating_Service_Rating $service */
+                $service = Mage::getService('rating/rating');
+                $service->delete($service->getById((int) $this->getRequest()->getParam('id')));
                 Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('adminhtml')->__('The rating has been deleted.'));
                 $this->_redirect('*/*/');
             } catch (Exception $e) {

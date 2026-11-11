@@ -1314,7 +1314,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
     public function setPaymentData($data)
     {
         $data['method'] ??= $this->getQuote()->getPayment()->getMethod();
-        Mage::getService('checkout/cart')->selectPaymentMethod($this->getQuote(), $data);
+        Mage::getService('checkout/cart')->selectPaymentMethod($this->getQuote(), $data, Mage_Checkout_Model_Actor::Staff);
         return $this;
     }
 
@@ -1580,6 +1580,33 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         $placeOrder = function () use ($orderService, $quote, $orderData, &$order): void {
             $order = $orderService->submit($quote, Mage_Checkout_Model_Actor::Staff, null, $orderData, (bool) $this->getSendConfirmation());
         };
+        if ($oldOrder->getId()) {
+            // The cancel returns the stock that the new order takes, so it comes first. One transaction holds the
+            // two steps: a new order that fails keeps the old order as it is, and a cancel that fails places no order.
+            $placeNewOrder = $placeOrder;
+            $placeOrder = function () use ($orderService, $oldOrder, $orderData, $placeNewOrder, &$order): void {
+                $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+                $adapter->beginTransaction();
+                try {
+                    $orderService->cancel($oldOrder);
+                    $placeNewOrder();
+                    /** @var Mage_Sales_Model_Order $order */
+                    $oldOrder->setRelationChildId((string) $order->getId());
+                    $oldOrder->setRelationChildRealId($order->getIncrementId());
+
+                    Mage::dispatchEvent('adminhtml_sales_order_create_save_before', ['new_order' => $order, 'old_order' => $oldOrder]);
+
+                    $oldOrder->save();
+                    $order->save();
+                    $adapter->commit();
+                } catch (Throwable $e) {
+                    $adapter->rollBack();
+                    // The order of the session is again the order of the database
+                    $oldOrder->reset()->load((int) $orderData['relation_parent_id']);
+                    throw $e;
+                }
+            };
+        }
         if ($quote->getCustomerIsNew()) {
             /** @var Mage_Customer_Service_Customer $customerService */
             $customerService = Mage::getService('customer/customer');
@@ -1587,29 +1614,6 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             $customerService->create($quote->getCustomer(), $storeId, $storeId, $placeOrder);
         } else {
             $placeOrder();
-        }
-        /** @var Mage_Sales_Model_Order $order */
-        if ($oldOrder->getId()) {
-            // The old order and its payment stay as they are when the new order cannot be placed. The new order
-            // exists now, so a cancel that fails must not stop the link between the two orders
-            try {
-                $orderService->cancel($oldOrder);
-            } catch (Exception $e) {
-                Mage::logException($e);
-                $this->getSession()->addError(Mage::helper('adminhtml')->__(
-                    'The new order #%s was created, but the old order #%s was not canceled: %s',
-                    $order->getIncrementId(),
-                    $oldOrder->getIncrementId(),
-                    $e->getMessage(),
-                ));
-            }
-            $oldOrder->setRelationChildId((string) $order->getId());
-            $oldOrder->setRelationChildRealId($order->getIncrementId());
-
-            Mage::dispatchEvent('adminhtml_sales_order_create_save_before', ['new_order' => $order, 'old_order' => $oldOrder]);
-
-            $oldOrder->save();
-            $order->save();
         }
 
         return $order;

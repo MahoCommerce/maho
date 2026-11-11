@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Post;
 use Mage\Checkout\Api\CartProcessor;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -183,9 +184,9 @@ it('keeps the coupon of the cart when the promo code box applies a gift card', f
         ->and((string) $stored->getGiftcardCodes())->toContain((string) $giftcard->getCode());
 });
 
-it('applies the coupon of a code that is also a gift card, on the cart page and in the POS', function () {
+it('applies the coupon of a code that is also a gift card, on the cart page and in the admin GraphQL API', function () {
     $code = (string) $this->rule->getCouponCode();
-    $this->carts = [$webCart = CartParity::cart(), $posCart = CartParity::cart()];
+    $this->carts = [$webCart = CartParity::cart(), $staffCart = CartParity::cart()];
     $giftcard = Mage::getModel('giftcard/giftcard')
         ->setCode($code)
         ->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE)
@@ -197,15 +198,49 @@ it('applies the coupon of a code that is also a gift card, on the cart page and 
     try {
         $web = couponViaWeb($webCart, $code);
         new Mage\Checkout\Api\GraphQL\CartMutationHandler(new Mage\Checkout\Api\CartMapper())
-            ->handleApplyCoupon(['cartId' => (int) $posCart->getId(), 'couponCode' => $code]);
+            ->handleApplyCoupon(['cartId' => (int) $staffCart->getId(), 'couponCode' => $code]);
     } finally {
         $giftcard->delete();
     }
 
-    $stored = Mage::getModel('sales/quote')->loadByIdWithoutStore($posCart->getId());
+    $stored = Mage::getModel('sales/quote')->loadByIdWithoutStore($staffCart->getId());
     expect($web['success'])->toBe(["Coupon code \"{$code}\" was applied."])
         ->and((string) $stored->getCouponCode())->toBe($code)
         ->and($stored->getGiftcardCodes())->toBeNull();
+});
+
+it('removes the coupon of the cart on both transports', function () {
+    $code = (string) $this->rule->getCouponCode();
+    $this->carts = [$webCart = CartParity::cart(), $apiCart = CartParity::cart()];
+    foreach ($this->carts as $cart) {
+        Mage::getService('checkout/cart')->applyCoupon($cart, $code, Mage_Checkout_Model_Actor::Staff);
+    }
+    $discounted = (float) Mage::getModel('sales/quote')->loadByIdWithoutStore($webCart->getId())->getGrandTotal();
+
+    Mage::getSingleton('checkout/session')->replaceQuote(Mage::getModel('sales/quote')->loadByIdWithoutStore($webCart->getId()));
+    Mage::getSingleton('checkout/cart')->unsetData('quote');
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/checkout/cart/couponPost', 'POST', ['remove' => '1']));
+    $request->setRouteName('checkout')->setControllerName('cart')->setActionName('couponPost')->setDispatched(true);
+    Mage::app()->setRequest($request);
+    new Mage_Checkout_CartController($request, new Mage_Core_Controller_Response_Http())->couponPostAction();
+    $web = [];
+    foreach (Mage::getSingleton('checkout/session')->getMessages(true)->getItems() as $message) {
+        $web[] = [$message->getType(), $message->getText()];
+    }
+
+    $maskedId = (string) $apiCart->getData('masked_quote_id');
+    $apiRequest = AdminApiParity::jsonRequest('DELETE', "/api/rest/v2/guest-carts/{$maskedId}/coupon");
+    $api = AdminApiParity::api($apiRequest, fn() => new CartProcessor(CartParity::guestSecurity())
+        ->process(null, new Delete(name: 'remove_guest_coupon'), ['id' => $maskedId], ['request' => $apiRequest]));
+
+    $webStored = Mage::getModel('sales/quote')->loadByIdWithoutStore($webCart->getId());
+    $apiStored = Mage::getModel('sales/quote')->loadByIdWithoutStore($apiCart->getId());
+    expect($web)->toBe([[Mage_Core_Model_Message::SUCCESS, 'Coupon code was removed.']])
+        ->and($api['status'])->toBe(200)
+        ->and((string) $webStored->getCouponCode())->toBe('')
+        ->and((string) $apiStored->getCouponCode())->toBe('')
+        ->and((float) $webStored->getGrandTotal())->toBeGreaterThan($discounted)
+        ->and((float) $apiStored->getGrandTotal())->toBe((float) $webStored->getGrandTotal());
 });
 
 describe('the limit of codes', function () {

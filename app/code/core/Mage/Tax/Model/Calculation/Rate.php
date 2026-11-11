@@ -52,35 +52,7 @@ class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
     protected function _beforeSave()
     {
         $helper = Mage::helper('tax');
-        $errors = new Mage_Core_Exception_Input();
-        if (trim((string) $this->getCode()) === '') {
-            $errors->addError('code', $helper->__('Tax rate code is required.'));
-        }
-        $country = (string) $this->getTaxCountryId();
-        if ($country === '') {
-            $errors->addError('tax_country_id', $helper->__('Tax country is required.'));
-        } elseif (!Mage::getModel('directory/country')->loadByCode($country)->getId()) {
-            $errors->addError('tax_country_id', $helper->__('One of the country has invalid code.'));
-        }
-        $rate = $this->getData('rate');
-        if ($rate === null || $rate === '') {
-            $errors->addError('rate', $helper->__('Rate is required.'));
-        } elseif (!is_numeric($rate) || $rate < 0) {
-            $errors->addError('rate', $helper->__('Rate Percent should be a positive number.'));
-        }
-        foreach (array_keys($this->getTitle() ?? []) as $storeId) {
-            if (!array_key_exists((int) $storeId, Mage::app()->getStores())) {
-                $errors->addError('title', $helper->__('Unknown store ID: %s', $storeId));
-            }
-        }
-        if ($this->getZipIsRange()) {
-            foreach (['zip_from', 'zip_to'] as $field) {
-                if ((string) $this->getData($field) === '') {
-                    $errors->addError($field, $helper->__('Please fill all required fields with valid information.'));
-                }
-            }
-        }
-        $errors->throwIfErrors();
+        $this->validateRecord()->throwIfErrors();
 
         if ($this->getZipIsRange()) {
             $zipFrom = $this->getData('zip_from');
@@ -135,6 +107,35 @@ class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
         }
         Mage::dispatchEvent('tax_settings_change_after');
         return parent::_afterSave();
+    }
+
+    /**
+     * Add an error to $errors for each problem of the code, the country, the rate and the zip range, and return $errors.
+     * Mage_Tax_Service_Rate also checks that the store has the country and the store views of the titles.
+     */
+    public function validateRecord(Mage_Core_Exception_Input $errors = new Mage_Core_Exception_Input()): Mage_Core_Exception_Input
+    {
+        $helper = Mage::helper('tax');
+        if (trim((string) $this->getCode()) === '') {
+            $errors->addError('code', $helper->__('Tax rate code is required.'));
+        }
+        if ((string) $this->getTaxCountryId() === '') {
+            $errors->addError('tax_country_id', $helper->__('Tax country is required.'));
+        }
+        $rate = $this->getData('rate');
+        if ($rate === null || $rate === '') {
+            $errors->addError('rate', $helper->__('Rate is required.'));
+        } elseif (!is_numeric($rate) || $rate < 0) {
+            $errors->addError('rate', $helper->__('Rate Percent should be a positive number.'));
+        }
+        if ($this->getZipIsRange()) {
+            foreach (['zip_from', 'zip_to'] as $field) {
+                if ((string) $this->getData($field) === '') {
+                    $errors->addError($field, $helper->__('Please fill all required fields with valid information.'));
+                }
+            }
+        }
+        return $errors;
     }
 
     /**

@@ -51,7 +51,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
             /** @var \Mage_Directory_Service_Region $service */
             $service = Mage::getService('directory/region');
             $result = $service->import((string) $country, array_map(trim(...), explode(',', $locales)), $updateExisting, $dryRun, $log);
-        } catch (\Mage_Core_Exception|\JsonException $e) {
+        } catch (\Mage_Core_Exception|\RuntimeException $e) {
             $output->writeln("<error>{$e->getMessage()}</error>");
             return Command::FAILURE;
         }

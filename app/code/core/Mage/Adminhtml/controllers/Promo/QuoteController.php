@@ -118,9 +118,6 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
         try {
             Mage::dispatchEvent('adminhtml_controller_salesrule_prepare_save', ['request' => $this->getRequest()]);
             $data = $this->getRequest()->getPost();
-            if (Mage::helper('adminhtml')->hasTags($data['rule'], ['attribute'], false)) {
-                Mage::throwException(Mage::helper('catalogrule')->__('Wrong rule specified'));
-            }
             $data = $this->_filterDates($data, ['from_date', 'to_date']);
             /** @var Mage_SalesRule_Model_Rule $model */
             $model = $id ? $service->getById($id) : Mage::getModel('salesrule/rule');

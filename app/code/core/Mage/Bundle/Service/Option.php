@@ -111,7 +111,7 @@ class Mage_Bundle_Service_Option
         $product->setBundleOptionsData($options);
         $product->setBundleSelectionsData($selections);
         $product->setCanSaveBundleSelections(true);
-        $product->save();
+        Mage::getService('catalog/product')->savePart($product);
     }
 
     /**

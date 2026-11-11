@@ -88,7 +88,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             $pageSize = max(1, min((int) ($context['args']['pageSize'] ?? 20), 100));
             $status = $context['args']['status'] ?? null;
 
-            $result = $this->orderService->getListVisibleToCustomer((int) $customerId, $page, $pageSize, $status);
+            $result = new OrderList()->getListVisibleToCustomer((int) $customerId, $page, $pageSize, $status);
 
             $orders = [];
             foreach ($result['orders'] as $order) {
@@ -105,7 +105,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        $order = $this->orderService->getById((int) $orderId);
+        $order = $this->orderService->findById((int) $orderId);
 
         if (!$order) {
             return null;
@@ -136,7 +136,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 10, 100);
         $status = $this->stringFilter($context['filters'] ?? [], 'status');
 
-        $result = $this->orderService->getListVisibleToCustomer($customerId, $page, $pageSize, $status);
+        $result = new OrderList()->getListVisibleToCustomer($customerId, $page, $pageSize, $status);
 
         $orders = [];
         foreach ($result['orders'] as $order) {
@@ -162,7 +162,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         foreach (self::INT_FILTERS as $key) {
             $filters[$key] = $this->intFilter($input, $key);
         }
-        $result = $this->orderService->getList(
+        $result = new OrderList()->getList(
             $page,
             $pageSize,
             $filters,
@@ -301,12 +301,6 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             } else {
                 $dto->paymentMethodTitle = $payment->getMethod();
             }
-
-            // Get change amount for cash payments
-            $changeAmount = $payment->getAdditionalInformation('change_amount');
-            if ($changeAmount !== null) {
-                $dto->changeAmount = (float) $changeAmount;
-            }
         }
 
         if (!$isCollectionOrder) {
@@ -315,7 +309,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             $dto->statusHistory = $this->orderService->getNotes($order, $visibleOnly);
 
             // Map shipments with tracking
-            $dto->shipments = array_map(Shipment::fromModel(...), $this->orderService->getShipments($order, $visibleOnly));
+            $dto->shipments = array_map(Shipment::fromModel(...), \Mage::getService('sales/order_document')->getShipments($order, $visibleOnly));
 
             if (!$visibleOnly) {
                 // The statuses the admin comment form offers, which addOrderComment accepts

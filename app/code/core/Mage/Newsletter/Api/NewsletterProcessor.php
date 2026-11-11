@@ -13,7 +13,6 @@ namespace Mage\Newsletter\Api;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
@@ -45,21 +44,20 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
             }
             // The listeners of the request check ?store= and X-Store-Code only, not a store ID in the body
             $user = $this->security?->getUser();
-            if ($user instanceof ApiUser && !$user->canAccessStore($storeId)) {
-                throw new AccessDeniedHttpException("Token is not authorized for store: {$storeId}");
-            }
+            $this->assertRequestedStoreAllowed($storeId, $user instanceof ApiUser ? $user : null);
         }
         $storeId = StoreContext::ensureStore($storeId);
 
         $service = \Mage::getService('newsletter/subscriber');
         $customerId = $this->getAuthenticatedCustomerId();
         $email = (string) ($data->email ?: ($input['email'] ?? ''));
-        $captchaToken = $data->captchaToken ?? (isset($input['captchaToken']) ? (string) $input['captchaToken'] : null);
+        // The body of the client, for the CAPTCHA module
+        $fields = ['captchaToken' => $data->captchaToken ?? $input['captchaToken'] ?? null];
         // A customer token that sends no email asks for the address of the account
         $subscriber = match (true) {
-            $customerId === null => $service->subscribe($email, $storeId, null, $this->getGuestChannel(), $captchaToken),
-            $email === '' => $service->subscribeCustomer($customerId, $storeId, \Mage_Newsletter_Model_Channel::Api, $captchaToken),
-            default => $service->subscribe($email, $storeId, $customerId, \Mage_Newsletter_Model_Channel::Api, $captchaToken),
+            $customerId !== null && $email === '' => $service->subscribeCustomer($customerId, $storeId),
+            $customerId === null && $this->hasBackendAccess('newsletter') => $service->subscribeByAdmin($email, $storeId),
+            default => $service->subscribe($email, $storeId, $customerId, $fields),
         };
         $confirmationPending = $service->isConfirmationPending($subscriber, $customerId, $storeId);
         $message = $confirmationPending
@@ -81,18 +79,11 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
         return $dto;
     }
 
-    /**
-     * An admin token or a service token with access to the newsletter is the admin on the API, which asks no CAPTCHA.
-     */
-    private function getGuestChannel(): \Mage_Newsletter_Model_Channel
-    {
-        return $this->hasBackendAccess('newsletter') ? \Mage_Newsletter_Model_Channel::Admin : \Mage_Newsletter_Model_Channel::Api;
-    }
-
     private function unsubscribe(): NewsletterSubscription
     {
+        $this->requireUser();
         $customerId = $this->getAuthenticatedCustomerId()
-            ?? throw new AccessDeniedHttpException('Authentication required to unsubscribe. Use the unsubscribe link in your email.');
+            ?? throw new \Mage_Core_Exception_Forbidden('Authentication required to unsubscribe. Use the unsubscribe link in your email.');
 
         $subscriber = \Mage::getService('newsletter/subscriber')->unsubscribeCustomer($customerId);
 

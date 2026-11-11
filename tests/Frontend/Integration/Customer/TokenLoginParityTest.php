@@ -20,8 +20,8 @@ uses(Tests\MahoFrontendTestCase::class);
 
 /**
  * The storefront login and the customer grant of POST /auth/token check the login through
- * Mage_Customer_Service_Customer (#1348), so they share the login limits and the answer for an account that is
- * not confirmed.
+ * Mage_Customer_Service_Authentication (#1348), so they share the login limits, the second factor rule and the
+ * answer for an account that is not confirmed.
  */
 
 const TOKEN_LOGIN_PASSWORD = 'Password123!';
@@ -44,9 +44,12 @@ function tokenLoginCustomer(?int $websiteId = null): Mage_Customer_Model_Custome
 /**
  * @return array{success: list<string>, errors: list<string>}
  */
-function tokenLoginWeb(string $email, string $password): array
+function tokenLoginWeb(string $email, string $password, ?string $twofaCode = null): array
 {
     $params = ['login' => ['username' => $email, 'password' => $password]];
+    if ($twofaCode !== null) {
+        $params['login']['twofa_verification_code'] = $twofaCode;
+    }
     $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/customer/account/loginPost', 'POST', $params));
     $request->setPathInfo('/customer/account/loginPost');
     $request->setRouteName('customer');
@@ -68,9 +71,10 @@ function tokenLoginWeb(string $email, string $password): array
 /**
  * @return array{status: int, message: string, fields: list<string>, result: mixed}
  */
-function tokenLoginApi(string $email, string $password): array
+function tokenLoginApi(string $email, string $password, ?string $twofaCode = null): array
 {
-    $request = SymfonyRequest::create('/api/rest/v2/auth/token', 'POST', content: (string) json_encode(['email' => $email, 'password' => $password]));
+    $body = ['email' => $email, 'password' => $password] + ($twofaCode === null ? [] : ['twofa_code' => $twofaCode]);
+    $request = SymfonyRequest::create('/api/rest/v2/auth/token', 'POST', content: (string) json_encode($body));
     $processor = new AuthTokenProcessor(TransportParity::adminSecurity(), new JwtService(), new TokenBlacklist());
 
     return TransportParity::api(fn() => $processor->process(null, new Post(name: 'get_token'), [], ['request' => $request]));
@@ -105,7 +109,7 @@ afterEach(function () {
 
 it('counts the storefront login and the customer grant against one limit for each email', function () {
     $customer = tokenLoginCustomer();
-    Mage::app()->getStore()->setConfig(Mage_Customer_Service_Customer::XML_PATH_LOGIN_RATE_LIMIT, '1');
+    Mage::app()->getStore()->setConfig(Mage_Customer_Service_Authentication::XML_PATH_LOGIN_RATE_LIMIT, '1');
 
     $web = tokenLoginWeb($customer->getEmail(), 'wrong-password');
     $api = tokenLoginApi($customer->getEmail(), TOKEN_LOGIN_PASSWORD);
@@ -123,7 +127,7 @@ it('answers a wrong password with an error on the storefront and a 401 on the cu
 
     expect($web['errors'])->toBe([Mage::helper('customer')->__('Invalid login or password.')])
         ->and($api['status'])->toBe(401)
-        ->and($api['message'])->toBe('Invalid email or password');
+        ->and($api['message'])->toBe(Mage::helper('customer')->__('Invalid login or password.'));
 });
 
 it('refuses an account that is not confirmed with a 403 on the customer grant', function () {
@@ -145,8 +149,8 @@ it('finds the customer of another website when the client names no store', funct
     Mage::app()->getStore(TOKEN_LOGIN_WEBSITE)->setConfig('customer/create_account/confirm', '0');
     Mage::app()->getStore()->setConfig(Mage_Customer_Model_Config_Share::XML_PATH_CUSTOMER_ACCOUNT_SHARE, '1');
     $customer = tokenLoginCustomer((int) $website->getId());
-    /** @var Mage_Customer_Service_Customer $service */
-    $service = Mage::getService('customer/customer');
+    /** @var Mage_Customer_Service_Authentication $service */
+    $service = Mage::getService('customer/authentication');
     $websiteId = (int) Mage::app()->getStore()->getWebsiteId();
 
     expect(fn() => $service->authenticate($customer->getEmail(), TOKEN_LOGIN_PASSWORD, $websiteId))
@@ -154,3 +158,76 @@ it('finds the customer of another website when the client names no store', funct
         ->and((int) $service->authenticateInAnyWebsite($customer->getEmail(), TOKEN_LOGIN_PASSWORD, $websiteId)->getId())
         ->toBe((int) $customer->getId());
 });
+
+/**
+ * Ask the storefront whether the login needs a 2FA code, as the login form does before it posts.
+ */
+function tokenLoginWebPrelogin(string $email, string $password): bool
+{
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/customer/account/prelogin', 'POST', [
+        'login' => ['username' => $email, 'password' => $password],
+    ]));
+    $request->setRouteName('customer')->setControllerName('account')->setActionName('prelogin')
+        ->setControllerModule('Mage_Customer')->setDispatched(true);
+    Mage::app()->setRequest($request);
+    $response = new Mage_Core_Controller_Response_Http();
+    new Mage_Customer_AccountController($request, $response)->preloginAction();
+
+    return (bool) (json_decode((string) $response->getBody(), true)['require_twofa'] ?? false);
+}
+
+it('asks a customer who uses 2FA for the code on the storefront and the customer grant, and counts the login one time', function () {
+    $store = Mage::app()->getStore();
+    $store->setConfig('customer/password/allow_2fa', '1');
+    $store->setConfig(Mage_Customer_Service_Authentication::XML_PATH_LOGIN_RATE_LIMIT, '2');
+    $secret = Mage::helper('core/security')->generateTotpSecret();
+    $customer = tokenLoginCustomer();
+    $customer->setTwofaSecret($secret)->setTwofaEnabled()->save();
+    $email = (string) $customer->getEmail();
+
+    $prelogin = tokenLoginWebPrelogin($email, TOKEN_LOGIN_PASSWORD);
+    $webNoCode = tokenLoginWeb($email, TOKEN_LOGIN_PASSWORD);
+    $apiNoCode = tokenLoginApi($email, TOKEN_LOGIN_PASSWORD);
+    $isLoggedInWithoutCode = Mage::getSingleton('customer/session')->isLoggedIn();
+    // The three requests for the code did not count. The two logins with the code are the limit of the email
+    $web = tokenLoginWeb($email, TOKEN_LOGIN_PASSWORD, \OTPHP\TOTP::createFromSecret($secret)->now());
+    $isLoggedIn = Mage::getSingleton('customer/session')->isLoggedIn();
+    $apiWrongCode = tokenLoginApi($email, TOKEN_LOGIN_PASSWORD, '000000x');
+    $apiOverLimit = tokenLoginApi($email, TOKEN_LOGIN_PASSWORD, \OTPHP\TOTP::createFromSecret($secret)->now());
+
+    expect($prelogin)->toBeTrue()
+        ->and($webNoCode['errors'])->toBe([Mage::helper('customer')->__('Two-factor authentication code is required.')])
+        ->and($apiNoCode['status'])->toBe(401)
+        ->and($apiNoCode['message'])->toBe($webNoCode['errors'][0])
+        ->and($isLoggedInWithoutCode)->toBeFalse()
+        ->and($web['errors'])->toBe([])
+        ->and($isLoggedIn)->toBeTrue()
+        ->and($apiWrongCode['status'])->toBe(401)
+        ->and($apiWrongCode['message'])->toBe(Mage::helper('customer')->__('2FA verification code is invalid.'))
+        ->and($apiOverLimit['status'])->toBe(429);
+});
+
+it('gives the customer grant the error code of each refused login', function (?string $password, ?string $twofaCode, string $errorCode) {
+    Mage::app()->getStore()->setConfig('customer/password/allow_2fa', '1');
+    $secret = Mage::helper('core/security')->generateTotpSecret();
+    $customer = tokenLoginCustomer();
+    $customer->setTwofaSecret($secret)->setTwofaEnabled()->save();
+    /** @var Mage_Customer_Service_Authentication $service */
+    $service = Mage::getService('customer/authentication');
+
+    try {
+        $service->authenticateInAnyWebsite((string) $customer->getEmail(), $password ?? TOKEN_LOGIN_PASSWORD, (int) $customer->getWebsiteId(), $twofaCode);
+        $error = null;
+    } catch (Mage_Core_Exception_Unauthorized $e) {
+        $error = $e;
+    }
+
+    expect($error?->getErrorCode())->toBe($errorCode)
+        ->and(Maho\ApiPlatform\EventListener\ApiExceptionListener::mageExceptionStatus($error))->toBe(401)
+        ->and(Maho\ApiPlatform\EventListener\ApiExceptionListener::mageExceptionError($error))->toBe($errorCode);
+})->with([
+    'a wrong password' => ['wrong-password', null, 'invalid_credentials'],
+    'no 2FA code' => [null, null, 'twofa_required'],
+    'an empty 2FA code' => [null, '', 'twofa_required'],
+    'a wrong 2FA code' => [null, '000000x', 'twofa_invalid'],
+]);

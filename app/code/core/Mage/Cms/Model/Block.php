@@ -87,6 +87,16 @@ class Mage_Cms_Model_Block extends Mage_Core_Model_Abstract
         return $this->setData('identifier', $value);
     }
 
+    /**
+     * Tell whether a visitor of the store view $storeId can read the block: it is enabled, and it is in that
+     * store view or in all store views.
+     */
+    public function isVisibleInStore(int $storeId): bool
+    {
+        return $this->getIsActive()
+            && array_intersect([Mage_Core_Model_App::ADMIN_STORE_ID, $storeId], array_map(intval(...), (array) $this->getStoreId())) !== [];
+    }
+
     public function getIsActive(): ?bool
     {
         $value = $this->getData('is_active');

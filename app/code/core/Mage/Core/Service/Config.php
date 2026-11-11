@@ -33,6 +33,8 @@ use Mage_Adminhtml_Model_Config_Data as ConfigData;
  */
 class Mage_Core_Service_Config
 {
+    public const ACL_RESOURCE_PREFIX = 'admin/system/config/';
+
     private const SENSITIVE_NAME_PATTERN = '/key|secret|password|token|salt/i';
     private const SENSITIVE_FRONTEND_TYPES = ['obscure', 'password'];
 
@@ -163,11 +165,15 @@ class Mage_Core_Service_Config
     }
 
     /**
-     * Save $value at one scope through the backend model of the field, so a secret is encrypted. A path that no
-     * field of system.xml declares is refused, as in the admin, unless $allowUndeclared: then it is saved as it is.
+     * Save $value at one scope through the backend model of the field, so a secret is encrypted.
+     *
+     * A client that picks from the fields of System > Configuration, such as the API, leaves $allowUndeclared
+     * false: a path that no field declares is refused, and so is a scope where the field does not show.
+     * The operator of the server, such as a CLI command, passes true: any path is saved at any scope that exists.
      *
      * @throws Mage_Core_Exception_NoSuchEntity when no field declares the path and $allowUndeclared is false
-     * @throws Mage_Core_Exception_Input when the scope does not exist or the field does not show at it
+     * @throws Mage_Core_Exception_Input when the scope does not exist, or the field does not show at it and
+     *                                   $allowUndeclared is false
      * @throws Mage_Core_Exception when the backend model refuses the value
      */
     public function save(
@@ -187,7 +193,8 @@ class Mage_Core_Service_Config
      * @param iterable<array{0: string, 1: ?string, 2: string, 3: int}> $values the path, the value, the scope and
      *                                                                         the scope ID of each value
      * @throws Mage_Core_Exception_NoSuchEntity when no field declares a path and $allowUndeclared is false
-     * @throws Mage_Core_Exception_Input when a scope does not exist or a field does not show at it
+     * @throws Mage_Core_Exception_Input when a scope does not exist, or a field does not show at it and
+     *                                   $allowUndeclared is false
      * @throws Mage_Core_Exception when a backend model refuses a value
      */
     public function saveAll(iterable $values, bool $allowUndeclared = false): void
@@ -205,22 +212,67 @@ class Mage_Core_Service_Config
     }
 
     /**
-     * Check that $path can be saved at the scope, and return its field. Return null for a path that no field
-     * declares when $allowUndeclared.
+     * Check that $path can be saved at the scope, and return its field. With $allowUndeclared, only the scope
+     * must exist, and the result is null for a path that no field declares.
      *
      * @return FieldInfo|null
      * @throws Mage_Core_Exception_NoSuchEntity when no field declares the path and $allowUndeclared is false
-     * @throws Mage_Core_Exception_Input when the scope does not exist or the field does not show at it
+     * @throws Mage_Core_Exception_Input when the scope does not exist, or the field does not show at it and
+     *                                   $allowUndeclared is false
      */
     public function assertWritable(string $path, string $scope, int $scopeId, bool $allowUndeclared = false): ?array
     {
-        $field = $allowUndeclared ? $this->findField($path) : $this->getField($path);
+        if ($allowUndeclared) {
+            $this->assertScope($scope, $scopeId);
+            return $this->findField($path);
+        }
+        $field = $this->getField($path);
         $this->assertScope($scope, $scopeId);
-        if ($field !== null && !$this->isShownAtScope($field, $scope)) {
+        if (!$this->isShownAtScope($field, $scope)) {
             throw new Mage_Core_Exception_Input()
                 ->addError('scope', Mage::helper('core')->__("Field '%s' cannot be set at scope '%s'", $path, $scope));
         }
         return $field;
+    }
+
+    /**
+     * Whether the client can use the configuration section $section.
+     *
+     * @param callable(string): bool $isAllowed says whether the client can use an ACL resource
+     */
+    public function isSectionAllowed(string $section, callable $isAllowed): bool
+    {
+        return $isAllowed(self::ACL_RESOURCE_PREFIX . $section);
+    }
+
+    /**
+     * A field that stores its value in another section needs access to the two sections.
+     *
+     * @param FieldInfo $field
+     * @param callable(string): bool $isAllowed says whether the client can use an ACL resource
+     * @return string|null the first section of $field that the client cannot use
+     */
+    public function getDeniedSection(array $field, callable $isAllowed): ?string
+    {
+        return array_find(
+            $this->getAclSections($field),
+            fn(string $section): bool => !$this->isSectionAllowed($section, $isAllowed),
+        );
+    }
+
+    /**
+     * @param FieldInfo $field
+     * @param callable(string): bool $isAllowed says whether the client can use an ACL resource
+     * @throws Mage_Core_Exception_Forbidden when the client cannot use a section of $field
+     */
+    public function assertFieldAllowed(array $field, callable $isAllowed): void
+    {
+        $section = $this->getDeniedSection($field, $isAllowed);
+        if ($section !== null) {
+            throw new Mage_Core_Exception_Forbidden(
+                Mage::helper('core')->__('Your admin role does not grant access to the configuration section "%s".', $section),
+            );
+        }
     }
 
     /**
@@ -263,26 +315,15 @@ class Mage_Core_Service_Config
         $helper = Mage::helper('core');
         [$field, $error] = match ($scope) {
             ConfigData::SCOPE_DEFAULT => ['scope_id', $scopeId === 0 ? null : $helper->__('The default scope has the scope ID 0.')],
-            ConfigData::SCOPE_WEBSITES => ['scope_id', $this->hasId('core/website', 'website_id', $scopeId)
+            ConfigData::SCOPE_WEBSITES => ['scope_id', Mage::getModel('core/website')->load($scopeId)->getData('website_id') !== null
                 ? null : $helper->__('The website with the ID %d does not exist.', $scopeId)],
-            ConfigData::SCOPE_STORES => ['scope_id', $this->hasId('core/store', 'store_id', $scopeId)
+            ConfigData::SCOPE_STORES => ['scope_id', Mage::getModel('core/store')->load($scopeId)->getData('store_id') !== null
                 ? null : $helper->__('The store view with the ID %d does not exist.', $scopeId)],
             default => ['scope', $helper->__('The scope must be default, websites or stores.')],
         };
         if ($error !== null) {
             throw new Mage_Core_Exception_Input()->addError($field, $error);
         }
-    }
-
-    /**
-     * Read all the IDs of $table, because a WHERE with an ID out of the column range fails the query on PostgreSQL.
-     */
-    private function hasId(string $table, string $column, int $id): bool
-    {
-        $resource = Mage::getSingleton('core/resource');
-        $adapter = $resource->getConnection('core_read');
-        $ids = $adapter->fetchCol($adapter->select()->from($resource->getTableName($table), [$column]));
-        return in_array($id, array_map(intval(...), $ids), true);
     }
 
     /**

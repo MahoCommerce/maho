@@ -717,7 +717,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
                 $productId = $product->getId();
 
                 if (isset($data['copy_to_stores'])) {
-                    $this->_copyAttributesBetweenStores($data['copy_to_stores'], $product);
+                    $this->_getService()->copyToStores($product, (array) $data['copy_to_stores']);
                 }
 
                 $this->_getSession()->addSuccess($this->__('The product has been saved.'));
@@ -749,25 +749,14 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     }
 
     /**
-     * Duplicates product attributes between stores.
-     * @param array $stores list of store pairs: [fromStore => toStore, fromStore => toStore,..]
+     * @param array $stores list of store pairs: [toStore => fromStore, ...]
      * @param Mage_Catalog_Model_Product $product whose attributes should be copied
      * @return $this
-     * @throws Throwable
      */
+    #[\Deprecated('Use Mage_Catalog_Service_Product::copyToStores()')]
     protected function _copyAttributesBetweenStores(array $stores, Mage_Catalog_Model_Product $product)
     {
-        foreach ($stores as $storeTo => $storeFrom) {
-            $productInStore = Mage::getModel('catalog/product')
-                ->setStoreId($storeFrom)
-                ->load($product->getId());
-            Mage::dispatchEvent('product_duplicate_attributes', [
-                'product' => $productInStore,
-                'storeTo' => $storeTo,
-                'storeFrom' => $storeFrom,
-            ]);
-            $productInStore->setStoreId($storeTo)->save();
-        }
+        $this->_getService()->copyToStores($product, $stores);
         return $this;
     }
 
@@ -781,7 +770,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
         $product = $this->_initProduct();
         try {
             $duplicateImages = (bool) $this->getRequest()->getParam('duplicate_images', true);
-            $newProduct = $product->duplicate($duplicateImages);
+            $newProduct = $this->_getService()->duplicate($product, $duplicateImages);
             $this->_getSession()->addSuccess($this->__('The product has been duplicated.'));
             $this->_redirect('*/*/edit', ['_current' => true, 'id' => $newProduct->getId()]);
         } catch (Exception $e) {
@@ -907,6 +896,18 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
         }
 
         $this->_redirect('*/*/', ['store' => $storeId]);
+    }
+
+    /**
+     * @param int $status
+     * @throws Mage_Core_Exception
+     */
+    #[\Deprecated('Mage_Catalog_Service_Product::updateStatus() makes this check')]
+    public function _validateMassStatus(array $productIds, $status): void
+    {
+        if ($status == Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
+            $this->_getService()->assertHaveSku($productIds);
+        }
     }
 
     /**

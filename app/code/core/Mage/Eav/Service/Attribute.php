@@ -19,9 +19,6 @@ class Mage_Eav_Service_Attribute
 
     private const OPTION_SOURCE_MODEL = 'eav/entity_attribute_source_table';
 
-    /** The highest ID that the SMALLINT column eav_attribute.attribute_id holds. PostgreSQL refuses a larger value. */
-    private const MAX_ID = 32767;
-
     /**
      * Return a new attribute of the entity type $entityTypeCode, with the attribute model of the type.
      */
@@ -40,9 +37,7 @@ class Mage_Eav_Service_Attribute
     {
         $attribute = $this->newAttribute($entityTypeCode);
         $entityTypeId = (int) $attribute->getEntityTypeId();
-        if ($id > 0 && $id <= self::MAX_ID) {
-            $attribute->load($id);
-        }
+        $attribute->load($id);
         if (!$attribute->getId() || (int) $attribute->getEntityTypeId() !== $entityTypeId) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('eav')->__('This attribute no longer exists.'));
         }

@@ -46,13 +46,8 @@ class Maho_CustomerSegmentation_Service_Segment
     public function getById(int $id, ?array $websiteIds = null): Maho_CustomerSegmentation_Model_Segment
     {
         /** @var Maho_CustomerSegmentation_Model_Segment $segment */
-        $segment = Mage::getModel('customersegmentation/segment');
-        if ($id > 0) {
-            $segment->load($id);
-        }
-        if (!$segment->getId()
-            || ($websiteIds !== null && array_intersect($segment->getWebsiteIds(), $websiteIds) === [])
-        ) {
+        $segment = Mage::getModel('customersegmentation/segment')->load($id);
+        if (!$segment->getId() || ($websiteIds !== null && !$segment->isInWebsites($websiteIds))) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('customersegmentation')->__('This segment no longer exists.'));
         }
         return $segment;
@@ -60,28 +55,24 @@ class Maho_CustomerSegmentation_Service_Segment
 
     /**
      * Check $segment and save it. The transport puts its input into the segment through the typed setters first.
+     * The model checks the name, the websites, the refresh mode and the priority. The service checks that each new
+     * website and customer group exists, and the email sequences of the automation.
+     * With $websiteIds, the client changes only a segment whose websites are all among these.
      *
+     * @param list<int>|null $websiteIds
+     * @throws Mage_Core_Exception_Forbidden when a website of the segment is not in $websiteIds
      * @throws Mage_Core_Exception_Input with one error for each problem
      */
-    public function save(Maho_CustomerSegmentation_Model_Segment $segment): Maho_CustomerSegmentation_Model_Segment
+    public function save(Maho_CustomerSegmentation_Model_Segment $segment, ?array $websiteIds = null): Maho_CustomerSegmentation_Model_Segment
     {
+        $this->assertWritable($segment, $websiteIds);
         $helper = Mage::helper('customersegmentation');
-        $errors = new Mage_Core_Exception_Input();
+        $errors = new Mage_Core_Exception_Input()->addValidationResult($segment->getFieldErrors(), 'segment');
 
-        $name = trim((string) $segment->getName());
-        if ($name === '' || mb_strlen($name) > 255) {
-            $errors->addError('name', $helper->__('The segment name must have 1 to 255 characters.'));
-        }
-        $segment->setName($name);
-
-        $websiteIds = $segment->getWebsiteIds();
-        if ($websiteIds === []) {
-            $errors->addError('website_ids', $helper->__('Please select at least one website.'));
-        }
         $knownWebsiteIds = array_map(intval(...), array_keys(Mage::app()->getWebsites()));
         // Accept a stored ID, because an admin can delete its website or group after the segment is saved
         $storedWebsiteIds = $segment::idList($segment->getOrigData('website_ids'));
-        foreach (array_diff($websiteIds, $knownWebsiteIds, $storedWebsiteIds) as $id) {
+        foreach (array_diff($segment->getWebsiteIds(), $knownWebsiteIds, $storedWebsiteIds) as $id) {
             $errors->addError('website_ids', $helper->__('Unknown website ID: %s.', $id));
         }
 
@@ -89,15 +80,6 @@ class Maho_CustomerSegmentation_Service_Segment
         $storedGroupIds = $segment::idList($segment->getOrigData('customer_group_ids'));
         foreach (array_diff($segment->getCustomerGroupIds(), $knownGroupIds, $storedGroupIds) as $id) {
             $errors->addError('customer_group_ids', $helper->__('Unknown customer group ID: %s.', $id));
-        }
-
-        $refreshMode = $segment->getRefreshMode();
-        if ($refreshMode !== null && !in_array($refreshMode, self::REFRESH_MODES, true)) {
-            $errors->addError('refresh_mode', $helper->__('The refresh mode must be one of: %s.', implode(', ', self::REFRESH_MODES)));
-        }
-
-        if ((int) $segment->getPriority() < 0) {
-            $errors->addError('priority', $helper->__('The priority must be 0 or more.'));
         }
 
         // A new segment has no sequences yet: the admin adds them after the first save
@@ -121,9 +103,36 @@ class Maho_CustomerSegmentation_Service_Segment
         return $segment;
     }
 
-    public function delete(Maho_CustomerSegmentation_Model_Segment $segment): void
+    /**
+     * @param list<int>|null $websiteIds with it, the client deletes only a segment whose websites are all among these
+     * @throws Mage_Core_Exception_Forbidden when a website of the segment is not in $websiteIds
+     */
+    public function delete(Maho_CustomerSegmentation_Model_Segment $segment, ?array $websiteIds = null): void
     {
+        $this->assertWritable($segment, $websiteIds);
         $segment->delete();
+    }
+
+    /**
+     * Refuse a change to $segment by a client that works only in the websites $websiteIds, when a stored website
+     * or a new website of the segment is not among them. Null means a client that works in every website.
+     *
+     * @param list<int>|null $websiteIds
+     * @throws Mage_Core_Exception_Forbidden
+     */
+    private function assertWritable(Maho_CustomerSegmentation_Model_Segment $segment, ?array $websiteIds): void
+    {
+        if ($websiteIds === null) {
+            return;
+        }
+        $stored = $segment::idList($segment->getOrigData('website_ids'));
+        if (($segment->getId() && ($stored === [] || array_diff($stored, $websiteIds) !== []))
+            || array_diff($segment->getWebsiteIds(), $websiteIds) !== []
+        ) {
+            throw new Mage_Core_Exception_Forbidden(
+                Mage::helper('customersegmentation')->__('Access denied for a website of this customer segment'),
+            );
+        }
     }
 
     /**
@@ -131,10 +140,16 @@ class Maho_CustomerSegmentation_Service_Segment
      * When another refresh of the segment runs, wait for it for up to $waitSeconds. A request passes 0,
      * a queue worker and the cron pass REFRESH_WAIT_SECONDS.
      *
+     * @param list<int>|null $websiteIds with it, the client refreshes only a segment whose websites are all among these
+     * @throws Mage_Core_Exception_Forbidden when a website of the segment is not in $websiteIds
      * @throws Mage_Core_Exception_Conflict when the other refresh still runs after the wait
      */
-    public function refresh(Maho_CustomerSegmentation_Model_Segment $segment, int $waitSeconds = 0): Maho_CustomerSegmentation_Model_Segment
-    {
+    public function refresh(
+        Maho_CustomerSegmentation_Model_Segment $segment,
+        int $waitSeconds = 0,
+        ?array $websiteIds = null,
+    ): Maho_CustomerSegmentation_Model_Segment {
+        $this->assertWritable($segment, $websiteIds);
         // Two refreshes of one segment at once read and change the same members
         $lock = Mage::getSingleton('core/lock');
         $lockName = 'customersegmentation_refresh_' . (int) $segment->getId();

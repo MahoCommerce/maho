@@ -68,9 +68,9 @@ class Mage_Tax_Model_Calculation_Rule extends Mage_Core_Model_Abstract
     /**
      * Check the code, the priority, the position, and the classes and the rates of the rule.
      * A save without classes and rates keeps the stored ones. The resource model refuses a code that another rule uses.
+     * Mage_Tax_Service_Rule refuses a combination of the rates and the classes that another rule has.
      *
      * @throws Mage_Core_Exception_Input with one error for each invalid field
-     * @throws Mage_Core_Exception_Conflict when another rule has a combination of the rates and the classes
      */
     #[\Override]
     protected function _beforeSave()
@@ -105,15 +105,6 @@ class Mage_Tax_Model_Calculation_Rule extends Mage_Core_Model_Abstract
                 $errors->addError('tax_rate', $helper->__('At least one tax rate is required.'));
             } elseif ($unknown = array_diff($rateIds, array_map(intval(...), Mage::getResourceModel('tax/calculation_rate_collection')->getAllIds()))) {
                 $errors->addError('tax_rate', $helper->__('Tax rate not found with ID: %s', implode(', ', $unknown)));
-            }
-            $errors->throwIfErrors();
-
-            $existing = array_diff(
-                $this->fetchRuleCodes($rateIds, (array) $this->getData('tax_customer_class'), (array) $this->getData('tax_product_class')),
-                [$this->getOrigData('code')],
-            );
-            if ($existing !== []) {
-                throw new Mage_Core_Exception_Conflict($helper->__('Rules (%s) already exist for the specified Tax Rate, Customer Tax Class and Product Tax Class combinations', implode(',', $existing)));
             }
         }
         $errors->throwIfErrors();

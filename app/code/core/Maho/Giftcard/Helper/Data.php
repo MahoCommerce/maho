@@ -321,7 +321,17 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
             'barcode_url' => $this->getBarcodeDataUrl($giftcard->getCode()),
             'store_name' => Mage::getStoreConfig('general/store_information/name', $storeId),
             'store_url' => $store->getBaseUrl(),
+            'store' => $store,
         ];
+        // A template from before the delivery date feature uses these names
+        $vars['balance'] = $vars['formatted_amount'];
+        $vars['qr_code_url'] = $vars['qr_url'];
+        if ($giftcard->getPurchaseOrderId()) {
+            $order = Mage::getModel('sales/order')->load((int) $giftcard->getPurchaseOrderId());
+            if ($order->getId()) {
+                $vars['order'] = $order;
+            }
+        }
 
         if ($giftcard->getExpiresAt()) {
             $expiresAt = new DateTime($giftcard->getExpiresAt());

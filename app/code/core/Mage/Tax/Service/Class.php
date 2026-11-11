@@ -21,11 +21,7 @@ class Mage_Tax_Service_Class
     {
         /** @var Mage_Tax_Model_Class $class */
         $class = Mage::getModel('tax/class');
-        try {
-            $class->load($id);
-        } catch (\Doctrine\DBAL\Exception\DriverException) {
-            // An ID that the column cannot hold matches no row
-        }
+        $class->load($id);
         if (!$class->getId() || ($classType !== null && $class->getClassType() !== $classType)) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('tax')->__('This class no longer exists'));
         }

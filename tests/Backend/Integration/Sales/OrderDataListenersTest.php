@@ -27,7 +27,7 @@ function &orderDataCreated(): array
 function orderDataPlace(Mage_Sales_Model_Quote $quote): Mage_Sales_Model_Order
 {
     $cart = Mage::getService('checkout/cart');
-    $address = $cart->mapAddressInput([
+    $address = \Mage\Checkout\Api\CartRequest::mapAddress([
         'firstName' => 'Test', 'lastName' => 'Buyer', 'street' => ['123 Test St'], 'city' => 'Los Angeles',
         'region' => 'California', 'postcode' => '90210', 'countryId' => 'US', 'telephone' => '5550100',
     ]);

@@ -59,7 +59,7 @@ class CronRun extends BaseMahoCommand
         try {
             /** @var \Mage_Cron_Service_Job $service */
             $service = Mage::getService('cron/job');
-            $schedule = $service->run($jobCode);
+            $schedule = $service->run($jobCode, usePending: true);
         } catch (\Mage_Core_Exception_Conflict $e) {
             $output->writeln("<error>{$e->getMessage()}</error>");
             return Command::INVALID;

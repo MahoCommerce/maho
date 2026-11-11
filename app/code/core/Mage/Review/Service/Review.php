@@ -10,7 +10,6 @@
 
 declare(strict_types=1);
 
-use Mage_Review_Model_Channel as Channel;
 use Mage_Review_Model_Review as Review;
 
 class Mage_Review_Service_Review
@@ -54,37 +53,29 @@ class Mage_Review_Service_Review
     /**
      * Save the review that a customer or a guest writes on the storefront, with the status pending. The transport
      * sets the product ID, the title, the detail and the nickname. $votes gives the option ID by the rating ID.
-     * $customerId is the customer who is logged in, or null for a guest. The API sends the solved CAPTCHA in
-     * $captchaToken. Maho_Captcha checks the storefront form before the controller.
+     * $customerId is the customer who is logged in, or null for a guest.
      *
      * @param array<int|string, int|string> $votes
+     * @param array<array-key, mixed> $fields the fields that the client sent, with the token of the CAPTCHA: the form POST or the API body
      * @throws Mage_Core_Exception_Forbidden when $customerId is null and the store does not accept reviews of guests
      * @throws Mage_Core_Exception_TooManyRequests when the client or the customer is over the limit
      * @throws Mage_Core_Exception_NoSuchEntity when the store does not show the product
      * @throws Mage_Core_Exception_Input with one error for each invalid field, or when the CAPTCHA refuses the token
      */
-    public function submit(
-        Review $review,
-        array $votes,
-        int $storeId,
-        ?int $customerId,
-        Channel $channel,
-        ?string $captchaToken = null,
-    ): Review {
+    public function submit(Review $review, array $votes, int $storeId, ?int $customerId, array $fields): Review
+    {
         $helper = Mage::helper('review');
         if ($customerId === null && !$this->isGuestAllowed($storeId)) {
             throw new Mage_Core_Exception_Forbidden($helper->__('Only registered customers can write reviews.'));
         }
-        if ($channel === Channel::Api) {
-            Mage::helper('apiplatform')->assertCaptcha(['captchaToken' => $captchaToken]);
-        }
-        $this->checkRateLimits($storeId, $customerId);
+        Mage::helper('core')->assertCaptcha($fields);
+        $this->attemptRateLimits($storeId, $customerId);
         $product = $this->getProduct((int) $review->getEntityPkValue(), $storeId);
 
         $review->setTitle(trim((string) $review->getTitle()))
             ->setDetail(trim((string) $review->getDetail()))
             ->setNickname(trim((string) $review->getNickname()));
-        $errors = $this->validate($review);
+        $errors = new Mage_Core_Exception_Input()->addValidationResult($review->validate(), 'review');
         // A store shows only its own ratings, so it takes a vote only for them
         $this->validateVotes($votes, $storeId, $errors);
         $errors->throwIfErrors();
@@ -129,7 +120,7 @@ class Mage_Review_Service_Review
      */
     public function save(Review $review, array $votes = []): Review
     {
-        $errors = $this->validate($review);
+        $errors = new Mage_Core_Exception_Input()->addValidationResult($review->validate(), 'review');
         $this->validateStatus($review->getStatusId(), $errors);
         $this->validateVotes($votes, null, $errors);
         $errors->throwIfErrors();
@@ -180,16 +171,6 @@ class Mage_Review_Service_Review
         $review->delete();
     }
 
-    private function validate(Review $review): Mage_Core_Exception_Input
-    {
-        $errors = new Mage_Core_Exception_Input();
-        $messages = $review->validate();
-        foreach ($messages === true ? [] : $messages as $field => $message) {
-            $errors->addError((string) $field, $message);
-        }
-        return $errors;
-    }
-
     private function validateStatus(?int $statusId, Mage_Core_Exception_Input $errors): void
     {
         if (!array_key_exists((int) $statusId, Mage::helper('review')->getReviewStatuses())) {
@@ -222,21 +203,14 @@ class Mage_Review_Service_Review
      *
      * @throws Mage_Core_Exception_TooManyRequests
      */
-    private function checkRateLimits(int $storeId, ?int $customerId): void
+    private function attemptRateLimits(int $storeId, ?int $customerId): void
     {
         $core = Mage::helper('core');
         $limit = (int) Mage::getStoreConfig(self::XML_PATH_RATE_LIMIT, $storeId);
-        $limiters = [$core->rateLimiter('review_submit', $limit, self::RATE_LIMIT_WINDOW, \Maho\Security\RateLimitScope::Ip)];
+        $core->rateLimiter('review_submit', $limit, self::RATE_LIMIT_WINDOW, \Maho\Security\RateLimitScope::Ip)->attemptOrThrow();
         if ($customerId !== null) {
-            $limiters[] = $core->rateLimiterBy('review_submit', 'review_submit:customer:' . $customerId, $limit, self::RATE_LIMIT_WINDOW);
-        }
-        foreach ($limiters as $limiter) {
-            if (!$limiter->attempt()) {
-                throw new Mage_Core_Exception_TooManyRequests(
-                    Mage::helper('review')->__('Too many requests. Please try again later.'),
-                    self::RATE_LIMIT_WINDOW,
-                );
-            }
+            $core->rateLimiterBy('review_submit', 'review_submit:customer:' . $customerId, $limit, self::RATE_LIMIT_WINDOW)
+                ->attemptOrThrow();
         }
     }
 

@@ -532,14 +532,33 @@ class Mage_Checkout_Model_Type_Onepage
         }
 
         $quote = $this->getQuote();
-        $order = null;
-        $placeOrder = function () use ($quote, $agreementIds, &$order): void {
-            $order = Mage::getService('sales/order')->submit($quote, Mage_Checkout_Model_Actor::Customer, $agreementIds);
+        // The order service runs this step after the save of the order. Then it sends the new order email, when the
+        // payment method does not redirect to a third party and no observer of the event below stopped the email
+        // with setCanSendNewEmailFlag(false), and it dispatches checkout_submit_all_after.
+        $afterSave = function (Mage_Sales_Model_Order $order) use ($quote): void {
+            $this->_checkoutSession->setLastQuoteId($quote->getId())
+                ->setLastSuccessQuoteId($quote->getId())
+                ->clearHelperData();
+
+            Mage::dispatchEvent('checkout_type_onepage_save_order_after', ['order' => $order, 'quote' => $quote]);
+
+            $this->_checkoutSession->setLastOrderId($order->getId())
+                ->setRedirectUrl($quote->getPayment()->getOrderPlaceRedirectUrl())
+                ->setLastRealOrderId($order->getIncrementId());
+
+            // as well a billing agreement can be created
+            $agreement = $order->getPayment()->getBillingAgreement();
+            if ($agreement) {
+                $this->_checkoutSession->setLastBillingAgreementId($agreement->getId());
+            }
+        };
+        $placeOrder = function () use ($quote, $agreementIds, $afterSave): void {
+            Mage::getService('sales/order')->submit($quote, Mage_Checkout_Model_Actor::Customer, $agreementIds, afterSave: $afterSave);
         };
         if ($isNewCustomer) {
             /** @var Mage_Customer_Service_Customer $customerService */
             $customerService = Mage::getService('customer/customer');
-            $customerService->register($quote->getCustomer(), (int) $quote->getStoreId(), '', $placeOrder);
+            $customerService->registerAtCheckout($quote->getCustomer(), (int) $quote->getStoreId(), $placeOrder);
             try {
                 $this->_involveNewCustomer();
             } catch (Exception $e) {
@@ -547,27 +566,6 @@ class Mage_Checkout_Model_Type_Onepage
             }
         } else {
             $placeOrder();
-        }
-        /** @var Mage_Sales_Model_Order $order */
-
-        $this->_checkoutSession->setLastQuoteId($this->getQuote()->getId())
-            ->setLastSuccessQuoteId($this->getQuote()->getId())
-            ->clearHelperData();
-
-        Mage::dispatchEvent(
-            'checkout_type_onepage_save_order_after',
-            ['order' => $order, 'quote' => $this->getQuote()],
-        );
-
-        // A payment method that redirects to a third party gives the URL, and the order email waits for its answer
-        $this->_checkoutSession->setLastOrderId($order->getId())
-            ->setRedirectUrl($this->getQuote()->getPayment()->getOrderPlaceRedirectUrl())
-            ->setLastRealOrderId($order->getIncrementId());
-
-        // as well a billing agreement can be created
-        $agreement = $order->getPayment()->getBillingAgreement();
-        if ($agreement) {
-            $this->_checkoutSession->setLastBillingAgreementId($agreement->getId());
         }
 
         return $this;

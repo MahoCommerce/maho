@@ -57,8 +57,8 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('notifyCustomer must be a boolean');
         }
 
-        $service = \Mage::getService('sales/order');
-        $order = $service->requireById((int) ($uriVariables['orderId'] ?? 0));
+        $service = \Mage::getService('sales/order_document');
+        $order = \Mage::getService('sales/order')->getById((int) ($uriVariables['orderId'] ?? 0));
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         $qtys = [];
@@ -75,7 +75,7 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
      */
     private function executeLifecycleAction(string $method, array $uriVariables): Invoice
     {
-        $service = \Mage::getService('sales/order');
+        $service = \Mage::getService('sales/order_document');
         $invoice = $service->requireInvoice((int) ($uriVariables['id'] ?? 0));
         $this->assertStoreAllowed($invoice->getStoreId(), $this->requireUser(), 'invoice');
 

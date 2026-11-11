@@ -71,7 +71,7 @@ function revocation_submit_input(array $overrides = []): \Maho\DataObject
 
 function revocation_submit(\Maho\DataObject $input): ?Maho_Revocation_Model_Request
 {
-    return Mage::getService('revocation/request')->submit($input, Maho_Revocation_Model_Channel::Web);
+    return Mage::getService('revocation/request')->submit($input);
 }
 
 describe('Revocation submission service', function () {

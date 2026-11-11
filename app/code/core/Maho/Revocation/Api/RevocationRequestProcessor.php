@@ -39,9 +39,7 @@ final class RevocationRequestProcessor extends Processor
 
         $args = $context['args']['input'] ?? [];
         $ip = (string) \Mage::helper('core/http')->getRemoteAddr();
-        /** @var \Maho_Revocation_Model_Request $model the API channel has no honeypot, so submit() returns a request */
-        $model = $service->submit(new \Maho\DataObject([
-            'customer_id' => $this->requireCustomerId(),
+        $model = $service->submitForCustomer($this->requireCustomerId(), new \Maho\DataObject([
             'order_id' => $args['orderId'] ?? $dto?->orderId,
             'order_reference' => $args['orderReference'] ?? $dto?->orderReference,
             'reason' => $args['reason'] ?? $dto?->reason,
@@ -50,7 +48,12 @@ final class RevocationRequestProcessor extends Processor
             'locale' => \Mage::app()->getLocale()->getLocaleCode(),
             'store_id' => StoreContext::getStoreId(),
             'received_at_microtime' => microtime(true),
-        ]), \Maho_Revocation_Model_Channel::Api);
+            'form_fields' => $args ?: $this->parseRequestBody($context['request'] ?? null),
+        ]));
+        // A bot that fills the honeypot gets the answer of a recorded declaration, with no ID. No row, no email.
+        if ($model === null) {
+            return $dto ?? new RevocationRequest();
+        }
 
         return RevocationRequest::fromModel($model);
     }

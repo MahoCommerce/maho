@@ -17,7 +17,7 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
     }
 
     /**
-     * Check the store view, the theme and the dates of $object, and the overlap with the other changes of its store view.
+     * Check the dates of $object, and the overlap with the other changes of its store view.
      * An empty date removes that bound, and a date is stored as Y-m-d.
      *
      * @param Mage_Core_Model_Design $object
@@ -27,39 +27,29 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
-        $helper = Mage::helper('core');
-        $errors = new Mage_Core_Exception_Input();
+        $this->addDateErrors($object, new Mage_Core_Exception_Input())->throwIfErrors();
 
-        $storeId = $object->getStoreId();
-        if ($storeId === null) {
-            $errors->addError('store_id', $helper->__('The store view is required.'));
-        } elseif (!array_key_exists($storeId, Mage::app()->getStores())) {
-            $errors->addError('store_id', $helper->__('The store view %s does not exist.', $storeId));
-        }
-
-        // Accept a stored design, because an admin can remove its theme after the change is saved
-        $design = (string) $object->getDesign();
-        if ($design === '') {
-            $errors->addError('design', $helper->__('The design is required.'));
-        } elseif ((!$object->getId() || $object->dataHasChangedFor('design')) && !in_array($design, $this->getInstalledDesigns(), true)) {
-            $errors->addError('design', $helper->__('The design "%s" is not an installed theme. Use the form "package/theme".', $design));
-        }
-
-        $dateFrom = $this->readDate($object, 'date_from', $errors);
-        $dateTo = $this->readDate($object, 'date_to', $errors);
-        if ($dateFrom !== null && $dateTo !== null && $dateFrom > $dateTo) {
-            $errors->addError('date_from', $helper->__('Start date cannot be greater than end date.'));
-        }
-
-        $errors->throwIfErrors();
-
-        if ($this->_checkIntersection((int) $storeId, $dateFrom, $dateTo, (int) $object->getId())) {
+        if ($this->_checkIntersection((int) $object->getStoreId(), $object->getDateFrom(), $object->getDateTo(), (int) $object->getId())) {
             throw new Mage_Core_Exception_Conflict(
-                $helper->__('Your design change for the specified store intersects with another one, please specify another date range.'),
+                Mage::helper('core')->__('Your design change for the specified store intersects with another one, please specify another date range.'),
             );
         }
 
         return parent::_beforeSave($object);
+    }
+
+    /**
+     * Write each date of $object as Y-m-d, or null when it is empty. Add an error to $errors for a value
+     * that is not a date, and for a start date after the end date. Return $errors.
+     */
+    public function addDateErrors(Mage_Core_Model_Design $object, Mage_Core_Exception_Input $errors): Mage_Core_Exception_Input
+    {
+        $dateFrom = $this->readDate($object, 'date_from', $errors);
+        $dateTo = $this->readDate($object, 'date_to', $errors);
+        if ($dateFrom !== null && $dateTo !== null && $dateFrom > $dateTo) {
+            $errors->addError('date_from', Mage::helper('core')->__('Start date cannot be greater than end date.'));
+        }
+        return $errors;
     }
 
     /**
@@ -81,20 +71,6 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
         $date = substr($value, 0, 10);
         $object->setData($field, $date);
         return $date;
-    }
-
-    /**
-     * @return list<string> each installed theme as "package/theme"
-     */
-    private function getInstalledDesigns(): array
-    {
-        $designs = [];
-        foreach (Mage::getModel('core/design_package')->getThemeList() as $package => $themes) {
-            foreach ((array) $themes as $theme) {
-                $designs[] = $package . '/' . $theme;
-            }
-        }
-        return $designs;
     }
 
     /**

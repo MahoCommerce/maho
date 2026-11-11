@@ -133,23 +133,13 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             $websiteIds = $saveData['website_ids'] ?? null;
             unset($saveData['website_ids']);
 
-            $isNew = !$model->getId();
-            $oldBalance = (float) $model->getBalance();
-            $newBalance = isset($saveData['balance']) ? (float) $saveData['balance'] : $oldBalance;
-            if (!$isNew) {
-                // update() below is the only writer of the balance of an existing card
-                $saveData['balance'] = $oldBalance;
-            }
-
+            // A form that does not post the balance keeps the balance of the card
+            $saveData['balance'] ??= $model->getData('balance');
             $model->setData($saveData);
             if ($websiteIds !== null) {
                 $model->setWebsiteIds(is_array($websiteIds) ? $websiteIds : [$websiteIds]);
             }
-            if ($isNew) {
-                $this->getService()->save($model);
-            } else {
-                $this->getService()->update($model, $newBalance, null, $saveData['comment'] ?? 'Admin adjustment');
-            }
+            $this->getService()->save($model, $saveData['comment'] ?? 'Admin adjustment');
 
             $session->addSuccess(Mage::helper('giftcard')->__('The gift card has been saved.'));
             $session->setFormData(false);

@@ -125,7 +125,7 @@ The merchant notification sets the customer's address as **Reply-To** so you can
 
 ### Abuse Protection
 
-This form must stay frictionless, so only **invisible** background measures are used. Manual CAPTCHAs and email verification links are legally inadmissible for the revocation form.
+This form must stay frictionless, so only **invisible** background measures are used. Manual CAPTCHAs and email verification links are legally inadmissible for the revocation form. When the invisible CAPTCHA of the store is on (**System → Configuration → Advanced → Admin → Captcha**), it also checks this form and the API, with no step for the consumer.
 
 | Setting | Description | Default |
 |---------|-------------|---------|

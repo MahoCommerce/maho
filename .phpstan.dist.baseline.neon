@@ -4717,12 +4717,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/CreateController.php
 
 		-
-			rawMessage: 'Call to an undefined method Mage_Sales_Model_Order_Creditmemo::void().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/CreditmemoController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Sales_Order_CreditmemoController::_getItemData() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -11195,18 +11189,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Paygate/Model/Authorizenet/Cards.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Payment_Model_Method_Abstract::cancelPartialAuthorization().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Paygate/controllers/Adminhtml/Paygate/Authorizenet/PaymentController.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Payment_Model_Method_Abstract::cancelPartialAuthorization().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Paygate/controllers/Authorizenet/PaymentController.php
 
 		-
 			rawMessage: Property Mage_Payment_Block_Info_Checkmo::$_mailingAddress has no type specified.

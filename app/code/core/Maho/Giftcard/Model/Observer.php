@@ -79,6 +79,16 @@ class Maho_Giftcard_Model_Observer
     }
 
     /**
+     * @param Maho_Giftcard_Model_Giftcard $giftcard
+     * @param Mage_Sales_Model_Order $order
+     */
+    #[\Deprecated(message: "use Mage::getService('giftcard/giftcard')->sendToRecipient()", since: '27.1')]
+    protected function _sendGiftcardEmail($giftcard, $order): void
+    {
+        Mage::getService('giftcard/giftcard')->sendToRecipient($giftcard, (int) $order->getStoreId());
+    }
+
+    /**
      * Create a gift card
      */
     protected function _createGiftcard(
@@ -212,6 +222,18 @@ class Maho_Giftcard_Model_Observer
                 ]);
             }
         }
+    }
+
+    /**
+     * Check the gift cards of the cart again before its order is placed: a card that was spent elsewhere since
+     * the cart got it must not discount this order.
+     *
+     * @throws Mage_Core_Exception see Maho_Giftcard_Service_Giftcard::revalidateCart()
+     */
+    #[Maho\Config\Observer('sales_quote_submit_validate', id: 'giftcard_revalidate_cart')]
+    public function revalidateCart(Maho\Event\Observer $observer): void
+    {
+        Mage::getService('giftcard/giftcard')->revalidateCart($observer->getEvent()->getQuote());
     }
 
     /**
@@ -690,15 +712,15 @@ class Maho_Giftcard_Model_Observer
         $code = trim((string) $giftcardData['code']);
         $quote = $orderCreateModel->getQuote();
         $session = Mage::getSingleton('adminhtml/session_quote');
-        /** @var Mage_Checkout_Service_Cart $service */
-        $service = Mage::getService('checkout/cart');
+        /** @var Maho_Giftcard_Service_Giftcard $service */
+        $service = Mage::getService('giftcard/giftcard');
 
         try {
             if (($giftcardData['action'] ?? 'apply') === 'remove') {
-                $service->removeGiftcard($quote, $code, collectAndSave: false);
+                $service->removeFromCart($quote, $code, collectAndSave: false);
                 $session->addSuccess(Mage::helper('giftcard')->__('Gift card was removed.'));
             } else {
-                $service->applyGiftcard($quote, $code, actor: Mage_Checkout_Model_Actor::Staff, collectAndSave: false);
+                $service->applyToCart($quote, $code, actor: Mage_Checkout_Model_Actor::Staff, collectAndSave: false);
                 $session->addSuccess(Mage::helper('giftcard')->__('Gift card "%s" was applied.', $code));
             }
         } catch (Mage_Core_Exception $e) {

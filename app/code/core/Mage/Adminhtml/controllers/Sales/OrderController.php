@@ -49,7 +49,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     protected function _initOrder()
     {
         try {
-            $order = Mage::getService('sales/order')->requireById((int) $this->getRequest()->getParam('order_id'));
+            $order = Mage::getService('sales/order')->getById((int) $this->getRequest()->getParam('order_id'));
         } catch (Mage_Core_Exception_NoSuchEntity $e) {
             $this->_getSession()->addError($e->getMessage());
             $this->_redirect('*/*/');
@@ -116,15 +116,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     {
         if ($order = $this->_initOrder()) {
             try {
-                // FIX. Enable re-sending again - http://magento.stackexchange.com/a/37690/78
-                $order->setEmailSent(false);
-                $order->sendNewOrderEmail();
-                $historyItem = Mage::getResourceModel('sales/order_status_history_collection')
-                    ->getUnnotifiedForInstance($order, Mage_Sales_Model_Order::HISTORY_ENTITY_NAME);
-                if ($historyItem) {
-                    $historyItem->setIsCustomerNotified(1);
-                    $historyItem->save();
-                }
+                Mage::getService('sales/order')->resendEmail($order);
                 $this->_getSession()->addSuccess($this->__('The order email has been sent.'));
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
@@ -354,7 +346,8 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     }
 
     /**
-     * Run the action $action (cancel, hold or unhold) of the order service on each selected order.
+     * Run the action $action (cancel, hold or unhold) of the order service on each selected order. An order that
+     * fails for another reason than its state, such as an error of the payment gateway, adds its message.
      *
      * @return array{int, int} the count of the changed orders and the count of the orders that refused the action
      */
@@ -365,10 +358,17 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
         $orderIds = (array) $this->getRequest()->getPost('order_ids', []);
         foreach ($orderIds as $orderId) {
             try {
-                $service->{$action}($service->requireById((int) $orderId));
+                $order = $service->getById((int) $orderId);
+            } catch (Mage_Core_Exception_NoSuchEntity) {
+                continue;
+            }
+            try {
+                $service->{$action}($order);
                 $done++;
-            } catch (Mage_Core_Exception) {
-                // The order no longer exists, or its state refuses the action
+            } catch (Mage_Core_Exception_Conflict) {
+                // The state of the order refuses the action
+            } catch (Mage_Core_Exception $e) {
+                $this->_getSession()->addError($this->__('Order #%s: %s', $order->getIncrementId(), $e->getMessage()));
             }
         }
         return [$done, count($orderIds) - $done];
@@ -662,21 +662,15 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
         if ($data && $address->getId()) {
             // The form sends no region_id for a country without regions, so clear the old one
             $address->addData($data + ['region_id' => null]);
-            Mage::getModel('sales/observer_addressAttributes')->refreshOptionLabels($address);
             try {
-                $address->implodeStreetAddress();
-                $errors = $address->getFormatErrors();
-                if ($errors) {
-                    foreach ($errors as $error) {
-                        $this->_getSession()->addError($error);
-                    }
-                    $this->_redirect('*/*/address', ['address_id' => $address->getId()]);
-                    return;
-                }
-                $address->save();
+                Mage::getService('sales/order')->saveAddress($address);
                 $this->_getSession()->addSuccess(Mage::helper('sales')->__('The order address has been updated.'));
                 $this->_redirect('*/*/view', ['order_id' => $address->getParentId()]);
                 return;
+            } catch (Mage_Core_Exception_Input $e) {
+                foreach ($e->getErrors() as $error) {
+                    $this->_getSession()->addError($error['message']);
+                }
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
             } catch (Exception $e) {
@@ -698,43 +692,17 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     public function guestOrderEmailChangeAction(): void
     {
         $orderId = $this->getRequest()->getParam('order_id');
-        $newEmail = trim($this->getRequest()->getParam('email'));
 
         try {
-            $order = Mage::getModel('sales/order')->load($orderId);
-            if (!$order->getId()) {
-                throw new Mage_Core_Exception($this->__('This order no longer exists.'));
-            }
-            if (!$order->getCustomerIsGuest()) {
-                throw new Mage_Core_Exception($this->__('Email can only be changed for guest orders.'));
-            }
-
-            // Check if email hasn't changed
-            if ($newEmail === $order->getCustomerEmail()) {
-                $this->_redirect('*/*/view', ['order_id' => $orderId]);
-                return;
-            }
-
-            // Validate email
-            $coreHelper = Mage::helper('core');
-            if (!$coreHelper->isValidNotBlank($newEmail) || !$coreHelper->isValidEmail($newEmail)) {
-                throw new Mage_Core_Exception($this->__('Please enter a valid email address. For example johndoe@domain.com.'));
-            }
-
-            // Update the email
-            $oldEmail = $order->getCustomerEmail();
-            $order->setCustomerEmail($newEmail);
-            $order->addStatusHistoryComment(
-                $this->__(
-                    'Customer email address changed from %s to %s by %s.',
-                    $oldEmail,
-                    $newEmail,
-                    Mage::getSingleton('admin/session')->getUser()->getUsername(),
-                ),
+            $service = Mage::getService('sales/order');
+            $changed = $service->changeGuestEmail(
+                $service->getById((int) $orderId),
+                (string) $this->getRequest()->getParam('email'),
+                (string) Mage::getSingleton('admin/session')->getUser()->getUsername(),
             );
-            $order->save();
-
-            $this->_getSession()->addSuccess($this->__('The email address has been updated successfully.'));
+            if ($changed) {
+                $this->_getSession()->addSuccess($this->__('The email address has been updated successfully.'));
+            }
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
         } catch (Exception $e) {

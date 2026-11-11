@@ -127,6 +127,36 @@ function adminUserParityResetPassword(Mage_Admin_Model_User $user, string $secre
     return $messages;
 }
 
+/**
+ * Post $email to the Forgot Password page of the admin.
+ *
+ * @return array{success: list<string>, errors: list<string>}
+ */
+function adminUserParityForgotPassword(string $email): array
+{
+    $request = new Mage_Core_Controller_Request_Http(
+        SymfonyRequest::create('http://localhost/admin/index/forgotpassword', 'POST', ['email' => $email]),
+    );
+    $request->setRouteName('adminhtml')->setControllerName('index')->setActionName('forgotpassword')->setDispatched(true);
+    Mage::app()->setRequest($request);
+    AdminApiParity::adminMessages();
+    $controller = new Mage_Adminhtml_IndexController($request, new Mage_Core_Controller_Response_Http());
+    $controller->getLayout()->getMessagesBlock()->getMessageCollection()->clear();
+    try {
+        $controller->forgotpasswordAction();
+    } catch (Throwable) {
+        // The redirect and the page need a dispatched request. The messages are the outcome
+    }
+    $messages = AdminApiParity::adminMessages();
+    // The form of the page takes the errors out of the session
+    $layoutMessages = $controller->getLayout()->getMessagesBlock()->getMessageCollection();
+    foreach ($layoutMessages->getErrors() as $error) {
+        $messages['errors'][] = $error->getText();
+    }
+    $layoutMessages->clear();
+    return $messages;
+}
+
 beforeEach(function (): void {
     $this->admin = AdminRoleFixture::login(['all']);
     Mage::app()->cleanCache([Maho\Security\RateLimiter::CACHE_TAG]);
@@ -206,6 +236,52 @@ it('ends a password reset link when the password changes on any page or the CLI'
         ->and($this->admin->reload()->getRpToken())->toBeNull()
         ->and($this->admin->getRpTokenCreatedAt())->toBeNull();
 });
+
+it('gives the user a reset link from the Forgot Password page through the service', function (): void {
+    $email = (string) $this->admin->getEmail();
+    $admin = adminUserParityForgotPassword($email);
+    $token = $this->admin->reload()->getRpToken();
+
+    Mage::getService('admin/user')->requestPasswordReset($email);
+
+    expect($admin['errors'])->toBe([])
+        ->and($admin['success'])->toBe([Mage::helper('adminhtml')->__(
+            'If there is an account associated with %s you will receive an email with a link to reset your password.',
+            $email,
+        )])
+        ->and($token)->not->toBeEmpty()
+        ->and($this->admin->reload()->getRpToken())->not->toBeEmpty()
+        ->and($this->admin->getRpToken())->not->toBe($token);
+});
+
+it('does not tell on the Forgot Password page whether an email has an account', function (): void {
+    $email = 'parity-nobody@example.test';
+    $admin = adminUserParityForgotPassword($email);
+
+    Mage::getService('admin/user')->requestPasswordReset($email);
+
+    expect($admin['errors'])->toBe([])
+        ->and($admin['success'])->toHaveCount(1)
+        ->and($this->admin->reload()->getRpToken())->toBeNull();
+});
+
+it('refuses an empty or an invalid email on the Forgot Password page with the errors of the service', function (string $email, string $message): void {
+    $admin = adminUserParityForgotPassword($email);
+    $errors = [];
+    try {
+        Mage::getService('admin/user')->requestPasswordReset($email);
+    } catch (Mage_Core_Exception_Input $e) {
+        $errors = $e->getErrors();
+    }
+
+    expect($errors)->toBe([['field' => 'email', 'message' => Mage::helper('adminhtml')->__($message)]])
+        ->and($admin['errors'])->toBe(array_column($errors, 'message'))
+        ->and($admin['success'])->toBe([])
+        ->and($this->admin->reload()->getRpToken())->toBeNull();
+})->with([
+    'empty' => ['', 'The email address is empty.'],
+    'invalid' => ['not-an-email', 'Invalid email address.'],
+]);
 
 it('refuses a user name or an email that another user has, on the admin page and the CLI', function (): void {
     $message = Mage::helper('adminhtml')->__('A user with the same user name or email already exists.');

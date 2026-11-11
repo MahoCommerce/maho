@@ -65,6 +65,14 @@ SPDX-License-Identifier: AFL-3.0
             <related_cache_types>
                 <block_html/>
             </related_cache_types>
+            <rule>
+                <simple_actions>
+                    <by_percent/>
+                    <by_fixed/>
+                    <to_percent/>
+                    <to_fixed/>
+                </simple_actions>
+            </rule>
         </catalogrule>
     </global>
     <frontend>

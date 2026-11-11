@@ -71,7 +71,7 @@ Gift messages have no separate resource - they are the `setGiftMessageOnCart` / 
 
 | Resource | Queries | Mutations |
 |---|---|---|
-| Customer | `currentCustomer`, `customer(id:)` *(admin)*, `customers` *(admin)* | `loginCustomer`, `logoutCustomer`, `quickCreateCustomer` (register), `updateCustomer`, `changePasswordCustomer`, `forgotPasswordCustomer`, `resetPasswordCustomer` |
+| Customer | `currentCustomer`, `customer(id:)` *(admin)*, `customers` *(admin)* | `loginCustomer`, `logoutCustomer`, `updateCustomer`, `changePasswordCustomer`, `forgotPasswordCustomer`, `resetPasswordCustomer` |
 | Address | `address(id:)`, `addresses`, `myAddresses` | `createAddress`, `updateAddress`, `deleteAddress` |
 | Customer group | `customerGroup(id:)`, `customerGroups` *(admin)* | - |
 

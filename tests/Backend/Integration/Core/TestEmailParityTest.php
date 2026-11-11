@@ -131,16 +131,17 @@ it('sends the same test email from the admin and the CLI', function (): void {
         ->and($spy->sentTo)->toBe([$email, $email]);
 });
 
-it('reports a mail transport that does not send the email, on the admin and the CLI', function (): void {
+it('reports a mail transport that does not send the email as a server fault, on the admin and the CLI', function (): void {
     testEmailSpy(false);
     $message = Mage::helper('core')->__('Failed to send test email. Please check your email configuration and error logs.');
 
     $admin = testEmailViaAdmin('parity@example.test');
-    $cli = testEmailViaCli('parity@example.test');
 
-    expect($admin)->toBe(['success' => false, 'message' => $message])
-        ->and($cli['code'])->toBe(Command::FAILURE)
-        ->and($cli['output'])->toContain($message);
+    // The console application prints an exception that the command does not catch, and exits with 1
+    expect($admin)->toBe(['success' => false, 'message' => Mage::helper('adminhtml')->__('An error occurred: %s', $message)])
+        ->and(fn() => testEmailViaCli('parity@example.test'))->toThrow(RuntimeException::class, $message)
+        ->and(fn() => testEmailViaQueueCli('parity@example.test'))
+        ->toThrow(RuntimeException::class, Mage::helper('core')->__('Could not add the test email to the queue. Please check the error logs.'));
 });
 
 it('sends the test email without the queue and restores the developer mode', function (): void {

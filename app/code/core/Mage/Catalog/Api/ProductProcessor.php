@@ -136,11 +136,17 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
     {
         $service = self::service();
         $product = $service->newProduct($data->type ?: Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, $data->attributeSetId ?: null);
-        $product->setSku($data->sku)
-            ->setName($data->name)
-            ->setStatus(($data->isActive ?? true) ? Mage_Catalog_Model_Product_Status::STATUS_ENABLED : Mage_Catalog_Model_Product_Status::STATUS_DISABLED)
-            ->setVisibility($this->toVisibility($data->visibility) ?? Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
-            ->setTaxClassId($data->taxClassId ?? 0);
+        $product->setSku($data->sku)->setName($data->name);
+        if ($data->isActive === false) {
+            $product->setStatus(Mage_Catalog_Model_Product_Status::STATUS_DISABLED);
+        }
+        $visibility = $this->toVisibility($data->visibility);
+        if ($visibility !== null) {
+            $product->setVisibility($visibility);
+        }
+        if ($data->taxClassId !== null) {
+            $product->setTaxClassId($data->taxClassId);
+        }
         $product->addData($this->collectAttributeData($data));
         $product->addData($this->collectCustomAttributeData($product, $data));
         $allowedStoreIds = $user->getAllowedStoreIds();
@@ -225,25 +231,15 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         if ($data->taxClassId !== null) {
             $attrData['tax_class_id'] = $data->taxClassId;
         }
-        $service->updateAttributes([$id], $attrData, $storeId);
-        // The activity log records the new values
-        $product->addData($attrData);
-
-        $service->deleteStoreValues($id, array_map(strval(...), $data->useDefault ?? []), $storeId);
-        $stockData = $this->toStockData($data);
-        if ($stockData !== []) {
-            $stock = self::stockService();
-            $stock->update($stock->getByProductId($id), $stockData);
-        }
-        if ($categoryIdsSent) {
-            $service->setCategoryIds($id, $data->categoryIds);
-        }
-        if ($data->websiteIds !== null) {
-            $current = array_map(intval(...), $product->getWebsiteIds());
-            $wanted = array_map(intval(...), $data->websiteIds);
-            $service->changeWebsites([$id], array_values(array_diff($wanted, $current)), array_values(array_diff($current, $wanted)), $user->getAllowedStoreIds());
-            $product->setWebsiteIds($wanted);
-        }
+        $service->updateWithoutSave(
+            $product,
+            $attrData,
+            array_map(strval(...), $data->useDefault ?? []),
+            $this->toStockData($data),
+            $categoryIdsSent ? $data->categoryIds : null,
+            $data->websiteIds,
+            $user->getAllowedStoreIds(),
+        );
 
         $this->logApiActivity('catalog/product', 'update', $oldData, $product);
 

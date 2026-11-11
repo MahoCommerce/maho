@@ -2824,6 +2824,15 @@ class Sqlite extends AbstractPdoAdapter
     }
 
     /**
+     * SQLite stores a SMALLINT, an INTEGER and a BIGINT column of the schema as INTEGER, which holds 64 bits.
+     */
+    #[\Override]
+    protected function _getIntegerColumnBits(array $column): ?int
+    {
+        return parent::_getIntegerColumnBits($column) === null ? null : 64;
+    }
+
+    /**
      * Prepare value for save in column
      */
     #[\Override]

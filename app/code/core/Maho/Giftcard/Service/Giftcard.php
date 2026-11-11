@@ -25,10 +25,7 @@ class Maho_Giftcard_Service_Giftcard
     public function getById(int $id): Maho_Giftcard_Model_Giftcard
     {
         /** @var Maho_Giftcard_Model_Giftcard $giftcard */
-        $giftcard = Mage::getModel('giftcard/giftcard');
-        if ($id > 0) {
-            $giftcard->load($id);
-        }
+        $giftcard = Mage::getModel('giftcard/giftcard')->load($id);
         if (!$giftcard->getId()) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('giftcard')->__('This gift card no longer exists.'));
         }
@@ -68,14 +65,11 @@ class Maho_Giftcard_Service_Giftcard
     {
         $helper = Mage::helper('giftcard');
         $core = Mage::helper('core');
+        $tooManyAttempts = $helper->__('Too many attempts. Please wait a moment and try again.');
         $failures = $customerId ? $core->rateLimiterBy('giftcard_balance_check', (string) $customerId, self::CUSTOMER_FAILURE_LIMIT, self::CUSTOMER_FAILURE_WINDOW) : null;
-        if ($failures?->tooManyAttempts()) {
-            throw new Mage_Core_Exception_TooManyRequests($helper->__('Too many attempts. Please wait a moment and try again.'), self::CUSTOMER_FAILURE_WINDOW);
-        }
+        $failures?->throwIfTooManyAttempts($tooManyAttempts);
         $limit = (int) Mage::getStoreConfig(self::XML_PATH_BALANCE_RATE_LIMIT);
-        if (!$core->rateLimiter('giftcard_balance', $limit, self::BALANCE_RATE_LIMIT_WINDOW)->attempt()) {
-            throw new Mage_Core_Exception_TooManyRequests($helper->__('Too many attempts. Please wait a moment and try again.'), self::BALANCE_RATE_LIMIT_WINDOW);
-        }
+        $core->rateLimiter('giftcard_balance', $limit, self::BALANCE_RATE_LIMIT_WINDOW)->attemptOrThrow($tooManyAttempts);
         if (trim($code) === '') {
             throw new Mage_Core_Exception_Input()->addError('code', $helper->__('Please enter a gift card code.'));
         }
@@ -93,21 +87,21 @@ class Maho_Giftcard_Service_Giftcard
     }
 
     /**
-     * Save $giftcard. A new card needs a balance above zero. The model checks the status, the code, the
-     * websites and the highest balance. An existing card changes its balance through adjustBalance().
+     * Save $giftcard. The model checks the status, the code, the websites and the balance. A changed balance of
+     * an existing card is an adjustment with a history entry that holds $comment, see update().
      *
      * @throws Mage_Core_Exception_Input
      * @throws Mage_Core_Exception_Conflict when another card has the code
      */
-    public function save(Maho_Giftcard_Model_Giftcard $giftcard): Maho_Giftcard_Model_Giftcard
+    public function save(Maho_Giftcard_Model_Giftcard $giftcard, ?string $comment = null): Maho_Giftcard_Model_Giftcard
     {
-        if (!$giftcard->getId()) {
-            $balance = (float) ($giftcard->getData('initial_balance') ?: $giftcard->getData('balance'));
-            $errors = new Mage_Core_Exception_Input();
-            if ($balance <= 0) {
-                $errors->addError('initial_balance', Mage::helper('giftcard')->__('Gift card balance must be greater than zero'));
-            }
-            $errors->throwIfErrors();
+        $balance = (float) $giftcard->getData('balance');
+        // A card that was not loaded has no stored balance to compare with
+        $storedBalance = $giftcard->getOrigData('balance');
+        if ($giftcard->getId() && $storedBalance !== null && $balance !== (float) $storedBalance) {
+            // adjustBalance() is the only writer of the balance of an existing card
+            $giftcard->setData('balance', (float) $storedBalance);
+            return $this->update($giftcard, $balance, null, $comment);
         }
         $giftcard->save();
         return $giftcard;
@@ -144,7 +138,7 @@ class Maho_Giftcard_Service_Giftcard
             if ($status !== null && $status !== $giftcard->getStatus()) {
                 $giftcard->setStatus($status);
             }
-            $this->save($giftcard);
+            $giftcard->save();
             $resource->commit();
         } catch (Throwable $e) {
             $resource->rollBack();
@@ -222,6 +216,215 @@ class Maho_Giftcard_Service_Giftcard
             $storeId = $giftcard->getData('purchase_store_id');
             $this->sendToRecipient($giftcard, $storeId === null ? null : (int) $storeId);
         }
+    }
+
+    /**
+     * Return the balance of $giftcard to show in $store: in the current currency of the store when the card
+     * converts to it, else in the currency of the card. A card with no website has no currency, so it gets its
+     * stored balance with the current currency of the store.
+     *
+     * @return array{balance: float, currency: string}
+     */
+    public function getDisplayBalance(Maho_Giftcard_Model_Giftcard $giftcard, Mage_Core_Model_Store $store): array
+    {
+        $currencyCode = (string) $store->getCurrentCurrencyCode();
+        if ($giftcard->getWebsiteIds() === []) {
+            $balance = $giftcard->getBalance();
+        } else {
+            $balance = $giftcard->getBalanceIn($currencyCode);
+            if ($balance === null) {
+                $currencyCode = (string) $giftcard->getCurrencyCode();
+                $balance = $giftcard->getBalance();
+            }
+        }
+
+        return ['balance' => (float) $store->roundPrice($balance), 'currency' => $currencyCode];
+    }
+
+    /**
+     * Apply the gift card $code to $quote. The errors of a code tell whether it exists, so a shopper has a limit
+     * of codes per minute. Staff has no limit. $amount is the part of the balance to use, in the currency of the
+     * cart, or null for the full balance. With $collectAndSave false, the caller collects the totals and saves the
+     * cart, as the admin order page does.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests when the shopper is over the limit
+     * @throws Mage_Core_Exception see validateForCart()
+     */
+    public function applyToCart(
+        Mage_Sales_Model_Quote $quote,
+        string $code,
+        ?float $amount = null,
+        Mage_Checkout_Model_Actor $actor = Mage_Checkout_Model_Actor::Customer,
+        bool $collectAndSave = true,
+    ): Mage_Sales_Model_Quote {
+        if ($actor === Mage_Checkout_Model_Actor::Customer) {
+            $limit = (int) Mage::getStoreConfig(self::XML_PATH_BALANCE_RATE_LIMIT);
+            Mage::helper('core')
+                ->rateLimiter('cart_giftcard', $limit, self::BALANCE_RATE_LIMIT_WINDOW, Maho\Security\RateLimitScope::Ip)
+                ->attemptOrThrow();
+        }
+        $giftcard = $this->validateForCart($quote, trim($code));
+        $code = (string) $giftcard->getCode();
+        $appliedCodes = $this->getCartCodes($quote);
+
+        // giftcard_codes holds base currency amounts: convert $amount with the rate that gave the prices of the cart
+        $store = $quote->getStore();
+        $baseCurrency = $store->getBaseCurrencyCode();
+        if ($amount !== null && $store->getCurrentCurrencyCode() !== $baseCurrency) {
+            $amount /= $store->getCurrentCurrencyRate();
+        }
+        $balance = (float) $giftcard->getBalance($baseCurrency);
+        $appliedCodes[$code] = $amount === null ? $balance : min($amount, $balance);
+
+        $quote->setGiftcardCodes(Mage::helper('core')->jsonEncode($appliedCodes));
+        if ($collectAndSave) {
+            Mage::getService('checkout/cart')->collectAndSave($quote);
+        }
+
+        return $quote;
+    }
+
+    /**
+     * Return the gift card of $code when $quote can take it.
+     *
+     * @throws Mage_Core_Exception_Conflict when the card is already on the cart
+     * @throws Mage_Core_Exception when the code is empty, the card does not exist or cannot pay for this cart
+     */
+    public function validateForCart(Mage_Sales_Model_Quote $quote, string $code): Maho_Giftcard_Model_Giftcard
+    {
+        $helper = Mage::helper('giftcard');
+        if ($code === '') {
+            throw new Mage_Core_Exception($helper->__('Please enter a gift card code.'));
+        }
+
+        foreach ($quote->getAllItems() as $item) {
+            if ($item->getProductType() === 'giftcard') {
+                throw new Mage_Core_Exception($helper->__('Gift cards cannot be used to purchase gift card products.'));
+            }
+        }
+
+        // A card of another website gets the same message as an unknown code
+        try {
+            $giftcard = $this->getByCode($code, (int) $quote->getStore()->getWebsiteId());
+        } catch (Mage_Core_Exception_NoSuchEntity) {
+            throw new Mage_Core_Exception($helper->__('Gift card "%s" is not valid.', $code));
+        }
+        $code = (string) $giftcard->getCode();
+
+        if (!$giftcard->isValid()) {
+            throw new Mage_Core_Exception(match ($giftcard->getStatus()) {
+                Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED => $helper->__('Gift card "%s" has expired.', $code),
+                Maho_Giftcard_Model_Giftcard::STATUS_USED => $helper->__('Gift card "%s" has been fully used.', $code),
+                default => $helper->__('Gift card "%s" is not active.', $code),
+            });
+        }
+
+        if ($this->findCartCode($this->getCartCodes($quote), $code) !== null) {
+            throw new Mage_Core_Exception_Conflict($helper->__('Gift card "%s" is already applied.', $code));
+        }
+
+        return $giftcard;
+    }
+
+    /**
+     * Check each gift card of $quote against its balance in the database, before the order is placed. The cart
+     * holds the amount from the time of applyToCart(), and the card can be spent elsewhere after that. An amount
+     * above the balance becomes the balance, and the cart is saved.
+     *
+     * @throws Mage_Core_Exception when a card of the cart is not valid for the website or has no balance
+     */
+    public function revalidateCart(Mage_Sales_Model_Quote $quote): Mage_Sales_Model_Quote
+    {
+        $applied = $this->getCartCodes($quote);
+        if ($applied === []) {
+            return $quote;
+        }
+
+        $helper = Mage::helper('giftcard');
+        $changed = false;
+        $baseCurrency = $quote->getStore()->getBaseCurrencyCode();
+        $websiteId = (int) $quote->getStore()->getWebsiteId();
+        foreach ($applied as $code => $appliedAmount) {
+            $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode((string) $code);
+            if (!$giftcard->getId() || !$giftcard->isValidForWebsite($websiteId)) {
+                throw new Mage_Core_Exception($helper->__('Gift card "%s" is no longer valid', $code));
+            }
+            $balance = (float) $giftcard->getBalance($baseCurrency);
+            if ($balance <= 0) {
+                throw new Mage_Core_Exception($helper->__('Gift card "%s" has no remaining balance', $code));
+            }
+            if ($balance < (float) $appliedAmount) {
+                $applied[$code] = $balance;
+                $changed = true;
+            }
+        }
+
+        if ($changed) {
+            $quote->setGiftcardCodes(Mage::helper('core')->jsonEncode($applied));
+            Mage::getService('checkout/cart')->collectAndSave($quote);
+        }
+
+        return $quote;
+    }
+
+    /**
+     * Remove the gift card $code from $quote. The case of the code does not matter. With $collectAndSave false,
+     * the caller collects the totals and saves the cart, as the admin order page does.
+     *
+     * @throws Mage_Core_Exception_Input when the code is empty
+     * @throws Mage_Core_Exception_NoSuchEntity when the card is not on the cart
+     */
+    public function removeFromCart(Mage_Sales_Model_Quote $quote, string $code, bool $collectAndSave = true): Mage_Sales_Model_Quote
+    {
+        $helper = Mage::helper('giftcard');
+        if ($code === '') {
+            throw new Mage_Core_Exception_Input()->addError('code', $helper->__('Gift card code is required'));
+        }
+
+        $appliedCodes = $this->getCartCodes($quote);
+        $appliedCode = $this->findCartCode($appliedCodes, $code);
+        if ($appliedCode === null) {
+            throw new Mage_Core_Exception_NoSuchEntity($helper->__('Gift card "%s" is not applied to this cart', $code));
+        }
+        unset($appliedCodes[$appliedCode]);
+
+        if ($appliedCodes === []) {
+            $quote->setGiftcardCodes(null);
+            $quote->setGiftcardAmount(0);
+            $quote->setBaseGiftcardAmount(0);
+        } else {
+            $quote->setGiftcardCodes(Mage::helper('core')->jsonEncode($appliedCodes));
+        }
+
+        if ($collectAndSave) {
+            Mage::getService('checkout/cart')->collectAndSave($quote);
+        }
+
+        return $quote;
+    }
+
+    /**
+     * @return array<string, float|int|string> the code of each gift card of $quote => its amount in the base currency
+     */
+    private function getCartCodes(Mage_Sales_Model_Quote $quote): array
+    {
+        $codes = $quote->getGiftcardCodes();
+        $codes = $codes ? Mage::helper('core')->jsonDecode($codes, true) : [];
+
+        return is_array($codes) ? $codes : [];
+    }
+
+    /**
+     * Return the key of $code in $appliedCodes. A cart from before the code was stored in its own case can hold
+     * the code as the customer typed it, so the case does not matter.
+     *
+     * @param array<string, mixed> $appliedCodes
+     */
+    private function findCartCode(array $appliedCodes, string $code): ?string
+    {
+        $key = array_find_key($appliedCodes, fn(mixed $amount, int|string $appliedCode): bool => strcasecmp((string) $appliedCode, $code) === 0);
+
+        return $key === null ? null : (string) $key;
     }
 
     /**

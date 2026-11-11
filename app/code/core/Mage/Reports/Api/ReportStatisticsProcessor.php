@@ -13,9 +13,7 @@ declare(strict_types=1);
 namespace Mage\Reports\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Maho\ApiPlatform\Exception\ValidationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class ReportStatisticsProcessor extends \Maho\ApiPlatform\Processor
@@ -29,14 +27,12 @@ final class ReportStatisticsProcessor extends \Maho\ApiPlatform\Processor
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): JsonResponse
     {
         $user = $this->requireUser();
-        if ($user->getAllowedStoreIds() !== null) {
-            throw new AccessDeniedHttpException('A token with a store restriction cannot refresh statistics, because a refresh changes the statistics of all stores');
-        }
+        $this->assertUnrestricted($user);
 
         $body = $this->parseRequestBody($context['request'] ?? null);
         $mode = $body['mode'] ?? self::MODE_RECENT;
         if (!in_array($mode, [self::MODE_RECENT, self::MODE_LIFETIME], true)) {
-            throw new ValidationException('mode must be recent or lifetime', 'mode', 'Choice');
+            throw new \Mage_Core_Exception_Input()->addError('mode', 'mode must be recent or lifetime');
         }
         $reports = $body['reports'] ?? [];
         if (!is_array($reports) || !array_is_list($reports)) {

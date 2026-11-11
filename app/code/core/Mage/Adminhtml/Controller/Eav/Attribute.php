@@ -331,4 +331,33 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
         $this->_getSession()->addSuccess($this->getDeletedMessage());
         $this->_redirect('*/*/');
     }
+
+    /**
+     * @return list<string>
+     */
+    #[\Deprecated('The attribute model gives the tags: Mage_Eav_Model_Entity_Attribute::getAllowedOptionTags()')]
+    protected function getAllowedTags(): array
+    {
+        return $this->createAttributeModel()->getAllowedOptionTags();
+    }
+
+    #[\Deprecated('Mage_Eav_Service_Attribute::save() checks the input type')]
+    protected function isValidInputType(string $input, Mage_Eav_Model_Entity_Attribute $model): bool
+    {
+        return isset($model->getInputTypes()[$input]);
+    }
+
+    /**
+     * @return array<string, string|null>
+     */
+    #[\Deprecated('Mage_Eav_Service_Attribute::save() sets the models of the input type')]
+    protected function getInputTypeModels(string $input, Mage_Eav_Model_Entity_Attribute $model): array
+    {
+        $type = $model->getInputTypes()[$input] ?? [];
+        return [
+            'backend_model' => $type['backend_model'] ?? null,
+            'source_model' => $type['source_model'] ?? null,
+            'frontend_model' => $type['frontend_model'] ?? null,
+        ];
+    }
 }

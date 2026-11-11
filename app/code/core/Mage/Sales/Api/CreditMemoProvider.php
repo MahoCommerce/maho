@@ -53,7 +53,7 @@ final class CreditMemoProvider extends CrudProvider
 
     private function getCreditMemoById(int $id): CreditMemo
     {
-        $creditmemo = \Mage::getService('sales/order')->requireCreditmemo($id);
+        $creditmemo = \Mage::getService('sales/order_document')->requireCreditmemo($id);
         $this->assertStoreAllowed((int) $creditmemo->getStoreId(), $this->requireUser(), 'credit memo');
 
         return CreditMemo::fromModel($creditmemo);
@@ -61,7 +61,7 @@ final class CreditMemoProvider extends CrudProvider
 
     private function getCreditMemosForOrder(int $orderId, array $context): TraversablePaginator
     {
-        $order = \Mage::getService('sales/order')->requireById($orderId);
+        $order = \Mage::getService('sales/order')->getById($orderId);
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         ['page' => $page, 'pageSize' => $perPage] = $this->extractPagination($context);

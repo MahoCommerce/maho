@@ -48,7 +48,7 @@ class Mage_Core_Service_Store
     public function getWebsiteById(int $id): Website
     {
         /** @var Website */
-        return $this->load('core/website', $id, Mage::app()->getWebsites(true), Mage::helper('core')->__('The website does not exist.'));
+        return $this->load('core/website', $id, Mage::helper('core')->__('The website does not exist.'));
     }
 
     /**
@@ -57,7 +57,7 @@ class Mage_Core_Service_Store
     public function getGroupById(int $id): Group
     {
         /** @var Group */
-        return $this->load('core/store_group', $id, Mage::app()->getGroups(true), Mage::helper('core')->__('The store does not exist'));
+        return $this->load('core/store_group', $id, Mage::helper('core')->__('The store does not exist'));
     }
 
     /**
@@ -66,7 +66,7 @@ class Mage_Core_Service_Store
     public function getStoreById(int $id): Store
     {
         /** @var Store */
-        return $this->load('core/store', $id, Mage::app()->getStores(true), Mage::helper('core')->__("Store view doesn't exist"));
+        return $this->load('core/store', $id, Mage::helper('core')->__("Store view doesn't exist"));
     }
 
     /**
@@ -112,7 +112,7 @@ class Mage_Core_Service_Store
      *
      * @throws Mage_Core_Exception_Conflict
      */
-    public function validateDelete(Website|Group|Store $model): void
+    private function validateDelete(Website|Group|Store $model): void
     {
         if (!$model->isCanDelete()) {
             throw new Mage_Core_Exception_Conflict(match (true) {
@@ -124,17 +124,11 @@ class Mage_Core_Service_Store
     }
 
     /**
-     * Load a fresh $alias model. The lookup in $known keeps an ID that is out of range for the column away from PostgreSQL.
-     *
-     * @param array<int|string, mixed> $known
      * @throws Mage_Core_Exception_NoSuchEntity
      */
-    private function load(string $alias, int $id, array $known, string $message): Mage_Core_Model_Abstract
+    private function load(string $alias, int $id, string $message): Mage_Core_Model_Abstract
     {
-        $model = Mage::getModel($alias);
-        if (isset($known[$id])) {
-            $model->load($id);
-        }
+        $model = Mage::getModel($alias)->load($id);
         if ($model->getId() === null) {
             throw new Mage_Core_Exception_NoSuchEntity($message);
         }

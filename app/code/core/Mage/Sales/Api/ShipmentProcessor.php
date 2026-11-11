@@ -48,7 +48,7 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
             throw new \Mage_Core_Exception_Input()->addError('shipment_id', 'Shipment ID is required');
         }
 
-        $shipment = \Mage::getService('sales/order')->requireShipment($shipmentId);
+        $shipment = \Mage::getService('sales/order_document')->requireShipment($shipmentId);
         $this->assertStoreAllowed($shipment->getStoreId(), $this->requireUser(), 'shipment');
 
         return $shipment;
@@ -61,7 +61,7 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
     {
         $args = $context['args']['input'] ?? [];
         $shipment = $this->resolveShipment($uriVariables, $context);
-        \Mage::getService('sales/order')->addTrack($shipment, $this->buildTrack($args));
+        \Mage::getService('sales/order_document')->addTrack($shipment, $this->buildTrack($args));
 
         return Shipment::fromModel($shipment->load($shipment->getId()));
     }
@@ -72,7 +72,7 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
     private function addComment(array $uriVariables, array $context): Shipment
     {
         $args = $context['args']['input'] ?? [];
-        $shipment = \Mage::getService('sales/order')->addComment(
+        $shipment = \Mage::getService('sales/order_document')->addComment(
             $this->resolveShipment($uriVariables, $context),
             (string) ($args['comment'] ?? ''),
             (bool) ($args['notifyCustomer'] ?? false),
@@ -97,7 +97,7 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
             throw new \Mage_Core_Exception_Input()->addError('track_id', 'Track ID is required');
         }
 
-        $shipment = \Mage::getService('sales/order')->removeTrack($this->resolveShipment($uriVariables, $context), $trackId);
+        $shipment = \Mage::getService('sales/order_document')->removeTrack($this->resolveShipment($uriVariables, $context), $trackId);
 
         return Shipment::fromModel(\Mage::getModel('sales/order_shipment')->load($shipment->getId()));
     }
@@ -125,8 +125,8 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
      */
     private function doCreateShipment(int $orderId, array $input): Shipment
     {
-        $service = \Mage::getService('sales/order');
-        $order = $service->requireById($orderId);
+        $service = \Mage::getService('sales/order_document');
+        $order = \Mage::getService('sales/order')->getById($orderId);
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         $qtys = [];

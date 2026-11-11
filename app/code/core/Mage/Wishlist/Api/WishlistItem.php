@@ -63,7 +63,7 @@ use Maho\ApiPlatform\CrudResource;
             uriTemplate: '/customers/me/wishlist/share',
             name: 'share_wishlist',
             security: "is_granted('ROLE_CUSTOMER')",
-            description: 'Send the wishlist by email. Body: emails (1 to 5 addresses), message (optional)',
+            description: 'Send the wishlist by email. Body: emails (1 to 5 addresses), message (optional), captchaToken (when the store uses a CAPTCHA)',
         ),
     ],
     graphQlOperations: [
@@ -116,6 +116,7 @@ use Maho\ApiPlatform\CrudResource;
             args: [
                 'emails' => ['type' => '[String!]!', 'description' => '1 to 5 email addresses'],
                 'message' => ['type' => 'String', 'description' => 'Message of the customer for the email'],
+                'captchaToken' => ['type' => 'String', 'description' => 'CAPTCHA token from the client-side widget, when the store uses a CAPTCHA'],
             ],
             security: "is_granted('ROLE_CUSTOMER')",
         ),

@@ -1439,7 +1439,7 @@ class ApiV2Helper
             if (!$order->canInvoice()) {
                 return;
             }
-            $invoice = \Mage::getService('sales/order')->buildInvoice($order);
+            $invoice = \Mage::getService('sales/order_document')->buildInvoice($order);
             if (!$invoice->getTotalQty()) {
                 return;
             }

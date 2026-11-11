@@ -18,7 +18,6 @@ use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\DataObject;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
@@ -99,11 +98,10 @@ final class ConfigSettingProcessor extends \Maho\ApiPlatform\Processor
      */
     private function assertScopeWritable(array $scope, ApiUser $user): void
     {
-        if ($user->getAllowedStoreIds() === null) {
-            return;
-        }
-        if ($scope['scope'] !== ConfigSetting::SCOPE_STORES || !$user->canAccessStore($scope['scopeId'])) {
-            throw new AccessDeniedHttpException('Token is not authorized for the requested scope.');
+        if ($scope['scope'] === ConfigSetting::SCOPE_STORES) {
+            $this->assertRequestedStoreAllowed($scope['scopeId'], $user);
+        } else {
+            $this->assertUnrestricted($user);
         }
     }
 

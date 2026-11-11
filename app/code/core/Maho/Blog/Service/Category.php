@@ -30,10 +30,7 @@ class Maho_Blog_Service_Category
     public function getById(int $id): Maho_Blog_Model_Category
     {
         /** @var Maho_Blog_Model_Category $category */
-        $category = Mage::getModel('blog/category');
-        if ($id > 0) {
-            $category->load($id);
-        }
+        $category = Mage::getModel('blog/category')->load($id);
         if (!$category->getId()) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('blog')->__('This category no longer exists.'));
         }
@@ -45,9 +42,7 @@ class Maho_Blog_Service_Category
      */
     public function isEnabled(int $storeId): bool
     {
-        /** @var Maho_Blog_Service_Post $posts */
-        $posts = Mage::getService('blog/post');
-        return $posts->isEnabled($storeId) && Mage::getStoreConfigFlag(self::XML_PATH_ENABLE_CATEGORIES, $storeId);
+        return Mage::helper('blog')->areCategoriesEnabled($storeId);
     }
 
     /**
@@ -59,9 +54,7 @@ class Maho_Blog_Service_Category
     {
         $this->checkEnabled($storeId);
         $category = $this->getById($id);
-        if (!$category->getIsActive()
-            || array_intersect([Mage_Core_Model_App::ADMIN_STORE_ID, $storeId], array_map(intval(...), $category->getStores())) === []
-        ) {
+        if (!$category->isVisibleInStore($storeId)) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('blog')->__('This category no longer exists.'));
         }
         return $category;

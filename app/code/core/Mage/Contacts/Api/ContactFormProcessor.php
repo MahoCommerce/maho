@@ -21,14 +21,13 @@ class ContactFormProcessor extends \Maho\ApiPlatform\Processor
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ContactForm
     {
         StoreContext::ensureStore();
-        $request = $context['request'] ?? null;
+        $storeId = StoreContext::getStoreId();
+        if (!\Mage::helper('contacts')->isApiEnabled($storeId)) {
+            throw new \Mage_Core_Exception_NoSuchEntity(\Mage::helper('contacts')->__('Contact form is not available'));
+        }
 
         // The raw body, because the honeypot field has a name that the DTO does not know
-        \Mage::getService('contacts/message')->send(
-            $this->parseRequestBody($request),
-            \Mage_Contacts_Model_Channel::Api,
-            StoreContext::getStoreId(),
-        );
+        \Mage::getService('contacts/message')->send($this->parseRequestBody($context['request'] ?? null), $storeId);
 
         $dto = new ContactForm();
         $dto->success = true;

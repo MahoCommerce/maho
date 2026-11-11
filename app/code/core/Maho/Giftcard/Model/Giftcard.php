@@ -94,6 +94,10 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         if ((float) $this->getData('balance') < 0) {
             $errors->addError('balance', $helper->__('Gift card balance cannot be negative'));
         }
+        // A used card can be created with a balance of zero, but a new card holds money at the start
+        if ($this->isCreation && (float) $this->getData('initial_balance') <= 0) {
+            $errors->addError('initial_balance', $helper->__('Gift card balance must be greater than zero'));
+        }
         $maxBalance = $this->isRefund ? null : $this->getMaxBalance();
         if ($maxBalance !== null) {
             $fields = $this->getId() ? [] : ['initial_balance'];

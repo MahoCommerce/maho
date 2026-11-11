@@ -123,3 +123,24 @@ it('does not save a refused option with the next option', function () {
         optionDeleteRestore($productId, $before);
     }
 });
+
+it('refuses a negative price of an option that has no values', function () {
+    $productId = optionDeleteSampleProductId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE);
+    $before = optionDeleteStoredIds($productId);
+    $product = Mage::getModel('catalog/product')->load($productId);
+    $option = optionDeleteNewOption()->setData('price', -1.0)->setData('price_type', 'fixed');
+
+    try {
+        $errors = [];
+        try {
+            Mage::getService('catalog/product_option')->save($product, $option);
+        } catch (Mage_Core_Exception_Input $e) {
+            $errors = $e->getErrors();
+        }
+
+        expect($errors)->toBe([['field' => 'price', 'message' => 'Price must not be negative']])
+            ->and(optionDeleteStoredIds($productId))->toBe($before);
+    } finally {
+        optionDeleteRestore($productId, $before);
+    }
+});

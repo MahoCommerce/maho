@@ -8,16 +8,17 @@
 
 declare(strict_types=1);
 
-use Maho_Revocation_Model_Channel as Channel;
-
 /**
  * Records a revocation declaration and dispatches the receipt/notification emails.
  *
  * Input keys of submit(): customer_name, email, order_reference, reason, ip, user_agent, locale,
- * store_id, received_at_microtime (float), customer_id (?int), session_order_id (?int).
- * The web channel adds form_fields (the POST, for the honeypot) and render_token (the frt field).
- * The API channel gives customer_id and order_id or order_reference. The service then takes the
- * name, the email and the store from the customer and the order.
+ * store_id, received_at_microtime (float), customer_id (?int), session_order_id (?int),
+ * form_fields (the fields that the client sent, for the honeypot: the form POST or the API body).
+ * A caller that renders the form also gives render_token (the frt field of the form): submit() then
+ * checks the time between the render and the submit.
+ * Input keys of submitForCustomer(): order_id or order_reference, and reason, ip, user_agent, locale,
+ * store_id, received_at_microtime, form_fields. The service takes the name, the email and the store
+ * from the customer and the order.
  */
 class Maho_Revocation_Service_Request
 {
@@ -66,33 +67,117 @@ class Maho_Revocation_Service_Request
 
     /**
      * Record the declaration in $input and send its emails. Return null and record nothing when the
-     * web form fills the honeypot or comes back too fast, so that a bot cannot detect the trap.
+     * client fills the honeypot or the form comes back too fast, so that a bot cannot detect the trap.
      *
-     * @throws Mage_Core_Exception_NoSuchEntity when revocation is disabled, or the customer of the API does not exist
+     * @throws Mage_Core_Exception_NoSuchEntity when revocation is disabled
+     * @throws Mage_Core_Exception_Input when the CAPTCHA module of the store refuses the token
      * @throws Mage_Core_Exception_TooManyRequests when the client is over its limit
      * @throws Mage_Core_Exception on validation failure (before any row is written)
      */
-    public function submit(\Maho\DataObject $input, Channel $channel): ?Maho_Revocation_Model_Request
+    public function submit(\Maho\DataObject $input): ?Maho_Revocation_Model_Request
+    {
+        $this->_assertEnabled($input);
+        if ($this->_isBotSubmission($input)) {
+            return null;
+        }
+        $this->_assertCaptcha($input);
+        $this->_attemptRateLimit($input);
+        return $this->_record($input);
+    }
+
+    /**
+     * Record the declaration of the customer $customerId for the order that $input names, and send its emails.
+     * The name and the email come from the account. An order of the customer gives a verified declaration.
+     * Return null and record nothing when the client fills the honeypot.
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity when revocation is disabled, or the customer does not exist
+     * @throws Mage_Core_Exception_Input when the CAPTCHA module of the store refuses the token
+     * @throws Mage_Core_Exception_TooManyRequests when the client is over its limit
+     * @throws Mage_Core_Exception when $input names no order
+     */
+    public function submitForCustomer(int $customerId, \Maho\DataObject $input): ?Maho_Revocation_Model_Request
+    {
+        $this->_assertEnabled($input);
+        if ($this->_isBotSubmission($input)) {
+            return null;
+        }
+        $this->_assertCaptcha($input);
+        $this->_readCustomerOrder($input->setCustomerId($customerId));
+        $this->_attemptRateLimit($input);
+        return $this->_record($input);
+    }
+
+    /**
+     * Sends the receipt email and clears the suppression flag, recording the resend.
+     */
+    public function resendReceipt(Maho_Revocation_Model_Request $request): bool
+    {
+        $sent = Mage::getModel('revocation/email')->sendReceipt($request);
+        if ($sent) {
+            $request->setSuppressedAt(null)
+                ->setSuppressedReason(null)
+                ->appendAdminNote('Receipt email resent to ' . $request->getEmail())
+                ->save();
+        }
+        return $sent;
+    }
+
+    #[\Deprecated('Maho_Revocation_Model_Request::_beforeSave() checks the processing status')]
+    public function isValidProcessedStatus(string $status): bool
+    {
+        return array_key_exists($status, Mage::getModel('revocation/source_processedStatus')->toOptionHash());
+    }
+
+    /**
+     * Set the processing status $status of $request. Does not save: save() checks the status and stamps processed_at.
+     *
+     * @throws Mage_Core_Exception when the status is not valid
+     */
+    #[\Deprecated('Use decide(), which also saves the request')]
+    public function applyProcessedStatus(Maho_Revocation_Model_Request $request, string $status): void
+    {
+        if (!$this->isValidProcessedStatus($status)) {
+            Mage::throwException(Mage::helper('revocation')->__('Invalid processing status.'));
+        }
+        $request->setProcessedStatus($status);
+    }
+
+    /**
+     * Set the store of $input when it has none, and refuse a store that has no revocation.
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity
+     */
+    protected function _assertEnabled(\Maho\DataObject $input): void
+    {
+        $input->setStoreId((int) ($input->getStoreId() ?? Mage::app()->getStore()->getId()));
+        if (!Mage::helper('revocation')->isEnabled($input->getStoreId())) {
+            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('revocation')->__('Revocation is not available'));
+        }
+    }
+
+    /**
+     * @throws Mage_Core_Exception_TooManyRequests
+     */
+    protected function _attemptRateLimit(\Maho\DataObject $input): void
+    {
+        $helper = Mage::helper('revocation');
+        if ($helper->isIpRateLimited($input->getStoreId())) {
+            throw new Mage_Core_Exception_TooManyRequests(
+                $helper->__('Your request could not be processed right now. Please try again later or contact us directly.'),
+                self::RATE_LIMIT_WINDOW,
+            );
+        }
+    }
+
+    /**
+     * Check the declaration in $input, save it and send its emails.
+     *
+     * @throws Mage_Core_Exception on validation failure (before any row is written)
+     */
+    protected function _record(\Maho\DataObject $input): Maho_Revocation_Model_Request
     {
         $helper = Mage::helper('revocation');
         $coreHelper = Mage::helper('core');
-
-        $input->setStoreId((int) ($input->getStoreId() ?? Mage::app()->getStore()->getId()));
-        if (!$helper->isEnabled($input->getStoreId())) {
-            throw new Mage_Core_Exception_NoSuchEntity($helper->__('Revocation is not available'));
-        }
-        if ($channel === Channel::Web && $this->_isBotSubmission($input)) {
-            return null;
-        }
-        if ($channel === Channel::Api) {
-            $this->_readCustomerOrder($input);
-        }
-        if ($helper->isIpRateLimited($input->getStoreId())) {
-            throw new Mage_Core_Exception_TooManyRequests(match ($channel) {
-                Channel::Web => $helper->__('Your request could not be processed right now. Please try again later or contact us directly.'),
-                Channel::Api => $helper->__('Too many requests. Please try again later.'),
-            }, self::RATE_LIMIT_WINDOW);
-        }
 
         $customerName = trim((string) $input->getCustomerName());
         $email = trim((string) $input->getEmail());
@@ -143,24 +228,22 @@ class Maho_Revocation_Service_Request
     }
 
     /**
-     * Sends the receipt email and clears the suppression flag, recording the resend.
+     * Whether the client filled the honeypot, or the form came back faster than the minimum time.
+     * A form that the store renders embeds an encrypted render timestamp, and its controller gives it as
+     * render_token. A missing or unreadable one counts as too fast. An input without the key render_token
+     * comes from a client that renders no form, such as the API, and has no time check.
      */
-    public function resendReceipt(Maho_Revocation_Model_Request $request): bool
+    /**
+     * The CAPTCHA of the store is invisible, so it adds no step for the consumer.
+     *
+     * @throws Mage_Core_Exception_Input when the CAPTCHA module of the store refuses the token
+     */
+    protected function _assertCaptcha(\Maho\DataObject $input): void
     {
-        $sent = Mage::getModel('revocation/email')->sendReceipt($request);
-        if ($sent) {
-            $request->setSuppressedAt(null)
-                ->setSuppressedReason(null)
-                ->appendAdminNote('Receipt email resent to ' . $request->getEmail())
-                ->save();
-        }
-        return $sent;
+        $fields = $input->getFormFields();
+        Mage::helper('core')->assertCaptcha(is_array($fields) ? $fields : []);
     }
 
-    /**
-     * Whether the web form filled the honeypot or came back faster than the minimum time.
-     * The form embeds an encrypted render timestamp. A missing or unreadable one counts as too fast.
-     */
     protected function _isBotSubmission(\Maho\DataObject $input): bool
     {
         $storeId = (int) $input->getStoreId();
@@ -171,7 +254,7 @@ class Maho_Revocation_Service_Request
         }
 
         $minSeconds = (int) Mage::getStoreConfig(Maho_Revocation_Helper_Data::XML_PATH_MIN_SUBMIT_SECONDS, $storeId);
-        if ($minSeconds <= 0) {
+        if ($minSeconds <= 0 || !$input->hasData('render_token')) {
             return false;
         }
         $renderedAt = Mage::helper('core')->decrypt((string) $input->getRenderToken());
@@ -180,7 +263,7 @@ class Maho_Revocation_Service_Request
     }
 
     /**
-     * Fill the declaration of the API from the account of the customer. An order of the customer gives a verified
+     * Fill the declaration in $input from the account of its customer. An order of the customer gives a verified
      * declaration, as the link on the order page of the storefront does. Any other order, and an order after its
      * revocation period, is recorded too, as on the public form: the merchant decides in the admin.
      *
@@ -191,9 +274,6 @@ class Maho_Revocation_Service_Request
     {
         $helper = Mage::helper('revocation');
         $customer = Mage::getService('customer/customer')->getById((int) $input->getCustomerId());
-        if (!$customer) {
-            throw new Mage_Core_Exception_NoSuchEntity($helper->__('Customer not found'));
-        }
 
         $order = Mage::getModel('sales/order');
         $orderReference = trim((string) $input->getOrderReference());

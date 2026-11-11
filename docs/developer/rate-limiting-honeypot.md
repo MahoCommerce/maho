@@ -195,7 +195,8 @@ The honeypot switch is a field of the module, under **System > Configuration > G
 | Field | Path | Purpose |
 |-------|------|---------|
 | Honeypot Field | `contacts/abuse/honeypot_enabled` | Adds the invisible trap field. Submissions that fill it are silently dropped. |
-| Contact form (web + API) | `system/rate_limit/contact` | Per-client and per-email throttle. `0` disables the limit. |
+| Contact form per IP (web + API) | `system/rate_limit/contact_ip` | Per IP address, for the form and the API together. Default 10 per hour. `0` disables the limit. |
+| Contact form per email (web + API) | `system/rate_limit/contact` | Per email address. `0` disables the limit. |
 | Contact form auto-reply | `system/rate_limit/contact_auto_reply` | Caps auto-reply emails per address. `0` disables the limit. |
 
 Follow this pattern when adding abuse protection to your own public endpoints: keep the measures invisible to real customers, and don't set limits so low that legitimate visitors get blocked.

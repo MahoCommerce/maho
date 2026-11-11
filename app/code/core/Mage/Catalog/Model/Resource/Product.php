@@ -92,6 +92,29 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
     }
 
     /**
+     * Return the IDs of $productIds that are in none of the websites $websiteIds.
+     *
+     * @param array<int|string> $productIds
+     * @param array<int|string> $websiteIds
+     * @return list<int>
+     */
+    public function getIdsNotInWebsites(array $productIds, array $websiteIds): array
+    {
+        if ($productIds === []) {
+            return [];
+        }
+        $websiteIds = array_map(intval(...), $websiteIds);
+        $productWebsites = $this->getWebsiteIdsByProductIds($productIds);
+        $outside = [];
+        foreach ($productIds as $productId) {
+            if (array_intersect(array_map(intval(...), $productWebsites[$productId] ?? []), $websiteIds) === []) {
+                $outside[] = (int) $productId;
+            }
+        }
+        return $outside;
+    }
+
+    /**
      * Retrieve product category identifiers
      *
      * @param Mage_Catalog_Model_Product|\Maho\DataObject $product

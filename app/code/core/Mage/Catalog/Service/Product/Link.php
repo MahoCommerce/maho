@@ -47,7 +47,7 @@ class Mage_Catalog_Service_Product_Link
     /**
      * @return array<int, array{position: int, qty?: float}> the data of each link, by the ID of the linked product
      */
-    public function getLinkData(Product $product, string $type): array
+    private function getLinkData(Product $product, string $type): array
     {
         $links = [];
         if ($type === self::TYPE_GROUPED) {
@@ -139,12 +139,9 @@ class Mage_Catalog_Service_Product_Link
         }
         /** @var Mage_Catalog_Model_Resource_Product $resource */
         $resource = Mage::getResourceSingleton('catalog/product');
-        $productWebsites = $resource->getWebsiteIdsByProductIds($productIds);
-        foreach ($resource->getProductsSku(array_values($productIds)) as $row) {
-            $ids = array_map(intval(...), $productWebsites[$row['entity_id']] ?? []);
-            if (array_intersect($ids, $websiteIds) === []) {
-                throw new Mage_Core_Exception_Forbidden(Mage::helper('catalog')->__("Access denied for this product's websites"));
-            }
+        $existingIds = array_column($resource->getProductsSku(array_values($productIds)), 'entity_id');
+        if ($resource->getIdsNotInWebsites($existingIds, $websiteIds) !== []) {
+            throw new Mage_Core_Exception_Forbidden(Mage::helper('catalog')->__("Access denied for this product's websites"));
         }
     }
 
@@ -169,7 +166,7 @@ class Mage_Catalog_Service_Product_Link
 
         $setter = self::SETTERS[$type];
         $product->$setter($links);
-        $product->save();
+        Mage::getService('catalog/product')->savePart($product);
     }
 
     /**

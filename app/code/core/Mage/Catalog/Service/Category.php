@@ -17,11 +17,6 @@ class Mage_Catalog_Service_Category
     /** The attributes that take the value of the configuration when they hold null. */
     public const USE_CONFIG_CODES = ['available_sort_by', 'default_sort_by', 'filter_price_range'];
 
-    /** The highest ID that the SMALLINT column cms_block.block_id holds. PostgreSQL refuses a larger value. */
-    private const MAX_CMS_BLOCK_ID = 32767;
-
-    private const MAX_ENTITY_ID = 2147483647;
-
     /**
      * Load the category $id with the values of the store view $storeId.
      *
@@ -32,9 +27,7 @@ class Mage_Catalog_Service_Category
         /** @var Category $category */
         $category = Mage::getModel('catalog/category');
         $category->setStoreId($storeId);
-        if ($id > 0 && $id <= self::MAX_ENTITY_ID) {
-            $category->load($id);
-        }
+        $category->load($id);
         if (!$category->getId()) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('catalog')->__('Category not found'));
         }
@@ -139,22 +132,9 @@ class Mage_Catalog_Service_Category
      */
     public function useDefault(Category $category, array $codes): void
     {
-        $errors = new Mage_Core_Exception_Input();
-        if ($codes !== [] && (int) $category->getStoreId() === Mage_Core_Model_App::ADMIN_STORE_ID) {
-            $errors->addError('use_default', Mage::helper('catalog')->__('useDefault requires a store context (?store=): global values have no default to revert to.'));
-            $errors->throwIfErrors();
+        foreach (Mage::helper('catalog')->getStoreScopeAttributes(Category::ENTITY, $codes, (int) $category->getStoreId()) as $attribute) {
+            $category->setData($attribute->getAttributeCode(), false);
         }
-        foreach ($codes as $code) {
-            $attribute = Mage::getSingleton('eav/config')->getAttribute(Category::ENTITY, $code);
-            if (!$attribute instanceof Mage_Catalog_Model_Resource_Eav_Attribute || !$attribute->getId() || $attribute->getBackend()->isStatic()) {
-                $errors->addError('use_default', Mage::helper('catalog')->__('Unknown attribute in useDefault: %s', $code));
-            } elseif ($attribute->isScopeGlobal()) {
-                $errors->addError('use_default', Mage::helper('catalog')->__("Attribute '%s' is global scope and has no store override to revert.", $code));
-            } else {
-                $category->setData($code, false);
-            }
-        }
-        $errors->throwIfErrors();
     }
 
     /**
@@ -224,26 +204,14 @@ class Mage_Catalog_Service_Category
     public function delete(Category $category): void
     {
         Mage::dispatchEvent('catalog_controller_category_delete', ['category' => $category]);
-        $wasSecure = (bool) Mage::registry('isSecureArea');
-        if (!$wasSecure) {
-            Mage::register('isSecureArea', true);
-        }
-        try {
-            $category->delete();
-        } finally {
-            if (!$wasSecure) {
-                Mage::unregister('isSecureArea');
-            }
-        }
+        Mage::helper('catalog')->deleteInSecureArea($category);
     }
 
     private function getParent(int $parentId): Category
     {
         /** @var Category $parent */
         $parent = Mage::getModel('catalog/category');
-        if ($parentId > 0 && $parentId <= self::MAX_ENTITY_ID) {
-            $parent->load($parentId);
-        }
+        $parent->load($parentId);
         return $parent;
     }
 
@@ -348,7 +316,7 @@ class Mage_Catalog_Service_Category
 
         $landingPage = $category->getData('landing_page');
         if ($category->dataHasChangedFor('landing_page') && is_numeric($landingPage) && (int) $landingPage > 0
-            && ((int) $landingPage > self::MAX_CMS_BLOCK_ID || !Mage::getModel('cms/block')->load((int) $landingPage)->getId())
+            && !Mage::getModel('cms/block')->load((int) $landingPage)->getId()
         ) {
             $errors['landing_page'] = Mage::helper('catalog')->__('CMS block %s not found', (int) $landingPage);
         }

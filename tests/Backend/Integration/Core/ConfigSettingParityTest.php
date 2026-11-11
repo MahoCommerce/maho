@@ -140,10 +140,10 @@ it('encrypts a secret on every transport', function (): void {
     }
 });
 
-it('refuses a field at a scope where System > Configuration does not show it, on the API and the CLI', function (): void {
+it('refuses a field at a scope where System > Configuration does not show it, on the API and on the CLI with --strict', function (): void {
     $api = configParityApi('PUT', CONFIG_PARITY_DEFAULT_ONLY, ['value' => '1', 'scope' => 'stores', 'scopeCode' => $this->store->getCode()]);
     $cli = configParityCli(new ConfigSet(), [
-        'path' => CONFIG_PARITY_DEFAULT_ONLY, 'value' => '1', '--scope' => 'stores', '--scope-id' => (int) $this->store->getId(),
+        'path' => CONFIG_PARITY_DEFAULT_ONLY, 'value' => '1', '--scope' => 'stores', '--scope-id' => (int) $this->store->getId(), '--strict' => true,
     ]);
 
     $message = "Field 'web/url/use_store' cannot be set at scope 'stores'";
@@ -153,6 +153,46 @@ it('refuses a field at a scope where System > Configuration does not show it, on
         ->and($cli['code'])->toBe(Command::FAILURE)
         ->and($cli['output'])->toContain($message)
         ->and(configParityStored(CONFIG_PARITY_DEFAULT_ONLY, 'stores', (int) $this->store->getId()))->toBeFalse();
+});
+
+it('saves a field on the CLI at a scope where System > Configuration does not show it', function (): void {
+    $storeId = (int) $this->store->getId();
+    $cli = configParityCli(new ConfigSet(), [
+        'path' => CONFIG_PARITY_DEFAULT_ONLY, 'value' => '1', '--scope' => 'stores', '--scope-id' => $storeId,
+    ]);
+
+    expect($cli['code'])->toBe(Command::SUCCESS)
+        ->and(configParityStored(CONFIG_PARITY_DEFAULT_ONLY, 'stores', $storeId))->toBe('1');
+});
+
+it('tells the observers of the section after a save on the CLI', function (): void {
+    $spy = new class {
+        /** @var list<array{0: mixed, 1: mixed}> */
+        public array $events = [];
+
+        public function record(Maho\Event\Observer $observer): void
+        {
+            $this->events[] = [$observer->getEvent()->getData('website'), $observer->getEvent()->getData('store')];
+        }
+    };
+    Mage::register('_singleton/tests/config_parity_spy', $spy, true);
+    (function (): void {
+        $this->_events['global']['admin_system_config_changed_section_general'] = ['observers' => [
+            'config_parity_spy' => ['type' => 'singleton', 'model' => 'tests/config_parity_spy', 'method' => 'record'],
+        ]];
+    })->call(Mage::app());
+
+    try {
+        $cli = configParityCli(new ConfigSet(), ['path' => CONFIG_PARITY_NAME, 'value' => 'Cli Name', '--scope' => 'default', '--scope-id' => 0]);
+    } finally {
+        (function (): void {
+            unset($this->_events['global']['admin_system_config_changed_section_general']);
+        })->call(Mage::app());
+        Mage::unregister('_singleton/tests/config_parity_spy');
+    }
+
+    expect($cli['code'])->toBe(Command::SUCCESS)
+        ->and($spy->events)->toBe([[null, null]]);
 });
 
 it('deletes a website value through the backend model of the field on the API and the CLI', function (): void {
@@ -248,20 +288,20 @@ describe('a path that no field declares', function (): void {
             ->and($stored)->toBe('0');
     });
 
-    it('is refused on the API and the CLI, as in the admin, and saved on the CLI with --undeclared', function (): void {
+    it('is refused on the API, as in the admin, and on the CLI with --strict, and the CLI saves it without', function (): void {
         $path = 'dev/parity/undeclared';
         $api = configParityApi('PUT', $path, ['value' => 'y']);
-        $cli = configParityCli(new ConfigSet(), ['path' => $path, 'value' => 'x', '--scope' => 'default', '--scope-id' => 0]);
+        $strict = configParityCli(new ConfigSet(), ['path' => $path, 'value' => 'x', '--scope' => 'default', '--scope-id' => 0, '--strict' => true]);
         $stored = configParityStored($path, 'default', 0);
-        $forced = configParityCli(new ConfigSet(), ['path' => $path, 'value' => 'x', '--scope' => 'default', '--scope-id' => 0, '--undeclared' => true]);
-        $forcedStored = configParityStored($path, 'default', 0);
+        $cli = configParityCli(new ConfigSet(), ['path' => $path, 'value' => 'x', '--scope' => 'default', '--scope-id' => 0]);
+        $cliStored = configParityStored($path, 'default', 0);
         Mage::getConfig()->deleteConfig($path);
 
         expect($api['status'])->toBe(404)
-            ->and($cli['code'])->toBe(Command::FAILURE)
-            ->and($cli['output'])->toContain("Configuration setting '{$path}' not found")
+            ->and($strict['code'])->toBe(Command::FAILURE)
+            ->and($strict['output'])->toContain("Configuration setting '{$path}' not found")
             ->and($stored)->toBeFalse()
-            ->and($forced['code'])->toBe(Command::SUCCESS)
-            ->and($forcedStored)->toBe('x');
+            ->and($cli['code'])->toBe(Command::SUCCESS)
+            ->and($cliStored)->toBe('x');
     });
 });

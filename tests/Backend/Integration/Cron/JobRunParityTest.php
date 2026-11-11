@@ -164,7 +164,31 @@ it('records a run of the CLI in a new schedule, and frees the lock after it', fu
         ->and($schedules)->toHaveCount(1)
         ->and($schedules[0]->getStatus())->toBe(Mage_Cron_Model_Schedule::STATUS_SUCCESS)
         ->and($schedules[0]->getFinishedAt())->not->toBeNull()
-        ->and(Mage::getService('cron/job')->isRunning(CRON_PARITY_JOB))->toBeFalse();
+        ->and(Mage::getSingleton('core/lock')->isHeld('cron.job.' . CRON_PARITY_JOB))->toBeFalse();
+});
+
+it('runs the pending schedule of the job on the CLI, so that the scheduler does not run it again', function (): void {
+    $now = Mage::app()->getLocale()->formatDateForDb('now');
+    /** @var Mage_Cron_Model_Schedule $pending */
+    $pending = Mage::getModel('cron/schedule');
+    $pending->setJobCode(CRON_PARITY_JOB)
+        ->setStatus(Mage_Cron_Model_Schedule::STATUS_PENDING)
+        ->setCreatedAt($now)
+        ->setScheduledAt($now)
+        ->save();
+
+    $cli = cronParityCli(new CronRun(), ['mode' => CRON_PARITY_JOB]);
+
+    $schedules = cronParitySchedules();
+    expect($cli['code'])->toBe(Command::SUCCESS)
+        ->and(CronParity_Model_Job::$runs)->toBe(1)
+        ->and($schedules)->toHaveCount(1)
+        ->and((int) $schedules[0]->getId())->toBe((int) $pending->getId())
+        ->and($schedules[0]->getStatus())->toBe(Mage_Cron_Model_Schedule::STATUS_SUCCESS)
+        ->and($schedules[0]->getExecutedAt())->not->toBeNull();
+
+    new CronParityObserver()->runScheduled($schedules[0], [new CronParity_Model_Job(), 'execute']);
+    expect(CronParity_Model_Job::$runs)->toBe(1);
 });
 
 it('records the error of a job and frees the lock after it', function (): void {
@@ -179,7 +203,7 @@ it('records the error of a job and frees the lock after it', function (): void {
         ->and($cli['output'])->toContain('cron parity failure')
         ->and($schedules[0]->getStatus())->toBe(Mage_Cron_Model_Schedule::STATUS_ERROR)
         ->and($schedules[0]->getMessages())->toBe('cron parity failure')
-        ->and(Mage::getService('cron/job')->isRunning(CRON_PARITY_JOB))->toBeFalse();
+        ->and(Mage::getSingleton('core/lock')->isHeld('cron.job.' . CRON_PARITY_JOB))->toBeFalse();
 });
 
 it('does not start a second run of a job while the first one runs', function (): void {

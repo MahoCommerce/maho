@@ -389,13 +389,15 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Add an error to $errors for each problem of the name, the websites, the customer groups and the dates.
+     * Add an error to $errors for each problem of the name, the websites, the customer groups, the dates and the
+     * trees of conditions.
      * A new rule must have all of them. A website or a group that the rule had before passes, because an admin
      * can delete it after the save.
      */
     protected function _validateScope(Mage_Core_Exception_Input $errors): void
     {
         $helper = Mage::helper('rule');
+        $this->_validateTrees($errors);
         if (!$this->getId() || $this->hasData('name')) {
             $name = trim((string) $this->getData('name'));
             if ($name === '' || mb_strlen($name) > 255) {
@@ -437,16 +439,54 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
             $this->setData($field, $dates[$field]);
         }
         if ($dates['from_date'] !== null && $dates['to_date'] !== null && $dates['from_date'] > $dates['to_date']) {
-            $this->_addRecordError($errors, 'to_date', $helper->__('End Date must be greater than Start Date.'));
+            $this->_addRecordError($errors, 'to_date', $helper->__('End Date must be greater than Start Date.'), ['from_date']);
         }
     }
 
     /**
-     * Add $message to $errors, unless $errors already has an error of $field: a transport that could not read a
-     * value reports it first.
+     * Add an error to $errors for each tree of conditions that holds an attribute with an HTML tag. The admin
+     * shows the attribute of a condition as text.
      */
-    protected function _addRecordError(Mage_Core_Exception_Input $errors, string $field, string $message): void
+    protected function _validateTrees(Mage_Core_Exception_Input $errors): void
     {
+        foreach (['conditions' => $this->getConditions(), 'actions' => $this->getActions()] as $field => $root) {
+            if ($root && self::_hasAttributeWithTags($root->asArray())) {
+                $errors->addError($field, Mage::helper('rule')->__('Wrong rule specified'));
+            }
+        }
+    }
+
+    /**
+     * @param array<array-key, mixed> $tree a condition and its children, in the format of asArray()
+     */
+    private static function _hasAttributeWithTags(array $tree): bool
+    {
+        foreach ($tree as $key => $value) {
+            if (is_array($value)) {
+                if (self::_hasAttributeWithTags($value)) {
+                    return true;
+                }
+            } elseif ($key === 'attribute' && is_string($value) && $value !== Mage::helper('core')->removeTags($value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Add $message to $errors, unless $errors already has an error of $field: a transport that could not read a
+     * value reports it first. A loaded rule reports only a field that changed since the load, or whose rule
+     * depends on a field of $relatedFields that changed, so a save of a counter passes with an old stored value.
+     *
+     * @param list<string> $relatedFields
+     */
+    protected function _addRecordError(Mage_Core_Exception_Input $errors, string $field, string $message, array $relatedFields = []): void
+    {
+        if ($this->getId() && $this->getOrigData() !== null
+            && array_filter([$field, ...$relatedFields], $this->dataHasChangedFor(...)) === []
+        ) {
+            return;
+        }
         if (!in_array($field, array_column($errors->getErrors(), 'field'), true)) {
             $errors->addError($field, $message);
         }
@@ -510,6 +550,16 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
             $this->setData('website_ids', (array) $websiteIds);
         }
         return $this->_getData('website_ids');
+    }
+
+    /**
+     * Tell whether the rule is in one or more of the websites $websiteIds.
+     *
+     * @param list<int|string> $websiteIds
+     */
+    public function isInWebsites(array $websiteIds): bool
+    {
+        return array_intersect(array_map(intval(...), (array) $this->getWebsiteIds()), array_map(intval(...), $websiteIds)) !== [];
     }
 
     /**

@@ -53,22 +53,23 @@ function reviewParityCustomerSecurity(int $customerId): Security
 }
 
 /**
- * Post the review form of the product page, as the browser does.
+ * Post the review form of the product page, as the browser does, with the token of the CAPTCHA widget in $captchaToken.
  *
  * @param array<int, int> $ratings the option ID by the rating ID
  * @return array{accepted: bool, messages: list<string>}
  */
-function reviewViaForm(int $productId, string $title, array $ratings = []): array
+function reviewViaForm(int $productId, string $title, array $ratings = [], ?string $captchaToken = null): array
 {
     Mage::unregister('current_product');
     Mage::unregister('product');
-    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/review/product/post', 'POST', [
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/review/product/post', 'POST', array_filter([
         'id' => $productId,
         'title' => $title,
         'detail' => 'Parity detail',
         'nickname' => 'Parity',
         'ratings' => $ratings,
-    ]));
+        'maho_captcha' => $captchaToken,
+    ], fn($value) => $value !== null)));
     $request->setRouteName('review')->setControllerName('product')->setActionName('post')->setDispatched(true);
     new Mage_Review_ProductController($request, new Mage_Core_Controller_Response_Http())->postAction();
 
@@ -252,8 +253,28 @@ it('refuses a nickname that the column cannot hold on both transports', function
         ->setDetail('Parity detail')
         ->setNickname(str_repeat('n', Mage_Review_Model_Review::MAX_NICKNAME_LENGTH + 1));
 
-    expect(fn() => Mage::getService('review/review')->submit($review, [], $this->storeId, null, Mage_Review_Model_Channel::Web))
+    expect(fn() => Mage::getService('review/review')->submit($review, [], $this->storeId, null, []))
         ->toThrow(Mage_Core_Exception_Input::class, 'Nickname cannot exceed 128 characters');
+});
+
+it('refuses the same nickname when a caller saves the review model with no service', function () {
+    $review = Mage::getModel('review/review');
+    $review->setEntityId((int) $review->getEntityIdByCode(Mage_Review_Model_Review::ENTITY_PRODUCT_CODE))
+        ->setEntityPkValue((int) $this->product->getId())
+        ->setStatusId(Mage_Review_Model_Review::STATUS_PENDING)
+        ->setStoreId($this->storeId)
+        ->setStores([$this->storeId])
+        ->setTitle($this->title)
+        ->setDetail('Parity detail')
+        ->setNickname(str_repeat('n', Mage_Review_Model_Review::MAX_NICKNAME_LENGTH + 1));
+
+    expect(fn() => $review->save())->toThrow(Mage_Core_Exception_Input::class, 'Nickname cannot exceed 128 characters')
+        ->and(reviewParityReviews($this->title))->toBe([]);
+
+    $review->setNickname('Parity')->save();
+    $stored = Mage::getService('review/review')->getById((int) $review->getId());
+    expect($stored->setStatusId(Mage_Review_Model_Review::STATUS_APPROVED)->save()->getStatusId())
+        ->toBe(Mage_Review_Model_Review::STATUS_APPROVED);
 });
 
 it('refuses a product that the store does not show on both transports', function () {
@@ -295,35 +316,40 @@ it('refuses a guest when the store accepts reviews of customers only', function 
     Mage::app()->getStore()->setConfig(Mage_Review_Service_Review::XML_PATH_GUEST_ALLOWED, '0');
     $review = Mage::getModel('review/review')->setEntityPkValue((int) $this->product->getId())->setTitle($this->title);
 
-    expect(fn() => Mage::getService('review/review')->submit($review, [], $this->storeId, null, Mage_Review_Model_Channel::Web))
+    expect(fn() => Mage::getService('review/review')->submit($review, [], $this->storeId, null, []))
         ->toThrow(Mage_Core_Exception_Forbidden::class);
 });
 
 describe('the CAPTCHA', function () {
-    afterEach(fn() => Mage::unregister('_helper/apiplatform'));
+    afterEach(fn() => CaptchaStub::uninstall());
 
-    it('asks the CAPTCHA module of the store on the API, and leaves the form to its predispatch observer', function () {
+    it('refuses on the form and on the API a review with a token that the CAPTCHA module refuses', function (?string $token) {
         $captcha = CaptchaStub::install();
 
-        $api = reviewViaApi((int) $this->customer->getId(), (int) $this->product->getId(), $this->title);
-        expect($api['status'])->toBe(422)
+        $api = reviewViaApi((int) $this->customer->getId(), (int) $this->product->getId(), $this->title, captchaToken: $token);
+        expect(reviewViaForm((int) $this->product->getId(), $this->title, captchaToken: $token))
+            ->toBe(['accepted' => false, 'messages' => ['Incorrect CAPTCHA.']])
+            ->and($api['status'])->toBe(422)
             ->and($api['fields'])->toBe(['captchaToken'])
             ->and($api['errors'])->toBe(['Incorrect CAPTCHA.'])
             ->and(reviewParityReviews($this->title))->toBe([])
-            ->and($captcha->checks)->toHaveCount(1);
+            ->and($captcha->checks)->toHaveCount(2);
+    })->with(['a wrong token' => 'wrong', 'no token' => null]);
 
-        expect(reviewViaForm((int) $this->product->getId(), $this->title)['accepted'])->toBeTrue()
-            ->and($captcha->checks)->toHaveCount(1);
-    });
-
-    it('saves the review of the API with a token that the CAPTCHA module accepts', function (bool $graphQl) {
+    it('saves the review of each transport with a token that the CAPTCHA module accepts', function (string $transport) {
         $captcha = CaptchaStub::install();
+        $customerId = (int) $this->customer->getId();
+        $productId = (int) $this->product->getId();
 
-        $api = reviewViaApi((int) $this->customer->getId(), (int) $this->product->getId(), $this->title, captchaToken: CaptchaStub::SOLVED, graphQl: $graphQl);
-        expect($api['status'])->toBe(200)
+        $accepted = match ($transport) {
+            'form' => reviewViaForm($productId, $this->title, captchaToken: CaptchaStub::SOLVED)['accepted'],
+            'REST' => reviewViaApi($customerId, $productId, $this->title, captchaToken: CaptchaStub::SOLVED)['status'] === 200,
+            'GraphQL' => reviewViaApi($customerId, $productId, $this->title, captchaToken: CaptchaStub::SOLVED, graphQl: true)['status'] === 200,
+        };
+        expect($accepted)->toBeTrue()
             ->and(reviewParityReviews($this->title))->toHaveCount(1)
-            ->and($captcha->checks)->toBe([['captchaToken' => CaptchaStub::SOLVED]]);
-    })->with(['REST' => false, 'GraphQL' => true]);
+            ->and($captcha->checks)->toHaveCount(1);
+    })->with(['form', 'REST', 'GraphQL']);
 });
 
 describe('moderation', function () {
@@ -336,7 +362,7 @@ describe('moderation', function () {
                 ->setTitle($this->title)
                 ->setDetail('Parity detail')
                 ->setNickname('Parity');
-            $reviews[$transport] = (int) $service->submit($review, [], $this->storeId, (int) $this->customer->getId(), Mage_Review_Model_Channel::Web)->getId();
+            $reviews[$transport] = (int) $service->submit($review, [], $this->storeId, (int) $this->customer->getId(), [])->getId();
         }
 
         $data = new Review();

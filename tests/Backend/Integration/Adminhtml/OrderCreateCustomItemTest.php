@@ -209,7 +209,7 @@ it('places an order with the line, then invoices and refunds it with return to s
     Mage::getModel('core/resource_transaction')->addObject($invoice)->addObject($order)->save();
 
     $order = Mage::getModel('sales/order')->load($order->getId());
-    $creditmemo = Mage::getService('sales/order')->buildCreditmemo($order);
+    $creditmemo = Mage::getService('sales/order_document')->buildCreditmemo($order);
     foreach ($creditmemo->getAllItems() as $creditmemoItem) {
         $creditmemoItem->setBackToStock(true);
     }

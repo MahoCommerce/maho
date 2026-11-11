@@ -14,6 +14,26 @@ class Mage_Paygate_Helper_Data extends Mage_Core_Helper_Abstract
     protected $_moduleName = 'Mage_Paygate';
 
     /**
+     * Cancel the active partial authorizations of the payment of $quote in the store of $quote, and save the
+     * payment. The payment is saved when the gateway refuses, too.
+     *
+     * @throws Mage_Core_Exception
+     */
+    public function cancelPartialAuthorization(Mage_Sales_Model_Quote $quote): void
+    {
+        $payment = $quote->getPayment();
+        try {
+            $paymentMethod = Mage::helper('payment')->getMethodInstance(Mage_Paygate_Model_Authorizenet::METHOD_CODE);
+            if ($paymentMethod instanceof Mage_Paygate_Model_Authorizenet) {
+                $paymentMethod->setStore($quote->getStoreId());
+                $paymentMethod->cancelPartialAuthorization($payment);
+            }
+        } finally {
+            $payment->save();
+        }
+    }
+
+    /**
      * Converts a lot of messages to message
      *
      * @param  array $messages

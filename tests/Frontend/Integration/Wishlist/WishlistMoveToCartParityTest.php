@@ -11,6 +11,7 @@ use ApiPlatform\Metadata\Post;
 use Mage\Wishlist\Api\WishlistProcessor;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
@@ -72,6 +73,8 @@ beforeEach(function () {
     $session->start();
     Mage::register(Mage_Core_Model_Session_Abstract::REGISTRY_KEY, $session);
     Mage::app()->setCurrentStore(Mage::app()->getDefaultStoreView());
+    // The customer of the test logs in without the confirmation email
+    Mage::app()->getStore()->setConfig(Mage_Customer_Model_Customer::XML_PATH_IS_CONFIRM, '0');
     Mage::app()->getStore()->setConfig(Mage_Wishlist_Service_Wishlist::XML_PATH_ENABLED, '1');
 
     $this->product = Mage::getModel('catalog/product')->setStoreId(0)
@@ -100,6 +103,9 @@ beforeEach(function () {
 });
 
 afterEach(function () {
+    Mage::getSingleton('customer/session')->logout();
+    Mage::unregister('_singleton/checkout/cart');
+    Mage::unregister('wishlist');
     foreach ($this->quotes as $quote) {
         $quote->delete();
     }
@@ -110,32 +116,52 @@ afterEach(function () {
 });
 
 it('moves an item to the cart with its options on both transports', function () {
-    $buyRequest = new Maho\DataObject(['qty' => 1, 'options' => [$this->optionId => 'For Jane']]);
-    $item = Mage::getService('wishlist/wishlist')->addProduct($this->wishlist, (int) $this->product->getId(), $buyRequest, 1);
-    $webQuote = Mage::getService('checkout/cart')->create(null, 1);
-    $this->quotes[] = $webQuote;
+    $customerId = (int) $this->customer->getId();
+    $productId = (int) $this->product->getId();
+    $service = Mage::getService('wishlist/wishlist');
+    $buyRequest = fn(): Maho\DataObject => new Maho\DataObject(['qty' => 1, 'options' => [$this->optionId => 'For Jane']]);
+    $lines = fn(Mage_Sales_Model_Quote $quote): array => array_map(
+        fn(Mage_Sales_Model_Quote_Item $line): float => (float) $line->getQty(),
+        Mage::getModel('sales/quote')->loadByIdWithoutStore($quote->getId())->getAllVisibleItems(),
+    );
 
-    // The page keeps the item in the wishlist without "delete", so the API can move the same item after it
-    $added = Mage::getModel('wishlist/item')->loadWithOptions($item->getId())
-        ->addToCart(Mage::getModel('checkout/cart')->setQuote($webQuote));
-    $request = AdminApiParity::jsonRequest('POST', "/api/rest/v2/customers/me/wishlist/{$item->getId()}/move-to-cart");
-    $api = AdminApiParity::api($request, fn() => new WishlistProcessor(wishlistMoveSecurity((int) $this->customer->getId()))
-        ->process(null, new Post(name: 'moveToCart'), [], ['request' => $request, 'args' => ['input' => ['itemId' => $item->getId(), 'qty' => 1]]]));
-    $apiQuote = Mage::getService('checkout/cart')->getForCustomer((int) $this->customer->getId(), 1);
-    $this->quotes[] = $apiQuote;
+    // The page and the API use the cart of the customer, so the line of the API must merge with the line of the page
+    $quote = Mage::getService('checkout/cart')->getForCustomer($customerId, 1);
+    $this->quotes[] = $quote;
+    Mage::getSingleton('customer/session')->setCustomer($this->customer);
+    Mage::getSingleton('checkout/session')->replaceQuote($quote);
+    Mage::unregister('_singleton/checkout/cart');
+    Mage::unregister('wishlist');
 
-    expect($added)->toBeTrue()
-        ->and($api['errors'])->toBe([])
+    $pageItemId = (int) $service->addProduct($this->wishlist, $productId, $buyRequest(), 1)->getId();
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/wishlist/index/cart', 'POST', ['item' => $pageItemId]));
+    $request->setRouteName('wishlist')->setControllerName('index')->setActionName('cart')->setDispatched(true);
+    Mage::app()->setRequest($request);
+    new Mage_Wishlist_IndexController($request, new Mage_Core_Controller_Response_Http())->cartAction();
+
+    expect(Mage::getSingleton('wishlist/session')->getMessages(true)->getErrors())->toBe([])
+        ->and(wishlistMoveOptionValues($quote, $this->optionId))->toBe(['For Jane'])
+        ->and($lines($quote))->toBe([1.0])
+        ->and(Mage::getModel('wishlist/item')->load($pageItemId)->getId())->toBeNull();
+
+    $wishlist = $service->getForCustomer($customerId, 1);
+    $apiItemId = (int) $service->addProduct($wishlist, $productId, $buyRequest(), 1)->getId();
+    $request = AdminApiParity::jsonRequest('POST', "/api/rest/v2/customers/me/wishlist/{$apiItemId}/move-to-cart");
+    $api = AdminApiParity::api($request, fn() => new WishlistProcessor(wishlistMoveSecurity($customerId))
+        ->process(null, new Post(name: 'moveToCart'), [], ['request' => $request, 'args' => ['input' => ['itemId' => $apiItemId, 'qty' => 1]]]));
+
+    expect($api['errors'])->toBe([])
         ->and($api['status'])->toBe(200)
-        ->and(wishlistMoveOptionValues($webQuote, $this->optionId))->toBe(['For Jane'])
-        ->and(wishlistMoveOptionValues($apiQuote, $this->optionId))->toBe(['For Jane']);
+        ->and(wishlistMoveOptionValues($quote, $this->optionId))->toBe(['For Jane'])
+        ->and($lines($quote))->toBe([2.0])
+        ->and(Mage::getModel('wishlist/item')->load($apiItemId)->getId())->toBeNull();
 });
 
 it('moves the qty of the item when the API client sends no qty, as the wishlist page does', function (string $transport) {
     $itemId = (int) Mage::getService('wishlist/wishlist')
         ->addProduct($this->wishlist, (int) $this->product->getId(), new Maho\DataObject(['qty' => 3]), 1)
         ->getId();
-    $request = Symfony\Component\HttpFoundation\Request::create(
+    $request = SymfonyRequest::create(
         "/api/rest/v2/customers/me/wishlist/{$itemId}/move-to-cart",
         'POST',
         server: ['CONTENT_TYPE' => 'application/json'],

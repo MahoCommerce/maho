@@ -206,10 +206,10 @@ it('reports a row with a disabled product as failed, and places no order for it'
     }
 });
 
-it('moves an order to its status through the order service, with no email to the customer', function (): void {
-    $spy = new class extends Mage_Sales_Service_Order {
-        /** @var list<string> */
-        public array $calls = [];
+it('moves an order to its status through the order services, with no email to the customer', function (): void {
+    $calls = new ArrayObject();
+    $orders = new class ($calls) extends Mage_Sales_Service_Order {
+        public function __construct(private ArrayObject $calls) {}
 
         #[\Override]
         public function cancel(Mage_Sales_Model_Order $order, ?string $reason = null): Mage_Sales_Model_Order
@@ -217,6 +217,9 @@ it('moves an order to its status through the order service, with no email to the
             $this->calls[] = 'cancel';
             return parent::cancel($order, $reason);
         }
+    };
+    $documents = new class ($calls) extends Mage_Sales_Service_Order_Document {
+        public function __construct(private ArrayObject $calls) {}
 
         #[\Override]
         public function invoice(
@@ -235,7 +238,9 @@ it('moves an order to its status through the order service, with no email to the
         }
     };
     Mage::unregister('_service/sales/order');
-    Mage::register('_service/sales/order', $spy);
+    Mage::register('_service/sales/order', $orders);
+    Mage::unregister('_service/sales/order_document');
+    Mage::register('_service/sales/order_document', $documents);
     $item = loadSimplePricedProduct()->getSku() . ':1';
     $path = ordersCsv([
         ordersRow('IMP-ORD-10', 'canceled', 5, 'imp.guest@example.org', $item),
@@ -246,8 +251,9 @@ it('moves an order to its status through the order service, with no email to the
         (new Orders())->import($path, [Orders::OPTION_SKIP_STATISTICS => true]);
     } finally {
         Mage::unregister('_service/sales/order');
+        Mage::unregister('_service/sales/order_document');
         unlink($path);
     }
 
-    expect($spy->calls)->toBe(['cancel', 'invoice:offline:false']);
+    expect($calls->getArrayCopy())->toBe(['cancel', 'invoice:offline:false']);
 });

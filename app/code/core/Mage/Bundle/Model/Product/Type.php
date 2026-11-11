@@ -210,6 +210,27 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
     }
 
     /**
+     * Apply the rule of allowsCustomOptions() to the save of $product. A save that changes the price from fixed to
+     * dynamic deletes the custom options of the product. Any other save keeps the stored custom options: from the
+     * option list that it submits, it takes only the entries that delete an option.
+     */
+    protected function _refuseCustomOptions(Mage_Catalog_Model_Product $product): void
+    {
+        $priceTypeBefore = $product->getOrigData('price_type');
+        if ($priceTypeBefore !== null && (int) $priceTypeBefore !== Mage_Bundle_Model_Product_Price::PRICE_TYPE_DYNAMIC) {
+            $this->_deleteCustomOptions($product);
+            return;
+        }
+        $options = $product->getProductOptions();
+        if (is_array($options)) {
+            $product->setProductOptions(array_values(array_filter(
+                $options,
+                static fn(mixed $option): bool => is_array($option) && ($option['is_delete'] ?? '') == '1',
+            )));
+        }
+    }
+
+    /**
      * Give $product an option list that deletes each custom option that it has.
      */
     protected function _deleteCustomOptions(Mage_Catalog_Model_Product $product): void
@@ -251,7 +272,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
         }
 
         if (!$this->allowsCustomOptions($product) && !$product->getOptionsReadonly()) {
-            $this->_deleteCustomOptions($product);
+            $this->_refuseCustomOptions($product);
         }
 
         $this->_validateBundleData($product);

@@ -215,41 +215,20 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     {
         if ($this->getRequest()->isPost()) {
             $email = (string) $this->getRequest()->getParam('email');
-
-            if (!empty($email)) {
-                // Validate received data to be an email address
-                if (Mage::helper('core')->isValidEmail($email)) {
-                    $collection = Mage::getResourceModel('admin/user_collection');
-                    /** @var Mage_Admin_Model_Resource_User_Collection $collection */
-                    $collection->addFieldToFilter('email', $email);
-                    $collection->load(false);
-
-                    if ($collection->getSize() > 0) {
-                        foreach ($collection as $item) {
-                            /** @var Mage_Admin_Model_User $user */
-                            $user = Mage::getModel('admin/user')->load($item->getId());
-                            if ($user->getId()) {
-                                $newResetPasswordLinkToken = Mage::helper('admin')->generateResetPasswordLinkToken();
-                                $user->changeResetPasswordLinkToken($newResetPasswordLinkToken);
-                                $user->save();
-                                $user->sendPasswordResetConfirmationEmail();
-                            }
-                            break;
-                        }
-                    }
-                    $this->_getSession()
-                        ->addSuccess(
-                            $this->__(
-                                'If there is an account associated with %s you will receive an email with a link to reset your password.',
-                                $email,
-                            ),
-                        );
-                    $this->_redirect('*/*/login');
-                    return;
+            try {
+                /** @var Mage_Admin_Service_User $service */
+                $service = Mage::getService('admin/user');
+                $service->requestPasswordReset($email);
+                $this->_getSession()->addSuccess($this->__(
+                    'If there is an account associated with %s you will receive an email with a link to reset your password.',
+                    $email,
+                ));
+                $this->_redirect('*/*/login');
+                return;
+            } catch (Mage_Core_Exception_Input $e) {
+                foreach ($e->getErrors() as $error) {
+                    $this->_getSession()->addError($error['message']);
                 }
-                $this->_getSession()->addError($this->__('Invalid email address.'));
-            } else {
-                $this->_getSession()->addError($this->__('The email address is empty.'));
             }
         }
         $this->loadLayout();

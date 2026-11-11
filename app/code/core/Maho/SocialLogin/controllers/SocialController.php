@@ -35,7 +35,7 @@ class Maho_SocialLogin_SocialController extends Mage_Core_Controller_Front_Actio
         }
 
         $request = $this->getRequest();
-        // An ID token must echo a nonce that this session issued
+        // An ID token must echo a nonce that this session issued. An empty nonce matches no token
         $nonce = (string) $request->getPost('nonce');
 
         try {
@@ -43,13 +43,20 @@ class Maho_SocialLogin_SocialController extends Mage_Core_Controller_Front_Actio
                 (string) $request->getPost('provider'),
                 (string) $request->getPost('token'),
                 (int) Mage::app()->getStore()->getId(),
-                Maho_SocialLogin_Model_Channel::Web,
-                Mage::getModel('sociallogin/nonce')->consume($nonce) ? $nonce : null,
+                Mage::getModel('sociallogin/nonce')->consume($nonce) ? $nonce : '',
                 [
                     'firstname' => (string) $request->getPost('firstname'),
                     'lastname' => (string) $request->getPost('lastname'),
                 ],
             );
+        } catch (Mage_Customer_Exception_SecondFactorRequired $e) {
+            // The provider proved who the customer is. The challenge page asks for the 2FA code and logs in
+            $session->setTwofaPendingCustomerId($e->getCustomerId());
+            $this->getResponse()->setBodyJson([
+                'success' => true,
+                'redirect' => Mage::getUrl('customer/account/twofaChallenge'),
+            ]);
+            return;
         } catch (Mage_Core_Exception $e) {
             $this->jsonError($e->getMessage(), 400);
             return;
@@ -60,18 +67,6 @@ class Maho_SocialLogin_SocialController extends Mage_Core_Controller_Front_Actio
         }
 
         $customer = $result['customer'];
-        // Same shape as magicLinkLoginAction: identity is proven, but customers who
-        // opted into 2FA must still clear the challenge before the session logs in.
-        // loginById() is unusable here because it refuses 2FA-enabled customers.
-        if ($session->shouldChallengeTwofa($customer)) {
-            $session->startTwofaChallenge($customer);
-            $this->getResponse()->setBodyJson([
-                'success' => true,
-                'redirect' => Mage::getUrl('customer/account/twofaChallenge'),
-            ]);
-            return;
-        }
-
         $session->setCustomerAsLoggedIn($customer);
         $redirect = $this->resolveRedirect();
         if ($result['is_new']) {

@@ -26,6 +26,12 @@ use Maho\ApiPlatform\Service\StoreContext;
  */
 class CustomerQueryHandler
 {
+    /** The address fields that the input of an operation can hold: the field of the model => the key of the input. */
+    private const ADDRESS_FIELDS = [
+        'street' => 'street', 'city' => 'city', 'region' => 'region', 'region_id' => 'regionId',
+        'postcode' => 'postcode', 'country_id' => 'countryId', 'telephone' => 'telephone',
+    ];
+
     private readonly \Mage_Customer_Service_Customer $customerService;
 
     public function __construct(private CustomerProvider $customerProvider)
@@ -73,7 +79,7 @@ class CustomerQueryHandler
         if (!$id) {
             throw ValidationException::requiredField('customerId');
         }
-        $customer = $this->customerService->getById((int) $id);
+        $customer = $this->customerService->findById((int) $id);
         if ($customer) {
             $this->customerProvider->assertCustomerWebsiteAllowed($customer);
         }
@@ -81,7 +87,9 @@ class CustomerQueryHandler
     }
 
     /**
-     * Handle createCustomer mutation on the store of the request. A telephone becomes the default address.
+     * Handle createCustomer mutation on the store of the request. The customer gets a random password and the
+     * email with the link to set one. Address fields in the input become the default address, which must be
+     * complete.
      */
     public function handleCreateCustomer(array $variables, array $context): array
     {
@@ -102,8 +110,19 @@ class CustomerQueryHandler
         if (isset($input['groupId'])) {
             $customer->setGroupId((int) $input['groupId']);
         }
-        $address = empty($input['telephone']) ? null : $this->fillAddress(\Mage::getModel('customer/address'), $input);
-        $this->customerService->quickCreate($customer, (int) ($context['store_id'] ?? StoreContext::getDefaultStoreId()), $address);
+        $storeId = (int) ($context['store_id'] ?? StoreContext::getDefaultStoreId());
+        if (array_intersect_key($input, array_flip(self::ADDRESS_FIELDS)) !== []) {
+            $customer->addAddress($this->fillAddress(
+                \Mage::getModel('customer/address')
+                    ->setFirstname($firstName)
+                    ->setLastname($lastName)
+                    ->setCountryId(\Maho\ApiPlatform\Service\StoreDefaults::getCountryId($storeId))
+                    ->setIsDefaultBilling(true)
+                    ->setIsDefaultShipping(true),
+                $input,
+            ));
+        }
+        $this->customerService->create($customer->setPassword(''), $storeId, $storeId);
 
         return ['createCustomer' => [
             'customer' => $this->mapCustomer($customer),
@@ -124,7 +143,7 @@ class CustomerQueryHandler
             throw ValidationException::requiredField('customerId');
         }
 
-        $customer = $this->customerService->requireById($customerId);
+        $customer = $this->customerService->getById($customerId);
         $this->customerProvider->assertCustomerWebsiteAllowed($customer);
         if (isset($input['email'])) {
             $this->customerService->save($customer->setEmail($input['email']));
@@ -144,22 +163,21 @@ class CustomerQueryHandler
 
         return ['updateCustomerAddress' => [
             'success' => true,
-            'customer' => $this->mapCustomer($this->customerService->requireById($customerId)),
+            'customer' => $this->mapCustomer($this->customerService->getById($customerId)),
         ]];
     }
 
     /**
-     * Write the address fields of $input into $address. A point of sale asks only some of the fields, so the
-     * address skips the validation.
+     * Write the address fields of $input into $address.
      */
     private function fillAddress(\Mage_Customer_Model_Address $address, array $input): \Mage_Customer_Model_Address
     {
-        foreach (['street' => 'street', 'city' => 'city', 'postcode' => 'postcode', 'telephone' => 'telephone', 'country_id' => 'countryId'] as $field => $key) {
+        foreach (self::ADDRESS_FIELDS as $field => $key) {
             if (isset($input[$key])) {
                 $address->setData($field, $input[$key]);
             }
         }
-        return $address->setShouldIgnoreValidation(true);
+        return $address;
     }
 
     /**

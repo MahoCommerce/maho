@@ -29,12 +29,7 @@ class Mage_Core_Service_Email_Template
     public function getById(int $id): Mage_Adminhtml_Model_Email_Template
     {
         /** @var Mage_Adminhtml_Model_Email_Template $template */
-        $template = Mage::getModel('adminhtml/email_template');
-        try {
-            $template->load($id);
-        } catch (\Doctrine\DBAL\Exception\DriverException) {
-            // An ID that the column cannot hold matches no row
-        }
+        $template = Mage::getModel('adminhtml/email_template')->load($id);
         if (!$template->getId()) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('core')->__('This email template no longer exists.'));
         }
@@ -43,15 +38,71 @@ class Mage_Core_Service_Email_Template
 
     /**
      * Save $template. The transport puts its input into the template through the setters first.
-     * The model checks the fields and refuses a name that another template has.
+     * The name, the subject and the text must be set, and only the text may hold HTML tags. The text keeps its
+     * template directives as they are, because only an admin user writes a template. A plain text template has
+     * no styles. The model refuses a name that another template has.
      *
      * @throws Mage_Core_Exception_Conflict when another template has the name
      * @throws Mage_Core_Exception_Input with one error for each invalid field
      */
     public function save(Mage_Adminhtml_Model_Email_Template $template): Mage_Adminhtml_Model_Email_Template
     {
+        $helper = Mage::helper('core');
+        $errors = new Mage_Core_Exception_Input();
+
+        // A name in use is a conflict whatever the other fields hold, so it comes before the field errors
+        $template->assertCodeNotInUse();
+        if (trim((string) $template->getTemplateCode()) === '') {
+            $errors->addError('template_code', $helper->__('The template Name must not be empty.'));
+        }
+        if (trim((string) $template->getTemplateText()) === '') {
+            $errors->addError('template_text', $helper->__('The template text must not be empty.'));
+        }
+        if (trim((string) $template->getTemplateSubject()) === '') {
+            $errors->addError('template_subject', $helper->__('The template subject must not be empty.'));
+        }
+        // Accept a stored type, so that an old template without one can still be saved
+        $type = (int) $template->getData('template_type');
+        if ((!$template->getId() || $template->dataHasChangedFor('template_type'))
+            && !in_array($type, [Mage_Core_Model_Template::TYPE_TEXT, Mage_Core_Model_Template::TYPE_HTML], true)
+        ) {
+            $errors->addError('template_type', $helper->__('The template type must be text or html.'));
+        }
+        $senderEmail = (string) $template->getTemplateSenderEmail();
+        if ($senderEmail !== '' && !$helper->isValidEmail($senderEmail)) {
+            $errors->addError('template_sender_email', $helper->__('The sender email is not a valid email address.'));
+        }
+        foreach ($this->getTagFreeFields() as $field => $label) {
+            if ($helper->hasTags((string) $template->getData($field))) {
+                $errors->addError($field, $helper->__('%s must not contain HTML tags.', $label));
+            }
+        }
+        $errors->throwIfErrors();
+
+        if ($type === Mage_Core_Model_Template::TYPE_TEXT) {
+            $template->setData('template_styles', '');
+        }
         $template->save();
         return $template;
+    }
+
+    /**
+     * Return the fields that must not hold HTML tags, with their admin labels. Only the text of a template may hold HTML.
+     *
+     * @return array<string, string>
+     */
+    protected function getTagFreeFields(): array
+    {
+        $helper = Mage::helper('core');
+        return [
+            'template_code' => $helper->__('Template Name'),
+            'template_subject' => $helper->__('Template Subject'),
+            'template_styles' => $helper->__('Template Styles'),
+            'template_sender_name' => $helper->__('Sender Name'),
+            'template_sender_email' => $helper->__('Sender Email'),
+            'orig_template_code' => $helper->__('Original Template'),
+            'orig_template_variables' => $helper->__('Template Variables'),
+        ];
     }
 
     /**
@@ -67,7 +118,8 @@ class Mage_Core_Service_Email_Template
      * through the queue, so that a fault of the transport shows at once.
      *
      * @throws Mage_Core_Exception_Input when $recipient is not a valid email address
-     * @throws Mage_Core_Exception when the store has no mail transport, or the transport does not send the email
+     * @throws Mage_Core_Exception when the store has no mail transport
+     * @throws RuntimeException when the transport does not send the email
      */
     public function sendTest(
         #[\SensitiveParameter]
@@ -75,7 +127,7 @@ class Mage_Core_Service_Email_Template
     ): void {
         $helper = Mage::helper('core');
         if (!$this->sendTemplate($this->newTestTemplate($recipient), $recipient)) {
-            throw new Mage_Core_Exception($helper->__('Failed to send test email. Please check your email configuration and error logs.'));
+            throw new RuntimeException($helper->__('Failed to send test email. Please check your email configuration and error logs.'));
         }
     }
 
@@ -83,14 +135,15 @@ class Mage_Core_Service_Email_Template
      * Put the test email of sendTest() for $recipient in the email queue, with the same checks. A queue worker sends it.
      *
      * @throws Mage_Core_Exception_Input when $recipient is not a valid email address
-     * @throws Mage_Core_Exception when the store has no mail transport, or the queue does not take the email
+     * @throws Mage_Core_Exception when the store has no mail transport
+     * @throws RuntimeException when the queue does not take the email
      */
     public function queueTest(
         #[\SensitiveParameter]
         string $recipient,
     ): void {
         if (!$this->queueTemplate($this->newTestTemplate($recipient), $recipient)) {
-            throw new Mage_Core_Exception(Mage::helper('core')->__('Could not add the test email to the queue. Please check the error logs.'));
+            throw new RuntimeException(Mage::helper('core')->__('Could not add the test email to the queue. Please check the error logs.'));
         }
     }
 

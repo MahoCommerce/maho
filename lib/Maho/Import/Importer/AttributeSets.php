@@ -63,7 +63,7 @@ class AttributeSets extends AbstractImporter
             if ($sortOrder !== null) {
                 $set->setSortOrder($sortOrder);
             }
-            $service->create($set, $this->resolver->attributeSetId($row['skeleton']));
+            $service->save($set, $this->resolver->attributeSetId($row['skeleton']));
             $result->created++;
             $reporter->info("attribute set {$row['name']} created");
         }

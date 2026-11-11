@@ -33,18 +33,42 @@ use Tests\Helpers\AdminApiParity;
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * The admin product save and the product sub-resources of the API write tier prices, custom options, links and
- * configurable children through the same backend, option and type models (#1348). Each test gives the same input to
- * both transports and compares the outcome.
+ * The product sub-resources of the API write the parts of a product through the services of the product parts
+ * (#1348). The admin product page writes the same parts through the product save.
+ *
+ * - Tier prices, group prices and custom options: the test posts the fields of the product form to the save action
+ *   of the admin product page, and gives the same input to the API.
+ * - The other parts (children, bundle options, downloadable links): the test saves the product model with the data
+ *   that the admin action reads from the form. So these tests compare the service with the model save, not with
+ *   the admin page.
  */
 
 /**
- * Save $product as the admin product page does: put $data into it, validate it and save it.
+ * Post the fields $productFields of the product form, and the other form fields $fields, to the save action of the
+ * admin product page.
+ *
+ * @param array<string, mixed> $productFields
+ * @param array<string, mixed> $fields
+ * @return list<string> the error messages
+ */
+function productPartsViaAdminAction(Mage_Catalog_Model_Product $product, array $productFields, array $fields = []): array
+{
+    Mage::unregister('product');
+    Mage::unregister('current_product');
+    return AdminApiParity::admin(Mage_Adminhtml_Catalog_ProductController::class, 'save', $fields + [
+        'id' => (int) $product->getId(),
+        'product' => $productFields + ['website_ids' => [1]],
+    ])['errors'];
+}
+
+/**
+ * Validate and save the product model with the data that $prepare puts into it, as the admin product page does
+ * after it reads the form. The admin controller does not run.
  *
  * @param callable(Mage_Catalog_Model_Product): void $prepare
  * @return list<string> the error messages
  */
-function productPartsViaAdmin(Mage_Catalog_Model_Product $product, callable $prepare): array
+function productPartsViaModelSave(Mage_Catalog_Model_Product $product, callable $prepare): array
 {
     $product = Mage::getModel('catalog/product')->setStoreId(0)->load($product->getId());
     $prepare($product);
@@ -99,7 +123,7 @@ function productPartsProduct(string $sku, string $typeId = Mage_Catalog_Model_Pr
 function productPartsProductWithRequiredOption(string $sku): Mage_Catalog_Model_Product
 {
     $product = productPartsProduct($sku);
-    productPartsViaAdmin($product, function (Mage_Catalog_Model_Product $p): void {
+    productPartsViaModelSave($product, function (Mage_Catalog_Model_Product $p): void {
         $p->setProductOptions([['option_id' => '0', 'is_delete' => '', 'title' => 'Note', 'type' => 'field', 'is_require' => 1, 'price' => 0, 'price_type' => 'fixed']]);
         $p->setCanSaveCustomOptions(true);
     });
@@ -124,6 +148,8 @@ afterEach(function () {
         Mage::getModel('catalog/product')->load($product->getId())->delete();
     }
     Mage::unregister('isSecureArea');
+    Mage::unregister('product');
+    Mage::unregister('current_product');
 });
 
 describe('tier prices', function () {
@@ -131,7 +157,7 @@ describe('tier prices', function () {
         $this->products[] = $product = productPartsProduct('parts-tier-negative');
         $row = ['website_id' => 0, 'cust_group' => Mage_Customer_Model_Group::CUST_GROUP_ALL, 'price_qty' => 2, 'price' => -1];
 
-        $admin = productPartsViaAdmin($product, fn(Mage_Catalog_Model_Product $p) => $p->setTierPrice([$row]));
+        $admin = productPartsViaAdminAction($product, ['tier_price' => [$row]]);
         $api = productPartsViaApi(ProductTierPriceProcessor::class, ProductTierPriceProvider::class, 'PUT', "/api/rest/v2/products/{$product->getId()}/tier-prices", [['qty' => 2, 'price' => -1]], ['productId' => (int) $product->getId()]);
 
         expect($admin)->toBe(['Price must not be negative'])
@@ -143,7 +169,7 @@ describe('tier prices', function () {
         $this->products[] = $product = productPartsProduct('parts-tier-duplicate');
         $row = ['website_id' => 0, 'cust_group' => Mage_Customer_Model_Group::CUST_GROUP_ALL, 'price_qty' => 2, 'price' => 8];
 
-        $admin = productPartsViaAdmin($product, fn(Mage_Catalog_Model_Product $p) => $p->setTierPrice([$row, $row]));
+        $admin = productPartsViaAdminAction($product, ['tier_price' => [$row, $row]]);
         $api = productPartsViaApi(ProductTierPriceProcessor::class, ProductTierPriceProvider::class, 'PUT', "/api/rest/v2/products/{$product->getId()}/tier-prices", [['qty' => 2, 'price' => 8], ['qty' => 2, 'price' => 8]], ['productId' => (int) $product->getId()]);
 
         expect($admin)->toBe(['Duplicate website tier price customer group and quantity.'])
@@ -156,10 +182,11 @@ describe('custom options', function () {
     it('refuses a select option without values on both transports', function () {
         $this->products[] = $product = productPartsProduct('parts-option-select');
 
-        $admin = productPartsViaAdmin($product, function (Mage_Catalog_Model_Product $p): void {
-            $p->setProductOptions([['option_id' => '0', 'is_delete' => '', 'title' => 'Size', 'type' => 'drop_down', 'is_require' => 1, 'values' => []]]);
-            $p->setCanSaveCustomOptions(true);
-        });
+        $admin = productPartsViaAdminAction(
+            $product,
+            ['options' => [['option_id' => '0', 'is_delete' => '', 'title' => 'Size', 'type' => 'drop_down', 'is_require' => 1, 'values' => []]]],
+            ['affect_product_custom_options' => '1'],
+        );
         $api = productPartsViaApi(ProductCustomOptionProcessor::class, ProductCustomOptionProvider::class, 'POST', "/api/rest/v2/products/{$product->getId()}/custom-options", ['title' => 'Size', 'type' => 'drop_down', 'values' => []], ['productId' => (int) $product->getId()]);
 
         expect($admin)->toBe(['Select-type options require at least one value'])
@@ -171,15 +198,17 @@ describe('custom options', function () {
         $this->products[] = $adminProduct = productPartsProduct('parts-option-admin');
         $this->products[] = $apiProduct = productPartsProduct('parts-option-api');
 
-        productPartsViaAdmin($adminProduct, function (Mage_Catalog_Model_Product $p): void {
-            $p->setProductOptions([['option_id' => '0', 'is_delete' => '', 'title' => 'Note', 'type' => 'field', 'is_require' => 1, 'price' => 2, 'price_type' => 'fixed']]);
-            $p->setCanSaveCustomOptions(true);
-        });
+        $adminErrors = productPartsViaAdminAction(
+            $adminProduct,
+            ['options' => [['option_id' => '0', 'is_delete' => '', 'title' => 'Note', 'type' => 'field', 'is_require' => 1, 'price' => 2, 'price_type' => 'fixed']]],
+            ['affect_product_custom_options' => '1'],
+        );
         $api = productPartsViaApi(ProductCustomOptionProcessor::class, ProductCustomOptionProvider::class, 'POST', "/api/rest/v2/products/{$apiProduct->getId()}/custom-options", ['title' => 'Note', 'type' => 'field', 'required' => true, 'price' => 2], ['productId' => (int) $apiProduct->getId()]);
 
         $admin = Mage::getModel('catalog/product')->load($adminProduct->getId());
         $viaApi = Mage::getModel('catalog/product')->load($apiProduct->getId());
-        expect($api['status'])->toBe(200)
+        expect($adminErrors)->toBe([])
+            ->and($api['status'])->toBe(200)
             ->and($api['result']->title)->toBe('Note')
             ->and([(bool) $viaApi->getHasOptions(), (bool) $viaApi->getRequiredOptions()])
             ->toBe([(bool) $admin->getHasOptions(), (bool) $admin->getRequiredOptions()])
@@ -188,11 +217,11 @@ describe('custom options', function () {
 });
 
 describe('grouped and configurable children', function () {
-    it('refuses a grouped child of a type that the grouped product cannot contain on both transports', function () {
+    it('refuses a grouped child of a type that the grouped product cannot contain in the model save and in the API', function () {
         $this->products[] = $grouped = productPartsProduct('parts-grouped', Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
         $this->products[] = $child = productPartsProduct('parts-grouped-child', Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
 
-        $admin = productPartsViaAdmin($grouped, fn(Mage_Catalog_Model_Product $p) => $p->setGroupedLinkData([(int) $child->getId() => ['qty' => 1, 'position' => 0]]));
+        $admin = productPartsViaModelSave($grouped, fn(Mage_Catalog_Model_Product $p) => $p->setGroupedLinkData([(int) $child->getId() => ['qty' => 1, 'position' => 0]]));
         $api = productPartsViaApi(GroupedProductLinkProcessor::class, GroupedProductLinkProvider::class, 'POST', "/api/rest/v2/products/{$grouped->getId()}/grouped", ['childProductId' => (int) $child->getId()], ['productId' => (int) $grouped->getId()]);
 
         expect($admin)->toHaveCount(1)
@@ -205,7 +234,7 @@ describe('grouped and configurable children', function () {
         $this->products[] = $configurable = productPartsProduct('parts-configurable', Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
         $nameId = (int) Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'name')->getId();
 
-        $admin = productPartsViaAdmin($configurable, function (Mage_Catalog_Model_Product $p) use ($nameId): void {
+        $admin = productPartsViaModelSave($configurable, function (Mage_Catalog_Model_Product $p) use ($nameId): void {
             $p->setConfigurableAttributesData([['attribute_id' => $nameId, 'position' => 0]]);
             $p->setCanSaveConfigurableAttributes(true);
         });
@@ -234,7 +263,7 @@ describe('group prices', function () {
         $this->products[] = $product = productPartsProduct('parts-group-negative');
         $row = ['website_id' => 0, 'cust_group' => 1, 'price' => -1];
 
-        $admin = productPartsViaAdmin($product, fn(Mage_Catalog_Model_Product $p) => $p->setGroupPrice([$row]));
+        $admin = productPartsViaAdminAction($product, ['group_price' => [$row]]);
         $api = productPartsViaApi(ProductGroupPriceProcessor::class, ProductGroupPriceProvider::class, 'PUT', "/api/rest/v2/products/{$product->getId()}/group-prices", [['customerGroupId' => 1, 'price' => -1]], ['productId' => (int) $product->getId()]);
 
         expect($admin)->toBe(['Price must not be negative'])
@@ -244,10 +273,10 @@ describe('group prices', function () {
 });
 
 describe('bundle options', function () {
-    it('refuses an option without a title on both transports', function () {
+    it('refuses an option without a title in the model save and in the API', function () {
         $this->products[] = $bundle = productPartsProduct('parts-bundle-title', Mage_Catalog_Model_Product_Type::TYPE_BUNDLE);
 
-        $admin = productPartsViaAdmin($bundle, function (Mage_Catalog_Model_Product $p): void {
+        $admin = productPartsViaModelSave($bundle, function (Mage_Catalog_Model_Product $p): void {
             $p->setBundleOptionsData([['option_id' => '', 'delete' => '', 'title' => '', 'type' => 'select', 'required' => 1, 'position' => 0]]);
             $p->setBundleSelectionsData([[]]);
             $p->setCanSaveBundleSelections(true);
@@ -259,12 +288,12 @@ describe('bundle options', function () {
             ->and($api['errors'])->toBe($admin);
     });
 
-    it('refuses a selection with a required custom option on both transports', function () {
+    it('refuses a selection with a required custom option in the model save and in the API', function () {
         $this->products[] = $bundle = productPartsProduct('parts-bundle-required', Mage_Catalog_Model_Product_Type::TYPE_BUNDLE);
         $this->products[] = $child = productPartsProductWithRequiredOption('parts-bundle-required-child');
         $childId = (int) $child->getId();
 
-        $admin = productPartsViaAdmin($bundle, function (Mage_Catalog_Model_Product $p) use ($childId): void {
+        $admin = productPartsViaModelSave($bundle, function (Mage_Catalog_Model_Product $p) use ($childId): void {
             $p->setBundleOptionsData([['option_id' => '', 'delete' => '', 'title' => 'Part', 'type' => 'select', 'required' => 1, 'position' => 0]]);
             $p->setBundleSelectionsData([[[
                 'selection_id' => '', 'delete' => '', 'product_id' => $childId, 'selection_qty' => 1, 'selection_price_value' => 0,
@@ -282,7 +311,7 @@ describe('bundle options', function () {
     it('deletes the custom options of a bundle that gets a dynamic price, and refuses a new one', function () {
         $this->products[] = $bundle = productPartsProduct('parts-bundle-dynamic', Mage_Catalog_Model_Product_Type::TYPE_BUNDLE);
         $bundleId = (int) $bundle->getId();
-        productPartsViaAdmin($bundle, function (Mage_Catalog_Model_Product $p): void {
+        productPartsViaModelSave($bundle, function (Mage_Catalog_Model_Product $p): void {
             $p->setData('price_type', Mage_Bundle_Model_Product_Price::PRICE_TYPE_FIXED);
             $p->setProductOptions([['option_id' => '0', 'is_delete' => '', 'title' => 'Note', 'type' => 'field', 'is_require' => 0, 'price' => 1, 'price_type' => 'fixed']]);
             $p->setCanSaveCustomOptions(true);
@@ -290,7 +319,7 @@ describe('bundle options', function () {
         expect(productPartsOptionIds($bundleId))->toHaveCount(1);
 
         // A save that does not come from the admin product page, so the observer of that page does not run
-        $admin = productPartsViaAdmin($bundle, fn(Mage_Catalog_Model_Product $p) => $p->setData('price_type', Mage_Bundle_Model_Product_Price::PRICE_TYPE_DYNAMIC));
+        $admin = productPartsViaModelSave($bundle, fn(Mage_Catalog_Model_Product $p) => $p->setData('price_type', Mage_Bundle_Model_Product_Price::PRICE_TYPE_DYNAMIC));
         expect($admin)->toBe([])
             ->and(productPartsOptionIds($bundleId))->toBe([]);
 
@@ -302,12 +331,12 @@ describe('bundle options', function () {
 });
 
 describe('children with a required custom option or another attribute set', function () {
-    it('refuses a grouped child with a required custom option on both transports', function () {
+    it('refuses a grouped child with a required custom option in the model save and in the API', function () {
         $this->products[] = $grouped = productPartsProduct('parts-grouped-required', Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
         $this->products[] = $child = productPartsProductWithRequiredOption('parts-grouped-required-child');
         $childId = (int) $child->getId();
 
-        $admin = productPartsViaAdmin($grouped, fn(Mage_Catalog_Model_Product $p) => $p->setGroupedLinkData([$childId => ['qty' => 1, 'position' => 0]]));
+        $admin = productPartsViaModelSave($grouped, fn(Mage_Catalog_Model_Product $p) => $p->setGroupedLinkData([$childId => ['qty' => 1, 'position' => 0]]));
         $api = productPartsViaApi(GroupedProductLinkProcessor::class, GroupedProductLinkProvider::class, 'POST', "/api/rest/v2/products/{$grouped->getId()}/grouped", ['childProductId' => $childId], ['productId' => (int) $grouped->getId()]);
 
         expect($admin)->toBe(["Product {$childId} has a required custom option."])
@@ -315,12 +344,12 @@ describe('children with a required custom option or another attribute set', func
             ->and($api['errors'])->toBe($admin);
     });
 
-    it('refuses a configurable child with a required custom option on both transports', function () {
+    it('refuses a configurable child with a required custom option in the model save and in the API', function () {
         $this->products[] = $configurable = productPartsProduct('parts-configurable-required', Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
         $this->products[] = $child = productPartsProductWithRequiredOption('parts-configurable-required-child');
         $childId = (int) $child->getId();
 
-        $admin = productPartsViaAdmin($configurable, fn(Mage_Catalog_Model_Product $p) => $p->setConfigurableProductsData([$childId => []]));
+        $admin = productPartsViaModelSave($configurable, fn(Mage_Catalog_Model_Product $p) => $p->setConfigurableProductsData([$childId => []]));
         $api = productPartsViaApi(ConfigurableSetupProcessor::class, ConfigurableSetupProvider::class, 'POST', "/api/rest/v2/products/{$configurable->getId()}/configurable/children", ['childProductId' => $childId], ['productId' => (int) $configurable->getId()]);
 
         expect($admin)->toBe(["Product {$childId} has a required custom option."])
@@ -328,7 +357,7 @@ describe('children with a required custom option or another attribute set', func
             ->and($api['errors'])->toBe($admin);
     });
 
-    it('refuses a configurable child of another attribute set on both transports', function () {
+    it('refuses a configurable child of another attribute set in the model save and in the API', function () {
         /** @var Mage_Eav_Model_Entity_Attribute_Set $set */
         $set = Mage::getModel('eav/entity_attribute_set');
         $set->setEntityTypeId((int) Mage::getResourceSingleton('catalog/product')->getTypeId())
@@ -342,7 +371,7 @@ describe('children with a required custom option or another attribute set', func
             $childId = (int) $child->getId();
             Mage::getModel('catalog/product')->load($childId)->setAttributeSetId((int) $set->getId())->save();
 
-            $admin = productPartsViaAdmin($configurable, fn(Mage_Catalog_Model_Product $p) => $p->setConfigurableProductsData([$childId => []]));
+            $admin = productPartsViaModelSave($configurable, fn(Mage_Catalog_Model_Product $p) => $p->setConfigurableProductsData([$childId => []]));
             $api = productPartsViaApi(ConfigurableSetupProcessor::class, ConfigurableSetupProvider::class, 'POST', "/api/rest/v2/products/{$configurable->getId()}/configurable/children", ['childProductId' => $childId], ['productId' => (int) $configurable->getId()]);
 
             expect($admin)->toBe(["Product {$childId} is not in the attribute set of the product."])
@@ -361,10 +390,10 @@ describe('children with a required custom option or another attribute set', func
 });
 
 describe('downloadable links', function () {
-    it('refuses a URL link without a title and without a URL on both transports', function () {
+    it('refuses a URL link without a title and without a URL in the model save and in the API', function () {
         $this->products[] = $product = productPartsProduct('parts-downloadable', Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE);
 
-        $admin = productPartsViaAdmin($product, fn(Mage_Catalog_Model_Product $p) => $p->setDownloadableData(['link' => [[
+        $admin = productPartsViaModelSave($product, fn(Mage_Catalog_Model_Product $p) => $p->setDownloadableData(['link' => [[
             'link_id' => '', 'is_delete' => '', 'title' => '', 'type' => 'url', 'link_url' => '', 'price' => 0,
             'number_of_downloads' => 0, 'is_shareable' => Mage_Downloadable_Model_Link::LINK_SHAREABLE_CONFIG, 'sort_order' => 0,
         ]]]));

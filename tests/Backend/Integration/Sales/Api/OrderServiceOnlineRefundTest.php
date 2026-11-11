@@ -53,7 +53,7 @@ describe('The order service refund of a credit memo without an invoice', functio
         $order = onlineRefundPaidOrder();
 
         try {
-            expect(fn() => \Mage::getService('sales/order')->refund($order, [], null, false))
+            expect(fn() => \Mage::getService('sales/order_document')->refund($order, [], null, false))
                 ->toThrow(Mage_Core_Exception::class, 'Cannot refund online');
 
             $reloaded = Mage::getModel('sales/order')->load($order->getId());
@@ -69,7 +69,7 @@ describe('The order service refund of a credit memo without an invoice', functio
         $order = onlineRefundPaidOrder();
 
         try {
-            $creditmemo = \Mage::getService('sales/order')->refund($order, [], null, true);
+            $creditmemo = \Mage::getService('sales/order_document')->refund($order, [], null, true);
 
             $reloaded = Mage::getModel('sales/order')->load($order->getId());
             expect((float) $creditmemo->getBaseGrandTotal())->toBe(100.0)
@@ -81,20 +81,20 @@ describe('The order service refund of a credit memo without an invoice', functio
         }
     });
 
-    it('refunds an admin GraphQL processReturn offline', function (): void {
+    it('refunds an admin GraphQL createCreditMemo offline', function (): void {
         $order = onlineRefundPaidOrder();
         $orderItemId = (int) $order->getAllItems()[0]->getId();
 
         try {
             $handler = new OrderMutationHandler(new OrderProvider($this->createMock(Security::class)));
-            $result = $handler->handleProcessReturn([
+            $result = $handler->handleCreateCreditMemo([
                 'orderId' => (int) $order->getId(),
                 'items' => [['orderItemId' => $orderItemId, 'qty' => 1]],
             ], []);
 
             $reloaded = Mage::getModel('sales/order')->load($order->getId());
-            expect($result['processReturn']['success'])->toBeTrue()
-                ->and($result['processReturn']['creditmemo']['grandTotal'])->toBe(100.0)
+            expect($result['createCreditMemo']['success'])->toBeTrue()
+                ->and($result['createCreditMemo']['creditmemo']['grandTotal'])->toBe(100.0)
                 ->and((float) $reloaded->getBaseTotalRefunded())->toBe(100.0)
                 ->and((float) $reloaded->getBaseTotalOfflineRefunded())->toBe(100.0)
                 ->and((float) $reloaded->getBaseTotalOnlineRefunded())->toBe(0.0);

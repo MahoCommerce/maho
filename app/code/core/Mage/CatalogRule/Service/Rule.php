@@ -39,12 +39,8 @@ class Mage_CatalogRule_Service_Rule
     {
         /** @var Rule $rule */
         $rule = Mage::getModel('catalogrule/rule');
-        if ($id > 0) {
-            $rule->load($id);
-        }
-        if (!$rule->getId()
-            || ($websiteIds !== null && array_intersect(array_map(intval(...), (array) $rule->getWebsiteIds()), $websiteIds) === [])
-        ) {
+        $rule->load($id);
+        if (!$rule->getId() || ($websiteIds !== null && !$rule->isInWebsites($websiteIds))) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('catalogrule')->__('Catalog price rule not found'));
         }
         return $rule;

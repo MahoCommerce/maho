@@ -187,12 +187,4 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
 
         return $item;
     }
-
-    /**
-     * Invalidate wishlist cache for a customer
-     */
-    public static function invalidateCache(int $customerId): void
-    {
-        \Mage::app()->getCache()->clean(["API_WISHLIST_{$customerId}"]);
-    }
 }

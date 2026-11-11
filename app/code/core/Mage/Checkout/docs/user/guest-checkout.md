@@ -16,8 +16,8 @@ the customer must register or log in.
 
 The storefront checkout and the API apply the same setting: with No, the store refuses an order
 from a guest cart, also when the customer pays with PayPal. An order that you create in the admin
-can be a guest order in any store view. The same is true for an order of the point of sale, and of
-an API client that has the permission to write orders.
+can be a guest order in any store view. The same is true for an order of an API client that has
+the permission to write orders.
 
 A guest order needs a valid email address. It also needs each field that the **Checkout
 Registration** form makes required, such as the date of birth or the tax/VAT number. The

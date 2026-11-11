@@ -33,12 +33,12 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
     protected function _initInvoice($order)
     {
         $invoiceId = (int) $this->getRequest()->getParam('invoice_id');
-        return $invoiceId ? Mage::getService('sales/order')->requireInvoice($invoiceId, (int) $order->getId())->setOrder($order) : false;
+        return $invoiceId ? Mage::getService('sales/order_document')->requireInvoice($invoiceId, (int) $order->getId())->setOrder($order) : false;
     }
 
     /**
      * Return the credit memo data and the "return to stock" flags of the form, for
-     * Mage_Sales_Service_Order::prepareCreditmemo().
+     * Mage_Sales_Service_Order_Document::prepareCreditmemo().
      *
      * @return array{0: array<string, mixed>, 1: array<int, bool>|null}
      */
@@ -70,13 +70,13 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
     {
         $this->_title($this->__('Sales'))->_title($this->__('Credit Memos'));
 
-        $service = Mage::getService('sales/order');
+        $service = Mage::getService('sales/order_document');
         $creditmemoId = (int) $this->getRequest()->getParam('creditmemo_id');
         try {
             if ($creditmemoId) {
                 $creditmemo = $service->requireCreditmemo($creditmemoId);
             } else {
-                $order = $service->requireById((int) $this->getRequest()->getParam('order_id'));
+                $order = Mage::getService('sales/order')->getById((int) $this->getRequest()->getParam('order_id'));
                 [$data, $backToStock] = $this->_getCreditmemoInput();
                 $creditmemo = $service->prepareCreditmemo($order, $data, $backToStock, $this->_initInvoice($order) ?: null);
             }
@@ -98,6 +98,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
      * @return $this
      * @throws Exception
      */
+    #[\Deprecated('No core code calls it. Use Mage_Sales_Service_Order_Document::cancelCreditmemo().', since: '27.1')]
     protected function _saveCreditmemo($creditmemo)
     {
         $transactionSave = Mage::getModel('core/resource_transaction')
@@ -216,8 +217,8 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
                 $this->_forward('noRoute');
                 return;
             }
-            $service = Mage::getService('sales/order');
-            $order = $service->requireById($orderId);
+            $service = Mage::getService('sales/order_document');
+            $order = Mage::getService('sales/order')->getById($orderId);
             [$input, $backToStock] = $this->_getCreditmemoInput();
             if ($input['qtys'] === []) {
                 // Without qtys, the service refunds every item, as the form without item rows does
@@ -273,8 +274,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
         $creditmemo = $this->_initCreditmemo();
         if ($creditmemo) {
             try {
-                $creditmemo->cancel();
-                $this->_saveCreditmemo($creditmemo);
+                Mage::getService('sales/order_document')->cancelCreditmemo($creditmemo);
                 $this->_getSession()->addSuccess($this->__('The credit memo has been canceled.'));
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
@@ -296,8 +296,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
         $creditmemo = $this->_initCreditmemo();
         if ($creditmemo) {
             try {
-                $creditmemo->void();
-                $this->_saveCreditmemo($creditmemo);
+                Mage::getService('sales/order_document')->voidCreditmemo($creditmemo);
                 $this->_getSession()->addSuccess($this->__('The credit memo has been voided.'));
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
@@ -319,7 +318,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
         try {
             $this->getRequest()->setParam('creditmemo_id', $this->getRequest()->getParam('id'));
             $data = (array) $this->getRequest()->getPost('comment');
-            Mage::getService('sales/order')->addComment(
+            Mage::getService('sales/order_document')->addComment(
                 $this->_initCreditmemo() ?: Mage::throwException($this->__('The credit memo no longer exists.')),
                 (string) ($data['comment'] ?? ''),
                 !empty($data['is_customer_notified']),

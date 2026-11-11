@@ -211,16 +211,31 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
         $progress = Mage::getModel('index/progress');
         $progress->init($runner->getSteps($queue));
 
-        $this->getResponse()->sendJsonAndDetach($progress->toArray());
+        $this->_sendAndDetach($progress->toArray());
 
         try {
             $runner->run($queue, $progress);
         } catch (Throwable $e) {
             Mage::logException($e);
         } finally {
-            // Prevent the framework from sending a second response
-            exit;
+            $this->_endRequest();
         }
+    }
+
+    /**
+     * Answer the client with $record now, and keep the request alive for the reindex.
+     */
+    protected function _sendAndDetach(array $record): void
+    {
+        $this->getResponse()->sendJsonAndDetach($record);
+    }
+
+    /**
+     * End the request, so that the framework does not send a second response.
+     */
+    protected function _endRequest(): void
+    {
+        exit;
     }
 
     /**

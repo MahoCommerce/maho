@@ -188,9 +188,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
 
         $storeId = (int) $storeId;
         $user = $this->security?->getUser();
-        if ($user instanceof ApiUser && !$user->canAccessStore($storeId)) {
-            throw new \Mage_Core_Exception_Forbidden("Token is not authorized for store: {$storeId}");
-        }
+        $this->assertRequestedStoreAllowed($storeId, $user instanceof ApiUser ? $user : null);
 
         return $storeId;
     }
@@ -364,9 +362,9 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->resolveAndVerify($context, $uriVariables);
         CustomAttributes::applyToCartAddress($quote->getShippingAddress(), $args['customAttributes'] ?? null);
         try {
-            $quote = $this->cartService->setShippingAddress($quote, $this->cartService->mapAddressInput($args));
+            $quote = $this->cartService->setShippingAddress($quote, CartRequest::mapAddress($args));
         } catch (\Mage_Core_Exception_Input $e) {
-            throw $e->withFieldNames(\Mage_Checkout_Service_Cart::ADDRESS_API_FIELDS);
+            throw CartRequest::withAddressFieldNames($e);
         }
 
         return $this->cartMapper->mapQuoteToCart($quote);
@@ -383,7 +381,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $sameAsShipping = filter_var($args['sameAsShipping'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
-        $addressData = $this->cartService->mapAddressInput($args);
+        $addressData = CartRequest::mapAddress($args);
         if ($sameAsShipping) {
             foreach (array_keys(\Maho\ApiPlatform\Service\CustomAttributes::userDefined('customer_address')) as $code) {
                 $quote->getBillingAddress()->setData($code, $quote->getShippingAddress()->getData($code));
@@ -394,7 +392,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         try {
             $quote = $this->cartService->setBillingAddress($quote, $addressData, $sameAsShipping);
         } catch (\Mage_Core_Exception_Input $e) {
-            throw $e->withFieldNames(\Mage_Checkout_Service_Cart::ADDRESS_API_FIELDS);
+            throw CartRequest::withAddressFieldNames($e);
         }
 
         return $this->cartMapper->mapQuoteToCart($quote);
@@ -413,28 +411,18 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->resolveAndVerify($context, $uriVariables);
 
         if (is_array($address) && $address !== []) {
-            $estimate = \Mage::getModel('sales/quote_address')->addData($this->cartService->mapAddressInput($address));
+            $estimate = \Mage::getModel('sales/quote_address')->addData(CartRequest::mapAddress($address));
             $quote = $this->cartService->estimateShipping($quote, $estimate);
         } else {
-            // No address in the body: request fresh rates for the current cart
-            // state. Without the flag collectShippingRates() is a no-op and the
-            // response would repeat rates persisted before earlier cart changes.
-            // Persist the refresh: a later set-shipping-method validates and
-            // prices against the saved rates, so advertising unsaved ones would
-            // offer methods that call then rejects.
-            $quote->getShippingAddress()->setCollectShippingRates();
-            $this->cartService->collectAndSave($quote);
+            // No address in the body: the saved rates can be older than the last change of the cart
+            $this->cartService->refreshShippingRates($quote);
         }
 
         // Guest frontend contract: return the plain list of available shipping
         // methods (code/title/price). The authenticated /carts/{id} variant
         // returns the full Cart (availableShippingMethods included).
         if ($focused) {
-            $shippingAddress = $quote->getShippingAddress();
-            $methods = $shippingAddress->getId()
-                ? $this->cartService->inQuoteStoreScope($quote, fn(): array => $this->cartMapper->getAvailableShippingMethods($shippingAddress))
-                : [];
-            return $this->respondRaw($methods);
+            return $this->respondRaw($this->cartMapper->getShippingMethodsOfCart($quote));
         }
 
         return $this->cartMapper->mapQuoteToCart($quote);
@@ -469,7 +457,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
-        $quote = $this->cartService->setPaymentMethod($quote, $methodCode, $additionalData);
+        $quote = $this->cartService->setPaymentMethod($quote, $methodCode, $additionalData, CartRequest::backOfficeActor($this->isPrivilegedCartActor()));
 
         return $this->cartMapper->mapQuoteToCart($quote);
     }
@@ -484,7 +472,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $maskedId = $args['maskedId'] ?? null;
         $requestedCustomerId = $args['customerId'] ?? null;
 
-        // Admin/POS users can assign any customer to any cart
+        // Staff can assign any customer to any cart
         if ($this->isPrivilegedCartActor()) {
             $quote = $this->cartService->requireAccessible(
                 CartRequest::load($cartId ? (int) $cartId : null, is_string($maskedId) ? $maskedId : null),
@@ -507,9 +495,21 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             throw new \Mage_Core_Exception_Forbidden('Cannot assign a different customer to this cart');
         }
 
-        $quote = $this->cartService->merge(is_string($maskedId) ? $maskedId : '', $customerId);
+        $quote = $this->cartService->merge(is_string($maskedId) ? $maskedId : '', $customerId, (int) \Mage::app()->getStore()->getId());
 
         return $this->cartMapper->mapQuoteToCart($quote);
+    }
+
+    /**
+     * @throws \Mage_Core_Exception_NoSuchEntity when the store has no gift card module
+     */
+    private function giftcardService(): \Maho_Giftcard_Service_Giftcard
+    {
+        if (!\Mage::helper('core')->isModuleEnabled('Maho_Giftcard')) {
+            throw new \Mage_Core_Exception_NoSuchEntity(\Mage::helper('checkout')->__('Gift cards are not available'));
+        }
+
+        return \Mage::getService('giftcard/giftcard');
     }
 
     /**
@@ -521,7 +521,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $giftcardCode = is_scalar($args['giftcardCode'] ?? null) ? (string) $args['giftcardCode'] : '';
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
-        $quote = $this->cartService->applyGiftcard($quote, $giftcardCode, null, $this->actor());
+        $quote = $this->giftcardService()->applyToCart($quote, $giftcardCode, null, $this->actor());
 
         return $this->cartMapper->mapQuoteToCart($quote);
     }
@@ -532,10 +532,10 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function removeGiftcardFromCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $giftcardCode = trim($args['giftcardCode'] ?? '');
+        $giftcardCode = is_scalar($args['giftcardCode'] ?? null) ? trim((string) $args['giftcardCode']) : '';
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
-        $quote = $this->cartService->removeGiftcard($quote, $giftcardCode);
+        $quote = $this->giftcardService()->removeFromCart($quote, $giftcardCode);
 
         return $this->cartMapper->mapQuoteToCart($quote);
     }

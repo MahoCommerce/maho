@@ -297,7 +297,7 @@ function seedOpenInvoice(): ?int
         $order = Mage::getModel('sales/order')->load($orderId);
         $order->getPayment()->setIsTransactionPending(true);
 
-        $invoice = Mage::getService('sales/order')->buildInvoice($order);
+        $invoice = Mage::getService('sales/order_document')->buildInvoice($order);
         if (!$invoice->getTotalQty()) {
             return null;
         }

@@ -541,21 +541,6 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Refuse a new mode that is not in getModesOptions(). A stored mode stays valid.
-     *
-     * @throws Mage_Core_Exception_Input
-     */
-    #[\Override]
-    protected function _beforeSave()
-    {
-        if ((!$this->getId() || $this->dataHasChangedFor('mode')) && !array_key_exists((string) $this->getMode(), $this->getModesOptions())) {
-            throw new Mage_Core_Exception_Input()
-                ->addError('mode', Mage::helper('index')->__('mode must be real_time or manual'));
-        }
-        return parent::_beforeSave();
-    }
-
-    /**
      * Get list of process mode options
      *
      * @return array

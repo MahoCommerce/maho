@@ -142,7 +142,9 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
             $this->_redirect('*/*/');
             return;
         } catch (Mage_Core_Exception $e) {
-            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+            foreach (explode("\n", $e->getMessage()) as $message) {
+                Mage::getSingleton('adminhtml/session')->addError($message);
+            }
         } catch (Exception $e) {
             Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('Internal Error'));
             Mage::logException($e);

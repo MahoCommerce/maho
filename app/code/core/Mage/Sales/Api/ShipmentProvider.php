@@ -60,7 +60,7 @@ final class ShipmentProvider extends CrudProvider
 
     private function getShipmentById(int $id): Shipment
     {
-        $shipment = \Mage::getService('sales/order')->requireShipment($id);
+        $shipment = \Mage::getService('sales/order_document')->requireShipment($id);
         $this->assertStoreAllowed($shipment->getStoreId(), $this->requireUser(), 'shipment');
 
         return Shipment::fromModel($shipment);
@@ -71,7 +71,7 @@ final class ShipmentProvider extends CrudProvider
      */
     private function getShipmentsForOrder(int $orderId): ArrayPaginator
     {
-        $order = \Mage::getService('sales/order')->requireById($orderId);
+        $order = \Mage::getService('sales/order')->getById($orderId);
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         $shipments = [];

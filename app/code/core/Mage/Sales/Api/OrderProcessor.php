@@ -91,20 +91,12 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
                 : $this->orderService->requireVisibleToCustomerByIncrementId($incrementId, $customerId);
         }
 
-        $order = $byId ? $this->orderService->requireById($orderId) : $this->orderService->requireByIncrementId($incrementId);
+        $order = $byId ? $this->orderService->getById($orderId) : $this->orderService->getByIncrementId($incrementId);
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         return $order;
     }
 
-    /**
-     * Place order from cart. CartRequest::resolve() finds the cart that the URI
-     * (e.g. /guest-carts/{id}/place-order) or the request body (cartId / maskedId) names.
-     * Also applies shipping/billing address, customer email, and payment data
-     * from the request body, frontend callers send the full checkout state in
-     * one shot rather than pre-mutating the cart. paymentData reaches assignData() flat, with
-     * a copy under \Mage_Checkout_Service_Cart::PAYMENT_ADDITIONAL_DATA_KEY so no key is lost at save time.
-     */
     /**
      * Write the fields of $values, the guestCustomer of the body, into the customer columns of $quote.
      */
@@ -128,16 +120,18 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
+    /**
+     * Place order from cart. CartRequest::resolve() finds the cart that the URI
+     * (e.g. /guest-carts/{id}/place-order) or the request body (cartId / maskedId) names.
+     * The body can hold the addresses, the shipping method and the payment data of the order:
+     * \Mage_Checkout_Service_Cart::applyCheckoutState() applies them before the order is placed.
+     */
     private function placeOrder(array $uriVariables, array $context): Order
     {
         $args = $context['args']['input'] ?? $context['request_data'] ?? [];
         $guestEmail = $args['guestEmail'] ?? $args['email'] ?? null;
         $orderNote = $args['orderNote'] ?? null;
-        // POS-only fields: only trust them from admin/api callers so a guest
-        // cannot stamp an arbitrary employee id or cash amount onto the order.
         $isPrivileged = $this->isPrivilegedOrderActor();
-        $cashTendered = ($isPrivileged && isset($args['cashTendered'])) ? (float) $args['cashTendered'] : null;
-        $employeeId = ($isPrivileged && isset($args['employeeId'])) ? (int) $args['employeeId'] : null;
         $actor = $isPrivileged ? \Mage_Checkout_Model_Actor::Staff : \Mage_Checkout_Model_Actor::Customer;
         $agreementIds = $actor === \Mage_Checkout_Model_Actor::Customer ? $this->readAgreementIds($args) : null;
         $sendConfirmation = ($isPrivileged && isset($args['sendConfirmation'])) ? (bool) filter_var($args['sendConfirmation'], FILTER_VALIDATE_BOOLEAN) : null;
@@ -155,24 +149,6 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             $isPrivileged,
         );
 
-        // Frontend callers send the full checkout state in the body. Apply any
-        // provided addresses in-memory; the single collection below prices them
-        // together with the shipping method, and the final save persists them.
-        foreach (['shippingAddress' => $quote->getShippingAddress(), 'billingAddress' => $quote->getBillingAddress()] as $key => $address) {
-            if (!isset($args[$key]) || !is_array($args[$key])) {
-                continue;
-            }
-            CustomAttributes::applyToCartAddress($address, $args[$key]['customAttributes'] ?? null);
-            $addressData = $this->cartService->mapAddressInput($args[$key]);
-            try {
-                $key === 'shippingAddress'
-                    ? $this->cartService->applyShippingAddress($quote, $addressData)
-                    : $this->cartService->applyBillingAddress($quote, $addressData);
-            } catch (\Mage_Core_Exception_Input $e) {
-                throw $e->withFieldNames(array_map(fn(string $field): string => "{$key}.{$field}", \Mage_Checkout_Service_Cart::ADDRESS_API_FIELDS));
-            }
-        }
-
         // A guest sends the fields of the Checkout Registration form, which a customer order takes from the account
         if (!$quote->getCustomerId()) {
             $this->applyGuestCustomer($quote, $args['guestCustomer'] ?? null);
@@ -181,63 +157,38 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             throw new \Mage_Core_Exception_Input()->addError('customer_custom_attributes', 'customerCustomAttributes is for a guest order. A customer order takes the values of the customer account');
         }
 
-        // Set shipping method directly on the in-memory address. The frontend
-        // sends a composite carrier_method string in the body, and we preserve
-        // the in-memory quote state through to place() rather than
-        // save + reload through cartService->setShippingMethod.
-        $validateShippingMethod = false;
-        if ($shippingMethod && !$quote->isVirtual()) {
-            $shippingAddress = $quote->getShippingAddress();
-            $shippingAddress->setShippingMethod($shippingMethod);
-            $shippingAddress->setCollectShippingRates();
-            $validateShippingMethod = true;
+        // The client sends the checkout data with the order, and the cart service applies it in one pass
+        $addresses = [];
+        foreach (['shippingAddress' => $quote->getShippingAddress(), 'billingAddress' => $quote->getBillingAddress()] as $key => $address) {
+            if (!isset($args[$key]) || !is_array($args[$key])) {
+                $addresses[$key] = null;
+                continue;
+            }
+            CustomAttributes::applyToCartAddress($address, $args[$key]['customAttributes'] ?? null);
+            $addresses[$key] = CartRequest::mapAddress($args[$key]);
         }
-        // Collect once: this prices the applied addresses and shipping method,
-        // and gives the payment gate below fresh totals
-        $this->cartService->collectAndVerifyTotals($quote);
-
-        // Reject a method the client made up: after rates are collected the
-        // chosen code must resolve to a real rate, otherwise a caller could
-        // claim e.g. free shipping that the store does not actually offer.
-        // Validate before persisting so a bogus method never lands on the saved
-        // quote's shipping address (which would corrupt later loads of the cart).
-        if ($validateShippingMethod) {
-            $this->cartService->assertShippingMethodAvailable($quote, $shippingMethod);
-        }
-
-        // Gate the method pre-fee: setMethod() alone accepts any configured
-        // code, so without this a client could force e.g. "free" on a paid
-        // cart and place an unpaid order.
-        if ($paymentMethod) {
-            $this->cartService->assertPaymentMethodAvailable($quote, $paymentMethod);
-
-            // Caller-scope read; must stay outside the store-scope switch below
-            $this->cartService->importPaymentData(
+        try {
+            $this->cartService->applyCheckoutState(
                 $quote,
-                $paymentMethod,
+                $addresses['shippingAddress'],
+                $addresses['billingAddress'],
+                is_string($shippingMethod) ? $shippingMethod : null,
+                is_string($paymentMethod) ? $paymentMethod : null,
                 (isset($args['paymentData']) && is_array($args['paymentData'])) ? $args['paymentData'] : null,
-                \Mage_Payment_Model_Method_Abstract::checksForCurrentScope(),
+                CartRequest::backOfficeActor($isPrivileged),
             );
-
-            // Recollect so payment-dependent totals (e.g. payment fees) land on
-            // the order; the consumed rates flag keeps the validated rates.
-            $this->cartService->collectAndVerifyTotals($quote);
+        } catch (\Mage_Core_Exception_Input $e) {
+            throw CartRequest::withAddressFieldNames($e, ['shipping_address' => 'shippingAddress', 'billing_address' => 'billingAddress']);
         }
 
-        $placeOrder = function () use ($quote, $guestEmail, $orderNote, $cashTendered, $employeeId, $actor, $agreementIds, $sendConfirmation): array {
-            $quote->save();
-
-            return $this->orderService->place(
-                $quote,
-                $guestEmail,
-                $orderNote,
-                $cashTendered,
-                $employeeId,
-                $actor,
-                $agreementIds,
-                $sendConfirmation,
-            );
-        };
+        $placeOrder = fn(): array => $this->orderService->place(
+            $quote,
+            $guestEmail,
+            $orderNote,
+            $actor,
+            $agreementIds,
+            $sendConfirmation,
+        );
 
         // An admin-scoped caller places in admin scope so payment methods apply
         // MOTO handling (issue #1337). Any other caller places in the quote's
@@ -248,15 +199,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             ? $placeOrder()
             : $this->cartService->inQuoteStoreScope($quote, $placeOrder);
 
-        $order = $result['order'];
-        $accessToken = $result['accessToken'];
-        $changeAmount = $result['changeAmount'];
-
-        $dto = $this->orderProvider->mapToDto($order, $accessToken);
-        if ($changeAmount !== null) {
-            $dto->changeAmount = $changeAmount;
-        }
-        return $dto;
+        return $this->orderProvider->mapToDto($result['order'], $result['accessToken']);
     }
 
     /**

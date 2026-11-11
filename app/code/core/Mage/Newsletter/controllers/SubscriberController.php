@@ -35,7 +35,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
                 (string) $this->getRequest()->getPost('email'),
                 $storeId,
                 $customerId,
-                Mage_Newsletter_Model_Channel::Web,
+                $this->getRequest()->getPost(),
             );
             $session->addSuccess($service->isConfirmationPending($subscriber, $customerId, $storeId)
                 ? $this->__('Confirmation request has been sent.')
@@ -68,20 +68,18 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
         $code  = (string) $this->getRequest()->getParam('code');
 
         if ($id && $code) {
-            $subscriber = Mage::getModel('newsletter/subscriber')->load($id);
             $session = Mage::getSingleton('core/session');
-
-            if ($subscriber->getStatus() == $subscriber::STATUS_SUBSCRIBED) {
-                $session->addNotice($this->__('This email address is already confirmed.'));
-            } elseif ($subscriber->getId() && $subscriber->getCode()) {
-                if ($subscriber->confirm($code)) {
-                    $subscriber->sendConfirmationSuccessEmail();
+            try {
+                $subscriber = $this->subscriberService()->confirm($id, $code);
+                if ($subscriber->getIsStatusChanged()) {
                     $session->addSuccess($this->__('Your subscription has been confirmed.'));
                 } else {
-                    $session->addError($this->__('Invalid subscription confirmation code.'));
+                    $session->addNotice($this->__('This email address is already confirmed.'));
                 }
-            } else {
-                $session->addError($this->__('Invalid subscription ID.'));
+            } catch (Mage_Core_Exception $e) {
+                $session->addError($e->getMessage());
+            } catch (Exception $e) {
+                $session->addException($e, $this->__('There was a problem with the subscription.'));
             }
         }
 

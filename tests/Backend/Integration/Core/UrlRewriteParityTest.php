@@ -173,9 +173,20 @@ describe('a system rewrite', function () {
     });
 });
 
-it('checks a direct model save too, so an importer or an extension gets the same rules', function () {
+it('refuses a redirect type that the form does not have in the service', function () {
     $rewrite = Mage::getModel('core/url_rewrite')->setStoreId($this->storeId)->setIdPath('pest/parity/direct')
         ->setRequestPath('pest-parity-direct.html')->setTargetPath('contacts')->setOptions('X');
 
-    expect(fn() => $rewrite->save())->toThrow(Mage_Core_Exception_Input::class, 'The redirect must be');
+    expect(fn() => Mage::getService('core/url_rewrite')->save($rewrite))->toThrow(Mage_Core_Exception_Input::class, 'The redirect must be');
+});
+
+it('lets a script save a rewrite of the admin store without a target path, as before the service', function () {
+    $rewrite = Mage::getModel('core/url_rewrite')->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID)
+        ->setIdPath('pest/parity/script')->setRequestPath('pest-parity-script.html');
+    $rewrite->save();
+
+    $saved = Mage::getModel('core/url_rewrite')->load($rewrite->getId());
+    expect((int) $saved->getStoreId())->toBe(Mage_Core_Model_App::ADMIN_STORE_ID)
+        ->and($saved->getRequestPath())->toBe('pest-parity-script.html')
+        ->and($saved->getTargetPath())->toBeNull();
 });

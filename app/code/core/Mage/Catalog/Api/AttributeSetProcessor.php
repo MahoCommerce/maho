@@ -73,7 +73,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         $this->rejectUnknownFields($body, ['name', 'skeletonId']);
         $set = $this->setService()->newSet(\Mage_Catalog_Model_Product::ENTITY)
             ->setAttributeSetName($this->readString($body, 'name'));
-        $this->setService()->create($set, $this->readInteger($body, 'skeletonId'));
+        $this->setService()->save($set, $this->readInteger($body, 'skeletonId'));
         $this->logApiActivity('attribute_set', 'create', null, $set);
 
         return $this->toDto((int) $set->getId());

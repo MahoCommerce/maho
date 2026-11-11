@@ -91,9 +91,11 @@ page with a "404 Not Found" status, as any other URL that does not exist. The XM
 list it.
 
 The store keeps a page that a **CMS Home Page** or **CMS No Route Page** setting uses. You cannot
-delete it or disable it. The admin shows an error with the path of the setting, and the API answers
-with the status 409 Conflict. The same rule applies to the page that the `web/default/cms_no_cookies`
-setting names, which has no field in the admin.
+delete it or disable it. When you delete it, the admin shows an error with the path of the setting,
+and the API answers with the status 409 Conflict. When you disable it, the store saves your other
+changes and keeps the page enabled. The admin shows a warning with the path of the setting, and the
+API gives the page back with the status **Enabled**. The same rule applies to the page that the
+`web/default/cms_no_cookies` setting names, which has no field in the admin.
 
 This protection does not always work. When two pages have the same URL key, the setting can store
 the URL key with the page ID, for example `home|5`. The store then does not find the page, and lets

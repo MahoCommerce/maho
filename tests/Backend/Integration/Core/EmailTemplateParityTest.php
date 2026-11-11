@@ -147,10 +147,17 @@ it('resets the config path that uses a deleted template on both transports', fun
     }
 });
 
-it('checks a direct model save too, so an importer or an extension gets the same rules', function () {
-    $template = Mage::getModel('core/email_template')->setTemplateCode('Pest parity direct')
-        ->setTemplateSubject('<script>x</script>')->setTemplateText('Body');
+it('checks the name on a direct model save, and leaves the form rules to the service', function () {
+    $noName = Mage::getModel('core/email_template')->setTemplateSubject('Hello')->setTemplateText('Body');
+    expect(fn() => $noName->save())->toThrow(Mage_Core_Exception_Input::class, 'The template Name must not be empty.');
 
-    expect(fn() => $template->save())->toThrow(Mage_Core_Exception_Input::class)
-        ->and(emailTemplateParityId('Pest parity direct'))->toBeNull();
+    // A script or an extension saves a subject with a tag, as before the service
+    $template = Mage::getModel('core/email_template')->setTemplateCode('Pest parity direct')
+        ->setTemplateSubject('<b>Hello</b>')->setTemplateText('Body');
+    $template->save();
+    expect(emailTemplateParityId('Pest parity direct'))->not->toBeNull();
+
+    $duplicate = Mage::getModel('core/email_template')->setTemplateCode('Pest parity direct')
+        ->setTemplateSubject('Hello')->setTemplateText('Body');
+    expect(fn() => $duplicate->save())->toThrow(Mage_Core_Exception_Conflict::class);
 });

@@ -151,4 +151,15 @@ class Maho_SocialLogin_Helper_Data extends Mage_Core_Helper_Abstract
             default => ucfirst($code),
         };
     }
+
+    #[\Deprecated(message: 'Maho_SocialLogin_Service_Identity::authenticate() counts each sign-in in the limit system/rate_limit/auth_token_ip', since: '26.11')]
+    public function getIpRateLimiter(?int $storeId = null): \Maho\Security\RateLimiter
+    {
+        return Mage::helper('core')->rateLimiter(
+            'social_auth',
+            (int) Mage::getStoreConfig(Maho_SocialLogin_Service_Identity::XML_PATH_RATE_LIMIT, $storeId),
+            Maho_SocialLogin_Service_Identity::RATE_LIMIT_WINDOW,
+            \Maho\Security\RateLimitScope::Ip,
+        );
+    }
 }

@@ -15,30 +15,38 @@ use Mage_Cron_Model_Schedule as Schedule;
 class Mage_Cron_Service_Job
 {
     /**
-     * Run the cron job $jobCode now, outside its schedule. A new schedule records the run: RUNNING, then SUCCESS,
-     * or ERROR with the message of the exception or when the job calls setIsError() on the schedule. $started gets the schedule when it is RUNNING, before the job
-     * starts. The job holds its lock while it runs, so that a second run of the same job cannot start.
+     * Run the cron job $jobCode now, outside its schedule. A schedule records the run: RUNNING, then SUCCESS,
+     * or ERROR with the message of the exception or when the job calls setIsError() on the schedule.
+     * With $usePending, the run takes the first pending schedule of the job, so that the scheduler does not
+     * run it a second time. Without a pending schedule, and without $usePending, the run gets a new schedule.
+     * $started gets the schedule when it is RUNNING, before the job starts.
+     * The job holds its lock while it runs, so that a second run of the same job cannot start.
      *
      * @param (callable(Schedule): void)|null $started
      * @throws Mage_Core_Exception_NoSuchEntity when no enabled module declares $jobCode
      * @throws Mage_Core_Exception when the job declares a callback that does not exist
      * @throws Mage_Core_Exception_Conflict when the job runs already
      */
-    public function run(string $jobCode, ?callable $started = null): Schedule
+    public function run(string $jobCode, ?callable $started = null, bool $usePending = false): Schedule
     {
         $callback = $this->getCallback($jobCode);
         if (!$this->acquireLock($jobCode)) {
-            throw new Mage_Core_Exception_Conflict(Mage::helper('cron')->__('The cron job %s is already running.', $jobCode));
+            throw $this->alreadyRunning($jobCode);
         }
 
         try {
             $now = Mage::app()->getLocale()->formatDateForDb('now');
-            /** @var Schedule $schedule */
-            $schedule = Mage::getModel('cron/schedule');
-            $schedule->setJobCode($jobCode)
-                ->setStatus(Schedule::STATUS_RUNNING)
-                ->setCreatedAt($now)
-                ->setScheduledAt($now)
+            $schedule = $usePending ? $this->getPendingSchedule($jobCode) : null;
+            if ($schedule === null) {
+                /** @var Schedule $schedule */
+                $schedule = Mage::getModel('cron/schedule');
+                $schedule->setJobCode($jobCode)
+                    ->setCreatedAt($now)
+                    ->setScheduledAt($now);
+            } elseif (!$schedule->tryLockJob()) {
+                throw $this->alreadyRunning($jobCode);
+            }
+            $schedule->setStatus(Schedule::STATUS_RUNNING)
                 ->setExecutedAt($now)
                 ->save();
             if ($started !== null) {
@@ -51,6 +59,23 @@ class Mage_Cron_Service_Job
         } finally {
             $this->releaseLock($jobCode);
         }
+    }
+
+    protected function getPendingSchedule(string $jobCode): ?Schedule
+    {
+        /** @var Schedule $schedule */
+        $schedule = Mage::getModel('cron/schedule')->getCollection()
+            ->addFieldToFilter('status', Schedule::STATUS_PENDING)
+            ->addFieldToFilter('job_code', $jobCode)
+            ->orderByScheduledAt()
+            ->setPageSize(1)
+            ->getFirstItem();
+        return $schedule->getId() ? $schedule : null;
+    }
+
+    protected function alreadyRunning(string $jobCode): Mage_Core_Exception_Conflict
+    {
+        return new Mage_Core_Exception_Conflict(Mage::helper('cron')->__('The cron job %s is already running.', $jobCode));
     }
 
     /**
@@ -141,7 +166,7 @@ class Mage_Cron_Service_Job
     /**
      * Whether a process runs $jobCode now.
      */
-    public function isRunning(string $jobCode): bool
+    private function isRunning(string $jobCode): bool
     {
         return Mage::getSingleton('core/lock')->isHeld($this->getLockName($jobCode));
     }

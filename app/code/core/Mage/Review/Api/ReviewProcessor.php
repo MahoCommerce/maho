@@ -120,8 +120,7 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
             $rating === null ? [] : $service->getStarVotes($rating, $storeId),
             $storeId,
             $customerId,
-            \Mage_Review_Model_Channel::Api,
-            $captchaToken,
+            ['captchaToken' => $captchaToken],
         );
 
         $dto = Review::fromModel($review);

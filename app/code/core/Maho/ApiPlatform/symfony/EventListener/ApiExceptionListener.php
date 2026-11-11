@@ -280,23 +280,12 @@ class ApiExceptionListener implements EventSubscriberInterface
                 );
             }
             $data = [
-                'error' => match ($statusCode) {
-                    403 => 'forbidden',
-                    404 => 'not_found',
-                    409 => 'conflict',
-                    429 => 'too_many_requests',
-                    default => 'unprocessable_entity',
-                },
+                'error' => self::mageExceptionError($exception),
                 'message' => $exception->getMessage(),
                 'code' => $statusCode,
             ];
             if ($exception instanceof \Mage_Core_Exception_Input) {
-                $errors = array_map(
-                    fn(array $error): array => ['field' => self::apiFieldName($error['field']), 'message' => $error['message']],
-                    $exception->getErrors(),
-                );
-                // The first field, as ValidationException gives it
-                $data['details'] = ['field' => $errors[0]['field'] ?? null, 'errors' => $errors];
+                $data['details'] = self::mageExceptionDetails($exception);
             }
 
             if ($this->showDebug()) {
@@ -306,8 +295,15 @@ class ApiExceptionListener implements EventSubscriberInterface
                 ];
             }
 
+            $headers = [];
+            if ($statusCode === 401) {
+                $headers['WWW-Authenticate'] = \Mage::helper('apiplatform')->getBearerChallenge();
+            }
             $retryAfter = $exception instanceof \Mage_Core_Exception_TooManyRequests ? $exception->getRetryAfter() : null;
-            return new JsonResponse($data, $statusCode, $retryAfter === null ? [] : ['Retry-After' => (string) $retryAfter]);
+            if ($retryAfter !== null) {
+                $headers['Retry-After'] = (string) $retryAfter;
+            }
+            return new JsonResponse($data, $statusCode, $headers);
         }
 
         // Handle generic exceptions
@@ -339,12 +335,46 @@ class ApiExceptionListener implements EventSubscriberInterface
     public static function mageExceptionStatus(\Mage_Core_Exception $exception): int
     {
         return match (true) {
+            $exception instanceof \Mage_Core_Exception_Unauthorized => 401,
             $exception instanceof \Mage_Core_Exception_Forbidden => 403,
             $exception instanceof \Mage_Core_Exception_NoSuchEntity => 404,
             $exception instanceof \Mage_Core_Exception_Conflict => 409,
             $exception instanceof \Mage_Core_Exception_TooManyRequests => 429,
             default => 422,
         };
+    }
+
+    /**
+     * Return the name of the fault of a Mage_Core_Exception, the `error` of the response. GraphQL uses the same name.
+     */
+    public static function mageExceptionError(\Mage_Core_Exception $exception): string
+    {
+        if ($exception instanceof \Mage_Core_Exception_Unauthorized && $exception->getErrorCode() !== null) {
+            return $exception->getErrorCode();
+        }
+        return match (self::mageExceptionStatus($exception)) {
+            401 => 'unauthorized',
+            403 => 'forbidden',
+            404 => 'not_found',
+            409 => 'conflict',
+            429 => 'too_many_requests',
+            default => 'unprocessable_entity',
+        };
+    }
+
+    /**
+     * Return the `details` of the response for $exception: each error with the API name of its field, and the first field,
+     * as ValidationException gives it. GraphQL uses the same details.
+     *
+     * @return array{field: ?string, errors: list<array{field: string, message: string}>}
+     */
+    public static function mageExceptionDetails(\Mage_Core_Exception_Input $exception): array
+    {
+        $errors = array_map(
+            fn(array $error): array => ['field' => self::apiFieldName($error['field']), 'message' => $error['message']],
+            $exception->getErrors(),
+        );
+        return ['field' => $errors[0]['field'] ?? null, 'errors' => $errors];
     }
 
     /**

@@ -167,7 +167,7 @@ The cart page and the checkout of the storefront and the API use the same rules 
 
 - An item must be a product that is enabled and in the website of the cart. A guest or customer token can add only a product that the storefront shows. An admin token and an API token with the `carts/write` grant can also add a product that the storefront does not show, as the admin order create does. A product that is not available gives a 422.
 - A simple product that the storefront does not show, a variant of a configurable product, goes to the cart as its configurable parent, on the storefront, in the admin order create and on the API.
-- Without `qty`, the item gets the default qty of the product. A qty must be above 0 and at most 10,000, else the API gives a 422. A new line below the minimum sale qty of its product gets the minimum.
+- Without `qty`, the item gets the default qty of the product. A qty must be above 0 and at most the maximum sale qty of the product, else the API gives a 422. A new line below the minimum sale qty of its product gets the minimum.
 - Only an admin token or an API token with the `carts/write` grant can send `customPrice`. A guest or customer token gets a 403.
 - A `shipping-methods` request with an `address` keeps only the country, the region, the postcode and the city of the address on the cart, as the estimate of the cart page does. An unknown country gives a 422 with `countryId` in `details.errors`. Set the full address with `shipping-address`.
 - A `shipping-address`, a `billing-address` and the addresses of a place-order body take `firstName`, `lastName`, `street`, `city`, `region` or `regionId`, `postcode`, `countryId`, `telephone`, `company`, `prefix`, `middleName`, `suffix`, `vatId` and `saveInAddressBook`. They get the checks of the address form of the checkout: each field that the store makes required, and the length and the format of each field. An address that is not valid gives a 422 with one entry in `details.errors` for each problem. The entry names the field as the body names it, such as `firstName`, or `shippingAddress.firstName` in a place-order body. A problem of the whole address names the field `address`. The cart keeps the text of an address without HTML tags.
@@ -217,7 +217,7 @@ The cart page and the checkout of the storefront and the API use the same rules 
 
 **Two-factor authentication:** the operations give a 404 when the store does not allow 2FA for customers. To turn 2FA on, call `POST /customers/me/two-factor/secret`, put `twofaSecret` into the authenticator app, then call `POST /customers/me/two-factor` with `currentPassword`, `twofaEnabled: true` and the current code in `twofaCode`. To turn it off, send `currentPassword` and `twofaEnabled: false`: a store that requires 2FA gives a 403. A wrong password or a wrong code gives a 422, and each request counts in the **Change password** rate limit. A customer who already uses 2FA gets a 409 from the secret operation.
 
-An admin token or an API token with the `customers/create` grant creates an account that needs no confirmation. The customer gets the welcome email from the store of the request. Without a `password`, the account gets a random password, and the welcome email has the link to set a password, as **Email Link to Set Password** does in the admin. The GraphQL `quickCreateCustomer` mutation and the createCustomer operation of the admin GraphQL endpoint always give a random password and this email.
+An admin token or an API token with the `customers/create` grant creates an account that needs no confirmation. The customer gets the welcome email from the store of the request. Without a `password`, the account gets a random password, and the welcome email has the link to set a password, as **Email Link to Set Password** does in the admin. The createCustomer operation of the admin GraphQL endpoint always gives a random password and this email. When its input has address fields, they become the default address, which must be complete.
 
 **Addresses** (`Address` resource, same DTO is exposed under three URL families):
 
@@ -705,6 +705,7 @@ curl -X POST /api/rest/v2/customers/me/revocation-requests \
 - The API records every declaration, as the public form does: the merchant decides in the admin.
 - An order of the authenticated customer gives a **verified** declaration (`verified: true`), the same trust level as the my-account web link, also after the cooling-off window. Any other order reference is recorded **unverified**, and it is not linked to an order. The declaration row is the legal receipt and is always written, even if the receipt/notification emails are suppressed.
 - Disabled revocation (`revocation/general/enabled = 0`) returns `404`.
+- When the CAPTCHA of the store is on, send the solved token in `captchaToken`, as the form of the storefront does. The CAPTCHA is invisible, so it adds no step for the consumer. A missing or refused token gives a 422.
 
 **Response fields:** `id`, `orderId`, `orderReference`, `reason`, `customerName`, `email`, `verified`, `storeId`, `receivedAt`, `processedStatus`, `processedAt`, `suppressedAt`, `suppressedReason`. The internal-only fields `adminNote`, `ip`, and `userAgent` are returned **only** to admins.
 
@@ -816,11 +817,11 @@ Admin-only. Used for group-based pricing and tax-class assignment.
 | DELETE | `/customers/me/wishlist/{id}` | Customer/API | Remove from wishlist |
 | POST | `/customers/me/wishlist/{id}/move-to-cart` | Customer/API | Move item to cart, with the options of the item |
 | POST | `/customers/me/wishlist/sync` | Customer/API | Sync a guest (localStorage) wishlist into the customer's wishlist |
-| POST | `/customers/me/wishlist/share` | Customer | Send the wishlist by email (`{emails: [...], message}`) |
+| POST | `/customers/me/wishlist/share` | Customer | Send the wishlist by email (`{emails: [...], message, captchaToken}`) |
 
 `move-to-cart` takes an optional `qty`. Without `qty`, the cart gets the qty of the wishlist item, as on the wishlist page.
 
-`share` sends the items and the link of the shared wishlist to 1 to 5 addresses, with the optional `message` of the customer, as the share form of the wishlist page does. No address, more than 5 addresses or an address that is not valid gives a 422 with an entry for `emails` in `details.errors`. The limit `system/rate_limit/wishlist_share` counts the shares of one customer on the API and the page together, and a customer over the limit gets a 429 with a `Retry-After` header. The answer is an item with only `id`, which is the ID of the wishlist. The API cannot add the RSS link of the share form.
+`share` sends the items and the link of the shared wishlist to 1 to 5 addresses, with the optional `message` of the customer, as the share form of the wishlist page does. When the CAPTCHA of the store is on, send the solved token in `captchaToken`, as the share form does. No address, more than 5 addresses or an address that is not valid gives a 422 with an entry for `emails` in `details.errors`. The limit `system/rate_limit/wishlist_share` counts the shares of one customer on the API and the page together, and a customer over the limit gets a 429 with a `Retry-After` header. The answer is an item with only `id`, which is the ID of the wishlist. The API cannot add the RSS link of the share form.
 
 ---
 

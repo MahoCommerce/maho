@@ -164,8 +164,8 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
             }
         }
 
-        $this->validateAttributeSet($errors, 'customer_attribute_set_id', $this->getCustomerAttributeSetId(), 'customer');
-        $this->validateAttributeSet($errors, 'customer_address_attribute_set_id', $this->getCustomerAddressAttributeSetId(), 'customer_address');
+        $this->addAttributeSetError($errors, 'customer_attribute_set_id', $this->getCustomerAttributeSetId(), 'customer');
+        $this->addAttributeSetError($errors, 'customer_address_attribute_set_id', $this->getCustomerAddressAttributeSetId(), 'customer_address');
         $errors->throwIfErrors();
 
         $this->_prepareData();
@@ -175,7 +175,7 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
     /**
      * Add an error for $field to $errors when $setId is not a set of the entity type.
      */
-    protected function validateAttributeSet(Mage_Core_Exception_Input $errors, string $field, ?int $setId, string $entityTypeCode): void
+    protected function addAttributeSetError(Mage_Core_Exception_Input $errors, string $field, ?int $setId, string $entityTypeCode): void
     {
         if (!$setId) {
             return;
@@ -184,6 +184,14 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
             Mage::helper('eav')->assertSetOfType($setId, Mage::getSingleton('eav/config')->getEntityType($entityTypeCode));
         } catch (Mage_Core_Exception $e) {
             $errors->addError($field, $e->getMessage());
+        }
+    }
+
+    #[\Deprecated(message: 'use addAttributeSetError(), which records the problem of each attribute set', since: '26.11')]
+    protected function validateAttributeSet(?int $setId, string $entityTypeCode): void
+    {
+        if ($setId) {
+            Mage::helper('eav')->assertSetOfType($setId, Mage::getSingleton('eav/config')->getEntityType($entityTypeCode));
         }
     }
 

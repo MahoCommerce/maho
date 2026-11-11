@@ -318,4 +318,24 @@ return function (SchemaEditor $schema): void {
             ->create(),
     );
 
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('customer_flowpassword')
+            ->addColumn(Schema::column('flowpassword_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('ip', Types::STRING, length: 50))
+            ->addColumn(Schema::column('email', Types::STRING, length: 255))
+            // Model _beforeSave always populates requested_date with formatDateForDb('now');
+            // no DB-level default needed.
+            ->addColumn(Schema::column('requested_date', Types::STRING, length: 255))
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('flowpassword_id')
+                    ->create(),
+            )
+            ->addIndex(Index::editor()->setUnquotedColumnNames('email'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('ip'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('requested_date'))
+            ->setComment('Customer flow password')
+            ->create(),
+    );
 };

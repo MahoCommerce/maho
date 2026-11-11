@@ -30,12 +30,12 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     {
         $this->_title($this->__('Sales'))->_title($this->__('Invoices'));
 
-        $service = Mage::getService('sales/order');
+        $service = Mage::getService('sales/order_document');
         $invoiceId = (int) $this->getRequest()->getParam('invoice_id');
         try {
             $invoice = $invoiceId
                 ? $service->requireInvoice($invoiceId)
-                : $service->prepareInvoice($service->requireById((int) $this->getRequest()->getParam('order_id')), $this->_getItemQtys());
+                : $service->prepareInvoice(Mage::getService('sales/order')->getById((int) $this->getRequest()->getParam('order_id')), $this->_getItemQtys());
         } catch (Mage_Core_Exception_NoSuchEntity|Mage_Core_Exception_Conflict $e) {
             $this->_getSession()->addError($e->getMessage());
             return false;
@@ -150,13 +150,13 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
         }
 
         try {
-            $service = Mage::getService('sales/order');
+            $service = Mage::getService('sales/order_document');
             $tracks = [];
             foreach ((array) $this->getRequest()->getPost('tracking') as $track) {
                 $tracks[] = Mage::getModel('sales/order_shipment_track')->addData($track);
             }
-            $service->invoice(
-                $service->requireById((int) $orderId),
+            $invoice = $service->invoice(
+                Mage::getService('sales/order')->getById((int) $orderId),
                 $this->_getItemQtys(),
                 ($data['capture_case'] ?? '') !== '' ? (string) $data['capture_case'] : null,
                 ($data['comment_text'] ?? '') !== '' ? (string) $data['comment_text'] : null,
@@ -170,6 +170,12 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
             $this->_getSession()->addSuccess(!empty($data['do_shipment'])
                 ? $this->__('The invoice and shipment have been created.')
                 : $this->__('The invoice has been created.'));
+            if ($invoice->getData(Mage_Sales_Service_Order_Document::EMAIL_FAILED)) {
+                $this->_getSession()->addError($this->__('Unable to send the invoice email.'));
+            }
+            if ($invoice->getData(Mage_Sales_Service_Order_Document::SHIPMENT_EMAIL_FAILED)) {
+                $this->_getSession()->addError($this->__('Unable to send the shipment email.'));
+            }
             Mage::getSingleton('adminhtml/session')->getCommentText(true);
             $this->_redirect('*/sales_order/view', ['order_id' => $orderId]);
             return;
@@ -210,13 +216,13 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     }
 
     /**
-     * Run $method (captureInvoice, cancelInvoice or voidInvoice) of the order service on the invoice of the request.
+     * Run $method (captureInvoice, cancelInvoice or voidInvoice) of the document service on the invoice of the request.
      */
     protected function _changeInvoice(string $method, string $success, string $failure): void
     {
         if ($invoice = $this->_initInvoice()) {
             try {
-                Mage::getService('sales/order')->{$method}($invoice);
+                Mage::getService('sales/order_document')->{$method}($invoice);
                 $this->_getSession()->addSuccess($success);
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
@@ -237,7 +243,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
             $this->getRequest()->setParam('invoice_id', $this->getRequest()->getParam('id'));
             $data = (array) $this->getRequest()->getPost('comment');
             $invoice = $this->_initInvoice() ?: Mage::throwException($this->__('The invoice no longer exists.'));
-            Mage::getService('sales/order')->addComment(
+            Mage::getService('sales/order_document')->addComment(
                 $invoice,
                 (string) ($data['comment'] ?? ''),
                 !empty($data['is_customer_notified']),

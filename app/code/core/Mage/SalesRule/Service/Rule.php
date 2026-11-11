@@ -53,10 +53,8 @@ class Mage_SalesRule_Service_Rule
     {
         /** @var Rule $rule */
         $rule = Mage::getModel('salesrule/rule');
-        if ($id > 0) {
-            $rule->load($id);
-        }
-        if (!$rule->getId() || !$this->hasWebsite($rule, $websiteIds)) {
+        $rule->load($id);
+        if (!$rule->getId() || ($websiteIds !== null && !$rule->isInWebsites($websiteIds))) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('salesrule')->__('Cart price rule not found'));
         }
         return $rule;
@@ -64,21 +62,27 @@ class Mage_SalesRule_Service_Rule
 
     /**
      * Save $rule. The transport puts its input into the rule first. $inputErrors holds the values that the
-     * transport could not read: they come back together with the problems of the rule. A rule with a specific
-     * coupon needs its code.
+     * transport could not read: they come back together with the problems of the rule. A specific coupon must
+     * have a code.
      *
      * @throws Mage_Core_Exception_Input with one error for each problem
      * @throws Mage_Core_Exception_Conflict when another coupon has the code
      */
     public function save(Rule $rule, ?Mage_Core_Exception_Input $inputErrors = null): Rule
     {
-        $inputErrors ??= new Mage_Core_Exception_Input();
-        if ((int) $rule->getCouponType() === Rule::COUPON_TYPE_SPECIFIC && !$rule->getUseAutoGeneration() && trim((string) $rule->getCouponCode()) === '') {
-            $inputErrors->addError('coupon_code', Mage::helper('salesrule')->__('The coupon code is required for a specific coupon.'));
+        $errors = $rule->validateRecord($inputErrors ?? new Mage_Core_Exception_Input());
+        // A rule from a collection does not hold the code of its coupon. A loaded rule that already had no code
+        // passes when the save does not change its coupon.
+        if ((int) $rule->getCouponType() === Rule::COUPON_TYPE_SPECIFIC
+            && !$rule->getUseAutoGeneration()
+            && trim((string) $rule->getCouponCode()) === ''
+            && (!$rule->getId() || ($rule->hasData('coupon_code')
+                && array_filter(['coupon_code', 'coupon_type', 'use_auto_generation'], $rule->dataHasChangedFor(...)) !== []))
+            && !in_array('coupon_code', array_column($errors->getErrors(), 'field'), true)
+        ) {
+            $errors->addError('coupon_code', Mage::helper('salesrule')->__('The coupon code is required for a specific coupon.'));
         }
-        if ($inputErrors->getErrors() !== []) {
-            $rule->validateRecord($inputErrors)->throwIfErrors();
-        }
+        $errors->throwIfErrors();
         $rule->save();
         return $rule;
     }
@@ -214,11 +218,9 @@ class Mage_SalesRule_Service_Rule
     {
         /** @var Coupon $coupon */
         $coupon = Mage::getModel('salesrule/coupon');
-        if ($id > 0) {
-            $coupon->load($id);
-        }
+        $coupon->load($id);
         if (!$coupon->getId()
-            || ($websiteIds !== null && !$this->hasWebsite(Mage::getModel('salesrule/rule')->load($coupon->getRuleId()), $websiteIds))
+            || ($websiteIds !== null && !Mage::getModel('salesrule/rule')->load($coupon->getRuleId())->isInWebsites($websiteIds))
         ) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('salesrule')->__('Coupon not found'));
         }
@@ -296,9 +298,7 @@ class Mage_SalesRule_Service_Rule
             $limiters[] = Mage::helper('core')->rateLimiterBy('coupon_validate', 'coupon_validate:customer:' . $customerId, $limit, self::CHECK_RATE_LIMIT_WINDOW);
         }
         foreach ($limiters as $limiter) {
-            if (!$limiter->attempt()) {
-                throw new Mage_Core_Exception_TooManyRequests($helper->__('Too many requests. Please try again later.'), self::CHECK_RATE_LIMIT_WINDOW);
-            }
+            $limiter->attemptOrThrow();
         }
 
         /** @var Coupon $coupon */
@@ -313,7 +313,7 @@ class Mage_SalesRule_Service_Rule
         $locale = Mage::app()->getLocale();
         $reason = match (true) {
             !$rule->getId() || !$rule->getIsActive() => $helper->__('Coupon is not active'),
-            !$this->hasWebsite($rule, [$websiteId]) => $helper->__('Coupon is not valid for this website'),
+            !$rule->isInWebsites([$websiteId]) => $helper->__('Coupon is not valid for this website'),
             $customerGroupId !== null && !in_array($customerGroupId, array_map(intval(...), $rule->getCustomerGroupIds()), true)
                 => $helper->__('Coupon is not valid for this customer group'),
             !$locale->isStoreDateInInterval(null, dateFrom: $rule->getFromDate()) => $helper->__('Coupon is not yet active'),
@@ -346,13 +346,5 @@ class Mage_SalesRule_Service_Rule
             return $ruleCustomer->getId() && $ruleCustomer->getTimesUsed() >= $rule->getUsesPerCustomer();
         }
         return false;
-    }
-
-    /**
-     * @param list<int>|null $websiteIds
-     */
-    private function hasWebsite(Rule $rule, ?array $websiteIds): bool
-    {
-        return $websiteIds === null || array_intersect(array_map(intval(...), (array) $rule->getWebsiteIds()), $websiteIds) !== [];
     }
 }

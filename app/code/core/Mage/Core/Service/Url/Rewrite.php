@@ -25,12 +25,7 @@ class Mage_Core_Service_Url_Rewrite
      */
     public function getById(int $id, ?array $storeIds = null): Mage_Core_Model_Url_Rewrite
     {
-        $rewrite = $this->newRewrite();
-        try {
-            $rewrite->load($id);
-        } catch (\Doctrine\DBAL\Exception\DriverException) {
-            // An ID that the column cannot hold matches no row
-        }
+        $rewrite = $this->newRewrite()->load($id);
         if (!$rewrite->getId() || ($storeIds !== null && !in_array((int) $rewrite->getStoreId(), $storeIds, true))) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('core')->__('This URL rewrite no longer exists.'));
         }
@@ -39,9 +34,11 @@ class Mage_Core_Service_Url_Rewrite
 
     /**
      * Save $rewrite. The transport puts its input into the rewrite through the typed setters first. A new rewrite is
-     * custom. A rewrite with a product or a category gets the ID path and the target path of that product or category.
-     * The resource model checks the fields and the uniqueness of the request path and the ID path. A system rewrite
-     * keeps its store view. The catalog URL indexer writes a system rewrite again when it reindexes its product or
+     * custom. Check the store view, the request path, the redirect type, the product and the category. A rewrite
+     * without a product or a category needs an ID path and a target path. The request path is stored in lower case.
+     * A rewrite with a product or a category gets the ID path and the target path of that product or category.
+     * The resource model checks the uniqueness of the request path and the ID path. A system rewrite keeps its
+     * store view. The catalog URL indexer writes a system rewrite again when it reindexes its product or
      * category, so a change to a system rewrite lasts until then.
      *
      * @throws Mage_Core_Exception_Input with one error for each invalid field
@@ -57,14 +54,66 @@ class Mage_Core_Service_Url_Rewrite
         }
         $product = $rewrite->getProductId() === null ? null : Mage::getModel('catalog/product')->load($rewrite->getProductId());
         $category = $rewrite->getCategoryId() === null ? null : Mage::getModel('catalog/category')->load($rewrite->getCategoryId());
-        // A product or a category that does not exist is an error of the resource model
         $exists = ($product === null || $product->getId()) && ($category === null || $category->getId());
         if ($exists && ($product || $category)) {
             $this->setCatalogPaths($rewrite, $product, $category);
         }
+        $this->validate($rewrite, $product, $category);
 
         $rewrite->save();
         return $rewrite;
+    }
+
+    /**
+     * @throws Mage_Core_Exception_Input with one error for each invalid field
+     */
+    private function validate(
+        Mage_Core_Model_Url_Rewrite $rewrite,
+        ?Mage_Core_Model_Abstract $product,
+        ?Mage_Core_Model_Abstract $category,
+    ): void {
+        $helper = Mage::helper('core');
+        $errors = new Mage_Core_Exception_Input();
+
+        $storeId = $rewrite->getStoreId();
+        if ($storeId === null || $storeId === '') {
+            $errors->addError('store_id', $helper->__('The store view is required.'));
+        } elseif (!array_key_exists((int) $storeId, Mage::app()->getStores())) {
+            $errors->addError('store_id', $helper->__('The store view %s does not exist.', $storeId));
+        }
+
+        $requestPath = strtolower(trim((string) $rewrite->getRequestPath()));
+        $rewrite->setRequestPath($requestPath);
+        if ($requestPath === '') {
+            $errors->addError('request_path', $helper->__('The request path is required.'));
+        } else {
+            try {
+                Mage::helper('core/url_rewrite')->validateRequestPath($requestPath);
+            } catch (Mage_Core_Exception $e) {
+                $errors->addError('request_path', $e->getMessage());
+            }
+        }
+
+        if ($rewrite->getOptions() !== null && !in_array($rewrite->getOptions(), Mage_Core_Model_Url_Rewrite::OPTIONS, true)) {
+            $errors->addError('options', $helper->__('The redirect must be "" (no redirect), "R" (302) or "RP" (301).'));
+        }
+
+        if ($product !== null && !$product->getId()) {
+            $errors->addError('product_id', $helper->__('The product %s does not exist.', $rewrite->getProductId()));
+        }
+        if ($category !== null && !$category->getId()) {
+            $errors->addError('category_id', $helper->__('The category %s does not exist.', $rewrite->getCategoryId()));
+        }
+        if ($product === null && $category === null) {
+            if (trim((string) $rewrite->getIdPath()) === '') {
+                $errors->addError('id_path', $helper->__('The ID path is required for a rewrite without a product or a category.'));
+            }
+            if (trim((string) $rewrite->getTargetPath()) === '') {
+                $errors->addError('target_path', $helper->__('The target path is required for a rewrite without a product or a category.'));
+            }
+        }
+
+        $errors->throwIfErrors();
     }
 
     public function delete(Mage_Core_Model_Url_Rewrite $rewrite): void

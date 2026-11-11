@@ -70,7 +70,7 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
             $this->assertCustomerAccess($requestedId);
         }
 
-        $mahoCustomer = $this->customerService->getById($requestedId);
+        $mahoCustomer = $this->customerService->findById($requestedId);
         if (!$mahoCustomer) {
             return null;
         }
@@ -112,7 +112,7 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
      */
     private function getItem(int $id): ?Customer
     {
-        $mahoCustomer = $this->customerService->getById($id);
+        $mahoCustomer = $this->customerService->findById($id);
         return $mahoCustomer ? $this->mapToDto($mahoCustomer) : null;
     }
 

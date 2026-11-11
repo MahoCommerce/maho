@@ -41,17 +41,48 @@ function adminCartConfigure(int $customerId, int $itemId, array $fields): array
 }
 
 /**
- * Give $fields to the configure page of the storefront cart for the cart of the session. Return the error, or null.
+ * Post the removal of the line $itemId to the cart tab of the admin customer page. The action renders the
+ * tab after the removal, so the design is the admin design that preDispatch() sets in a real request.
+ */
+function adminCartRemove(int $customerId, int $itemId): void
+{
+    Mage::getDesign()
+        ->setArea(Mage_Core_Model_App_Area::AREA_ADMINHTML)
+        ->setPackageName((string) Mage::getConfig()->getNode('stores/admin/design/package/name'))
+        ->setTheme((string) Mage::getConfig()->getNode('stores/admin/design/theme/openmage'));
+    Mage::app()->getLayout()->setArea(Mage_Core_Model_App_Area::AREA_ADMINHTML);
+
+    AdminApiParity::admin(Mage_Adminhtml_CustomerController::class, 'cart', ['id' => $customerId, 'website_id' => 1, 'delete' => $itemId]);
+}
+
+/**
+ * Post $fields to the configure page of the storefront cart, with $quote as the cart of the session. Return the
+ * error message of the session, or null.
  *
  * @param array<string, mixed> $fields
  */
 function storefrontCartConfigure(Mage_Sales_Model_Quote $quote, int $itemId, array $fields): ?string
 {
-    $cart = Mage::getModel('checkout/cart')->setQuote(Mage::getModel('sales/quote')->loadByIdWithoutStore($quote->getId()));
+    $session = Mage::getSingleton('checkout/session');
+    $session->replaceQuote(Mage::getModel('sales/quote')->loadByIdWithoutStore($quote->getId()));
+    $session->getMessages(true);
+    Mage::getSingleton('checkout/cart')->unsetData('quote');
+
+    // getParams() reads the superglobals, as on a real request
+    $_POST = ['id' => $itemId] + $fields;
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/checkout/cart/updateItemOptions', 'POST', $_POST));
+    $request->setRouteName('checkout')->setControllerName('cart')->setActionName('updateItemOptions')->setDispatched(true);
+    Mage::app()->setRequest($request);
     try {
-        $cart->updateItem($itemId, new Maho\DataObject($fields));
-    } catch (Mage_Core_Exception $e) {
-        return $e->getMessage();
+        new Mage_Checkout_CartController($request, new Mage_Core_Controller_Response_Http())->updateItemOptionsAction();
+    } finally {
+        $_POST = [];
+    }
+
+    foreach ($session->getMessages(true)->getItems() as $message) {
+        if ($message->getType() !== Mage_Core_Model_Message::SUCCESS) {
+            return $message->getText();
+        }
     }
     return null;
 }
@@ -117,7 +148,7 @@ afterEach(function () {
 });
 
 it('removes a line of the cart and collects the totals again', function () {
-    AdminApiParity::admin(Mage_Adminhtml_CustomerController::class, 'cart', ['id' => $this->customer->getId(), 'website_id' => 1, 'delete' => $this->itemId]);
+    adminCartRemove((int) $this->customer->getId(), $this->itemId);
 
     $quote = adminCartQuote($this->customer);
     expect($quote->getAllVisibleItems())->toBe([])
@@ -126,7 +157,7 @@ it('removes a line of the cart and collects the totals again', function () {
 });
 
 it('keeps the cart when the line to remove is not in it', function () {
-    AdminApiParity::admin(Mage_Adminhtml_CustomerController::class, 'cart', ['id' => $this->customer->getId(), 'website_id' => 1, 'delete' => $this->itemId + 1000]);
+    adminCartRemove((int) $this->customer->getId(), $this->itemId + 1000);
 
     expect(adminCartLine($this->quote, $this->optionId))->toBe(['qty' => 2.0, 'engraving' => 'For Jane']);
 });
@@ -146,8 +177,8 @@ it('refuses the same qty on both transports', function () {
     $fields = ['qty' => 20000, 'options' => [$this->optionId => 'For Jane']];
 
     expect(adminCartConfigure((int) $this->customer->getId(), $this->itemId, $fields))
-        ->toBe(['error' => true, 'message' => 'Quantity cannot exceed 10,000'])
-        ->and(storefrontCartConfigure($this->quote, $this->itemId, $fields))->toBe('Quantity cannot exceed 10,000')
+        ->toBe(['error' => true, 'message' => 'The maximum quantity allowed for purchase is 10000.'])
+        ->and(storefrontCartConfigure($this->quote, $this->itemId, $fields))->toBe('The maximum quantity allowed for purchase is 10000.')
         ->and(adminCartLine($this->quote, $this->optionId))->toBe(['qty' => 2.0, 'engraving' => 'For Jane']);
 });
 

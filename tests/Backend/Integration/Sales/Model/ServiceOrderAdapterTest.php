@@ -9,6 +9,35 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
+/**
+ * A rewrite of the model sales/service_order, as an extension has it: it counts the invoices that it prepares, and
+ * it never ships or refunds the item adapter-a.
+ */
+class ServiceOrderAdapterTestRewrite extends Mage_Sales_Model_Service_Order
+{
+    /** @var list<string> */
+    public static array $calls = [];
+
+    #[\Override]
+    public function prepareInvoice($qtys = [])
+    {
+        self::$calls[] = 'prepareInvoice';
+        return parent::prepareInvoice($qtys);
+    }
+
+    #[\Override]
+    protected function _canShipItem($item, $qtys = [])
+    {
+        return $item->getSku() !== 'adapter-a' && parent::_canShipItem($item, $qtys);
+    }
+
+    #[\Override]
+    protected function _canRefundItem($item, $qtys = [], $invoiceQtysRefundLimits = [])
+    {
+        return $item->getSku() !== 'adapter-a' && parent::_canRefundItem($item, $qtys, $invoiceQtysRefundLimits);
+    }
+}
+
 // Two simple items: 2 of A at 10 and 3 of B at 20, so the order totals 80.
 function serviceOrderAdapterOrder(): Mage_Sales_Model_Order
 {
@@ -52,7 +81,7 @@ function serviceOrderAdapterItemId(Mage_Sales_Model_Order $order, string $sku): 
 
 function serviceOrderAdapterInvoiceAll(Mage_Sales_Model_Order $order): Mage_Sales_Model_Order_Invoice
 {
-    $invoice = Mage::getService('sales/order')->buildInvoice($order);
+    $invoice = Mage::getService('sales/order_document')->buildInvoice($order);
     $invoice->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE)->register();
     Mage::getModel('core/resource_transaction')->addObject($invoice)->addObject($invoice->getOrder())->save();
     return $invoice;
@@ -80,7 +109,7 @@ describe('The deprecated Mage_Sales_Model_Service_Order', function () {
         $qtys = [serviceOrderAdapterItemId($order, 'adapter-a') => '1,0'];
 
         $adapter = serviceOrderAdapterSummary(Mage::getModel('sales/service_order', $order)->prepareInvoice($qtys));
-        $service = serviceOrderAdapterSummary(Mage::getService('sales/order')->buildInvoice($order, $qtys));
+        $service = serviceOrderAdapterSummary(Mage::getService('sales/order_document')->buildInvoice($order, $qtys));
 
         expect($adapter)->toBe($service)
             ->and($service)->toBe(['total_qty' => 1.0, 'base_grand_total' => 10.0, 'qtys' => ['adapter-a' => 1.0, 'adapter-b' => 0.0]]);
@@ -91,7 +120,7 @@ describe('The deprecated Mage_Sales_Model_Service_Order', function () {
         $qtys = [serviceOrderAdapterItemId($order, 'adapter-b') => 2];
 
         $adapter = serviceOrderAdapterSummary(Mage::getModel('sales/service_order', $order)->prepareShipment($qtys));
-        $service = serviceOrderAdapterSummary(Mage::getService('sales/order')->buildShipment($order, $qtys));
+        $service = serviceOrderAdapterSummary(Mage::getService('sales/order_document')->buildShipment($order, $qtys));
 
         expect($adapter)->toBe($service)
             ->and($service['qtys'])->toBe(['adapter-b' => 2.0]);
@@ -104,7 +133,7 @@ describe('The deprecated Mage_Sales_Model_Service_Order', function () {
         $data = ['qtys' => [serviceOrderAdapterItemId($order, 'adapter-b') => 1], 'adjustment_positive' => '2,5'];
 
         $adapter = serviceOrderAdapterSummary(Mage::getModel('sales/service_order', $order)->prepareCreditmemo($data));
-        $service = serviceOrderAdapterSummary(Mage::getService('sales/order')->buildCreditmemo($order, $data));
+        $service = serviceOrderAdapterSummary(Mage::getService('sales/order_document')->buildCreditmemo($order, $data));
 
         expect($adapter)->toBe($service)
             ->and($service)->toBe(['total_qty' => 1.0, 'base_grand_total' => 22.5, 'qtys' => ['adapter-b' => 1.0]]);
@@ -115,7 +144,7 @@ describe('The deprecated Mage_Sales_Model_Service_Order', function () {
         $invoice = serviceOrderAdapterInvoiceAll($order);
 
         $adapter = serviceOrderAdapterSummary(Mage::getModel('sales/service_order', $order)->prepareInvoiceCreditmemo($invoice));
-        $service = serviceOrderAdapterSummary(Mage::getService('sales/order')->buildCreditmemo($order, [], $invoice));
+        $service = serviceOrderAdapterSummary(Mage::getService('sales/order_document')->buildCreditmemo($order, [], $invoice));
 
         expect($adapter)->toBe($service)
             ->and($service)->toBe(['total_qty' => 5.0, 'base_grand_total' => 80.0, 'qtys' => ['adapter-a' => 2.0, 'adapter-b' => 3.0]]);
@@ -136,5 +165,31 @@ describe('The deprecated Mage_Sales_Model_Service_Order', function () {
         Mage::getModel('sales/service_order', serviceOrderAdapterOrder())->setConvertor($convertor)->prepareInvoice();
 
         expect($convertor->invoices)->toBe(1);
+    });
+
+    test('core builds each document through a rewrite of the model', function () {
+        $order = serviceOrderAdapterOrder();
+        serviceOrderAdapterInvoiceAll($order);
+        $order = Mage::getModel('sales/order')->load($order->getId());
+        $cache = new ReflectionProperty(Mage_Core_Model_Config::class, '_classNameCache');
+        $cache->setValue(Mage::getConfig(), []);
+        Mage::getConfig()->setNode('global/models/sales/rewrite/service_order', ServiceOrderAdapterTestRewrite::class);
+        ServiceOrderAdapterTestRewrite::$calls = [];
+
+        try {
+            $service = Mage::getService('sales/order_document');
+            $order->prepareInvoice();
+            $shipment = serviceOrderAdapterSummary($service->buildShipment($order));
+            $creditmemo = serviceOrderAdapterSummary($service->buildCreditmemo($order));
+        } finally {
+            Mage::getConfig()->setNode('global/models/sales/rewrite/service_order', '');
+            $cache->setValue(Mage::getConfig(), []);
+        }
+
+        expect(ServiceOrderAdapterTestRewrite::$calls)->toBe(['prepareInvoice'])
+            ->and($shipment['qtys'])->toBe(['adapter-b' => 3.0])
+            ->and($creditmemo['qtys'])->toBe(['adapter-b' => 3.0])
+            ->and(serviceOrderAdapterSummary(Mage::getService('sales/order_document')->buildShipment($order))['qtys'])
+            ->toBe(['adapter-a' => 2.0, 'adapter-b' => 3.0]);
     });
 });

@@ -311,4 +311,18 @@ class Mage_Catalog_Model_Observer
             );
         }
     }
+
+    /**
+     * @throws Mage_Core_Exception
+     */
+    #[\Deprecated('Mage_Catalog_Model_Resource_Eav_Attribute checks the reserved codes before a save')]
+    public function checkReservedAttributeCodes(\Maho\Event\Observer $observer): void
+    {
+        $attribute = $observer->getEvent()->getAttribute();
+        if (is_object($attribute) && Mage::getModel('catalog/product')->isReservedAttribute($attribute)) {
+            throw new Mage_Core_Exception(
+                Mage::helper('catalog')->__('The attribute code \'%s\' is reserved by system. Please try another attribute code', $attribute->getAttributeCode()),
+            );
+        }
+    }
 }

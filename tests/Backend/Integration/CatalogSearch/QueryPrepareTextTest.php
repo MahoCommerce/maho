@@ -38,11 +38,12 @@ it('searches for the text of the caller, and leaves the request as it is', funct
         ->and(Mage::app()->getRequest()->getParam('q'))->toBe('text of the request');
 });
 
-it('searches for the text of the request without a text of the caller', function (): void {
+it('does not read the text of the request', function (): void {
     /** @var Mage_CatalogSearch_Service_Query $service */
     $service = Mage::getService('catalogsearch/query');
 
-    expect($service->prepare(1)->getQueryText())->toBe('text of the request');
+    expect($service->prepare(1, '')->getQueryText())->toBe('')
+        ->and(Mage::helper('catalogsearch')->getQueryText())->toBe('');
 });
 
 it('does not keep the text of an earlier search', function (): void {

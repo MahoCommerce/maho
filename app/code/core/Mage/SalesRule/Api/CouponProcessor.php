@@ -208,12 +208,11 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
     {
         $customerId = $this->getAuthenticatedCustomerId();
         $isPrivileged = $this->isAdmin() || $this->isApiUser();
-        /** @var \Mage_Sales_Model_Quote $quote */
-        $quote = \Mage::getModel('sales/quote');
-        if ($cartId) {
-            $quote->load($cartId);
-        }
-        $useCart = $isPrivileged && $quote->getId();
+        /** @var \Mage_Checkout_Service_Cart $cartService */
+        $cartService = \Mage::getService('checkout/cart');
+        // The service refuses a guest cart by its ID: its masked ID goes through the coupon endpoints of the cart
+        $quote = $cartId ? $cartService->requireAccessible($cartService->findById($cartId), false, $customerId, $isPrivileged) : null;
+        $useCart = $isPrivileged && $quote !== null;
         $groupId = match (true) {
             $useCart => (int) $quote->getCustomerGroupId(),
             $customerId !== null => (int) \Mage::getModel('customer/customer')->load($customerId)->getGroupId(),
@@ -239,11 +238,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             return $dto;
         }
 
-        if ($quote->getId()) {
-            // A guest cart has no owner to check here: its masked ID goes through the coupon endpoints of the cart
-            if (!$isPrivileged && ($customerId === null || (int) $quote->getCustomerId() !== $customerId)) {
-                throw new \Mage_Core_Exception('Cart not accessible');
-            }
+        if ($quote !== null) {
             // A copy, so that the stored cart does not change
             $preview = clone $quote;
             $preview->setCouponCode($code)->setTotalsCollectedFlag(false)->collectTotals();

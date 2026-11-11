@@ -13,7 +13,6 @@ declare(strict_types=1);
 namespace Mage\SalesRule\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Maho\ApiPlatform\Exception\ValidationException;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\Exception\ExtraAttributesException;
@@ -62,7 +61,7 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
             $value = $body[$field] ?? null;
             if (in_array($field, ['format', 'prefix', 'suffix'], true)) {
                 if ($value !== null && !is_string($value)) {
-                    throw new ValidationException("{$field} must be a text", $field);
+                    throw new \Mage_Core_Exception_Input()->addError($field, "{$field} must be a text");
                 }
                 $settings[$field] = $value;
             } else {
@@ -71,7 +70,7 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
             }
         }
         if ($settings['qty'] > self::MAX_GENERATE_QTY) {
-            throw new ValidationException(sprintf('qty must be an integer from 1 to %d', self::MAX_GENERATE_QTY), 'qty');
+            throw new \Mage_Core_Exception_Input()->addError('qty', sprintf('qty must be an integer from 1 to %d', self::MAX_GENERATE_QTY));
         }
 
         $count = $service->generateCoupons($rule, ...$settings);
@@ -95,13 +94,13 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
     {
         $ids = $body['ids'] ?? null;
         if (!is_array($ids) || !array_is_list($ids) || $ids === [] || count($ids) > self::MAX_DELETE_IDS) {
-            throw new ValidationException(sprintf('ids must be a list of 1 to %d coupon IDs', self::MAX_DELETE_IDS), 'ids');
+            throw new \Mage_Core_Exception_Input()->addError('ids', sprintf('ids must be a list of 1 to %d coupon IDs', self::MAX_DELETE_IDS));
         }
         $couponIds = [];
         foreach ($ids as $index => $id) {
             $couponIds[] = $this->readInteger($id) ?? 0;
             if (end($couponIds) < 1) {
-                throw new ValidationException('Each ID must be a positive integer', "ids[{$index}]");
+                throw new \Mage_Core_Exception_Input()->addError("ids[{$index}]", 'Each ID must be a positive integer');
             }
         }
 

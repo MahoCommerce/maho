@@ -161,4 +161,23 @@ class Maho_FeedManager_Model_Cron
             Mage::log("FeedManager: Cleaned {$deleted} log entries older than {$retentionDays} days", Mage::LOG_INFO);
         }
     }
+
+    #[\Deprecated(message: 'Use Maho_FeedManager_Model_Generator::isGenerating() instead')]
+    protected function _isFeedRunning(Maho_FeedManager_Model_Feed $feed): bool
+    {
+        return Maho_FeedManager_Model_Generator::isGenerating((int) $feed->getId());
+    }
+
+    #[\Deprecated(message: 'Use Maho_FeedManager_Service_Feed::reset() instead')]
+    public function resetHungFeed(int $feedId): bool
+    {
+        $feed = Mage::getModel('feedmanager/feed')->load($feedId);
+        return $feed->getId() && Mage::getService('feedmanager/feed')->reset($feed) > 0;
+    }
+
+    #[\Deprecated(message: 'Use Maho_FeedManager_Service_Feed::upload() instead')]
+    protected function _uploadFeed(Maho_FeedManager_Model_Feed $feed, Maho_FeedManager_Model_Log $log, string $localPath): void
+    {
+        Mage::getService('feedmanager/feed')->upload($feed, $log, $localPath);
+    }
 }

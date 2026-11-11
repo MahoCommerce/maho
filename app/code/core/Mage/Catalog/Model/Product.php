@@ -194,6 +194,56 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     }
 
     /**
+     * Add an error to $errors for each problem of the name, the type and the attribute set, and return $errors.
+     * A save calls this method. The name is required in the default scope: a store view can have no name of its
+     * own. A saved product reports only a value that changed since the load. $errors keeps the first error of a field.
+     * The SKU is not here: a duplicate has no SKU until the admin gives it one, so Mage_Catalog_Service_Product
+     * requires it.
+     */
+    public function validateRecord(Mage_Core_Exception_Input $errors = new Mage_Core_Exception_Input()): Mage_Core_Exception_Input
+    {
+        $helper = Mage::helper('catalog');
+        $fields = array_column($errors->getErrors(), 'field');
+        $isNew = !$this->getId();
+        if ((int) $this->getStoreId() === Mage_Core_Model_App::ADMIN_STORE_ID && !in_array('name', $fields, true)
+            && ($isNew || $this->dataHasChangedFor('name'))
+            && trim((string) $this->getData('name')) === ''
+        ) {
+            $errors->addError('name', $helper->__('Name is required'));
+        }
+        if (($isNew || $this->dataHasChangedFor('type_id')) && !in_array('type_id', $fields, true)
+            && !array_key_exists((string) $this->getTypeId(), Mage_Catalog_Model_Product_Type::getTypes())
+        ) {
+            $errors->addError('type_id', $helper->__('Unknown product type: %s', (string) $this->getTypeId()));
+        }
+        if (($isNew || $this->dataHasChangedFor('attribute_set_id')) && !in_array('attribute_set_id', $fields, true)
+            && !$this->isProductAttributeSet((int) $this->getAttributeSetId())
+        ) {
+            $errors->addError('attribute_set_id', $helper->__('Attribute set %s not found', (int) $this->getAttributeSetId()));
+        }
+        return $errors;
+    }
+
+    /**
+     * Tell whether $setId is the ID of an attribute set of products.
+     */
+    public function isProductAttributeSet(int $setId): bool
+    {
+        $set = Mage::getModel('eav/entity_attribute_set')->load($setId);
+        return $set->getId() && (int) $set->getEntityTypeId() === (int) $this->getResource()->getTypeId();
+    }
+
+    /**
+     * Tell whether the product is in one or more of the websites $websiteIds.
+     *
+     * @param list<int|string> $websiteIds
+     */
+    public function isInWebsites(array $websiteIds): bool
+    {
+        return array_intersect(array_map(intval(...), (array) $this->getWebsiteIds()), array_map(intval(...), $websiteIds)) !== [];
+    }
+
+    /**
      * Validate Product Data
      *
      * @todo implement full validation process with errors returning which are ignoring now
@@ -579,6 +629,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     #[\Override]
     protected function _beforeSave()
     {
+        $this->validateRecord()->throwIfErrors();
         $this->cleanCache();
         $this->setTypeHasOptions(false);
         $this->setTypeHasRequiredOptions(false);

@@ -246,22 +246,39 @@ describe('pages', function (): void {
 });
 
 describe('a page that the configuration uses', function (): void {
-    it('refuses to disable it with a conflict on both transports, and keeps it enabled', function (string $path): void {
+    it('keeps it enabled on both transports and saves the other fields, with a warning in the admin', function (string $path): void {
         $page = Mage::getService('cms/page')->save(Mage::getModel('cms/page')->setIdentifier(CMS_PARITY_PREFIX . 'used')
             ->setTitle('Parity')->setStores([0])->setRootTemplate('one_column')->setIsActive());
         $message = sprintf('Cannot disable page, it is used in configuration "%s".', $path);
 
         cmsParityWithConfig($path, CMS_PARITY_PREFIX . 'used', function () use ($page, $message): void {
             $admin = AdminApiParity::admin(Mage_Adminhtml_Cms_PageController::class, 'save', [
-                'page_id' => $page->getId(), 'identifier' => CMS_PARITY_PREFIX . 'used', 'title' => 'Parity', 'stores' => [0],
+                'page_id' => $page->getId(), 'identifier' => CMS_PARITY_PREFIX . 'used', 'title' => 'Parity Admin', 'stores' => [0],
                 'is_active' => 0, 'root_template' => 'one_column',
             ]);
-            $api = cmsParityApiUpdate((int) $page->getId(), ['isActive' => false]);
+            $adminSaved = Mage::getModel('cms/page')->load($page->getId());
+            $api = cmsParityApiUpdate((int) $page->getId(), ['isActive' => false, 'title' => 'Parity Api']);
+            $apiSaved = Mage::getModel('cms/page')->load($page->getId());
 
+            // A script that saves the model gets the same rule, and no exception
+            $model = Mage::getModel('cms/page')->load($page->getId())->setIsActive(false)->save();
+            $warnings = [];
+            foreach (Mage::getSingleton('adminhtml/session')->getMessages(true)->getItemsByType(Mage_Core_Model_Message::WARNING) as $warning) {
+                $warnings[] = $warning->getText();
+            }
+
+            // AdminApiParity::admin() lists each message that is not a success as an error. The resource model adds
+            // this one as a warning, which the loop above proves for the saves after the admin action
             expect($admin['errors'])->toBe([$message])
-                ->and($admin['success'])->toBe([])
-                ->and($api)->toMatchArray(['status' => 409, 'errors' => [$message]])
-                ->and(Mage::getModel('cms/page')->load($page->getId())->getIsActive())->toBeTrue();
+                ->and($admin['success'])->toBe(['The page has been saved.'])
+                ->and($adminSaved->getIsActive())->toBeTrue()
+                ->and($adminSaved->getTitle())->toBe('Parity Admin')
+                ->and($api['status'])->toBe(200)
+                ->and($api['result']->isActive)->toBeTrue()
+                ->and($apiSaved->getIsActive())->toBeTrue()
+                ->and($apiSaved->getTitle())->toBe('Parity Api')
+                ->and($model->getIsActive())->toBeTrue()
+                ->and($warnings)->toContain($message);
         });
     })->with([
         'home page' => [Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE],
@@ -362,6 +379,29 @@ describe('media upload', function (): void {
             ->and($api->path)->toBe($this->root . '/cms-parity-api' . $extension)
             ->and($api->dimensions)->toBe(['width' => 3, 'height' => 2])
             ->and(Mage::getStorage('media')->fileExists($admin['path']))->toBeTrue();
+    });
+
+    it('saves a video as it is on the admin page when the media library opens for the type media', function (): void {
+        $tmp = (string) tempnam(sys_get_temp_dir(), 'cms');
+        file_put_contents($tmp, 'not an image');
+        $_FILES['image'] = ['name' => 'cms-parity-video.mov', 'type' => 'video/quicktime', 'tmp_name' => $tmp, 'error' => UPLOAD_ERR_OK, 'size' => 12];
+
+        $request = new Mage_Core_Controller_Request_Http(
+            SymfonyRequest::create('http://localhost/admin/cms_wysiwyg_images/upload', 'POST', ['type' => 'media']),
+        );
+        Mage::app()->setRequest($request);
+        $response = new Mage_Core_Controller_Response_Http();
+        new Mage_Adminhtml_Cms_Wysiwyg_ImagesController($request, $response)->uploadAction();
+        $admin = json_decode((string) $response->getBody(), true);
+
+        try {
+            expect($admin)->toBe([
+                'path' => $this->root . '/cms-parity-video.mov', 'file' => 'cms-parity-video.mov', 'size' => 12, 'width' => 0, 'height' => 0,
+            ])
+                ->and(Mage::getStorage('media')->read($admin['path']))->toBe('not an image');
+        } finally {
+            Mage::getStorage('media')->delete($this->root . '/cms-parity-video.mov');
+        }
     });
 
     it('saves image bytes with the image type and the name rule of an upload', function (): void {

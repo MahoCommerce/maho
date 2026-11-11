@@ -54,7 +54,7 @@ function invoiceShippingDiscountSave(Mage_Sales_Model_Order_Invoice $invoice): v
 
 describe('Invoice shipping discount', function () {
     test('deducts the shipping discount on the first invoice', function () {
-        $invoice = Mage::getService('sales/order')->buildInvoice(invoiceShippingDiscountOrder());
+        $invoice = Mage::getService('sales/order_document')->buildInvoice(invoiceShippingDiscountOrder());
 
         expect((float) $invoice->getBaseShippingAmount())->toBe(10.0)
             ->and((float) $invoice->getBaseDiscountAmount())->toBe(-11.0)
@@ -65,7 +65,7 @@ describe('Invoice shipping discount', function () {
         $order = invoiceShippingDiscountOrder();
         // A pending payment transaction leaves the invoice open and unpaid, and an open invoice can be canceled.
         $order->getPayment()->setIsTransactionPending(true);
-        $first = Mage::getService('sales/order')->buildInvoice($order);
+        $first = Mage::getService('sales/order_document')->buildInvoice($order);
         $first->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::NOT_CAPTURE);
         $first->register();
         invoiceShippingDiscountSave($first);
@@ -78,7 +78,7 @@ describe('Invoice shipping discount', function () {
         invoiceShippingDiscountSave($first);
 
         $order = Mage::getModel('sales/order')->load($order->getId());
-        $invoice = Mage::getService('sales/order')->buildInvoice($order);
+        $invoice = Mage::getService('sales/order_document')->buildInvoice($order);
 
         expect((float) $order->getBaseTotalInvoiced())->toBe(0.0)
             ->and((float) $invoice->getBaseShippingAmount())->toBe(10.0)
@@ -89,12 +89,12 @@ describe('Invoice shipping discount', function () {
     test('does not deduct the shipping discount twice over partial invoices', function () {
         $order = invoiceShippingDiscountOrder();
         $itemId = (int) $order->getAllItems()[0]->getId();
-        $first = Mage::getService('sales/order')->buildInvoice($order, [$itemId => 1]);
+        $first = Mage::getService('sales/order_document')->buildInvoice($order, [$itemId => 1]);
         $first->register();
         invoiceShippingDiscountSave($first);
 
         $order = Mage::getModel('sales/order')->load($order->getId());
-        $second = Mage::getService('sales/order')->buildInvoice($order);
+        $second = Mage::getService('sales/order_document')->buildInvoice($order);
 
         // The first invoice has one item (50 - 5) and the shipping (10 - 1); the second has the other item.
         expect((float) $first->getBaseGrandTotal())->toBe(54.0)

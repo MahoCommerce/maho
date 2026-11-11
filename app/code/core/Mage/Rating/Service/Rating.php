@@ -13,6 +13,18 @@ class Mage_Rating_Service_Rating
     public const STARS = 5;
 
     /**
+     * @throws Mage_Core_Exception_NoSuchEntity
+     */
+    public function getById(int $id): Mage_Rating_Model_Rating
+    {
+        $rating = Mage::getModel('rating/rating')->load($id);
+        if (!$rating->getId()) {
+            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('rating')->__('Rating not found'));
+        }
+        return $rating;
+    }
+
+    /**
      * Save $rating. A rating with no options gets one option for each star: a customer votes through them.
      */
     public function save(Mage_Rating_Model_Rating $rating): Mage_Rating_Model_Rating
@@ -30,5 +42,10 @@ class Mage_Rating_Service_Rating
                 ->save();
         }
         return $rating;
+    }
+
+    public function delete(Mage_Rating_Model_Rating $rating): void
+    {
+        $rating->delete();
     }
 }

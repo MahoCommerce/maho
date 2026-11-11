@@ -16,7 +16,6 @@ use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class SocialAuthProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -43,15 +42,16 @@ class SocialAuthProcessor extends \Maho\ApiPlatform\Processor
             // Headless nonce contract: the caller generates its own nonce, passes it
             // to the provider SDK, and repeats it here; when omitted (for example a
             // trusted server-side relay), the nonce constraint is skipped.
+            // A customer who uses 2FA sends the code with the provider token
             $result = \Mage::getService('sociallogin/identity')->authenticate(
                 $data->provider,
                 $data->providerToken,
                 StoreContext::getStoreId(),
-                \Maho_SocialLogin_Model_Channel::Api,
                 is_string($data->nonce) && $data->nonce !== '' ? $data->nonce : null,
                 ['firstname' => (string) $data->firstName, 'lastname' => (string) $data->lastName],
+                is_string($data->twofaCode) ? trim($data->twofaCode) : null,
             );
-        } catch (\Mage_Core_Exception_TooManyRequests $e) {
+        } catch (\Mage_Core_Exception_TooManyRequests|\Mage_Core_Exception_Unauthorized $e) {
             throw $e;
         } catch (\Maho_SocialLogin_Model_ProviderUnavailableException $e) {
             // Transient upstream outage: retryable, not a credential rejection
@@ -62,19 +62,6 @@ class SocialAuthProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $customer = $result['customer'];
-
-        // A customer who uses 2FA gives the code before the token, as on the storefront
-        $code = is_string($data->twofaCode) ? trim($data->twofaCode) : '';
-        try {
-            \Mage::getService('customer/customer')->verifySecondFactor($customer, $code);
-        } catch (\Mage_Core_Exception $e) {
-            if ($e->getCode() !== \Mage_Customer_Model_Customer::EXCEPTION_2FA_INVALID) {
-                throw $e;
-            }
-            throw $code === ''
-                ? new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is required', $e, 0, ['X-Api-Error-Code' => 'twofa_required'])
-                : new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is invalid', $e, 0, ['X-Api-Error-Code' => 'twofa_invalid']);
-        }
 
         // A fresh DTO so the inbound credential is never echoed back
         $dto = new SocialAuth();

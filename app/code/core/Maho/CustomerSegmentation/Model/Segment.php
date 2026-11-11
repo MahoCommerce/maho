@@ -211,9 +211,46 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         return $this;
     }
 
+    /**
+     * Return the problems of the name, the websites, the refresh mode and the priority, each under the name of
+     * its field. A stored value that the save does not change is not checked, so that a segment from before
+     * the check can still be saved.
+     *
+     * @return array<string, string>
+     */
+    public function getFieldErrors(): array
+    {
+        $helper = Mage::helper('customersegmentation');
+        $isChanged = fn(string $field): bool => !$this->getId() || $this->dataHasChangedFor($field);
+        $errors = [];
+
+        $name = trim((string) $this->getName());
+        if ($isChanged('name') && ($name === '' || mb_strlen($name) > 255)) {
+            $errors['name'] = $helper->__('The segment name must have 1 to 255 characters.');
+        }
+        if ($this->getWebsiteIds() === [] && (!$this->getId() || self::idList($this->getOrigData('website_ids')) !== [])) {
+            $errors['website_ids'] = $helper->__('Please select at least one website.');
+        }
+        $refreshMode = $this->getRefreshMode();
+        $refreshModes = array_keys($this->getRefreshModeOptions());
+        if ($refreshMode !== null && $isChanged('refresh_mode') && !in_array($refreshMode, $refreshModes, true)) {
+            $errors['refresh_mode'] = $helper->__('The refresh mode must be one of: %s.', implode(', ', $refreshModes));
+        }
+        if ($isChanged('priority') && (int) $this->getPriority() < 0) {
+            $errors['priority'] = $helper->__('The priority must be 0 or more.');
+        }
+        return $errors;
+    }
+
+    /**
+     * @throws Mage_Core_Exception_Input with the errors of getFieldErrors()
+     */
     #[\Override]
     protected function _beforeSave(): self
     {
+        Mage_Core_Exception_Input::assertValid($this->getFieldErrors(), 'segment');
+        $this->setName(trim((string) $this->getName()));
+
         parent::_beforeSave();
 
         $now = Mage::app()->getLocale()->formatDateForDb('now');

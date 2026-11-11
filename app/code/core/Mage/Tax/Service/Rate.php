@@ -25,11 +25,7 @@ class Mage_Tax_Service_Rate
     public function getById(int $id): Mage_Tax_Model_Calculation_Rate
     {
         $rate = $this->newRate();
-        try {
-            $rate->load($id);
-        } catch (\Doctrine\DBAL\Exception\DriverException) {
-            // An ID that the column cannot hold matches no row
-        }
+        $rate->load($id);
         if (!$rate->getId()) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('tax')->__('This tax rate no longer exists.'));
         }
@@ -37,14 +33,26 @@ class Mage_Tax_Service_Rate
     }
 
     /**
-     * Save $rate. The transport puts its input into the rate first.
-     * The model checks the code, the country, the rate, the titles and the zip range.
+     * Save $rate. The transport puts its input into the rate first. The store must have the country of the rate
+     * and the store view of each title. The model checks the code, the rate and the zip range.
      *
      * @throws Mage_Core_Exception_Input with one error for each invalid field
      * @throws Mage_Core_Exception_Conflict when another rate has the code
      */
     public function save(Mage_Tax_Model_Calculation_Rate $rate): Mage_Tax_Model_Calculation_Rate
     {
+        $helper = Mage::helper('tax');
+        $errors = new Mage_Core_Exception_Input();
+        $country = (string) $rate->getTaxCountryId();
+        if ($country !== '' && !Mage::getModel('directory/country')->loadByCode($country)->getId()) {
+            $errors->addError('tax_country_id', $helper->__('One of the country has invalid code.'));
+        }
+        foreach (array_keys($rate->getTitle() ?? []) as $storeId) {
+            if (!array_key_exists((int) $storeId, Mage::app()->getStores())) {
+                $errors->addError('title', $helper->__('Unknown store ID: %s', $storeId));
+            }
+        }
+        $rate->validateRecord($errors)->throwIfErrors();
         $rate->save();
         return $rate;
     }

@@ -14,18 +14,12 @@ use Mage_Customer_Model_Address as Address;
 
 class Mage_Customer_Service_Address
 {
-    /** The largest value of an INTEGER column. PostgreSQL refuses a query with a larger ID. */
-    private const MAX_INTEGER = 2147483647;
-
     /**
      * @throws Mage_Core_Exception_NoSuchEntity
      */
     public function getById(int $id): Address
     {
-        $address = Mage::getModel('customer/address');
-        if ($id > 0 && $id <= self::MAX_INTEGER) {
-            $address->load($id);
-        }
+        $address = Mage::getModel('customer/address')->load($id);
         if (!$address->getId()) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('customer')->__('Address not found'));
         }
@@ -60,16 +54,9 @@ class Mage_Customer_Service_Address
     {
         /** @var Mage_Customer_Service_Customer $customers */
         $customers = Mage::getService('customer/customer');
-        $customer = $customers->requireById((int) $address->getCustomerId());
+        $customer = $customers->getById((int) $address->getCustomerId());
 
-        $errors = new Mage_Core_Exception_Input();
-        $result = $address->validate();
-        if (is_array($result)) {
-            foreach (array_values(array_unique($result)) as $message) {
-                $errors->addError('address', (string) $message);
-            }
-        }
-        $errors->throwIfErrors();
+        Mage_Core_Exception_Input::assertValid($address->validate(), 'address');
 
         if (!$address->getId() && $customer->getAddresses() === []) {
             $address->setIsDefaultBilling(true)->setIsDefaultShipping(true);

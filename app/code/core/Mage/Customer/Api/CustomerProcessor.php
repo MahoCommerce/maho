@@ -15,7 +15,6 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 /**
  * Customer State Processor - Handles customer mutations for API Platform.
@@ -47,7 +46,6 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             $operationName === 'two_factor_rest', $operationName === 'setTwoFactor' => $this->setTwoFactor($args),
             $operationName === 'two_factor_secret_rest', $operationName === 'createTwoFactorSecret' => $this->createTwoFactorSecret(),
             $operation instanceof Post => $this->createCustomer($data),
-            $operationName === 'quickCreate' => $this->createCustomerQuick($context['args']['input'] ?? $context['args'] ?? []),
             $operationName === 'login' => $this->customerLogin($args),
             $operationName === 'update' => $this->updateProfile($args['firstName'] ?? null, $args['lastName'] ?? null, $args['email'] ?? null, customAttributes: $args['customAttributes'] ?? null, currentPassword: $args['currentPassword'] ?? null),
             $operationName === 'changePassword' => $this->changePassword($args['currentPassword'] ?? '', $args['newPassword'] ?? ''),
@@ -61,7 +59,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
      * Register a customer (POST /customers). An admin or a service token holding customers/create creates an
      * account that needs no confirmation, and may set the admin-only fields; the securityPostDenormalize gate of
      * those fields has already reset them for any other caller. Any other caller sends the CAPTCHA token, as the
-     * registration form of the storefront does.
+     * registration form of the storefront does. The service makes a new customer active.
      */
     private function createCustomer(Customer $data): Customer
     {
@@ -70,8 +68,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $storeId = StoreContext::getStoreId();
         $customer = \Mage::getModel('customer/customer');
 
-        // websiteId is honored on create only: pick which website the account
-        // lives on, defaulting the store to that website's default store.
+        // The account lives on the website of the request, and its store is the default store of that website
         if ($data->websiteId !== null) {
             $website = $this->getWebsite($data->websiteId);
             $customer->setWebsiteId((int) $website->getId());
@@ -101,38 +98,19 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             $isPrivileged ? 'adminhtml_customer' : 'customer_account_create',
             $data->customAttributes ?? [],
         );
-        if ($data->isActive === null) {
-            $customer->setData('is_active', 1);
-        }
 
         if ($isPrivileged) {
             $this->getService()->create($customer, $storeId, $storeId);
         } else {
-            $this->getService()->register($customer, $storeId, channel: \Mage_Customer_Model_Channel::Api, captchaToken: $data->captchaToken);
+            $this->getService()->register($customer, $storeId, captchaFields: ['captchaToken' => $data->captchaToken]);
         }
-
-        return Customer::fromModel($customer);
-    }
-
-    /**
-     * Create a customer for a point of sale (GraphQL quickCreate). A telephone becomes the default address.
-     */
-    private function createCustomerQuick(array $args): Customer
-    {
-        StoreContext::ensureStore();
-        $customer = \Mage::getModel('customer/customer')
-            ->setEmail((string) ($args['email'] ?? ''))
-            ->setFirstname((string) ($args['firstname'] ?? ''))
-            ->setLastname((string) ($args['lastname'] ?? ''));
-        $address = empty($args['telephone']) ? null : \Mage::getModel('customer/address')->setTelephone((string) $args['telephone']);
-        $this->getService()->quickCreate($customer, StoreContext::getStoreId(), $address);
 
         return Customer::fromModel($customer);
     }
 
     /**
      * Check the email and the password of a customer (GraphQL login), in the website of the request first and then
-     * in the others, as the token endpoint does. A wrong email, password or 2FA code is a 401.
+     * in the others, as the token endpoint does. The service answers a wrong email, password or 2FA code with a 401.
      */
     private function customerLogin(array $args): Customer
     {
@@ -144,16 +122,14 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
 
         StoreContext::ensureStore();
         $websiteId = (int) \Mage::app()->getStore(StoreContext::getStoreId())->getWebsiteId();
-        try {
-            $customer = $this->getService()->authenticateInAnyWebsite($email, $password, $websiteId);
-        } catch (\Mage_Core_Exception $e) {
-            if (in_array($e->getCode(), [\Mage_Customer_Model_Customer::EXCEPTION_INVALID_EMAIL_OR_PASSWORD, \Mage_Customer_Model_Customer::EXCEPTION_2FA_INVALID], true)) {
-                throw new UnauthorizedHttpException('Bearer', 'Invalid email or password', $e, 0, ['X-Api-Error-Code' => 'invalid_credentials']);
-            }
-            throw $e;
-        }
+        $twofaCode = $args['twofaCode'] ?? null;
 
-        return Customer::fromModel($customer);
+        return Customer::fromModel($this->getAuthentication()->authenticateInAnyWebsite(
+            $email,
+            $password,
+            $websiteId,
+            is_scalar($twofaCode) ? trim((string) $twofaCode) : null,
+        ));
     }
 
     /**
@@ -176,7 +152,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         #[\SensitiveParameter]
         ?string $currentPassword = null,
     ): Customer {
-        $customer = $this->getService()->requireById($this->requireCustomerId());
+        $customer = $this->getService()->getById($this->requireCustomerId());
         if ($firstName !== null) {
             $customer->setFirstname($firstName);
         }
@@ -203,11 +179,11 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
      */
     private function updateCustomerAdmin(int $customerId, Customer $data): Customer
     {
-        $customer = $this->getService()->requireById($customerId);
+        $customer = $this->getService()->getById($customerId);
         $this->assertCustomerReachable($customer);
 
-        if ($data->websiteId !== null && $data->websiteId !== (int) $customer->getWebsiteId()) {
-            throw new \Mage_Core_Exception_Input()->addError('website_id', 'websiteId can only be set when creating a customer');
+        if ($data->websiteId !== null) {
+            $customer->setWebsiteId($data->websiteId);
         }
         if ($data->email !== '') {
             $customer->setEmail($data->email);
@@ -238,7 +214,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         #[\SensitiveParameter]
         string $newPassword,
     ): Customer {
-        $customer = $this->getService()->requireById($this->requireCustomerId());
+        $customer = $this->getService()->getById($this->requireCustomerId());
         $this->getService()->changePassword($customer, $currentPassword, $newPassword);
 
         return Customer::fromModel($customer);
@@ -251,7 +227,11 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     {
         StoreContext::ensureStore();
         $email = (string) ($args['email'] ?? '');
-        $this->getService()->sendPasswordResetLink($email, $this->getWebsiteId(), $this->getChannel(), $this->getCaptchaToken($args));
+        if ($this->hasBackendAccess('customers')) {
+            $this->getAuthentication()->sendPasswordResetLinkByStaff($email, $this->getWebsiteId());
+        } else {
+            $this->getAuthentication()->sendPasswordResetLink($email, $this->getWebsiteId(), $args);
+        }
 
         $dto = new Customer();
         $dto->email = $email;
@@ -265,7 +245,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     {
         StoreContext::ensureStore();
         $email = (string) ($args['email'] ?? '');
-        $this->getService()->sendMagicLink($email, $this->getWebsiteId());
+        $this->getAuthentication()->sendMagicLink($email, $this->getWebsiteId());
 
         $dto = new Customer();
         $dto->email = $email;
@@ -285,8 +265,9 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // The key proves nothing for an account that is already confirmed, so the answer has no customer data
+        $this->getAuthentication()->confirm($customerId, $key);
         $dto = new Customer();
-        $dto->id = (int) $this->getService()->confirm($customerId, $key)->getId();
+        $dto->id = $customerId;
         $dto->isConfirmed = true;
         return $dto;
     }
@@ -298,7 +279,11 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     {
         StoreContext::ensureStore();
         $email = (string) ($args['email'] ?? '');
-        $this->getService()->sendConfirmationLink($email, $this->getWebsiteId(), $this->getChannel(), $this->getCaptchaToken($args));
+        if ($this->hasBackendAccess('customers')) {
+            $this->getAuthentication()->sendConfirmationLinkByStaff($email, $this->getWebsiteId());
+        } else {
+            $this->getAuthentication()->sendConfirmationLink($email, $this->getWebsiteId(), $args);
+        }
 
         $dto = new Customer();
         $dto->email = $email;
@@ -314,8 +299,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new \Mage_Core_Exception_Input()->addError('twofaEnabled', 'twofaEnabled is required: true or false');
         }
         $code = $args['twofaCode'] ?? null;
-        $customer = $this->getService()->requireById($this->requireCustomerId());
-        $this->getService()->setSecondFactor(
+        $customer = $this->getService()->getById($this->requireCustomerId());
+        $this->getAuthentication()->setSecondFactor(
             $customer,
             (string) ($args['currentPassword'] ?? ''),
             $args['twofaEnabled'],
@@ -330,8 +315,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
      */
     private function createTwoFactorSecret(): Customer
     {
-        $customer = $this->getService()->requireById($this->requireCustomerId());
-        $secret = $this->getService()->getSecondFactorSecret($customer);
+        $customer = $this->getService()->getById($this->requireCustomerId());
+        $secret = $this->getAuthentication()->getSecondFactorSecret($customer);
 
         $dto = Customer::fromModel($customer);
         $dto->twofaSecret = $secret;
@@ -341,19 +326,6 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     private function getWebsiteId(): int
     {
         return (int) \Mage::app()->getStore(StoreContext::getStoreId())->getWebsiteId();
-    }
-
-    /**
-     * An admin token or a service token with access to the customers is the admin on the API, which asks no CAPTCHA.
-     */
-    private function getChannel(): \Mage_Customer_Model_Channel
-    {
-        return $this->hasBackendAccess('customers') ? \Mage_Customer_Model_Channel::Admin : \Mage_Customer_Model_Channel::Api;
-    }
-
-    private function getCaptchaToken(array $args): ?string
-    {
-        return isset($args['captchaToken']) && is_string($args['captchaToken']) ? $args['captchaToken'] : null;
     }
 
     private function resetPassword(array $args): Customer
@@ -366,7 +338,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new \Mage_Core_Exception_Input()->addError('reset_token', 'Email, reset token, and new password are required');
         }
 
-        $this->getService()->resetPassword($email, $resetToken, $newPassword);
+        $this->getAuthentication()->resetPassword($email, $resetToken, $newPassword);
 
         $dto = new Customer();
         $dto->email = $email;
@@ -384,37 +356,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new \Mage_Core_Exception_Input()->addError('account_token', 'Account token and password are required.');
         }
 
-        $tokenData = \Mage::helper('sales/accountToken')->verify($accountToken, 3600);
-        if ($tokenData['action'] !== 'create_account') {
-            throw new \Mage_Core_Exception('Invalid token action.');
-        }
-        /** @var \Mage_Sales_Service_Order $orderService */
-        $orderService = \Mage::getService('sales/order');
-        $order = $orderService->getById((int) $tokenData['orderId']);
-        if (!$order || $order->getCustomerEmail() !== $tokenData['email']) {
-            throw new \Mage_Core_Exception('Order not found.');
-        }
-
-        // Virtual/incomplete orders may have no billing address
-        $billingAddress = $order->getBillingAddress();
-        $customer = \Mage::getModel('customer/customer')
-            ->setWebsiteId((int) \Mage::app()->getStore($order->getStoreId())->getWebsiteId())
-            ->setStoreId((int) $order->getStoreId())
-            ->setEmail($tokenData['email'])
-            ->setFirstname($billingAddress ? $billingAddress->getFirstname() : '')
-            ->setLastname($billingAddress ? $billingAddress->getLastname() : '')
-            ->setPassword($password);
-        if ($billingAddress) {
-            $address = \Mage::getModel('customer/address')->setIsDefaultBilling(true)->setIsDefaultShipping(true);
-            foreach (['firstname', 'lastname', 'company', 'street', 'city', 'region_id', 'region', 'postcode', 'country_id', 'telephone'] as $field) {
-                $address->setData($field, $billingAddress->getData($field));
-            }
-            $customer->addAddress($address->setShouldIgnoreValidation(true));
-        }
-        $this->getService()->register($customer, (int) $order->getStoreId());
-        $orderService->assignToCustomer($order, $customer);
-
-        return Customer::fromModel($customer);
+        return Customer::fromModel($this->getService()->registerFromOrder($accountToken, $password));
     }
 
     /**
@@ -437,9 +379,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     private function getWebsite(int $websiteId): \Mage_Core_Model_Website
     {
         try {
-            // PostgreSQL refuses a website ID above the range of its SMALLINT column
-            $website = $websiteId >= 0 && $websiteId <= 32767 ? \Mage::app()->getWebsite($websiteId) : null;
-        } catch (\Throwable) {
+            $website = \Mage::app()->getWebsite($websiteId);
+        } catch (\Mage_Core_Exception) {
             $website = null;
         }
         return $website ?? throw new \Mage_Core_Exception_Input()->addError('website_id', "Website {$websiteId} does not exist");
@@ -460,9 +401,6 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             }
         }
         if ($data->gender !== null) {
-            if ($data->gender !== 0) {
-                $this->validateGenderOption($data->gender);
-            }
             $profile['gender'] = $data->gender ?: null;
         }
         if ($data->dob !== null) {
@@ -482,23 +420,6 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         }
         if ($data->disableAutoGroupChange !== null) {
             $customer->setData('disable_auto_group_change', (int) $data->disableAutoGroupChange);
-        }
-    }
-
-    /** Gender is a select attribute: only its own option ids are storable */
-    private function validateGenderOption(int $genderId): void
-    {
-        $attribute = \Mage::getSingleton('eav/config')->getAttribute('customer', 'gender');
-        $options = $attribute && $attribute->usesSource() ? $attribute->getSource()->getAllOptions() : [];
-
-        // The source prepends an empty option; only positive ids are real values.
-        $optionIds = array_values(array_filter(
-            array_map(intval(...), array_column($options, 'value')),
-            fn(int $id): bool => $id > 0,
-        ));
-
-        if (!in_array($genderId, $optionIds, true)) {
-            throw new \Mage_Core_Exception_Input()->addError('gender', "Invalid gender {$genderId}; allowed: " . implode(', ', $optionIds) . ' (0 clears)');
         }
     }
 
@@ -522,9 +443,6 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         if ($date === false || ($errors && ($errors['warning_count'] || $errors['error_count']))) {
             throw new \Mage_Core_Exception_Input()->addError('dob', 'Invalid date for dob; use Y-m-d format.');
         }
-        if ($date > new \DateTimeImmutable('now', new \DateTimeZone('UTC'))) {
-            throw new \Mage_Core_Exception_Input()->addError('dob', 'Date of birth cannot be in the future.');
-        }
 
         return $date->format(\Mage_Core_Model_Locale::DATETIME_FORMAT);
     }
@@ -532,5 +450,10 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     private function getService(): \Mage_Customer_Service_Customer
     {
         return \Mage::getService('customer/customer');
+    }
+
+    private function getAuthentication(): \Mage_Customer_Service_Authentication
+    {
+        return \Mage::getService('customer/authentication');
     }
 }

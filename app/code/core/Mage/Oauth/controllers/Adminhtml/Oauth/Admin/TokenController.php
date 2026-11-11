@@ -94,7 +94,7 @@ class Mage_Oauth_Adminhtml_Oauth_Admin_TokenController extends Mage_Adminhtml_Co
             /** @var Mage_Oauth_Model_Token $item */
             foreach ($collection as $item) {
                 $item->load($item->getId());
-                $item->setRevoked($status)->save();
+                $item->changeRevoked((bool) $status, (int) $user->getId());
             }
             if ($status) {
                 $message = $this->__('Selected entries revoked.');
@@ -139,7 +139,7 @@ class Mage_Oauth_Adminhtml_Oauth_Admin_TokenController extends Mage_Adminhtml_Co
 
             /** @var Mage_Oauth_Model_Token $item */
             foreach ($collection as $item) {
-                $item->delete();
+                $item->deleteAndNotify((int) $user->getId());
             }
             $this->_getSession()->addSuccess($this->__('Selected entries has been deleted.'));
         } catch (Mage_Core_Exception $e) {

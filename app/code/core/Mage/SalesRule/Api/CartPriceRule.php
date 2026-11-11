@@ -145,7 +145,7 @@ class CartPriceRule extends \Maho\ApiPlatform\Resource
 
     public bool $isRss = false;
 
-    #[ApiProperty(description: 'by_percent, by_fixed, cart_fixed or buy_x_get_y', extraProperties: [EnumSource::KEY => ['by_percent', 'by_fixed', 'cart_fixed', 'buy_x_get_y']])]
+    #[ApiProperty(description: 'by_percent, by_fixed, cart_fixed, buy_x_get_y, or an action that a module adds', extraProperties: [EnumSource::KEY => 'salesrule/rule::getSimpleActions'])]
     public string $simpleAction = \Mage_SalesRule_Model_Rule::BY_PERCENT_ACTION;
 
     #[ApiProperty(description: 'At most 100 for by_percent')]

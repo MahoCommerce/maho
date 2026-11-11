@@ -284,16 +284,20 @@ class Mage_Wishlist_Service_Wishlist
     /**
      * Send the link and the items of $wishlist to each address of $emails, with $message of the customer, and mark
      * the wishlist as shared. With $withRssLink, the email also has the link to the RSS feed of the wishlist.
+     * $fields is what the client sent, the form POST or the API body: the CAPTCHA module finds its token in it.
      *
      * @param array<string> $emails 1 to 5 addresses
-     * @throws Mage_Core_Exception_Input when $emails is empty, has more than 5 addresses, or has an address that is not valid
+     * @param array<array-key, mixed> $fields
+     * @throws Mage_Core_Exception_Input when the CAPTCHA refuses the token, or when $emails is empty, has more than
+     *                                    5 addresses, or has an address that is not valid
      * @throws Mage_Core_Exception_NoSuchEntity when the customer of the wishlist does not exist
      * @throws Mage_Core_Exception_TooManyRequests when the customer is over the limit
      */
-    public function share(Wishlist $wishlist, array $emails, string $message, int $storeId, bool $withRssLink = false): Wishlist
+    public function share(Wishlist $wishlist, array $emails, string $message, int $storeId, array $fields, bool $withRssLink = false): Wishlist
     {
         $helper = Mage::helper('wishlist');
         $core = Mage::helper('core');
+        $core->assertCaptcha($fields);
 
         $emails = array_values(array_unique(array_filter(array_map(fn(#[\SensitiveParameter]
             mixed $email): string => trim((string) $email), $emails))));
@@ -308,17 +312,10 @@ class Mage_Wishlist_Service_Wishlist
         }
 
         $customerId = (int) $wishlist->getCustomerId();
-        $customer = Mage::getService('customer/customer')->getById($customerId)
-            ?? throw new Mage_Core_Exception_NoSuchEntity($helper->__('Customer not found'));
+        $customer = Mage::getService('customer/customer')->getById($customerId);
 
         $limit = (int) Mage::getStoreConfig(self::XML_PATH_SHARE_RATE_LIMIT, $storeId);
-        $limiter = $core->rateLimiterBy('wishlist_share', "customer:{$customerId}", $limit, self::SHARE_RATE_LIMIT_WINDOW);
-        if (!$limiter->attempt()) {
-            throw new Mage_Core_Exception_TooManyRequests(
-                $helper->__('Too many requests. Please try again later.'),
-                self::SHARE_RATE_LIMIT_WINDOW,
-            );
-        }
+        $core->rateLimiterBy('wishlist_share', "customer:{$customerId}", $limit, self::SHARE_RATE_LIMIT_WINDOW)->attemptOrThrow();
 
         $message = nl2br(htmlspecialchars($message));
         $emulation = Mage::getSingleton('core/app_emulation');

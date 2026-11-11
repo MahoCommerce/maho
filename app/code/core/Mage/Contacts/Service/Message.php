@@ -10,14 +10,11 @@
 
 declare(strict_types=1);
 
-use Mage_Contacts_Model_Channel as Channel;
-
 class Mage_Contacts_Service_Message
 {
-    public const XML_PATH_ENABLED = 'contacts/contacts/enabled';
-    public const XML_PATH_API_ENABLED = 'contacts/api/enabled';
     public const XML_PATH_HONEYPOT_ENABLED = 'contacts/abuse/honeypot_enabled';
     public const XML_PATH_RATE_LIMIT = 'system/rate_limit/contact';
+    public const XML_PATH_IP_RATE_LIMIT = 'system/rate_limit/contact_ip';
     public const XML_PATH_RECIPIENT_RATE_LIMIT = 'system/rate_limit/contact_auto_reply';
     public const XML_PATH_EMAIL_SENDER = 'contacts/email/sender_email_identity';
     public const XML_PATH_EMAIL_RECIPIENT = 'contacts/email/recipient_email';
@@ -33,14 +30,6 @@ class Mage_Contacts_Service_Message
     /** Fields for the transport, the abuse checks and the aliases of the API. The email does not show them. */
     private const CONTROL_FIELDS = ['form_key', 'captchaToken', 'maho_captcha', 'message', 'phone'];
 
-    public function isEnabled(Channel $channel, ?int $storeId = null): bool
-    {
-        return Mage::getStoreConfigFlag(match ($channel) {
-            Channel::Web => self::XML_PATH_ENABLED,
-            Channel::Api => self::XML_PATH_API_ENABLED,
-        }, $storeId);
-    }
-
     public function isHoneypotEnabled(?int $storeId = null): bool
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_HONEYPOT_ENABLED, $storeId);
@@ -48,32 +37,27 @@ class Mage_Contacts_Service_Message
 
     /**
      * Check the message in $fields and email it to the store. When the message fills the honeypot, send nothing
-     * and throw nothing, so that a bot cannot detect the trap.
+     * and throw nothing, so that a bot cannot detect the trap. The caller checks the switch of its own endpoint
+     * first: Mage_Contacts_Helper_Data::isEnabled() for the storefront form, isApiEnabled() for the API.
      *
-     * $fields has name, email, comment (or message) and telephone (or phone), and the API sends captchaToken.
+     * $fields has name, email, comment (or message) and telephone (or phone), and the token of the CAPTCHA.
      * A field of a custom form goes to the email template as data.<field>.
      *
      * @param array<array-key, mixed> $fields the fields that the client sent: the form POST or the JSON body
-     * @throws Mage_Core_Exception_NoSuchEntity when the channel is disabled
      * @throws Mage_Core_Exception_Input with one error for each invalid field, or when the CAPTCHA refuses the token
      * @throws Mage_Core_Exception_TooManyRequests when the client or the email address is over its limit
      * @throws RuntimeException when the email to the store fails
      */
-    public function send(array $fields, Channel $channel, int $storeId): void
+    public function send(array $fields, int $storeId): void
     {
-        if (!$this->isEnabled($channel, $storeId)) {
-            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('contacts')->__('Contact form is not available'));
-        }
         if ($this->isHoneypotEnabled($storeId) && Mage::helper('core')->isHoneypotTriggered($fields)) {
             return;
         }
 
         $message = $this->readMessage($fields);
         $this->validate($message);
-        if ($channel === Channel::Api) {
-            Mage::helper('apiplatform')->assertCaptcha($fields);
-        }
-        $this->checkRateLimits($storeId, (string) $message->getData('email'));
+        Mage::helper('core')->assertCaptcha($fields);
+        $this->attemptRateLimits($storeId, (string) $message->getData('email'));
 
         $this->sendToStore($message, $storeId);
         $this->sendAutoReply($message, $storeId);
@@ -151,23 +135,25 @@ class Mage_Contacts_Service_Message
     }
 
     /**
-     * One limit, for one client and for one email address. The storefront form and the API count together.
+     * The limit of one client and the limit of one email address. The storefront form and the API count together.
      *
      * @throws Mage_Core_Exception_TooManyRequests
      */
-    private function checkRateLimits(int $storeId, #[\SensitiveParameter] string $email): void
+    private function attemptRateLimits(int $storeId, #[\SensitiveParameter] string $email): void
     {
         $core = Mage::helper('core');
-        $limit = (int) Mage::getStoreConfig(self::XML_PATH_RATE_LIMIT, $storeId);
-        $clientLimiter = $core->rateLimiter("contact:{$storeId}", $limit, self::RATE_LIMIT_WINDOW, \Maho\Security\RateLimitScope::Ip);
-        $emailLimiter = $core->rateLimiterBy('contact', $storeId . ':' . strtolower($email), $limit, self::RATE_LIMIT_WINDOW);
-
-        if (!$clientLimiter->attempt() || !$emailLimiter->attempt()) {
-            throw new Mage_Core_Exception_TooManyRequests(
-                Mage::helper('contacts')->__('Too many requests. Please try again later.'),
-                self::RATE_LIMIT_WINDOW,
-            );
-        }
+        $core->rateLimiter(
+            "contact:{$storeId}",
+            (int) Mage::getStoreConfig(self::XML_PATH_IP_RATE_LIMIT, $storeId),
+            self::RATE_LIMIT_WINDOW,
+            \Maho\Security\RateLimitScope::Ip,
+        )->attemptOrThrow();
+        $core->rateLimiterBy(
+            'contact',
+            $storeId . ':' . strtolower($email),
+            (int) Mage::getStoreConfig(self::XML_PATH_RATE_LIMIT, $storeId),
+            self::RATE_LIMIT_WINDOW,
+        )->attemptOrThrow();
     }
 
     /**

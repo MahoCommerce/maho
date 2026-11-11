@@ -8,7 +8,6 @@
 
 declare(strict_types=1);
 
-use ApiPlatform\Metadata\GraphQl\Mutation;
 use ApiPlatform\Metadata\Post;
 use Mage\Customer\Api\Customer as CustomerDto;
 use Mage\Customer\Api\CustomerProcessor;
@@ -19,9 +18,10 @@ use Tests\Helpers\AdminApiParity;
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * The admin, the REST and GraphQL create, the GraphQL quickCreate and the POS createCustomer create a customer
+ * The admin, the REST create and the admin GraphQL createCustomer create a customer
  * through Mage_Customer_Service_Customer, which picks the email (#1348). A customer with a random password gets
- * the link to set a password. Each test gives the same input to each transport and compares the outcome.
+ * the link to set a password. The CLI command customer:create uses the same method. Each test gives the same input
+ * to each transport and compares the outcome.
  */
 
 function staffCreateEmail(): string
@@ -59,21 +59,10 @@ function staffCreateViaRest(string $email, ?string $password = null): int
 
 /**
  * @param array<string, mixed> $input
- */
-function staffCreateViaQuickCreate(array $input): int
-{
-    $result = AdminApiParity::api(AdminApiParity::jsonRequest('POST', '/api/graphql'), fn() => new CustomerProcessor(AdminApiParity::adminSecurity())
-        ->process(null, new Mutation(name: 'quickCreate'), [], ['args' => ['input' => $input]]));
-
-    return $result['status'];
-}
-
-/**
- * @param array<string, mixed> $input
  * @param array<string, mixed> $context
  * @return array<string, mixed>
  */
-function staffCreateViaPos(array $input, array $context = ['store_id' => 1]): array
+function staffCreateViaAdminGraphQl(array $input, array $context = ['store_id' => 1]): array
 {
     return new CustomerQueryHandler(new CustomerProvider(AdminApiParity::adminSecurity()))->handleCreateCustomer(['input' => $input], $context);
 }
@@ -113,21 +102,18 @@ afterEach(function () {
 });
 
 it('sends the link to set a password when the password is random, on each transport', function () {
-    $emails = [staffCreateEmail(), staffCreateEmail(), staffCreateEmail(), staffCreateEmail()];
+    $emails = [staffCreateEmail(), staffCreateEmail(), staffCreateEmail()];
 
     $admin = staffCreateViaAdmin($emails[0], ['password' => 'auto', 'sendemail_store_id' => 1]);
     $rest = staffCreateViaRest($emails[1]);
-    $quick = staffCreateViaQuickCreate(['email' => $emails[2], 'firstname' => 'Staff', 'lastname' => 'Create']);
-    staffCreateViaPos(['email' => $emails[3], 'firstName' => 'Staff', 'lastName' => 'Create']);
+    staffCreateViaAdminGraphQl(['email' => $emails[2], 'firstName' => 'Staff', 'lastName' => 'Create']);
 
     expect($admin['errors'])->toBe([])
         ->and($rest)->toBe(200)
-        ->and($quick)->toBe(200)
         ->and($this->spy->emails)->toBe([
             ['password_link', $emails[0], 1],
             ['password_link', $emails[1], 1],
             ['password_link', $emails[2], 1],
-            ['password_link', $emails[3], 1],
         ]);
 });
 
@@ -142,45 +128,125 @@ it('sends the welcome email when staff gives the password, in the admin and on R
         ->and($this->spy->emails)->toBe([['registered', $emails[0], 1], ['registered', $emails[1], 1]]);
 });
 
-it('gives the same customer and address to the GraphQL quickCreate and the POS createCustomer', function () {
-    // The API starts in the admin store: the POS createCustomer takes the store of its request, not the current one
+it('creates the customer of the admin GraphQL createCustomer on the store of the request, with a complete default address', function () {
+    // The API starts in the admin store: the admin GraphQL createCustomer takes the store of its request, not the current one
     Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
     $fashion = Mage::app()->getStore('fashion');
-    [$quickEmail, $posEmail] = [staffCreateEmail(), staffCreateEmail()];
+    $email = staffCreateEmail();
 
-    Mage::app()->setCurrentStore((int) $fashion->getId());
-    staffCreateViaQuickCreate(['email' => $quickEmail, 'firstname' => 'Staff', 'lastname' => 'Create', 'telephone' => '5550100']);
+    staffCreateViaAdminGraphQl([
+        'email' => $email, 'firstName' => 'Staff', 'lastName' => 'Create',
+        'street' => '1 Main St', 'city' => 'Los Angeles', 'regionId' => 12, 'postcode' => '90210', 'countryId' => 'US', 'telephone' => '5550100',
+    ], ['store_id' => (int) $fashion->getId()]);
+
+    $customer = Mage::getModel('customer/customer')->setWebsiteId((int) $fashion->getWebsiteId())->loadByEmail($email);
+    $address = $customer->getDefaultBillingAddress();
+    expect((int) $customer->getWebsiteId())->toBe((int) $fashion->getWebsiteId())
+        ->and((int) $customer->getStoreId())->toBe((int) $fashion->getId())
+        ->and((int) $customer->getDefaultShipping())->toBe((int) $address->getId())
+        ->and($address->getName())->toBe('Staff Create')
+        ->and($address->getStreetFull())->toBe('1 Main St')
+        ->and($address->getCity())->toBe('Los Angeles')
+        ->and($address->getPostcode())->toBe('90210')
+        ->and($address->getTelephone())->toBe('5550100')
+        ->and($this->spy->emails)->toBe([['password_link', $email, (int) $fashion->getId()]]);
+});
+
+it('refuses an address that is not complete in the admin GraphQL createCustomer, and creates no customer', function () {
+    $email = staffCreateEmail();
+
+    expect(fn() => staffCreateViaAdminGraphQl(['email' => $email, 'firstName' => 'Staff', 'lastName' => 'Create', 'telephone' => '5550100']))
+        ->toThrow(Mage_Core_Exception_Input::class);
+
+    $customer = Mage::getModel('customer/customer')->setWebsiteId((int) Mage::app()->getStore(1)->getWebsiteId())->loadByEmail($email);
+    expect($customer->getId())->toBeNull()
+        ->and($this->spy->emails)->toBe([]);
+});
+
+it('refuses a customer group that does not exist in the admin, on REST and in the CLI', function () {
+    $emails = [staffCreateEmail(), staffCreateEmail(), staffCreateEmail()];
+    $message = Mage::helper('customer')->__('Customer group not found with ID: %s', 987654);
+
+    $admin = staffCreateViaAdmin($emails[0], ['password' => 'Password123!', 'group_id' => 987654]);
+
+    $dto = new CustomerDto();
+    $dto->email = $emails[1];
+    $dto->firstname = 'Staff';
+    $dto->lastname = 'Create';
+    $dto->password = 'Password123!';
+    $dto->groupId = 987654;
+    $rest = AdminApiParity::api(AdminApiParity::jsonRequest('POST', '/api/rest/v2/customers'), fn() => new CustomerProcessor(AdminApiParity::adminSecurity())->process($dto, new Post()));
+
     Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
-    staffCreateViaPos(['email' => $posEmail, 'firstName' => 'Staff', 'lastName' => 'Create', 'telephone' => '5550100'], ['store_id' => (int) $fashion->getId()]);
+    $command = new MahoCLI\Commands\CustomerCreate('customer:create');
+    new Symfony\Component\Console\Application()->addCommand($command);
+    $cli = new Symfony\Component\Console\Tester\CommandTester($command)->run([
+        'email' => $emails[2],
+        'password' => 'Password123!',
+        'firstname' => 'Staff',
+        'lastname' => 'Create',
+        'website' => Mage::app()->getWebsite(1)->getCode(),
+        'group' => '987654',
+    ], interactive: false);
 
-    $shape = function (string $email): array {
-        $customer = Mage::getModel('customer/customer')->setWebsiteId((int) Mage::app()->getStore('fashion')->getWebsiteId())->loadByEmail($email);
-        $address = $customer->getDefaultBillingAddress();
-        return [
-            'website_id' => $customer->getWebsiteId(),
-            'store_id' => $customer->getStoreId(),
-            'shipping' => (int) $customer->getDefaultShipping() === (int) $address?->getId(),
-            'name' => $address?->getName(),
-            'telephone' => $address?->getTelephone(),
-            'street' => $address?->getStreetFull(),
-            'city' => (string) $address?->getCity(),
-            'postcode' => (string) $address?->getPostcode(),
-            'country' => $address?->getCountryId(),
-        ];
+    $saved = Mage::getResourceModel('customer/customer_collection')->addAttributeToFilter('email', ['in' => $emails])->getSize();
+    expect($admin['errors'])->toBe([$message])
+        ->and($rest['status'])->toBe(422)
+        ->and($rest['errors'])->toBe([$message])
+        ->and($rest['fields'])->toBe(['groupId'])
+        ->and($cli->statusCode)->toBe(Symfony\Component\Console\Command\Command::INVALID)
+        ->and($cli->getDisplay())->toContain($message)
+        ->and($saved)->toBe(0);
+});
+
+it('sets the password that the admin gives for a saved customer, and emails the customer one time', function () {
+    $email = staffCreateEmail();
+    staffCreateViaAdmin($email, ['password' => 'Password123!']);
+    $customer = Mage::getModel('customer/customer')->setWebsiteId(1)->loadByEmail($email);
+    $spy = new class extends Mage_Customer_Service_Customer {
+        /** @var list<string> */
+        public array $notified = [];
+
+        #[\Override]
+        protected function sendPasswordChangedEmail(Mage_Customer_Model_Customer $customer): void
+        {
+            $this->notified[] = (string) $customer->getEmail();
+        }
     };
+    Mage::unregister('_service/customer/customer');
+    Mage::register('_service/customer/customer', $spy);
+    Mage::unregister('current_customer');
 
-    expect($shape($posEmail))->toBe($shape($quickEmail))
-        ->and($shape($posEmail))->toMatchArray([
-            'website_id' => (int) $fashion->getWebsiteId(),
-            'store_id' => (int) $fashion->getId(),
-            'shipping' => true,
-            'name' => 'Staff Create',
-            'telephone' => '5550100',
-            'city' => '',
-            'postcode' => '',
-        ])
-        ->and($this->spy->emails)->toBe([
-            ['password_link', $quickEmail, (int) $fashion->getId()],
-            ['password_link', $posEmail, (int) $fashion->getId()],
+    // The test has no admin user in the session, so the store must not ask for the password of the admin
+    $path = Mage_Customer_Helper_Data::XML_PATH_CUSTOMER_REQUIRE_ADMIN_USER_TO_CHANGE_USER_PASSWORD;
+    $required = Mage::getStoreConfig($path);
+    Mage::app()->getStore()->setConfig($path, '0');
+    try {
+        $admin = AdminApiParity::admin(Mage_Adminhtml_CustomerController::class, 'save', [
+            'customer_id' => (int) $customer->getId(),
+            'account' => ['email' => $email, 'firstname' => 'Staff', 'lastname' => 'Changed', 'website_id' => 1, 'group_id' => 1, 'new_password' => 'Changed456!'],
         ]);
+    } finally {
+        Mage::app()->getStore()->setConfig($path, $required);
+    }
+
+    $reloaded = Mage::getModel('customer/customer')->load($customer->getId());
+    expect($admin['errors'])->toBe([])
+        ->and($reloaded->getLastname())->toBe('Changed')
+        ->and($reloaded->validatePassword('Changed456!'))->toBeTrue()
+        ->and($spy->notified)->toBe([$email]);
+});
+
+it('tells the admin form that another customer has the email, with the rule of a save', function () {
+    $email = staffCreateEmail();
+    staffCreateViaAdmin($email, ['password' => 'Password123!']);
+    /** @var Mage_Customer_Service_Customer $service */
+    $service = Mage::getService('customer/customer');
+    $probe = Mage::getModel('customer/customer')->setWebsiteId(1)->setEmail(strtoupper($email));
+
+    $conflict = AdminApiParity::api(AdminApiParity::jsonRequest('POST', '/api/rest/v2/customers'), fn() => $service->assertEmailNotInUse($probe));
+    $second = staffCreateViaAdmin($email, ['password' => 'Password123!']);
+
+    expect($conflict['status'])->toBe(409)
+        ->and($second['errors'])->toBe($conflict['errors']);
 });

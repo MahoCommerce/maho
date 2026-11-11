@@ -9,11 +9,12 @@ declare(strict_types=1);
 
 use ApiPlatform\Metadata\Put;
 use Mage\Checkout\Api\CartProcessor;
-use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Tests\Helpers\AdminApiParity;
 use Tests\Helpers\CartParity;
+
+require_once __DIR__ . '/OnepageDriver.php';
 
 uses(Tests\MahoFrontendTestCase::class);
 
@@ -24,18 +25,34 @@ uses(Tests\MahoFrontendTestCase::class);
  */
 
 /**
- * Post the gift message fields of the shipping method step for $quote, as the checkout form names them.
+ * Post the shipping method step of the one page checkout for $quote, with the gift message fields as the checkout
+ * form names them. The step fires checkout_controller_onepage_save_shipping_method, and the gift message observer of
+ * the frontend area saves the messages.
  *
  * @param array<string, array<string, string>> $giftMessages
  */
 function giftMessageViaWeb(Mage_Sales_Model_Quote $quote, array $giftMessages): void
 {
-    $request = new Mage_Core_Controller_Request_Http(
-        SymfonyRequest::create('/checkout/onepage/saveShippingMethod', 'POST', ['giftmessage' => $giftMessages]),
+    Mage::getService('checkout/cart')->setShippingAddress(
+        Mage::getModel('sales/quote')->loadByIdWithoutStore($quote->getId()),
+        \Mage\Checkout\Api\CartRequest::mapAddress([
+            'firstName' => 'Gift', 'lastName' => 'Message', 'street' => ['1 Main St'], 'city' => 'Los Angeles',
+            'region' => 'California', 'postcode' => '90210', 'countryId' => 'US', 'telephone' => '5550100',
+        ]),
     );
-    Mage::getModel('giftmessage/observer')->checkoutEventCreateGiftMessage(new \Maho\Event\Observer([
-        'event' => new \Maho\Event(['request' => $request, 'quote' => $quote]),
-    ]));
+    // A real request loads the observers of the frontend area in preDispatch()
+    $hadFrontendEvents = (fn(): bool => isset($this->_events[Mage_Core_Model_App_Area::AREA_FRONTEND]))->call(Mage::app());
+    Mage::app()->addEventArea(Mage_Core_Model_App_Area::AREA_FRONTEND);
+    try {
+        $result = checkoutOnepagePost($quote, 'saveShippingMethod', ['shipping_method' => 'flatrate_flatrate', 'giftmessage' => $giftMessages]);
+    } finally {
+        if (!$hadFrontendEvents) {
+            (function (): void {
+                unset($this->_events[Mage_Core_Model_App_Area::AREA_FRONTEND]);
+            })->call(Mage::app());
+        }
+    }
+    expect($result['goto_section'] ?? null)->toBe('payment');
 }
 
 /**

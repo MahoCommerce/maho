@@ -38,7 +38,7 @@ function creditmemoShippingInclTaxOrder(): Mage_Sales_Model_Order
 // The API and the admin form refund no item with this qty map.
 function creditmemoShippingInclTaxMemo(Mage_Sales_Model_Order $order, array $data = []): Mage_Sales_Model_Order_Creditmemo
 {
-    return Mage::getService('sales/order')->buildCreditmemo($order, ['qtys' => [0 => 0]] + $data);
+    return Mage::getService('sales/order_document')->buildCreditmemo($order, ['qtys' => [0 => 0]] + $data);
 }
 
 // Refunds a shipping-only credit memo without a payment, as an offline refund records it on the order.
@@ -187,7 +187,7 @@ describe('Credit memo shipping displayed incl. tax', function () {
         // counts the 0.11 of hidden tax already refunded, and converts to more shipping than is left.
         $order = creditmemoShippingInclTaxOrder();
         $invoice = creditmemoShippingInclTaxInvoice($order);
-        $service = Mage::getService('sales/order');
+        $service = Mage::getService('sales/order_document');
         $first = $service->buildCreditmemo($order, ['qtys' => [0 => 0], 'shipping_amount' => 6.1], $invoice);
         $first->setPaymentRefundDisallowed(true)->refund();
 
@@ -205,7 +205,7 @@ describe('Credit memo shipping displayed incl. tax', function () {
         $invoice->setShippingTaxAmount(0.0)->setBaseShippingTaxAmount(0.0);
         $invoice->setShippingHiddenTaxAmount(0.0)->setBaseShippingHiddenTaxAmount(0.0);
 
-        $creditmemo = Mage::getService('sales/order')
+        $creditmemo = Mage::getService('sales/order_document')
             ->buildCreditmemo($order, ['qtys' => [0 => 0]], $invoice);
 
         expect((float) $creditmemo->getBaseShippingAmount())->toBe(0.0)

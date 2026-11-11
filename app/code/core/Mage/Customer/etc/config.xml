@@ -375,6 +375,9 @@ SPDX-License-Identifier: AFL-3.0
                     <form_attribute>
                         <table>customer_form_attribute</table>
                     </form_attribute>
+                    <flowpassword>
+                        <table>customer_flowpassword</table>
+                    </flowpassword>
                 </entities>
             </customer_resource>
         </models>
@@ -472,7 +475,6 @@ SPDX-License-Identifier: AFL-3.0
         <system>
             <rate_limit>
                 <customer_register>10</customer_register>
-                <forgot_password>3</forgot_password>
                 <confirmation_link>3</confirmation_link>
                 <magic_link_email>3</magic_link_email>
                 <magic_link_ip>10</magic_link_ip>
@@ -585,6 +587,9 @@ T: {{var telephone}}
         </customer>
         <admin>
             <security>
+                <forgot_password_flow_secure>1</forgot_password_flow_secure>
+                <forgot_password_email_times>5</forgot_password_email_times>
+                <forgot_password_ip_times>5</forgot_password_ip_times>
                 <min_admin_password_length>14</min_admin_password_length>
             </security>
         </admin>

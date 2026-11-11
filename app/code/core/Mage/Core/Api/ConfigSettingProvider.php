@@ -15,9 +15,7 @@ namespace Mage\Core\Api;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\TraversablePaginator;
-use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\ApiUser;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
@@ -86,7 +84,7 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
             ) {
                 continue;
             }
-            if ($this->deniedSection($field, $user) !== null) {
+            if ($this->service()->getDeniedSection($field, $this->aclCheck($user)) !== null) {
                 continue;
             }
             $matching[] = $field;
@@ -187,7 +185,7 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
         }
 
         if ($scopeCode === null || $scopeCode === '') {
-            throw self::scopeError("scopeCode is required for scope '$scope'", 'scopeCode', 'NotBlank', $inBody);
+            throw self::scopeError("scopeCode is required for scope '$scope'", 'scopeCode', $inBody);
         }
 
         if ($scope === ConfigSetting::SCOPE_WEBSITES) {
@@ -197,7 +195,7 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
                 $website = null;
             }
             if (!$website || !$website->getId()) {
-                throw self::scopeError("Website '$scopeCode' not found", 'scopeCode', 'Invalid', $inBody);
+                throw self::scopeError("Website '$scopeCode' not found", 'scopeCode', $inBody);
             }
             return ['scope' => $scope, 'scopeId' => (int) $website->getId(), 'scopeCode' => $website->getCode()];
         }
@@ -209,17 +207,17 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
                 $store = null;
             }
             if (!$store || !$store->getId()) {
-                throw self::scopeError("Store view '$scopeCode' not found", 'scopeCode', 'Invalid', $inBody);
+                throw self::scopeError("Store view '$scopeCode' not found", 'scopeCode', $inBody);
             }
             return ['scope' => $scope, 'scopeId' => (int) $store->getId(), 'scopeCode' => $store->getCode()];
         }
 
-        throw self::scopeError('scope must be default, websites or stores', 'scope', 'Choice', $inBody);
+        throw self::scopeError('scope must be default, websites or stores', 'scope', $inBody);
     }
 
-    private static function scopeError(string $message, string $field, string $constraint, bool $inBody): \Exception
+    private static function scopeError(string $message, string $field, bool $inBody): \Exception
     {
-        return $inBody ? new ValidationException($message, $field, $constraint) : new BadRequestHttpException($message);
+        return $inBody ? new \Mage_Core_Exception_Input()->addError($field, $message) : new BadRequestHttpException($message);
     }
 
     /**
@@ -229,8 +227,8 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
      */
     private function assertScopeReadable(array $scope, ApiUser $user): void
     {
-        if ($scope['scope'] === ConfigSetting::SCOPE_STORES && !$user->canAccessStore($scope['scopeId'])) {
-            throw new AccessDeniedHttpException('Token is not authorized for the requested store.');
+        if ($scope['scope'] === ConfigSetting::SCOPE_STORES) {
+            $this->assertRequestedStoreAllowed($scope['scopeId'], $user);
         }
     }
 
@@ -239,42 +237,35 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
      */
     public function isSectionAllowed(string $section, ApiUser $user): bool
     {
-        if (!$user->isAdmin()) {
-            return true;
-        }
-
-        try {
-            return (bool) \Mage::getSingleton('admin/session')->isAllowed('admin/system/config/' . $section);
-        } catch (\Exception) {
-            return false;
-        }
+        return $this->service()->isSectionAllowed($section, $this->aclCheck($user));
     }
 
     /**
      * A field that stores its value in another section needs access to the two sections, as in the admin.
      *
      * @param FieldInfo $field
+     * @throws \Mage_Core_Exception_Forbidden
      */
     public function assertSectionAllowed(array $field, ApiUser $user): void
     {
-        $section = $this->deniedSection($field, $user);
-        if ($section !== null) {
-            throw new AccessDeniedHttpException(
-                sprintf('Your admin role does not grant access to the configuration section "%s".', $section),
-            );
-        }
+        $this->service()->assertFieldAllowed($field, $this->aclCheck($user));
     }
 
     /**
-     * @param FieldInfo $field
-     * @return string|null the first section of $field that the admin role of $user does not allow
+     * @return \Closure(string): bool whether the role of $user allows an ACL resource
      */
-    private function deniedSection(array $field, ApiUser $user): ?string
+    private function aclCheck(ApiUser $user): \Closure
     {
-        return array_find(
-            $this->service()->getAclSections($field),
-            fn(string $section): bool => !$this->isSectionAllowed($section, $user),
-        );
+        return static function (string $resource) use ($user): bool {
+            if (!$user->isAdmin()) {
+                return true;
+            }
+            try {
+                return (bool) \Mage::getSingleton('admin/session')->isAllowed($resource);
+            } catch (\Exception) {
+                return false;
+            }
+        };
     }
 
     public function service(): \Mage_Core_Service_Config

@@ -161,7 +161,7 @@ abstract class Mage_Adminhtml_Controller_Eav_Set extends Mage_Adminhtml_Controll
             if ($isNewSet) {
                 $set = $service->newSet($entityTypeCode)
                     ->setAttributeSetName((string) $this->getRequest()->getParam('attribute_set_name'));
-                $service->create($set, (int) $this->getRequest()->getParam('skeleton_set'));
+                $service->save($set, (int) $this->getRequest()->getParam('skeleton_set'));
                 $this->_getSession()->addSuccess(Mage::helper('eav')->__('The attribute set has been saved.'));
                 $this->_redirect('*/*/edit', ['id' => $set->getId()]);
                 return;
@@ -223,4 +223,25 @@ abstract class Mage_Adminhtml_Controller_Eav_Set extends Mage_Adminhtml_Controll
     {
         return Mage::getService('eav/attribute_set');
     }
+
+    /**
+     * @throws Mage_Core_Exception_Conflict
+     */
+    #[\Deprecated('Mage_Eav_Service_Attribute_Set::saveTree() makes this check')]
+    protected function checkSystemAttributes(Mage_Eav_Model_Entity_Attribute_Set $set, array $data): void
+    {
+        $this->setService()->getRemovedAttributes($set, $data);
+    }
+
+    /**
+     * @return list<Mage_Eav_Model_Entity_Attribute_Abstract>
+     */
+    #[\Deprecated('Use Mage_Eav_Service_Attribute_Set::getRemovedAttributes()')]
+    protected function getRemovedAttributes(Mage_Eav_Model_Entity_Attribute_Set $set, array $data): array
+    {
+        return $this->setService()->getRemovedAttributes($set, $data);
+    }
+
+    #[\Deprecated('Mage_Eav_Service_Attribute_Set::delete() moves the records of the set')]
+    protected function beforeSetDelete(Mage_Eav_Model_Entity_Attribute_Set $attributeSet): void {}
 }

@@ -51,21 +51,27 @@ class Mage_Cms_Service_Media
     }
 
     /**
-     * Save the image of the upload field $field in the folder $folder, in the image type of the configuration.
-     * $filename is the name of the new file without its extension. A number follows a name that another file has.
+     * Save the file of the upload field $field in the folder $folder. $type names the list of extensions that the
+     * media library allows: "image", or another list of adminhtml/cms/browser/extensions, such as "media" for a video.
+     * An image is saved in the image type of the configuration, and $filename is the name of the new file without
+     * its extension. A number follows a name that another file has. A file of another type is saved as it is, with
+     * its own name, and its width and height are 0.
      *
      * @return array{path: string, file: string, size: int, width: int, height: int}
      * @throws Mage_Core_Exception_Input
      * @throws Mage_Core_Exception
      */
-    public function upload(string $folder, string $field, ?string $filename = null): array
+    public function upload(string $folder, string $field, ?string $filename = null, string $type = 'image'): array
     {
         $helper = Mage::helper('cms/wysiwyg_images');
         $mount = $helper->getMount();
         $directory = $this->getFolder($folder);
 
-        $result = $helper->getStorage()->uploadFile($directory, 'image', $field);
+        $result = $helper->getStorage()->uploadFile($directory, $type, $field);
         $uploadedPath = $result['path'] . '/' . $result['file'];
+        if ($type !== 'image') {
+            return ['path' => $uploadedPath, 'file' => $result['file'], 'size' => $mount->fileSize($uploadedPath), 'width' => 0, 'height' => 0];
+        }
 
         $baseName = $filename
             ? $this->getBaseName($filename)

@@ -9,9 +9,9 @@
  */
 
 /**
- * Builds the invoices, the shipments and the credit memos of one order through Mage_Sales_Service_Order.
- *
- * @deprecated since 27.1, use Mage_Sales_Service_Order::buildInvoice(), buildShipment() and buildCreditmemo()
+ * Builds the invoices, the shipments and the credit memos of one order through Mage_Sales_Service_Order_Document.
+ * When a store rewrites this model, the service builds each document through the rewrite. New code calls
+ * buildInvoice(), buildShipment() and buildCreditmemo() of the service, and does not create this model.
  */
 class Mage_Sales_Model_Service_Order
 {
@@ -55,7 +55,7 @@ class Mage_Sales_Model_Service_Order
     public function updateLocaleNumbers(&$data)
     {
         if (is_array($data)) {
-            $data = $this->getOrderService()->parseLocaleNumbers($data);
+            $data = $this->getDocumentService()->parseLocaleNumbers($data);
         }
         return $this;
     }
@@ -75,7 +75,10 @@ class Mage_Sales_Model_Service_Order
      */
     public function prepareInvoice($qtys = [])
     {
-        return $this->getOrderService()->buildInvoice($this->_order, (array) $qtys, $this->_convertor);
+        $qtys = (array) $qtys;
+        $this->updateLocaleNumbers($qtys);
+
+        return $this->getDocumentService()->buildInvoiceWith($this->_order, $qtys, $this->_convertor, $this->_canInvoiceItem(...));
     }
 
     /**
@@ -84,7 +87,10 @@ class Mage_Sales_Model_Service_Order
      */
     public function prepareShipment($qtys = [])
     {
-        return $this->getOrderService()->buildShipment($this->_order, (array) $qtys, $this->_convertor);
+        $qtys = (array) $qtys;
+        $this->updateLocaleNumbers($qtys);
+
+        return $this->getDocumentService()->buildShipmentWith($this->_order, $qtys, $this->_convertor, $this->_canShipItem(...));
     }
 
     /**
@@ -93,7 +99,7 @@ class Mage_Sales_Model_Service_Order
      */
     public function prepareCreditmemo($data = [])
     {
-        return $this->getOrderService()->buildCreditmemo($this->_order, (array) $data, null, $this->_convertor);
+        return $this->_buildCreditmemo(null, (array) $data);
     }
 
     /**
@@ -103,16 +109,36 @@ class Mage_Sales_Model_Service_Order
      */
     public function prepareInvoiceCreditmemo($invoice, $data = [])
     {
-        return $this->getOrderService()->buildCreditmemo($this->_order, (array) $data, $invoice, $this->_convertor);
+        return $this->_buildCreditmemo($invoice, (array) $data);
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function _buildCreditmemo(?Mage_Sales_Model_Order_Invoice $invoice, array $data): Mage_Sales_Model_Order_Creditmemo
+    {
+        if (isset($data['qtys']) && is_array($data['qtys'])) {
+            $this->updateLocaleNumbers($data['qtys']);
+        }
+
+        return $this->getDocumentService()->buildCreditmemoWith(
+            $this->_order,
+            $data,
+            $invoice,
+            $this->_convertor,
+            $this->_canRefundItem(...),
+            $this->_initCreditmemoData(...),
+        );
     }
 
     /**
      * @param Mage_Sales_Model_Order_Creditmemo $creditmemo
      * @param array $data
+     * @return void
      */
     protected function _initCreditmemoData($creditmemo, $data)
     {
-        $this->getOrderService()->setCreditmemoAmounts($creditmemo, (array) $data);
+        $this->getDocumentService()->setCreditmemoAmounts($creditmemo, (array) $data);
     }
 
     /**
@@ -122,7 +148,7 @@ class Mage_Sales_Model_Service_Order
      */
     protected function _canInvoiceItem($item, $qtys = [])
     {
-        return $this->getOrderService()->canInvoiceItem($item, (array) $qtys);
+        return $this->getDocumentService()->canInvoiceItem($item, (array) $qtys);
     }
 
     /**
@@ -132,7 +158,7 @@ class Mage_Sales_Model_Service_Order
      */
     protected function _canShipItem($item, $qtys = [])
     {
-        return $this->getOrderService()->canShipItem($item, (array) $qtys);
+        return $this->getDocumentService()->canShipItem($item, (array) $qtys);
     }
 
     /**
@@ -143,7 +169,7 @@ class Mage_Sales_Model_Service_Order
      */
     protected function _canRefundItem($item, $qtys = [], $invoiceQtysRefundLimits = [])
     {
-        return $this->getOrderService()->canRefundItem($item, (array) $qtys, (array) $invoiceQtysRefundLimits);
+        return $this->getDocumentService()->canRefundItem($item, (array) $qtys, (array) $invoiceQtysRefundLimits);
     }
 
     /**
@@ -153,11 +179,11 @@ class Mage_Sales_Model_Service_Order
      */
     protected function _canRefundNoDummyItem($item, $invoiceQtysRefundLimits = [])
     {
-        return $this->getOrderService()->hasQtyToRefund($item, (array) $invoiceQtysRefundLimits);
+        return $this->getDocumentService()->hasQtyToRefund($item, (array) $invoiceQtysRefundLimits);
     }
 
-    private function getOrderService(): Mage_Sales_Service_Order
+    private function getDocumentService(): Mage_Sales_Service_Order_Document
     {
-        return Mage::getService('sales/order');
+        return Mage::getService('sales/order_document');
     }
 }

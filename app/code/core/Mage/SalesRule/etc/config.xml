@@ -111,6 +111,14 @@ SPDX-License-Identifier: AFL-3.0
                     <num>0123456789</num>
                 </charset>
             </coupon>
+            <rule>
+                <simple_actions>
+                    <by_percent/>
+                    <by_fixed/>
+                    <cart_fixed/>
+                    <buy_x_get_y/>
+                </simple_actions>
+            </rule>
         </salesrule>
     </global>
     <adminhtml>

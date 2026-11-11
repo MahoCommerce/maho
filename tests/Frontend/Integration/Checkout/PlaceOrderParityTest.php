@@ -33,7 +33,7 @@ function placeOrderCart(): Mage_Sales_Model_Quote
     $quote = CartParity::cart();
     /** @var Mage_Checkout_Service_Cart $service */
     $service = Mage::getService('checkout/cart');
-    $address = $service->mapAddressInput([
+    $address = \Mage\Checkout\Api\CartRequest::mapAddress([
         'firstName' => 'Place', 'lastName' => 'Order', 'street' => ['1 Main St'], 'city' => 'Los Angeles',
         'region' => 'California', 'postcode' => '90210', 'countryId' => 'US', 'telephone' => '5550100',
     ]);
@@ -156,19 +156,34 @@ afterEach(function () {
 
 it('places the order with one new order email, one checkout_submit_all_after and a guest token on both transports', function () {
     [$webCart, $apiCart] = $this->carts;
-    $listener = new class {
-        /** @var list<string> */
-        public array $orders = [];
+    $spy = $this->spy;
+    $listener = new class ($spy) {
+        /** @var list<string> the events, each with the count of new order emails at its time */
+        public array $events = [];
 
-        public function record(Maho\Event\Observer $observer): void
+        public function __construct(private Mage_Sales_Service_Order $spy) {}
+
+        public function saveOrderAfter(Maho\Event\Observer $observer): void
         {
-            $this->orders[] = (string) $observer->getEvent()->getOrder()->getIncrementId();
+            $this->record('save_order_after', $observer);
+        }
+
+        public function submitAllAfter(Maho\Event\Observer $observer): void
+        {
+            $this->record('submit_all_after', $observer);
+        }
+
+        private function record(string $event, Maho\Event\Observer $observer): void
+        {
+            $this->events[] = $event . ':' . $observer->getEvent()->getOrder()->getIncrementId() . ':' . count($this->spy->newOrderEmails);
         }
     };
     Mage::register('_singleton/place_order_parity_listener', $listener, true);
     (function (): void {
+        $this->_events['global']['checkout_type_onepage_save_order_after']['observers']['place_order_parity_listener']
+            = ['type' => 'singleton', 'model' => 'place_order_parity_listener', 'method' => 'saveOrderAfter'];
         $this->_events['global']['checkout_submit_all_after']['observers']['place_order_parity_listener']
-            = ['type' => 'singleton', 'model' => 'place_order_parity_listener', 'method' => 'record'];
+            = ['type' => 'singleton', 'model' => 'place_order_parity_listener', 'method' => 'submitAllAfter'];
     })->call(Mage::app());
 
     try {
@@ -176,7 +191,10 @@ it('places the order with one new order email, one checkout_submit_all_after and
         $api = placeOrderViaApi($apiCart);
     } finally {
         (function (): void {
-            unset($this->_events['global']['checkout_submit_all_after']['observers']['place_order_parity_listener']);
+            unset(
+                $this->_events['global']['checkout_type_onepage_save_order_after']['observers']['place_order_parity_listener'],
+                $this->_events['global']['checkout_submit_all_after']['observers']['place_order_parity_listener'],
+            );
         })->call(Mage::app());
         Mage::unregister('_singleton/place_order_parity_listener');
     }
@@ -186,11 +204,43 @@ it('places the order with one new order email, one checkout_submit_all_after and
     expect($web['success'] ?? null)->toBeTrue()
         ->and($api['status'])->toBe(200)
         ->and($this->spy->newOrderEmails)->toBe($incrementIds)
-        ->and($listener->orders)->toBe($incrementIds)
+        // The one page checkout: its event, then the email, then checkout_submit_all_after. The API has no event of its own.
+        ->and($listener->events)->toBe([
+            "save_order_after:{$incrementIds[0]}:0",
+            "submit_all_after:{$incrementIds[0]}:1",
+            "submit_all_after:{$incrementIds[1]}:2",
+        ])
         ->and($orders[0]->getData('guest_access_token'))->toBeString()->not->toBeEmpty()
         ->and($orders[1]->getData('guest_access_token'))->toBeString()->not->toBeEmpty()
         ->and(placeOrderReload($webCart)->getIsActive())->toBeFalse()
         ->and(placeOrderReload($apiCart)->getIsActive())->toBeFalse();
+});
+
+it('sends no new order email when an observer of checkout_type_onepage_save_order_after stops it', function () {
+    $listener = new class {
+        public function stopEmail(Maho\Event\Observer $observer): void
+        {
+            $observer->getEvent()->getOrder()->setCanSendNewEmailFlag(false);
+        }
+    };
+    Mage::register('_singleton/place_order_parity_listener', $listener, true);
+    (function (): void {
+        $this->_events['global']['checkout_type_onepage_save_order_after']['observers']['place_order_parity_listener']
+            = ['type' => 'singleton', 'model' => 'place_order_parity_listener', 'method' => 'stopEmail'];
+    })->call(Mage::app());
+
+    try {
+        $web = placeOrderViaWeb($this->carts[0]);
+    } finally {
+        (function (): void {
+            unset($this->_events['global']['checkout_type_onepage_save_order_after']['observers']['place_order_parity_listener']);
+        })->call(Mage::app());
+        Mage::unregister('_singleton/place_order_parity_listener');
+    }
+
+    expect($web['success'] ?? null)->toBeTrue()
+        ->and(placeOrderOf($this->carts[0])->getId())->not->toBeNull()
+        ->and($this->spy->newOrderEmails)->toBe([]);
 });
 
 it('places a Staff order of the API without the email when the body asks for none', function () {
@@ -223,6 +273,23 @@ it('refuses a line with an error with the same message on both transports', func
         ->and($api['status'])->toBe(422)
         ->and($api['errors'])->toBe($web)
         ->and(array_unique($api['fields']))->toBe(['items']);
+});
+
+it('refuses a payment method that is no longer available, for a caller that selected it before', function () {
+    $quote = placeOrderReload($this->carts[0]);
+    Mage::app()->getStore()->setConfig('payment/checkmo/active', '0');
+
+    $fields = null;
+    try {
+        Mage::getService('sales/order')->submit($quote, Mage_Checkout_Model_Actor::Customer);
+    } catch (Mage_Core_Exception_Input $e) {
+        $fields = array_column($e->getErrors(), 'field');
+    } finally {
+        Mage::app()->getStore()->setConfig('payment/checkmo/active', '1');
+    }
+
+    expect($fields)->toBe(['payment_method'])
+        ->and(placeOrderOf($this->carts[0])->getId())->toBeNull();
 });
 
 describe('the minimum order amount', function () {
@@ -329,7 +396,7 @@ it('refuses a gift card that another order spends during the placement, and send
             ->setBalance(5.00)
             ->setInitialBalance(5.00);
         $giftcard->save();
-        Mage::getService('checkout/cart')->applyGiftcard($cart, (string) $giftcard->getCode(), actor: Mage_Checkout_Model_Actor::Staff);
+        Mage::getService('giftcard/giftcard')->applyToCart($cart, (string) $giftcard->getCode(), actor: Mage_Checkout_Model_Actor::Staff);
         $giftcards[(string) $giftcard->getCode()] = $giftcard;
     }
     // Each transport saves the cart before the placement. The listener spends the card at that moment
@@ -373,35 +440,35 @@ it('refuses a gift card that another order spends during the placement, and send
 });
 
 /**
- * Place the cart $quote through the POS placeOrder mutation.
+ * Place the cart $quote through the placeOrder mutation of the admin GraphQL API.
  *
  * @param array<string, mixed> $variables
  * @return array<string, mixed>
  */
-function placeOrderViaPos(Mage_Sales_Model_Quote $quote, array $variables = []): array
+function placeOrderViaAdminGraphQl(Mage_Sales_Model_Quote $quote, array $variables = []): array
 {
     $handler = new OrderMutationHandler(new OrderProvider(AdminApiParity::adminSecurity()));
 
-    return $handler->handlePlaceOrder(['cartId' => (int) $quote->getId()] + $variables, []);
+    return $handler->handlePlaceOrder(['cartId' => (int) $quote->getId()] + $variables);
 }
 
-describe('the API and the POS', function () {
+describe('the REST API and the admin GraphQL API', function () {
     it('refuse a guest email that is not valid', function () {
-        [$posCart, $apiCart] = $this->carts;
+        [$staffCart, $apiCart] = $this->carts;
 
         $api = placeOrderViaApi($apiCart, ['guestEmail' => 'not-an-email']);
 
         expect($api['status'])->toBe(422)
             ->and($api['errors'])->toBe(['Invalid email address.'])
             ->and($api['fields'])->toBe(['guestEmail'])
-            ->and(fn() => placeOrderViaPos($posCart, ['guestEmail' => 'not-an-email']))
+            ->and(fn() => placeOrderViaAdminGraphQl($staffCart, ['guestEmail' => 'not-an-email']))
             ->toThrow(Mage_Core_Exception_Input::class, 'Invalid email address.')
-            ->and(placeOrderOf($posCart)->getId())->toBeNull()
+            ->and(placeOrderOf($staffCart)->getId())->toBeNull()
             ->and(placeOrderOf($apiCart)->getId())->toBeNull();
     });
 
     it('dispatch sales_api_place_order_before once before each order', function () {
-        [$posCart, $apiCart] = $this->carts;
+        [$staffCart, $apiCart] = $this->carts;
         $listener = new class {
             /** @var list<array{quote: int, payment: ?string, shipping: ?string, ordered: bool}> */
             public array $calls = [];
@@ -424,7 +491,7 @@ describe('the API and the POS', function () {
         })->call(Mage::app());
 
         try {
-            placeOrderViaPos($posCart);
+            placeOrderViaAdminGraphQl($staffCart);
             $api = placeOrderViaApi($apiCart);
         } finally {
             (function (): void {
@@ -437,7 +504,7 @@ describe('the API and the POS', function () {
             'quote' => (int) $cart->getId(), 'payment' => 'checkmo', 'shipping' => 'flatrate_flatrate', 'ordered' => false,
         ];
         expect($api['status'])->toBe(200)
-            ->and($listener->calls)->toBe([$expected($posCart), $expected($apiCart)])
-            ->and(placeOrderOf($posCart)->getId())->not->toBeNull();
+            ->and($listener->calls)->toBe([$expected($staffCart), $expected($apiCart)])
+            ->and(placeOrderOf($staffCart)->getId())->not->toBeNull();
     });
 });

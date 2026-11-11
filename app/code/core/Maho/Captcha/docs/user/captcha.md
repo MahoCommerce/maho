@@ -81,6 +81,7 @@ The **CSS Selectors** field controls exactly which storefront forms get the capt
 .contacts-index-index #contactForm
 .customer-account-login #form-validate-register
 .customer-account-login #form-validate-forgot
+.customer-account-confirmation #form-validate
 #newsletter-validate-detail
 .catalog-product-view #review-form
 .review-product-list #review-form

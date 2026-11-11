@@ -49,12 +49,15 @@ class Mage_Catalog_Service_Product_Option
      * Save $option, a new option of $product or one from getById(). For a select type, a list of value arrays in the
      * data "values" replaces the values of the option. Without this list, the values stay.
      *
-     * @throws Mage_Core_Exception_Input for an invalid title, type or value
+     * @throws Mage_Core_Exception_Input for an invalid title, type or value, or a negative price of an option that has no values
      * @throws Mage_Core_Exception_Conflict when the product cannot have custom options, as a bundle with a dynamic price
      * @throws Mage_Core_Exception for a forbidden file extension
      */
     public function save(Product $product, Option $option): Option
     {
+        if ($option->getGroupByType() !== Option::OPTION_GROUP_SELECT && (float) $option->getData('price') < 0) {
+            throw new Mage_Core_Exception_Input()->addError('price', Mage::helper('catalog')->__('Price must not be negative'));
+        }
         $product = $this->write($product, $option, false);
         if ($option->getId()) {
             return $this->getById($product, (int) $option->getId());
@@ -150,7 +153,7 @@ class Mage_Catalog_Service_Product_Option
 
         $product->setProductOptions($options);
         $product->setCanSaveCustomOptions(true);
-        $product->save();
+        Mage::getService('catalog/product')->savePart($product);
         return $product;
     }
 

@@ -20,16 +20,8 @@ class Mage_Cms_Service_Block
     public function getById(int $id, ?int $storeId = null): Mage_Cms_Model_Block
     {
         /** @var Mage_Cms_Model_Block $block */
-        $block = Mage::getModel('cms/block');
-        try {
-            $block->load($id);
-        } catch (\Doctrine\DBAL\Exception\DriverException) {
-            // An ID that the column cannot hold matches no row
-        }
-        $storeIds = array_map(intval(...), (array) $block->getStoreId());
-        if (!$block->getId()
-            || ($storeId !== null && (!$block->getIsActive() || !array_intersect([Mage_Core_Model_App::ADMIN_STORE_ID, $storeId], $storeIds)))
-        ) {
+        $block = Mage::getModel('cms/block')->load($id);
+        if (!$block->getId() || ($storeId !== null && !$block->isVisibleInStore($storeId))) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('cms')->__('This block no longer exists.'));
         }
         return $block;

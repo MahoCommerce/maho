@@ -298,7 +298,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
-     * Check the 2FA code of the pending customer with Mage_Customer_Service_Customer::verifySecondFactor(). When the
+     * Check the 2FA code of the pending customer with Mage_Customer_Service_Authentication::verifySecondFactor(). When the
      * code is right, log the customer in.
      *
      * @throws Mage_Core_Exception_TooManyRequests when the client or the email is over the login limit
@@ -310,7 +310,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
             return false;
         }
         try {
-            Mage::getService('customer/customer')->verifySecondFactor($customer, $code);
+            Mage::getService('customer/authentication')->verifySecondFactor($customer, $code);
         } catch (Mage_Core_Exception_TooManyRequests $e) {
             throw $e;
         } catch (Mage_Core_Exception) {

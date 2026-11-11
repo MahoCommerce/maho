@@ -515,8 +515,8 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
                         'request' => $this->getRequest(),
                         'quote'   => $this->getOnepage()->getQuote()],
                 );
-                $this->getOnepage()->getQuote()->collectTotals();
-                $this->_prepareDataJSON($result);
+                // An observer of this event of the checkout form can change the cart, so the service collects and saves it again
+                Mage::getService('checkout/cart')->collectAndSave($this->getOnepage()->getQuote());
 
                 $result['goto_section'] = 'payment';
                 $result['update_section'] = [
@@ -524,7 +524,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
                     'html' => $this->_getPaymentMethodsHtml(),
                 ];
             }
-            $this->getOnepage()->getQuote()->collectTotals()->save();
             $this->_prepareDataJSON($result);
         }
     }
@@ -607,7 +606,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         foreach ($this->_getOrder()->getAllItems() as $item) {
             $items[$item->getId()] = $item->getQtyOrdered();
         }
-        $invoice = Mage::getService('sales/order')->buildInvoice($this->_getOrder(), $items);
+        $invoice = Mage::getService('sales/order_document')->buildInvoice($this->_getOrder(), $items);
         $invoice->setEmailSent()->register();
 
         Mage::register('current_invoice', $invoice);

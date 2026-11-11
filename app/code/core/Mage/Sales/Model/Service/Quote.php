@@ -39,8 +39,9 @@ class Mage_Sales_Model_Service_Quote
     protected $_order = null;
 
     /**
+     * False keeps the cart active after its order is placed
+     *
      * @var bool
-     * @deprecated since 27.1, has no effect: submit() closes the cart of each order
      */
     protected $_shouldInactivateQuote = true;
 
@@ -77,20 +78,28 @@ class Mage_Sales_Model_Service_Quote
     }
 
     /**
-     * Place the order of the quote.
+     * Place the order of the quote. Unlike the method of the same name before the services, it refuses a quote that
+     * has an order. It sends no email and does not dispatch checkout_submit_all_after: the caller does both.
      *
      * @return Mage_Sales_Model_Order
      * @throws Mage_Core_Exception
      */
     public function submitOrder()
     {
-        $this->_order = $this->getOrderService()->submit(
+        if (static::class !== self::class) {
+            // A subclass can add a check to _validate(), which submit() does not call
+            $this->_validate();
+        }
+        $this->_order = $this->getOrderService()->submitWithoutNotice(
             $this->_quote,
             Mage_Checkout_Model_Actor::Staff,
-            orderData: $this->_orderData,
-            sendConfirmation: false,
-            convertor: $this->_convertor,
+            $this->_orderData,
+            $this->_convertor,
         );
+        if (!$this->_shouldInactivateQuote) {
+            // submit() closes and saves the cart of each order
+            $this->_quote->setIsActive(true)->save();
+        }
         return $this->_order;
     }
 
@@ -119,7 +128,9 @@ class Mage_Sales_Model_Service_Quote
      */
     protected function _inactivateQuote()
     {
-        $this->_quote->setIsActive(false);
+        if ($this->_shouldInactivateQuote) {
+            $this->_quote->setIsActive(false);
+        }
         return $this;
     }
 

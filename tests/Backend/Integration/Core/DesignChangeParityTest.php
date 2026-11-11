@@ -143,3 +143,14 @@ it('checks a direct model save too, so an importer or an extension gets the same
 
     expect(fn() => $overlap->save())->toThrow(Mage_Core_Exception_Conflict::class);
 });
+
+it('lets a script save a change with a theme that is not installed, as before the service', function () {
+    $change = Mage::getModel('core/design')->setStoreId($this->storeId)->setDesign('base/pest_parity_theme')
+        ->setDateFrom('2095-06-01')->setDateTo('2095-06-30');
+    $change->save();
+
+    expect(Mage::getModel('core/design')->load($change->getId())->getDesign())->toBe('base/pest_parity_theme')
+        ->and(fn() => Mage::getService('core/design')->save(Mage::getModel('core/design')->setStoreId($this->storeId)
+            ->setDesign('base/pest_parity_theme')->setDateFrom('2095-08-01')->setDateTo('2095-08-31')))
+        ->toThrow(Mage_Core_Exception_Input::class, 'is not an installed theme');
+});

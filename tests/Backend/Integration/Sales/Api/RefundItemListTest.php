@@ -53,7 +53,7 @@ function refundItemListReturn(Security $security, Mage_Sales_Model_Order $order,
 {
     $handler = new OrderMutationHandler(new OrderProvider($security));
 
-    return $handler->handleProcessReturn(['orderId' => (int) $order->getId()] + $variables, []);
+    return $handler->handleCreateCreditMemo(['orderId' => (int) $order->getId()] + $variables, []);
 }
 
 function refundItemListItemId(Mage_Sales_Model_Order $order): int
@@ -67,7 +67,7 @@ describe('A refund with a list of items, in the order service', function (): voi
         $order = refundItemListOrder();
 
         try {
-            expect(fn() => Mage::getService('sales/order')->refund($order, ['qtys' => []]))
+            expect(fn() => Mage::getService('sales/order_document')->refund($order, ['qtys' => []]))
                 ->toThrow(Mage_Core_Exception::class, 'Credit memo total must be greater than zero');
             expect((float) Mage::getModel('sales/order')->load($order->getId())->getBaseTotalRefunded())->toBe(0.0);
         } finally {
@@ -79,7 +79,7 @@ describe('A refund with a list of items, in the order service', function (): voi
         $order = refundItemListOrder();
 
         try {
-            $creditmemo = Mage::getService('sales/order')->refund($order, []);
+            $creditmemo = Mage::getService('sales/order_document')->refund($order, []);
             expect((float) $creditmemo->getBaseGrandTotal())->toBe(110.0);
         } finally {
             $order->delete();
@@ -88,7 +88,7 @@ describe('A refund with a list of items, in the order service', function (): voi
 
 });
 
-describe('The POS processReturn mutation', function (): void {
+describe('The createCreditMemo mutation of the admin GraphQL API', function (): void {
 
     it('refunds no item, and no shipping, when every qty is 0', function (): void {
         $order = refundItemListOrder();
@@ -115,7 +115,7 @@ describe('The POS processReturn mutation', function (): void {
 
         try {
             $result = refundItemListReturn($this->createMock(Security::class), $order, ['items' => [['orderItemId' => refundItemListItemId($order), 'qty' => 1]]]);
-            expect($result['processReturn']['creditmemo']['grandTotal'])->toBe(110.0);
+            expect($result['createCreditMemo']['creditmemo']['grandTotal'])->toBe(110.0);
         } finally {
             $order->delete();
         }
@@ -129,7 +129,7 @@ describe('The POS processReturn mutation', function (): void {
                 'items' => [['orderItemId' => refundItemListItemId($order), 'qty' => 1]],
                 'shippingAmount' => 0,
             ]);
-            expect($result['processReturn']['creditmemo']['grandTotal'])->toBe(100.0);
+            expect($result['createCreditMemo']['creditmemo']['grandTotal'])->toBe(100.0);
         } finally {
             $order->delete();
         }
