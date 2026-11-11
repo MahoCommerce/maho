@@ -967,6 +967,7 @@
 "The lifetime statistics will be updated in the background. A message in the notifications tells you when each report is updated.","The lifetime statistics will be updated in the background. A message in the notifications tells you when each report is updated."
 "The Maho cache has been flushed and updates applied.","The Maho cache has been flushed and updates applied."
 "The minified CSS/JS cache was cleaned.","The minified CSS/JS cache was cleaned."
+"The new order #%s was created, but the old order #%s was not canceled: %s","The new order #%s was created, but the old order #%s was not canceled: %s"
 "The profile has been deleted.","The profile has been deleted."
 "The profile has been saved.","The profile has been saved."
 "The profile you are trying to save no longer exists","The profile you are trying to save no longer exists"
@@ -1171,4 +1172,3 @@
 "[STORE VIEW]","[STORE VIEW]"
 "[WEBSITE]","[WEBSITE]"
 "{{base_url}} is not recommended to use in a production environment to declare the Base Unsecure URL / Base Secure URL. It is highly recommended to change this value in your Maho <a href=""%s"">configuration</a>.","{{base_url}} is not recommended to use in a production environment to declare the Base Unsecure URL / Base Secure URL. It is highly recommended to change this value in your Maho <a href=""%s"">configuration</a>."
-"The new order #%s was created, but the old order #%s was not canceled: %s","The new order #%s was created, but the old order #%s was not canceled: %s"
