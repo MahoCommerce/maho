@@ -73,6 +73,7 @@ describe('Request body types', function (): void {
         'a bulk stock quantity that is a word' => ['PUT', '/api/rest/v2/inventory/bulk', ['items' => [['sku' => '{sku}', 'qty' => 'abc']]], ['inventory/write'], 'items[0].qty', 'The type of the "items[0].qty" attribute must be "float", "string" given.'],
         'a coupon cart id that is a list' => ['POST', '/api/rest/v2/coupons/validate', ['code' => 'PEST-NONE', 'cartId' => [1]], [], 'cartId', 'The type of the "cartId" attribute must be "int", "array" given.'],
         'bulk stock items that are not a list' => ['PUT', '/api/rest/v2/inventory/bulk', ['items' => 'x'], ['inventory/write'], 'items', 'The type of the "items" attribute must be "list", "string" given.'],
+        'a product stock quantity that is a word' => ['PUT', '/api/rest/v2/products/{id}', ['stockData' => ['qty' => 'abc']], ['products/write'], 'stockData.qty', 'The type of the "stockData.qty" attribute must be "float", "string" given.'],
     ]);
 
     it('answers a field of a resource of the wrong type the same way', function (): void {
@@ -99,6 +100,13 @@ describe('Request body types', function (): void {
 
     it('reads the string "false" as false', function (): void {
         $response = apiPut('/api/rest/v2/inventory/bulk', ['items' => [['sku' => $this->sku, 'isInStock' => 'false']]], serviceToken(['inventory/write']));
+
+        expect($response['status'])->toBe(200);
+        expect(requestBodyTypesIsInStock($this->productId))->toBe(0);
+    });
+
+    it('reads the string "false" as false in the stock data of a product', function (): void {
+        $response = apiPut("/api/rest/v2/products/{$this->productId}", ['stockData' => ['isInStock' => 'false']], serviceToken(['products/write']));
 
         expect($response['status'])->toBe(200);
         expect(requestBodyTypesIsInStock($this->productId))->toBe(0);

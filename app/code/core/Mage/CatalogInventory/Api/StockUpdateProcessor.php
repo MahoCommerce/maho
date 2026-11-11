@@ -83,7 +83,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
      * @param string $path where $input sits in the request, for its errors
      * @return array<string, float|int>
      */
-    private static function readColumns(array $input, string $path = ''): array
+    public static function readColumns(array $input, string $path = ''): array
     {
         $request = RequestInput::of($input, $path);
         $values = [];

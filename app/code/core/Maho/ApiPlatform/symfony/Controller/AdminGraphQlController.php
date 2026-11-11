@@ -175,6 +175,8 @@ class AdminGraphQlController
         try {
             $data = $this->resolveOperation($operation, $variables ?? [], $context);
             return ['data' => $data];
+        } catch (NotNormalizableValueException $e) {
+            return ['errors' => [['message' => $e->getMessage(), 'extensions' => ['code' => 'BAD_USER_INPUT']]]];
         } catch (\Exception $e) {
             \Mage::logException($e);
             return ['errors' => [['message' => \Mage::getIsDeveloperMode() ? $e->getMessage() : 'An error occurred processing the request']]];

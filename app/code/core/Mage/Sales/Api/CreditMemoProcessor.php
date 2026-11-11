@@ -12,7 +12,6 @@ namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Http\RequestInput;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
@@ -47,10 +46,7 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
             throw new \Mage_Core_Exception_Input()->addError('order_id', 'Order ID is required');
         }
 
-        $items = $args['items'] ?? null;
-        if ($items !== null && !is_array($items)) {
-            throw new BadRequestHttpException('Items must be a list of {orderItemId, qty} objects');
-        }
+        $items = $input->rows('items');
 
         $order = $this->orderService->getById($orderId);
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
@@ -71,13 +67,14 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
         $backToStock = null;
         if ($items !== null) {
             $data['qtys'] = [];
-            foreach ($items as $index => $itemData) {
-                $entry = $this->parseOrderItemEntry($itemData);
+            foreach ($items as $item) {
+                $entry = $this->parseOrderItemEntry($item);
                 $orderItemId = $entry['orderItemId'];
                 $data['qtys'][$orderItemId] = $entry['qty'];
-                if (array_key_exists('backToStock', $itemData)) {
+                $flag = $item->bool('backToStock');
+                if ($flag !== null) {
                     $backToStock ??= [];
-                    if (RequestInput::of($itemData, "items[{$index}]")->bool('backToStock')) {
+                    if ($flag) {
                         $backToStock[$orderItemId] = true;
                     }
                 }

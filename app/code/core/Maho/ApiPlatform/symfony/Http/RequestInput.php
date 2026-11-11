@@ -291,7 +291,10 @@ final class RequestInput
         return [null, null];
     }
 
-    private function pathOf(string $key): string
+    /**
+     * Return the place of $key in the request, for example "items[0].qty", to name the field of an error.
+     */
+    public function pathOf(string $key): string
     {
         return match (true) {
             $this->path === '' => $key,

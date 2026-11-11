@@ -130,8 +130,8 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         $qtys = [];
-        foreach ($input->list('items') ?? [] as $itemData) {
-            $entry = $this->parseOrderItemEntry($itemData);
+        foreach ($input->rows('items') ?? [] as $item) {
+            $entry = $this->parseOrderItemEntry($item);
             $qtys[$entry['orderItemId']] = $entry['qty'];
         }
 

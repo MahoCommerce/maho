@@ -17,6 +17,7 @@ use Mage\Sales\Api\OrderCurrency;
 use Mage\Sales\Api\OrderList;
 use Mage\Sales\Api\OrderProvider;
 use Maho\ApiPlatform\Exception\ValidationException;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Security\AdminAcl;
 use Maho\ApiPlatform\Trait\AdminQuoteTrait;
 
@@ -43,19 +44,20 @@ class OrderMutationHandler
     public function handlePlaceOrder(array $variables): array
     {
         AdminAcl::checkResource(Order::class);
-        $cartId = $variables['cartId'] ?? null;
+        $input = RequestInput::of($variables);
+        $cartId = $input->int('cartId');
         if (!$cartId) {
             throw ValidationException::requiredField('cartId');
         }
 
-        $quote = $this->loadAdminQuote((int) $cartId);
+        $quote = $this->loadAdminQuote($cartId);
 
         $cartService = \Mage::getService('checkout/cart');
-        $shippingMethod = (string) ($variables['shippingMethod'] ?? '');
+        $shippingMethod = $input->string('shippingMethod') ?? '';
         if ($shippingMethod !== '' && !$quote->isVirtual()) {
             $cartService->selectShippingMethod($quote, $shippingMethod);
         }
-        $paymentMethod = (string) ($variables['paymentMethod'] ?? '');
+        $paymentMethod = $input->string('paymentMethod') ?? '';
         if ($paymentMethod !== '') {
             // The ACL check above proves the staff. The endpoint runs in a store view, never in the admin scope
             $cartService->selectPaymentMethod($quote, ['method' => $paymentMethod], CartRequest::backOfficeActor(true));
@@ -63,10 +65,10 @@ class OrderMutationHandler
 
         $placeOrder = fn(): array => $this->orderService->place(
             $quote,
-            $variables['guestEmail'] ?? null,
-            $variables['orderNote'] ?? null,
+            $input->string('guestEmail'),
+            $input->string('orderNote'),
             \Mage_Checkout_Model_Actor::Staff,
-            sendConfirmation: isset($variables['sendConfirmation']) ? (bool) $variables['sendConfirmation'] : null,
+            sendConfirmation: $input->bool('sendConfirmation'),
         );
         // A caller in the admin scope places a backend order (issue #1337). Any other caller places in the store of the cart.
         $result = \Mage::app()->getStore()->isAdmin() ? $placeOrder() : $cartService->inQuoteStoreScope($quote, $placeOrder);
@@ -90,12 +92,12 @@ class OrderMutationHandler
     public function handleLookupOrder(array $variables): array
     {
         AdminAcl::checkResource(Order::class);
-        $incrementId = $variables['incrementId'] ?? $variables['orderNumber'] ?? null;
+        $incrementId = RequestInput::of($variables)->string('incrementId', 'orderNumber');
         if (!$incrementId) {
             throw ValidationException::requiredField('incrementId');
         }
 
-        return ['lookupOrder' => $this->mapOrder($this->orderService->getByIncrementId((string) $incrementId))];
+        return ['lookupOrder' => $this->mapOrder($this->orderService->getByIncrementId($incrementId))];
     }
 
     /**
@@ -104,14 +106,15 @@ class OrderMutationHandler
     public function handleGetCustomerOrders(array $variables): array
     {
         AdminAcl::checkResource(Order::class);
-        $customerId = $variables['customerId'] ?? null;
-        $limit = max(1, min((int) ($variables['limit'] ?? 10), 100));
+        $input = RequestInput::of($variables);
+        $customerId = $input->int('customerId');
+        $limit = self::readLimit($input);
 
         if (!$customerId) {
             throw ValidationException::requiredField('customerId');
         }
 
-        $result = new OrderList()->getListForCustomer((int) $customerId, 1, $limit);
+        $result = new OrderList()->getListForCustomer($customerId, 1, $limit);
 
         $orders = [];
         foreach ($result['orders'] as $order) {
@@ -127,10 +130,10 @@ class OrderMutationHandler
     public function handleRecentOrders(array $variables): array
     {
         AdminAcl::checkResource(Order::class);
-        $storeId = $variables['storeId'] ?? null;
-        $limit = max(1, min((int) ($variables['limit'] ?? 10), 100));
+        $input = RequestInput::of($variables);
+        $storeId = $input->int('storeId');
 
-        $orders = new OrderList()->getRecent($limit, $storeId ? (int) $storeId : null);
+        $orders = new OrderList()->getRecent(self::readLimit($input), $storeId ?: null);
 
         $result = [];
         foreach ($orders as $order) {
@@ -146,15 +149,16 @@ class OrderMutationHandler
     public function handleSearchOrders(array $variables): array
     {
         AdminAcl::checkResource(Order::class);
-        $search = $variables['search'] ?? null;
-        $storeId = $variables['storeId'] ?? null;
-        $limit = max(1, min((int) ($variables['limit'] ?? 10), 100));
+        $input = RequestInput::of($variables);
+        $search = $input->string('search');
+        $storeId = $input->int('storeId');
+        $limit = self::readLimit($input);
 
         if (!$search) {
             return ['searchOrders' => []];
         }
 
-        $orders = new OrderList()->search($search, $storeId ? (int) $storeId : null, $limit);
+        $orders = new OrderList()->search($search, $storeId ?: null, $limit);
 
         $result = [];
         foreach ($orders as $order) {
@@ -170,37 +174,46 @@ class OrderMutationHandler
     public function handleCreateCreditMemo(array $variables, array $context): array
     {
         AdminAcl::checkResource(CreditMemo::class);
-        $orderId = $variables['orderId'] ?? null;
-        $items = $variables['items'] ?? [];
-        $comment = $variables['comment'] ?? 'Return';
+        $input = RequestInput::of($variables);
+        $orderId = $input->int('orderId');
+        $items = $input->rows('items') ?? [];
+        $comment = $input->string('comment') ?? 'Return';
 
         if (!$orderId) {
             throw ValidationException::requiredField('orderId');
         }
-        if (empty($items)) {
+        if ($items === []) {
             throw ValidationException::requiredField('items');
         }
 
-        return $this->buildCreditMemo($this->orderService->getById((int) $orderId), $items, $comment, $variables);
+        return $this->buildCreditMemo($this->orderService->getById($orderId), $items, $comment, $input);
     }
 
     /**
-     * @param array<int, array<string, mixed>> $items
-     * @param array<string, mixed> $variables
+     * Return the limit argument of a list query, from 1 to 100, 10 when the query leaves it out.
+     */
+    private static function readLimit(RequestInput $input): int
+    {
+        return max(1, min($input->int('limit') ?? 10, 100));
+    }
+
+    /**
+     * @param list<RequestInput> $items
      * @return array<string, mixed>
      */
-    private function buildCreditMemo(\Mage_Sales_Model_Order $order, array $items, ?string $comment, array $variables): array
+    private function buildCreditMemo(\Mage_Sales_Model_Order $order, array $items, ?string $comment, RequestInput $input): array
     {
         $creditmemoData = ['qtys' => []];
         foreach (['adjustmentPositive' => 'adjustment_positive', 'adjustmentNegative' => 'adjustment_negative', 'shippingAmount' => 'shipping_amount'] as $field => $key) {
-            if (isset($variables[$field])) {
-                $creditmemoData[$key] = (float) $variables[$field];
+            $amount = $input->float($field);
+            if ($amount !== null) {
+                $creditmemoData[$key] = $amount;
             }
         }
-        foreach ($items as $itemData) {
-            $orderItemId = $itemData['orderItemId'] ?? null;
+        foreach ($items as $item) {
+            $orderItemId = $item->int('orderItemId');
             if ($orderItemId) {
-                $creditmemoData['qtys'][$orderItemId] = $itemData['qty'] ?? 0;
+                $creditmemoData['qtys'][$orderItemId] = $item->float('qty') ?? 0.0;
             }
         }
 
