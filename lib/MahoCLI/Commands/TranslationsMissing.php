@@ -71,7 +71,6 @@ class TranslationsMissing extends BaseMahoCommand
         }
 
         if (count($files) === 0) {
-            $files = [];
             foreach ([
                 // Grep for all files that might call the __ function
                 "grep -Frl --exclude-dir='.git' --include=*.php --include=*.phtml '__' .",
