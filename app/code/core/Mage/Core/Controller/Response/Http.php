@@ -866,7 +866,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
         );
 
         if ($deferred === null) {
-            Mage::log('Maho did not defer JavaScript on this page because the script regex failed: ' . preg_last_error_msg(), Mage::LOG_WARNING);
+            Mage::log('Maho did not defer JavaScript on this page because the script regex failed: ' . preg_last_error_msg(), Mage::LOG_WARNING, forceLog: true);
             return $html;
         }
 
