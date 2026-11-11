@@ -345,12 +345,14 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
     }
 
     /**
-     * Get default attribute source model
+     * Return the option table source, or the Yes/No source for a Yes/No attribute.
      */
     #[\Override]
     public function getDefaultSourceModel(): string
     {
-        return 'eav/entity_attribute_source_table';
+        return $this->getFrontendInput() === 'boolean'
+            ? 'eav/entity_attribute_source_boolean'
+            : 'eav/entity_attribute_source_table';
     }
 
     /**
