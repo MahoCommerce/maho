@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace MahoCLI\Commands;
 
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -227,5 +228,22 @@ trait DatabaseCliTrait
             '(sleep 1 && rm -f %s) > /dev/null 2>&1 &',
             escapeshellarg($filename),
         ));
+    }
+
+    private function runInteractiveCommand(string $command): int
+    {
+        $descriptorspec = [
+            0 => STDIN,
+            1 => STDOUT,
+            2 => STDERR,
+        ];
+
+        $process = proc_open($command, $descriptorspec, $pipes);
+        if (is_resource($process)) {
+            $exitCode = proc_close($process);
+            return $exitCode >= 0 ? $exitCode : Command::FAILURE;
+        }
+
+        return Command::FAILURE;
     }
 }

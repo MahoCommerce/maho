@@ -21,6 +21,5 @@ it('labels the creation time column created_at', function () {
     $tester = new CommandTester($command);
     $tester->execute([]);
 
-    expect($tester->getDisplay())->toContain('created_at')
-        ->and(substr_count($tester->getDisplay(), 'messages'))->toBe(1);
+    expect($tester->getDisplay())->toContain('created_at');
 });

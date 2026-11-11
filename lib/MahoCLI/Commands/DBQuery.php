@@ -171,7 +171,7 @@ class DBQuery extends BaseMahoCommand
             escapeshellarg($query),
         );
 
-        return $this->runCommand($command);
+        return $this->runInteractiveCommand($command);
     }
 
     private function executePgsql(mixed $connConfig, string $query): int
@@ -194,7 +194,7 @@ class DBQuery extends BaseMahoCommand
             escapeshellarg($query),
         );
 
-        return $this->runCommand($command);
+        return $this->runInteractiveCommand($command);
     }
 
     private function executeSqlite(mixed $connConfig, string $query): int
@@ -207,28 +207,12 @@ class DBQuery extends BaseMahoCommand
             escapeshellarg($query),
         );
 
-        return $this->runCommand($command);
+        return $this->runInteractiveCommand($command);
     }
 
     private function handleUnsupportedEngine(string $engine): int
     {
         fwrite(STDERR, "Unsupported database engine: {$engine}\n");
-        return Command::FAILURE;
-    }
-
-    private function runCommand(string $command): int
-    {
-        $descriptorspec = [
-            0 => STDIN,
-            1 => STDOUT,
-            2 => STDERR,
-        ];
-
-        $process = proc_open($command, $descriptorspec, $pipes);
-        if (is_resource($process)) {
-            return proc_close($process) === 0 ? Command::SUCCESS : Command::FAILURE;
-        }
-
         return Command::FAILURE;
     }
 }
