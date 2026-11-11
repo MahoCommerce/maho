@@ -45,7 +45,7 @@ it('answers credit memo items that are not a list with the error of the variable
 
 function adminGraphQlResponse(array $body): array
 {
-    $bare = static fn(string $class): object => (new ReflectionClass($class))->newInstanceWithoutConstructor();
+    $bare = static fn(string $class): object => new ReflectionClass($class)->newInstanceWithoutConstructor();
     $controller = new AdminGraphQlController(
         $bare(ProductQueryHandler::class),
         $bare(CartMutationHandler::class),
