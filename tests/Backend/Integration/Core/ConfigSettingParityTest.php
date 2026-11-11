@@ -41,6 +41,8 @@ function configParityApi(string $method, string $path, array $body = [], array $
         "/api/rest/v2/config-settings/{$path}" . ($query === [] ? '' : '?' . http_build_query($query)),
         $body,
     );
+    // Without a bearer token, the API answers 401 for each refused request
+    $request->headers->set('Authorization', 'Bearer test');
     $security = AdminApiParity::adminSecurity();
     $operation = $method === 'DELETE' ? new Delete() : new Put();
 
@@ -179,14 +181,14 @@ it('deletes a website value through the backend model of the field on the API an
 });
 
 it('needs access to the section that shows a field and to the section that holds its value, in the admin and the API', function (): void {
-    $path = 'payment/paypal_standard_checkout/title';
+    $path = 'paypal/credentials/webhook_id';
     $field = Mage::getService('core/config')->getField($path);
     $original = configParityStored($path);
     AdminRoleFixture::delete($this->admin);
-    $this->admin = AdminRoleFixture::login(['admin/system/config/paypal']);
+    $this->admin = AdminRoleFixture::login(['admin/system/config/payment']);
 
     try {
-        $admin = configParityAdmin('paypal', $field['group'], $field['field'], 'Admin Title');
+        $admin = configParityAdmin('payment', $field['group'], $field['field'], 'Admin Title');
         $api = configParityApi('PUT', $path, ['value' => 'Api Title']);
         $stored = configParityStored($path);
 
@@ -198,8 +200,8 @@ it('needs access to the section that shows a field and to the section that holds
         $original === false ? Mage::getConfig()->deleteConfig($path) : Mage::getConfig()->saveConfig($path, $original);
     }
 
-    expect($field['section'])->toBe('paypal')
-        ->and($field['targetSection'])->toBe('payment')
+    expect($field['section'])->toBe('payment')
+        ->and($field['targetSection'])->toBe('paypal')
         ->and($admin['errors'])->toBe(['Access denied.'])
         ->and($api['status'])->toBe(403)
         ->and($stored)->toBe($original)

@@ -321,7 +321,7 @@ it('takes the customer fields of a guest in guestCustomer, and refuses a guest o
         $this->orderIds[] = (int) $order->getId();
 
         expect($missing['status'])->toBe(422)
-            ->and(array_column($missing['json']['details']['errors'] ?? [], 'field'))->toContain('customer_dob')
+            ->and(array_column($missing['json']['details']['errors'] ?? [], 'field'))->toContain('customerDob')
             ->and($list['status'])->toBe(400)
             ->and((string) $order->getData('customer_dob'))->toStartWith('1990-05-17');
     } finally {

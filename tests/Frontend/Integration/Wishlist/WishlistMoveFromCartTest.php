@@ -73,6 +73,7 @@ beforeEach(function () {
     Mage::register(Mage_Core_Model_Session_Abstract::REGISTRY_KEY, $session);
     Mage::app()->setCurrentStore(Mage::app()->getDefaultStoreView());
     Mage::app()->getStore()->setConfig(Mage_Wishlist_Service_Wishlist::XML_PATH_ENABLED, '1');
+    Mage::app()->getStore()->setConfig(Mage_Customer_Model_Customer::XML_PATH_IS_CONFIRM, '0');
     Mage::getSingleton('checkout/session')->getMessages(true);
 
     $this->customer = Mage::getModel('customer/customer')

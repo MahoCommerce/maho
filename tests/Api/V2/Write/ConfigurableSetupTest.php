@@ -93,6 +93,8 @@ describe('Configurable Setup, Child Management', function (): void {
             'sku' => "PEST-CFGCHILD-{$suffix}",
             'name' => 'Config Child Test',
             'price' => 30,
+            // A configurable product takes a child of its own attribute set only
+            'attributeSetId' => (int) Mage::getModel('catalog/product')->load($configId)->getAttributeSetId(),
         ], $token);
         expect($child['status'])->toBeIn([200, 201]);
         $childId = $child['json']['id'];

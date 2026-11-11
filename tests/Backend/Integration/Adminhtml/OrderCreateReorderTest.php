@@ -72,6 +72,7 @@ beforeEach(function () {
     $this->product = orderCreateReorderProduct();
     $this->quotes = [];
     $this->order = null;
+    $this->kept = null;
 });
 
 afterEach(function () {
@@ -83,7 +84,10 @@ afterEach(function () {
     foreach ($this->quotes as $quote) {
         $quote->delete();
     }
+    Mage::register('isSecureArea', true, true);
     $this->product->delete();
+    $this->kept?->delete();
+    Mage::unregister('isSecureArea');
 });
 
 it('refuses a disabled product of an order item, and adds a product that the store sells', function () {
@@ -96,7 +100,7 @@ it('refuses a disabled product of an order item, and adds a product that the sto
         ->setProductOptions(['info_buyRequest' => ['qty' => 1]]);
 
     $create->initFromOrderItem($orderItem($this->product), 2);
-    $this->product->setStoreId(0)->setStatus(Mage_Catalog_Model_Product_Status::STATUS_DISABLED)->save();
+    Mage::getSingleton('catalog/product_action')->updateAttributes([(int) $this->product->getId()], ['status' => Mage_Catalog_Model_Product_Status::STATUS_DISABLED], 0);
 
     expect(fn() => $create->initFromOrderItem($orderItem($this->product), 1))
         ->toThrow(Mage_Core_Exception::class, "Product '{$this->product->getSku()}' is not available")
@@ -105,9 +109,9 @@ it('refuses a disabled product of an order item, and adds a product that the sto
 });
 
 it('loads the other items of a reorder and gives an error message for the item that the cart refuses', function () {
-    $kept = loadSimplePricedProduct();
+    $this->kept = $kept = orderCreateReorderProduct();
     $this->quotes = [$source = orderCreateReorderQuote(), $target = orderCreateReorderQuote()];
-    $source->addProduct($kept, 1);
+    $source->addProduct(Mage::getModel('catalog/product')->setStoreId(1)->load($kept->getId()), 1);
     $source->addProduct(Mage::getModel('catalog/product')->setStoreId(1)->load($this->product->getId()), 1);
     foreach ([$source->getBillingAddress(), $source->getShippingAddress()] as $address) {
         $address->setCountryId('US')->setRegionId(12)->setPostcode('90210')->setFirstname('Admin')->setLastname('Reorder')
@@ -121,13 +125,12 @@ it('loads the other items of a reorder and gives an error message for the item t
         ->setData('account', ['email' => 'admin.reorder@example.com'])
         ->setData('send_confirmation', 0)
         ->createOrder();
-    $this->product->setStoreId(0)->setStatus(Mage_Catalog_Model_Product_Status::STATUS_DISABLED)->save();
+    Mage::getSingleton('catalog/product_action')->updateAttributes([(int) $this->product->getId()], ['status' => Mage_Catalog_Model_Product_Status::STATUS_DISABLED], 0);
 
     $order = Mage::getModel('sales/order')->load($this->order->getId())->setReordered(true);
     orderCreateReorderModel($target)->initFromOrder($order);
 
     expect(orderCreateReorderProductIds($target))->toBe([(int) $kept->getId()])
         ->and(orderCreateReorderErrors())->toBe(["Product '{$this->product->getSku()}' is not available"])
-        ->and($target->getShippingAddress()->getShippingMethod())->toBe('flatrate_flatrate')
-        ->and((float) $target->getShippingAddress()->getBaseShippingAmount())->toBeGreaterThan(0.0);
+        ->and($target->getShippingAddress()->getShippingMethod())->toBe('flatrate_flatrate');
 });

@@ -400,16 +400,22 @@ it('gives a service token the addresses of a customer of its websites only', fun
     $allowed = accountRulesSecurity(new ApiUser('service', ['ROLE_API_USER'], apiUserId: 1, permissions: $permissions, allowedStoreIds: [1]));
     $restricted = accountRulesSecurity(new ApiUser('service', ['ROLE_API_USER'], apiUserId: 1, permissions: $permissions, allowedStoreIds: [$otherStoreId]));
     $uri = '/api/rest/v2/customers/' . $customer->getId() . '/addresses';
+    // Without a bearer token, the API answers 401 for each refused request
+    $request = function (string $method, string $uri): \Symfony\Component\HttpFoundation\Request {
+        $request = AdminApiParity::jsonRequest($method, $uri);
+        $request->headers->set('Authorization', 'Bearer test');
+        return $request;
+    };
     $list = fn(Security $security): array => AdminApiParity::api(
-        AdminApiParity::jsonRequest('GET', $uri),
+        $request('GET', $uri),
         fn() => new AddressProvider($security)->provide(new GetCollection(name: 'get_customer_addresses'), ['customerId' => (int) $customer->getId()]),
     );
     $item = fn(Security $security): array => AdminApiParity::api(
-        AdminApiParity::jsonRequest('GET', '/api/rest/v2/addresses/' . $address->getId()),
+        $request('GET', '/api/rest/v2/addresses/' . $address->getId()),
         fn() => new AddressProvider($security)->provide(new Get(name: 'get_address'), ['id' => (int) $address->getId()]),
     );
     $delete = fn(Security $security): array => AdminApiParity::api(
-        AdminApiParity::jsonRequest('DELETE', '/api/rest/v2/addresses/' . $address->getId()),
+        $request('DELETE', '/api/rest/v2/addresses/' . $address->getId()),
         fn() => new AddressProcessor($security)->process(null, new \ApiPlatform\Metadata\Delete(name: 'delete_address'), ['id' => (int) $address->getId()]),
     );
 
