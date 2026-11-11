@@ -87,7 +87,8 @@ it('removes only unused CSV records after a complete scan and keeps retained byt
     try {
         $source = $dir . '/source.php';
         $csv = $dir . '/translations.csv';
-        file_put_contents($source, "<?php __('keep, key'); __('multiline key');");
+        $translationFunction = '__';
+        file_put_contents($source, "<?php {$translationFunction}('keep, key'); {$translationFunction}('multiline key');");
         $before = "\"remove, key\",\"Unused, text\"\r\n"
             . "\"keep, key\",\"Keep, text\"\r\n"
             . "# translator note\r\n"
@@ -141,7 +142,8 @@ it('reports a failed or partial CSV write instead of a removed count', function 
         $source = $dir . '/source.php';
         $csv = $dir . '/translations.csv';
         $before = "\"remove, key\",\"Unused text\"\r\n\"keep, key\",\"Used text\"\r\n";
-        file_put_contents($source, "<?php __('keep, key');");
+        $translationFunction = '__';
+        file_put_contents($source, "<?php {$translationFunction}('keep, key');");
         file_put_contents($csv, $before);
 
         $command = new class extends TranslationsUnused {
