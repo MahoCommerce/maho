@@ -512,7 +512,6 @@ The forms stop showing these fields to the customer groups of this set: %s. The 
 "The order of the field in the forms.","The order of the field in the forms."
 "The password cannot be empty.","The password cannot be empty."
 "The password must have at least %d characters. Leading or trailing spaces will be ignored.","The password must have at least %d characters. Leading or trailing spaces will be ignored."
-"The website of a customer cannot change.","The website of a customer cannot change."
 "There are no items in customer's shopping cart at the moment","There are no items in customer's shopping cart at the moment"
 "There are no items in customer's wishlist at the moment","There are no items in customer's wishlist at the moment"
 "The registration of new customers is not allowed.","The registration of new customers is not allowed."
@@ -526,6 +525,7 @@ The forms stop showing these fields to the customer groups of this set: %s. The 
 "The VAT ID entered (%s) is not a valid VAT ID.","The VAT ID entered (%s) is not a valid VAT ID."
 "The VAT ID entered (%s) is not a valid VAT ID. The customer would belong to Customer Group %s.","The VAT ID entered (%s) is not a valid VAT ID. The customer would belong to Customer Group %s."
 "The VAT ID is valid. The current Customer Group will be used.","The VAT ID is valid. The current Customer Group will be used."
+"The website of a customer cannot change.","The website of a customer cannot change."
 The Websites section can change it for one website.,The Websites section can change it for one website.
 "This account is not active.","This account is not active."
 "This account is not confirmed.","This account is not confirmed."
