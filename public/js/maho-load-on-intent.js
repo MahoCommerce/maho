@@ -76,6 +76,10 @@
                 }
             }
 
+            if (script.element.dataset.mahoType) {
+                newScript.type = script.element.dataset.mahoType;
+            }
+
             if (script.src) {
                 // External script
                 newScript.onload = newScript.onerror = () => {
