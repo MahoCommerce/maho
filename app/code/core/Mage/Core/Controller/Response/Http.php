@@ -851,18 +851,11 @@ class Mage_Core_Controller_Response_Http implements \Stringable
                         return '';
                     }
 
-                    $type = '';
-                    $attrs = preg_replace_callback(
-                        '/"[^"]*"(*SKIP)(*FAIL)|\'[^\']*\'(*SKIP)(*FAIL)|\stype\s*=\s*("[^"]*"|\'[^\']*\'|[^\s"\'>]+)/i',
-                        function ($typeMatch) use (&$type) {
-                            $type = trim($typeMatch[1], " \t\n\r\f\"'");
-                            return '';
-                        },
+                    $attrs = preg_replace(
+                        '/"[^"]*"(*SKIP)(*FAIL)|\'[^\']*\'(*SKIP)(*FAIL)|\stype\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s"\'>]+)/i',
+                        '',
                         $matches[1],
                     );
-                    if (strtolower($type) === 'module') {
-                        $attrs .= ' data-maho-type="module"';
-                    }
 
                     $scripts[] = '<script type="text/plain" data-maho-script="' . $scriptIndex++ . '"' . $attrs . '>' . $matches[2] . '</script>';
                 } else {

@@ -49,12 +49,8 @@
             if (script.src) {
                 // Create a link element to start preloading
                 const link = document.createElement("link");
-                if (script.element.dataset.mahoType) {
-                    link.rel = "modulepreload";
-                } else {
-                    link.rel = "preload";
-                    link.as = "script";
-                }
+                link.rel = "preload";
+                link.as = "script";
                 link.href = script.src;
                 document.head.appendChild(link);
             }
@@ -78,10 +74,6 @@
                 if (attr.name !== "type" && attr.name !== "data-maho-script") {
                     newScript.setAttribute(attr.name, attr.value);
                 }
-            }
-
-            if (script.element.dataset.mahoType) {
-                newScript.type = script.element.dataset.mahoType;
             }
 
             if (script.src) {
