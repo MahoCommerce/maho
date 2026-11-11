@@ -208,6 +208,8 @@ it('stores the selection attributes on each child line of a bundle', function ()
 });
 
 it('creates the purchased links of a downloadable line', function (): void {
+    // A guest cannot buy a downloadable product by default
+    Mage::app()->getStore(1)->setConfig(Mage_Downloadable_Model_Observer::XML_PATH_DISABLE_GUEST_CHECKOUT, '0');
     $product = orderDataDownloadable();
     $linkIds = array_keys($product->getTypeInstance(true)->getLinks($product));
 

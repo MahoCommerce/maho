@@ -83,7 +83,7 @@ it('reports the same problems of a segment on the admin page and in the API, and
     );
 
     expect($api['status'])->toBe(422)
-        ->and($api['fields'])->toBe(['name', 'website_ids', 'refresh_mode'])
+        ->and($api['fields'])->toBe(['name', 'websiteIds', 'refreshMode'])
         ->and($admin['errors'])->toBe($api['errors'])
         ->and($admin['success'])->toBe([]);
 });

@@ -232,7 +232,7 @@ it('asks the CAPTCHA on POST /customers and on the forgot password operation, an
         ->and($register(null, CaptchaStub::SOLVED))->toBe(200)
         ->and($register(AdminApiParity::adminSecurity(), null))->toBe(200)
         ->and($refused['status'])->toBe(422)
-        ->and($refused['fields'])->toBe(['captcha_token'])
+        ->and($refused['fields'])->toBe(['captchaToken'])
         ->and($forgot(null, ['email' => $email, 'captchaToken' => CaptchaStub::SOLVED])['status'])->toBe(200)
         ->and($forgot(AdminApiParity::adminSecurity(), ['email' => $email])['status'])->toBe(200);
 });

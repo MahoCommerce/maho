@@ -53,7 +53,8 @@ afterEach(function () {
 });
 
 it('refuses the guest order of a customer actor without an email', function () {
-    $this->quote->setCustomerEmail(null);
+    // A cart without an email takes the email of its billing address
+    $this->quote->setCustomerEmail(null)->getBillingAddress()->setEmail(null);
 
     expect(guestOrderCustomerDataFields($this->quote, Mage_Checkout_Model_Actor::Customer))->toBe(['customer_email']);
 });
