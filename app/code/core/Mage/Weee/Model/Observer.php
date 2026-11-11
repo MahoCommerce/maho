@@ -107,11 +107,25 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
             '0',
             'discount_percent.value',
         );
+        // Match runtime's (int) cast, clamp and stored-zero no-discount sentinel.
+        $remainingPercent = sprintf(
+            '(CASE WHEN (%1$s) < 0 THEN -FLOOR(-(%1$s)) ELSE FLOOR(%1$s) END)',
+            $checkDiscountField,
+        );
+        $clampedRemainingPercent = sprintf(
+            '(CASE WHEN %1$s < 0 THEN 0 WHEN %1$s > 100 THEN 100 ELSE %1$s END)',
+            $remainingPercent,
+        );
+        $discountFactor = sprintf(
+            '(CASE WHEN %1$s = 0 THEN 1.0 ELSE %2$s / 100.0 END)',
+            $remainingPercent,
+            $clampedRemainingPercent,
+        );
         foreach ($attributes as $attribute) {
             $fieldAlias = sprintf('weee_%s_table.value', $attribute);
             $checkAdditionalCalculation = $select->getAdapter()->getCheckSql("{$fieldAlias} IS NULL", '0', $fieldAlias);
             if (Mage::helper('weee')->isDiscounted()) {
-                $additionalCalculations[] = sprintf('+(%s*(1-(%s/100)))', $checkAdditionalCalculation, $checkDiscountField);
+                $additionalCalculations[] = sprintf('+(%s*%s)', $checkAdditionalCalculation, $discountFactor);
             } else {
                 $additionalCalculations[] = "+($checkAdditionalCalculation)";
             }
