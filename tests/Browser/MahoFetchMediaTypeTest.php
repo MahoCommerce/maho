@@ -12,7 +12,7 @@ use Tests\MahoBrowserTestCase;
 
 uses(MahoBrowserTestCase::class)->group('browser');
 
-// The native helper consumes real Fetch Response objects; only the transport is replaced.
+// The test replaces only window.fetch. mahoFetch still reads real Response objects.
 const MAHO_FETCH_MEDIA_TYPE_SCENARIO = <<<'JS'
 (async () => {
     const original = {fetch: window.fetch, showLoader: window.showLoader, hideLoader: window.hideLoader,
