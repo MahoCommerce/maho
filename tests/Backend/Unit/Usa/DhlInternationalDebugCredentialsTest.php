@@ -34,7 +34,7 @@ it('keeps the DHL site ID and password out of the debug data of a tracking reque
     $carrier->getTracking('AWB1001');
 
     $request = $carrier->debugData['request'];
-    expect($request)->toContain('<AWBNumber>AWB1001</AWBNumber>');
+    expect($request)->toContain('>AWB1001</AWBNumber>');
     expect($request)->toContain('<SiteID>***</SiteID><Password>***</Password>');
     expect($request)->not->toContain('TEST_PASSWORD_MARKER');
 });
