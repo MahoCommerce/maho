@@ -370,7 +370,12 @@ it('turns 2FA on and off with the current password and the limit of the password
     $customer = accountRulesCustomer();
 
     $secret = $this->auth->getSecondFactorSecret($customer);
-    $code = \OTPHP\TOTP::createFromSecret($secret)->now();
+    $totp = \OTPHP\TOTP::createFromSecret($secret);
+    // The code must stay valid through three password checks, so it must not come from the end of a period
+    if ($totp->expiresIn() < 5) {
+        sleep($totp->expiresIn() + 1);
+    }
+    $code = $totp->now();
 
     expect(fn() => $this->auth->setSecondFactor($customer, 'WrongPassword1!', true, $code))->toThrow(Mage_Core_Exception::class, 'Current password is incorrect.')
         ->and(fn() => $this->auth->setSecondFactor($customer, ACCOUNT_RULES_PASSWORD, true, '000000x'))->toThrow(Mage_Core_Exception::class)

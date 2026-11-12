@@ -808,8 +808,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $stockData = $stockItem ?? $product->getStockItem();
         if ($stockData) {
             $dto->stockQty = $this->stockQtyFor($stockData);
-            $dto->stockStatus = $stockData->getIsInStock() ? 'in_stock' : 'out_of_stock';
         }
+        $dto->stockStatus = \Mage::helper('cataloginventory')->isInStock($product, $stockData) ? 'in_stock' : 'out_of_stock';
 
         $dto->categoryIds = $categoryIds ?? ($product->getCategoryIds() ?: []);
 
