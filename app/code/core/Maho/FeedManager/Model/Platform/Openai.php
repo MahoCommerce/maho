@@ -265,18 +265,18 @@ class Maho_FeedManager_Model_Platform_Openai extends Maho_FeedManager_Model_Plat
         'description' => ['source_type' => 'attribute', 'source_value' => 'description'],
         'url' => ['source_type' => 'attribute', 'source_value' => 'url', 'use_parent' => 'always'],
         'image_url' => ['source_type' => 'attribute', 'source_value' => 'image'],
-        'price' => ['source_type' => 'attribute', 'source_value' => 'price'],
-        'sale_price' => ['source_type' => 'attribute', 'source_value' => 'special_price'],
-        'sale_price_start_date' => [
-            'source_type' => 'attribute',
-            'source_value' => 'special_from_date',
-            'transformers' => 'format_date:output_format=Y-m-d',
+        'price' => [
+            'source_type' => 'combined',
+            'source_value' => '["{{regular_price}}","{{final_price}}"]',
+            'transformers' => 'current_price:part=price',
         ],
-        'sale_price_end_date' => [
-            'source_type' => 'attribute',
-            'source_value' => 'special_to_date',
-            'transformers' => 'format_date:output_format=Y-m-d',
+        'sale_price' => [
+            'source_type' => 'combined',
+            'source_value' => '["{{regular_price}}","{{final_price}}"]',
+            'transformers' => 'current_price:part=sale_price',
         ],
+        'sale_price_start_date' => ['source_type' => 'static', 'source_value' => ''],
+        'sale_price_end_date' => ['source_type' => 'static', 'source_value' => ''],
         'brand' => ['source_type' => 'attribute', 'source_value' => 'manufacturer'],
         'gtin' => ['source_type' => 'static', 'source_value' => ''],
         'mpn' => ['source_type' => 'static', 'source_value' => ''],
