@@ -150,3 +150,24 @@ it('shows a swipe carousel with a counter on a phone', function (string $layout)
         ->assertPresent('.fullscreen-gallery');
     waitForScript($page, "document.querySelector('.fg-scroll').scrollLeft > 0");
 })->with(['below', 'grid']);
+
+it('keeps the image of the last swatch call when an earlier image loads late', function () {
+    $page = visit(MahoServer::baseUrl() . galleryProductUrl());
+    waitForPageLoad($page, '.product-image-gallery');
+
+    $code = file_get_contents(dirname(__DIR__, 2) . '/public/skin/frontend/base/default/js/configurableswatches/product-media.js');
+    $page->script('window.eval(' . json_encode($code) . ')');
+    waitForScript($page, "typeof ConfigurableMediaImages === 'object'");
+
+    $result = $page->script("(() => {
+        const late = document.createElement('img');
+        late.src = '/media/swatch-race-' + Date.now() + '.png';
+        const fast = document.createElement('img');
+        ConfigurableMediaImages.swapImage(late);
+        ConfigurableMediaImages.swapImage(fast);
+        late.dispatchEvent(new Event('load'));
+        return [fast.classList.contains('visible'), late.classList.contains('visible')].join();
+    })()");
+
+    expect($result)->toBe('true,false');
+});

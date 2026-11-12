@@ -8,7 +8,7 @@ var ConfigurableMediaImages = {
     productImages: {},
     imageObjects: {},
 
-    // Latest call wins: an image loading late must not replace a newer selection.
+    // Only the image of the last call shows. An earlier image that loads late stays hidden.
     swapGeneration: 0,
 
     arrayIntersect: function(a, b) {
