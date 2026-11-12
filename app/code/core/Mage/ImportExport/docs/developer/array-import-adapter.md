@@ -232,14 +232,14 @@ $data = [
 ];
 ```
 
-Column names come from the first row. Later named-column rows are matched by key,
-so their key order does not matter. A missing column becomes an empty string,
-without shifting another value into it. Keys added only in later named-column rows
-are ignored; include every column to import in the first row. A later empty row
-produces empty values for those columns and does not stop iteration before later rows.
+The first row sets the column names. The adapter matches each later associative row to these names by key,
+so the key order of a row does not matter. A missing key gives an empty string,
+and no other value moves into its column. The adapter ignores a key that only a later row has,
+so put every column to import in the first row. An empty later row gives an empty value
+for each column, and the import continues with the next row.
 
-The existing format detection checks the first key: a row starting with a numeric
-key uses positional values, even if it also contains named keys.
+The adapter reads the first key of a row to find its format. A row with a numeric first key
+uses positional values, also when it has named keys.
 
 ### Indexed Arrays
 First row contains column headers:
