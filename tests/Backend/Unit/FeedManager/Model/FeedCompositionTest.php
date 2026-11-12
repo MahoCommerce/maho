@@ -84,7 +84,7 @@ class FeedCompositionBatch extends Maho_FeedManager_Model_Generator_Batch
     }
 }
 
-describe('Feed generation with saved products and mappings', function () {
+describe('Feed generation with saved products and mappings', function (): void {
     beforeEach(function (): void {
         $this->root = sys_get_temp_dir() . '/maho_feeds_' . uniqid();
         mkdir($this->root . '/media', 0777, true);
@@ -171,7 +171,7 @@ describe('Feed generation with saved products and mappings', function () {
 
     it('rejects a page clamped to nonempty survivors without replacing the published feed', function (): void {
         $products = array_map($this->createProduct, ['A', 'B', 'C', 'D']);
-        $ids = array_map(fn($product) => (int) $product->getId(), $products);
+        $ids = array_map(fn(Mage_Catalog_Model_Product $product): int => (int) $product->getId(), $products);
         $feed = ($this->createFeed)('json', 'custom');
         foreach (['id' => 'sku', 'title' => 'name', 'price' => 'price'] as $field => $attribute) {
             Mage::getModel('feedmanager/attributeMapping')->setFeedId((int) $feed->getId())
