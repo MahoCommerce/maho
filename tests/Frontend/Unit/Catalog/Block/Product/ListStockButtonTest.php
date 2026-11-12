@@ -46,16 +46,16 @@ $render = static function (string $mode, bool $isSalable, string $template): str
     return $block->toHtml();
 };
 
-it('shows Out of stock for a composite product that the stock index marks as not salable', function (string $mode) use ($render) {
-    $html = $render($mode, false, 'catalog/product/list.phtml');
+it('shows Out of stock for a composite product that the stock index marks as not salable', function (string $mode, string $template) use ($render) {
+    $html = $render($mode, false, $template);
 
     expect($html)->toContain('out-of-stock')
         ->and($html)->not->toContain('View Details');
-})->with(['grid', 'list']);
+})->with(['grid', 'list'])->with(['catalog/product/list.phtml', 'email/catalog/product/list.phtml']);
 
-it('shows View Details for a composite product that is salable', function (string $mode) use ($render) {
-    $html = $render($mode, true, 'catalog/product/list.phtml');
+it('shows View Details for a composite product that is salable', function (string $mode, string $template) use ($render) {
+    $html = $render($mode, true, $template);
 
     expect($html)->toContain('View Details')
         ->and($html)->not->toContain('out-of-stock');
-})->with(['grid', 'list']);
+})->with(['grid', 'list'])->with(['catalog/product/list.phtml', 'email/catalog/product/list.phtml']);
