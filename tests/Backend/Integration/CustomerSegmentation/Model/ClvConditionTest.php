@@ -110,7 +110,9 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
                 expect($profit)->toBeLessThan(0.0);
             }
         });
+    });
 
+    describe('Lifetime Refunds Calculations', function () {
         test('calculates refunds correctly for customers with credit memos', function () {
             $segment = createClvConditionTestSegment('Has Refunds', [
                 'type' => 'customersegmentation/segment_condition_customer_clv',
@@ -581,12 +583,12 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
         }
     }
 
-    function calculateCustomerLifetimeSales(int|string $customerId, array $excludedStatuses = ['canceled', 'closed']): float
+    function calculateCustomerLifetimeSales(int|string $customerId, array $excludedStates = ['canceled', 'closed']): float
     {
         $customerId = (int) $customerId;
         $orders = Mage::getResourceModel('sales/order_collection')
             ->addFieldToFilter('customer_id', $customerId)
-            ->addFieldToFilter('status', ['nin' => $excludedStatuses]);
+            ->addFieldToFilter('state', ['nin' => $excludedStates]);
 
         $total = 0.0;
         foreach ($orders as $order) {
