@@ -219,7 +219,7 @@ var ConfigurableMediaImages = {
             wrapper.classList.add('loading');
 
             // Wait until image is loaded
-            imageObject.addEventListener('load', function () {
+            var reveal = function () {
                 if (generation !== ConfigurableMediaImages.listGeneration[productId]) {
                     return;
                 }
@@ -235,7 +235,9 @@ var ConfigurableMediaImages = {
 
                 // Add new image
                 originalImage.parentNode.insertBefore(imageObject, originalImage.nextSibling);
-            }, { once: true });
+            };
+            imageObject.addEventListener('load', reveal, { once: true });
+            imageObject.addEventListener('error', reveal, { once: true });
         }
     },
 
