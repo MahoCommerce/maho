@@ -67,9 +67,9 @@ A theme of your own takes the widths of its parent theme. A developer can change
 The first image of a slideshow is often the largest image on the page. A slideshow tells the browser
 to load that image first, and to load the other images only when they come near the screen.
 
-In the dialog of the slideshow, the option **Load the first image first** is on for a new
-slideshow. Clear it for a slideshow that is lower on the page, or for a second slideshow, so that it
-does not compete with the main image of the page. The editor writes `fetchpriority="high"` on the
+In the dialog of the slideshow, the option **Load the first image with high priority on the page**
+is on for a new slideshow. Clear it for a slideshow that is lower on the page, or for a second
+slideshow, so that it does not compete with the main image of the page. The editor writes `fetchpriority="high"` on the
 first image when the option is on, and `loading="lazy"` on each image after the first. A slide with
 alternative images gets the attributes on the `<img>` inside the `<picture>`.
 

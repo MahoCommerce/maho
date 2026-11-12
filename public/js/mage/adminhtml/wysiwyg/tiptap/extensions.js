@@ -785,7 +785,7 @@ export const MahoSlideshow = Node.create({
                         <ul class="slides-list"></ul>
                         <label class="slideshow-priority">
                             <input type="checkbox" class="slideshow-priority-input"${priority ? ' checked' : ''}>
-                            <span>${escapeHtml(translate('Load the first image first'), true)}</span>
+                            <span>${escapeHtml(translate('Load the first image with high priority on the page'), true)}</span>
                         </label>
                     </div>
                 `;
