@@ -71,15 +71,7 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_OauthController extends Mage_Adminh
         // Consume once the decision is in: an approval or a denial ends the request.
         $request = $this->server()->readPendingRequest($secret, consume: $decision !== '');
         if ($request === null) {
-            $this->renderConsentError(
-                new Maho_ApiPlatform_Model_Oauth_Exception(
-                    Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_REQUEST,
-                    (string) $this->__('This authorization request expired or is no longer valid. Start again from the application.'),
-                    redirectable: false,
-                ),
-                '',
-                '',
-            );
+            $this->renderExpiredRequestError();
             return;
         }
 
@@ -125,7 +117,12 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_OauthController extends Mage_Adminh
         );
 
         if ($consentId !== null) {
-            $this->server()->readPendingRequest($secret, consume: true);
+            // A parallel request with the same cookie can consume the request first.
+            if ($this->server()->readPendingRequest($secret, consume: true) === null) {
+                $this->renderExpiredRequestError();
+                return;
+            }
+
             $this->approve($request, $adminId);
             return;
         }
@@ -280,6 +277,19 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_OauthController extends Mage_Adminh
         }
 
         $this->redirectToClient($redirectUri, $query);
+    }
+
+    protected function renderExpiredRequestError(): void
+    {
+        $this->renderConsentError(
+            new Maho_ApiPlatform_Model_Oauth_Exception(
+                Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_REQUEST,
+                (string) $this->__('This authorization request expired or is no longer valid. Start again from the application.'),
+                redirectable: false,
+            ),
+            '',
+            '',
+        );
     }
 
     /**
