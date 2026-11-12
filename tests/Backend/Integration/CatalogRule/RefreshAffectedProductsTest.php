@@ -360,6 +360,27 @@ it('removes the FPT discount of a product after a row refresh no longer matches 
     expect(wapRuntimeFpt($productId))->toBe(10.0);
 });
 
+it('adds the FPT discount of a product after a row refresh starts to match it', function (): void {
+    $fixture = wapCreateProduct('WAP-ROW-ADD-' . uniqid(), $this->wapAttributeCode);
+    $product = $fixture['product'];
+    $productId = (int) $product->getId();
+    $GLOBALS['wap_cleanup']['categories'][] = (int) $fixture['category']->getId();
+    $GLOBALS['wap_cleanup']['products'][] = $productId;
+    $matchedSku = 'WAP-ROW-ADD-MATCH-' . uniqid();
+    $rule = wapCreateRule($product, matchedSku: $matchedSku);
+    $GLOBALS['wap_cleanup']['rules'][] = (int) $rule->getId();
+    wapApplyAllRules();
+    expect(wapDiscountRows($productId))->toBeEmpty();
+
+    Mage::app()->getArea('adminhtml')->load(Mage_Core_Model_App_Area::PART_EVENTS);
+    $product->setSku($matchedSku)->setStockData(null)->save();
+
+    $rows = wapDiscountRows($productId);
+    expect($rows)->toHaveCount(1);
+    expect((float) $rows[0]['value'])->toBe(90.0);
+    expect(wapRuntimeFpt($productId))->toBe(9.0);
+});
+
 it('rebuilds website and customer group rows without touching unrelated products', function (): void {
     $moving = wapCreateProduct('WAP-MOVE-' . uniqid(), $this->wapAttributeCode, [1, 2]);
     $unrelated = wapCreateProduct('WAP-MOVE-UNRELATED-' . uniqid(), $this->wapAttributeCode);
