@@ -119,3 +119,15 @@ it('preserves the recipient region in the UPS shipment payload', function (
     'directory region' => ['US', 'California', 'CA', 'CA'],
     'absent region' => ['GB', null, null, null],
 ]);
+
+it('cuts the UPS shipment description at 35 bytes without splitting a character', function (string $name, string $expected) {
+    $method = new ReflectionMethod(Mage_Usa_Model_Shipping_Carrier_Ups::class, 'generateShipmentDescription');
+    $description = $method->invoke(new Mage_Usa_Model_Shipping_Carrier_Ups(), [['name' => $name]]);
+
+    expect($description)->toBe($expected)
+        ->and(json_encode($description))->not->toBeFalse();
+})->with([
+    'ASCII over the limit' => [str_repeat('A', 36), str_repeat('A', 35)],
+    'accent crossing the limit' => [str_repeat('A', 34) . 'éB', str_repeat('A', 34)],
+    'accent fitting the limit' => [str_repeat('A', 33) . 'éB', str_repeat('A', 33) . 'é'],
+]);
