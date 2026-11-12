@@ -1197,7 +1197,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
             $itemsDesc[] = $item->getName();
         }
 
-        return substr(implode(' ', $itemsDesc), 0, 35);
+        return mb_strcut(implode(' ', $itemsDesc), 0, 35, 'UTF-8');
     }
 
     /**
