@@ -56,6 +56,23 @@ final class RequestInput
     }
 
     /**
+     * The rows of a body that is a JSON array of objects, for an endpoint that replaces a whole list. A JSON object
+     * is a 400, also an empty one: it decodes to the same PHP array as an empty list and would clear the list.
+     *
+     * @return list<self>
+     * @throws BadRequestHttpException when the body is not a JSON array
+     */
+    public static function decodeRows(?Request $request, string $label): array
+    {
+        $body = self::decode($request);
+        $content = $request === null ? '' : ltrim($request->getContent());
+        if (!array_is_list($body) || ($content !== '' && $content[0] !== '[')) {
+            throw new BadRequestHttpException("Request body must be an array of {$label}s");
+        }
+        return self::rowsOf($body);
+    }
+
+    /**
      * Return null when the body is not a JSON object or array. Use it when the caller reports that error
      * itself, or ignores it.
      *

@@ -47,7 +47,7 @@ describe('RequestInput', function (): void {
 
     it('reads booleans as InputBag does', function (mixed $value, bool $expected): void {
         expect(RequestInput::of(['v' => $value])->bool('v'))->toBe($expected);
-        expect((new InputBag(['v' => $value]))->getBoolean('v'))->toBe($expected);
+        expect(new InputBag(['v' => $value])->getBoolean('v'))->toBe($expected);
     })->with([
         [true, true], [false, false],
         [1, true], [0, false],
@@ -81,6 +81,19 @@ describe('RequestInput', function (): void {
         expect(RequestInput::decode(Request::create('/', 'PUT', [], [], [], [], '[1,2]')))->toBe([1, 2]);
         expect(RequestInput::decode(Request::create('/', 'PUT')))->toBe([]);
         expect(RequestInput::decode(null))->toBe([]);
+    });
+
+    it('reads the rows of a JSON array and answers 400 for a JSON object, also an empty one', function (): void {
+        $rows = RequestInput::decodeRows(Request::create('/', 'PUT', [], [], [], [], ' [{"a":1},{"a":2}]'), 'link');
+
+        expect($rows)->toHaveCount(2);
+        expect($rows[1]->int('a'))->toBe(2);
+        expect(RequestInput::decodeRows(Request::create('/', 'PUT', [], [], [], [], '[]'), 'link'))->toBe([]);
+        expect(RequestInput::decodeRows(Request::create('/', 'PUT'), 'link'))->toBe([]);
+        foreach (['{}', '{"a":{"b":1}}'] as $content) {
+            expect(fn() => RequestInput::decodeRows(Request::create('/', 'PUT', [], [], [], [], $content), 'link'))
+                ->toThrow(BadRequestHttpException::class, 'Request body must be an array of links');
+        }
     });
 
     it('answers 400 for a body that is not a JSON object or array, or null when asked to try', function (string $content): void {
