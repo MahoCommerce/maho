@@ -18,7 +18,7 @@ beforeEach(function (): void {
         $store = Mage::getModel('core/store')->setCode('invoice_weee_' . $scope)
             ->setName('Invoice WEEE ' . $scope)->setWebsiteId(1)->setGroupId(1)->setIsActive(true)->save();
         $this->scopeStores[$scope] = (int) $store->getId();
-        foreach (['tax/weee/enable' => 1, 'tax/sales_display/price' => 3] as $path => $value) {
+        foreach (['tax/weee/enable' => 1, 'tax/sales_display/price' => 3, 'tax/cart_display/price' => 3] as $path => $value) {
             Mage::getModel('core/config')->saveConfig($path, $value, 'stores', $store->getId());
         }
     }
