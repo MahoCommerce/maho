@@ -177,12 +177,13 @@ var ConfigurableMediaImages = {
         // Move target image to correct place, in case it's necessary
         imageGallery.appendChild(targetImage);
 
-        if (targetImage.complete) { // Image already loaded -- swap immediately
+        if (targetImage.complete && targetImage.naturalWidth > 0) { // Image already loaded -- swap immediately
             revealImage();
         } else { // Need to wait for image to load
             // Add spinner
             imageGallery.classList.add('loading');
             targetImage.addEventListener('load', revealImage, { once: true });
+            targetImage.addEventListener('error', revealImage, { once: true });
         }
     },
 
