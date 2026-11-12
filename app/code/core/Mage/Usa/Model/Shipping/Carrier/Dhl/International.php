@@ -779,7 +779,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
                 $this->_setQuotesRequestXmlDate($requestXml, $date);
 
                 $request = $requestXml->asXML();
-                $debugPoint['request'] = $request;
+                $debugPoint['request'] = $this->_maskCredentials($request);
                 $responseBody = $this->_getCachedQuotes($request);
 
                 if ($debugPoint['from_cache'] = ($responseBody === null)) {
@@ -806,6 +806,14 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
             $this->_errors[$e->getCode()] = $e->getMessage();
         }
         return $this->_parseResponse($responseBody);
+    }
+
+    /**
+     * Put *** in place of the site ID and the password in a request, for the debug log.
+     */
+    protected function _maskCredentials(string $request): string
+    {
+        return preg_replace('#<(SiteID|Password)>[^<]*</\1>#', '<$1>***</$1>', $request);
     }
 
     /**
@@ -1373,7 +1381,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
 
         $responseBody = $this->_getCachedQuotes($request);
         if ($responseBody === null) {
-            $debugData = ['request' => $request];
+            $debugData = ['request' => $this->_maskCredentials($request)];
             try {
                 $client = \Maho\Http\Client::create([
                     'max_redirects' => 0,
@@ -1574,7 +1582,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
 
         $responseBody = $this->_getCachedQuotes($request);
         if ($responseBody === null) {
-            $debugData = ['request' => $request];
+            $debugData = ['request' => $this->_maskCredentials($request)];
             try {
                 $client = \Maho\Http\Client::create([
                     'max_redirects' => 0,
