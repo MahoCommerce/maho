@@ -67,6 +67,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
         // Base query for sales data
         $salesTable = $resource->getTableName('sales/order');
         $creditmemoTable = $resource->getTableName('sales/creditmemo');
+        $invoiceTable = $resource->getTableName('sales/invoice');
 
         switch ($attribute) {
             case 'lifetime_sales':
@@ -103,42 +104,31 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
                 break;
 
             case 'lifetime_profit':
-                $salesSelect = $adapter->select()
-                    ->from(['o' => $salesTable], ['customer_id', 'amount' => 'SUM(o.base_grand_total)'])
+                // Money kept: paid invoices minus refunded credit memos, so an unpaid or canceled part of an order adds nothing
+                $paidSelect = $adapter->select()
+                    ->from(['i' => $invoiceTable], ['customer_id' => 'o.customer_id', 'amount' => 'SUM(i.base_grand_total)'])
+                    ->join(['o' => $salesTable], 'i.order_id = o.entity_id', [])
                     ->where('o.customer_id IS NOT NULL')
-                    // The refunds query below subtracts the refunds of a closed order. Keep the sale of a closed order here.
-                    ->where('o.state NOT IN (?)', ['canceled'])
+                    ->where('i.state = ?', Mage_Sales_Model_Order_Invoice::STATE_PAID)
                     ->group('o.customer_id');
 
-                $refundsSelect = $adapter->select()
-                    ->from(['c' => $creditmemoTable], ['customer_id' => 'o.customer_id', 'amount' => 'SUM(c.base_grand_total)'])
-                    ->join(['o' => $salesTable], 'c.order_id = o.entity_id', [])
-                    ->where('o.customer_id IS NOT NULL')
-                    ->where('o.state NOT IN (?)', ['canceled'])
-                    ->group('o.customer_id');
+                $refundsSelect = $this->buildRefundsSelect($adapter, $creditmemoTable, $salesTable);
 
                 if ($website) {
                     $storeIds = $this->getCurrencyStoreIds($website);
-                    $salesSelect->where('o.store_id IN (?)', $storeIds);
+                    $paidSelect->where('o.store_id IN (?)', $storeIds);
                     $refundsSelect->where('o.store_id IN (?)', $storeIds);
                 }
 
                 $select = $adapter->select()
-                    ->from(['sales' => new Maho\Db\Expr("({$salesSelect})")], ['customer_id'])
-                    ->joinLeft(
-                        ['refunds' => new Maho\Db\Expr("({$refundsSelect})")],
-                        'sales.customer_id = refunds.customer_id',
-                        [],
-                    )
-                    ->columns(['total' => new Maho\Db\Expr('COALESCE(sales.amount, 0) - COALESCE(refunds.amount, 0)')]);
+                    ->from(['c' => $resource->getTableName('customer/entity')], ['customer_id' => 'c.entity_id'])
+                    ->joinLeft(['paid' => new Maho\Db\Expr("({$paidSelect})")], 'paid.customer_id = c.entity_id', [])
+                    ->joinLeft(['refunds' => new Maho\Db\Expr("({$refundsSelect})")], 'refunds.customer_id = c.entity_id', [])
+                    ->columns(['total' => new Maho\Db\Expr('COALESCE(paid.amount, 0) - COALESCE(refunds.amount, 0)')]);
                 break;
 
             case 'lifetime_refunds':
-                $select = $adapter->select()
-                    ->from(['c' => $creditmemoTable], ['customer_id' => 'o.customer_id', 'total' => 'SUM(c.base_grand_total)'])
-                    ->join(['o' => $salesTable], 'c.order_id = o.entity_id', [])
-                    ->where('o.customer_id IS NOT NULL')
-                    ->group('o.customer_id');
+                $select = $this->buildRefundsSelect($adapter, $creditmemoTable, $salesTable, 'total');
                 if ($website) {
                     $select->where('o.store_id IN (?)', $this->getCurrencyStoreIds($website));
                 }
@@ -157,6 +147,19 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
             return $adapter->quoteInto("{$fieldName} IN (?)", new Maho\Db\Expr((string) $clvSelect));
         }
         return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Maho\Db\Expr((string) $clvSelect));
+    }
+
+    /**
+     * Sum the refunded credit memos of each customer. An open or a canceled credit memo returned no money.
+     */
+    protected function buildRefundsSelect(\Maho\Db\Adapter\AdapterInterface $adapter, string $creditmemoTable, string $salesTable, string $amountColumn = 'amount'): \Maho\Db\Select
+    {
+        return $adapter->select()
+            ->from(['cm' => $creditmemoTable], ['customer_id' => 'o.customer_id', $amountColumn => 'SUM(cm.base_grand_total)'])
+            ->join(['o' => $salesTable], 'cm.order_id = o.entity_id', [])
+            ->where('o.customer_id IS NOT NULL')
+            ->where('cm.state = ?', Mage_Sales_Model_Order_Creditmemo::STATE_REFUNDED)
+            ->group('o.customer_id');
     }
 
     #[\Override]

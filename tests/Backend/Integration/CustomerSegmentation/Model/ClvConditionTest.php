@@ -27,10 +27,9 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
             expect($matchedCustomers)->toBeArray();
 
             foreach ($matchedCustomers as $customerId) {
-                // Calculate expected profit (sales - refunds)
-                $totalSales = calculateCustomerLifetimeSales($customerId, ['canceled']);
-                $totalRefunds = calculateCustomerLifetimeRefunds($customerId, ['canceled']);
-                $expectedProfit = $totalSales - $totalRefunds;
+                $totalPaid = calculateCustomerLifetimePaid($customerId);
+                $totalRefunds = calculateCustomerLifetimeRefunds($customerId);
+                $expectedProfit = $totalPaid - $totalRefunds;
 
                 expect($expectedProfit)->toBeGreaterThanOrEqual(200.0);
             }
@@ -48,9 +47,9 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
             expect($matchedCustomers)->toBeArray();
 
             foreach ($matchedCustomers as $customerId) {
-                $totalSales = calculateCustomerLifetimeSales($customerId, ['canceled']);
-                $totalRefunds = calculateCustomerLifetimeRefunds($customerId, ['canceled']);
-                $expectedProfit = $totalSales - $totalRefunds;
+                $totalPaid = calculateCustomerLifetimePaid($customerId);
+                $totalRefunds = calculateCustomerLifetimeRefunds($customerId);
+                $expectedProfit = $totalPaid - $totalRefunds;
 
                 expect($expectedProfit)->toBeGreaterThanOrEqual(100.0);
 
@@ -83,9 +82,9 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
             expect($matchedCustomers)->toBeArray();
 
             foreach ($matchedCustomers as $customerId) {
-                $totalSales = calculateCustomerLifetimeSales($customerId, ['canceled']);
-                $totalRefunds = calculateCustomerLifetimeRefunds($customerId, ['canceled']);
-                $profit = $totalSales - $totalRefunds;
+                $totalPaid = calculateCustomerLifetimePaid($customerId);
+                $totalRefunds = calculateCustomerLifetimeRefunds($customerId);
+                $profit = $totalPaid - $totalRefunds;
 
                 expect(abs($profit))->toBeLessThan(0.01); // Allow for floating point precision
             }
@@ -103,9 +102,9 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
             expect($matchedCustomers)->toBeArray();
 
             foreach ($matchedCustomers as $customerId) {
-                $totalSales = calculateCustomerLifetimeSales($customerId, ['canceled']);
-                $totalRefunds = calculateCustomerLifetimeRefunds($customerId, ['canceled']);
-                $profit = $totalSales - $totalRefunds;
+                $totalPaid = calculateCustomerLifetimePaid($customerId);
+                $totalRefunds = calculateCustomerLifetimeRefunds($customerId);
+                $profit = $totalPaid - $totalRefunds;
 
                 expect($profit)->toBeLessThan(0.0);
             }
@@ -310,7 +309,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
 
                 if ($orderCount === 0) {
                     $customersWithNoOrders++;
-                    $profit = calculateCustomerLifetimeSales($customerId, ['canceled']) - calculateCustomerLifetimeRefunds($customerId, ['canceled']);
+                    $profit = calculateCustomerLifetimePaid($customerId) - calculateCustomerLifetimeRefunds($customerId);
                     expect($profit)->toBe(0.0);
                 }
             }
@@ -331,14 +330,11 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
             $matchedCustomers = $segment->getMatchingCustomerIds();
 
             foreach ($matchedCustomers as $customerId) {
-                $refunds = calculateCustomerLifetimeRefunds($customerId, ['canceled']);
-                $sales = calculateCustomerLifetimeSales($customerId, ['canceled']);
+                $refunds = calculateCustomerLifetimeRefunds($customerId);
+                $paid = calculateCustomerLifetimePaid($customerId);
 
-                if ($refunds === 0.0 && $sales > 0.0) {
-                    // For customers with sales but no refunds, profit should equal sales
-                    $profit = $sales - $refunds;
-                    expect($profit)->toBe($sales);
-                    expect($profit)->toBeGreaterThan(0.0);
+                if ($refunds === 0.0) {
+                    expect($paid)->toBeGreaterThan(0.0);
                 }
             }
         });
@@ -354,11 +350,9 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
             $matchedCustomers = $segment->getMatchingCustomerIds();
 
             foreach ($matchedCustomers as $customerId) {
-                $sales = calculateCustomerLifetimeSales($customerId, ['canceled']);
-                $refunds = calculateCustomerLifetimeRefunds($customerId, ['canceled']);
-                $profit = $sales - $refunds;
-
-                expect($profit)->toBeGreaterThanOrEqual(99.99);
+                $paid = calculateCustomerLifetimePaid($customerId);
+                $refunds = calculateCustomerLifetimeRefunds($customerId);
+                expect($paid - $refunds)->toBeGreaterThanOrEqual(99.99);
             }
         });
     });
@@ -566,6 +560,16 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
 
                 $order->save();
 
+                if ($orderData['status'] !== 'canceled') {
+                    Mage::getModel('sales/order_invoice')
+                        ->setOrderId($order->getId())
+                        ->setStoreId(1)
+                        ->setGrandTotal($orderData['total'])
+                        ->setBaseGrandTotal($orderData['total'])
+                        ->setState(Mage_Sales_Model_Order_Invoice::STATE_PAID)
+                        ->save();
+                }
+
                 // Create credit memos for this order
                 foreach ($orderData['refunds'] as $refundAmount) {
                     $creditmemo = Mage::getModel('sales/order_creditmemo');
@@ -583,42 +587,57 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
         }
     }
 
-    function calculateCustomerLifetimeSales(int|string $customerId, array $excludedStates = ['canceled', 'closed']): float
+    function calculateCustomerLifetimeSales(int|string $customerId): float
     {
-        $customerId = (int) $customerId;
         $orders = Mage::getResourceModel('sales/order_collection')
-            ->addFieldToFilter('customer_id', $customerId)
-            ->addFieldToFilter('state', ['nin' => $excludedStates]);
+            ->addFieldToFilter('customer_id', (int) $customerId)
+            ->addFieldToFilter('state', ['nin' => ['canceled', 'closed']]);
 
         $total = 0.0;
         foreach ($orders as $order) {
-            $total += (float) $order->getGrandTotal();
+            $total += (float) $order->getBaseGrandTotal();
         }
 
         return $total;
     }
 
-    function calculateCustomerLifetimeRefunds(int|string $customerId, array $excludedStates = []): float
+    function calculateCustomerLifetimePaid(int|string $customerId): float
     {
-        // For test purposes, we'll calculate based on the actual creditmemos created
-        $customerId = (int) $customerId;
-
-        // Find orders for this customer
-        $orders = Mage::getResourceModel('sales/order_collection')
-            ->addFieldToFilter('customer_id', $customerId);
-        if ($excludedStates !== []) {
-            $orders->addFieldToFilter('state', ['nin' => $excludedStates]);
+        $orderIds = Mage::getResourceModel('sales/order_collection')
+            ->addFieldToFilter('customer_id', (int) $customerId)
+            ->getAllIds();
+        if ($orderIds === []) {
+            return 0.0;
         }
 
-        $total = 0.0;
-        foreach ($orders as $order) {
-            // Get creditmemos for this order
-            $creditmemos = Mage::getResourceModel('sales/order_creditmemo_collection')
-                ->addFieldToFilter('order_id', $order->getId());
+        $invoices = Mage::getResourceModel('sales/order_invoice_collection')
+            ->addFieldToFilter('order_id', ['in' => $orderIds])
+            ->addFieldToFilter('state', Mage_Sales_Model_Order_Invoice::STATE_PAID);
 
-            foreach ($creditmemos as $creditmemo) {
-                $total += (float) $creditmemo->getGrandTotal();
-            }
+        $total = 0.0;
+        foreach ($invoices as $invoice) {
+            $total += (float) $invoice->getBaseGrandTotal();
+        }
+
+        return $total;
+    }
+
+    function calculateCustomerLifetimeRefunds(int|string $customerId): float
+    {
+        $orderIds = Mage::getResourceModel('sales/order_collection')
+            ->addFieldToFilter('customer_id', (int) $customerId)
+            ->getAllIds();
+        if ($orderIds === []) {
+            return 0.0;
+        }
+
+        $creditmemos = Mage::getResourceModel('sales/order_creditmemo_collection')
+            ->addFieldToFilter('order_id', ['in' => $orderIds])
+            ->addFieldToFilter('state', Mage_Sales_Model_Order_Creditmemo::STATE_REFUNDED);
+
+        $total = 0.0;
+        foreach ($creditmemos as $creditmemo) {
+            $total += (float) $creditmemo->getBaseGrandTotal();
         }
 
         return $total;
