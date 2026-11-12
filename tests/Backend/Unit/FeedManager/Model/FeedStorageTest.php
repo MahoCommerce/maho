@@ -116,37 +116,19 @@ class FeedStoragePauseFailingBatch extends FeedStorageEmptyPageBatch
 
 class FeedStorageOpenFailingGenerator extends Maho_FeedManager_Model_Generator
 {
-    public static int $closeCalls = 0;
-
     #[\Override]
     protected function _openOutput(string $filePath): void
     {
         throw new RuntimeException('Injected open failure');
     }
-
-    #[\Override]
-    protected function _closeOutput(): void
-    {
-        self::$closeCalls++;
-        parent::_closeOutput();
-    }
 }
 
 class FeedStorageResumeFailingBatch extends Maho_FeedManager_Model_Generator_Batch
 {
-    public static int $pauseCalls = 0;
-
     #[\Override]
     protected function _resumeOutput(string $filePath, array $writerState = []): void
     {
         throw new RuntimeException('Injected resume failure');
-    }
-
-    #[\Override]
-    protected function _pauseOutput(): void
-    {
-        self::$pauseCalls++;
-        parent::_pauseOutput();
     }
 }
 
@@ -222,8 +204,6 @@ describe('FeedManager on the media and feeds mounts', function () {
         FeedStorageEmptyAfterCountGenerator::$collectionCalls = 0;
         FeedStorageCloseFailingGenerator::$closeCalls = 0;
         FeedStoragePauseFailingBatch::$pauseCalls = 0;
-        FeedStorageOpenFailingGenerator::$closeCalls = 0;
-        FeedStorageResumeFailingBatch::$pauseCalls = 0;
         $this->feedResource->rollBack();
         foreach ($this->previousConfig as $path => $value) {
             Mage::app()->getStore()->setConfig($path, $value);
@@ -517,28 +497,26 @@ describe('FeedManager on the media and feeds mounts', function () {
             ->and($result['errors'][1])->toContain('visited no products');
     });
 
-    it('does not close output when opening fails before it returns', function (): void {
+    it('reports only the open failure when opening fails before it returns', function (): void {
         $feed = ($this->createFeed)('json');
-        FeedStorageOpenFailingGenerator::$closeCalls = 0;
 
         $log = new FeedStorageOpenFailingGenerator()->generate($feed);
 
         expect($log->getStatus())->toBe(Maho_FeedManager_Model_Log::STATUS_FAILED)
-            ->and(FeedStorageOpenFailingGenerator::$closeCalls)->toBe(0)
+            ->and($log->getErrorMessagesArray())->toHaveCount(1)
             ->and($log->getErrorMessagesArray()[0])->toContain('Injected open failure');
     });
 
-    it('does not pause output when resuming fails before it returns', function (): void {
+    it('reports only the resume failure when resuming fails before it returns', function (): void {
         $feed = ($this->createFeed)('json');
         $batch = new FeedStorageResumeFailingBatch();
         $job = $batch->initBatch($feed);
-        FeedStorageResumeFailingBatch::$pauseCalls = 0;
 
         $result = $batch->processBatch($job['job_id']);
 
         expect($result['status'])->toBe(Maho_FeedManager_Model_Generator_Batch::STATUS_FAILED)
             ->and($result['message'])->toContain('Injected resume failure')
-            ->and(FeedStorageResumeFailingBatch::$pauseCalls)->toBe(0);
+            ->and($result['errors'])->toHaveCount(1);
     });
 
     it('removes the parts and the state when a job is cancelled', function (): void {

@@ -97,6 +97,8 @@ final class GooglePricingTest extends TestCase
             'nonfinite regular' => ['["NaN","50"]', 'price', '50.00 USD'],
             'malformed pair' => ['not-json', 'price', ''],
             'wrong shape' => ['["100","50","25"]', 'price', ''],
+            'final above regular price' => ['["100","120"]', 'price', '120.00 USD'],
+            'final above regular sale' => ['["100","120"]', 'sale_price', ''],
             'invalid selector' => ['["100","50"]', 'other', ''],
         ];
     }

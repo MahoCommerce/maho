@@ -119,16 +119,14 @@ describe('Feed generation with saved products and mappings', function () {
                 ->save();
             return $product;
         };
-        $this->createFeed = function (string $format, string $platform): Maho_FeedManager_Model_Feed {
-            return Mage::getModel('feedmanager/feed')->setData([
-                'name' => 'Synthetic feed composition', 'platform' => $platform, 'store_id' => 1,
-                'is_enabled' => 0, 'filename' => 'feed-composition-' . uniqid(), 'file_format' => $format,
-                'configurable_mode' => 'simple_only', 'include_product_types' => 'virtual',
-                'exclude_disabled' => 1, 'exclude_out_of_stock' => 0, 'auto_upload' => 0,
-                'notification_mode' => 'none', 'tax_mode' => 'excl', 'price_currency' => 'USD',
-                'csv_include_header' => 1, 'csv_delimiter' => ',', 'csv_enclosure' => '"',
-            ])->save();
-        };
+        $this->createFeed = (fn(string $format, string $platform): Maho_FeedManager_Model_Feed => Mage::getModel('feedmanager/feed')->setData([
+            'name' => 'Synthetic feed composition', 'platform' => $platform, 'store_id' => 1,
+            'is_enabled' => 0, 'filename' => 'feed-composition-' . uniqid(), 'file_format' => $format,
+            'configurable_mode' => 'simple_only', 'include_product_types' => 'virtual',
+            'exclude_disabled' => 1, 'exclude_out_of_stock' => 0, 'auto_upload' => 0,
+            'notification_mode' => 'none', 'tax_mode' => 'excl', 'price_currency' => 'USD',
+            'csv_include_header' => 1, 'csv_delimiter' => ',', 'csv_enclosure' => '"',
+        ])->save());
         $this->generateBoth = function (Maho_FeedManager_Model_Feed $feed, int $productId): array {
             $generator = new FeedCompositionGenerator();
             $generator->productIds = [$productId];

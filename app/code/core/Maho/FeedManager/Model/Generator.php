@@ -57,19 +57,9 @@ class Maho_FeedManager_Model_Generator
             return $existingLog;
         }
 
-        $outputOpen = false;
-        $closeOutput = function () use (&$outputOpen): void {
-            if (!$outputOpen) {
-                return;
-            }
-            $outputOpen = false;
-            $this->_closeOutput();
-        };
-
         try {
             $this->_tempPath = Mage::helper('feedmanager')->createTempFile();
             $this->_openOutput($this->_tempPath);
-            $outputOpen = true;
             $this->_checkMeasureUnits();
 
             $totalProducts = $this->_getProductCollection()->getSize();
@@ -84,12 +74,12 @@ class Maho_FeedManager_Model_Generator
             while ($this->_processedCount < $totalProducts) {
                 $processedBefore = $this->_processedCount;
                 $this->_processOneBatch($page++);
-                if ($this->_processedCount <= $processedBefore && $this->_processedCount < $totalProducts) {
+                if ($this->_processedCount === $processedBefore) {
                     throw new RuntimeException('Generation stopped because a batch visited no products before the initial total was reached');
                 }
             }
 
-            $closeOutput();
+            $this->_closeOutput();
 
             $this->_tempPath = $this->_validateAndPublish($this->_tempPath, $this->_errors);
 
@@ -109,7 +99,7 @@ class Maho_FeedManager_Model_Generator
         } catch (\Throwable $e) {
             $this->_errors[] = $e->getMessage();
             try {
-                $closeOutput();
+                $this->_closeOutput();
             } catch (\Throwable $closeError) {
                 $this->_errors[] = "Failed to close generation output: {$closeError->getMessage()}";
             }

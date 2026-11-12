@@ -166,7 +166,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
                 break;
 
             case 'writer':
-                $this->_writer->pause();
+                $this->_writer?->pause();
                 break;
         }
     }
@@ -190,7 +190,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
                 break;
 
             case 'writer':
-                $this->_writer->close();
+                $this->_writer?->close();
                 break;
         }
     }
