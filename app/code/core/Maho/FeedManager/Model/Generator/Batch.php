@@ -161,6 +161,7 @@ class Maho_FeedManager_Model_Generator_Batch
         }
 
         $tempPath = null;
+
         try {
             // Load state
             if (!$this->_loadState()) {
@@ -202,7 +203,11 @@ class Maho_FeedManager_Model_Generator_Batch
             $this->_state['current_page']++;
 
             // Process this batch using the shared engine
+            $processedBefore = $this->_processedCount;
             $processedInBatch = $this->_processOneBatch($this->_state['current_page']);
+            if ($this->_processedCount <= $processedBefore && $this->_processedCount < $this->_state['total_products']) {
+                throw new RuntimeException('Batch visited no products before the initial total was reached');
+            }
 
             // Pause output (releases file handle) and keep the rows of this batch as the part of this page
             $this->_pauseOutput();
@@ -237,6 +242,13 @@ class Maho_FeedManager_Model_Generator_Batch
             ];
         } catch (\Throwable $e) {
             if ($this->_errors !== []) {
+                $this->_state['errors'] = $this->_errors;
+                $this->_state['error_count'] = $this->_errorCount;
+            }
+            try {
+                $this->_pauseOutput();
+            } catch (\Throwable $pauseError) {
+                $this->_errors[] = "Failed to pause batch output: {$pauseError->getMessage()}";
                 $this->_state['errors'] = $this->_errors;
                 $this->_state['error_count'] = $this->_errorCount;
             }
@@ -307,6 +319,10 @@ class Maho_FeedManager_Model_Generator_Batch
 
             if (!$this->_feed->getId()) {
                 return $this->_failWithError('Feed no longer exists');
+            }
+
+            if ($this->_state['processed_count'] < $this->_state['total_products']) {
+                return $this->_failWithError('Cannot finalize generation before the initial product total is visited');
             }
 
             // Initialize platform (needed for XML writer close)

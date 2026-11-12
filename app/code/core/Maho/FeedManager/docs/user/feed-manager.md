@@ -421,7 +421,9 @@ Chain transformers using the pipe character: `transformer1|transformer2:option=v
     strip_tags|truncate:max_length=5000,suffix=...
     ```
 
-    This removes HTML tags and limits to 5000 characters with "..." suffix.
+    This removes HTML tags and limits the result to 5000 characters, including the "..." suffix.
+
+    If the suffix is longer than the maximum length, it is omitted and the text is truncated to the limit. A zero or negative maximum length produces an empty string.
 
 !!! example "Format Price for Google Shopping"
     Format a price with 2 decimals and currency suffix:
@@ -507,6 +509,31 @@ Select a preset to quickly configure decimal and thousands separators, or choose
 | Price Decimal Point | Character for decimal point (`.` or `,`) | `.` |
 | Price Thousands Separator | Character for thousands grouping (or empty for none) | (empty) |
 | Append Currency to Prices | Add currency code suffix to prices (e.g., "295.00 AUD") | Yes |
+
+### Default Prices
+
+The default price fields of every platform export the current price, which is the price that the store charges now. A sale is a current price below the regular price. The current price includes an active special price and an active catalog price rule. Expired or future special-price attributes do not activate a sale on their own.
+
+| Platform | During a sale | Without a sale |
+|---|---|---|
+| Google, Google Local Inventory, Facebook, Bing, Pinterest, OpenAI | `price` is the regular price, `sale_price` is the current price | `price` is the current price, `sale_price` is empty |
+| Trovaprezzi | `Price` is the current price, `OriginalPrice` is the regular price | `Price` is the current price, `OriginalPrice` is empty |
+| Idealo | `price` is the current price, `formerPrice` is the regular price | `price` is the current price, `formerPrice` is empty |
+
+These defaults use the **Current Price** transformer with the combined source `["{{regular_price}}","{{final_price}}"]`. Select the output field in **Price Field**:
+
+| Price Field | During a sale | Without a sale |
+|---|---|---|
+| Price | Regular price | Current price |
+| Sale Price | Current price | Empty |
+| Current Price | Current price | Current price |
+| Original Price | Regular price | Empty |
+
+The transformer compares the amounts at the two decimal places it exports. It uses a decimal point and no thousands separator, including when the feed's regional settings use another number format. **Currency Code** adds the feed currency code, as in `25.00 USD`. Trovaprezzi and Idealo omit it. Missing or invalid current amounts leave the field empty.
+
+The default sale dates are empty: `sale_price_effective_date`, and `sale_price_start_date` and `sale_price_end_date` for OpenAI. Regenerate the feed when prices or promotions change, including at the start and end of a promotion. A generated file keeps its prices until it is replaced.
+
+Existing saved columns, XML structures and custom mappings keep their configuration. To adopt the new defaults, review the price and sale date mappings. Loading a preset replaces the whole set of columns or XML structure, so preserve other custom mappings before doing so.
 
 !!! example "Google Shopping (Australia)"
     Google requires prices in the format `XX.XX CUR`:
