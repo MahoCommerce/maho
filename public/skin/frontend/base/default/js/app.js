@@ -751,6 +751,9 @@ var ProductMediaManager = {
         const current = gallery?.querySelector('.gallery-image.visible');
         if (!gallery || target === current) return;
 
+        // Cancel a swatch image that is still loading, so it cannot replace this image
+        if (window.ConfigurableMediaImages) ConfigurableMediaImages.swapGeneration++;
+
         target.removeAttribute('loading');
 
         const doSwap = () => {
