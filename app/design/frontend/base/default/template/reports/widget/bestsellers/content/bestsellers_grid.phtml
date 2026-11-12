@@ -64,7 +64,7 @@
                                                 'post')">
                                     <?= $this->__('Add to Cart') ?>
                                 </button>
-                            <?php elseif ($_product->getStockItem() && $_product->getStockItem()->getIsInStock()): ?>
+                            <?php elseif ($_product->isSaleable()): ?>
                                 <a title="<?= $this->quoteEscape($this->__('View Details')) ?>" class="button" href="<?= $_product->getProductUrl() ?>"><?= $this->__('View Details') ?></a>
                             <?php else: ?>
                                 <p class="availability out-of-stock"><span><?= $this->__('Out of stock') ?></span></p>
