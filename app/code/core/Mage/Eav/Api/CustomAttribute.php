@@ -96,6 +96,13 @@ class CustomAttribute extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'The attribute sets that hold the attribute, with the group in each set. A record accepts the attribute only when its set holds it. For customers and addresses, the customer group picks the set')]
     public array $attributeSets = [];
 
+    /** @var array<int|string, mixed>|null */
+    #[ApiProperty(description: 'The condition that shows the field in a form, or null when the form always shows it. '
+        . 'It maps a field code to its wanted values, for example {"country_id": ["IT"]}. An entry with an operator holds a group: '
+        . '{"operator": "OR", "condition": {...}}. The operator is AND (each entry), OR (any entry), NOT (no entry) or XOR (exactly one entry), '
+        . 'and the entries of one level are joined with AND. A field that the condition hides is not required, and a save does not keep its value')]
+    public ?array $dependsOn = null;
+
     /** @var list<string>|null */
     #[ApiProperty(description: 'Customer and address attributes only: the forms that show the attribute. The API checks a customer against adminhtml_customer and an address against adminhtml_customer_address')]
     public ?array $usedInForms = null;

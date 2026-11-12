@@ -14,10 +14,10 @@
  */
 class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml_Block_Abstract
 {
-    public const MODE_NOT = 'NOT';
-    public const MODE_AND = 'AND';
-    public const MODE_OR  = 'OR';
-    public const MODE_XOR = 'XOR';
+    public const MODE_NOT = \Maho\Data\Form\Condition::MODE_NOT;
+    public const MODE_AND = \Maho\Data\Form\Condition::MODE_AND;
+    public const MODE_OR  = \Maho\Data\Form\Condition::MODE_OR;
+    public const MODE_XOR = \Maho\Data\Form\Condition::MODE_XOR;
 
     /**
      * Optional field alias to ID map
@@ -242,8 +242,10 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
 
     /**
      * Add fallback values for fields not present in the form
+     *
+     * @param string|list<string> $value
      */
-    public function addFieldValue(string $field, string $value): self
+    public function addFieldValue(string $field, string|array $value): self
     {
         $this->_fieldValues[$field] = $value;
         return $this;

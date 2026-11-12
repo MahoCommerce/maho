@@ -121,6 +121,7 @@ final class CustomAttributeProvider extends \Maho\ApiPlatform\Provider
         $dto->input = (string) $attribute->getFrontendInput();
         $dto->isRequired = (bool) $attribute->getIsRequired();
         $dto->isUnique = (bool) $attribute->getIsUnique();
+        $dto->dependsOn = $attribute->getDependsOn();
         $default = $attribute->getDefaultValue();
         $dto->attributeSets = $sets[$dto->id] ?? [];
 

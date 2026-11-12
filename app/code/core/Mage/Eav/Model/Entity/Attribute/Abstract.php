@@ -631,6 +631,39 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
         return $this->setData('attribute_group_id', $value);
     }
 
+    /**
+     * Return the condition that shows this attribute in a form, in the format of Maho\Data\Form\Condition,
+     * or null when the attribute is always shown. An invalid stored value is null.
+     */
+    public function getDependsOn(): ?array
+    {
+        $value = $this->getData('depends_on');
+        if (is_string($value) && $value !== '') {
+            try {
+                $value = Mage::helper('core')->jsonDecode($value);
+            } catch (\JsonException) {
+                return null;
+            }
+        }
+        return is_array($value) && $value !== [] ? $value : null;
+    }
+
+    public function setDependsOn(?array $value): static
+    {
+        return $this->setData('depends_on', $value ? Mage::helper('core')->jsonEncode($value) : null);
+    }
+
+    /**
+     * Tell whether a form shows this attribute when its fields hold $values.
+     *
+     * @param array<string, mixed> $values
+     */
+    public function isDependencyMet(array $values): bool
+    {
+        $condition = $this->getDependsOn();
+        return $condition === null || \Maho\Data\Form\Condition::evaluate($condition, $values);
+    }
+
     public function getFrontendClass(): ?string
     {
         $value = $this->getData('frontend_class');

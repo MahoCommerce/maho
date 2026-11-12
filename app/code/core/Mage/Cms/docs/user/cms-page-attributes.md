@@ -63,6 +63,27 @@ of all the pages for it. You cannot undo this.
 
 If you add an attribute with the same code again, the pages have no value for it.
 
+## Show a field only when another field has a value
+
+A condition shows a field only when other fields of the same form have some values. For example, a
+field **Campaign End** can show only when the **Layout** is a landing page layout.
+
+1. Open the attribute in **System > Attributes > CMS Pages**.
+2. Go to the **When the Field Shows** section.
+3. Click **Add**, then select the field that decides and the values that show the field. Hold the
+   Ctrl or Cmd key to select more than one value.
+4. For more than one row, select in **Show the field when** if each row, at least one row, no row
+   or exactly one row must match.
+5. Click **Save**.
+
+A condition can read only a field with a list of values, such as a **Dropdown**, a **Yes/No** field,
+the **Status** or the **Layout** of the page. A field that a condition reads cannot have a condition
+of its own, and you cannot delete it while a condition reads it.
+
+When the condition hides a field, the edit page does not show it, the field is not required, and a
+save deletes its value. The API applies the same rule. A field on another tab reads the saved value
+of the field that decides, not the value that you just changed. Save the page to update it.
+
 ## Show a value on the storefront
 
 Set **Visible on Frontend** to **Yes** in the **Frontend Properties** of the attribute. The page

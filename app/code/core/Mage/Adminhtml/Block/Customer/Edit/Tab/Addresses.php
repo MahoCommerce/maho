@@ -214,6 +214,36 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Addresses extends Mage_Adminhtml_Bl
     }
 
     /**
+     * The template renders the form once for each address, so it starts one dependence controller for each address.
+     */
+    #[\Override]
+    protected function getAttributeDependenceHtml(): string
+    {
+        return '';
+    }
+
+    /**
+     * Return the conditions of the address fields, keyed by field code, and every field that they read.
+     */
+    public function getAttributeDependenceJson(): string
+    {
+        $depends = [];
+        $fields = [];
+        foreach ($this->getForm()->getAllElements() as $element) {
+            $attribute = $element->getEntityAttribute();
+            $condition = $attribute instanceof Mage_Eav_Model_Entity_Attribute_Abstract ? $attribute->getDependsOn() : null;
+            if ($condition !== null) {
+                $depends[(string) $element->getId()] = $condition;
+                $fields = [...$fields, (string) $element->getId(), ...\Maho\Data\Form\Condition::fields($condition)];
+            }
+        }
+        return Mage::helper('core')->jsonEncode([
+            'depends' => (object) $depends,
+            'fields' => array_values(array_unique($fields)),
+        ]);
+    }
+
+    /**
      * @return string
      */
     public function getCancelButtonHtml()

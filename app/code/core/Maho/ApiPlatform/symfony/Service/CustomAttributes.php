@@ -80,7 +80,8 @@ final class CustomAttributes
     /**
      * Check $values and set them on $model. A code that is not in $attributes is an error, and so is
      * a code that is not in $allowed when $allowed is a list. For a new record ($isNew), a required
-     * attribute of $allowed with no default value that $values leaves out is an error too.
+     * attribute of $allowed with no default value that $values leaves out is an error too. An attribute
+     * whose condition $values and the data of $model do not meet is not required and gets no value.
      *
      * @param array<string, mixed> $values
      * @param array<string, \Mage_Eav_Model_Entity_Attribute_Abstract> $attributes
@@ -92,8 +93,9 @@ final class CustomAttributes
         $helper = \Mage::helper('eav');
         $errors = new \Mage_Core_Exception_Input();
         $checked = [];
+        $data = self::conditionData($model, $values);
         if ($isNew) {
-            self::addMissingRequired($errors, $attributes, $values, $allowed);
+            self::addMissingRequired($errors, $attributes, $values, $allowed, data: $data);
         }
         foreach ($values as $code => $value) {
             $code = (string) $code;
@@ -105,6 +107,10 @@ final class CustomAttributes
             }
             if ($allowed !== null && !in_array($code, $allowed, true)) {
                 $errors->addError($field, $helper->__('"%s" is not in the attribute set of this record.', $code));
+                continue;
+            }
+            if (!$attribute->isDependencyMet($data)) {
+                $checked[$code] = null;
                 continue;
             }
             $value = is_bool($value) ? (int) $value : $value;
@@ -140,23 +146,44 @@ final class CustomAttributes
 
     /**
      * Add an error for each required attribute of $attributes that has no default value and that $values
-     * leaves out. When $allowed is a list, an attribute that is not in it is skipped. Each error names
-     * the field $field.<code>.
+     * leaves out. When $allowed is a list, an attribute that is not in it is skipped. When $data is an
+     * array, an attribute whose condition $data does not meet is skipped. Each error names the field
+     * $field.<code>.
      *
      * @param array<string, \Mage_Eav_Model_Entity_Attribute_Abstract> $attributes
      * @param array<string, mixed> $values
      * @param list<string>|null $allowed
+     * @param array<string, mixed>|null $data the values that the conditions read, see conditionData()
      */
-    public static function addMissingRequired(\Mage_Core_Exception_Input $errors, array $attributes, array $values, ?array $allowed = null, string $field = 'customAttributes'): void
+    public static function addMissingRequired(\Mage_Core_Exception_Input $errors, array $attributes, array $values, ?array $allowed = null, string $field = 'customAttributes', ?array $data = null): void
     {
         foreach ($attributes as $code => $attribute) {
             if ($attribute->getIsRequired() && !array_key_exists($code, $values)
                 && ($allowed === null || in_array($code, $allowed, true))
+                && ($data === null || $attribute->isDependencyMet($data))
                 && (string) $attribute->getDefaultValue() === ''
             ) {
                 $errors->addError("{$field}.{$code}", \Mage::helper('eav')->__('"%s" is a required value.', $code));
             }
         }
+    }
+
+    /**
+     * Return the values that the conditions of the attributes read: $values over the data of $model. A boolean
+     * is 0 or 1, as the option values of a Yes/No field.
+     *
+     * @param array<string, mixed> $values
+     * @return array<string, mixed>
+     */
+    public static function conditionData(\Maho\DataObject $model, array $values): array
+    {
+        $data = $values + $model->getData();
+        foreach ($data as $code => $value) {
+            if (is_bool($value)) {
+                $data[$code] = (int) $value;
+            }
+        }
+        return $data;
     }
 
     /**

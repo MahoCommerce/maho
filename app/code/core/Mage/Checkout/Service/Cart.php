@@ -986,7 +986,8 @@ class Mage_Checkout_Service_Cart
     /**
      * Check $address with the rules of the address form of $actor, then with the rules of the address model. Staff
      * has the address form of the admin, with the fields that the storefront does not show. A customer has the
-     * address form of the storefront. An address that a flow marks with should_ignore_validation passes.
+     * address form of the storefront. An address that a flow marks with should_ignore_validation passes. A field that
+     * the condition of its attribute hides loses its value first.
      *
      * @throws \Mage_Core_Exception_Input one error for each problem
      */
@@ -1005,6 +1006,7 @@ class Mage_Checkout_Service_Cart
             ->setFormCode($isStaff ? 'adminhtml_customer_address' : 'customer_address_edit')
             ->setEntityType('customer_address')
             ->setEntity($address);
+        \Mage::helper('eav')->clearHiddenValues($address, $form->getAttributes());
         $data = ['street' => $address->getStreet()] + $address->getData();
         foreach ($form->getAttributes() as $code => $attribute) {
             if (!$isStaff && !$attribute->getIsVisible()) {

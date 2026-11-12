@@ -106,17 +106,19 @@ final class CustomAttributes
     /**
      * Validate $values against the Address Book and Checkout form, then set them on the cart address
      * $address. The checkout sets the whole address at once, so each required attribute of the form
-     * must be in $values, as on the storefront. The order copies the values from the cart.
+     * must be in $values, as on the storefront. The order copies the values from the cart. The conditions of the
+     * attributes read $addressData, the other fields of the address that the request sends.
      *
+     * @param array<string, mixed> $addressData
      * @throws \Symfony\Component\HttpKernel\Exception\BadRequestHttpException when $values is not a map
      * @throws \Mage_Core_Exception_Input
      */
-    public static function applyToCartAddress(\Mage_Sales_Model_Quote_Address $address, mixed $values): void
+    public static function applyToCartAddress(\Mage_Sales_Model_Quote_Address $address, mixed $values, array $addressData = []): void
     {
         if ($values !== null && !is_array($values)) {
             throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('customAttributes must be an object of attribute codes and values');
         }
-        self::apply($address, 'customer_address_edit', $values ?? [], true);
+        self::apply($address, 'customer_address_edit', $values ?? [], true, context: $addressData);
         foreach (array_keys(array_diff_key(Values::userDefined('customer_address'), $values ?? [])) as $code) {
             $address->setData($code);
         }
@@ -153,11 +155,14 @@ final class CustomAttributes
      * Validate $values against the attributes of $formCode, then set them on $entity.
      * A code that is not a user-defined attribute of the form is an error, and so is a required
      * attribute that a new $entity does not get. A storefront form takes only the attributes that
-     * it shows on the website, and an admin form takes every attribute of the form.
+     * it shows on the website, and an admin form takes every attribute of the form. An attribute whose
+     * condition is not met is not required and gets no value. The condition reads $values, then
+     * $context, then the data of $entity.
      *
      * @param array<string, mixed> $values
      * @param bool|null $isNew true when $values replace every value of $entity, null for a new $entity only
      * @param string $field the field that each error names, as $field.<code>
+     * @param array<string, mixed> $context the other fields of the request, which the entity does not hold yet
      * @throws \Mage_Core_Exception_Input
      */
     public static function apply(
@@ -166,6 +171,7 @@ final class CustomAttributes
         array $values,
         ?bool $isNew = null,
         string $field = 'customAttributes',
+        array $context = [],
     ): void {
         $form = \Mage::getModel('customer/form');
         $form->setFormCode($formCode)
@@ -177,16 +183,23 @@ final class CustomAttributes
         $request = $form->prepareRequest($values);
         $helper = \Mage::helper('customer');
 
+        $data = Values::conditionData($entity, $values + $context);
+
         $errors = new \Mage_Core_Exception_Input();
         $models = [];
+        $hidden = [];
         if ($isNew ?? !$entity->getId()) {
-            Values::addMissingRequired($errors, $attributes, $values, field: $field);
+            Values::addMissingRequired($errors, $attributes, $values, field: $field, data: $data);
         }
         foreach ($values as $code => $value) {
             $code = (string) $code;
             $attribute = $attributes[$code] ?? null;
             if ($attribute === null) {
                 $errors->addError("{$field}.{$code}", $helper->__('"%s" is not a custom attribute of this form.', $code));
+                continue;
+            }
+            if (!$attribute->isDependencyMet($data)) {
+                $hidden[] = $code;
                 continue;
             }
             // Only a multiselect and a multiline take a list, and a list holds only strings and numbers
@@ -218,6 +231,9 @@ final class CustomAttributes
 
         foreach ($models as [$model, $value]) {
             $model->compactValue($value);
+        }
+        foreach ($hidden as $code) {
+            $entity->setData($code);
         }
     }
 }

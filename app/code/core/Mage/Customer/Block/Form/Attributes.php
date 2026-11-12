@@ -130,6 +130,38 @@ class Mage_Customer_Block_Form_Attributes extends Mage_Core_Block_Template
         return $this->getData('id_prefix') . $attribute->getAttributeCode();
     }
 
+    /**
+     * Return the configuration of FieldDependenceController for the fields of this block, or null when no field has
+     * a condition. A field that a condition reads and that the form does not have takes the value of the entity.
+     */
+    public function getDependenceJson(): ?string
+    {
+        $depends = [];
+        $values = [];
+        $entity = $this->form?->getEntity();
+        foreach ($this->getAttributes() as $attribute) {
+            $condition = $attribute->getDependsOn();
+            if ($condition === null) {
+                continue;
+            }
+            $depends[(string) $attribute->getAttributeCode()] = $condition;
+            foreach (\Maho\Data\Form\Condition::fields($condition) as $field) {
+                $value = $entity?->getData($field);
+                if ($value !== null && $value !== '') {
+                    $values[$field] = array_map(strval(...), is_array($value) ? array_values($value) : explode(',', (string) $value));
+                }
+            }
+        }
+        if (!$depends) {
+            return null;
+        }
+        return Mage::helper('core')->jsonEncode([
+            'depends' => $depends,
+            'nameFormat' => (string) ($this->getData('name_format') ?: '%s'),
+            'values' => (object) $values,
+        ]);
+    }
+
     public function getValidationClass(Mage_Customer_Model_Attribute $attribute): string
     {
         $classes = [];

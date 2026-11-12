@@ -658,8 +658,8 @@ class formElementDependenceController {
         // Find all child form elements, except hidden fields because they may have custom logic
         rowEl.querySelectorAll('input:not([type=hidden]), textarea, select').forEach((el) => {
             // If Use Default is checked, don't toggle the main form element, only toggle the inherit box itself
-            const inheritCheckboxEl = document.getElementById(el.id + '_inherit');
-            if (inheritCheckboxEl && inheritCheckboxEl.checked) {
+            const inheritCheckboxEl = document.getElementById(el.id + '_inherit') ?? document.getElementById(el.id + '_default');
+            if (inheritCheckboxEl && inheritCheckboxEl !== el && inheritCheckboxEl.checked) {
                 return;
             }
             // Do not enable if can_edit_price option is set to true

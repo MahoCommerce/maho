@@ -193,6 +193,10 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
             $this->assignFirstGroupOfDefaultSet();
         }
 
+        if ($this->hasData('depends_on')) {
+            $this->setDependsOn($this->getDependsOn());
+        }
+
         return parent::_beforeSave();
     }
 
@@ -256,7 +260,142 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
             }
         }
 
+        if ($this->isValueChanged('depends_on')) {
+            $this->addDependsOnErrors($errors);
+        }
+
         return $errors;
+    }
+
+    /**
+     * Return the fields that the condition of this attribute can read, keyed by code: each attribute of
+     * the entity type with a list of options, except this attribute. A subclass adds the fields of its
+     * edit form that are not attributes.
+     *
+     * @return array<string, array{label: string, options: list<array{value: string, label: string}>}>
+     */
+    public function getDependencySources(): array
+    {
+        if (!$this->getEntityTypeId()) {
+            return [];
+        }
+        $entityType = $this->getEntityType();
+        /** @var Mage_Eav_Model_Resource_Entity_Attribute_Collection $collection */
+        $collection = Mage::getResourceModel($entityType->getEntityAttributeCollection());
+        $collection->setEntityTypeFilter((int) $entityType->getId())
+            ->addFieldToFilter('main_table.frontend_input', ['in' => ['select', 'multiselect', 'boolean']])
+            ->addFieldToFilter('main_table.frontend_label', ['notnull' => true])
+            ->setOrder('main_table.frontend_label', 'ASC');
+
+        $sources = [];
+        foreach ($collection as $attribute) {
+            /** @var Mage_Eav_Model_Entity_Attribute_Abstract $attribute */
+            $code = (string) $attribute->getAttributeCode();
+            if ($code === $this->getAttributeCode() || (string) $attribute->getFrontendLabel() === '') {
+                continue;
+            }
+            try {
+                $options = $attribute->usesSource() ? $attribute->getSource()->getAllOptions() : [];
+            } catch (Mage_Core_Exception) {
+                continue;
+            }
+            $sources[$code] = [
+                'label' => Mage::helper('eav')->__((string) $attribute->getFrontendLabel()),
+                'options' => self::flattenOptions($options),
+            ];
+        }
+        return $sources;
+    }
+
+    /**
+     * Return the codes of the attributes of the same entity type whose condition reads this attribute.
+     *
+     * @return list<string>
+     */
+    public function getDependentAttributeCodes(): array
+    {
+        $code = (string) ($this->getOrigData('attribute_code') ?? $this->getAttributeCode());
+        if ($code === '' || !$this->getEntityTypeId()) {
+            return [];
+        }
+        $adapter = $this->_getResource()->getReadConnection();
+        $rows = $adapter->fetchPairs(
+            $adapter->select()
+                ->from($this->_getResource()->getMainTable(), ['attribute_code', 'depends_on'])
+                ->where('entity_type_id = ?', (int) $this->getEntityTypeId())
+                ->where('depends_on IS NOT NULL'),
+        );
+        $codes = [];
+        foreach ($rows as $dependentCode => $json) {
+            $condition = Mage::getModel('eav/entity_attribute')->setData('depends_on', $json)->getDependsOn();
+            if ($dependentCode !== $code && $condition && in_array($code, \Maho\Data\Form\Condition::fields($condition), true)) {
+                $codes[] = (string) $dependentCode;
+            }
+        }
+        return $codes;
+    }
+
+    /**
+     * Add an error to $errors for each part of the condition that a form cannot apply.
+     */
+    protected function addDependsOnErrors(Mage_Core_Exception_Input $errors): void
+    {
+        $raw = $this->getData('depends_on');
+        if ($raw === null || $raw === '' || $raw === '[]') {
+            return;
+        }
+        $helper = Mage::helper('eav');
+        $condition = $this->getDependsOn();
+        if ($condition === null) {
+            $errors->addError('depends_on', $helper->__('The condition is not valid JSON.'));
+            return;
+        }
+        foreach (\Maho\Data\Form\Condition::structureErrors($condition) as $message) {
+            $errors->addError('depends_on', $message);
+        }
+
+        $dependents = $this->getId() ? $this->getDependentAttributeCodes() : [];
+        if ($dependents) {
+            $errors->addError('depends_on', $helper->__('This attribute cannot have a condition, because the condition of %s reads it.', implode(', ', $dependents)));
+        }
+
+        $sources = $this->getDependencySources();
+        $config = Mage::getSingleton('eav/config');
+        foreach (\Maho\Data\Form\Condition::wantedValues($condition) as $field => $values) {
+            if ($field === $this->getAttributeCode()) {
+                $errors->addError('depends_on', $helper->__('The condition cannot read the attribute itself.'));
+                continue;
+            }
+            if (!isset($sources[$field])) {
+                $errors->addError('depends_on', $helper->__('The condition reads the field %s, which this form does not have or which has no options.', $field));
+                continue;
+            }
+            $source = $config->getAttribute($this->getEntityType(), $field);
+            if ($source instanceof Mage_Eav_Model_Entity_Attribute_Abstract && $source->getDependsOn() !== null) {
+                $errors->addError('depends_on', $helper->__('The condition cannot read %s, because %s has a condition of its own.', $field, $field));
+            }
+            $unknown = array_diff($values, array_column($sources[$field]['options'], 'value'));
+            if ($unknown) {
+                $errors->addError('depends_on', $helper->__('The field %s has no option with the value %s.', $field, implode(', ', $unknown)));
+            }
+        }
+    }
+
+    /**
+     * @param array<mixed> $options the result of getAllOptions(), which can hold groups of options
+     * @return list<array{value: string, label: string}>
+     */
+    protected static function flattenOptions(array $options): array
+    {
+        $result = [];
+        foreach ($options as $option) {
+            if (is_array($option['value'] ?? null)) {
+                $result = [...$result, ...self::flattenOptions($option['value'])];
+            } elseif (isset($option['value']) && $option['value'] !== '') {
+                $result[] = ['value' => (string) $option['value'], 'label' => (string) ($option['label'] ?? $option['value'])];
+            }
+        }
+        return $result;
     }
 
     /**

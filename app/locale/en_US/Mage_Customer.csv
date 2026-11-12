@@ -3,6 +3,7 @@
 "* Required Fields","* Required Fields"
 "2FA Verification Code","2FA Verification Code"
 "2FA verification code is invalid.","2FA verification code is invalid."
+"A field that its condition hides is never required.","A field that its condition hides is never required."
 "Accept Format-valid VAT When VIES Unavailable","Accept Format-valid VAT When VIES Unavailable"
 "Account confirmation email","Account confirmation email"
 "Account confirmation is required. Please, check your e-mail for confirmation link. To resend confirmation email please %s.","Account confirmation is required. Please, check your e-mail for confirmation link. To resend confirmation email please %s."

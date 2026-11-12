@@ -55,6 +55,7 @@ class CustomerForm extends \Maho\ApiPlatform\Resource
      */
     #[ApiProperty(writable: false, description: 'The fields by group of the attribute set of the customer group. The first group has no title: its fields '
         . 'join the fields of the platform. Each other group has its title in the store view. A field has code, label, input, '
-        . 'isRequired, sortOrder, options (value and label, for a dropdown or a multiselect), multilineCount and validateRules')]
+        . 'isRequired, sortOrder, options (value and label, for a dropdown or a multiselect), multilineCount, validateRules and dependsOn. '
+        . 'dependsOn is null, or the condition that shows the field, in the format of dependsOn of /custom-attributes. A field that it hides is not required')]
     public array $groups = [];
 }

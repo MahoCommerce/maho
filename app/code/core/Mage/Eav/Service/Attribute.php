@@ -105,10 +105,15 @@ class Mage_Eav_Service_Attribute
     /**
      * Delete $attribute and the values that the records hold for it.
      *
-     * @throws Mage_Core_Exception_Conflict for a system attribute and for an attribute of configurable products
+     * @throws Mage_Core_Exception_Conflict for a system attribute, for an attribute of configurable products and
+     *                                      for an attribute that the condition of another attribute reads
      */
     public function delete(Attribute $attribute): void
     {
+        $dependents = $attribute->getDependentAttributeCodes();
+        if ($dependents) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('eav')->__('The condition of %s reads this attribute. Remove the condition first.', implode(', ', $dependents)));
+        }
         $attribute->delete();
     }
 
@@ -254,8 +259,10 @@ class Mage_Eav_Service_Attribute
             $errors->addError('frontend_input', Mage::helper('eav')->__('Input type "%s" not found in the input types list.', $input));
             return;
         }
+        // A dropdown or a multiple select of any entity type keeps its own options in the option table
+        $sourceModel = $type['source_model'] ?? (in_array($input, self::OPTION_INPUT_TYPES, true) ? self::OPTION_SOURCE_MODEL : null);
         $attribute->setBackendModel($type['backend_model'] ?? null)
-            ->setSourceModel($type['source_model'] ?? null)
+            ->setSourceModel($sourceModel)
             ->setFrontendModel($type['frontend_model'] ?? null);
         if (!$attribute->getBackendType()) {
             $attribute->setBackendType($attribute->getBackendTypeByInput($input));

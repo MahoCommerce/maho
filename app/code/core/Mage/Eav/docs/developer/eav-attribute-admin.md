@@ -105,10 +105,13 @@ the options of an attribute through it:
 - `newAttribute($entityTypeCode)`, `getById($id, $entityTypeCode)` and `getByCode($code, $entityTypeCode)`
   give the attribute model of the type. An ID or a code of another type is not found.
 - `save($attribute)` removes the HTML tags from the labels and checks the attribute. A new attribute
-  gets the backend, source and frontend models of its input type and becomes user-defined.
+  gets the backend, source and frontend models of its input type and becomes user-defined. A new
+  Dropdown or Multiple Select whose input type names no source model gets the option table,
+  `eav/entity_attribute_source_table`.
 - `saveOptions($attribute, $changes)` changes some options of a Dropdown or a Multiple Select and
   keeps the others, with their default flag.
-- `delete($attribute)` deletes a user-defined attribute.
+- `delete($attribute)` deletes a user-defined attribute. It refuses an attribute that the condition
+  of another attribute reads.
 
 The model keeps the rules of one attribute, so a save in code gets them too:
 
@@ -194,6 +197,48 @@ To show a page attribute in another place, read it in a template of the `Mage_Cm
 block: `$this->getPage()->getData('your_code')`. A Dropdown returns the option ID, and a Multiple
 Select returns the option IDs separated by commas. The value is not sanitized, so escape it, for
 example with `$this->escapeHtml()`.
+
+## Conditions
+
+`eav_attribute.depends_on` holds the condition that shows the attribute in a form, as JSON, or
+NULL. The format is the format of `Mage_Adminhtml_Block_Widget_Form_Element_Dependence` (#54):
+a map of a field code to its wanted values, and groups with an operator.
+
+```json
+[{"operator": "OR", "condition": {
+    "customer_type": ["company"],
+    "0": {"operator": "AND", "condition": {"country_id": ["IT"], "is_brand": ["1"]}}
+}}]
+```
+
+The entries of one level are joined with AND. `AND` needs each entry, `OR` one entry, `NOT` no entry
+and `XOR` exactly one entry. Values are strings: an option ID, or `0` and `1` for a Yes/No field.
+
+- `Maho\Data\Form\Condition::evaluate($condition, $values)` evaluates a condition in PHP. It
+  follows `evalCondition()` of `formElementDependenceController` in `form.js`.
+- `getDependsOn()`, `setDependsOn()` and `isDependencyMet($values)` of the attribute read, write
+  and evaluate it.
+- `getDependencySources()` lists the fields that a condition can read: each attribute of the type
+  with options. A subclass adds the fields of its edit page that are not attributes, as
+  `Mage_Cms_Model_Attribute` does for `is_active` and `root_template`.
+- `getValidationErrors()` refuses an unknown field, a value that is not an option, the attribute
+  itself, a field that has a condition of its own, and a condition on a field that another
+  condition reads. So a condition has one level of fields, and no chain.
+
+The attribute edit page writes one group with one operator. A condition with a group inside a group
+shows as read-only JSON, and a save keeps it.
+
+Where the condition applies:
+
+| Place | Code |
+|---|---|
+| Admin edit forms | `Mage_Adminhtml_Block_Widget_Form::getAttributeDependenceHtml()` adds a `formElementDependenceController` for the fields that `_setFieldset()` added. A field of another tab gives its saved value through `getAttributeDependenceValues()`. The customer address tab starts one controller for each address. |
+| Storefront forms | `Mage_Customer_Block_Form_Attributes::getDependenceJson()` and `FieldDependenceController` in `js/varien/form.js`. The controller finds each field by its name in the form. |
+| Validation | `Mage_Eav_Model_Attribute_Data_Abstract::isShown()`. Each `validateValue()` accepts a hidden field. |
+| Values | `Mage_Eav_Helper_Data::clearHiddenValues()` sets a hidden value to null. `Mage_Eav_Model_Entity_Abstract::_beforeSave()`, the CMS page resource, the category service and the cart address check call it. A condition that reads a field that the record does not hold keeps the value, so a partial update deletes nothing. `Mage_Eav_Model_Form::compactData()` and the `apply()` methods of the API helpers also set a hidden value to null. |
+| API | `dependsOn` of `/custom-attributes` and of each field of `/customer-forms/{form}`. |
+
+A hidden field in the browser is disabled, so the form does not send it.
 
 ## The API
 

@@ -168,8 +168,8 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
                 $addresses[$key] = null;
                 continue;
             }
-            CustomAttributes::applyToCartAddress($address, $values['customAttributes'] ?? null);
             $addresses[$key] = CartRequest::mapAddress($values, $input->pathOf($key));
+            CustomAttributes::applyToCartAddress($address, $values['customAttributes'] ?? null, $addresses[$key]);
         }
         try {
             $this->cartService->applyCheckoutState(

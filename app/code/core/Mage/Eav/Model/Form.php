@@ -374,6 +374,10 @@ abstract class Mage_Eav_Model_Form
             }
             $dataModel = $this->_getAttributeDataModel($attribute);
             $dataModel->setExtractedData($data);
+            if (!$dataModel->isShown()) {
+                $this->getEntity()->setData($attribute->getAttributeCode());
+                continue;
+            }
             $data[$attribute->getAttributeCode()] ??= false;
             $dataModel->compactValue($data[$attribute->getAttributeCode()]);
         }

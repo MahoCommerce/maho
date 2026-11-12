@@ -50,6 +50,27 @@ Do not take an attribute out of a set by mistake. Every night, the store deletes
 attribute that is not in the set of its post or category. When a save of the set page takes an
 attribute out, the page asks first, and names the number of posts or categories that have a value.
 
+## Show a field only when another field has a value
+
+A condition shows a field only when other fields of the same form have some values. For example, a
+field **Event Date** can show only when the field **Post Type** is **Event**.
+
+1. Open the attribute in **System > Attributes > Blog Posts** or **Blog Categories**.
+2. Go to the **When the Field Shows** section.
+3. Click **Add**, then select the field that decides and the values that show the field. Hold the
+   Ctrl or Cmd key to select more than one value.
+4. For more than one row, select in **Show the field when** if each row, at least one row, no row
+   or exactly one row must match.
+5. Click **Save**.
+
+A condition can read only a field with a list of values, such as a **Dropdown**, a **Yes/No** field,
+or the **Status**. A field that a condition reads cannot have a condition of its own, and you cannot
+delete it while a condition reads it.
+
+When the condition hides a field, the edit page does not show it, the field is not required, and a
+save deletes its value. The API applies the same rule. A field on another tab reads the saved value
+of the field that decides, not the value that you just changed. Save the post to update it.
+
 ## Show the attribute on the storefront
 
 Set **Visible on Frontend** to **Yes** in the **Frontend Properties** of the attribute. The post

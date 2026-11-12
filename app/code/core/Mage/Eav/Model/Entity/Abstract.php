@@ -1632,6 +1632,9 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      */
     protected function _beforeSave(\Maho\DataObject $object)
     {
+        if (!$this->isPartialSave()) {
+            Mage::helper('eav')->clearHiddenValues($object, $this->_attributesByCode);
+        }
         $this->walkAttributes('backend/beforeSave', [$object]);
         return $this;
     }

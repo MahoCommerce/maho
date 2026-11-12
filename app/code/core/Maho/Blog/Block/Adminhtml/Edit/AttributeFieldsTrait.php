@@ -37,6 +37,7 @@ trait Maho_Blog_Block_Adminhtml_Edit_AttributeFieldsTrait
                 $entity->setData($attribute->getAttributeCode(), $attribute->getDefaultValue());
             }
         }
+        $this->setData('attribute_dependence_values', $entity->getData());
         $this->_setFieldset($others, $fieldset);
         foreach ($editors as $attribute) {
             $fieldset->addField((string) $attribute->getAttributeCode(), 'editor', [
@@ -45,7 +46,7 @@ trait Maho_Blog_Block_Adminhtml_Edit_AttributeFieldsTrait
                 'required' => (bool) $attribute->getIsRequired(),
                 'style' => 'height:20em;',
                 'config' => Mage::getSingleton('cms/wysiwyg_config')->getConfig(),
-            ]);
+            ])->setEntityAttribute($attribute);
         }
     }
 }

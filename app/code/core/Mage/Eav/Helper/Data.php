@@ -148,6 +148,39 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Set to null the value of each attribute of $attributes whose condition $object does not meet, because a form
+     * hides that field. An attribute whose condition reads a field that $object does not hold keeps its value.
+     *
+     * @param iterable<Mage_Eav_Model_Entity_Attribute_Abstract> $attributes
+     * @return list<string> the codes of the attributes that the condition hides
+     */
+    public function clearHiddenValues(\Maho\DataObject $object, iterable $attributes): array
+    {
+        $data = $object->getData();
+        $hidden = [];
+        foreach ($attributes as $attribute) {
+            $condition = $attribute->getDependsOn();
+            if ($condition === null) {
+                continue;
+            }
+            // A partial load or update does not hold every field, and an unknown value must not delete data
+            foreach (\Maho\Data\Form\Condition::fields($condition) as $field) {
+                if (!array_key_exists($field, $data)) {
+                    continue 2;
+                }
+            }
+            if (!\Maho\Data\Form\Condition::evaluate($condition, $data)) {
+                $code = (string) $attribute->getAttributeCode();
+                $hidden[] = $code;
+                if ($object->getData($code) !== null) {
+                    $object->setData($code);
+                }
+            }
+        }
+        return $hidden;
+    }
+
+    /**
      * Throw an exception when the attribute set $setId is not a set of $entityType.
      *
      * @throws Mage_Core_Exception

@@ -245,8 +245,12 @@ class Mage_Catalog_Service_Category
         ));
         $isAdminScope = (int) $category->getStoreId() === Mage_Core_Model_App::ADMIN_STORE_ID;
         $category->setData('use_post_data_config', $useConfig);
+        $hidden = Mage::helper('eav')->clearHiddenValues($category, $category->getAttributes());
         try {
             foreach ($category->getAttributes() as $code => $attribute) {
+                if (in_array($code, $hidden, true)) {
+                    continue;
+                }
                 $value = $category->getData($code);
                 // In a store view, false means that the store view uses the default value
                 if (!$isAdminScope && $value === false) {

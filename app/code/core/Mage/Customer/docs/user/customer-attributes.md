@@ -56,6 +56,46 @@ Configuration > Customers > Customer Configuration**. So its **Default** field o
 
 **Sort Order** sets the place of the field in a form.
 
+## Show a field only when another field has a value
+
+A condition shows a field only when other fields of the same form have some values. For example,
+an address field **SdI Code** can show only when the **Country** is Italy.
+
+1. Open the attribute in **System > Attributes > Customers** or **Customer Addresses**.
+2. Go to the **When the Field Shows** section.
+3. Click **Add**.
+4. In the first list, select the field that decides, for example **Country**.
+5. In the second list, select the values that show the field, for example **Italy**. Hold the Ctrl
+   or Cmd key to select more than one value.
+6. To add more fields, click **Add** again. Then, in **Show the field when**, select how the rows
+   join:
+    - **Each row matches**: every row must match.
+    - **At least one row matches**: one row is enough.
+    - **No row matches**: the field shows only when no row matches.
+    - **Exactly one row matches**: one row must match, and the other rows must not.
+7. Click **Save**.
+
+The rules of a condition:
+
+- A condition can read only the fields of the same record. An address field can read the
+  **Country** or another address field, and never a field of the customer.
+- A condition can read only a field with a list of values: a **Dropdown**, a **Multiple Select**, a
+  **Yes/No** field, or a standard field such as **Country** or **Gender**.
+- A field that a condition reads cannot have a condition of its own.
+- You cannot delete a field while a condition reads it. Remove the condition first.
+
+When the condition hides a field:
+
+- The forms of the storefront and the admin do not show the field. They show it again as soon as
+  the customer selects a value that matches.
+- The field is not required, also when **Default** is **Required**. So **Required** with a condition
+  means "required only when the field shows".
+- When the customer saves, the field loses its value. The API and the imports apply the same
+  rule.
+
+The address forms of a new order in the admin always show the field. The order still applies the
+condition when you save it.
+
 ## Check where a field shows
 
 Three settings decide if a customer sees a field: the forms of the attribute, the attribute set of
@@ -238,3 +278,7 @@ the storefront forms show to the customer group on the website, as on the storef
 storefront form for the customer group of the caller: the label in the store view, the input type, the
 options, the required flag and the group title. The form is `customer_account_create`,
 `customer_account_edit`, `checkout_register`, `customer_address_edit` or `customer_register_address`.
+Each field also has `dependsOn`: `null`, or the condition of the field, as
+`[{"operator": "AND", "condition": {"country_id": ["IT"]}}]`. A headless storefront shows the field
+only when the condition is true. When the condition is false, the API does not require the field and
+does not keep a value for it.

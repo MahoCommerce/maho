@@ -123,6 +123,65 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
         return parent::_beforeToHtml();
     }
 
+    #[\Override]
+    protected function _afterToHtml($html)
+    {
+        return parent::_afterToHtml($html) . $this->getAttributeDependenceHtml();
+    }
+
+    /**
+     * Return the script that shows each attribute field of the form only when the condition of its attribute is met.
+     * A field that the condition reads and that the form does not have, such as a field of another tab, takes its
+     * value from getAttributeDependenceValues().
+     */
+    protected function getAttributeDependenceHtml(): string
+    {
+        $form = $this->getForm();
+        if (!$form instanceof \Maho\Data\Form) {
+            return '';
+        }
+        $htmlIds = [];
+        foreach ($form->getAllElements() as $element) {
+            $htmlIds[(string) $element->getId()] = (string) $element->getHtmlId();
+        }
+        /** @var Mage_Adminhtml_Block_Widget_Form_Element_Dependence|null $block */
+        $block = null;
+        $values = null;
+        foreach ($form->getAllElements() as $element) {
+            $attribute = $element->getEntityAttribute();
+            $condition = $attribute instanceof Mage_Eav_Model_Entity_Attribute_Abstract ? $attribute->getDependsOn() : null;
+            if ($condition === null) {
+                continue;
+            }
+            $block ??= $this->getLayout()->createBlock('adminhtml/widget_form_element_dependence');
+            $code = (string) $element->getId();
+            $block->setRawFieldDependence($code, $condition)
+                ->addFieldMap($htmlIds[$code], $code);
+            foreach (\Maho\Data\Form\Condition::fields($condition) as $field) {
+                if (isset($htmlIds[$field])) {
+                    $block->addFieldMap($htmlIds[$field], $field);
+                    continue;
+                }
+                $values ??= $this->getAttributeDependenceValues();
+                $value = $values[$field] ?? null;
+                if ($value !== null && $value !== '') {
+                    $block->addFieldValue($field, array_map(strval(...), is_array($value) ? array_values($value) : explode(',', (string) $value)));
+                }
+            }
+        }
+        return $block?->toHtml() ?? '';
+    }
+
+    /**
+     * Return the values of the record that the form edits, for the conditions of its attribute fields.
+     *
+     * @return array<string, mixed>
+     */
+    protected function getAttributeDependenceValues(): array
+    {
+        return $this->getData('attribute_dependence_values') ?? $this->getForm()?->getDataObject()?->getData() ?? [];
+    }
+
     /**
      * Initialize form fields values
      * Method will be called after prepareForm and can be used for field values initialization

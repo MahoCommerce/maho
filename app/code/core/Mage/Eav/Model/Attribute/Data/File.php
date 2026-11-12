@@ -132,6 +132,9 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
     #[\Override]
     public function validateValue($value)
     {
+        if (!$this->isShown()) {
+            return true;
+        }
         if ($this->getIsAjaxRequest()) {
             return true;
         }

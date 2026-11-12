@@ -203,7 +203,8 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
 
     /**
      * Turn the custom attribute values of $page into column values, and check the required and unique attributes.
-     * An attribute that $page does not hold keeps its stored value, and a new page gets its default value.
+     * An attribute that $page does not hold keeps its stored value, and a new page gets its default value. An
+     * attribute that its condition hides has no value.
      * Each error names the attribute code after $fieldPrefix, for example customAttributes. for the API.
      *
      * @throws Mage_Core_Exception_Input
@@ -212,7 +213,11 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
     {
         $helper = Mage::helper('eav');
         $errors = new Mage_Core_Exception_Input();
+        $hidden = $helper->clearHiddenValues($page, $this->getCustomAttributes());
         foreach ($this->getCustomAttributes() as $code => $attribute) {
+            if (in_array($code, $hidden, true)) {
+                continue;
+            }
             $label = (string) $attribute->getFrontend()->getLabel();
             if (!$page->hasData($code)) {
                 if ($page->getId()) {

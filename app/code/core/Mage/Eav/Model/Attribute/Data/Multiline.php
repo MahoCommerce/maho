@@ -37,6 +37,9 @@ class Mage_Eav_Model_Attribute_Data_Multiline extends Mage_Eav_Model_Attribute_D
     #[\Override]
     public function validateValue($value)
     {
+        if (!$this->isShown()) {
+            return true;
+        }
         $errors     = [];
         $attribute  = $this->getAttribute();
 
