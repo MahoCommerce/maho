@@ -150,3 +150,107 @@ it('shows a swipe carousel with a counter on a phone', function (string $layout)
         ->assertPresent('.fullscreen-gallery');
     waitForScript($page, "document.querySelector('.fg-scroll').scrollLeft > 0");
 })->with(['below', 'grid']);
+
+function swatchScriptPage(): mixed
+{
+    $page = visit(MahoServer::baseUrl() . galleryProductUrl());
+    waitForPageLoad($page, '.product-image-gallery');
+
+    $code = file_get_contents(dirname(__DIR__, 2) . '/public/skin/frontend/base/default/js/configurableswatches/product-media.js');
+    $page->script('window.eval(' . json_encode($code) . ')');
+    waitForScript($page, "typeof ConfigurableMediaImages === 'object'");
+
+    return $page;
+}
+
+it('keeps the image of the last swatch call when an earlier image loads late', function () {
+    $page = swatchScriptPage();
+
+    $result = $page->script("(() => {
+        const late = document.createElement('img');
+        late.src = '/media/swatch-race-' + Date.now() + '.png';
+        const fast = document.createElement('img');
+        ConfigurableMediaImages.swapImage(late);
+        ConfigurableMediaImages.swapImage(fast);
+        late.dispatchEvent(new Event('load'));
+        return [fast.classList.contains('visible'), late.classList.contains('visible')].join();
+    })()");
+
+    expect($result)->toBe('true,false');
+});
+
+it('keeps the clicked thumbnail when a swatch image loads late', function () {
+    $page = swatchScriptPage();
+
+    $result = $page->script("(() => {
+        const late = document.createElement('img');
+        late.src = '/media/swatch-race-' + Date.now() + '.png';
+        ConfigurableMediaImages.swapImage(late);
+        ProductMediaManager.swapImage(document.querySelector('#image-2'));
+        late.dispatchEvent(new Event('load'));
+        return late.classList.contains('visible');
+    })()");
+
+    expect($result)->toBeFalse();
+});
+
+it('removes the gallery spinner when a swatch image fails to load', function () {
+    $page = swatchScriptPage();
+
+    $result = $page->script("(() => {
+        const bad = document.createElement('img');
+        bad.src = '/media/swatch-missing-' + Date.now() + '.png';
+        ConfigurableMediaImages.swapImage(bad);
+        bad.dispatchEvent(new Event('error'));
+        return [
+            document.querySelector('.product-image-gallery').classList.contains('loading'),
+            bad.classList.contains('visible'),
+            document.querySelectorAll('.product-image-gallery .visible').length,
+        ].join();
+    })()");
+
+    expect($result)->toBe('false,false,1');
+});
+
+it('keeps the image of the last swatch call in a product list', function () {
+    $page = swatchScriptPage();
+
+    $result = $page->script("(() => {
+        const wrapper = document.createElement('div');
+        const original = document.createElement('img');
+        original.id = 'product-collection-image-999999';
+        wrapper.append(original);
+        document.body.append(wrapper);
+        const late = document.createElement('img');
+        late.className = 'product-collection-image-999999';
+        late.src = '/media/list-race-' + Date.now() + '.png';
+        const fast = document.createElement('img');
+        fast.className = 'product-collection-image-999999';
+        ConfigurableMediaImages.swapListImage(999999, late);
+        ConfigurableMediaImages.swapListImage(999999, fast);
+        const spinner = wrapper.classList.contains('loading');
+        late.dispatchEvent(new Event('load'));
+        return [spinner, fast.isConnected, late.isConnected].join();
+    })()");
+
+    expect($result)->toBe('false,true,false');
+});
+
+it('keeps the swatch image when a thumbnail loads late', function () {
+    $page = swatchScriptPage();
+
+    $result = $page->script("(() => {
+        const thumb = document.querySelector('#image-2');
+        const hidden = thumb.cloneNode();
+        hidden.id = 'image-late';
+        hidden.src = '/media/thumb-race-' + Date.now() + '.png';
+        document.querySelector('.product-image-gallery').append(hidden);
+        ProductMediaManager.swapImage(hidden);
+        const swatch = document.createElement('img');
+        ConfigurableMediaImages.swapImage(swatch);
+        hidden.dispatchEvent(new Event('load'));
+        return [swatch.classList.contains('visible'), hidden.classList.contains('visible')].join();
+    })()");
+
+    expect($result)->toBe('true,false');
+});
