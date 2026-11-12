@@ -761,7 +761,9 @@ var ProductMediaManager = {
 
         target.removeAttribute('loading');
 
+        const generation = window.ConfigurableMediaImages?.swapGeneration;
         const doSwap = () => {
+            if (generation !== window.ConfigurableMediaImages?.swapGeneration) return;
             gallery.classList.remove('loading');
             if (current) current.classList.remove('visible');
             target.classList.add('gallery-image', 'visible');

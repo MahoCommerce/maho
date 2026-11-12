@@ -184,7 +184,11 @@ var ConfigurableMediaImages = {
             // Add spinner
             imageGallery.classList.add('loading');
             targetImage.addEventListener('load', revealImage, { once: true });
-            targetImage.addEventListener('error', revealImage, { once: true });
+            targetImage.addEventListener('error', function() {
+                if (generation === ConfigurableMediaImages.swapGeneration) {
+                    imageGallery.classList.remove('loading');
+                }
+            }, { once: true });
         }
     },
 
@@ -237,7 +241,11 @@ var ConfigurableMediaImages = {
                 originalImage.parentNode.insertBefore(imageObject, originalImage.nextSibling);
             };
             imageObject.addEventListener('load', reveal, { once: true });
-            imageObject.addEventListener('error', reveal, { once: true });
+            imageObject.addEventListener('error', function () {
+                if (generation === ConfigurableMediaImages.listGeneration[productId]) {
+                    wrapper.classList.remove('loading');
+                }
+            }, { once: true });
         }
     },
 

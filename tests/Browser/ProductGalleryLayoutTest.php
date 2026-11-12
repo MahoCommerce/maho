@@ -202,10 +202,14 @@ it('removes the gallery spinner when a swatch image fails to load', function () 
         bad.src = '/media/swatch-missing-' + Date.now() + '.png';
         ConfigurableMediaImages.swapImage(bad);
         bad.dispatchEvent(new Event('error'));
-        return document.querySelector('.product-image-gallery').classList.contains('loading');
+        return [
+            document.querySelector('.product-image-gallery').classList.contains('loading'),
+            bad.classList.contains('visible'),
+            document.querySelectorAll('.product-image-gallery .visible').length,
+        ].join();
     })()");
 
-    expect($result)->toBeFalse();
+    expect($result)->toBe('false,false,1');
 });
 
 it('keeps the image of the last swatch call in a product list', function () {
@@ -230,4 +234,23 @@ it('keeps the image of the last swatch call in a product list', function () {
     })()");
 
     expect($result)->toBe('false,true,false');
+});
+
+it('keeps the swatch image when a thumbnail loads late', function () {
+    $page = swatchScriptPage();
+
+    $result = $page->script("(() => {
+        const thumb = document.querySelector('#image-2');
+        const hidden = thumb.cloneNode();
+        hidden.id = 'image-late';
+        hidden.src = '/media/thumb-race-' + Date.now() + '.png';
+        document.querySelector('.product-image-gallery').append(hidden);
+        ProductMediaManager.swapImage(hidden);
+        const swatch = document.createElement('img');
+        ConfigurableMediaImages.swapImage(swatch);
+        hidden.dispatchEvent(new Event('load'));
+        return [swatch.classList.contains('visible'), hidden.classList.contains('visible')].join();
+    })()");
+
+    expect($result)->toBe('true,false');
 });
