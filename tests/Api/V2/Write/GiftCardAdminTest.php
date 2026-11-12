@@ -270,6 +270,31 @@ describe('GraphQL adjustBalanceGiftCard', function (): void {
 
 });
 
+describe('a balance that changed after the client read it', function (): void {
+
+    it('gives a 409 over REST and an error over GraphQL, and keeps the stored balance', function (): void {
+        $code = 'PEST-GQL-SEEN-' . time();
+        $create = apiPost('/api/rest/v2/giftcards', ['initialBalance' => 20.0, 'code' => $code], adminToken());
+        expect($create['status'])->toBeSuccessful();
+        trackAdminGiftCard($code);
+        $id = (int) $create['json']['id'];
+
+        $rest = apiPut("/api/rest/v2/giftcards/{$id}", ['balance' => 30.0, 'expectedBalance' => 15.0], adminToken());
+        $graphql = gqlQuery(<<<GRAPHQL
+        mutation {
+            adjustBalanceGiftCard(input: {code: "{$code}", newBalance: 30, expectedBalance: 15}) {
+                giftCard { balance }
+            }
+        }
+        GRAPHQL, [], adminToken());
+
+        expect($rest['status'])->toBe(409);
+        expect($graphql['json'])->toHaveKey('errors');
+        expect((float) apiGet("/api/rest/v2/giftcards/{$id}", adminToken())['json']['balance'])->toBe(20.0);
+    });
+
+});
+
 describe('POST /api/rest/v2/giftcards/{id}/send-email', function (): void {
 
     it('creates a card without the email, and sends it on request over REST and GraphQL', function (): void {

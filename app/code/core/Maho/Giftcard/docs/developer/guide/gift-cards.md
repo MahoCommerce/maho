@@ -197,13 +197,19 @@ $giftcard->adjustBalance(
 `adjustBalance()` reads the stored balance and status with a row lock, so the history entry
 records the change from the stored balance. A balance of 0 makes the card used, and a positive
 balance makes a used card active. When you give `$shownBalance` and the stored balance is
-different, the method throws `Mage_Core_Exception_Conflict` and changes nothing. The admin edit
-form uses this: a refund that runs while the form is open is not replaced.
+different, the method throws `Mage_Core_Exception_Conflict` and changes nothing.
 
 A balance below 0, or above the **Maximum Balance** of the card, gives a
 `Mage_Core_Exception_Input` on the `balance` field. The model keeps its other unsaved changes, so
-`Maho_Giftcard_Service_Giftcard::save()` and `update()` write them after the adjustment. Both
-methods take the shown balance as `$expectedBalance`.
+`Maho_Giftcard_Service_Giftcard::save()` and `update()` write them after the adjustment.
+
+`save()`, `update()` and `adjustBalance()` of the service take the balance that the client saw as
+`$expectedBalance`. The admin edit form sends it, and the API takes it as `expectedBalance`, so the
+two transports follow the same rules:
+
+- A stored balance that is not `$expectedBalance` gives a conflict (409), and nothing changes.
+- A new balance equal to `$expectedBalance` means that the client did not change the balance. The
+  card keeps its stored balance, so a refund that ran meanwhile stays.
 
 #### Who Writes the Balance
 

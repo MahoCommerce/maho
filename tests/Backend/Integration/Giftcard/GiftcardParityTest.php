@@ -203,6 +203,58 @@ describe('a card above a lowered highest balance', function (): void {
     });
 });
 
+/**
+ * Create a card with a balance of 50, then refund 10 to it, as a credit memo does while a client edits the card.
+ */
+function giftcardParityRefundedCard(string $suffix): Maho_Giftcard_Model_Giftcard
+{
+    $giftcard = giftcardParityCard($suffix, ['balance' => 50.0]);
+    Mage::getModel('giftcard/giftcard')->load($giftcard->getId())->refund(10.0);
+    return $giftcard;
+}
+
+/**
+ * @return array{success: list<string>, errors: list<string>}
+ */
+function giftcardParityAdminBalance(Maho_Giftcard_Model_Giftcard $giftcard, float $balance, float $shownBalance): array
+{
+    return TransportParity::admin(Maho_Giftcard_Adminhtml_GiftcardController::class, 'save', [
+        'id' => $giftcard->getId(), 'giftcard_id' => $giftcard->getId(), 'code' => $giftcard->getCode(),
+        'status' => Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE, 'website_ids' => [(int) Mage::app()->getStore()->getWebsiteId()],
+        'balance' => $balance, 'shown_balance' => $shownBalance,
+    ]);
+}
+
+describe('a balance that a refund changed after the client saw it', function (): void {
+    it('refuses a new balance with the same conflict on the admin page and in the API', function (): void {
+        $adminCard = giftcardParityRefundedCard('SEEN-ADMIN');
+        $apiCard = giftcardParityRefundedCard('SEEN-API');
+
+        $admin = giftcardParityAdminBalance($adminCard, 80.0, 50.0);
+        $api = giftcardParityApi(['balance' => 80.0, 'expectedBalance' => 50.0], (int) $apiCard->getId());
+
+        expect($admin['errors'])->toHaveCount(1)
+            ->and($admin['errors'][0])->toContain('The balance of this gift card changed to')
+            ->and($api['status'])->toBe(409)
+            ->and($api['errors'])->toBe($admin['errors'])
+            ->and((float) Mage::getModel('giftcard/giftcard')->load($adminCard->getId())->getBalance())->toBe(60.0)
+            ->and((float) Mage::getModel('giftcard/giftcard')->load($apiCard->getId())->getBalance())->toBe(60.0);
+    });
+
+    it('keeps the refund on the admin page and in the API when the client sends back the balance that it saw', function (): void {
+        $adminCard = giftcardParityRefundedCard('KEEP-ADMIN');
+        $apiCard = giftcardParityRefundedCard('KEEP-API');
+
+        $admin = giftcardParityAdminBalance($adminCard, 50.0, 50.0);
+        $api = giftcardParityApi(['balance' => 50.0, 'expectedBalance' => 50.0], (int) $apiCard->getId());
+
+        expect($admin['errors'])->toBe([])
+            ->and($api['status'])->toBe(200)
+            ->and($api['result']->balance)->toBe(60.0)
+            ->and((float) Mage::getModel('giftcard/giftcard')->load($adminCard->getId())->getBalance())->toBe(60.0);
+    });
+});
+
 it('refuses an unknown status on the admin mass action and in the API, and keeps the balance', function (): void {
     $giftcard = giftcardParityCard('STATUS');
 

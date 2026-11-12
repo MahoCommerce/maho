@@ -598,6 +598,8 @@ GET /api/rest/v2/coupons?page=2&itemsPerPage=50
 | PUT | `/giftcards/{id}` | Admin/API | Update the status and adjust the balance |
 | POST | `/giftcards/{id}/send-email` | Admin/API | Email the gift card to its recipient |
 
+**Balance changes**: `PUT /giftcards/{id}` takes an optional `expectedBalance`, the balance that the client read before it sent the new one. GraphQL `adjustBalanceGiftCard` takes the same argument. If a refund or an order changed the stored balance since then, the request gives a 409 and changes nothing. A `balance` equal to `expectedBalance` keeps the stored balance. The admin edit form follows the same rules.
+
 REST `GET /giftcards/{id}` is **admin-only and keyed by numeric ID**. A public **balance check by code** (no recipient/sender PII) is exposed over GraphQL only - see the [GraphQL reference](graphql.md#inventory-promotions).
 
 **Gift card email** <span class="version-badge">v27.1+</span>: `POST /giftcards` sends no email, as a card that the admin creates gets none. To send it, call `POST /giftcards/{id}/send-email` with an empty body, which does what the **Send Email** button of the admin does. It sends the email now, also when the card got it before, and the card in the response has the time in `emailSentAt`. A card without `recipientEmail` gives a 422 with `recipientEmail` in `details.errors`. The operation needs an admin token or the `giftcards/write` grant. A card that a customer buys still gets the email when the invoice is paid.

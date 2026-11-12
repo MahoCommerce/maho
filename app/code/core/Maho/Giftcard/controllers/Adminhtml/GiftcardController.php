@@ -138,15 +138,12 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             $websiteIds = $saveData['website_ids'] ?? null;
             unset($saveData['website_ids']);
 
-            // Compare with the balance that the form showed: a refund can change the stored one meanwhile
+            // The balance that the form showed: a refund can change the stored one meanwhile
             $shownBalance = $model->getId() && is_numeric($saveData['shown_balance'] ?? null) ? (float) $saveData['shown_balance'] : null;
             unset($saveData['shown_balance']);
 
-            // A form that does not post the balance, or posts the one that it showed, keeps the balance of the card
+            // A form that does not post the balance keeps the balance of the card
             $saveData['balance'] ??= $model->getData('balance');
-            if ($shownBalance !== null && is_numeric($saveData['balance']) && round((float) $saveData['balance'] - $shownBalance, 4) === 0.0) {
-                $saveData['balance'] = $model->getData('balance');
-            }
             $model->setData($saveData);
             if ($websiteIds !== null) {
                 $model->setWebsiteIds(is_array($websiteIds) ? $websiteIds : [$websiteIds]);

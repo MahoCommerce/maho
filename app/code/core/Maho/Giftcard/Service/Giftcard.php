@@ -109,13 +109,18 @@ class Maho_Giftcard_Service_Giftcard
     }
 
     /**
-     * Give $giftcard the balance $newBalance and write a history entry with $comment.
+     * Give $giftcard the balance $newBalance and write a history entry with $comment. $expectedBalance is the
+     * balance that the client saw. When $newBalance is that balance, the client did not change it, and the card
+     * keeps its stored balance, also when a refund changed it since.
      *
      * @throws Mage_Core_Exception_Input when the model refuses the balance: below zero or above the highest balance
      * @throws Mage_Core_Exception_Conflict when the stored balance is not $expectedBalance
      */
     public function adjustBalance(Maho_Giftcard_Model_Giftcard $giftcard, float $newBalance, ?string $comment = null, ?float $expectedBalance = null): Maho_Giftcard_Model_Giftcard
     {
+        if ($expectedBalance !== null && round($newBalance - $expectedBalance, 4) === 0.0) {
+            return $giftcard;
+        }
         if ($newBalance !== (float) $giftcard->getBalance()) {
             $giftcard->adjustBalance($newBalance, $comment, $expectedBalance);
         }
