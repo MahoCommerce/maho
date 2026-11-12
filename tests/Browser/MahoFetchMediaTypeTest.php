@@ -12,7 +12,7 @@ use Tests\MahoBrowserTestCase;
 
 uses(MahoBrowserTestCase::class)->group('browser');
 
-// The test replaces only window.fetch. mahoFetch still reads real Response objects.
+// The test stubs window.fetch and the page helpers. mahoFetch still reads real Response objects.
 const MAHO_FETCH_MEDIA_TYPE_SCENARIO = <<<'JS'
 (async () => {
     const original = {fetch: window.fetch, showLoader: window.showLoader, hideLoader: window.hideLoader,
