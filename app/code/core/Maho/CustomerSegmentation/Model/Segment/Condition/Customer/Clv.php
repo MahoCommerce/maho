@@ -106,8 +106,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
                 $salesSelect = $adapter->select()
                     ->from(['o' => $salesTable], ['customer_id', 'amount' => 'SUM(o.base_grand_total)'])
                     ->where('o.customer_id IS NOT NULL')
-                    // An order refunded in full is closed, and its refunds are subtracted below:
-                    // leaving out its sales too would take it off the profit twice.
+                    // The refunds query below subtracts the refunds of a closed order. Keep the sale of a closed order here.
                     ->where('o.state NOT IN (?)', ['canceled'])
                     ->group('o.customer_id');
 
