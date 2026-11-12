@@ -15,11 +15,13 @@ use Mage\Customer\Api\GraphQL\CustomerQueryHandler;
 use Mage\Sales\Api\GraphQL\OrderMutationHandler;
 use Mage\Catalog\Api\GraphQL\ProductQueryHandler;
 use Maho\ApiPlatform\Security\SameOriginGuard;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 
 /**
  * Admin GraphQL Controller.
@@ -64,15 +66,25 @@ class AdminGraphQlController
         SameOriginGuard::assert($request);
 
         // Parse request
-        $content = $request->getContent();
-        try {
-            $input = (array) \Mage::helper('core')->jsonDecode($content ?: '[]');
-        } catch (\JsonException) {
-            $input = [];
+        $body = RequestInput::tryDecode($request);
+        if ($body === null) {
+            return new JsonResponse([
+                'errors' => [['message' => 'Invalid JSON in request body']],
+            ], Response::HTTP_BAD_REQUEST);
         }
+        $input = RequestInput::of($body);
 
-        $query = $input['query'] ?? '';
-        $variables = $input['variables'] ?? null;
+        try {
+            $query = $input->string('query') ?? '';
+            $variables = $input->array('variables');
+            $operationName = $input->string('operationName');
+            // A storeId that is not an integer is left to the store the admin bridge chose
+            $requestedStoreId = RequestInput::toInt($variables['storeId'] ?? null);
+        } catch (NotNormalizableValueException $e) {
+            return new JsonResponse([
+                'errors' => [['message' => $e->getMessage()]],
+            ], Response::HTTP_BAD_REQUEST);
+        }
 
         if (empty($query)) {
             return new JsonResponse([
@@ -83,7 +95,7 @@ class AdminGraphQlController
         try {
             // Authentication handled by Symfony firewall (AdminSessionAuthenticator)
             // $_SERVER context vars are set by the authenticator
-            $storeId = (int) ($_SERVER['MAHO_STORE_ID'] ?? $input['variables']['storeId'] ?? 1);
+            $storeId = (int) ($_SERVER['MAHO_STORE_ID'] ?? $requestedStoreId ?? 1);
             $adminUserId = (int) ($_SERVER['MAHO_ADMIN_USER_ID'] ?? 0);
 
             $context = [
@@ -92,7 +104,6 @@ class AdminGraphQlController
                 'admin_user_id' => $adminUserId,
             ];
 
-            $operationName = $input['operationName'] ?? null;
             $result = $this->executeQuery($query, $variables, $context, $operationName);
 
             // Admin API always uses camelCase (GraphQL standard)
@@ -164,6 +175,8 @@ class AdminGraphQlController
         try {
             $data = $this->resolveOperation($operation, $variables ?? [], $context);
             return ['data' => $data];
+        } catch (NotNormalizableValueException $e) {
+            return ['errors' => [['message' => $e->getMessage(), 'extensions' => ['code' => 'BAD_USER_INPUT']]]];
         } catch (\Exception $e) {
             \Mage::logException($e);
             return ['errors' => [['message' => \Mage::getIsDeveloperMode() ? $e->getMessage() : 'An error occurred processing the request']]];

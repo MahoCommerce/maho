@@ -13,9 +13,9 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -47,10 +47,10 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
             return null;
         }
 
-        $body = $this->parseRequestBody($context['request'] ?? null);
         if ($operation instanceof Post) {
-            $linkedId = (int) ($body['linkedProductId'] ?? $body['linked_product_id'] ?? 0);
-            $position = (int) ($body['position'] ?? 0);
+            $input = RequestInput::of($this->parseRequestBody($context['request'] ?? null));
+            $linkedId = $input->int('linkedProductId', 'linked_product_id') ?? 0;
+            $position = $input->int('position') ?? 0;
             $service->addLink($product, $linkType, $linkedId, ['position' => $position], $websiteIds);
 
             $linked = \Mage::getModel('catalog/product')->load($linkedId);
@@ -64,11 +64,8 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $links = [];
-        foreach ($body as $link) {
-            if (!is_array($link)) {
-                throw new BadRequestHttpException('Each link must be an object with linkedProductId');
-            }
-            $links[(int) ($link['linkedProductId'] ?? $link['linked_product_id'] ?? 0)] = ['position' => (int) ($link['position'] ?? 0)];
+        foreach (RequestInput::decodeRows($context['request'] ?? null, 'link') as $link) {
+            $links[$link->int('linkedProductId', 'linked_product_id') ?? 0] = ['position' => $link->int('position') ?? 0];
         }
         $service->setLinks($product, $linkType, $links, $websiteIds);
 

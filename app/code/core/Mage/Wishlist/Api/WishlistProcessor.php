@@ -13,6 +13,7 @@ namespace Mage\Wishlist\Api;
 use Mage\Checkout\Api\CartRequest;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Delete;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -83,24 +84,19 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
 
         if ($operationName === 'move_to_cart') {
             $itemId = (int) ($uriVariables['id'] ?? 0);
-            $body = $context['request']?->toArray() ?? [];
-            $qty = isset($body['qty']) ? (float) $body['qty'] : null;
-            // JSON numbers arrive as int; moveToCart types $cartId as ?string.
-            $cartId = isset($body['cartId']) ? (string) $body['cartId'] : null;
-            return $this->moveToCart($itemId, $qty, $cartId);
+            $input = RequestInput::of($this->parseRequestBody($context['request'] ?? null));
+            return $this->moveToCart($itemId, $input->float('qty'), $input->string('cartId'));
         }
 
         if ($operationName === 'sync_wishlist') {
-            $body = $context['request']?->toArray() ?? [];
-            return $this->syncWishlist($body['productIds'] ?? []);
+            $input = RequestInput::of($this->parseRequestBody($context['request'] ?? null));
+            return $this->syncWishlist($input->intList('productIds') ?? []);
         }
 
         if ($operationName === 'share_wishlist') {
-            $body = $context['request']?->toArray() ?? [];
-            if (!is_array($body['emails'] ?? [])) {
-                throw new BadRequestHttpException('emails must be a list of email addresses');
-            }
-            return $this->shareWishlist($body['emails'] ?? [], (string) ($body['message'] ?? ''), $body);
+            $body = $this->parseRequestBody($context['request'] ?? null);
+            $input = RequestInput::of($body);
+            return $this->shareWishlist($input->stringList('emails') ?? [], $input->string('message') ?? '', $body);
         }
 
         // Default POST - add to wishlist

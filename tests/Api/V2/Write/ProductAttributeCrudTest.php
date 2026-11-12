@@ -182,13 +182,13 @@ describe('Product attribute lifecycle', function (): void {
             ]);
 
         // A value of a wrong type makes the request malformed
-        expect(pattrCreate(['isSearchable' => 'yes'])['status'])->toBe(400);
+        expect(pattrCreate(['isSearchable' => 'maybe'])['status'])->toBe(400);
 
         $scope = pattrCreate(['scope' => 'planet']);
         expect($scope['status'])->toBe(422)
             ->and(pattrFields($scope))->toBe(['scope']);
 
-        $unknown = pattrCreate(['unknownField' => 1, 'isSearchable' => 'yes']);
+        $unknown = pattrCreate(['unknownField' => 1, 'isSearchable' => 'maybe']);
         expect($unknown['status'])->toBe(400)
             ->and(pattrFields($unknown))->toBe(['unknownField']);
     });

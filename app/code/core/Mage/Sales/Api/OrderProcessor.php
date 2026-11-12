@@ -13,6 +13,7 @@ namespace Mage\Sales\Api;
 use Mage\Checkout\Api\CartRequest;
 use Mage\Customer\Api\CustomAttributes;
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -79,10 +80,10 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
      */
     private function resolveManagedOrder(array $context, array $uriVariables): \Mage_Sales_Model_Order
     {
-        $args = $context['args']['input'] ?? [];
-        $orderId = (int) ($uriVariables['id'] ?? $args['orderId'] ?? 0);
-        $incrementId = $args['incrementId'] ?? null;
-        $byId = $orderId > 0 || !is_string($incrementId);
+        $input = RequestInput::of($context['args']['input'] ?? []);
+        $orderId = (int) ($uriVariables['id'] ?? $input->int('orderId') ?? 0);
+        $incrementId = $input->string('incrementId');
+        $byId = $orderId > 0 || $incrementId === null;
 
         if (!$this->isAdmin() && !$this->isApiUser()) {
             $customerId = $this->getAuthenticatedCustomerId();
@@ -129,14 +130,16 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
     private function placeOrder(array $uriVariables, array $context): Order
     {
         $args = $context['args']['input'] ?? $context['request_data'] ?? [];
-        $guestEmail = $args['guestEmail'] ?? $args['email'] ?? null;
-        $orderNote = $args['orderNote'] ?? null;
+        $input = RequestInput::of($args);
+        $guestEmail = $input->string('guestEmail', 'email');
+        $orderNote = $input->string('orderNote');
         $isPrivileged = $this->isPrivilegedOrderActor();
         $actor = $isPrivileged ? \Mage_Checkout_Model_Actor::Staff : \Mage_Checkout_Model_Actor::Customer;
-        $agreementIds = $actor === \Mage_Checkout_Model_Actor::Customer ? $this->readAgreementIds($args) : null;
-        $sendConfirmation = ($isPrivileged && isset($args['sendConfirmation'])) ? (bool) filter_var($args['sendConfirmation'], FILTER_VALIDATE_BOOLEAN) : null;
-        $paymentMethod = $args['paymentMethod'] ?? null;
-        $shippingMethod = $args['shippingMethod'] ?? null;
+        $agreementIds = $actor === \Mage_Checkout_Model_Actor::Customer ? $input->intList('agreementIds') ?? [] : null;
+        $sendConfirmation = $isPrivileged ? $input->bool('sendConfirmation') : null;
+        $paymentMethod = $input->string('paymentMethod');
+        $shippingMethod = $input->string('shippingMethod');
+        $paymentData = $input->array('paymentData');
         // Scope, not authorization: a caller in the admin scope (store 0) places a backend
         // order, while a service token naming a real store is a storefront flow.
         $isAdminOrder = \Mage::app()->getStore()->isAdmin();
@@ -160,21 +163,22 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // The client sends the checkout data with the order, and the cart service applies it in one pass
         $addresses = [];
         foreach (['shippingAddress' => $quote->getShippingAddress(), 'billingAddress' => $quote->getBillingAddress()] as $key => $address) {
-            if (!isset($args[$key]) || !is_array($args[$key])) {
+            $values = $input->array($key);
+            if ($values === null) {
                 $addresses[$key] = null;
                 continue;
             }
-            CustomAttributes::applyToCartAddress($address, $args[$key]['customAttributes'] ?? null);
-            $addresses[$key] = CartRequest::mapAddress($args[$key]);
+            CustomAttributes::applyToCartAddress($address, $values['customAttributes'] ?? null);
+            $addresses[$key] = CartRequest::mapAddress($values, $input->pathOf($key));
         }
         try {
             $this->cartService->applyCheckoutState(
                 $quote,
                 $addresses['shippingAddress'],
                 $addresses['billingAddress'],
-                is_string($shippingMethod) ? $shippingMethod : null,
-                is_string($paymentMethod) ? $paymentMethod : null,
-                (isset($args['paymentData']) && is_array($args['paymentData'])) ? $args['paymentData'] : null,
+                $shippingMethod,
+                $paymentMethod,
+                $paymentData,
                 CartRequest::backOfficeActor($isPrivileged),
             );
         } catch (\Mage_Core_Exception_Input $e) {
@@ -203,27 +207,11 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Return the agreement IDs of the body. A Customer sends them when the store asks to accept its agreements.
-     *
-     * @return list<int>
-     */
-    private function readAgreementIds(array $args): array
-    {
-        $agreementIds = $args['agreementIds'] ?? [];
-        if (!is_array($agreementIds) || !array_is_list($agreementIds)) {
-            throw new BadRequestHttpException('agreementIds must be a list of agreement IDs');
-        }
-
-        return array_map(intval(...), $agreementIds);
-    }
-
-    /**
      * Cancel order
      */
     private function cancelOrder(array $context, array $uriVariables = []): Order
     {
-        $args = $context['args']['input'] ?? [];
-        $reason = $args['reason'] ?? null;
+        $reason = RequestInput::of($context['args']['input'] ?? [])->string('reason');
 
         $order = $this->resolveManagedOrder($context, $uriVariables);
         $order = $this->orderService->cancel($order, $reason);
@@ -236,7 +224,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
      */
     private function holdOrder(array $context, array $uriVariables = []): Order
     {
-        $reason = $context['args']['input']['reason'] ?? null;
+        $reason = RequestInput::of($context['args']['input'] ?? [])->string('reason');
 
         $order = $this->resolveManagedOrder($context, $uriVariables);
         $order = $this->orderService->hold($order, $reason);
@@ -249,7 +237,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
      */
     private function unholdOrder(array $context, array $uriVariables = []): Order
     {
-        $reason = $context['args']['input']['reason'] ?? null;
+        $reason = RequestInput::of($context['args']['input'] ?? [])->string('reason');
 
         $order = $this->resolveManagedOrder($context, $uriVariables);
         $order = $this->orderService->unhold($order, $reason);
@@ -262,18 +250,14 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
      */
     private function addOrderComment(array $context, array $uriVariables = []): Order
     {
-        $args = $context['args']['input'] ?? [];
-        $status = $args['status'] ?? null;
-        if ($status !== null && !is_string($status)) {
-            throw new BadRequestHttpException('Status must be a string');
-        }
-        $status = trim((string) $status);
+        $input = RequestInput::of($context['args']['input'] ?? []);
+        $status = trim($input->string('status') ?? '');
 
         $order = $this->orderService->addNote(
             $this->resolveManagedOrder($context, $uriVariables),
-            (string) ($args['comment'] ?? $args['note'] ?? ''),
-            (bool) ($args['notifyCustomer'] ?? false),
-            (bool) ($args['visibleOnFront'] ?? false),
+            $input->string('comment', 'note') ?? '',
+            $input->bool('notifyCustomer') ?? false,
+            $input->bool('visibleOnFront') ?? false,
             $status !== '' ? $status : null,
         );
 

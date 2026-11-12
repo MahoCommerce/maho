@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
@@ -40,15 +40,13 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
     private function createCreditMemo(array $uriVariables, array $context): CreditMemo
     {
         $args = $context['args']['input'] ?? [];
-        $orderId = (int) ($uriVariables['orderId'] ?? $args['orderId'] ?? 0);
+        $input = RequestInput::of($args);
+        $orderId = (int) ($uriVariables['orderId'] ?? $input->int('orderId') ?? 0);
         if (!$orderId) {
             throw new \Mage_Core_Exception_Input()->addError('order_id', 'Order ID is required');
         }
 
-        $items = $args['items'] ?? null;
-        if ($items !== null && !is_array($items)) {
-            throw new BadRequestHttpException('Items must be a list of {orderItemId, qty} objects');
-        }
+        $items = $input->rows('items');
 
         $order = $this->orderService->getById($orderId);
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
@@ -59,8 +57,9 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
         // into grand total and never reset), over-refunding the order.
         $data = [];
         foreach (['adjustmentPositive' => 'adjustment_positive', 'adjustmentNegative' => 'adjustment_negative', 'shippingAmount' => 'shipping_amount'] as $field => $key) {
-            if (isset($args[$field])) {
-                $data[$key] = (float) $args[$field];
+            $amount = $input->float($field);
+            if ($amount !== null) {
+                $data[$key] = $amount;
             }
         }
 
@@ -68,13 +67,14 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
         $backToStock = null;
         if ($items !== null) {
             $data['qtys'] = [];
-            foreach ($items as $itemData) {
-                $entry = $this->parseOrderItemEntry($itemData);
+            foreach ($items as $item) {
+                $entry = $this->parseOrderItemEntry($item);
                 $orderItemId = $entry['orderItemId'];
                 $data['qtys'][$orderItemId] = $entry['qty'];
-                if (array_key_exists('backToStock', $itemData)) {
+                $flag = $item->bool('backToStock');
+                if ($flag !== null) {
                     $backToStock ??= [];
-                    if ($itemData['backToStock']) {
+                    if ($flag) {
                         $backToStock[$orderItemId] = true;
                     }
                 }
@@ -82,13 +82,14 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // refund() refuses an invoice that does not exist or is not an invoice of the order
-        $invoice = isset($args['invoiceId']) ? \Mage::getModel('sales/order_invoice')->load((int) $args['invoiceId']) : null;
+        $invoiceId = $input->int('invoiceId');
+        $invoice = $invoiceId !== null ? \Mage::getModel('sales/order_invoice')->load($invoiceId) : null;
 
         $creditmemo = \Mage::getService('sales/order_document')->refund(
             $order,
             $data,
-            $args['comment'] ?? null,
-            (bool) ($args['offlineRefund'] ?? true),
+            $input->string('comment'),
+            $input->bool('offlineRefund') ?? true,
             $backToStock,
             invoice: $invoice,
         );

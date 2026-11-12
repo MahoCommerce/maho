@@ -10,8 +10,7 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Trait;
 
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Maho\ApiPlatform\Http\RequestInput;
 
 /**
  * Read one entry of an API items list that names order items. Mage_Sales_Service_Order checks that the item is in the
@@ -20,23 +19,24 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 trait OrderItemsTrait
 {
     /**
+     * A value of the wrong type is a 400. A missing or invalid orderItemId or qty is a 422.
+     *
      * @return array{orderItemId: int, qty: float}
+     * @throws \Mage_Core_Exception_Input
      */
-    protected function parseOrderItemEntry(mixed $itemData): array
+    protected function parseOrderItemEntry(RequestInput $item): array
     {
-        if (!is_array($itemData)) {
-            throw new BadRequestHttpException('Each item must be an object with orderItemId and qty');
-        }
+        $orderItemId = $item->int('orderItemId');
+        $qty = $item->float('qty');
 
-        $orderItemId = $itemData['orderItemId'] ?? null;
-        if (!is_numeric($orderItemId) || (int) $orderItemId <= 0) {
-            throw new UnprocessableEntityHttpException('Each item must have a valid orderItemId');
+        $errors = new \Mage_Core_Exception_Input();
+        if ($orderItemId === null || $orderItemId <= 0) {
+            $errors->addError($item->pathOf('orderItemId'), 'Each item must have a valid orderItemId');
         }
-
-        $qty = $itemData['qty'] ?? null;
-        if (!is_numeric($qty)) {
-            throw new UnprocessableEntityHttpException('Each item must have a numeric qty');
+        if ($qty === null) {
+            $errors->addError($item->pathOf('qty'), 'Each item must have a numeric qty');
         }
+        $errors->throwIfErrors();
 
         return ['orderItemId' => (int) $orderItemId, 'qty' => (float) $qty];
     }

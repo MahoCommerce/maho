@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 namespace Mage\Checkout\Api;
 
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class CartRequest
 {
@@ -56,38 +56,42 @@ final class CartRequest
      * the lookup tries it first, then the name. When a region matches, the text becomes its name.
      *
      * @param array<string, mixed> $input
+     * @param string $path where $input sits in the request, for its errors
      * @return array<string, mixed>
      */
-    public static function mapAddress(array $input): array
+    public static function mapAddress(array $input, string $path = ''): array
     {
-        $regionId = $input['regionId'] ?? null;
-        $regionText = $input['region'] ?? null;
-        $countryId = $input['countryId'] ?? '';
+        $fields = RequestInput::of($input, $path);
+        $regionId = ($input['regionId'] ?? '') === '' ? null : $fields->int('regionId');
+        $regionText = $fields->string('region');
+        $countryId = $fields->string('countryId') ?? '';
 
         if (!$regionId && $regionText && $countryId !== '') {
-            $region = \Mage::getModel('directory/region')->loadByCodeOrName((string) $regionText, (string) $countryId);
+            $region = \Mage::getModel('directory/region')->loadByCodeOrName($regionText, $countryId);
             if ($region->getId()) {
                 $regionId = (int) $region->getId();
                 $regionText = $region->getName();
             }
         }
 
+        $street = is_string($input['street'] ?? null) ? [$input['street']] : ($fields->stringList('street') ?? []);
+
         return [
-            'prefix' => $input['prefix'] ?? null,
-            'firstname' => $input['firstName'] ?? '',
-            'middlename' => $input['middleName'] ?? null,
-            'lastname' => $input['lastName'] ?? '',
-            'suffix' => $input['suffix'] ?? null,
-            'company' => $input['company'] ?? null,
-            'street' => $input['street'] ?? [],
-            'city' => $input['city'] ?? '',
+            'prefix' => $fields->string('prefix'),
+            'firstname' => $fields->string('firstName') ?? '',
+            'middlename' => $fields->string('middleName'),
+            'lastname' => $fields->string('lastName') ?? '',
+            'suffix' => $fields->string('suffix'),
+            'company' => $fields->string('company'),
+            'street' => $street,
+            'city' => $fields->string('city') ?? '',
             'region' => $regionText,
             'region_id' => $regionId,
-            'postcode' => $input['postcode'] ?? '',
+            'postcode' => $fields->string('postcode') ?? '',
             'country_id' => $countryId,
-            'telephone' => $input['telephone'] ?? '',
-            'vat_id' => $input['vatId'] ?? null,
-            'save_in_address_book' => filter_var($input['saveInAddressBook'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            'telephone' => $fields->string('telephone') ?? '',
+            'vat_id' => $fields->string('vatId'),
+            'save_in_address_book' => $fields->bool('saveInAddressBook') ?? false,
         ];
     }
 
@@ -140,14 +144,7 @@ final class CartRequest
 
         // Bridge REST request body for Provider context (Processor does this later, but Provider runs first)
         if (empty($args) && $request instanceof \Symfony\Component\HttpFoundation\Request) {
-            try {
-                $body = \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]');
-            } catch (\JsonException) {
-                throw new BadRequestHttpException('Invalid JSON in request body');
-            }
-            if (is_array($body)) {
-                $args = $body;
-            }
+            $args = RequestInput::decode($request);
         }
 
         // On a guest-carts route the path segment is the identifier, so it wins
@@ -174,7 +171,7 @@ final class CartRequest
         // caller.
         $cartId = null;
         if (!$isGuestCartRoute) {
-            $cartId = isset($args['cartId']) ? (int) $args['cartId'] : null;
+            $cartId = RequestInput::toInt($args['cartId'] ?? null);
             if (!$cartId && !$maskedId && isset($uriVariables['id'])) {
                 $cartId = (int) $uriVariables['id'];
             }

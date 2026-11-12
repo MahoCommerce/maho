@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Mage\SalesRule\Api;
 
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\Exception\ExtraAttributesException;
@@ -66,7 +67,7 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
                 $settings[$field] = $value;
             } else {
                 // A value that is not an integer is out of range for the service
-                $settings[$field] = $value === null && $field !== 'qty' ? null : ($this->readInteger($value) ?? -1);
+                $settings[$field] = $value === null && $field !== 'qty' ? null : (RequestInput::toInt($value) ?? -1);
             }
         }
         if ($settings['qty'] > self::MAX_GENERATE_QTY) {
@@ -98,7 +99,7 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
         }
         $couponIds = [];
         foreach ($ids as $index => $id) {
-            $couponIds[] = $this->readInteger($id) ?? 0;
+            $couponIds[] = RequestInput::toInt($id) ?? 0;
             if (end($couponIds) < 1) {
                 throw new \Mage_Core_Exception_Input()->addError("ids[{$index}]", 'Each ID must be a positive integer');
             }
@@ -114,11 +115,5 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
         $coupon = $service->deleteGeneratedCoupon($rule, $couponId);
         $this->logApiActivity('coupon', 'delete', $coupon->getData(), null);
         return null;
-    }
-
-    private function readInteger(mixed $value): ?int
-    {
-        $number = is_bool($value) || !is_scalar($value) ? false : filter_var($value, FILTER_VALIDATE_INT);
-        return $number === false ? null : $number;
     }
 }

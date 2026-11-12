@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Mage\Contacts\Api;
 
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Service\StoreContext;
 
 class ContactFormProcessor extends \Maho\ApiPlatform\Processor
@@ -26,8 +27,13 @@ class ContactFormProcessor extends \Maho\ApiPlatform\Processor
             throw new \Mage_Core_Exception_NoSuchEntity(\Mage::helper('contacts')->__('Contact form is not available'));
         }
 
-        // The raw body, because the honeypot field has a name that the DTO does not know
-        \Mage::getService('contacts/message')->send($this->parseRequestBody($context['request'] ?? null), $storeId);
+        // The raw body, because the honeypot field has a name that the DTO does not know. Check the types of the fields that the service reads.
+        $body = $this->parseRequestBody($context['request'] ?? null);
+        $input = RequestInput::of($body);
+        foreach (['name', 'email', 'comment', 'message', 'telephone', 'phone'] as $field) {
+            $input->string($field);
+        }
+        \Mage::getService('contacts/message')->send($body, $storeId);
 
         $dto = new ContactForm();
         $dto->success = true;

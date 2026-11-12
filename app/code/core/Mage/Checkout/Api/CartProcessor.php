@@ -12,6 +12,7 @@ namespace Mage\Checkout\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Mage\Customer\Api\CustomAttributes;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Bundle\SecurityBundle\Security;
 use Maho\ApiPlatform\Service\StoreContext;
@@ -199,11 +200,12 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function addItemToCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $customPrice = $this->parseCustomPrice($args);
+        // The cart service decides who may set a custom price
+        $customPrice = RequestInput::of($args)->float('customPrice');
 
         $recreated = false;
         $quote = $this->resolveCartForItemAdd($context, $uriVariables, $recreated);
-        $product = $this->cartService->getProductBySku(is_scalar($args['sku'] ?? null) ? (string) $args['sku'] : '', (int) $quote->getStoreId());
+        $product = $this->cartService->getProductBySku(RequestInput::of($args)->string('sku') ?? '', (int) $quote->getStoreId());
         $this->cartService->addProduct($quote, $product, $this->buildBuyRequest($args), $this->actor(), $customPrice);
 
         $cart = $this->cartMapper->mapQuoteToCart($quote);
@@ -218,8 +220,9 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function buildBuyRequest(array $args): \Maho\DataObject
     {
         $buyRequest = new \Maho\DataObject();
-        if (isset($args['qty'])) {
-            $buyRequest->setQty((float) $args['qty']);
+        $qty = RequestInput::of($args)->float('qty');
+        if ($qty !== null) {
+            $buyRequest->setQty($qty);
         }
         foreach ([
             'options' => 'options',
@@ -241,20 +244,6 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             }
         }
         return $buyRequest;
-    }
-
-    /**
-     * Read the optional customPrice override. The cart service decides who may set it.
-     */
-    private function parseCustomPrice(array $args): ?float
-    {
-        if (!isset($args['customPrice']) || $args['customPrice'] === '') {
-            return null;
-        }
-        if (!is_numeric($args['customPrice'])) {
-            throw new BadRequestHttpException('customPrice must be a number');
-        }
-        return (float) $args['customPrice'];
     }
 
     /**
@@ -299,13 +288,14 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function updateCartItem(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $customPrice = $this->parseCustomPrice($args);
+        $input = RequestInput::of($args);
+        $customPrice = $input->float('customPrice');
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->updateItem(
             $quote,
-            (int) ($args['itemId'] ?? $uriVariables['itemId'] ?? 0),
-            isset($args['qty']) ? (float) $args['qty'] : null,
+            $input->int('itemId') ?? (int) ($uriVariables['itemId'] ?? 0),
+            $input->float('qty'),
             $customPrice,
             $this->actor(),
         );
@@ -321,7 +311,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $args = $context['args']['input'] ?? [];
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
-        $quote = $this->cartService->removeItem($quote, (int) ($args['itemId'] ?? $uriVariables['itemId'] ?? 0));
+        $quote = $this->cartService->removeItem($quote, RequestInput::of($args)->int('itemId') ?? (int) ($uriVariables['itemId'] ?? 0));
 
         return $this->cartMapper->mapQuoteToCart($quote);
     }
@@ -334,10 +324,10 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $args = $context['args']['input'] ?? [];
         // Accept both field names: GraphQL/authenticated callers send couponCode,
         // the guest REST body uses code.
-        $couponCode = $args['couponCode'] ?? $args['code'] ?? '';
+        $couponCode = RequestInput::of($args)->string('couponCode', 'code') ?? '';
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
-        $quote = $this->cartService->applyCoupon($quote, is_scalar($couponCode) ? (string) $couponCode : '', $this->actor());
+        $quote = $this->cartService->applyCoupon($quote, $couponCode, $this->actor());
 
         return $this->cartMapper->mapQuoteToCart($quote);
     }
@@ -376,9 +366,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function setBillingAddressOnCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        // FILTER_VALIDATE_BOOLEAN also normalizes stringly-typed clients
-        // ("true"/"false"/"1"/"0"), which strict_types would otherwise 500 on
-        $sameAsShipping = filter_var($args['sameAsShipping'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $sameAsShipping = RequestInput::of($args)->bool('sameAsShipping') ?? false;
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $addressData = CartRequest::mapAddress($args);
@@ -411,7 +399,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->resolveAndVerify($context, $uriVariables);
 
         if (is_array($address) && $address !== []) {
-            $estimate = \Mage::getModel('sales/quote_address')->addData(CartRequest::mapAddress($address));
+            $estimate = \Mage::getModel('sales/quote_address')->addData(CartRequest::mapAddress($address, 'address'));
             $quote = $this->cartService->estimateShipping($quote, $estimate);
         } else {
             // No address in the body: the saved rates can be older than the last change of the cart
@@ -468,21 +456,22 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function assignCustomerToCart(array $context): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $cartId = $args['cartId'] ?? null;
-        $maskedId = $args['maskedId'] ?? null;
-        $requestedCustomerId = $args['customerId'] ?? null;
+        $input = RequestInput::of($args);
+        $cartId = $input->int('cartId');
+        $maskedId = $input->string('maskedId');
+        $requestedCustomerId = $input->int('customerId');
 
         // Staff can assign any customer to any cart
         if ($this->isPrivilegedCartActor()) {
             $quote = $this->cartService->requireAccessible(
-                CartRequest::load($cartId ? (int) $cartId : null, is_string($maskedId) ? $maskedId : null),
-                is_string($maskedId),
+                CartRequest::load($cartId ?: null, $maskedId),
+                $maskedId !== null,
                 null,
                 true,
             );
             $customer = \Mage::getModel('customer/customer');
             if ($requestedCustomerId) {
-                $customer->load((int) $requestedCustomerId);
+                $customer->load($requestedCustomerId);
             }
             $quote = $this->cartService->assignCustomer($quote, $customer);
 
@@ -491,11 +480,11 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
 
         // Customer self-assignment (merge guest cart)
         $customerId = $this->requireCustomerId();
-        if ($requestedCustomerId && (int) $requestedCustomerId !== $customerId) {
+        if ($requestedCustomerId && $requestedCustomerId !== $customerId) {
             throw new \Mage_Core_Exception_Forbidden('Cannot assign a different customer to this cart');
         }
 
-        $quote = $this->cartService->merge(is_string($maskedId) ? $maskedId : '', $customerId, (int) \Mage::app()->getStore()->getId());
+        $quote = $this->cartService->merge($maskedId ?? '', $customerId, (int) \Mage::app()->getStore()->getId());
 
         return $this->cartMapper->mapQuoteToCart($quote);
     }
@@ -518,7 +507,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function applyGiftcardToCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $giftcardCode = is_scalar($args['giftcardCode'] ?? null) ? (string) $args['giftcardCode'] : '';
+        $giftcardCode = RequestInput::of($args)->string('giftcardCode') ?? '';
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->giftcardService()->applyToCart($quote, $giftcardCode, null, $this->actor());
@@ -532,7 +521,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function removeGiftcardFromCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $giftcardCode = is_scalar($args['giftcardCode'] ?? null) ? trim((string) $args['giftcardCode']) : '';
+        $giftcardCode = trim(RequestInput::of($args)->string('giftcardCode') ?? '');
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->giftcardService()->removeFromCart($quote, $giftcardCode);
@@ -547,10 +536,11 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function setGiftMessage(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
+        $input = RequestInput::of($args);
         $itemId = $this->resolveGiftMessageItemId($args, $uriVariables);
-        $sender = (string) ($args['sender'] ?? '');
-        $recipient = (string) ($args['recipient'] ?? '');
-        $message = (string) ($args['message'] ?? '');
+        $sender = $input->string('sender') ?? '';
+        $recipient = $input->string('recipient') ?? '';
+        $message = $input->string('message') ?? '';
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->setGiftMessage($quote, $itemId, $sender, $recipient, $message);
@@ -579,7 +569,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
      */
     private function resolveGiftMessageItemId(array $args, array $uriVariables): ?int
     {
-        $itemId = $args['itemId'] ?? $uriVariables['itemId'] ?? null;
+        $itemId = ($args['itemId'] ?? '') === '' ? $uriVariables['itemId'] ?? null : RequestInput::of($args)->int('itemId');
         return $itemId !== null && $itemId !== '' ? (int) $itemId : null;
     }
 

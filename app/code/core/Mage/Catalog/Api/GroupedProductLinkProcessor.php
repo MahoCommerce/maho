@@ -15,9 +15,9 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
 use Mage_Catalog_Model_Product_Type;
 use Mage_Catalog_Service_Product_Link as LinkService;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -49,15 +49,12 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
             return null;
         }
 
-        $body = $this->parseRequestBody($context['request'] ?? null);
         if ($operation instanceof Post) {
-            $service->addLink($product, LinkService::TYPE_GROUPED, self::childId($body), self::linkData($body), $websiteIds);
+            $input = RequestInput::of($this->parseRequestBody($context['request'] ?? null));
+            $service->addLink($product, LinkService::TYPE_GROUPED, self::childId($input), self::linkData($input), $websiteIds);
         } else {
             $links = [];
-            foreach ($body as $link) {
-                if (!is_array($link)) {
-                    throw new BadRequestHttpException('Each link must be an object');
-                }
+            foreach (RequestInput::decodeRows($context['request'] ?? null, 'link') as $link) {
                 $links[self::childId($link)] = self::linkData($link);
             }
             $service->setLinks($product, LinkService::TYPE_GROUPED, $links, $websiteIds);
@@ -66,20 +63,16 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
         return $this->provider->getGroupedLinks($this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_GROUPED));
     }
 
-    /**
-     * @param array<string, mixed> $link
-     */
-    private static function childId(array $link): int
+    private static function childId(RequestInput $link): int
     {
-        return (int) ($link['childProductId'] ?? $link['child_product_id'] ?? 0);
+        return $link->int('childProductId', 'child_product_id') ?? 0;
     }
 
     /**
-     * @param array<string, mixed> $link
      * @return array{qty: float, position: int}
      */
-    private static function linkData(array $link): array
+    private static function linkData(RequestInput $link): array
     {
-        return ['qty' => (float) ($link['qty'] ?? 1), 'position' => (int) ($link['position'] ?? 0)];
+        return ['qty' => $link->float('qty') ?? 1.0, 'position' => $link->int('position') ?? 0];
     }
 }

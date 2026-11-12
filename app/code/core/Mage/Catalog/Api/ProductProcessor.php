@@ -18,7 +18,7 @@ use Mage_Catalog_Model_Product_Status;
 use Mage_Catalog_Model_Product_Type;
 use Mage_Catalog_Model_Product_Visibility;
 use Mage_Catalog_Service_Product;
-use Mage_CatalogInventory_Service_Stock;
+use Mage\CatalogInventory\Api\StockUpdateProcessor;
 use Mage_Core_Exception_Input;
 use Mage_Core_Exception_NoSuchEntity;
 use Maho\ApiPlatform\Security\ApiUser;
@@ -124,12 +124,6 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
     {
         /** @var Mage_Catalog_Service_Product */
         return Mage::getService('catalog/product');
-    }
-
-    private static function stockService(): Mage_CatalogInventory_Service_Stock
-    {
-        /** @var Mage_CatalogInventory_Service_Stock */
-        return Mage::getService('cataloginventory/stock');
     }
 
     private function create(Product $data, ApiUser $user): Product
@@ -307,7 +301,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
      */
     private function toStockData(Product $data): array
     {
-        $stockData = self::stockService()->toColumns($data->stockData ?? []);
+        $stockData = StockUpdateProcessor::readColumns($data->stockData ?? [], 'stockData');
         if (!isset($stockData['qty']) && $data->stockQty !== null) {
             $stockData['qty'] = $data->stockQty;
         }

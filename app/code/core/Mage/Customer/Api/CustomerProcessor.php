@@ -13,6 +13,7 @@ namespace Mage\Customer\Api;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
 
@@ -32,6 +33,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         // injected here to keep those endpoints working over REST.
         $this->normalizeGraphQlInput($context);
         $args = $context['args']['input'] ?? [];
+        $input = RequestInput::of($args);
 
         return match (true) {
             $operationName === 'update_profile' => $this->updateProfile($data->firstname, $data->lastname, $data->email !== '' ? $data->email : null, $this->extractProfileFields($data), $data->customAttributes, $data->currentPassword),
@@ -47,8 +49,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             $operationName === 'two_factor_secret_rest', $operationName === 'createTwoFactorSecret' => $this->createTwoFactorSecret(),
             $operation instanceof Post => $this->createCustomer($data),
             $operationName === 'login' => $this->customerLogin($args),
-            $operationName === 'update' => $this->updateProfile($args['firstName'] ?? null, $args['lastName'] ?? null, $args['email'] ?? null, customAttributes: $args['customAttributes'] ?? null, currentPassword: $args['currentPassword'] ?? null),
-            $operationName === 'changePassword' => $this->changePassword($args['currentPassword'] ?? '', $args['newPassword'] ?? ''),
+            $operationName === 'update' => $this->updateProfile($input->string('firstName'), $input->string('lastName'), $input->string('email'), customAttributes: $input->array('customAttributes'), currentPassword: $input->string('currentPassword')),
+            $operationName === 'changePassword' => $this->changePassword($input->string('currentPassword') ?? '', $input->string('newPassword') ?? ''),
             // A stateless API has no session: the client logs out when it drops its tokens
             $operationName === 'logout' => new Customer(),
             default => $data instanceof Customer ? $data : new Customer(),
@@ -114,21 +116,22 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
      */
     private function customerLogin(array $args): Customer
     {
-        $email = (string) ($args['email'] ?? '');
-        $password = (string) ($args['password'] ?? '');
+        $input = RequestInput::of($args);
+        $email = $input->string('email') ?? '';
+        $password = $input->string('password') ?? '';
         if ($email === '' || $password === '') {
             throw new \Mage_Core_Exception_Input()->addError('email', 'Email and password are required');
         }
 
         StoreContext::ensureStore();
         $websiteId = (int) \Mage::app()->getStore(StoreContext::getStoreId())->getWebsiteId();
-        $twofaCode = $args['twofaCode'] ?? null;
+        $twofaCode = $input->string('twofaCode');
 
         return Customer::fromModel($this->getAuthentication()->authenticateInAnyWebsite(
             $email,
             $password,
             $websiteId,
-            is_scalar($twofaCode) ? trim((string) $twofaCode) : null,
+            $twofaCode === null ? null : trim($twofaCode),
         ));
     }
 
@@ -226,7 +229,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     private function forgotPassword(array $args): Customer
     {
         StoreContext::ensureStore();
-        $email = (string) ($args['email'] ?? '');
+        $email = RequestInput::of($args)->string('email') ?? '';
         if ($this->hasBackendAccess('customers')) {
             $this->getAuthentication()->sendPasswordResetLinkByStaff($email, $this->getWebsiteId());
         } else {
@@ -244,7 +247,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     private function requestMagicLink(array $args): Customer
     {
         StoreContext::ensureStore();
-        $email = (string) ($args['email'] ?? '');
+        $email = RequestInput::of($args)->string('email') ?? '';
         $this->getAuthentication()->sendMagicLink($email, $this->getWebsiteId());
 
         $dto = new Customer();
@@ -278,7 +281,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     private function sendConfirmationLink(array $args): Customer
     {
         StoreContext::ensureStore();
-        $email = (string) ($args['email'] ?? '');
+        $email = RequestInput::of($args)->string('email') ?? '';
         if ($this->hasBackendAccess('customers')) {
             $this->getAuthentication()->sendConfirmationLinkByStaff($email, $this->getWebsiteId());
         } else {
@@ -298,13 +301,14 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         if (!is_bool($args['twofaEnabled'] ?? null)) {
             throw new \Mage_Core_Exception_Input()->addError('twofaEnabled', 'twofaEnabled is required: true or false');
         }
-        $code = $args['twofaCode'] ?? null;
+        $input = RequestInput::of($args);
+        $code = $input->string('twofaCode');
         $customer = $this->getService()->getById($this->requireCustomerId());
         $this->getAuthentication()->setSecondFactor(
             $customer,
-            (string) ($args['currentPassword'] ?? ''),
+            $input->string('currentPassword') ?? '',
             $args['twofaEnabled'],
-            is_scalar($code) ? trim((string) $code) : null,
+            $code === null ? null : trim($code),
         );
 
         return Customer::fromModel($customer);
@@ -331,9 +335,10 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     private function resetPassword(array $args): Customer
     {
         StoreContext::ensureStore();
-        $email = (string) ($args['email'] ?? '');
-        $resetToken = (string) ($args['resetToken'] ?? '');
-        $newPassword = (string) ($args['newPassword'] ?? '');
+        $input = RequestInput::of($args);
+        $email = $input->string('email') ?? '';
+        $resetToken = $input->string('resetToken') ?? '';
+        $newPassword = $input->string('newPassword') ?? '';
         if ($email === '' || $resetToken === '' || $newPassword === '') {
             throw new \Mage_Core_Exception_Input()->addError('reset_token', 'Email, reset token, and new password are required');
         }
@@ -350,8 +355,9 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
      */
     private function createAccountFromOrder(array $args): Customer
     {
-        $accountToken = (string) ($args['accountToken'] ?? '');
-        $password = (string) ($args['password'] ?? '');
+        $input = RequestInput::of($args);
+        $accountToken = $input->string('accountToken') ?? '';
+        $password = $input->string('password') ?? '';
         if ($accountToken === '' || $password === '') {
             throw new \Mage_Core_Exception_Input()->addError('account_token', 'Account token and password are required.');
         }

@@ -13,6 +13,7 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 
@@ -37,12 +38,12 @@ final class ProductTierPriceProcessor extends \Maho\ApiPlatform\Processor
 
         $rows = [];
         if (!$operation instanceof DeleteOperationInterface) {
-            foreach (ProductGroupPriceProcessor::parsePriceRows($context['request'] ?? null, 'tier price') as $row) {
+            foreach (RequestInput::decodeRows($context['request'] ?? null, 'tier price') as $row) {
                 $rows[] = [
-                    'website_id' => (int) ($row['websiteId'] ?? $row['website_id'] ?? 0),
+                    'website_id' => $row->int('websiteId', 'website_id') ?? 0,
                     'cust_group' => ProductGroupPriceProcessor::parseGroupId($row),
-                    'price_qty' => (float) ($row['qty'] ?? 1),
-                    'price' => (float) ($row['price'] ?? 0),
+                    'price_qty' => $row->float('qty') ?? 1.0,
+                    'price' => $row->float('price') ?? 0.0,
                 ];
             }
         }

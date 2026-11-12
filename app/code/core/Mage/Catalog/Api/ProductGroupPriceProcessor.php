@@ -13,10 +13,9 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class ProductGroupPriceProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -39,11 +38,11 @@ final class ProductGroupPriceProcessor extends \Maho\ApiPlatform\Processor
 
         $rows = [];
         if (!$operation instanceof DeleteOperationInterface) {
-            foreach (self::parsePriceRows($context['request'] ?? null, 'group price') as $row) {
+            foreach (RequestInput::decodeRows($context['request'] ?? null, 'group price') as $row) {
                 $rows[] = [
-                    'website_id' => (int) ($row['websiteId'] ?? $row['website_id'] ?? 0),
+                    'website_id' => $row->int('websiteId', 'website_id') ?? 0,
                     'cust_group' => self::parseGroupId($row),
-                    'price' => (float) ($row['price'] ?? 0),
+                    'price' => $row->float('price') ?? 0.0,
                 ];
             }
         }
@@ -57,36 +56,10 @@ final class ProductGroupPriceProcessor extends \Maho\ApiPlatform\Processor
             : $this->provider->provide(new GetCollection(), ['productId' => $productId], []);
     }
 
-    /**
-     * Read the body of a price endpoint: a JSON array of objects, not the object that parseRequestBody() reads.
-     *
-     * @return list<array<string, mixed>>
-     * @throws BadRequestHttpException when the body is not a JSON array of objects
-     */
-    public static function parsePriceRows(?Request $request, string $label): array
+    public static function parseGroupId(RequestInput $row): int
     {
-        try {
-            $body = $request ? \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]') : [];
-        } catch (\JsonException) {
-            throw new BadRequestHttpException('Invalid JSON in request body');
-        }
-        if (!is_array($body)) {
-            throw new BadRequestHttpException("Request body must be an array of {$label}s");
-        }
-        foreach ($body as $row) {
-            if (!is_array($row)) {
-                throw new BadRequestHttpException("Each {$label} must be an object");
-            }
-        }
-        return array_values($body);
-    }
-
-    /**
-     * @param array<string, mixed> $row
-     */
-    public static function parseGroupId(array $row): int
-    {
-        $groupId = $row['customerGroupId'] ?? $row['customer_group_id'] ?? 'all';
-        return $groupId === 'all' ? \Mage_Customer_Model_Group::CUST_GROUP_ALL : (int) $groupId;
+        return ($row->string('customerGroupId', 'customer_group_id') ?? 'all') === 'all'
+            ? \Mage_Customer_Model_Group::CUST_GROUP_ALL
+            : (int) $row->int('customerGroupId', 'customer_group_id');
     }
 }

@@ -13,6 +13,7 @@ namespace Mage\Review\Api;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\Service\StoreContext;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
@@ -36,14 +37,14 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         StoreContext::ensureStore();
 
         if ($operation->getName() === 'submit') {
-            $args = $context['args']['input'] ?? [];
+            $input = RequestInput::of($context['args']['input'] ?? []);
             return $this->submitReview(
-                (int) $args['productId'],
-                $args['title'],
-                $args['detail'],
-                $args['nickname'],
-                isset($args['rating']) ? (int) $args['rating'] : null,
-                isset($args['captchaToken']) ? (string) $args['captchaToken'] : null,
+                $input->int('productId') ?? 0,
+                $input->string('title') ?? '',
+                $input->string('detail') ?? '',
+                $input->string('nickname') ?? '',
+                $input->int('rating'),
+                $input->string('captchaToken'),
             );
         }
 

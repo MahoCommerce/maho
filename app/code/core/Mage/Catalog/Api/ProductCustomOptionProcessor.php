@@ -15,6 +15,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
 use Mage_Catalog_Model_Product_Option;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 
@@ -48,64 +49,60 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
             return null;
         }
 
-        $this->applyBody($option, $this->parseRequestBody($context['request'] ?? null), $isNew);
+        $this->applyBody($option, RequestInput::of($this->parseRequestBody($context['request'] ?? null)), $isNew);
         $option = $service->save($product, $option);
 
         return $this->provider->provide(new GetCollection(), ['productId' => $productId, 'optionId' => (int) $option->getId()], []);
     }
 
     /**
-     * Write the fields of $body into $option. A new option gets the default of each field that $body leaves out.
-     *
-     * @param array<string, mixed> $body
+     * Write the fields of $input into $option. A new option gets the default of each field that $input leaves out.
      */
-    private function applyBody(Mage_Catalog_Model_Product_Option $option, array $body, bool $isNew): void
+    private function applyBody(Mage_Catalog_Model_Product_Option $option, RequestInput $input, bool $isNew): void
     {
-        $field = static fn(string $camel, string $snake): mixed => $body[$camel] ?? $body[$snake] ?? null;
-
-        if (isset($body['title']) || $isNew) {
-            $option->setTitle((string) ($body['title'] ?? ''));
+        if (($title = $input->string('title')) !== null || $isNew) {
+            $option->setTitle($title ?? '');
         }
-        if (isset($body['type']) || $isNew) {
-            $option->setType((string) ($body['type'] ?? ''));
+        if (($type = $input->string('type')) !== null || $isNew) {
+            $option->setType($type ?? '');
         }
-        if (isset($body['required']) || $isNew) {
-            $option->setIsRequire(!empty($body['required']));
+        if (($required = $input->bool('required')) !== null || $isNew) {
+            $option->setIsRequire($required ?? false);
         }
-        if (($sortOrder = $field('sortOrder', 'sort_order')) !== null || $isNew) {
-            $option->setSortOrder((int) $sortOrder);
+        if (($sortOrder = $input->int('sortOrder', 'sort_order')) !== null || $isNew) {
+            $option->setSortOrder($sortOrder ?? 0);
         }
-        if (isset($body['price'])) {
-            $option->setData('price', (float) $body['price']);
+        if (($price = $input->float('price')) !== null) {
+            $option->setData('price', $price);
         }
-        if (($priceType = $field('priceType', 'price_type')) !== null || $isNew) {
-            $option->setData('price_type', (string) ($priceType ?? 'fixed'));
+        if (($priceType = $input->string('priceType', 'price_type')) !== null || $isNew) {
+            $option->setData('price_type', $priceType ?? 'fixed');
         }
-        if (isset($body['sku'])) {
-            $option->setSku((string) $body['sku']);
+        if (($sku = $input->string('sku')) !== null) {
+            $option->setSku($sku);
         }
-        if (($maxCharacters = $field('maxCharacters', 'max_characters')) !== null) {
-            $option->setMaxCharacters((int) $maxCharacters);
+        if (($maxCharacters = $input->int('maxCharacters', 'max_characters')) !== null) {
+            $option->setMaxCharacters($maxCharacters);
         }
-        if (($fileExtensions = $field('fileExtensions', 'file_extensions')) !== null) {
-            $option->setFileExtension((string) $fileExtensions);
+        if (($fileExtensions = $input->string('fileExtensions', 'file_extensions')) !== null) {
+            $option->setFileExtension($fileExtensions);
         }
-        if (($imageSizeX = $field('imageSizeX', 'image_size_x')) !== null) {
-            $option->setImageSizeX((int) $imageSizeX);
+        if (($imageSizeX = $input->int('imageSizeX', 'image_size_x')) !== null) {
+            $option->setImageSizeX($imageSizeX);
         }
-        if (($imageSizeY = $field('imageSizeY', 'image_size_y')) !== null) {
-            $option->setImageSizeY((int) $imageSizeY);
+        if (($imageSizeY = $input->int('imageSizeY', 'image_size_y')) !== null) {
+            $option->setImageSizeY($imageSizeY);
         }
-        if (isset($body['values'])) {
+        $rows = $input->rows('values');
+        if ($rows !== null) {
             $values = [];
-            foreach (array_values((array) $body['values']) as $index => $value) {
-                $value = is_array($value) ? $value : [];
+            foreach ($rows as $index => $value) {
                 $values[] = [
-                    'title' => (string) ($value['title'] ?? ''),
-                    'price' => (float) ($value['price'] ?? 0),
-                    'price_type' => (string) ($value['priceType'] ?? $value['price_type'] ?? 'fixed'),
-                    'sku' => (string) ($value['sku'] ?? ''),
-                    'sort_order' => (int) ($value['sortOrder'] ?? $value['sort_order'] ?? $index),
+                    'title' => $value->string('title') ?? '',
+                    'price' => $value->float('price') ?? 0.0,
+                    'price_type' => $value->string('priceType', 'price_type') ?? 'fixed',
+                    'sku' => $value->string('sku') ?? '',
+                    'sort_order' => $value->int('sortOrder', 'sort_order') ?? $index,
                 ];
             }
             $option->setData('values', $values);

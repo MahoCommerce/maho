@@ -136,6 +136,24 @@ describe('POST /api/rest/v2/orders', function (): void {
         }
     });
 
+    it('names the address in the error of a field of the wrong type', function (): void {
+        $cartId = makeOrderCartWithItem();
+        if ($cartId === null) {
+            $this->markTestSkipped('Could not seed a cart for the customer');
+        }
+
+        $response = apiPost('/api/rest/v2/orders', [
+            'cartId' => $cartId,
+            'shippingAddress' => orderPlacementAddress(),
+            'billingAddress' => ['regionId' => [12]] + orderPlacementAddress(),
+            'paymentMethod' => 'cashondelivery',
+            'shippingMethod' => 'freeshipping_freeshipping',
+        ], customerToken());
+
+        expect($response['status'])->toBe(400);
+        expect($response['json']['details']['errors'][0]['field'] ?? null)->toBe('billingAddress.regionId');
+    });
+
     it('requires authentication', function (): void {
         $response = apiPost('/api/rest/v2/orders', [
             'cartId' => 1,

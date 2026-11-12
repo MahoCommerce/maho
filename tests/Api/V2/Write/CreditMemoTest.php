@@ -63,6 +63,31 @@ describe('POST /api/rest/v2/orders/{orderId}/credit-memos', function (): void {
         expect((float) ($response['json']['baseGrandTotal'] ?? 0))->toEqualWithDelta($expected, 0.01);
     });
 
+    it('reads the string "false" of backToStock as false', function (): void {
+        $orderId = seedRefundableOrder();
+        if (!$orderId) {
+            $this->markTestSkipped('Could not seed an invoiced, refundable order in this store');
+        }
+
+        $order = Mage::getModel('sales/order')->load($orderId);
+        $items = [];
+        foreach ($order->getAllVisibleItems() as $item) {
+            $items[] = [
+                'orderItemId' => (int) $item->getId(),
+                'qty' => (float) $item->getQtyOrdered(),
+                'backToStock' => 'false',
+            ];
+        }
+
+        $response = apiPost("/api/rest/v2/orders/{$orderId}/credit-memos", [
+            'items' => $items,
+            'offlineRefund' => true,
+        ], adminToken());
+
+        expect($response['status'])->toBeIn([200, 201]);
+        expect($response['json']['items'][0]['backToStock'])->toBeFalse();
+    });
+
     it('refunds an adjustment alone when items is an empty list', function (): void {
         $orderId = seedRefundableOrder();
         if (!$orderId) {

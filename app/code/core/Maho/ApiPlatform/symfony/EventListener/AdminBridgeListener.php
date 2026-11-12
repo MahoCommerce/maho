@@ -12,6 +12,7 @@ namespace Maho\ApiPlatform\EventListener;
 
 use Mage_Core_Model_App_Area;
 use Mage_Core_Model_Store_Exception;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Security\AdminSessionAuthenticator;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -54,11 +55,8 @@ class AdminBridgeListener
             return;
         }
 
-        try {
-            $input = (array) \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]');
-        } catch (\JsonException) {
-            $input = [];
-        }
+        // The controller answers a body that does not decode
+        $input = RequestInput::tryDecode($request) ?? [];
 
         $_SERVER['MAHO_ADMIN_USER_ID'] = $adminUser->getId();
         $_SERVER['MAHO_ADMIN_USERNAME'] = $adminUser->getUsername();
@@ -78,7 +76,7 @@ class AdminBridgeListener
     private function resolveStoreId(mixed $requested): int
     {
         if ($requested !== null) {
-            $requestedId = (int) $requested;
+            $requestedId = RequestInput::toInt($requested);
             if ($requestedId > 0) {
                 try {
                     $store = \Mage::app()->getStore($requestedId);

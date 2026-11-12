@@ -15,6 +15,7 @@ namespace Mage\Core\Api;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Exception\ValidationException;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\DataObject;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -39,12 +40,13 @@ final class ConfigSettingProcessor extends \Maho\ApiPlatform\Processor
         $user = $this->requireUser();
         $body = $operation instanceof DeleteOperationInterface ? [] : $this->parseRequestBody($context['request'] ?? null);
         $params = $body + $this->provider->requestFilters($context);
+        $input = RequestInput::of($params);
 
         $service = $this->provider->service();
-        $field = $service->getField((string) ($uriVariables['path'] ?? $params['path'] ?? ''));
+        $field = $service->getField((string) ($uriVariables['path'] ?? $input->string('path') ?? ''));
         $scope = $this->provider->resolveScope(
-            isset($params['scope']) ? (string) $params['scope'] : ConfigSetting::SCOPE_DEFAULT,
-            isset($params['scopeCode']) ? (string) $params['scopeCode'] : null,
+            $input->string('scope') ?? ConfigSetting::SCOPE_DEFAULT,
+            $input->string('scopeCode'),
             array_key_exists('scope', $body) || array_key_exists('scopeCode', $body),
         );
         $this->provider->assertSectionAllowed($field, $user);

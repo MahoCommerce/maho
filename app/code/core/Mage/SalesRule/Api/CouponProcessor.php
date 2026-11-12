@@ -14,6 +14,7 @@ namespace Mage\SalesRule\Api;
 
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Trait\PriceRuleFieldsTrait;
 
 final class CouponProcessor extends \Maho\ApiPlatform\Processor
@@ -47,11 +48,13 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
     {
         $name = $operation->getName();
         $isGraphQl = in_array($name, ['create', 'update', 'delete', 'validate'], true);
-        $input = $isGraphQl ? $context['args']['input'] ?? [] : ($operation instanceof Delete ? [] : $context['request']?->toArray() ?? []);
+        $input = $isGraphQl ? $context['args']['input'] ?? [] : ($operation instanceof Delete ? [] : $this->parseRequestBody($context['request'] ?? null));
         $id = $isGraphQl ? $this->parseGraphQlId($input['id'] ?? null) : (int) ($uriVariables['id'] ?? 0);
 
+        $fields = RequestInput::of($input);
+
         return match (true) {
-            str_contains($name, 'validate') => $this->validate((string) ($input['code'] ?? ''), isset($input['cartId']) ? (int) $input['cartId'] : null),
+            str_contains($name, 'validate') => $this->validate($fields->string('code') ?? '', $fields->int('cartId')),
             $name === 'delete', $operation instanceof Delete => $this->delete($id),
             $name === 'update', isset($uriVariables['id']) => $this->update($id, $input),
             default => $this->create($input),
@@ -66,14 +69,16 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         /** @var \Mage_SalesRule_Service_Rule $service */
         $service = \Mage::getService('salesrule/rule');
         $errors = new \Mage_Core_Exception_Input();
-        $code = (string) ($data['code'] ?? '');
+        $input = RequestInput::of($data);
+        $code = $input->string('code') ?? '';
+        $description = $input->string('description');
 
-        $rule = $service->newRule()->setIsActive()->setName($data['description'] ?? mb_substr("Coupon: {$code}", 0, 255))->setDescription($data['description'] ?? '');
+        $rule = $service->newRule()->setIsActive()->setName($description ?? mb_substr("Coupon: {$code}", 0, 255))->setDescription($description ?? '');
         // Without scope fields, a coupon is for all groups and for the website of the current store only
         $rule->setCustomerGroupIds(\Mage::getResourceModel('customer/group_collection')->getAllIds())
             ->setWebsiteIds([(int) \Maho\ApiPlatform\Service\StoreContext::getStore()->getWebsiteId()]);
         $this->readFields($rule, $data + ['discountType' => ''], $errors);
-        $rule->setDiscountAmount((float) ($data['discountAmount'] ?? 0));
+        $rule->setDiscountAmount($input->float('discountAmount') ?? 0.0);
 
         /** @var \Mage_SalesRule_Model_Coupon $coupon */
         $coupon = \Mage::getModel('salesrule/coupon');
@@ -94,16 +99,20 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         $service = \Mage::getService('salesrule/rule');
         [$coupon, $rule] = $this->loadWritable($service, $id);
         $errors = new \Mage_Core_Exception_Input();
+        $input = RequestInput::of($data);
 
-        if (isset($data['description'])) {
-            $rule->setDescription($data['description'])->setName($data['description']);
+        $description = $input->string('description');
+        if ($description !== null) {
+            $rule->setDescription($description)->setName($description);
         }
         $this->readFields($rule, $data, $errors);
-        if (isset($data['discountAmount'])) {
-            $rule->setDiscountAmount((float) $data['discountAmount']);
+        $discountAmount = $input->float('discountAmount');
+        if ($discountAmount !== null) {
+            $rule->setDiscountAmount($discountAmount);
         }
-        if (isset($data['code'])) {
-            $coupon->setCode((string) $data['code']);
+        $code = $input->string('code');
+        if ($code !== null) {
+            $coupon->setCode($code);
         }
         $this->readExpirationDate($coupon, $data, $errors);
         $service->saveCoupon($coupon, $rule, $errors);
@@ -144,23 +153,24 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
      */
     private function readFields(\Mage_SalesRule_Model_Rule $rule, array $data, \Mage_Core_Exception_Input $errors): void
     {
+        $input = RequestInput::of($data);
         foreach (self::RULE_FIELDS as $field => [$column, $type]) {
             if (array_key_exists($field, $data) && ($data[$field] !== null || $type !== 'bool')) {
-                $value = $data[$field];
                 $rule->setData($column, match ($type) {
-                    'bool' => (bool) $value,
-                    'int' => (int) $value,
-                    'float' => $value === null ? null : (float) $value,
-                    'date' => $value ?: null,
+                    'bool' => $input->bool($field),
+                    'int' => $input->int($field) ?? 0,
+                    'float' => $input->float($field),
+                    'date' => $input->string($field) ?: null,
                 });
             }
         }
 
-        if (isset($data['discountType'])) {
-            if (!isset(self::DISCOUNT_TYPE_MAP[$data['discountType']])) {
+        $discountType = $input->string('discountType');
+        if ($discountType !== null) {
+            if (!isset(self::DISCOUNT_TYPE_MAP[$discountType])) {
                 $errors->addError('discount_type', 'Invalid discount type. Must be one of: ' . implode(', ', array_keys(self::DISCOUNT_TYPE_MAP)));
             } else {
-                $rule->setSimpleAction(self::DISCOUNT_TYPE_MAP[$data['discountType']]);
+                $rule->setSimpleAction(self::DISCOUNT_TYPE_MAP[$discountType]);
             }
         }
         foreach (['customerGroupIds' => 'customer_group_ids', 'websiteIds' => 'website_ids'] as $field => $column) {
@@ -176,8 +186,9 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
                 $rule->setData($column, $ids);
             }
         }
-        if (isset($data['minimumSubtotal'])) {
-            $this->setMinimumSubtotalCondition($rule, (float) $data['minimumSubtotal']);
+        $minimumSubtotal = $input->float('minimumSubtotal');
+        if ($minimumSubtotal !== null) {
+            $this->setMinimumSubtotalCondition($rule, $minimumSubtotal);
         }
     }
 
@@ -191,9 +202,9 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         if (!array_key_exists('expirationDate', $data)) {
             return;
         }
-        $value = $data['expirationDate'];
+        $value = RequestInput::of($data)->string('expirationDate');
         try {
-            $coupon->setExpirationDate($value === null || $value === '' ? null : \Mage::app()->getLocale()->formatDateForDb((string) $value));
+            $coupon->setExpirationDate($value === null || $value === '' ? null : \Mage::app()->getLocale()->formatDateForDb($value));
         } catch (\Exception) {
             $errors->addError('expiration_date', 'Invalid date for expirationDate; use Y-m-d or Y-m-d H:i:s format.');
         }

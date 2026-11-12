@@ -13,6 +13,7 @@ namespace Mage\Customer\Api;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
@@ -36,7 +37,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         }
         if ($operationName === 'update' || $operationName === 'delete') {
             $args = $context['args']['input'] ?? [];
-            $addressId = $this->parseGraphQlId($args['id'] ?? null);
+            $addressId = $this->parseGraphQlId(RequestInput::of($args)->string('id'));
             if (!$addressId) {
                 throw new \Mage_Core_Exception_Input()->addError('id', 'Address ID is required');
             }
@@ -153,33 +154,36 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
      */
     private function fromGraphQlArgs(Address $dto, array $args): Address
     {
+        $input = RequestInput::of($args);
         $strings = [
             'firstName' => 'firstname', 'lastName' => 'lastname', 'city' => 'city',
             'postcode' => 'postcode', 'countryId' => 'countryId', 'telephone' => 'telephone',
         ];
         foreach ($strings as $arg => $property) {
-            if (isset($args[$arg])) {
-                $dto->{$property} = (string) $args[$arg];
+            $value = $input->string($arg);
+            if ($value !== null) {
+                $dto->{$property} = $value;
             }
         }
         if (isset($args['street'])) {
-            $dto->street = $args['street'];
+            $dto->street = is_array($args['street']) ? $input->stringList('street') : $input->string('street');
         }
-        foreach (['region' => 'region', 'company' => 'company'] as $arg => $property) {
-            if (array_key_exists($arg, $args)) {
-                $dto->{$property} = $args[$arg];
+        foreach (['region', 'company'] as $property) {
+            if (array_key_exists($property, $args)) {
+                $dto->{$property} = $input->string($property);
             }
         }
         if (array_key_exists('regionId', $args)) {
-            $dto->regionId = isset($args['regionId']) ? (int) $args['regionId'] : null;
+            $dto->regionId = $input->int('regionId');
         }
         foreach (['isDefaultBilling', 'isDefaultShipping'] as $flag) {
-            if (isset($args[$flag])) {
-                $dto->{$flag} = (bool) $args[$flag];
+            $value = $input->bool($flag);
+            if ($value !== null) {
+                $dto->{$flag} = $value;
             }
         }
         // Without the argument the stored values stay: apply() would check them against the form of the current group
-        $dto->customAttributes = $args['customAttributes'] ?? null;
+        $dto->customAttributes = $input->array('customAttributes');
         return $dto;
     }
 

@@ -16,6 +16,7 @@ use Mage_Catalog_Service_Product;
 use Mage_CatalogInventory_Model_Stock_Item;
 use Mage_CatalogInventory_Service_Stock;
 use Mage_Core_Exception;
+use Maho\ApiPlatform\Http\RequestInput;
 
 /**
  * Give a stock update of one product or of up to 100 products, by SKU, to the stock service.
@@ -34,7 +35,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         };
 
         return $name === 'bulkUpdate' || str_contains($name, 'bulk')
-            ? $this->updateMany(is_array($input['items'] ?? null) ? $input['items'] : [])
+            ? $this->updateMany(RequestInput::of($input)->list('items') ?? [])
             : $this->updateOne($input);
     }
 
@@ -55,12 +56,12 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
      */
     private function updateOne(array $input): StockUpdate
     {
-        $sku = (string) ($input['sku'] ?? '');
+        $sku = RequestInput::of($input)->string('sku') ?? '';
         if ($sku === '') {
             throw new \Mage_Core_Exception_Input()->addError('sku', 'SKU is required');
         }
         // A missing qty leaves the stored quantity as it is, so a request that only changes the flags keeps the stock
-        $columns = self::stock()->toColumns($input);
+        $columns = self::readColumns($input);
         if ($columns === []) {
             throw new Mage_Core_Exception('At least one stock field must be provided');
         }
@@ -76,7 +77,35 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * @param array<array-key, mixed> $items
+     * Return the stock change in $input as the stock service reads it. A value of the wrong type is a 400.
+     *
+     * @param array<array-key, mixed> $input
+     * @param string $path where $input sits in the request, for its errors
+     * @return array<string, float|int>
+     */
+    public static function readColumns(array $input, string $path = ''): array
+    {
+        $request = RequestInput::of($input, $path);
+        $values = [];
+        foreach (array_keys($input) as $key) {
+            $column = self::stock()->columnOf((string) $key);
+            if ($column === null) {
+                continue;
+            }
+            $value = match (Mage_CatalogInventory_Service_Stock::COLUMNS[$column]) {
+                'float' => $request->float((string) $key),
+                'int' => $request->int((string) $key),
+                default => $request->bool((string) $key),
+            };
+            if ($value !== null) {
+                $values[$column] = is_bool($value) ? (int) $value : $value;
+            }
+        }
+        return $values;
+    }
+
+    /**
+     * @param list<mixed> $items
      */
     private function updateMany(array $items): StockUpdate
     {
@@ -87,15 +116,16 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
             throw new Mage_Core_Exception('Maximum ' . self::MAX_BULK_ITEMS . ' items per bulk update');
         }
 
+        $rows = RequestInput::rowsOf($items, 'items');
         $changes = [];
         foreach ($items as $index => $item) {
-            $sku = (string) (is_array($item) ? $item['sku'] ?? '' : '');
+            $sku = $rows[$index]->string('sku') ?? '';
             if ($sku === '') {
                 throw new Mage_Core_Exception("Item at index {$index}: SKU is required");
             }
             $productId = self::products()->getIdBySku($sku)
                 ?? throw new Mage_Core_Exception("Item at index {$index}: Product not found for SKU: {$sku}");
-            $changes[$index] = ['sku' => $sku, 'id' => $productId, 'data' => self::stock()->toColumns($item)];
+            $changes[$index] = ['sku' => $sku, 'id' => $productId, 'data' => self::readColumns($item, "items[{$index}]")];
         }
         self::products()->assertIdsInStores(array_column($changes, 'id'), $this->requireUser()->getAllowedStoreIds());
 

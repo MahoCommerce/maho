@@ -55,28 +55,12 @@ class Mage_CatalogInventory_Service_Stock
     private const NON_NEGATIVE_COLUMNS = ['min_qty', 'min_sale_qty', 'max_sale_qty', 'notify_stock_qty', 'qty_increments'];
 
     /**
-     * Return the stock change in $input, as column => value. A key is a column of COLUMNS, in snake case or in camel
-     * case. An unknown key and a null value are left out. A flag becomes 0 or 1.
-     *
-     * @param array<array-key, mixed> $input
-     * @return array<string, float|int>
+     * Return the column of COLUMNS that the key $key names, in snake case or in camel case, or null for another key.
      */
-    public function toColumns(array $input): array
+    public function columnOf(string $key): ?string
     {
-        $columns = [];
-        foreach ($input as $key => $value) {
-            $column = strtolower((string) preg_replace('/[A-Z]/', '_$0', (string) $key));
-            $type = self::COLUMNS[$column] ?? null;
-            if ($type === null || $value === null) {
-                continue;
-            }
-            $columns[$column] = match ($type) {
-                'float' => (float) $value,
-                'int' => (int) $value,
-                default => (int) (bool) $value,
-            };
-        }
-        return $columns;
+        $column = strtolower((string) preg_replace('/[A-Z]/', '_$0', $key));
+        return isset(self::COLUMNS[$column]) ? $column : null;
     }
 
     /**

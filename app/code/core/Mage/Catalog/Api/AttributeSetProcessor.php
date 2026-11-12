@@ -14,9 +14,9 @@ namespace Mage\Catalog\Api;
 
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Serializer\Exception\ExtraAttributesException;
-use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 
 final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -71,9 +71,10 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
     private function create(array $body): AttributeSet
     {
         $this->rejectUnknownFields($body, ['name', 'skeletonId']);
+        $input = RequestInput::of($body);
         $set = $this->setService()->newSet(\Mage_Catalog_Model_Product::ENTITY)
-            ->setAttributeSetName($this->readString($body, 'name'));
-        $this->setService()->save($set, $this->readInteger($body, 'skeletonId'));
+            ->setAttributeSetName($input->string('name'));
+        $this->setService()->save($set, $input->int('skeletonId'));
         $this->logApiActivity('attribute_set', 'create', null, $set);
 
         return $this->toDto((int) $set->getId());
@@ -87,7 +88,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         $this->rejectUnknownFields($body, ['name', 'skeletonId']);
         $set = $this->setService()->getById($id, \Mage_Catalog_Model_Product::ENTITY);
         $oldData = $set->getData();
-        $this->setService()->save($set->setAttributeSetName($this->readString($body, 'name')));
+        $this->setService()->save($set->setAttributeSetName(RequestInput::of($body)->string('name')));
         $this->logApiActivity('attribute_set', 'update', $oldData, $set);
 
         return $this->toDto($id);
@@ -102,8 +103,9 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         $set = $this->setService()->getById($id, \Mage_Catalog_Model_Product::ENTITY);
         /** @var \Mage_Eav_Model_Entity_Attribute_Group $group */
         $group = \Mage::getModel('eav/entity_attribute_group');
-        $group->setAttributeGroupName($this->readString($body, 'name'))
-            ->setSortOrder($this->readInteger($body, 'sortOrder') ?? 0);
+        $input = RequestInput::of($body);
+        $group->setAttributeGroupName($input->string('name'))
+            ->setSortOrder($input->int('sortOrder') ?? 0);
         $oldData = $set->getData();
         $this->setService()->addGroup($set, $group);
         $this->logApiActivity('attribute_set', 'update', $oldData, $set);
@@ -117,13 +119,14 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
     private function assignAttribute(int $id, array $body): AttributeSet
     {
         $this->rejectUnknownFields($body, ['attributeId', 'attributeCode', 'groupId', 'groupName', 'sortOrder']);
+        $input = RequestInput::of($body);
         $set = $this->setService()->getById($id, \Mage_Catalog_Model_Product::ENTITY);
         $oldData = $set->getData();
         $this->setService()->assignAttribute(
             $set,
-            $this->readInteger($body, 'attributeId') ?? $this->readString($body, 'attributeCode'),
-            $this->readInteger($body, 'groupId') ?? $this->readString($body, 'groupName'),
-            $this->readInteger($body, 'sortOrder') ?? 0,
+            $input->int('attributeId') ?? $input->string('attributeCode'),
+            $input->int('groupId') ?? $input->string('groupName'),
+            $input->int('sortOrder') ?? 0,
         );
         $this->logApiActivity('attribute_set', 'update', $oldData, $set);
 
@@ -145,46 +148,6 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         if ($unknown !== []) {
             throw new ExtraAttributesException(array_map(strval(...), array_values($unknown)));
         }
-    }
-
-    /**
-     * Return the integer in $body[$field], or null when the field is missing or null. Refuse another type with a 400.
-     *
-     * @param array<string, mixed> $body
-     */
-    private function readInteger(array $body, string $field): ?int
-    {
-        $value = $body[$field] ?? null;
-        if ($value === null) {
-            return null;
-        }
-        $number = is_bool($value) || !is_scalar($value) ? false : filter_var($value, FILTER_VALIDATE_INT);
-        return $number === false ? throw self::wrongType($field, 'int', $value) : $number;
-    }
-
-    /**
-     * Return the text in $body[$field], or null when the field is missing or null. Refuse another type with a 400.
-     *
-     * @param array<string, mixed> $body
-     */
-    private function readString(array $body, string $field): ?string
-    {
-        $value = $body[$field] ?? null;
-        if ($value !== null && !is_string($value)) {
-            throw self::wrongType($field, 'string', $value);
-        }
-        return $value;
-    }
-
-    private static function wrongType(string $field, string $type, mixed $value): NotNormalizableValueException
-    {
-        return NotNormalizableValueException::createForUnexpectedDataType(
-            sprintf('The type of the "%s" attribute must be "%s", "%s" given.', $field, $type, get_debug_type($value)),
-            $value,
-            [$type],
-            $field,
-            true,
-        );
     }
 
     private function setService(): \Mage_Eav_Service_Attribute_Set

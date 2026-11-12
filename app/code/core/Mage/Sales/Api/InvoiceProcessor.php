@@ -13,7 +13,7 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Maho\ApiPlatform\Http\RequestInput;
 
 final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -36,38 +36,23 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
 
     private function createInvoice(array $uriVariables, array $context): Invoice
     {
-        $args = $context['args']['input'] ?? [];
-        $captureCase = $args['capture'] ?? null;
-        if ($captureCase !== null && !is_string($captureCase)) {
-            throw new BadRequestHttpException('capture must be a string');
-        }
-
-        $items = $args['items'] ?? null;
-        if ($items !== null && !is_array($items)) {
-            throw new BadRequestHttpException('Items must be a list of {orderItemId, qty} objects');
-        }
-
-        $comment = $args['comment'] ?? null;
-        if ($comment !== null && !is_string($comment)) {
-            throw new BadRequestHttpException('Comment must be a string');
-        }
-
-        $notifyCustomer = $args['notifyCustomer'] ?? false;
-        if (!is_scalar($notifyCustomer)) {
-            throw new BadRequestHttpException('notifyCustomer must be a boolean');
-        }
+        $input = RequestInput::of($context['args']['input'] ?? []);
+        $captureCase = $input->string('capture');
+        $items = $input->rows('items');
+        $comment = $input->string('comment');
+        $notifyCustomer = $input->bool('notifyCustomer') ?? false;
 
         $service = \Mage::getService('sales/order_document');
         $order = \Mage::getService('sales/order')->getById((int) ($uriVariables['orderId'] ?? 0));
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         $qtys = [];
-        foreach ($items ?? [] as $itemData) {
-            $entry = $this->parseOrderItemEntry($itemData);
+        foreach ($items ?? [] as $item) {
+            $entry = $this->parseOrderItemEntry($item);
             $qtys[$entry['orderItemId']] = $entry['qty'];
         }
 
-        return Invoice::fromModel($service->invoice($order, $qtys, $captureCase, $comment, (bool) $notifyCustomer));
+        return Invoice::fromModel($service->invoice($order, $qtys, $captureCase, $comment, $notifyCustomer));
     }
 
     /**

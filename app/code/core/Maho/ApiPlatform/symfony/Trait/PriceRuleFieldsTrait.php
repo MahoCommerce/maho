@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Trait;
 
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 
@@ -42,7 +43,7 @@ trait PriceRuleFieldsTrait
                 'text' => [is_string($value), is_string($value) ? trim($value) : null, 'a text'],
                 'text?' => [$value === null || is_string($value), $value, 'a text or null'],
                 'bool' => [is_bool($value) || $value === 0 || $value === 1, (bool) $value, 'true or false'],
-                'int' => [$this->readInteger($value) !== null, $this->readInteger($value), 'an integer'],
+                'int' => [RequestInput::toInt($value) !== null, RequestInput::toInt($value), 'an integer'],
                 'number' => [$this->readNumber($value) !== null, $this->readNumber($value), 'a number'],
                 'number?' => [$value === null || $this->readNumber($value) !== null, $this->readNumber($value), 'a number or null'],
                 'date' => [$value === null || is_string($value), $value === '' ? null : $value, 'a date in the format YYYY-MM-DD or null'],
@@ -84,20 +85,8 @@ trait PriceRuleFieldsTrait
         if (!is_array($value)) {
             return null;
         }
-        $ids = array_map($this->readInteger(...), array_values($value));
+        $ids = array_map(RequestInput::toInt(...), array_values($value));
         return in_array(null, $ids, true) ? null : array_values(array_unique($ids));
-    }
-
-    /**
-     * Return $value as an integer, or null when it is not an integer or a text of an integer.
-     */
-    protected function readInteger(mixed $value): ?int
-    {
-        if (is_bool($value) || !is_scalar($value)) {
-            return null;
-        }
-        $number = filter_var($value, FILTER_VALIDATE_INT);
-        return $number === false ? null : $number;
     }
 
     private function readNumber(mixed $value): ?float

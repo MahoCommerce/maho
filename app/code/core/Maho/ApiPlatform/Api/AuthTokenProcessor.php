@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Api;
 
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Service\JwtService;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Service\TokenBlacklist;
@@ -52,16 +53,8 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
     {
         StoreContext::ensureStore();
 
-        $request = $context['request'] ?? null;
-        if ($request === null) {
-            $body = [];
-        } else {
-            try {
-                $body = (array) \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]');
-            } catch (\JsonException) {
-                $body = [];
-            }
-        }
+        // A body that does not decode reads as empty, so it gets the invalid_request error of the grant
+        $body = RequestInput::tryDecode($context['request'] ?? null) ?? [];
 
         $this->checkRateLimitByIp('auth_token', 'auth_token_ip', 60);
 
@@ -78,8 +71,9 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleCustomerGrant(array $data): AuthToken
     {
-        $email = $data['email'] ?? $data['username'] ?? '';
-        $password = $data['password'] ?? '';
+        // A value of a wrong type reads as missing, so it gets the invalid_request error of the grant
+        $email = RequestInput::toString($data['email'] ?? $data['username'] ?? null) ?? '';
+        $password = RequestInput::toString($data['password'] ?? null) ?? '';
 
         $coreHelper = \Mage::helper('core');
 
@@ -170,8 +164,8 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleClientCredentialsGrant(array $data): AuthToken
     {
-        $clientId = $data['client_id'] ?? '';
-        $clientSecret = $data['client_secret'] ?? '';
+        $clientId = RequestInput::toString($data['client_id'] ?? null) ?? '';
+        $clientSecret = RequestInput::toString($data['client_secret'] ?? null) ?? '';
 
         if (empty($clientId) || empty($clientSecret)) {
             throw new BadRequestHttpException('client_id and client_secret are required', null, 0, ['X-Api-Error-Code' => 'invalid_request']);
@@ -214,8 +208,8 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleApiUserGrant(array $data): AuthToken
     {
-        $username = $data['username'] ?? '';
-        $apiKey = $data['api_key'] ?? '';
+        $username = RequestInput::toString($data['username'] ?? null) ?? '';
+        $apiKey = RequestInput::toString($data['api_key'] ?? null) ?? '';
 
         if (empty($username) || empty($apiKey)) {
             throw new BadRequestHttpException('username and api_key are required', null, 0, ['X-Api-Error-Code' => 'invalid_request']);

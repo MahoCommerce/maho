@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Maho\Giftcard\Api;
 
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
 
@@ -22,24 +23,22 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): GiftCard
     {
         $user = $this->requireUser();
-        $args = $context['args']['input'] ?? [];
+        $input = RequestInput::of($context['args']['input'] ?? []);
 
         return match (true) {
-            $operation->getName() === 'create' => $this->create($user, $args, null),
-            $operation->getName() === 'adjustBalance' => $this->adjustBalance($user, $args),
+            $operation->getName() === 'create' => $this->create($user, $input, null),
+            $operation->getName() === 'adjustBalance' => $this->adjustBalance($user, $input),
             $operation->getName() === 'giftcard_send_email' => $this->sendEmail($user, (int) $uriVariables['id']),
-            $operation->getName() === 'sendEmail' => $this->sendEmail($user, (int) ($args['giftCardId'] ?? 0)),
+            $operation->getName() === 'sendEmail' => $this->sendEmail($user, $input->int('giftCardId') ?? 0),
             isset($uriVariables['id']) => $this->update($user, (int) $uriVariables['id'], $data),
-            default => $this->create($user, [], $data),
+            default => $this->create($user, $input, $data),
         };
     }
 
     /**
-     * Create a card from the GraphQL $args or from the REST $data. A card with no websites gets the website of the request.
-     *
-     * @param array<string, mixed> $args
+     * Create a card from the GraphQL $input or from the REST $data. A card with no websites gets the website of the request.
      */
-    private function create(ApiUser $user, array $args, ?GiftCard $data): GiftCard
+    private function create(ApiUser $user, RequestInput $input, ?GiftCard $data): GiftCard
     {
         /** @var \Maho_Giftcard_Model_Giftcard $giftcard */
         $giftcard = \Mage::getModel('giftcard/giftcard');
@@ -48,18 +47,19 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
             // Clients before 1.1.0 send one websiteId
             $websiteIds = $data->websiteIds ?? ($data->websiteId !== null ? [$data->websiteId] : null);
         } else {
+            $initialBalance = $input->float('initialBalance') ?? 0.0;
             $giftcard->addData([
-                'balance' => (float) ($args['initialBalance'] ?? 0),
-                'initial_balance' => (float) ($args['initialBalance'] ?? 0),
-                'code' => $args['code'] ?? null,
-                'recipient_name' => $args['recipientName'] ?? null,
-                'recipient_email' => $args['recipientEmail'] ?? null,
-                'sender_name' => $args['senderName'] ?? null,
-                'sender_email' => $args['senderEmail'] ?? null,
-                'message' => $args['message'] ?? null,
-                'expires_at' => $args['expiresAt'] ?? null,
+                'balance' => $initialBalance,
+                'initial_balance' => $initialBalance,
+                'code' => $input->string('code'),
+                'recipient_name' => $input->string('recipientName'),
+                'recipient_email' => $input->string('recipientEmail'),
+                'sender_name' => $input->string('senderName'),
+                'sender_email' => $input->string('senderEmail'),
+                'message' => $input->string('message'),
+                'expires_at' => $input->string('expiresAt'),
             ]);
-            $websiteIds = isset($args['websiteIds']) ? (array) $args['websiteIds'] : null;
+            $websiteIds = $input->intList('websiteIds');
         }
         $giftcard->setWebsiteIds($websiteIds ?? [(int) StoreContext::getStore()->getWebsiteId()]);
         $this->assertAllWebsitesAllowed($giftcard->getWebsiteIds(), $user, 'gift card');
@@ -106,12 +106,9 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
         return GiftCard::fromModel($service->getById($id));
     }
 
-    /**
-     * @param array<string, mixed> $args
-     */
-    private function adjustBalance(ApiUser $user, array $args): GiftCard
+    private function adjustBalance(ApiUser $user, RequestInput $input): GiftCard
     {
-        $code = trim((string) ($args['code'] ?? ''));
+        $code = trim($input->string('code') ?? '');
         if ($code === '') {
             throw new \Mage_Core_Exception_Input()->addError('code', \Mage::helper('giftcard')->__('Gift card code is required'));
         }
@@ -120,7 +117,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
         $service = \Mage::getService('giftcard/giftcard');
         $giftcard = $service->getByCode($code);
         $this->assertAllWebsitesAllowed($giftcard->getWebsiteIds(), $user, 'gift card');
-        $service->update($giftcard, (float) ($args['newBalance'] ?? 0), null, $args['comment'] ?? null);
+        $service->update($giftcard, $input->float('newBalance') ?? 0.0, null, $input->string('comment'));
 
         return GiftCard::fromModel($giftcard);
     }

@@ -15,6 +15,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
 use Mage_Downloadable_Model_Link;
 use Mage_Downloadable_Model_Product_Type;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 
@@ -38,31 +39,31 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
         $product = $this->loadProduct($productId, Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE);
 
         $request = $context['request'] ?? null;
-        $body = $this->parseRequestBody($request);
-        $field = static fn(string $camel, string $snake): mixed => $body[$camel] ?? $body[$snake] ?? null;
+        $input = RequestInput::of($this->parseRequestBody($request));
         /** @var \Mage_Downloadable_Service_Link $service */
         $service = \Mage::getService('downloadable/link');
 
         if ($operation instanceof Post) {
             /** @var Mage_Downloadable_Model_Link $link */
             $link = \Mage::getModel('downloadable/link');
-            $link->setData('title', (string) ($body['title'] ?? ''));
-            $link->setPrice((float) ($body['price'] ?? 0));
-            $link->setSortOrder((int) $field('sortOrder', 'sort_order'));
-            $link->setNumberOfDownloads((int) $field('numberOfDownloads', 'number_of_downloads'));
-            $link->setLinkType((string) ($field('linkType', 'link_type') ?? 'url'));
-            $link->setData('is_shareable', (int) ($field('isShareable', 'is_shareable') ?? Mage_Downloadable_Model_Link::LINK_SHAREABLE_CONFIG));
+            $link->setData('title', $input->string('title') ?? '');
+            $link->setPrice($input->float('price') ?? 0.0);
+            $link->setSortOrder($input->int('sortOrder', 'sort_order') ?? 0);
+            $link->setNumberOfDownloads($input->int('numberOfDownloads', 'number_of_downloads') ?? 0);
+            $link->setLinkType($input->string('linkType', 'link_type') ?? 'url');
+            $link->setData('is_shareable', $input->int('isShareable', 'is_shareable') ?? Mage_Downloadable_Model_Link::LINK_SHAREABLE_CONFIG);
             if ($link->getLinkType() === 'url') {
-                $link->setLinkUrl((string) $field('linkUrl', 'link_url'));
+                $link->setLinkUrl($input->string('linkUrl', 'link_url') ?? '');
             }
-            if ($field('sampleType', 'sample_type') === 'url') {
+            if ($input->string('sampleType', 'sample_type') === 'url') {
                 $link->setSampleType('url');
-                $link->setSampleUrl((string) $field('sampleUrl', 'sample_url'));
+                $link->setSampleUrl($input->string('sampleUrl', 'sample_url') ?? '');
             }
             return $this->mapToDto($service->save($product, $link));
         }
 
-        $linkId = (int) ($field('linkId', 'link_id') ?? ($operation instanceof DeleteOperationInterface ? $request?->query->get('linkId') : $body['id'] ?? 0));
+        $linkId = $input->int('linkId', 'link_id')
+            ?? ($operation instanceof DeleteOperationInterface ? (int) $request?->query->get('linkId') : $input->int('id') ?? 0);
         $link = $service->getById($product, $linkId);
 
         if ($operation instanceof DeleteOperationInterface) {
@@ -70,27 +71,27 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
             return null;
         }
 
-        if (isset($body['title'])) {
-            $link->setData('title', (string) $body['title']);
+        if (($title = $input->string('title')) !== null) {
+            $link->setData('title', $title);
         }
-        if (isset($body['price'])) {
-            $link->setPrice((float) $body['price']);
+        if (($price = $input->float('price')) !== null) {
+            $link->setPrice($price);
         }
-        if (($sortOrder = $field('sortOrder', 'sort_order')) !== null) {
-            $link->setSortOrder((int) $sortOrder);
+        if (($sortOrder = $input->int('sortOrder', 'sort_order')) !== null) {
+            $link->setSortOrder($sortOrder);
         }
-        if (($downloads = $field('numberOfDownloads', 'number_of_downloads')) !== null) {
-            $link->setNumberOfDownloads((int) $downloads);
+        if (($downloads = $input->int('numberOfDownloads', 'number_of_downloads')) !== null) {
+            $link->setNumberOfDownloads($downloads);
         }
-        if (($linkUrl = $field('linkUrl', 'link_url')) !== null) {
-            $link->setLinkUrl((string) $linkUrl);
+        if (($linkUrl = $input->string('linkUrl', 'link_url')) !== null) {
+            $link->setLinkUrl($linkUrl);
         }
-        if (($isShareable = $field('isShareable', 'is_shareable')) !== null) {
-            $link->setData('is_shareable', (int) $isShareable);
+        if (($isShareable = $input->int('isShareable', 'is_shareable')) !== null) {
+            $link->setData('is_shareable', $isShareable);
         }
-        if (($sampleUrl = $field('sampleUrl', 'sample_url')) !== null) {
+        if (($sampleUrl = $input->string('sampleUrl', 'sample_url')) !== null) {
             $link->setSampleType($sampleUrl === '' ? null : 'url');
-            $link->setSampleUrl($sampleUrl === '' ? null : (string) $sampleUrl);
+            $link->setSampleUrl($sampleUrl === '' ? null : $sampleUrl);
         }
         $service->save($product, $link);
 
