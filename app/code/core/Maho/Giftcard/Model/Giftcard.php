@@ -44,6 +44,9 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         // Mage_Core_Model_Abstract sets _isObjectNew=true on first save and never
         // resets it, so isObjectNew() keeps returning true on subsequent saves. Use
         // !getId() instead so the creation defaults below run exactly once.
+        if ($this->getId() && $this->dataHasChangedFor('balance')) {
+            throw new LogicException('A save() does not write the balance of a saved gift card. Call adjustBalance(), use(), useUpTo() or refund().');
+        }
         if (!$this->getId()) {
             $this->isCreation = true;
             $helper = Mage::helper('giftcard');
@@ -351,6 +354,8 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             $balance = (float) $this->getData('balance');
             $orderId = $this->getPurchaseOrderId();
             $this->_addHistory(self::ACTION_CREATED, $balance, 0.0, $balance, $orderId ?: null, $this->creationComment);
+            // The next save() of this object compares the balance with the stored one
+            $this->setOrigData('balance', $this->getData('balance'));
         }
         if (is_array($this->getData('website_ids'))) {
             $this->unsetData('website_ids');

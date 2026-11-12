@@ -214,8 +214,12 @@ two transports follow the same rules:
 #### Who Writes the Balance
 
 Only `use()`, `useUpTo()`, `refund()` and `adjustBalance()` change the balance of a saved card.
-`save()` writes the balance of a new card only. For a saved card, it leaves the `balance` column
-out, so a save of a card that was loaded before a refund keeps the refund.
+`save()` writes the balance of a new card only:
+
+- A `save()` that changes the balance of a saved card throws a `LogicException` and saves nothing.
+  Call `adjustBalance()` instead. `Maho_Giftcard_Service_Giftcard::save()` does this for you.
+- A `save()` of a card that was loaded before a refund does not write the `balance` column, so the
+  refund stays.
 
 ### Creating Gift Cards Programmatically
 
