@@ -52,6 +52,10 @@ class OrderMutationHandler
 
         $quote = $this->loadAdminQuote($cartId);
 
+        $guestEmail = $input->string('guestEmail');
+        $orderNote = $input->string('orderNote');
+        $sendConfirmation = $input->bool('sendConfirmation');
+
         $cartService = \Mage::getService('checkout/cart');
         $shippingMethod = $input->string('shippingMethod') ?? '';
         if ($shippingMethod !== '' && !$quote->isVirtual()) {
@@ -65,10 +69,10 @@ class OrderMutationHandler
 
         $placeOrder = fn(): array => $this->orderService->place(
             $quote,
-            $input->string('guestEmail'),
-            $input->string('orderNote'),
+            $guestEmail,
+            $orderNote,
             \Mage_Checkout_Model_Actor::Staff,
-            sendConfirmation: $input->bool('sendConfirmation'),
+            sendConfirmation: $sendConfirmation,
         );
         // A caller in the admin scope places a backend order (issue #1337). Any other caller places in the store of the cart.
         $result = \Mage::app()->getStore()->isAdmin() ? $placeOrder() : $cartService->inQuoteStoreScope($quote, $placeOrder);

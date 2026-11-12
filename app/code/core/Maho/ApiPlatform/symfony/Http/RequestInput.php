@@ -16,8 +16,9 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 
 /**
- * Typed reads of request input that the serializer does not type: a raw request body, the GraphQL style input
- * of a processor, or a row of either. The serializer types only the fields of a resource, so a value under an
+ * Typed reads of request input that the serializer does not type.
+ *
+ * The input is a raw request body, the GraphQL style input of a processor, or a row of either. The serializer types only the fields of a resource, so a value under an
  * alias, a key the resource does not declare, or an entry of an array field can be of any JSON type.
  *
  * Each read takes the first of its keys that is set and not null, and returns null when there is none, so a

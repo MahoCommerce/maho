@@ -121,6 +121,7 @@ describe('Bundle Options, CRUD Lifecycle', function (): void {
         expect($response['status'])->toBe(422);
 
         $read = apiGet("/api/rest/v2/products/{$bundleId}/bundle-options");
+        expect($read['status'])->toBe(200);
         expect(getItems($read))->toBe([]);
     });
 
