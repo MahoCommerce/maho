@@ -498,15 +498,10 @@ class Maho_FeedManager_Model_Mapper
 
         // Stock information
         $stockItem = $product->getStockItem();
-        if ($stockItem) {
-            $data['qty'] = (int) $stockItem->getQty();
-            $data['is_in_stock'] = (int) $stockItem->getIsInStock();
-            $data['stock_status'] = $stockItem->getIsInStock() ? 1 : 0;
-        } else {
-            $data['qty'] = 0;
-            $data['is_in_stock'] = 0;
-            $data['stock_status'] = 0;
-        }
+        $isInStock = (int) Mage::helper('cataloginventory')->isInStock($product, $stockItem);
+        $data['qty'] = $stockItem ? (int) $stockItem->getQty() : 0;
+        $data['is_in_stock'] = $isInStock;
+        $data['stock_status'] = $isInStock;
 
         // Parent/variant relationship
         $parentId = $this->_getParentId($product);

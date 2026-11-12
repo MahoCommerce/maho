@@ -135,4 +135,27 @@ class Mage_CatalogInventory_Helper_Data extends Mage_Core_Helper_Abstract
         $qty = (float) $stockItem->getQty();
         return $qty > 0 && $qty <= Mage::getStoreConfigAsFloat(self::XML_PATH_STOCK_THRESHOLD_QTY) ? $qty : null;
     }
+
+    /**
+     * Whether the storefront shows the product as in stock in the website of the product store.
+     * The Stock Status index decides, so a composite product with no child in stock is out of stock,
+     * and so is a disabled product. Without an index row, such as in the admin store, the
+     * Stock Availability of the product decides.
+     */
+    public function isInStock(
+        Mage_Catalog_Model_Product $product,
+        ?Mage_CatalogInventory_Model_Stock_Item $stockItem = null,
+    ): bool {
+        if (!$product->hasData('is_salable') && $product->getId() && $product->getStore()->getWebsiteId()) {
+            Mage::getSingleton('cataloginventory/stock_status')->assignProduct($product);
+        }
+        $indexed = $product->getData('is_salable');
+        if ($indexed !== null) {
+            return (bool) $indexed;
+        }
+
+        $stockItem ??= $product->getStockItem()
+            ?? Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
+        return (bool) $stockItem->getIsInStock();
+    }
 }
