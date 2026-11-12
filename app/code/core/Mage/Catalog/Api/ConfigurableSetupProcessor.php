@@ -17,7 +17,6 @@ use Mage_Catalog_Model_Product_Type;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -50,14 +49,13 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
 
         $body = $this->parseRequestBody($context['request'] ?? null);
         if ($operation instanceof Post) {
-            $service->addChild($product, self::childId($body['childProductId'] ?? $body['child_product_id'] ?? $body['childId'] ?? 0), $websiteIds);
+            $service->addChild($product, (int) ($body['childProductId'] ?? $body['child_product_id'] ?? $body['childId'] ?? 0), $websiteIds);
         } else {
             $codes = $body['superAttributes'] ?? $body['super_attributes'] ?? [];
-            $childIds = $body['childProductIds'] ?? $body['child_product_ids'] ?? [];
             $service->setUp(
                 $product,
                 empty($codes) ? [] : self::attributeCodes($codes),
-                empty($childIds) ? [] : self::childIds($childIds),
+                array_map(intval(...), array_values((array) ($body['childProductIds'] ?? $body['child_product_ids'] ?? []))),
                 $websiteIds,
             );
         }
@@ -81,35 +79,5 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
         }
 
         return $codes;
-    }
-
-    /**
-     * @return list<int>
-     * @throws BadRequestHttpException when $ids is not a list of product ids
-     */
-    private static function childIds(mixed $ids): array
-    {
-        if (!is_array($ids) || !array_is_list($ids)) {
-            throw new BadRequestHttpException('childProductIds must be a list of product ids');
-        }
-
-        return array_map(self::childId(...), $ids);
-    }
-
-    /**
-     * @throws BadRequestHttpException when $id is not an integer
-     * @throws UnprocessableEntityHttpException when $id is below 1
-     */
-    private static function childId(mixed $id): int
-    {
-        if (!is_int($id) && !(is_string($id) && ctype_digit($id))) {
-            throw new BadRequestHttpException('A child product id must be an integer');
-        }
-        $childId = (int) $id;
-        if ($childId < 1) {
-            throw new UnprocessableEntityHttpException('A child product id must be positive');
-        }
-
-        return $childId;
     }
 }

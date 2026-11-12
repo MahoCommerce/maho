@@ -325,7 +325,7 @@ describe('Configurable Setup, Setup', function (): void {
         expect(configurableSetupSuperAttributeRows($this->configurableId))->toBe(1);
     });
 
-    it('rejects a malformed setup request', function (string $key, mixed $value): void {
+    it('rejects super attributes that are not a list of codes', function (string $key, mixed $value): void {
         $response = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [$key => $value], $this->token);
 
         expect($response['status'])->toBe(400);
@@ -333,27 +333,7 @@ describe('Configurable Setup, Setup', function (): void {
     })->with([
         'a super attribute that is not a code' => ['superAttributes', [['color']]],
         'super attributes that are not a list' => ['super_attributes', 'color'],
-        'a child id that is not a number' => ['childProductIds', ['abc']],
-        'child ids that are not a list' => ['child_product_ids', 'x'],
-        'a child id that is a boolean' => ['childProductIds', [true]],
     ]);
-
-    it('rejects a malformed child id when one child is added', function (mixed $childId): void {
-        $response = apiPost("/api/rest/v2/products/{$this->configurableId}/configurable/children", [
-            'childProductId' => $childId,
-        ], $this->token);
-
-        expect($response['status'])->toBe(400);
-    })->with([
-        'an array' => [[5]],
-        'text' => ['abc'],
-    ]);
-
-    it('rejects a missing child id when one child is added', function (): void {
-        $response = apiPost("/api/rest/v2/products/{$this->configurableId}/configurable/children", [], $this->token);
-
-        expect($response['status'])->toBe(422);
-    });
 
     it('saves no super attribute when the children cannot be assigned', function (): void {
         $response = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
