@@ -200,7 +200,8 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function addItemToCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $customPrice = $this->parseCustomPrice($args);
+        // The cart service decides who may set a custom price
+        $customPrice = RequestInput::of($args)->float('customPrice');
 
         $recreated = false;
         $quote = $this->resolveCartForItemAdd($context, $uriVariables, $recreated);
@@ -246,20 +247,6 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Read the optional customPrice override. The cart service decides who may set it.
-     */
-    private function parseCustomPrice(array $args): ?float
-    {
-        if (!isset($args['customPrice']) || $args['customPrice'] === '') {
-            return null;
-        }
-        if (!is_numeric($args['customPrice'])) {
-            throw new BadRequestHttpException('customPrice must be a number');
-        }
-        return (float) $args['customPrice'];
-    }
-
-    /**
      * Resolve the target cart for an add-to-cart. On the public guest path a
      * stale/expired/non-existent masked cart is transparently replaced with a
      * fresh guest cart (flagged via $recreated) so a returning shopper whose
@@ -302,7 +289,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     {
         $args = $context['args']['input'] ?? [];
         $input = RequestInput::of($args);
-        $customPrice = $this->parseCustomPrice($args);
+        $customPrice = $input->float('customPrice');
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->updateItem(
