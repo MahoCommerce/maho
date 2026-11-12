@@ -1562,12 +1562,13 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      */
     protected function _getTransactionDetails($transactionId)
     {
-        $requestBody = sprintf(
-            '<?xml version="1.0" encoding="utf-8"?>'
+        $requestFormat = '<?xml version="1.0" encoding="utf-8"?>'
             . '<getTransactionDetailsRequest xmlns="AnetApi/xml/v1/schema/AnetApiSchema.xsd">'
             . '<merchantAuthentication><name>%s</name><transactionKey>%s</transactionKey></merchantAuthentication>'
             . '<transId>%s</transId>'
-            . '</getTransactionDetailsRequest>',
+            . '</getTransactionDetailsRequest>';
+        $requestBody = sprintf(
+            $requestFormat,
             $this->getConfigData('login'),
             $this->getConfigData('trans_key'),
             $transactionId,
@@ -1583,7 +1584,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
 
         $debugData = [
             'url' => $uri,
-            'request' => $requestBody,
+            'request' => sprintf($requestFormat, '***', '***', $transactionId),
         ];
 
         try {
