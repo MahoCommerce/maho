@@ -407,7 +407,8 @@ it('refuses a gift card that another order spends during the placement, and send
         public function spend(Maho\Event\Observer $observer): void
         {
             foreach (array_keys(json_decode((string) $observer->getEvent()->getQuote()->getGiftcardCodes(), true) ?: []) as $code) {
-                ($this->giftcards[$code] ?? null)?->setBalance(0)->save();
+                // A save() does not write the balance of a saved card: spend it as an order does
+                ($this->giftcards[$code] ?? null)?->useUpTo(5.00);
             }
         }
     };

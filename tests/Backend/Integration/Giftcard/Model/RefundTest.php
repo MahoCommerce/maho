@@ -16,6 +16,8 @@ function giftcardRefundCard(float $balance = 100.0): Maho_Giftcard_Model_Giftcar
         ->setCode('REFUND-' . bin2hex(random_bytes(8)))
         ->setWebsiteIds([1])
         ->setBalance($balance)
+        // A new card needs a starting balance, also when it is created used with a balance of 0
+        ->setInitialBalance($balance > 0 ? $balance : 100.0)
         ->setExpiresAt(null)
         ->save();
 }
