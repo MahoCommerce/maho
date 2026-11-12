@@ -9,12 +9,12 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-it('keeps the DHL site ID and password out of the debug data of a tracking request', function () {
+it('keeps the DHL site ID and password out of the debug data of a tracking request', function (): void {
     $carrier = new class extends Mage_Usa_Model_Shipping_Carrier_Dhl_International {
         public array $debugData = [];
 
         #[\Override]
-        public function getConfigData($field)
+        public function getConfigData(mixed $field): ?string
         {
             return match ($field) {
                 'id' => '1',
@@ -25,7 +25,7 @@ it('keeps the DHL site ID and password out of the debug data of a tracking reque
         }
 
         #[\Override]
-        protected function _debug($debugData)
+        protected function _debug(mixed $debugData): void
         {
             $this->debugData = $debugData;
         }
@@ -39,12 +39,12 @@ it('keeps the DHL site ID and password out of the debug data of a tracking reque
     expect($request)->not->toContain('TEST_PASSWORD_MARKER');
 });
 
-it('keeps the DHL site ID and password out of the debug data of a rate request', function () {
+it('keeps the DHL site ID and password out of the debug data of a rate request', function (): void {
     $carrier = new class extends Mage_Usa_Model_Shipping_Carrier_Dhl_International {
         public array $debugData = [];
 
         #[\Override]
-        public function getConfigData($field)
+        public function getConfigData(mixed $field): ?string
         {
             return match ($field) {
                 'id' => '1',
@@ -55,13 +55,13 @@ it('keeps the DHL site ID and password out of the debug data of a rate request',
         }
 
         #[\Override]
-        protected function _debug($debugData)
+        protected function _debug(mixed $debugData): void
         {
             $this->debugData = $debugData;
         }
 
         #[\Override]
-        protected function _getQuotesFromServer($request)
+        protected function _getQuotesFromServer(mixed $request): string
         {
             return '<r/>';
         }

@@ -9,12 +9,12 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-it('keeps the merchant credentials out of the debug data of a transaction details request', function () {
+it('keeps the merchant credentials out of the debug data of a transaction details request', function (): void {
     $method = new class extends Mage_Paygate_Model_Authorizenet {
         public array $debugData = [];
 
         #[\Override]
-        public function getConfigData($field, $storeId = null)
+        public function getConfigData(mixed $field, mixed $storeId = null): ?string
         {
             return match ($field) {
                 'login' => 'TEST_LOGIN_MARKER',
@@ -25,7 +25,7 @@ it('keeps the merchant credentials out of the debug data of a transaction detail
         }
 
         #[\Override]
-        protected function _debug($debugData)
+        protected function _debug(mixed $debugData): static
         {
             $this->debugData = $debugData;
             return $this;
