@@ -114,6 +114,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
                     ->from(['c' => $creditmemoTable], ['customer_id' => 'o.customer_id', 'amount' => 'SUM(c.base_grand_total)'])
                     ->join(['o' => $salesTable], 'c.order_id = o.entity_id', [])
                     ->where('o.customer_id IS NOT NULL')
+                    ->where('o.state NOT IN (?)', ['canceled'])
                     ->group('o.customer_id');
 
                 if ($website) {

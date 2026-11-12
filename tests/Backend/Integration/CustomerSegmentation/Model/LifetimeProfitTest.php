@@ -102,4 +102,13 @@ describe('Lifetime profit condition of a customer segment', function () {
         expect(($this->profitSegment)('>=', '100')->getMatchingCustomerIds(1))->toContain($customerId)
             ->and(($this->profitSegment)('>', '100')->getMatchingCustomerIds(1))->not->toContain($customerId);
     });
+
+    test('leaves the refunds of a canceled order out of the profit', function () {
+        $customerId = ($this->createProfitCustomer)([
+            [Mage_Sales_Model_Order::STATE_COMPLETE, 100.00, []],
+            [Mage_Sales_Model_Order::STATE_CANCELED, 100.00, [60.00]],
+        ]);
+
+        expect(($this->profitSegment)('>=', '100')->getMatchingCustomerIds(1))->toContain($customerId);
+    });
 });
