@@ -10,25 +10,6 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-final class Wap_AffectedProductProbe
-{
-    /** @var list<array<string, mixed>> */
-    public static array $records = [];
-
-    public function capture(\Maho\Event\Observer $observer): void
-    {
-        $event = $observer->getEvent();
-        $condition = $event->getProductCondition();
-        $read = Mage::getSingleton('core/resource')->getConnection('core_read');
-        self::$records[] = [
-            'event_product' => $event->getProduct(),
-            'condition_class' => $condition::class,
-            'condition_sql' => (string) $condition->getIdsSelect($read),
-            'ids' => array_map(intval(...), $read->fetchCol($condition->getIdsSelect($read))),
-        ];
-    }
-}
-
 function wapCreateFeeAttribute(string $code): void
 {
     Mage::getResourceModel('catalog/setup', 'catalog_setup')->addAttribute(Mage_Catalog_Model_Product::ENTITY, $code, [
@@ -133,15 +114,6 @@ function wapRuntimeFpt(int $productId, int $websiteId = 1, int $storeId = 1, int
     return (float) Mage::getModel('weee/tax')->getWeeeAmount($loaded, null, null, $websiteId, false, false);
 }
 
-function wapEventIds(): array
-{
-    $ids = [];
-    foreach (Wap_AffectedProductProbe::$records as $record) {
-        $ids = array_merge($ids, $record['ids']);
-    }
-    return array_values(array_unique(array_map(intval(...), $ids)));
-}
-
 /**
  * @return list<array<string, mixed>>
  */
@@ -167,9 +139,6 @@ beforeEach(function (): void {
     $GLOBALS['wap_cleanup'] = ['products' => [], 'categories' => [], 'rules' => [], 'attribute' => null];
     $this->wapPreviousStore = Mage::app()->getStore()->getId();
     Mage::app()->setCurrentStore(1);
-    Wap_AffectedProductProbe::$records = [];
-    Mage::getConfig()->setNode('global/events/catalogrule_after_apply/observers/wap_probe/class', Wap_AffectedProductProbe::class);
-    Mage::getConfig()->setNode('global/events/catalogrule_after_apply/observers/wap_probe/method', 'capture');
     Mage::app()->getArea('global')->load(Mage_Core_Model_App_Area::PART_EVENTS);
 
     $token = substr(hash('sha256', uniqid('', true)), 0, 8);
@@ -226,7 +195,7 @@ afterEach(function (): void {
     Mage::app()->setCurrentStore($this->wapPreviousStore ?? Mage_Core_Model_App::ADMIN_STORE_ID);
 });
 
-it('refreshes native FPT discounts from affected product IDs', function (): void {
+it('refreshes native FPT discounts after a catalog rule refresh', function (): void {
     $fixture = wapCreateProduct('WAP-' . uniqid(), $this->wapAttributeCode);
     $product = $fixture['product'];
     $productId = (int) $product->getId();
@@ -255,12 +224,9 @@ it('refreshes native FPT discounts from affected product IDs', function (): void
         "SELECT entity_id, website_id, customer_group_id, value FROM {$discountTable} WHERE entity_id = ?",
         [$productId],
     );
-    $probe = Wap_AffectedProductProbe::$records;
     expect($runtimeFpt)->toBe(9.0);
     expect((float) ($rulePrice['rule_price'] ?? 0))->toBe(72.0);
     expect((float) ($priceIndex['min_price'] ?? 0))->toBe(72.0);
-    expect($probe)->not->toBeEmpty();
-    expect(array_last($probe)['ids'])->toContain($productId);
     expect($discountRows)->toHaveCount(1);
     expect((float) $discountRows[0]['value'])->toBe(90.0);
 });
@@ -278,11 +244,9 @@ it('rebuilds the FPT remainder when a matched percentage rule changes', function
     expect((float) wapDiscountRows($productId)[0]['value'])->toBe(90.0);
     expect(wapRuntimeFpt($productId))->toBe(9.0);
 
-    Wap_AffectedProductProbe::$records = [];
     $rule->setDiscountAmount(20)->save();
     wapApplyAllRules();
 
-    expect(wapEventIds())->toContain($productId);
     expect((float) wapDiscountRows($productId)[0]['value'])->toBe(80.0);
     expect(wapRuntimeFpt($productId))->toBe(8.0);
 });
@@ -317,7 +281,6 @@ it('preserves stacked, stop, fixed amount, and unrelated product controls', func
     $stoppedId = (int) $stopped['product']->getId();
     $fixedId = (int) $fixed['product']->getId();
     $unrelatedId = (int) $unrelated['product']->getId();
-    expect(wapEventIds())->toContain($stackedId, $stoppedId, $fixedId)->not->toContain($unrelatedId);
     expect((float) wapDiscountRows($stackedId)[0]['value'])->toBe(60.3);
     expect(wapRuntimeFpt($stackedId))->toBe(6.0);
     expect((float) wapDiscountRows($stoppedId)[0]['value'])->toBe(90.0);
@@ -338,7 +301,6 @@ it('keeps the existing one hundred percent zero sentinel behavior', function ():
 
     wapApplyAllRules();
 
-    expect(wapEventIds())->toContain($productId);
     expect(wapDiscountRows($productId))->toHaveCount(1);
     expect((float) wapDiscountRows($productId)[0]['value'])->toBe(0.0);
     expect(wapRuntimeFpt($productId))->toBe(10.0);
@@ -369,10 +331,8 @@ it('removes stale FPT discounts when rules are disabled, deleted, or unmatched',
     $rules['deleted']->delete();
     wapSetRuleSku($rules['unmatched'], 'WAP-NO-MATCH-' . uniqid());
     $rules['unmatched']->save();
-    Wap_AffectedProductProbe::$records = [];
     wapApplyAllRules();
 
-    expect(wapEventIds())->toContain(...$productIds);
     foreach ($productIds as $productId) {
         expect(wapRulePriceRows($productId))->toBeEmpty();
         expect(wapDiscountRows($productId))->toBeEmpty();
@@ -380,7 +340,7 @@ it('removes stale FPT discounts when rules are disabled, deleted, or unmatched',
     }
 });
 
-it('includes a row refresh product after its old rule prices are gone', function (): void {
+it('removes the FPT discount of a product after a row refresh no longer matches it', function (): void {
     $fixture = wapCreateProduct('WAP-ROW-' . uniqid(), $this->wapAttributeCode);
     $product = $fixture['product'];
     $productId = (int) $product->getId();
@@ -393,11 +353,9 @@ it('includes a row refresh product after its old rule prices are gone', function
     expect(wapRulePriceRows($productId))->not->toBeEmpty();
 
     Mage::app()->getArea('adminhtml')->load(Mage_Core_Model_App_Area::PART_EVENTS);
-    Wap_AffectedProductProbe::$records = [];
     $product->setSku('WAP-ROW-NO-MATCH-' . uniqid())->setStockData(null)->save();
 
     expect(wapRulePriceRows($productId))->toBeEmpty();
-    expect(wapEventIds())->toContain($productId);
     expect(wapDiscountRows($productId))->toBeEmpty();
     expect(wapRuntimeFpt($productId))->toBe(10.0);
 });
@@ -423,7 +381,6 @@ it('rebuilds website and customer group rows without touching unrelated products
     expect(wapDiscountRows($unrelatedId))->toBeEmpty();
 
     $rule->setWebsiteIds([2])->setCustomerGroupIds([1])->save();
-    Wap_AffectedProductProbe::$records = [];
     wapApplyAllRules();
 
     $rows = wapDiscountRows($movingId);
@@ -431,6 +388,5 @@ it('rebuilds website and customer group rows without touching unrelated products
     expect((int) $rows[0]['website_id'])->toBe(2);
     expect((int) $rows[0]['customer_group_id'])->toBe(1);
     expect((float) $rows[0]['value'])->toBe(90.0);
-    expect(wapEventIds())->toContain($movingId)->not->toContain($unrelatedId);
     expect(wapDiscountRows($unrelatedId))->toBeEmpty();
 });

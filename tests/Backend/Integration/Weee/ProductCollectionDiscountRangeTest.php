@@ -90,7 +90,6 @@ function widcRangeCounts(int $categoryId, int $range, int $productId): array
         ->setLayer($layer)
         ->setWebsiteId(1)
         ->setCustomerGroupId(0);
-    // Build the public filter items used by category layered navigation.
     $items = $filter->getItems();
     expect($items)->not->toBeEmpty();
 
@@ -220,8 +219,7 @@ it('keeps zero and one hundred percent rules aligned with runtime behavior', fun
     expect($counts)->toBe([$bucket => 1]);
 })->with([
     'zero percent leaves FPT unchanged' => [0.0, 100.0, 10.0],
-    // Runtime treats the stored zero as its current no-discount sentinel. Preserve that behavior;
-    // this case does not assert that 100% catalog-rule discounts should discount FPT.
+    // The runtime reads a stored 0 as no discount. This case keeps that behavior.
     'one hundred percent follows current runtime sentinel behavior' => [100.0, 0.0, 10.0],
 ]);
 
@@ -269,6 +267,31 @@ it('keeps catalog price ranges aligned when stacked percentage rules leave a fra
     $loaded = Mage::getModel('catalog/product')->setStoreId(1)->load((int) $product->getId())->setCustomerGroupId(0);
     $runtimeAmount = (float) Mage::getModel('weee/tax')->getWeeeAmount($loaded, null, null, 1, false, false);
     expect($runtimeAmount)->toBe(6.0);
+    $bucket = widcExpectedBucket((int) $product->getId(), $runtimeAmount, 1);
+    expect(widcRangeCounts((int) $fixture['category']->getId(), 1, (int) $product->getId()))->toBe([$bucket => 1]);
+});
+
+it('treats a negative stored FPT remainder as a full discount in the catalog price range', function (): void {
+    $fixture = widcCreateProduct('WIDC-NEG-' . uniqid(), $this->widcAttributeCode);
+    $product = $fixture['product'];
+    $GLOBALS['widc_cleanup']['categories'][] = (int) $fixture['category']->getId();
+    $GLOBALS['widc_cleanup']['products'][] = (int) $product->getId();
+    foreach ([10.0, 150.0] as $index => $amount) {
+        $rule = widcCreateRule($product, 'WIDC negative ' . $index . ' ' . uniqid(), 'by_percent', $amount, $index);
+        $GLOBALS['widc_cleanup']['rules'][] = (int) $rule->getId();
+    }
+
+    $read = Mage::getSingleton('core/resource')->getConnection('core_read');
+    $discountTable = Mage::getSingleton('core/resource')->getTableName('weee/discount');
+    $storedRow = $read->fetchRow(
+        "SELECT value FROM {$discountTable} WHERE entity_id = ? AND website_id = ? AND customer_group_id = ?",
+        [(int) $product->getId(), 1, 0],
+    );
+    expect($storedRow)->not->toBeFalse();
+    expect((float) $storedRow['value'])->toBe(-45.0);
+    $loaded = Mage::getModel('catalog/product')->setStoreId(1)->load((int) $product->getId())->setCustomerGroupId(0);
+    $runtimeAmount = (float) Mage::getModel('weee/tax')->getWeeeAmount($loaded, null, null, 1, false, false);
+    expect($runtimeAmount)->toBe(0.0);
     $bucket = widcExpectedBucket((int) $product->getId(), $runtimeAmount, 1);
     expect(widcRangeCounts((int) $fixture['category']->getId(), 1, (int) $product->getId()))->toBe([$bucket => 1]);
 });
