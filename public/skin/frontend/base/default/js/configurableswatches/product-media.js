@@ -10,6 +10,7 @@ var ConfigurableMediaImages = {
 
     // Only the image of the last call shows. An earlier image that loads late stays hidden.
     swapGeneration: 0,
+    listGeneration: {},
 
     arrayIntersect: function(a, b) {
         return a.filter(value => b.includes(value));
@@ -198,8 +199,11 @@ var ConfigurableMediaImages = {
 
     swapListImage: function(productId, imageObject) {
         var originalImage = document.querySelector('#product-collection-image-' + productId);
+        var generation = ConfigurableMediaImages.listGeneration[productId] = (ConfigurableMediaImages.listGeneration[productId] || 0) + 1;
 
         if (imageObject.complete) { // Swap image immediately
+            originalImage.parentNode.classList.remove('loading');
+
             // Remove old image
             originalImage.classList.add('hidden');
             document.querySelectorAll('.product-collection-image-' + productId).forEach(function (image) {
@@ -216,6 +220,10 @@ var ConfigurableMediaImages = {
 
             // Wait until image is loaded
             imageObject.addEventListener('load', function () {
+                if (generation !== ConfigurableMediaImages.listGeneration[productId]) {
+                    return;
+                }
+
                 // Remove spinner
                 wrapper.classList.remove('loading');
 
@@ -227,7 +235,7 @@ var ConfigurableMediaImages = {
 
                 // Add new image
                 originalImage.parentNode.insertBefore(imageObject, originalImage.nextSibling);
-            });
+            }, { once: true });
         }
     },
 
