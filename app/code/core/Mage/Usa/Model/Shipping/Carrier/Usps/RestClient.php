@@ -151,9 +151,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_RestClient
     {
         $accessToken = $this->oauthClient->getAccessToken();
 
-        $client = \Maho\Http\Client::create([
-            'timeout' => 30,
-        ]);
+        $client = $this->_createHttpClient();
 
         $headers = [
             'Authorization' => 'Bearer ' . $accessToken,
@@ -224,15 +222,11 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_RestClient
                 'code' => $e->getCode(),
             ];
 
-            // A rejected HTTP status throws our own exception, so retain the response too.
+            // The status check throws before the body is read. Read the body here to get the USPS error.
             $errorMessage = null;
             try {
-                $errorResponse = $response ?? null;
-                if ($errorResponse === null && method_exists($e, 'getResponse')) {
-                    $errorResponse = $e->getResponse();
-                }
-                if ($errorResponse !== null) {
-                    $errorContent = $errorResponse->getContent(false);
+                if (isset($response)) {
+                    $errorContent = $response->getContent(false);
                     $debugData['error']['response_body'] = $errorContent;
                     $errorData = Mage::helper('core')->jsonDecode($errorContent);
                     if (isset($errorData['error'])) {
@@ -253,5 +247,10 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_RestClient
 
             throw $e;
         }
+    }
+
+    protected function _createHttpClient(): \Symfony\Contracts\HttpClient\HttpClientInterface
+    {
+        return \Maho\Http\Client::create(['timeout' => 30]);
     }
 }
