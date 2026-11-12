@@ -96,35 +96,20 @@ final class ImageTool
         if (!is_string($bytes) || $bytes === '' || @getimagesizefromstring($bytes) === false) {
             return ['ok' => false, 'text' => 'The provider returned no image.'];
         }
-        $info = getimagesizefromstring($bytes);
-        $extension = match ($info['mime'] ?? '') {
-            'image/jpeg' => 'jpg',
-            'image/webp' => 'webp',
-            'image/gif' => 'gif',
-            default => 'png',
-        };
 
-        $helper = \Mage::helper('cms/wysiwyg_images');
-        $mount = $helper->getMount();
-        $directory = $helper->getStorageRootPath() . '/' . self::FOLDER;
-        $file = $name . '.' . $extension;
-        $counter = 1;
-        while ($mount->fileExists($directory . '/' . $file)) {
-            $file = $name . '-' . (++$counter) . '.' . $extension;
-        }
-        $mediaPath = $directory . '/' . $file;
         try {
-            $mount->write($mediaPath, $bytes);
-        } catch (\League\Flysystem\FilesystemException) {
+            $image = \Mage::getService('cms/media')->saveImage(self::FOLDER, $bytes, $name);
+        } catch (\Mage_Core_Exception|\League\Flysystem\FilesystemException) {
             return ['ok' => false, 'text' => 'The image cannot be saved in the media library.'];
         }
+        $mediaPath = $image['path'];
 
         return ['ok' => true, 'text' => sprintf(
             'Image saved as %s (%dx%d). URL: %s. Directive for page content: <img src="{{media url=\\"%s\\"}}" alt="">. It is in the media library under wysiwyg/%s.',
             $mediaPath,
-            (int) ($info[0] ?? 0),
-            (int) ($info[1] ?? 0),
-            $mount->publicUrl($mediaPath),
+            $image['width'],
+            $image['height'],
+            \Mage::helper('cms/wysiwyg_images')->getMount()->publicUrl($mediaPath),
             $mediaPath,
             self::FOLDER,
         )];

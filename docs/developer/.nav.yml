@@ -18,8 +18,10 @@ nav:
   - Markdown renderers: markdown-renderers.md
 - Core & architecture:
   - Routing: routing.md
+  - Services: services.md
   - Event observers: observers.md
   - Override configs: override-configurations.md
+  - Attribute admin pages: eav-attribute-admin.md
   - Rate limiting & honeypot: rate-limiting-honeypot.md
   - Message queue: message-queue.md
   - Shipping tracking URLs: shipping-tracking-url.md

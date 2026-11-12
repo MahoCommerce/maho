@@ -13,31 +13,13 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
-use Mage;
-use Mage_Catalog_Model_Product;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
-/**
- */
 final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
 {
     use ProductLoaderTrait;
-
-    private const LINK_SETTER_MAP = [
-        'related' => 'setRelatedLinkData',
-        'cross_sell' => 'setCrossSellLinkData',
-        'up_sell' => 'setUpSellLinkData',
-    ];
-
-    private const LINK_COLLECTION_MAP = [
-        'related' => 'getRelatedProductCollection',
-        'cross_sell' => 'getCrossSellProductCollection',
-        'up_sell' => 'getUpSellProductCollection',
-    ];
 
     public function __construct(
         Security $security,
@@ -51,135 +33,42 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
     {
         $user = $this->requireUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);
-
-        // Enforce website scope for store-restricted API users on every
-        // sub-resource write/delete (mirrors ProductProcessor's main CRUD check).
         $this->assertProductWebsitesAllowed($this->loadProduct($productId), $user);
-        $linkType = ProductLinkProvider::extractLinkType($context);
 
-        if (!isset(self::LINK_SETTER_MAP[$linkType])) {
-            throw new NotFoundHttpException("Invalid link type: {$linkType}. Valid types: related, cross-sell, up-sell");
-        }
+        /** @var \Mage_Catalog_Service_Product_Link $service */
+        $service = \Mage::getService('catalog/product_link');
+        $linkType = ProductLinkProvider::extractLinkType($context);
+        $service->assertType($linkType);
+        $product = $this->loadProductForWrite($productId, $user);
+        $websiteIds = $this->allowedWebsiteIds($user);
 
         if ($operation instanceof DeleteOperationInterface) {
-            $linkedProductId = ProductLinkProvider::extractLinkedProductId($context);
-            return $this->handleRemoveLink($productId, $linkType, $linkedProductId);
+            $service->removeLink($product, $linkType, ProductLinkProvider::extractLinkedProductId($context));
+            return null;
         }
-
-        $request = $context['request'] ?? null;
-        $body = $this->parseRequestBody($request);
 
         if ($operation instanceof Post) {
-            return $this->handleAddLink($productId, $linkType, $body);
+            $input = RequestInput::of($this->parseRequestBody($context['request'] ?? null));
+            $linkedId = $input->int('linkedProductId', 'linked_product_id') ?? 0;
+            $position = $input->int('position') ?? 0;
+            $service->addLink($product, $linkType, $linkedId, ['position' => $position], $websiteIds);
+
+            $linked = \Mage::getModel('catalog/product')->load($linkedId);
+            $dto = new ProductLink();
+            $dto->id = $productId . '_' . $linkType . '_' . $linkedId;
+            $dto->linkedProductId = $linkedId;
+            $dto->linkedProductSku = (string) $linked->getSku();
+            $dto->linkedProductName = (string) $linked->getName();
+            $dto->position = $position;
+            return $dto;
         }
 
-        // PUT = replace all
-        return $this->handleReplaceAll($productId, $linkType, $body);
-    }
-
-    private function handleReplaceAll(int $productId, string $linkType, array $body): array
-    {
-        $product = $this->loadProductForWrite($productId, $this->requireUser());
-
-        $linkData = [];
-        foreach ($body as $link) {
-            if (!is_array($link)) {
-                throw new BadRequestHttpException('Each link must be an object with linkedProductId');
-            }
-            $linkedId = (int) ($link['linkedProductId'] ?? $link['linked_product_id'] ?? 0);
-            if ($linkedId <= 0) {
-                throw new UnprocessableEntityHttpException('linkedProductId is required and must be positive');
-            }
-            $this->authorizeAssociatedProductWebsites($linkedId);
-            $linkData[$linkedId] = ['position' => (int) ($link['position'] ?? 0)];
+        $links = [];
+        foreach (RequestInput::decodeRows($context['request'] ?? null, 'link') as $link) {
+            $links[$link->int('linkedProductId', 'linked_product_id') ?? 0] = ['position' => $link->int('position') ?? 0];
         }
-
-        $setter = self::LINK_SETTER_MAP[$linkType];
-        $product->$setter($linkData);
-
-        $this->safeSave($product, 'save links');
+        $service->setLinks($product, $linkType, $links, $websiteIds);
 
         return $this->provider->getLinks($this->loadProduct($productId), $linkType);
     }
-
-    private function handleAddLink(int $productId, string $linkType, array $body): ProductLink
-    {
-        $product = $this->loadProductForWrite($productId, $this->requireUser());
-
-        $linkedId = (int) ($body['linkedProductId'] ?? $body['linked_product_id'] ?? 0);
-        if ($linkedId <= 0) {
-            throw new UnprocessableEntityHttpException('linkedProductId is required and must be positive');
-        }
-
-        $this->authorizeAssociatedProductWebsites($linkedId);
-
-        // Get existing links
-        $existingLinks = $this->getExistingLinkData($product, $linkType);
-        $position = (int) ($body['position'] ?? 0);
-        $existingLinks[$linkedId] = ['position' => $position];
-
-        $setter = self::LINK_SETTER_MAP[$linkType];
-        $product->$setter($existingLinks);
-
-        $this->safeSave($product, 'add link');
-
-        // Return the single added link
-        $dto = new ProductLink();
-        $dto->id = $productId . '_' . $linkType . '_' . $linkedId;
-        $dto->linkedProductId = $linkedId;
-        $dto->position = $position;
-
-        // Try to get name/sku
-        $linked = Mage::getModel('catalog/product')->load($linkedId);
-        if ($linked->getId()) {
-            $dto->linkedProductSku = (string) $linked->getSku();
-            $dto->linkedProductName = (string) $linked->getName();
-        }
-
-        return $dto;
-    }
-
-    private function handleRemoveLink(int $productId, string $linkType, int $linkedProductId): null
-    {
-        $product = $this->loadProductForWrite($productId, $this->requireUser());
-
-        $existingLinks = $this->getExistingLinkData($product, $linkType);
-        unset($existingLinks[$linkedProductId]);
-
-        $setter = self::LINK_SETTER_MAP[$linkType];
-        $product->$setter($existingLinks);
-
-        $this->safeSave($product, 'remove link');
-
-        return null;
-    }
-
-    /**
-     * @return array<int, array{position: int}>
-     */
-    private function getExistingLinkData(Mage_Catalog_Model_Product $product, string $linkType): array
-    {
-        $method = self::LINK_COLLECTION_MAP[$linkType];
-        $collection = $product->$method();
-        $links = [];
-        foreach ($collection as $linked) {
-            $links[(int) $linked->getId()] = ['position' => (int) $linked->getPosition()];
-        }
-        return $links;
-    }
-
-    /**
-     * Guard against linking a foreign-website product: a store-restricted token
-     * may only relate/cross-sell/up-sell products within its own website scope.
-     * No-op for unrestricted users (skips the linked-product load).
-     */
-    private function authorizeAssociatedProductWebsites(int $linkedId): void
-    {
-        $user = $this->requireUser();
-        if ($this->getAllowedWebsiteIds($user) === null) {
-            return;
-        }
-        $this->assertProductWebsitesAllowed($this->loadProduct($linkedId), $user);
-    }
-
 }

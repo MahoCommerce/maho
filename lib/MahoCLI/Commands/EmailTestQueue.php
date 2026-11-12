@@ -28,24 +28,18 @@ class EmailTestQueue extends BaseMahoCommand
     ): int {
         $this->initMaho();
 
-        $emailTemplate = Mage::getModel('core/email_template');
-        $emailQueue = Mage::getModel('core/email_queue');
-
-        $emailTemplate
-            ->setQueue($emailQueue) // This forces it to use the queue
-            ->setSenderName(Mage::getStoreConfig('trans_email/ident_general/name'))
-            ->setSenderEmail(Mage::getStoreConfig('trans_email/ident_general/email'))
-            ->setTemplateType(\Mage_Core_Model_Template::TYPE_TEXT)
-            ->setTemplateText('This is just a test.')
-            ->setTemplateSubject('Test email');
-        $result = $emailTemplate->send($recipient, 'Test email');
-
-        if ($result) {
-            $output->writeln('Test email successfully added to queue!');
-            return Command::SUCCESS;
+        try {
+            /** @var \Mage_Core_Service_Email_Template $service */
+            $service = Mage::getService('core/email_template');
+            $service->queueTest($recipient);
+        } catch (\Mage_Core_Exception_Input $e) {
+            $output->writeln("<error>{$e->getMessage()}</error>");
+            return Command::INVALID;
+        } catch (\Mage_Core_Exception $e) {
+            $output->writeln("<error>{$e->getMessage()}</error>");
+            return Command::FAILURE;
         }
-
-        $output->writeln('Could not add test email to queue, please check error logs.');
-        return Command::FAILURE;
+        $output->writeln('Test email successfully added to queue!');
+        return Command::SUCCESS;
     }
 }

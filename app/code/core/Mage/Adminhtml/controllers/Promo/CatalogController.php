@@ -107,79 +107,55 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
     #[Maho\Config\Route('/admin/promo_catalog/save')]
     public function saveAction(): void
     {
-        if ($data = $this->getRequest()->getPost()) {
-            try {
-                $model = Mage::getModel('catalogrule/rule');
-                Mage::dispatchEvent(
-                    'adminhtml_controller_catalogrule_prepare_save',
-                    ['request' => $this->getRequest()],
-                );
-                $data = $this->getRequest()->getPost();
-                if (Mage::helper('adminhtml')->hasTags($data['rule'], ['attribute'], false)) {
-                    Mage::throwException(Mage::helper('catalogrule')->__('Wrong rule specified'));
-                }
-                $data = $this->_filterDates($data, ['from_date', 'to_date']);
-                if ($id = $this->getRequest()->getParam('rule_id')) {
-                    $model->load($id);
-                    if ($id != $model->getId()) {
-                        Mage::throwException(Mage::helper('catalogrule')->__('Wrong rule specified.'));
-                    }
-                }
+        $data = $this->getRequest()->getPost();
+        if (!$data) {
+            $this->_redirect('*/*/');
+            return;
+        }
+        $session = $this->_getSession();
+        $id = (int) $this->getRequest()->getParam('rule_id');
+        /** @var Mage_CatalogRule_Service_Rule $service */
+        $service = Mage::getService('catalogrule/rule');
+        try {
+            Mage::dispatchEvent('adminhtml_controller_catalogrule_prepare_save', ['request' => $this->getRequest()]);
+            $data = $this->getRequest()->getPost();
+            $data = $this->_filterDates($data, ['from_date', 'to_date']);
+            /** @var Mage_CatalogRule_Model_Rule $model */
+            $model = $id ? $service->getById($id) : Mage::getModel('catalogrule/rule');
 
-                $validateResult = $model->validateData(new \Maho\DataObject($data));
-                if ($validateResult !== true) {
-                    foreach ($validateResult as $errorMessage) {
-                        $this->_getSession()->addError($errorMessage);
-                    }
-                    $this->_getSession()->setPageData($data);
-                    $this->_redirect('*/*/edit', ['id' => $model->getId()]);
-                    return;
-                }
+            $data['conditions'] = $data['rule']['conditions'];
+            $autoApply = !empty($data['auto_apply']);
+            unset($data['rule'], $data['auto_apply']);
+            $model->loadPost($data);
 
-                $data['conditions'] = $data['rule']['conditions'];
-                unset($data['rule']);
-
-                $autoApply = false;
-                if (!empty($data['auto_apply'])) {
-                    $autoApply = true;
-                    unset($data['auto_apply']);
-                }
-
-                $model->loadPost($data);
-
-                Mage::getSingleton('adminhtml/session')->setPageData($model->getData());
-
-                $model->save();
-
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('catalogrule')->__('The rule has been saved.'),
-                );
-                Mage::getSingleton('adminhtml/session')->setPageData(false);
-                if ($autoApply) {
-                    $this->getRequest()->setParam('rule_id', $model->getId());
-                    $this->_forward('applyRules');
-                } else {
-                    Mage::getModel('catalogrule/flag')->loadSelf()
-                        ->setState(1)
-                        ->save();
-                    if ($this->getRequest()->getParam('back')) {
-                        $this->_redirect('*/*/edit', ['id' => $model->getId()]);
-                        return;
-                    }
-                    $this->_redirect('*/*/');
-                }
-                return;
-            } catch (Mage_Core_Exception $e) {
-                $this->_getSession()->addError($e->getMessage());
-            } catch (Exception $e) {
-                $this->_getSession()->addError(
-                    Mage::helper('catalogrule')->__('An error occurred while saving the rule data. Please review the log and try again.'),
-                );
-                Mage::logException($e);
-                Mage::getSingleton('adminhtml/session')->setPageData($data);
-                $this->_redirect('*/*/edit', ['id' => $this->getRequest()->getParam('rule_id')]);
-                return;
+            $session->setPageData($model->getData());
+            $service->save($model);
+            $session->addSuccess(Mage::helper('catalogrule')->__('The rule has been saved.'));
+            $session->setPageData(false);
+            if ($autoApply) {
+                $this->getRequest()->setParam('rule_id', $model->getId());
+                $this->_forward('applyRules');
+            } elseif ($this->getRequest()->getParam('back')) {
+                $this->_redirect('*/*/edit', ['id' => $model->getId()]);
+            } else {
+                $this->_redirect('*/*/');
             }
+            return;
+        } catch (Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $session->addError($error['message']);
+            }
+            $session->setPageData($data);
+            $this->_redirect('*/*/edit', ['id' => $id ?: null]);
+            return;
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+        } catch (Exception $e) {
+            $session->addError(Mage::helper('catalogrule')->__('An error occurred while saving the rule data. Please review the log and try again.'));
+            Mage::logException($e);
+            $session->setPageData($data);
+            $this->_redirect('*/*/edit', ['id' => $id ?: null]);
+            return;
         }
         $this->_redirect('*/*/');
     }
@@ -187,40 +163,20 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
     #[Maho\Config\Route('/admin/promo_catalog/delete')]
     public function deleteAction(): void
     {
-        if ($id = $this->getRequest()->getParam('id')) {
-            try {
-                $model = Mage::getModel('catalogrule/rule');
-                $model->load($id);
-                if (!$model->getRuleId()) {
-                    Mage::getSingleton('adminhtml/session')->addError(
-                        Mage::helper('catalogrule')->__('Unable to find a rule to delete.'),
-                    );
-                    $this->_redirect('*/*/');
-                    return;
-                }
-                $model->delete();
-                Mage::getModel('catalogrule/flag')->loadSelf()
-                    ->setState(1)
-                    ->save();
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('catalogrule')->__('The rule has been deleted.'),
-                );
-                $this->_redirect('*/*/');
-                return;
-            } catch (Mage_Core_Exception $e) {
-                $this->_getSession()->addError($e->getMessage());
-            } catch (Exception $e) {
-                $this->_getSession()->addError(
-                    Mage::helper('catalogrule')->__('An error occurred while deleting the rule. Please review the log and try again.'),
-                );
-                Mage::logException($e);
-                $this->_redirect('*/*/edit', ['id' => $this->getRequest()->getParam('id')]);
-                return;
-            }
+        $session = $this->_getSession();
+        /** @var Mage_CatalogRule_Service_Rule $service */
+        $service = Mage::getService('catalogrule/rule');
+        try {
+            $service->delete($service->getById((int) $this->getRequest()->getParam('id')));
+            $session->addSuccess(Mage::helper('catalogrule')->__('The rule has been deleted.'));
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+        } catch (Exception $e) {
+            $session->addError(Mage::helper('catalogrule')->__('An error occurred while deleting the rule. Please review the log and try again.'));
+            Mage::logException($e);
+            $this->_redirect('*/*/edit', ['id' => $this->getRequest()->getParam('id')]);
+            return;
         }
-        Mage::getSingleton('adminhtml/session')->addError(
-            Mage::helper('catalogrule')->__('Unable to find a rule to delete.'),
-        );
         $this->_redirect('*/*/');
     }
 
@@ -281,8 +237,9 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
     public function applyRulesAction(): void
     {
         try {
-            Mage::getModel('catalogrule/rule')
-                ->queueApplyAll(Mage::helper('adminnotification')->getCurrentAdminUserId());
+            /** @var Mage_CatalogRule_Service_Rule $service */
+            $service = Mage::getService('catalogrule/rule');
+            $service->queueApply(Mage::helper('adminnotification')->getCurrentAdminUserId());
             $this->_getSession()->addSuccess(Mage::helper('catalogrule')->__('The rules will be applied in the background. A message in the notifications tells you when they are applied.'));
         } catch (Exception $e) {
             $this->_getSession()->addError(Mage::helper('catalogrule')->__('Unable to apply rules.'));

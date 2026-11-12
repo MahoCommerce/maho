@@ -47,18 +47,22 @@ class Mage_Newsletter_ManageController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/newsletter/manage/save', name: 'newsletter.manage.save', methods: ['POST'])]
     public function saveAction()
     {
+        $session = Mage::getSingleton('customer/session');
+        $customerId = (int) $session->getCustomerId();
+        $service = Mage::getService('newsletter/subscriber');
         try {
-            Mage::getSingleton('customer/session')->getCustomer()
-            ->setStoreId(Mage::app()->getStore()->getId())
-            ->setIsSubscribed((bool) $this->getRequest()->getParam('is_subscribed', false))
-            ->save();
-            if ((bool) $this->getRequest()->getParam('is_subscribed', false)) {
-                Mage::getSingleton('customer/session')->addSuccess($this->__('The subscription has been saved.'));
+            if ($this->getRequest()->getParam('is_subscribed')) {
+                $service->subscribeCustomer($customerId, (int) Mage::app()->getStore()->getId());
+                $session->addSuccess($this->__('The subscription has been saved.'));
             } else {
-                Mage::getSingleton('customer/session')->addSuccess($this->__('The subscription has been removed.'));
+                $service->unsubscribeCustomer($customerId);
+                $session->addSuccess($this->__('The subscription has been removed.'));
             }
-        } catch (Exception) {
-            Mage::getSingleton('customer/session')->addError($this->__('An error occurred while saving your subscription.'));
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $session->addError($this->__('An error occurred while saving your subscription.'));
         }
         $this->_redirect('customer/account/');
     }

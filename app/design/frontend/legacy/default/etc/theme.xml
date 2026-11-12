@@ -6,4 +6,9 @@ SPDX-License-Identifier: AFL-3.0
 <theme>
     <parent>base/default</parent>
     <title>Legacy (deprecated since 26.9)</title>
+    <!-- The widths where the CSS of this theme changes the layout: max-width 770px and 979px -->
+    <breakpoints>
+        <mobile>770</mobile>
+        <tablet>979</tablet>
+    </breakpoints>
 </theme>

@@ -36,6 +36,11 @@ SPDX-License-Identifier: AFL-3.0
                 </entities>
             </index_resource>
         </models>
+        <services>
+            <index>
+                <class>Mage_Index_Service</class>
+            </index>
+        </services>
         <resources>
             <index_setup>
                 <setup>

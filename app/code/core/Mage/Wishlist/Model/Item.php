@@ -305,45 +305,17 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
     }
 
     /**
-     * Add or Move item product to shopping cart
+     * Add the product of the item to the cart of $cart, and delete the item when $delete is true.
      *
-     * Return true if product was successful added or exception with code
-     * Return false for disabled or unvisible products
-     *
-     * @throws Mage_Core_Exception
-     * @param bool $delete  delete the item after successful add to cart
-     * @return bool
+     * @param bool $delete
+     * @return true
+     * @throws Mage_Core_Exception see Mage_Checkout_Service_Cart::addProduct()
      */
+    #[\Deprecated(message: 'use Mage_Wishlist_Service_Wishlist::moveToCart()', since: '27.1')]
     public function addToCart(Mage_Checkout_Model_Cart $cart, $delete = false)
     {
-        $product = $this->getProduct();
-        $storeId = $this->getStoreId();
-
-        if ($product->getStatus() != Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
-            return false;
-        }
-
-        if (!$product->isVisibleInSiteVisibility()) {
-            if ($product->getStoreId() == $storeId) {
-                return false;
-            }
-        }
-
-        if (!$product->isSalable()) {
-            throw new Mage_Core_Exception('', self::EXCEPTION_CODE_NOT_SALABLE);
-        }
-
-        $buyRequest = $this->getBuyRequest();
-
-        $cart->addProduct($product, $buyRequest);
-        if (!$product->isVisibleInSiteVisibility()) {
-            $cart->getQuote()->getItemByProduct($product)->setStoreId($storeId);
-        }
-
-        if ($delete) {
-            $this->delete();
-        }
-
+        $wishlist = Mage::getModel('wishlist/wishlist')->load($this->getWishlistId());
+        Mage::getService('wishlist/wishlist')->moveToCart($wishlist, $this, $cart->getQuote(), keepItem: !$delete);
         return true;
     }
 

@@ -65,7 +65,7 @@ class CmsBlocks extends AbstractCmsImporter
             if ($row['body'] !== null) {
                 $block->setContent($row['body']);
             }
-            $block->save();
+            Mage::getService('cms/block')->save($block);
         }
         $this->resolver->reset();
         $reporter->info(count($rows) . ' blocks');

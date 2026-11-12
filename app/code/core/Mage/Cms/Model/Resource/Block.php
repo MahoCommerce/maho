@@ -37,8 +37,11 @@ class Mage_Cms_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstract
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
+        if (trim((string) $object->getData('identifier')) === '') {
+            throw new Mage_Core_Exception_Input()->addError('identifier', Mage::helper('cms')->__('Identifier is required.'));
+        }
         if (!$this->getIsUniqueBlockToStores($object)) {
-            Mage::throwException(Mage::helper('cms')->__('A block identifier with the same properties already exists in the selected store.'));
+            throw new Mage_Core_Exception_Conflict(Mage::helper('cms')->__('A block identifier with the same properties already exists in the selected store.'));
         }
 
         // Sanitize the markup authored in this field on save, keeping the template directives it

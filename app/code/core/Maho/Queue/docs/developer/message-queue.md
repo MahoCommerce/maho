@@ -362,7 +362,9 @@ truncated error, availability and queue time. Opening a row shows the full error
 with **Retry** and **Discard** buttons; the grid offers both as mass actions.
 
 Only `failed` messages can be retried, since flipping a claimed row would race the worker. Discarding
-deletes the row permanently.
+deletes the row permanently. A `processing` message can be retried or discarded only when its claim is
+abandoned: while a live worker runs it, both actions skip it. `email:queue:clear` deletes through the same
+rule.
 
 Three ACL resources under **System > Tools > Message Queue** let you split access: *View Messages*,
 *Retry Messages* and *Discard Messages*.

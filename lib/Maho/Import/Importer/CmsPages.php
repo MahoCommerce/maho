@@ -2,6 +2,7 @@
 
 /**
  * CMS pages keyed by identifier and store set; `is_home` also points the store's home page at the page.
+ * A custom attribute of CMS pages in the attribute set is a column too, with option labels for a dropdown.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -31,10 +32,19 @@ class CmsPages extends AbstractCmsImporter
     protected function prepare(CsvFile $file, array $options): array
     {
         $rows = [];
+        $attributes = Mage::getResourceSingleton('cms/page')->getCustomAttributes();
+        $outsideSet = [];
+        foreach (Mage::getSingleton('eav/config')->getAttributes(\Mage_Cms_Model_Page::ENTITY) as $attribute) {
+            $code = (string) $attribute->getAttributeCode();
+            if ($attribute->getIsUserDefined() && !isset($attributes[$code])) {
+                $outsideSet[] = $code;
+            }
+        }
         foreach ($file as $line => $row) {
             $identifier = $this->requireValue($file, $line, $row, 'identifier');
-            if (!preg_match('/^[a-z0-9][a-z0-9_\/-]*$/', $identifier)) {
-                $this->fail($file, $line, "identifier '$identifier' must be lowercase letters, digits, dashes, underscores or slashes");
+            $error = Mage::getResourceSingleton('cms/page')->getIdentifierError($identifier);
+            if ($error !== null) {
+                $this->fail($file, $line, "identifier '$identifier': $error");
             }
             $row['store_ids'] = $this->storeIds($file, $line, $row);
             $row['is_active'] = $this->at($file, $line, fn() => CsvFile::bool($row['is_active'] ?? '', true));
@@ -43,6 +53,19 @@ class CmsPages extends AbstractCmsImporter
             $row['body'] = $this->content($file, $line, $row, $options, $row['page_id'] === null);
             if ($row['page_id'] === null && ($row['title'] ?? '') === '') {
                 $this->fail($file, $line, 'title is required for a new page');
+            }
+            $row['custom'] = [];
+            foreach ($outsideSet as $code) {
+                if (($row[$code] ?? '') !== '') {
+                    $this->fail($file, $line, "$code is not in the attribute set of CMS pages");
+                }
+            }
+            foreach ($attributes as $code => $attribute) {
+                if (($row[$code] ?? '') !== '') {
+                    $row['custom'][$code] = $this->customValue($file, $line, $attribute, $row[$code]);
+                } elseif ($row['page_id'] === null && $attribute->getIsRequired() && (string) $attribute->getDefaultValue() === '') {
+                    $this->fail($file, $line, "$code is required for a new page");
+                }
             }
             $rows[$line] = $row;
         }
@@ -53,15 +76,15 @@ class CmsPages extends AbstractCmsImporter
     protected function write(CsvFile $file, array $rows, array $options, Reporter $reporter): Result
     {
         $result = new Result();
-        $config = Mage::getModel('core/config');
-        $configTouched = false;
+        /** @var \Mage_Cms_Service_Page $service */
+        $service = Mage::getService('cms/page');
+        $homePages = [];
         foreach ($rows as $row) {
-            $page = Mage::getModel('cms/page');
             if ($row['page_id'] !== null) {
-                $page->load($row['page_id']);
+                $page = Mage::getModel('cms/page')->load($row['page_id']);
                 $result->updated++;
             } else {
-                $page->setRootTemplate('one_column');
+                $page = $service->newPage();
                 $result->created++;
             }
             $page->setIdentifier($row['identifier'])->setStores($row['store_ids'])->setIsActive((bool) $row['is_active']);
@@ -73,15 +96,18 @@ class CmsPages extends AbstractCmsImporter
             if ($row['body'] !== null) {
                 $page->setContent($row['body']);
             }
-            $page->save();
+            foreach ($row['custom'] as $code => $value) {
+                $page->setData($code, $value);
+            }
+            $service->save($page);
             if ($row['is_home']) {
                 foreach ($row['store_ids'] as $storeId) {
-                    $config->saveConfig(\Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE, $row['identifier'], $storeId === 0 ? 'default' : 'stores', $storeId);
+                    $homePages[] = [\Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE, $row['identifier'], $storeId === 0 ? 'default' : 'stores', $storeId];
                 }
-                $configTouched = true;
             }
         }
-        if ($configTouched) {
+        if ($homePages !== []) {
+            Mage::getService('core/config')->saveAll($homePages);
             Mage::app()->getCache()->cleanType('config');
         }
         $reporter->info(count($rows) . ' pages');

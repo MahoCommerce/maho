@@ -27,7 +27,7 @@ describe('POST /api/rest/v2/customers/me/revocation-requests', function (): void
         expect($response['status'])->toBeUnauthorized();
     });
 
-    it('returns 404 when the order is not the customer own order', function (): void {
+    it('records an unverified declaration when the order is not the customer own order', function (): void {
         enableRevocation();
 
         $response = apiPost('/api/rest/v2/customers/me/revocation-requests', [
@@ -35,7 +35,12 @@ describe('POST /api/rest/v2/customers/me/revocation-requests', function (): void
             'reason' => 'Changed my mind',
         ], customerToken());
 
-        expect($response['status'])->toBeNotFound();
+        expect($response['status'])->toBeSuccessful();
+        expect($response['json']['verified'])->toBeFalse();
+        expect($response['json']['orderId'] ?? null)->toBeNull();
+        expect($response['json']['orderReference'])->toBe('999999999');
+
+        trackCreated('revocation_request', (int) $response['json']['id']);
     });
 
     it('records a verified declaration against the customer own order', function (): void {

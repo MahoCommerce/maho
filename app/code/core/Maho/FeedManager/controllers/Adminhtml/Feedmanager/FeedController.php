@@ -672,50 +672,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         }
     }
 
-    /**
-     * Reset a hung feed
-     */
-    #[Maho\Config\Route('/admin/feedmanager_feed/reset')]
-    public function resetAction(): void
-    {
-        $id = (int) $this->getRequest()->getParam('id');
-
-        if (!$id) {
-            $this->_getSession()->addError($this->__('Unable to find feed.'));
-            $this->_redirect('*/*/');
-            return;
-        }
-
-        $cron = new Maho_FeedManager_Model_Cron();
-        if ($cron->resetHungFeed($id)) {
-            $this->_getSession()->addSuccess($this->__('Feed generation has been reset.'));
-        } else {
-            $this->_getSession()->addNotice($this->__('Feed is not stuck or has not exceeded the timeout.'));
-        }
-
-        $this->_redirect('*/*/edit', ['id' => $id]);
-    }
-
-    /**
-     * Force cleanup any running jobs for a feed
-     */
-    protected function _forceCleanupRunningJobs(int $feedId): void
-    {
-        /** @var Maho_FeedManager_Model_Resource_Log_Collection $collection */
-        $collection = Mage::getResourceModel('feedmanager/log_collection')
-            ->addFeedFilter($feedId)
-            ->addFieldToFilter('status', Maho_FeedManager_Model_Log::STATUS_RUNNING);
-
-        foreach ($collection as $log) {
-            $log->setStatus(Maho_FeedManager_Model_Log::STATUS_FAILED)
-                ->setCompletedAt(Mage::app()->getLocale()->formatDateForDb('now'))
-                ->addError('Cancelled - new generation started')
-                ->save();
-        }
-
-        new Maho_FeedManager_Model_Generator_Batch()->deleteFeedJobs($feedId);
-    }
-
     #[Maho\Config\Route('/admin/feedmanager_feed/view')]
     public function viewAction(): void
     {
@@ -863,6 +819,8 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         }
 
         $generated = 0;
+        /** @var Maho_FeedManager_Service_Feed $service */
+        $service = Mage::getService('feedmanager/feed');
 
         foreach ($feedIds as $feedId) {
             try {
@@ -871,23 +829,16 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                     continue;
                 }
 
-                if (Maho_FeedManager_Model_Generator::isGenerating((int) $feedId)) {
-                    $this->_getSession()->addNotice(
-                        $this->__("Feed '%s' is already being generated, skipped.", $feed->getName()),
-                    );
-                    continue;
-                }
-
-                $generator = new Maho_FeedManager_Model_Generator();
-                $log = $generator->generate($feed);
-
-                if ($log->getStatus() === 'completed') {
+                $log = $service->generate($feed);
+                if ($log->getStatus() === Maho_FeedManager_Model_Log::STATUS_COMPLETED) {
                     $generated++;
                 } else {
                     $this->_getSession()->addError(
                         $this->__("Feed '%s' generation failed: %s", $feed->getName(), $log->getErrorMessage()),
                     );
                 }
+            } catch (Mage_Core_Exception_Conflict $e) {
+                $this->_getSession()->addNotice($e->getMessage());
             } catch (Exception $e) {
                 $this->_getSession()->addError(
                     $this->__('Failed to generate feed %s: %s', $feedId, $e->getMessage()),
@@ -937,25 +888,9 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 return;
             }
 
-            // Check if already running
-            $force = (bool) $this->getRequest()->getParam('force');
-            if (Maho_FeedManager_Model_Generator::isGenerating($id)) {
-                if ($force) {
-                    // Force cleanup any stuck running jobs
-                    $this->_forceCleanupRunningJobs($id);
-                } else {
-                    $this->getResponse()->setBodyJson([
-                        'error' => true,
-                        'message' => $this->__('Feed is already being generated.'),
-                        'status' => Maho_FeedManager_Model_Generator::getGenerationStatus($id),
-                    ]);
-                    return;
-                }
-            }
-
-            // Initialize batch generation
-            $batchGenerator = new Maho_FeedManager_Model_Generator_Batch();
-            $result = $batchGenerator->initBatch($feed);
+            /** @var Maho_FeedManager_Service_Feed $service */
+            $service = Mage::getService('feedmanager/feed');
+            $result = $service->startBatch($feed, (bool) $this->getRequest()->getParam('force'));
 
             $this->getResponse()->setBodyJson([
                 'success' => true,
@@ -987,8 +922,9 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         }
 
         try {
-            $batchGenerator = new Maho_FeedManager_Model_Generator_Batch();
-            $result = $batchGenerator->processBatch($jobId);
+            /** @var Maho_FeedManager_Service_Feed $service */
+            $service = Mage::getService('feedmanager/feed');
+            $result = $service->processBatch((string) $jobId);
 
             $this->getResponse()->setBodyJson($result);
 
@@ -1015,8 +951,9 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         }
 
         try {
-            $batchGenerator = new Maho_FeedManager_Model_Generator_Batch();
-            $result = $batchGenerator->finalize($jobId);
+            /** @var Maho_FeedManager_Service_Feed $service */
+            $service = Mage::getService('feedmanager/feed');
+            $result = $service->finalizeBatch($jobId);
 
             $this->getResponse()->setBodyJson($result);
 
@@ -1043,8 +980,9 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         }
 
         try {
-            $batchGenerator = new Maho_FeedManager_Model_Generator_Batch();
-            $result = $batchGenerator->cancel($jobId);
+            /** @var Maho_FeedManager_Service_Feed $service */
+            $service = Mage::getService('feedmanager/feed');
+            $result = $service->cancelBatch((string) $jobId);
 
             $this->getResponse()->setBodyJson($result);
 
@@ -1053,47 +991,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 'error' => true,
                 'message' => $e->getMessage(),
             ]);
-        }
-    }
-
-    /**
-     * AJAX action to force reset a stuck generation
-     */
-    #[Maho\Config\Route('/admin/feedmanager_feed/forceReset')]
-    public function forceResetAction(): void
-    {
-        $id = (int) $this->getRequest()->getParam('id');
-
-        if (!$id) {
-            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Feed ID required')]);
-            return;
-        }
-
-        try {
-            // Mark all running logs for this feed as failed
-            /** @var Maho_FeedManager_Model_Resource_Log_Collection $collection */
-            $collection = Mage::getResourceModel('feedmanager/log_collection')
-                ->addFeedFilter($id)
-                ->addFieldToFilter('status', Maho_FeedManager_Model_Log::STATUS_RUNNING);
-
-            $count = 0;
-            foreach ($collection as $log) {
-                /** @var Maho_FeedManager_Model_Log $log */
-                $log->setStatus(Maho_FeedManager_Model_Log::STATUS_FAILED)
-                    ->addError('Manually reset by user')
-                    ->save();
-                $count++;
-            }
-
-            new Maho_FeedManager_Model_Generator_Batch()->deleteFeedJobs($id);
-
-            $this->getResponse()->setBodyJson([
-                'success' => true,
-                'message' => $this->__('Reset %d running job(s)', $count),
-            ]);
-
-        } catch (Exception $e) {
-            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
     }
 
@@ -1111,7 +1008,8 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         }
 
         try {
-            $batchGenerator = new Maho_FeedManager_Model_Generator_Batch();
+            /** @var Maho_FeedManager_Model_Generator_Batch $batchGenerator */
+            $batchGenerator = Mage::getModel('feedmanager/generator_batch');
             $result = $batchGenerator->getStatus($jobId);
 
             $this->getResponse()->setBodyJson($result);
@@ -1142,20 +1040,14 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
 
         $jobs = [];
         $errors = [];
+        /** @var Maho_FeedManager_Service_Feed $service */
+        $service = Mage::getService('feedmanager/feed');
 
         foreach ($feedIds as $feedId) {
             try {
                 $feed = Mage::getModel('feedmanager/feed')->load($feedId);
                 if ($feed->getId()) {
-                    // Check if already running
-                    if (Maho_FeedManager_Model_Generator::isGenerating((int) $feedId)) {
-                        $errors[] = $this->__("Feed '%s' is already being generated", $feed->getName());
-                        continue;
-                    }
-
-                    $batchGenerator = new Maho_FeedManager_Model_Generator_Batch();
-                    $result = $batchGenerator->initBatch($feed);
-
+                    $result = $service->startBatch($feed);
                     $jobs[] = [
                         'feed_id' => $feedId,
                         'feed_name' => $feed->getName(),
@@ -1164,6 +1056,8 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                         'batches_total' => $result['batches_total'],
                     ];
                 }
+            } catch (Mage_Core_Exception_Conflict $e) {
+                $errors[] = $e->getMessage();
             } catch (Exception $e) {
                 $errors[] = $this->__('Failed to initialize feed %s: %s', $feedId, $e->getMessage());
                 Mage::logException($e);
@@ -1200,72 +1094,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 return;
             }
 
-            $destinationId = (int) $feed->getDestinationId();
-            if (!$destinationId) {
-                $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('No destination configured for this feed')]);
-                return;
-            }
-
-            // Check if file exists
-            $path = $feed->getStoragePath();
-            if ($path === null || !Mage::helper('feedmanager')->getOutputMount()->fileExists($path)) {
-                $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Feed file not found. Please generate the feed first.')]);
-                return;
-            }
-
-            /** @var Maho_FeedManager_Model_Destination $destination */
-            $destination = Mage::getModel('feedmanager/destination')->load($destinationId);
-
-            if (!$destination->getId()) {
-                $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Destination not found')]);
-                return;
-            }
-
-            if (!$destination->isEnabled()) {
-                $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Destination is disabled')]);
-                return;
-            }
-
-            // Perform upload
-            $uploader = new Maho_FeedManager_Model_Uploader($destination);
-            $remoteName = $feed->getOutputFilename();
-            $success = $uploader->uploadFeed($feed);
-
-            // Update destination last upload info
-            $destination->setLastUploadAt(Mage::app()->getLocale()->formatDateForDb('now'))
-                ->setLastUploadStatus($success ? 'success' : 'failed')
-                ->save();
-
-            // Get or create log entry for this upload
-            /** @var Maho_FeedManager_Model_Resource_Log_Collection $logCollection */
-            $logCollection = Mage::getResourceModel('feedmanager/log_collection')
-                ->addFeedFilter($id)
-                ->setOrder('started_at', 'DESC')
-                ->setPageSize(1);
-
-            /** @var Maho_FeedManager_Model_Log $log */
-            $log = $logCollection->getFirstItem();
-
-            if ($success) {
-                $message = $this->__('Uploaded to %s as %s', $destination->getName(), $remoteName);
-                if ($log->getId()) {
-                    $log->recordUploadSuccess($destinationId, $message);
-                }
-                $this->getResponse()->setBodyJson([
-                    'success' => true,
-                    'message' => $message,
-                ]);
-            } else {
-                $message = $this->__('Upload failed');
-                if ($log->getId()) {
-                    $log->recordUploadFailure($destinationId, $message);
-                }
-                $this->getResponse()->setBodyJson([
-                    'error' => true,
-                    'message' => $message,
-                ]);
-            }
-
+            /** @var Maho_FeedManager_Service_Feed $service */
+            $service = Mage::getService('feedmanager/feed');
+            $result = $service->upload($feed);
+            $success = $result['status'] === Maho_FeedManager_Model_Log::UPLOAD_STATUS_SUCCESS;
+            $this->getResponse()->setBodyJson([$success ? 'success' : 'error' => true, 'message' => $result['message']]);
+        } catch (Mage_Core_Exception $e) {
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         } catch (Exception $e) {
             Mage::logException($e);
             $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);

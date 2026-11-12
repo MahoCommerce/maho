@@ -133,7 +133,10 @@ class Mage_Directory_Model_Region extends Mage_Core_Model_Abstract
         return $this->_getResource()->hasTranslation($this);
     }
 
-    public function validateTranslation(array $data): array|true
+    /**
+     * Check the name $data of this region in one locale. With $allowExisting, a name that the locale already has is not an error.
+     */
+    public function validateTranslation(array $data, bool $allowExisting = false): array|true
     {
         $errors = [];
 
@@ -150,7 +153,7 @@ class Mage_Directory_Model_Region extends Mage_Core_Model_Abstract
         }
 
         // Check for duplicate locale/region combination
-        if (!empty($data['locale'])) {
+        if (!$allowExisting && !empty($data['locale'])) {
             $existingRegion = $this->_getResource()->getTranslation($this, $data['locale']);
             if ($existingRegion->getLocale()) {
                 $errors[] = Mage::helper('directory')->__('A region name for this locale and region combination already exists.');

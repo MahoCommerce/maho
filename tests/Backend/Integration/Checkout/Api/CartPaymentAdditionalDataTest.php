@@ -120,11 +120,11 @@ describe('set-payment-method additionalData', function (): void {
         }
     });
 
-    it('treats a card method as unusable over the API', function (): void {
+    it('treats a card method as unusable without card data', function (): void {
         // buildPaymentImportData() strips every cc_* key, so Mage_Payment_Model_Method_Cc::validate()
         // can never pass. Such a method must not reach the setter nor the advertised list.
-        expect(\Mage::getService('checkout/cart')->isMethodUsableOverApi(new Mage_Paygate_Model_Authorizenet()))->toBeFalse()
-            ->and(\Mage::getService('checkout/cart')->isMethodUsableOverApi(new Mage_Payment_Model_Method_Checkmo()))->toBeTrue();
+        expect(\Mage::getService('checkout/cart')->isUsableWithoutCardData(new Mage_Paygate_Model_Authorizenet()))->toBeFalse()
+            ->and(\Mage::getService('checkout/cart')->isUsableWithoutCardData(new Mage_Payment_Model_Method_Checkmo()))->toBeTrue();
     });
 
     it('does not advertise a method the setter would reject', function (): void {

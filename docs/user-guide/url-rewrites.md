@@ -107,6 +107,10 @@ for old URL keys have the type **Custom**.
 A custom rewrite takes its request path. If a product later needs the same URL, the product gets a
 URL with a number (see [Why a URL is not the one you chose](#why-a-url-is-not-the-one-you-chose)).
 
+A request path must be unique in its store view. The store refuses a rewrite whose request path
+another rewrite of the store view already has. The REST API (`/url-rewrites`) checks the same
+rules, and it cannot change or delete a **System** rewrite.
+
 ## URL keys per store view
 
 The **URL Key** has the scope **[STORE VIEW]**. Each store view can have its own URL key for the

@@ -113,7 +113,7 @@ beforeEach(function (): void {
 
 afterEach(function (): void {
     $this->eventsProperty->setValue(Mage::app(), $this->originalEvents);
-    WishlistProvider::invalidateCache((int) $this->customer->getId());
+    Mage::app()->getCache()->clean(['API_WISHLIST_' . (int) $this->customer->getId()]);
     Mage::register('isSecureArea', true, true);
     $this->customer->delete();
     Mage::unregister('isSecureArea');
@@ -130,7 +130,7 @@ it('dispatches the event for the item returned by an add', function (): void {
 it('dispatches the event once per item on a cache miss and on a cache hit', function (): void {
     $customerId = (int) $this->customer->getId();
     wishlistDtoCall(new WishlistProcessor($this->security), 'addToWishlist', (int) $this->product->getId());
-    WishlistProvider::invalidateCache($customerId);
+    Mage::app()->getCache()->clean(["API_WISHLIST_{$customerId}"]);
 
     $provider = new WishlistProvider($this->security);
     $name = $this->product->getName();
@@ -150,7 +150,7 @@ it('dispatches the event once per item on a cache miss and on a cache hit', func
 it('caches the item as built from the database, before observers run', function (): void {
     $customerId = (int) $this->customer->getId();
     wishlistDtoCall(new WishlistProcessor($this->security), 'addToWishlist', (int) $this->product->getId());
-    WishlistProvider::invalidateCache($customerId);
+    Mage::app()->getCache()->clean(["API_WISHLIST_{$customerId}"]);
 
     wishlistDtoCall(new WishlistProvider($this->security), 'getWishlistItems');
 

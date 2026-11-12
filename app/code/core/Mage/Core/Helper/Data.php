@@ -1072,6 +1072,34 @@ XML;
     }
 
     /**
+     * Ask the CAPTCHA module of the store to check the token in $fields. $fields is what the client sent: the form
+     * POST or the body of the API request. A service calls this for every transport, and the CAPTCHA module finds
+     * its own field. Without a CAPTCHA module, each request passes.
+     *
+     * @param array<array-key, mixed> $fields
+     * @return string|null the error message, or null when the CAPTCHA module accepts the request
+     */
+    public function getCaptchaError(array $fields): ?string
+    {
+        $result = new \Maho\DataObject(['verified' => true, 'error' => '']);
+        Mage::dispatchEvent('api_verify_captcha', ['result' => $result, 'data' => $fields]);
+
+        return $result->getVerified() ? null : ((string) $result->getError() ?: $this->__('Incorrect CAPTCHA.'));
+    }
+
+    /**
+     * @param array<array-key, mixed> $fields see getCaptchaError()
+     * @throws Mage_Core_Exception_Input with an error on captcha_token when the CAPTCHA module refuses the token
+     */
+    public function assertCaptcha(array $fields): void
+    {
+        $error = $this->getCaptchaError($fields);
+        if ($error !== null) {
+            throw new Mage_Core_Exception_Input()->addError('captcha_token', $error);
+        }
+    }
+
+    /**
      * Visually-hidden honeypot trap field markup, ready to echo inside a `<form>`.
      *
      * Renders the install-specific field from `getHoneypotFieldName()` so every

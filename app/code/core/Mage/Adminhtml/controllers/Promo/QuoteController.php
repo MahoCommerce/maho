@@ -106,126 +106,78 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     #[Maho\Config\Route('/admin/promo_quote/save')]
     public function saveAction(): void
     {
-        if ($data = $this->getRequest()->getPost()) {
-            try {
-                /** @var Mage_SalesRule_Model_Rule $model */
-                $model = Mage::getModel('salesrule/rule');
-                Mage::dispatchEvent(
-                    'adminhtml_controller_salesrule_prepare_save',
-                    ['request' => $this->getRequest()],
-                );
-                $data = $this->getRequest()->getPost();
-                if (Mage::helper('adminhtml')->hasTags($data['rule'], ['attribute'], false)) {
-                    Mage::throwException(Mage::helper('catalogrule')->__('Wrong rule specified'));
-                }
-                $data = $this->_filterDates($data, ['from_date', 'to_date']);
-                $id = $this->getRequest()->getParam('rule_id');
-                if ($id) {
-                    $model->load($id);
-                    if ($id != $model->getId()) {
-                        Mage::throwException(Mage::helper('salesrule')->__('Wrong rule specified.'));
-                    }
-                }
-
-                $session = Mage::getSingleton('adminhtml/session');
-
-                $validateResult = $model->validateData(new \Maho\DataObject($data));
-                if ($validateResult !== true) {
-                    foreach ($validateResult as $errorMessage) {
-                        $session->addError($errorMessage);
-                    }
-                    $session->setPageData($data);
-                    $this->_redirect('*/*/edit', ['id' => $model->getId()]);
-                    return;
-                }
-
-                if (isset($data['simple_action']) && $data['simple_action'] == 'by_percent'
-                    && isset($data['discount_amount'])
-                ) {
-                    $data['discount_amount'] = min(100, $data['discount_amount']);
-                }
-                if (isset($data['rule']['conditions'])) {
-                    $data['conditions'] = $data['rule']['conditions'];
-                }
-                if (isset($data['rule']['actions'])) {
-                    $data['actions'] = $data['rule']['actions'];
-                }
-                unset($data['times_used']);
-                unset($data['rule']);
-                $model->loadPost($data);
-
-                $useAutoGeneration = !empty($data['use_auto_generation']);
-                $model->setUseAutoGeneration($useAutoGeneration);
-
-                $session->setPageData($model->getData());
-
-                $model->save();
-                $session->addSuccess(Mage::helper('salesrule')->__('The rule has been saved.'));
-                $session->setPageData(false);
-                if ($this->getRequest()->getParam('back')) {
-                    $this->_redirect('*/*/edit', ['id' => $model->getId()]);
-                    return;
-                }
-                $this->_redirect('*/*/');
-                return;
-            } catch (Mage_Core_Exception $e) {
-                $this->_getSession()->addError($e->getMessage());
-                $id = (int) $this->getRequest()->getParam('rule_id');
-                if (!empty($id)) {
-                    $this->_redirect('*/*/edit', ['id' => $id]);
-                } else {
-                    $this->_redirect('*/*/new');
-                }
-                return;
-            } catch (Exception $e) {
-                $this->_getSession()->addError(
-                    Mage::helper('catalogrule')->__('An error occurred while saving the rule data. Please review the log and try again.'),
-                );
-                Mage::logException($e);
-                Mage::getSingleton('adminhtml/session')->setPageData($data);
-                $this->_redirect('*/*/edit', ['id' => $this->getRequest()->getParam('rule_id')]);
-                return;
-            }
+        $data = $this->getRequest()->getPost();
+        if (!$data) {
+            $this->_redirect('*/*/');
+            return;
         }
-        $this->_redirect('*/*/');
+        $session = $this->_getSession();
+        $id = (int) $this->getRequest()->getParam('rule_id');
+        /** @var Mage_SalesRule_Service_Rule $service */
+        $service = Mage::getService('salesrule/rule');
+        try {
+            Mage::dispatchEvent('adminhtml_controller_salesrule_prepare_save', ['request' => $this->getRequest()]);
+            $data = $this->getRequest()->getPost();
+            $data = $this->_filterDates($data, ['from_date', 'to_date']);
+            /** @var Mage_SalesRule_Model_Rule $model */
+            $model = $id ? $service->getById($id) : Mage::getModel('salesrule/rule');
+
+            foreach (['conditions', 'actions'] as $tree) {
+                if (isset($data['rule'][$tree])) {
+                    $data[$tree] = $data['rule'][$tree];
+                }
+            }
+            unset($data['times_used'], $data['rule']);
+            $model->loadPost($data);
+            $model->setUseAutoGeneration(!empty($data['use_auto_generation']));
+
+            $session->setPageData($model->getData());
+            $service->save($model);
+            $session->addSuccess(Mage::helper('salesrule')->__('The rule has been saved.'));
+            $session->setPageData(false);
+            if ($this->getRequest()->getParam('back')) {
+                $this->_redirect('*/*/edit', ['id' => $model->getId()]);
+            } else {
+                $this->_redirect('*/*/');
+            }
+        } catch (Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $session->addError($error['message']);
+            }
+            $session->setPageData($data);
+            $this->_redirect('*/*/edit', ['id' => $id ?: null]);
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+            if ($id) {
+                $this->_redirect('*/*/edit', ['id' => $id]);
+            } else {
+                $this->_redirect('*/*/new');
+            }
+        } catch (Exception $e) {
+            $session->addError(Mage::helper('catalogrule')->__('An error occurred while saving the rule data. Please review the log and try again.'));
+            Mage::logException($e);
+            $session->setPageData($data);
+            $this->_redirect('*/*/edit', ['id' => $id ?: null]);
+        }
     }
 
     #[Maho\Config\Route('/admin/promo_quote/delete')]
     public function deleteAction(): void
     {
-        if ($id = $this->getRequest()->getParam('id')) {
-            try {
-                $model = Mage::getModel('salesrule/rule');
-                $model->load($id);
-
-                if (!$model->getRuleId()) {
-                    Mage::getSingleton('adminhtml/session')->addError(
-                        Mage::helper('catalogrule')->__('Unable to find a rule to delete.'),
-                    );
-                    $this->_redirect('*/*/');
-                    return;
-                }
-
-                $model->delete();
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('salesrule')->__('The rule has been deleted.'),
-                );
-                $this->_redirect('*/*/');
-                return;
-            } catch (Mage_Core_Exception $e) {
-                $this->_getSession()->addError($e->getMessage());
-            } catch (Exception $e) {
-                $this->_getSession()->addError(
-                    Mage::helper('catalogrule')->__('An error occurred while deleting the rule. Please review the log and try again.'),
-                );
-                Mage::logException($e);
-                $this->_redirect('*/*/edit', ['id' => $this->getRequest()->getParam('id')]);
-                return;
-            }
+        $session = $this->_getSession();
+        /** @var Mage_SalesRule_Service_Rule $service */
+        $service = Mage::getService('salesrule/rule');
+        try {
+            $service->delete($service->getById((int) $this->getRequest()->getParam('id')));
+            $session->addSuccess(Mage::helper('salesrule')->__('The rule has been deleted.'));
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+        } catch (Exception $e) {
+            $session->addError(Mage::helper('catalogrule')->__('An error occurred while deleting the rule. Please review the log and try again.'));
+            Mage::logException($e);
+            $this->_redirect('*/*/edit', ['id' => $this->getRequest()->getParam('id')]);
+            return;
         }
-        Mage::getSingleton('adminhtml/session')->addError(
-            Mage::helper('salesrule')->__('Unable to find a rule to delete.'),
-        );
         $this->_redirect('*/*/');
     }
 
@@ -356,20 +308,16 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     {
         $this->_initRule();
         $rule = Mage::registry('current_promo_quote_rule');
-
         if (!$rule->getId()) {
             $this->_forward('noRoute');
+            return;
         }
 
         $codesIds = $this->getRequest()->getParam('ids');
-
         if (is_array($codesIds)) {
-            $couponsCollection = Mage::getResourceModel('salesrule/coupon_collection')
-                ->addFieldToFilter('coupon_id', ['in' => $codesIds]);
-
-            foreach ($couponsCollection as $coupon) {
-                $coupon->delete();
-            }
+            /** @var Mage_SalesRule_Service_Rule $service */
+            $service = Mage::getService('salesrule/rule');
+            $service->deleteCoupons($rule, array_map(intval(...), $codesIds));
         }
     }
 
@@ -393,20 +341,29 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
             $result['error'] = Mage::helper('salesrule')->__('Rule is not defined');
         } else {
             try {
-                $data = $this->getRequest()->getParams();
-
-                /** @var Mage_SalesRule_Model_Coupon_Massgenerator $generator */
-                $generator = $rule::getCouponMassGenerator();
-                if (!$generator->validateData($data)) {
-                    $result['error'] = Mage::helper('salesrule')->__('Not valid data provided');
-                } else {
-                    $generator->setData($data);
-                    $generator->generatePool();
-                    $generated = $generator->getGeneratedCount();
-                    $this->_getSession()->addSuccess(Mage::helper('salesrule')->__('%s Coupon(s) have been generated', $generated));
-                    $this->_initLayoutMessages('adminhtml/session');
-                    $result['messages']  = $this->getLayout()->getMessagesBlock()->getGroupedHtml();
+                $request = $this->getRequest();
+                $number = fn(string $field): ?int => ($request->getParam($field) ?? '') === '' ? null : (int) $request->getParam($field);
+                $text = fn(string $field): ?string => ($request->getParam($field) ?? '') === '' ? null : (string) $request->getParam($field);
+                // The tab generates when the form has auto generation on, before its save too, with the uses of the form
+                if ($request->getParam('use_auto_generation')) {
+                    $rule->setUseAutoGeneration();
                 }
+                $rule->setUsesPerCoupon((int) $request->getParam('uses_per_coupon', $rule->getUsesPerCoupon()))
+                    ->setUsesPerCustomer((int) $request->getParam('uses_per_customer', $rule->getUsesPerCustomer()));
+                /** @var Mage_SalesRule_Service_Rule $service */
+                $service = Mage::getService('salesrule/rule');
+                $generated = $service->generateCoupons(
+                    $rule,
+                    (int) $request->getParam('qty', 0),
+                    $number('length'),
+                    $text('format'),
+                    $text('prefix'),
+                    $text('suffix'),
+                    $number('dash'),
+                );
+                $this->_getSession()->addSuccess(Mage::helper('salesrule')->__('%s Coupon(s) have been generated', $generated));
+                $this->_initLayoutMessages('adminhtml/session');
+                $result['messages'] = $this->getLayout()->getMessagesBlock()->getGroupedHtml();
             } catch (Mage_Core_Exception $e) {
                 $result['error'] = $e->getMessage();
             } catch (Exception $e) {

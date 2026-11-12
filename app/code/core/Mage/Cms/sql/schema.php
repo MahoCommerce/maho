@@ -127,4 +127,24 @@ return function (SchemaEditor $schema): void {
             ->setComment('CMS Page To Store Linkage Table')
             ->create(),
     );
+
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('cms_eav_attribute')
+            ->addColumn(Schema::column('attribute_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('is_visible_on_front', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('is_html_allowed_on_front', Types::SMALLINT, unsigned: true, default: 0))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('attribute_id')->create())
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('attribute_id')
+                    ->setUnquotedReferencedTableName('eav_attribute')
+                    ->setUnquotedReferencedColumnNames('attribute_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('CMS Page EAV Attribute Table')
+            ->create(),
+    );
 };

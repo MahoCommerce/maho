@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
 SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
 SPDX-License-Identifier: AFL-3.0
@@ -11,6 +12,14 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_Eav>
     </modules>
     <global>
+        <docs>
+            <developer>docs/developer</developer>
+        </docs>
+        <services>
+            <eav>
+                <class>Mage_Eav_Service</class>
+            </eav>
+        </services>
         <models>
             <eav>
                 <class>Mage_Eav_Model</class>
@@ -43,6 +52,9 @@ SPDX-License-Identifier: AFL-3.0
                     <attribute_group>
                         <table>eav_attribute_group</table>
                     </attribute_group>
+                    <attribute_group_label>
+                        <table>eav_attribute_group_label</table>
+                    </attribute_group_label>
                     <attribute_option>
                         <table>eav_attribute_option</table>
                     </attribute_option>

@@ -13,16 +13,10 @@ declare(strict_types=1);
  */
 class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 {
-    /**
-     * Check if rate limited via the shared core helper. The Client scope keys by IP so balance-code
-     * enumeration cannot be reset by dropping the session cookie, falling back to the session id
-     * when the IP is unknown. Silent: the action returns its own JSON message.
-     */
+    #[\Deprecated(message: 'Maho_Giftcard_Service_Giftcard::checkBalance() has the limit, so this method limits nothing', since: '27.1')]
     protected function _isRateLimited(): bool
     {
-        return !Mage::helper('core')
-            ->rateLimiter('giftcard_balance', (int) Mage::getStoreConfig('system/rate_limit/giftcard_balance'), 60)
-            ->attempt();
+        return false;
     }
 
     /**
@@ -32,51 +26,15 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     public function checkBalanceAction(): void
     {
         $result = ['success' => false];
-
-        // Rate limiting
-        if ($this->_isRateLimited()) {
-            $result['message'] = $this->__('Too many attempts. Please wait a moment and try again.');
-            $this->_sendJsonResponse($result);
-            return;
-        }
-
-        $code = trim((string) $this->getRequest()->getPost('giftcard_code'));
-
-        if (!$code) {
-            $result['message'] = $this->__('Please enter a gift card code.');
-            $this->_sendJsonResponse($result);
-            return;
-        }
-
         try {
-            // Load gift card by code
-            $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
-
-            // Don't leak info - return same message for non-existent, wrong website, or inactive cards
-            if (!$giftcard->getId()) {
-                $result['message'] = $this->__('Gift card not found.');
-                $this->_sendJsonResponse($result);
-                return;
-            }
-
-            $websiteId = (int) Mage::app()->getStore()->getWebsiteId();
-            if (!$giftcard->isAvailableOnWebsite($websiteId)) {
-                $result['message'] = $this->__('Gift card not found.');
-                $this->_sendJsonResponse($result);
-                return;
-            }
-
-            // Only show balance for valid (active) gift cards
-            if (!$giftcard->isValid()) {
-                $result['message'] = $this->__('Gift card not found.');
-                $this->_sendJsonResponse($result);
-                return;
-            }
-
-            // Get store currency for display
-            $storeCurrencyCode = Mage::app()->getStore()->getCurrentCurrencyCode();
-            $balance = $giftcard->getBalance($storeCurrencyCode);
-            $balanceFormatted = Mage::app()->getStore()->formatPrice($balance, false);
+            $store = Mage::app()->getStore();
+            $giftcard = Mage::getService('giftcard/giftcard')->checkBalance(
+                (string) $this->getRequest()->getPost('giftcard_code'),
+                (int) $store->getWebsiteId(),
+                (int) Mage::getSingleton('customer/session')->getCustomerId() ?: null,
+            );
+            $balance = $giftcard->getBalance($store->getCurrentCurrencyCode());
+            $balanceFormatted = $store->formatPrice($balance, false);
 
             $result['success'] = true;
             $result['message'] = $this->__('Balance: %s', $balanceFormatted);
@@ -84,7 +42,8 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
                 'balance' => $balance,
                 'balance_formatted' => $balanceFormatted,
             ];
-
+        } catch (Mage_Core_Exception $e) {
+            $result['message'] = $e->getMessage();
         } catch (Exception $e) {
             Mage::logException($e);
             $result['message'] = $this->__('Unable to check balance.');
@@ -101,16 +60,8 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     {
         $code = trim((string) $this->getRequest()->getParam('giftcard_code'));
 
-        if (!$code) {
-            Mage::getSingleton('checkout/session')->addError(
-                $this->__('Please enter a gift card code.'),
-            );
-            $this->_redirect('checkout/cart');
-            return;
-        }
-
         try {
-            Mage::getService('checkout/cart')->applyGiftcard($this->_getQuote(), $code);
+            Mage::getService('giftcard/giftcard')->applyToCart($this->_getQuote(), $code);
 
             Mage::getSingleton('checkout/session')->addSuccess(
                 $this->__('Gift card "%s" was applied.', $code),
@@ -137,39 +88,13 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
         }
 
         try {
-            $quote = $this->_getQuote();
-
-            // Get currently applied codes
-            $appliedCodes = $quote->getGiftcardCodes();
-            if ($appliedCodes) {
-                $appliedCodes = json_decode($appliedCodes, true);
-            } else {
-                $appliedCodes = [];
-            }
-
-            // Remove the code
-            if (isset($appliedCodes[$code])) {
-                unset($appliedCodes[$code]);
-
-                if ($appliedCodes === []) {
-                    $quote->setGiftcardCodes(null);
-                    $quote->setGiftcardAmount(0);
-                    $quote->setBaseGiftcardAmount(0);
-                } else {
-                    $quote->setGiftcardCodes(json_encode($appliedCodes));
-                }
-
-                $quote->collectTotals()->save();
-
-                Mage::getSingleton('checkout/session')->addSuccess(
-                    $this->__('Gift card was removed.'),
-                );
-            }
-
-        } catch (Exception) {
-            Mage::getSingleton('checkout/session')->addError(
-                $this->__('Cannot remove gift card.'),
-            );
+            Mage::getService('giftcard/giftcard')->removeFromCart($this->_getQuote(), (string) $code);
+            Mage::getSingleton('checkout/session')->addSuccess($this->__('Gift card was removed.'));
+        } catch (Mage_Core_Exception_NoSuchEntity) {
+            // The card is not in the cart, so there is nothing to remove
+        } catch (Exception $e) {
+            Mage::logException($e);
+            Mage::getSingleton('checkout/session')->addError($this->__('Cannot remove gift card.'));
         }
 
         $this->_redirect('checkout/cart');
@@ -191,15 +116,9 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 
         $code = trim((string) $this->getRequest()->getPost('giftcard_code'));
 
-        if (!$code) {
-            $result['message'] = $this->__('Please enter a gift card code.');
-            $this->_sendJsonResponse($result);
-            return;
-        }
-
         try {
             $quote = $this->_getQuote();
-            Mage::getService('checkout/cart')->applyGiftcard($quote, $code);
+            Mage::getService('giftcard/giftcard')->applyToCart($quote, $code);
 
             $result['success'] = true;
             $result['message'] = $this->__('Gift card "%s" was applied.', $code);
@@ -242,43 +161,20 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 
         try {
             $quote = $this->_getQuote();
+            Mage::getService('giftcard/giftcard')->removeFromCart($quote, (string) $code);
 
-            // Get currently applied codes
-            $appliedCodes = $quote->getGiftcardCodes();
-            if ($appliedCodes) {
-                $appliedCodes = json_decode($appliedCodes, true);
-            } else {
-                $appliedCodes = [];
+            $result['success'] = true;
+            $result['message'] = $this->__('Gift card was removed.');
+            $result['data'] = $this->_getGiftcardData($quote);
+
+            // The payment methods change when the gift cards no longer cover the order
+            if ($this->getRequest()->getParam('checkout') === '1') {
+                $result['payment_methods_html'] = $this->_getPaymentMethodsHtml($quote);
             }
-
-            // Remove the code
-            if (isset($appliedCodes[$code])) {
-                unset($appliedCodes[$code]);
-
-                if ($appliedCodes === []) {
-                    $quote->setGiftcardCodes(null);
-                    $quote->setGiftcardAmount(0);
-                    $quote->setBaseGiftcardAmount(0);
-                } else {
-                    $quote->setGiftcardCodes(json_encode($appliedCodes));
-                }
-
-                $quote->collectTotals()->save();
-
-                $result['success'] = true;
-                $result['message'] = $this->__('Gift card was removed.');
-                $result['data'] = $this->_getGiftcardData($quote);
-
-                // Include updated payment methods HTML if this is a checkout context
-                // The payment methods need to be refreshed when removing gift cards too
-                if ($this->getRequest()->getParam('checkout') === '1') {
-                    $result['payment_methods_html'] = $this->_getPaymentMethodsHtml($quote);
-                }
-            } else {
-                $result['message'] = $this->__('Gift card not found.');
-            }
-
-        } catch (Exception) {
+        } catch (Mage_Core_Exception_NoSuchEntity) {
+            $result['message'] = $this->__('Gift card not found.');
+        } catch (Exception $e) {
+            Mage::logException($e);
             $result['message'] = $this->__('Cannot remove gift card.');
         }
 

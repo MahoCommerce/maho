@@ -1,7 +1,9 @@
 <?php
 
 /**
- * core_config_data rows scoped by website or store code, with lookups resolved at import time.
+ * core_config_data rows scoped by website or store code, with lookups resolved at import time. Each row goes
+ * through the config service. The operator of the server runs the import, so it saves any path at any scope that
+ * exists. With the strict option, it refuses a path that no field declares and a scope where the field does not show.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -49,40 +51,56 @@ class Config extends AbstractImporter
             $row['scope'] = $scope;
             $row['scope_id'] = $this->at($file, $line, fn() => $this->resolver->scopeId($scope, $scopeCode));
             $this->at($file, $line, fn() => $this->resolver->expand($row['value']));
+            try {
+                self::service()->assertWritable($path, $scope, $row['scope_id'], empty($options['strict']));
+            } catch (\Mage_Core_Exception_NoSuchEntity) {
+                $this->fail($file, $line, "path '$path' is not a field of System > Configuration");
+            } catch (\Mage_Core_Exception $e) {
+                $this->fail($file, $line, $e->getMessage());
+            }
             $rows[$line] = $row;
         }
         return $rows;
     }
 
     /**
-     * The web/ rows are saved first and the stores reloaded, so a {{store_url:code}} macro in a later row
-     * sees the base URLs and the store code flag this same file sets.
+     * The web/ rows are saved first, and the config and the stores reload before the other rows. So a
+     * {{store_url:code}} macro in a later row sees the base URLs and the store code flag that this same file sets,
+     * and a store that this process created.
      */
     #[\Override]
     protected function write(CsvFile $file, array $rows, array $options, Reporter $reporter): Result
     {
         $result = new Result();
-        $configData = Mage::getModel('adminhtml/config_data');
         $web = array_filter($rows, static fn(array $row): bool => str_starts_with($row['path'], 'web/'));
         $rest = array_diff_key($rows, $web);
+        if ($web === []) {
+            // The service reloads after a web/ batch only, and a store created after the config loaded has no config
+            Mage::getConfig()->reinit();
+            Mage::app()->reinitStores();
+        }
         foreach ([$web, $rest] as $batch) {
-            foreach ($batch as $line => $row) {
-                try {
-                    $configData->saveValue($row['path'], $this->resolver->expand($row['value']), $row['scope'], $row['scope_id']);
-                } catch (\Mage_Core_Exception $e) {
-                    $this->fail($file, $line, $e->getMessage());
+            $line = 0;
+            // The generator expands each value when the service reaches it, after the web/ batch reloaded the stores
+            $values = (function () use ($batch, &$line): \Generator {
+                foreach ($batch as $line => $row) {
+                    yield [$row['path'], $this->resolver->expand($row['value']), $row['scope'], $row['scope_id']];
                 }
-                $result->updated++;
+            })();
+            try {
+                self::service()->saveAll($values, empty($options['strict']));
+            } catch (\Mage_Core_Exception $e) {
+                $this->fail($file, $line, $e->getMessage());
             }
-            if ($batch === $web && $web !== []) {
-                Mage::app()->getCache()->cleanType('config');
-                Mage::getConfig()->reinit();
-                Mage::app()->reinitStores();
-            }
+            $result->updated += count($batch);
         }
         Mage::app()->getCache()->cleanType('config');
         $this->resolver->reset();
         return $result;
     }
 
+    private static function service(): \Mage_Core_Service_Config
+    {
+        return Mage::getService('core/config');
+    }
 }

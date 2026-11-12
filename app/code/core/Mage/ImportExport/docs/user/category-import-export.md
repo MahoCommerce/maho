@@ -231,6 +231,26 @@ category_path,_store,name,custom_field,special_attribute
 electronics,,Electronics,custom_value,special_value
 ```
 
+### Attribute Sets <span class="version-badge">v27.1+</span> { #attribute-sets }
+
+The `_attribute_set` column holds the name of the attribute set of the category. The export writes
+it on the row of each category with an empty `_store`.
+
+- A new category with an empty `_attribute_set` takes the set of its parent category.
+- A saved category with an empty `_attribute_set` keeps its set.
+- A row that names another set moves the category to that set.
+
+The import refuses a value of an attribute that is not in the set of the category. Every night, the
+store deletes such a value, so the import does not save it:
+
+```csv
+_root,_path,name,_attribute_set,brand_story
+Default Category,brands,Brands,Brand,
+Default Category,brands/aurelie,Aurelie,,Hand-made since 1987
+```
+
+The second row takes the **Brand** set of its parent, so it can hold a **Brand Story**.
+
 ## Error Handling
 
 ### Common Errors
@@ -241,6 +261,7 @@ electronics,,Electronics,custom_value,special_value
 4. **Invalid store code**: Store view doesn't exist
 5. **Missing required attributes**: Required fields are empty
 6. **Invalid data types**: Wrong format for boolean/integer fields
+7. **Invalid sort order**: `available_sort_by` or `default_sort_by` has a code that is not an attribute that a product listing can sort by. Separate the codes of `available_sort_by` with a comma, for example `name,price`
 
 ### Error Messages
 

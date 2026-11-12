@@ -21,6 +21,25 @@ declare(strict_types=1);
  * @group write
  */
 
+/**
+ * A file option of $product, which a cart item option names as option_<ID>. The caller deletes it.
+ */
+function customOptionFileProductOption(Mage_Catalog_Model_Product $product): Mage_Catalog_Model_Product_Option
+{
+    $option = Mage::getModel('catalog/product_option')->setData([
+        'product_id' => (int) $product->getId(),
+        'type' => Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE,
+        'title' => 'Upload ' . uniqid(),
+        'is_require' => 0,
+        'sort_order' => 0,
+        'store_id' => 0,
+        'price' => 0,
+        'price_type' => 'fixed',
+    ]);
+    $option->save();
+    return $option;
+}
+
 describe('GET /api/rest/v2/custom-option-file/{optionId}/{key}', function (): void {
 
     it('downloads the file when the hex secret key matches', function (): void {
@@ -37,6 +56,7 @@ describe('GET /api/rest/v2/custom-option-file/{optionId}/{key}', function (): vo
         $item = $quote->getAllItems()[0] ?? null;
         expect($item)->not->toBeNull();
         expect((int) $item->getId())->toBeGreaterThan(0);
+        $productOption = customOptionFileProductOption($product);
 
         // A real file on disk under the custom option quote directory.
         $optionFile = Mage::getModel('catalog/product_option_type_file');
@@ -53,7 +73,7 @@ describe('GET /api/rest/v2/custom-option-file/{optionId}/{key}', function (): vo
         $option = Mage::getModel('sales/quote_item_option');
         $option->setData('item_id', (int) $item->getId());
         $option->setData('product_id', (int) $product->getId());
-        $option->setData('code', 'option_file');
+        $option->setData('code', 'option_' . $productOption->getId());
         $option->setData('value', Mage::helper('core')->jsonEncode([
             'type' => 'text/plain',
             'title' => 'test.txt',
@@ -74,6 +94,7 @@ describe('GET /api/rest/v2/custom-option-file/{optionId}/{key}', function (): vo
             expect($bad['status'])->toBe(403);
         } finally {
             $option->delete();
+            $productOption->delete();
             $quote->delete();
             @unlink($fullPath);
         }
@@ -87,6 +108,7 @@ describe('GET /api/rest/v2/custom-option-file/{optionId}/{key}', function (): vo
         $quote->save();
         $item = $quote->getAllItems()[0] ?? null;
         expect($item)->not->toBeNull();
+        $productOption = customOptionFileProductOption($product);
 
         $optionFile = Mage::getModel('catalog/product_option_type_file');
         $escaped = $optionFile->getQuoteTargetDir(true) . '/../../../../app/etc/local.xml';
@@ -96,7 +118,7 @@ describe('GET /api/rest/v2/custom-option-file/{optionId}/{key}', function (): vo
         $option = Mage::getModel('sales/quote_item_option');
         $option->setData('item_id', (int) $item->getId());
         $option->setData('product_id', (int) $product->getId());
-        $option->setData('code', 'option_file');
+        $option->setData('code', 'option_' . $productOption->getId());
         $option->setData('value', Mage::helper('core')->jsonEncode([
             'type' => 'text/plain',
             'title' => 'local.xml',
@@ -112,7 +134,46 @@ describe('GET /api/rest/v2/custom-option-file/{optionId}/{key}', function (): vo
             expect((string) ($response['raw'] ?? ''))->not->toContain('<config');
         } finally {
             $option->delete();
+            $productOption->delete();
             $quote->delete();
+        }
+    });
+
+    it('returns 404 for an option that is not a file option', function (): void {
+        // The value of a text option is the text of the shopper, who can write the fields of a stored file into it
+        $product = Mage::getModel('catalog/product')->load((int) fixtures('product_id'));
+        $quote = Mage::getModel('sales/quote');
+        $quote->setStoreId((int) Mage::app()->getDefaultStoreView()->getId());
+        $quote->addProduct($product, 1);
+        $quote->save();
+        $item = $quote->getAllItems()[0] ?? null;
+        expect($item)->not->toBeNull();
+
+        $optionFile = Mage::getModel('catalog/product_option_type_file');
+        $relPath = $optionFile->getQuoteTargetDir(true) . '/test_' . uniqid() . '.txt';
+        $fullPath = Mage::getBaseDir() . $relPath;
+        if (!is_dir(dirname($fullPath))) {
+            mkdir(dirname($fullPath), 0o777, true);
+        }
+        file_put_contents($fullPath, 'another-shopper-file');
+        $secretKey = substr(md5($relPath), 0, 20);
+        $option = Mage::getModel('sales/quote_item_option');
+        $option->setData('item_id', (int) $item->getId());
+        $option->setData('product_id', (int) $product->getId());
+        $option->setData('code', 'info_buyRequest');
+        $option->setData('value', Mage::helper('core')->jsonEncode([
+            'quote_path' => $relPath,
+            'secret_key' => $secretKey,
+        ]));
+        $option->save();
+
+        try {
+            $response = apiGet("/api/rest/v2/custom-option-file/{$option->getId()}/{$secretKey}");
+            expect($response['status'])->toBe(404);
+        } finally {
+            $option->delete();
+            $quote->delete();
+            @unlink($fullPath);
         }
     });
 

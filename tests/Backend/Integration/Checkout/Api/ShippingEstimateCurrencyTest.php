@@ -52,7 +52,7 @@ describe('GraphQL shipping estimate currency', function (): void {
         $baseRate = (float) $flatrate['amount'];
         expect($flatrate['currency'])->toBe('USD');
 
-        // The injected free-shipping row shares the label.
+        // Each method has the same label.
         foreach ($methods as $method) {
             expect($method['currency'])->toBe('USD');
         }

@@ -12,7 +12,6 @@ namespace Mage\SalesRule\Api;
 
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Resource;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Coupon State Provider.
@@ -27,28 +26,9 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
     #[\Override]
     protected function provideItem(int|string $id): Resource
     {
-        /** @var \Mage_SalesRule_Model_Coupon $coupon */
-        $coupon = \Mage::getModel('salesrule/coupon');
-        $coupon->load($id);
-
-        if (!$coupon->getId()) {
-            throw new NotFoundHttpException('Coupon not found');
-        }
-
-        // A restricted token only sees coupons whose rule targets at least one
-        // allowed website; hide the rest like the collection filter does.
-        $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
-        if ($allowedWebsiteIds !== null) {
-            /** @var \Mage_SalesRule_Model_Rule $rule */
-            $rule = \Mage::getModel('salesrule/rule');
-            $rule->load($coupon->getRuleId());
-            $ruleWebsiteIds = array_map(intval(...), (array) $rule->getWebsiteIds());
-            if (array_intersect($ruleWebsiteIds, $allowedWebsiteIds) === []) {
-                throw new NotFoundHttpException('Coupon not found');
-            }
-        }
-
-        return Coupon::fromModel($coupon);
+        /** @var \Mage_SalesRule_Service_Rule $service */
+        $service = \Mage::getService('salesrule/rule');
+        return Coupon::fromModel($service->getCouponById((int) $id, $this->allowedWebsiteIds($this->requireUser())));
     }
 
     #[\Override]

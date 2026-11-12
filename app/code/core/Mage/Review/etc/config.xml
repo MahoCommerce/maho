@@ -45,6 +45,11 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Mage_Review_Block</class>
             </review>
         </blocks>
+        <services>
+            <review>
+                <class>Mage_Review_Service</class>
+            </review>
+        </services>
     </global>
     <adminhtml>
         <translate>

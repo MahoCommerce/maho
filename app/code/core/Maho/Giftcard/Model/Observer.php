@@ -30,6 +30,9 @@ class Maho_Giftcard_Model_Observer
             return;
         }
 
+        /** @var Maho_Giftcard_Service_Giftcard $service */
+        $service = Mage::getService('giftcard/giftcard');
+
         // Process each invoiced item
         foreach ($invoice->getAllItems() as $invoiceItem) {
             $orderItem = $invoiceItem->getOrderItem();
@@ -54,6 +57,7 @@ class Maho_Giftcard_Model_Observer
             $senderName = $buyRequest['giftcard_sender_name'] ?? '';
             $senderEmail = $buyRequest['giftcard_sender_email'] ?? '';
             $message = $buyRequest['giftcard_message'] ?? '';
+            $deliveryDate = $buyRequest['giftcard_delivery_date'] ?? null;
 
             // Generate gift cards for each invoiced quantity
             $qtyInvoiced = (int) $invoiceItem->getQty();
@@ -69,10 +73,19 @@ class Maho_Giftcard_Model_Observer
                     $message,
                 );
 
-                // Send gift card email to recipient
-                $this->_sendGiftcardEmail($giftcard, $order);
+                $service->sendToRecipient($giftcard, (int) $order->getStoreId(), is_string($deliveryDate) ? $deliveryDate : null);
             }
         }
+    }
+
+    /**
+     * @param Maho_Giftcard_Model_Giftcard $giftcard
+     * @param Mage_Sales_Model_Order $order
+     */
+    #[\Deprecated(message: "use Mage::getService('giftcard/giftcard')->sendToRecipient()", since: '27.1')]
+    protected function _sendGiftcardEmail($giftcard, $order): void
+    {
+        Mage::getService('giftcard/giftcard')->sendToRecipient($giftcard, (int) $order->getStoreId());
     }
 
     /**
@@ -120,72 +133,11 @@ class Maho_Giftcard_Model_Observer
         // Purchased cards start valid only on the website they were bought on
         $giftcard->setWebsiteIds([(int) $website->getId()]);
 
+        // The first save of the card writes its "created" history entry
+        $giftcard->setCreationComment("Created from order #{$order->getIncrementId()}");
         $giftcard->save();
 
-        // Add history entry
-        $history = Mage::getModel('giftcard/history');
-        $history->setData([
-            'giftcard_id' => $giftcard->getId(),
-            'action' => Maho_Giftcard_Model_Giftcard::ACTION_CREATED,
-            'base_amount' => $baseAmount,
-            'balance_before' => 0,
-            'balance_after' => $baseAmount,
-            'order_id' => $order->getId(),
-            'comment' => "Created from order #{$order->getIncrementId()}",
-            'created_at' => Mage::app()->getLocale()->formatDateForDb('now'),
-        ]);
-        $history->save();
-
         return $giftcard;
-    }
-
-    /**
-     * Send gift card email to recipient
-     *
-     * @param Maho_Giftcard_Model_Giftcard $giftcard
-     * @param Mage_Sales_Model_Order $order
-     * @return void
-     */
-    protected function _sendGiftcardEmail($giftcard, $order)
-    {
-        // Only send if recipient email is provided
-        if (!$giftcard->getRecipientEmail()) {
-            return;
-        }
-
-        try {
-            $helper = Mage::helper('giftcard');
-
-            // Prepare email variables
-            $storeCurrencyCode = $order->getStore()->getCurrentCurrencyCode();
-            $emailVars = [
-                'giftcard' => $giftcard,
-                'order' => $order,
-                'code' => $giftcard->getCode(),
-                'balance' => Mage::app()->getLocale()->formatCurrency($giftcard->getBalance($storeCurrencyCode), $storeCurrencyCode),
-                'recipient_name' => $giftcard->getRecipientName(),
-                'sender_name' => $giftcard->getSenderName(),
-                'message' => $giftcard->getMessage(),
-                'qr_code_url' => $helper->getQrCodeUrl($giftcard->getCode()),
-                'store' => Mage::app()->getStore(),
-            ];
-
-            // Send email
-            $emailTemplate = Mage::getModel('core/email_template');
-            $emailTemplate->setDesignConfig(['area' => 'frontend', 'store' => $order->getStoreId()])
-                ->sendTransactional(
-                    'giftcard_email_template',
-                    Mage::getStoreConfig('sales/email/identity', $order->getStoreId()),
-                    $giftcard->getRecipientEmail(),
-                    $giftcard->getRecipientName(),
-                    $emailVars,
-                    $order->getStoreId(),
-                );
-
-            // Email sent successfully
-        } catch (Exception $e) {
-            Mage::logException($e);
-        }
     }
 
     /**
@@ -270,6 +222,18 @@ class Maho_Giftcard_Model_Observer
                 ]);
             }
         }
+    }
+
+    /**
+     * Check the gift cards of the cart again before its order is placed: a card that was spent elsewhere since
+     * the cart got it must not discount this order.
+     *
+     * @throws Mage_Core_Exception see Maho_Giftcard_Service_Giftcard::revalidateCart()
+     */
+    #[Maho\Config\Observer('sales_quote_submit_validate', id: 'giftcard_revalidate_cart')]
+    public function revalidateCart(Maho\Event\Observer $observer): void
+    {
+        Mage::getService('giftcard/giftcard')->revalidateCart($observer->getEvent()->getQuote());
     }
 
     /**
@@ -746,59 +710,24 @@ class Maho_Giftcard_Model_Observer
         }
 
         $code = trim((string) $giftcardData['code']);
-        $action = $giftcardData['action'] ?? 'apply';
         $quote = $orderCreateModel->getQuote();
         $session = Mage::getSingleton('adminhtml/session_quote');
+        /** @var Maho_Giftcard_Service_Giftcard $service */
+        $service = Mage::getService('giftcard/giftcard');
 
-        // Get currently applied codes
-        $appliedCodes = $quote->getGiftcardCodes();
-        if ($appliedCodes) {
-            $appliedCodes = json_decode($appliedCodes, true);
-        }
-        if (!is_array($appliedCodes)) {
-            $appliedCodes = [];
-        }
-
-        if ($action === 'remove') {
-            // Remove gift card
-            if (isset($appliedCodes[$code])) {
-                unset($appliedCodes[$code]);
-
-                if ($appliedCodes === []) {
-                    $quote->setGiftcardCodes(null);
-                    $quote->setGiftcardAmount(0);
-                    $quote->setBaseGiftcardAmount(0);
-                } else {
-                    $quote->setGiftcardCodes(json_encode($appliedCodes));
-                }
-
-                $session->addSuccess(
-                    Mage::helper('giftcard')->__('Gift card was removed.'),
-                );
+        try {
+            if (($giftcardData['action'] ?? 'apply') === 'remove') {
+                $service->removeFromCart($quote, $code, collectAndSave: false);
+                $session->addSuccess(Mage::helper('giftcard')->__('Gift card was removed.'));
+            } else {
+                $service->applyToCart($quote, $code, actor: Mage_Checkout_Model_Actor::Staff, collectAndSave: false);
+                $session->addSuccess(Mage::helper('giftcard')->__('Gift card "%s" was applied.', $code));
             }
-        } else {
-            // Apply gift card
-            try {
-                $giftcard = Mage::getService('checkout/cart')->validateGiftcard($quote, $code);
-                $code = (string) $giftcard->getCode();
-
-                // Store gift card code with placeholder amount (collect will calculate actual amount)
-                $appliedCodes[$code] = 0;
-
-                $quote->setGiftcardCodes(json_encode($appliedCodes));
-
-                $session->addSuccess(
-                    Mage::helper('giftcard')->__('Gift card "%s" was applied.', $code),
-                );
-
-            } catch (Mage_Core_Exception $e) {
-                $session->addError($e->getMessage());
-            } catch (Exception $e) {
-                Mage::logException($e);
-                $session->addError(
-                    Mage::helper('giftcard')->__('Cannot apply gift card.'),
-                );
-            }
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $session->addError(Mage::helper('giftcard')->__('Cannot apply gift card.'));
         }
 
         // Mark for recollection

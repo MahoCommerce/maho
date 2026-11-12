@@ -178,14 +178,23 @@ class Mage_Sales_Model_Order_Shipment_Track extends Mage_Sales_Model_Abstract
     }
 
     /**
-     * Before object save
-     *
      * @return $this
+     * @throws Mage_Core_Exception_Input when the number or the carrier is empty
      */
     #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();
+
+        $this->setData('track_number', trim((string) $this->getTrackNumber()));
+        $errors = new Mage_Core_Exception_Input();
+        if ($this->getTrackNumber() === '') {
+            $errors->addError('track_number', Mage::helper('sales')->__('Track number is required'));
+        }
+        if (trim((string) $this->getCarrierCode()) === '') {
+            $errors->addError('carrier_code', Mage::helper('sales')->__('The carrier needs to be specified.'));
+        }
+        $errors->throwIfErrors();
 
         if (!$this->getParentId() && $this->getShipment()) {
             $this->setParentId($this->getShipment()->getId());

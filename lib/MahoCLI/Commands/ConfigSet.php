@@ -23,6 +23,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class ConfigSet extends BaseMahoCommand
 {
+    use ConfigCommandTrait;
+
     public function __invoke(
         OutputInterface $output,
         #[Argument(description: 'Configuration path (e.g., web/url/base, general/store_information/name)')]
@@ -35,6 +37,8 @@ class ConfigSet extends BaseMahoCommand
         ?int $scopeId = null,
         #[Option(description: 'Encrypt the value before storing', shortcut: 'e')]
         bool $encrypt = false,
+        #[Option(description: 'Refuse a path that no field of System > Configuration declares, and a scope where the field does not show')]
+        bool $strict = false,
     ): int {
         $this->initMaho();
 
@@ -47,148 +51,46 @@ class ConfigSet extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        // Validate scope
-        if (!in_array($scope, ['default', 'websites', 'stores'])) {
-            $output->writeln('<error>Invalid scope. Must be one of: default, websites, stores</error>');
-            return Command::FAILURE;
-        }
-
-        // Validate scope_id exists
-        if (!$this->validateScopeId($scope, $scopeId, $output)) {
-            return Command::FAILURE;
+        if ($encrypt) {
+            $value = Mage::helper('core')->encrypt($value);
         }
 
         try {
-            // Encrypt value if requested
-            if ($encrypt) {
-                $value = Mage::helper('core')->encrypt($value);
-            }
-
-            // Save the value through the backend model of its field, as the admin form does
-            Mage::getModel('adminhtml/config_data')->saveValue($path, $value, $scope, $scopeId);
-
-            // Clear configuration cache
-            Mage::app()->getCache()->clean(['config']);
-
-            // Get the config_id of the saved configuration
-            $connection = Mage::getSingleton('core/resource')->getConnection('core_read');
-            $table = Mage::getSingleton('core/resource')->getTableName('core_config_data');
-
-            $select = $connection->select()
-                ->from($table, ['config_id'])
-                ->where('path = ?', $path)
-                ->where('scope = ?', $scope)
-                ->where('scope_id = ?', $scopeId);
-
-            $configId = $connection->fetchOne($select);
-
-            // Get scope name
-            $scopeName = $this->getScopeName($scope, $scopeId);
-
-            // Display results in table
-            $output->writeln('<info>Configuration saved successfully</info>');
-            $output->writeln('');
-
-            $tableOutput = new Table($output);
-            $tableOutput->setHeaders(['Config ID', 'Path', 'Scope', 'Scope ID', 'Name', 'Value']);
-            $tableOutput->addRow([
-                $configId ?: 'N/A',
-                $path,
-                $scope,
-                $scopeId,
-                $scopeName,
-                $encrypt ? '<comment>[ENCRYPTED]</comment>' : $value,
-            ]);
-            $tableOutput->render();
-
-            if ($encrypt) {
-                $output->writeln('');
-                $output->writeln('<info>Value was encrypted before storing</info>');
-            }
-
-            $output->writeln('');
-            $output->writeln('<info>Configuration cache has been cleared</info>');
-
-        } catch (\Exception $e) {
+            /** @var \Mage_Core_Service_Config $service */
+            $service = Mage::getService('core/config');
+            $service->save($path, $value, $scope, $scopeId, allowUndeclared: !$strict);
+        } catch (\Mage_Core_Exception $e) {
             $output->writeln('<error>Error saving configuration: ' . $e->getMessage() . '</error>');
             return Command::FAILURE;
         }
 
+        $configId = Mage::getResourceModel('core/config_data_collection')
+            ->addFieldToFilter('path', $path)
+            ->addFieldToFilter('scope', $scope)
+            ->addFieldToFilter('scope_id', $scopeId)
+            ->getFirstItem()
+            ->getId();
+
+        $output->writeln('<info>Configuration saved successfully</info>');
+        $output->writeln('');
+
+        $tableOutput = new Table($output);
+        $tableOutput->setHeaders(['Config ID', 'Path', 'Scope', 'Scope ID', 'Name', 'Value']);
+        $tableOutput->addRow([
+            $configId ?: 'N/A',
+            $path,
+            $scope,
+            $scopeId,
+            $this->getScopeName($scope, $scopeId),
+            $encrypt ? '<comment>[ENCRYPTED]</comment>' : $value,
+        ]);
+        $tableOutput->render();
+
+        if ($encrypt) {
+            $output->writeln('');
+            $output->writeln('<info>Value was encrypted before storing</info>');
+        }
+
         return Command::SUCCESS;
-    }
-
-    private function getScopeName(string $scope, int $scopeId): string
-    {
-        if ($scopeId === 0) {
-            return 'Default Config';
-        }
-
-        try {
-            switch ($scope) {
-                case 'websites':
-                    $website = Mage::getModel('core/website')->load($scopeId);
-                    if ($website && $website->getId()) {
-                        return $website->getName() . ' (' . $website->getCode() . ')';
-                    }
-                    break;
-
-                case 'stores':
-                    $store = Mage::getModel('core/store')->load($scopeId);
-                    if ($store && $store->getId()) {
-                        return $store->getName() . ' (' . $store->getCode() . ')';
-                    }
-                    break;
-            }
-        } catch (\Exception) {
-            // Ignore errors when getting names
-        }
-
-        return '<comment>[Unknown]</comment>';
-    }
-
-    private function validateScopeId(string $scope, int $scopeId, OutputInterface $output): bool
-    {
-        // Default scope with ID 0 is always valid
-        if ($scope === 'default' && $scopeId === 0) {
-            return true;
-        }
-
-        // Default scope must have ID 0
-        if ($scope === 'default' && $scopeId !== 0) {
-            $output->writeln('<error>Default scope must have scope_id 0</error>');
-            return false;
-        }
-
-        // Check if website exists
-        if ($scope === 'websites') {
-            $website = Mage::getModel('core/website')->load($scopeId);
-            if (!$website || !$website->getId()) {
-                $output->writeln('<error>Website with ID ' . $scopeId . ' does not exist</error>');
-                $output->writeln('<comment>Available websites:</comment>');
-
-                $websites = Mage::getModel('core/website')->getCollection();
-                foreach ($websites as $web) {
-                    $output->writeln(sprintf('  ID: %d - %s (%s)', $web->getId(), $web->getName(), $web->getCode()));
-                }
-                return false;
-            }
-        }
-
-        // Check if store exists
-        if ($scope === 'stores') {
-            $store = Mage::getModel('core/store')->load($scopeId);
-            if (!$store || !$store->getId()) {
-                $output->writeln('<error>Store with ID ' . $scopeId . ' does not exist</error>');
-                $output->writeln('<comment>Available stores:</comment>');
-
-                $stores = Mage::getModel('core/store')->getCollection();
-                foreach ($stores as $st) {
-                    $output->writeln(sprintf('  ID: %d - %s (%s)', $st->getId(), $st->getName(), $st->getCode()));
-                }
-                return false;
-            }
-        }
-
-        return true;
     }
 }

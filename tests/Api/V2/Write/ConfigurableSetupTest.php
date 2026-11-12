@@ -93,6 +93,8 @@ describe('Configurable Setup, Child Management', function (): void {
             'sku' => "PEST-CFGCHILD-{$suffix}",
             'name' => 'Config Child Test',
             'price' => 30,
+            // A configurable product takes a child of its own attribute set only
+            'attributeSetId' => (int) Mage::getModel('catalog/product')->load($configId)->getAttributeSetId(),
         ], $token);
         expect($child['status'])->toBeIn([200, 201]);
         $childId = $child['json']['id'];
@@ -120,7 +122,9 @@ describe('Configurable Setup, Child Management', function (): void {
         // Verify removed
         $final = apiGet("/api/rest/v2/products/{$configId}/configurable");
         $finalData = getItems($final);
-        expect($finalData[0]['childProductIds'])->not->toContain($childId);
+        expect($finalData[0]['childProductIds'])->not->toContain($childId)
+            ->and(Mage::getResourceSingleton('catalog/product_type_configurable')->getChildrenIds($configId, false)[0])
+            ->not->toHaveKey($childId);
     });
 
 });

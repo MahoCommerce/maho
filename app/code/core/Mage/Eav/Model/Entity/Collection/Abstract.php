@@ -1068,6 +1068,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
                 foreach ($values as $value) {
                     $this->_setItemAttributeValue($value);
                 }
+                unset($values);
             }
         }
 

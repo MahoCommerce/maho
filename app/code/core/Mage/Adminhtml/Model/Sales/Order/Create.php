@@ -152,6 +152,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
      */
     public function initRuleData()
     {
+        Mage::unregister('rule_data');
         Mage::register('rule_data', new \Maho\DataObject([
             'store_id'  => $this->_session->getStore()->getId(),
             'website_id'  => $this->_session->getStore()->getWebsiteId(),
@@ -299,9 +300,10 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                 }
 
                 if ($qty > 0) {
-                    $item = $this->initFromOrderItem($orderItem, $qty);
-                    if (is_string($item)) {
-                        Mage::throwException($item);
+                    try {
+                        $this->initFromOrderItem($orderItem, $qty);
+                    } catch (Mage_Core_Exception $e) {
+                        $session->addError($e->getMessage());
                     }
                 }
             }
@@ -402,10 +404,11 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
     }
 
     /**
-     * Initialize creation data from existing order Item
+     * Add the product of $orderItem to the quote, with the options of the order item.
      *
      * @param int $qty
-     * @return Mage_Sales_Model_Quote_Item|string|$this
+     * @return Mage_Sales_Model_Quote_Item|$this
+     * @throws Mage_Core_Exception when the cart refuses the product
      */
     public function initFromOrderItem(Mage_Sales_Model_Order_Item $orderItem, $qty = null)
     {
@@ -444,10 +447,13 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             if (is_numeric($qty)) {
                 $buyRequest->setQty($qty);
             }
-            $item = $this->getQuote()->addProduct($product, $buyRequest);
-            if (is_string($item)) {
-                return $item;
-            }
+            $item = Mage::getService('checkout/cart')->addProduct(
+                $this->getQuote(),
+                $product,
+                $buyRequest,
+                Mage_Checkout_Model_Actor::Staff,
+                save: false,
+            );
 
             if ($additionalOptions = $orderItem->getProductOptionByCode('additional_options')) {
                 $item->addOption(new \Maho\DataObject(
@@ -574,11 +580,13 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                         ->load($item->getProduct()->getId());
 
                     $product->setSkipCheckRequiredOption();
-                    $newItem = $this->getQuote()->addProduct($product, $info);
-
-                    if (is_string($newItem)) {
-                        Mage::throwException($newItem);
-                    }
+                    $newItem = Mage::getService('checkout/cart')->addProduct(
+                        $this->getQuote(),
+                        $product,
+                        $info,
+                        Mage_Checkout_Model_Actor::Staff,
+                        save: false,
+                    );
                     $product->unsSkipCheckRequiredOption();
                     $newItem->checkData();
                     $this->_needCollectCart = true;
@@ -606,14 +614,18 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                             ]);
                         }
 
-                        $cartItem = $cart->addProduct($product, $info);
-                        if (is_string($cartItem)) {
-                            Mage::throwException($cartItem);
-                        }
+                        $cartItem = Mage::getService('checkout/cart')->addProduct(
+                            $cart,
+                            $product,
+                            $info,
+                            Mage_Checkout_Model_Actor::Staff,
+                            save: false,
+                        );
                         if ($cartItem->getParentItem()) {
                             $cartItem = $cartItem->getParentItem();
                         }
                         $cartItem->setPrice($item->getProduct()->getPrice());
+                        $cart->setTotalsCollectedFlag(false);
                         $this->_needCollectCart = true;
                         $removeItem = true;
                     }
@@ -666,9 +678,10 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             foreach ($data['add_order_item'] as $orderItemId => $value) {
                 /** @var Mage_Sales_Model_Order_Item $orderItem */
                 $orderItem = Mage::getModel('sales/order_item')->load($orderItemId);
-                $item = $this->initFromOrderItem($orderItem);
-                if (is_string($item)) {
-                    Mage::throwException($item);
+                try {
+                    $this->initFromOrderItem($orderItem);
+                } catch (Mage_Core_Exception $e) {
+                    $this->getSession()->addError($e->getMessage());
                 }
             }
         }
@@ -676,7 +689,12 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             foreach ($data['add_cart_item'] as $itemId => $qty) {
                 $item = $this->getCustomerCart()->getItemById($itemId);
                 if ($item) {
-                    $this->moveQuoteItem($item, 'order', $qty);
+                    try {
+                        $this->moveQuoteItem($item, 'order', $qty);
+                    } catch (Mage_Core_Exception $e) {
+                        $this->getSession()->addError($e->getMessage());
+                        continue;
+                    }
                     $this->removeItem($itemId, 'cart');
                 }
             }
@@ -772,40 +790,37 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         }
         $config = new \Maho\DataObject($config);
 
+        $service = Mage::getService('checkout/cart');
         if (!($product instanceof Mage_Catalog_Model_Product)) {
-            $productId = $product;
-            $product = Mage::getModel('catalog/product')
-                ->setStore($this->getSession()->getStore())
-                ->setStoreId($this->getSession()->getStoreId())
-                ->load($product);
-            if (!$product->getId()) {
-                Mage::throwException(
-                    Mage::helper('adminhtml')->__('Failed to add a product to cart by id "%s".', $productId),
-                );
-            }
+            $product = $service->getProductById((int) $product, (int) $this->getSession()->getStoreId())
+                ->setStore($this->getSession()->getStore());
         }
 
         $stockItem = $product->getStockItem();
         if ($stockItem && $stockItem->getIsQtyDecimal()) {
             $product->setIsQtyDecimal();
-        } else {
+        } elseif ($config->hasQty()) {
             $config->setQty((int) $config->getQty());
+        }
+        if ($config->hasQty() && $config->getQty() <= 0) {
+            $config->setQty(1);
         }
 
         $product->setCartQty((float) $config->getQty());
-        $item = $this->getQuote()->addProductAdvanced(
-            $product,
-            $config,
-            Mage_Catalog_Model_Product_Type_Abstract::PROCESS_MODE_FULL,
-        );
-        if (is_string($item)) {
-            if ($product->getTypeId() != Mage_Catalog_Model_Product_Type_Grouped::TYPE_CODE) {
-                $item = $this->getQuote()->addProductAdvanced(
-                    $product,
-                    $config,
-                    Mage_Catalog_Model_Product_Type_Abstract::PROCESS_MODE_LITE,
-                );
+        try {
+            $item = $service->addProduct($this->getQuote(), $product, $config, Mage_Checkout_Model_Actor::Staff);
+        } catch (Mage_Core_Exception $e) {
+            // A product that misses options goes to the order anyway: the grid then opens its configure popup
+            if (!$e->getMessages(Mage_Core_Model_Message::NOTICE)
+                || $product->getTypeId() == Mage_Catalog_Model_Product_Type_Grouped::TYPE_CODE
+            ) {
+                throw $e;
             }
+            $item = $this->getQuote()->addProductAdvanced(
+                $service->getCartProduct($product, $config, (int) $this->getQuote()->getStoreId()),
+                $config,
+                Mage_Catalog_Model_Product_Type_Abstract::PROCESS_MODE_LITE,
+            );
             if (is_string($item)) {
                 Mage::throwException($item);
             }
@@ -928,8 +943,19 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
 
                         if (empty($info['action']) || !empty($info['configured'])) {
                             $item->setQty($itemQty);
-                            $item->setCustomPrice($itemPrice);
-                            $item->setOriginalCustomPrice($itemPrice);
+                            $currentPrice = $item->getOriginalCustomPrice();
+                            if (($itemPrice === null) !== ($currentPrice === null) || (float) $itemPrice !== (float) $currentPrice) {
+                                // A new configuration can give a new line, which has no ID before the save
+                                if (!$item->getId()) {
+                                    $this->getQuote()->save();
+                                }
+                                Mage::getService('checkout/cart')->setCustomPrice(
+                                    $this->getQuote(),
+                                    (int) $item->getId(),
+                                    $itemPrice === null ? null : (float) $itemPrice,
+                                    Mage_Checkout_Model_Actor::Staff,
+                                );
+                            }
                             $item->setNoDiscount($noDiscount);
                             $item->getProduct()->setIsSuperMode();
                             $item->getProduct()->unsSkipCheckRequiredOption();
@@ -1135,8 +1161,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
     }
 
     /**
-     * Set and validate Quote address
-     * All errors added to _errors
+     * Put the fields of the address form of $data into $address.
      *
      * @return $this
      */
@@ -1158,21 +1183,9 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         }
         $request        = $addressForm->prepareRequest($requestData);
         $addressData    = $addressForm->extractData($request, $requestScope);
+        // Mage_Sales_Service_Order::validateQuote() checks the address when the order is placed
         if ($this->getIsValidate()) {
-            $errors = $addressForm->validateData($addressData);
-            if ($errors !== true) {
-                if ($address->getAddressType() == Mage_Sales_Model_Quote_Address::TYPE_SHIPPING) {
-                    $typeName = Mage::helper('adminhtml')->__('Shipping Address: ');
-                } else {
-                    $typeName = Mage::helper('adminhtml')->__('Billing Address: ');
-                }
-                foreach ($errors as $error) {
-                    $this->_errors[] = $typeName . $error;
-                }
-                $addressForm->restoreData($addressData);
-            } else {
-                $addressForm->compactData($addressData);
-            }
+            $addressForm->compactData($addressData);
         } else {
             $addressForm->restoreData($addressData);
         }
@@ -1208,16 +1221,14 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
 
     public function setShippingAsBilling($flag)
     {
-        if ($flag) {
-            $tmpAddress = clone $this->getBillingAddress();
-            $tmpAddress->unsAddressId()
-                ->unsAddressType();
-            $data = $tmpAddress->getData();
-            $data['save_in_address_book'] = 0; // Do not duplicate address (billing address will do saving too)
-            unset($data['shipping_method']); // Do not reset shipping method to be able to recollect totals
-            $this->getShippingAddress()->addData($data);
+        /** @var Mage_Checkout_Service_Cart $cartService */
+        $cartService = Mage::getService('checkout/cart');
+        // The form sends the flag on each reload, and a copy without a change needs no save of the cart
+        if ($flag && !$cartService->isShippingSameAsBilling($this->getQuote())) {
+            $cartService->useBillingForShipping($this->getQuote());
+        } elseif (!$flag) {
+            $this->getShippingAddress()->setSameAsBilling(false);
         }
-        $this->getShippingAddress()->setSameAsBilling((bool) $flag);
         $this->setRecollect(true);
         return $this;
     }
@@ -1295,17 +1306,32 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         return $this;
     }
 
+    /**
+     * Give the quote the payment method and the payment data of $data, and save the quote.
+     *
+     * @throws Mage_Core_Exception when the method is not available for the quote, or refuses the data
+     */
     public function setPaymentData($data)
     {
         $data['method'] ??= $this->getQuote()->getPayment()->getMethod();
-        $this->getQuote()->getPayment()->importData($data);
+        Mage::getService('checkout/cart')->selectPaymentMethod($this->getQuote(), $data, Mage_Checkout_Model_Actor::Staff);
         return $this;
     }
 
     public function applyCoupon($code)
     {
         $code = trim((string) $code);
-        $this->getQuote()->setCouponCode($code);
+        if ($code === '') {
+            $this->getQuote()->setCouponCode('');
+        } else {
+            // The catalog price rules of the totals read the rule data
+            $this->initRuleData();
+            try {
+                Mage::getService('checkout/cart')->applyCoupon($this->getQuote(), $code, Mage_Checkout_Model_Actor::Staff);
+            } catch (Mage_Core_Exception) {
+                // The cart keeps its coupon, and the controller tells that the code is not valid
+            }
+        }
         $this->setRecollect(true);
         return $this;
     }
@@ -1450,81 +1476,24 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         $store = $this->getSession()->getStore();
 
         $customerIsInStore = $this->_customerIsInStore($store);
-        $customerBillingAddress = null;
-        $customerShippingAddress = null;
 
+        // Mage_Sales_Service_Order::submit() adds the addresses to the address book
         if ($customer->getId()) {
             // Create new customer if customer is not registered in specified store
             if (!$customerIsInStore) {
                 $customer->setId(null)
+                    ->unsetData('created_at')
                     ->setStore($store)
                     ->setDefaultBilling(null)
-                    ->setDefaultShipping(null)
-                    ->setPassword($customer->generatePassword());
+                    ->setDefaultShipping(null);
                 $this->_setCustomerData($customer);
-            }
-
-            if ($this->getBillingAddress()->getSaveInAddressBook()) {
-                $customerBillingAddress = $this->getBillingAddress()->exportCustomerAddress();
-                $customerAddressId = $this->getBillingAddress()->getCustomerAddressId();
-                if ($customerAddressId && $customer->getId()) {
-                    $customer->getAddressItemById($customerAddressId)->addData($customerBillingAddress->getData());
-                } else {
-                    $customer->addAddress($customerBillingAddress);
-                }
-            }
-
-            if (!$this->getQuote()->isVirtual() && $this->getShippingAddress()->getSaveInAddressBook()) {
-                $customerShippingAddress = $this->getShippingAddress()->exportCustomerAddress();
-                $customerAddressId = $this->getShippingAddress()->getCustomerAddressId();
-                if ($customerAddressId && $customer->getId()) {
-                    $customer->getAddressItemById($customerAddressId)->addData($customerShippingAddress->getData());
-                } elseif (!empty($customerAddressId)
-                    && $customerBillingAddress !== null
-                    && $this->getBillingAddress()->getCustomerAddressId() == $customerAddressId
-                ) {
-                    $customerBillingAddress->setIsDefaultShipping();
-                } else {
-                    $customer->addAddress($customerShippingAddress);
-                }
-            }
-
-            if (is_null($customer->getDefaultBilling()) && $customerBillingAddress) {
-                $customerBillingAddress->setIsDefaultBilling();
-            }
-
-            if (is_null($customer->getDefaultShipping())) {
-                if ($this->getShippingAddress()->getSameAsBilling() && $customerBillingAddress) {
-                    $customerBillingAddress->setIsDefaultShipping();
-                } elseif ($customerShippingAddress) {
-                    $customerShippingAddress->setIsDefaultShipping();
-                }
             }
         } else {
             // Prepare new customer
-            $customerBillingAddress = $this->getBillingAddress()->exportCustomerAddress();
-            $customer->addData($customerBillingAddress->getData())
-                ->setPassword($customer->generatePassword())
+            $customer->addData($this->getBillingAddress()->exportCustomerAddress()->getData())
                 ->setStore($store);
             $customer->setEmail($this->_getNewCustomerEmail($customer));
             $this->_setCustomerData($customer);
-
-            if ($this->getBillingAddress()->getSaveInAddressBook()) {
-                $customerBillingAddress->setIsDefaultBilling();
-                $customer->addAddress($customerBillingAddress);
-            }
-
-            $shippingAddress = $this->getShippingAddress();
-            if (!$this->getQuote()->isVirtual()
-                && !$shippingAddress->getSameAsBilling()
-                && $shippingAddress->getSaveInAddressBook()
-            ) {
-                $customerShippingAddress = $shippingAddress->exportCustomerAddress();
-                $customerShippingAddress->setIsDefaultShipping();
-                $customer->addAddress($customerShippingAddress);
-            } else {
-                $customerBillingAddress->setIsDefaultShipping();
-            }
         }
 
         // Set quote customer data to customer
@@ -1573,6 +1542,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
      * Create new order
      *
      * @return Mage_Sales_Model_Order
+     * @throws Mage_Core_Exception
      */
     public function createOrder()
     {
@@ -1581,7 +1551,9 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         $quote = $this->getQuote();
         $this->_prepareQuoteItems();
 
-        $service = Mage::getModel('sales/service_quote', $quote);
+        /** @var Mage_Sales_Service_Order $orderService */
+        $orderService = Mage::getService('sales/order');
+        $orderData = [];
         /** @var Mage_Sales_Model_Order $oldOrder */
         $oldOrder = $this->getSession()->getOrder();
         if ($oldOrder->getId()) {
@@ -1597,46 +1569,58 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                 'increment_id'              => $originalId . '-' . ($oldOrder->getEditIncrement() + 1),
             ];
             $quote->setReservedOrderId($orderData['increment_id']);
-            $service->setOrderData($orderData);
 
-            $oldOrder->cancel();
-
-            if (!$oldOrder->isCanceled()) {
+            $orderService->validateQuote($quote, Mage_Checkout_Model_Actor::Staff);
+            if (!$oldOrder->canCancel()) {
                 Mage::throwException('Could not cancel the old order during order edit.');
             }
         }
 
-        /** @var Mage_Sales_Model_Order $order */
-        $order = $service->submitOrder();
-        $customer = $quote->getCustomer();
-        if ((!$customer->getId() || !$customer->isInStore($this->getSession()->getStore()))
-            && !$quote->getCustomerIsGuest()
-        ) {
-            $customer->setCreatedAt($order->getCreatedAt());
-            $customer
-                ->save()
-                ->sendNewAccountEmail('registered', '', $quote->getStoreId());
-        }
+        $order = null;
+        $placeOrder = function () use ($orderService, $quote, $orderData, &$order): void {
+            $order = $orderService->submit($quote, Mage_Checkout_Model_Actor::Staff, null, $orderData, (bool) $this->getSendConfirmation());
+        };
         if ($oldOrder->getId()) {
-            $oldOrder->setRelationChildId((string) $order->getId());
-            $oldOrder->setRelationChildRealId($order->getIncrementId());
+            // The cancel returns the stock that the new order takes, so it comes first. One transaction holds the
+            // two steps: a new order that fails keeps the old order as it is, and a cancel that fails places no order.
+            $placeNewOrder = $placeOrder;
+            $placeOrder = function () use ($orderService, $oldOrder, $orderData, $placeNewOrder, &$order): void {
+                $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+                $adapter->beginTransaction();
+                try {
+                    $orderService->cancel($oldOrder);
+                    $placeNewOrder();
+                    /** @var Mage_Sales_Model_Order $order */
+                    $oldOrder->setRelationChildId((string) $order->getId());
+                    $oldOrder->setRelationChildRealId($order->getIncrementId());
 
-            Mage::dispatchEvent('adminhtml_sales_order_create_save_before', ['new_order' => $order, 'old_order' => $oldOrder]);
+                    Mage::dispatchEvent('adminhtml_sales_order_create_save_before', ['new_order' => $order, 'old_order' => $oldOrder]);
 
-            $oldOrder->save();
-            $order->save();
+                    $oldOrder->save();
+                    $order->save();
+                    $adapter->commit();
+                } catch (Throwable $e) {
+                    $adapter->rollBack();
+                    // The order of the session is again the order of the database
+                    $oldOrder->reset()->load((int) $orderData['relation_parent_id']);
+                    throw $e;
+                }
+            };
         }
-        if ($this->getSendConfirmation()) {
-            $order->queueNewOrderEmail();
+        if ($quote->getCustomerIsNew()) {
+            /** @var Mage_Customer_Service_Customer $customerService */
+            $customerService = Mage::getService('customer/customer');
+            $storeId = (int) $quote->getStoreId();
+            $customerService->create($quote->getCustomer(), $storeId, $storeId, $placeOrder);
+        } else {
+            $placeOrder();
         }
-
-        Mage::dispatchEvent('checkout_submit_all_after', ['order' => $order, 'quote' => $quote]);
 
         return $order;
     }
 
     /**
-     * Validate quote data before order creation
+     * Check the customer and the store of the order. Mage_Sales_Service_Order::validateQuote() checks the cart.
      *
      * @return $this
      */
@@ -1649,43 +1633,6 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
 
         if (!$this->getSession()->getStore()->getId()) {
             Mage::throwException(Mage::helper('adminhtml')->__('Please select a store.'));
-        }
-        $items = $this->getQuote()->getAllItems();
-
-        if (count($items) == 0) {
-            $this->_errors[] = Mage::helper('adminhtml')->__('You need to specify order items.');
-        }
-
-        foreach ($items as $item) {
-            $messages = $item->getMessage(false);
-            if ($item->getHasError() && is_array($messages) && !empty($messages)) {
-                $this->_errors = array_merge($this->_errors, $messages);
-            }
-        }
-
-        if (!$this->getQuote()->isVirtual()) {
-            if (!$this->getQuote()->getShippingAddress()->getShippingMethod()) {
-                $this->_errors[] = Mage::helper('adminhtml')->__('Shipping method must be specified.');
-            }
-        }
-
-        if (!$this->getQuote()->getPayment()->getMethod()) {
-            $this->_errors[] = Mage::helper('adminhtml')->__('Payment method must be specified.');
-        } else {
-            $method = $this->getQuote()->getPayment()->getMethodInstance();
-            if (!$method) {
-                $this->_errors[] = Mage::helper('adminhtml')->__('Payment method instance is not available.');
-            } else {
-                if (!$method->isAvailable($this->getQuote())) {
-                    $this->_errors[] = Mage::helper('adminhtml')->__('Payment method is not available.');
-                } else {
-                    try {
-                        $method->validate();
-                    } catch (Mage_Core_Exception $e) {
-                        $this->_errors[] = $e->getMessage();
-                    }
-                }
-            }
         }
 
         if (!empty($this->_errors)) {

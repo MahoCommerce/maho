@@ -34,94 +34,36 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
         $post = Mage::app()->getRequest()->getPost();
         /** @var Mage_Core_Model_Cookie $cookieModel */
         $cookieModel = Mage::getSingleton('core/cookie');
-        $limit = (int) Mage::getStoreConfig('system/rate_limit/guest_order_lookup');
-        $limiter = Mage::helper('core')->rateLimiter(
-            'guest_order_lookup',
-            $limit,
-            3600,
-            \Maho\Security\RateLimitScope::Ip,
-        );
-
-        // Throttle every request that presents a credential. The cookie is attacker-supplied
-        // too, so its protect code is guessable at the same rate as the form.
-        if ((!empty($post) || $cookieModel->get($this->_cookieName)) && $limiter->tooManyAttempts()) {
-            Mage::getSingleton('core/session')->addError(
-                $this->__('Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again.'),
-            );
+        $cookie = (string) $cookieModel->get($this->_cookieName);
+        if (empty($post) && $cookie === '') {
             Mage::app()->getResponse()->setRedirect(Mage::getUrl('sales/guest/form'));
             return false;
         }
 
-        $errors = false;
-
-        /** @var Mage_Sales_Model_Order $order */
-        $order = Mage::getModel('sales/order');
-        $errorMessage = 'Entered data is incorrect. Please try again.';
-        if (empty($post) && !$cookieModel->get($this->_cookieName)) {
+        $service = Mage::getService('sales/order');
+        try {
+            if (isset($post['oar_order_id'], $post['oar_type'])) {
+                $type = (string) $post['oar_type'];
+                $order = $service->findForGuest(
+                    (string) $post['oar_order_id'],
+                    (string) ($post['oar_billing_lastname'] ?? ''),
+                    $type === 'email' ? (string) ($post['oar_email'] ?? '') : '',
+                    $type === 'zip' ? (string) ($post['oar_zip'] ?? '') : '',
+                );
+                $cookieModel->set($this->_cookieName, base64_encode($order->getProtectCode() . ':' . $order->getIncrementId()), $this->_lifeTime, '/');
+            } else {
+                [$protectCode, $incrementId] = array_pad(explode(':', (string) base64_decode($cookie)), 2, '');
+                $order = $service->findForGuestByProtectCode($incrementId, $protectCode);
+                $cookieModel->renew($this->_cookieName, $this->_lifeTime, '/');
+            }
+        } catch (Mage_Core_Exception $e) {
+            Mage::getSingleton('core/session')->addError($e->getMessage());
             Mage::app()->getResponse()->setRedirect(Mage::getUrl('sales/guest/form'));
             return false;
         }
 
-        if (!empty($post) && isset($post['oar_order_id']) && isset($post['oar_type'])) {
-            $type           = $post['oar_type'];
-            $incrementId    = $post['oar_order_id'];
-            $lastName       = $post['oar_billing_lastname'];
-            $email          = $post['oar_email'];
-            $zip            = $post['oar_zip'];
-            if (empty($incrementId) || empty($lastName) || empty($type) || (!in_array($type, ['email', 'zip']))
-                || ($type == 'email' && empty($email)) || ($type == 'zip' && empty($zip))
-            ) {
-                $errors = true;
-            }
-            if (!$errors) {
-                $order->loadByIncrementId($incrementId);
-            }
-            if ($order->getId()) {
-                $billingAddress = $order->getBillingAddress();
-                if ((strtolower($lastName) != strtolower($billingAddress->getLastname()))
-                    || ($type == 'email'
-                        && strtolower($email) != strtolower($order->getCustomerEmail()))
-                    || ($type == 'zip'
-                        && (strtolower($zip) != strtolower($billingAddress->getPostcode())))
-                ) {
-                    $errors = true;
-                }
-            } else {
-                $errors = true;
-            }
-            if ($errors === false && !is_null($order->getCustomerId())) {
-                $errorMessage = 'Please log in to view your order details.';
-                $errors = true;
-            }
-            if (!$errors) {
-                $toCookie = base64_encode($order->getProtectCode() . ':' . $incrementId);
-                $cookieModel->set($this->_cookieName, $toCookie, $this->_lifeTime, '/');
-            }
-        } elseif ($cookieModel->get($this->_cookieName)) {
-            $cookie = $cookieModel->get($this->_cookieName);
-            $cookieOrder = $this->_loadOrderByCookie($cookie);
-            if (!is_null($cookieOrder)) {
-                if (is_null($cookieOrder->getCustomerId())) {
-                    $cookieModel->renew($this->_cookieName, $this->_lifeTime, '/');
-                    $order = $cookieOrder;
-                } else {
-                    $errorMessage = 'Please log in to view your order details.';
-                    $errors = true;
-                }
-            } else {
-                $errors = true;
-            }
-        }
-
-        if (!$errors && $order->getId()) {
-            Mage::register('current_order', $order);
-            return true;
-        }
-
-        $limiter->hit();
-        Mage::getSingleton('core/session')->addError($this->__($errorMessage));
-        Mage::app()->getResponse()->setRedirect(Mage::getUrl('sales/guest/form'));
-        return false;
+        Mage::register('current_order', $order);
+        return true;
     }
 
     /**
@@ -151,29 +93,20 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
     }
 
     /**
-     * Try to load order by cookie hash
+     * Load the order that the cookie $cookie of the guest order form names.
      *
      * @param string|null $cookie
      * @return null|Mage_Sales_Model_Order
      */
+    #[\Deprecated('No core code calls it. Use Mage_Sales_Service_Order::findForGuestByProtectCode().', since: '27.1')]
     protected function _loadOrderByCookie($cookie = null)
     {
-        if (!is_null($cookie)) {
-            $cookieData = explode(':', base64_decode($cookie));
-            $protectCode = $cookieData[0];
-            $incrementId = $cookieData[1] ?? null;
+        [$protectCode, $incrementId] = array_pad(explode(':', (string) base64_decode((string) $cookie)), 2, '');
+        $order = $protectCode !== '' && $incrementId !== ''
+            ? Mage::getService('sales/order')->findByIncrementId($incrementId)
+            : null;
 
-            if (!empty($protectCode) && !empty($incrementId)) {
-                /** @var Mage_Sales_Model_Order $order */
-                $order = Mage::getModel('sales/order');
-                $order->loadByIncrementId($incrementId);
-
-                if (hash_equals((string) $order->getProtectCode(), $protectCode)) {
-                    return $order;
-                }
-            }
-        }
-        return null;
+        return $order && hash_equals((string) $order->getProtectCode(), $protectCode) ? $order : null;
     }
 
     /**

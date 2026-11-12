@@ -128,6 +128,12 @@ sensitive change.
 To turn 2FA off, the customer types the current password. Maho refuses this when **Require Two-Factor
 Authentication** is **Yes**.
 
+Each password that the customer types on this page counts in the **Change password** rate limit, under
+**System > Configuration > Advanced > System > Rate limit**.
+
+A headless storefront does the same steps with `POST /customers/me/two-factor/secret` and
+`POST /customers/me/two-factor`. See [Endpoints](../api/v2/endpoints.md).
+
 ### How the rule applies
 
 When 2FA is mandatory, Maho only gates the sensitive parts of the storefront: the customer account and the

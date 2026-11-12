@@ -6,7 +6,7 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Maho_Captcha>
-            <version>2.0.0</version>
+            <version>2.0.1</version>
         </Maho_Captcha>
     </modules>
     <global>
@@ -23,6 +23,13 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Maho_Captcha_Helper</class>
             </captcha>
         </helpers>
+        <resources>
+            <captcha_setup>
+                <setup>
+                    <module>Maho_Captcha</module>
+                </setup>
+            </captcha_setup>
+        </resources>
     </global>
     <frontend>
         <layout>
@@ -67,6 +74,7 @@ SPDX-License-Identifier: AFL-3.0
 .contacts-index-index #contactForm
 .customer-account-login #form-validate-register
 .customer-account-login #form-validate-forgot
+.customer-account-confirmation #form-validate
 #newsletter-validate-detail
 .catalog-product-view #review-form
 .review-product-list #review-form

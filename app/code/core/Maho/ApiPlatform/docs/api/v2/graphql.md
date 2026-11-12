@@ -65,11 +65,13 @@ Item queries take a node IRI (`id: "/api/rest/v2/products/123"`); collection que
 
 Gift messages have no separate resource - they are the `setGiftMessageOnCart` / `removeGiftMessageFromCart` mutations above.
 
+`setShippingAddressOnCart` and `setBillingAddressOnCart` take `prefix`, `middleName`, `suffix` and `vatId` next to the other fields of the address. They also take `saveInAddressBook` <span class="version-badge">v27.1+</span>: on a customer cart, `true` adds the address to the address book of the customer when the order is placed. Without it, or with `false`, the address does not go to the address book. A guest cart ignores it.
+
 ### Customers
 
 | Resource | Queries | Mutations |
 |---|---|---|
-| Customer | `currentCustomer`, `customer(id:)` *(admin)*, `customers` *(admin)* | `loginCustomer`, `logoutCustomer`, `quickCreateCustomer` (register), `updateCustomer`, `changePasswordCustomer`, `forgotPasswordCustomer`, `resetPasswordCustomer` |
+| Customer | `currentCustomer`, `customer(id:)` *(admin)*, `customers` *(admin)* | `loginCustomer`, `logoutCustomer`, `updateCustomer`, `changePasswordCustomer`, `forgotPasswordCustomer`, `resetPasswordCustomer` |
 | Address | `address(id:)`, `addresses`, `myAddresses` | `createAddress`, `updateAddress`, `deleteAddress` |
 | Customer group | `customerGroup(id:)`, `customerGroups` *(admin)* | - |
 
@@ -82,15 +84,19 @@ Gift messages have no separate resource - they are the `setGiftMessageOnCart` / 
 | Credit memo | `creditMemo(id:)`, `creditMemos`, `orderCreditMemos(orderId:)` | `createCreditMemo` |
 | Revocation request | `revocationRequest(id:)`, `revocationRequests` *(admin)*, `myRevocationRequests` | `submitRevocationRequest` |
 
+`placeOrder` applies the rules of the place-order endpoints (see [Orders](endpoints.md#orders)). It takes `agreementIds`, the terms and conditions that the customer accepted, and `sendConfirmation` for an admin or an API token with the grant to create orders. The `placeOrder` mutation of the admin GraphQL endpoint takes `sendConfirmation` too.
+
 ### Inventory & promotions
 
 | Resource | Queries | Mutations |
 |---|---|---|
 | Stock | `stock(id:)`, `stocks` *(admin)* | `updateStock`, `bulkUpdateStock` |
 | Coupon | `coupon(id:)`, `coupons` *(admin)* | `createCoupon`, `updateCoupon`, `deleteCoupon`, `validateCoupon` |
-| Gift card | `giftCard(id:)` *(admin)*, `giftCards` *(admin)*, `checkBalanceGiftCard(code:)` *(public)* | `createGiftCard`, `adjustBalanceGiftCard` |
+| Gift card | `giftCard(id:)` *(admin)*, `giftCards` *(admin)*, `checkBalanceGiftCard(code:)` *(public)* | `createGiftCard`, `adjustBalanceGiftCard`, `sendEmailGiftCard` |
 
 `checkBalanceGiftCard(code:)` is the public balance check (returns balance + status with the code masked, no recipient/sender PII).
+
+`createGiftCard` sends no email <span class="version-badge">v27.1+</span>. `sendEmailGiftCard(input: {giftCardId:})` sends it, as the **Send Email** button of the admin and `POST /giftcards/{id}/send-email` do. A card without `recipientEmail` gives an error on `recipientEmail`.
 
 !!! warning "v26.9+ breaking change"
     `createGiftCard` takes `websiteIds: [Int!]` in place of the removed scalar
@@ -113,7 +119,8 @@ Gift messages have no separate resource - they are the `setGiftMessageOnCart` / 
 | Resource | Queries | Mutations |
 |---|---|---|
 | Newsletter | `newsletter(id:)` *(admin)*, `newsletters` *(admin)*, `statusNewsletter` | `subscribeNewsletter`, `unsubscribeNewsletter` |
-| Wishlist item | `wishlistItem(id:)` *(admin)*, `wishlistItems` *(admin)*, `myWishlistItems` | `addWishlistItem`, `removeWishlistItem`, `moveToCartWishlistItem`, `syncWishlistItem` |
+| Wishlist item | `wishlistItem(id:)` *(admin)*, `wishlistItems` *(admin)*, `myWishlistItems` | `addWishlistItem`, `removeWishlistItem`, `moveToCartWishlistItem`, `syncWishlistItem`, `shareWishlistItem` |
+| Product alert | `productAlert(id:)`, `productAlerts`, `myProductAlerts` | `subscribeProductAlert`, `unsubscribeProductAlert` |
 
 ### Store, directory & tax
 

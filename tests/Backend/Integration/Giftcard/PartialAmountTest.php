@@ -79,7 +79,7 @@ describe('Gift card partial amount + deduction consistency', function (): void {
 
         // The cart API applies a $10 request through this call: it stores min($requested, $balance)
         // in giftcard_codes, then collects totals.
-        Mage::getService('checkout/cart')->applyGiftcard($quote, $giftcard->getCode(), $requestedAmount);
+        Mage::getService('giftcard/giftcard')->applyToCart($quote, $giftcard->getCode(), $requestedAmount);
 
         // (1) The partial request is ignored: the applied amount is the full
         // balance capped at the payable total, NOT the requested $10.

@@ -34,7 +34,7 @@ SPDX-License-Identifier: OSL-3.0
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 770px) {
     .blog_post_image {
         max-width: calc(100% + 1rem);
         margin-inline: -0.5rem;

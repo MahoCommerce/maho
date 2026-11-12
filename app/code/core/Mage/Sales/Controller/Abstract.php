@@ -18,14 +18,7 @@ abstract class Mage_Sales_Controller_Abstract extends Mage_Core_Controller_Front
      */
     protected function _canViewOrder($order)
     {
-        $customerId = Mage::getSingleton('customer/session')->getCustomerId();
-        $availableStates = Mage::getSingleton('sales/order_config')->getVisibleOnFrontStates();
-        if ($order->getId() && $order->getCustomerId() && ($order->getCustomerId() == $customerId)
-            && in_array($order->getState(), $availableStates, true)
-        ) {
-            return true;
-        }
-        return false;
+        return Mage::getService('sales/order')->isVisibleToCustomer($order, (int) Mage::getSingleton('customer/session')->getCustomerId());
     }
 
     /**
@@ -112,7 +105,7 @@ abstract class Mage_Sales_Controller_Abstract extends Mage_Core_Controller_Front
             return;
         }
         $order = Mage::registry('current_order');
-        if (!Mage::helper('sales/reorder')->canReorder($order)) {
+        if (!Mage::getService('sales/order')->canReorder($order, Mage_Checkout_Model_Actor::Customer)) {
             $this->_redirect('*/*/view', ['order_id' => $order->getId()]);
             return;
         }

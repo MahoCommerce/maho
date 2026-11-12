@@ -14,7 +14,6 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\CrudProvider;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class CreditMemoProvider extends CrudProvider
 {
@@ -54,13 +53,7 @@ final class CreditMemoProvider extends CrudProvider
 
     private function getCreditMemoById(int $id): CreditMemo
     {
-        $creditmemo = \Mage::getModel('sales/order_creditmemo');
-        $creditmemo->load($id);
-
-        if (!$creditmemo->getId()) {
-            throw new NotFoundHttpException('Credit memo not found');
-        }
-
+        $creditmemo = \Mage::getService('sales/order_document')->requireCreditmemo($id);
         $this->assertStoreAllowed((int) $creditmemo->getStoreId(), $this->requireUser(), 'credit memo');
 
         return CreditMemo::fromModel($creditmemo);
@@ -68,13 +61,7 @@ final class CreditMemoProvider extends CrudProvider
 
     private function getCreditMemosForOrder(int $orderId, array $context): TraversablePaginator
     {
-        $order = \Mage::getModel('sales/order');
-        $order->load($orderId);
-
-        if (!$order->getId()) {
-            throw new NotFoundHttpException('Order not found');
-        }
-
+        $order = \Mage::getService('sales/order')->getById($orderId);
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         ['page' => $page, 'pageSize' => $perPage] = $this->extractPagination($context);

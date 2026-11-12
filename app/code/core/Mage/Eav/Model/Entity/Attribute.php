@@ -30,6 +30,11 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
 
     public const ATTRIBUTE_CODE_MAX_LENGTH                 = 64;
 
+    /** The code of a new attribute: a letter a-z, then letters a-z, digits and underscores. "event" is not a valid code. */
+    public const ATTRIBUTE_CODE_PATTERN = '/^(?!event$)[a-z][a-z_0-9]{1,254}$/';
+
+    public const LABEL_MAX_LENGTH = 255;
+
     /**
      * Parameter name in event
      *
@@ -126,18 +131,18 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     }
 
     /**
+     * The column limits the length of the code. Mage_Eav_Service_Attribute checks the rules of the admin form
+     * and of the API with getValidationErrors(), so a setup script can save a code that the form refuses.
+     *
      * @throws Mage_Eav_Exception
      */
     #[\Override]
     protected function _beforeSave()
     {
-        /**
-         * Check for maximum attribute_code length
-         */
-        if (isset($this->_data['attribute_code'])) {
-            if (!Mage::helper('core')->isValidLength($this->_data['attribute_code'], null, self::ATTRIBUTE_CODE_MAX_LENGTH)) {
-                throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Maximum length of attribute code must be less then %s symbols', self::ATTRIBUTE_CODE_MAX_LENGTH));
-            }
+        if (isset($this->_data['attribute_code'])
+            && !Mage::helper('core')->isValidLength($this->_data['attribute_code'], null, self::ATTRIBUTE_CODE_MAX_LENGTH)
+        ) {
+            throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Maximum length of attribute code must be less then %s symbols', self::ATTRIBUTE_CODE_MAX_LENGTH));
         }
 
         $defaultValue   = $this->getDefaultValue();
@@ -182,7 +187,145 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
             }
         }
 
+        if (!$this->getId() && !$this->getAttributeSetId() && $this->getEntityTypeId()
+            && $this->getAdminPageSettings()?->addToDefaultSet
+        ) {
+            $this->assignFirstGroupOfDefaultSet();
+        }
+
         return parent::_beforeSave();
+    }
+
+    /**
+     * Return one error for each value that the admin form and the API refuse. A subclass adds the rules of its
+     * entity type. A saved attribute keeps its code, its input type and its locked fields. The model does not
+     * call this method when it saves: Mage_Eav_Service_Attribute does.
+     */
+    public function getValidationErrors(): Mage_Core_Exception_Input
+    {
+        $helper = Mage::helper('eav');
+        $errors = new Mage_Core_Exception_Input();
+        $isNew = !$this->getId();
+
+        $code = $this->getData('attribute_code');
+        if ($isNew && (!is_string($code) || !preg_match(self::ATTRIBUTE_CODE_PATTERN, $code))) {
+            $errors->addError('attribute_code', $helper->__('Attribute code is invalid. Please use only letters (a-z), numbers (0-9) or underscore(_) in this field, first character should be a letter. Do not use "event" for an attribute code.'));
+        } elseif (is_string($code) && !Mage::helper('core')->isValidLength($code, null, self::ATTRIBUTE_CODE_MAX_LENGTH)) {
+            $errors->addError('attribute_code', $helper->__('Maximum length of attribute code must be less then %s symbols', self::ATTRIBUTE_CODE_MAX_LENGTH));
+        }
+
+        if (!$isNew) {
+            $fixed = [
+                'attribute_code' => $helper->__('The attribute code cannot change after the attribute is created.'),
+                'frontend_input' => $helper->__('The input type cannot change after the attribute is created.'),
+            ];
+            foreach ($fixed as $field => $message) {
+                if ($this->hasChangedStoredValue($field)) {
+                    $errors->addError($field, $message);
+                }
+            }
+            foreach ($this->getLockedFields() as $field) {
+                if ($this->hasChangedStoredValue($field)) {
+                    $errors->addError($field, $helper->__('The field %s cannot change for this attribute.', $field));
+                }
+            }
+        }
+
+        $label = $this->getData('frontend_label');
+        if ($isNew || $this->isValueChanged('frontend_label')) {
+            $labels = is_array($label) ? $label : [0 => $label];
+            if (!is_string($labels[0] ?? null) || trim($labels[0]) === '') {
+                $errors->addError('frontend_label', $helper->__('Frontend label is not defined'));
+            }
+            foreach ($labels as $text) {
+                if (is_string($text) && mb_strlen($text) > self::LABEL_MAX_LENGTH) {
+                    $errors->addError('frontend_label', $helper->__('A label can have at most %d characters.', self::LABEL_MAX_LENGTH));
+                    break;
+                }
+            }
+        }
+
+        $class = $this->getData('frontend_class');
+        if ($class !== null && $class !== '' && $this->isValueChanged('frontend_class') && $this->getEntityTypeId()) {
+            $classes = array_values(array_filter(array_column(
+                $helper->getFrontendClasses($this->getEntityType()->getEntityTypeCode()),
+                'value',
+            )));
+            if (!in_array($class, $classes, true)) {
+                $errors->addError('frontend_class', $helper->__('The input validation must be one of: %s', implode(', ', $classes)));
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Return the fields that a save cannot change on this saved attribute: the locked fields that the
+     * configuration gives for its code, and the unique flag of a system attribute.
+     *
+     * @return list<string>
+     */
+    public function getLockedFields(): array
+    {
+        $fields = [];
+        if ($this->getEntityTypeId()) {
+            $locked = Mage::helper('eav')->getAttributeLockedFields($this->getEntityType()->getEntityTypeCode());
+            $fields = array_values($locked[(string) $this->getOrigData('attribute_code')] ?? []);
+        }
+        if ($this->getOrigData('is_user_defined') !== null && !$this->getOrigData('is_user_defined')) {
+            $fields[] = 'is_unique';
+        }
+        return array_values(array_unique($fields));
+    }
+
+    /**
+     * Return the HTML tags that an option label keeps when the attribute allows HTML on the storefront.
+     *
+     * @return list<string>
+     */
+    public function getAllowedOptionTags(): array
+    {
+        return $this->getAdminPageSettings()->allowedTags ?? [];
+    }
+
+    /**
+     * Tell whether $field holds a value that differs from the value that the attribute had when it was loaded.
+     */
+    protected function hasChangedStoredValue(string $field): bool
+    {
+        $stored = $this->getOrigData($field);
+        return $stored !== null && $this->hasData($field) && (string) $this->getData($field) !== (string) $stored;
+    }
+
+    /**
+     * Tell whether a save writes a new value of $field: the attribute is new and has a value, or the attribute was
+     * loaded and the value changed since. An attribute from Mage_Eav_Model_Config has no loaded values, so a save of
+     * it does not check the values that it already had.
+     */
+    protected function isValueChanged(string $field): bool
+    {
+        if (!$this->getId()) {
+            return $this->getData($field) !== null;
+        }
+        return $this->getOrigData('attribute_id') !== null && $this->dataHasChangedFor($field);
+    }
+
+    /**
+     * Put this attribute in the first group of the default set of its entity type, so that the
+     * records show it at once. The save writes the set and the group.
+     */
+    protected function assignFirstGroupOfDefaultSet(): void
+    {
+        $setId = (int) $this->getEntityType()->getDefaultAttributeSetId();
+        $groupId = (int) Mage::getResourceModel('eav/entity_attribute_group_collection')
+            ->setAttributeSetFilter($setId)
+            ->setSortOrder()
+            ->getFirstItem()
+            ->getId();
+        if ($setId && $groupId) {
+            $this->setAttributeSetId($setId);
+            $this->setAttributeGroupId($groupId);
+        }
     }
 
     /**
@@ -196,6 +339,158 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     }
 
     /**
+     * Return the settings of the admin pages that manage the attributes of this entity type,
+     * or null when System > Attributes does not manage the type.
+     *
+     * The module of the entity type gives them, and declares the menu entry and the ACL resource
+     * in its own adminhtml.xml.
+     */
+    public function getAdminPageSettings(): ?Mage_Eav_Model_Entity_Attribute_AdminPageSettings
+    {
+        return null;
+    }
+
+    /**
+     * Return the summary that the edit page of this attribute shows above the properties, or null for no summary.
+     *
+     * Each row names one setting and lists its values. A value that does not show the attribute has
+     * shown false. A row note explains the row.
+     *
+     * @return array{comment: string, rows: list<array{label: string, items: list<array{label: string, shown: bool}>, note: ?string}>}|null
+     */
+    public function getAttributeSummary(): ?array
+    {
+        return null;
+    }
+
+    /**
+     * Return a text that the edit page of $set shows above the groups, or null for no text.
+     * Each line of the text is a paragraph.
+     */
+    public function getSetNote(Mage_Eav_Model_Entity_Attribute_Set $set): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Return the question that the edit page of $set asks before it deletes the set.
+     *
+     * The records of the set move to the default set. The nightly eav_clean_orphaned_records job
+     * then deletes their values of the attributes that are not in the default set, so the
+     * question names those attributes.
+     */
+    public function getSetDeleteQuestion(Mage_Eav_Model_Entity_Attribute_Set $set): string
+    {
+        $helper = Mage::helper('eav');
+        $labels = Mage::getResourceSingleton('eav/entity_attribute_set')->getMissingAttributeLabels(
+            (int) $set->getId(),
+            (int) $this->getEntityType()->getDefaultAttributeSetId(),
+        );
+
+        $text = $helper->__('The records of this set will move to the default set.');
+        if ($labels) {
+            $text .= ' ' . $helper->__('They will lose their values of the attributes that are not in the default set: %s.', implode(', ', $labels));
+        }
+        return $text . ' ' . $helper->__('Delete the set?');
+    }
+
+    /**
+     * Return the question that the edit page of $set asks before a save takes $attributes out of
+     * the set, or null for no question.
+     *
+     * The nightly eav_clean_orphaned_records job deletes the values of an attribute that is not in
+     * the set of the record, so the question names each attribute and its number of records with a value.
+     *
+     * @param list<Mage_Eav_Model_Entity_Attribute_Abstract> $attributes
+     */
+    public function getSetRemoveQuestion(Mage_Eav_Model_Entity_Attribute_Set $set, array $attributes): ?string
+    {
+        if (!$attributes) {
+            return null;
+        }
+        $helper = Mage::helper('eav');
+        $resource = Mage::getResourceSingleton('eav/entity_attribute_set');
+        $names = [];
+        foreach ($attributes as $attribute) {
+            $label = self::getQuestionLabel($attribute);
+            $count = $resource->countRecordsWithValue((int) $set->getId(), $attribute);
+            $names[] = $count ? $helper->__('%s (records with a value: %d)', $label, $count) : $label;
+        }
+        return $helper->__('These attributes leave the set: %s.', implode(', ', $names))
+            . ' ' . $helper->__('Tonight, the store deletes their values in the records of this set. Save the set?');
+    }
+
+    /**
+     * Return the label of $attribute for a question, or its code when it has no label.
+     */
+    protected static function getQuestionLabel(Mage_Eav_Model_Entity_Attribute_Abstract $attribute): string
+    {
+        return (string) ($attribute->getFrontendLabel() ?: $attribute->getAttributeCode());
+    }
+
+    /**
+     * Return the labels of $attributes for a question, separated by commas.
+     *
+     * @param list<Mage_Eav_Model_Entity_Attribute_Abstract> $attributes
+     */
+    protected static function getQuestionLabels(array $attributes): string
+    {
+        $labels = [];
+        foreach ($attributes as $attribute) {
+            $labels[] = self::getQuestionLabel($attribute);
+        }
+        return implode(', ', $labels);
+    }
+
+    /**
+     * Turn the posted values of the admin attribute form into the data of this attribute.
+     * The attribute is loaded when it exists.
+     */
+    public function prepareAdminData(array $data): array
+    {
+        return $data;
+    }
+
+    /**
+     * Save the posted values of the admin attribute form that the attribute does not save itself.
+     */
+    public function saveAdminData(array $data): void {}
+
+    /**
+     * Return the input types that the admin offers for the entity type of this attribute.
+     *
+     * The key is the input code. Each type has a label, and can name a backend_model, a
+     * source_model and a frontend_model. The event eav_attribute_input_types_prepare lets a
+     * module add or remove a type.
+     *
+     * @return array<string, array{label: string, backend_model?: string, source_model?: string, frontend_model?: string}>
+     */
+    public function getInputTypes(): array
+    {
+        $types = new \Maho\DataObject($this->_getInputTypes());
+        Mage::dispatchEvent('eav_attribute_input_types_prepare', [
+            'attribute' => $this,
+            'entity_type_code' => $this->getEntityType()->getEntityTypeCode(),
+            'types' => $types,
+        ]);
+        return $types->getData();
+    }
+
+    /**
+     * @return array<string, array{label: string, backend_model?: string, source_model?: string, frontend_model?: string}>
+     */
+    protected function _getInputTypes(): array
+    {
+        $types = [];
+        foreach (Mage::getModel('eav/adminhtml_system_config_source_inputtype')->toOptionArray() as $option) {
+            $types[$option['value']] = ['label' => $option['label']];
+        }
+        $types['boolean']['source_model'] = 'eav/entity_attribute_source_boolean';
+        $types['multiselect']['backend_model'] = 'eav/entity_attribute_backend_array';
+        return $types;
+    }
+
+    /**
      * Detect backend storage type using frontend input type
      *
      * @return string backend_type field value
@@ -206,7 +501,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
         $field = null;
         $field = match ($type) {
             'text', 'gallery', 'media_image', 'file' => 'varchar',
-            'image', 'textarea', 'multiselect' => 'text',
+            'image', 'textarea', 'multiselect', 'multiline' => 'text',
             'date' => 'datetime',
             'select', 'boolean' => 'int',
             'price' => 'decimal',

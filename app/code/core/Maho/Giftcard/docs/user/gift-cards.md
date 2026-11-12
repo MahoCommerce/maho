@@ -11,7 +11,7 @@ Maho's built-in Gift Card module provides a complete solution for selling, manag
 The Gift Card module enables:
 
 - **Selling gift cards** as virtual products with fixed or custom amounts
-- **Multi-channel delivery** via email with optional scheduling, QR codes, and barcodes
+- **Delivery by email**, at once or on a date that the customer selects, with QR codes and barcodes
 - **Flexible redemption** at checkout with partial balance support
 - **Full order lifecycle integration** including invoices, credit memos, and refunds
 - **Complete admin management** with history tracking and batch operations
@@ -26,7 +26,7 @@ The Gift Card module enables:
 - **Reduced fraud** compared to discount codes through unique, trackable codes
 
 ### For Customers
-- **Easy gifting** with personalized messages and scheduled delivery
+- **Easy gifting** with personalized messages and a delivery date
 - **Flexible spending** with partial redemption and balance tracking
 - **Multiple payment options** by combining gift cards with other payment methods
 - **Instant delivery** via email for last-minute gifts
@@ -50,6 +50,7 @@ Navigate to **System > Configuration > Sales > Gift Cards** to configure the mod
 | **Code Prefix** | Prefix added to all codes, e.g., "GC" | Global |
 | **Default Expiry (days)** | Days until expiration, 0 = never expires | Store View |
 | **Refund Expiration Extension (days)** | When refunding to a gift card that is expired or will expire soon, extend expiration by this many days (default: 30). Set to 0 to disable extension. | Store View |
+| **Maximum Balance** | The highest balance, in the base currency, that an admin, the API or an import gives a card (default: 10,000). A purchased card and a refund have no limit. Leave it empty or set 0 for no limit. A card of several websites gets the lowest limit of them. | Website |
 | **Allow Gift Message** | Enable personalized messages on gift cards | Store View |
 | **Show QR Code** | Display QR codes on gift cards and emails | Store View |
 | **Show Barcode** | Display Code128 barcodes (requires barcode library) | Store View |
@@ -123,7 +124,7 @@ When customers view a gift card product, they see:
 2. **Recipient information** - Name and email for delivery
 3. **Sender information** - Name and optional email
 4. **Gift message** - Personal message (if enabled)
-5. **Delivery date** - Optional scheduled delivery
+5. **Delivery date** - Optional. The day on which the recipient gets the email. Leave it empty to send the email when the invoice is paid
 
 ```
 ┌─────────────────────────────────────────┐
@@ -153,17 +154,21 @@ Gift cards appear in the cart with their selected options:
 - Recipient name and email
 - Sender name
 - Gift message (if provided)
-- Scheduled delivery date (if set)
+- Delivery date (if set)
 
 ### Gift Card Delivery
 
-After the order is invoiced:
+When the invoice is paid, Maho creates the gift card. The delivery date that the customer selects sets when the email goes to the recipient:
 
-1. **Immediate delivery**: Email sent right away if no delivery date specified
-2. **Scheduled delivery**: Email sent on the specified date via cron job
+1. **No delivery date, today or a past date**: Maho sends the email at once.
+2. **A date after today**: Maho schedules the email for the start of that day, in the timezone of the store of the order. A cron job sends it at most 5 minutes later.
+
+The cart, the order in the admin and the order emails show the delivery date with the other gift card options. The delivery date must be a real date. The cart refuses another value, on the storefront and in the API.
+
+A scheduled email uses the same template, sender and store as an email at once. When the cron job cannot send it, Maho logs the error and the cron job tries again on its next run. When you click **Send Email** before the date, the recipient gets the email at once, and the cron job does not send it again.
 
 !!! info "Activation vs. Delivery"
-    Gift cards are **activated immediately** when the invoice is paid, regardless of the scheduled delivery date. The delivery date only controls when the email is sent - the gift card code is valid and usable as soon as the order is invoiced. The expiration date is also calculated from the activation date, not the delivery date.
+    A gift card is **activated immediately** when the invoice is paid, also when its email is scheduled for a later date. The code is valid from that moment. The expiration date is calculated from the activation date, not from the delivery date.
 
 Email contents:
 
@@ -220,7 +225,10 @@ Customers can check their gift card balance without applying it:
 3. View current balance and expiration date
 
 !!! warning "Rate Limiting"
-    Balance checks are rate-limited to 10 attempts per minute to prevent code enumeration attacks.
+    Balance checks are rate-limited to prevent code enumeration attacks. The limit is 10 checks per minute for one
+    visitor by default, and the checkout box, the My Account page and the API share it. Set it in
+    **System > Configuration > Advanced > System > Rate limit > Gift card balance check**. The same number limits
+    the gift card codes that one visitor can apply to a cart in one minute.
 
 ### Check Balance From My Account <span class="version-badge">v26.9+</span>
 
@@ -238,10 +246,9 @@ The page is deliberately cautious about what it reveals:
 - The code is never placed in the address bar, so it does not reach browser
   history or server referer logs.
 - Failed lookups are limited to 10 per hour, per customer. Successful lookups do
-  not count, so a customer holding several cards is not penalised.
-
-This page is separate from the checkout balance check described above, and has
-its own limit.
+  not count, so a customer holding several cards is not penalised. This limit
+  applies to every balance check of a logged-in customer, on top of the limit
+  per minute described above.
 
 ### Partial Redemption
 
@@ -306,7 +313,7 @@ Administrators can create gift cards without a purchase:
    - **Code**: Leave blank for auto-generation or enter custom code
    - **Status**: Set to Active for immediate use
    - **Websites**: Select one or more websites the card is valid on. They must share one base currency <span class="version-badge">v26.9+</span>
-   - **Balance**: Enter the gift card value
+   - **Balance**: Enter the gift card value. It must be more than 0 and at most the **Maximum Balance** setting. A card from a purchase has no upper limit. When you lower the setting, a card with a higher balance keeps it, and you can still change its other fields
    - **Recipient/Sender Info**: Optional delivery details
    - **Expiration Date**: Optional expiration
    - **Comment**: Internal note for audit trail
@@ -404,18 +411,13 @@ Generate printable PDFs for physical delivery:
 
 ### Sending Emails
 
-Trigger gift card notification emails:
+To send the gift card email to the recipient:
 
-#### Immediate Send
 1. Open the gift card
 2. Click **Send Email**
-3. Email sent immediately to the recipient
+3. Maho sends the email immediately, also when the card got the email before or waits for its delivery date
 
-#### Scheduled Send
-1. Open the gift card
-2. Set the **Scheduled Email Date**
-3. Save the gift card
-4. Email will be sent by the cron job at the scheduled time
+A gift card without a **Recipient Email** has no **Send Email** button. A gift card that you create on this page gets no email until you click **Send Email**. The API follows the same rule.
 
 ## Order Integration
 
@@ -668,14 +670,14 @@ A daily cron job (runs at 1 AM) automatically:
 **Possible causes:**
 
 - No recipient email on gift card
-- Email scheduled for future delivery
+- Email scheduled for a later delivery date
 - Email queue not processing
 - SMTP configuration issues
 
 **Solution:**
 
 1. Check gift card has recipient email set
-2. Check `email_scheduled_at` vs `email_sent_at` timestamps
+2. Check `email_scheduled_at` and `email_sent_at` of the gift card: the first holds the time of a scheduled email, the second the time of the last email
 3. Verify email cron job is running (every 5 minutes)
 4. Check email logs for delivery errors
 

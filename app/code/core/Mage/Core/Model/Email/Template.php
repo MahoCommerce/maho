@@ -600,19 +600,35 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     }
 
     /**
-     * Validate email template code
+     * The name must be set, and no other template can have it.
+     *
+     * @throws Mage_Core_Exception_Conflict when another template has the name
+     * @throws Mage_Core_Exception_Input when the name is empty
      */
     #[\Override]
     protected function _beforeSave()
     {
-        $code = $this->getTemplateCode();
-        if (empty($code)) {
-            Mage::throwException(Mage::helper('core')->__('The template Name must not be empty.'));
+        $helper = Mage::helper('core');
+        $code = trim((string) $this->getTemplateCode());
+        $this->setTemplateCode($code);
+        if ($code === '') {
+            throw new Mage_Core_Exception_Input()
+                ->addError('template_code', $helper->__('The template Name must not be empty.'));
         }
-        if ($this->_getResource()->checkCodeUsage($this)) {
-            Mage::throwException(Mage::helper('core')->__('Duplicate Of Template Name'));
-        }
+        $this->assertCodeNotInUse();
         return parent::_beforeSave();
+    }
+
+    /**
+     * @throws Mage_Core_Exception_Conflict when another template has the name of this template
+     */
+    public function assertCodeNotInUse(): void
+    {
+        if ($this->_getResource()->checkCodeUsage($this)) {
+            throw new Mage_Core_Exception_Conflict(
+                Mage::helper('core')->__("An email template with code '%s' already exists", trim((string) $this->getTemplateCode())),
+            );
+        }
     }
 
     public function getAddedAt(): ?string

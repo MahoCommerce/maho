@@ -290,21 +290,22 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Verify a captcha token submitted via the API.
-     * Returns null on success, or an error message string on failure.
+     * @param array<array-key, mixed> $data the fields of the request
+     * @return string|null the error message, or null when the CAPTCHA module accepts the request
      */
+    #[\Deprecated('Use Mage::helper(\'core\')->getCaptchaError()')]
     public function verifyCaptcha(array $data): ?string
     {
-        $result = new \Maho\DataObject(['verified' => true, 'error' => '']);
-        Mage::dispatchEvent('api_verify_captcha', [
-            'result' => $result,
-            'data' => $data,
-        ]);
+        return Mage::helper('core')->getCaptchaError($data);
+    }
 
-        if (!$result->getVerified()) {
-            return $result->getError() ?: Mage::helper('captcha')->__('Incorrect CAPTCHA.');
-        }
-
-        return null;
+    /**
+     * @param array<array-key, mixed> $data the fields of the request
+     * @throws Mage_Core_Exception_Input with an error on captcha_token when the CAPTCHA module refuses the token
+     */
+    #[\Deprecated('Use Mage::helper(\'core\')->assertCaptcha()')]
+    public function assertCaptcha(array $data): void
+    {
+        Mage::helper('core')->assertCaptcha($data);
     }
 }

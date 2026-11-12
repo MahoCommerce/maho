@@ -237,7 +237,7 @@ it('handles url_key conflicts during import', function () {
     $existingCategory->setName('Existing Category')
         ->setUrlKey('edge-conflict-electronics')
         ->setIsActive(1)
-        ->setParentId(2)
+        ->setPath('1/2')
         ->setStoreId(0)
         ->save();
 

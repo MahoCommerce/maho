@@ -13,15 +13,12 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
-use Mage;
+use Mage_Downloadable_Model_Link;
 use Mage_Downloadable_Model_Product_Type;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
-/**
- */
 final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
 {
     use ProductLoaderTrait;
@@ -38,176 +35,85 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
     {
         $user = $this->requireUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);
-
-        // Enforce website scope for store-restricted API users on every
-        // sub-resource write/delete (mirrors ProductProcessor's main CRUD check).
         $this->assertProductWebsitesAllowed($this->loadProduct($productId), $user);
+        $product = $this->loadProduct($productId, Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE);
 
         $request = $context['request'] ?? null;
-        $body = $this->parseRequestBody($request);
-
-        if ($operation instanceof DeleteOperationInterface) {
-            $linkId = (int) ($body['linkId'] ?? $body['link_id'] ?? 0);
-            if ($linkId <= 0) {
-                $linkId = (int) ($request?->query->get('linkId') ?? 0);
-            }
-            return $this->handleDelete($productId, $linkId);
-        }
+        $input = RequestInput::of($this->parseRequestBody($request));
+        /** @var \Mage_Downloadable_Service_Link $service */
+        $service = \Mage::getService('downloadable/link');
 
         if ($operation instanceof Post) {
-            return $this->handleCreate($productId, $body);
-        }
-
-        return $this->handleUpdate($productId, $body);
-    }
-
-    private function handleCreate(int $productId, array $body): DownloadableLink
-    {
-        $this->loadProduct($productId, Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE);
-
-        $title = (string) ($body['title'] ?? '');
-        if ($title === '') {
-            throw new UnprocessableEntityHttpException('title is required');
-        }
-
-        $linkType = (string) ($body['linkType'] ?? $body['link_type'] ?? 'url');
-        if (!in_array($linkType, ['url', 'file'], true)) {
-            throw new UnprocessableEntityHttpException("Invalid linkType: {$linkType}. Valid: url, file");
-        }
-
-        $price = (float) ($body['price'] ?? 0);
-        if ($price < 0) {
-            throw new UnprocessableEntityHttpException('Price must not be negative');
-        }
-
-        /** @var \Mage_Downloadable_Model_Link $link */
-        $link = Mage::getModel('downloadable/link');
-        $link->setProductId($productId);
-        $link->setStoreId(0);
-        $link->setTitle($title);
-        $link->setPrice($price);
-        $link->setSortOrder((int) ($body['sortOrder'] ?? $body['sort_order'] ?? 0));
-        $link->setNumberOfDownloads((int) ($body['numberOfDownloads'] ?? $body['number_of_downloads'] ?? 0));
-        $link->setLinkType($linkType);
-        $link->setIsShareable($this->validateIsShareable(
-            $body['isShareable'] ?? $body['is_shareable'] ?? \Mage_Downloadable_Model_Link::LINK_SHAREABLE_CONFIG,
-        ));
-
-        if ($linkType === 'url') {
-            $linkUrl = (string) ($body['linkUrl'] ?? $body['link_url'] ?? '');
-            if ($linkUrl === '') {
-                throw new UnprocessableEntityHttpException('linkUrl is required for url type links');
+            /** @var Mage_Downloadable_Model_Link $link */
+            $link = \Mage::getModel('downloadable/link');
+            $link->setData('title', $input->string('title') ?? '');
+            $link->setPrice($input->float('price') ?? 0.0);
+            $link->setSortOrder($input->int('sortOrder', 'sort_order') ?? 0);
+            $link->setNumberOfDownloads($input->int('numberOfDownloads', 'number_of_downloads') ?? 0);
+            $link->setLinkType($input->string('linkType', 'link_type') ?? 'url');
+            $link->setData('is_shareable', $input->int('isShareable', 'is_shareable') ?? Mage_Downloadable_Model_Link::LINK_SHAREABLE_CONFIG);
+            if ($link->getLinkType() === 'url') {
+                $link->setLinkUrl($input->string('linkUrl', 'link_url') ?? '');
             }
+            if ($input->string('sampleType', 'sample_type') === 'url') {
+                $link->setSampleType('url');
+                $link->setSampleUrl($input->string('sampleUrl', 'sample_url') ?? '');
+            }
+            return $this->mapToDto($service->save($product, $link));
+        }
+
+        $linkId = $input->int('linkId', 'link_id')
+            ?? ($operation instanceof DeleteOperationInterface ? (int) $request?->query->get('linkId') : $input->int('id') ?? 0);
+        $link = $service->getById($product, $linkId);
+
+        if ($operation instanceof DeleteOperationInterface) {
+            $service->delete($product, $link);
+            return null;
+        }
+
+        if (($title = $input->string('title')) !== null) {
+            $link->setData('title', $title);
+        }
+        if (($price = $input->float('price')) !== null) {
+            $link->setPrice($price);
+        }
+        if (($sortOrder = $input->int('sortOrder', 'sort_order')) !== null) {
+            $link->setSortOrder($sortOrder);
+        }
+        if (($downloads = $input->int('numberOfDownloads', 'number_of_downloads')) !== null) {
+            $link->setNumberOfDownloads($downloads);
+        }
+        if (($linkUrl = $input->string('linkUrl', 'link_url')) !== null) {
             $link->setLinkUrl($linkUrl);
         }
-
-        // Sample
-        $sampleType = $body['sampleType'] ?? $body['sample_type'] ?? null;
-        if ($sampleType === 'url') {
-            $link->setSampleType('url');
-            $link->setSampleUrl($body['sampleUrl'] ?? $body['sample_url'] ?? '');
+        if (($isShareable = $input->int('isShareable', 'is_shareable')) !== null) {
+            $link->setData('is_shareable', $isShareable);
         }
+        if (($sampleUrl = $input->string('sampleUrl', 'sample_url')) !== null) {
+            $link->setSampleType($sampleUrl === '' ? null : 'url');
+            $link->setSampleUrl($sampleUrl === '' ? null : $sampleUrl);
+        }
+        $service->save($product, $link);
 
-        $this->safeSave($link, 'create link');
+        return $this->provider->getLinks(
+            $this->loadProduct($productId, Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE),
+            withLinkUrl: true,
+        );
+    }
 
+    private function mapToDto(Mage_Downloadable_Model_Link $link): DownloadableLink
+    {
         $dto = new DownloadableLink();
         $dto->id = (int) $link->getId();
-        $dto->title = $title;
+        $dto->title = (string) $link->getTitle();
         $dto->price = (float) $link->getPrice();
         $dto->sortOrder = (int) $link->getSortOrder();
         $dto->numberOfDownloads = (int) $link->getNumberOfDownloads();
         $dto->isShareable = (int) $link->getIsShareable();
-        $dto->linkType = $linkType;
+        $dto->linkType = (string) $link->getLinkType();
         $dto->linkUrl = $link->getLinkUrl();
         $dto->sampleUrl = $link->getSampleUrl();
         $dto->sampleType = $link->getSampleType();
-
         return $dto;
     }
-
-    private function handleUpdate(int $productId, array $body): array
-    {
-        $this->loadProduct($productId, Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE);
-
-        $linkId = (int) ($body['linkId'] ?? $body['link_id'] ?? $body['id'] ?? 0);
-        if ($linkId <= 0) {
-            throw new UnprocessableEntityHttpException('linkId is required');
-        }
-
-        /** @var \Mage_Downloadable_Model_Link $link */
-        $link = Mage::getModel('downloadable/link')->load($linkId);
-        if (!$link->getId() || (int) $link->getProductId() !== $productId) {
-            throw new NotFoundHttpException('Downloadable link not found');
-        }
-
-        if (isset($body['title'])) {
-            $link->setTitle($body['title']);
-        }
-        if (isset($body['price'])) {
-            $price = (float) $body['price'];
-            if ($price < 0) {
-                throw new UnprocessableEntityHttpException('Price must not be negative');
-            }
-            $link->setPrice($price);
-        }
-        if (isset($body['sortOrder']) || isset($body['sort_order'])) {
-            $link->setSortOrder((int) ($body['sortOrder'] ?? $body['sort_order']));
-        }
-        if (isset($body['numberOfDownloads']) || isset($body['number_of_downloads'])) {
-            $link->setNumberOfDownloads((int) ($body['numberOfDownloads'] ?? $body['number_of_downloads']));
-        }
-        if (isset($body['linkUrl']) || isset($body['link_url'])) {
-            $link->setLinkUrl($body['linkUrl'] ?? $body['link_url']);
-        }
-        if (isset($body['isShareable']) || isset($body['is_shareable'])) {
-            $link->setIsShareable($this->validateIsShareable($body['isShareable'] ?? $body['is_shareable']));
-        }
-        $sampleUrl = $body['sampleUrl'] ?? $body['sample_url'] ?? null;
-        if ($sampleUrl !== null) {
-            if ($sampleUrl === '') {
-                $link->setData('sample_type');
-                $link->setData('sample_url');
-            } else {
-                $link->setSampleType('url');
-                $link->setSampleUrl($sampleUrl);
-            }
-        }
-
-        $this->safeSave($link, 'update link');
-
-        return $this->provider->getLinks($this->loadProduct($productId, Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE));
-    }
-
-    private function handleDelete(int $productId, int $linkId): null
-    {
-        $this->loadProduct($productId, Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE);
-
-        if ($linkId <= 0) {
-            throw new UnprocessableEntityHttpException('linkId is required');
-        }
-
-        /** @var \Mage_Downloadable_Model_Link $link */
-        $link = Mage::getModel('downloadable/link')->load($linkId);
-        if (!$link->getId() || (int) $link->getProductId() !== $productId) {
-            throw new NotFoundHttpException('Downloadable link not found');
-        }
-
-        $this->safeDelete($link, 'delete link');
-
-        return null;
-    }
-
-    private function validateIsShareable(mixed $value): int
-    {
-        $isShareable = (int) $value;
-        if (!in_array($isShareable, [
-            \Mage_Downloadable_Model_Link::LINK_SHAREABLE_NO,
-            \Mage_Downloadable_Model_Link::LINK_SHAREABLE_YES,
-            \Mage_Downloadable_Model_Link::LINK_SHAREABLE_CONFIG,
-        ], true)) {
-            throw new UnprocessableEntityHttpException('isShareable must be 0 (no), 1 (yes), or 2 (use config)');
-        }
-        return $isShareable;
-    }
-
 }

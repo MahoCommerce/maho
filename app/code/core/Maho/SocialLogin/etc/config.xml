@@ -99,7 +99,6 @@ SPDX-License-Identifier: AFL-3.0
                 <facebook_app_id/>
                 <facebook_app_secret backend_model="adminhtml/system_config_backend_encrypted"/>
                 <allow_registration>1</allow_registration>
-                <ip_rate_limit_per_hour>30</ip_rate_limit_per_hour>
                 <nonce_ttl>600</nonce_ttl>
             </social_login>
         </customer>

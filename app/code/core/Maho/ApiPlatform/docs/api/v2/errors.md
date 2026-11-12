@@ -46,9 +46,9 @@ Some endpoints emit domain-specific `error` codes beyond the status-derived ones
 | 403 | `forbidden` | Authenticated but lacking permission for this operation |
 | 404 | `not_found` | The resource in the URL or the route does not exist (e.g. the bundle options of a product that is not a bundle, or an unknown product link type) |
 | 405 | `method_not_allowed` | HTTP method not supported on this route |
-| 409 | `conflict` | The state of the resource does not allow the action (e.g. an order that cannot be invoiced, shipped or refunded, an invoice that cannot be captured, voided or canceled, a coupon code that already exists, the delete of a root category, another operation in progress on the same order, or an idempotency key that is still in use) |
+| 409 | `conflict` | The state of the resource does not allow the action (e.g. an order that cannot be invoiced, shipped or refunded, an invoice that cannot be captured, voided or canceled, a coupon code or a product SKU that already exists, a coupon for an empty cart, the delete or the move of a root category, another operation in progress on the same order, or an idempotency key that is still in use) |
 | 422 | `unprocessable_entity` | The request can be read, but its content is not valid (e.g. a missing field, a value out of range, an unknown ID, a [revocation submission](endpoints.md#revocation-eu) past the cooling-off window, or an invalid `processedStatus` value) |
-| 429 | `too_many_requests` | The client hit a rate limit (e.g. on guest order lookup, which is IP rate-limited) |
+| 429 | `too_many_requests` | The client hit a rate limit (e.g. on guest order lookup, or on the coupon codes and the gift card codes that a guest or a customer tries on a cart) |
 | 500 | `internal_server_error` | Unexpected server error. In production the message is "An internal error occurred", and the server logs the exception |
 | 502 / 503 | `bad_gateway` / `service_unavailable` | Upstream or availability problems |
 

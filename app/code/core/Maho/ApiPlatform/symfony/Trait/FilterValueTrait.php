@@ -16,10 +16,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 trait FilterValueTrait
 {
-    /**
-     * Each word of a search adds a LIKE condition, so a search uses only its first words.
-     */
-    public const MAX_SEARCH_WORDS = 10;
+    public const MAX_SEARCH_WORDS = \Mage_Core_Helper_String::MAX_SEARCH_WORDS;
 
     /**
      * Return the filter $key as a string, or null when it is absent or empty.
@@ -80,7 +77,6 @@ trait FilterValueTrait
      */
     protected function searchWords(?string $search): array
     {
-        $words = preg_split('/\s+/', trim((string) $search), -1, PREG_SPLIT_NO_EMPTY) ?: [];
-        return array_slice($words, 0, self::MAX_SEARCH_WORDS);
+        return \Mage::helper('core/string')->splitSearchWords($search);
     }
 }
