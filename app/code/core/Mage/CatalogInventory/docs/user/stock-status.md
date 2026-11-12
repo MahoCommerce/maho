@@ -92,7 +92,8 @@ child. A value whose children are all out of stock or disabled is not in the lis
 ## The Stock Status index
 
 The storefront shows the stock status from the **Stock Status** index, one value per product and
-per website. Go to **System > Index Management** to see it.
+per website. The `stockStatus` of the product API and the stock status of a product feed read the
+same index. Go to **System > Index Management** to see it.
 
 - In **Update on Save** mode, the store updates the index when you save a product or when an order
   changes the stock. When a child changes, the store also updates its configurable parent.

@@ -348,8 +348,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
 
         // Apply exclude out of stock products filter
         if ($this->_feed->getExcludeOutOfStock()) {
-            /** @phpstan-ignore argument.type (Works with product collection despite PHPDoc) */
-            Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($collection);
+            Mage::getSingleton('cataloginventory/stock_status')->addIsInStockFilterToCollection($collection);
         }
 
         // Apply product type filter

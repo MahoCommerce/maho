@@ -85,7 +85,7 @@ The General tab also includes **Schedule**, **Upload Settings** (destination, au
 In the **Filters** tab, configure which products to include:
 
 - **Exclude Disabled** - Skip disabled products
-- **Exclude Out of Stock** - Skip products with no stock
+- **Exclude Out of Stock** - Skip products that the storefront shows as out of stock. A configurable, grouped or bundle product is out of stock when no child is in stock
 - **Product Types** - Select which product types to include (simple, configurable, grouped, bundle, virtual, downloadable)
 - **Product Conditions** - Standard rule conditions for advanced filtering (see [Product Filtering](#10-product-filtering))
 
