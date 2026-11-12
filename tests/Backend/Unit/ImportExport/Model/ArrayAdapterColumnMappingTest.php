@@ -70,6 +70,19 @@ describe('ImportExport array column mapping', function () {
         expect($adapter->current())->toBe(['sku' => 'SECOND', 'name' => 'Second product', 'price' => '']);
     });
 
+    it('keeps an indexed row positional when its internal pointer is advanced', function () {
+        $row = ['SECOND', 'Second product'];
+        end($row);
+        next($row);
+
+        $adapter = Mage_ImportExport_Model_Import_Adapter::createArrayAdapter([
+            ['sku', 'name'],
+            $row,
+        ]);
+
+        expect($adapter->current())->toBe(['sku' => 'SECOND', 'name' => 'Second product']);
+    });
+
     it('uses the same mapping when seeking and rewinding', function () {
         $adapter = Mage_ImportExport_Model_Import_Adapter::createArrayAdapter([
             ['sku' => 'FIRST', 'name' => 'First product'],

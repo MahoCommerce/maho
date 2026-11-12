@@ -112,9 +112,9 @@ class Mage_ImportExport_Model_Import_Adapter_Array extends Mage_ImportExport_Mod
             $row = $this->_data[$this->_position];
 
             // Match associative values to the columns established by the first row.
-            if (is_array($row) && !is_numeric(key($row))) {
+            if (is_array($row) && !is_numeric(array_key_first($row))) {
                 $this->_currentRow = array_map(
-                    static fn($column) => array_key_exists($column, $row) ? $row[$column] : '',
+                    static fn(mixed $column): mixed => array_key_exists($column, $row) ? $row[$column] : '',
                     $this->_colNames,
                 );
             } else {
@@ -198,7 +198,7 @@ class Mage_ImportExport_Model_Import_Adapter_Array extends Mage_ImportExport_Mod
             }
 
             // For associative arrays, check key consistency
-            if (!is_numeric(key($row))) {
+            if (!is_numeric(array_key_first($row))) {
                 $rowKeys = array_keys($row);
                 $missingKeys = array_diff($this->_colNames, $rowKeys);
 
