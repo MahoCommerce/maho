@@ -50,6 +50,10 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
     {
         $attrCode = $this->getAttribute();
 
+        if ($attrCode === 'is_in_stock' && $object instanceof Mage_Catalog_Model_Product) {
+            return $this->validateAttribute((int) Mage::helper('cataloginventory')->isInStock($object));
+        }
+
         if ($object->hasData($attrCode)) {
             return $this->validateAttribute($object->getData($attrCode));
         }
