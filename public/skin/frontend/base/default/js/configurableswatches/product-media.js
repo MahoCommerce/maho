@@ -178,7 +178,7 @@ var ConfigurableMediaImages = {
         // Move target image to correct place, in case it's necessary
         imageGallery.appendChild(targetImage);
 
-        if (targetImage.complete && targetImage.naturalWidth > 0) { // Image already loaded -- swap immediately
+        if (targetImage.complete) { // Image already loaded -- swap immediately
             revealImage();
         } else { // Need to wait for image to load
             // Add spinner
