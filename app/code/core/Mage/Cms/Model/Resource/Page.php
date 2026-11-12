@@ -213,6 +213,17 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
     {
         $helper = Mage::helper('eav');
         $errors = new Mage_Core_Exception_Input();
+        // A condition reads the values that a save writes: the defaults of a new page, and 0 or 1 for the status
+        if (!$page->getId()) {
+            foreach ($this->getCustomAttributes() as $code => $attribute) {
+                if (!$page->hasData($code) && (string) $attribute->getDefaultValue() !== '') {
+                    $page->setData($code, (string) $attribute->getDefaultValue());
+                }
+            }
+        }
+        if (is_bool($page->getData('is_active'))) {
+            $page->setData('is_active', (int) $page->getData('is_active'));
+        }
         $hidden = $helper->clearHiddenValues($page, $this->getCustomAttributes());
         foreach ($this->getCustomAttributes() as $code => $attribute) {
             if (in_array($code, $hidden, true)) {

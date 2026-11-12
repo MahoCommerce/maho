@@ -295,7 +295,10 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
                 continue;
             }
             try {
-                $options = $attribute->usesSource() ? $attribute->getSource()->getAllOptions() : [];
+                // A Yes/No attribute stores no source model, so usesSource() is false, but its default source has the options
+                $options = $attribute->usesSource() || $attribute->getFrontendInput() === 'boolean'
+                    ? $attribute->getSource()->getAllOptions()
+                    : [];
             } catch (Mage_Core_Exception) {
                 continue;
             }

@@ -147,6 +147,7 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
         /** @var Mage_Adminhtml_Block_Widget_Form_Element_Dependence|null $block */
         $block = null;
         $values = null;
+        $keepDisabled = [];
         foreach ($form->getAllElements() as $element) {
             $attribute = $element->getEntityAttribute();
             $condition = $attribute instanceof Mage_Eav_Model_Entity_Attribute_Abstract ? $attribute->getDependsOn() : null;
@@ -157,6 +158,9 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
             $code = (string) $element->getId();
             $block->setRawFieldDependence($code, $condition)
                 ->addFieldMap($htmlIds[$code], $code);
+            if ($element->getDisabled()) {
+                $keepDisabled[] = $htmlIds[$code];
+            }
             foreach (\Maho\Data\Form\Condition::fields($condition) as $field) {
                 if (isset($htmlIds[$field])) {
                     $block->addFieldMap($htmlIds[$field], $field);
@@ -169,7 +173,7 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
                 }
             }
         }
-        return $block?->toHtml() ?? '';
+        return $block?->addConfigOption('keep_disabled', $keepDisabled)->toHtml() ?? '';
     }
 
     /**

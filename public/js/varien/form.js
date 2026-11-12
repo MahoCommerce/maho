@@ -260,6 +260,19 @@ class ZipUpdater {
 class FieldDependenceController {
     static MODES = ['NOT', 'AND', 'OR', 'XOR'];
 
+    static #controllers = new WeakMap();
+
+    /**
+     * Apply the conditions of a form again, after a script changed its values without a change event.
+     *
+     * @param {HTMLFormElement} form
+     */
+    static refresh(form) {
+        for (const controller of FieldDependenceController.#controllers.get(form) ?? []) {
+            controller.update();
+        }
+    }
+
     /**
      * @param {HTMLElement} anchor - an element inside the form
      * @param {Object} config
@@ -270,6 +283,8 @@ class FieldDependenceController {
     constructor(anchor, config) {
         this.form = anchor.closest('form') ?? document;
         this.config = config;
+        const controllers = FieldDependenceController.#controllers.get(this.form) ?? [];
+        FieldDependenceController.#controllers.set(this.form, [...controllers, this]);
         const sources = new Set();
         for (const condition of Object.values(config.depends)) {
             this.collectFields(condition, sources);

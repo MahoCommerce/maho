@@ -229,6 +229,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
      *     on_event: string,    // the event name that triggers condition evaluation, false to disable, defaults to "change"
      *     field_map: array,    // key/value pairs of field aliases to their associated DOM IDs.
      *     field_values: array, // key/value pairs of fallback values for fields not present in the form
+     *     keep_disabled: list<string>, // DOM IDs of fields that a condition hides and shows, and never enables
      *     levels_up: int,      // deprecated: the number of ancestor elements to find the parent element to hide
      *     can_edit_price: bool // deprecated: prevent enabling fields, only use if dependence block contains no other elements
      * }

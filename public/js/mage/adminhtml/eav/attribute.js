@@ -151,6 +151,7 @@ class EavAttributeDependence {
         this.operatorEl.addEventListener('change', () => this.write());
         document.getElementById('depends_on_add').addEventListener('click', () => {
             this.addRow('', []);
+            this.update();
             this.rowsEl.lastElementChild?.querySelector('select')?.focus();
         });
         for (const row of config.condition.rows) {
@@ -222,8 +223,13 @@ class EavAttributeDependence {
      */
     fillValues(valuesEl, field, selected) {
         valuesEl.replaceChildren();
-        for (const option of this.config.sources[field]?.options ?? []) {
+        const options = this.config.sources[field]?.options ?? [];
+        for (const option of options) {
             valuesEl.add(new Option(option.label, option.value, false, selected.includes(option.value)));
+        }
+        // A stored value that the field no longer offers stays until the admin removes it
+        for (const value of selected.filter((value) => !options.some((option) => option.value === value))) {
+            valuesEl.add(new Option(value, value, false, true));
         }
         valuesEl.disabled = valuesEl.options.length === 0;
     }

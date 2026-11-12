@@ -147,6 +147,10 @@ class Mage_Customer_Block_Form_Attributes extends Mage_Core_Block_Template
             $depends[(string) $attribute->getAttributeCode()] = $condition;
             foreach (\Maho\Data\Form\Condition::fields($condition) as $field) {
                 $value = $entity?->getData($field);
+                // A new customer gets the website of the store when it is saved, see Mage_Customer_Model_Attribute
+                if ($field === 'website_id' && $value === null && $entity instanceof Mage_Customer_Model_Customer) {
+                    $value = Mage::app()->getStore()->getWebsiteId();
+                }
                 if ($value !== null && $value !== '') {
                     $values[$field] = array_map(strval(...), is_array($value) ? array_values($value) : explode(',', (string) $value));
                 }

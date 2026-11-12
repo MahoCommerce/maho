@@ -52,6 +52,19 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
         $this->_init('customer/attribute');
     }
 
+    /**
+     * A new customer gets the website of the current store when it is saved, so a condition reads that website
+     * before the save, as the forms of the storefront do.
+     */
+    #[\Override]
+    public function isDependencyMet(array $values): bool
+    {
+        if (($values['website_id'] ?? null) === null && $this->getEntityType()->getEntityTypeCode() === 'customer') {
+            $values['website_id'] = Mage::app()->getStore()->getWebsiteId();
+        }
+        return parent::isDependencyMet($values);
+    }
+
     #[\Override]
     public function getAdminPageSettings(): ?Mage_Eav_Model_Entity_Attribute_AdminPageSettings
     {

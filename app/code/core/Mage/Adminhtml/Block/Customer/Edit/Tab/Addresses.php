@@ -223,13 +223,16 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Addresses extends Mage_Adminhtml_Bl
     }
 
     /**
-     * Return the conditions of the address fields, keyed by field code, and every field that they read.
+     * Return the conditions of the address fields, keyed by field code, every field that they read, and for each
+     * saved address the values of the fields that the form does not have.
      */
     public function getAttributeDependenceJson(): string
     {
         $depends = [];
         $fields = [];
+        $formFields = [];
         foreach ($this->getForm()->getAllElements() as $element) {
+            $formFields[] = (string) $element->getId();
             $attribute = $element->getEntityAttribute();
             $condition = $attribute instanceof Mage_Eav_Model_Entity_Attribute_Abstract ? $attribute->getDependsOn() : null;
             if ($condition !== null) {
@@ -237,9 +240,24 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Addresses extends Mage_Adminhtml_Bl
                 $fields = [...$fields, (string) $element->getId(), ...\Maho\Data\Form\Condition::fields($condition)];
             }
         }
+        $absent = array_diff($fields, $formFields);
+        $values = [];
+        if ($absent) {
+            /** @var Mage_Customer_Model_Customer $customer */
+            $customer = Mage::registry('current_customer');
+            foreach ($customer->getAddresses() as $address) {
+                foreach ($absent as $field) {
+                    $value = $address->getData($field);
+                    if ($value !== null && $value !== '') {
+                        $values[(int) $address->getId()][$field] = array_map(strval(...), is_array($value) ? array_values($value) : explode(',', (string) $value));
+                    }
+                }
+            }
+        }
         return Mage::helper('core')->jsonEncode([
             'depends' => (object) $depends,
             'fields' => array_values(array_unique($fields)),
+            'values' => (object) $values,
         ]);
     }
 

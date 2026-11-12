@@ -238,3 +238,55 @@ it('does not require a hidden field on a CMS page save, and clears its value', f
     expect($disabled->getData($this->code))->toBeNull()
         ->and(fn() => $resource->prepareCustomAttributes($enabled))->toThrow(Mage_Core_Exception_Input::class, 'required');
 });
+
+it('keeps the value when the field that the condition reads is false, the value of a store view that uses the default', function () {
+    $this->created[] = $attribute = dependencyAttribute('customer_address', ['attribute_code' => $this->code], dependencyItaly());
+    $object = new \Maho\DataObject(['country_id' => false, $this->code => 'kept']);
+
+    expect(Mage::helper('eav')->clearHiddenValues($object, [$attribute]))->toBe([])
+        ->and($object->getData($this->code))->toBe('kept');
+});
+
+it('offers the Yes and No options of a Yes/No field that stores no source model', function () {
+    $this->created[] = dependencyAttribute('customer_address', [
+        'attribute_code' => $this->code,
+        'frontend_input' => 'boolean',
+    ]);
+    $reader = dependencyService()->newAttribute('customer_address')->setAttributeCode($this->code . '_r');
+
+    expect(array_column($reader->getDependencySources()[$this->code]['options'] ?? [], 'value'))->toEqualCanonicalizing(['0', '1']);
+});
+
+it('reads the website of the store for a new customer, as the save gives it', function () {
+    $this->created[] = $attribute = dependencyAttribute('customer', ['attribute_code' => $this->code], [
+        'website_id' => [(string) Mage::app()->getStore()->getWebsiteId()],
+    ]);
+
+    expect(dependencyService()->getByCode($this->code, 'customer')->isDependencyMet([]))->toBeTrue();
+});
+
+it('applies the defaults and the status of a new CMS page before it checks a condition', function () {
+    $this->created[] = $source = dependencyAttribute('cms_page', [
+        'attribute_code' => $this->code,
+        'frontend_input' => 'boolean',
+        'default_value' => '0',
+    ]);
+    $this->created[] = dependencyAttribute('cms_page', [
+        'attribute_code' => $this->code . '_r',
+        'is_required' => 1,
+    ], [['operator' => 'AND', 'condition' => [$this->code => ['1']]]]);
+    $this->created[] = dependencyAttribute('cms_page', [
+        'attribute_code' => $this->code . '_s',
+        'is_required' => 1,
+    ], [['operator' => 'AND', 'condition' => ['is_active' => ['1']]]]);
+    /** @var Mage_Cms_Model_Resource_Page $resource */
+    $resource = Mage::getResourceSingleton('cms/page');
+
+    $page = Mage::getModel('cms/page')->setData('is_active', false);
+    $resource->prepareCustomAttributes($page);
+
+    expect($page->getData($this->code))->toBe('0')
+        ->and($page->getData('is_active'))->toBe(0)
+        ->and($page->getData($this->code . '_r'))->toBeNull()
+        ->and($page->getData($this->code . '_s'))->toBeNull();
+});

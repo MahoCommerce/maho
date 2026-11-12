@@ -149,8 +149,8 @@ return [
         'code', 'exchangeRate', 'extensions', 'symbol',
     ],
     'CustomAttribute' => [
-        'attributeSets', 'code', 'defaultValue', 'entityType', 'extensions', 'id', 'input', 'isRequired',
-        'isUnique', 'label', 'options', 'usedInForms',
+        'attributeSets', 'code', 'defaultValue', 'dependsOn', 'entityType', 'extensions', 'id', 'input',
+        'isRequired', 'isUnique', 'label', 'options', 'usedInForms',
     ],
     'Customer' => [
         'addresses', 'createdAt', 'createdIn', 'customAttributes', 'defaultBillingAddress', 'defaultShippingAddress',

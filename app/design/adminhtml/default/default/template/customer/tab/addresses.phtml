@@ -253,19 +253,34 @@ class addressesModel {
     }
 
     /**
-     * Show the fields of the address form with the prefix that their conditions allow.
+     * Show the fields of the address form with the prefix that their conditions allow. A field that the form does
+     * not have takes the saved value of the address $addressId.
      *
      * @param {string} prefix
+     * @param {number} [addressId]
      */
-    initDependence(prefix) {
+    initDependence(prefix, addressId) {
         if (!this.dependence.fields.length) {
             return;
         }
         const fieldMap = {};
+        const fieldValues = {};
+        const keepDisabled = [];
         for (const code of this.dependence.fields) {
             fieldMap[code] = prefix + code;
+            if (document.getElementById(prefix + code)?.disabled) {
+                keepDisabled.push(prefix + code);
+            }
+            const saved = this.dependence.values[addressId]?.[code];
+            if (saved) {
+                fieldValues[prefix + code] = saved;
+            }
         }
-        new formElementDependenceController(this.dependence.depends, { field_map: fieldMap });
+        new formElementDependenceController(this.dependence.depends, {
+            field_map: fieldMap,
+            field_values: fieldValues,
+            keep_disabled: keepDisabled,
+        });
     }
 
     prepareTemplate(template) {
@@ -668,7 +683,7 @@ class addressesModel {
 
 const customerAddresses = new addressesModel();
 <?php foreach ($addressCollection as $_address): ?>
-customerAddresses.initDependence('_item<?= (int) $_address->getId() ?>');
+customerAddresses.initDependence('_item<?= (int) $_address->getId() ?>', <?= (int) $_address->getId() ?>);
 <?php endforeach ?>
 
 <?php if (Mage::helper('customer')->isVatValidationEnabled()): ?>

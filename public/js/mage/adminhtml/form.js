@@ -465,6 +465,7 @@ class formElementDependenceController {
      * @param {Object.<string, string>} [config.field_values]
      * @param {number} [config.levels_up]
      * @param {boolean} [config.can_edit_price]
+     * @param {string[]} [config.keep_disabled] - ids of fields that a condition never enables
      */
     constructor(elementsMap, config = {}) {
         this.config = config;
@@ -664,6 +665,10 @@ class formElementDependenceController {
             }
             // Do not enable if can_edit_price option is set to true
             if (shouldShowUp && this.config.can_edit_price != undefined && !this.config.can_edit_price) {
+                return;
+            }
+            // A field that the page disabled for another reason, such as a missing permission, stays disabled
+            if (shouldShowUp && this.config.keep_disabled?.includes(el.id)) {
                 return;
             }
             el.disabled = !shouldShowUp;
