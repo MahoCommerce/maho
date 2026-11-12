@@ -1503,6 +1503,12 @@
         margin: 0;
     }
 
+    .slideshow-priority {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
     .slide-item {
         display: flex;
         gap: 15px;

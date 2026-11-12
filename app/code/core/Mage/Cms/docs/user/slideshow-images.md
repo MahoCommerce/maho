@@ -62,6 +62,20 @@ A theme of your own takes the widths of its parent theme. A developer can change
     side of a preset in each store view. Then no order is correct for all of them. In this case, use
     only presets or only custom widths in the slide, or make one page or block for each store view.
 
+## Load speed of the images
+
+The first image of a slideshow is often the largest image on the page. A slideshow tells the browser
+to load that image first, and to load the other images only when they come near the screen.
+
+In the dialog of the slideshow, the option **Load the first image first** is on for a new
+slideshow. Clear it for a slideshow that is lower on the page, or for a second slideshow, so that it
+does not compete with the main image of the page. The editor writes `fetchpriority="high"` on the
+first image when the option is on, and `loading="lazy"` on each image after the first. A slide with
+alternative images gets the attributes on the `<img>` inside the `<picture>`.
+
+A slideshow that you saved before has the option off. Open the slideshow, select the option, and
+click **Insert Slideshow**.
+
 ## In the source view
 
 The source view shows each alternative image as a `<source>` in a `<picture>`. A preset is a
