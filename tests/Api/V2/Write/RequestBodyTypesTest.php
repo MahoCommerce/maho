@@ -91,6 +91,13 @@ describe('Request body types', function (): void {
         expect(getItems($read))->toBe([]);
     });
 
+    it('rejects product links sent as an object instead of a list', function (): void {
+        $response = apiPut("/api/rest/v2/products/{$this->productId}/links/related", ['a' => ['linkedProductId' => $this->productId]], serviceToken(['products/write']));
+
+        expect($response['status'])->toBe(400);
+        expect($response['json']['message'] ?? '')->toBe('Request body must be an array of links');
+    });
+
     it('rejects tier prices sent as an object instead of a list', function (): void {
         $response = apiPut("/api/rest/v2/products/{$this->productId}/tier-prices", ['a' => ['qty' => 2, 'price' => 5]], serviceToken(['products/write']));
 

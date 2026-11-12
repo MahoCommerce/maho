@@ -18,6 +18,7 @@ use Mage_Catalog_Service_Product_Link as LinkService;
 use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -54,6 +55,9 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
             $input = RequestInput::of($body);
             $service->addLink($product, LinkService::TYPE_GROUPED, self::childId($input), self::linkData($input), $websiteIds);
         } else {
+            if (!array_is_list($body)) {
+                throw new BadRequestHttpException('Request body must be an array of links');
+            }
             $links = [];
             foreach (RequestInput::rowsOf($body) as $link) {
                 $links[self::childId($link)] = self::linkData($link);

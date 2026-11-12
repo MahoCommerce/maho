@@ -16,6 +16,7 @@ use ApiPlatform\Metadata\Post;
 use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -64,6 +65,9 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
             return $dto;
         }
 
+        if (!array_is_list($body)) {
+            throw new BadRequestHttpException('Request body must be an array of links');
+        }
         $links = [];
         foreach (RequestInput::rowsOf($body) as $link) {
             $links[$link->int('linkedProductId', 'linked_product_id') ?? 0] = ['position' => $link->int('position') ?? 0];
