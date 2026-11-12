@@ -1,6 +1,6 @@
 ---
 description: The state and the status of an order, how an order moves from New to Complete, and which orders still need a shipment.
-admin_pages: [sales_order, sales_order_shipment, sales_order_invoice]
+admin_pages: [sales_order, sales_order_shipment, sales_order_invoice, sales_order_creditmemo]
 ---
 
 # Order States
@@ -45,3 +45,25 @@ too, but the payment is not confirmed. Check the payment before you ship either 
 
 To see them, go to **Sales > Orders** and filter the **Status** column. A Processing order can
 already have a shipment for some items: open it and check the **Shipments** tab.
+
+## Which orders the customer sees
+
+A customer sees their orders in **My Account > My Orders** on the storefront, except a Pending
+Payment order: its payment is not confirmed. The API gives the customer the same orders. The list
+of the customer leaves out a Pending Payment order. A read of it or of its invoices, and a cancel by
+the customer, answer that the order does not exist. An administrator and an API user see every order.
+
+## What the store refuses
+
+The admin and the API apply the same rules to an order and to its documents:
+
+- **Cancel**, **Hold** and **Unhold** show an error when the state of the order does not allow the
+  action. For example, an order with an invoice for every item cannot be canceled.
+- A comment on an order needs a text, unless it changes the status.
+- An invoice cannot have a quantity that is more than the quantity that is left to invoice. A
+  quantity with decimals is refused for an item that does not accept one.
+- When the payment method ships the order with its invoice, the store refuses a shipment by itself.
+  Use the **Invoice and Ship** button instead.
+- Each tracking number needs a number and a carrier.
+- A credit memo must refund more than zero, and not more than the amount that the order can still
+  refund. A refund from an invoice uses an invoice of the same order.

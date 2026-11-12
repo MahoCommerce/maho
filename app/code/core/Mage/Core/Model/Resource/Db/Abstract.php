@@ -347,7 +347,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
         $field ??= $this->getIdFieldName();
 
         $read = $this->_getReadAdapter();
-        if ($read && !is_null($value)) {
+        if ($read && !is_null($value) && $this->_canFieldHoldValue($field, $value)) {
             $select = $this->_getLoadSelect($field, $value, $object);
             $data = $read->fetchRow($select);
 
@@ -360,6 +360,17 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
         $this->_afterLoad($object);
 
         return $this;
+    }
+
+    /**
+     * Return false when $field is an integer column of the main table and $value is out of its range. No row has
+     * such a value, and PostgreSQL refuses the query. The check uses the value as _getLoadSelect() converts it.
+     */
+    protected function _canFieldHoldValue(string $field, mixed $value): bool
+    {
+        $read = $this->_getReadAdapter();
+        $column = $read->describeTable($this->getMainTable())[$field] ?? null;
+        return $column === null || $read->canColumnHoldValue($column, $read->prepareColumnValue($column, $value));
     }
 
     /**
@@ -563,10 +574,27 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     }
 
     /**
+     * Return the value that the unique check compares with a column. A column that cannot hold the value
+     * stores its default, so the check uses the default. Return null when no row can hold the value.
+     *
+     * @param array<string, mixed> $column the description of the column, from describeTable()
+     */
+    protected function _getUniqueCheckValue(array $column, mixed $value): ?string
+    {
+        $value = trim((string) $value);
+        $adapter = $this->_getWriteAdapter();
+        if ($column === [] || $adapter->canColumnHoldValue($column, $value)) {
+            return $value;
+        }
+        $default = $column['DEFAULT'] ?? null;
+        return $default !== null && $adapter->canColumnHoldValue($column, (string) $default) ? (string) $default : null;
+    }
+
+    /**
      * Check for unique values existence
      *
      * @return $this
-     * @throws Mage_Core_Exception
+     * @throws Mage_Core_Exception_Conflict
      */
     protected function _checkUnique(Mage_Core_Model_Abstract $object)
     {
@@ -586,15 +614,17 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
             $select = $this->_getWriteAdapter()->select()
                 ->from($this->getMainTable());
 
+            $columns = $this->_getWriteAdapter()->describeTable($this->getMainTable());
+
             foreach ($fields as $unique) {
                 $select->reset(Maho\Db\Select::WHERE);
 
-                if (is_array($unique['field'])) {
-                    foreach ($unique['field'] as $field) {
-                        $select->where($field . '=?', trim((string) $data->getData($field)));
+                foreach ((array) $unique['field'] as $field) {
+                    $value = $this->_getUniqueCheckValue($columns[$field] ?? [], $data->getData($field));
+                    if ($value === null) {
+                        continue 2;
                     }
-                } else {
-                    $select->where($unique['field'] . '=?', trim((string) $data->getData($unique['field'])));
+                    $select->where($field . '=?', $value);
                 }
 
                 if ($object->getId() || $object->getId() === '0') {
@@ -614,7 +644,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
             } else {
                 $error = Mage::helper('core')->__('%s already exist.', implode(', ', $existent));
             }
-            Mage::throwException($error);
+            throw new Mage_Core_Exception_Conflict($error);
         }
         return $this;
     }

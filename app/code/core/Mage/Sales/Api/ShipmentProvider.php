@@ -15,7 +15,6 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\ArrayPaginator;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\CrudProvider;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class ShipmentProvider extends CrudProvider
 {
@@ -61,11 +60,7 @@ final class ShipmentProvider extends CrudProvider
 
     private function getShipmentById(int $id): Shipment
     {
-        $shipment = \Mage::getModel('sales/order_shipment')->load($id);
-        if (!$shipment->getId()) {
-            throw new NotFoundHttpException('Shipment not found');
-        }
-
+        $shipment = \Mage::getService('sales/order_document')->requireShipment($id);
         $this->assertStoreAllowed($shipment->getStoreId(), $this->requireUser(), 'shipment');
 
         return Shipment::fromModel($shipment);
@@ -76,11 +71,7 @@ final class ShipmentProvider extends CrudProvider
      */
     private function getShipmentsForOrder(int $orderId): ArrayPaginator
     {
-        $order = \Mage::getModel('sales/order')->load($orderId);
-        if (!$order->getId()) {
-            throw new NotFoundHttpException('Order not found');
-        }
-
+        $order = \Mage::getService('sales/order')->getById($orderId);
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         $shipments = [];

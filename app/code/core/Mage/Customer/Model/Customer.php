@@ -149,13 +149,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     protected $_cacheTag = self::CACHE_TAG;
 
     /**
-     * Confirmation requirement flag
-     *
-     * @var bool
-     */
-    private static $_isConfirmationRequired;
-
-    /**
      * Initialize customer model
      */
     #[\Override]
@@ -200,8 +193,8 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
             );
         }
 
-        if (Mage::getStoreConfigFlag('customer/password/allow_2fa') && $this->getTwofaEnabled()) {
-            if (!Mage::helper('core/security')->verifyTotpCode($this->getTwofaSecret() ?? '', $twofaVerificationCode ?? '')) {
+        if ($this->isTwofaRequired()) {
+            if (!$this->verifyTwofaCode($twofaVerificationCode ?? '')) {
                 throw Mage::exception(
                     'Mage_Core',
                     Mage::helper('customer')->__('2FA verification code is invalid.'),
@@ -216,6 +209,19 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         ]);
 
         return true;
+    }
+
+    /**
+     * Return whether the store asks this customer for a 2FA code at login.
+     */
+    public function isTwofaRequired(): bool
+    {
+        return Mage::getStoreConfigFlag('customer/password/allow_2fa') && (bool) $this->getTwofaEnabled();
+    }
+
+    public function verifyTwofaCode(#[\SensitiveParameter] string $code): bool
+    {
+        return Mage::helper('core/security')->verifyTotpCode($this->getTwofaSecret() ?? '', $code);
     }
 
     /**
@@ -703,12 +709,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         if ($this->canSkipConfirmation()) {
             return false;
         }
-        if (self::$_isConfirmationRequired === null) {
-            $storeId = $this->getStoreId() ?: null;
-            self::$_isConfirmationRequired = Mage::getStoreConfigFlag(self::XML_PATH_IS_CONFIRM, $storeId);
-        }
-
-        return self::$_isConfirmationRequired;
+        return Mage::getStoreConfigFlag(self::XML_PATH_IS_CONFIRM, $this->getStoreId() ?: null);
     }
 
     /**
@@ -837,14 +838,14 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Send email with link to set password
+     * Send the email with the link to set a password. With $isNew, send the welcome email of a new account.
+     * Without $storeId, send it from the current store. The admin store sends from a store of the website.
      *
-     * @bool $isNew Send welcome email?
      * @return $this
      */
-    public function sendPasswordLinkEmail(bool $isNew = false)
+    public function sendPasswordLinkEmail(bool $isNew = false, ?int $storeId = null)
     {
-        $storeId = Mage::app()->getStore()->getId();
+        $storeId ??= (int) Mage::app()->getStore()->getId();
         if (!$storeId) {
             $storeId = $this->_getWebsiteStoreId();
         }
@@ -1100,9 +1101,13 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
             $errors[] = Mage::helper('customer')->__('The last name cannot be empty.');
         }
 
-        // Validate email
-        if (!Mage::helper('core')->isValidEmail($this->getEmail())) {
-            $errors[] = Mage::helper('customer')->__('Invalid email address "%s".', $this->getEmail());
+        $fieldErrors = $this->validateFields();
+        $fieldErrors = is_array($fieldErrors) ? $fieldErrors : [];
+        // A guest of the checkout is a customer of the NOT LOGGED IN group, so only a save checks the group
+        unset($fieldErrors['group_id']);
+        if (isset($fieldErrors['email'])) {
+            $errors[] = $fieldErrors['email'];
+            unset($fieldErrors['email']);
         }
 
         $password = $this->getPassword();
@@ -1134,24 +1139,76 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
             $errors[] = Mage::helper('customer')->__('Please make sure your passwords match.');
         }
 
-        $entityType = Mage::getSingleton('eav/config')->getEntityType('customer');
-        $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'dob');
-        if ($attribute->getIsRequired() && trim((string) $this->getDob()) == '') {
-            $errors[] = Mage::helper('customer')->__('The Date of Birth is required.');
+        if (!$this->getDeferRequiredProfile()) {
+            $entityType = Mage::getSingleton('eav/config')->getEntityType('customer');
+            $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'dob');
+            if ($attribute->getIsRequired() && trim((string) $this->getDob()) == '') {
+                $errors[] = Mage::helper('customer')->__('The Date of Birth is required.');
+            }
+            $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'taxvat');
+            if ($attribute->getIsRequired() && trim((string) $this->getTaxvat()) == '') {
+                $errors[] = Mage::helper('customer')->__('The TAX/VAT number is required.');
+            }
+            $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'gender');
+            if ($attribute->getIsRequired() && !$this->getGender()) {
+                $errors[] = Mage::helper('customer')->__('Gender is required.');
+            }
         }
-        $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'taxvat');
-        if ($attribute->getIsRequired() && trim((string) $this->getTaxvat()) == '') {
-            $errors[] = Mage::helper('customer')->__('The TAX/VAT number is required.');
-        }
-        $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'gender');
-        if ($attribute->getIsRequired() && !$this->getGender()) {
-            $errors[] = Mage::helper('customer')->__('Gender is required.');
-        }
+        $errors = [...$errors, ...array_values($fieldErrors)];
 
         if (empty($errors)) {
             return true;
         }
         return $errors;
+    }
+
+    /**
+     * Check the fields that have a rule of their own: the email must be valid, the customer group must be a group
+     * for customers, the gender must be an option of its attribute and the date of birth must not be in the future.
+     * A stored group, gender or date of birth that did not change is accepted. validate() includes these checks,
+     * without the check of the customer group. Mage_Customer_Service_Customer checks the group before each save.
+     *
+     * @return array<string, string>|true the message of each problem, by field
+     */
+    public function validateFields(): array|bool
+    {
+        $helper = Mage::helper('customer');
+        $errors = [];
+        if (!Mage::helper('core')->isValidEmail($this->getEmail())) {
+            $errors['email'] = $helper->__('Invalid email address "%s".', $this->getEmail());
+        }
+
+        $isNew = !$this->getId();
+        if ($isNew || $this->dataHasChangedFor('group_id')) {
+            $groupId = (int) $this->getGroupId();
+            $groups = Mage::getResourceModel('customer/group_collection')->setRealGroupsFilter()->toOptionHash();
+            if (!array_key_exists($groupId, $groups)) {
+                $errors['group_id'] = $helper->__('Customer group not found with ID: %s', $groupId);
+            }
+        }
+
+        $gender = $this->getGender();
+        if ($gender && ($isNew || $this->dataHasChangedFor('gender'))) {
+            $attribute = Mage::getSingleton('eav/config')->getAttribute('customer', 'gender');
+            $options = $attribute && $attribute->usesSource() ? $attribute->getSource()->getAllOptions() : [];
+            if (!in_array($gender, array_map(intval(...), array_column($options, 'value')), true)) {
+                $errors['gender'] = $helper->__('The gender is not valid.');
+            }
+        }
+
+        $dob = trim((string) $this->getDob());
+        if ($dob !== '' && ($isNew || $this->dataHasChangedFor('dob'))) {
+            try {
+                $isFuture = new DateTimeImmutable($dob, new DateTimeZone('UTC')) > new DateTimeImmutable('now', new DateTimeZone('UTC'));
+            } catch (Exception) {
+                $isFuture = false;
+            }
+            if ($isFuture) {
+                $errors['dob'] = $helper->__('The Date of Birth cannot be in the future.');
+            }
+        }
+
+        return $errors === [] ? true : $errors;
     }
 
     /**
@@ -1852,6 +1909,21 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     public function setForceConfirmed(?bool $value = true): static
     {
         return $this->setData('force_confirmed', $value);
+    }
+
+    /**
+     * Whether validate() lets the date of birth, the tax/VAT number and the gender stay empty when the store requires
+     * them. A social sign-up sets it: the provider does not give these fields, and the customer fills them later.
+     */
+    public function getDeferRequiredProfile(): ?bool
+    {
+        $value = $this->getData('defer_required_profile');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setDeferRequiredProfile(?bool $value = true): static
+    {
+        return $this->setData('defer_required_profile', $value);
     }
 
     public function getGender(): ?int

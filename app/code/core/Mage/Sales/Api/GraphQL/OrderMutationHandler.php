@@ -10,12 +10,14 @@ declare(strict_types=1);
 
 namespace Mage\Sales\Api\GraphQL;
 
+use Mage\Checkout\Api\CartRequest;
 use Mage\Sales\Api\CreditMemo;
 use Mage\Sales\Api\Order;
 use Mage\Sales\Api\OrderCurrency;
+use Mage\Sales\Api\OrderList;
 use Mage\Sales\Api\OrderProvider;
-use Maho\ApiPlatform\Exception\NotFoundException;
 use Maho\ApiPlatform\Exception\ValidationException;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Security\AdminAcl;
 use Maho\ApiPlatform\Trait\AdminQuoteTrait;
 
@@ -39,50 +41,43 @@ class OrderMutationHandler
     /**
      * Handle placeOrder mutation
      */
-    public function handlePlaceOrder(array $variables, array $context): array
+    public function handlePlaceOrder(array $variables): array
     {
         AdminAcl::checkResource(Order::class);
-        $cartId = $variables['cartId'] ?? null;
+        $input = RequestInput::of($variables);
+        $cartId = $input->int('cartId');
         if (!$cartId) {
             throw ValidationException::requiredField('cartId');
         }
 
-        $quote = $this->loadAdminQuote((int) $cartId);
+        $quote = $this->loadAdminQuote($cartId);
 
-        $paymentMethod = $variables['paymentMethod'] ?? null;
-        $shippingMethod = $variables['shippingMethod'] ?? null;
+        $guestEmail = $input->string('guestEmail');
+        $orderNote = $input->string('orderNote');
+        $sendConfirmation = $input->bool('sendConfirmation');
 
-        if ($paymentMethod) {
-            $quote->getPayment()->setMethod($paymentMethod);
+        $cartService = \Mage::getService('checkout/cart');
+        $shippingMethod = $input->string('shippingMethod') ?? '';
+        if ($shippingMethod !== '' && !$quote->isVirtual()) {
+            $cartService->selectShippingMethod($quote, $shippingMethod);
         }
-        if ($shippingMethod && !$quote->isVirtual()) {
-            $shippingAddress = $quote->getShippingAddress();
-            $shippingAddress->setShippingMethod($shippingMethod);
-            $shippingAddress->setCollectShippingRates();
-        }
-
-        if ($paymentMethod || $shippingMethod) {
-            $quote->collectTotals()->save();
-        }
-
-        // Reject a method the client made up: after rates are collected the
-        // chosen code must resolve to a real rate, otherwise a caller could
-        // claim e.g. free shipping that the store does not actually offer.
-        if ($shippingMethod && !$quote->isVirtual()
-            && !$quote->getShippingAddress()->getShippingRateByCode($shippingMethod)) {
-            throw ValidationException::invalidValue('shippingMethod', 'is not available for this address');
+        $paymentMethod = $input->string('paymentMethod') ?? '';
+        if ($paymentMethod !== '') {
+            // The ACL check above proves the staff. The endpoint runs in a store view, never in the admin scope
+            $cartService->selectPaymentMethod($quote, ['method' => $paymentMethod], CartRequest::backOfficeActor(true));
         }
 
-        $result = $this->orderService->place(
+        $placeOrder = fn(): array => $this->orderService->place(
             $quote,
-            $variables['guestEmail'] ?? null,
-            $variables['orderNote'] ?? null,
-            $variables['cashTendered'] ?? null,
-            $context['admin_user_id'] ?? null,
+            $guestEmail,
+            $orderNote,
+            \Mage_Checkout_Model_Actor::Staff,
+            sendConfirmation: $sendConfirmation,
         );
+        // A caller in the admin scope places a backend order (issue #1337). Any other caller places in the store of the cart.
+        $result = \Mage::app()->getStore()->isAdmin() ? $placeOrder() : $cartService->inQuoteStoreScope($quote, $placeOrder);
 
         $order = $result['order'];
-        $invoiceAndShipment = $this->createInvoiceAndShipment($order);
 
         return ['placeOrder' => [
             'order' => [
@@ -92,9 +87,6 @@ class OrderMutationHandler
                 'currency' => OrderCurrency::of($order),
                 'grandTotal' => (float) $order->getGrandTotal(),
             ],
-            'invoice' => $invoiceAndShipment['invoice'],
-            'shipment' => $invoiceAndShipment['shipment'],
-            'changeAmount' => $result['changeAmount'] ?? null,
         ]];
     }
 
@@ -104,17 +96,12 @@ class OrderMutationHandler
     public function handleLookupOrder(array $variables): array
     {
         AdminAcl::checkResource(Order::class);
-        $incrementId = $variables['incrementId'] ?? $variables['orderNumber'] ?? null;
+        $incrementId = RequestInput::of($variables)->string('incrementId', 'orderNumber');
         if (!$incrementId) {
             throw ValidationException::requiredField('incrementId');
         }
 
-        $order = $this->orderService->getByIncrementId($incrementId);
-        if (!$order) {
-            throw NotFoundException::order();
-        }
-
-        return ['lookupOrder' => $this->mapOrder($order)];
+        return ['lookupOrder' => $this->mapOrder($this->orderService->getByIncrementId($incrementId))];
     }
 
     /**
@@ -123,14 +110,15 @@ class OrderMutationHandler
     public function handleGetCustomerOrders(array $variables): array
     {
         AdminAcl::checkResource(Order::class);
-        $customerId = $variables['customerId'] ?? null;
-        $limit = max(1, min((int) ($variables['limit'] ?? 10), 100));
+        $input = RequestInput::of($variables);
+        $customerId = $input->int('customerId');
+        $limit = self::readLimit($input);
 
         if (!$customerId) {
             throw ValidationException::requiredField('customerId');
         }
 
-        $result = $this->orderService->getListForCustomer((int) $customerId, 1, $limit);
+        $result = new OrderList()->getListForCustomer($customerId, 1, $limit);
 
         $orders = [];
         foreach ($result['orders'] as $order) {
@@ -146,10 +134,10 @@ class OrderMutationHandler
     public function handleRecentOrders(array $variables): array
     {
         AdminAcl::checkResource(Order::class);
-        $storeId = $variables['storeId'] ?? null;
-        $limit = max(1, min((int) ($variables['limit'] ?? 10), 100));
+        $input = RequestInput::of($variables);
+        $storeId = $input->int('storeId');
 
-        $orders = $this->orderService->getRecent($limit, $storeId ? (int) $storeId : null);
+        $orders = new OrderList()->getRecent(self::readLimit($input), $storeId ?: null);
 
         $result = [];
         foreach ($orders as $order) {
@@ -165,15 +153,16 @@ class OrderMutationHandler
     public function handleSearchOrders(array $variables): array
     {
         AdminAcl::checkResource(Order::class);
-        $search = $variables['search'] ?? null;
-        $storeId = $variables['storeId'] ?? null;
-        $limit = max(1, min((int) ($variables['limit'] ?? 10), 100));
+        $input = RequestInput::of($variables);
+        $search = $input->string('search');
+        $storeId = $input->int('storeId');
+        $limit = self::readLimit($input);
 
         if (!$search) {
             return ['searchOrders' => []];
         }
 
-        $orders = $this->orderService->search($search, $storeId ? (int) $storeId : null, $limit);
+        $orders = new OrderList()->search($search, $storeId ?: null, $limit);
 
         $result = [];
         foreach ($orders as $order) {
@@ -184,71 +173,62 @@ class OrderMutationHandler
     }
 
     /**
-     * Handle processReturn mutation
+     * Handle createCreditMemo mutation: refund the listed items of an order offline
      */
-    public function handleProcessReturn(array $variables, array $context): array
+    public function handleCreateCreditMemo(array $variables, array $context): array
     {
         AdminAcl::checkResource(CreditMemo::class);
-        $orderId = $variables['orderId'] ?? null;
-        $items = $variables['items'] ?? [];
-        $adjustmentPositive = (float) ($variables['adjustmentPositive'] ?? 0);
-        $adjustmentNegative = (float) ($variables['adjustmentNegative'] ?? 0);
-        $comment = $variables['comment'] ?? 'Return';
+        $input = RequestInput::of($variables);
+        $orderId = $input->int('orderId');
+        $items = $input->rows('items') ?? [];
+        $comment = $input->string('comment') ?? 'Return';
 
         if (!$orderId) {
             throw ValidationException::requiredField('orderId');
         }
-        if (empty($items)) {
+        if ($items === []) {
             throw ValidationException::requiredField('items');
         }
-        if (!empty($variables['refundToStoreCredit'])) {
-            throw ValidationException::invalidValue('refundToStoreCredit', 'store credit refunds are not supported');
-        }
 
-        $order = \Mage::getModel('sales/order')->load($orderId);
-        if (!$order->getId()) {
-            throw NotFoundException::order();
-        }
-
-        return $this->buildProcessReturn($order, $items, $comment, $adjustmentPositive, $adjustmentNegative);
+        return $this->buildCreditMemo($this->orderService->getById($orderId), $items, $comment, $input);
     }
 
     /**
-     * @param array<int, array<string, mixed>> $items
+     * Return the limit argument of a list query, from 1 to 100, 10 when the query leaves it out.
+     */
+    private static function readLimit(RequestInput $input): int
+    {
+        return max(1, min($input->int('limit') ?? 10, 100));
+    }
+
+    /**
+     * @param list<RequestInput> $items
      * @return array<string, mixed>
      */
-    private function buildProcessReturn(
-        \Mage_Sales_Model_Order $order,
-        array $items,
-        ?string $comment,
-        float $adjustmentPositive,
-        float $adjustmentNegative,
-    ): array {
-        $creditmemoData = [
-            'qtys' => [],
-            'shipping_amount' => 0,
-            'adjustment_positive' => $adjustmentPositive,
-            'adjustment_negative' => $adjustmentNegative,
-        ];
-
-        foreach ($items as $itemData) {
-            $orderItemId = $itemData['orderItemId'] ?? null;
-            $qty = $itemData['qty'] ?? 0;
-            if ($orderItemId && $qty > 0) {
-                $creditmemoData['qtys'][$orderItemId] = $qty;
+    private function buildCreditMemo(\Mage_Sales_Model_Order $order, array $items, ?string $comment, RequestInput $input): array
+    {
+        $creditmemoData = ['qtys' => []];
+        foreach (['adjustmentPositive' => 'adjustment_positive', 'adjustmentNegative' => 'adjustment_negative', 'shippingAmount' => 'shipping_amount'] as $field => $key) {
+            $amount = $input->float($field);
+            if ($amount !== null) {
+                $creditmemoData[$key] = $amount;
+            }
+        }
+        foreach ($items as $item) {
+            $orderItemId = $item->int('orderItemId');
+            if ($orderItemId) {
+                $creditmemoData['qtys'][$orderItemId] = $item->float('qty') ?? 0.0;
             }
         }
 
-        // Refunds run through the order service so this path and the REST/GraphQL
-        // CreditMemo resource apply the same money rules and the same lock.
-        $creditmemo = $this->orderService->refund(
+        $creditmemo = \Mage::getService('sales/order_document')->refund(
             $order,
             $creditmemoData,
             $comment,
             offlineRefund: true,
         );
 
-        return ['processReturn' => [
+        return ['createCreditMemo' => [
             'success' => true,
             'creditmemo' => [
                 'id' => (int) $creditmemo->getId(),
@@ -259,34 +239,6 @@ class OrderMutationHandler
             ],
             'order' => $this->mapOrder($order->load($order->getId())),
         ]];
-    }
-
-    /**
-     * Create invoice and shipment for an order, logging any failures
-     *
-     * @return array{invoice: ?array, shipment: ?array}
-     */
-    private function createInvoiceAndShipment(\Mage_Sales_Model_Order $order): array
-    {
-        $invoice = null;
-        $shipment = null;
-
-        try {
-            if ($order->canInvoice()) {
-                $invoice = $this->orderService->invoice($order, captureCase: \Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
-            }
-            if ($order->canShip()) {
-                $shipment = $this->orderService->ship($order);
-            }
-            $order->load($order->getId());
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-        }
-
-        return [
-            'invoice' => $invoice ? ['invoiceId' => (int) $invoice->getId(), 'incrementId' => $invoice->getIncrementId()] : null,
-            'shipment' => $shipment ? ['shipmentId' => (int) $shipment->getId(), 'incrementId' => $shipment->getIncrementId()] : null,
-        ];
     }
 
     /**

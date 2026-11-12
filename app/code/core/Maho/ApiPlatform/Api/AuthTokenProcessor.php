@@ -11,9 +11,11 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Api;
 
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Service\JwtService;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Service\TokenBlacklist;
+use Maho\ApiPlatform\Trait\RateLimitTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -21,6 +23,8 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
 {
+    use RateLimitTrait;
+
     private readonly \Mage_Checkout_Service_Cart $cartService;
 
     public function __construct(
@@ -49,16 +53,8 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
     {
         StoreContext::ensureStore();
 
-        $request = $context['request'] ?? null;
-        if ($request === null) {
-            $body = [];
-        } else {
-            try {
-                $body = (array) \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]');
-            } catch (\JsonException) {
-                $body = [];
-            }
-        }
+        // A body that does not decode reads as empty, so it gets the invalid_request error of the grant
+        $body = RequestInput::tryDecode($context['request'] ?? null) ?? [];
 
         $this->checkRateLimitByIp('auth_token', 'auth_token_ip', 60);
 
@@ -66,16 +62,18 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
 
         return match ($grantType) {
             'customer' => $this->handleCustomerGrant($body),
+            'magic_link' => $this->handleMagicLinkGrant($body),
             'client_credentials' => $this->handleClientCredentialsGrant($body),
             'api_user' => $this->handleApiUserGrant($body),
-            default => throw new BadRequestHttpException('Unsupported grant type. Use: customer, client_credentials, api_user', null, 0, ['X-Api-Error-Code' => 'unsupported_grant_type']),
+            default => throw new BadRequestHttpException('Unsupported grant type. Use: customer, magic_link, client_credentials, api_user', null, 0, ['X-Api-Error-Code' => 'unsupported_grant_type']),
         };
     }
 
     private function handleCustomerGrant(array $data): AuthToken
     {
-        $email = $data['email'] ?? $data['username'] ?? '';
-        $password = $data['password'] ?? '';
+        // A value of a wrong type reads as missing, so it gets the invalid_request error of the grant
+        $email = RequestInput::toString($data['email'] ?? $data['username'] ?? null) ?? '';
+        $password = RequestInput::toString($data['password'] ?? null) ?? '';
 
         $coreHelper = \Mage::helper('core');
 
@@ -87,41 +85,41 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Invalid email format', null, 0, ['X-Api-Error-Code' => 'invalid_request']);
         }
 
-        $this->checkRateLimit('auth_token:email:' . strtolower($email), 'customer_login', 60);
-
         // Scalar, not string: clients routinely send a TOTP code as a JSON number
         $rawTwofaCode = $data['twofa_code'] ?? null;
         $twofaCode = is_scalar($rawTwofaCode) ? trim((string) $rawTwofaCode) : null;
 
-        try {
-            $customer = $this->authenticateCustomerAcrossWebsites($email, $password, $twofaCode);
+        return $this->generateCustomerTokenResponse($this->authenticateCustomer($email, $password, $twofaCode), $data);
+    }
 
+    /**
+     * Give a customer token for the token of a magic login link. A customer who uses 2FA sends the code with the
+     * same link: the link stays valid until the code is right.
+     */
+    private function handleMagicLinkGrant(array $data): AuthToken
+    {
+        $token = $data['token'] ?? '';
+        if (!is_string($token) || trim($token) === '') {
+            throw new BadRequestHttpException('token is required', null, 0, ['X-Api-Error-Code' => 'invalid_request']);
+        }
+        $rawTwofaCode = $data['twofa_code'] ?? null;
+        $twofaCode = is_scalar($rawTwofaCode) ? trim((string) $rawTwofaCode) : null;
+
+        /** @var \Mage_Customer_Service_Authentication $service */
+        $service = \Mage::getService('customer/authentication');
+
+        return $this->generateCustomerTokenResponse($service->authenticateByMagicLink(trim($token), $twofaCode), $data);
+    }
+
+    private function generateCustomerTokenResponse(\Mage_Customer_Model_Customer $customer, array $data): AuthToken
+    {
+        try {
             $token = $this->jwtService->generateCustomerToken($customer);
 
-            $guestCartMaskedId = $data['maskedId'] ?? $data['cartId'] ?? $data['guestCartId'] ?? null;
-            $cartId = null;
-            $customerCart = null;
-
-            if ($this->cartService->isValidMaskedId($guestCartMaskedId)) {
-                try {
-                    // Delegate to \Mage_Checkout_Service_Cart::merge, which enforces the full
-                    // guest-cart ownership guard (rejecting a masked ID resolving
-                    // to another customer's cart), re-collects totals correctly
-                    // (setTotalsCollectedFlag(false) before collectTotals), and
-                    // deactivates the guest cart atomically.
-                    $customerCart = $this->cartService->merge($guestCartMaskedId, (int) $customer->getId());
-                    $cartId = (int) $customerCart->getId();
-                } catch (\Exception $e) {
-                    \Mage::log('Cart merge failed: ' . $e->getMessage(), \Mage::LOG_WARNING);
-                }
-            }
-
-            if (!$cartId) {
-                $customerCart = \Mage::getModel('sales/quote')
-                    ->setSharedStoreIds([\Mage::app()->getStore()->getId()])
-                    ->loadByCustomer((int) $customer->getId());
-                $cartId = $customerCart->getId() ? (int) $customerCart->getId() : null;
-            }
+            $customerCart = $this->cartService->mergeAtLogin(
+                $data['maskedId'] ?? $data['cartId'] ?? $data['guestCartId'] ?? null,
+                (int) $customer->getId(),
+            );
 
             $dto = new AuthToken();
             $dto->token = $token;
@@ -133,7 +131,7 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
                 'firstName' => $customer->getFirstname(),
                 'lastName' => $customer->getLastname(),
             ];
-            $dto->cartId = $cartId;
+            $dto->cartId = $customerCart ? (int) $customerCart->getId() : null;
             $dto->cartMaskedId = $customerCart?->getData('masked_quote_id');
             $dto->cartItemsQty = $customerCart ? (float) $customerCart->getItemsQty() : 0;
 
@@ -147,70 +145,27 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Authenticate a customer in a way that works in single- and multi-website
-     * setups without requiring the client to send X-Store-Code.
-     *
-     * - When customer accounts are GLOBAL: walk every website and try the
-     *   credentials. The customer exists on exactly one (the email is unique
-     *   within a sharing scope), so at most one website yields a match. We
-     *   surface the same "Invalid email or password" message for misses to
-     *   keep responses indistinguishable.
-     * - When customer accounts are PER-WEBSITE: try the request store's
-     *   resolved website first; on a miss with EMAIL_NOT_CONFIRMED, propagate
-     *   the confirmation error. On any other miss we still try other websites
-     *   (the email is unique per website, so trying the rest is cheap and
-     *   covers clients that didn't send X-Store-Code).
-     *
-     * @throws UnauthorizedHttpException for invalid credentials, or when 2FA is
-     *         enabled and the twofa_code is missing or wrong (only after the
-     *         password itself was proven correct)
-     * @throws HttpException 403 when the matched account isn't confirmed
+     * Check the login with the customer service, in the website of the request first and then in the others, so that
+     * a client does not need to send X-Store-Code. A wrong email, password or 2FA code is a 401 with an error code.
      */
-    private function authenticateCustomerAcrossWebsites(#[\SensitiveParameter]
-        string $email, #[\SensitiveParameter]
-        string $password, #[\SensitiveParameter]
-        ?string $twofaCode = null): \Mage_Customer_Model_Customer
-    {
-        $primaryWebsiteId = (int) \Mage::app()->getStore()->getWebsiteId();
-        $websiteIds = [$primaryWebsiteId];
-        foreach (\Mage::app()->getWebsites() as $website) {
-            $wid = (int) $website->getId();
-            if ($wid !== $primaryWebsiteId) {
-                $websiteIds[] = $wid;
-            }
-        }
+    private function authenticateCustomer(
+        #[\SensitiveParameter]
+        string $email,
+        #[\SensitiveParameter]
+        string $password,
+        #[\SensitiveParameter]
+        ?string $twofaCode,
+    ): \Mage_Customer_Model_Customer {
+        /** @var \Mage_Customer_Service_Authentication $service */
+        $service = \Mage::getService('customer/authentication');
 
-        $confirmation = null;
-        foreach ($websiteIds as $websiteId) {
-            $customer = \Mage::getModel('customer/customer')->setWebsiteId($websiteId);
-            try {
-                $customer->authenticate($email, $password, $twofaCode);
-                return $customer;
-            } catch (\Mage_Core_Exception $e) {
-                if ($e->getCode() === \Mage_Customer_Model_Customer::EXCEPTION_EMAIL_NOT_CONFIRMED) {
-                    // Save and keep trying, another website may have a confirmed account.
-                    $confirmation ??= $e;
-                } elseif ($e->getCode() === \Mage_Customer_Model_Customer::EXCEPTION_2FA_INVALID) {
-                    // The password was correct on this website, so the miss is
-                    // purely the second factor; disclosing that is standard
-                    // (mfa_required) and lets the client prompt for a code.
-                    throw $twofaCode === null || $twofaCode === ''
-                        ? new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is required', null, 0, ['X-Api-Error-Code' => 'twofa_required'])
-                        : new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is invalid', null, 0, ['X-Api-Error-Code' => 'twofa_invalid']);
-                }
-            }
-        }
-
-        if ($confirmation !== null) {
-            throw new HttpException(403, 'This account is not confirmed. Please check your email for the confirmation link.');
-        }
-        throw new UnauthorizedHttpException('Bearer', 'Invalid email or password', null, 0, ['X-Api-Error-Code' => 'invalid_credentials']);
+        return $service->authenticateInAnyWebsite($email, $password, (int) \Mage::app()->getStore()->getWebsiteId(), $twofaCode);
     }
 
     private function handleClientCredentialsGrant(array $data): AuthToken
     {
-        $clientId = $data['client_id'] ?? '';
-        $clientSecret = $data['client_secret'] ?? '';
+        $clientId = RequestInput::toString($data['client_id'] ?? null) ?? '';
+        $clientSecret = RequestInput::toString($data['client_secret'] ?? null) ?? '';
 
         if (empty($clientId) || empty($clientSecret)) {
             throw new BadRequestHttpException('client_id and client_secret are required', null, 0, ['X-Api-Error-Code' => 'invalid_request']);
@@ -253,8 +208,8 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleApiUserGrant(array $data): AuthToken
     {
-        $username = $data['username'] ?? '';
-        $apiKey = $data['api_key'] ?? '';
+        $username = RequestInput::toString($data['username'] ?? null) ?? '';
+        $apiKey = RequestInput::toString($data['api_key'] ?? null) ?? '';
 
         if (empty($username) || empty($apiKey)) {
             throw new BadRequestHttpException('username and api_key are required', null, 0, ['X-Api-Error-Code' => 'invalid_request']);
@@ -339,15 +294,15 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
                 throw new UnauthorizedHttpException('Bearer', 'Token refresh is only supported for customer tokens; re-authenticate to obtain a new token');
             }
 
-            $customer = \Mage::getModel('customer/customer')->load($payload->customer_id);
-            if (!$customer->getId()) {
+            // The service refuses a customer that an admin deleted or set to not active after the token was issued.
+            // A token endpoint answers each refused token with a 401.
+            /** @var \Mage_Customer_Service_Customer $service */
+            $service = \Mage::getService('customer/customer');
+            try {
+                $customer = $service->requireActiveById((int) $payload->customer_id);
+            } catch (\Mage_Core_Exception_NoSuchEntity) {
                 throw new UnauthorizedHttpException('Bearer', 'Customer not found');
-            }
-
-            // Honour deactivation between issuance and refresh, without this,
-            // a banned/disabled customer can keep refreshing tokens indefinitely
-            // until the original token's expiry.
-            if (!$customer->getIsActive()) {
+            } catch (\Mage_Core_Exception_Forbidden) {
                 throw new UnauthorizedHttpException('Bearer', 'Customer account is inactive');
             }
 

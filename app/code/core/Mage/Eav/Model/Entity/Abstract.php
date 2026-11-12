@@ -621,7 +621,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
 
             try {
                 $results[$attrCode] = call_user_func_array([$instance, $method], $args);
-            } catch (Mage_Eav_Model_Entity_Attribute_Exception $e) {
+            } catch (Mage_Eav_Model_Entity_Attribute_Exception|Mage_Core_Exception_Input|Mage_Core_Exception_Conflict $e) {
                 throw $e;
             } catch (Exception $e) {
                 $e = Mage::getModel('eav/entity_attribute_exception', $e->getMessage());
@@ -899,10 +899,9 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
         /**
          * Load object base row data
          */
-        // No row has an empty id, and PostgreSQL rejects '' for an integer column
-        $row = $entityId === null || $entityId === ''
-            ? false
-            : $this->_getReadAdapter()->fetchRow($this->_getLoadRowSelect($object, $entityId));
+        $row = $this->_canEntityIdExist($entityId)
+            ? $this->_getReadAdapter()->fetchRow($this->_getLoadRowSelect($object, $entityId))
+            : false;
 
         if (is_array($row)) {
             $object->addData($row);
@@ -981,6 +980,20 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     protected function _prepareLoadSelect(array $selects)
     {
         return $this->_getReadAdapter()->select()->union($selects, Maho\Db\Select::SQL_UNION_ALL);
+    }
+
+    /**
+     * Return false when the ID column of the entity table cannot hold $entityId: an empty value, a text that is not
+     * a whole number, or a number out of the range of the column. No row has such an ID, and PostgreSQL refuses the query.
+     */
+    protected function _canEntityIdExist(mixed $entityId): bool
+    {
+        if ($entityId === null || $entityId === '') {
+            return false;
+        }
+        $read = $this->_getReadAdapter();
+        $column = $read->describeTable($this->getEntityTable())[$this->getEntityIdField()] ?? [];
+        return $read->canColumnHoldValue($column, $entityId);
     }
 
     /**

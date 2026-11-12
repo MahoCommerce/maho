@@ -13,7 +13,6 @@ namespace Mage\Checkout\Api\GraphQL;
 use Mage\Checkout\Api\CartRequest;
 use Mage\Checkout\Api\Cart;
 use Mage\Checkout\Api\CartMapper;
-use Maho\ApiPlatform\Exception\NotFoundException;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\AdminAcl;
 use Maho\ApiPlatform\Trait\AdminQuoteTrait;
@@ -71,14 +70,14 @@ class CartMutationHandler
         AdminAcl::checkResource(Cart::class);
         $cartId = $variables['cartId'] ?? $variables['input']['cartId'] ?? null;
         $sku = $variables['sku'] ?? $variables['input']['sku'] ?? null;
-        $qty = $variables['qty'] ?? $variables['input']['qty'] ?? 1;
+        $qty = $variables['qty'] ?? $variables['input']['qty'] ?? null;
         // Admin-only surface (AdminAcl gate above), so no extra gate on the price override
         $customPrice = $variables['customPrice'] ?? $variables['input']['customPrice'] ?? null;
         if ($customPrice === '') {
             $customPrice = null;
         }
         if ($customPrice !== null && !is_numeric($customPrice)) {
-            throw ValidationException::invalidValue('customPrice', 'must be a number');
+            throw new \Mage_Core_Exception_Input()->addError('customPrice', 'customPrice must be a number');
         }
 
         if (!$cartId) {
@@ -87,11 +86,14 @@ class CartMutationHandler
         if (!$sku) {
             throw ValidationException::requiredField('sku');
         }
-        $quote = CartRequest::load((int) $cartId);
-        if (!$quote) {
-            throw NotFoundException::cart($cartId);
-        }
-        $quote = $this->cartService->addItem($quote, $sku, (float) $qty, [], $customPrice !== null ? (float) $customPrice : null);
+        $quote = $this->loadAdminQuote($cartId);
+        $this->cartService->addProduct(
+            $quote,
+            $this->cartService->getProductBySku((string) $sku, (int) $quote->getStoreId()),
+            new \Maho\DataObject($qty === null ? [] : ['qty' => (float) $qty]),
+            \Mage_Checkout_Model_Actor::Staff,
+            $customPrice !== null ? (float) $customPrice : null,
+        );
 
         return ['addToCart' => $this->mapCart($quote)];
     }
@@ -114,11 +116,8 @@ class CartMutationHandler
         if ($qty === null) {
             throw ValidationException::requiredField('qty');
         }
-        $quote = CartRequest::load((int) $cartId);
-        if (!$quote) {
-            throw NotFoundException::cart($cartId);
-        }
-        $quote = $this->cartService->updateItem($quote, (int) $itemId, (float) $qty);
+        $quote = $this->loadAdminQuote($cartId);
+        $quote = $this->cartService->updateItems($quote, [(int) $itemId => (float) $qty]);
         return ['updateQty' => $this->mapCart($quote)];
     }
 
@@ -136,10 +135,7 @@ class CartMutationHandler
         if (!$itemId) {
             throw ValidationException::requiredField('itemId');
         }
-        $quote = CartRequest::load((int) $cartId);
-        if (!$quote) {
-            throw NotFoundException::cart($cartId);
-        }
+        $quote = $this->loadAdminQuote($cartId);
         $quote = $this->cartService->removeItem($quote, (int) $itemId);
         return ['removeItem' => $this->mapCart($quote)];
     }
@@ -152,39 +148,14 @@ class CartMutationHandler
     {
         AdminAcl::checkResource(Cart::class);
         $cartId = $variables['cartId'] ?? null;
-        $couponCode = $variables['couponCode'] ?? null;
+        $couponCode = is_scalar($variables['couponCode'] ?? null) ? (string) $variables['couponCode'] : '';
         if (!$cartId) {
             throw ValidationException::requiredField('cartId');
         }
-        if (!$couponCode) {
-            throw ValidationException::requiredField('couponCode');
-        }
-        $quote = CartRequest::load((int) $cartId);
-        if (!$quote) {
-            throw NotFoundException::cart($cartId);
-        }
+        $quote = $this->loadAdminQuote($cartId);
 
-        // First, check if this is a gift card code
-        /** @var \Maho_Giftcard_Model_Giftcard $giftcard */
-        $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($couponCode);
-        if ($giftcard->getId() && $giftcard->isValid()) {
-            // It's a valid gift card - apply via the shared REST path so the
-            // website-scope and currency checks aren't bypassed.
-            try {
-                $this->cartService->applyGiftcard($quote, $couponCode);
-            } catch (\Mage_Core_Exception $e) {
-                throw ValidationException::invalidValue('couponCode', $e->getMessage());
-            }
-            return ['applyCoupon' => $this->mapCart($quote)];
-        }
-
-        // Not a gift card, try as coupon
-        try {
-            $this->cartService->applyCoupon($quote, $couponCode);
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            throw ValidationException::invalidValue('couponCode', 'invalid or expired coupon');
-        }
+        // One code field takes a coupon code or a gift card code
+        $this->cartService->applyCode($quote, $couponCode, \Mage_Checkout_Model_Actor::Staff);
 
         return ['applyCoupon' => $this->mapCart($quote)];
     }
@@ -199,10 +170,7 @@ class CartMutationHandler
         if (!$cartId) {
             throw ValidationException::requiredField('cartId');
         }
-        $quote = CartRequest::load((int) $cartId);
-        if (!$quote) {
-            throw NotFoundException::cart($cartId);
-        }
+        $quote = $this->loadAdminQuote($cartId);
         $this->cartService->removeCoupon($quote);
         return ['removeCoupon' => $this->mapCart($quote)];
     }
@@ -214,20 +182,14 @@ class CartMutationHandler
     {
         AdminAcl::checkResource(Cart::class);
         $cartId = $variables['cartId'] ?? null;
-        $customerId = $variables['customerId'] ?? null;
+        $customerId = (int) ($variables['customerId'] ?? 0);
         if (!$cartId) {
             throw ValidationException::requiredField('cartId');
         }
-        if (!$customerId) {
-            throw ValidationException::requiredField('customerId');
-        }
-        $quote = CartRequest::load((int) $cartId);
-        if (!$quote) {
-            throw NotFoundException::cart($cartId);
-        }
-        $customer = \Mage::getModel('customer/customer')->load($customerId);
-        if (!$customer->getId()) {
-            throw NotFoundException::customer($customerId);
+        $quote = $this->loadAdminQuote($cartId);
+        $customer = \Mage::getModel('customer/customer');
+        if ($customerId) {
+            $customer->load($customerId);
         }
         $quote = $this->cartService->assignCustomer($quote, $customer);
         return ['assignCustomerToCart' => $this->mapCart($quote)];
@@ -243,27 +205,10 @@ class CartMutationHandler
         if (!$code) {
             throw ValidationException::requiredField('code');
         }
-        /** @var \Maho_Giftcard_Model_Giftcard $giftcard */
-        $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($code);
-        if (!$giftcard->getId()) {
-            throw NotFoundException::giftCard($code);
-        }
-        // Report in the display currency when the card converts to it, in the card's own
-        // currency otherwise; a card-to-store rate row may simply not exist.
-        $store = \Mage::app()->getStore();
-        $currencyCode = $store->getCurrentCurrencyCode();
-        // A card orphaned by a website deletion has no currency source
-        $orphaned = $giftcard->getWebsiteIds() === [];
-        if ($orphaned) {
-            $balance = $giftcard->getBalance();
-        } else {
-            $balance = $giftcard->getBalanceIn($currencyCode);
-            if ($balance === null) {
-                $currencyCode = $giftcard->getCurrencyCode();
-                $balance = $giftcard->getBalance();
-            }
-        }
-        $balance = (float) $store->roundPrice($balance);
+        /** @var \Maho_Giftcard_Service_Giftcard $service */
+        $service = \Mage::getService('giftcard/giftcard');
+        $giftcard = $service->getByCode((string) $code);
+        ['balance' => $balance, 'currency' => $currencyCode] = $service->getDisplayBalance($giftcard, \Mage::app()->getStore());
         return ['checkGiftCardBalance' => [
             'code' => $giftcard->getCode(),
             'currency' => $currencyCode,
@@ -291,19 +236,9 @@ class CartMutationHandler
             throw ValidationException::requiredField('code');
         }
 
-        $quote = CartRequest::load((int) $cartId);
-        if (!$quote) {
-            throw NotFoundException::cart($cartId);
-        }
+        $quote = $this->loadAdminQuote($cartId);
 
-        // Reuse the REST path so website-scope, quote-currency balance, validity
-        // and duplicate checks stay in one place (\Mage_Checkout_Service_Cart::applyGiftcard also
-        // collects totals and saves). Avoids the drift this handler had before.
-        try {
-            $this->cartService->applyGiftcard($quote, (string) $code, $amount);
-        } catch (\Mage_Core_Exception $e) {
-            throw ValidationException::invalidValue('code', $e->getMessage());
-        }
+        \Mage::getService('giftcard/giftcard')->applyToCart($quote, (string) $code, $amount, \Mage_Checkout_Model_Actor::Staff);
 
         return ['applyGiftcardToCart' => $this->mapCart($quote)];
     }
@@ -324,21 +259,9 @@ class CartMutationHandler
             throw ValidationException::requiredField('code');
         }
 
-        $quote = CartRequest::load((int) $cartId);
-        if (!$quote) {
-            throw NotFoundException::cart($cartId);
-        }
+        $quote = $this->loadAdminQuote($cartId);
 
-        // Reuse the REST path so the giftcard_amount/base_giftcard_amount fields
-        // are zeroed and the totals-collected flag is reset before re-collecting
-        // (removeGiftcard also collects totals and saves). The previous inline
-        // removal only unset the code from the JSON blob, leaving a stale gift
-        // card discount on an already-collected quote.
-        try {
-            $this->cartService->removeGiftcard($quote, (string) $code);
-        } catch (\Mage_Core_Exception $e) {
-            throw ValidationException::invalidValue('code', $e->getMessage());
-        }
+        \Mage::getService('giftcard/giftcard')->removeFromCart($quote, (string) $code);
 
         return ['removeGiftcardFromCart' => $this->mapCart($quote)];
     }
@@ -354,44 +277,25 @@ class CartMutationHandler
             throw ValidationException::requiredField('cartId');
         }
 
-        $quote = $this->loadAdminQuote($cartId);
+        $quote = $this->cartService->refreshShippingRates($this->loadAdminQuote($cartId));
+        $currency = $this->cartService->inQuoteStoreScope($quote, fn(): string => $quote->getStore()->getCurrentCurrencyCode());
 
-        return $this->cartService->inQuoteStoreScope($quote, function () use ($quote): array {
-            $shippingAddress = $quote->getShippingAddress();
-            if (!$shippingAddress->getCountryId()) {
-                $defaults = \Maho\ApiPlatform\Service\StoreDefaults::getPosAddress($quote->getStoreId() ? (int) $quote->getStoreId() : null);
-                $shippingAddress->setCountryId($defaults['country_id'])->setPostcode($defaults['postcode'])->setCollectShippingRates();
-            }
+        // CartMapper owns the rate mapping, so REST and GraphQL give the same methods at the same price
+        $methods = [];
+        foreach ($this->cartMapper->getShippingMethodsOfCart($quote) as $method) {
+            $methods[] = [
+                'carrierCode' => $method['carrierCode'],
+                'carrierTitle' => $method['carrierTitle'],
+                'methodCode' => $method['methodCode'],
+                'methodTitle' => $method['methodTitle'],
+                'amount' => $method['price'],
+                'currency' => $currency,
+                'available' => $method['available'],
+                'errorMessage' => $method['errorMessage'],
+            ];
+        }
 
-            $currency = $quote->getStore()->getCurrentCurrencyCode();
-
-            // CartMapper owns the rate mapping, so REST and GraphQL price identically
-            $methods = [];
-            foreach ($this->cartMapper->getAvailableShippingMethods($shippingAddress) as $method) {
-                $methods[] = [
-                    'carrierCode' => $method['carrierCode'],
-                    'carrierTitle' => $method['carrierTitle'],
-                    'methodCode' => $method['methodCode'],
-                    'methodTitle' => $method['methodTitle'],
-                    'amount' => $method['price'],
-                    'currency' => $currency,
-                    'available' => $method['available'],
-                    'errorMessage' => $method['errorMessage'],
-                ];
-            }
-            $hasFreeShipping = array_any($methods, fn($m) => $m['carrierCode'] === 'freeshipping');
-            if (!$hasFreeShipping) {
-                array_unshift($methods, [
-                    'carrierCode' => 'freeshipping', 'carrierTitle' => 'Free Shipping',
-                    'methodCode' => 'freeshipping', 'methodTitle' => 'POS In-Store Pickup',
-                    'amount' => 0.0,
-                    'currency' => $currency,
-                    'available' => true, 'errorMessage' => null,
-                ]);
-            }
-
-            return ['availableShippingMethods' => $methods];
-        });
+        return ['availableShippingMethods' => $methods];
     }
 
     /**

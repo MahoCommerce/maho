@@ -13,8 +13,8 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\Pagination\TraversablePaginator;
+use Maho\ApiPlatform\Service\CustomAttributes;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Maho\ApiPlatform\Trait\DateRangeFilterTrait;
 
@@ -24,8 +24,6 @@ use Maho\ApiPlatform\Trait\DateRangeFilterTrait;
 final class ProductProvider extends \Maho\ApiPlatform\Provider
 {
     use DateRangeFilterTrait;
-    // Read-side reuse only: shares the stock item column list with the write paths.
-    use \Maho\ApiPlatform\Trait\StockWriterTrait;
 
     /** Whitelist of fields the client may sort by; everything else is rejected to keep ORDER BY injection-safe. */
     private const SORTABLE_FIELDS = ['name', 'price', 'special_price', 'created_at', 'updated_at', 'position', 'sku', 'entity_id'];
@@ -48,21 +46,35 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      *
      * A backend read bypasses the current-store website check, but a
      * store-restricted token must stay inside the websites its allowed stores
-     * map to, exactly like every product write path (assertProductWebsitesAllowed).
+     * map to, exactly like every product write path.
      * Public: the admin GraphQL ProductQueryHandler applies the same allowlist.
+     *
+     * @throws \Mage_Core_Exception_Forbidden
      */
     public function assertBackendProductAccess(?Product $dto): ?Product
     {
-        if ($dto === null) {
-            return null;
-        }
-        $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
-        if ($allowedWebsiteIds !== null
-            && array_intersect(array_map(intval(...), $dto->websiteIds ?? []), $allowedWebsiteIds) === []
-        ) {
-            throw new AccessDeniedHttpException("Access denied for this product's websites");
+        if ($dto !== null) {
+            self::service()->assertWebsitesInStores($dto->websiteIds ?? [], $this->requireUser()->getAllowedStoreIds());
         }
         return $dto;
+    }
+
+    private static function searchService(): \Mage_CatalogSearch_Service_Query
+    {
+        /** @var \Mage_CatalogSearch_Service_Query */
+        return \Mage::getService('catalogsearch/query');
+    }
+
+    private static function categoryService(): \Mage_Catalog_Service_Category
+    {
+        /** @var \Mage_Catalog_Service_Category */
+        return \Mage::getService('catalog/category');
+    }
+
+    private static function service(): \Mage_Catalog_Service_Product
+    {
+        /** @var \Mage_Catalog_Service_Product */
+        return \Mage::getService('catalog/product');
     }
 
     /**
@@ -303,16 +315,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      */
     public function getProductBySku(string $sku, bool $visibleOnly = true): ?Product
     {
-        $product = \Mage::getModel('catalog/product')->loadByAttribute('sku', $sku);
-        if (!$product instanceof \Mage_Catalog_Model_Product || !$product->getId()) {
-            return null;
-        }
-        // loadByAttribute() returns a partially-hydrated model that doesn't fire
-        // the catalog_product_load_after event chain, so $product->getOptions()
-        // returns empty and getMediaGalleryImages() is null. Re-load by ID to
-        // get the full product surface (custom options, media gallery, type
-        // instance data) the detail DTO needs.
-        return $this->loadProductDto((int) $product->getId(), $visibleOnly);
+        $id = self::service()->getIdBySku($sku);
+        return $id === null ? null : $this->loadProductDto($id, $visibleOnly);
     }
 
     /**
@@ -342,30 +346,16 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     /**
      * Full-load a product scoped to the current store and return its detail DTO.
      *
-     * Single-item public reads (by id, sku, barcode) pass $visibleOnly = true so
-     * a disabled product the listing hides can't be fetched by guessing its
-     * identifier. The admin GraphQL endpoint passes false, as admins must be able
-     * to load disabled products too.
+     * Single-item public reads (by id, sku, barcode) pass $visibleOnly = true, so
+     * they reach only a product that the storefront of the store shows. The admin
+     * GraphQL endpoint passes false, as admins must be able to load disabled products too.
      */
     public function loadProductDto(int $id, bool $visibleOnly = true): ?Product
     {
-        $product = \Mage::getModel('catalog/product')
-            ->setStoreId(StoreContext::getStoreId())
-            ->load($id);
-        if (!$product->getId()) {
-            return null;
-        }
-        // Scope to the current store's website. setStoreId() only scopes EAV
-        // attribute values, not website assignment, so without this check a
-        // caller could read a product that exists solely on another website by
-        // guessing its id/sku/barcode (the collection path already filters this).
-        if ($visibleOnly) {
-            $websiteId = (int) StoreContext::getStore()->getWebsiteId();
-            if (!in_array($websiteId, array_map(intval(...), $product->getWebsiteIds()), true)) {
-                return null;
-            }
-        }
-        if ($visibleOnly && (int) $product->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
+        $storeId = StoreContext::getStoreId();
+        try {
+            $product = $visibleOnly ? self::service()->getVisibleById($id, $storeId) : self::service()->getById($id, $storeId);
+        } catch (\Mage_Core_Exception_NoSuchEntity) {
             return null;
         }
         // Set the group on the product too, so tier, catalog-rule and final prices match the cache key's group
@@ -403,14 +393,18 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      *
      * @return TraversablePaginator<Product>
      */
-    private function getByUrlKey(string $urlKey, int $page, int $pageSize): TraversablePaginator
+    private function getByUrlKey(string $urlKey, int $page, int $pageSize, bool $backend): TraversablePaginator
     {
         $collection = \Mage::getResourceModel('catalog/product_collection')
             ->addAttributeToSelect('*')
             ->addAttributeToFilter('url_key', $urlKey)
-            ->addAttributeToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
             ->setPageSize($pageSize)
             ->setCurPage($page);
+        if ($backend) {
+            $collection->addAttributeToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
+        } else {
+            self::service()->addVisibleFilter($collection, StoreContext::getStoreId());
+        }
 
         // Sort composite products first so they take priority over simples with shared url_keys.
         // ANSI CASE instead of MySQL's FIELD() so the ordering works on PostgreSQL and SQLite too.
@@ -470,7 +464,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // Handle urlKey filter, direct DB lookup, bypass search
         $urlKey = $this->stringFilter($requestFilters, 'urlKey');
         if ($urlKey !== null) {
-            return $this->getByUrlKey($urlKey, $page, $pageSize);
+            return $this->getByUrlKey($urlKey, $page, $pageSize, $backend);
         }
 
         // Pick the collection source by intent. Use a fresh layer instance
@@ -486,19 +480,14 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         //   root category isn't a normal browsable node), so it must NOT back the
         //   full-catalog listing.
         $layer = null;
+        $searchQuery = null;
         if ($backend) {
             // Like the admin product grid: every status and visibility
             $collection = \Mage::getResourceModel('catalog/product_collection');
             $collection->addAttributeToSelect('*');
             $this->applyBackendFilters($collection, $requestFilters, $search);
         } elseif (!empty($search)) {
-            // Fulltext prepareResult() reads the term from the catalogsearch
-            // helper's getQueryText() (request 'q'); feed it in and reset the
-            // FPM-persisted helper so a prior request's term can't leak in.
-            \Mage::unregister('_helper/catalogsearch');
-            $searchHelper = \Mage::helper('catalogsearch');
-            \Mage::app()->getRequest()->setParam($searchHelper->getQueryParamName(), $search);
-            $searchHelper->getQuery()->setStoreId((int) \Mage::app()->getStore()->getId());
+            $searchQuery = self::searchService()->prepare(StoreContext::getStoreId(), (string) $search);
             $layer = \Mage::getModel('catalogsearch/layer');
         } elseif (!empty($requestFilters['categoryId'])) {
             $layer = \Mage::getModel('catalog/layer');
@@ -506,10 +495,12 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
         if ($layer !== null) {
             if (!empty($requestFilters['categoryId'])) {
-                $category = \Mage::getModel('catalog/category')->load((int) $requestFilters['categoryId']);
-                if ($category->getId()) {
-                    $layer->setCurrentCategory($category);
+                try {
+                    $category = self::categoryService()->getVisibleById((int) $requestFilters['categoryId'], StoreContext::getStoreId());
+                } catch (\Mage_Core_Exception_NoSuchEntity) {
+                    return new TraversablePaginator(new \ArrayIterator([]), $page, $pageSize, 0);
                 }
+                $layer->setCurrentCategory($category);
             }
             $collection = $layer->getProductCollection();
         } elseif (!$backend) {
@@ -639,6 +630,9 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         $total = $collection->getSize();
+        if ($searchQuery !== null) {
+            self::searchService()->log($searchQuery, (int) $total);
+        }
         $collection->setPageSize($pageSize);
         $collection->setCurPage($page);
         // One query for all tier prices, as the finalPrice of each product reads them
@@ -814,8 +808,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $stockData = $stockItem ?? $product->getStockItem();
         if ($stockData) {
             $dto->stockQty = $this->stockQtyFor($stockData);
-            $dto->stockStatus = $stockData->getIsInStock() ? 'in_stock' : 'out_of_stock';
         }
+        $dto->stockStatus = \Mage::helper('cataloginventory')->isInStock($product, $stockData) ? 'in_stock' : 'out_of_stock';
 
         $dto->categoryIds = $categoryIds ?? ($product->getCategoryIds() ?: []);
 
@@ -852,28 +846,22 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             // Full column set on purpose: this feeds the cache, and ProductStockItemNormalizer
             // drops the policy columns per request. qty takes the masked stockQty, not the column.
             $dto->stockItem = ['qty' => $dto->stockQty];
-            $columns = ['is_in_stock' => 'bool', 'manage_stock' => 'bool'] + self::STOCK_ITEM_EXTENDED_COLUMNS;
-            foreach ($columns as $column => $type) {
-                $dto->stockItem[$column] = $this->castStockColumnValue($stockData->getData($column), $type);
+            foreach (array_diff_key(\Mage_CatalogInventory_Service_Stock::COLUMNS, ['qty' => true]) as $column => $type) {
+                $value = $stockData->getData($column);
+                $dto->stockItem[$column] = match ($type) {
+                    'float' => (float) $value,
+                    'int' => (int) $value,
+                    default => (bool) $value,
+                };
             }
         }
 
         // Generic EAV read: user-defined attribute values not covered by a
-        // dedicated DTO property (the read counterpart of customAttributesWrite).
+        // dedicated DTO property, the same keys that a write takes.
         // Backend only, like cost: it ignores is_visible_on_front and would
         // otherwise expose internal data. Frontend callers get the curated
         // additionalAttributes list below instead.
-        $dedicated = Product::dedicatedAttributeCodes();
-        $dto->customAttributes = [];
-        foreach ($product->getAttributes() as $code => $attribute) {
-            if (!$attribute->getIsUserDefined() || isset($dedicated[$code])) {
-                continue;
-            }
-            $value = $product->getData($code);
-            if ($value !== null && $value !== '') {
-                $dto->customAttributes[$code] = $value;
-            }
-        }
+        $dto->customAttributes = CustomAttributes::read($product, Product::customAttributeDefinitions($product));
 
         $typeId = $product->getTypeId();
         $typeInstance = $product->getTypeInstance(true);
@@ -981,9 +969,9 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // so GraphQL renders them as Iterable scalar rather than the broken
         // CursorConnection wrapping (see the typed-array null-edges commit
         // history). Flatten each Product to a summary-shape array on assignment.
-        $dto->relatedProducts   = array_map($this->productToSummary(...), $this->getLinkedProducts($product->getRelatedProductCollection()));
-        $dto->crosssellProducts = array_map($this->productToSummary(...), $this->getLinkedProducts($product->getCrossSellProductCollection()));
-        $dto->upsellProducts    = array_map($this->productToSummary(...), $this->getLinkedProducts($product->getUpSellProductCollection()));
+        $dto->relatedProducts   = array_map($this->productToSummary(...), $this->getLinkedProducts($product, \Mage_Catalog_Service_Product_Link::TYPE_RELATED));
+        $dto->crosssellProducts = array_map($this->productToSummary(...), $this->getLinkedProducts($product, \Mage_Catalog_Service_Product_Link::TYPE_CROSS_SELL));
+        $dto->upsellProducts    = array_map($this->productToSummary(...), $this->getLinkedProducts($product, \Mage_Catalog_Service_Product_Link::TYPE_UP_SELL));
 
         // Grouped children
         if ($typeId === \Mage_Catalog_Model_Product_Type::TYPE_GROUPED) {
@@ -1246,15 +1234,13 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     /**
      * @return Product[]
      */
-    private function getLinkedProducts(\Mage_Catalog_Model_Resource_Product_Collection $collection): array
+    private function getLinkedProducts(\Mage_Catalog_Model_Product $product, string $type): array
     {
+        /** @var \Mage_Catalog_Service_Product_Link $service */
+        $service = \Mage::getService('catalog/product_link');
+        $collection = $service->getVisibleLinkCollection($product, $type, StoreContext::getStoreId());
         $collection->addAttributeToSelect(['name', 'price', 'special_price', 'image', 'url_key', 'status', 'visibility'])
-            ->addFieldToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
             ->setPageSize(20);
-        $collection->setVisibility(\Mage::getSingleton('catalog/product_visibility')->getVisibleInCatalogIds());
-        if (!\Mage::getStoreConfigFlag('cataloginventory/options/show_out_of_stock')) {
-            \Mage::getModel('cataloginventory/stock_status')->addIsInStockFilterToCollection($collection);
-        }
 
         $products = [];
         foreach ($collection as $product) {

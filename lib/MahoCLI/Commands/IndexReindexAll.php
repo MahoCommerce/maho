@@ -12,6 +12,7 @@ namespace MahoCLI\Commands;
 use Mage;
 use Mage_Core_Exception;
 use Mage_Index_Model_Process;
+use Maho\Job\StepState;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
@@ -20,7 +21,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\StreamableInputInterface;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
-use Throwable;
 
 #[AsCommand(
     name: 'index:reindex:all',
@@ -42,9 +42,8 @@ class IndexReindexAll extends BaseMahoCommand
             return $this->reindexCodesFromStdin($input, $output);
         }
 
-        $runner = Mage::getModel('index/runner');
-        $queue = $runner->buildQueue();
-        $lanes = $runner->buildLanes($queue);
+        $queue = $this->processService()->getQueue();
+        $lanes = Mage::getModel('index/runner')->buildLanes($queue);
         $totalStartTime = microtime(true);
 
         if ($sequential || count($lanes) < 2 || !$this->canWriteInParallel()) {
@@ -77,16 +76,20 @@ class IndexReindexAll extends BaseMahoCommand
     private function reindexSequential(array $queue, OutputInterface $output): int
     {
         $failed = 0;
-        foreach ($queue as $process) {
-            $output->write("Reindexing {$process->getIndexerCode()}... ");
-            [$duration, $error] = $this->reindex($process);
-            if ($error === null) {
-                $output->writeln(sprintf('<info>done!</info> (%.2fs)', $duration));
-            } else {
-                $output->writeln(sprintf('<error>failed</error> (%.2fs): %s', $duration, $error));
-                $failed++;
-            }
-        }
+        $this->processService()->reindexQueue(
+            $queue,
+            function (Mage_Index_Model_Process $process) use ($output): void {
+                $output->write("Reindexing {$process->getIndexerCode()}... ");
+            },
+            function (Mage_Index_Model_Process $process, array $result) use ($output, &$failed): void {
+                if ($result['state'] === StepState::Success) {
+                    $output->writeln(sprintf('<info>done!</info> (%.2fs)', $result['duration']));
+                } else {
+                    $output->writeln(sprintf('<error>failed</error> (%.2fs): %s', $result['duration'], $result['message']));
+                    $failed++;
+                }
+            },
+        );
         return $failed;
     }
 
@@ -140,39 +143,24 @@ class IndexReindexAll extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        $indexer = Mage::getSingleton('index/indexer');
         $result = [];
         foreach ($codes as $code) {
-            $process = $indexer->getProcessByCode((string) $code);
-            if (!$process) {
-                $result[$code] = ['duration' => 0.0, 'error' => 'Index not found'];
+            try {
+                $process = $this->processService()->getByCode((string) $code);
+            } catch (Mage_Core_Exception $e) {
+                $result[$code] = ['duration' => 0.0, 'error' => $e->getMessage()];
                 continue;
             }
-            [$duration, $error] = $this->reindex($process);
-            $result[$code] = ['duration' => $duration, 'error' => $error];
+            $step = $this->processService()->reindexQueue([$process])[$process->getIndexerCode()];
+            $result[$code] = ['duration' => $step['duration'], 'error' => $step['state'] === StepState::Success ? null : $step['message']];
         }
         $output->writeln(self::JOB_RESULT_PREFIX . Mage::helper('core')->jsonEncode($result), OutputInterface::OUTPUT_RAW);
 
         return Command::SUCCESS;
     }
 
-    /**
-     * Only a Mage_Core_Exception message is written for a human. Any other message can hold
-     * SQL or paths, so it goes to exception.log, as in Mage_Index_Model_Runner::run().
-     *
-     * @return array{float, ?string} the duration and the error message
-     */
-    private function reindex(Mage_Index_Model_Process $process): array
+    private function processService(): \Mage_Index_Service_Process
     {
-        $startTime = microtime(true);
-        try {
-            $process->reindexEverything();
-            return [microtime(true) - $startTime, null];
-        } catch (Mage_Core_Exception $e) {
-            return [microtime(true) - $startTime, $e->getMessage()];
-        } catch (Throwable $e) {
-            Mage::logException($e);
-            return [microtime(true) - $startTime, Mage::helper('index')->__('There was a problem with reindexing process.')];
-        }
+        return Mage::getService('index/process');
     }
 }

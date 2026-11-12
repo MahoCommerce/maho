@@ -40,7 +40,7 @@ SPDX-License-Identifier: AFL-3.0
         color: var(--maho-color-text-secondary);
         font-size: 0.9rem;
 
-        @media (width <= 768px) {
+        @media (width <= 770px) {
             display: none;
         }
     }
@@ -80,7 +80,7 @@ SPDX-License-Identifier: AFL-3.0
         --_gap: 0.5rem;
     }
 
-    @media (width <= 768px) {
+    @media (width <= 770px) {
         grid-template-columns: 1fr;
         --_gap: 0;
         --_input-padding: 0.75rem;
@@ -95,7 +95,7 @@ SPDX-License-Identifier: AFL-3.0
     position: sticky;
     inset-block-start: 1rem;
 
-    @media (width <= 768px) {
+    @media (width <= 770px) {
         position: static;
     }
 }
@@ -103,7 +103,7 @@ SPDX-License-Identifier: AFL-3.0
 .onestep-column-right {
     min-inline-size: 380px;
 
-    @media (width <= 768px) {
+    @media (width <= 770px) {
         min-inline-size: 0;
     }
 }
@@ -249,7 +249,7 @@ SPDX-License-Identifier: AFL-3.0
         padding: 0;
         list-style: none;
 
-        @media (width <= 768px) {
+        @media (width <= 770px) {
             grid-template-columns: 1fr;
         }
     }
@@ -268,7 +268,7 @@ SPDX-License-Identifier: AFL-3.0
         grid-template-columns: repeat(2, 1fr);
         gap: 0.75rem 1rem;
 
-        @media (width <= 768px) {
+        @media (width <= 770px) {
             grid-template-columns: 1fr;
         }
 

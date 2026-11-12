@@ -2220,7 +2220,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      */
     public function prepareInvoice($qtys = [])
     {
-        return Mage::getModel('sales/service_order', $this)->prepareInvoice($qtys);
+        return Mage::getService('sales/order_document')->buildInvoice($this, (array) $qtys);
     }
 
     /**
@@ -2231,7 +2231,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      */
     public function prepareShipment($qtys = [])
     {
-        return Mage::getModel('sales/service_order', $this)->prepareShipment($qtys);
+        return Mage::getService('sales/order_document')->buildShipment($this, (array) $qtys);
     }
 
     /**
@@ -2862,6 +2862,37 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     public function setCustomer(?Mage_Customer_Model_Customer $value): static
     {
         return $this->setData('customer', $value);
+    }
+
+    /**
+     * Return the option labels of the user-defined customer attributes of the order, keyed by code, as
+     * the customer saw them when the order was placed. A multiselect has a list of labels.
+     *
+     * @return array<string, string|list<string>>
+     */
+    public function getCustomerAttributeLabels(): array
+    {
+        $value = $this->getData('customer_attribute_labels');
+        if (is_array($value)) {
+            return $value;
+        }
+        if (!is_string($value) || $value === '') {
+            return [];
+        }
+        try {
+            $labels = Mage::helper('core')->jsonDecode($value);
+        } catch (\JsonException) {
+            return [];
+        }
+        return is_array($labels) ? $labels : [];
+    }
+
+    /**
+     * @param array<string, string|list<string>> $value
+     */
+    public function setCustomerAttributeLabels(array $value): static
+    {
+        return $this->setData('customer_attribute_labels', $value ? Mage::helper('core')->jsonEncode($value) : null);
     }
 
     public function getCustomerDob(): ?string

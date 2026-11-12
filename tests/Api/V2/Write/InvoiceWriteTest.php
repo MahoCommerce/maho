@@ -206,6 +206,14 @@ describe('POST /api/rest/v2/orders/{orderId}/invoices', function (): void {
         expect(apiPost("/api/rest/v2/orders/{$orderId}/invoices", ['items' => 'all'], adminToken())['status'])->toBe(400);
         expect(apiPost("/api/rest/v2/orders/{$orderId}/invoices", ['comment' => ['x']], adminToken())['status'])->toBe(400);
         expect(apiPost("/api/rest/v2/orders/{$orderId}/invoices", ['items' => ['nope']], adminToken())['status'])->toBe(400);
+
+        $wordQty = apiPost("/api/rest/v2/orders/{$orderId}/invoices", ['items' => [['orderItemId' => 1, 'qty' => 'abc']]], adminToken());
+        expect($wordQty['status'])->toBe(400);
+        expect($wordQty['json']['details']['errors'][0]['field'] ?? null)->toBe('items[0].qty');
+
+        $noItemId = apiPost("/api/rest/v2/orders/{$orderId}/invoices", ['items' => [['qty' => 1]]], adminToken());
+        expect($noItemId['status'])->toBe(422);
+        expect($noItemId['json']['details']['errors'][0]['field'] ?? null)->toBe('items[0].orderItemId');
     });
 
 });
@@ -297,7 +305,7 @@ function seedOpenInvoice(): ?int
         $order = Mage::getModel('sales/order')->load($orderId);
         $order->getPayment()->setIsTransactionPending(true);
 
-        $invoice = Mage::getModel('sales/service_order', $order)->prepareInvoice();
+        $invoice = Mage::getService('sales/order_document')->buildInvoice($order);
         if (!$invoice->getTotalQty()) {
             return null;
         }

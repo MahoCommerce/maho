@@ -41,6 +41,13 @@ declare(strict_types=1);
  */
 class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 {
+    /** The attributes that start a date range, with the attribute that ends it. */
+    public const DATE_RANGES = [
+        'special_from_date' => 'special_to_date',
+        'news_from_date' => 'news_to_date',
+        'custom_design_from' => 'custom_design_to',
+    ];
+
     /**
      * Entity code.
      * Can be used as part of method name for entity processing
@@ -187,18 +194,100 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     }
 
     /**
+     * Add an error to $errors for each problem of the name, the type and the attribute set, and return $errors.
+     * A save calls this method. The name is required in the default scope: a store view can have no name of its
+     * own. A saved product reports only a value that changed since the load. $errors keeps the first error of a field.
+     * The SKU is not here: a duplicate has no SKU until the admin gives it one, so Mage_Catalog_Service_Product
+     * requires it.
+     */
+    public function validateRecord(Mage_Core_Exception_Input $errors = new Mage_Core_Exception_Input()): Mage_Core_Exception_Input
+    {
+        $helper = Mage::helper('catalog');
+        $fields = array_column($errors->getErrors(), 'field');
+        $isNew = !$this->getId();
+        if ((int) $this->getStoreId() === Mage_Core_Model_App::ADMIN_STORE_ID && !in_array('name', $fields, true)
+            && ($isNew || $this->dataHasChangedFor('name'))
+            && trim((string) $this->getData('name')) === ''
+        ) {
+            $errors->addError('name', $helper->__('Name is required'));
+        }
+        if (($isNew || $this->dataHasChangedFor('type_id')) && !in_array('type_id', $fields, true)
+            && !array_key_exists((string) $this->getTypeId(), Mage_Catalog_Model_Product_Type::getTypes())
+        ) {
+            $errors->addError('type_id', $helper->__('Unknown product type: %s', (string) $this->getTypeId()));
+        }
+        if (($isNew || $this->dataHasChangedFor('attribute_set_id')) && !in_array('attribute_set_id', $fields, true)
+            && !$this->isProductAttributeSet((int) $this->getAttributeSetId())
+        ) {
+            $errors->addError('attribute_set_id', $helper->__('Attribute set %s not found', (int) $this->getAttributeSetId()));
+        }
+        return $errors;
+    }
+
+    /**
+     * Tell whether $setId is the ID of an attribute set of products.
+     */
+    public function isProductAttributeSet(int $setId): bool
+    {
+        $set = Mage::getModel('eav/entity_attribute_set')->load($setId);
+        return $set->getId() && (int) $set->getEntityTypeId() === (int) $this->getResource()->getTypeId();
+    }
+
+    /**
+     * Tell whether the product is in one or more of the websites $websiteIds.
+     *
+     * @param list<int|string> $websiteIds
+     */
+    public function isInWebsites(array $websiteIds): bool
+    {
+        return array_intersect(array_map(intval(...), (array) $this->getWebsiteIds()), array_map(intval(...), $websiteIds)) !== [];
+    }
+
+    /**
      * Validate Product Data
      *
      * @todo implement full validation process with errors returning which are ignoring now
      *
      * @return $this
+     * @throws Mage_Eav_Model_Entity_Attribute_Exception when the backend of an attribute refuses its value
+     * @throws Mage_Core_Exception_Input when a date range starts after it ends
      */
     public function validate()
     {
         Mage::dispatchEvent($this->_eventPrefix . '_validate_before', [$this->_eventObject => $this]);
         $this->_getResource()->validate($this);
+        self::assertDateRanges($this->getData());
         Mage::dispatchEvent($this->_eventPrefix . '_validate_after', [$this->_eventObject => $this]);
         return $this;
+    }
+
+    /**
+     * Check that each date range of DATE_RANGES in $values does not start after it ends.
+     *
+     * @param array<string, mixed> $values the value of each attribute, by attribute code
+     * @throws Mage_Core_Exception_Input with one error for each range
+     */
+    public static function assertDateRanges(array $values): void
+    {
+        $errors = new Mage_Core_Exception_Input();
+        foreach (self::DATE_RANGES as $from => $to) {
+            $start = $values[$from] ?? null;
+            $end = $values[$to] ?? null;
+            if (is_string($start) && $start !== '' && is_string($end) && $end !== '' && strtotime($start) > strtotime($end)) {
+                $errors->addError($from, Mage::helper('catalog')->__('The From Date value should be less than or equal to the To Date value.'));
+            }
+        }
+        $errors->throwIfErrors();
+    }
+
+    /**
+     * Return the one website of a store in single store mode, or null when the store has more than one store view.
+     *
+     * @return list<int>|null
+     */
+    public static function getSingleStoreWebsiteIds(): ?array
+    {
+        return Mage::app()->isSingleStoreMode() ? [(int) Mage::app()->getStore(true)->getWebsiteId()] : null;
     }
 
     /**
@@ -540,9 +629,15 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     #[\Override]
     protected function _beforeSave()
     {
+        $this->validateRecord()->throwIfErrors();
         $this->cleanCache();
         $this->setTypeHasOptions(false);
         $this->setTypeHasRequiredOptions(false);
+
+        $singleStoreWebsiteIds = self::getSingleStoreWebsiteIds();
+        if ($singleStoreWebsiteIds !== null) {
+            $this->setWebsiteIds($singleStoreWebsiteIds);
+        }
 
         $this->getTypeInstance(true)->beforeSave($this);
 
@@ -559,6 +654,8 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
             $options = $this->getProductOptions();
             if (is_array($options)) {
                 $this->setIsCustomOptionChanged();
+                // The list of the product replaces a list that a failed save left in the option singleton
+                $this->getOptionInstance()->unsetOptions();
                 foreach ($this->getProductOptions() as $option) {
                     $this->getOptionInstance()->addOption($option);
                     if ((!isset($option['is_delete'])) || $option['is_delete'] != '1') {
@@ -1874,7 +1971,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      *  Check whether attribute reserved or not
      *
-     *  @param Mage_Catalog_Model_Entity_Attribute $attribute Attribute model object
+     *  @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute Attribute model object
      *  @return bool
      */
     public function isReservedAttribute($attribute)

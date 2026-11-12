@@ -21,7 +21,6 @@ use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Trait\CacheTrait;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Review Provider, extends CrudProvider with review-specific operations.
@@ -95,6 +94,8 @@ final class ReviewProvider extends CrudProvider
     private function getProductReviews(int $productId, int $page = 1, int $pageSize = 10): TraversablePaginator
     {
         $storeId = StoreContext::getStoreId();
+        // The reviews of a product show where the storefront shows the product
+        $this->service()->getProduct($productId, $storeId);
         $cacheKey = "api_reviews_{$productId}_{$page}_{$pageSize}_{$storeId}";
 
         return $this->remember(
@@ -268,12 +269,7 @@ final class ReviewProvider extends CrudProvider
 
     private function getReview(int $reviewId, bool $checkVisibility = true): Review
     {
-        /** @var \Mage_Review_Model_Review $review */
-        $review = \Mage::getModel('review/review')->load($reviewId);
-
-        if (!$review->getId()) {
-            throw new NotFoundHttpException('Review not found');
-        }
+        $review = $this->service()->getById($reviewId);
 
         // Store scoping: outside the backend a review is only visible in
         // the store views it is assigned to. Store 0 is a marker row added on
@@ -289,22 +285,22 @@ final class ReviewProvider extends CrudProvider
             if ($this->isApiUser()) {
                 $allowedStoreIds = $this->requireUser()->getAllowedStoreIds();
                 if ($allowedStoreIds !== null && array_intersect($storeIds, $allowedStoreIds) === []) {
-                    throw new NotFoundHttpException('Review not found');
+                    throw new \Mage_Core_Exception_NoSuchEntity('Review not found');
                 }
             } elseif (!in_array(StoreContext::getStoreId(), $storeIds, true)) {
-                throw new NotFoundHttpException('Review not found');
+                throw new \Mage_Core_Exception_NoSuchEntity('Review not found');
             }
         }
 
-        // Non-approved reviews are visible to their author, to admins and to
-        // service tokens scoped for moderation; everyone else gets 404.
-        if ($checkVisibility
-            && (int) $review->getStatusId() !== \Mage_Review_Model_Review::STATUS_APPROVED
-            && !$this->hasBackendAccess('reviews')
-        ) {
+        // Their author, admins and service tokens scoped for moderation see every review. Everyone else sees an
+        // approved review of a product that the storefront shows, and gets 404 for the rest.
+        if ($checkVisibility && !$this->hasBackendAccess('reviews')) {
             $customerId = $this->getAuthenticatedCustomerId();
             if (!$customerId || (int) $review->getCustomerId() !== $customerId) {
-                throw new NotFoundHttpException('Review not found');
+                if ((int) $review->getStatusId() !== \Mage_Review_Model_Review::STATUS_APPROVED) {
+                    throw new \Mage_Core_Exception_NoSuchEntity('Review not found');
+                }
+                $this->service()->getProduct((int) $review->getEntityPkValue(), StoreContext::getStoreId());
             }
         }
 
@@ -381,5 +377,11 @@ final class ReviewProvider extends CrudProvider
         $review->stores = $data['stores'] ?? null;
 
         return $review;
+    }
+
+    private function service(): \Mage_Review_Service_Review
+    {
+        /** @var \Mage_Review_Service_Review */
+        return \Mage::getService('review/review');
     }
 }

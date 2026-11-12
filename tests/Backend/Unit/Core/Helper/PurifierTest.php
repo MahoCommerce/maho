@@ -43,6 +43,11 @@ describe('Mage_Core_Helper_Purifier HTML5 support', function () {
             ->toContain('loading="lazy"');
     });
 
+    it('keeps fetchpriority on an image', function () {
+        expect($this->purifier->purify('<img src="/a.jpg" alt="x" fetchpriority="high" />'))
+            ->toContain('fetchpriority="high"');
+    });
+
     it('keeps class, which themes depend on', function () {
         expect($this->purifier->purify('<p class="std">x</p>'))->toContain('class="std"');
     });

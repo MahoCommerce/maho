@@ -122,8 +122,12 @@ class Mage_Adminhtml_Customer_Cart_Product_Composite_CartController extends Mage
             $buyRequest = new \Maho\DataObject($this->getRequest()->getPost());
             $buyRequest->unsFormKey();
 
-            $this->_quote->updateItem($this->_quoteItem->getId(), $buyRequest);
-            $this->_quote->collectTotals()->save();
+            Mage::getService('checkout/cart')->reconfigureItem(
+                $this->_quote,
+                (int) $this->_quoteItem->getId(),
+                $buyRequest,
+                Mage_Checkout_Model_Actor::Staff,
+            );
 
             $this->getResponse()->setBodyJson(['ok' => true]);
 

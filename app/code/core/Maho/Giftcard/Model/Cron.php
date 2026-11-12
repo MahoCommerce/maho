@@ -10,34 +10,12 @@ declare(strict_types=1);
 
 class Maho_Giftcard_Model_Cron
 {
-    /**
-     * Process scheduled gift card emails
-     * Runs every 5 minutes
-     */
     #[Maho\Config\CronJob('giftcard_process_scheduled_emails', schedule: '*/5 * * * *')]
     public function processScheduledEmails(): void
     {
-        try {
-            $currentTimeUtc = new DateTime('now', new DateTimeZone('UTC'));
-
-            // Get gift cards with scheduled emails that are due
-            $collection = Mage::getResourceModel('giftcard/giftcard_collection')
-                ->addFieldToFilter('email_scheduled_at', ['notnull' => true])
-                ->addFieldToFilter('email_scheduled_at', ['lteq' => $currentTimeUtc->format('Y-m-d H:i:s')])
-                ->addFieldToFilter('email_sent_at', ['null' => true])
-                ->addFieldToFilter('recipient_email', ['notnull' => true])
-                ->setPageSize(50); // Process max 50 per run
-
-            foreach ($collection as $giftcard) {
-                try {
-                    Mage::helper('giftcard')->sendGiftcardEmail($giftcard);
-                } catch (Exception $e) {
-                    Mage::logException($e);
-                }
-            }
-        } catch (Exception $e) {
-            Mage::logException($e);
-        }
+        /** @var Maho_Giftcard_Service_Giftcard $service */
+        $service = Mage::getService('giftcard/giftcard');
+        $service->sendScheduledEmails();
     }
 
     /**

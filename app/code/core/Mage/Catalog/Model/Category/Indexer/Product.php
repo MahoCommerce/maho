@@ -190,8 +190,8 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
                 }
             }
 
-            // check changed websites
-            if ($actionObject->getWebsiteIds()) {
+            // check changed websites and categories
+            if ($actionObject->getWebsiteIds() || $actionObject->hasData('category_ids')) {
                 $rebuildIndex = true;
             }
 

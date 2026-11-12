@@ -73,9 +73,9 @@
         gap: 0.125rem;
     }
 
-    /* Fullscreen stays at the end of the first row, also when the other groups wrap */
+    /* Source and Fullscreen stay together at the end of the first row, also when the other groups wrap */
     &:has(> .toolbar-group > button[data-command="toggleFullscreen"]) {
-        padding-right: calc(var(--tt-btn-size) + 0.5rem);
+        padding-right: calc(2 * var(--tt-btn-size) + 0.625rem);
     }
 
     .toolbar-group:has(> button[data-command="toggleFullscreen"]) {
@@ -1503,6 +1503,12 @@
         margin: 0;
     }
 
+    .slideshow-priority {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
     .slide-item {
         display: flex;
         gap: 15px;
@@ -1564,6 +1570,158 @@
             &:invalid {
                 border-color: var(--tt-color-danger);
             }
+        }
+    }
+
+    .slide-sources {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .slide-source {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        padding: 4px 6px;
+        border: 1px dashed #ccc;
+        border-radius: 3px;
+    }
+
+    .source-preview {
+        width: 48px;
+        height: 32px;
+        object-fit: cover;
+        border-radius: 3px;
+        flex-shrink: 0;
+        background: var(--tt-color-bg-subtle);
+    }
+
+    .source-breakpoint {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85em;
+    }
+
+    .source-breakpoint-combo {
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        input {
+            width: 120px;
+            padding-right: 26px;
+        }
+    }
+
+    .source-breakpoint-toggle {
+        position: absolute;
+        right: 3px;
+        width: 20px;
+        height: 20px;
+        padding: 2px;
+        background: none;
+        border: none;
+        color: var(--tt-color-text-muted);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        svg {
+            width: 14px;
+            height: 14px;
+        }
+    }
+
+    .source-breakpoint-menu {
+        position: absolute;
+        top: calc(100% + 2px);
+        left: 0;
+        z-index: 10;
+        min-width: 100%;
+        margin: 0;
+        padding: 4px 0;
+        list-style: none;
+        background: var(--tt-color-bg);
+        border: 1px solid var(--tt-color-border);
+        border-radius: 3px;
+        box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
+
+        &[hidden] {
+            display: none;
+        }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 5px 10px;
+            white-space: nowrap;
+            cursor: pointer;
+
+            &:hover,
+            &.active {
+                background: var(--tt-color-bg-hover);
+            }
+
+            &[aria-selected="true"] {
+                font-weight: 600;
+            }
+        }
+    }
+
+    .source-breakpoint-width {
+        color: var(--tt-color-text-muted);
+    }
+
+    .remove-source {
+        margin-left: auto;
+        width: 24px;
+        height: 24px;
+        padding: 3px;
+        background: none;
+        border: none;
+        border-radius: 3px;
+        color: var(--tt-color-danger);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+
+        &:hover {
+            background: var(--tt-color-bg-subtle);
+        }
+
+        svg {
+            width: 16px;
+            height: 16px;
+        }
+    }
+
+    .add-source {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        align-self: flex-start;
+        padding: 4px 8px;
+        background: none;
+        border: 1px dashed #ccc;
+        border-radius: 3px;
+        color: inherit;
+        font-size: 0.85em;
+        cursor: pointer;
+
+        &:hover {
+            border-color: var(--tt-color-primary);
+            color: var(--tt-color-primary);
+        }
+
+        svg {
+            width: 14px;
+            height: 14px;
         }
     }
 

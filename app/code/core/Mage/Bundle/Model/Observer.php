@@ -32,16 +32,6 @@ class Mage_Bundle_Model_Observer
             $product->setBundleSelectionsData($selections);
         }
 
-        if ($product->getPriceType() == '0' && !$product->getOptionsReadonly()) {
-            $product->setCanSaveCustomOptions();
-            if ($customOptions = $product->getProductOptions()) {
-                foreach (array_keys($customOptions) as $key) {
-                    $customOptions[$key]['is_delete'] = 1;
-                }
-                $product->setProductOptions($customOptions);
-            }
-        }
-
         $product->setCanSaveBundleSelections(
             (bool) $request->getPost('affect_bundle_product_selections') && !$product->getCompositeReadonly(),
         );

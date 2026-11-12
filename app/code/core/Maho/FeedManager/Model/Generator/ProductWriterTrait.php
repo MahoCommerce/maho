@@ -166,7 +166,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
                 break;
 
             case 'writer':
-                $this->_writer->pause();
+                $this->_writer?->pause();
                 break;
         }
     }
@@ -190,7 +190,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
                 break;
 
             case 'writer':
-                $this->_writer->close();
+                $this->_writer?->close();
                 break;
         }
     }
@@ -212,6 +212,11 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
     {
         $collection = $this->_getProductCollection();
         $collection->setPageSize($this->_batchSize)->setCurPage($page);
+
+        // Do not let a request for a page past the current end revisit the last page.
+        if ($collection->getCurPage() !== $page) {
+            return 0;
+        }
 
         $productIds = $collection->getAllIds();
         if (!empty($productIds)) {
@@ -348,8 +353,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
 
         // Apply exclude out of stock products filter
         if ($this->_feed->getExcludeOutOfStock()) {
-            /** @phpstan-ignore argument.type (Works with product collection despite PHPDoc) */
-            Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($collection);
+            Mage::getSingleton('cataloginventory/stock_status')->addIsInStockFilterToCollection($collection);
         }
 
         // Apply product type filter
@@ -917,7 +921,9 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
     protected function _validateAndPublish(string $tempPath, array &$errors): string
     {
         $validator = new Maho_FeedManager_Model_Validator();
-        if (!$validator->validate($tempPath, $this->_feed->getFileFormat())) {
+        $format = $this->_feed->getFileFormat();
+        $csv = $this->_writer instanceof Maho_FeedManager_Model_Writer_Csv ? $this->_writer : null;
+        if (!$validator->validate($tempPath, $format, $csv?->getDelimiter(), $csv?->getEnclosure())) {
             $errors = array_merge($errors, $validator->getErrors());
             throw new RuntimeException('Feed validation failed: ' . implode(', ', $validator->getErrors()));
         }

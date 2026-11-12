@@ -155,6 +155,23 @@ describe('customPrice on add-to-cart', function (): void {
         expect($response['status'])->toBe(400);
     });
 
+    it('rejects an empty customPrice instead of reading it as no custom price', function (): void {
+        $sku = fixtures('write_test_sku');
+        expect($sku)->not->toBeEmpty();
+
+        $token = serviceToken(['carts/write']);
+        $cartId = makeCustomPriceCart($token);
+        expect($cartId)->not->toBeNull();
+
+        $response = apiPost("/api/rest/v2/carts/{$cartId}/items", [
+            'sku' => $sku,
+            'qty' => 1,
+            'customPrice' => '',
+        ], $token);
+
+        expect($response['status'])->toBe(400);
+    });
+
     it('rejects re-adding the same SKU at a different customPrice', function (): void {
         $sku = fixtures('write_test_sku');
         expect($sku)->not->toBeEmpty();

@@ -494,7 +494,7 @@ describe('Giftcard History Integration', function () {
 
         // Check history
         $history = $giftcard->getHistoryCollection();
-        expect($history->getSize())->toBe(3);
+        expect($history->getSize())->toBe(4);
 
         // Verify order of actions (most recent first)
         $actions = [];
@@ -502,9 +502,12 @@ describe('Giftcard History Integration', function () {
             $actions[] = $entry->getAction();
         }
 
-        expect($actions)->toContain(Maho_Giftcard_Model_Giftcard::ACTION_USED);
-        expect($actions)->toContain(Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED);
-        expect($actions)->toContain(Maho_Giftcard_Model_Giftcard::ACTION_ADJUSTED);
+        expect($actions)->toBe([
+            Maho_Giftcard_Model_Giftcard::ACTION_ADJUSTED,
+            Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED,
+            Maho_Giftcard_Model_Giftcard::ACTION_USED,
+            Maho_Giftcard_Model_Giftcard::ACTION_CREATED,
+        ]);
     });
 
     test('history entries have correct timestamps', function () {

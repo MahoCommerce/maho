@@ -14,276 +14,143 @@ use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Mage;
 use Mage_Catalog_Model_Category;
-use Mage_Core_Model_App;
+use Mage_Catalog_Service_Category;
 use Maho\ApiPlatform\Security\ApiUser;
-use Maho\ApiPlatform\Trait\ActivityLogTrait;
+use Maho\ApiPlatform\Service\CustomAttributes;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
- * Category State Processor.
- *
- * Handles create, update, and delete operations for categories.
- * Requires JWT authentication with categories/write or categories/delete permission.
+ * Give a category write to the category service. Requires the categories/write or the categories/delete permission.
  */
 final class CategoryProcessor extends \Maho\ApiPlatform\Processor
 {
-    use ActivityLogTrait;
-
-    /**
-     * Upper bound for ids stored in SMALLINT columns (cms_block.block_id). PostgreSQL has no
-     * unsigned integers, so comparing such a column against a larger value is a query error
-     * rather than a non-match: out-of-range ids must be rejected before they reach SQL.
-     */
-    private const MAX_SMALLINT = 32767;
-
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Category
     {
         $user = $this->requireUser();
+        $service = self::service();
 
         if ($operation instanceof DeleteOperationInterface) {
-            return $this->handleDelete((int) $uriVariables['id'], $user);
+            $category = $service->getById((int) $uriVariables['id']);
+            $service->assertInStores($category, $user->getAllowedStoreIds());
+            $oldData = $category->getData();
+            $service->delete($category);
+            $this->logApiActivity('catalog/category', 'delete', $oldData, null);
+            return null;
         }
 
         assert($data instanceof Category);
+        StoreContext::ensureStore();
 
         if (isset($uriVariables['id'])) {
             return $this->handleUpdate((int) $uriVariables['id'], $data, $user);
         }
 
-        return $this->handleCreate($data, $user);
-    }
-
-    private function handleCreate(Category $data, ApiUser $user): Category
-    {
-        StoreContext::ensureStore();
-
-        if (empty($data->name)) {
-            throw new BadRequestHttpException('Name is required');
-        }
-
-        $parentId = $data->parentId;
-        $parentId ??= StoreContext::getRootCategoryId();
-
-        /** @var Mage_Catalog_Model_Category $parentCategory */
-        $parentCategory = Mage::getModel('catalog/category')->load($parentId);
-        if (!$parentCategory->getId()) {
-            throw new UnprocessableEntityHttpException('Parent category not found');
-        }
-
-        // A store-restricted token may only create under a category in one of
-        // its own stores' root trees. The new category inherits the parent's
-        // path, so authorizing the parent scopes the child too.
-        self::authorizeCategoryStore($parentCategory, $user);
-
-        /** @var Mage_Catalog_Model_Category $category */
-        $category = Mage::getModel('catalog/category');
-
-        $category->setData([
-            'name' => $data->name,
-            'is_active' => ($data->isActive ?? true) ? 1 : 0,
-            'include_in_menu' => ($data->includeInMenu ?? true) ? 1 : 0,
-            'parent_id' => $parentId,
-            'path' => $parentCategory->getPath(),
-        ]);
-
-        // After setData(), which replaces the whole data array including store_id.
-        $this->useAdminScope($category);
-
-        if ($data->urlKey !== null) {
-            $category->setUrlKey($data->urlKey);
-        } else {
-            $category->setUrlKey($category->formatUrlKey($data->name));
-        }
-
+        $category = $service->newCategory($data->parentId ?? (int) StoreContext::getRootCategoryId(), $user->getAllowedStoreIds());
+        $category->setName($data->name)
+            ->setIsActive(($data->isActive ?? true) ? 1 : 0)
+            ->setIncludeInMenu(($data->includeInMenu ?? true) ? 1 : 0)
+            ->setUrlKey($data->urlKey);
         $this->applyCategoryData($category, $data);
-
-        $this->safeSave($category, 'create category');
-
+        $service->save($category, 'customAttributes.');
         $this->logApiActivity('catalog/category', 'create', null, $category);
 
         return $this->refreshDto($category);
     }
 
+    private static function service(): Mage_Catalog_Service_Category
+    {
+        /** @var Mage_Catalog_Service_Category */
+        return Mage::getService('catalog/category');
+    }
+
     private function handleUpdate(int $id, Category $data, ApiUser $user): Category
     {
-        StoreContext::ensureStore();
+        $service = self::service();
         $storeId = $this->resolveWriteScope($user);
-
-        /** @var Mage_Catalog_Model_Category $category */
-        $category = Mage::getModel('catalog/category');
-        $category->setStoreId($storeId);
-        $category->load($id);
-
-        if (!$category->getId()) {
-            throw new NotFoundHttpException('Category not found');
-        }
-
-        self::authorizeCategoryStore($category, $user);
-
+        $category = $service->getById($id, $storeId);
+        $service->assertInStores($category, $user->getAllowedStoreIds());
         $oldData = $category->getData();
 
         if ($data->name !== '') {
             $category->setName($data->name);
         }
-
         if ($data->isActive !== null) {
             $category->setIsActive($data->isActive ? 1 : 0);
         }
         if ($data->includeInMenu !== null) {
-            $category->setData('include_in_menu', $data->includeInMenu ? 1 : 0);
+            $category->setIncludeInMenu($data->includeInMenu ? 1 : 0);
         }
-
         if ($data->urlKey !== null) {
             $category->setUrlKey($data->urlKey);
         }
-
         if ($data->parentId !== null && $data->parentId !== (int) $category->getParentId()) {
-            $this->moveCategory($category, $data->parentId, $user);
+            $service->move($category, $data->parentId, storeIds: $user->getAllowedStoreIds());
         }
 
         $this->applyCategoryData($category, $data);
-        $this->applyUseDefault($category, $data, $storeId);
+        $service->useDefault($category, array_map(strval(...), $data->useDefault ?? []));
 
         // A store view write stores only the fields of the request.
         $inherited = StoreScopeWrite::keepInheritedValues($category, $oldData, StoreScopeWrite::requestedCodes($data));
-
-        $this->safeSave($category, 'update category');
-
+        $service->save($category, 'customAttributes.');
         StoreScopeWrite::restoreInheritedValues($category, $oldData, $inherited);
         $this->logApiActivity('catalog/category', 'update', $oldData, $category);
 
         return $this->refreshDto($category);
     }
 
-    private function handleDelete(int $id, ApiUser $user): null
-    {
-        /** @var Mage_Catalog_Model_Category $category */
-        $category = Mage::getModel('catalog/category')->load($id);
-
-        if (!$category->getId()) {
-            throw new NotFoundHttpException('Category not found');
-        }
-
-        self::authorizeCategoryStore($category, $user);
-
-        // Prevent deletion of root categories
-        if ((int) $category->getLevel() <= 1) {
-            throw new ConflictHttpException('Cannot delete root categories');
-        }
-
-        $oldData = $category->getData();
-
-        $this->secureAreaDelete($category, 'delete category');
-
-        $this->logApiActivity('catalog/category', 'delete', $oldData, null);
-
-        return null;
-    }
-
     private function applyCategoryData(Mage_Catalog_Model_Category $category, Category $data): void
     {
-        if ($data->description !== null) {
-            $category->setDescription($data->description);
-        }
-        if ($data->position !== null) {
-            $category->setPosition($data->position);
-        }
-        if ($data->metaTitle !== null) {
-            $category->setData('meta_title', $data->metaTitle);
-        }
-        if ($data->metaDescription !== null) {
-            $category->setData('meta_description', $data->metaDescription);
-        }
-        if ($data->metaKeywords !== null) {
-            $category->setData('meta_keywords', $data->metaKeywords);
-        }
-        if ($data->displayMode !== null) {
-            $category->setData('display_mode', $data->displayMode);
-        }
-        if ($data->pageLayout !== null) {
-            $category->setData('page_layout', $data->pageLayout);
-        }
-        if ($data->metaRobots !== null) {
-            $category->setData('meta_robots', $data->metaRobots !== '' ? $data->metaRobots : null);
-        }
-        if ($data->isAnchor !== null) {
-            $category->setData('is_anchor', $data->isAnchor ? 1 : 0);
-        }
-        if ($data->availableSortBy !== null) {
-            $category->setData('available_sort_by', $this->validateAttributeValue('available_sort_by', $data->availableSortBy));
-        }
-        if ($data->defaultSortBy !== null) {
-            $category->setData('default_sort_by', $this->validateAttributeValue('default_sort_by', $data->defaultSortBy));
-        }
-        if ($data->landingPageId !== null) {
-            $category->setData('landing_page', $this->validateAttributeValue('landing_page', $data->landingPageId));
-        }
-        if ($data->image !== null) {
-            $category->setData('image', $this->validateAttributeValue('image', $data->image));
-        }
-        if ($data->customDesign !== null) {
-            $category->setData('custom_design', $data->customDesign !== '' ? $data->customDesign : null);
-        }
-        if ($data->customDesignFrom !== null) {
-            $category->setData('custom_design_from', $this->validateAttributeValue('custom_design_from', $data->customDesignFrom));
-        }
-        if ($data->customDesignTo !== null) {
-            $category->setData('custom_design_to', $this->validateAttributeValue('custom_design_to', $data->customDesignTo));
-        }
-        if ($data->customLayoutUpdate !== null) {
-            $category->setData('custom_layout_update', $this->validateAttributeValue('custom_layout_update', $data->customLayoutUpdate));
-        }
-        if ($data->customUseParentSettings !== null) {
-            $category->setData('custom_use_parent_settings', $data->customUseParentSettings ? 1 : 0);
-        }
-        if ($data->customApplyToProducts !== null) {
-            $category->setData('custom_apply_to_products', $data->customApplyToProducts ? 1 : 0);
-        }
-        if ($data->filterPriceRange !== null) {
-            $category->setData('filter_price_range', $data->filterPriceRange > 0 ? $data->filterPriceRange : null);
-        }
-        if (!empty($data->customAttributesWrite)) {
-            $this->applyCustomAttributes($category, $data->customAttributesWrite);
-        }
-        if (!empty($data->productPositions)) {
-            if (!$category->getId()) {
-                throw new UnprocessableEntityHttpException(
-                    'productPositions applies to products already assigned to the category: create it first, '
-                    . 'assign products, then set their positions.',
-                );
+        $category->assignAttributeSet($data->attributeSetId);
+        $fields = [
+            'description' => $data->description,
+            'position' => $data->position,
+            'meta_title' => $data->metaTitle,
+            'meta_description' => $data->metaDescription,
+            'meta_keywords' => $data->metaKeywords,
+            'display_mode' => $data->displayMode,
+            'page_layout' => $data->pageLayout,
+            'meta_robots' => $data->metaRobots,
+            'is_anchor' => $data->isAnchor,
+            'available_sort_by' => $data->availableSortBy,
+            'default_sort_by' => $data->defaultSortBy,
+            'landing_page' => $data->landingPageId,
+            'image' => $data->image,
+            'custom_design' => $data->customDesign,
+            'custom_design_from' => $data->customDesignFrom,
+            'custom_design_to' => $data->customDesignTo,
+            'custom_layout_update' => $data->customLayoutUpdate,
+            'custom_use_parent_settings' => $data->customUseParentSettings,
+            'custom_apply_to_products' => $data->customApplyToProducts,
+            'filter_price_range' => $data->filterPriceRange,
+        ];
+        foreach ($fields as $code => $value) {
+            if ($value !== null) {
+                $category->setData($code, $this->toModelValue($code, $value));
             }
-            $this->applyProductPositions($category, $data->productPositions);
         }
-
-        // The sortby backend implodes an array on save and wipes any non-array
-        // value to ''. The EAV backend explodes the stored string on load, so the
-        // guard is a no-op on the load→save path; it protects values that reach
-        // the model as a comma string (customAttributesWrite).
-        $availableSortBy = $category->getData('available_sort_by');
-        if (is_string($availableSortBy) && $availableSortBy !== '') {
-            $category->setData('available_sort_by', explode(',', $availableSortBy));
+        $this->applyCustomAttributes($category, $data->customAttributes ?? []);
+        if (!empty($data->productPositions)) {
+            self::service()->setProductPositions($category, $data->productPositions);
         }
     }
 
     /**
-     * Per-attribute validation shared by the dedicated DTO fields and the generic
-     * customAttributesWrite bag, so the bag cannot bypass it.
+     * Convert a value of the request into the value of the model attribute $code: an empty value clears the
+     * attribute. The service checks the value.
      */
-    private function validateAttributeValue(string $code, mixed $value): mixed
+    private function toModelValue(string $code, mixed $value): mixed
     {
         return match ($code) {
-            'image' => $this->validateImageFilename($this->scalarValue($code, $value)),
-            'landing_page' => $this->validateLandingPage((int) $this->scalarValue($code, $value)),
-            'available_sort_by' => $this->validateSortByCodes($this->toSortByCodes($value)),
-            'default_sort_by' => $this->validateDefaultSortBy($this->scalarValue($code, $value)),
+            'is_anchor', 'custom_use_parent_settings', 'custom_apply_to_products' => $value ? 1 : 0,
+            'filter_price_range' => (float) $value > 0 ? (float) $value : null,
+            'landing_page' => (int) $this->scalarValue($code, $value) > 0 ? (int) $value : null,
+            'available_sort_by' => $this->toSortByCodes($value),
             'custom_design_from', 'custom_design_to' => $this->normalizeDateInput($this->scalarValue($code, $value), $code),
-            'custom_layout_update' => $this->validateLayoutUpdate($this->scalarValue($code, $value)),
+            'image', 'default_sort_by', 'meta_robots', 'custom_design' => $this->scalarValue($code, $value) === '' ? null : (string) $value,
+            'custom_layout_update' => trim($this->scalarValue($code, $value)) === '' ? null : (string) $value,
             default => $value,
         };
     }
@@ -297,7 +164,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * @return string[]
+     * @return list<mixed>
      */
     private function toSortByCodes(mixed $value): array
     {
@@ -310,98 +177,6 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         throw new BadRequestHttpException('available_sort_by must be an array of sort-by codes');
     }
 
-    private function validateDefaultSortBy(string $code): ?string
-    {
-        if ($code === '') {
-            return null;
-        }
-        $this->validateSortByCodes([$code]);
-        return $code;
-    }
-
-    /**
-     * Layout updates are executed when the storefront renders the category, so the
-     * API must apply the same validator the admin form does (blocked templates,
-     * disallowed blocks, helper attributes) instead of storing arbitrary XML.
-     */
-    private function validateLayoutUpdate(string $xml): ?string
-    {
-        if (trim($xml) === '') {
-            return null;
-        }
-
-        /** @var \Mage_Adminhtml_Model_LayoutUpdate_Validator $validator */
-        $validator = Mage::getModel('adminhtml/layoutUpdate_validator');
-        try {
-            $isValid = $validator->isValid($xml);
-        } catch (\Throwable) {
-            $isValid = false;
-        }
-
-        if (!$isValid) {
-            $messages = implode(' ', $validator->getMessages());
-            throw new UnprocessableEntityHttpException(trim('customLayoutUpdate is not a valid layout update. ' . $messages));
-        }
-
-        return $xml;
-    }
-
-    /**
-     * @param string[] $codes
-     * @return string[]
-     */
-    private function validateSortByCodes(array $codes): array
-    {
-        $valid = array_keys(Mage::getSingleton('catalog/config')->getAttributeUsedForSortByArray());
-        foreach ($codes as $code) {
-            if (!is_string($code) || !in_array($code, $valid, true)) {
-                $label = is_scalar($code) ? (string) $code : gettype($code);
-                throw new UnprocessableEntityHttpException(
-                    'Invalid sort-by code "' . $label . '". Valid: ' . implode(', ', $valid),
-                );
-            }
-        }
-        return array_values($codes);
-    }
-
-    private function validateLandingPage(int $blockId): ?int
-    {
-        if ($blockId <= 0) {
-            return null;
-        }
-        if ($blockId > self::MAX_SMALLINT) {
-            throw new UnprocessableEntityHttpException("CMS block {$blockId} not found");
-        }
-        $block = Mage::getModel('cms/block')->load($blockId);
-        if (!$block->getId()) {
-            throw new UnprocessableEntityHttpException("CMS block {$blockId} not found");
-        }
-        return $blockId;
-    }
-
-    /**
-     * Accept a bare media filename as stored by the admin (media/catalog/category).
-     * A path, a ".." or a scheme (such as phar: or C:) could point outside that folder.
-     */
-    private function validateImageFilename(string $image): ?string
-    {
-        if ($image === '') {
-            return null;
-        }
-        if (str_contains($image, '/') || str_contains($image, '\\') || str_contains($image, '..')
-            || preg_match('#^[a-z][a-z0-9+.-]*:#i', $image)
-        ) {
-            throw new UnprocessableEntityHttpException(
-                'image must be a bare filename (stored under media/catalog/category), with no path, no ".." and no scheme',
-            );
-        }
-        $extension = strtolower(pathinfo($image, PATHINFO_EXTENSION));
-        if (!in_array($extension, \Maho\Io\File::ALLOWED_IMAGES_EXTENSIONS, true)) {
-            throw new UnprocessableEntityHttpException('image must have a valid image file extension');
-        }
-        return $image;
-    }
-
     private function normalizeDateInput(string $value, string $field): ?string
     {
         if ($value === '') {
@@ -410,179 +185,38 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         try {
             return Mage::app()->getLocale()->formatDateForDb($value, withTime: false);
         } catch (\Throwable) {
-            throw new UnprocessableEntityHttpException("{$field} must be a valid date (Y-m-d)");
+            throw new \Mage_Core_Exception_Input()->addError($field, "{$field} must be a valid date (Y-m-d)");
         }
     }
 
     /**
-     * Codes handled by dedicated DTO fields or structural/system columns. They
-     * must never be written through the generic customAttributesWrite bag.
-     */
-    private const PROTECTED_ATTRIBUTE_CODES = [
-        'entity_id', 'entity_type_id', 'attribute_set_id', 'parent_id', 'path',
-        'level', 'position', 'children_count', 'children', 'all_children',
-        'url_path', 'created_at', 'updated_at',
-    ];
-
-    /**
-     * Apply arbitrary EAV attribute values supplied via customAttributesWrite.
-     *
-     * Protected/system codes are rejected outright; unknown codes (not real
-     * catalog_category EAV attributes) are skipped silently so a typo can't
-     * inject an arbitrary column. Codes that have a validated dedicated DTO
-     * field run through the same validation, the bag is not a way around it.
+     * Apply the values of the customAttributes map: the user-defined attributes of the category. A
+     * user-defined attribute must be in the set of the category, because the nightly
+     * eav_clean_orphaned_records cron deletes a value whose attribute is not in the set.
      *
      * @param array<string, mixed> $attributes
+     * @throws \Mage_Core_Exception_Input
      */
     private function applyCustomAttributes(Mage_Catalog_Model_Category $category, array $attributes): void
     {
-        $eavConfig = Mage::getSingleton('eav/config');
-
-        foreach ($attributes as $code => $value) {
-            $code = (string) $code;
-
-            if (in_array($code, self::PROTECTED_ATTRIBUTE_CODES, true)) {
-                throw new UnprocessableEntityHttpException(
-                    "Attribute '{$code}' cannot be set via customAttributes; use the dedicated field.",
-                );
-            }
-
-            $attribute = $eavConfig->getAttribute(Mage_Catalog_Model_Category::ENTITY, $code);
-            if (!$attribute || !$attribute->getId()) {
-                // Unknown attribute, skip silently.
-                continue;
-            }
-
-            $category->setData($code, $this->validateAttributeValue($code, $value));
-        }
-    }
-
-    /**
-     * Update positions of products already assigned to the category. Products
-     * not currently assigned are ignored; assignment itself is managed on the
-     * product resource (categoryIds).
-     *
-     * @param array<int|string, mixed> $positions
-     */
-    private function applyProductPositions(Mage_Catalog_Model_Category $category, array $positions): void
-    {
-        $existing = $category->getProductsPosition();
-
-        $changed = false;
-        foreach ($positions as $productId => $position) {
-            $productId = (int) $productId;
-            if (!array_key_exists($productId, $existing)) {
-                continue;
-            }
-            $existing[$productId] = (int) $position;
-            $changed = true;
-        }
-
-        if ($changed) {
-            $category->setPostedProducts($existing);
-        }
-    }
-
-    private function moveCategory(Mage_Catalog_Model_Category $category, int $newParentId, ApiUser $user): void
-    {
-        /** @var Mage_Catalog_Model_Category $newParent */
-        $newParent = Mage::getModel('catalog/category')->load($newParentId);
-        if (!$newParent->getId()) {
-            throw new UnprocessableEntityHttpException('New parent category not found');
-        }
-
-        // The destination must also be within the caller's store tree, otherwise
-        // a store-restricted token could move a category into another store's root.
-        self::authorizeCategoryStore($newParent, $user);
-
-        $category->move($newParentId, 0);
-    }
-
-    /**
-     * Authorize a category against a store-restricted API user: the category
-     * must live under the root-category tree of at least one store the user may
-     * access. No-op for unrestricted users (getAllowedStoreIds() === null).
-     * Mirrors the root-tree scoping the read-side CategoryProvider applies, so a
-     * store-scoped write token cannot create/update/delete/move categories
-     * belonging to a store it was never granted.
-     */
-    public static function authorizeCategoryStore(Mage_Catalog_Model_Category $category, ApiUser $user): void
-    {
-        $allowedStoreIds = $user->getAllowedStoreIds();
-        if ($allowedStoreIds === null) {
+        if ($attributes === []) {
             return;
         }
-
-        $allowedRootIds = [];
-        foreach ($allowedStoreIds as $storeId) {
-            try {
-                $allowedRootIds[] = (int) Mage::app()->getStore($storeId)->getRootCategoryId();
-            } catch (\Mage_Core_Model_Store_Exception) {
-                // deleted or unknown store: grants access to no category tree
-            }
-        }
-
-        // The store root and every descendant carry the root id in their path.
-        $pathIds = array_map(intval(...), explode('/', (string) $category->getPath()));
-        if (array_intersect($pathIds, $allowedRootIds) === []) {
-            throw new AccessDeniedHttpException("Access denied for this category's store");
-        }
+        CustomAttributes::apply(
+            $category,
+            $attributes,
+            CustomAttributes::userDefined(Mage_Catalog_Model_Category::ENTITY),
+            array_keys($category->getAttributes()),
+        );
     }
 
     /**
-     * Creates always write the admin scope, the scope every store view falls back
-     * to, so a new category starts with the same values everywhere. Updates pick
-     * their scope via resolveWriteScope(): global without ?store=, a store
-     * override with it, and useDefault to remove an override again.
-     */
-    private function useAdminScope(Mage_Catalog_Model_Category $category): void
-    {
-        $category->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID);
-    }
-
-    /**
-     * Revert store overrides to the default value. Catalog EAV treats `false` as
-     * the "use default" sentinel: saving it at a store scope deletes that store's
-     * value row, so reads fall back to the global value again.
-     */
-    private function applyUseDefault(Mage_Catalog_Model_Category $category, Category $data, int $storeId): void
-    {
-        if (empty($data->useDefault)) {
-            return;
-        }
-
-        if ($storeId === Mage_Core_Model_App::ADMIN_STORE_ID) {
-            throw new UnprocessableEntityHttpException('useDefault requires a store context (?store=): global values have no default to revert to.');
-        }
-
-        foreach ($data->useDefault as $code) {
-            $code = (string) $code;
-            $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Category::ENTITY, $code);
-            if (!$attribute instanceof \Mage_Catalog_Model_Resource_Eav_Attribute || !$attribute->getId() || $attribute->getBackend()->isStatic()) {
-                throw new UnprocessableEntityHttpException("Unknown attribute in useDefault: {$code}");
-            }
-            if ($attribute->isScopeGlobal()) {
-                throw new UnprocessableEntityHttpException("Attribute '{$code}' is global scope and has no store override to revert.");
-            }
-            $category->setData($code, false);
-        }
-    }
-
-    /**
-     * Write responses mirror a GET of the saved entity: applyCategoryData()
-     * normalizes several fields on save (empty string to null, image filename
-     * to URL on read), and useDefault leaves the EAV `false` sentinel in the
-     * in-memory model, so the response is mapped from a fresh load in the same
-     * store scope rather than from the request-mutated instance.
+     * Map the response from a new load in the same store scope, as a GET does: the save changes several values,
+     * and useDefault leaves the EAV false value in the model.
      */
     private function refreshDto(Mage_Catalog_Model_Category $category): Category
     {
-        /** @var Mage_Catalog_Model_Category $fresh */
-        $fresh = Mage::getModel('catalog/category');
-        $fresh->setStoreId((int) $category->getStoreId());
-        $fresh->load((int) $category->getId());
-
+        $fresh = self::service()->getById((int) $category->getId(), (int) $category->getStoreId());
         return new CategoryProvider($this->security)->mapToDto($fresh, withStoreOverrides: true);
     }
-
 }

@@ -10,6 +10,19 @@ declare(strict_types=1);
 
 class Maho_Blog_Block_Adminhtml_Category_Edit_Tab_General extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
+    use Maho_Blog_Block_Adminhtml_Edit_AttributeFieldsTrait;
+
+    #[\Override]
+    protected function _prepareLayout()
+    {
+        parent::_prepareLayout();
+        // A user-defined attribute of the category can use the editor
+        if (Mage::getSingleton('cms/wysiwyg_config')->isEnabled()) {
+            $this->getLayout()->getBlock('head')->setCanLoadWysiwyg(true);
+        }
+        return $this;
+    }
+
     #[\Override]
     protected function _prepareForm()
     {
@@ -77,6 +90,8 @@ class Maho_Blog_Block_Adminhtml_Category_Edit_Tab_General extends Mage_Adminhtml
             }
         }
 
+        Maho_Blog_Block_Adminhtml_Edit_Tabs::addAttributeSetField($fieldset, $model);
+
         $fieldset->addField('is_active', 'select', [
             'label' => Mage::helper('blog')->__('Status'),
             'title' => Mage::helper('blog')->__('Status'),
@@ -96,6 +111,8 @@ class Maho_Blog_Block_Adminhtml_Category_Edit_Tab_General extends Mage_Adminhtml
             'name' => 'position',
             'value' => '0',
         ]);
+
+        $this->addAttributeFields($fieldset, Maho_Blog_Block_Adminhtml_Edit_Tabs::getMainTabAttributes($model), $model);
 
         $form->setValues($model->getData());
         $this->setForm($form);

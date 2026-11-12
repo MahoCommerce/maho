@@ -18,7 +18,6 @@
         "Tests\\Backend\\Integration\\ApiPlatform\\AuthorizationCoverageTest": 4.1369,
         "Tests\\Backend\\Integration\\ApiPlatform\\CacheFlushObserverTest": 0.2739,
         "Tests\\Backend\\Integration\\ApiPlatform\\CacheInvalidationTest": 0.051,
-        "Tests\\Backend\\Integration\\ApiPlatform\\CashTenderedTest": 0.2098,
         "Tests\\Backend\\Integration\\ApiPlatform\\CatalogCacheGroupScopeTest": 0.4643,
         "Tests\\Backend\\Integration\\ApiPlatform\\CurrencyContextListenerTest": 0.0644,
         "Tests\\Backend\\Integration\\ApiPlatform\\CustomerScopeCoverageTest": 3.5205,

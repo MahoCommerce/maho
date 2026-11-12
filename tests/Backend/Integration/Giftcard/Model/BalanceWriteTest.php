@@ -92,3 +92,52 @@ it('refuses to adjust a card that no longer exists', function (): void {
     expect(fn() => $this->stale->adjustBalance(150.0))
         ->toThrow(Mage_Core_Exception_NoSuchEntity::class);
 });
+
+/**
+ * @return array{success: list<string>, errors: list<string>}
+ */
+function giftcardAdminSave(Maho_Giftcard_Model_Giftcard $card, float $balance, float $shownBalance): array
+{
+    return Tests\Helpers\TransportParity::admin(Maho_Giftcard_Adminhtml_GiftcardController::class, 'save', [
+        'id' => $card->getId(), 'giftcard_id' => $card->getId(), 'code' => $card->getCode(),
+        'status' => Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE, 'website_ids' => [1],
+        'balance' => $balance, 'shown_balance' => $shownBalance, 'recipient_name' => 'Ann',
+    ]);
+}
+
+describe('the admin edit form', function (): void {
+    beforeEach(function (): void {
+        Mage::unregister(Mage_Core_Model_Session_Abstract::REGISTRY_KEY);
+        $session = new Symfony\Component\HttpFoundation\Session\Session(new Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage());
+        $session->start();
+        Mage::register(Mage_Core_Model_Session_Abstract::REGISTRY_KEY, $session);
+    });
+
+    it('keeps a refund when the form posts the balance that it showed', function (): void {
+        $admin = giftcardAdminSave($this->card, 100.0, 100.0);
+
+        $stored = Mage::getModel('giftcard/giftcard')->load($this->card->getId());
+        expect($admin['errors'])->toBe([])
+            ->and((float) $stored->getBalance())->toBe(110.0)
+            ->and($stored->getRecipientName())->toBe('Ann');
+    });
+
+    it('refuses a new balance when a refund changed the balance that the form showed', function (): void {
+        $admin = giftcardAdminSave($this->card, 150.0, 100.0);
+
+        $stored = Mage::getModel('giftcard/giftcard')->load($this->card->getId());
+        expect($admin['errors'])->toHaveCount(1)
+            ->and($admin['errors'][0])->toContain('The balance of this gift card changed to')
+            ->and((float) $stored->getBalance())->toBe(110.0)
+            ->and($stored->getRecipientName())->not->toBe('Ann');
+    });
+
+    it('saves a new balance and the other fields together when the shown balance is the stored one', function (): void {
+        $admin = giftcardAdminSave($this->card, 150.0, 110.0);
+
+        $stored = Mage::getModel('giftcard/giftcard')->load($this->card->getId());
+        expect($admin['errors'])->toBe([])
+            ->and((float) $stored->getBalance())->toBe(150.0)
+            ->and($stored->getRecipientName())->toBe('Ann');
+    });
+});

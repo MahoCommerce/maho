@@ -148,21 +148,18 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
                 /**
                  * Look for custom defined field path
                  */
-                if (is_object($fieldConfig)) {
-                    $configPath = (string) $fieldConfig->config_path;
-                    if (!empty($configPath) && strrpos($configPath, '/') > 0) {
-                        $parts = explode('/', $configPath);
-                        if (!$this->_isSectionAllowed($parts[0])) {
-                            Mage::throwException('Access denied.');
-                        }
-                        // Extend old data with specified section group
-                        $groupPath = substr($configPath, 0, strrpos($configPath, '/'));
-                        if (!isset($oldConfigAdditionalGroups[$groupPath])) {
-                            $oldConfig = $this->extendConfig($groupPath, true, $oldConfig);
-                            $oldConfigAdditionalGroups[$groupPath] = true;
-                        }
-                        $path = $configPath;
+                $configPath = is_object($fieldConfig) ? Mage::getService('core/config')->getConfigPath($fieldConfig) : null;
+                if ($configPath !== null) {
+                    if (!$this->_isSectionAllowed(explode('/', $configPath)[0])) {
+                        Mage::throwException('Access denied.');
                     }
+                    // Extend old data with specified section group
+                    $groupPath = substr($configPath, 0, strrpos($configPath, '/'));
+                    if (!isset($oldConfigAdditionalGroups[$groupPath])) {
+                        $oldConfig = $this->extendConfig($groupPath, true, $oldConfig);
+                        $oldConfigAdditionalGroups[$groupPath] = true;
+                    }
+                    $path = $configPath;
                 }
 
                 $inherit = !empty($fieldData['inherit']);
@@ -199,7 +196,46 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
      * A field without a backend model, or with a file backend model, gets a plain write.
      * A file backend model keeps a value only when the value comes from an upload.
      */
-    public function saveValue(string $path, string $value, string $scope = self::SCOPE_DEFAULT, int $scopeId = 0): void
+    public function saveValue(string $path, ?string $value, string $scope = self::SCOPE_DEFAULT, int $scopeId = 0): void
+    {
+        $dataObject = $this->getBackendModel($path, $value, $scope, $scopeId);
+        if (!$dataObject || $dataObject instanceof Mage_Adminhtml_Model_System_Config_Backend_File) {
+            Mage::getConfig()->saveConfig($path, $value, $scope, $scopeId);
+            return;
+        }
+        $dataObject->save();
+    }
+
+    /**
+     * Delete the own value of $path at one scope through the backend model of its field, as the
+     * Use Default checkbox of the admin form does. Return false when the scope has no own value.
+     */
+    public function deleteValue(string $path, string $scope = self::SCOPE_DEFAULT, int $scopeId = 0): bool
+    {
+        $row = Mage::getResourceModel('core/config_data_collection')
+            ->addFieldToFilter('path', $path)
+            ->addFieldToFilter('scope', $scope)
+            ->addFieldToFilter('scope_id', $scopeId)
+            ->getFirstItem();
+        if (!$row instanceof Mage_Core_Model_Config_Data || !$row->getId()) {
+            return false;
+        }
+        $value = $row->getValue();
+        try {
+            $dataObject = $this->getBackendModel($path, $value === null ? null : (string) $value, $scope, $scopeId);
+        } catch (Mage_Core_Exception) {
+            // The website or the store view of a stray row can be gone
+            $dataObject = null;
+        }
+        ($dataObject ?? $row)->setId($row->getId())->delete();
+        return true;
+    }
+
+    /**
+     * Return the backend model of the field of $path, ready to save $value, or null for a path that
+     * no field of system.xml declares.
+     */
+    protected function getBackendModel(string $path, ?string $value, string $scope, int $scopeId): ?Mage_Core_Model_Config_Data
     {
         $sections = Mage::getSingleton('adminhtml/config')->getSections();
         $parts = explode('/', $path, 3);
@@ -210,11 +246,8 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
         ));
         $backendClass = $fieldConfig ? Mage::helper('adminhtml/config')->getBackendModelByFieldConfig($fieldConfig) : null;
         $dataObject = $backendClass ? Mage::getModel($backendClass) : false;
-        if (!$dataObject instanceof Mage_Core_Model_Config_Data
-            || $dataObject instanceof Mage_Adminhtml_Model_System_Config_Backend_File
-        ) {
-            Mage::getConfig()->saveConfig($path, $value, $scope, $scopeId);
-            return;
+        if (!$dataObject instanceof Mage_Core_Model_Config_Data) {
+            return null;
         }
 
         $field = $fieldConfig->getName();
@@ -226,7 +259,9 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
         foreach ($fieldConfig->getParent()->children() as $name => $node) {
             $nodePath = (string) $node->config_path ?: "{$section}/{$group}/{$name}";
             $fieldValue = $name === $field ? $value : (string) Mage::getConfig()->getNode($nodePath, $scope, $scopeId);
-            $fields[$name] = in_array((string) $node->frontend_type, ['multiselect', 'time'], true) ? explode(',', $fieldValue) : $fieldValue;
+            $fields[$name] = $fieldValue !== null && in_array((string) $node->frontend_type, ['multiselect', 'time'], true)
+                ? explode(',', $fieldValue)
+                : $fieldValue;
         }
         $store = $scope === self::SCOPE_STORES ? Mage::app()->getStore($scopeId) : null;
         $website = match ($scope) {
@@ -235,7 +270,7 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
             default => null,
         };
 
-        $dataObject
+        return $dataObject
             ->setField($field)
             ->setGroups([$group => ['fields' => array_map(static fn($fieldValue) => ['value' => $fieldValue], $fields)]])
             ->setGroupId($group)
@@ -246,8 +281,7 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
             ->setFieldConfig($fieldConfig)
             ->setFieldsetData($fields)
             ->setPath($path)
-            ->setValue($fields[$field])
-            ->save();
+            ->setValue($fields[$field]);
     }
 
     /**
@@ -487,12 +521,11 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
         if (!$field) {
             return false;
         }
-        return match ($this->getScope()) {
-            self::SCOPE_DEFAULT => (bool) (int) $field->show_in_default,
-            self::SCOPE_WEBSITES => (bool) (int) $field->show_in_website,
-            self::SCOPE_STORES => (bool) (int) $field->show_in_store,
-            default => true,
-        };
+        $scope = $this->getScope();
+        if (!in_array($scope, [self::SCOPE_DEFAULT, self::SCOPE_WEBSITES, self::SCOPE_STORES], true)) {
+            return true;
+        }
+        return Mage::getService('core/config')->isNodeShownAtScope($field, $scope);
     }
 
     /**

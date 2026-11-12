@@ -353,7 +353,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     /**
      * Do remote request for and handle errors
      *
-     * @return Mage_Shipping_Model_Rate_Result|bool
+     * @return Mage_Shipping_Model_Rate_Result
      */
     protected function _getQuotes()
     {
@@ -367,7 +367,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
         $response = $this->_doRatesRequest(self::RATE_REQUEST_GENERAL);
         $preparedGeneral = $this->_prepareRateResponse($response);
         if ($this->_result->getError() && $preparedGeneral->getError()) {
-            return $this->_result->getError();
+            return $this->_result;
         }
         $this->_result->append($preparedGeneral);
         $this->_removeErrorsIfRateExist();

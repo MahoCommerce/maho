@@ -1126,7 +1126,7 @@ button.btn-remove {
   width: 26.31579%;
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: 979px) {
   .col3-layout .col-right {
     float: left;
     clear: left;
@@ -1846,6 +1846,26 @@ span.weee {
   margin-bottom: 1.5rem;
 }
 
+/* The custom attributes of a category, a CMS page or a blog post (eav/frontend/attributes.phtml) */
+.attribute-groups {
+  margin-bottom: 1.5rem;
+}
+.attribute-specs-table {
+  margin-top: 1.5rem;
+}
+.attribute-specs-table caption {
+  margin-bottom: 10px;
+  color: var(--maho-color-text-primary);
+  font-size: 1.125rem;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+/* A Text Area value, and the title of a group with no table, start a section of their own */
+.attribute-text,
+.attribute-group-title {
+  margin-top: 1.5rem;
+}
+
 .pager-no-toolbar {
   margin-bottom: 10px;
 }
@@ -2364,6 +2384,10 @@ p.required,
 .form-list .field,
 .form-list .wide,
 .form-list .control {
+  margin-bottom: 10px;
+}
+/* A custom field (customer/form/attributes.phtml) has no .field wrapper, so it takes the same gap itself */
+.form-list li.custom-attribute {
   margin-bottom: 10px;
 }
 

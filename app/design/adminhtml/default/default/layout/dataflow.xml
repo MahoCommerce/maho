@@ -15,6 +15,7 @@ SPDX-License-Identifier: AFL-3.0
                 <action method="addJs"><script>validation.js</script></action>
                 <action method="addJs"><script>varien/js.js</script></action>
                 <action method="addJs"><script>mage/translate.js</script></action>
+                <action method="addJs"><script>purify.min.js</script></action>
                 <action method="addJs"><script>mage/adminhtml/tools.js</script></action>
             </block>
             <block type="adminhtml/system_convert_profile_run" name="system_convert_profile_run" template="system/convert/profile/process.phtml" output="toHtml"/>
@@ -28,6 +29,7 @@ SPDX-License-Identifier: AFL-3.0
                 <action method="addJs"><script>validation.js</script></action>
                 <action method="addJs"><script>varien/js.js</script></action>
                 <action method="addJs"><script>mage/translate.js</script></action>
+                <action method="addJs"><script>purify.min.js</script></action>
                 <action method="addJs"><script>mage/adminhtml/tools.js</script></action>
             </block>
             <block type="adminhtml/system_convert_profile_run" name="system_convert_profile_run" template="system/convert/profile/process.phtml" output="toHtml"/>

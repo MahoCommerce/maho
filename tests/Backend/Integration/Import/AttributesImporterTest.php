@@ -98,6 +98,9 @@ it('creates a set, attributes with options and swatches, assigns them, and rerun
         ->getFirstItem()
         ->getValue();
     expect(explode(',', (string) $swatchIds))->toContain((string) $finish->getId());
+    // The importer saves through the config service, which reloads the configuration
+    expect(explode(',', (string) Mage::getStoreConfig('configswatches/general/swatch_attributes', Mage_Core_Model_App::ADMIN_STORE_ID)))
+        ->toContain((string) $finish->getId());
 
     $again = (new Attributes())->import($attributes, [Attributes::OPTION_OPTIONS_CSV => $options]);
     expect($again->created)->toBe(0);

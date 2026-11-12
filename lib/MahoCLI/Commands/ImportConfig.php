@@ -30,8 +30,10 @@ class ImportConfig extends BaseMahoCommand
         string $csv,
         #[Option(description: self::DRY_RUN_DESCRIPTION)]
         bool $dryRun = false,
+        #[Option(description: 'Refuse a path that no field of System > Configuration declares, and a scope where the field does not show')]
+        bool $strict = false,
     ): int {
         $this->initMaho();
-        return $this->runImport(new Config(), $csv, [], $dryRun, $output);
+        return $this->runImport(new Config(), $csv, ['strict' => $strict], $dryRun, $output);
     }
 }

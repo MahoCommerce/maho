@@ -8,11 +8,4 @@
 
 declare(strict_types=1);
 
-class Maho_Blog_Model_Resource_Attribute extends Mage_Core_Model_Resource_Db_Abstract
-{
-    #[\Override]
-    protected function _construct(): void
-    {
-        $this->_init('blog/eav_attribute', 'attribute_id');
-    }
-}
+class Maho_Blog_Model_Resource_Attribute extends Mage_Eav_Model_Resource_Entity_Attribute {}

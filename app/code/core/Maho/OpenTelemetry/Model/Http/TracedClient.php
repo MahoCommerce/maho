@@ -89,10 +89,10 @@ class Maho_OpenTelemetry_Model_Http_TracedClient implements HttpClientInterface
             // Inject W3C Trace Context headers for distributed tracing
             $propagationHeaders = $this->_tracer->getTracePropagationHeaders($urlParts['host'] ?? '', $span);
             if (!empty($propagationHeaders)) {
-                $options['headers'] = array_merge(
-                    $options['headers'] ?? [],
-                    $propagationHeaders,
-                );
+                // Append last so Symfony replaces earlier names regardless of case or header format.
+                foreach ($propagationHeaders as $name => $value) {
+                    $options['headers'][] = $name . ': ' . $value;
+                }
             }
 
             // The response closes the span once the body is consumed. Reading the status

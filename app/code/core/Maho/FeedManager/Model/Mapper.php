@@ -423,6 +423,14 @@ class Maho_FeedManager_Model_Mapper
     }
 
     /**
+     * Remove the control characters that XML does not allow. Keep tab, line feed and carriage return.
+     */
+    public static function removeControlCharacters(string $value): string
+    {
+        return preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $value);
+    }
+
+    /**
      * The fields the mappings fill with a value.
      *
      * @return array<int, string>
@@ -490,15 +498,10 @@ class Maho_FeedManager_Model_Mapper
 
         // Stock information
         $stockItem = $product->getStockItem();
-        if ($stockItem) {
-            $data['qty'] = (int) $stockItem->getQty();
-            $data['is_in_stock'] = (int) $stockItem->getIsInStock();
-            $data['stock_status'] = $stockItem->getIsInStock() ? 1 : 0;
-        } else {
-            $data['qty'] = 0;
-            $data['is_in_stock'] = 0;
-            $data['stock_status'] = 0;
-        }
+        $isInStock = (int) Mage::helper('cataloginventory')->isInStock($product, $stockItem);
+        $data['qty'] = $stockItem ? (int) $stockItem->getQty() : 0;
+        $data['is_in_stock'] = $isInStock;
+        $data['stock_status'] = $isInStock;
 
         // Parent/variant relationship
         $parentId = $this->_getParentId($product);
@@ -1833,8 +1836,9 @@ class Maho_FeedManager_Model_Mapper
             }
 
             // Build XML element
-            $valueStr = (string) ($value ?? '');
+            $valueStr = self::removeControlCharacters((string) ($value ?? ''));
             if ($cdata) {
+                $valueStr = str_replace(']]>', ']]]]><![CDATA[>', $valueStr);
                 $xml .= $indentStr . '<' . $tag . '><![CDATA[' . $valueStr . ']]></' . $tag . ">\n";
             } else {
                 $xml .= $indentStr . '<' . $tag . '>' . htmlspecialchars($valueStr) . '</' . $tag . ">\n";

@@ -79,6 +79,40 @@ Do not use `ipRateLimiter()`. It is deprecated since 26.9. It allows one request
 
 A public endpoint reads its budget from `system/rate_limit/<key>`. Add a positive default in `config.xml`, and add a field under "Per-endpoint Limits" in `system.xml`. Without a default, the limit is off.
 
+### The keys of the core modules
+
+Each key is a field under **System > Configuration > Advanced > System > Rate limit > Per-endpoint
+Limits**. The module that owns the feature adds the field, so a disabled module has no field.
+A value of `0` turns the limit off.
+
+| Key (`system/rate_limit/...`) | Module | Default | What it counts |
+|---|---|---|---|
+| `admin_reset_password` | Mage_Admin | 10 per hour | Per client. Counts only a rejected admin password reset link. |
+| `auth_token_ip` | Mage_Api | 20 per minute | Per IP address. Counts each request to `/api/rest/v2/auth/token` and each social sign-in attempt on the storefront. |
+| `customer_login` | Mage_Api | 5 per minute | Per email or credential. Covers the storefront login, the GraphQL `customerLogin` mutation and each grant of `/auth/token`. |
+| `contact` | Mage_Contacts | 3 per hour | Per client and per email address. Covers the contact form and `POST /contact`. |
+| `contact_auto_reply` | Mage_Contacts | 3 per hour | Per recipient address. Counts the auto-reply emails. The store still gets each message. |
+| `customer_register` | Mage_Customer | 10 per hour | Per IP address. |
+| `forgot_password` | Mage_Customer | 3 per hour | Per email address. |
+| `confirmation_link` | Mage_Customer | 3 per hour | Per IP address and per email address. Counts each request to send the confirmation link again. |
+| `magic_link_email` | Mage_Customer | 3 per hour | Per email address. |
+| `magic_link_ip` | Mage_Customer | 10 per hour | Per IP address. Higher than the email limit, for customers on a shared network. |
+| `reset_password` | Mage_Customer | 10 per hour | Per client. Counts only a rejected password reset link, account confirmation key or magic login link. |
+| `change_password` | Mage_Customer | 10 per hour | Per IP address and per customer. |
+| `downloadable_link` | Mage_Downloadable | 300 per hour | Per IP address. Counts only a hash that matches nothing. |
+| `newsletter_subscribe` | Mage_Newsletter | 3 per hour | Per email address. |
+| `newsletter_unsubscribe` | Mage_Newsletter | 30 per hour | Per IP address. |
+| `reports_refresh` | Mage_Reports | 10 per minute | Per admin user or API caller. |
+| `review_submit` | Mage_Review | 5 per hour | Per IP address. |
+| `guest_order_lookup` | Mage_Sales | 30 per hour | Per IP address. Counts only a failed lookup, on the guest order form and the API. |
+| `coupon_validate` | Mage_SalesRule | 60 per minute | Per IP address and per customer. |
+| `shipping_tracking` | Mage_Shipping | 60 per hour | Per IP address. Counts only a lookup that finds nothing. |
+| `wishlist_share` | Mage_Wishlist | 10 per hour | Per customer. Each share sends up to 5 emails. |
+| `giftcard_balance` | Maho_Giftcard | 10 per minute | Per IP address. |
+| `revocation_submit` | Maho_Revocation | 5 per hour | Per IP address. |
+| `revocation_receipt` | Maho_Revocation | 1 per day | Per recipient address. A request over the limit is still recorded, but the customer gets no receipt email. |
+| `revocation_merchant_notification` | Maho_Revocation | 100 per hour | Per store view. |
+
 ### The RateLimiter API
 
 | Method               | Behaviour |
@@ -150,18 +184,19 @@ if (Mage::getStoreConfigFlag('mymodule/abuse/honeypot_enabled')
 
 ## Worked example: the contact form
 
-The contact form (`Mage_Contacts_IndexController`) combines all three tools and is the canonical reference implementation:
+The contact form (`Mage_Contacts_Service_Message`, which the storefront form and `POST /contact` call) combines all three tools and is the canonical reference implementation:
 
 1. **Honeypot** - a hidden field. Bots that fill it get the normal success page (so they can't detect the trap) and no email is sent.
-2. **Per-IP throttle** (`rateLimiter('contacts_ip', ..., RateLimitScope::Ip)`) - blunts automated submission floods.
+2. **Per-client and per-email throttle** (`rateLimiter("contact:{$storeId}", ..., RateLimitScope::Ip)` and `rateLimiterBy('contact', $email, ...)`) - blunts automated submission floods. Both transports count together.
 3. **Per-recipient throttle** (`rateLimiterBy('contacts_recipient', $email, ...)`) - caps how many auto-reply emails a single address can receive, defeating email-bombing of third parties. The merchant notification is still sent; only the attacker-controllable auto-reply is capped, and only when auto-reply is enabled.
 
-These are exposed under **System > Configuration > Contacts > Abuse Protection** with three fields:
+The honeypot switch is a field of the module, under **System > Configuration > General > Contacts > Abuse Protection**. The limits are under **System > Configuration > Advanced > System > Rate limit**, as for every public endpoint:
 
-| Field | Purpose |
-|-------|---------|
-| Honeypot Field | Adds the invisible trap field. Submissions that fill it are silently dropped. |
-| Submissions per IP per Hour | Per-IP throttle. `0` disables the limit. |
-| Auto-Reply Emails per Recipient per Hour | Caps auto-reply emails per address. `0` disables the limit. |
+| Field | Path | Purpose |
+|-------|------|---------|
+| Honeypot Field | `contacts/abuse/honeypot_enabled` | Adds the invisible trap field. Submissions that fill it are silently dropped. |
+| Contact form per IP (web + API) | `system/rate_limit/contact_ip` | Per IP address, for the form and the API together. Default 10 per hour. `0` disables the limit. |
+| Contact form per email (web + API) | `system/rate_limit/contact` | Per email address. `0` disables the limit. |
+| Contact form auto-reply | `system/rate_limit/contact_auto_reply` | Caps auto-reply emails per address. `0` disables the limit. |
 
 Follow this pattern when adding abuse protection to your own public endpoints: keep the measures invisible to real customers, and don't set limits so low that legitimate visitors get blocked.

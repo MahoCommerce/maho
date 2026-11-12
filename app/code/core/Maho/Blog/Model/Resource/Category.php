@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
+class Maho_Blog_Model_Resource_Category extends Maho_Blog_Model_Resource_Abstract
 {
     protected string $_storeTable;
     protected string $_postCategoryTable;
@@ -48,15 +48,38 @@ class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
         ];
     }
 
+    /**
+     * The codes of the attributes that are columns of the entity table.
+     *
+     * @return list<string>
+     */
     public function getStaticAttributeCodes(): array
     {
-        return Mage::getModel('blog/category')->getStaticAttributes();
+        return [
+            'parent_id',
+            'path',
+            'level',
+            'position',
+            'name',
+            'url_key',
+            'is_active',
+            'meta_title',
+            'meta_keywords',
+            'meta_description',
+            'meta_robots',
+        ];
     }
 
     #[\Override]
     protected function _beforeSave(\Maho\DataObject $object): self
     {
         $coreHelper = Mage::helper('core');
+
+        $object->setData('attribute_set_id', Mage::helper('blog')->getValidAttributeSetId(
+            (int) $object->getData('attribute_set_id'),
+            $this->getEntityType(),
+        ));
+        Mage::helper('blog')->sanitizeAttributeValues($object, $this->getEntityType());
 
         // Strip HTML tags from string fields
         $stringFields = ['name', 'url_key', 'meta_title', 'meta_keywords', 'meta_description'];
@@ -87,6 +110,8 @@ class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
             $object->setData('url_key', $urlKey);
         }
 
+        $this->_validateNameAndParent($object);
+
         // Ensure url_key is unique among siblings (same parent_id)
         $urlKey = $object->getData('url_key');
         $parentId = (int) ($object->getData('parent_id') ?: Maho_Blog_Model_Category::ROOT_PARENT_ID);
@@ -99,7 +124,7 @@ class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
             $select->where('entity_id != ?', $object->getId());
         }
         if ($adapter->fetchOne($select)) {
-            Mage::throwException(
+            throw new Mage_Core_Exception_Conflict(
                 Mage::helper('blog')->__('A category with URL key "%s" already exists under the same parent.', $urlKey),
             );
         }
@@ -132,6 +157,39 @@ class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
         }
 
         return parent::_beforeSave($object);
+    }
+
+    /**
+     * @throws Mage_Core_Exception_Input
+     */
+    protected function _validateNameAndParent(\Maho\DataObject $category): void
+    {
+        $helper = Mage::helper('blog');
+        $errors = new Mage_Core_Exception_Input();
+        if ((!$category->getId() || $category->hasData('name')) && (string) $category->getData('name') === '') {
+            $errors->addError('name', $helper->__('Blog category name is required'));
+        }
+
+        $parentId = (int) $category->getData('parent_id');
+        if ($parentId !== Maho_Blog_Model_Category::ROOT_PARENT_ID) {
+            $parentPath = $this->_lookupPath($parentId);
+            if ($parentPath === null) {
+                $errors->addError('parent_id', $helper->__('Unknown parent blog category id %s', $parentId));
+            } elseif ($category->getId() && in_array((int) $category->getId(), array_map(intval(...), explode('/', $parentPath)), true)) {
+                $errors->addError('parent_id', $helper->__('A blog category cannot be moved under itself or its descendants'));
+            }
+        }
+        $errors->throwIfErrors();
+    }
+
+    /**
+     * The subtree goes with the category, so that no category has a parent that does not exist.
+     */
+    #[\Override]
+    protected function _beforeDelete(\Maho\DataObject $object)
+    {
+        $this->deleteDescendants((int) $object->getId());
+        return parent::_beforeDelete($object);
     }
 
     #[\Override]

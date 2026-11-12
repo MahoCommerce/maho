@@ -43,6 +43,7 @@ class Maho_FeedManager_Model_Writer_Json implements Maho_FeedManager_Model_Write
     #[\Override]
     public function open(string $filePath, ?Maho_FeedManager_Model_Platform_AdapterInterface $platform = null): void
     {
+        $rootKey = json_encode($this->_rootKey, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
         $this->_handle = fopen($filePath, 'w');
 
         if ($this->_handle === false) {
@@ -50,7 +51,7 @@ class Maho_FeedManager_Model_Writer_Json implements Maho_FeedManager_Model_Write
         }
 
         // Start JSON with root key
-        fwrite($this->_handle, '{"' . $this->_rootKey . '":[' . ($this->_prettyPrint ? PHP_EOL : ''));
+        fwrite($this->_handle, '{' . $rootKey . ':[' . ($this->_prettyPrint ? PHP_EOL : ''));
         $this->_firstProduct = true;
     }
 

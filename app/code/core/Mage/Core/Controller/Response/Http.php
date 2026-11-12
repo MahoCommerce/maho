@@ -836,8 +836,8 @@ class Mage_Core_Controller_Response_Http implements \Stringable
         $scripts = [];
 
         // Extract all scripts and transform based on mode
-        $html = preg_replace_callback(
-            '/<script(?:\s+[^>]*?)?>(?:(?!<\/script>).)*?<\/script>/is',
+        $deferred = preg_replace_callback(
+            '#<script(\s[^>]*)?>([^<]*+(?:<(?!/script>)[^<]*+)*+)</script>#i',
             function ($matches) use (&$scriptIndex, $mode, &$scripts) {
                 // For load on intent mode, transform scripts
                 if ($mode == Mage_Core_Model_Source_Js_Defer::MODE_LOAD_ON_INTENT) {
@@ -851,18 +851,13 @@ class Mage_Core_Controller_Response_Http implements \Stringable
                         return '';
                     }
 
-                    // Extract and process attributes
-                    if (preg_match('/<script(\s+[^>]*?)?>(.*?)<\/script>/is', $matches[0], $parts)) {
-                        $attrs = $parts[1];
-                        $content = $parts[2];
+                    $attrs = preg_replace(
+                        '/"[^"]*"(*SKIP)(*FAIL)|\'[^\']*\'(*SKIP)(*FAIL)|\stype\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s"\'>]+)/i',
+                        '',
+                        $matches[1],
+                    );
 
-                        // Remove existing type attribute more efficiently
-                        $attrs = preg_replace('/\stype\s*=\s*["\']?[^"\'>\s]+["\']?/i', '', $attrs);
-
-                        $scripts[] = '<script type="text/plain" data-maho-script="' . $scriptIndex++ . '"' . $attrs . '>' . $content . '</script>';
-                    } else {
-                        $scripts[] = $matches[0];
-                    }
+                    $scripts[] = '<script type="text/plain" data-maho-script="' . $scriptIndex++ . '"' . $attrs . '>' . $matches[2] . '</script>';
                 } else {
                     // For defer only mode, keep script as-is
                     $scripts[] = $matches[0];
@@ -872,7 +867,14 @@ class Mage_Core_Controller_Response_Http implements \Stringable
                 return '';
             },
             $html,
-        ) ?? $html;
+        );
+
+        if ($deferred === null) {
+            Mage::log('Maho did not defer JavaScript on this page because the script regex failed: ' . preg_last_error_msg(), Mage::LOG_WARNING, forceLog: true);
+            return $html;
+        }
+
+        $html = $deferred;
 
         // Prepare scripts for bottom insertion
         $scriptsHtml = '';

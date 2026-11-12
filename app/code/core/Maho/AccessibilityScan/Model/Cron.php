@@ -27,30 +27,20 @@ class Maho_AccessibilityScan_Model_Cron
             return;
         }
 
-        $level = $helper->getDefaultWcagLevel();
+        /** @var Maho_AccessibilityScan_Service_Scan $service */
+        $service = Mage::getService('accessibilityscan/scan');
         $failed = [];
         foreach ($urls as $url) {
-            // Re-validate on every run: store base URLs may have changed since the list was saved
-            $storeId = $helper->resolveScanUrlStoreId($url);
-            if ($storeId === null) {
-                Mage::log("AccessibilityScan: skipping scheduled scan of $url: the URL no longer matches any store base URL", Mage::LOG_WARNING);
-                $failed[] = $url;
-                continue;
-            }
-
             try {
-                $scan = Mage::getModel('accessibilityscan/scan');
-                $scan->setUrl($url)
-                    ->setStoreId($storeId)
-                    ->setWcagLevel($level)
-                    ->setTriggeredBy(Maho_AccessibilityScan_Model_Scan::TRIGGER_SCHEDULE)
-                    ->setStatus(Maho_AccessibilityScan_Model_Scan::STATUS_PENDING)
-                    ->save();
-
+                // The service checks the URL on every run: the store base URLs can change after the list was saved
+                $scan = $service->start($url, null, Maho_AccessibilityScan_Model_Scan::TRIGGER_SCHEDULE);
                 Mage::getModel('accessibilityscan/runner')->run($scan);
                 if ($scan->isFailed()) {
                     $failed[] = $url;
                 }
+            } catch (Mage_Core_Exception_Input $e) {
+                Mage::log("AccessibilityScan: skipping scheduled scan of $url: {$e->getMessage()}", Mage::LOG_WARNING);
+                $failed[] = $url;
             } catch (Throwable $e) {
                 Mage::logException($e);
                 $failed[] = $url;

@@ -90,19 +90,13 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     #[Maho\Config\Route('/admin/giftcard/edit')]
     public function editAction(): void
     {
-        $id = $this->getRequest()->getParam('id');
-        $model = Mage::getModel('giftcard/giftcard');
-
-        if ($id) {
-            $model->load($id);
-
-            if (!$model->getId()) {
-                Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('giftcard')->__('This gift card no longer exists.'),
-                );
-                $this->_redirect('*/*/');
-                return;
-            }
+        $id = (int) $this->getRequest()->getParam('id');
+        try {
+            $model = $id ? $this->getService()->getById($id) : Mage::getModel('giftcard/giftcard');
+        } catch (Mage_Core_Exception_NoSuchEntity $e) {
+            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+            $this->_redirect('*/*/');
+            return;
         }
 
         $this->_title($model->getId() ? $model->getCode() : Mage::helper('giftcard')->__('New Gift Card'));
@@ -124,179 +118,107 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     }
 
     /**
-     * Save gift card
+     * Save gift card. A changed balance of an existing card is an adjustment with a history entry.
      */
     #[Maho\Config\Route('/admin/giftcard/save')]
     public function saveAction(): void
     {
-        if ($data = $this->getRequest()->getPost()) {
-            $id = $this->getRequest()->getParam('id');
-            $model = Mage::getModel('giftcard/giftcard');
-
-            if ($id) {
-                $model->load($id);
-            }
-
-            try {
-                // Keep $data as posted: the catch block redisplays it on the error path
-                $saveData = $data;
-
-                // Nothing posted leaves the stored associations untouched
-                $websiteIds = $saveData['website_ids'] ?? null;
-                unset($saveData['website_ids']);
-
-                // Compare with the balance that the form showed: a refund can change the stored one meanwhile
-                $shownBalance = isset($saveData['shown_balance']) && $saveData['shown_balance'] !== ''
-                    ? (float) $saveData['shown_balance']
-                    : (float) $model->getBalance();
-                $newBalance = isset($saveData['balance']) && $saveData['balance'] !== ''
-                    ? (float) $saveData['balance']
-                    : $shownBalance;
-                $isBalanceAdjustment = $model->getId() && round($newBalance - $shownBalance, 4) !== 0.0;
-                unset($saveData['shown_balance']);
-                if ($model->getId()) {
-                    unset($saveData['balance']);
-                }
-
-                $model->setData($saveData);
-                if ($websiteIds !== null) {
-                    $model->setWebsiteIds(is_array($websiteIds) ? $websiteIds : [$websiteIds]);
-                }
-
-                $resource = $model->getResource();
-                $resource->beginTransaction();
-                try {
-                    $model->save();
-                    if ($isBalanceAdjustment) {
-                        $model->adjustBalance($newBalance, $saveData['comment'] ?? 'Admin adjustment', $shownBalance);
-                    }
-                    $resource->commit();
-                } catch (Exception $e) {
-                    $resource->rollBack();
-                    throw $e;
-                }
-
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('giftcard')->__('The gift card has been saved.'),
-                );
-
-                Mage::getSingleton('adminhtml/session')->setFormData(false);
-
-                if ($this->getRequest()->getParam('back')) {
-                    $this->_redirect('*/*/edit', ['id' => $model->getId()]);
-                    return;
-                }
-
-                $this->_redirect('*/*/');
-                return;
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                Mage::getSingleton('adminhtml/session')->setFormData($data);
-                $this->_redirect('*/*/edit', ['id' => $this->getRequest()->getParam('id')]);
-                return;
-            }
+        $data = $this->getRequest()->getPost();
+        if (!$data) {
+            $this->_redirect('*/*/');
+            return;
         }
 
-        $this->_redirect('*/*/');
+        $session = Mage::getSingleton('adminhtml/session');
+        $id = (int) $this->getRequest()->getParam('id');
+        try {
+            $model = $id ? $this->getService()->getById($id) : Mage::getModel('giftcard/giftcard');
+            $saveData = $data;
+            // Nothing posted leaves the stored associations untouched
+            $websiteIds = $saveData['website_ids'] ?? null;
+            unset($saveData['website_ids']);
+
+            // Compare with the balance that the form showed: a refund can change the stored one meanwhile
+            $shownBalance = $model->getId() && is_numeric($saveData['shown_balance'] ?? null) ? (float) $saveData['shown_balance'] : null;
+            unset($saveData['shown_balance']);
+
+            // A form that does not post the balance, or posts the one that it showed, keeps the balance of the card
+            $saveData['balance'] ??= $model->getData('balance');
+            if ($shownBalance !== null && is_numeric($saveData['balance']) && round((float) $saveData['balance'] - $shownBalance, 4) === 0.0) {
+                $saveData['balance'] = $model->getData('balance');
+            }
+            $model->setData($saveData);
+            if ($websiteIds !== null) {
+                $model->setWebsiteIds(is_array($websiteIds) ? $websiteIds : [$websiteIds]);
+            }
+            $this->getService()->save($model, $saveData['comment'] ?? 'Admin adjustment', $shownBalance);
+
+            $session->addSuccess(Mage::helper('giftcard')->__('The gift card has been saved.'));
+            $session->setFormData(false);
+            $this->getRequest()->getParam('back') ? $this->_redirect('*/*/edit', ['id' => $model->getId()]) : $this->_redirect('*/*/');
+            return;
+        } catch (Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $session->addError($error['message']);
+            }
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $session->addError(Mage::helper('giftcard')->__('Unable to save the gift card.'));
+        }
+        $session->setFormData($data);
+        $this->_redirect('*/*/edit', ['id' => $id]);
     }
 
-    /**
-     * Delete gift card
-     */
     #[Maho\Config\Route('/admin/giftcard/delete')]
     public function deleteAction(): void
     {
-        if ($id = $this->getRequest()->getParam('id')) {
-            try {
-                $model = Mage::getModel('giftcard/giftcard')->load($id);
-                $model->delete();
-
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('giftcard')->__('The gift card has been deleted.'),
-                );
-
-                $this->_redirect('*/*/');
-                return;
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                $this->_redirect('*/*/edit', ['id' => $id]);
-                return;
-            }
+        $session = Mage::getSingleton('adminhtml/session');
+        try {
+            $this->getService()->delete($this->getService()->getById((int) $this->getRequest()->getParam('id')));
+            $session->addSuccess(Mage::helper('giftcard')->__('The gift card has been deleted.'));
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
         }
-
-        Mage::getSingleton('adminhtml/session')->addError(
-            Mage::helper('giftcard')->__('Unable to find a gift card to delete.'),
-        );
-
         $this->_redirect('*/*/');
     }
 
-    /**
-     * Mass delete action
-     */
     #[Maho\Config\Route('/admin/giftcard/massDelete')]
     public function massDeleteAction(): void
     {
-        $giftcardIds = $this->getRequest()->getParam('giftcard');
-
-        if (!is_array($giftcardIds)) {
-            Mage::getSingleton('adminhtml/session')->addError(
-                Mage::helper('giftcard')->__('Please select gift card(s).'),
-            );
-        } else {
-            try {
-                foreach ($giftcardIds as $giftcardId) {
-                    $giftcard = Mage::getModel('giftcard/giftcard')->load($giftcardId);
-                    $giftcard->delete();
-                }
-
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('giftcard')->__(
-                        'Total of %d record(s) were deleted.',
-                        count($giftcardIds),
-                    ),
-                );
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-            }
-        }
-
-        $this->_redirect('*/*/index');
+        $this->massAction(fn(Maho_Giftcard_Model_Giftcard $giftcard) => $this->getService()->delete($giftcard), 'Total of %d record(s) were deleted.');
     }
 
-    /**
-     * Mass status change action
-     */
     #[Maho\Config\Route('/admin/giftcard/massStatus')]
     public function massStatusAction(): void
     {
+        $status = (string) $this->getRequest()->getParam('status');
+        $this->massAction(fn(Maho_Giftcard_Model_Giftcard $giftcard) => $this->getService()->save($giftcard->setStatus($status)), 'Total of %d record(s) were updated.');
+    }
+
+    /**
+     * Run $action on each selected card, then show $successMessage with the number of cards.
+     *
+     * @param callable(Maho_Giftcard_Model_Giftcard): mixed $action
+     */
+    private function massAction(callable $action, string $successMessage): void
+    {
+        $session = Mage::getSingleton('adminhtml/session');
         $giftcardIds = $this->getRequest()->getParam('giftcard');
-        $status = $this->getRequest()->getParam('status');
-
         if (!is_array($giftcardIds)) {
-            Mage::getSingleton('adminhtml/session')->addError(
-                Mage::helper('giftcard')->__('Please select gift card(s).'),
-            );
-        } else {
-            try {
-                foreach ($giftcardIds as $giftcardId) {
-                    Mage::getModel('giftcard/giftcard')
-                        ->load($giftcardId)
-                        ->setStatus($status)
-                        ->save();
-                }
-
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('giftcard')->__(
-                        'Total of %d record(s) were updated.',
-                        count($giftcardIds),
-                    ),
-                );
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-            }
+            $session->addError(Mage::helper('giftcard')->__('Please select gift card(s).'));
+            $this->_redirect('*/*/index');
+            return;
         }
-
+        try {
+            foreach ($giftcardIds as $giftcardId) {
+                $action($this->getService()->getById((int) $giftcardId));
+            }
+            $session->addSuccess(Mage::helper('giftcard')->__($successMessage, count($giftcardIds)));
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+        }
         $this->_redirect('*/*/index');
     }
 
@@ -308,23 +230,10 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     {
         $this->getResponse()->setHeader('Content-Type', 'application/json', true);
 
-        $code = $this->getRequest()->getParam('code');
-
-        if ($code === null || $code === '') {
-            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
-                'success' => false,
-                'message' => 'Please enter a gift card code.',
-            ]));
-            return;
-        }
-
-        $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
-
-        if (!$giftcard->getId()) {
-            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
-                'success' => false,
-                'message' => 'Gift card not found.',
-            ]));
+        try {
+            $giftcard = $this->getService()->getByCode((string) $this->getRequest()->getParam('code'));
+        } catch (Mage_Core_Exception_NoSuchEntity $e) {
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode(['success' => false, 'message' => $e->getMessage()]));
             return;
         }
 
@@ -342,5 +251,10 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             'is_valid' => $giftcard->isValid(),
             'expires_at' => $giftcard->getExpiresAt(),
         ]));
+    }
+
+    private function getService(): Maho_Giftcard_Service_Giftcard
+    {
+        return Mage::getService('giftcard/giftcard');
     }
 }

@@ -37,6 +37,27 @@ class Maho_Blog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_Attri
         $this->_init('blog/attribute');
     }
 
+    #[\Override]
+    public function getAdminPageSettings(): ?Mage_Eav_Model_Entity_Attribute_AdminPageSettings
+    {
+        $helper = Mage::helper('blog');
+        [$title, $setsTitle] = match ($this->getEntityType()->getEntityTypeCode()) {
+            Maho_Blog_Model_Post::ENTITY => [$helper->__('Blog Post Attributes'), $helper->__('Blog Post Attribute Sets')],
+            Maho_Blog_Model_Category::ENTITY => [$helper->__('Blog Category Attributes'), $helper->__('Blog Category Attribute Sets')],
+            default => [null, null],
+        };
+        if ($title === null) {
+            return null;
+        }
+        return new Mage_Eav_Model_Entity_Attribute_AdminPageSettings(
+            acl: 'system/attributes/' . $this->getEntityType()->getEntityTypeCode(),
+            title: $title,
+            setsTitle: $setsTitle,
+            mainTab: 'blog/adminhtml_attribute_edit_tab_main',
+            addToDefaultSet: true,
+        );
+    }
+
     /**
      * Processing object before save data
      *
@@ -47,6 +68,8 @@ class Maho_Blog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_Attri
     protected function _beforeSave()
     {
         $this->setData('modulePrefix', 'Maho_Blog');
+        // The blog resources save every value for store 0
+        $this->setData('is_global', self::SCOPE_GLOBAL);
         return parent::_beforeSave();
     }
 

@@ -21,6 +21,7 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
     public const DIRECTIVE_KEYWORDS = [
         'media', 'skin', 'store', 'widget', 'config', 'block',
         'layout', 'template', 'protocol', 'htmlescape', 'customvar', 'inlinecss', 'include', 'icon',
+        'breakpoint',
     ];
 
     /**
@@ -69,7 +70,7 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
      * 1. The keyword must be one $renderer actually resolves. \Maho\Filter\Template leaves a
      *    directive it has no handler for untouched in the output, so masking one hands the payload
      *    straight to the browser. This is renderer-specific, not global: the catalog filter
-     *    implements only 5 of the 13 keywords below, so masking {{config}} in a product
+     *    implements only a few of the keywords below, so masking {{config}} in a product
      *    description would emit it verbatim on the storefront.
      * 2. The body must be well-formed `name="value"` parameters, and no parameter may be named like
      *    an event handler. A directive legitimately contains quotes, so a body such as
@@ -89,7 +90,7 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
         $keywords = array_filter(
             self::DIRECTIVE_KEYWORDS,
             // method_exists, not is_callable: a renderer with a magic __call would satisfy
-            // is_callable for every keyword and silently widen the mask to all 14.
+            // is_callable for every keyword and silently widen the mask to every keyword.
             static fn(string $keyword): bool => method_exists($renderer, $keyword . 'Directive'),
         );
 

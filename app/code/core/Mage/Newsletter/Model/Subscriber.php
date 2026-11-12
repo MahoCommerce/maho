@@ -274,7 +274,8 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Subscribes by email
+     * Subscribe $email for the customer who is logged in, or for a guest, and return the new status.
+     * Mage::getService('newsletter/subscriber')->subscribe() also checks the guest switch and the rate limits.
      *
      * @param string $email
      * @throws Exception
@@ -282,60 +283,69 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
      */
     public function subscribe(#[\SensitiveParameter] $email)
     {
-        $this->loadByEmail($email);
         $customerSession = Mage::getSingleton('customer/session');
+        $customerId = $customerSession->isLoggedIn() ? (int) $customerSession->getCustomerId() : null;
+        return $this->subscribeEmail((string) $email, (int) Mage::app()->getStore()->getId(), $customerId);
+    }
 
+    /**
+     * Return whether $email is the address of the account of the customer $customerId on the website of the store $storeId.
+     */
+    public function isAccountEmail(#[\SensitiveParameter] string $email, int $storeId, ?int $customerId): bool
+    {
+        if ($customerId === null) {
+            return false;
+        }
+        $ownerId = Mage::getModel('customer/customer')
+            ->setWebsiteId(Mage::app()->getStore($storeId)->getWebsiteId())
+            ->loadByEmail($email)
+            ->getId();
+        return (int) $ownerId === $customerId;
+    }
+
+    /**
+     * Subscribe $email on the store $storeId and return the new status. $customerId is the customer who asks,
+     * or null for a guest. A customer who subscribes the address of the account needs no confirmation, and the
+     * subscription gets the ID of the customer. With $alwaysConfirm, an address that is not the address of the
+     * account gets the confirmation email also when the store asks no confirmation.
+     *
+     * @throws Mage_Core_Exception when the address is already subscribed
+     */
+    public function subscribeEmail(
+        #[\SensitiveParameter]
+        string $email,
+        int $storeId,
+        ?int $customerId = null,
+        bool $alwaysConfirm = false,
+    ): int {
+        $this->loadByEmail($email);
         if (!$this->getId()) {
             $this->setSubscriberConfirmCode($this->randomSequence());
         }
 
-        $isConfirmNeed   = Mage::getStoreConfig(self::XML_PATH_CONFIRMATION_FLAG) == 1;
-        $isOwnSubscribes = false;
-        $ownerId = Mage::getModel('customer/customer')
-            ->setWebsiteId(Mage::app()->getStore()->getWebsiteId())
-            ->loadByEmail($email)
-            ->getId();
-        $isSubscribeOwnEmail = $customerSession->isLoggedIn() && $ownerId == $customerSession->getId();
+        $isOwnEmail = $this->isAccountEmail($email, $storeId, $customerId);
+        $needsConfirmation = !$isOwnEmail
+            && ($alwaysConfirm || Mage::getStoreConfigFlag(self::XML_PATH_CONFIRMATION_FLAG, $storeId));
 
-        if (!$this->getId() || $this->getStatus() == self::STATUS_UNSUBSCRIBED
-            || $this->getStatus() == self::STATUS_NOT_ACTIVE
-        ) {
-            if ($isConfirmNeed === true) {
-                // if user subscribes own login email - confirmation is not needed
-                $isOwnSubscribes = $isSubscribeOwnEmail;
-                if ($isOwnSubscribes == true) {
-                    $this->setStatus(self::STATUS_SUBSCRIBED);
-                } else {
-                    $this->setStatus(self::STATUS_NOT_ACTIVE);
-                }
-            } else {
-                $this->setStatus(self::STATUS_SUBSCRIBED);
-            }
+        if (!$this->getId() || in_array($this->getStatus(), [self::STATUS_UNSUBSCRIBED, self::STATUS_NOT_ACTIVE], true)) {
+            $this->setStatus($needsConfirmation ? self::STATUS_NOT_ACTIVE : self::STATUS_SUBSCRIBED);
             $this->setSubscriberEmail($email);
-        } elseif ($this->getStatus() == self::STATUS_SUBSCRIBED) {
+        } elseif ($this->getStatus() === self::STATUS_SUBSCRIBED) {
             Mage::throwException(Mage::helper('newsletter')->__('This email address is already registered.'));
         }
 
-        if ($isSubscribeOwnEmail) {
-            $this->setStoreId($customerSession->getCustomer()->getStoreId());
-            $this->setCustomerId($customerSession->getCustomerId());
-        } else {
-            $this->setStoreId(Mage::app()->getStore()->getId());
-            $this->setCustomerId(0);
-        }
-
+        $this->setStoreId($storeId);
+        $this->setCustomerId($isOwnEmail ? $customerId : 0);
         $this->setIsStatusChanged(true);
-
         $this->save();
-        if ($isConfirmNeed === true
-            && $isOwnSubscribes === false
-        ) {
+
+        if ($needsConfirmation) {
             $this->sendConfirmationRequestEmail();
         } else {
             $this->sendConfirmationSuccessEmail();
         }
 
-        return $this->getStatus();
+        return (int) $this->getStatus();
     }
 
     /**
@@ -409,18 +419,16 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
 
         $this->setStatus($status);
 
-        if (!$this->getId()) {
-            $storeId = $customer->getStoreId();
-            if ($customer->getStoreId() == 0) {
-                $storeId = Mage::app()->getWebsite($customer->getWebsiteId())->getDefaultStore()->getId();
-            }
-            $this->setStoreId($storeId)
-                ->setCustomerId($customer->getId())
-                ->setEmail($customer->getEmail());
-        } else {
-            $this->setStoreId($customer->getStoreId())
-                ->setEmail($customer->getEmail());
+        // A customer that an admin created has the store 0, and its subscription takes the default store view of its website
+        $storeId = (int) $customer->getStoreId();
+        if ($storeId === Mage_Core_Model_App::ADMIN_STORE_ID) {
+            $storeId = (int) Mage::app()->getWebsite($customer->getWebsiteId())->getDefaultStore()->getId();
         }
+        if (!$this->getId()) {
+            $this->setCustomerId($customer->getId());
+        }
+        $this->setStoreId($storeId)
+            ->setEmail($customer->getEmail());
 
         $this->save();
         $sendSubscription = $customer->getData('sendSubscription') || $sendInformationEmail;

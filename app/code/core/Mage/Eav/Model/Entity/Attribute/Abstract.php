@@ -469,11 +469,20 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     }
 
     /**
-     * Get default source model
+     * Return the source model of an attribute that stores none. A Yes/No attribute never stores one, so it gets
+     * the Yes/No source. Any other attribute gets the default of its entity model.
      */
     public function getDefaultSourceModel(): string
     {
-        return $this->getEntity()->getDefaultAttributeSourceModel();
+        if ($this->getFrontendInput() === 'boolean') {
+            return 'eav/entity_attribute_source_boolean';
+        }
+        // getEntity() gives the entity type, which names no default, when no entity model loaded this attribute
+        $entity = $this->getEntity();
+
+        return $entity instanceof Mage_Eav_Model_Entity_Abstract
+            ? (string) $entity->getDefaultAttributeSourceModel()
+            : Mage_Eav_Model_Entity::DEFAULT_SOURCE_MODEL;
     }
 
     /**

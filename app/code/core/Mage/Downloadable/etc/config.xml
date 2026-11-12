@@ -11,6 +11,11 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_Downloadable>
     </modules>
     <global>
+        <services>
+            <downloadable>
+                <class>Mage_Downloadable_Service</class>
+            </downloadable>
+        </services>
         <!-- Link and sample files of downloadable products. They are private: no public URL. -->
         <storage>
             <mounts>

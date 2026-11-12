@@ -189,9 +189,19 @@ final class QueueManager
         ], $where) === 1;
     }
 
+    /**
+     * Delete a stored message. A processing row is deleted only when its claim is abandoned: a live worker
+     * still runs its handler, so the delete would not stop the job. The age cut-off is in the DELETE, so a
+     * worker that claims the row between the read and the write keeps it.
+     */
     public static function discardStoredMessage(int $messageId): bool
     {
-        return self::writeAdapter()->delete(self::tableName(), ['message_id = ?' => $messageId]) > 0;
+        $adapter = self::writeAdapter();
+        return $adapter->delete(self::tableName(), [
+            'message_id = ?' => $messageId,
+            '(' . $adapter->quoteInto('status <> ?', DbTransport::STATUS_PROCESSING)
+                . ' OR ' . $adapter->quoteInto('claimed_at < ?', DbTransport::abandonedBefore()) . ')',
+        ]) > 0;
     }
 
     public static function tableName(): string

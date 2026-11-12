@@ -45,7 +45,7 @@ describe('The order service validation messages', function (): void {
             ->setCollectShippingRates(true)
             ->setShippingMethod('flatrate_flatrate');
         $quote->setCustomerIsGuest(true)->setCustomerEmail('order-validation@example.com');
-        $quote->getPayment()->setMethod('cashondelivery');
+        $quote->getPayment()->setMethod('checkmo');
         $quote->setIsActive(true);
         $quote->collectTotals()->save();
 

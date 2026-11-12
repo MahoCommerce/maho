@@ -56,7 +56,7 @@ Go to **System > Configuration > Catalog > Feed Manager** to configure:
 
 | Setting | Description | Default |
 |---|---|---|
-| Enable Module | Turn FeedManager on/off | Yes |
+| Enable Module | Turn FeedManager on/off. When it is off, the schedule generates no feed, and the Generate buttons and the `feed:generate` commands refuse to generate one | Yes |
 | Output Directory | Where feed files are saved (relative to `media/`) | `feeds` |
 | Batch Size | Products processed per batch (lower = less memory) | 500 |
 | Log Retention (Days) | How long to keep generation logs | 30 |
@@ -85,7 +85,7 @@ The General tab also includes **Schedule**, **Upload Settings** (destination, au
 In the **Filters** tab, configure which products to include:
 
 - **Exclude Disabled** - Skip disabled products
-- **Exclude Out of Stock** - Skip products with no stock
+- **Exclude Out of Stock** - Skip products that the storefront shows as out of stock. A configurable, grouped or bundle product is out of stock when no child is in stock
 - **Product Types** - Select which product types to include (simple, configurable, grouped, bundle, virtual, downloadable)
 - **Product Conditions** - Standard rule conditions for advanced filtering (see [Product Filtering](#10-product-filtering))
 
@@ -156,6 +156,7 @@ Build nested XML structures with full control over elements, attributes, CDATA, 
 ### CSV Column Builder
 
 Define columns, their order, and data sources. Configure delimiter (comma, tab, pipe) and text enclosure.
+With the enclosure "None", values have no quotes. A value must not hold the delimiter or a line break.
 
 !!! example "CSV Output"
     ```csv
@@ -420,7 +421,9 @@ Chain transformers using the pipe character: `transformer1|transformer2:option=v
     strip_tags|truncate:max_length=5000,suffix=...
     ```
 
-    This removes HTML tags and limits to 5000 characters with "..." suffix.
+    This removes HTML tags and limits the result to 5000 characters, including the "..." suffix.
+
+    If the suffix is longer than the maximum length, it is omitted and the text is truncated to the limit. A zero or negative maximum length produces an empty string.
 
 !!! example "Format Price for Google Shopping"
     Format a price with 2 decimals and currency suffix:
@@ -506,6 +509,31 @@ Select a preset to quickly configure decimal and thousands separators, or choose
 | Price Decimal Point | Character for decimal point (`.` or `,`) | `.` |
 | Price Thousands Separator | Character for thousands grouping (or empty for none) | (empty) |
 | Append Currency to Prices | Add currency code suffix to prices (e.g., "295.00 AUD") | Yes |
+
+### Default Prices
+
+The default price fields of every platform export the current price, which is the price that the store charges now. A sale is a current price below the regular price. The current price includes an active special price and an active catalog price rule. Expired or future special-price attributes do not activate a sale on their own.
+
+| Platform | During a sale | Without a sale |
+|---|---|---|
+| Google, Google Local Inventory, Facebook, Bing, Pinterest, OpenAI | `price` is the regular price, `sale_price` is the current price | `price` is the current price, `sale_price` is empty |
+| Trovaprezzi | `Price` is the current price, `OriginalPrice` is the regular price | `Price` is the current price, `OriginalPrice` is empty |
+| Idealo | `price` is the current price, `formerPrice` is the regular price | `price` is the current price, `formerPrice` is empty |
+
+These defaults use the **Current Price** transformer with the combined source `["{{regular_price}}","{{final_price}}"]`. Select the output field in **Price Field**:
+
+| Price Field | During a sale | Without a sale |
+|---|---|---|
+| Price | Regular price | Current price |
+| Sale Price | Current price | Empty |
+| Current Price | Current price | Current price |
+| Original Price | Regular price | Empty |
+
+The transformer compares the amounts at the two decimal places it exports. It uses a decimal point and no thousands separator, including when the feed's regional settings use another number format. **Currency Code** adds the feed currency code, as in `25.00 USD`. Trovaprezzi and Idealo omit it. Missing or invalid current amounts leave the field empty.
+
+The default sale dates are empty: `sale_price_effective_date`, and `sale_price_start_date` and `sale_price_end_date` for OpenAI. Regenerate the feed when prices or promotions change, including at the start and end of a promotion. A generated file keeps its prices until it is replaced.
+
+Existing saved columns, XML structures and custom mappings keep their configuration. To adopt the new defaults, review the price and sale date mappings. Loading a preset replaces the whole set of columns or XML structure, so preserve other custom mappings before doing so.
 
 !!! example "Google Shopping (Australia)"
     Google requires prices in the format `XX.XX CUR`:
@@ -597,7 +625,9 @@ Navigate to **Catalog > Feed Manager > Destinations** and click "Add New Destina
 
 ### Linking Feeds to Destinations
 
-In your feed's General tab, select the destination and enable "Auto Upload" to automatically push the feed after each generation.
+In your feed's General tab, select the destination and enable "Auto Upload" to automatically push the feed after each generation. The upload follows every generation: the **Generate** buttons of the admin, the cron, `feed:generate` and `feed:generate:all`. The log of the generation shows the result of the upload.
+
+When a feed has a destination and its upload did not succeed or did not run, the dialog that shows the generated feed has an **Upload Now** button. It sends the newest file of the feed to the destination and writes the result on the newest log.
 
 ---
 
@@ -690,6 +720,8 @@ FeedManager provides command-line tools for automation and debugging.
 # Validate a feed without regenerating
 ./maho feed:validate 4
 ```
+
+A feed that is already being generated, from the admin, the cron or another command, is not generated a second time. `feed:generate` shows the error "Feed '...' is already being generated" and ends with a failure exit code. `feed:generate:all` skips the feed with the same message and does not count it as a failure. A generation that runs for more than 30 minutes counts as stuck and does not block a new one. The hourly cron marks it as failed and sends the timeout notification.
 
 !!! example "Cron Script for Custom Scheduling"
     Add to your system crontab for custom generation times:

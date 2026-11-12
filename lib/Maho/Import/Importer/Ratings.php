@@ -20,8 +20,6 @@ use Maho\Import\Result;
 
 class Ratings extends AbstractImporter
 {
-    private const STARS = 5;
-
     #[\Override]
     protected function requiredColumns(): array
     {
@@ -54,6 +52,8 @@ class Ratings extends AbstractImporter
     protected function write(CsvFile $file, array $rows, array $options, Reporter $reporter): Result
     {
         $result = new Result();
+        /** @var \Mage_Rating_Service_Rating $service */
+        $service = Mage::getService('rating/rating');
         $entityId = (int) Mage::getModel('rating/rating')->getEntityIdByCode(\Mage_Rating_Model_Rating::ENTITY_PRODUCT_CODE);
         $listed = [];
         foreach ($rows as $row) {
@@ -64,8 +64,7 @@ class Ratings extends AbstractImporter
             if (($row['position'] ?? '') !== '') {
                 $rating->setPosition((int) $row['position']);
             }
-            $rating->setStores($row['store_ids'])->save();
-            $this->ensureOptions((int) $rating->getId());
+            $service->save($rating->setStores($row['store_ids']));
         }
         $others = Mage::getResourceModel('rating/rating_collection')->addEntityFilter($entityId);
         if ($listed !== []) {
@@ -75,8 +74,8 @@ class Ratings extends AbstractImporter
         $hidden = 0;
         foreach ($others as $other) {
             $rating = Mage::getModel('rating/rating')->load($other->getId());
-            if ((array) $rating->getStores() !== []) {
-                $rating->setStores([])->save();
+            if (array_diff(array_map(intval(...), (array) $rating->getStores()), [\Mage_Core_Model_App::ADMIN_STORE_ID]) !== []) {
+                $service->save($rating->setStores([]));
                 $hidden++;
             }
         }
@@ -96,24 +95,5 @@ class Ratings extends AbstractImporter
             $ids[] = (int) $store->getId();
         }
         return $ids;
-    }
-
-    /**
-     * A rating votes through its options, one per star: a new rating gets five of them.
-     */
-    private function ensureOptions(int $ratingId): void
-    {
-        $existing = Mage::getResourceModel('rating/rating_option_collection')->addRatingFilter($ratingId)->count();
-        if ($existing > 0) {
-            return;
-        }
-        for ($star = 1; $star <= self::STARS; $star++) {
-            Mage::getModel('rating/rating_option')
-                ->setRatingId($ratingId)
-                ->setCode((string) $star)
-                ->setValue($star)
-                ->setPosition($star)
-                ->save();
-        }
     }
 }

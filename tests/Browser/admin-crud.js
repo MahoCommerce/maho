@@ -22,7 +22,9 @@
   const ajax = u => send(u, {headers: {'X-Requested-With': 'XMLHttpRequest'}}).then(r => r.text());
   const messages = t => {
     const d = parse(t);
-    const read = sel => [...d.querySelectorAll(sel)].map(e => e.innerText.trim()).filter(Boolean);
+    // A page can hold a hidden message that its script shows later, such as the warning of the configurable product
+    const read = sel => [...d.querySelectorAll(sel)].filter(e => !e.closest('[style*="display: none"], [style*="display:none"]'))
+      .map(e => e.innerText.trim()).filter(Boolean);
     return {ok: read('.success-msg li, li.success-msg'), err: read('.error-msg li, li.error-msg')};
   };
   const outcome = t => { const m = messages(t); return (m.ok[0] || '-') + (m.err.length ? ' ERR: ' + m.err.join(' | ') : ''); };
@@ -52,7 +54,8 @@
     const found = new Set();
     for (const u of C.menu()) {
       const {t} = await get(u);
-      const re = new RegExp(base() + '(?:[a-z_]+\\/new|tax_rate\\/add|system_store\\/new(?:Website|Group|Store))\\/key\\/[0-9a-f]+\\/', 'g');
+      // System > Attributes keeps the entity type in the url of every page
+      const re = new RegExp(base() + '(?:[a-z_]+\\/new(?:\\/entity_type\\/[a-z_]+)?|tax_rate\\/add|system_store\\/new(?:Website|Group|Store))\\/key\\/[0-9a-f]+\\/', 'g');
       for (const m of t.matchAll(re)) found.add(m[0]);
     }
     const product = [...found].find(u => u.includes('/catalog_product/new/'));
@@ -96,6 +99,7 @@
   // Values that the generic filler cannot guess, by the path of the create form.
   C.presets = {
     catalog_product_attribute: (f, tag) => [set(f, 'frontend_label[0]', tag), set(f, 'attribute_code', tag)],
+    eav_attribute: (f, tag) => [set(f, 'frontend_label[0]', tag), set(f, 'attribute_code', tag)],
     directory_country: f => [set(f, 'country_id', 'QZ'), set(f, 'iso2_code', 'QZ'), set(f, 'iso3_code', 'QZQ')],
     sitemap: (f, tag) => [set(f, 'sitemap_path', '/'), set(f, 'sitemap_filename', tag + '.xml')],
     customer: (f, tag) => {
@@ -169,7 +173,7 @@
     .map(e => e.getAttribute('title') || e.getAttribute('href'))
     .filter(h => h && /\/edit[A-Za-z]*\/.*\/key\//.test(h))
     .map(h => h.replace(/key\/[0-9a-f]+\/?/, '')));
-  const indexOf = entity => C.menu().find(h => h.includes('/' + entity + '/index/'));
+  const indexOf = (entity, type = '') => C.menu().find(h => h.includes('/' + entity + '/index/' + type));
 
   // Find the edit url of the grid row that holds $tag. A grid keeps its last filter in the
   // admin session, so the filter is cleared again after the search.
@@ -208,7 +212,7 @@
   C.one = async createUrl => {
     const tag = 'crud' + Math.random().toString(36).slice(2, 8);
     const entity = short(createUrl).replace(/\/(new|add|new[A-Z]\w*)\/.*$/, '');
-    const index = indexOf(entity);
+    const index = indexOf(entity, (short(createUrl).match(/\/(entity_type\/[a-z_]+\/)/) || [])[1]);
     const before = index ? editLinks(await gridHtml(index)) : new Set();
     const rep = {form: short(createUrl).replace(/\/$/, ''), steps: {}};
     const stop = (step, why) => { rep.steps[step] = why; return rep; };
@@ -216,6 +220,17 @@
     try {
       let doc = f.contentDocument, html = doc.documentElement.outerHTML, m = html.match(C.FATAL);
       if (m) return stop('new', 'FATAL ' + snip(html, m));
+      // A new configurable product asks for its super attributes first: pick one, as the Continue button does
+      const superAttribute = doc.querySelector('input.attribute-checkbox');
+      if (superAttribute) {
+        const next = (html.match(/setSuperSettings\('([^']+)'/) || [])[1];
+        if (!next) return stop('new', 'no continue url on the super attributes step');
+        const attributes = btoa(superAttribute.value).replace(/\//g, '%2F').replace(/=/g, '%3D');
+        f.remove();
+        f = await frame(next.replace(/\{\{attributes\}\}|%7B%7Battributes%7D%7D/i, attributes));
+        doc = f.contentDocument; html = doc.documentElement.outerHTML; m = html.match(C.FATAL);
+        if (m) return stop('new', 'FATAL ' + snip(html, m));
+      }
       let form = findForm(doc);
       if (!form) return stop('new', 'no form at ' + short(f.contentWindow.location.href));
       C.fill(form, tag, entity);
@@ -226,7 +241,7 @@
       if (m) return stop('create', 'FATAL ' + snip(res.t, m));
       rep.steps.create = outcome(res.t);
       if (messages(res.t).err.length) return rep;
-      let editUrl = /\/edit[A-Za-z]*\/[a-z_]*id\/[^/]+\//.test(short(res.r.url)) ? res.r.url : await findEdit(res.r.url, C.search[entity] || tag, (short(createUrl).match(/\/new([A-Z]\w*)\//) || [])[1]);
+      let editUrl = /\/edit[A-Za-z]*\/(?:entity_type\/[a-z_]+\/)?[a-z_]*id\/[^/]+\//.test(short(res.r.url)) ? res.r.url : await findEdit(res.r.url, C.search[entity] || tag, (short(createUrl).match(/\/new([A-Z]\w*)\//) || [])[1]);
       if (!editUrl && index) {
         const added = [...editLinks(await gridHtml(index))].filter(l => !before.has(l));
         const html = await gridHtml(index);

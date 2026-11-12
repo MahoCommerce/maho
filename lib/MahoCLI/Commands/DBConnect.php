@@ -98,33 +98,4 @@ class DBConnect extends BaseMahoCommand
         fwrite(STDERR, "Unsupported database engine: {$engine}\n");
         return Command::FAILURE;
     }
-
-    private function runInteractiveCommand(string $command): int
-    {
-        $descriptorspec = [
-            0 => STDIN,
-            1 => STDOUT,
-            2 => ['pipe', 'w'],
-        ];
-
-        $process = proc_open($command, $descriptorspec, $pipes);
-        if (is_resource($process)) {
-            stream_set_blocking($pipes[2], false);
-
-            while (true) {
-                $status = proc_get_status($process);
-                if (!$status['running']) {
-                    break;
-                }
-                usleep(100000);
-            }
-
-            fclose($pipes[2]);
-            proc_close($process);
-
-            return Command::SUCCESS;
-        }
-
-        return Command::FAILURE;
-    }
 }

@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Mage\Customer\Api;
 
+use Maho\ApiPlatform\Metadata\CustomAttributeSchema;
 use Maho\Config\ApiResource;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\Get;
@@ -144,6 +145,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
                 'company' => ['type' => 'String'],
                 'isDefaultBilling' => ['type' => 'Boolean'],
                 'isDefaultShipping' => ['type' => 'Boolean'],
+                'customAttributes' => ['type' => 'Iterable', 'description' => 'Values of the custom address attributes, keyed by attribute code'],
             ],
             description: 'Create a new address for the authenticated customer',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('addresses/write')",
@@ -164,15 +166,19 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
                 'company' => ['type' => 'String'],
                 'isDefaultBilling' => ['type' => 'Boolean'],
                 'isDefaultShipping' => ['type' => 'Boolean'],
+                'customAttributes' => ['type' => 'Iterable', 'description' => 'Values of the custom address attributes, keyed by attribute code'],
             ],
-            description: 'Update an existing address',
+            description: 'Update an existing address. The id is the address ID or its IRI',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('addresses/write')",
+            // The processor loads the address, so the id can be a plain ID and not only an IRI
+            read: false,
         ),
         new DeleteMutation(
             name: 'delete',
             args: ['id' => ['type' => 'ID!']],
-            description: 'Delete an address',
+            description: 'Delete an address. The id is the address ID or its IRI',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('addresses/write')",
+            read: false,
         ),
     ],
 )]
@@ -264,6 +270,14 @@ class Address extends CrudResource
     #[ApiProperty(extraProperties: ['computed' => true])]
     public ?bool $isDefaultShipping = null;
 
+    /** @var array<string, mixed>|null */
+    #[ApiProperty(description: 'Values of the user-defined address attributes, keyed by attribute code. A multiselect is a list of option IDs, a dropdown an option ID, a Yes/No a boolean, a date Y-m-d, a multiline a list of lines. An admin or API token reads and writes the attributes of the Admin Customer Address form. A customer or a guest reads and writes the attributes of the Address Book and Checkout form. The set of the customer group and the mode of the website apply. GET /custom-attributes?entityType=customer_address lists the attributes and their options', extraProperties: [CustomAttributeSchema::KEY => 'customer_address'])]
+    public ?array $customAttributes = null;
+
+    /** @var array<string, string|list<string>>|null */
+    #[ApiProperty(description: 'Order addresses only: the option labels of the dropdown, multiselect and Yes/No values of customAttributes, keyed by attribute code, as the customer saw them when the order was placed. A multiselect has a list of labels. A customer or a guest gets the attributes of the storefront address forms only', writable: false, extraProperties: ['computed' => true])]
+    public ?array $customAttributeLabels = null;
+
     public static function afterLoad(self $dto, object $model): void
     {
         // Normalize street to array
@@ -273,6 +287,10 @@ class Address extends CrudResource
         // Normalize regionId
         $regionId = $model->getData('region_id');
         $dto->regionId = $regionId ? (int) $regionId : null;
+
+        if ($model instanceof \Maho\DataObject) {
+            $dto->customAttributes = CustomAttributes::readAddress($model);
+        }
     }
 
     /**
@@ -280,7 +298,10 @@ class Address extends CrudResource
      */
     public static function fromOrderAddress(\Mage_Sales_Model_Order_Address $address): self
     {
-        return self::fromGenericAddress($address);
+        $dto = self::fromGenericAddress($address);
+        $dto->customAttributes = CustomAttributes::readAddress($address);
+        $dto->customAttributeLabels = $address->getCustomAttributeLabels();
+        return $dto;
     }
 
     /**
@@ -288,7 +309,9 @@ class Address extends CrudResource
      */
     public static function fromQuoteAddress(\Mage_Sales_Model_Quote_Address $address): self
     {
-        return self::fromGenericAddress($address);
+        $dto = self::fromGenericAddress($address);
+        $dto->customAttributes = CustomAttributes::readAddress($address);
+        return $dto;
     }
 
     /**
