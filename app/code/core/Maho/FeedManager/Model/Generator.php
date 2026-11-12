@@ -72,7 +72,11 @@ class Maho_FeedManager_Model_Generator
 
             $page = 1;
             while ($this->_processedCount < $totalProducts) {
+                $processedBefore = $this->_processedCount;
                 $this->_processOneBatch($page++);
+                if ($this->_processedCount === $processedBefore) {
+                    throw new RuntimeException('Generation stopped because a batch visited no products before the initial total was reached');
+                }
             }
 
             $this->_closeOutput();
@@ -94,6 +98,11 @@ class Maho_FeedManager_Model_Generator
 
         } catch (\Throwable $e) {
             $this->_errors[] = $e->getMessage();
+            try {
+                $this->_closeOutput();
+            } catch (\Throwable $closeError) {
+                $this->_errors[] = "Failed to close generation output: {$closeError->getMessage()}";
+            }
             $this->_log->setStatus(Maho_FeedManager_Model_Log::STATUS_FAILED);
 
             Mage::logException($e);

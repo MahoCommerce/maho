@@ -23,13 +23,13 @@ class Maho_FeedManager_Model_Transformer_Truncate extends Maho_FeedManager_Model
             'label' => 'Maximum Length',
             'type' => 'text',
             'required' => true,
-            'note' => 'Maximum number of characters',
+            'note' => 'Maximum number of characters, including the suffix',
         ],
         'suffix' => [
             'label' => 'Suffix',
             'type' => 'text',
             'required' => false,
-            'note' => 'Text to append when truncated (e.g., "...")',
+            'note' => 'Text to append when truncated (e.g., "..."). Omitted if longer than the maximum length.',
         ],
         'word_boundary' => [
             'label' => 'Respect Word Boundary',
@@ -51,8 +51,16 @@ class Maho_FeedManager_Model_Transformer_Truncate extends Maho_FeedManager_Model
         $suffix = (string) $this->_getOption($options, 'suffix', '');
         $wordBoundary = (bool) $this->_getOption($options, 'word_boundary', false);
 
+        if ($maxLength <= 0) {
+            return '';
+        }
+
         if (mb_strlen($value) <= $maxLength) {
             return $value;
+        }
+
+        if (mb_strlen($suffix) > $maxLength) {
+            $suffix = '';
         }
 
         $effectiveLength = $maxLength - mb_strlen($suffix);
