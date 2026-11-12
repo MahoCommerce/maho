@@ -509,10 +509,9 @@ describe('FeedManager on the media and feeds mounts', function () {
 
     it('reports only the resume failure when resuming fails before it returns', function (): void {
         $feed = ($this->createFeed)('json');
-        $batch = new FeedStorageResumeFailingBatch();
-        $job = $batch->initBatch($feed);
+        $job = new Maho_FeedManager_Model_Generator_Batch()->initBatch($feed);
 
-        $result = $batch->processBatch($job['job_id']);
+        $result = new FeedStorageResumeFailingBatch()->processBatch($job['job_id']);
 
         expect($result['status'])->toBe(Maho_FeedManager_Model_Generator_Batch::STATUS_FAILED)
             ->and($result['message'])->toContain('Injected resume failure')
