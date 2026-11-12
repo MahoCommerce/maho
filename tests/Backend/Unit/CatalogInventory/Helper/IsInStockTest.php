@@ -10,13 +10,22 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
+function isInStockItem(bool $flag): Mage_CatalogInventory_Model_Stock_Item
+{
+    // getIsInStock() is always true for an item that does not manage stock
+    return Mage::getModel('cataloginventory/stock_item')
+        ->setUseConfigManageStock(false)
+        ->setManageStock()
+        ->setIsInStock($flag);
+}
+
 function isInStockProduct(int $storeId, bool $flag): Mage_Catalog_Model_Product
 {
     return Mage::getModel('catalog/product')
         ->setId(1)
         ->setTypeId('configurable')
         ->setStoreId($storeId)
-        ->setStockItem(Mage::getModel('cataloginventory/stock_item')->setIsInStock($flag));
+        ->setStockItem(isInStockItem($flag));
 }
 
 describe('Mage_CatalogInventory_Helper_Data::isInStock()', function () {
@@ -43,8 +52,6 @@ describe('Mage_CatalogInventory_Helper_Data::isInStock()', function () {
 
     it('prefers the stock item that the caller passes', function () {
         $product = isInStockProduct(0, false);
-        $stockItem = Mage::getModel('cataloginventory/stock_item')->setIsInStock(true);
-
-        expect(Mage::helper('cataloginventory')->isInStock($product, $stockItem))->toBeTrue();
+        expect(Mage::helper('cataloginventory')->isInStock($product, isInStockItem(true)))->toBeTrue();
     });
 });
