@@ -213,6 +213,37 @@ describe('OAuth authorization code flow', function (): void {
         ]))->toThrow(Maho_ApiPlatform_Model_Oauth_Exception::class);
     });
 
+    it('lets only one of two parallel requests use a refresh token', function (): void {
+        $flow = oauthIssueCode();
+        $first = oauthExchange($flow['client_id'], $flow['code'], $flow['verifier']);
+
+        // The second request loads the row before the first request marks it as used.
+        /** @var Maho_ApiPlatform_Model_Oauth_Token $stale */
+        $stale = Mage::getModel('apiplatform/oauth_token');
+        $stale->loadBySecret($first['refresh_token'], Maho_ApiPlatform_Model_Oauth_Token::TYPE_REFRESH);
+        expect($stale->getData('used_at'))->toBeNull();
+
+        oauthServer()->exchangeRefreshToken([
+            'client_id' => $flow['client_id'],
+            'refresh_token' => $first['refresh_token'],
+        ]);
+
+        expect($stale->markUsed())->toBeFalse();
+    });
+
+    it('lets only one of two parallel requests use an authorization code', function (): void {
+        $flow = oauthIssueCode();
+
+        /** @var Maho_ApiPlatform_Model_Oauth_Token $stale */
+        $stale = Mage::getModel('apiplatform/oauth_token');
+        $stale->loadBySecret($flow['code'], Maho_ApiPlatform_Model_Oauth_Token::TYPE_CODE);
+        expect($stale->getData('used_at'))->toBeNull();
+
+        oauthExchange($flow['client_id'], $flow['code'], $flow['verifier']);
+
+        expect($stale->markUsed())->toBeFalse();
+    });
+
 });
 
 describe('OAuth authorization request validation', function (): void {
