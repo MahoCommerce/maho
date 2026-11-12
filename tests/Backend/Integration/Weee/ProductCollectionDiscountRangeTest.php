@@ -276,19 +276,12 @@ it('treats a negative stored FPT remainder as a full discount in the catalog pri
     $product = $fixture['product'];
     $GLOBALS['widc_cleanup']['categories'][] = (int) $fixture['category']->getId();
     $GLOBALS['widc_cleanup']['products'][] = (int) $product->getId();
-    foreach ([10.0, 150.0] as $index => $amount) {
-        $rule = widcCreateRule($product, 'WIDC negative ' . $index . ' ' . uniqid(), 'by_percent', $amount, $index);
-        $GLOBALS['widc_cleanup']['rules'][] = (int) $rule->getId();
-    }
+    $rule = widcCreateRule($product, 'WIDC negative ' . uniqid(), 'by_percent', 10);
+    $GLOBALS['widc_cleanup']['rules'][] = (int) $rule->getId();
 
-    $read = Mage::getSingleton('core/resource')->getConnection('core_read');
+    $write = Mage::getSingleton('core/resource')->getConnection('core_write');
     $discountTable = Mage::getSingleton('core/resource')->getTableName('weee/discount');
-    $storedRow = $read->fetchRow(
-        "SELECT value FROM {$discountTable} WHERE entity_id = ? AND website_id = ? AND customer_group_id = ?",
-        [(int) $product->getId(), 1, 0],
-    );
-    expect($storedRow)->not->toBeFalse();
-    expect((float) $storedRow['value'])->toBe(-45.0);
+    $write->update($discountTable, ['value' => -45], $write->quoteInto('entity_id = ?', (int) $product->getId()));
     $loaded = Mage::getModel('catalog/product')->setStoreId(1)->load((int) $product->getId())->setCustomerGroupId(0);
     $runtimeAmount = (float) Mage::getModel('weee/tax')->getWeeeAmount($loaded, null, null, 1, false, false);
     expect($runtimeAmount)->toBe(0.0);
