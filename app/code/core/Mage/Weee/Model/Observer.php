@@ -107,15 +107,13 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
             '0',
             'discount_percent.value',
         );
-        // Match runtime's (int) cast, clamp and stored-zero no-discount sentinel.
+        // Use the rule of Mage_Weee_Model_Tax::_getDiscountPercentForProduct(). A stored 0 means no discount.
         $remainingPercent = sprintf(
             '(CASE WHEN (%1$s) < 0 THEN -FLOOR(-(%1$s)) ELSE FLOOR(%1$s) END)',
             $checkDiscountField,
         );
-        $clampedRemainingPercent = sprintf(
-            '(CASE WHEN %1$s < 0 THEN 0 WHEN %1$s > 100 THEN 100 ELSE %1$s END)',
-            $remainingPercent,
-        );
+        $adapter = $select->getAdapter();
+        $clampedRemainingPercent = $adapter->getLeastSql(['100', $adapter->getGreatestSql(['0', $remainingPercent])]);
         $discountFactor = sprintf(
             '(CASE WHEN %1$s = 0 THEN 1.0 ELSE %2$s / 100.0 END)',
             $remainingPercent,
@@ -265,13 +263,12 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
             return $this;
         }
 
-        $productCondition = $observer->getEvent()->getProductCondition();
-        if ($productCondition) {
-            $eventProduct = $productCondition;
+        $eventProduct = $observer->getEvent()->getProduct();
+        if ($eventProduct) {
+            Mage::getModel('weee/tax')->updateProductsDiscountPercent($eventProduct);
         } else {
-            $eventProduct = $observer->getEvent()->getProduct();
+            Mage::getModel('weee/tax')->updateDiscountPercents();
         }
-        Mage::getModel('weee/tax')->updateProductsDiscountPercent($eventProduct);
 
         return $this;
     }
