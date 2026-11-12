@@ -66,7 +66,7 @@ describe('Transformer Factory', function () {
             ->and($categories)->toHaveKey('Text Formatting')
             ->and($categories)->toHaveKey('Values & Defaults')
             ->and($categories)->toHaveKey('Numbers & Prices')
-            ->and($categories['Numbers & Prices'])->toHaveKey('google_price')
+            ->and($categories['Numbers & Prices'])->toHaveKey('current_price')
             ->and($categories)->toHaveKey('Dates & URLs')
             ->and($categories)->toHaveKey('Advanced');
     });

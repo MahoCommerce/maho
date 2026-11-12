@@ -410,7 +410,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
         'price' => [
             'source_type' => 'combined',
             'source_value' => '["{{regular_price}}","{{final_price}}"]',
-            'transformers' => 'google_price:part=price',
+            'transformers' => 'current_price:part=price',
         ],
         'brand' => [
             'source_type' => 'attribute',
@@ -450,7 +450,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
         'sale_price' => [
             'source_type' => 'combined',
             'source_value' => '["{{regular_price}}","{{final_price}}"]',
-            'transformers' => 'google_price:part=sale_price',
+            'transformers' => 'current_price:part=sale_price',
         ],
         // Export the current native price. Regenerate the feed when prices change.
         'sale_price_effective_date' => [

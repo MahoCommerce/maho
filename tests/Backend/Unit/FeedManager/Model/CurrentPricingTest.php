@@ -10,7 +10,7 @@ declare(strict_types=1);
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-final class GooglePricingTest extends TestCase
+final class CurrentPricingTest extends TestCase
 {
     private Maho_FeedManager_Model_Mapper $mapper;
     private Mage_Catalog_Model_Product $product;
@@ -108,7 +108,7 @@ final class GooglePricingTest extends TestCase
     {
         self::assertSame($expected, Maho_FeedManager_Model_Transformer::apply(
             $payload,
-            'google_price',
+            'current_price',
             ['part' => $part],
             ['regular_price' => 999, 'final_price' => 1, '_feed' => ['price_currency' => 'usd']],
         ));
@@ -131,13 +131,105 @@ final class GooglePricingTest extends TestCase
         $xml = array_column($adapter->getDefaultXmlStructure(), null, 'tag');
         foreach (['price', 'sale_price'] as $field) {
             $chain = Maho_FeedManager_Model_Transformer::parseChainString($defaults[$field]['transformers'] ?? '');
-            self::assertSame('google_price', $chain[0]['transformer'] ?? null);
+            self::assertSame('current_price', $chain[0]['transformer'] ?? null);
             self::assertSame(['part' => $field], $chain[0]['options']);
             self::assertSame($defaults[$field]['transformers'], $xml['g:' . $field]['transformers']);
             self::assertSame('combined', $xml['g:' . $field]['source_type']);
         }
         self::assertSame('', $defaults['sale_price_effective_date']['source_value']);
         self::assertEmpty($defaults['sale_price_effective_date']['transformers'] ?? []);
+    }
+
+    public static function otherParts(): array
+    {
+        return [
+            'current during a sale' => ['["100","50"]', 'current', 'code', '50.00 USD'],
+            'current without a sale' => ['["100","100"]', 'current', 'code', '100.00 USD'],
+            'original during a sale' => ['["100","50"]', 'original_price', 'code', '100.00 USD'],
+            'original without a sale' => ['["100","100"]', 'original_price', 'code', ''],
+            'original above the regular price' => ['["100","120"]', 'original_price', 'code', ''],
+            'no currency code' => ['["1234.5","50"]', 'original_price', 'none', '1234.50'],
+            'no currency code for the current price' => ['["100","50"]', 'current', 'none', '50.00'],
+        ];
+    }
+
+    #[DataProvider('otherParts')]
+    public function testTheCurrentAndOriginalPartsFollowTheSale(string $payload, string $part, string $currency, string $expected): void
+    {
+        self::assertSame($expected, Maho_FeedManager_Model_Transformer::apply(
+            $payload,
+            'current_price',
+            ['part' => $part, 'currency' => $currency],
+            ['_feed' => ['price_currency' => 'usd']],
+        ));
+    }
+
+    public static function salePlatforms(): array
+    {
+        $dates = ['sale_price_effective_date'];
+        return [
+            'Google Local Inventory' => [Maho_FeedManager_Model_Platform_GoogleLocalInventory::class, $dates],
+            'Facebook' => [Maho_FeedManager_Model_Platform_Facebook::class, $dates],
+            'Bing' => [Maho_FeedManager_Model_Platform_Bing::class, $dates],
+            'Pinterest' => [Maho_FeedManager_Model_Platform_Pinterest::class, $dates],
+            'OpenAI' => [Maho_FeedManager_Model_Platform_Openai::class, ['sale_price_start_date', 'sale_price_end_date']],
+        ];
+    }
+
+    #[DataProvider('salePlatforms')]
+    public function testTheOtherSalePlatformsExportTheRegularPriceWithTheCurrentPrice(string $adapterClass, array $dateFields): void
+    {
+        $defaults = new $adapterClass()->getDefaultMappings();
+        $cases = [
+            'expired special' => [[100, 100, 50, '2020-01-01', '2020-01-31'], '100.00 USD', ''],
+            'current special' => [[100, 50, 50, '2020-01-01', '2099-01-31'], '100.00 USD', '50.00 USD'],
+            'native discount without special' => [[100, 70, null, null, null], '100.00 USD', '70.00 USD'],
+        ];
+        foreach ($cases as $name => [[$regular, $final, $special, $from, $to], $price, $sale]) {
+            $raw = ['regular_price' => $regular, 'final_price' => $final, 'price' => $final,
+                'special_price' => $special, 'special_from_date' => $from, 'special_to_date' => $to,
+                'sale_price_effective_date' => $from && $to ? $from . '/' . $to : '',
+                '_feed' => ['price_currency' => 'USD']];
+            self::assertSame($price, $this->mapper->resolveFieldValue($defaults['price'], $raw, $this->product), $name);
+            self::assertSame($sale, $this->mapper->resolveFieldValue($defaults['sale_price'], $raw, $this->product), $name);
+            foreach ($dateFields as $field) {
+                self::assertSame('', $this->mapper->resolveFieldValue($defaults[$field], $raw, $this->product), $name);
+            }
+        }
+    }
+
+    public static function comparisonPrices(): array
+    {
+        return [
+            'expired special' => [100, 100, 50, '2020-01-01', '2020-01-31', '100.00', ''],
+            'current special' => [100, 50, 50, '2020-01-01', '2099-01-31', '50.00', '100.00'],
+            'no special' => [100, 100, null, null, null, '100.00', ''],
+        ];
+    }
+
+    #[DataProvider('comparisonPrices')]
+    public function testPriceComparisonSitesExportTheCurrentPrice(
+        float $regular,
+        float $final,
+        ?float $special,
+        ?string $from,
+        ?string $to,
+        string $current,
+        string $original,
+    ): void {
+        $raw = ['regular_price' => $regular, 'final_price' => $final, 'price' => $final,
+            'special_price' => $special, 'special_from_date' => $from, 'special_to_date' => $to,
+            '_feed' => ['price_currency' => 'EUR']];
+
+        $trovaprezzi = new Maho_FeedManager_Model_Platform_Trovaprezzi();
+        $defaults = $trovaprezzi->getDefaultMappings();
+        self::assertSame($current, $this->mapper->resolveFieldValue($defaults['Price'], $raw, $this->product));
+        self::assertSame($original, $this->mapper->resolveFieldValue($defaults['OriginalPrice'], $raw, $this->product));
+        self::assertTrue($trovaprezzi->getRequiredAttributes()['Price']['required']);
+        self::assertArrayNotHasKey('OriginalPrice', $trovaprezzi->getRequiredAttributes());
+
+        $defaults = new Maho_FeedManager_Model_Platform_Idealo()->getDefaultMappings();
+        self::assertSame($original, $this->mapper->resolveFieldValue($defaults['formerPrice'], $raw, $this->product));
     }
 
     private function resolveDefaults(array $raw, string $parentMode = ''): array
