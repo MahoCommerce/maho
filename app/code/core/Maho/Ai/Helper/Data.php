@@ -421,7 +421,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * The editor guide the panel generated in the browser, kept in the cache per version of
-     * the editor script, so the browser sends it once and not with every message.
+     * the editor scripts, so the browser sends it once and not with every message.
      */
     public function editorGuide(): string
     {
@@ -441,10 +441,11 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
     public function editorGuideCacheId(): string
     {
         $directory = Mage::getBaseDir('public') . DS . 'js' . DS . 'mage' . DS . 'adminhtml' . DS . 'wysiwyg' . DS . 'tiptap' . DS;
-        $key = '';
-        foreach (['setup.js', 'extensions.js'] as $file) {
-            $key .= is_file($directory . $file) ? (string) filemtime($directory . $file) : '0';
+        $files = [$directory . 'setup.js', $directory . 'extensions.js'];
+        foreach (glob($directory . 'extensions' . DS . '*.js') ?: [] as $file) {
+            $files[] = $file;
         }
+        $key = implode('_', array_map(fn(string $file): string => is_file($file) ? (string) filemtime($file) : '0', $files));
 
         return 'ai_editor_guide_' . $key;
     }

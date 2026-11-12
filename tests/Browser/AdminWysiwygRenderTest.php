@@ -130,6 +130,7 @@ it('keeps the image priority of a slideshow and loads the other images lazily', 
     $html = 'document.createRange().createContextualFragment(window.tiptapEditors.get("block_content").editor.getHTML())';
 
     expect($page->script($html . '.querySelector(' . json_encode($firstImageSelector) . ').getAttribute("fetchpriority")'))->toBe($priority)
+        ->and($page->script($html . '.querySelector(' . json_encode($firstImageSelector) . ').getAttribute("loading")'))->toBeNull()
         ->and($page->script($html . '.querySelector(".slideshow li:nth-child(2) img").getAttribute("loading")'))->toBe('lazy');
 })->with([
     'first image has high priority' => [

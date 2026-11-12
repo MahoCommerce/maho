@@ -1322,6 +1322,20 @@ it('ignores the storefront store cookie: reads the default store view and builds
     }
 });
 
+it('changes the editor guide cache id when the file extensions.js changes', function (): void {
+    $path = Mage::getBaseDir('public') . '/js/mage/adminhtml/wysiwyg/tiptap/extensions.js';
+    $time = filemtime($path);
+    try {
+        $before = Mage::helper('ai')->editorGuideCacheId();
+        touch($path, $time + 60);
+        clearstatcache();
+        expect(Mage::helper('ai')->editorGuideCacheId())->not->toBe($before);
+    } finally {
+        touch($path, $time);
+        clearstatcache();
+    }
+});
+
 it('offers the content editor guide as a tool once the panel sent one, and keeps it for later requests', function (): void {
     $admin = aiChatAdmin('ai_chat_guide', ['all']);
     $cacheId = Mage::helper('ai')->editorGuideCacheId();
