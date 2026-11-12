@@ -114,7 +114,7 @@ Identify high-value and VIP customers:
 | **Lifetime Profit** | True profitability segmentation |
 | **Lifetime Refunds** | Problem customer identification |
 
-**Lifetime Profit** is the total of the paid invoices of the customer, minus the total of the refunded credit memos. An order that the customer did not pay adds nothing, even when it is not canceled. An open or canceled invoice or credit memo does not count. A customer with no paid invoice has a profit of 0. **Lifetime Refunds** also counts only the refunded credit memos.
+**Lifetime Profit** is the total of the paid invoices of the customer, minus the total of the refunded credit memos. An order that the customer did not pay adds nothing, even when it is not canceled. An open or canceled invoice or credit memo does not count. A customer with no paid invoice and no refunded credit memo has a profit of 0. **Lifetime Refunds** also counts only the refunded credit memos.
 
 **Example**: VIP Customer Segment
 ```
