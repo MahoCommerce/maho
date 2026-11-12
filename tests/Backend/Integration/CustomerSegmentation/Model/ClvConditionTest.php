@@ -29,7 +29,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
             foreach ($matchedCustomers as $customerId) {
                 // Calculate expected profit (sales - refunds)
                 $totalSales = calculateCustomerLifetimeSales($customerId, ['canceled']);
-                $totalRefunds = calculateCustomerLifetimeRefunds($customerId);
+                $totalRefunds = calculateCustomerLifetimeRefunds($customerId, ['canceled']);
                 $expectedProfit = $totalSales - $totalRefunds;
 
                 expect($expectedProfit)->toBeGreaterThanOrEqual(200.0);
@@ -49,7 +49,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
 
             foreach ($matchedCustomers as $customerId) {
                 $totalSales = calculateCustomerLifetimeSales($customerId, ['canceled']);
-                $totalRefunds = calculateCustomerLifetimeRefunds($customerId);
+                $totalRefunds = calculateCustomerLifetimeRefunds($customerId, ['canceled']);
                 $expectedProfit = $totalSales - $totalRefunds;
 
                 expect($expectedProfit)->toBeGreaterThanOrEqual(100.0);
@@ -84,7 +84,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
 
             foreach ($matchedCustomers as $customerId) {
                 $totalSales = calculateCustomerLifetimeSales($customerId, ['canceled']);
-                $totalRefunds = calculateCustomerLifetimeRefunds($customerId);
+                $totalRefunds = calculateCustomerLifetimeRefunds($customerId, ['canceled']);
                 $profit = $totalSales - $totalRefunds;
 
                 expect(abs($profit))->toBeLessThan(0.01); // Allow for floating point precision
@@ -104,7 +104,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
 
             foreach ($matchedCustomers as $customerId) {
                 $totalSales = calculateCustomerLifetimeSales($customerId, ['canceled']);
-                $totalRefunds = calculateCustomerLifetimeRefunds($customerId);
+                $totalRefunds = calculateCustomerLifetimeRefunds($customerId, ['canceled']);
                 $profit = $totalSales - $totalRefunds;
 
                 expect($profit)->toBeLessThan(0.0);
@@ -308,7 +308,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
 
                 if ($orderCount === 0) {
                     $customersWithNoOrders++;
-                    $profit = calculateCustomerLifetimeSales($customerId, ['canceled']) - calculateCustomerLifetimeRefunds($customerId);
+                    $profit = calculateCustomerLifetimeSales($customerId, ['canceled']) - calculateCustomerLifetimeRefunds($customerId, ['canceled']);
                     expect($profit)->toBe(0.0);
                 }
             }
@@ -329,7 +329,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
             $matchedCustomers = $segment->getMatchingCustomerIds();
 
             foreach ($matchedCustomers as $customerId) {
-                $refunds = calculateCustomerLifetimeRefunds($customerId);
+                $refunds = calculateCustomerLifetimeRefunds($customerId, ['canceled']);
                 $sales = calculateCustomerLifetimeSales($customerId, ['canceled']);
 
                 if ($refunds === 0.0 && $sales > 0.0) {
@@ -353,7 +353,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
 
             foreach ($matchedCustomers as $customerId) {
                 $sales = calculateCustomerLifetimeSales($customerId, ['canceled']);
-                $refunds = calculateCustomerLifetimeRefunds($customerId);
+                $refunds = calculateCustomerLifetimeRefunds($customerId, ['canceled']);
                 $profit = $sales - $refunds;
 
                 expect($profit)->toBeGreaterThanOrEqual(99.99);
@@ -596,7 +596,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
         return $total;
     }
 
-    function calculateCustomerLifetimeRefunds(int|string $customerId): float
+    function calculateCustomerLifetimeRefunds(int|string $customerId, array $excludedStates = []): float
     {
         // For test purposes, we'll calculate based on the actual creditmemos created
         $customerId = (int) $customerId;
@@ -604,6 +604,9 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
         // Find orders for this customer
         $orders = Mage::getResourceModel('sales/order_collection')
             ->addFieldToFilter('customer_id', $customerId);
+        if ($excludedStates !== []) {
+            $orders->addFieldToFilter('state', ['nin' => $excludedStates]);
+        }
 
         $total = 0.0;
         foreach ($orders as $order) {
