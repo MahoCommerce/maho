@@ -60,6 +60,7 @@ function invoiceWeeeHtml(Mage_Sales_Model_Order_Invoice_Item $item): string
     try {
         $items = Mage::app()->getLayout()->createBlock('adminhtml/sales_order_invoice_view_items');
         $items->addItemRender('default', 'adminhtml/sales_items_renderer_default', 'sales/order/invoice/view/items/renderer/default.phtml');
+        $items->addItemRender('downloadable', 'adminhtml/sales_items_renderer_default', 'downloadable/sales/order/invoice/view/items/renderer/downloadable.phtml');
         $items->getItemRenderer($item->getOrderItem()->getProductType())->setOrder($item->getInvoice()->getOrder());
         return $items->getItemHtml($item);
     } finally {
@@ -86,7 +87,7 @@ it('renders invoice WEEE details using the invoice store regardless of the curre
     expect(str_contains($unitInclTax, 'Owned recycling fee'))->toBe($invoiceMode === 2)
         ->and($actual)->toBe($sameStore)
         ->and($item->getData())->toBe($before + ['store_id' => $this->scopeStores['invoice']]);
-})->with(['simple', 'configurable'])->with([
+})->with(['simple', 'configurable', 'downloadable'])->with([
     'different store, separate WEEE' => [0, 2],
     'different store, included WEEE' => [2, 0],
     'same mode, separate WEEE' => [2, 2],
