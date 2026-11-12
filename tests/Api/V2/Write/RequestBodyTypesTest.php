@@ -34,12 +34,12 @@ function requestBodyTypesProduct(): int
     return (int) $product->getId();
 }
 
-function requestBodyTypesIsInStock(int $productId): int
+function requestBodyTypesManageStock(int $productId): int
 {
     $resource = Mage::getSingleton('core/resource');
 
     return (int) $resource->getConnection('core_read')->fetchOne(
-        'SELECT is_in_stock FROM ' . $resource->getTableName('cataloginventory/stock_item') . ' WHERE product_id = ?',
+        'SELECT manage_stock FROM ' . $resource->getTableName('cataloginventory/stock_item') . ' WHERE product_id = ?',
         [$productId],
     );
 }
@@ -99,17 +99,17 @@ describe('Request body types', function (): void {
     });
 
     it('reads the string "false" as false', function (): void {
-        $response = apiPut('/api/rest/v2/inventory/bulk', ['items' => [['sku' => $this->sku, 'isInStock' => 'false']]], serviceToken(['inventory/write']));
+        $response = apiPut('/api/rest/v2/inventory/bulk', ['items' => [['sku' => $this->sku, 'manageStock' => 'false']]], serviceToken(['inventory/write']));
 
         expect($response['status'])->toBe(200);
-        expect(requestBodyTypesIsInStock($this->productId))->toBe(0);
+        expect(requestBodyTypesManageStock($this->productId))->toBe(0);
     });
 
     it('reads the string "false" as false in the stock data of a product', function (): void {
-        $response = apiPut("/api/rest/v2/products/{$this->productId}", ['stockData' => ['isInStock' => 'false']], serviceToken(['products/write']));
+        $response = apiPut("/api/rest/v2/products/{$this->productId}", ['stockData' => ['manageStock' => 'false']], serviceToken(['products/write']));
 
         expect($response['status'])->toBe(200);
-        expect(requestBodyTypesIsInStock($this->productId))->toBe(0);
+        expect(requestBodyTypesManageStock($this->productId))->toBe(0);
     });
 
     it('answers a client secret that is not a string with the invalid_request error of OAuth', function (): void {
