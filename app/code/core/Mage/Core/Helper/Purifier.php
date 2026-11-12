@@ -116,6 +116,8 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
     {
         $config = new HtmlSanitizerConfig()
             ->allowSafeElements()
+            // The W3C baseline has no fetchpriority, and the slideshow puts it on its first image
+            ->allowAttribute('fetchpriority', 'img')
             // Relative URLs default to being dropped, which would strip the href from every
             // internal link and the src from every locally hosted image.
             ->allowRelativeLinks()

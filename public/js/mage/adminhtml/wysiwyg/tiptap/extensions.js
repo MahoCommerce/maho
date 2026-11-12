@@ -651,13 +651,18 @@ const parseSlides = (div, presets) => {
 /**
  * Render array of slides into a TipTap node object.
  *
- * A slide without alternatives renders the same `<li><a><img></a></li>` as before, so existing
- * content saves byte for byte. With alternatives the `<img>` stays as the fallback for a browser
- * that ignores `<picture>`.
+ * Every slide after the first loads its image lazily. The first slide gets `fetchpriority="high"`
+ * when `priority` is true. With alternatives the `<img>` stays as the fallback for a browser that
+ * ignores `<picture>`, and the attributes apply to the image that the browser picks.
  */
-const renderSlides = (slides, presets) => {
-    return slides.map((slide) => {
+const renderSlides = (slides, presets, priority) => {
+    return slides.map((slide, index) => {
         const { src, alt, href, sources = [] } = slide;
+        const img = ['img', {
+            src,
+            alt,
+            ...(index === 0 ? (priority ? { fetchpriority: 'high' } : {}) : { loading: 'lazy' }),
+        }];
 
         let media;
         if (sources.length) {
@@ -665,10 +670,10 @@ const renderSlides = (slides, presets) => {
             for (const source of sortSources(sources, presets)) {
                 picture.push(['source', { media: renderMedia(source), srcset: source.srcset }]);
             }
-            picture.push(['img', { src, alt }]);
+            picture.push(img);
             media = picture;
         } else {
-            media = ['img', { src, alt }];
+            media = img;
         }
 
         const content = href ? ['a', { href }, media] : media;
@@ -693,6 +698,11 @@ export const MahoSlideshow = Node.create({
                 default: [],
                 rendered: false,
             },
+            // Whether the first image loads with a high fetch priority. A new slideshow has it on.
+            priority: {
+                default: true,
+                rendered: false,
+            },
         };
     },
 
@@ -701,13 +711,14 @@ export const MahoSlideshow = Node.create({
             tag: 'div.slideshow',
             getAttrs: (div) => {
                 const slides = parseSlides(div, this.options.breakpoints ?? []);
-                return { slides };
+                const priority = div.querySelector(':scope > ul > li img')?.getAttribute('fetchpriority') === 'high';
+                return { slides, priority };
             },
         }];
     },
 
     renderHTML({ node }) {
-        const slides = renderSlides(node.attrs.slides, this.options.breakpoints ?? []);
+        const slides = renderSlides(node.attrs.slides, this.options.breakpoints ?? [], node.attrs.priority);
         return ['div', { class: 'slideshow' }, ['ul', {}, ...slides]];
     },
 
@@ -763,16 +774,21 @@ export const MahoSlideshow = Node.create({
                     ...slide,
                     sources: (slide.sources ?? []).map((source) => ({ ...source })),
                 }));
+                let priority = node?.attrs?.priority ?? true;
                 let sortableInstance;
 
                 // Create slideshow editor dialog content
                 const presets = this.options.breakpoints ?? [];
+                const translate = (string) => editor.options.wysiwygSetup.translate(string);
                 const dialogContent = `
                     <div class="slideshow-editor">
                         <ul class="slides-list"></ul>
+                        <label class="slideshow-priority">
+                            <input type="checkbox" class="slideshow-priority-input"${priority ? ' checked' : ''}>
+                            <span>${escapeHtml(translate('Load the first image with high priority on the page'), true)}</span>
+                        </label>
                     </div>
                 `;
-                const translate = (string) => editor.options.wysiwygSetup.translate(string);
                 const slideTemplate = `
                     <div class="slide-handle">
                         ${editor.options.wysiwygSetup.getIcon('hamburger')}
@@ -831,6 +847,9 @@ export const MahoSlideshow = Node.create({
                     onOpen: (dialog) => {
                         const container = dialog.querySelector('.slideshow-editor');
                         const slidesList = container.querySelector('.slides-list');
+                        container.querySelector('.slideshow-priority-input').addEventListener('change', (event) => {
+                            priority = event.target.checked;
+                        });
 
                         const addSource = (slide) => {
                             MediabrowserUtility.openDialog(this.options.browserUrl, null, null, null, {
@@ -1104,7 +1123,7 @@ export const MahoSlideshow = Node.create({
 
                         editor.commands.insertContentAt({ from, to }, {
                             type: this.name,
-                            attrs: { slides: normalized },
+                            attrs: { slides: normalized, priority },
                         });
                         return true;
                     },

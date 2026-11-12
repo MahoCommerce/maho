@@ -128,6 +128,7 @@ Every CMS page uses this set. A page shows only the attributes of the set.,Every
 "Leave empty to start from the beginning.","Leave empty to start from the beginning."
 "Link","Link"
 "Link to a CMS Page","Link to a CMS Page"
+"Load the first image with high priority on the page","Load the first image with high priority on the page"
 "Manage Pages","Manage Pages"
 "Media","Media"
 "Media Gallery","Media Gallery"
