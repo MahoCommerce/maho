@@ -60,7 +60,8 @@ async function mahoFetch(url, options) {
         url.searchParams.set('isAjax', true);
 
         const response = await fetch(url, fetchOptions);
-        const result = response.headers.get('Content-Type') === 'application/json'
+        const mediaType = (response.headers.get('Content-Type') ?? '').split(';', 1)[0].trim().toLowerCase();
+        const result = mediaType === 'application/json'
               ? await response.json()
               : await response.text();
 
