@@ -440,9 +440,13 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function editorGuideCacheId(): string
     {
-        $path = Mage::getBaseDir('public') . DS . 'js' . DS . 'mage' . DS . 'adminhtml' . DS . 'wysiwyg' . DS . 'tiptap' . DS . 'setup.js';
+        $directory = Mage::getBaseDir('public') . DS . 'js' . DS . 'mage' . DS . 'adminhtml' . DS . 'wysiwyg' . DS . 'tiptap' . DS;
+        $key = '';
+        foreach (['setup.js', 'extensions.js'] as $file) {
+            $key .= is_file($directory . $file) ? (string) filemtime($directory . $file) : '0';
+        }
 
-        return 'ai_editor_guide_' . (is_file($path) ? (string) filemtime($path) : '0');
+        return 'ai_editor_guide_' . $key;
     }
 
     /**
