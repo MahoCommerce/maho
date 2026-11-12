@@ -83,6 +83,7 @@
 "Gift card balance cannot be negative","Gift card balance cannot be negative"
 "Gift card balance cannot exceed %s","Gift card balance cannot exceed %s"
 "Gift card balance check","Gift card balance check"
+"Gift card balance must be a finite number","Gift card balance must be a finite number"
 "Gift card balance must be greater than zero","Gift card balance must be greater than zero"
 "Gift Card Code","Gift Card Code"
 "Gift card code '%s' already exists","Gift card code '%s' already exists"

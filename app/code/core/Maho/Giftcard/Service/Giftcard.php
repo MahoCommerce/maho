@@ -121,9 +121,8 @@ class Maho_Giftcard_Service_Giftcard
         if ($expectedBalance !== null && round($newBalance - $expectedBalance, 4) === 0.0) {
             return $giftcard;
         }
-        if ($newBalance !== (float) $giftcard->getBalance()) {
-            $giftcard->adjustBalance($newBalance, $comment, $expectedBalance);
-        }
+        // The model compares with the stored balance, which can differ from the loaded one
+        $giftcard->adjustBalance($newBalance, $comment, $expectedBalance);
         return $giftcard;
     }
 

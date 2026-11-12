@@ -168,12 +168,7 @@ $giftcard->refund(
 );
 ```
 
-Credit memos and order cancellations call `refund()` for each gift card of the order. The
-method reads the stored balance, status and expiry date with a row lock, then writes the credit
-and its history entry on the resource's write connection in one transaction. It reloads the model
-from that connection before committing. Inside a caller's transaction, a savepoint rolls back a
-failed refund without discarding the caller's earlier changes. A successful refund stays in that
-transaction until the caller commits or rolls it back.
+Credit memos and order cancellations call `refund()` for each gift card of the order.
 
 - The card becomes active, also when it was used or disabled.
 - When **Refund Expiration Extension** is above 0, a card that expires within that many days gets
@@ -181,7 +176,7 @@ transaction until the caller commits or rolls it back.
 - When the extension is 0, an expired card stays expired.
 
 `refund()` does not call `save()`, so the gift card model-save events do not run. The history
-model-save events still run. Save other changes to the model before you call `refund()`.
+model-save events still run.
 
 #### Admin Balance Adjustment
 
@@ -194,14 +189,13 @@ $giftcard->adjustBalance(
 // Creates history entry with admin user ID
 ```
 
-`adjustBalance()` reads the stored balance and status with a row lock, so the history entry
-records the change from the stored balance. A balance of 0 makes the card used, and a positive
-balance makes a used card active. When you give `$shownBalance` and the stored balance is
-different, the method throws `Mage_Core_Exception_Conflict` and changes nothing.
+The history entry records the change from the stored balance, not from the loaded one. A balance
+of 0 makes the card used, and a positive balance makes a used card active. A new balance that is
+the stored balance changes nothing and writes no history. When you give `$shownBalance` and the
+stored balance is different, the method throws `Mage_Core_Exception_Conflict` and changes nothing.
 
-A balance below 0, or above the **Maximum Balance** of the card, gives a
-`Mage_Core_Exception_Input` on the `balance` field. The model keeps its other unsaved changes, so
-`Maho_Giftcard_Service_Giftcard::save()` and `update()` write them after the adjustment.
+A balance that is not a finite number, below 0, or above the **Maximum Balance** of the card gives
+a `Mage_Core_Exception_Input` on the `balance` field.
 
 `save()`, `update()` and `adjustBalance()` of the service take the balance that the client saw as
 `$expectedBalance`. The admin edit form sends it, and the API takes it as `expectedBalance`, so the
@@ -214,6 +208,17 @@ two transports follow the same rules:
 #### Who Writes the Balance
 
 Only `use()`, `useUpTo()`, `refund()` and `adjustBalance()` change the balance of a saved card.
+They share one protected method, `_changeBalance()`:
+
+- It locks the row of the card and reads the stored balance, status and expiry date, so two
+  requests cannot change the same balance at the same time.
+- It writes the new values and the history entry in one transaction. Inside a transaction of the
+  caller, a savepoint undoes a failed change and keeps the earlier work of the caller. A
+  successful change stays in that transaction until the caller commits or rolls it back.
+- It copies the stored and the written values into the model, and keeps the other unsaved changes
+  of the model, so `Maho_Giftcard_Service_Giftcard::update()` saves them after an adjustment.
+- Each method refuses an amount that is not a finite number.
+
 `save()` writes the balance of a new card only:
 
 - A `save()` that changes the balance of a saved card throws a `LogicException` and saves nothing.

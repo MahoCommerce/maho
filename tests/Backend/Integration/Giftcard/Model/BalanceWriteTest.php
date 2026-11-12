@@ -92,3 +92,40 @@ it('refuses to adjust a card that no longer exists', function (): void {
     expect(fn() => $this->stale->adjustBalance(150.0))
         ->toThrow(Mage_Core_Exception_NoSuchEntity::class);
 });
+
+it('refuses an amount that is not a finite number on each balance write, and changes nothing', function (float $amount): void {
+    $entries = $this->stale->getHistoryCollection()->getSize();
+
+    expect(fn() => $this->stale->use($amount))->toThrow(Mage_Core_Exception::class, 'Amount must be greater than zero.')
+        ->and(fn() => $this->stale->useUpTo($amount))->toThrow(Mage_Core_Exception::class, 'Amount must be greater than zero.')
+        ->and(fn() => $this->stale->adjustBalance($amount))->toThrow(Mage_Core_Exception_Input::class, 'Gift card balance must be a finite number');
+
+    $stored = Mage::getModel('giftcard/giftcard')->load($this->card->getId());
+    expect((float) $stored->getBalance())->toBe(110.0)
+        ->and($stored->getHistoryCollection()->getSize())->toBe($entries);
+})->with([
+    'not a number' => [NAN],
+    'positive infinity' => [INF],
+    'negative infinity' => [-INF],
+]);
+
+it('writes no history when the new balance is the stored balance', function (): void {
+    $this->stale->adjustBalance(110.0, 'No change');
+
+    $adjustments = $this->stale->getHistoryCollection()
+        ->addFieldToFilter('action', Maho_Giftcard_Model_Giftcard::ACTION_ADJUSTED)
+        ->getSize();
+    expect($adjustments)->toBe(0)
+        ->and((float) $this->stale->getBalance())->toBe(110.0);
+});
+
+it('adjusts through the service when the new balance is the loaded one but not the stored one', function (): void {
+    Mage::getService('giftcard/giftcard')->adjustBalance($this->stale, 100.0, 'Back to the loaded balance');
+
+    $history = $this->stale->getHistoryCollection()
+        ->addFieldToFilter('action', Maho_Giftcard_Model_Giftcard::ACTION_ADJUSTED)
+        ->getFirstItem();
+    expect(giftcardStoredBalance($this->card->getId()))->toBe(100.0)
+        ->and((float) $history->getBalanceBefore())->toBe(110.0)
+        ->and((float) $history->getBaseAmount())->toBe(-10.0);
+});

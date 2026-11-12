@@ -365,13 +365,9 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Use gift card for payment
+     * Take $baseAmount, in the base currency, from the balance of the card.
      *
-     * @param float $baseAmount Amount to deduct (in base currency)
-     * @param int|null $orderId Order ID for history
-     * @param string|null $comment Optional comment
-     * @return $this
-     * @throws Mage_Core_Exception
+     * @throws Mage_Core_Exception when the card is not valid, $baseAmount is not a positive number or exceeds the balance
      */
     public function use(float $baseAmount, ?int $orderId = null, ?string $comment = null): self
     {
@@ -379,7 +375,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             throw new Mage_Core_Exception('This gift card is not valid for use.');
         }
 
-        if ($baseAmount <= 0) {
+        if (!is_finite($baseAmount) || $baseAmount <= 0) {
             throw new Mage_Core_Exception('Amount must be greater than zero.');
         }
 
@@ -392,9 +388,15 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
      * Take $baseAmount from the balance, or the whole balance when it is lower, and return the amount taken.
      *
      * A placed order calls this: the customer already got the discount, so the card gives what it has left.
+     *
+     * @throws Mage_Core_Exception when $baseAmount is not a finite number
      */
     public function useUpTo(float $baseAmount, ?int $orderId = null, ?string $comment = null): float
     {
+        if (!is_finite($baseAmount)) {
+            throw new Mage_Core_Exception('Amount must be greater than zero.');
+        }
+
         return $baseAmount > 0 ? $this->_debit($baseAmount, true, $orderId, $comment) : 0.0;
     }
 
@@ -403,46 +405,24 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
      */
     protected function _debit(float $baseAmount, bool $upToBalance, ?int $orderId, ?string $comment): float
     {
-        $resource = $this->getResource();
-        $write = Mage::getSingleton('core/resource')->getConnection('core_write');
-        $table = $resource->getMainTable();
-
-        $resource->beginTransaction();
-        try {
-            // The row lock stops two requests from spending the same balance
-            $balanceBefore = (float) $write->fetchOne(
-                $write->select()
-                    ->from($table, ['balance'])
-                    ->where('giftcard_id = ?', $this->getId())
-                    ->forUpdate(),
-            );
-
+        $amount = 0.0;
+        $this->_changeBalance(function (?array $stored) use ($baseAmount, $upToBalance, $orderId, $comment, &$amount): ?array {
+            // A card that no longer exists has nothing to give
+            $balanceBefore = $stored === null ? 0.0 : (float) $stored['balance'];
             if (!$upToBalance && $baseAmount > $balanceBefore) {
                 throw new Mage_Core_Exception('Amount exceeds gift card balance.');
             }
 
             $amount = min($baseAmount, $balanceBefore);
-            if ($amount > 0) {
-                $balanceAfter = $balanceBefore - $amount;
-                $data = [
-                    'balance' => $balanceAfter,
-                    'updated_at' => Mage::app()->getLocale()->formatDateForDb('now'),
-                ];
-                if ($balanceAfter <= 0) {
-                    $data['status'] = self::STATUS_USED;
-                }
-                $write->update($table, $data, ['giftcard_id = ?' => $this->getId()]);
-
-                $this->_addHistory(self::ACTION_USED, -$amount, $balanceBefore, $balanceAfter, $orderId, $comment);
+            if ($amount <= 0) {
+                return null;
             }
-
-            $resource->commit();
-        } catch (\Throwable $e) {
-            $resource->rollBack();
-            throw $e;
-        }
-
-        $this->load($this->getId());
+            $data = ['balance' => $balanceBefore - $amount];
+            if ($data['balance'] <= 0) {
+                $data['status'] = self::STATUS_USED;
+            }
+            return ['data' => $data, 'action' => self::ACTION_USED, 'amount' => -$amount, 'order_id' => $orderId, 'comment' => $comment];
+        });
 
         return max(0.0, $amount);
     }
@@ -463,40 +443,13 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             throw new Mage_Core_Exception('Amount must be greater than zero.');
         }
 
-        $resource = $this->getResource();
-        $table = $resource->getMainTable();
         $extensionDays = (int) Mage::getStoreConfig('giftcard/general/refund_expiration_extension', $storeId);
-
-        $resource->beginTransaction();
-        // Resource reads use its writer while the transaction is open.
-        $write = $resource->getReadConnection();
-        $savepoint = null;
-        try {
-            // Adapter nesting counts transactions without creating savepoints.
-            if ($write->getTransactionLevel() > 1) {
-                $name = 'giftcard_refund_' . $write->getTransactionLevel();
-                $write->getConnection()->createSavepoint($name);
-                $savepoint = $name;
-            }
-
-            // The row lock stops two requests from adding to the same balance
-            $stored = $write->fetchRow(
-                $write->select()
-                    ->from($table, ['balance', 'status', 'expires_at'])
-                    ->where('giftcard_id = ?', $this->getId())
-                    ->forUpdate(),
-            );
-            if ($stored === false) {
+        $this->_changeBalance(function (?array $stored) use ($baseAmount, $orderId, $comment, $extensionDays): array {
+            if ($stored === null) {
                 throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('giftcard')->__('Gift card not found.'));
             }
 
-            $balanceBefore = (float) $stored['balance'];
-            $balanceAfter = $balanceBefore + $baseAmount;
-            $data = [
-                'balance' => $balanceAfter,
-                'updated_at' => Mage::app()->getLocale()->formatDateForDb('now'),
-            ];
-
+            $data = ['balance' => (float) $stored['balance'] + $baseAmount];
             $isExpired = $stored['status'] === self::STATUS_EXPIRED;
             if ($extensionDays > 0) {
                 $minimumExpiresAt = new DateTimeImmutable('now', new DateTimeZone('UTC'))->modify("+{$extensionDays} days");
@@ -509,16 +462,126 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
                     $comment = $comment === null ? ucfirst($extended) : "{$comment} ({$extended})";
                 }
             }
-
             if (!$isExpired || $extensionDays > 0) {
                 $data['status'] = self::STATUS_ACTIVE;
             }
 
-            $write->update($table, $data, ['giftcard_id = ?' => $this->getId()]);
+            return ['data' => $data, 'action' => self::ACTION_REFUNDED, 'amount' => $baseAmount, 'order_id' => $orderId, 'comment' => $comment];
+        });
 
-            $this->_addHistory(self::ACTION_REFUNDED, $baseAmount, $balanceBefore, $balanceAfter, $orderId, $comment);
+        return $this;
+    }
 
-            $this->load($this->getId());
+    /**
+     * Set the balance to $newBalance and record the change in the history. A $newBalance that is the
+     * stored balance changes nothing.
+     *
+     * A balance of 0 makes the card used, and a positive balance makes a used card active.
+     * Give $expectedBalance when the person saw a balance before they typed the new one:
+     * the method then refuses to replace a balance that changed since.
+     *
+     * @throws Mage_Core_Exception_Input when $newBalance is not a finite number, is below zero or is above the highest balance
+     * @throws Mage_Core_Exception_Conflict when the stored balance is not $expectedBalance
+     * @throws Mage_Core_Exception_NoSuchEntity when the card no longer exists
+     */
+    public function adjustBalance(float $newBalance, ?string $comment = null, ?float $expectedBalance = null): self
+    {
+        $this->_changeBalance(function (?array $stored) use ($newBalance, $comment, $expectedBalance): ?array {
+            $helper = Mage::helper('giftcard');
+            if ($stored === null) {
+                throw new Mage_Core_Exception_NoSuchEntity($helper->__('Gift card not found.'));
+            }
+
+            $balanceBefore = (float) $stored['balance'];
+            if ($expectedBalance !== null && round($balanceBefore - $expectedBalance, 4) !== 0.0) {
+                throw new Mage_Core_Exception_Conflict($helper->__(
+                    'The balance of this gift card changed to %s while you edited it. Check the balance, then save again.',
+                    Mage::app()->getLocale()->formatCurrency($balanceBefore, $this->getCurrencyCode()),
+                ));
+            }
+
+            $errors = new Mage_Core_Exception_Input();
+            if (!is_finite($newBalance)) {
+                $errors->addError('balance', $helper->__('Gift card balance must be a finite number'));
+            } elseif ($newBalance < 0) {
+                $errors->addError('balance', $helper->__('Gift card balance cannot be negative'));
+            }
+            $errors->throwIfErrors();
+            if (round($newBalance - $balanceBefore, 4) === 0.0) {
+                return null;
+            }
+            $maxBalance = $this->getMaxBalance();
+            if ($maxBalance !== null && $newBalance > $maxBalance) {
+                $errors->addError('balance', $helper->__('Gift card balance cannot exceed %s', $maxBalance));
+            }
+            $errors->throwIfErrors();
+
+            $data = ['balance' => $newBalance];
+            if ($newBalance <= 0) {
+                $data['status'] = self::STATUS_USED;
+            } elseif ($stored['status'] === self::STATUS_USED) {
+                $data['status'] = self::STATUS_ACTIVE;
+            }
+
+            return ['data' => $data, 'action' => self::ACTION_ADJUSTED, 'amount' => $newBalance - $balanceBefore, 'order_id' => null, 'comment' => $comment];
+        });
+
+        return $this;
+    }
+
+    /**
+     * Lock the row of this card and give its stored balance, status and expiry date to $change, or null when
+     * the card no longer exists. $change returns the columns to write and the history entry, or null for no
+     * change. Write both, then copy the stored and the written values into this model. A load() would drop the
+     * other changes that Maho_Giftcard_Service_Giftcard::update() saves after an adjustment.
+     *
+     * Inside a transaction of the caller, a savepoint undoes a failed change and keeps the earlier work of the
+     * caller. A successful change stays in that transaction until the caller commits or rolls it back.
+     *
+     * @param callable(?array<string, mixed>): ?array{data: array<string, mixed>, action: string, amount: float, order_id: ?int, comment: ?string} $change
+     */
+    protected function _changeBalance(callable $change): void
+    {
+        $resource = $this->getResource();
+        $resource->beginTransaction();
+        // Resource reads use its writer while the transaction is open
+        $write = $resource->getReadConnection();
+        $savepoint = null;
+        try {
+            // Adapter nesting counts transactions without creating savepoints
+            if ($write->getTransactionLevel() > 1) {
+                $savepoint = 'giftcard_balance_' . $write->getTransactionLevel();
+                $write->getConnection()->createSavepoint($savepoint);
+            }
+
+            // The row lock stops two requests from changing the same balance
+            $stored = $write->fetchRow(
+                $write->select()
+                    ->from($resource->getMainTable(), ['balance', 'status', 'expires_at'])
+                    ->where('giftcard_id = ?', $this->getId())
+                    ->forUpdate(),
+            );
+            $result = $change($stored === false ? null : $stored);
+
+            $values = $stored === false ? [] : $stored;
+            if ($result !== null && $stored !== false) {
+                $data = $result['data'] + ['updated_at' => Mage::app()->getLocale()->formatDateForDb('now')];
+                $write->update($resource->getMainTable(), $data, ['giftcard_id = ?' => $this->getId()]);
+                $balanceBefore = (float) $stored['balance'];
+                $this->_addHistory(
+                    $result['action'],
+                    $result['amount'],
+                    $balanceBefore,
+                    (float) ($data['balance'] ?? $balanceBefore),
+                    $result['order_id'],
+                    $result['comment'],
+                );
+                $values = $data + $values;
+            }
+            foreach ($values as $key => $value) {
+                $this->setData($key, $value)->setOrigData($key, $value);
+            }
+
             if ($savepoint !== null) {
                 $write->getConnection()->releaseSavepoint($savepoint);
             }
@@ -532,84 +595,6 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             $resource->rollBack();
             throw $e;
         }
-
-        return $this;
-    }
-
-    /**
-     * Set the balance to $newBalance and record the change in the history.
-     *
-     * A balance of 0 makes the card used, and a positive balance makes a used card active.
-     * Give $expectedBalance when the person saw a balance before they typed the new one:
-     * the method then refuses to replace a balance that changed since.
-     *
-     * The card keeps its other unsaved changes, so a save after this method writes them.
-     *
-     * @throws Mage_Core_Exception_Input when $newBalance is below zero, or above the highest balance and not the stored one
-     * @throws Mage_Core_Exception_Conflict when the stored balance is not $expectedBalance
-     * @throws Mage_Core_Exception_NoSuchEntity when the card no longer exists
-     */
-    public function adjustBalance(float $newBalance, ?string $comment = null, ?float $expectedBalance = null): self
-    {
-        $resource = $this->getResource();
-        $table = $resource->getMainTable();
-
-        $resource->beginTransaction();
-        try {
-            $write = $resource->getReadConnection();
-            $stored = $write->fetchRow(
-                $write->select()
-                    ->from($table, ['balance', 'status'])
-                    ->where('giftcard_id = ?', $this->getId())
-                    ->forUpdate(),
-            );
-            if ($stored === false) {
-                throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('giftcard')->__('Gift card not found.'));
-            }
-
-            $balanceBefore = (float) $stored['balance'];
-            if ($expectedBalance !== null && round($balanceBefore - $expectedBalance, 4) !== 0.0) {
-                throw new Mage_Core_Exception_Conflict(Mage::helper('giftcard')->__(
-                    'The balance of this gift card changed to %s while you edited it. Check the balance, then save again.',
-                    Mage::app()->getLocale()->formatCurrency($balanceBefore, $this->getCurrencyCode()),
-                ));
-            }
-
-            $helper = Mage::helper('giftcard');
-            $errors = new Mage_Core_Exception_Input();
-            if ($newBalance < 0) {
-                $errors->addError('balance', $helper->__('Gift card balance cannot be negative'));
-            }
-            $maxBalance = $this->getMaxBalance();
-            if ($maxBalance !== null && $newBalance > $maxBalance && $newBalance !== $balanceBefore) {
-                $errors->addError('balance', $helper->__('Gift card balance cannot exceed %s', $maxBalance));
-            }
-            $errors->throwIfErrors();
-
-            $data = [
-                'balance' => $newBalance,
-                'updated_at' => Mage::app()->getLocale()->formatDateForDb('now'),
-            ];
-            if ($newBalance <= 0) {
-                $data['status'] = self::STATUS_USED;
-            } elseif ($stored['status'] === self::STATUS_USED) {
-                $data['status'] = self::STATUS_ACTIVE;
-            }
-            $write->update($table, $data, ['giftcard_id = ?' => $this->getId()]);
-
-            $this->_addHistory(self::ACTION_ADJUSTED, $newBalance - $balanceBefore, $balanceBefore, $newBalance, null, $comment);
-
-            // A load() would drop the other changes that Maho_Giftcard_Service_Giftcard::update() saves after this call
-            foreach ($data as $key => $value) {
-                $this->setData($key, $value)->setOrigData($key, $value);
-            }
-            $resource->commit();
-        } catch (\Throwable $e) {
-            $resource->rollBack();
-            throw $e;
-        }
-
-        return $this;
     }
 
     /**
