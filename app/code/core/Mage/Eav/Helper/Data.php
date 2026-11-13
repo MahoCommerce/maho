@@ -162,7 +162,8 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
             if ($this->isHidden($object, $attribute)) {
                 $code = (string) $attribute->getAttributeCode();
                 $hidden[] = $code;
-                if ($object->getData($code) !== null) {
+                // An absent key would take the default value of the attribute when the record saves
+                if ($object->getData($code) !== null || !$object->hasData($code)) {
                     $object->setData($code);
                 }
             }

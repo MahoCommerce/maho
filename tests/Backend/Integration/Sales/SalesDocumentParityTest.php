@@ -658,6 +658,7 @@ describe('rules that the admin pages get from the services', function (): void {
                 'firstname' => 'Parity', 'lastname' => 'Buyer', 'street' => 'Via Roma 1', 'city' => 'Milano',
                 'country_id' => 'IT', 'postcode' => '20121', 'telephone' => '555-1234', $code => 'IT123',
             ])->save();
+            expect(Mage::getModel('sales/order_address')->load($address->getId())->getData($code))->toBe('IT123');
 
             Mage::getService('sales/order')->saveAddress($address->setCountryId('US')->setRegionId(12)->setPostcode('90210'));
 

@@ -197,6 +197,33 @@ it('clears the value of a hidden field when an address is saved', function () {
         ->and($american)->toBeNull();
 });
 
+it('gives no default value to a hidden field of a new address', function () {
+    $this->created[] = dependencyAttribute('customer_address', [
+        'attribute_code' => $this->code,
+        'default_value' => 'DEFAULT',
+        'used_in_forms' => ['customer_address_edit'],
+    ], dependencyItaly());
+    $this->customer = Mage::getModel('customer/customer')->setWebsiteId(1)->addData([
+        'email' => $this->code . '@example.com',
+        'firstname' => 'Pest',
+        'lastname' => 'Dependency',
+    ])->save();
+
+    $address = Mage::getModel('customer/address')->addData([
+        'parent_id' => $this->customer->getId(),
+        'firstname' => 'Pest',
+        'lastname' => 'Dependency',
+        'street' => '1 Main St',
+        'city' => 'Los Angeles',
+        'region_id' => 12,
+        'postcode' => '90001',
+        'telephone' => '555',
+        'country_id' => 'US',
+    ])->save();
+
+    expect(Mage::getModel('customer/address')->load($address->getId())->getData($this->code))->toBeNull();
+});
+
 it('keeps the value when a partial update does not hold the field that the condition reads', function () {
     $this->created[] = $attribute = dependencyAttribute('customer_address', ['attribute_code' => $this->code], dependencyItaly());
     $object = new \Maho\DataObject([$this->code => 'kept']);
