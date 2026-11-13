@@ -52,7 +52,7 @@ jobs:
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git commit -am "Refreshed the test timings that balance the CI shards"
           # main can move during the test run, which takes more than an hour
-          for attempt in 1 2 3; do
+          for _ in 1 2 3; do
             if git pull --rebase origin main && git push origin HEAD:main; then
               exit 0
             fi

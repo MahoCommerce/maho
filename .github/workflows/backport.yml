@@ -78,7 +78,7 @@ jobs:
               continue
             fi
             # GitHub computes the mergeability of a new pull request after a short delay
-            for attempt in 1 2 3 4 5 6; do
+            for _ in 1 2 3 4 5 6; do
               if gh pr merge "$number" --squash; then
                 continue 2
               fi
