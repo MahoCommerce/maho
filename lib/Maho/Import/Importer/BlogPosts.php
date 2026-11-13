@@ -83,6 +83,12 @@ class BlogPosts extends AbstractCmsImporter
             }
             // A condition reads the option IDs of the file, and the status as the save writes it, 0 or 1
             $post = new \Maho\DataObject(['is_active' => (int) $row['is_active']] + $row['custom']);
+            // The save gives an attribute that the file leaves out its default value, and a condition reads that value
+            foreach ($this->customAttributes() as $code => $attribute) {
+                if (!isset($row['custom'][$code])) {
+                    $attribute->getBackend()->beforeSave($post);
+                }
+            }
             foreach ($this->customAttributes() as $code => $attribute) {
                 // A new post needs each required attribute of its set, unless the attribute has a default value
                 if ($row['post_id'] === null && !isset($row['custom'][$code]) && $attribute->getIsRequired()

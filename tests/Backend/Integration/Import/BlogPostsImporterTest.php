@@ -196,6 +196,12 @@ it('requires a post attribute only when its condition, which reads an option lab
         expect(fn() => new BlogPosts()->validate($beginner, $options))->not->toThrow(RowException::class)
             ->and(fn() => new BlogPosts()->validate($expertPath, $options))->toThrow(RowException::class, "{$code}_c is required")
             ->and(fn() => new BlogPosts()->validate($noLevel, $options))->toThrow(RowException::class, "{$code}_c is required");
+
+        // With Beginner as the default level, a row without a level gets Beginner, which hides the certificate
+        $beginnerId = (string) $level->getSource()->getOptionId('Beginner');
+        Mage::getModel('blog/resource_eav_attribute')->load($level->getId())->setDefaultValue($beginnerId)->save();
+        Mage::getSingleton('eav/config')->clear();
+        expect(fn() => new BlogPosts()->validate($noLevel, $options))->not->toThrow(RowException::class);
     } finally {
         $certificate->delete();
         $level->delete();
