@@ -32,6 +32,9 @@ class Mage_Core_Model_Image_Resizer
     /** @var array<string, array<string, true>> the files that createFilesAfterCommit() took in this request, by entity */
     protected array $scheduled = [];
 
+    /** Whether createFilesAfterCommit() queues the files instead of creating them. deferFileCreation() sets it. */
+    protected bool $fileCreationDeferred = false;
+
     /**
      * Create the files of $files for every settings set of $entity. A file that exists is
      * written again, so a changed source with the same name gets new files.
@@ -163,23 +166,45 @@ class Mage_Core_Model_Image_Resizer
             $this->scheduled[$entity][$file] = true;
         }
 
-        $run = function () use ($entity, $files): void {
-            $failed = [];
-            try {
-                $this->createFiles($entity, $files, onFailure: function (string $file) use (&$failed): void {
-                    $failed[] = $file;
-                });
-            } catch (\Throwable $e) {
-                Mage::logException($e);
-                $failed = $files;
-            }
-            $this->queue($entity, $failed);
-        };
+        $run = $this->fileCreationDeferred
+            ? fn() => $this->queue($entity, $files)
+            : function () use ($entity, $files): void {
+                $failed = [];
+                try {
+                    $this->createFiles($entity, $files, onFailure: function (string $file) use (&$failed): void {
+                        $failed[] = $file;
+                    });
+                } catch (\Throwable $e) {
+                    Mage::logException($e);
+                    $failed = $files;
+                }
+                $this->queue($entity, $failed);
+            };
 
         if (Mage::getSingleton('core/resource')->getConnection('core_write')->getTransactionLevel() > 0) {
             Mage::getResourceSingleton('core/config')->addCommitCallback($run);
         } else {
             $run();
+        }
+    }
+
+    /**
+     * Run $callback, and queue the files that createFilesAfterCommit() gets during it, instead of
+     * creating them. An import uses it, so that a save does not create every size of its image. The
+     * queue creates the files later. Before that, a request for a missing file creates it.
+     *
+     * @template T
+     * @param callable(): T $callback
+     * @return T
+     */
+    public function deferFileCreation(callable $callback): mixed
+    {
+        $before = $this->fileCreationDeferred;
+        $this->fileCreationDeferred = true;
+        try {
+            return $callback();
+        } finally {
+            $this->fileCreationDeferred = $before;
         }
     }
 

@@ -18,6 +18,9 @@ use Maho\Import\CsvFile;
 use Maho\Import\Reporter;
 use Maho\Import\Result;
 
+/**
+ * @phpstan-type StockColumns array{qty: float, is_in_stock: int, low_stock_date: ?string, stock_status_changed_auto: int}
+ */
 class Orders extends AbstractImporter
 {
     /** Skip the refresh of the report statistics, for a caller that refreshes them once after several files. */
@@ -96,26 +99,35 @@ class Orders extends AbstractImporter
             }
         }
         $stock = $this->stockOf(array_values($productIds));
+        $backInStock = [];
         $now = time();
         $done = 0;
-        foreach ($rows as $line => $row) {
-            $reporter->progress(++$done, count($rows), 'orders');
-            if ($this->exists($row['reference'], (int) $row['store_id'])) {
-                continue;
+        try {
+            foreach ($rows as $line => $row) {
+                $reporter->progress(++$done, count($rows), 'orders');
+                if ($this->exists($row['reference'], (int) $row['store_id'])) {
+                    continue;
+                }
+                try {
+                    $order = Mage::app()->withStore((int) $row['store_id'], fn() => $this->place($row));
+                    $this->applyStatus($order, $row['status']);
+                } catch (\Mage_Core_Exception $e) {
+                    $this->fail($file, $line, $e->getMessage());
+                } finally {
+                    // Every order puts the stock back, so the next orders of a popular product still find it.
+                    $backInStock += $this->restoreStock($stock, $row['lines']);
+                }
+                // A few minutes from the reference, so the orders of one hour do not share a time.
+                $seconds = (int) $row['hours_ago'] * 3600 + crc32($row['reference']) % 3600;
+                $this->moveDates((int) $order->getId(), gmdate('Y-m-d H:i:s', $now - $seconds));
+                $result->created++;
             }
-            try {
-                $order = Mage::app()->withStore((int) $row['store_id'], fn() => $this->place($row));
-                $this->applyStatus($order, $row['status']);
-            } catch (\Mage_Core_Exception $e) {
-                $this->fail($file, $line, $e->getMessage());
-            } finally {
-                // Every order puts the stock back, so the next orders of a popular product still find it.
-                $this->restoreStock($stock, $row['lines']);
+        } finally {
+            if ($backInStock !== []) {
+                // An order that takes the last unit removes the product from the price, filter and search indexes
+                $products = new \Maho\DataObject(['product_ids' => array_values($backInStock), 'attributes_data' => ['force_reindex_required' => 1]]);
+                Mage::getSingleton('index/indexer')->processEntityAction($products, \Mage_Catalog_Model_Product::ENTITY, \Mage_Index_Model_Event::TYPE_MASS_ACTION);
             }
-            // A few minutes from the reference, so the orders of one hour do not share a time.
-            $seconds = (int) $row['hours_ago'] * 3600 + crc32($row['reference']) % 3600;
-            $this->moveDates((int) $order->getId(), gmdate('Y-m-d H:i:s', $now - $seconds));
-            $result->created++;
         }
         if ($result->created > 0 && !($options[self::OPTION_SKIP_STATISTICS] ?? false)) {
             Mage::getModel('reports/statistics')->refreshLifetime(self::STATISTICS);
@@ -274,7 +286,7 @@ class Orders extends AbstractImporter
 
     /**
      * @param list<int> $productIds
-     * @return array<int, array{qty: float, is_in_stock: bool}>
+     * @return array<int, StockColumns>
      */
     private function stockOf(array $productIds): array
     {
@@ -285,22 +297,29 @@ class Orders extends AbstractImporter
         $read = $resource->getConnection('core_read');
         $stock = [];
         $select = $read->select()
-            ->from($resource->getTableName('cataloginventory/stock_item'), ['product_id', 'qty', 'is_in_stock'])
+            ->from($resource->getTableName('cataloginventory/stock_item'), ['product_id', 'qty', 'is_in_stock', 'low_stock_date', 'stock_status_changed_auto'])
             ->where('product_id IN (?)', $productIds);
         foreach ($read->fetchAll($select) as $item) {
-            $stock[(int) $item['product_id']] = ['qty' => (float) $item['qty'], 'is_in_stock' => (bool) $item['is_in_stock']];
+            $stock[(int) $item['product_id']] = [
+                'qty' => (float) $item['qty'],
+                'is_in_stock' => (int) $item['is_in_stock'],
+                'low_stock_date' => $item['low_stock_date'],
+                'stock_status_changed_auto' => (int) $item['stock_status_changed_auto'],
+            ];
         }
         return $stock;
     }
 
     /**
      * Puts the stock of the products of an order back as it was before the import: placing an order
-     * takes stock, and cancelling one gives it back.
+     * takes stock, and cancelling one gives it back. A save of the stock item would reindex each product
+     * and clean its cache, so the update writes the stock columns back and reindexes the stock status only.
      *
-     * @param array<int, array{qty: float, is_in_stock: bool}> $stock
+     * @param array<int, StockColumns> $stock
      * @param list<array{product_id: int, parent_id: int|null, qty: int}> $lines
+     * @return array<int, int> the products that the order took out of stock and that are in stock again, by ID
      */
-    private function restoreStock(array $stock, array $lines): void
+    private function restoreStock(array $stock, array $lines): array
     {
         $productIds = [];
         foreach ($lines as $orderLine) {
@@ -309,17 +328,25 @@ class Orders extends AbstractImporter
                 $productIds[] = $orderLine['parent_id'];
             }
         }
-        foreach (array_unique($productIds) as $productId) {
-            if (!isset($stock[$productId])) {
+        $restored = [];
+        $backInStock = [];
+        $resource = Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        foreach ($this->stockOf(array_values(array_unique($productIds))) as $productId => $current) {
+            $was = $stock[$productId] ?? null;
+            if ($was === null || $current === $was) {
                 continue;
             }
-            $was = $stock[$productId];
-            $item = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId);
-            if ((float) $item->getQty() === $was['qty'] && (bool) $item->getIsInStock() === $was['is_in_stock']) {
-                continue;
+            $write->update($resource->getTableName('cataloginventory/stock_item'), $was, ['product_id = ?' => $productId]);
+            $restored[$productId] = $productId;
+            if ($current['is_in_stock'] !== $was['is_in_stock']) {
+                $backInStock[$productId] = $productId;
             }
-            $item->setQty($was['qty'])->setIsInStock($was['is_in_stock'])->save();
         }
+        if ($restored !== []) {
+            Mage::getResourceSingleton('cataloginventory/indexer_stock')->reindexProducts(array_values($restored));
+        }
+        return $backInStock;
     }
 
     private function regionId(CsvFile $file, int $line, string $countryId, string $region): ?int

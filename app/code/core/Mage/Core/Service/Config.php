@@ -161,7 +161,7 @@ class Mage_Core_Service_Config
             ->setGroupsSelector($groups)
             ->save();
 
-        $this->afterChange($section, $website ?: null, $store ?: null);
+        $this->afterChanges([[$section, $website ?: null, $store ?: null]]);
     }
 
     /**
@@ -206,9 +206,10 @@ class Mage_Core_Service_Config
             $section = $field['section'] ?? explode('/', $path)[0];
             $changes["{$section}/{$scope}/{$scopeId}"] = [$section, $scope, $scopeId];
         }
-        foreach ($changes as [$section, $scope, $scopeId]) {
-            $this->afterChange($section, ...$this->scopeCodes($scope, $scopeId));
-        }
+        $this->afterChanges(array_map(
+            fn(array $change): array => [$change[0], ...$this->scopeCodes($change[1], $change[2])],
+            array_values($changes),
+        ));
     }
 
     /**
@@ -284,27 +285,38 @@ class Mage_Core_Service_Config
         if (!Mage::getModel('adminhtml/config_data')->deleteValue($path, $scope, $scopeId)) {
             return false;
         }
-        $this->afterChange($this->getFields()[$path]['section'] ?? explode('/', $path)[0], ...$this->scopeCodes($scope, $scopeId));
+        $this->afterChanges([[$this->getFields()[$path]['section'] ?? explode('/', $path)[0], ...$this->scopeCodes($scope, $scopeId)]]);
         return true;
     }
 
     /**
-     * Reload the configuration and tell the observers of the section, as after a save in the admin.
+     * Reload the configuration and the stores once, and tell the observers of each section in $changes, as after a
+     * save in the admin. One reload for all the sections keeps an import of many sections fast.
+     *
+     * @param list<array{0: string, 1: ?string, 2: ?string}> $changes the section, the website code and the store
+     *                                                               code of each change
      */
-    protected function afterChange(string $section, ?string $website, ?string $store): void
+    protected function afterChanges(array $changes): void
     {
-        if ($section === 'advanced') {
+        if ($changes === []) {
+            return;
+        }
+        if (in_array('advanced', array_column($changes, 0), true)) {
             // The Disable Modules Output fields change the layout
             Mage::app()->cleanCache(['layout', Mage_Core_Model_Layout_Update::LAYOUT_GENERAL_CACHE_TAG]);
         }
         Mage::getConfig()->reinit();
-        Mage::dispatchEvent('admin_system_config_section_save_after', [
-            'website' => $website,
-            'store' => $store,
-            'section' => $section,
-        ]);
+        foreach ($changes as [$section, $website, $store]) {
+            Mage::dispatchEvent('admin_system_config_section_save_after', [
+                'website' => $website,
+                'store' => $store,
+                'section' => $section,
+            ]);
+        }
         Mage::app()->reinitStores();
-        Mage::dispatchEvent("admin_system_config_changed_section_{$section}", ['website' => $website, 'store' => $store]);
+        foreach ($changes as [$section, $website, $store]) {
+            Mage::dispatchEvent("admin_system_config_changed_section_{$section}", ['website' => $website, 'store' => $store]);
+        }
     }
 
     /**
