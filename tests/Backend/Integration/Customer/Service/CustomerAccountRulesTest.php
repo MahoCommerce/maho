@@ -521,7 +521,12 @@ it('confirms an account and turns 2FA on through the API operations', function (
     // The key of an account that is already confirmed is not checked, so the answer has no customer data
     $other = $call(null, 'confirm_rest', ['customerId' => (int) $customer->getId(), 'key' => 'any']);
     $secret = $call($security, 'two_factor_secret_rest', []);
-    $code = \OTPHP\TOTP::createFromSecret((string) $secret['result']?->twofaSecret)->now();
+    $totp = \OTPHP\TOTP::createFromSecret((string) $secret['result']?->twofaSecret);
+    // The code must stay valid through two password checks, so it must not come from the end of a period
+    if ($totp->expiresIn() < 5) {
+        sleep($totp->expiresIn() + 1);
+    }
+    $code = $totp->now();
     $wrongPassword = $call($security, 'two_factor_rest', ['currentPassword' => 'WrongPassword1!', 'twofaEnabled' => true, 'twofaCode' => $code]);
     $enabled = $call($security, 'two_factor_rest', ['currentPassword' => ACCOUNT_RULES_PASSWORD, 'twofaEnabled' => true, 'twofaCode' => $code]);
 

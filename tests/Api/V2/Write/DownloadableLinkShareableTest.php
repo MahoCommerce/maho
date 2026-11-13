@@ -53,7 +53,8 @@ describe('Downloadable Links, Shareable & Samples', function (): void {
         $read = apiGet("/api/rest/v2/products/{$productId}/downloadable-links");
         $links = getItems($read);
         expect($links[0]['isShareable'])->toBe(1);
-        expect($links[0]['sampleUrl'])->toBeNull();
+        // Null fields are omitted from REST responses (skip_null_values)
+        expect($links[0])->not->toHaveKey('sampleUrl');
 
         // Update shareable and add a sample URL
         $update = apiPut("/api/rest/v2/products/{$productId}/downloadable-links", [
@@ -78,7 +79,8 @@ describe('Downloadable Links, Shareable & Samples', function (): void {
 
         $cleared = apiGet("/api/rest/v2/products/{$productId}/downloadable-links");
         $links = getItems($cleared);
-        expect($links[0]['sampleUrl'])->toBeNull();
+        // Null fields are omitted from REST responses (skip_null_values)
+        expect($links[0])->not->toHaveKey('sampleUrl');
     });
 
     it('rejects an invalid isShareable value', function (): void {
