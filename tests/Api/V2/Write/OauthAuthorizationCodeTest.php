@@ -81,6 +81,57 @@ function oauthIssueCode(): array
     ];
 }
 
+/**
+ * A token that another request marks as used just after this request loads it.
+ */
+class OauthTokenUsedByParallelRequest extends Maho_ApiPlatform_Model_Oauth_Token
+{
+    public static string $type = '';
+
+    #[\Override]
+    public function loadBySecret(#[\SensitiveParameter] string $secret, string $type): self
+    {
+        parent::loadBySecret($secret, $type);
+        if ($type === self::$type && $this->getId()) {
+            Mage::getSingleton('core/resource')->getConnection('core_write')->update(
+                $this->getResource()->getMainTable(),
+                ['used_at' => time()],
+                ['entity_id = ?' => (int) $this->getId()],
+            );
+        }
+        return $this;
+    }
+}
+
+/**
+ * Run $callback while a parallel request uses each token of $type first.
+ */
+function oauthWithParallelRequest(string $type, callable $callback): mixed
+{
+    $cache = new ReflectionProperty(Mage_Core_Model_Config::class, '_classNameCache');
+    $cache->setValue(Mage::getConfig(), []);
+    Mage::getConfig()->setNode('global/models/apiplatform/rewrite/oauth_token', OauthTokenUsedByParallelRequest::class);
+    OauthTokenUsedByParallelRequest::$type = $type;
+
+    try {
+        return $callback();
+    } finally {
+        OauthTokenUsedByParallelRequest::$type = '';
+        Mage::getConfig()->setNode('global/models/apiplatform/rewrite/oauth_token', '');
+        $cache->setValue(Mage::getConfig(), []);
+    }
+}
+
+function oauthConsentId(string $clientId): ?int
+{
+    return oauthServer()->findExistingConsentId(
+        $clientId,
+        oauthAdminId(),
+        'mcp',
+        Mage::helper('apiplatform')->getDefaultResource(),
+    );
+}
+
 /** @return array<string, mixed> */
 function oauthExchange(string $clientId, string $code, string $verifier, ?string $redirectUri = null): array
 {
@@ -173,12 +224,7 @@ describe('OAuth authorization code flow', function (): void {
         expect(fn() => oauthExchange($stranger['client_id'], $flow['code'], $flow['verifier']))
             ->toThrow(Maho_ApiPlatform_Model_Oauth_Exception::class);
 
-        expect(oauthServer()->findExistingConsentId(
-            $flow['client_id'],
-            oauthAdminId(),
-            'mcp',
-            Mage::helper('apiplatform')->getDefaultResource(),
-        ))->not->toBeNull();
+        expect(oauthConsentId($flow['client_id']))->not->toBeNull();
     });
 
     it('rotates the refresh token on every use', function (): void {
@@ -211,6 +257,51 @@ describe('OAuth authorization code flow', function (): void {
             'client_id' => $flow['client_id'],
             'refresh_token' => $second['refresh_token'],
         ]))->toThrow(Maho_ApiPlatform_Model_Oauth_Exception::class);
+    });
+
+    it('revokes the grant when a parallel request uses the refresh token first', function (): void {
+        $flow = oauthIssueCode();
+        $first = oauthExchange($flow['client_id'], $flow['code'], $flow['verifier']);
+        expect(oauthConsentId($flow['client_id']))->not->toBeNull();
+
+        expect(fn() => oauthWithParallelRequest(
+            Maho_ApiPlatform_Model_Oauth_Token::TYPE_REFRESH,
+            fn() => oauthServer()->exchangeRefreshToken([
+                'client_id' => $flow['client_id'],
+                'refresh_token' => $first['refresh_token'],
+            ]),
+        ))->toThrow(Maho_ApiPlatform_Model_Oauth_Exception::class, 'Refresh token already used');
+
+        expect(oauthConsentId($flow['client_id']))->toBeNull();
+    });
+
+    it('revokes the grant when a parallel request uses the authorization code first', function (): void {
+        $flow = oauthIssueCode();
+        expect(oauthConsentId($flow['client_id']))->not->toBeNull();
+
+        expect(fn() => oauthWithParallelRequest(
+            Maho_ApiPlatform_Model_Oauth_Token::TYPE_CODE,
+            fn() => oauthExchange($flow['client_id'], $flow['code'], $flow['verifier']),
+        ))->toThrow(Maho_ApiPlatform_Model_Oauth_Exception::class, 'Authorization code already used');
+
+        expect(oauthConsentId($flow['client_id']))->toBeNull();
+    });
+
+    it('refuses a pending request that a parallel request consumed first', function (): void {
+        $client = oauthRegisterClient();
+        $secret = oauthServer()->createPendingRequest(oauthServer()->validateAuthorizationRequest([
+            'client_id' => $client['client_id'],
+            'redirect_uri' => oauthRedirectUri(),
+            'response_type' => 'code',
+            'code_challenge' => oauthPkce()['challenge'],
+            'code_challenge_method' => 'S256',
+            'scope' => 'mcp',
+        ]));
+
+        expect(oauthWithParallelRequest(
+            Maho_ApiPlatform_Model_Oauth_Token::TYPE_PENDING,
+            fn() => oauthServer()->readPendingRequest($secret, consume: true),
+        ))->toBeNull();
     });
 
 });
