@@ -53,13 +53,22 @@ jobs:
           # successful, so only a real failure turns this job red.
           experimental: '{ "conflict_resolution": "draft_commit_conflicts" }'
 
+      # Only admins and the CI app may change a release branch, so the merge uses the token of
+      # the app. The app has write access to contents and pull requests only.
+      - name: Get a token of the CI app
+        id: app-token
+        if: ${{ !cancelled() && steps.backport.outputs.created_pull_numbers != '' }}
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ secrets.MAHO_CI_APP_CLIENT_ID }}
+          private-key: ${{ secrets.MAHO_CI_APP_PRIVATE_KEY }}
+
       # A backport without a conflict is merged at once. A conflict gives a draft pull request,
-      # which waits for a maintainer. The ruleset on the release branches must let GitHub
-      # Actions bypass it, or the merge is refused.
+      # which waits for a maintainer.
       - name: Merge the backports without a conflict
         if: ${{ !cancelled() && steps.backport.outputs.created_pull_numbers != '' }}
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           NUMBERS: ${{ steps.backport.outputs.created_pull_numbers }}
         run: |
           STATUS=0

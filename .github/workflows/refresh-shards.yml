@@ -27,17 +27,25 @@ jobs:
     # and the download fails when that job did not upload it.
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
+      # Only admins and the CI app may push to main, so the push uses the token of the app.
+      # The app has write access to contents and pull requests only.
+      - name: Get a token of the CI app
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ secrets.MAHO_CI_APP_CLIENT_ID }}
+          private-key: ${{ secrets.MAHO_CI_APP_PRIVATE_KEY }}
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          token: ${{ steps.app-token.outputs.token }}
 
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: shards-json
           path: tests/.pest
 
-      # The ruleset on main must let GitHub Actions bypass it, or this push is refused.
       - name: Commit the timings to main
         run: |
           git config user.name 'github-actions[bot]'
