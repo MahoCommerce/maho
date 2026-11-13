@@ -29,6 +29,8 @@ jobs:
     # that branch to main.
     if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
+    # The keys of the CI app are secrets of this environment, which allows only main
+    environment: maho-ci
     steps:
       # Only admins and the CI app may push to main, so the push uses the token of the app.
       # The app has write access to contents and pull requests only. A pull request that the

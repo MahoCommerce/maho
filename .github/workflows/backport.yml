@@ -15,6 +15,9 @@ jobs:
   backport:
     name: Backport to maintenance branch
     runs-on: ubuntu-latest
+    # The keys of the CI app are secrets of this environment, which allows only main. A
+    # workflow on another branch, such as the branch of a pull request, cannot read them.
+    environment: maho-ci
     permissions:
       contents: write
       pull-requests: write
