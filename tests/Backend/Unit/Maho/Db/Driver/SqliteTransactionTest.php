@@ -49,6 +49,20 @@ it('lets a transaction that read first still write after another connection trie
     expect($this->second->fetchCol('SELECT body FROM note'))->toBe(['first']);
 });
 
+it('starts a real transaction again after a start that the lock refused', function (): void {
+    $this->first->beginTransaction();
+    expect(fn() => $this->second->beginTransaction())
+        ->toThrow(Exception::class, 'database is locked')
+        ->and($this->second->getConnection()->getTransactionNestingLevel())->toBe(0);
+    $this->first->commit();
+
+    // A level left at 1 would turn this BEGIN into a savepoint
+    $this->second->beginTransaction();
+
+    expect($this->second->getConnection()->getTransactionNestingLevel())->toBe(1);
+    $this->second->rollBack();
+});
+
 it('rolls back a transaction and frees the write lock', function (): void {
     $this->first->beginTransaction();
     $this->first->insert('note', ['body' => 'first']);

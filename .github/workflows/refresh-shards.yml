@@ -2,8 +2,8 @@ name: Refresh Test Shards
 
 # The Pest shards are balanced by the test timings in tests/.pest/shards.json. A new test has
 # no timing and goes to the shards in turn, so the balance drifts as tests are added. Once a
-# week, this workflow records new timings and commits them to main. The file only splits the
-# tests between the shards, so it cannot make a test pass or fail.
+# week, this workflow records new timings and commits them to main when every test passed.
+# The file only splits the tests between the shards, so it cannot make a test pass or fail.
 
 on:
   schedule:
@@ -23,9 +23,10 @@ jobs:
   commit:
     name: Commit the timings
     needs: tests
-    # Another test job can fail at random. Only the artifact of the refresh job matters here,
-    # and the download fails when that job did not upload it.
-    if: ${{ !cancelled() }}
+    # The timings are committed only when every test job of the run passed. A failed week
+    # commits nothing, and the next week tries again. A run started on another branch must not
+    # commit: the rebase would push the commits of that branch to main.
+    if: ${{ needs.tests.result == 'success' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
       # Only admins and the CI app may push to main, so the push uses the token of the app.
