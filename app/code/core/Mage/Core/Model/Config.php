@@ -322,11 +322,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             $merge = clone $this->_prototype;
             $merge->loadFile($file);
             if ($basename === 'local.xml') {
-                // Each parallel test worker sets its own database name.
-                $dbName = getenv('MAHO_DB_NAME');
-                if (is_string($dbName) && $dbName !== '') {
-                    $merge->setNode('global/resources/default_setup/connection/dbname', $dbName);
-                }
                 $this->_isLocalConfigLoaded = true;
                 $this->_refLocalConfigObject = $merge;
             }

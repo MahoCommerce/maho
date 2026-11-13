@@ -556,7 +556,7 @@ a spec, an RFC, a documented invariant. Fix the wrong side, and say which one it
 Suites live in `tests/{Install,Backend,Frontend,Api,Browser}/` with base test cases
 `Tests\Maho{Install,Backend,Frontend,Api}TestCase`. The `Browser` suite needs Playwright; when it
 isn't installed, a plain `composer test` silently runs only `Install,Backend,Frontend`. The
-comments in `.github/workflows/pest.yml` explain the CI slices and the parallel backend slice.
+comments in `.github/workflows/pest.yml` explain the CI shards and how to refresh them.
 
 ## Security Patterns
 

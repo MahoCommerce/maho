@@ -7,6 +7,11 @@ on:
   pull_request:
   workflow_call:
   workflow_dispatch:
+    inputs:
+      update_shards:
+        description: Record test timings on the mysql-min backend slice and upload tests/.pest/shards.json as an artifact
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -25,7 +30,7 @@ jobs:
 
     env:
       MAGE_IS_DEVELOPER_MODE: 1
-      # A runner has 4 vCPUs. The worker databases and --processes both read this value.
+      # A runner has 4 vCPUs.
       PEST_WORKERS: 4
 
     strategy:
@@ -33,14 +38,16 @@ jobs:
       matrix:
         # Every backend runs as three slices. The suites never share state across a slice
         # boundary: Backend, Frontend and Install never touch the web server, Api never uses
-        # Playwright, and Browser never uses the Api helpers. The backend slice runs 4 Pest
-        # workers, and each worker uses its own copy of the database (see tests/Pest.php).
-        # The Api and Browser suites cannot run in parallel yet: they send requests to one web
-        # server, which reads one database.
+        # Playwright, and Browser never uses the Api helpers. The backend slice runs as
+        # PEST_WORKERS time-balanced shards at the same time, each in its own copy of the
+        # checkout and of the database (see .github/scripts/pest-workers.sh). The shards come
+        # from the committed tests/.pest/shards.json. Refresh it from CI (workflow_dispatch
+        # with update_shards): timings measured here balance the shards, timings from a
+        # developer machine do not, because the slow tests differ.
         slice:
-          - { name: backend, suites: "Install,Backend,Frontend", parallel: true,  server: false, browser: false }
-          - { name: api,     suites: "Api",                      parallel: false, server: true,  browser: false }
-          - { name: browser, suites: "Browser",                  parallel: false, server: true,  browser: true }
+          - { name: backend, suites: "Install,Backend,Frontend", workers: true,  server: false, browser: false }
+          - { name: api,     suites: "Api",                      workers: false, server: true,  browser: false }
+          - { name: browser, suites: "Browser",                  workers: false, server: true,  browser: true }
         # Version-free ids: the pinned image tags live only in the include rows below, so a
         # bump of the minimum supported version does not touch the matrix key.
         db:
@@ -293,30 +300,6 @@ jobs:
           PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
           PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
 
-      # Each Pest worker of the backend slice uses its own copy of the database (see
-      # tests/Pest.php). The copy runs after every config:set above, so each copy holds them.
-      # PostgreSQL copies a template database inside the server. MySQL and MariaDB have no
-      # template, so the job dumps the database once and restores the copies at the same time.
-      - name: Create the worker databases
-        if: matrix.slice.parallel
-        run: |
-          DB="$(docker ps -q)"
-          if [ "${{ matrix.db_engine }}" = "pgsql" ]; then
-            for i in $(seq 1 "$PEST_WORKERS"); do
-              docker exec "$DB" psql -U postgres -q -v ON_ERROR_STOP=1 -c "CREATE DATABASE maho_$i TEMPLATE maho"
-            done
-          else
-            docker exec "$DB" sh -c 'if command -v mariadb-dump >/dev/null; then exec mariadb-dump -uroot -proot --single-transaction --routines --triggers --events maho; fi; exec mysqldump -uroot -proot --single-transaction --routines --triggers --events --set-gtid-purged=OFF maho' > var/worker.sql
-            PIDS=""
-            for i in $(seq 1 "$PEST_WORKERS"); do
-              docker exec "$DB" sh -c "exec \"\$(command -v mariadb || command -v mysql)\" -uroot -proot -e 'CREATE DATABASE maho_$i'"
-              docker exec -i "$DB" sh -c "exec \"\$(command -v mariadb || command -v mysql)\" -uroot -proot maho_$i" < var/worker.sql &
-              PIDS="$PIDS $!"
-            done
-            # A bare "wait" returns 0 even when a restore fails.
-            for pid in $PIDS; do wait "$pid"; done
-          fi
-
       - name: Run Pest Tests
         env:
           API_BASE_URL: http://${{ env.MAHO_BROWSER_HOST }}:8901
@@ -327,11 +310,23 @@ jobs:
           # and Pest collapses a repeated bare "--exclude-group" token into one.
           EXCLUDE="--exclude-group=currency-live --exclude-group=sandbox"
           if [ "${{ matrix.live }}" = "true" ]; then EXCLUDE=""; fi
-          PARALLEL=""
-          if [ "${{ matrix.slice.parallel }}" = "true" ]; then PARALLEL="--parallel --processes=$PEST_WORKERS"; fi
           # --profile lists the slowest tests of the slice at the end of the log.
-          ./vendor/bin/pest --display-errors --display-warnings --profile \
-            --testsuite="${{ matrix.slice.suites }}" $PARALLEL $EXCLUDE
+          ARGS="--display-errors --display-warnings --profile --testsuite=${{ matrix.slice.suites }} $EXCLUDE"
+          # The timings are recorded in one process, over every test of the slice.
+          if [ "${{ inputs.update_shards }}" = "true" ] && [ "${{ matrix.db }}-${{ matrix.slice.name }}" = "mysql-min-backend" ]; then
+            ./vendor/bin/pest $ARGS --update-shards
+          elif [ "${{ matrix.slice.workers }}" = "true" ]; then
+            DB_ENGINE=${{ matrix.db_engine }} .github/scripts/pest-workers.sh $ARGS
+          else
+            ./vendor/bin/pest $ARGS
+          fi
+
+      - name: Upload the refreshed shard timings
+        if: inputs.update_shards && matrix.db == 'mysql-min' && matrix.slice.name == 'backend'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: shards-json
+          path: tests/.pest/shards.json
 
       - name: Upload browser test failure diagnostics
         if: failure()
@@ -342,7 +337,7 @@ jobs:
             Tests/Browser/Screenshots/
             tests/Browser/Screenshots/
             var/log/
-            var/worker_*/log/
+            var/workers/*/var/log/
           if-no-files-found: ignore
           retention-days: 7
 
@@ -359,9 +354,9 @@ jobs:
       matrix:
         # See the slice comment on the pest-db job.
         slice:
-          - { name: backend, suites: "Install,Backend,Frontend", parallel: true,  server: false, browser: false }
-          - { name: api,     suites: "Api",                      parallel: false, server: true,  browser: false }
-          - { name: browser, suites: "Browser",                  parallel: false, server: true,  browser: true }
+          - { name: backend, suites: "Install,Backend,Frontend", workers: true,  server: false, browser: false }
+          - { name: api,     suites: "Api",                      workers: false, server: true,  browser: false }
+          - { name: browser, suites: "Browser",                  workers: false, server: true,  browser: true }
 
     steps:
       - name: Setup PHP
@@ -518,15 +513,6 @@ jobs:
           PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
           PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
 
-      # See the same step on the pest-db job. The database is in WAL mode, so a plain cp can
-      # miss the last writes. VACUUM INTO reads them from the WAL file too.
-      - name: Create the worker databases
-        if: matrix.slice.parallel
-        run: |
-          for i in $(seq 1 "$PEST_WORKERS"); do
-            php -r '(new PDO("sqlite:var/db/maho.sqlite"))->exec("VACUUM INTO " . var_export($argv[1], true));' "var/db/maho_$i.sqlite"
-          done
-
       - name: Run Pest Tests
         env:
           API_BASE_URL: http://${{ env.MAHO_BROWSER_HOST }}:8901
@@ -534,11 +520,12 @@ jobs:
           PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
         # See the matrix comment above: the live-service groups run in one job only.
         run: |
-          PARALLEL=""
-          if [ "${{ matrix.slice.parallel }}" = "true" ]; then PARALLEL="--parallel --processes=$PEST_WORKERS"; fi
-          ./vendor/bin/pest --display-errors --display-warnings --profile \
-            --testsuite="${{ matrix.slice.suites }}" $PARALLEL \
-            --exclude-group=currency-live --exclude-group=sandbox
+          ARGS="--display-errors --display-warnings --profile --testsuite=${{ matrix.slice.suites }} --exclude-group=currency-live --exclude-group=sandbox"
+          if [ "${{ matrix.slice.workers }}" = "true" ]; then
+            DB_ENGINE=sqlite .github/scripts/pest-workers.sh $ARGS
+          else
+            ./vendor/bin/pest $ARGS
+          fi
 
       - name: Upload browser test failure diagnostics
         if: failure()
@@ -549,6 +536,6 @@ jobs:
             Tests/Browser/Screenshots/
             tests/Browser/Screenshots/
             var/log/
-            var/worker_*/log/
+            var/workers/*/var/log/
           if-no-files-found: ignore
           retention-days: 7
