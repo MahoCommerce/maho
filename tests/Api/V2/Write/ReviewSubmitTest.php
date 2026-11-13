@@ -76,8 +76,9 @@ it('saves a review with no vote when the REST body has no rating, as the storefr
         ->and($response['json']['rating'] ?? null)->toBeNull();
 
     $read = apiGet('/api/rest/v2/reviews/' . $reviewId, adminToken());
+    // Null fields are omitted from REST responses (skip_null_values)
     expect($read['status'])->toBe(200)
-        ->and($read['json']['rating'])->toBeNull();
+        ->and($read['json'])->not->toHaveKey('rating');
 });
 
 it('refuses stars out of 1 to 5 in a REST body with a 422 on rating', function (int $rating): void {

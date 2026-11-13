@@ -184,8 +184,8 @@ class Maho_ApiPlatform_Model_Oauth_Server
             return null;
         }
 
-        if ($consume) {
-            $pending->markUsed();
+        if ($consume && !$pending->markUsed()) {
+            return null;
         }
 
         try {
@@ -266,7 +266,12 @@ class Maho_ApiPlatform_Model_Oauth_Server
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_GRANT, 'The grant was revoked');
         }
 
-        $code->markUsed();
+        // Another request with the same code can pass the checks above at the same time.
+        if (!$code->markUsed()) {
+            $code->revokeGrant();
+            throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_GRANT, 'Authorization code already used');
+        }
+
         $client->recordUsage();
 
         return $this->issueTokenSet($code, $consentId);
@@ -312,7 +317,12 @@ class Maho_ApiPlatform_Model_Oauth_Server
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_GRANT, 'The grant was revoked');
         }
 
-        $refresh->markUsed();
+        // Another request with the same token can pass the checks above at the same time.
+        if (!$refresh->markUsed()) {
+            $refresh->revokeGrant();
+            throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_GRANT, 'Refresh token already used');
+        }
+
         $client->recordUsage();
 
         return $this->issueTokenSet($refresh, $consentId);

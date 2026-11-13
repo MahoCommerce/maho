@@ -148,18 +148,22 @@ describe('config helper', function () {
     test('availability maps to full schema.org URLs', function () {
         $schema = Maho_StructuredData_Helper_Data::SCHEMA;
 
-        $product = Mage::getResourceModel('catalog/product_collection')
+        // Another test can change any product, so the test selects one that is enabled and in
+        // stock, in a fixed order
+        $collection = Mage::getResourceModel('catalog/product_collection')
             ->addAttributeToSelect('*')
             ->addAttributeToFilter('type_id', 'simple')
-            ->setPageSize(1)
-            ->getFirstItem();
+            ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+            ->setOrder('entity_id', 'ASC')
+            ->setPageSize(1);
+        Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($collection);
+        $product = $collection->getFirstItem();
 
         if (!$product->getId()) {
             $this->markTestSkipped('No simple product in catalog.');
         }
         $product->setStoreId(Mage::app()->getStore()->getId());
 
-        // Sample-data simple products ship enabled and in stock.
         expect($this->helper->getAvailabilityUrl($product))->toBe($schema . 'InStock');
 
         // Disabling the product makes it not saleable, so it reports out of stock.

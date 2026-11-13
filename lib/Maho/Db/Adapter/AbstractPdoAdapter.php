@@ -281,7 +281,20 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         if ($this->_transactionLevel === 0) {
             $this->_debugTimer();
             $this->_connect();
-            $this->_connection->beginTransaction();
+            try {
+                $this->_connection->beginTransaction();
+            } catch (\Doctrine\DBAL\Exception $e) {
+                // DBAL counts the transaction before the database opens it, and keeps the count
+                // when the BEGIN fails, so the next BEGIN would be a savepoint. Its rollBack()
+                // resets the count first, and then fails because no transaction is open.
+                if ($this->_connection->isTransactionActive()) {
+                    try {
+                        $this->_connection->rollBack();
+                    } catch (\Throwable) {
+                    }
+                }
+                throw $e;
+            }
             $this->_debugStat(self::DEBUG_TRANSACTION, 'BEGIN');
         }
         ++$this->_transactionLevel;

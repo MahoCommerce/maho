@@ -15,6 +15,9 @@ jobs:
   backport:
     name: Backport to maintenance branch
     runs-on: ubuntu-latest
+    # The keys of the CI app are secrets of this environment, which allows only main. A
+    # workflow on another branch, such as the branch of a pull request, cannot read them.
+    environment: maho-ci
     permissions:
       contents: write
       pull-requests: write
@@ -52,6 +55,46 @@ jobs:
           # the backport silently evaporating. Such a target still counts as
           # successful, so only a real failure turns this job red.
           experimental: '{ "conflict_resolution": "draft_commit_conflicts" }'
+
+      # Only admins and the CI app may change a release branch, so the merge uses the token of
+      # the app. The app has write access to contents and pull requests only.
+      - name: Get a token of the CI app
+        id: app-token
+        if: ${{ !cancelled() && contains(toJSON(github.event.pull_request.labels.*.name), '"backport ') }}
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ secrets.MAHO_CI_APP_CLIENT_ID }}
+          private-key: ${{ secrets.MAHO_CI_APP_PRIVATE_KEY }}
+
+      # A backport without a conflict is merged at once. A conflict gives a draft pull request,
+      # which waits for a maintainer. The step looks up every open backport of the source pull
+      # request, not only the ones that this run created: a rerun after a failed merge finds
+      # the pull request of the first run, which the action then skips.
+      - name: Merge the backports without a conflict
+        if: ${{ !cancelled() && steps.app-token.outcome == 'success' }}
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PREFIX: backport-${{ github.event.pull_request.number }}-to-
+        run: |
+          NUMBERS=$(gh pr list --state open --limit 100 --json number,headRefName \
+            --jq "[.[] | select(.headRefName | startswith(\"$PREFIX\")) | .number] | join(\" \")")
+          STATUS=0
+          for number in $NUMBERS; do
+            if [ "$(gh pr view "$number" --json isDraft --jq .isDraft)" = "true" ]; then
+              echo "#$number has a conflict, so it stays open."
+              continue
+            fi
+            # GitHub computes the mergeability of a new pull request after a short delay
+            for _ in 1 2 3 4 5 6; do
+              if gh pr merge "$number" --squash; then
+                continue 2
+              fi
+              sleep 10
+            done
+            echo "::error::Could not merge the backport #$number."
+            STATUS=1
+          done
+          exit $STATUS
 
       # The action reports per-target failures only as a comment on the source
       # PR, which is easy to miss on an already-merged PR. Mirror it into the
