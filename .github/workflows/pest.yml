@@ -337,12 +337,15 @@ jobs:
             ./vendor/bin/pest $ARGS --shard=${{ matrix.slice.shard }}
           fi
 
+      # Pest also writes the timings when a test fails. "Refresh Test Shards" then opens a
+      # pull request with them, so the failure gets a fix.
       - name: Upload the refreshed shard timings
-        if: env.REFRESH_SHARDS == 'true'
+        if: ${{ !cancelled() && env.REFRESH_SHARDS == 'true' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: shards-json
           path: tests/.pest/shards.json
+          if-no-files-found: error
 
       - name: Upload browser test failure diagnostics
         if: failure()

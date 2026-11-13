@@ -2,8 +2,9 @@ name: Refresh Test Shards
 
 # The Pest shards are balanced by the test timings in tests/.pest/shards.json. A new test has
 # no timing and goes to the shards in turn, so the balance drifts as tests are added. Once a
-# week, this workflow records new timings and commits them to main when every test passed.
-# The file only splits the tests between the shards, so it cannot make a test pass or fail.
+# week, this workflow records new timings. When every test passed, it commits them to main.
+# When a test failed, it opens a pull request with them, so that the failure gets a fix. The
+# file only splits the tests between the shards, so it cannot make a test pass or fail.
 
 on:
   schedule:
@@ -23,14 +24,14 @@ jobs:
   commit:
     name: Commit the timings
     needs: tests
-    # The timings are committed only when every test job of the run passed. A failed week
-    # commits nothing, and the next week tries again. A run started on another branch must not
-    # commit: the rebase would push the commits of that branch to main.
-    if: ${{ needs.tests.result == 'success' && github.ref == 'refs/heads/main' }}
+    # A run started on another branch must not commit: the rebase would push the commits of
+    # that branch to main.
+    if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
       # Only admins and the CI app may push to main, so the push uses the token of the app.
-      # The app has write access to contents and pull requests only.
+      # The app has write access to contents and pull requests only. A pull request that the
+      # app opens also starts CI, unlike one that GITHUB_TOKEN opens.
       - name: Get a token of the CI app
         id: app-token
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
@@ -47,16 +48,42 @@ jobs:
           name: shards-json
           path: tests/.pest
 
-      - name: Commit the timings to main
+      - name: Commit the timings
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git commit -am "Refreshed the test timings that balance the CI shards"
-          # main can move during the test run, which takes more than an hour
-          for _ in 1 2 3; do
-            if git pull --rebase origin main && git push origin HEAD:main; then
-              exit 0
-            fi
-            sleep 10
-          done
-          exit 1
+          git commit -am "$TITLE"
+          if [ "$TESTS_RESULT" = success ]; then
+            # main can move during the test run, which takes more than an hour
+            for _ in 1 2 3; do
+              if git pull --rebase origin main && git push origin HEAD:main; then
+                exit 0
+              fi
+              sleep 10
+            done
+            exit 1
+          fi
+          # A failed test gets a pull request instead, so that a maintainer sees it and fixes it
+          # there. An open pull request of an earlier week can hold fixes, so it stays as it is.
+          OPEN=$(gh pr list --head "$BRANCH" --state open --json url --jq '.[].url')
+          if [ -n "$OPEN" ]; then
+            echo "::warning::Tests failed, and the pull request of an earlier week is still open: $OPEN"
+            exit 0
+          fi
+          git push --force origin "HEAD:refs/heads/$BRANCH"
+          gh pr create --base main --head "$BRANCH" --title "$TITLE" --body "$(printf '%s\n' \
+            '## What it does' \
+            '' \
+            "Updates \`tests/.pest/shards.json\` with the test timings of the weekly run. That run had failing tests, so the timings did not go to \`main\` directly: $RUN_URL" \
+            '' \
+            'Fix the failing tests on this branch, then merge.' \
+            '' \
+            '## Release notes' \
+            '' \
+            'Nothing to note.')"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          TESTS_RESULT: ${{ needs.tests.result }}
+          BRANCH: refresh-test-shards
+          TITLE: Refreshed the test timings that balance the CI shards
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
