@@ -31,7 +31,7 @@ abstract class AbstractImporter implements ImporterInterface
         $file = CsvFile::open($csvPath, $this->requiredColumns());
         $options = $this->normalize($file, $options);
         $rows = $this->prepare($file, $options);
-        $result = Mage::getSingleton('core/image_resizer')->withQueuedCreation(
+        $result = Mage::getSingleton('core/image_resizer')->deferFileCreation(
             fn(): Result => $this->write($file, $rows, $options, $reporter ?? new NullReporter()),
         );
         // An importer can write with SQL, so no save queues the build of the content classes

@@ -124,7 +124,7 @@ describe('resized image files of an image entity', function () {
             ->and(($this->sizeOf)(($this->pathOf)(2400)))->toBe([400, 200]);
     });
 
-    it('queues the files of a save inside withQueuedCreation(), and creates them at once again after it', function (): void {
+    it('queues the files of a save inside deferFileCreation(), and creates them at once again after it', function (): void {
         $resizer = new class extends Mage_Core_Model_Image_Resizer {
             /** @var list<array{string, list<string>}> */
             public array $queued = [];
@@ -140,12 +140,12 @@ describe('resized image files of an image entity', function () {
         };
         ($this->writePng)('catalog/product/a/b/hat.png', 400, 200);
 
-        $resizer->withQueuedCreation(fn() => $resizer->createFilesAfterCommit('product', ['/a/b/shirt.png']));
+        $resizer->deferFileCreation(fn() => $resizer->createFilesAfterCommit('product', ['/a/b/shirt.png']));
 
         expect($resizer->queued)->toBe([['product', ['/a/b/shirt.png']]])
             ->and($this->mount->fileExists(($this->pathOf)(300)))->toBeFalse();
 
-        expect(fn() => $resizer->withQueuedCreation(fn() => throw new RuntimeException('import failed')))
+        expect(fn() => $resizer->deferFileCreation(fn() => throw new RuntimeException('import failed')))
             ->toThrow(RuntimeException::class, 'import failed');
         $resizer->createFilesAfterCommit('product', ['/a/b/hat.png']);
 
