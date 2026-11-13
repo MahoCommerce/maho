@@ -93,8 +93,10 @@ When the condition hides a field:
 - When the customer saves, the field loses its value. The API and the imports apply the same
   rule.
 
-The address forms of an order in the admin always show the field: the forms of a new order, and the
-form that changes an address of an order. The order still applies the condition when you save it.
+The address forms of an order in the admin always show the field, and they do not mark it as
+required: the forms of a new order, and the form that changes an address of an order. A new order
+still requires the field when the condition shows it. When you save an address of an order, a field
+that the condition hides loses its value.
 
 ## Check where a field shows
 

@@ -128,11 +128,17 @@ abstract class Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract extends Mag
             $inputType = $attribute->getFrontend()->getInputType();
 
             if ($inputType) {
+                $class = (string) $attribute->getFrontend()->getClass();
+                // The form always shows the field, so it cannot require a field that a condition can hide
+                $hasCondition = $attribute->getDependsOn() !== null;
+                if ($hasCondition) {
+                    $class = implode(' ', array_diff(explode(' ', $class), ['required-entry']));
+                }
                 $element = $form->addField($attribute->getAttributeCode(), $inputType, [
                     'name'      => $attribute->getAttributeCode(),
                     'label'     => $this->__($attribute->getFrontendLabel() ?? $attribute->getStoreLabel()),
-                    'class'     => $attribute->getFrontend()->getClass(),
-                    'required'  => $attribute->getIsRequired(),
+                    'class'     => $class,
+                    'required'  => $attribute->getIsRequired() && !$hasCondition,
                     'note'      => $this->escapeHtml($this->__($attribute->getNote())),
                 ]);
                 if ($inputType == 'multiline') {

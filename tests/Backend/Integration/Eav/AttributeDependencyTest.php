@@ -259,6 +259,42 @@ it('clears a hidden field when the field that its condition reads takes its defa
         ->and($saved->getData($this->code . '_r'))->toBeNull();
 });
 
+it('does not require a field that a condition can hide in the admin order address forms', function () {
+    $this->created[] = dependencyAttribute('customer_address', [
+        'attribute_code' => $this->code,
+        'is_required' => 1,
+        'used_in_forms' => ['adminhtml_customer_address'],
+    ], dependencyItaly());
+    $this->created[] = dependencyAttribute('customer_address', [
+        'attribute_code' => $this->code . '_a',
+        'is_required' => 1,
+        'used_in_forms' => ['adminhtml_customer_address'],
+    ]);
+    $block = new class extends Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract {
+        #[\Override]
+        protected function _prepareForm()
+        {
+            return $this;
+        }
+
+        public function addAttributes(array $attributes, \Maho\Data\Form $form): void
+        {
+            $this->_addAttributesToForm($attributes, $form);
+        }
+    };
+    $block->setLayout(Mage::app()->getLayout());
+    $form = new \Maho\Data\Form();
+
+    $block->addAttributes([
+        dependencyService()->getByCode($this->code, 'customer_address'),
+        dependencyService()->getByCode($this->code . '_a', 'customer_address'),
+    ], $form);
+
+    expect($form->getElement($this->code)->getRequired())->toBeFalse()
+        ->and((string) $form->getElement($this->code)->getClass())->not->toContain('required-entry')
+        ->and($form->getElement($this->code . '_a')->getRequired())->toBeTrue();
+});
+
 it('keeps the value when a partial update does not hold the field that the condition reads', function () {
     $this->created[] = $attribute = dependencyAttribute('customer_address', ['attribute_code' => $this->code], dependencyItaly());
     $object = new \Maho\DataObject([$this->code => 'kept']);
