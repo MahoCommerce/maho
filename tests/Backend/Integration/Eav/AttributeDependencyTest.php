@@ -384,7 +384,9 @@ it('gives the storefront form the website of the store for a new customer', func
 });
 
 it('keeps a field that the admin form disabled out of the reach of a condition', function () {
-    $this->created[] = dependencyAttribute('customer', ['attribute_code' => $this->code], dependencyItaly());
+    $this->created[] = dependencyAttribute('customer', ['attribute_code' => $this->code], [
+        'website_id' => [(string) Mage::app()->getStore()->getWebsiteId()],
+    ]);
     $attribute = dependencyService()->getByCode($this->code, 'customer');
     $form = new \Maho\Data\Form();
     $fieldset = $form->addFieldset('pest', ['legend' => 'Pest']);
