@@ -252,6 +252,8 @@ describe('Product block', function () {
         $product = Mage::getResourceModel('catalog/product_collection')
             ->addAttributeToSelect('*')
             ->addAttributeToFilter('type_id', 'grouped')
+            // PostgreSQL keeps no row order, and a set whose items have one price gives one Offer
+            ->setOrder('entity_id', 'ASC')
             ->setPageSize(1)
             ->getFirstItem();
 
