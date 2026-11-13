@@ -33,6 +33,7 @@ class CmsPages extends AbstractCmsImporter
     {
         $rows = [];
         $attributes = Mage::getResourceSingleton('cms/page')->getCustomAttributes();
+        $defaults = array_filter(array_map(fn($attribute) => (string) $attribute->getDefaultValue(), $attributes), fn($value) => $value !== '');
         $outsideSet = [];
         foreach (Mage::getSingleton('eav/config')->getAttributes(\Mage_Cms_Model_Page::ENTITY) as $attribute) {
             $code = (string) $attribute->getAttributeCode();
@@ -63,8 +64,18 @@ class CmsPages extends AbstractCmsImporter
             foreach ($attributes as $code => $attribute) {
                 if (($row[$code] ?? '') !== '') {
                     $row['custom'][$code] = $this->customValue($file, $line, $attribute, $row[$code]);
-                } elseif ($row['page_id'] === null && $attribute->getIsRequired() && (string) $attribute->getDefaultValue() === '') {
-                    $this->fail($file, $line, "$code is required for a new page");
+                }
+            }
+            if ($row['page_id'] === null) {
+                // A condition reads the page that the save gets: the defaults of a new page, and 0 or 1 for the status
+                $page = Mage::getService('cms/page')->newPage()
+                    ->addData(array_filter(array_intersect_key($row, array_flip(self::TEXT_COLUMNS)), fn($value) => $value !== ''))
+                    ->addData($row['custom'] + $defaults)
+                    ->setData('is_active', (int) $row['is_active']);
+                foreach ($attributes as $code => $attribute) {
+                    if (!$page->hasData($code) && $attribute->getIsRequired() && !Mage::helper('eav')->isHidden($page, $attribute)) {
+                        $this->fail($file, $line, "$code is required for a new page");
+                    }
                 }
             }
             $rows[$line] = $row;
