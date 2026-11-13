@@ -71,7 +71,7 @@ it('creates a tree below the root, applies store overrides and reruns without du
         [$root, 'imp-cat', $store, 'Imp Cat Store', '', '', '', '', '', ''],
     ]);
 
-    expect((new Categories())->import($path, [Categories::OPTION_MEDIA_DIR => $mediaDir])->created)->toBe(2);
+    expect(new Categories()->import($path, [Categories::OPTION_MEDIA_DIR => $mediaDir])->created)->toBe(2);
 
     $parent = categoriesFind('imp-cat');
     expect($parent->getName())->toBe('Imp Cat');
@@ -91,17 +91,63 @@ it('creates a tree below the root, applies store overrides and reruns without du
     expect((int) $parent->getChildrenCount())->toBe(1);
     expect(Mage::getModel('catalog/category')->setStoreId(1)->load($parent->getId())->getName())->toBe('Imp Cat Store');
 
-    (new Categories())->import($path, [Categories::OPTION_MEDIA_DIR => $mediaDir]);
+    new Categories()->import($path, [Categories::OPTION_MEDIA_DIR => $mediaDir]);
     expect(Mage::getResourceModel('catalog/category_collection')->addAttributeToFilter('url_key', 'imp-cat')->count())->toBe(1);
     unlink($path);
     unlink($mediaDir . '/imp-cat.png');
     rmdir($mediaDir);
 });
 
+it('queues the resized files of the category image instead of creating them', function (): void {
+    $spy = new class extends Mage_Core_Model_Image_Resizer {
+        /** @var list<array{string, list<string>}> */
+        public array $created = [];
+        /** @var list<array{string, list<string>}> */
+        public array $queued = [];
+
+        #[\Override]
+        public function createFiles(string $entity, iterable $files, ?array $settingsList = null, ?array $existing = null, ?callable $onFile = null, ?callable $onFailure = null): int
+        {
+            $this->created[] = [$entity, [...$files]];
+            return 0;
+        }
+
+        #[\Override]
+        public function queue(string $entity, array $files): void
+        {
+            if ($files !== []) {
+                $this->queued[] = [$entity, array_values($files)];
+            }
+        }
+    };
+    $original = Mage::registry('_singleton/core/image_resizer');
+    Mage::unregister('_singleton/core/image_resizer');
+    Mage::register('_singleton/core/image_resizer', $spy);
+    $mediaDir = sys_get_temp_dir() . '/imp-cat-media-' . uniqid();
+    mkdir($mediaDir);
+    imagepng(imagecreatetruecolor(4, 4), $mediaDir . '/imp-cat.png');
+    $path = categoriesCsv([['_root', '_path', 'name', 'image'], [categoriesRootName(), 'imp-cat', 'Imp Cat', 'imp-cat.png']]);
+
+    try {
+        new Categories()->import($path, [Categories::OPTION_MEDIA_DIR => $mediaDir]);
+
+        expect($spy->created)->toBe([])
+            ->and($spy->queued)->toBe([[Mage_Catalog_Model_Category_Image::ENTITY, ['imp-cat.png']]]);
+    } finally {
+        Mage::unregister('_singleton/core/image_resizer');
+        if ($original !== null) {
+            Mage::register('_singleton/core/image_resizer', $original);
+        }
+        unlink($path);
+        unlink($mediaDir . '/imp-cat.png');
+        rmdir($mediaDir);
+    }
+});
+
 it('reads back the file of export:categories', function (): void {
     $root = categoriesRootName();
     $source = categoriesCsv([['_root', '_path', 'name', 'description'], [$root, 'imp-cat', 'Imp Cat', 'Exported text']]);
-    (new Categories())->import($source);
+    new Categories()->import($source);
     $exported = tempnam(sys_get_temp_dir(), 'categories-export') . '.csv';
     Mage::getModel('importexport/export')
         ->setData(['entity' => 'catalog_category', 'file_format' => 'csv', 'export_filter' => ['url_key' => 'imp-cat']])
@@ -109,7 +155,7 @@ it('reads back the file of export:categories', function (): void {
         ->exportFile();
     categoriesCleanup();
 
-    (new Categories())->import($exported);
+    new Categories()->import($exported);
 
     expect(categoriesFind('imp-cat')->getDescription())->toBe('Exported text');
     unlink($source);
