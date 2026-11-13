@@ -26,6 +26,18 @@ spl_autoload_register(function (string $class): void {
     }
 });
 
+// In a parallel run, Pest gives each worker a TEST_TOKEN from 1 to N. Each worker uses
+// its own copy of the database (maho_N, or maho_N.sqlite) and its own var directory,
+// so a config write or a cache flush in one worker does not reach the other workers.
+// CI creates the copies before the run, see the backend slice in pest.yml.
+$workerToken = getenv('TEST_TOKEN');
+if (is_string($workerToken) && ctype_digit($workerToken)) {
+    $localXml = simplexml_load_file(dirname(__DIR__) . '/app/etc/local.xml');
+    $dbName = (string) $localXml->global->resources->default_setup->connection->dbname;
+    putenv('MAHO_DB_NAME=' . preg_replace('/(\.sqlite)?$/', '_' . $workerToken . '$1', $dbName, 1));
+    putenv('MAHO_VAR_DIR=' . dirname(__DIR__) . '/var/worker_' . $workerToken);
+}
+
 // For frontend tests:
 // uses(Tests\MahoFrontendTestCase::class);
 

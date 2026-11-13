@@ -161,7 +161,7 @@ class Mage_Core_Model_Config_Options extends \Maho\DataObject
     public function getVarDir()
     {
         //$dir = $this->getDataSetDefault('var_dir', $this->getBaseDir().DS.'var');
-        $dir = $this->_data['var_dir'] ?? ($this->_data['base_dir'] . DS . self::VAR_DIRECTORY);
+        $dir = $this->_data['var_dir'] ?? (getenv('MAHO_VAR_DIR') ?: $this->_data['base_dir'] . DS . self::VAR_DIRECTORY);
         if (!$this->createDirIfNotExists($dir)) {
             $dir = $this->getSysTmpDir() . DS . 'magento' . DS . 'var';
             if (!$this->createDirIfNotExists($dir)) {
