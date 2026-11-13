@@ -337,10 +337,10 @@ jobs:
             ./vendor/bin/pest $ARGS --shard=${{ matrix.slice.shard }}
           fi
 
-      # Pest also writes the timings when a test fails. "Refresh Test Shards" then opens a
-      # pull request with them, so the failure gets a fix.
+      # Pest writes the timings only when every test passed. Otherwise the file is still the
+      # committed one, so nothing is uploaded.
       - name: Upload the refreshed shard timings
-        if: ${{ !cancelled() && env.REFRESH_SHARDS == 'true' }}
+        if: env.REFRESH_SHARDS == 'true'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: shards-json
