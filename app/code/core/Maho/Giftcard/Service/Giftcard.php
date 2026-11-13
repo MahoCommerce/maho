@@ -88,12 +88,13 @@ class Maho_Giftcard_Service_Giftcard
 
     /**
      * Save $giftcard. The model checks the status, the code, the websites and the balance. A changed balance of
-     * an existing card is an adjustment with a history entry that holds $comment, see update().
+     * an existing card is an adjustment with a history entry that holds $comment, see update(). Give
+     * $expectedBalance when the client saw a balance before it sent the new one.
      *
      * @throws Mage_Core_Exception_Input
-     * @throws Mage_Core_Exception_Conflict when another card has the code
+     * @throws Mage_Core_Exception_Conflict when another card has the code, or the stored balance is not $expectedBalance
      */
-    public function save(Maho_Giftcard_Model_Giftcard $giftcard, ?string $comment = null): Maho_Giftcard_Model_Giftcard
+    public function save(Maho_Giftcard_Model_Giftcard $giftcard, ?string $comment = null, ?float $expectedBalance = null): Maho_Giftcard_Model_Giftcard
     {
         $balance = (float) $giftcard->getData('balance');
         // A card that was not loaded has no stored balance to compare with
@@ -101,22 +102,27 @@ class Maho_Giftcard_Service_Giftcard
         if ($giftcard->getId() && $storedBalance !== null && $balance !== (float) $storedBalance) {
             // adjustBalance() is the only writer of the balance of an existing card
             $giftcard->setData('balance', (float) $storedBalance);
-            return $this->update($giftcard, $balance, null, $comment);
+            return $this->update($giftcard, $balance, null, $comment, $expectedBalance);
         }
         $giftcard->save();
         return $giftcard;
     }
 
     /**
-     * Give $giftcard the balance $newBalance and write a history entry with $comment.
+     * Give $giftcard the balance $newBalance and write a history entry with $comment. $expectedBalance is the
+     * balance that the client saw. When $newBalance is that balance, the client did not change it, and the card
+     * keeps its stored balance, also when a refund changed it since.
      *
      * @throws Mage_Core_Exception_Input when the model refuses the balance: below zero or above the highest balance
+     * @throws Mage_Core_Exception_Conflict when the stored balance is not $expectedBalance
      */
-    public function adjustBalance(Maho_Giftcard_Model_Giftcard $giftcard, float $newBalance, ?string $comment = null): Maho_Giftcard_Model_Giftcard
+    public function adjustBalance(Maho_Giftcard_Model_Giftcard $giftcard, float $newBalance, ?string $comment = null, ?float $expectedBalance = null): Maho_Giftcard_Model_Giftcard
     {
-        if ($newBalance !== (float) $giftcard->getBalance()) {
-            $giftcard->adjustBalance($newBalance, $comment);
+        if ($expectedBalance !== null && round($newBalance - $expectedBalance, 4) === 0.0) {
+            return $giftcard;
         }
+        // The model compares with the stored balance, which can differ from the loaded one
+        $giftcard->adjustBalance($newBalance, $comment, $expectedBalance);
         return $giftcard;
     }
 
@@ -125,15 +131,15 @@ class Maho_Giftcard_Service_Giftcard
      * change fails, nothing is saved. An explicit status wins over the status that the new balance gives.
      *
      * @throws Mage_Core_Exception_Input
-     * @throws Mage_Core_Exception_Conflict when another card has the code
+     * @throws Mage_Core_Exception_Conflict when another card has the code, or the stored balance is not $expectedBalance
      */
-    public function update(Maho_Giftcard_Model_Giftcard $giftcard, ?float $balance, ?string $status, ?string $comment = null): Maho_Giftcard_Model_Giftcard
+    public function update(Maho_Giftcard_Model_Giftcard $giftcard, ?float $balance, ?string $status, ?string $comment = null, ?float $expectedBalance = null): Maho_Giftcard_Model_Giftcard
     {
         $resource = $giftcard->getResource();
         $resource->beginTransaction();
         try {
             if ($balance !== null) {
-                $this->adjustBalance($giftcard, $balance, $comment);
+                $this->adjustBalance($giftcard, $balance, $comment, $expectedBalance);
             }
             if ($status !== null && $status !== $giftcard->getStatus()) {
                 $giftcard->setStatus($status);

@@ -98,6 +98,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
                 'code' => ['type' => 'String!', 'description' => 'Gift card code'],
                 'newBalance' => ['type' => 'Float!', 'description' => 'New balance amount'],
                 'comment' => ['type' => 'String', 'description' => 'Reason for adjustment'],
+                'expectedBalance' => ['type' => 'Float', 'description' => 'The balance that the client saw. A different stored balance gives a conflict, and a newBalance equal to it keeps the stored balance'],
             ],
             description: 'Adjust gift card balance',
             security: "is_granted('ROLE_ADMIN') or is_granted('giftcards/write')",
@@ -181,6 +182,13 @@ class GiftCard extends CrudResource
     /** Not persisted on the card: recorded as the giftcard_history comment of a balance adjustment. */
     #[ApiProperty(readable: false)]
     public ?string $comment = null;
+
+    /**
+     * The balance that the client saw before it sent the new one. A different stored balance gives a 409, and a
+     * balance equal to this one keeps the stored balance. The admin edit form sends it too.
+     */
+    #[ApiProperty(readable: false)]
+    public ?float $expectedBalance = null;
 
     /**
      * Balance change log, newest first. Populated only on the permission-gated

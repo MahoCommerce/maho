@@ -163,20 +163,68 @@ $giftcard->use(
 $giftcard->refund(
     $baseAmount,
     $orderId,
-    'Refund for credit memo #456'
+    'Refund for credit memo #456',
+    $storeId               // Store whose refund expiration extension applies
 );
-// Automatically reverts status from "used" to "active" if applicable
 ```
+
+Credit memos and order cancellations call `refund()` for each gift card of the order.
+
+- The card becomes active, also when it was used or disabled.
+- When **Refund Expiration Extension** is above 0, a card that expires within that many days gets
+  an expiry date that many days from now. The history comment records the extension.
+- When the extension is 0, an expired card stays expired.
+
+`refund()` does not call `save()`, so the gift card model-save events do not run. The history
+model-save events still run.
 
 #### Admin Balance Adjustment
 
 ```php
 $giftcard->adjustBalance(
     $newBalance,
-    'Customer service adjustment'
+    'Customer service adjustment',
+    $shownBalance          // Optional: the balance that the person saw
 );
 // Creates history entry with admin user ID
 ```
+
+The history entry records the change from the stored balance, not from the loaded one. A balance
+of 0 makes the card used, and a positive balance makes a used card active. A new balance that is
+the stored balance changes nothing and writes no history. When you give `$shownBalance` and the
+stored balance is different, the method throws `Mage_Core_Exception_Conflict` and changes nothing.
+
+A balance that is not a finite number, below 0, or above the **Maximum Balance** of the card gives
+a `Mage_Core_Exception_Input` on the `balance` field.
+
+`save()`, `update()` and `adjustBalance()` of the service take the balance that the client saw as
+`$expectedBalance`. The admin edit form sends it, and the API takes it as `expectedBalance`, so the
+two transports follow the same rules:
+
+- A stored balance that is not `$expectedBalance` gives a conflict (409), and nothing changes.
+- A new balance equal to `$expectedBalance` means that the client did not change the balance. The
+  card keeps its stored balance, so a refund that ran meanwhile stays.
+
+#### Who Writes the Balance
+
+Only `use()`, `useUpTo()`, `refund()` and `adjustBalance()` change the balance of a saved card.
+They share one protected method, `_changeBalance()`:
+
+- It locks the row of the card and reads the stored balance, status and expiry date, so two
+  requests cannot change the same balance at the same time.
+- It writes the new values and the history entry in one transaction. Inside a transaction of the
+  caller, a savepoint undoes a failed change and keeps the earlier work of the caller. A
+  successful change stays in that transaction until the caller commits or rolls it back.
+- It copies the stored and the written values into the model, and keeps the other unsaved changes
+  of the model, so `Maho_Giftcard_Service_Giftcard::update()` saves them after an adjustment.
+- Each method refuses an amount that is not a finite number.
+
+`save()` writes the balance of a new card only:
+
+- A `save()` that changes the balance of a saved card throws a `LogicException` and saves nothing.
+  Call `adjustBalance()` instead. `Maho_Giftcard_Service_Giftcard::save()` does this for you.
+- A `save()` of a card that was loaded before a refund does not write the `balance` column, so the
+  refund stays.
 
 ### Creating Gift Cards Programmatically
 
@@ -376,7 +424,7 @@ Executes on credit memo refund:
 - Uses row locking to prevent race conditions
 - Calculates proportional refund for partial gift card orders
 - For full coverage orders, refunds entire credit memo amount
-- Updates gift card status back to active if was "used"
+- Updates gift card status back to active if it was "used" or "disabled"
 - **Extends expiration** if the card is expired or will expire within the configured extension period:
     - Compares card's `expires_at` to `now + refund_expiration_extension` days
     - If card expires sooner, extends to the full extension period from now
@@ -390,7 +438,7 @@ Executes when an order is canceled:
 
 - Uses row locking to prevent race conditions
 - Restores the full gift card balance for all applied gift cards
-- Updates gift card status back to active if was "used"
+- Updates gift card status back to active if it was "used" or "disabled"
 - **Extends expiration** using the same logic as credit memo refunds:
     - Compares card's `expires_at` to `now + refund_expiration_extension` days
     - If card expires sooner, extends to the full extension period from now

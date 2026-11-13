@@ -101,9 +101,14 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
 
         $this->_title($model->getId() ? $model->getCode() : Mage::helper('giftcard')->__('New Gift Card'));
 
+        $storedBalance = $model->getBalance();
         $data = Mage::getSingleton('adminhtml/session')->getFormData(true);
         if (is_array($data) && $data !== []) {
             $model->setData($data);
+        }
+        if ($model->getId()) {
+            // The save compares the posted balance with this one, also after a failed save
+            $model->setData('shown_balance', $storedBalance);
         }
 
         Mage::register('current_giftcard', $model);
@@ -133,13 +138,17 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             $websiteIds = $saveData['website_ids'] ?? null;
             unset($saveData['website_ids']);
 
+            // The balance that the form showed: a refund can change the stored one meanwhile
+            $shownBalance = $model->getId() && is_numeric($saveData['shown_balance'] ?? null) ? (float) $saveData['shown_balance'] : null;
+            unset($saveData['shown_balance']);
+
             // A form that does not post the balance keeps the balance of the card
             $saveData['balance'] ??= $model->getData('balance');
             $model->setData($saveData);
             if ($websiteIds !== null) {
                 $model->setWebsiteIds(is_array($websiteIds) ? $websiteIds : [$websiteIds]);
             }
-            $this->getService()->save($model, $saveData['comment'] ?? 'Admin adjustment');
+            $this->getService()->save($model, $saveData['comment'] ?? 'Admin adjustment', $shownBalance);
 
             $session->addSuccess(Mage::helper('giftcard')->__('The gift card has been saved.'));
             $session->setFormData(false);

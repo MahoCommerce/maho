@@ -89,6 +89,21 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
     }
 
     /**
+     * Leave out the balance of an existing card. Only use(), useUpTo(), refund() and adjustBalance() change it,
+     * under a row lock, so a save of a card that was loaded earlier cannot replace a newer balance. The model
+     * refuses a save that changes the balance.
+     */
+    #[\Override]
+    protected function _prepareDataForSave(Mage_Core_Model_Abstract $object)
+    {
+        $data = parent::_prepareDataForSave($object);
+        if ($object->getId()) {
+            unset($data['balance']);
+        }
+        return $data;
+    }
+
+    /**
      * Return whether a card other than $exceptId has $code. Codes do not differ by case only, because loadByCode() ignores the case.
      */
     protected function _isCodeUsed(string $code, int $exceptId): bool

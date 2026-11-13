@@ -811,9 +811,7 @@ describe('Observer: Refund Gift Card on Order Cancel', function (): void {
         $order->setGiftcardCodes(json_encode([$code => 50.00]));
         $order->save();
 
-        // Simulate order placement to deduct balance
-        $giftcard->setBalance(50.00);
-        $giftcard->save();
+        $giftcard->use(50.00);
 
         // Verify balance was deducted
         $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
@@ -887,11 +885,8 @@ describe('Observer: Refund Gift Card on Order Cancel', function (): void {
         ]));
         $order->save();
 
-        // Deduct balances
-        $giftcard1->setBalance(20.00);
-        $giftcard1->save();
-        $giftcard2->setBalance(35.00);
-        $giftcard2->save();
+        $giftcard1->use(80.00);
+        $giftcard2->use(40.00);
 
         // Verify balances were deducted
         $giftcard1 = Mage::getModel('giftcard/giftcard')->loadByCode($code1);
@@ -966,9 +961,7 @@ describe('Observer: Refund Gift Card on Order Cancel', function (): void {
         $order->setGiftcardCodes(json_encode([$code => 50.00]));
         $order->save();
 
-        // Deduct balance
-        $giftcard->setBalance(50.00);
-        $giftcard->save();
+        $giftcard->use(50.00);
 
         // Set extension days config (default is 30 days)
         $originalExtension = Mage::getStoreConfig('giftcard/general/refund_expiration_extension');
@@ -994,5 +987,45 @@ describe('Observer: Refund Gift Card on Order Cancel', function (): void {
         $minExpectedExpiration->modify('+25 days');
 
         expect($newExpiresAt->getTimestamp())->toBeGreaterThan($minExpectedExpiration->getTimestamp());
+    });
+
+    test('skips a gift card whose share of a cancel rounds to 0', function (): void {
+        $cards = [];
+        foreach (['A' => 0.01, 'B' => 99.99] as $name => $applied) {
+            $cards[$name] = Mage::getModel('giftcard/giftcard')
+                ->setCode("CANCEL-ZERO-{$name}-" . uniqid())
+                ->setBalance(0.0)
+                ->setInitialBalance(100.0)
+                ->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED)
+                ->setWebsiteIds([1])
+                ->save();
+        }
+        $order = Mage::getModel('sales/order');
+        $order->setIncrementId('CANCEL-ZERO-' . uniqid());
+        $order->setStoreId(1);
+        $order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
+        $order->setStatus('pending_payment');
+        $order->setGrandTotal(0.0);
+        $order->setBaseGrandTotal(0.0);
+        $order->setGiftcardAmount(1.0);
+        $order->setBaseGiftcardAmount(1.0);
+        $order->setGiftcardCodes(json_encode([
+            $cards['A']->getCode() => 0.01,
+            $cards['B']->getCode() => 99.99,
+        ]));
+        $order->save();
+
+        $event = new Maho\Event();
+        $event->setOrder($order);
+        $eventObserver = new Maho\Event\Observer();
+        $eventObserver->setEvent($event);
+
+        Mage::getModel('giftcard/observer')->refundGiftcardOnOrderCancel($eventObserver);
+
+        $refundRows = fn(Maho_Giftcard_Model_Giftcard $card) => $card->getHistoryCollection()
+            ->addFieldToFilter('action', Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED)->getSize();
+        $b = Mage::getModel('giftcard/giftcard')->load($cards['B']->getId());
+        expect($refundRows($cards['A']))->toBe(0)
+            ->and((float) $b->getBalance())->toBe(1.0);
     });
 });

@@ -93,14 +93,32 @@ describe('Giftcard CRUD Operations', function () {
 
         // Update
         $giftcard->setMessage('Updated message');
-        $giftcard->setBalance(50.00);
         $giftcard->save();
 
-        // Reload and verify
         $reloaded = Mage::getModel('giftcard/giftcard')->load($id);
         expect($reloaded->getMessage())->toBe('Updated message');
-        expect((float) $reloaded->getBalance())->toBe(50.00);
+        expect((float) $reloaded->getBalance())->toBe(100.00);
         expect((float) $reloaded->getInitialBalance())->toBe(100.00); // Unchanged
+    });
+
+    test('refuses a save that changes the balance of a saved card, and saves nothing', function () {
+        $giftcard = Mage::getModel('giftcard/giftcard')
+            ->setCode(Mage::helper('giftcard')->generateCode())
+            ->setWebsiteIds([1])
+            ->setBalance(100.00)
+            ->setMessage('Original message');
+        $giftcard->save();
+
+        $loaded = Mage::getModel('giftcard/giftcard')->load($giftcard->getId());
+        foreach ([$giftcard, $loaded] as $card) {
+            expect(fn() => $card->setMessage('Updated message')->setBalance(50.00)->save())
+                ->toThrow(LogicException::class, 'Call adjustBalance()');
+        }
+
+        $reloaded = Mage::getModel('giftcard/giftcard')->load($giftcard->getId());
+        expect((float) $reloaded->getBalance())->toBe(100.00)
+            ->and($reloaded->getMessage())->toBe('Original message');
+        $reloaded->delete();
     });
 
     test('can delete gift card', function () {
