@@ -161,7 +161,7 @@ class Mage_Core_Service_Config
             ->setGroupsSelector($groups)
             ->save();
 
-        $this->afterChange($section, $website ?: null, $store ?: null);
+        $this->afterChanges([[$section, $website ?: null, $store ?: null]]);
     }
 
     /**
@@ -285,16 +285,8 @@ class Mage_Core_Service_Config
         if (!Mage::getModel('adminhtml/config_data')->deleteValue($path, $scope, $scopeId)) {
             return false;
         }
-        $this->afterChange($this->getFields()[$path]['section'] ?? explode('/', $path)[0], ...$this->scopeCodes($scope, $scopeId));
+        $this->afterChanges([[$this->getFields()[$path]['section'] ?? explode('/', $path)[0], ...$this->scopeCodes($scope, $scopeId)]]);
         return true;
-    }
-
-    /**
-     * Reload the configuration and tell the observers of the section, as after a save in the admin.
-     */
-    protected function afterChange(string $section, ?string $website, ?string $store): void
-    {
-        $this->afterChanges([[$section, $website, $store]]);
     }
 
     /**
