@@ -338,6 +338,7 @@ jobs:
             tests/Browser/Screenshots/
             var/log/
             var/workers/*/var/log/
+            var/workers/worker-*.log
           if-no-files-found: ignore
           retention-days: 7
 
@@ -537,5 +538,6 @@ jobs:
             tests/Browser/Screenshots/
             var/log/
             var/workers/*/var/log/
+            var/workers/worker-*.log
           if-no-files-found: ignore
           retention-days: 7

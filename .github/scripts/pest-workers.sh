@@ -16,6 +16,10 @@ set -euo pipefail
 
 ROOT="$PWD"
 WORKERS="${PEST_WORKERS:?}"
+if ! [[ "$WORKERS" =~ ^[1-9][0-9]*$ ]]; then
+    echo "PEST_WORKERS must be a positive integer." >&2
+    exit 1
+fi
 DB_NAME="$(php -r 'echo simplexml_load_file("app/etc/local.xml")->global->resources->default_setup->connection->dbname;')"
 if [ "$DB_ENGINE" = "sqlite" ] && [[ "$DB_NAME" == /* ]]; then
     echo "The SQLite path in local.xml must be relative to var/db, so that each copy finds its own file."
