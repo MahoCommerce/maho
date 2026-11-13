@@ -96,6 +96,7 @@ class Orders extends AbstractImporter
             }
         }
         $stock = $this->stockOf(array_values($productIds));
+        $restored = [];
         $now = time();
         $done = 0;
         foreach ($rows as $line => $row) {
@@ -110,12 +111,16 @@ class Orders extends AbstractImporter
                 $this->fail($file, $line, $e->getMessage());
             } finally {
                 // Every order puts the stock back, so the next orders of a popular product still find it.
-                $this->restoreStock($stock, $row['lines']);
+                $restored += $this->restoreStock($stock, $row['lines']);
             }
             // A few minutes from the reference, so the orders of one hour do not share a time.
             $seconds = (int) $row['hours_ago'] * 3600 + crc32($row['reference']) % 3600;
             $this->moveDates((int) $order->getId(), gmdate('Y-m-d H:i:s', $now - $seconds));
             $result->created++;
+        }
+        if ($restored !== []) {
+            // An order reindexes the prices of its products while their stock is low, so they follow the stock back
+            Mage::getResourceSingleton('catalog/product_indexer_price')->reindexProductIds(array_values($restored));
         }
         if ($result->created > 0 && !($options[self::OPTION_SKIP_STATISTICS] ?? false)) {
             Mage::getModel('reports/statistics')->refreshLifetime(self::STATISTICS);
@@ -295,12 +300,14 @@ class Orders extends AbstractImporter
 
     /**
      * Puts the stock of the products of an order back as it was before the import: placing an order
-     * takes stock, and cancelling one gives it back.
+     * takes stock, and cancelling one gives it back. A save of the stock item would reindex each product
+     * and clean its cache, so the update writes the two columns and reindexes the stock status only.
      *
      * @param array<int, array{qty: float, is_in_stock: bool}> $stock
      * @param list<array{product_id: int, parent_id: int|null, qty: int}> $lines
+     * @return array<int, int> the products that got their stock back, by ID
      */
-    private function restoreStock(array $stock, array $lines): void
+    private function restoreStock(array $stock, array $lines): array
     {
         $productIds = [];
         foreach ($lines as $orderLine) {
@@ -309,17 +316,26 @@ class Orders extends AbstractImporter
                 $productIds[] = $orderLine['parent_id'];
             }
         }
-        foreach (array_unique($productIds) as $productId) {
-            if (!isset($stock[$productId])) {
+        $now = $this->stockOf(array_values(array_unique($productIds)));
+        $restored = [];
+        $resource = Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        foreach ($now as $productId => $is) {
+            $was = $stock[$productId] ?? null;
+            if ($was === null || $is === $was) {
                 continue;
             }
-            $was = $stock[$productId];
-            $item = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId);
-            if ((float) $item->getQty() === $was['qty'] && (bool) $item->getIsInStock() === $was['is_in_stock']) {
-                continue;
-            }
-            $item->setQty($was['qty'])->setIsInStock($was['is_in_stock'])->save();
+            $write->update(
+                $resource->getTableName('cataloginventory/stock_item'),
+                ['qty' => $was['qty'], 'is_in_stock' => (int) $was['is_in_stock']],
+                ['product_id = ?' => $productId],
+            );
+            $restored[$productId] = $productId;
         }
+        if ($restored !== []) {
+            Mage::getResourceSingleton('cataloginventory/indexer_stock')->reindexProducts(array_values($restored));
+        }
+        return $restored;
     }
 
     private function regionId(CsvFile $file, int $line, string $countryId, string $region): ?int
