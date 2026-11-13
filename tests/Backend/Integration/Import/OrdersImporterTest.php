@@ -59,6 +59,29 @@ function stockQty(int $productId): float
     return (float) Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId)->getQty();
 }
 
+/**
+ * Give the product one unit in stock, with its own manage stock setting. Return the old values for addData().
+ *
+ * @return array<string, mixed>
+ */
+function stockOfOneUnit(int $productId): array
+{
+    $item = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId);
+    $was = ['qty' => $item->getQty(), 'is_in_stock' => $item->getIsInStock(), 'manage_stock' => $item->getManageStock(),
+        'use_config_manage_stock' => $item->getUseConfigManageStock()];
+    $item->setUseConfigManageStock(false)->setManageStock(true)->setQty(1)->setIsInStock(true)->save();
+    return $was;
+}
+
+function priceIndexRows(int $productId): int
+{
+    $read = Mage::getSingleton('core/resource')->getConnection('core_read');
+    return (int) $read->fetchOne($read->select()
+        ->from(Mage::getSingleton('core/resource')->getTableName('catalog/product_index_price'), [new Maho\Db\Expr('COUNT(*)')])
+        ->where('entity_id = ?', $productId)
+        ->where('website_id = ?', (int) Mage::app()->getStore(1)->getWebsiteId()));
+}
+
 function ordersCleanup(): void
 {
     $orders = Mage::getResourceModel('sales/order_collection')->addFieldToFilter('ext_order_id', ['like' => 'IMP-ORD-%']);
@@ -122,10 +145,7 @@ it('places an order for each status, dates it back and skips it on rerun', funct
 it('puts back the stock, the stock status and the price index of a product whose last unit an order takes', function (): void {
     $product = loadSimplePricedProduct();
     $productId = (int) $product->getId();
-    $item = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId);
-    $was = ['qty' => $item->getQty(), 'is_in_stock' => $item->getIsInStock(), 'manage_stock' => $item->getManageStock(),
-        'use_config_manage_stock' => $item->getUseConfigManageStock()];
-    $item->setUseConfigManageStock(false)->setManageStock(true)->setQty(1)->setIsInStock(true)->save();
+    $was = stockOfOneUnit($productId);
     $path = ordersCsv([ordersRow('IMP-ORD-LAST', 'pending', 1, 'imp.guest@example.org', $product->getSku() . ':1')]);
 
     try {
@@ -133,17 +153,32 @@ it('puts back the stock, the stock status and the price index of a product whose
 
         $item = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId);
         $status = Mage::getResourceSingleton('cataloginventory/stock_status')->getProductStatus([$productId], 1);
-        $read = Mage::getSingleton('core/resource')->getConnection('core_read');
-        $priceRows = $read->fetchOne($read->select()
-            ->from(Mage::getSingleton('core/resource')->getTableName('catalog/product_index_price'), [new Maho\Db\Expr('COUNT(*)')])
-            ->where('entity_id = ?', $productId)
-            ->where('website_id = ?', (int) Mage::app()->getStore(1)->getWebsiteId()));
         expect((float) $item->getQty())->toBe(1.0)
             ->and((bool) $item->getIsInStock())->toBeTrue()
             ->and($item->getLowStockDate())->toBeNull()
             ->and((int) $item->getStockStatusChangedAutomatically())->toBe(0)
             ->and((int) $status[$productId])->toBe(Mage_CatalogInventory_Model_Stock_Status::STATUS_IN_STOCK)
-            ->and((int) $priceRows)->toBeGreaterThan(0);
+            ->and(priceIndexRows($productId))->toBeGreaterThan(0);
+    } finally {
+        Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId)->addData($was)->save();
+        unlink($path);
+    }
+});
+
+it('puts back the price index of a product whose last unit an order takes, when a later row fails', function (): void {
+    $product = loadSimplePricedProduct();
+    $productId = (int) $product->getId();
+    $was = stockOfOneUnit($productId);
+    $item = $product->getSku() . ':1';
+    $path = ordersCsv([
+        [...ordersRow('IMP-ORD-PARTIAL-1', 'pending', 1, 'imp.guest@example.org', $item), ''],
+        [...ordersRow('IMP-ORD-PARTIAL-2', 'pending', 1, 'imp.guest@example.org', $item), 'NO-SUCH-COUPON'],
+    ], ['coupon_code']);
+
+    try {
+        expect(fn() => new Orders()->import($path, [Orders::OPTION_SKIP_STATISTICS => true]))
+            ->toThrow(RowException::class, "Coupon code 'NO-SUCH-COUPON' is not valid");
+        expect(priceIndexRows($productId))->toBeGreaterThan(0);
     } finally {
         Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId)->addData($was)->save();
         unlink($path);
