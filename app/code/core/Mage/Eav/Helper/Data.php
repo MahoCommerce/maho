@@ -157,20 +157,9 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function clearHiddenValues(\Maho\DataObject $object, iterable $attributes): array
     {
-        $data = $object->getData();
         $hidden = [];
         foreach ($attributes as $attribute) {
-            $condition = $attribute->getDependsOn();
-            if ($condition === null) {
-                continue;
-            }
-            // A partial load or update does not hold every field, and an unknown value must not delete data
-            foreach (\Maho\Data\Form\Condition::fields($condition) as $field) {
-                if (!array_key_exists($field, $data) || $data[$field] === false) {
-                    continue 2;
-                }
-            }
-            if (!$attribute->isDependencyMet($data)) {
+            if ($this->isHidden($object, $attribute)) {
                 $code = (string) $attribute->getAttributeCode();
                 $hidden[] = $code;
                 if ($object->getData($code) !== null) {
@@ -179,6 +168,26 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
             }
         }
         return $hidden;
+    }
+
+    /**
+     * Tell whether the condition of $attribute hides its field for the data of $object. A condition that reads a
+     * field that $object does not hold, or holds as false, does not hide it.
+     */
+    public function isHidden(\Maho\DataObject $object, Mage_Eav_Model_Entity_Attribute_Abstract $attribute): bool
+    {
+        $condition = $attribute->getDependsOn();
+        if ($condition === null) {
+            return false;
+        }
+        $data = $object->getData();
+        // A partial load or update does not hold every field, and an unknown value must not delete data
+        foreach (\Maho\Data\Form\Condition::fields($condition) as $field) {
+            if (!array_key_exists($field, $data) || $data[$field] === false) {
+                return false;
+            }
+        }
+        return !$attribute->isDependencyMet($data);
     }
 
     /**

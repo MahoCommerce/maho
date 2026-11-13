@@ -331,6 +331,43 @@ it('clears the value of a hidden field when the cart checks an address', functio
     expect($address->getData($this->code))->toBeNull();
 });
 
+it('does not require a hidden category field, and keeps no value for it', function () {
+    $setId = (int) Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Category::ENTITY)->getDefaultAttributeSetId();
+    $inSet = [
+        'attribute_set_id' => $setId,
+        'attribute_group_id' => (int) Mage::getModel('eav/entity_attribute_set')->load($setId)->getDefaultGroupId(),
+    ];
+    $this->created[] = dependencyAttribute('catalog_category', ['attribute_code' => $this->code, 'frontend_input' => 'boolean'] + $inSet);
+    $this->created[] = dependencyAttribute(
+        'catalog_category',
+        ['attribute_code' => $this->code . '_r', 'is_required' => 1] + $inSet,
+        [['operator' => 'AND', 'condition' => [$this->code => ['1']]]],
+    );
+    /** @var Mage_Catalog_Service_Category $service */
+    $service = Mage::getService('catalog/category');
+    $parentId = (int) Mage::app()->getDefaultStoreView()->getRootCategoryId();
+    $newCategory = fn(string $isBrand) => $service->newCategory($parentId)
+        ->setName('Pest Dependency ' . $this->code)->setIsActive(1)->setIncludeInMenu(1)->setData($this->code, $isBrand);
+    $hidden = $newCategory('0');
+    $shown = $newCategory('1');
+
+    try {
+        $legacyCheck = $hidden->validate();
+        $saved = $service->save($hidden);
+        expect($legacyCheck)->toBeTrue()
+            ->and(Mage::getModel('catalog/category')->load($saved->getId())->getData($this->code . '_r'))->toBeNull()
+            ->and(fn() => $service->save($shown))->toThrow(Mage_Core_Exception_Input::class, 'required');
+    } finally {
+        Mage::register('isSecureArea', true, true);
+        foreach ([$hidden, $shown] as $category) {
+            if ($category->getId()) {
+                Mage::getModel('catalog/category')->load($category->getId())->delete();
+            }
+        }
+        Mage::unregister('isSecureArea');
+    }
+});
+
 it('gives the storefront form the website of the store for a new customer', function () {
     $websiteId = (string) Mage::app()->getStore()->getWebsiteId();
     $this->created[] = dependencyAttribute('customer', [
