@@ -249,7 +249,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Addresses extends Mage_Adminhtml_Bl
                 foreach ($absent as $field) {
                     $value = $address->getData($field);
                     if ($value !== null && $value !== '') {
-                        $values[(int) $address->getId()][$field] = array_map(strval(...), is_array($value) ? array_values($value) : explode(',', (string) $value));
+                        $values[(int) $address->getId()][$field] = \Maho\Data\Form\Condition::fieldValues($value);
                     }
                 }
             }

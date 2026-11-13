@@ -169,7 +169,7 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
                 $values ??= $this->getAttributeDependenceValues();
                 $value = $values[$field] ?? null;
                 if ($value !== null && $value !== '') {
-                    $block->addFieldValue($field, array_map(strval(...), is_array($value) ? array_values($value) : explode(',', (string) $value)));
+                    $block->addFieldValue($field, \Maho\Data\Form\Condition::fieldValues($value));
                 }
             }
         }

@@ -52,13 +52,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
      */
     public function isLogicalOperator(?string $operator): bool
     {
-        $operators = [
-            self::MODE_NOT,
-            self::MODE_AND,
-            self::MODE_OR,
-            self::MODE_XOR,
-        ];
-        return in_array($operator, $operators);
+        return in_array($operator, \Maho\Data\Form\Condition::MODES, true);
     }
 
     /**

@@ -95,7 +95,7 @@ describe('Attribute dependencies (REST)', function (): void {
     it('lists the condition of the attribute', function (): void {
         $list = apiGet('/api/rest/v2/custom-attributes?entityType=customer_address', serviceToken(['custom-attributes/read']));
         $items = $list['json']['member'] ?? $list['json']['hydra:member'] ?? $list['json'];
-        $attribute = array_values(array_filter($items, fn(array $item): bool => ($item['code'] ?? '') === DEP_ATTR_CODE))[0] ?? null;
+        $attribute = array_first(array_filter($items, fn(array $item): bool => ($item['code'] ?? '') === DEP_ATTR_CODE)) ?? null;
 
         expect($list['status'])->toBe(200)
             ->and($attribute['dependsOn'] ?? null)->toBe([['operator' => 'AND', 'condition' => ['country_id' => ['IT']]]]);
@@ -129,6 +129,51 @@ describe('Attribute dependencies (REST)', function (): void {
 
         expect($created['status'])->toBeSuccessful()
             ->and($read['json']['customAttributes'] ?? [])->not->toHaveKey(DEP_ATTR_CODE);
+    });
+
+    it('keeps the value of a field that the country of the same place-order body shows', function (): void {
+        $sku = 'pest-dep-attr-' . uniqid();
+        $product = Mage::getModel('catalog/product')->setStoreId(0)
+            ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+            ->setAttributeSetId(Mage::getModel('catalog/product')->getDefaultAttributeSetId())
+            ->setSku($sku)->setName('Pest dependency product')->setUrlKey($sku)->setPrice(10.0)->setWeight(1)
+            ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+            ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
+            ->setTaxClassId(0)->setWebsiteIds([1])
+            ->setStockData(['use_config_manage_stock' => 0, 'manage_stock' => 0, 'is_in_stock' => 1, 'qty' => 100]);
+        $product->save();
+        trackCreated('product', (int) $product->getId());
+        $token = customerToken();
+        $cartId = (int) apiPost('/api/rest/v2/carts', [], $token)['json']['id'];
+        trackCreated('quote', $cartId);
+        $address = [
+            'firstName' => 'Pest', 'lastName' => 'Dependency', 'street' => ['Via Roma 1'], 'city' => 'Milano',
+            'postcode' => '20121', 'countryId' => 'IT', 'telephone' => '+39 02 1234567',
+            'customAttributes' => [DEP_ATTR_CODE => 'ABC1234'],
+        ];
+        $order = null;
+
+        try {
+            expect(apiPost("/api/rest/v2/carts/{$cartId}/items", ['sku' => $sku, 'qty' => 1], $token)['status'])->toBeIn([200, 201]);
+            $response = apiPost("/api/rest/v2/carts/{$cartId}/place-order", [
+                'shippingAddress' => $address,
+                'billingAddress' => $address,
+                'paymentMethod' => 'checkmo',
+                'shippingMethod' => 'flatrate_flatrate',
+            ], $token);
+            expect($response['status'])->toBeIn([200, 201]);
+            $order = Mage::getModel('sales/order')->loadByIncrementId((string) $response['json']['incrementId']);
+
+            expect($order->getShippingAddress()->getData(DEP_ATTR_CODE))->toBe('ABC1234')
+                ->and($order->getBillingAddress()->getData(DEP_ATTR_CODE))->toBe('ABC1234');
+        } finally {
+            if ($order?->getId()) {
+                Mage::register('isSecureArea', true, true);
+                $order->delete();
+                Mage::unregister('isSecureArea');
+            }
+            cleanupTestData();
+        }
     });
 
 });

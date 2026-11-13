@@ -469,6 +469,11 @@ class formElementDependenceController {
      */
     constructor(elementsMap, config = {}) {
         this.config = config;
+        // A field that uses the default value is disabled only until the admin unchecks its Use Default box
+        this.config.keep_disabled = config.keep_disabled?.filter((id) => {
+            const inheritCheckboxEl = document.getElementById(id + '_inherit') ?? document.getElementById(id + '_default');
+            return !(inheritCheckboxEl?.checked && !inheritCheckboxEl.disabled);
+        });
         for (let [targetField, condition] of Object.entries(elementsMap)) {
             this.trackChange(null, targetField, condition);
             this.bindEventListeners(condition, [targetField, condition]);

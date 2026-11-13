@@ -231,17 +231,10 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
             }
             $label = (string) $attribute->getFrontend()->getLabel();
             if (!$page->hasData($code)) {
-                if ($page->getId()) {
-                    continue;
+                if (!$page->getId() && $attribute->getIsRequired()) {
+                    $errors->addError($fieldPrefix . $code, $helper->__('"%s" is a required value.', $label));
                 }
-                $default = (string) $attribute->getDefaultValue();
-                if ($default === '') {
-                    if ($attribute->getIsRequired()) {
-                        $errors->addError($fieldPrefix . $code, $helper->__('"%s" is a required value.', $label));
-                    }
-                    continue;
-                }
-                $page->setData($code, $default);
+                continue;
             }
 
             $value = $page->getData($code);

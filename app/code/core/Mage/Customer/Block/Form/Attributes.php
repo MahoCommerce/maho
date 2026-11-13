@@ -152,7 +152,7 @@ class Mage_Customer_Block_Form_Attributes extends Mage_Core_Block_Template
                     $value = Mage::app()->getStore()->getWebsiteId();
                 }
                 if ($value !== null && $value !== '') {
-                    $values[$field] = array_map(strval(...), is_array($value) ? array_values($value) : explode(',', (string) $value));
+                    $values[$field] = \Maho\Data\Form\Condition::fieldValues($value);
                 }
             }
         }

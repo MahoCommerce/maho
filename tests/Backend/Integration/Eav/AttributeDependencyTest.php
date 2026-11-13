@@ -290,3 +290,70 @@ it('applies the defaults and the status of a new CMS page before it checks a con
         ->and($page->getData($this->code . '_r'))->toBeNull()
         ->and($page->getData($this->code . '_s'))->toBeNull();
 });
+
+it('refuses a condition that is not valid JSON', function () {
+    $attribute = dependencyService()->newAttribute('customer_address')->addData([
+        'attribute_code' => $this->code,
+        'frontend_input' => 'text',
+        'frontend_label' => ['Pest Dependency'],
+        'depends_on' => '{bad',
+    ]);
+
+    expect(fn() => dependencyService()->save($attribute))->toThrow(Mage_Core_Exception_Input::class, 'The condition is not valid JSON.');
+});
+
+it('lets the condition of a blog attribute read the status', function (string $entityType) {
+    $condition = [['operator' => 'AND', 'condition' => ['is_active' => ['1']]]];
+    $this->created[] = dependencyAttribute($entityType, ['attribute_code' => $this->code], $condition);
+
+    expect(dependencyService()->getByCode($this->code, $entityType)->getDependsOn())->toBe($condition);
+})->with([Maho_Blog_Model_Post::ENTITY, Maho_Blog_Model_Category::ENTITY]);
+
+it('clears the value of a hidden field when the cart checks an address', function () {
+    $this->created[] = dependencyAttribute('customer_address', [
+        'attribute_code' => $this->code,
+        'used_in_forms' => ['customer_address_edit'],
+    ], dependencyItaly());
+    $address = Mage::getModel('sales/quote_address')->setData([
+        'firstname' => 'Pest',
+        'lastname' => 'Dependency',
+        'street' => '1 Main St',
+        'city' => 'Los Angeles',
+        'region_id' => 12,
+        'postcode' => '90001',
+        'telephone' => '555',
+        'country_id' => 'US',
+        $this->code => 'X',
+    ]);
+
+    Mage::getService('checkout/cart')->validateAddress($address);
+
+    expect($address->getData($this->code))->toBeNull();
+});
+
+it('gives the storefront form the website of the store for a new customer', function () {
+    $websiteId = (string) Mage::app()->getStore()->getWebsiteId();
+    $this->created[] = dependencyAttribute('customer', [
+        'attribute_code' => $this->code,
+        'used_in_forms' => ['customer_account_create'],
+    ], ['website_id' => [$websiteId]]);
+    $block = new Mage_Customer_Block_Form_Attributes();
+    $block->setCustomerForm('customer_account_create', Mage::getModel('customer/customer'));
+
+    $json = Mage::helper('core')->jsonDecode($block->getDependenceJson());
+
+    expect($json['depends'])->toHaveKey($this->code)
+        ->and($json['values']['website_id'] ?? null)->toBe([$websiteId]);
+});
+
+it('keeps a field that the admin form disabled out of the reach of a condition', function () {
+    $this->created[] = dependencyAttribute('customer', ['attribute_code' => $this->code], dependencyItaly());
+    $attribute = dependencyService()->getByCode($this->code, 'customer');
+    $form = new \Maho\Data\Form();
+    $fieldset = $form->addFieldset('pest', ['legend' => 'Pest']);
+    $disabled = $fieldset->addField($this->code, 'text', ['name' => $this->code, 'disabled' => true])->setEntityAttribute($attribute);
+    $block = new class extends Mage_Adminhtml_Block_Widget_Form {};
+    $block->setLayout(Mage::app()->getLayout())->setForm($form);
+
+    expect($block->toHtml())->toContain('"keep_disabled":["' . $disabled->getHtmlId() . '"]');
+});

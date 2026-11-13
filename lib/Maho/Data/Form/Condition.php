@@ -129,9 +129,11 @@ final class Condition
     }
 
     /**
+     * Return the value of a field as a list of strings. A list or a comma string is a multiselect value.
+     *
      * @return list<string>
      */
-    private static function fieldValues(mixed $value): array
+    public static function fieldValues(mixed $value): array
     {
         if ($value === null || $value === false) {
             return [];
