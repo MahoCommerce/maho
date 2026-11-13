@@ -10,7 +10,9 @@
 # its own local.xml, var directory and database copy. Maho then needs no change to select them.
 #
 # Usage: pest-workers.sh <pest arguments>
-# Environment: PEST_WORKERS (the number of workers), DB_ENGINE (mysql, pgsql or sqlite).
+# Environment: PEST_WORKERS (the number of workers), DB_ENGINE (mysql, pgsql or sqlite), and
+# PEST_SHARD (optional, such as 2/3): the part of the tests that this job runs. Its workers split
+# that part again, so with PEST_SHARD=2/3 and 4 workers, the workers run shards 5 to 8 of 12.
 
 set -euo pipefail
 
@@ -20,6 +22,13 @@ if ! [[ "$WORKERS" =~ ^[1-9][0-9]*$ ]]; then
     echo "PEST_WORKERS must be a positive integer." >&2
     exit 1
 fi
+SHARD="${PEST_SHARD:-1/1}"
+if ! [[ "$SHARD" =~ ^([1-9][0-9]*)/([1-9][0-9]*)$ ]] || [ "${BASH_REMATCH[1]}" -gt "${BASH_REMATCH[2]}" ]; then
+    echo "PEST_SHARD must be index/total, such as 2/3." >&2
+    exit 1
+fi
+FIRST_SHARD=$(((BASH_REMATCH[1] - 1) * WORKERS))
+TOTAL_SHARDS=$((BASH_REMATCH[2] * WORKERS))
 DB_NAME="$(php -r 'echo simplexml_load_file("app/etc/local.xml")->global->resources->default_setup->connection->dbname;')"
 if [ "$DB_ENGINE" = "sqlite" ] && [[ "$DB_NAME" == /* ]]; then
     echo "The SQLite path in local.xml must be relative to var/db, so that each copy finds its own file."
@@ -84,14 +93,14 @@ PIDS=()
 for i in $(seq 1 "$WORKERS"); do
     dir="$ROOT"
     if [ "$i" -gt 1 ]; then dir="$ROOT/var/workers/$i"; fi
-    (cd "$dir" && ./vendor/bin/pest --colors=always --shard="$i/$WORKERS" "$@") > "var/workers/worker-$i.log" 2>&1 &
+    (cd "$dir" && ./vendor/bin/pest --colors=always --shard="$((FIRST_SHARD + i))/$TOTAL_SHARDS" "$@") > "var/workers/worker-$i.log" 2>&1 &
     PIDS+=($!)
 done
 
 STATUS=0
 for i in $(seq 1 "$WORKERS"); do
     if wait "${PIDS[$((i - 1))]}"; then RESULT=passed; else RESULT=failed; STATUS=1; fi
-    echo "::group::Worker $i of $WORKERS ($RESULT)"
+    echo "::group::Worker $i of $WORKERS, shard $((FIRST_SHARD + i)) of $TOTAL_SHARDS ($RESULT)"
     cat "var/workers/worker-$i.log"
     echo "::endgroup::"
 done

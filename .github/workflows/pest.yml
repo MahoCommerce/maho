@@ -6,10 +6,15 @@ on:
       - main
   pull_request:
   workflow_call:
+    inputs:
+      update_shards:
+        description: Record the test timings of every suite in the mysql-min backend-1 job and upload tests/.pest/shards.json as an artifact
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       update_shards:
-        description: Record test timings on the mysql-min backend slice and upload tests/.pest/shards.json as an artifact
+        description: Record the test timings of every suite in the mysql-min backend-1 job and upload tests/.pest/shards.json as an artifact
         type: boolean
         default: false
 
@@ -25,29 +30,36 @@ jobs:
     name: Test Suite (${{ matrix.db_image }}, ${{ matrix.slice.name }})
     runs-on: ubuntu-latest
     # The Playwright websocket read has no timeout, so a wedged browser otherwise hangs the
-    # job until GitHub's 6h limit. A healthy slice takes 6 to 13 minutes.
-    timeout-minutes: 30
+    # job until GitHub's 6h limit. A healthy slice takes 6 to 13 minutes. The timing refresh
+    # runs every suite in one job, so it gets more time.
+    timeout-minutes: ${{ (inputs.update_shards && matrix.db == 'mysql-min' && matrix.slice.name == 'backend-1') && 120 || 30 }}
 
     env:
       MAGE_IS_DEVELOPER_MODE: 1
       # A runner has 4 vCPUs.
       PEST_WORKERS: 4
+      REFRESH_SHARDS: ${{ inputs.update_shards && matrix.db == 'mysql-min' && matrix.slice.name == 'backend-1' }}
 
     strategy:
       fail-fast: false
       matrix:
-        # Every backend runs as three slices. The suites never share state across a slice
-        # boundary: Backend, Frontend and Install never touch the web server, Api never uses
-        # Playwright, and Browser never uses the Api helpers. The backend slice runs as
-        # PEST_WORKERS time-balanced shards at the same time, each in its own copy of the
-        # checkout and of the database (see .github/scripts/pest-workers.sh). The shards come
-        # from the committed tests/.pest/shards.json. Refresh it from CI (workflow_dispatch
-        # with update_shards): timings measured here balance the shards, timings from a
-        # developer machine do not, because the slow tests differ.
+        # Every backend runs three slices, and each slice runs as two time-balanced shards. The
+        # suites never share state across a slice boundary: Backend, Frontend and Install never
+        # touch the web server, Api never uses Playwright, and Browser never uses the Api
+        # helpers. A backend job also runs PEST_WORKERS shards of its half at the same time,
+        # each in its own copy of the checkout and of the database (see
+        # .github/scripts/pest-workers.sh). The shards come from the committed
+        # tests/.pest/shards.json. Refresh it from CI (workflow_dispatch with update_shards):
+        # timings measured here balance the shards, timings from a developer machine do not,
+        # because the slow tests differ. Pest writes only the timings of the tests that it ran,
+        # so the refresh runs every suite in the mysql-min backend-1 job.
         slice:
-          - { name: backend, suites: "Install,Backend,Frontend", workers: true,  server: false, browser: false }
-          - { name: api,     suites: "Api",                      workers: false, server: true,  browser: false }
-          - { name: browser, suites: "Browser",                  workers: false, server: true,  browser: true }
+          - { name: backend-1, suites: "Install,Backend,Frontend", shard: "1/2", workers: true,  server: false, browser: false }
+          - { name: backend-2, suites: "Install,Backend,Frontend", shard: "2/2", workers: true,  server: false, browser: false }
+          - { name: api-1,     suites: "Api",                      shard: "1/2", workers: false, server: true,  browser: false }
+          - { name: api-2,     suites: "Api",                      shard: "2/2", workers: false, server: true,  browser: false }
+          - { name: browser-1, suites: "Browser",                  shard: "1/2", workers: false, server: true,  browser: true }
+          - { name: browser-2, suites: "Browser",                  shard: "2/2", workers: false, server: true,  browser: true }
         # Version-free ids: the pinned image tags live only in the include rows below, so a
         # bump of the minimum supported version does not touch the matrix key.
         db:
@@ -139,7 +151,7 @@ jobs:
       # Only the Browser suite needs Playwright. The other slices select their suites with
       # --testsuite, so the browser test files are never loaded there.
       - name: Setup Node
-        if: matrix.slice.browser
+        if: matrix.slice.browser || env.REFRESH_SHARDS == 'true'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: lts/*
@@ -148,7 +160,7 @@ jobs:
       # The apt-get of "install-deps" can take more than 10 minutes on a slow Ubuntu mirror,
       # so it runs only when Chromium does not start, with a bound on every fetch.
       - name: Install Playwright
-        if: matrix.slice.browser
+        if: matrix.slice.browser || env.REFRESH_SHARDS == 'true'
         timeout-minutes: 15
         run: |
           npm ci
@@ -260,7 +272,7 @@ jobs:
           ./maho cache:flush
 
       - name: Start built-in web server
-        if: matrix.slice.server
+        if: matrix.slice.server || env.REFRESH_SHARDS == 'true'
         run: |
           # One server for the Api and Browser suites, bound to the host:port the store
           # was installed with so base_url needs no rewrite (see Tests\Browser\MahoServer).
@@ -310,19 +322,23 @@ jobs:
           # and Pest collapses a repeated bare "--exclude-group" token into one.
           EXCLUDE="--exclude-group=currency-live --exclude-group=sandbox"
           if [ "${{ matrix.live }}" = "true" ]; then EXCLUDE=""; fi
+          # The refresh records the timings of every suite in one process, in the order of
+          # phpunit.xml, as a local "composer test" runs them.
+          if [ "$REFRESH_SHARDS" = "true" ]; then
+            ./vendor/bin/pest --display-errors --display-warnings \
+              --testsuite=Install,Backend,Frontend,Api,Browser --update-shards $EXCLUDE
+            exit
+          fi
           # --profile lists the slowest tests of the slice at the end of the log.
           ARGS="--display-errors --display-warnings --profile --testsuite=${{ matrix.slice.suites }} $EXCLUDE"
-          # The timings are recorded in one process, over every test of the slice.
-          if [ "${{ inputs.update_shards }}" = "true" ] && [ "${{ matrix.db }}-${{ matrix.slice.name }}" = "mysql-min-backend" ]; then
-            ./vendor/bin/pest $ARGS --update-shards
-          elif [ "${{ matrix.slice.workers }}" = "true" ]; then
-            DB_ENGINE=${{ matrix.db_engine }} .github/scripts/pest-workers.sh $ARGS
+          if [ "${{ matrix.slice.workers }}" = "true" ]; then
+            PEST_SHARD=${{ matrix.slice.shard }} DB_ENGINE=${{ matrix.db_engine }} .github/scripts/pest-workers.sh $ARGS
           else
-            ./vendor/bin/pest $ARGS
+            ./vendor/bin/pest $ARGS --shard=${{ matrix.slice.shard }}
           fi
 
       - name: Upload the refreshed shard timings
-        if: inputs.update_shards && matrix.db == 'mysql-min' && matrix.slice.name == 'backend'
+        if: env.REFRESH_SHARDS == 'true'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: shards-json
@@ -355,9 +371,12 @@ jobs:
       matrix:
         # See the slice comment on the pest-db job.
         slice:
-          - { name: backend, suites: "Install,Backend,Frontend", workers: true,  server: false, browser: false }
-          - { name: api,     suites: "Api",                      workers: false, server: true,  browser: false }
-          - { name: browser, suites: "Browser",                  workers: false, server: true,  browser: true }
+          - { name: backend-1, suites: "Install,Backend,Frontend", shard: "1/2", workers: true,  server: false, browser: false }
+          - { name: backend-2, suites: "Install,Backend,Frontend", shard: "2/2", workers: true,  server: false, browser: false }
+          - { name: api-1,     suites: "Api",                      shard: "1/2", workers: false, server: true,  browser: false }
+          - { name: api-2,     suites: "Api",                      shard: "2/2", workers: false, server: true,  browser: false }
+          - { name: browser-1, suites: "Browser",                  shard: "1/2", workers: false, server: true,  browser: true }
+          - { name: browser-2, suites: "Browser",                  shard: "2/2", workers: false, server: true,  browser: true }
 
     steps:
       - name: Setup PHP
@@ -474,7 +493,7 @@ jobs:
           ./maho cache:flush
 
       - name: Start built-in web server
-        if: matrix.slice.server
+        if: matrix.slice.server || env.REFRESH_SHARDS == 'true'
         run: |
           # One server for the Api and Browser suites, bound to the host:port the store
           # was installed with so base_url needs no rewrite (see Tests\Browser\MahoServer).
@@ -523,9 +542,9 @@ jobs:
         run: |
           ARGS="--display-errors --display-warnings --profile --testsuite=${{ matrix.slice.suites }} --exclude-group=currency-live --exclude-group=sandbox"
           if [ "${{ matrix.slice.workers }}" = "true" ]; then
-            DB_ENGINE=sqlite .github/scripts/pest-workers.sh $ARGS
+            PEST_SHARD=${{ matrix.slice.shard }} DB_ENGINE=sqlite .github/scripts/pest-workers.sh $ARGS
           else
-            ./vendor/bin/pest $ARGS
+            ./vendor/bin/pest $ARGS --shard=${{ matrix.slice.shard }}
           fi
 
       - name: Upload browser test failure diagnostics

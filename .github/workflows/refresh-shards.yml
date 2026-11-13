@@ -1,0 +1,61 @@
+name: Refresh Test Shards
+
+# The Pest shards are balanced by the test timings in tests/.pest/shards.json. A new test has
+# no timing and goes to the shards in turn, so the balance drifts as tests are added. Once a
+# week, this workflow records new timings and opens a pull request with them. An open pull
+# request of an earlier week gets the new timings instead.
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    uses: ./.github/workflows/pest.yml
+    with:
+      update_shards: true
+    secrets: inherit
+
+  pull-request:
+    name: Open the pull request
+    needs: tests
+    # Another test job can fail at random. Only the artifact of the refresh job matters here,
+    # and the download fails when that job did not upload it.
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: shards-json
+          path: tests/.pest
+
+      - name: Open or update the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: refresh-test-shards
+          TITLE: Refreshed the test timings that balance the CI shards
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git switch -C "$BRANCH"
+          git commit -am "$TITLE"
+          git push --force origin "$BRANCH"
+          if [ -z "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
+            gh pr create --base main --head "$BRANCH" --title "$TITLE" --body "$(printf '%s\n' \
+              '## What it does' \
+              '' \
+              'Updates `tests/.pest/shards.json` with the test timings of the last full test run, so that the CI shards take about the same time. The weekly "Refresh Test Shards" workflow opened this pull request.' \
+              '' \
+              '## Release notes' \
+              '' \
+              'Nothing to note.')"
+          fi
