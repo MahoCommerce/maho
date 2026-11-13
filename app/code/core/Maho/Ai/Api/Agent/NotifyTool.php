@@ -14,6 +14,7 @@ namespace Maho\Ai\Api\Agent;
 
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
+use Symfony\AI\Platform\Tool\ToolEffectHints;
 
 /**
  * Only a run without a browser offers it: in the chat, the answer itself reaches the
@@ -43,9 +44,15 @@ final class NotifyTool
         return $this->conversation !== null;
     }
 
+    /** The tool sends a notification to the administrator. It changes no store data. */
+    public static function effectHints(): ToolEffectHints
+    {
+        return new ToolEffectHints(readOnlyHint: true, destructiveHint: false, openWorldHint: false);
+    }
+
     public function tool(): Tool
     {
-        return ToolDefinition::create(
+        return new Tool(
             new ExecutionReference(self::class, 'notify'),
             self::NAME,
             'Put a message in the admin notification inbox, for a result that needs the attention of the administrators. The message links to this conversation. In a scheduled run, the final answer goes to the inbox anyway: call this only for a problem that needs a higher severity, and the final answer is then not sent. The text must stand on its own: the facts, the records and the numbers.',
@@ -59,7 +66,7 @@ final class NotifyTool
                 'required' => ['title', 'text', 'severity'],
                 'additionalProperties' => false,
             ],
-            ['title' => 'Send a notification', 'read_only' => true, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 

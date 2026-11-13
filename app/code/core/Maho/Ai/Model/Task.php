@@ -160,12 +160,13 @@ class Maho_Ai_Model_Task extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    public function markFailed(string $errorMessage): static
+    /** Queue the task again while it has retries left and $retry is true. Else mark it failed. */
+    public function markFailed(string $errorMessage, bool $retry = true): static
     {
         $retries = (int) $this->getData('retries');
         $maxRetries = (int) $this->getData('max_retries');
 
-        if ($retries < $maxRetries) {
+        if ($retry && $retries < $maxRetries) {
             // Re-queue for retry
             $this->setData('status', self::STATUS_PENDING);
             $this->setData('retries', $retries + 1);

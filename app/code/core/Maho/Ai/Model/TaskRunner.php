@@ -8,6 +8,9 @@
 
 declare(strict_types=1);
 
+use Symfony\AI\Platform\Exception\ExceptionInterface as PlatformExceptionInterface;
+use Symfony\AI\Platform\Exception\RetryableExceptionInterface;
+
 class Maho_Ai_Model_TaskRunner
 {
     /** Pending tasks the cron job sends to the queue again in one run. */
@@ -199,13 +202,27 @@ class Maho_Ai_Model_TaskRunner
                 default => throw new Mage_Core_Exception("Unknown task type: {$taskType}"),
             };
         } catch (Throwable $e) {
-            $task->markFailed($e->getMessage())->save();
+            $task->markFailed($e->getMessage(), self::isRetryable($e))->save();
             Mage::log(
                 sprintf('Maho AI task #%d failed: %s', $task->getId(), $e->getMessage()),
                 Mage::LOG_ERROR,
                 'ai.log',
             );
         }
+    }
+
+    /**
+     * Tell if the next attempt can pass: a provider that is overloaded or rate limited, a lost
+     * connection, or an error of unknown cause. A provider error of another kind, such as a wrong
+     * API key or a blocked prompt, and a Maho error, such as a missing setting, fail the same way again.
+     */
+    private static function isRetryable(Throwable $e): bool
+    {
+        return match (true) {
+            $e instanceof RetryableExceptionInterface => true,
+            $e instanceof PlatformExceptionInterface, $e instanceof Mage_Core_Exception => false,
+            default => true,
+        };
     }
 
     private function executeCompletionTask(Maho_Ai_Model_Task $task): void

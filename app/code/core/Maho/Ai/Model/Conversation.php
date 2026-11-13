@@ -212,7 +212,7 @@ class Maho_Ai_Model_Conversation extends Mage_Core_Model_Abstract
         }
         $task = $this->latestTask();
         if ($task !== null && ($task->isPending() || $task->isProcessing())) {
-            $task->setData('max_retries', 0)->markFailed('The worker stopped before the run ended.')->save();
+            $task->markFailed('The worker stopped before the run ended.', retry: false)->save();
         }
         $this->setStatus(self::STATUS_ACTIVE)->save();
         $this->addMessage([
