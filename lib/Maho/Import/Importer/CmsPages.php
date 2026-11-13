@@ -33,7 +33,6 @@ class CmsPages extends AbstractCmsImporter
     {
         $rows = [];
         $attributes = Mage::getResourceSingleton('cms/page')->getCustomAttributes();
-        $defaults = array_filter(array_map(fn($attribute) => (string) $attribute->getDefaultValue(), $attributes), fn($value) => $value !== '');
         $outsideSet = [];
         foreach (Mage::getSingleton('eav/config')->getAttributes(\Mage_Cms_Model_Page::ENTITY) as $attribute) {
             $code = (string) $attribute->getAttributeCode();
@@ -67,15 +66,15 @@ class CmsPages extends AbstractCmsImporter
                 }
             }
             if ($row['page_id'] === null) {
-                // A condition reads the page that the save gets: the defaults of a new page, and 0 or 1 for the status
-                $page = Mage::getService('cms/page')->newPage()
+                // The save checks the attributes of a new page with the same call, so a row fails here and not in the write
+                $page = Mage::getService('cms/page')->newPage()->setIsActive((bool) $row['is_active'])
                     ->addData(array_filter(array_intersect_key($row, array_flip(self::TEXT_COLUMNS)), fn($value) => $value !== ''))
-                    ->addData($row['custom'] + $defaults)
-                    ->setData('is_active', (int) $row['is_active']);
-                foreach ($attributes as $code => $attribute) {
-                    if (!$page->hasData($code) && $attribute->getIsRequired() && !Mage::helper('eav')->isHidden($page, $attribute)) {
-                        $this->fail($file, $line, "$code is required for a new page");
-                    }
+                    ->addData($row['custom']);
+                try {
+                    Mage::getResourceSingleton('cms/page')->prepareCustomAttributes($page);
+                } catch (\Mage_Core_Exception_Input $e) {
+                    $error = $e->getErrors()[0];
+                    $this->fail($file, $line, "{$error['field']}: {$error['message']}");
                 }
             }
             $rows[$line] = $row;

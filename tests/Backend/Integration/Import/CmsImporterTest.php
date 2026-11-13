@@ -171,13 +171,62 @@ it('requires a page attribute only when its condition shows it', function (): vo
 
     try {
         expect(fn() => new CmsPages()->validate($disabled))->not->toThrow(RowException::class)
-            ->and(fn() => new CmsPages()->validate($enabled))->toThrow(RowException::class, "$code is required");
+            ->and(fn() => new CmsPages()->validate($enabled))->toThrow(RowException::class, "$code: \"Campaign\" is a required value.");
     } finally {
         unlink($disabled);
         unlink($enabled);
         $attribute->delete();
         if ($connection->tableColumnExists($table, $code)) {
             $connection->dropColumn($table, $code);
+        }
+        $connection->resetDdlCache($table);
+        Mage::getSingleton('eav/config')->clear();
+    }
+});
+
+it('counts the default value of a page attribute when it checks a condition', function (): void {
+    $typeId = (int) Mage::getSingleton('eav/config')->getEntityType(Mage_Cms_Model_Page::ENTITY)->getId();
+    $suffix = substr(uniqid(), -6);
+    $flag = 'pest_imp_defa_' . $suffix;
+    $reason = 'pest_imp_defb_' . $suffix;
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $table = Mage::getSingleton('core/resource')->getTableName('cms/page');
+    $flagAttribute = Mage::getModel('cms/attribute')->setData([
+        'entity_type_id' => $typeId,
+        'attribute_code' => $flag,
+        'backend_type' => 'static',
+        'frontend_input' => 'boolean',
+        'frontend_label' => 'Flag',
+        'is_user_defined' => 1,
+        'default_value' => '1',
+    ]);
+    $flagAttribute->save();
+    $reasonAttribute = Mage::getModel('cms/attribute')->setData([
+        'entity_type_id' => $typeId,
+        'attribute_code' => $reason,
+        'backend_type' => 'static',
+        'frontend_input' => 'text',
+        'frontend_label' => 'Reason',
+        'is_user_defined' => 1,
+        'is_required' => 1,
+        'depends_on' => '[{"operator":"AND","condition":{"' . $flag . '":["0"]}}]',
+    ]);
+    $reasonAttribute->save();
+    Mage::getSingleton('eav/config')->clear();
+    $path = cmsCsv([['identifier', 'stores', 'title', 'content', 'is_active'], ['imp-dep-def', '', 'Imp Def', '<p>Body</p>', '1']]);
+
+    try {
+        // The flag is 1 by default, so the condition hides Reason and the row needs no value for it
+        expect(new CmsPages()->import($path)->created)->toBe(1);
+    } finally {
+        unlink($path);
+        cmsCleanup();
+        $reasonAttribute->delete();
+        $flagAttribute->delete();
+        foreach ([$reason, $flag] as $code) {
+            if ($connection->tableColumnExists($table, $code)) {
+                $connection->dropColumn($table, $code);
+            }
         }
         $connection->resetDdlCache($table);
         Mage::getSingleton('eav/config')->clear();
