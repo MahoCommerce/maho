@@ -80,6 +80,8 @@ describe('Revocation success page', function () {
 
 describe('Revocation form prefill', function () {
     it('pre-fills the form from the my-account entry point order', function () {
+        // Values that an earlier test posted with an error stay in the session and come first
+        Mage::getSingleton('core/session')->unsRevocationFormData();
         $order = Mage::getModel('sales/order');
         $order->setId(424242);
         $order->setIncrementId('100000077');

@@ -21,7 +21,7 @@ afterAll(function (): void {
     cleanupTestData();
 });
 
-function deleteUrlRewrite(int $id): void
+function deleteUrlRewriteIfExists(int $id): void
 {
     try {
         $rewrite = Mage::getModel('core/url_rewrite')->load($id);
@@ -126,7 +126,7 @@ describe('URL rewrite CRUD lifecycle', function (): void {
             expect($delete['status'])->toBeIn([200, 204]);
             expect(apiGet("/api/rest/v2/url-rewrites/{$id}", adminToken())['status'])->toBeNotFound();
         } finally {
-            deleteUrlRewrite($id);
+            deleteUrlRewriteIfExists($id);
         }
     });
 
@@ -155,7 +155,7 @@ describe('URL rewrite CRUD lifecycle', function (): void {
             expect($create['json']['targetPath'])->toBe('catalog/product/view/id/' . $product->getId());
             expect($create['json']['productId'])->toBe((int) $product->getId());
         } finally {
-            deleteUrlRewrite($id);
+            deleteUrlRewriteIfExists($id);
         }
     });
 

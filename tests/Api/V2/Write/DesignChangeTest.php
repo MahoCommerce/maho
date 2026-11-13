@@ -155,7 +155,8 @@ describe('Design change CRUD lifecycle', function (): void {
                 'dateTo' => null,
             ], $writeToken);
             expect($clear['status'])->toBe(200);
-            expect($clear['json']['dateTo'])->toBeNull();
+            // Null fields are omitted from REST responses (skip_null_values)
+            expect($clear['json'])->not->toHaveKey('dateTo');
 
             expect(apiDelete("/api/rest/v2/design-changes/{$id}", $writeToken)['status'])->toBeForbidden();
 

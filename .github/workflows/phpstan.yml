@@ -51,7 +51,8 @@ jobs:
         id: phpstan-result-cache
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: var
+          # Must be the same as tmpDir in .phpstan.dist.neon.
+          path: .phpstan.cache
           key: phpstan-result-cache-${{ matrix.php-versions }}-${{ github.ref_name }}-${{ github.run_id }}
           restore-keys: |
             phpstan-result-cache-${{ matrix.php-versions }}-${{ github.ref_name }}
@@ -77,5 +78,6 @@ jobs:
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: always()
         with:
-          path: var
+          # Must be the same as tmpDir in .phpstan.dist.neon.
+          path: .phpstan.cache
           key: ${{ steps.phpstan-result-cache.outputs.cache-primary-key }}

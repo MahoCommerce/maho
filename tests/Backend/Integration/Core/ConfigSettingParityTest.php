@@ -195,6 +195,48 @@ it('tells the observers of the section after a save on the CLI', function (): vo
         ->and($spy->events)->toBe([[null, null]]);
 });
 
+it('tells the observers of each section once after one save of values in several sections', function (): void {
+    $spy = new class {
+        /** @var list<string> */
+        public array $events = [];
+
+        public function record(Maho\Event\Observer $observer): void
+        {
+            $this->events[] = $observer->getEvent()->getName() . ' ' . Mage::getStoreConfig(CONFIG_PARITY_NAME, Mage_Core_Model_App::ADMIN_STORE_ID);
+        }
+    };
+    $events = ['admin_system_config_section_save_after', 'admin_system_config_changed_section_general', 'admin_system_config_changed_section_system'];
+    Mage::register('_singleton/tests/config_parity_spy', $spy, true);
+    (function () use ($events): void {
+        foreach ($events as $event) {
+            $this->_events['global'][$event] = ['observers' => [
+                'config_parity_spy' => ['type' => 'singleton', 'model' => 'tests/config_parity_spy', 'method' => 'record'],
+            ]];
+        }
+    })->call(Mage::app());
+
+    try {
+        Mage::getService('core/config')->saveAll([
+            [CONFIG_PARITY_NAME, 'Batch Name', 'default', 0],
+            [CONFIG_PARITY_SECRET, 'batch-secret', 'default', 0],
+        ]);
+    } finally {
+        (function () use ($events): void {
+            foreach ($events as $event) {
+                unset($this->_events['global'][$event]);
+            }
+        })->call(Mage::app());
+        Mage::unregister('_singleton/tests/config_parity_spy');
+    }
+
+    expect($spy->events)->toBe([
+        'admin_system_config_section_save_after Batch Name',
+        'admin_system_config_section_save_after Batch Name',
+        'admin_system_config_changed_section_general Batch Name',
+        'admin_system_config_changed_section_system Batch Name',
+    ])->and(Mage::helper('core')->decrypt((string) configParityStored(CONFIG_PARITY_SECRET)))->toBe('batch-secret');
+});
+
 it('deletes a website value through the backend model of the field on the API and the CLI', function (): void {
     $websiteId = (int) $this->website->getId();
     /** @var Mage_Core_Service_Config $service */

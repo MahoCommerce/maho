@@ -20,10 +20,10 @@ class SymbolSaveSpyConfigService extends Mage_Core_Service_Config
     public array $sections = [];
 
     #[\Override]
-    protected function afterChange(string $section, ?string $website, ?string $store): void
+    protected function afterChanges(array $changes): void
     {
-        $this->sections[] = $section;
-        parent::afterChange($section, $website, $store);
+        array_push($this->sections, ...array_column($changes, 0));
+        parent::afterChanges($changes);
     }
 }
 

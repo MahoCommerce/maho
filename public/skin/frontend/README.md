@@ -524,7 +524,7 @@ Only needed when editing `default/src/*.css` or upgrading Tailwind/DaisyUI:
 ```
 
 The command installs the npm toolchain on first run if needed. CI runs the same
-command in `.github/workflows/theme-build.yml` and fails when the committed
+command in `.github/workflows/lint.yml` and fails when the committed
 bundles do not match the sources.
 
 Commit the compiled CSS: it ships pre-built for everyone else. Page-specific

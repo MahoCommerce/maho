@@ -137,8 +137,9 @@ it('answers a conflict at once when the API refreshes a segment that another ref
     }
     $free = segmentParityApi($segment, 'refresh_customer_segment');
 
+    // A wait for the lock lasts REFRESH_WAIT_SECONDS (an hour). The margin covers a slow or busy CI runner.
     expect($api['status'])->toBe(409)
         ->and($api['errors'])->toBe(['Another refresh of the segment is in progress.'])
-        ->and(microtime(true) - $startedAt)->toBeLessThan(2.0)
+        ->and(microtime(true) - $startedAt)->toBeLessThan(10.0)
         ->and($free['status'])->toBe(200);
 });
