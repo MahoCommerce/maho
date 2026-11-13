@@ -322,6 +322,8 @@ WHERE e.entity_id IN (
 )
 ```
 
+Lifetime Profit starts from `customer_entity` in the same way. It sums the `base_grand_total` of the invoices in state `Mage_Sales_Model_Order_Invoice::STATE_PAID`, and subtracts the `base_grand_total` of the credit memos in state `Mage_Sales_Model_Order_Creditmemo::STATE_REFUNDED`. The order state does not count. Lifetime Refunds sums the same refunded credit memos.
+
 ---
 
 ### 4. Newsletter Subscription
