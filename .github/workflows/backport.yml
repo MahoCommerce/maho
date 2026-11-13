@@ -53,6 +53,33 @@ jobs:
           # successful, so only a real failure turns this job red.
           experimental: '{ "conflict_resolution": "draft_commit_conflicts" }'
 
+      # A backport without a conflict is merged at once. A conflict gives a draft pull request,
+      # which waits for a maintainer. The ruleset on the release branches must let GitHub
+      # Actions bypass it, or the merge is refused.
+      - name: Merge the backports without a conflict
+        if: ${{ !cancelled() && steps.backport.outputs.created_pull_numbers != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBERS: ${{ steps.backport.outputs.created_pull_numbers }}
+        run: |
+          STATUS=0
+          for number in $NUMBERS; do
+            if [ "$(gh pr view "$number" --json isDraft --jq .isDraft)" = "true" ]; then
+              echo "#$number has a conflict, so it stays open."
+              continue
+            fi
+            # GitHub computes the mergeability of a new pull request after a short delay
+            for attempt in 1 2 3 4 5 6; do
+              if gh pr merge "$number" --squash; then
+                continue 2
+              fi
+              sleep 10
+            done
+            echo "::error::Could not merge the backport #$number."
+            STATUS=1
+          done
+          exit $STATUS
+
       # The action reports per-target failures only as a comment on the source
       # PR, which is easy to miss on an already-merged PR. Mirror it into the
       # job status. Note that GITHUB_TOKEN carries no `workflows` scope, so a
