@@ -32,6 +32,9 @@ class Mage_Core_Model_Image_Resizer
     /** @var array<string, array<string, true>> the files that createFilesAfterCommit() took in this request, by entity */
     protected array $scheduled = [];
 
+    /** Whether createFilesAfterCommit() queues the files instead of creating them, see withQueuedCreation(). */
+    protected bool $queueOnly = false;
+
     /**
      * Create the files of $files for every settings set of $entity. A file that exists is
      * written again, so a changed source with the same name gets new files.
@@ -162,6 +165,10 @@ class Mage_Core_Model_Image_Resizer
         foreach ($files as $file) {
             $this->scheduled[$entity][$file] = true;
         }
+        if ($this->queueOnly) {
+            $this->queue($entity, $files);
+            return;
+        }
 
         $run = function () use ($entity, $files): void {
             $failed = [];
@@ -180,6 +187,26 @@ class Mage_Core_Model_Image_Resizer
             Mage::getResourceSingleton('core/config')->addCommitCallback($run);
         } else {
             $run();
+        }
+    }
+
+    /**
+     * Run $callback with createFilesAfterCommit() queueing the files instead of creating them. An
+     * import of many records uses it: each save would otherwise create every size of its image, and
+     * the queue creates them later. Until then, a request for a missing file creates it.
+     *
+     * @template T
+     * @param callable(): T $callback
+     * @return T
+     */
+    public function withQueuedCreation(callable $callback): mixed
+    {
+        $before = $this->queueOnly;
+        $this->queueOnly = true;
+        try {
+            return $callback();
+        } finally {
+            $this->queueOnly = $before;
         }
     }
 
