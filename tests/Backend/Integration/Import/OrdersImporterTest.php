@@ -119,7 +119,7 @@ it('places an order for each status, dates it back and skips it on rerun', funct
     unlink($path);
 });
 
-it('puts back the stock and the stock status of a product whose last unit an order takes', function (): void {
+it('puts back the stock, the stock status and the price index of a product whose last unit an order takes', function (): void {
     $product = loadSimplePricedProduct();
     $productId = (int) $product->getId();
     $item = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId);
@@ -133,9 +133,17 @@ it('puts back the stock and the stock status of a product whose last unit an ord
 
         $item = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId);
         $status = Mage::getResourceSingleton('cataloginventory/stock_status')->getProductStatus([$productId], 1);
+        $read = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $priceRows = $read->fetchOne($read->select()
+            ->from(Mage::getSingleton('core/resource')->getTableName('catalog/product_index_price'), [new Maho\Db\Expr('COUNT(*)')])
+            ->where('entity_id = ?', $productId)
+            ->where('website_id = ?', (int) Mage::app()->getStore(1)->getWebsiteId()));
         expect((float) $item->getQty())->toBe(1.0)
             ->and((bool) $item->getIsInStock())->toBeTrue()
-            ->and((int) $status[$productId])->toBe(Mage_CatalogInventory_Model_Stock_Status::STATUS_IN_STOCK);
+            ->and($item->getLowStockDate())->toBeNull()
+            ->and((int) $item->getStockStatusChangedAutomatically())->toBe(0)
+            ->and((int) $status[$productId])->toBe(Mage_CatalogInventory_Model_Stock_Status::STATUS_IN_STOCK)
+            ->and((int) $priceRows)->toBeGreaterThan(0);
     } finally {
         Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId)->addData($was)->save();
         unlink($path);
