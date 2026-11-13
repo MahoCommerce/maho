@@ -347,7 +347,8 @@ it('does not require a hidden category field, and keeps no value for it', functi
     $service = Mage::getService('catalog/category');
     $parentId = (int) Mage::app()->getDefaultStoreView()->getRootCategoryId();
     $newCategory = fn(string $isBrand) => $service->newCategory($parentId)
-        ->setName('Pest Dependency ' . $this->code)->setIsActive(1)->setIncludeInMenu(1)->setData($this->code, $isBrand);
+        ->setName('Pest Dependency ' . $this->code)->setIsActive(1)->setIncludeInMenu(1)
+        ->setAvailableSortBy(['position'])->setDefaultSortBy('position')->setData($this->code, $isBrand);
     $hidden = $newCategory('0');
     $shown = $newCategory('1');
 
