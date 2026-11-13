@@ -153,6 +153,28 @@ describe('resized image files of an image entity', function () {
             ->and($this->mount->fileExists(($this->pathOf)(300, '/a/b/hat.png')))->toBeTrue();
     });
 
+    it('queues the files inside deferFileCreation() only after the open transaction commits', function (): void {
+        $resizer = new class extends Mage_Core_Model_Image_Resizer {
+            /** @var list<array{string, list<string>}> */
+            public array $queued = [];
+
+            #[\Override]
+            public function queue(string $entity, array $files): void
+            {
+                $this->queued[] = [$entity, $files];
+            }
+        };
+        $config = Mage::getResourceSingleton('core/config');
+
+        $config->beginTransaction();
+        $resizer->deferFileCreation(fn() => $resizer->createFilesAfterCommit('product', ['/a/b/shirt.png']));
+        $beforeCommit = $resizer->queued;
+        $config->commit();
+
+        expect($beforeCommit)->toBe([])
+            ->and($resizer->queued)->toBe([['product', ['/a/b/shirt.png']]]);
+    });
+
     it('frames the source in the box of a ratio with contain, and crops it with cover', function (): void {
         $contain = new Mage_Core_Model_Image_Settings([300], ratio: [1, 1]);
         $cover = new Mage_Core_Model_Image_Settings([100], ratio: [1, 1], fit: 'cover');

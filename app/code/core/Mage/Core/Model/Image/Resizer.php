@@ -165,23 +165,21 @@ class Mage_Core_Model_Image_Resizer
         foreach ($files as $file) {
             $this->scheduled[$entity][$file] = true;
         }
-        if ($this->fileCreationDeferred) {
-            $this->queue($entity, $files);
-            return;
-        }
 
-        $run = function () use ($entity, $files): void {
-            $failed = [];
-            try {
-                $this->createFiles($entity, $files, onFailure: function (string $file) use (&$failed): void {
-                    $failed[] = $file;
-                });
-            } catch (\Throwable $e) {
-                Mage::logException($e);
-                $failed = $files;
-            }
-            $this->queue($entity, $failed);
-        };
+        $run = $this->fileCreationDeferred
+            ? fn() => $this->queue($entity, $files)
+            : function () use ($entity, $files): void {
+                $failed = [];
+                try {
+                    $this->createFiles($entity, $files, onFailure: function (string $file) use (&$failed): void {
+                        $failed[] = $file;
+                    });
+                } catch (\Throwable $e) {
+                    Mage::logException($e);
+                    $failed = $files;
+                }
+                $this->queue($entity, $failed);
+            };
 
         if (Mage::getSingleton('core/resource')->getConnection('core_write')->getTransactionLevel() > 0) {
             Mage::getResourceSingleton('core/config')->addCommitCallback($run);
