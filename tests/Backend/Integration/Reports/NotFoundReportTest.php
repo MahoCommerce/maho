@@ -96,6 +96,13 @@ describe('Not Found report', function () {
         'a path over 255 characters' => ['missing-page-' . str_repeat('a', 260)],
     ]);
 
+    it('counts the length of the path in characters', function () {
+        $path = $this->path . '-' . str_repeat('é', 128);
+
+        expect(notFoundRecord('http://localhost/' . $path))->toBeTrue();
+        expect(notFoundRow($path, $this->storeId))->not->toBeNull();
+    });
+
     it('records nothing in the admin store', function () {
         Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
         try {
@@ -184,6 +191,42 @@ describe('Not Found report', function () {
             expect($withoutRedirect->getSize())->toBe(0);
         } finally {
             $this->write->delete($rewriteTable, ['id_path = ?' => $this->path]);
+        }
+    });
+});
+
+describe('Not Found report with a rewrite of store 0', function () {
+    it('shows the target of a rewrite of store 0 when the store view has none', function () {
+        Mage::app()->setCurrentStore(Mage::app()->getDefaultStoreView());
+        $storeId = (int) Mage::app()->getStore()->getId();
+        $path = 'missing-page-' . uniqid();
+        $write = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $table = Mage::getSingleton('core/resource')->getTableName('reports/not_found');
+        $rewriteTable = Mage::getSingleton('core/resource')->getTableName('core/url_rewrite');
+        Mage::getResourceSingleton('reports/notFound')->recordHit($storeId, $path, null);
+        $write->insert($rewriteTable, [
+            'store_id' => Mage_Core_Model_App::ADMIN_STORE_ID,
+            'id_path' => $path,
+            'request_path' => $path,
+            'target_path' => 'default-page.html',
+            'is_system' => 0,
+            'options' => 'RP',
+        ]);
+
+        try {
+            $collection = Mage::getResourceModel('reports/notFound_collection')
+                ->addRedirectTarget()
+                ->addFieldToFilter('main_table.request_path', $path);
+            expect($collection->getSize())->toBe(1);
+            expect($collection->getFirstItem()->getData('redirect_target'))->toBe('default-page.html');
+
+            $withRedirect = Mage::getResourceModel('reports/notFound_collection')
+                ->addRedirectFilter(true)
+                ->addFieldToFilter('main_table.request_path', $path);
+            expect($withRedirect->getSize())->toBe(1);
+        } finally {
+            $write->delete($rewriteTable, ['id_path = ?' => $path]);
+            $write->delete($table, ['request_path = ?' => $path]);
         }
     });
 });

@@ -74,7 +74,7 @@ class Mage_Reports_Model_NotFound extends Mage_Core_Model_Abstract
     private function normalizePath(string $pathInfo): ?string
     {
         $path = strtolower(trim($pathInfo, '/'));
-        if ($path === '' || strlen($path) > self::MAX_PATH_LENGTH || !mb_check_encoding($path, 'UTF-8')) {
+        if ($path === '' || !mb_check_encoding($path, 'UTF-8') || mb_strlen($path, 'UTF-8') > self::MAX_PATH_LENGTH) {
             return null;
         }
         foreach (self::IGNORED_PREFIXES as $prefix) {

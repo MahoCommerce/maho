@@ -19,17 +19,26 @@ class Mage_Reports_Model_Resource_NotFound_Collection extends Mage_Core_Model_Re
     }
 
     /**
-     * Add the target path of the URL rewrite that has the same request path in the same store view, as
-     * redirect_target. It is null when no rewrite exists.
+     * Add the target path of the URL rewrite that has the same request path, as redirect_target. A rewrite of the
+     * store view wins over a rewrite of store 0, as in the URL rewrite lookup. It is null when no rewrite exists.
      */
     public function addRedirectTarget(): static
     {
         if (!$this->redirectJoined) {
-            $this->getSelect()->joinLeft(
-                ['rewrite' => $this->getTable('core/url_rewrite')],
-                'rewrite.request_path = main_table.request_path AND rewrite.store_id = main_table.store_id',
-                ['redirect_target' => 'rewrite.target_path'],
-            );
+            $rewriteTable = $this->getTable('core/url_rewrite');
+            $this->getSelect()
+                ->joinLeft(
+                    ['rewrite' => $rewriteTable],
+                    'rewrite.request_path = main_table.request_path AND rewrite.store_id = main_table.store_id',
+                    [],
+                )
+                ->joinLeft(
+                    ['rewrite_default' => $rewriteTable],
+                    'rewrite_default.request_path = main_table.request_path AND rewrite_default.store_id = '
+                        . Mage_Core_Model_App::ADMIN_STORE_ID,
+                    [],
+                )
+                ->columns(['redirect_target' => new \Maho\Db\Expr('COALESCE(rewrite.target_path, rewrite_default.target_path)')]);
             $this->redirectJoined = true;
         }
         return $this;
@@ -41,7 +50,11 @@ class Mage_Reports_Model_Resource_NotFound_Collection extends Mage_Core_Model_Re
     public function addRedirectFilter(bool $hasRedirect): static
     {
         $this->addRedirectTarget();
-        $this->getSelect()->where($hasRedirect ? 'rewrite.url_rewrite_id IS NOT NULL' : 'rewrite.url_rewrite_id IS NULL');
+        $this->getSelect()->where(
+            $hasRedirect
+                ? '(rewrite.url_rewrite_id IS NOT NULL OR rewrite_default.url_rewrite_id IS NOT NULL)'
+                : '(rewrite.url_rewrite_id IS NULL AND rewrite_default.url_rewrite_id IS NULL)',
+        );
         return $this;
     }
 }
