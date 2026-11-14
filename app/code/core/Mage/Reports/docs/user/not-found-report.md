@@ -39,8 +39,9 @@ away. The address does not answer 404 again, so its hits stop. See [URL Rewrites
 for the fields of a rewrite.
 
 A store view cannot have two URL rewrites with the same request path. When the store view already
-has a rewrite for the address that does not redirect, such as the rewrite of a disabled product,
-the row has no **Redirect** link. Find that rewrite in **Catalog > URL Rewrite Management**.
+has a URL rewrite with this request path, the row has no **Redirect** link. This is also true when
+that rewrite does not redirect, such as the rewrite of a disabled product. Find that rewrite in
+**Catalog > URL Rewrite Management**.
 
 To delete rows, select them, choose **Delete** in **Actions** and click **Submit**. An address
 that answers 404 again gets a new row.

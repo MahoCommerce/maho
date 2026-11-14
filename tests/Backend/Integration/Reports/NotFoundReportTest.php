@@ -258,6 +258,23 @@ describe('Not Found report with a URL rewrite that does not redirect', function 
         expect(($this->collection)(false)->getSize())->toBe(1);
     });
 
+    it('does not count a rewrite of store 0 that does not redirect when the store view has none', function () {
+        ($this->addRewrite)(Mage_Core_Model_App::ADMIN_STORE_ID, '', 'catalog/product/view/id/1');
+
+        $item = ($this->collection)()->getFirstItem();
+        expect($item->getData('redirect_target'))->toBeNull();
+        expect($item->getData('url_rewrite_id'))->toBeNull();
+        expect(($this->collection)(false)->getSize())->toBe(1);
+        expect(($this->collection)(true)->getSize())->toBe(0);
+    });
+
+    it('counts a rewrite with an external target as a redirect, as the storefront does', function () {
+        ($this->addRewrite)($this->storeId, '', 'https://example.com/new-page');
+
+        expect(($this->collection)()->getFirstItem()->getData('redirect_target'))->toBe('https://example.com/new-page');
+        expect(($this->collection)(true)->getSize())->toBe(1);
+    });
+
     it('prefers the redirect of the store view over the redirect of store 0', function () {
         ($this->addRewrite)($this->storeId, 'RP', 'view-page.html');
         ($this->addRewrite)(Mage_Core_Model_App::ADMIN_STORE_ID, 'RP', 'default-page.html');
@@ -366,7 +383,7 @@ describe('URL rewrite edit page prefill', function () {
         try {
             new Mage_Adminhtml_UrlrewriteController($request, new Mage_Core_Controller_Response_Http())->editAction();
         } catch (Throwable) {
-            // The layout needs a full admin page. The rewrite is ready before it.
+            // editAction() fails in a test when it builds the layout. It sets the rewrite before that step.
         }
 
         $rewrite = Mage::registry('current_urlrewrite');
