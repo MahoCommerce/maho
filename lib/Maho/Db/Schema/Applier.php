@@ -20,7 +20,7 @@ use Doctrine\DBAL\Schema\Comparator;
 use Doctrine\DBAL\Schema\DefaultExpression;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
-use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\TypeProvider;
 use Doctrine\DBAL\Types\Types;
 use Maho\Db\Adapter\AdapterInterface;
 
@@ -167,7 +167,7 @@ final class Applier
         // restores it, leaving the column a plain INT and the migration forever
         // re-planning the same change. Re-assert the target column's definition
         // after every PK is in place. Runs last (all PKs settled).
-        $alters = array_merge($alters, self::autoIncrementRestores($platform, $existingTables, $tablesToAlter));
+        $alters = array_merge($alters, self::autoIncrementRestores($platform, $connection->getConfiguration()->getTypeProvider(), $existingTables, $tablesToAlter));
 
         // Conversions lead the batch: InnoDB refuses a foreign key referencing a
         // MyISAM table (errno 150), which FOREIGN_KEY_CHECKS=0 does not lift.
@@ -205,10 +205,11 @@ final class Applier
         [$dropKeys, $addKeys, $keyTables] = self::legacyCharsetForeignKeys($connection, $platform, $tables);
         // Convert an undeclared table in a dropped key before the ADD statement for that key.
         $keyedUndeclared = array_diff_key(array_intersect_key($tables, $keyTables), $declaredTables);
-        [$declared, $undeclared] = self::charsetConversionStatements($platform, array_diff_key($tables, $keyedUndeclared), $declaredTables);
+        $types = $connection->getConfiguration()->getTypeProvider();
+        [$declared, $undeclared] = self::charsetConversionStatements($platform, $types, array_diff_key($tables, $keyedUndeclared), $declaredTables);
 
         return [
-            array_merge($dropKeys, $declared, self::charsetConversionStatements($platform, $keyedUndeclared, [])[1], $addKeys),
+            array_merge($dropKeys, $declared, self::charsetConversionStatements($platform, $types, $keyedUndeclared, [])[1], $addKeys),
             $undeclared,
         ];
     }
@@ -320,7 +321,7 @@ final class Applier
      * @param array<string, Table> $declaredTables live name => introspected live table
      * @return array{list<string>, list<string>} the declared tables, then the undeclared tables
      */
-    private static function charsetConversionStatements(AbstractPlatform $platform, array $tables, array $declaredTables): array
+    private static function charsetConversionStatements(AbstractPlatform $platform, TypeProvider $types, array $tables, array $declaredTables): array
     {
         $statements = [];
         $undeclared = [];
@@ -346,7 +347,7 @@ final class Applier
                 $part = sprintf(
                     'MODIFY %s %s CHARACTER SET utf8mb4 COLLATE %s %s',
                     $platform->quoteSingleIdentifier($column->getObjectName()->getIdentifier()->getValue()),
-                    Type::getType($column->getTypeName())->getSQLDeclaration($column->toArray(true), $platform),
+                    $types->get($column->getTypeName())->getSQLDeclaration($column->toArray(true), $platform),
                     self::utf8mb4Collation($columnCollation),
                     $column->getNotnull() ? 'NOT NULL' : 'NULL',
                 );
@@ -589,7 +590,7 @@ final class Applier
      * @param list<\Doctrine\DBAL\Schema\Table> $targetTables parallel to $liveTables
      * @return list<string>
      */
-    private static function autoIncrementRestores(AbstractPlatform $platform, array $liveTables, array $targetTables): array
+    private static function autoIncrementRestores(AbstractPlatform $platform, TypeProvider $types, array $liveTables, array $targetTables): array
     {
         if (!$platform instanceof AbstractMySQLPlatform) {
             return [];
@@ -615,7 +616,7 @@ final class Applier
                 'ALTER TABLE %s MODIFY %s %s AUTO_INCREMENT NOT NULL',
                 $target->getObjectName()->toString(),
                 $autoColumn->getObjectName()->toString(),
-                Type::getType($autoColumn->getTypeName())->getSQLDeclaration($autoColumn->toArray(true), $platform),
+                $types->get($autoColumn->getTypeName())->getSQLDeclaration($autoColumn->toArray(true), $platform),
             );
         }
 

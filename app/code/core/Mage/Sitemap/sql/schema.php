@@ -26,7 +26,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('sitemap_type', Types::STRING, length: 32, notNull: false))
             ->addColumn(Schema::column('sitemap_filename', Types::STRING, length: 32, notNull: false))
             ->addColumn(Schema::column('sitemap_path', Types::STRING, length: 255, notNull: false))
-            ->addColumn(Schema::column('sitemap_time', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('sitemap_time', Types::DATETIME_IMMUTABLE, notNull: false))
             ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('sitemap_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))

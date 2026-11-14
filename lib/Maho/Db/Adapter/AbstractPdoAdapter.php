@@ -11,6 +11,7 @@ namespace Maho\Db\Adapter;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Types\Types;
 use Maho\Db\Ddl\Table;
 use Maho\Db\Exception;
 use Maho\Db\Expr;
@@ -1461,7 +1462,14 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             // Use getIdentifier()->getValue() to get the raw name without quotes
             $columnNameStr = $column->getObjectName()->getIdentifier()->getValue();
             $isPrimary = in_array(strtolower($columnNameStr), $primaryColumns);
-            $typeName = $column->getTypeName();
+            // DBAL introspects date and time columns as the immutable types. Callers match the plain names.
+            $typeName = match ($column->getTypeName()) {
+                Types::DATE_IMMUTABLE => 'date',
+                Types::TIME_IMMUTABLE => 'time',
+                Types::DATETIME_IMMUTABLE => 'datetime',
+                Types::DATETIMETZ_IMMUTABLE => 'datetimetz',
+                default => $column->getTypeName(),
+            };
 
             $result[$columnNameStr] = [
                 'SCHEMA_NAME'      => $schemaName ?? '',
