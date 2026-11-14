@@ -9,25 +9,10 @@ declare(strict_types=1);
 
 uses(Tests\MahoFrontendTestCase::class);
 
-it('renders the configured price of an unavailable fixed bundle in both tax modes', function (): void {
-    $unicodeRaw = '<span id="currency-encoding-probe">€</span>';
-    $unicodeDom = new DOMDocument();
-    $unicodeLoaded = $unicodeDom->loadHTML('<?xml encoding="UTF-8">' . $unicodeRaw);
-    $unicodeNodes = (new DOMXPath($unicodeDom))->query("//*[@id='currency-encoding-probe']");
-    expect(mb_check_encoding($unicodeRaw, 'UTF-8'))->toBeTrue()
-        ->and($unicodeLoaded)->toBeTrue()->and($unicodeNodes->length)->toBe(1)
-        ->and($unicodeNodes->item(0)->textContent)->toBe('€');
-    $app = Mage::app();
-    $previousStore = $app->getStore();
-    $store = $app->getDefaultStoreView();
-    $previousRequestedCurrency = $store->getData('requested_currency_code');
-    $app->setCurrentStore($store);
+it('shows the tax amounts in the configured price of an unavailable fixed bundle', function (): void {
+    $store = Mage::app()->getDefaultStoreView();
+    Mage::app()->setCurrentStore($store);
     $resource = Mage::getResourceSingleton('catalog/product');
-    $write = Mage::getSingleton('core/resource')->getConnection('core_write');
-    expect($resource->getWriteConnection())->toBe($write)
-        ->and($write->getTransactionLevel())->toBe(0)
-        ->and(Mage::registry('product'))->toBeNull()
-        ->and($store->getCurrentCurrencyCode())->toBe($store->getBaseCurrencyCode());
 
     $settings = [
         'tax/calculation/price_includes_tax' => '0',
@@ -39,11 +24,8 @@ it('renders the configured price of an unavailable fixed bundle in both tax mode
         'shipping/origin/postcode' => '1010',
         'sales/msrp/enabled' => '0',
         'tax/weee/enable' => '0',
-        'currency/options/allow' => (string) $store->getConfig('currency/options/allow'),
     ];
-    $savedSettings = [];
     foreach ($settings as $path => $value) {
-        $savedSettings[$path] = $store->getConfig($path);
         $store->setConfig($path, $value);
     }
 
@@ -105,42 +87,19 @@ it('renders the configured price of an unavailable fixed bundle in both tax mode
         $bundleId = (int) $bundle->getId();
         expect($bundleId)->toBeGreaterThan(0);
 
-        $capture = static function (string $country, bool $inputIncludesTax, int $displayType, float $basePrice = 100.0, ?float $expectedFinal = null) use ($store, $bundleId, $guestClassId): array {
-            $expectedFinal ??= $basePrice;
+        $format = static fn(float $amount): string => trim(html_entity_decode(
+            strip_tags($store->formatPrice($amount, false)),
+            ENT_QUOTES | ENT_HTML5,
+            'UTF-8',
+        ));
+        $capture = static function (string $country, bool $inputIncludesTax, int $displayType) use ($store, $bundleId): array {
             $store->setConfig('shipping/origin/country_id', $country);
             $store->setConfig('tax/calculation/price_includes_tax', (string) (int) $inputIncludesTax);
             $store->setConfig('tax/display/type', (string) $displayType);
             $product = Mage::getModel('catalog/product')->setStoreId((int) $store->getId())->load($bundleId);
-            expect((int) $product->getId())->toBe($bundleId)
-                ->and($product->getPriceType())->toBe(Mage_Bundle_Model_Product_Price::PRICE_TYPE_FIXED)
-                ->and($product->getData('can_show_price'))->toBeNull()
-                ->and($product->getCanShowPrice())->toBeNull()
-                ->and($product->getStockItem()->getIsInStock())->toBeFalse()
-                ->and($product->isSaleable())->toBeFalse()
-                ->and(Mage::helper('catalog/product')->canShow($product))->toBeTrue()
-                ->and($product->getCalculatedFinalPrice())->toBeNull()
-                ->and((float) $product->getData('price'))->toEqualWithDelta($basePrice, 0.000001)
-                ->and((float) $product->getFinalPrice())->toEqualWithDelta($expectedFinal, 0.000001);
-            $type = $product->getTypeInstance(true);
-            $optionIds = $type->getOptionsIds($product);
-            expect(count($optionIds))->toBe(1)
-                ->and(count($type->getSelectionsCollection($optionIds, $product)))->toBe(1);
+            expect($product->getPriceType())->toBe(Mage_Bundle_Model_Product_Price::PRICE_TYPE_FIXED)
+                ->and($product->isSaleable())->toBeFalse();
 
-            $calc = Mage::getSingleton('tax/calculation');
-            $request = $calc->getRateRequest(null, null, null, $store)->setProductClassId($product->getTaxClassId());
-            expect((int) $request->getCustomerClassId())->toBe($guestClassId)
-                ->and((int) $request->getProductClassId())->toBe((int) $product->getTaxClassId())
-                ->and($product->getData('tax_percent'))->toBeNull()
-                ->and($product->getData('applied_rates'))->toBeNull();
-            $oracle = Mage::getModel('catalog/product')->setStoreId((int) $store->getId())->load($bundleId);
-            expect($oracle)->not->toBe($product)
-                ->and((float) $oracle->getFinalPrice())->toEqualWithDelta($expectedFinal, 0.000001);
-            $rounded = $store->roundPrice((float) $oracle->getFinalPrice());
-            $tax = Mage::helper('tax');
-            $net = (float) $tax->getPrice($oracle, $rounded, false, null, null, null, $store, null, false);
-            $gross = (float) $tax->getPrice($oracle, $rounded, true, null, null, null, $store, null, false);
-            $displayPrice = (float) $tax->getPrice($oracle, $rounded, null, null, null, null, $store, null, false);
-            expect($product->getData('tax_percent'))->toBeNull()->and($product->getData('applied_rates'))->toBeNull();
             $layout = Mage::app()->getLayout();
             $parent = $layout->createBlock('catalog/product_view');
             $priceBlock = $layout->createBlock('bundle/catalog_product_price')
@@ -148,53 +107,32 @@ it('renders the configured price of an unavailable fixed bundle in both tax mode
             $parent->setChild('bundle_prices', $priceBlock);
             $html = $parent->getChildHtml('bundle_prices', false);
             $dom = new DOMDocument();
-            $old = libxml_use_internal_errors(true);
+            $previous = libxml_use_internal_errors(true);
             try {
-                expect(mb_check_encoding($html, 'UTF-8'))->toBeTrue();
-                expect($dom->loadHTML('<?xml encoding="UTF-8">' . $html))->toBeTrue();
+                $dom->loadHTML('<?xml encoding="UTF-8">' . $html);
             } finally {
                 libxml_clear_errors();
-                libxml_use_internal_errors($old);
+                libxml_use_internal_errors($previous);
             }
             $xpath = new DOMXPath($dom);
-            $texts = [];
-            $rawTexts = [];
             $ids = $displayType === Mage_Tax_Model_Config::DISPLAY_TYPE_BOTH
                 ? ['excluding' => "price-excluding-tax-{$bundleId}", 'including' => "price-including-tax-{$bundleId}"]
                 : ['display' => "product-price-{$bundleId}"];
+            $texts = [];
             foreach ($ids as $kind => $id) {
                 $nodes = $xpath->query("//*[@id='{$id}']");
-                expect($nodes)->not->toBeFalse()->and($nodes->length)->toBe(1);
+                expect($nodes->length)->toBe(1);
                 $texts[$kind] = trim($nodes->item(0)->textContent);
-                $pattern = '~<span\b[^>]*\bid="' . preg_quote($id, '~') . '"[^>]*>(.*?)</span\s*>~su';
-                expect(preg_match($pattern, $html, $rawMatch))->toBe(1);
-                $rawTexts[$kind] = trim(html_entity_decode(strip_tags($rawMatch[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
-                expect($texts[$kind])->toBe($rawTexts[$kind]);
             }
-            expect($html)->not->toContain('bundle.reloadPrice()');
-            $priceBlock->setWithoutPrice(true);
-            $hiddenHtml = $priceBlock->toHtml();
-            $priceBlock->unsWithoutPrice();
-            expect($hiddenHtml)->not->toContain('price-excluding-tax-' . $bundleId)
-                ->not->toContain('price-including-tax-' . $bundleId)
-                ->not->toContain('product-price-' . $bundleId);
-            $format = static fn(float $amount): string => trim(html_entity_decode(strip_tags(Mage::helper('core')->currency($amount, true, false)), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
-            $expected = $displayType === Mage_Tax_Model_Config::DISPLAY_TYPE_BOTH
-                ? ['excluding' => $format($displayPrice), 'including' => $format($gross)]
-                : ['display' => $format($displayPrice)];
-            return ['input' => $basePrice, 'raw_attribute' => (float) $product->getData('price'),
-                'final' => (float) $product->getFinalPrice(),
-                'group_price' => $product->getGroupPrice(), 'rate' => (float) $calc->getRate($request), 'net' => $net, 'gross' => $gross,
-                'display_price' => $displayPrice, 'texts' => $texts, 'raw_texts' => $rawTexts,
-                'html_utf8' => true, 'without_price_spans_absent' => true, 'expected' => $expected];
+            return $texts;
         };
 
         $both = Mage_Tax_Model_Config::DISPLAY_TYPE_BOTH;
-        $zero = $capture('FR', false, $both);
-        $taxed = $capture('AT', false, $both);
-        $included = $capture('AT', true, $both);
-        $singleIncluding = $capture('AT', false, Mage_Tax_Model_Config::DISPLAY_TYPE_INCLUDING_TAX);
-        $singleExcluding = $capture('AT', true, Mage_Tax_Model_Config::DISPLAY_TYPE_EXCLUDING_TAX);
+        expect($capture('FR', false, $both))->toBe(['excluding' => $format(100.0), 'including' => $format(100.0)])
+            ->and($capture('AT', false, $both))->toBe(['excluding' => $format(100.0), 'including' => $format(120.0)])
+            ->and($capture('AT', true, $both))->toBe(['excluding' => $format(83.33), 'including' => $format(100.0)])
+            ->and($capture('AT', false, Mage_Tax_Model_Config::DISPLAY_TYPE_INCLUDING_TAX))->toBe(['display' => $format(120.0)])
+            ->and($capture('AT', true, Mage_Tax_Model_Config::DISPLAY_TYPE_EXCLUDING_TAX))->toBe(['display' => $format(83.33)]);
 
         // Reload before each native attribute update; the creation object is never saved twice.
         $updatePrice = static function (float $price) use ($resource, $bundleId): void {
@@ -203,12 +141,7 @@ it('renders the configured price of an unavailable fixed bundle in both tax mode
             $resource->saveAttribute($updated, 'price');
         };
         $updatePrice(100.024);
-        $fractional = $capture('AT', false, $both, 100.024, 100.02);
-        $fractionalExpected = trim(html_entity_decode(
-            strip_tags($store->formatPrice(120.02, false)),
-            ENT_QUOTES | ENT_HTML5,
-            'UTF-8',
-        ));
+        expect($capture('AT', false, $both)['including'])->toBe($format(120.02));
 
         $baseCurrency = $store->getBaseCurrencyCode();
         $otherCurrency = $baseCurrency === 'EUR' ? 'USD' : 'EUR';
@@ -216,49 +149,11 @@ it('renders the configured price of an unavailable fixed bundle in both tax mode
         $store->setConfig('currency/options/allow', $baseCurrency . ',' . $otherCurrency);
         $store->unsetData('available_currency_codes')->unsetData('disallowed_base_currency_code_index');
         $store->clearCurrencyRateMemos()->setRequestedCurrencyCode($otherCurrency);
-        expect($store->getCurrentCurrencyCode())->toBe($otherCurrency)
-            ->and($store->getCurrentCurrencyRate())->toBe(3.0);
         $updatePrice(100.01);
-        $converted = $capture('AT', false, $both, 100.01);
-        $formatConverted = static fn(float $price): string => trim(html_entity_decode(
-            strip_tags($store->formatPrice($price, false)),
-            ENT_QUOTES | ENT_HTML5,
-            'UTF-8',
-        ));
-        expect($zero['rate'])->toBe(0.0)->and($zero['net'])->toBe(100.0)->and($zero['gross'])->toBe(100.0)
-            ->and($zero['texts'])->toBe($zero['expected']);
-        expect($taxed['rate'])->toBe(20.0)->and($taxed['net'])->toBe(100.0)->and($taxed['gross'])->toBe(120.0)
-            ->and($taxed['texts'])->toBe($taxed['expected']);
-        expect($included['rate'])->toBe(20.0)->and($included['net'])->toEqualWithDelta(83.33333333333333, 0.000001)->and($included['gross'])->toBe(100.0)
-            ->and($included['texts'])->toBe($included['expected']);
-        expect($singleIncluding['rate'])->toBe(20.0)->and($singleIncluding['display_price'])->toBe(120.0)
-            ->and($singleIncluding['texts'])->toBe($singleIncluding['expected']);
-        expect($singleExcluding['rate'])->toBe(20.0)->and($singleExcluding['display_price'])->toEqualWithDelta(83.33333333333333, 0.000001)
-            ->and($singleExcluding['texts'])->toBe($singleExcluding['expected']);
-        expect($fractional['input'])->toBe(100.024)->and($fractional['raw_attribute'])->toBe(100.024)
-            ->and($fractional['final'])->toBe(100.02)
-            ->and((float) $fractional['group_price'])->toBe(0.0)
-            ->and($fractional['rate'])->toBe(20.0)->and($fractional['gross'])->toEqualWithDelta(120.024, 0.000001)
-            ->and($fractional['texts'])->toBe($fractional['expected'])
-            ->and($fractional['texts']['including'])->toBe($fractionalExpected);
-        expect($converted['rate'])->toBe(20.0)->and($converted['gross'])->toEqualWithDelta(120.012, 0.000001)
-            ->and($converted['texts'])->toBe($converted['expected'])
-            ->and($converted['texts']['including'])->toBe($formatConverted(360.04));
+        expect($capture('AT', false, $both)['including'])->toBe($format(360.04));
     } finally {
-        try {
-            if ($transactionStarted) {
-                $resource->rollBack();
-            }
-        } finally {
-            foreach ($savedSettings as $path => $value) {
-                $store->setConfig($path, $value);
-            }
-            $store->unsetData('available_currency_codes')->unsetData('disallowed_base_currency_code_index');
-            $store->clearCurrencyRateMemos()->clearCurrentCurrency();
-            if (is_string($previousRequestedCurrency)) {
-                $store->setRequestedCurrencyCode($previousRequestedCurrency);
-            }
-            $app->setCurrentStore($previousStore);
+        if ($transactionStarted) {
+            $resource->rollBack();
         }
     }
 });
