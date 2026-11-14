@@ -189,19 +189,18 @@ it('requires a post attribute only when its condition, which reads an option lab
     $options = [AbstractCmsImporter::OPTION_CONTENT_DIR => $contentDir];
     $beginner = blogCsv([['url_key', 'stores', 'title', 'content_file', $code], ['imp-dep-beginner', $store, 'Imp Beginner', 'post.html', 'Beginner']]);
     $expertPath = blogCsv([['url_key', 'stores', 'title', 'content_file', $code], ['imp-dep-expert', $store, 'Imp Expert', 'post.html', 'Expert']]);
-    // The save does not hide a field whose condition reads a field that the post does not hold
+    // A field that the post does not hold counts as empty, as in the form, so the condition hides the certificate
     $noLevel = blogCsv([['url_key', 'stores', 'title', 'content_file', $code], ['imp-dep-none', $store, 'Imp None', 'post.html', '']]);
 
     try {
         expect(fn() => new BlogPosts()->validate($beginner, $options))->not->toThrow(RowException::class)
             ->and(fn() => new BlogPosts()->validate($expertPath, $options))->toThrow(RowException::class, "{$code}_c is required")
-            ->and(fn() => new BlogPosts()->validate($noLevel, $options))->toThrow(RowException::class, "{$code}_c is required");
+            ->and(fn() => new BlogPosts()->validate($noLevel, $options))->not->toThrow(RowException::class);
 
-        // With Beginner as the default level, a row without a level gets Beginner, which hides the certificate
-        $beginnerId = (string) $level->getSource()->getOptionId('Beginner');
-        Mage::getModel('blog/resource_eav_attribute')->load($level->getId())->setDefaultValue($beginnerId)->save();
+        // With Expert as the default level, a row without a level gets Expert, which shows the certificate
+        Mage::getModel('blog/resource_eav_attribute')->load($level->getId())->setDefaultValue($expert)->save();
         Mage::getSingleton('eav/config')->clear();
-        expect(fn() => new BlogPosts()->validate($noLevel, $options))->not->toThrow(RowException::class);
+        expect(fn() => new BlogPosts()->validate($noLevel, $options))->toThrow(RowException::class, "{$code}_c is required");
     } finally {
         $certificate->delete();
         $level->delete();
