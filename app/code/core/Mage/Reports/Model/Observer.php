@@ -25,4 +25,28 @@ class Mage_Reports_Model_Observer
         Mage::app()->getLocale()->revert();
         return $this;
     }
+
+    /**
+     * Count a storefront 404 in the Not Found report. Every 404 of a storefront page passes here once, also after
+     * a forward to the no-route page.
+     */
+    #[Maho\Config\Observer('controller_front_send_response_before', area: 'frontend')]
+    public function recordNotFound(\Maho\Event\Observer $_observer): void
+    {
+        $request = Mage::app()->getRequest();
+        $response = Mage::app()->getResponse();
+        if ($response->getHttpResponseCode() !== 404) {
+            return;
+        }
+        Mage::getSingleton('reports/notFound')->recordRequest($request, $response);
+    }
+
+    #[Maho\Config\CronJob('report_not_found_clean', schedule: '15 * * * *')]
+    public function cleanNotFound(): void
+    {
+        Mage::getResourceSingleton('reports/notFound')->clean(
+            Mage::getStoreConfigAsInt(Mage_Reports_Model_NotFound::XML_PATH_DAYS_TO_KEEP),
+            Mage::getStoreConfigAsInt(Mage_Reports_Model_NotFound::XML_PATH_MAX_ROWS),
+        );
+    }
 }

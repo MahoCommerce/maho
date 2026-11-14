@@ -211,4 +211,32 @@ return function (SchemaEditor $schema): void {
                 ->create(),
         );
     }
+
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('report_not_found')
+            ->addColumn(Schema::column('not_found_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('request_path', Types::STRING, length: 255))
+            ->addColumn(Schema::column('hits', Types::INTEGER, unsigned: true, default: 1))
+            ->addColumn(Schema::column('referer', Types::TEXT, notNull: false))
+            ->addColumn(Schema::column('first_seen_at', Types::DATETIME_MUTABLE))
+            ->addColumn(Schema::column('last_seen_at', Types::DATETIME_MUTABLE))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('not_found_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('request_path', 'store_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('last_seen_at'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('hits'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Storefront Paths That Answered 404')
+            ->create(),
+    );
 };
