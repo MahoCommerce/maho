@@ -127,10 +127,8 @@ class Mage_ConfigurableSwatches_Helper_Productlist extends Mage_Core_Helper_Abst
 
     /**
      * See if the swatch matches a filter currently applied to the product list.
-     *
-     * @param int|string $optionId
      */
-    public function swatchMatchesFilter($optionId): bool
+    public function swatchMatchesFilter(int|string $optionId): bool
     {
         return in_array((string) $optionId, $this->_getSwatchAttributeFilteredValues(), true);
     }
