@@ -85,6 +85,7 @@ class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert
             if (count($csvData) == 1 && $csvData[0] === null) {
                 continue;
             }
+            $csvData = Mage::helper('core')->unEscapeCSVData($csvData);
 
             $itemData = [];
             $countRows++;
