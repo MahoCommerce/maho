@@ -12,7 +12,15 @@ uses(Tests\MahoBackendTestCase::class);
 describe('Dataflow CSV parser', function () {
     it('removes the space that the CSV export puts before a value that a spreadsheet reads as a formula', function () {
         Mage::app()->getStore()->setConfig(Mage_ImportExport_Model_Export_Adapter_Csv::CONFIG_ESCAPING_FLAG, '1');
-        $batch = Mage::getSingleton('dataflow/batch')->setAdapter('catalog/convert_adapter_product')->save();
+        $resource = Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        $profileTable = $resource->getTableName('dataflow/profile');
+        $write->insert($profileTable, ['name' => 'csv-unescape-' . uniqid(), 'direction' => 'import', 'entity_type' => 'product']);
+        $profileId = (int) $write->lastInsertId($profileTable);
+        $batch = Mage::getSingleton('dataflow/batch')
+            ->setProfileId($profileId)
+            ->setAdapter('catalog/convert_adapter_product')
+            ->save();
         file_put_contents(
             $batch->getIoAdapter()->getFile(true),
             "sku,name\nSKU-1,\" @home Lamp\"\nSKU-2,\" =1+1\"\nSKU-3,\" plain\"\n",
@@ -25,12 +33,11 @@ describe('Dataflow CSV parser', function () {
                 ->setVar('fieldnames', 'true')
                 ->parse();
 
-            $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
             $rows = array_map(
                 fn(string $data) => unserialize($data, ['allowed_classes' => false]),
-                $adapter->fetchCol(
-                    $adapter->select()
-                        ->from(Mage::getSingleton('core/resource')->getTableName('dataflow/batch_import'), ['batch_data'])
+                $write->fetchCol(
+                    $write->select()
+                        ->from($resource->getTableName('dataflow/batch_import'), ['batch_data'])
                         ->where('batch_id = ?', (int) $batch->getId())
                         ->order('batch_import_id'),
                 ),
@@ -43,6 +50,7 @@ describe('Dataflow CSV parser', function () {
             ]);
         } finally {
             $batch->delete();
+            $write->delete($profileTable, ['profile_id = ?' => $profileId]);
         }
     });
 });
