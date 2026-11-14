@@ -1141,16 +1141,19 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
 
         if (!$this->getDeferRequiredProfile()) {
             $entityType = Mage::getSingleton('eav/config')->getEntityType('customer');
+            // A field that its condition hides is not required
+            $isRequired = fn(Mage_Customer_Model_Attribute $attribute): bool => $attribute->getIsRequired()
+                && !Mage::helper('eav')->isHidden($this, $attribute);
             $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'dob');
-            if ($attribute->getIsRequired() && trim((string) $this->getDob()) == '') {
+            if ($isRequired($attribute) && trim((string) $this->getDob()) == '') {
                 $errors[] = Mage::helper('customer')->__('The Date of Birth is required.');
             }
             $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'taxvat');
-            if ($attribute->getIsRequired() && trim((string) $this->getTaxvat()) == '') {
+            if ($isRequired($attribute) && trim((string) $this->getTaxvat()) == '') {
                 $errors[] = Mage::helper('customer')->__('The TAX/VAT number is required.');
             }
             $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'gender');
-            if ($attribute->getIsRequired() && !$this->getGender()) {
+            if ($isRequired($attribute) && !$this->getGender()) {
                 $errors[] = Mage::helper('customer')->__('Gender is required.');
             }
         }

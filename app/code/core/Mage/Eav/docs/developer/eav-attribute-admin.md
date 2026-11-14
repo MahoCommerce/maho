@@ -233,13 +233,19 @@ Where the condition applies:
 | Place | Code |
 |---|---|
 | Admin edit forms | `Mage_Adminhtml_Block_Widget_Form::getAttributeDependenceHtml()` adds a `formElementDependenceController` for the fields that `_setFieldset()` added. A field of another tab gives its saved value through `getAttributeDependenceValues()`. A field that the page renders disabled, such as for an admin without the save permission, goes into `keep_disabled`, so a condition never enables it. A field that uses the default value leaves `keep_disabled` while its Use Default box is checked and enabled. The customer address tab starts one controller for each address. |
-| Storefront forms | `Mage_Customer_Block_Form_Attributes::getDependenceJson()` and `FieldDependenceController` in `js/varien/form.js`. The controller finds each field by its name in the form. |
+| Storefront forms | `Mage_Customer_Block_Form_Attributes::getDependenceJson()` and `FieldDependenceController` in `js/varien/form.js`. The configuration holds every visible field of the form that has a condition, also a standard field that the template renders itself, such as `company`. The controller finds each field by its name in the form, and hides the closest `li` or `.field`. |
 | Validation | `Mage_Eav_Model_Attribute_Data_Abstract::isRequired()` is true only when the attribute is required and `isShown()` is true. Each `validateValue()` uses it, so a hidden field is not required, and a value that the client sends is still checked. |
 | Values | A condition never changes a stored value. `Mage_Eav_Helper_Data::isHidden()` tells whether a condition hides an attribute for a record. The required check of `Mage_Eav_Model_Entity_Attribute_Backend_Abstract::validate()`, the CMS page resource and the blog post importer call it, and the CMS page importer calls the check of the CMS page resource, so each one accepts an empty hidden field. A condition that reads a field that the record does not hold, or holds as `false` (a store view that uses the default), does not hide the field, so the field stays required. The API helpers skip the required check of a hidden field. |
 | Output | `Mage_Customer_Block_Address_Renderer_Default::render()` does not print a hidden field of an address, and `Mage_Eav_Block_Frontend_Attributes::getAttributeValues()` leaves it out of the storefront table. A template that prints a value by its code checks `Mage::helper('eav')->isHidden($record, $attribute)` first. |
 | API | `dependsOn` of `/custom-attributes` and of each field of `/customer-forms/{form}`. |
 
 A hidden field in the browser is disabled, so the form does not send it.
+
+The models always require some standard fields, so the configuration locks their condition with a
+`depends_on` entry in `global/eav_attributes/<entity type>/<code>/locked_fields`. The attribute page
+then has no condition editor for them, and a save refuses a condition. `Mage/Customer/etc/config.xml`
+locks the name, the email, the website and the group of a customer, and the fields that
+`Mage_Customer_Model_Address_Abstract::_basicCheck()` checks.
 
 ## The API
 

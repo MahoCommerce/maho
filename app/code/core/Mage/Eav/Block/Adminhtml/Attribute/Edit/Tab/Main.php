@@ -62,14 +62,17 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit_Tab_Main extends Mage_Eav_Block_Ad
             ], '^');
         }
 
-        $form->addFieldset('depends_fieldset', [
-            'legend' => $helper->__('When the Field Shows'),
-            'class' => 'fieldset-wide',
-            'comment' => $helper->__('Leave the rows empty to show the field in every form. With rows, a form shows the field only when the other fields have these values. A field that the form hides is not required, and it keeps its value.'),
-            'html_content' => $this->getLayout()->createBlock('eav/adminhtml_attribute_edit_dependence')
-                ->setData('attribute', $attribute)
-                ->toHtml(),
-        ]);
+        // The models always require some standard fields, so a condition cannot hide them
+        if (!in_array('depends_on', $attribute->getLockedFields(), true)) {
+            $form->addFieldset('depends_fieldset', [
+                'legend' => $helper->__('When the Field Shows'),
+                'class' => 'fieldset-wide',
+                'comment' => $helper->__('Leave the rows empty to show the field in every form. With rows, a form shows the field only when the other fields have these values. A field that the form hides is not required, and it keeps its value.'),
+                'html_content' => $this->getLayout()->createBlock('eav/adminhtml_attribute_edit_dependence')
+                    ->setData('attribute', $attribute)
+                    ->toHtml(),
+            ]);
+        }
 
         Mage::dispatchEvent('adminhtml_eav_attribute_edit_prepare_form', [
             'form' => $form,

@@ -469,3 +469,53 @@ it('keeps a field that the admin form disabled out of the reach of a condition',
 
     expect($block->toHtml())->toContain('"keep_disabled":["' . $disabled->getHtmlId() . '"]');
 });
+
+it('gives the storefront form the condition of a standard field that the template shows itself', function () {
+    $company = dependencyService()->getByCode('company', 'customer_address');
+    dependencyService()->save($company->setDependsOn(dependencyItaly()));
+    Mage::getSingleton('eav/config')->clear();
+
+    try {
+        $block = new Mage_Customer_Block_Form_Attributes();
+        $block->setCustomerForm('customer_address_edit', Mage::getModel('customer/address'));
+        $json = Mage::helper('core')->jsonDecode((string) $block->getDependenceJson());
+
+        expect($json['depends']['company'] ?? null)->toBe(dependencyItaly());
+    } finally {
+        $company = dependencyService()->getByCode('company', 'customer_address');
+        dependencyService()->save($company->setDependsOn(null));
+    }
+});
+
+it('does not require a standard customer field that its condition hides', function () {
+    $taxvat = dependencyService()->getByCode('taxvat', 'customer');
+    $wasRequired = (bool) $taxvat->getIsRequired();
+    dependencyService()->save($taxvat->setIsRequired(true)->setDependsOn(['gender' => ['1']]));
+    Mage::getSingleton('eav/config')->clear();
+    $message = 'The TAX/VAT number is required.';
+    $customer = fn(int $gender) => Mage::getModel('customer/customer')->setData([
+        'firstname' => 'Pest',
+        'lastname' => 'Dependency',
+        'email' => $this->code . '@example.com',
+        'gender' => $gender,
+        'password' => 'Password123',
+        'password_confirmation' => 'Password123',
+    ]);
+
+    try {
+        $hidden = $customer(2)->validate();
+        $shown = $customer(1)->validate();
+
+        expect(is_array($hidden) ? $hidden : [])->not->toContain($message)
+            ->and($shown)->toContain($message);
+    } finally {
+        $taxvat = dependencyService()->getByCode('taxvat', 'customer');
+        dependencyService()->save($taxvat->setIsRequired($wasRequired)->setDependsOn(null));
+    }
+});
+
+it('refuses a condition on a standard field that the address always requires', function () {
+    $telephone = dependencyService()->getByCode('telephone', 'customer_address')->setDependsOn(dependencyItaly());
+
+    expect(fn() => dependencyService()->save($telephone))->toThrow(Mage_Core_Exception_Input::class);
+});

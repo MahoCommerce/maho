@@ -131,15 +131,21 @@ class Mage_Customer_Block_Form_Attributes extends Mage_Core_Block_Template
     }
 
     /**
-     * Return the configuration of FieldDependenceController for the fields of this block, or null when no field has
-     * a condition. A field that a condition reads and that the form does not have takes the value of the entity.
+     * Return the configuration of FieldDependenceController for the visible fields of the form, or null when no field
+     * has a condition. The fields are the fields of this block and the standard fields that the template of the form
+     * shows itself, such as company and vat_id. A field that a condition reads and that the form does not have takes
+     * the value of the entity.
      */
     public function getDependenceJson(): ?string
     {
         $depends = [];
         $values = [];
         $entity = $this->form?->getEntity();
-        foreach ($this->getAttributes() as $attribute) {
+        foreach ($this->form?->getAttributes() ?? [] as $attribute) {
+            /** @var Mage_Customer_Model_Attribute $attribute */
+            if (!$attribute->getIsVisible()) {
+                continue;
+            }
             $condition = $attribute->getDependsOn();
             if ($condition === null) {
                 continue;

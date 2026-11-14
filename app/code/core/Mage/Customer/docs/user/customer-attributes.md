@@ -83,6 +83,11 @@ The rules of a condition:
   **Yes/No** field, or a standard field such as **Country** or **Gender**.
 - A field that a condition reads cannot have a condition of its own.
 - You cannot delete a field while a condition reads it. Remove the condition first.
+- A standard field, such as **Company**, **VAT Number**, **Tax/VAT Number**, **Date of Birth** or
+  **Gender**, can have a condition too. The store always requires some standard fields, so they
+  have no **When the Field Shows** section: the name, the email, the website and the group of a
+  customer, and the name, the street, the city, the country, the state, the zip code and the
+  telephone of an address.
 
 When the condition hides a field:
 
@@ -94,6 +99,23 @@ When the condition hides a field:
   with its old value. The API and the imports apply the same rule.
 - The address does not print the field: in the address book, at checkout, on the order pages, in
   the emails and on the PDFs.
+
+### Example: the Italian invoice fields
+
+An Italian company needs its VAT number and an SdI code or a PEC address on its invoices. A private
+customer does not. A condition cannot read a field of the customer from an address, so the customer
+type must be an address field:
+
+1. In **System > Attributes > Customer Addresses**, add a **Dropdown** with the label
+   **Customer Type** and the options **Private** and **Company**. In **Used in Forms**, select
+   the address forms.
+2. Add the text fields **SdI Code** and **PEC**, with the same forms.
+3. Open **SdI Code**. In **When the Field Shows**, add the row **Customer Type** is **Company**,
+   then the row **Country** is **Italy**. In **Show the field when**, select **Each row matches**.
+4. Do the same for **PEC** and for the standard fields **Company** and **VAT Number**.
+5. To require a field only for Italian companies, set its **Default** to **Required**.
+
+A customer in the United States, or a private customer in Italy, then sees none of these fields.
 
 The address forms of an order in the admin always show the field, and they do not mark it as
 required: the forms of a new order, and the form that changes an address of an order. A new order
