@@ -92,7 +92,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
     }
 
     /**
-     * Retrieve rewrite by idPath
+     * Retrieve rewrite by idPath. The system rewrite comes before a custom rewrite with the same ID path.
      *
      * @param string $idPath
      * @param int $storeId
@@ -104,7 +104,9 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
         $select = $adapter->select()
             ->from($this->getMainTable())
             ->where('store_id = :store_id')
-            ->where('id_path = :id_path');
+            ->where('id_path = :id_path')
+            ->order('is_system ' . Maho\Db\Select::SQL_DESC)
+            ->limit(1);
         $bind = [
             'store_id' => (int) $storeId,
             'id_path'  => $idPath,

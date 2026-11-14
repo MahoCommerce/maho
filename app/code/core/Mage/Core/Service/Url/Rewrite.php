@@ -123,7 +123,9 @@ class Mage_Core_Service_Url_Rewrite
 
     /**
      * Write the ID path and the target path of $product and $category into $rewrite. A redirect goes to the
-     * request path of their own rewrite, so the browser shows the URL that the store uses.
+     * request path of their own rewrite, so the browser shows the URL that the store uses. A system rewrite gets
+     * the ID path of the catalog. A custom rewrite gets an ID path of its own, so that a product or a category
+     * can have many custom rewrites in a store view.
      *
      * @throws Mage_Core_Exception_Input when a redirect has no rewrite of the product or the category to go to
      */
@@ -134,7 +136,7 @@ class Mage_Core_Service_Url_Rewrite
     ): void {
         $catalogUrl = Mage::getSingleton('catalog/url');
         $idPath = $catalogUrl->generatePath('id', $product, $category);
-        $rewrite->setIdPath($idPath);
+        $rewrite->setIdPath($rewrite->getIsSystem() ? $idPath : $this->getCustomIdPath($rewrite));
 
         if (in_array($rewrite->getOptions(), ['R', 'RP'], true)) {
             $target = Mage::getResourceModel('catalog/url')->getRewriteByIdPath($idPath, (int) $rewrite->getStoreId());
@@ -149,5 +151,18 @@ class Mage_Core_Service_Url_Rewrite
             }
         }
         $rewrite->setTargetPath($catalogUrl->generatePath('target', $product, $category));
+    }
+
+    /**
+     * Return the saved ID path of the custom rewrite $rewrite, or a new unique ID path. An older custom rewrite can
+     * have the ID path of its product or category. It gets a new ID path, so that it no longer takes that slot.
+     */
+    private function getCustomIdPath(Mage_Core_Model_Url_Rewrite $rewrite): string
+    {
+        $saved = (string) $rewrite->getOrigData('id_path');
+        if ($saved !== '' && !preg_match('#^(category|product)/\d#', $saved)) {
+            return $saved;
+        }
+        return Mage::getSingleton('catalog/url')->generateUniqueIdPath();
     }
 }
