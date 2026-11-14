@@ -237,7 +237,8 @@ describe('the listing attribute of a product that uses two of them', function ()
         ]);
 
         expect($parent->getListSwatchAttrId())->toBe(listSwatchAttributeId($expected))
-            ->and($parent->getListSwatchAttrValues())->toHaveCount(2);
+            ->and($parent->getListSwatchAttrValues())->toHaveCount(2)
+            ->and($parent->getListSwatchAttrStockValues())->toBe(array_combine(listSwatchOptionIds($expected, 2), [true, true]));
     })->with([
         'color first' => [['color' => 0, 'size' => 1], 'color'],
         'size first' => [['color' => 1, 'size' => 0], 'size'],
