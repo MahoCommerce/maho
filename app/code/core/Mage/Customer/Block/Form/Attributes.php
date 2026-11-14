@@ -13,9 +13,16 @@ declare(strict_types=1);
  *
  * The template of the form renders the system attributes itself. This block adds the attributes
  * that an admin created, for the attribute set of the customer group of the entity.
+ *
+ * A template can render the block two times: with the placement top at the start of the form, and with the
+ * placement bottom after the standard fields. A field goes to the top when its sort order is lower than the
+ * sort order of each standard field of the form. A block without a placement renders all the fields.
  */
 class Mage_Customer_Block_Form_Attributes extends Mage_Core_Block_Template
 {
+    public const PLACEMENT_TOP = 'top';
+    public const PLACEMENT_BOTTOM = 'bottom';
+
     protected ?Mage_Customer_Model_Form $form = null;
 
     #[\Override]
@@ -38,7 +45,21 @@ class Mage_Customer_Block_Form_Attributes extends Mage_Core_Block_Template
     }
 
     /**
-     * Return the visible user-defined attributes of the form.
+     * Set the part of the fields that the block renders: PLACEMENT_TOP, PLACEMENT_BOTTOM, or null for all the fields.
+     */
+    public function setPlacement(?string $placement): static
+    {
+        return $this->setData('placement', $placement);
+    }
+
+    public function getPlacement(): ?string
+    {
+        $value = $this->getData('placement');
+        return $value === null ? null : (string) $value;
+    }
+
+    /**
+     * Return the visible user-defined attributes of the form, in the placement of the block.
      *
      * @return list<Mage_Customer_Model_Attribute>
      */
@@ -47,14 +68,38 @@ class Mage_Customer_Block_Form_Attributes extends Mage_Core_Block_Template
         if (!$this->form) {
             return [];
         }
+        $placement = $this->getPlacement();
+        $firstStandard = $placement === null ? null : $this->getFirstStandardSortOrder();
         $attributes = [];
         foreach ($this->form->getUserAttributes() as $attribute) {
             /** @var Mage_Customer_Model_Attribute $attribute */
-            if ($attribute->getIsVisible()) {
-                $attributes[] = $attribute;
+            if (!$attribute->getIsVisible()) {
+                continue;
             }
+            if ($placement !== null) {
+                $isTop = $firstStandard !== null && (int) $attribute->getSortOrder() < $firstStandard;
+                if ($isTop !== ($placement === self::PLACEMENT_TOP)) {
+                    continue;
+                }
+            }
+            $attributes[] = $attribute;
         }
         return $attributes;
+    }
+
+    /**
+     * Return the lowest sort order of the visible standard fields of the form, or null when the form has none.
+     */
+    protected function getFirstStandardSortOrder(): ?int
+    {
+        $sortOrders = [];
+        foreach ($this->form?->getSystemAttributes() ?? [] as $attribute) {
+            /** @var Mage_Customer_Model_Attribute $attribute */
+            if ($attribute->getIsVisible()) {
+                $sortOrders[] = (int) $attribute->getSortOrder();
+            }
+        }
+        return $sortOrders ? min($sortOrders) : null;
     }
 
     /**
@@ -135,9 +180,13 @@ class Mage_Customer_Block_Form_Attributes extends Mage_Core_Block_Template
      * has a condition: the conditions that show the fields, and the conditions that make optional fields required. The
      * fields are the fields of this block and the standard fields that the template of the form shows itself, such as
      * company and vat_id. A field that a condition reads and that the form does not have takes the value of the entity.
+     * The block with the placement top returns null, because the controller of the other block covers the whole form.
      */
     public function getDependenceJson(): ?string
     {
+        if ($this->getPlacement() === self::PLACEMENT_TOP) {
+            return null;
+        }
         $depends = [];
         $required = [];
         $fields = [];

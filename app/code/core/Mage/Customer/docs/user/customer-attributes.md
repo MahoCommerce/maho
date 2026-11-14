@@ -54,7 +54,10 @@ A standard field, such as **Date of Birth**, gets its **Hidden** setting from **
 Configuration > Customers > Customer Configuration**. So its **Default** field offers only
 **Optional** and **Required**.
 
-**Sort Order** sets the place of the field in a form.
+**Sort Order** sets the place of the field in a form. The storefront forms show a new field after the
+standard fields. To show a field at the top of the form, before the name, give it a **Sort Order** that is
+lower than the **Sort Order** of each standard field of the form, for example `1`. Do this for a field that
+decides the other fields, such as a **Customer Type** with the values Private and Company.
 
 ## Show a field only when another field has a value
 

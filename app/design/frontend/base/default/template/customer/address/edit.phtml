@@ -27,6 +27,9 @@
     <input type="hidden" name="error_url" value="<?= $this->getErrorUrl() ?>">
         <h2 class="legend"><?= $this->__('Contact Information') ?></h2>
         <ul class="form-list">
+            <?= $this->getLayout()->createBlock('customer/form_attributes')
+                ->setCustomerForm('customer_address_edit', $this->getAddress())
+                ->setPlacement(Mage_Customer_Block_Form_Attributes::PLACEMENT_TOP)->toHtml() ?>
             <li class="fields">
                 <?= $this->getNameBlockHtml() ?>
             </li>
@@ -108,7 +111,7 @@
             </li>
             <?php endif ?>
             <?= $this->getLayout()->createBlock('customer/form_attributes')
-                ->setCustomerForm('customer_address_edit', $this->getAddress())->toHtml() ?>
+                ->setCustomerForm('customer_address_edit', $this->getAddress())->setPlacement(Mage_Customer_Block_Form_Attributes::PLACEMENT_BOTTOM)->toHtml() ?>
             <li<?php if ($this->canSetAsDefaultBilling()) {
             echo ' class="control"';
             } ?>>

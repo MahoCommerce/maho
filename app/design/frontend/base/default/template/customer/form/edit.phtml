@@ -18,6 +18,9 @@
         <?= $this->getBlockHtml('formkey') ?>
         <h2 class="legend"><?= $this->__('Account Information') ?></h2>
         <ul class="form-list">
+        <?= $this->getLayout()->createBlock('customer/form_attributes')
+            ->setCustomerForm('customer_account_edit', $this->getCustomer())
+            ->setPlacement(Mage_Customer_Block_Form_Attributes::PLACEMENT_TOP)->toHtml() ?>
             <li class="fields">
                 <?= $this->getLayout()->createBlock('customer/widget_name')->setObject($this->getCustomer())->toHtml() ?>
             </li>
@@ -40,7 +43,7 @@
             <li><?= $_gender->setGender($this->getCustomer()->getGender())->toHtml() ?></li>
         <?php endif ?>
         <?= $this->getLayout()->createBlock('customer/form_attributes')
-            ->setCustomerForm('customer_account_edit', $this->getCustomer())->toHtml() ?>
+            ->setCustomerForm('customer_account_edit', $this->getCustomer())->setPlacement(Mage_Customer_Block_Form_Attributes::PLACEMENT_BOTTOM)->toHtml() ?>
         <?php $magicLinkMode = Mage::helper('customer')->getMagicLinkRegistrationMode(); ?>
         <?php if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD): ?>
             <li>
