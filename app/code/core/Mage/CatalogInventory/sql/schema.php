@@ -47,7 +47,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('max_sale_qty', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
             ->addColumn(Schema::column('use_config_max_sale_qty', Types::SMALLINT, unsigned: true, default: 1))
             ->addColumn(Schema::column('is_in_stock', Types::SMALLINT, unsigned: true, default: 0))
-            ->addColumn(Schema::column('low_stock_date', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('low_stock_date', Types::DATETIME_IMMUTABLE, notNull: false))
             ->addColumn(Schema::column('notify_stock_qty', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
             ->addColumn(Schema::column('use_config_notify_stock_qty', Types::SMALLINT, unsigned: true, default: 1))
             ->addColumn(Schema::column('manage_stock', Types::SMALLINT, unsigned: true, default: 0))

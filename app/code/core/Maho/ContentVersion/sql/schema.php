@@ -28,7 +28,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('version_number', Types::INTEGER, unsigned: true))
             ->addColumn(Schema::column('content_data', Types::TEXT, length: 16777215))
             ->addColumn(Schema::column('editor', Types::STRING, length: 100, notNull: false))
-            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('version_id')->create())
             ->addIndex(
                 Index::editor()

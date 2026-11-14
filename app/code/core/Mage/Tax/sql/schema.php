@@ -181,7 +181,7 @@ return function (SchemaEditor $schema): void {
             Table::editor()
                 ->setUnquotedName($tableName)
                 ->addColumn(Schema::column('id', Types::INTEGER, unsigned: true, autoincrement: true))
-                ->addColumn(Schema::column('period', Types::DATE_MUTABLE, notNull: false))
+                ->addColumn(Schema::column('period', Types::DATE_IMMUTABLE, notNull: false))
                 ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
                 ->addColumn(Schema::column('code', Types::STRING, length: 255))
                 ->addColumn(Schema::column('order_status', Types::STRING, length: 50))

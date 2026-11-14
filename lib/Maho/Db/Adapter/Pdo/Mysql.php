@@ -14,7 +14,6 @@ namespace Maho\Db\Adapter\Pdo;
 use Doctrine\DBAL\Exception\DeadlockException;
 use Doctrine\DBAL\Schema\Exception\TableDoesNotExist;
 use Doctrine\DBAL\Schema\Name\OptionallyQualifiedName;
-use Doctrine\DBAL\Types\Type;
 use Maho\Db\Adapter\AbstractPdoAdapter;
 use Maho\Db\Helper;
 
@@ -1449,6 +1448,7 @@ class Mysql extends AbstractPdoAdapter
                 throw TableDoesNotExist::new($fullTableName);
             }
             $platform = $this->_connection->getDatabasePlatform();
+            $types = $this->_connection->getConfiguration()->getTypeProvider();
 
             // Get primary key information
             $primaryKey = [];
@@ -1470,7 +1470,7 @@ class Mysql extends AbstractPdoAdapter
                 $columnName = $column->getObjectName()->getIdentifier()->getValue();
 
                 // Get the SQL declaration and parse it to extract MySQL type
-                $sqlDeclaration = Type::getType($column->getTypeName())->getSQLDeclaration($column->toArray(true), $platform);
+                $sqlDeclaration = $types->get($column->getTypeName())->getSQLDeclaration($column->toArray(true), $platform);
                 $typeInfo = $this->_parseMysqlType($sqlDeclaration);
 
                 // Determine if column is in primary key

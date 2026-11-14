@@ -34,7 +34,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('display_in_terms', Types::SMALLINT, default: 1))
             ->addColumn(Schema::column('is_active', Types::SMALLINT, notNull: false, default: 1))
             ->addColumn(Schema::column('is_processed', Types::SMALLINT, notNull: false, default: 0))
-            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('query_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('query_text', 'store_id', 'popularity'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))

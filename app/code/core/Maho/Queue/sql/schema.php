@@ -33,14 +33,14 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('dedupe_key', Types::STRING, length: 64, notNull: false))
             // W3C trace context of the dispatching request, so the consumer span joins its trace
             ->addColumn(Schema::column('trace_context', Types::STRING, length: 1024, notNull: false))
-            ->addColumn(Schema::column('available_at', Types::DATETIME_MUTABLE))
-            ->addColumn(Schema::column('claimed_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('available_at', Types::DATETIME_IMMUTABLE))
+            ->addColumn(Schema::column('claimed_at', Types::DATETIME_IMMUTABLE, notNull: false))
             ->addColumn(Schema::column('claim_token', Types::STRING, length: 32, notNull: false))
-            ->addColumn(Schema::column('processed_at', Types::DATETIME_MUTABLE, notNull: false))
-            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('processed_at', Types::DATETIME_IMMUTABLE, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
             // Transport keeps updated_at current on every write; the on-update
             // auto-bump is cross-engine unsafe (PgSQL/SQLite downgrade silently).
-            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('message_id')->create())
             // (status, available_at, queue) serves unfiltered polls and countDue's date
             // bound; (status, queue, available_at) lets a pool worker's queue IN (...)

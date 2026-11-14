@@ -60,7 +60,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
             ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 1))
             ->addColumn(Schema::column('active', Types::SMALLINT, unsigned: true, default: 1))
-            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_IMMUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('tag_relation_id')
