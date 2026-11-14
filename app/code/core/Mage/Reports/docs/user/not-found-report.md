@@ -21,7 +21,7 @@ and other bots.
 | Hits | The number of times that the address answered 404 |
 | Last Referer | The last page that linked to the address, if the browser sent it |
 | First Seen, Last Seen | The first and the last time that the address answered 404 |
-| Redirects To | The target path of a URL rewrite that has this address as its request path |
+| Redirects To | The target path of the URL rewrite that redirects this address |
 
 The report shows the addresses with the most hits first. **Export** saves the report as a CSV file.
 
@@ -37,6 +37,10 @@ The report shows the addresses with the most hits first. **Export** saves the re
 After the save, the **Redirects To** column shows the target path, and the **Redirect** link goes
 away. The address does not answer 404 again, so its hits stop. See [URL Rewrites](url-rewrites.md)
 for the fields of a rewrite.
+
+A store view cannot have two URL rewrites with the same request path. When the store view already
+has a rewrite for the address that does not redirect, such as the rewrite of a disabled product,
+the row has no **Redirect** link. Find that rewrite in **Catalog > URL Rewrite Management**.
 
 To delete rows, select them, choose **Delete** in **Actions** and click **Submit**. An address
 that answers 404 again gets a new row.

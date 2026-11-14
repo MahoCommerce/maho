@@ -10,6 +10,9 @@ declare(strict_types=1);
 
 class Mage_Reports_Model_Resource_NotFound_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
+    private const REDIRECT_TARGET_SQL = "CASE WHEN rewrite.options IN ('R', 'RP') THEN rewrite.target_path"
+        . " WHEN rewrite.url_rewrite_id IS NULL AND rewrite_default.options IN ('R', 'RP') THEN rewrite_default.target_path END";
+
     private bool $redirectJoined = false;
 
     #[\Override]
@@ -19,8 +22,9 @@ class Mage_Reports_Model_Resource_NotFound_Collection extends Mage_Core_Model_Re
     }
 
     /**
-     * Add the target path of the URL rewrite that has the same request path, as redirect_target. A rewrite of the
-     * store view wins over a rewrite of store 0, as in the URL rewrite lookup. It is null when no rewrite exists.
+     * Add the target path of the URL rewrite that redirects the path, as redirect_target. A rewrite of the store view
+     * wins over a rewrite of store 0, as in the URL rewrite lookup. It is null when the rewrite that the lookup picks
+     * does not redirect, or when no rewrite exists. Add the ID of the rewrite of the store view as url_rewrite_id.
      */
     public function addRedirectTarget(): static
     {
@@ -38,23 +42,22 @@ class Mage_Reports_Model_Resource_NotFound_Collection extends Mage_Core_Model_Re
                         . Mage_Core_Model_App::ADMIN_STORE_ID,
                     [],
                 )
-                ->columns(['redirect_target' => new \Maho\Db\Expr('COALESCE(rewrite.target_path, rewrite_default.target_path)')]);
+                ->columns([
+                    'redirect_target' => new \Maho\Db\Expr(self::REDIRECT_TARGET_SQL),
+                    'url_rewrite_id' => 'rewrite.url_rewrite_id',
+                ]);
             $this->redirectJoined = true;
         }
         return $this;
     }
 
     /**
-     * Keep only the paths that have a URL rewrite ($hasRedirect true) or only the paths without one.
+     * Keep only the paths that a URL rewrite redirects ($hasRedirect true) or only the other paths.
      */
     public function addRedirectFilter(bool $hasRedirect): static
     {
         $this->addRedirectTarget();
-        $this->getSelect()->where(
-            $hasRedirect
-                ? '(rewrite.url_rewrite_id IS NOT NULL OR rewrite_default.url_rewrite_id IS NOT NULL)'
-                : '(rewrite.url_rewrite_id IS NULL AND rewrite_default.url_rewrite_id IS NULL)',
-        );
+        $this->getSelect()->where('(' . self::REDIRECT_TARGET_SQL . ($hasRedirect ? ') IS NOT NULL' : ') IS NULL'));
         return $this;
     }
 }

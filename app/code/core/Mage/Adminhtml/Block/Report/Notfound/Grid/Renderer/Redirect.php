@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Link to a new URL rewrite that redirects the path, when the path has no URL rewrite yet.
+ * Link to a new URL rewrite that redirects the path, when no rewrite redirects it and the store view has no rewrite
+ * with this request path.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -16,6 +17,7 @@ class Mage_Adminhtml_Block_Report_Notfound_Grid_Renderer_Redirect extends Mage_A
     public function render(\Maho\DataObject $row)
     {
         if ($row->getData('redirect_target') !== null
+            || $row->getData('url_rewrite_id') !== null
             || !Mage::getSingleton('admin/session')->isAllowed(Mage_Adminhtml_UrlrewriteController::ADMIN_RESOURCE)
         ) {
             return '';

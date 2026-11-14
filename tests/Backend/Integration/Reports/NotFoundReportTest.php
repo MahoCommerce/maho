@@ -158,6 +158,16 @@ describe('Not Found report', function () {
         expect(notFoundRow("{$this->path}-3", $this->storeId))->toBeNull();
     });
 
+    it('keeps one row for each path and store', function () {
+        $resource = Mage::getResourceSingleton('reports/notFound');
+        $resource->recordHit($this->storeId, $this->path, null);
+        $resource->recordHit(Mage_Core_Model_App::ADMIN_STORE_ID, $this->path, null);
+        $resource->recordHit($this->storeId, $this->path, null);
+
+        expect((int) notFoundRow($this->path, $this->storeId)['hits'])->toBe(2);
+        expect((int) notFoundRow($this->path, Mage_Core_Model_App::ADMIN_STORE_ID)['hits'])->toBe(1);
+    });
+
     it('deletes the selected rows', function () {
         notFoundRecord('http://localhost/' . $this->path);
         $id = (int) notFoundRow($this->path, $this->storeId)['not_found_id'];
@@ -168,6 +178,12 @@ describe('Not Found report', function () {
 
     it('shows the target of a URL rewrite that redirects the path', function () {
         notFoundRecord('http://localhost/' . $this->path);
+        $filtered = fn(bool $hasRedirect) => Mage::getResourceModel('reports/notFound_collection')
+            ->addRedirectFilter($hasRedirect)
+            ->addFieldToFilter('main_table.request_path', $this->path);
+        expect($filtered(false)->getSize())->toBe(1);
+        expect($filtered(true)->getSize())->toBe(0);
+
         $rewriteTable = Mage::getSingleton('core/resource')->getTableName('core/url_rewrite');
         $this->write->insert($rewriteTable, [
             'store_id' => $this->storeId,
@@ -192,6 +208,62 @@ describe('Not Found report', function () {
         } finally {
             $this->write->delete($rewriteTable, ['id_path = ?' => $this->path]);
         }
+    });
+});
+
+describe('Not Found report with a URL rewrite that does not redirect', function () {
+    beforeEach(function () {
+        $this->storeId = (int) Mage::app()->getDefaultStoreView()->getId();
+        $this->path = 'missing-page-' . uniqid();
+        $this->write = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $this->rewriteTable = Mage::getSingleton('core/resource')->getTableName('core/url_rewrite');
+        $this->addRewrite = fn(int $storeId, string $options, string $target) => $this->write->insert($this->rewriteTable, [
+            'store_id' => $storeId,
+            'id_path' => "{$this->path}-{$storeId}",
+            'request_path' => $this->path,
+            'target_path' => $target,
+            'is_system' => 0,
+            'options' => $options,
+        ]);
+        $this->collection = fn(?bool $hasRedirect = null) => ($hasRedirect === null
+            ? Mage::getResourceModel('reports/notFound_collection')->addRedirectTarget()
+            : Mage::getResourceModel('reports/notFound_collection')->addRedirectFilter($hasRedirect))
+            ->addFieldToFilter('main_table.request_path', $this->path);
+        Mage::getResourceSingleton('reports/notFound')->recordHit($this->storeId, $this->path, null);
+    });
+
+    afterEach(function () {
+        $this->write->delete($this->rewriteTable, ['request_path = ?' => $this->path]);
+        $this->write->delete(
+            Mage::getSingleton('core/resource')->getTableName('reports/not_found'),
+            ['request_path = ?' => $this->path],
+        );
+    });
+
+    it('does not count a rewrite of the store view that does not redirect', function () {
+        ($this->addRewrite)($this->storeId, '', 'catalog/product/view/id/1');
+
+        $item = ($this->collection)()->getFirstItem();
+        expect($item->getData('redirect_target'))->toBeNull();
+        expect((int) $item->getData('url_rewrite_id'))->toBeGreaterThan(0);
+        expect(($this->collection)(false)->getSize())->toBe(1);
+        expect(($this->collection)(true)->getSize())->toBe(0);
+    });
+
+    it('does not count a redirect of store 0 when the rewrite of the store view does not redirect', function () {
+        ($this->addRewrite)($this->storeId, '', 'catalog/product/view/id/1');
+        ($this->addRewrite)(Mage_Core_Model_App::ADMIN_STORE_ID, 'RP', 'default-page.html');
+
+        expect(($this->collection)()->getFirstItem()->getData('redirect_target'))->toBeNull();
+        expect(($this->collection)(false)->getSize())->toBe(1);
+    });
+
+    it('prefers the redirect of the store view over the redirect of store 0', function () {
+        ($this->addRewrite)($this->storeId, 'RP', 'view-page.html');
+        ($this->addRewrite)(Mage_Core_Model_App::ADMIN_STORE_ID, 'RP', 'default-page.html');
+
+        expect(($this->collection)()->getSize())->toBe(1);
+        expect(($this->collection)()->getFirstItem()->getData('redirect_target'))->toBe('view-page.html');
     });
 });
 
@@ -227,6 +299,55 @@ describe('Not Found report with a rewrite of store 0', function () {
         } finally {
             $write->delete($rewriteTable, ['id_path = ?' => $path]);
             $write->delete($table, ['request_path = ?' => $path]);
+        }
+    });
+});
+
+describe('Not Found report grid renderers', function () {
+    it('shows a referer as escaped text, and as a link only for http and https', function () {
+        $render = fn(string $referer) => Mage::app()->getLayout()
+            ->createBlock('adminhtml/report_notfound_grid_renderer_referer')
+            ->setColumn(new \Maho\DataObject(['index' => 'referer']))
+            ->render(new \Maho\DataObject(['referer' => $referer]));
+
+        expect($render(''))->toBe('');
+        expect($render('javascript:alert(1)'))->toBe('javascript:alert(1)');
+        $html = $render('https://example.com/"><script>x</script>');
+        expect($html)->not->toContain('<script>');
+        expect($html)->toStartWith('<a href="https://example.com/');
+        expect($html)->toContain('rel="noopener noreferrer nofollow"');
+    });
+
+    it('shows a Redirect link only for a path without a rewrite, to an admin who may edit URL rewrites', function () {
+        Mage::app()->getRequest()->setRouteName('adminhtml');
+        $storeId = (int) Mage::app()->getDefaultStoreView()->getId();
+        $path = 'missing-page-' . uniqid() . '/a b&c';
+        $renderer = new Mage_Adminhtml_Block_Report_Notfound_Grid_Renderer_Redirect();
+        $row = fn(?string $target = null, ?int $rewriteId = null) => new \Maho\DataObject([
+            'request_path' => $path,
+            'store_id' => $storeId,
+            'redirect_target' => $target,
+            'url_rewrite_id' => $rewriteId,
+        ]);
+
+        $user = Tests\Helpers\AdminRoleFixture::login(['admin/catalog/urlrewrite']);
+        try {
+            expect($renderer->render($row('some/target')))->toBe('');
+            expect($renderer->render($row(null, 1)))->toBe('');
+
+            preg_match('/href="([^"]+)"/', $renderer->render($row()), $match);
+            parse_str((string) parse_url(html_entity_decode($match[1] ?? ''), PHP_URL_QUERY), $query);
+            expect($query['request_path'] ?? null)->toBe($path);
+            expect($query['store_id'] ?? null)->toBe((string) $storeId);
+        } finally {
+            Tests\Helpers\AdminRoleFixture::delete($user);
+        }
+
+        $user = Tests\Helpers\AdminRoleFixture::login(['admin/catalog/products']);
+        try {
+            expect($renderer->render($row()))->toBe('');
+        } finally {
+            Tests\Helpers\AdminRoleFixture::delete($user);
         }
     });
 });
