@@ -253,8 +253,9 @@ class ZipUpdater {
 }
 
 /**
- * Show the custom attribute fields of a storefront form only when the condition of each attribute is met, and
- * disable the hidden fields so that the form does not send them. A condition uses the format of
+ * Show the attribute fields of a storefront form only when the condition of each attribute is met, and disable the
+ * hidden fields so that the form does not send them. Mark an optional field as required while its required
+ * condition is met. A condition uses the format of
  * Maho\Data\Form\Condition: {field: [values]} entries joined with AND, and {operator, condition} groups.
  * The wanted value __any__ matches a field that holds any value that is not empty.
  */
@@ -279,7 +280,8 @@ class FieldDependenceController {
     /**
      * @param {HTMLElement} anchor - an element inside the form
      * @param {Object} config
-     * @param {Object<string, Object>} config.depends - the condition of each field, keyed by attribute code
+     * @param {Object<string, Object>} config.depends - the condition that shows each field, keyed by attribute code
+     * @param {Object<string, Object>} [config.required] - the condition that makes each optional field required
      * @param {string} config.nameFormat - the format of the input names, for example billing[%s]
      * @param {Object<string, string[]>} config.values - the values of the fields that the form does not have
      */
@@ -289,7 +291,7 @@ class FieldDependenceController {
         const controllers = FieldDependenceController.#controllers.get(this.form) ?? [];
         FieldDependenceController.#controllers.set(this.form, [...controllers, this]);
         const sources = new Set();
-        for (const condition of Object.values(config.depends)) {
+        for (const condition of [...Object.values(config.depends), ...Object.values(config.required ?? {})]) {
             this.collectFields(condition, sources);
         }
         for (const field of sources) {
@@ -380,6 +382,24 @@ class FieldDependenceController {
             for (const el of row.querySelectorAll('input, select, textarea')) {
                 el.disabled = !shown;
             }
+        }
+        for (const [code, condition] of Object.entries(this.config.required ?? {})) {
+            const elements = this.fieldElements(code);
+            const row = elements[0]?.closest('li, .field');
+            if (!row) {
+                continue;
+            }
+            const shown = !this.config.depends[code] || this.evaluate(this.config.depends[code]);
+            const required = shown && this.evaluate(condition);
+            for (const el of elements) {
+                el.classList.toggle('required-entry', required);
+                if (required) {
+                    el.setAttribute('aria-required', 'true');
+                } else {
+                    el.removeAttribute('aria-required');
+                }
+            }
+            row.querySelector('label')?.classList.toggle('required', required);
         }
     }
 }

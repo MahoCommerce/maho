@@ -62,14 +62,26 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit_Tab_Main extends Mage_Eav_Block_Ad
             ], '^');
         }
 
-        // The models always require some standard fields, so a condition cannot hide them
-        if (!in_array('depends_on', $attribute->getLockedFields(), true)) {
+        // The models always require some standard fields, so a condition cannot hide them or make them required
+        $isAlwaysRequired = in_array('depends_on', $attribute->getLockedFields(), true);
+        if (!$isAlwaysRequired) {
             $form->addFieldset('depends_fieldset', [
                 'legend' => $helper->__('When the Field Shows'),
                 'class' => 'fieldset-wide',
                 'comment' => $helper->__('Leave the rows empty to show the field in every form. With rows, a form shows the field only when the other fields have these values. A field that the form hides is not required, and it keeps its value.'),
                 'html_content' => $this->getLayout()->createBlock('eav/adminhtml_attribute_edit_dependence')
                     ->setData('attribute', $attribute)
+                    ->toHtml(),
+            ]);
+        }
+        if (!$isAlwaysRequired) {
+            $form->addFieldset('required_when_fieldset', [
+                'legend' => $helper->__('When the Field Is Required'),
+                'class' => 'fieldset-wide',
+                'comment' => $helper->__('Leave the rows empty to let the Required setting decide alone. With rows, an optional field is also required when the other fields have these values, and only while the form shows the field.'),
+                'html_content' => $this->getLayout()->createBlock('eav/adminhtml_attribute_edit_dependence')
+                    ->setData('attribute', $attribute)
+                    ->setData('column', 'required_when')
                     ->toHtml(),
             ]);
         }

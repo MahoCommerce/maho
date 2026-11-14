@@ -571,3 +571,100 @@ it('gives no image of a field that its condition hides', function () {
         ->and(Mage::helper('eav')->getImageSet($category('1'), $this->code . '_logo'))->toBeInstanceOf(Mage_Core_Model_Image_Set::class)
         ->and(Mage::helper('eav')->getImageSet($category('1'), $this->code))->toBeNull();
 });
+
+it('requires PEC only while SdI is empty, for an Italian company, and lets the required condition read a field with a condition', function () {
+    $this->created[] = dependencyAttribute('customer_address', [
+        'attribute_code' => $this->code . '_sdi',
+        'is_visible' => 1,
+        'used_in_forms' => ['customer_address_edit'],
+    ], dependencyItaly());
+    $this->created[] = $pec = dependencyAttribute('customer_address', [
+        'attribute_code' => $this->code . '_pec',
+        'is_visible' => 1,
+        'used_in_forms' => ['customer_address_edit'],
+    ], dependencyItaly());
+    $pec->setRequiredWhen([['operator' => 'NOT', 'condition' => [$this->code . '_sdi' => [\Maho\Data\Form\Condition::ANY_VALUE]]]]);
+    dependencyService()->save($pec);
+    Mage::getSingleton('eav/config')->clear();
+    $pec = dependencyService()->getByCode($this->code . '_pec', 'customer_address');
+    $helper = Mage::helper('eav');
+    $message = '"Pest Dependency" is a required value.';
+    /** @var Mage_Customer_Model_Form $form */
+    $form = Mage::getModel('customer/form')->setFormCode('customer_address_edit')->setEntity(Mage::getModel('customer/address'));
+    $errors = fn(array $data) => is_array($result = $form->validateData($data)) ? $result : [];
+
+    expect($helper->isRequired(new \Maho\DataObject(['country_id' => 'IT', $this->code . '_sdi' => '']), $pec))->toBeTrue()
+        ->and($helper->isRequired(new \Maho\DataObject(['country_id' => 'IT', $this->code . '_sdi' => 'ABC1234']), $pec))->toBeFalse()
+        ->and($helper->isRequired(new \Maho\DataObject(['country_id' => 'US', $this->code . '_sdi' => '']), $pec))->toBeFalse()
+        ->and($errors(['country_id' => 'IT', $this->code . '_sdi' => '', $this->code . '_pec' => '']))->toContain($message)
+        ->and($errors(['country_id' => 'IT', $this->code . '_sdi' => 'ABC1234', $this->code . '_pec' => '']))->not->toContain($message)
+        ->and($errors(['country_id' => 'US', $this->code . '_sdi' => '', $this->code . '_pec' => '']))->not->toContain($message);
+
+    // Each of the two reads the other, so the customer fills in one of them
+    $sdi = dependencyService()->getByCode($this->code . '_sdi', 'customer_address')
+        ->setRequiredWhen([['operator' => 'NOT', 'condition' => [$this->code . '_pec' => [\Maho\Data\Form\Condition::ANY_VALUE]]]]);
+    dependencyService()->save($sdi);
+    expect($helper->isRequired(new \Maho\DataObject(['country_id' => 'IT', $this->code . '_pec' => '']), $sdi))->toBeTrue()
+        ->and($helper->isRequired(new \Maho\DataObject(['country_id' => 'IT', $this->code . '_pec' => 'a@pec.it']), $sdi))->toBeFalse();
+});
+
+it('gives the storefront form and the API the condition that makes a field required', function () {
+    $this->created[] = dependencyAttribute('customer_address', [
+        'attribute_code' => $this->code,
+        'is_visible' => 1,
+        'used_in_forms' => ['customer_address_edit'],
+    ]);
+    $this->created[] = $attribute = dependencyAttribute('customer_address', [
+        'attribute_code' => $this->code . '_r',
+        'is_visible' => 1,
+        'used_in_forms' => ['customer_address_edit'],
+    ]);
+    $condition = [$this->code => [\Maho\Data\Form\Condition::ANY_VALUE]];
+    dependencyService()->save($attribute->setRequiredWhen($condition));
+    Mage::getSingleton('eav/config')->clear();
+    $attributes = [$this->code . '_r' => dependencyService()->getByCode($this->code . '_r', 'customer_address')];
+    $block = new Mage_Customer_Block_Form_Attributes();
+    $block->setCustomerForm('customer_address_edit', Mage::getModel('customer/address'));
+    $json = Mage::helper('core')->jsonDecode((string) $block->getDependenceJson());
+
+    expect($json['required'][$this->code . '_r'] ?? null)->toBe($condition)
+        ->and(fn() => \Maho\ApiPlatform\Service\CustomAttributes::apply(new \Maho\DataObject([$this->code => 'set']), [], $attributes, isNew: true))
+        ->toThrow(Mage_Core_Exception_Input::class, 'required');
+    \Maho\ApiPlatform\Service\CustomAttributes::apply(new \Maho\DataObject([$this->code => '']), [], $attributes, isNew: true);
+});
+
+it('shows an address field for one customer group, read as customer.group_id', function () {
+    $groups = Mage::getResourceModel('customer/group_collection')->setRealGroupsFilter()->getAllIds();
+    [$wholesale, $other] = [(string) $groups[0], (string) $groups[1]];
+    $this->created[] = $attribute = dependencyAttribute('customer_address', [
+        'attribute_code' => $this->code,
+        'used_in_forms' => ['customer_address_edit'],
+    ], ['customer.group_id' => [$wholesale]]);
+    $sources = $attribute->getDependencySources();
+    $address = fn(string $groupId) => Mage::getModel('customer/address')
+        ->setCustomer(Mage::getModel('customer/customer')->setGroupId((int) $groupId));
+    $guestAddress = Mage::getModel('sales/quote_address')
+        ->setQuote(Mage::getModel('sales/quote')->setCustomerGroupId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID));
+
+    expect(array_column($sources['customer.group_id']['options'] ?? [], 'value'))->toContain('0', $wholesale)
+        ->and(Mage::helper('eav')->isHidden($address($wholesale), $attribute))->toBeFalse()
+        ->and(Mage::helper('eav')->isHidden($address($other), $attribute))->toBeTrue()
+        ->and(Mage::helper('eav')->isHidden($guestAddress, $attribute))->toBeTrue();
+});
+
+it('refuses to delete a customer field that an address condition reads, and lets that field have a condition of its own', function () {
+    $this->created[] = $customerField = dependencyAttribute('customer', [
+        'attribute_code' => $this->code,
+        'frontend_input' => 'boolean',
+        'used_in_forms' => ['customer_account_edit'],
+    ]);
+    $this->created[] = dependencyAttribute('customer_address', [
+        'attribute_code' => $this->code . '_r',
+        'used_in_forms' => ['customer_address_edit'],
+    ], ['customer.' . $this->code => ['1']]);
+    $customerField = dependencyService()->getByCode($this->code, 'customer');
+
+    expect(fn() => dependencyService()->delete($customerField))->toThrow(Mage_Core_Exception_Conflict::class)
+        ->and(fn() => dependencyService()->save($customerField->setDependsOn(['website_id' => [(string) Mage::app()->getStore()->getWebsiteId()]])))
+        ->not->toThrow(Mage_Core_Exception_Input::class);
+});

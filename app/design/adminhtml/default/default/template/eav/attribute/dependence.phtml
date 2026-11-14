@@ -8,32 +8,33 @@
 /** @var Mage_Eav_Block_Adminhtml_Attribute_Edit_Dependence $this */
 $helper = Mage::helper('eav');
 $attribute = $this->getAttribute();
+$column = $this->getColumn();
 $dependents = $this->getDependentCodes();
 $editable = $this->getEditableCondition();
 ?>
 <?php if ($dependents): ?>
 <p class="note"><span><?= $this->escapeHtml($helper->__('The condition of %s reads this field, so this field cannot have a condition.', implode(', ', $dependents))) ?></span></p>
 <?php elseif ($editable === null): ?>
-<input type="hidden" name="depends_on" id="depends_on" value="<?= $this->escapeHtml((string) $attribute->getData('depends_on')) ?>">
-<div id="depends_on_nested">
+<input type="hidden" name="<?= $column ?>" id="<?= $column ?>" value="<?= $this->escapeHtml($this->getStoredCondition()) ?>">
+<div id="<?= $column ?>_nested">
     <p class="note"><span><?= $this->escapeHtml($helper->__('This condition has groups inside groups, which this page cannot change. Delete it to write a new one.')) ?></span></p>
-    <pre class="bg-base-200 rounded-box p-3 text-sm whitespace-pre-wrap my-2"><?= $this->escapeHtml(json_encode($attribute->getDependsOn(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)) ?></pre>
-    <button type="button" class="d-btn d-btn-sm" id="depends_on_delete"><?= $this->escapeHtml($helper->__('Delete')) ?></button>
+    <pre class="bg-base-200 rounded-box p-3 text-sm whitespace-pre-wrap my-2"><?= $this->escapeHtml(json_encode($attribute->decodeConditionOf($column), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)) ?></pre>
+    <button type="button" class="d-btn d-btn-sm" id="<?= $column ?>_delete"><?= $this->escapeHtml($helper->__('Delete')) ?></button>
 </div>
 <script>
-    document.getElementById('depends_on_delete').addEventListener('click', () => {
-        document.getElementById('depends_on').value = '';
-        document.getElementById('depends_on_nested').replaceChildren();
+    document.getElementById('<?= $column ?>_delete').addEventListener('click', () => {
+        document.getElementById('<?= $column ?>').value = '';
+        document.getElementById('<?= $column ?>_nested').replaceChildren();
     });
 </script>
 <?php else: ?>
-<input type="hidden" name="depends_on" id="depends_on" value="<?= $this->escapeHtml((string) $attribute->getData('depends_on')) ?>">
+<input type="hidden" name="<?= $column ?>" id="<?= $column ?>" value="<?= $this->escapeHtml($this->getStoredCondition()) ?>">
 <table class="form-list">
     <tbody>
         <tr>
-            <td class="label"><label for="depends_on_operator"><?= $this->escapeHtml($helper->__('Show the field when')) ?></label></td>
+            <td class="label"><label for="<?= $column ?>_operator"><?= $this->escapeHtml($this->isShowCondition() ? $helper->__('Show the field when') : $helper->__('Require the field when')) ?></label></td>
             <td class="value">
-                <select id="depends_on_operator" class="select">
+                <select id="<?= $column ?>_operator" class="select">
                     <?php foreach ($this->getOperators() as $value => $label): ?>
                     <option value="<?= $this->escapeHtml($value) ?>"<?= $value === $editable['operator'] ? ' selected' : '' ?>><?= $this->escapeHtml($label) ?></option>
                     <?php endforeach ?>
@@ -43,8 +44,8 @@ $editable = $this->getEditableCondition();
         <tr>
             <td class="label"></td>
             <td class="value">
-                <div id="depends_on_rows" class="flex flex-col gap-3 mb-3"></div>
-                <button type="button" class="d-btn d-btn-sm" id="depends_on_add"><?= $this->escapeHtml($helper->__('Add')) ?></button>
+                <div id="<?= $column ?>_rows" class="flex flex-col gap-3 mb-3"></div>
+                <button type="button" class="d-btn d-btn-sm" id="<?= $column ?>_add"><?= $this->escapeHtml($helper->__('Add')) ?></button>
             </td>
         </tr>
     </tbody>

@@ -168,4 +168,15 @@ class Mage_Customer_Model_Address extends Mage_Customer_Model_Address_Abstract
         $value = $this->getData('post_index');
         return $value === null ? null : (int) $value;
     }
+
+    /**
+     * A customer that is not saved yet, such as a new customer in the admin, has no ID, so the address reads the
+     * customer that it holds.
+     */
+    #[\Override]
+    protected function getConditionCustomer(): ?Mage_Customer_Model_Customer
+    {
+        $customer = $this->_customer ?: $this->getCustomer();
+        return $customer instanceof Mage_Customer_Model_Customer ? $customer : null;
+    }
 }

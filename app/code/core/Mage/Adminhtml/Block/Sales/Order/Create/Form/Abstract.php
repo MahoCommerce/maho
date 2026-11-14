@@ -130,7 +130,7 @@ abstract class Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract extends Mag
             if ($inputType) {
                 $class = (string) $attribute->getFrontend()->getClass();
                 // The form always shows the field, so it cannot require a field that a condition can hide
-                $hasCondition = $attribute->getDependsOn() !== null;
+                $hasCondition = $attribute->getDependsOn() !== null || $attribute->getRequiredWhen() !== null;
                 if ($hasCondition) {
                     $class = implode(' ', array_diff(explode(' ', $class), ['required-entry']));
                 }

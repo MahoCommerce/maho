@@ -165,20 +165,40 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
      */
     public function isShown(): bool
     {
-        $attribute = $this->getAttribute();
-        if ($attribute->getDependsOn() === null) {
-            return true;
-        }
-        $sent = array_filter($this->_extractedData, static fn(mixed $value): bool => $value !== false);
-        return $attribute->isDependencyMet($sent + ($this->_entity?->getData() ?? []));
+        $condition = $this->getAttribute()->getDependsOn();
+        return $condition === null
+            || $this->getAttribute()->isDependencyMet($this->getConditionValues(\Maho\Data\Form\Condition::fields($condition)));
     }
 
     /**
-     * Tell whether the field needs a value: the attribute is required and the form shows the field.
+     * Tell whether the field needs a value: the form shows the field, and the attribute is required or the condition
+     * of its getRequiredWhen() is met.
      */
     public function isRequired(): bool
     {
-        return (bool) $this->getAttribute()->getIsRequired() && $this->isShown();
+        if (!$this->isShown()) {
+            return false;
+        }
+        $attribute = $this->getAttribute();
+        if ($attribute->getIsRequired()) {
+            return true;
+        }
+        $condition = $attribute->getRequiredWhen();
+        return $condition !== null
+            && $attribute->isRequiredWhenMet($this->getConditionValues(\Maho\Data\Form\Condition::fields($condition)));
+    }
+
+    /**
+     * Return the values that a condition that reads $fields sees: the values that the form sent, over the data of
+     * the entity.
+     *
+     * @param list<string> $fields
+     * @return array<string, mixed>
+     */
+    protected function getConditionValues(array $fields): array
+    {
+        $sent = array_filter($this->_extractedData, static fn(mixed $value): bool => $value !== false);
+        return $sent + ($this->_entity ? Mage::helper('eav')->getConditionData($this->_entity, $fields) : []);
     }
 
     /**

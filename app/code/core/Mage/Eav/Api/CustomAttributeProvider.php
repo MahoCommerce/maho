@@ -122,6 +122,7 @@ final class CustomAttributeProvider extends \Maho\ApiPlatform\Provider
         $dto->isRequired = (bool) $attribute->getIsRequired();
         $dto->isUnique = (bool) $attribute->getIsUnique();
         $dto->dependsOn = $attribute->getDependsOn();
+        $dto->requiredWhen = $attribute->getRequiredWhen();
         $default = $attribute->getDefaultValue();
         $dto->attributeSets = $sets[$dto->id] ?? [];
 

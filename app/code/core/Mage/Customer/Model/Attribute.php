@@ -57,12 +57,53 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
      * before the save, as the forms of the storefront do.
      */
     #[\Override]
-    public function isDependencyMet(array $values): bool
+    protected function conditionValues(array $values): array
     {
         if (($values['website_id'] ?? null) === null && $this->getEntityType()->getEntityTypeCode() === 'customer') {
             $values['website_id'] = Mage::app()->getStore()->getWebsiteId();
         }
-        return parent::isDependencyMet($values);
+        return $values;
+    }
+
+    /**
+     * The condition of an address attribute can also read the fields of the customer, with the prefix customer., such
+     * as customer.group_id. Its group list has every group, also NOT LOGGED IN for a guest of the checkout.
+     */
+    #[\Override]
+    public function getDependencySources(): array
+    {
+        $sources = parent::getDependencySources();
+        if (!$this->getEntityTypeId() || $this->getEntityType()->getEntityTypeCode() !== 'customer_address') {
+            return $sources;
+        }
+        $helper = Mage::helper('customer');
+        $customerType = Mage::getSingleton('eav/config')->getEntityType('customer');
+        $reader = Mage::getModel('customer/attribute')->setEntityTypeId((int) $customerType->getId());
+        foreach ($reader->getDependencySources() as $code => $source) {
+            if ($code === 'group_id') {
+                $source['options'] = array_map(
+                    fn(array $option): array => ['value' => (string) $option['value'], 'label' => (string) $option['label']],
+                    Mage::getResourceModel('customer/group_collection')->toOptionArray(),
+                );
+            }
+            $source['label'] = $helper->__('Customer: %s', $source['label']);
+            $sources[Mage_Customer_Model_Address_Abstract::CUSTOMER_FIELD_PREFIX . $code] = $source;
+        }
+        return $sources;
+    }
+
+    /**
+     * The condition of an address attribute reads a customer field with the prefix customer.
+     */
+    #[\Override]
+    protected function getDependentScopes(string $code): array
+    {
+        $scopes = parent::getDependentScopes($code);
+        if ($this->getEntityTypeId() && $this->getEntityType()->getEntityTypeCode() === 'customer') {
+            $addressType = Mage::getSingleton('eav/config')->getEntityType('customer_address');
+            $scopes[] = [(int) $addressType->getId(), Mage_Customer_Model_Address_Abstract::CUSTOMER_FIELD_PREFIX . $code];
+        }
+        return $scopes;
     }
 
     #[\Override]

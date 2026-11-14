@@ -254,7 +254,8 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
     #[\Override]
     protected function _toHtml()
     {
-        if (!$this->_depends) {
+        // The required option alone also needs the controller, which marks a field as required
+        if (!$this->_depends && empty($this->_configOptions['required'])) {
             return '';
         }
         return "<script>new formElementDependenceController({$this->_getDependsJson()}, {$this->_getConfigJson()})</script>\n";

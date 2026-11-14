@@ -91,8 +91,8 @@ class BlogPosts extends AbstractCmsImporter
             }
             foreach ($this->customAttributes() as $code => $attribute) {
                 // A new post needs each required attribute of its set, unless the attribute has a default value
-                if ($row['post_id'] === null && !isset($row['custom'][$code]) && $attribute->getIsRequired()
-                    && (string) $attribute->getDefaultValue() === '' && !Mage::helper('eav')->isHidden($post, $attribute)
+                if ($row['post_id'] === null && !isset($row['custom'][$code]) && Mage::helper('eav')->isRequired($post, $attribute)
+                    && (string) $attribute->getDefaultValue() === ''
                     && in_array($code, $setCodes ??= $this->setAttributeCodes($row['attribute_set_id'] ?? $this->postSetId(null)), true)
                 ) {
                     $this->fail($file, $line, "$code is required for a new post");

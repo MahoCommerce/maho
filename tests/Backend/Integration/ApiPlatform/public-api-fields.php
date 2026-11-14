@@ -150,7 +150,7 @@ return [
     ],
     'CustomAttribute' => [
         'attributeSets', 'code', 'defaultValue', 'dependsOn', 'entityType', 'extensions', 'id', 'input',
-        'isRequired', 'isUnique', 'label', 'options', 'usedInForms',
+        'isRequired', 'isUnique', 'label', 'options', 'requiredWhen', 'usedInForms',
     ],
     'Customer' => [
         'addresses', 'createdAt', 'createdIn', 'customAttributes', 'defaultBillingAddress', 'defaultShippingAddress',

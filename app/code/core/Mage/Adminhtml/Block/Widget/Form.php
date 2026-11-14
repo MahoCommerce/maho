@@ -130,9 +130,10 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
     }
 
     /**
-     * Return the script that shows each attribute field of the form only when the condition of its attribute is met.
-     * A field that the condition reads and that the form does not have, such as a field of another tab, takes its
-     * value from getAttributeDependenceValues().
+     * Return the script that shows each attribute field of the form only when the condition of its attribute is met,
+     * and that marks an optional field as required while its required condition is met. A field that a condition
+     * reads and that the form does not have, such as a field of another tab, takes its value from
+     * getAttributeDependenceValues().
      */
     protected function getAttributeDependenceHtml(): string
     {
@@ -148,20 +149,30 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
         $block = null;
         $values = null;
         $keepDisabled = [];
+        $required = [];
         foreach ($form->getAllElements() as $element) {
             $attribute = $element->getEntityAttribute();
-            $condition = $attribute instanceof Mage_Eav_Model_Entity_Attribute_Abstract ? $attribute->getDependsOn() : null;
-            if ($condition === null) {
+            if (!$attribute instanceof Mage_Eav_Model_Entity_Attribute_Abstract) {
+                continue;
+            }
+            $condition = $attribute->getDependsOn();
+            $requiredWhen = $attribute->getIsRequired() ? null : $attribute->getRequiredWhen();
+            if ($condition === null && $requiredWhen === null) {
                 continue;
             }
             $block ??= $this->getLayout()->createBlock('adminhtml/widget_form_element_dependence');
             $code = (string) $element->getId();
-            $block->setRawFieldDependence($code, $condition)
-                ->addFieldMap($htmlIds[$code], $code);
-            if ($element->getDisabled()) {
-                $keepDisabled[] = $htmlIds[$code];
+            $block->addFieldMap($htmlIds[$code], $code);
+            if ($condition !== null) {
+                $block->setRawFieldDependence($code, $condition);
+                if ($element->getDisabled()) {
+                    $keepDisabled[] = $htmlIds[$code];
+                }
             }
-            foreach (\Maho\Data\Form\Condition::fields($condition) as $field) {
+            if ($requiredWhen !== null) {
+                $required[$code] = $requiredWhen;
+            }
+            foreach (array_unique([...\Maho\Data\Form\Condition::fields($condition ?? []), ...\Maho\Data\Form\Condition::fields($requiredWhen ?? [])]) as $field) {
                 if (isset($htmlIds[$field])) {
                     $block->addFieldMap($htmlIds[$field], $field);
                     continue;
@@ -173,7 +184,9 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
                 }
             }
         }
-        return $block?->addConfigOption('keep_disabled', $keepDisabled)->toHtml() ?? '';
+        return $block?->addConfigOption('keep_disabled', $keepDisabled)
+            ->addConfigOption('required', (object) $required)
+            ->toHtml() ?? '';
     }
 
     /**

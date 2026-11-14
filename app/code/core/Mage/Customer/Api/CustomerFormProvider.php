@@ -106,6 +106,7 @@ final class CustomerFormProvider extends \Maho\ApiPlatform\Provider
             'multilineCount' => $attribute->getFrontendInput() === 'multiline' ? (int) $attribute->getMultilineCount() : null,
             'validateRules' => (object) array_filter((array) $attribute->getValidateRules(), fn(mixed $value): bool => $value !== '' && $value !== null),
             'dependsOn' => $attribute->getDependsOn(),
+            'requiredWhen' => $attribute->getIsRequired() ? null : $attribute->getRequiredWhen(),
         ];
     }
 }

@@ -100,8 +100,15 @@ class CustomAttribute extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'The condition that shows the field in a form, or null when the form always shows it. '
         . 'It maps a field code to its wanted values, for example {"country_id": ["IT"]}. An entry with an operator holds a group: '
         . '{"operator": "OR", "condition": {...}}. The operator is AND (each entry), OR (any entry), NOT (no entry) or XOR (exactly one entry), '
-        . 'and the entries of one level are joined with AND. A field that the condition hides is not required, and a save does not keep its value')]
+        . 'and the entries of one level are joined with AND. The wanted value __any__ matches any value that is not empty. '
+        . 'An address condition can read a customer field with the prefix customer., for example customer.group_id. '
+        . 'A field that the condition hides is not required, and it keeps its value')]
     public ?array $dependsOn = null;
+
+    /** @var array<int|string, mixed>|null */
+    #[ApiProperty(description: 'The condition that makes an optional field required while the form shows it, in the format of dependsOn, '
+        . 'or null when only isRequired decides')]
+    public ?array $requiredWhen = null;
 
     /** @var list<string>|null */
     #[ApiProperty(description: 'Customer and address attributes only: the forms that show the attribute. The API checks a customer against adminhtml_customer and an address against adminhtml_customer_address')]

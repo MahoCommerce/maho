@@ -130,26 +130,28 @@ class EavAttributeForm {
 }
 
 /**
- * Controls the editor of the condition that shows the attribute in a form. Each row names a field and the values
- * that show the attribute. The editor writes the condition into the hidden depends_on input, in the format of
- * Mage_Adminhtml_Block_Widget_Form_Element_Dependence: [{operator, condition: {field: [values]}}].
+ * Controls the editor of a condition of the attribute: the condition that shows it in a form (depends_on) or the
+ * condition that makes it required (required_when). Each row names a field and its values. The editor writes the
+ * condition into the hidden input of its column, in the format of Mage_Adminhtml_Block_Widget_Form_Element_Dependence:
+ * [{operator, condition: {field: [values]}}].
  */
 class EavAttributeDependence {
 
     /**
      * @param {Object} config
+     * @param {string} config.column - depends_on or required_when, the prefix of the element IDs
      * @param {Object<string, {label: string, options: {value: string, label: string}[]}>} config.sources
      * @param {{operator: string, rows: {field: string, values: string[]}[]}} config.condition
      * @param {Object<string, string>} config.labels
      */
     constructor(config) {
         this.config = config;
-        this.input = document.getElementById('depends_on');
-        this.operatorEl = document.getElementById('depends_on_operator');
-        this.rowsEl = document.getElementById('depends_on_rows');
+        this.input = document.getElementById(config.column);
+        this.operatorEl = document.getElementById(`${config.column}_operator`);
+        this.rowsEl = document.getElementById(`${config.column}_rows`);
 
         this.operatorEl.addEventListener('change', () => this.write());
-        document.getElementById('depends_on_add').addEventListener('click', () => {
+        document.getElementById(`${config.column}_add`).addEventListener('click', () => {
             this.addRow('', []);
             this.update();
             this.rowsEl.lastElementChild?.querySelector('select')?.focus();

@@ -201,7 +201,8 @@ example with `$this->escapeHtml()`.
 ## Conditions
 
 `eav_attribute.depends_on` holds the condition that shows the attribute in a form, as JSON, or
-NULL. The format is the format of `Mage_Adminhtml_Block_Widget_Form_Element_Dependence` (#54):
+NULL. `eav_attribute.required_when` holds the condition that makes an optional attribute required
+while the form shows it, in the same format. The format is the format of `Mage_Adminhtml_Block_Widget_Form_Element_Dependence` (#54):
 a map of a field code to its wanted values, and groups with an operator.
 
 ```json
@@ -216,18 +217,29 @@ and `XOR` exactly one entry. Values are strings: an option ID, or `0` and `1` fo
 The value `__any__` (`Maho\Data\Form\Condition::ANY_VALUE`) matches a field that holds any value
 that is not empty. It is the only value of a text, text area, date or datetime field.
 
+A field with a dot belongs to a related record. The condition of an address attribute reads a
+customer field as `customer.<code>`, such as `customer.group_id`.
+`Mage_Customer_Model_Address_Abstract::getConditionData()` adds these fields from the customer of a
+customer address, from the cart of a quote address, and from the order of an order address. The cart
+and the order give their own group, and a guest has the group `0` (NOT LOGGED IN).
+`Mage_Eav_Helper_Data::getConditionData()` calls it only when a condition reads a field with a dot.
+
 - `Maho\Data\Form\Condition::evaluate($condition, $values)` evaluates a condition in PHP. It
   follows `evalCondition()` of `formElementDependenceController` in `form.js`.
 - `getDependsOn()`, `setDependsOn()` and `isDependencyMet($values)` of the attribute read, write
-  and evaluate it.
+  and evaluate the condition that shows it. `getRequiredWhen()`, `setRequiredWhen()` and
+  `isRequiredWhenMet($values)` do the same for the condition that makes it required, and
+  `isRequiredFor($values)` joins the two with the Required flag.
 - `getDependencySources()` lists the fields that a condition can read: each attribute of the type
   with options, and each visible text, text area, date or datetime attribute, with no options. A
   file, an image and a multiline field are not in the list, because their form inputs do not hold
   the stored value in one input. A subclass adds the fields of its edit page that are not attributes, as
   `Mage_Cms_Model_Attribute` does for `is_active` and `root_template`.
-- `getValidationErrors()` refuses an unknown field, a value that is not an option, the attribute
-  itself, a field that has a condition of its own, and a condition on a field that another
-  condition reads. So a condition has one level of fields, and no chain.
+- `getValidationErrors()` refuses an unknown field, a value that is not an option, and the attribute
+  itself. For `depends_on`, it also refuses a field that has a condition of its own, and a condition
+  on a field that another condition of the same type reads. So a condition that shows a field has
+  one level of fields, and no chain. `required_when` has no such rule, because it only reads values:
+  two fields can each be required when the other is empty.
 
 The attribute edit page writes one group with one operator. A condition with a group inside a group
 shows as read-only JSON, and a save keeps it.
@@ -236,18 +248,18 @@ Where the condition applies:
 
 | Place | Code |
 |---|---|
-| Admin edit forms | `Mage_Adminhtml_Block_Widget_Form::getAttributeDependenceHtml()` adds a `formElementDependenceController` for the fields that `_setFieldset()` added. A field of another tab gives its saved value through `getAttributeDependenceValues()`. A field that the page renders disabled, such as for an admin without the save permission, goes into `keep_disabled`, so a condition never enables it. A field that uses the default value leaves `keep_disabled` while its Use Default box is checked and enabled. The customer address tab starts one controller for each address. |
-| Storefront forms | `Mage_Customer_Block_Form_Attributes::getDependenceJson()` and `FieldDependenceController` in `js/varien/form.js`. The configuration holds every visible field of the form that has a condition, also a standard field that the template renders itself, such as `company`. The controller finds each field by its name in the form, and hides the closest `li` or `.field`. |
-| Validation | `Mage_Eav_Model_Attribute_Data_Abstract::isRequired()` is true only when the attribute is required and `isShown()` is true. Each `validateValue()` uses it, so a hidden field is not required, and a value that the client sends is still checked. |
-| Values | A condition never changes a stored value. `Mage_Eav_Helper_Data::isHidden()` tells whether a condition hides an attribute for a record. The required check of `Mage_Eav_Model_Entity_Attribute_Backend_Abstract::validate()`, the CMS page resource and the blog post importer call it, and the CMS page importer calls the check of the CMS page resource, so each one accepts an empty hidden field. A condition that reads a field that the record does not hold, or holds as `false` (a store view that uses the default), does not hide the field, so the field stays required. The API helpers skip the required check of a hidden field. |
+| Admin edit forms | `Mage_Adminhtml_Block_Widget_Form::getAttributeDependenceHtml()` adds a `formElementDependenceController` for the fields that `_setFieldset()` added. Its `required` option holds the `required_when` conditions, and `trackRequired()` switches the `required-entry` class and the star of the label. A field of another tab gives its saved value through `getAttributeDependenceValues()`. A field that the page renders disabled, such as for an admin without the save permission, goes into `keep_disabled`, so a condition never enables it. A field that uses the default value leaves `keep_disabled` while its Use Default box is checked and enabled. The customer address tab starts one controller for each address. |
+| Storefront forms | `Mage_Customer_Block_Form_Attributes::getDependenceJson()` and `FieldDependenceController` in `js/varien/form.js`. The configuration holds every visible field of the form that has a condition, also a standard field that the template renders itself, such as `company`. The controller finds each field by its name in the form, and hides the closest `li` or `.field`. Its `required` option holds the `required_when` conditions. |
+| Validation | `Mage_Eav_Model_Attribute_Data_Abstract::isRequired()` is true when `isShown()` is true and the Required flag is set or `required_when` is met. Each `validateValue()` uses it, so a hidden field is not required, and a value that the client sends is still checked. |
+| Values | A condition never changes a stored value. `Mage_Eav_Helper_Data::isHidden()` tells whether a condition hides an attribute for a record, and `isRequired()` whether the record must have a value for it. The required check of `Mage_Eav_Model_Entity_Attribute_Backend_Abstract::validate()`, `Mage_Customer_Model_Customer::validate()`, the CMS page resource and the blog post importer call `isRequired()`, and the CMS page importer calls the check of the CMS page resource, so each one accepts an empty hidden field. A condition that reads a field that the record does not hold, or holds as `false` (a store view that uses the default), does not hide the field, so the field stays required. The API helpers decide with `isRequiredFor()`. |
 | Output | `Mage_Customer_Block_Address_Renderer_Default::render()` does not print a hidden field of an address, and `Mage_Eav_Block_Frontend_Attributes::getAttributeValues()` leaves it out of the storefront table. A template that prints a value by its code checks `Mage::helper('eav')->isHidden($record, $attribute)` first. For an image attribute, `Mage::helper('eav')->getImageSet($record, $code)` returns the resized files, or null when the condition hides the field. |
-| API | `dependsOn` of `/custom-attributes` and of each field of `/customer-forms/{form}`. |
+| API | `dependsOn` and `requiredWhen` of `/custom-attributes` and of each field of `/customer-forms/{form}`. |
 
 A hidden field in the browser is disabled, so the form does not send it.
 
 The models always require some standard fields, so the configuration locks their condition with a
 `depends_on` entry in `global/eav_attributes/<entity type>/<code>/locked_fields`. The attribute page
-then has no condition editor for them, and a save refuses a condition. `Mage/Customer/etc/config.xml`
+then has no editor for either condition, and a save refuses a condition that shows the field. `Mage/Customer/etc/config.xml`
 locks the name, the email, the website and the group of a customer, and the fields that
 `Mage_Customer_Model_Address_Abstract::_basicCheck()` checks.
 

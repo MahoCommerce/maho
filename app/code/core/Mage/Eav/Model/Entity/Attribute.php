@@ -205,6 +205,9 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
         if ($this->hasData('depends_on')) {
             $this->setDependsOn($this->getDependsOn());
         }
+        if ($this->hasData('required_when')) {
+            $this->setRequiredWhen($this->getRequiredWhen());
+        }
 
         return parent::_beforeSave();
     }
@@ -269,8 +272,10 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
             }
         }
 
-        if ($this->isValueChanged('depends_on')) {
-            $this->addDependsOnErrors($errors);
+        foreach (['depends_on', 'required_when'] as $column) {
+            if ($this->isValueChanged($column)) {
+                $this->addConditionErrors($errors, $column);
+            }
         }
 
         return $errors;
@@ -327,75 +332,107 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     }
 
     /**
-     * Return the codes of the attributes of the same entity type whose condition reads this attribute.
+     * Return the codes of the attributes whose condition in one of $columns reads this attribute: the attributes of
+     * the same entity type, and with $otherTypes the attributes of the other types of getDependentScopes().
      *
+     * @param list<string> $columns depends_on, required_when or both
      * @return list<string>
      */
-    public function getDependentAttributeCodes(): array
+    public function getDependentAttributeCodes(array $columns = ['depends_on'], bool $otherTypes = false): array
     {
         $code = (string) ($this->getOrigData('attribute_code') ?? $this->getAttributeCode());
         if ($code === '' || !$this->getEntityTypeId()) {
             return [];
         }
         $adapter = $this->_getResource()->getReadConnection();
-        $rows = $adapter->fetchPairs(
-            $adapter->select()
-                ->from($this->_getResource()->getMainTable(), ['attribute_code', 'depends_on'])
-                ->where('entity_type_id = ?', (int) $this->getEntityTypeId())
-                ->where('depends_on IS NOT NULL'),
-        );
         $codes = [];
-        foreach ($rows as $dependentCode => $json) {
-            $condition = Mage::getModel('eav/entity_attribute')->setData('depends_on', $json)->getDependsOn();
-            if ($dependentCode !== $code && $condition && in_array($code, \Maho\Data\Form\Condition::fields($condition), true)) {
-                $codes[] = (string) $dependentCode;
+        foreach ($this->getDependentScopes($code) as [$entityTypeId, $field]) {
+            if (!$otherTypes && $entityTypeId !== (int) $this->getEntityTypeId()) {
+                continue;
+            }
+            $select = $adapter->select()
+                ->from($this->_getResource()->getMainTable(), ['attribute_code', ...$columns])
+                ->where('entity_type_id = ?', $entityTypeId)
+                ->where(implode(' OR ', array_map(fn(string $column): string => $adapter->quoteIdentifier($column) . ' IS NOT NULL', $columns)));
+            foreach ($adapter->fetchAll($select) as $row) {
+                $reader = Mage::getModel('eav/entity_attribute')->setData($row);
+                $isSelf = $entityTypeId === (int) $this->getEntityTypeId() && $row['attribute_code'] === $code;
+                foreach ($columns as $column) {
+                    $condition = $reader->decodeConditionOf($column);
+                    if (!$isSelf && $condition && in_array($field, \Maho\Data\Form\Condition::fields($condition), true)) {
+                        $codes[] = (string) $row['attribute_code'];
+                        break;
+                    }
+                }
             }
         }
-        return $codes;
+        return array_values(array_unique($codes));
     }
 
     /**
-     * Add an error to $errors for each part of the condition that a form cannot apply.
+     * Return the condition that the column $column holds, for a caller outside the attribute.
      */
-    protected function addDependsOnErrors(Mage_Core_Exception_Input $errors): void
+    public function decodeConditionOf(string $column): ?array
     {
-        $raw = $this->getData('depends_on');
+        return $this->decodeCondition($column);
+    }
+
+    /**
+     * Return the places where a condition can read the attribute $code: pairs of an entity type ID and the field name
+     * that a condition of that type uses. A subclass adds another entity type, as an address reads a customer field.
+     *
+     * @return list<array{int, string}>
+     */
+    protected function getDependentScopes(string $code): array
+    {
+        return [[(int) $this->getEntityTypeId(), $code]];
+    }
+
+    /**
+     * Add an error to $errors for each part of the condition in $column that a form cannot apply. The condition
+     * of depends_on also cannot read a field with a condition of its own, nor be on a field that another condition
+     * reads. The condition of required_when only reads values, so it has no such rule.
+     */
+    protected function addConditionErrors(Mage_Core_Exception_Input $errors, string $column): void
+    {
+        $raw = $this->getData($column);
         if ($raw === null || $raw === '' || $raw === '[]') {
             return;
         }
         $helper = Mage::helper('eav');
-        $condition = $this->getDependsOn();
+        $condition = $this->decodeCondition($column);
         if ($condition === null) {
-            $errors->addError('depends_on', $helper->__('The condition is not valid JSON.'));
+            $errors->addError($column, $helper->__('The condition is not valid JSON.'));
             return;
         }
         foreach (\Maho\Data\Form\Condition::structureErrors($condition) as $message) {
-            $errors->addError('depends_on', $message);
+            $errors->addError($column, $message);
         }
 
-        $dependents = $this->getId() ? $this->getDependentAttributeCodes() : [];
+        $isShowCondition = $column === 'depends_on';
+        $dependents = $isShowCondition && $this->getId() ? $this->getDependentAttributeCodes() : [];
         if ($dependents) {
-            $errors->addError('depends_on', $helper->__('This attribute cannot have a condition, because the condition of %s reads it.', implode(', ', $dependents)));
+            $errors->addError($column, $helper->__('This attribute cannot have a condition, because the condition of %s reads it.', implode(', ', $dependents)));
         }
 
         $sources = $this->getDependencySources();
         $config = Mage::getSingleton('eav/config');
         foreach (\Maho\Data\Form\Condition::wantedValues($condition) as $field => $values) {
             if ($field === $this->getAttributeCode()) {
-                $errors->addError('depends_on', $helper->__('The condition cannot read the attribute itself.'));
+                $errors->addError($column, $helper->__('The condition cannot read the attribute itself.'));
                 continue;
             }
             if (!isset($sources[$field])) {
-                $errors->addError('depends_on', $helper->__('The condition reads the field %s, which this form does not have.', $field));
+                $errors->addError($column, $helper->__('The condition reads the field %s, which this form does not have.', $field));
                 continue;
             }
             $source = $config->getAttribute($this->getEntityType(), $field);
-            if ($source instanceof Mage_Eav_Model_Entity_Attribute_Abstract && $source->getDependsOn() !== null) {
-                $errors->addError('depends_on', $helper->__('The condition cannot read %s, because %s has a condition of its own.', $field, $field));
+            if ($isShowCondition && $source instanceof Mage_Eav_Model_Entity_Attribute_Abstract && $source->getDependsOn() !== null) {
+                $errors->addError($column, $helper->__('The condition cannot read %s, because %s has a condition of its own.', $field, $field));
             }
             $unknown = array_diff($values, [...array_column($sources[$field]['options'], 'value'), \Maho\Data\Form\Condition::ANY_VALUE]);
             if ($unknown) {
-                $errors->addError('depends_on', $helper->__('The field %s has no option with the value %s.', $field, implode(', ', $unknown)));
+                $errors->addError($column, $helper->__('The field %s has no option with the value %s.', $field, implode(', ', $unknown)));
             }
         }
     }

@@ -204,7 +204,7 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Turn the custom attribute values of $page into column values, and check the required and unique attributes.
      * An attribute that $page does not hold keeps its stored value, and a new page gets its default value. An
-     * attribute that its condition hides is not required.
+     * attribute that its condition hides is not required, and a condition can make an optional attribute required.
      * Each error names the attribute code after $fieldPrefix, for example customAttributes. for the API.
      *
      * @throws Mage_Core_Exception_Input
@@ -225,7 +225,7 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
             $page->setData('is_active', (int) $page->getData('is_active'));
         }
         foreach ($this->getCustomAttributes() as $code => $attribute) {
-            $isRequired = $attribute->getIsRequired() && !$helper->isHidden($page, $attribute);
+            $isRequired = $helper->isRequired($page, $attribute);
             $label = (string) $attribute->getFrontend()->getLabel();
             if (!$page->hasData($code)) {
                 if (!$page->getId() && $isRequired) {

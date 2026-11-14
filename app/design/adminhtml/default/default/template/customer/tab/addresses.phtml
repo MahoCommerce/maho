@@ -253,8 +253,9 @@ class addressesModel {
     }
 
     /**
-     * Show the fields of the address form with the prefix that their conditions allow. A field that the form does
-     * not have takes the saved value of the address $addressId.
+     * Show the fields of the address form with the prefix that their conditions allow, and mark the optional fields
+     * that their required conditions make required. A field that the form does not have takes the saved value of the
+     * address $addressId, or the value of the customer for a new address.
      *
      * @param {string} prefix
      * @param {number} [addressId]
@@ -271,7 +272,7 @@ class addressesModel {
             if (document.getElementById(prefix + code)?.disabled) {
                 keepDisabled.push(prefix + code);
             }
-            const saved = this.dependence.values[addressId]?.[code];
+            const saved = this.dependence.values[addressId ?? 0]?.[code];
             if (saved) {
                 fieldValues[prefix + code] = saved;
             }
@@ -280,6 +281,7 @@ class addressesModel {
             field_map: fieldMap,
             field_values: fieldValues,
             keep_disabled: keepDisabled,
+            required: this.dependence.required,
         });
     }
 

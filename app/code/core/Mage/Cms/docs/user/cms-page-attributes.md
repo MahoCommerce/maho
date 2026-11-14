@@ -88,6 +88,10 @@ of values on the storefront does not show a hidden field. The API applies the sa
 another tab reads the saved value of the field that decides, not the value that you just changed.
 Save the page to update it.
 
+The section **When the Field Is Required** works in the same way, and makes an optional field
+required only when the other fields have some values. It can read a field that has a condition of
+its own.
+
 ## Show a value on the storefront
 
 Set **Visible on Frontend** to **Yes** in the **Frontend Properties** of the attribute. The page

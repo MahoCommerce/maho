@@ -225,9 +225,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
     {
         $attrCode = $this->getAttribute()->getAttributeCode();
         $value = $object->getData($attrCode);
-        if ($this->getAttribute()->getIsRequired() && $this->getAttribute()->isValueEmpty($value)
-            && !Mage::helper('eav')->isHidden($object, $this->getAttribute())
-        ) {
+        if ($this->getAttribute()->isValueEmpty($value) && Mage::helper('eav')->isRequired($object, $this->getAttribute())) {
             return false;
         }
 

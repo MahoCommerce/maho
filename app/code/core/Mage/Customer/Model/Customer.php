@@ -1141,9 +1141,8 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
 
         if (!$this->getDeferRequiredProfile()) {
             $entityType = Mage::getSingleton('eav/config')->getEntityType('customer');
-            // A field that its condition hides is not required
-            $isRequired = fn(Mage_Customer_Model_Attribute $attribute): bool => $attribute->getIsRequired()
-                && !Mage::helper('eav')->isHidden($this, $attribute);
+            // A field that its condition hides is not required, and a condition can make an optional field required
+            $isRequired = fn(Mage_Customer_Model_Attribute $attribute): bool => Mage::helper('eav')->isRequired($this, $attribute);
             $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'dob');
             if ($isRequired($attribute) && trim((string) $this->getDob()) == '') {
                 $errors[] = Mage::helper('customer')->__('The Date of Birth is required.');

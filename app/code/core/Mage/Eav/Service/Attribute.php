@@ -106,11 +106,11 @@ class Mage_Eav_Service_Attribute
      * Delete $attribute and the values that the records hold for it.
      *
      * @throws Mage_Core_Exception_Conflict for a system attribute, for an attribute of configurable products and
-     *                                      for an attribute that the condition of another attribute reads
+     *                                      for an attribute that a condition of another attribute reads
      */
     public function delete(Attribute $attribute): void
     {
-        $dependents = $attribute->getDependentAttributeCodes();
+        $dependents = $attribute->getDependentAttributeCodes(['depends_on', 'required_when'], otherTypes: true);
         if ($dependents) {
             throw new Mage_Core_Exception_Conflict(Mage::helper('eav')->__('The condition of %s reads this attribute. Remove the condition first.', implode(', ', $dependents)));
         }

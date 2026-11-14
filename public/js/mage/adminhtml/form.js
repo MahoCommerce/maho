@@ -469,6 +469,7 @@ class formElementDependenceController {
      * @param {number} [config.levels_up]
      * @param {boolean} [config.can_edit_price]
      * @param {string[]} [config.keep_disabled] - ids of fields that a condition never enables
+     * @param {Object.<string, Object>} [config.required] - target fields and the conditions that make them required
      */
     constructor(elementsMap, config = {}) {
         this.config = config;
@@ -480,6 +481,10 @@ class formElementDependenceController {
         for (let [targetField, condition] of Object.entries(elementsMap)) {
             this.trackChange(null, targetField, condition);
             this.bindEventListeners(condition, [targetField, condition]);
+        }
+        for (const [targetField, condition] of Object.entries(config.required ?? {})) {
+            this.trackRequired(targetField, condition);
+            this.bindEventListeners(condition, [targetField, condition], (event, ...args) => this.trackRequired(...args));
         }
     }
 
@@ -504,22 +509,23 @@ class formElementDependenceController {
      *
      * @param {Object} condition
      * @param {Array<any>} eventArgs
+     * @param {Function} [handler] - called with the event and eventArgs, trackChange() by default
      */
-    bindEventListeners(condition, eventArgs = []) {
+    bindEventListeners(condition, eventArgs = [], handler = (event, ...args) => this.trackChange(event, ...args)) {
         for (let [dependentField, subcondition] of Object.entries(condition)) {
             if (this.isLogicalOperator(subcondition?.operator)) {
-                this.bindEventListeners(subcondition.condition, eventArgs);
+                this.bindEventListeners(subcondition.condition, eventArgs, handler);
             } else {
                 const dependentEl = document.getElementById(this.mapFieldId(dependentField));
                 if (dependentEl) {
                     if (this.config.on_event !== false) {
                         dependentEl.addEventListener(this.config.on_event ?? 'change', (event) => {
-                            this.trackChange(event, ...eventArgs);
+                            handler(event, ...eventArgs);
                         });
                     }
                     dependentEl.addEventListener('update', (event) => {
                         if (event instanceof formElementDependenceEvent) {
-                            this.trackChange(event, ...eventArgs);
+                            handler(event, ...eventArgs);
                         }
                     });
                 }
@@ -685,6 +691,32 @@ class formElementDependenceController {
         });
 
         this.toggleElem(rowEl, !shouldShowUp);
+    }
+
+    /**
+     * Mark a field as required while its condition is met: the required-entry class on the field, and the star
+     * on its label.
+     *
+     * @param {string} field - field name alias or ID of the target element
+     * @param {Object} condition - key/value pairs of field names and wanted values, or subconditions
+     */
+    trackRequired(field, condition) {
+        const el = document.getElementById(this.mapFieldId(field));
+        if (!el) {
+            return;
+        }
+        const required = this.evalCondition(condition);
+        el.classList.toggle('required-entry', required);
+        const label = document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
+        const star = label?.querySelector('span.required');
+        if (required && label && !star) {
+            const mark = document.createElement('span');
+            mark.className = 'required';
+            mark.textContent = '*';
+            label.append(' ', mark);
+        } else if (!required) {
+            star?.remove();
+        }
     }
 }
 

@@ -132,41 +132,50 @@ class Mage_Customer_Block_Form_Attributes extends Mage_Core_Block_Template
 
     /**
      * Return the configuration of FieldDependenceController for the visible fields of the form, or null when no field
-     * has a condition. The fields are the fields of this block and the standard fields that the template of the form
-     * shows itself, such as company and vat_id. A field that a condition reads and that the form does not have takes
-     * the value of the entity.
+     * has a condition: the conditions that show the fields, and the conditions that make optional fields required. The
+     * fields are the fields of this block and the standard fields that the template of the form shows itself, such as
+     * company and vat_id. A field that a condition reads and that the form does not have takes the value of the entity.
      */
     public function getDependenceJson(): ?string
     {
         $depends = [];
-        $values = [];
-        $entity = $this->form?->getEntity();
+        $required = [];
+        $fields = [];
         foreach ($this->form?->getAttributes() ?? [] as $attribute) {
             /** @var Mage_Customer_Model_Attribute $attribute */
             if (!$attribute->getIsVisible()) {
                 continue;
             }
-            $condition = $attribute->getDependsOn();
-            if ($condition === null) {
-                continue;
+            $code = (string) $attribute->getAttributeCode();
+            if ($condition = $attribute->getDependsOn()) {
+                $depends[$code] = $condition;
+                $fields = [...$fields, ...\Maho\Data\Form\Condition::fields($condition)];
             }
-            $depends[(string) $attribute->getAttributeCode()] = $condition;
-            foreach (\Maho\Data\Form\Condition::fields($condition) as $field) {
-                $value = $entity?->getData($field);
-                // A new customer gets the website of the store when it is saved, see Mage_Customer_Model_Attribute
-                if ($field === 'website_id' && $value === null && $entity instanceof Mage_Customer_Model_Customer) {
-                    $value = Mage::app()->getStore()->getWebsiteId();
-                }
-                if ($value !== null && $value !== '') {
-                    $values[$field] = \Maho\Data\Form\Condition::fieldValues($value);
-                }
+            // A field that the Required setting already requires needs no condition to require it
+            if (!$attribute->getIsRequired() && ($condition = $attribute->getRequiredWhen())) {
+                $required[$code] = $condition;
+                $fields = [...$fields, ...\Maho\Data\Form\Condition::fields($condition)];
             }
         }
-        if (!$depends) {
+        if (!$depends && !$required) {
             return null;
         }
+        $values = [];
+        $entity = $this->form?->getEntity();
+        $data = $entity ? Mage::helper('eav')->getConditionData($entity, $fields) : [];
+        foreach (array_unique($fields) as $field) {
+            $value = $data[$field] ?? null;
+            // A new customer gets the website of the store when it is saved, see Mage_Customer_Model_Attribute
+            if ($field === 'website_id' && $value === null && $entity instanceof Mage_Customer_Model_Customer) {
+                $value = Mage::app()->getStore()->getWebsiteId();
+            }
+            if ($value !== null && $value !== '' && $value !== false) {
+                $values[$field] = \Maho\Data\Form\Condition::fieldValues($value);
+            }
+        }
         return Mage::helper('core')->jsonEncode([
-            'depends' => $depends,
+            'depends' => (object) $depends,
+            'required' => (object) $required,
             'nameFormat' => (string) ($this->getData('name_format') ?: '%s'),
             'values' => (object) $values,
         ]);

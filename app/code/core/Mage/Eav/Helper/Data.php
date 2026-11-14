@@ -179,14 +179,61 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
         if ($condition === null) {
             return false;
         }
-        $data = $object->getData();
+        $fields = \Maho\Data\Form\Condition::fields($condition);
+        $data = $this->getConditionData($object, $fields);
         // A partial load or update does not hold every field, so the field stays required
-        foreach (\Maho\Data\Form\Condition::fields($condition) as $field) {
+        foreach ($fields as $field) {
             if (!array_key_exists($field, $data) || $data[$field] === false) {
                 return false;
             }
         }
         return !$attribute->isDependencyMet($data);
+    }
+
+    /**
+     * Tell whether the field of $attribute needs a value for the data of $object: the condition does not hide it,
+     * and the Required flag is set or the condition of getRequiredWhen() is met. A field that the condition of
+     * getRequiredWhen() reads and that $object holds as false (a store view that uses the default) has no known
+     * value, so that condition does not make the field required.
+     */
+    public function isRequired(\Maho\DataObject $object, Mage_Eav_Model_Entity_Attribute_Abstract $attribute): bool
+    {
+        if ($this->isHidden($object, $attribute)) {
+            return false;
+        }
+        if ($attribute->getIsRequired()) {
+            return true;
+        }
+        $condition = $attribute->getRequiredWhen();
+        if ($condition === null) {
+            return false;
+        }
+        $fields = \Maho\Data\Form\Condition::fields($condition);
+        $data = $this->getConditionData($object, $fields);
+        foreach ($fields as $field) {
+            if (($data[$field] ?? null) === false) {
+                return false;
+            }
+        }
+        return $attribute->isRequiredWhenMet($data);
+    }
+
+    /**
+     * Return the values that a condition reads for $object, when the condition reads $fields. A field with a dot,
+     * such as customer.group_id, belongs to a related record: a model with getConditionData(), such as an address,
+     * adds those fields. Other models give their own data.
+     *
+     * @param list<string> $fields
+     * @return array<string, mixed>
+     */
+    public function getConditionData(\Maho\DataObject $object, array $fields): array
+    {
+        foreach ($fields as $field) {
+            if (str_contains($field, '.') && method_exists($object, 'getConditionData')) {
+                return $object->getConditionData();
+            }
+        }
+        return $object->getData();
     }
 
     /**

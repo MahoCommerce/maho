@@ -223,32 +223,43 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Addresses extends Mage_Adminhtml_Bl
     }
 
     /**
-     * Return the conditions of the address fields, keyed by field code, every field that they read, and for each
-     * saved address the values of the fields that the form does not have.
+     * Return the conditions that show the address fields and the conditions that make optional address fields
+     * required, keyed by field code, every field that they read, and the values of the fields that the form does not
+     * have: for each saved address, and under the key 0 for a new address, which has only the customer fields.
      */
     public function getAttributeDependenceJson(): string
     {
         $depends = [];
+        $required = [];
         $fields = [];
         $formFields = [];
         foreach ($this->getForm()->getAllElements() as $element) {
-            $formFields[] = (string) $element->getId();
+            $code = (string) $element->getId();
+            $formFields[] = $code;
             $attribute = $element->getEntityAttribute();
-            $condition = $attribute instanceof Mage_Eav_Model_Entity_Attribute_Abstract ? $attribute->getDependsOn() : null;
-            if ($condition !== null) {
-                $depends[(string) $element->getId()] = $condition;
-                $fields = [...$fields, (string) $element->getId(), ...\Maho\Data\Form\Condition::fields($condition)];
+            if (!$attribute instanceof Mage_Eav_Model_Entity_Attribute_Abstract) {
+                continue;
+            }
+            if ($condition = $attribute->getDependsOn()) {
+                $depends[$code] = $condition;
+                $fields = [...$fields, $code, ...\Maho\Data\Form\Condition::fields($condition)];
+            }
+            if (!$attribute->getIsRequired() && ($condition = $attribute->getRequiredWhen())) {
+                $required[$code] = $condition;
+                $fields = [...$fields, $code, ...\Maho\Data\Form\Condition::fields($condition)];
             }
         }
-        $absent = array_diff($fields, $formFields);
+        $absent = array_values(array_diff(array_unique($fields), $formFields));
         $values = [];
         if ($absent) {
             /** @var Mage_Customer_Model_Customer $customer */
             $customer = Mage::registry('current_customer');
-            foreach ($customer->getAddresses() as $address) {
+            $newAddress = Mage::getModel('customer/address')->setCustomer($customer);
+            foreach ([0 => $newAddress, ...$customer->getAddresses()] as $address) {
+                $data = Mage::helper('eav')->getConditionData($address, $absent);
                 foreach ($absent as $field) {
-                    $value = $address->getData($field);
-                    if ($value !== null && $value !== '') {
+                    $value = $data[$field] ?? null;
+                    if ($value !== null && $value !== '' && $value !== false) {
                         $values[(int) $address->getId()][$field] = \Maho\Data\Form\Condition::fieldValues($value);
                     }
                 }
@@ -256,6 +267,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Addresses extends Mage_Adminhtml_Bl
         }
         return Mage::helper('core')->jsonEncode([
             'depends' => (object) $depends,
+            'required' => (object) $required,
             'fields' => array_values(array_unique($fields)),
             'values' => (object) $values,
         ]);
