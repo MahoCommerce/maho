@@ -20,6 +20,15 @@ declare(strict_types=1);
  */
 class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Abstract
 {
+    /** The input types whose fields a condition reads by option. */
+    public const OPTION_INPUTS = ['select', 'multiselect', 'boolean'];
+
+    /**
+     * The input types whose fields a condition reads only for a value or no value. A file, an image and a multiline
+     * field are not here: their form inputs do not hold the stored value in one input.
+     */
+    public const FREE_VALUE_INPUTS = ['text', 'textarea', 'date', 'datetime'];
+
     /**
      * Prefix of model events names
      *
@@ -193,6 +202,13 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
             $this->assignFirstGroupOfDefaultSet();
         }
 
+        if ($this->hasData('depends_on')) {
+            $this->setDependsOn($this->getDependsOn());
+        }
+        if ($this->hasData('required_when')) {
+            $this->setRequiredWhen($this->getRequiredWhen());
+        }
+
         return parent::_beforeSave();
     }
 
@@ -256,7 +272,191 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
             }
         }
 
+        foreach (['depends_on', 'required_when'] as $column) {
+            if ($this->isValueChanged($column)) {
+                $this->addConditionErrors($errors, $column);
+            }
+        }
+
         return $errors;
+    }
+
+    /**
+     * Return the fields that the condition of this attribute can read, keyed by code: each attribute of
+     * the entity type with a list of options, and each visible attribute with a free value, such as a
+     * text, except this attribute. A field with a free value has no options: a condition can only ask
+     * whether it holds a value (Maho\Data\Form\Condition::ANY_VALUE). A subclass adds the fields of its
+     * edit form that are not attributes.
+     *
+     * @return array<string, array{label: string, options: list<array{value: string, label: string}>}>
+     */
+    public function getDependencySources(): array
+    {
+        if (!$this->getEntityTypeId()) {
+            return [];
+        }
+        $entityType = $this->getEntityType();
+        /** @var Mage_Eav_Model_Resource_Entity_Attribute_Collection $collection */
+        $collection = Mage::getResourceModel($entityType->getEntityAttributeCollection());
+        $collection->setEntityTypeFilter((int) $entityType->getId())
+            ->addFieldToFilter('main_table.frontend_input', ['in' => [...self::OPTION_INPUTS, ...self::FREE_VALUE_INPUTS]])
+            ->addFieldToFilter('main_table.frontend_label', ['notnull' => true])
+            ->setOrder('main_table.frontend_label', 'ASC');
+
+        $sources = [];
+        foreach ($collection as $attribute) {
+            /** @var Mage_Eav_Model_Entity_Attribute_Abstract $attribute */
+            $code = (string) $attribute->getAttributeCode();
+            if ($code === $this->getAttributeCode() || (string) $attribute->getFrontendLabel() === '') {
+                continue;
+            }
+            $hasOptions = in_array($attribute->getFrontendInput(), self::OPTION_INPUTS, true);
+            // A field with a free value that no form shows, such as a token of the customer, is not a choice
+            if (!$hasOptions && $attribute->hasData('is_visible') && !$attribute->getData('is_visible')) {
+                continue;
+            }
+            try {
+                // A Yes/No attribute stores no source model, so usesSource() is false, but its default source has the options
+                $options = $hasOptions && ($attribute->usesSource() || $attribute->getFrontendInput() === 'boolean')
+                    ? $attribute->getSource()->getAllOptions()
+                    : [];
+            } catch (Mage_Core_Exception) {
+                continue;
+            }
+            $sources[$code] = [
+                'label' => Mage::helper('eav')->__((string) $attribute->getFrontendLabel()),
+                'options' => self::flattenOptions($options),
+            ];
+        }
+        return $sources;
+    }
+
+    /**
+     * Return the codes of the attributes whose condition in one of $columns reads this attribute: the attributes of
+     * the same entity type, and with $otherTypes the attributes of the other types of getDependentScopes().
+     *
+     * @param list<string> $columns depends_on, required_when or both
+     * @return list<string>
+     */
+    public function getDependentAttributeCodes(array $columns = ['depends_on'], bool $otherTypes = false): array
+    {
+        $code = (string) ($this->getOrigData('attribute_code') ?? $this->getAttributeCode());
+        if ($code === '' || !$this->getEntityTypeId()) {
+            return [];
+        }
+        $adapter = $this->_getResource()->getReadConnection();
+        $codes = [];
+        foreach ($this->getDependentScopes($code) as [$entityTypeId, $field]) {
+            if (!$otherTypes && $entityTypeId !== (int) $this->getEntityTypeId()) {
+                continue;
+            }
+            $select = $adapter->select()
+                ->from($this->_getResource()->getMainTable(), ['attribute_code', ...$columns])
+                ->where('entity_type_id = ?', $entityTypeId)
+                ->where(implode(' OR ', array_map(fn(string $column): string => $adapter->quoteIdentifier($column) . ' IS NOT NULL', $columns)));
+            foreach ($adapter->fetchAll($select) as $row) {
+                $reader = Mage::getModel('eav/entity_attribute')->setData($row);
+                $isSelf = $entityTypeId === (int) $this->getEntityTypeId() && $row['attribute_code'] === $code;
+                foreach ($columns as $column) {
+                    $condition = $reader->decodeConditionOf($column);
+                    if (!$isSelf && $condition && in_array($field, \Maho\Data\Form\Condition::fields($condition), true)) {
+                        $codes[] = (string) $row['attribute_code'];
+                        break;
+                    }
+                }
+            }
+        }
+        return array_values(array_unique($codes));
+    }
+
+    /**
+     * Return the condition that the column $column holds, for a caller outside the attribute.
+     */
+    public function decodeConditionOf(string $column): ?array
+    {
+        return $this->decodeCondition($column);
+    }
+
+    /**
+     * Return the places where a condition can read the attribute $code: pairs of an entity type ID and the field name
+     * that a condition of that type uses. A subclass adds another entity type, as an address reads a customer field.
+     *
+     * @return list<array{int, string}>
+     */
+    protected function getDependentScopes(string $code): array
+    {
+        return [[(int) $this->getEntityTypeId(), $code]];
+    }
+
+    /**
+     * Add an error to $errors for each part of the condition in $column that a form cannot apply. The condition
+     * of depends_on also cannot read a field with a condition of its own, nor be on a field that another condition
+     * reads. The condition of required_when only reads values, so it has no such rule.
+     */
+    protected function addConditionErrors(Mage_Core_Exception_Input $errors, string $column): void
+    {
+        $raw = $this->getData($column);
+        if ($raw === null || $raw === '' || $raw === '[]') {
+            return;
+        }
+        $helper = Mage::helper('eav');
+        // The configuration locks depends_on on a field that the models always require, for both conditions
+        if (in_array('depends_on', $this->getLockedFields(), true)) {
+            $errors->addError($column, $helper->__('The store always requires this field, so it cannot have a condition.'));
+            return;
+        }
+        $condition = $this->decodeCondition($column);
+        if ($condition === null) {
+            $errors->addError($column, $helper->__('The condition is not valid JSON.'));
+            return;
+        }
+        foreach (\Maho\Data\Form\Condition::structureErrors($condition) as $message) {
+            $errors->addError($column, $message);
+        }
+
+        $isShowCondition = $column === 'depends_on';
+        $dependents = $isShowCondition && $this->getId() ? $this->getDependentAttributeCodes() : [];
+        if ($dependents) {
+            $errors->addError($column, $helper->__('This attribute cannot have a condition, because the condition of %s reads it.', implode(', ', $dependents)));
+        }
+
+        $sources = $this->getDependencySources();
+        $config = Mage::getSingleton('eav/config');
+        foreach (\Maho\Data\Form\Condition::wantedValues($condition) as $field => $values) {
+            if ($field === $this->getAttributeCode()) {
+                $errors->addError($column, $helper->__('The condition cannot read the attribute itself.'));
+                continue;
+            }
+            if (!isset($sources[$field])) {
+                $errors->addError($column, $helper->__('The condition reads the field %s, which this form does not have.', $field));
+                continue;
+            }
+            $source = $config->getAttribute($this->getEntityType(), $field);
+            if ($isShowCondition && $source instanceof Mage_Eav_Model_Entity_Attribute_Abstract && $source->getDependsOn() !== null) {
+                $errors->addError($column, $helper->__('The condition cannot read %s, because %s has a condition of its own.', $field, $field));
+            }
+            $unknown = array_diff($values, [...array_column($sources[$field]['options'], 'value'), \Maho\Data\Form\Condition::ANY_VALUE]);
+            if ($unknown) {
+                $errors->addError($column, $helper->__('The field %s has no option with the value %s.', $field, implode(', ', $unknown)));
+            }
+        }
+    }
+
+    /**
+     * @param array<mixed> $options the result of getAllOptions(), which can hold groups of options
+     * @return list<array{value: string, label: string}>
+     */
+    protected static function flattenOptions(array $options): array
+    {
+        $result = [];
+        foreach ($options as $option) {
+            if (is_array($option['value'] ?? null)) {
+                $result = [...$result, ...self::flattenOptions($option['value'])];
+            } elseif (isset($option['value']) && $option['value'] !== '') {
+                $result[] = ['value' => (string) $option['value'], 'label' => (string) ($option['label'] ?? $option['value'])];
+            }
+        }
+        return $result;
     }
 
     /**

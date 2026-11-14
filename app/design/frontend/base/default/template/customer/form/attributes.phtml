@@ -62,3 +62,6 @@
     </li>
 <?php endif ?>
 <?php endforeach ?>
+<?php if ($_dependence = $this->getDependenceJson()): ?>
+    <li class="no-display"><script>new FieldDependenceController(document.currentScript, <?= $_dependence ?>);</script></li>
+<?php endif ?>

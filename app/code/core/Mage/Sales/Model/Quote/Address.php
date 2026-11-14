@@ -1989,4 +1989,21 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     {
         return $this->getData('children');
     }
+
+    #[\Override]
+    protected function getConditionCustomer(): ?Mage_Customer_Model_Customer
+    {
+        $quote = $this->getQuote();
+        return $quote && $quote->getCustomerId() ? $quote->getCustomer() : null;
+    }
+
+    /**
+     * The cart holds the group of its customer, also for a guest.
+     */
+    #[\Override]
+    protected function getConditionCustomerGroupId(): int
+    {
+        $quote = $this->getQuote();
+        return $quote ? (int) $quote->getCustomerGroupId() : parent::getConditionCustomerGroupId();
+    }
 }

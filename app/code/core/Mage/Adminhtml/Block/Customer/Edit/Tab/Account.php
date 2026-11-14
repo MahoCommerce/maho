@@ -23,6 +23,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Account extends Mage_Adminhtml_Bloc
         $form->setFieldNameSuffix('account');
 
         $customer = Mage::registry('current_customer');
+        $this->setData('attribute_dependence_values', $customer->getData());
 
         /** @var Mage_Customer_Model_Form $customerForm */
         $customerForm = Mage::getModel('customer/form');

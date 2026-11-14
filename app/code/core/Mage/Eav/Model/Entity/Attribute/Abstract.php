@@ -631,6 +631,96 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
         return $this->setData('attribute_group_id', $value);
     }
 
+    /**
+     * Return the condition that shows this attribute in a form, in the format of Maho\Data\Form\Condition,
+     * or null when the attribute is always shown. An invalid stored value is null.
+     */
+    public function getDependsOn(): ?array
+    {
+        return $this->decodeCondition('depends_on');
+    }
+
+    public function setDependsOn(?array $value): static
+    {
+        return $this->setData('depends_on', $value ? Mage::helper('core')->jsonEncode($value) : null);
+    }
+
+    /**
+     * Return the condition that makes this attribute required when the form shows it, in the format of
+     * Maho\Data\Form\Condition, or null when only the Required flag decides. An invalid stored value is null.
+     */
+    public function getRequiredWhen(): ?array
+    {
+        return $this->decodeCondition('required_when');
+    }
+
+    public function setRequiredWhen(?array $value): static
+    {
+        return $this->setData('required_when', $value ? Mage::helper('core')->jsonEncode($value) : null);
+    }
+
+    /**
+     * Tell whether a form shows this attribute when its fields hold $values.
+     *
+     * @param array<string, mixed> $values
+     */
+    public function isDependencyMet(array $values): bool
+    {
+        $condition = $this->getDependsOn();
+        return $condition === null || \Maho\Data\Form\Condition::evaluate($condition, $this->conditionValues($values));
+    }
+
+    /**
+     * Tell whether the condition of getRequiredWhen() is met when the fields hold $values. False when the attribute
+     * has no such condition.
+     *
+     * @param array<string, mixed> $values
+     */
+    public function isRequiredWhenMet(array $values): bool
+    {
+        $condition = $this->getRequiredWhen();
+        return $condition !== null && \Maho\Data\Form\Condition::evaluate($condition, $this->conditionValues($values));
+    }
+
+    /**
+     * Tell whether a form requires this attribute when its fields hold $values: the form shows it, and the Required
+     * flag is set or the condition of getRequiredWhen() is met.
+     *
+     * @param array<string, mixed> $values
+     */
+    public function isRequiredFor(array $values): bool
+    {
+        return $this->isDependencyMet($values) && ($this->getIsRequired() || $this->isRequiredWhenMet($values));
+    }
+
+    /**
+     * Return the values that a condition reads, from the values of the fields. A subclass adds a value that a save
+     * gives later.
+     *
+     * @param array<string, mixed> $values
+     * @return array<string, mixed>
+     */
+    protected function conditionValues(array $values): array
+    {
+        return $values;
+    }
+
+    /**
+     * Return the condition that the column $column holds, or null when it holds none or an invalid value.
+     */
+    protected function decodeCondition(string $column): ?array
+    {
+        $value = $this->getData($column);
+        if (is_string($value) && $value !== '') {
+            try {
+                $value = Mage::helper('core')->jsonDecode($value);
+            } catch (\JsonException) {
+                return null;
+            }
+        }
+        return is_array($value) && $value !== [] ? $value : null;
+    }
+
     public function getFrontendClass(): ?string
     {
         $value = $this->getData('frontend_class');

@@ -37,6 +37,21 @@ class Maho_Blog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_Attri
         $this->_init('blog/attribute');
     }
 
+    /**
+     * A condition can also read the status of the post or the category, which is a column of the entity table.
+     */
+    #[\Override]
+    public function getDependencySources(): array
+    {
+        $helper = Mage::helper('blog');
+        return [
+            'is_active' => ['label' => $helper->__('Status'), 'options' => [
+                ['value' => '1', 'label' => $helper->__('Enabled')],
+                ['value' => '0', 'label' => $helper->__('Disabled')],
+            ]],
+        ] + parent::getDependencySources();
+    }
+
     #[\Override]
     public function getAdminPageSettings(): ?Mage_Eav_Model_Entity_Attribute_AdminPageSettings
     {

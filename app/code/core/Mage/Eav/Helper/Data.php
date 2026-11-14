@@ -8,6 +8,8 @@
  * @package Mage_Eav
  */
 
+declare(strict_types=1);
+
 class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
 {
     /**
@@ -145,6 +147,95 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
             $collection->addVisibleFilter();
         }
         return $collection;
+    }
+
+    /**
+     * Return the resized files of the image that the image attribute $code of $record holds. Return null when the
+     * record has no image there, or when the condition of the attribute hides the field. A template shows a custom
+     * image, such as the logo of a brand category, with this method.
+     */
+    public function getImageSet(Mage_Core_Model_Abstract $record, string $code): ?Mage_Core_Model_Image_Set
+    {
+        $resource = $record->getResource();
+        $attribute = method_exists($resource, 'getAttribute') ? $resource->getAttribute($code) : false;
+        if (!$attribute instanceof Mage_Eav_Model_Entity_Attribute_Abstract) {
+            return null;
+        }
+        $backend = $attribute->getBackend();
+        $file = (string) $record->getData($code);
+        if (!$backend instanceof Mage_Eav_Model_Entity_Attribute_Backend_Image || $file === '' || $this->isHidden($record, $attribute)) {
+            return null;
+        }
+        return Mage::helper('core/image')->init($backend->getImageEntity(), $file);
+    }
+
+    /**
+     * Tell whether the condition of $attribute hides its field for the data of $object. A hidden field is not
+     * required, and an address does not print it. The condition never changes a stored value. A field that $object
+     * does not hold has no value, as in the forms: a loaded EAV record holds no key for an empty attribute. A field
+     * that $object holds as false (a store view that uses the default) has no known value, so the condition does not
+     * hide the field.
+     */
+    public function isHidden(\Maho\DataObject $object, Mage_Eav_Model_Entity_Attribute_Abstract $attribute): bool
+    {
+        $condition = $attribute->getDependsOn();
+        if ($condition === null) {
+            return false;
+        }
+        $fields = \Maho\Data\Form\Condition::fields($condition);
+        $data = $this->getConditionData($object, $fields);
+        foreach ($fields as $field) {
+            if (($data[$field] ?? null) === false) {
+                return false;
+            }
+        }
+        return !$attribute->isDependencyMet($data);
+    }
+
+    /**
+     * Tell whether the field of $attribute needs a value for the data of $object: the condition does not hide it,
+     * and the Required flag is set or the condition of getRequiredWhen() is met. A field that the condition of
+     * getRequiredWhen() reads and that $object holds as false (a store view that uses the default) has no known
+     * value, so that condition does not make the field required.
+     */
+    public function isRequired(\Maho\DataObject $object, Mage_Eav_Model_Entity_Attribute_Abstract $attribute): bool
+    {
+        if ($this->isHidden($object, $attribute)) {
+            return false;
+        }
+        if ($attribute->getIsRequired()) {
+            return true;
+        }
+        $condition = $attribute->getRequiredWhen();
+        if ($condition === null) {
+            return false;
+        }
+        $fields = \Maho\Data\Form\Condition::fields($condition);
+        $data = $this->getConditionData($object, $fields);
+        foreach ($fields as $field) {
+            if (($data[$field] ?? null) === false) {
+                return false;
+            }
+        }
+        return $attribute->isRequiredWhenMet($data);
+    }
+
+    /**
+     * Return the values that a condition reads for $object, when the condition reads $fields. A field with a dot,
+     * such as customer.group_id, belongs to a related record: a model with getConditionData(), such as an address,
+     * adds those fields. Other models give their own data.
+     *
+     * @param list<string> $fields
+     * @return array<string, mixed>
+     */
+    public function getConditionData(\Maho\DataObject $object, array $fields): array
+    {
+        foreach ($fields as $field) {
+            if (str_contains($field, '.') && method_exists($object, 'getConditionData')) {
+                return $object->getConditionData();
+            }
+        }
+        return $object->getData();
     }
 
     /**
