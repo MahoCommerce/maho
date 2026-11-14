@@ -25,7 +25,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('image_id', Types::INTEGER, unsigned: true, autoincrement: true))
             ->addColumn(Schema::column('type', Types::STRING, length: 32))
             ->addColumn(Schema::column('path', Types::STRING, length: 255))
-            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('image_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('type', 'path'))
             ->setComment('Media Cleaner orphan files')

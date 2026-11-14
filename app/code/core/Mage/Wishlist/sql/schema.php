@@ -27,7 +27,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, default: 0))
             ->addColumn(Schema::column('shared', Types::SMALLINT, unsigned: true, default: 0))
             ->addColumn(Schema::column('sharing_code', Types::STRING, length: 32, notNull: false))
-            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_IMMUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('wishlist_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('shared'))
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('customer_id'))
@@ -51,7 +51,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('wishlist_id', Types::INTEGER, unsigned: true, default: 0))
             ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
             ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
-            ->addColumn(Schema::column('added_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('added_at', Types::DATETIME_IMMUTABLE, notNull: false))
             ->addColumn(Schema::column('description', Types::TEXT, length: 65535, notNull: false))
             ->addColumn(Schema::column('qty', Types::DECIMAL, precision: 12, scale: 4))
             ->addPrimaryKeyConstraint(

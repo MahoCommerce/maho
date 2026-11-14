@@ -48,8 +48,8 @@ return function (Schema $schema): void {
     $t->addColumn('job_code',    Types::STRING,  ['length' => 255, 'default' => '0']);
     $t->addColumn('status',      Types::STRING,  ['length' => 7, 'default' => 'pending']);
     $t->addColumn('messages',    Types::TEXT,    ['notnull' => false]);
-    $t->addColumn('created_at',  Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
-    $t->addColumn('scheduled_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
+    $t->addColumn('created_at',  Types::DATETIME_IMMUTABLE, ['default' => new CurrentTimestamp()]);
+    $t->addColumn('scheduled_at', Types::DATETIME_IMMUTABLE, ['notnull' => false]);
 
     $t->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('schedule_id')->create(),
@@ -72,7 +72,7 @@ Follow these conventions so your schema matches the core modules and migrates cl
 - **Use `CurrentTimestamp` for `CURRENT_TIMESTAMP` defaults**, not the literal string:
   ```php
   use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
-  $t->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+  $t->addColumn('created_at', Types::DATETIME_IMMUTABLE, ['default' => new CurrentTimestamp()]);
   ```
 - **Do not name indexes or foreign keys.** Call `addIndex()`, `addUniqueIndex()`, and `addForeignKeyConstraint()` without a name argument. DBAL autogenerates a name (a column hash, plus the table name for FKs), which keeps you within the 64-character identifier limit and guarantees uniqueness automatically. For a fulltext index, pass `null` as the name to keep the flag: `addIndex(['data_index'], null, ['fulltext'])`.
 - **Charset and collation** default to `utf8` / `utf8_general_ci` (matching Maho's legacy adapter). Override per table with `$t->addOption('charset', 'utf8mb4')` if needed.

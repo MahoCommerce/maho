@@ -29,7 +29,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('provider', Types::STRING, length: 32))
             ->addColumn(Schema::column('provider_id', Types::STRING, length: 255))
             ->addColumn(Schema::column('provider_email', Types::STRING, length: 255, notNull: false))
-            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_IMMUTABLE))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('identity_id')->create())
             ->addIndex(
                 Index::editor()

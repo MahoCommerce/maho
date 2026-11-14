@@ -44,7 +44,7 @@ return function (SchemaEditor $schema): void {
         Table::editor()
             ->setUnquotedName('review')
             ->addColumn(Schema::column('review_id', Types::BIGINT, unsigned: true, autoincrement: true))
-            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
             ->addColumn(Schema::column('entity_id', Types::SMALLINT, unsigned: true, default: 0))
             ->addColumn(Schema::column('entity_pk_value', Types::INTEGER, unsigned: true, default: 0))
             ->addColumn(Schema::column('status_id', Types::SMALLINT, unsigned: true, default: 0))

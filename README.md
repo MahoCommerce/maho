@@ -56,7 +56,7 @@ Then open https://localhost:54321. For web server, database and production setup
 
 - **PHP 8.5** with strict types, typed accessors, `#[\Override]` and attributes
 - **Symfony 8.1** components: HTTP, console, routing, messenger, mailer, validation, cache
-- **Doctrine DBAL 4.5** with a declarative schema, on **MySQL, MariaDB, PostgreSQL and SQLite**
+- **Doctrine DBAL 4.6** with a declarative schema, on **MySQL, MariaDB, PostgreSQL and SQLite**
 - **API Platform 5.0** for REST, GraphQL and MCP from one set of resources
 - **Tailwind CSS 4 and daisyUI 5** for the storefront and the admin, **TipTap 3** for content
 - **Vanilla JavaScript**: no jQuery, no Prototype.js
