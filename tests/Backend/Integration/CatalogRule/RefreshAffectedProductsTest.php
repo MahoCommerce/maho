@@ -8,57 +8,18 @@
 
 declare(strict_types=1);
 
+use Tests\Helpers\WeeeDiscountFixture;
+
 uses(Tests\MahoBackendTestCase::class);
 
 function wapCreateFeeAttribute(string $code): void
 {
-    Mage::getResourceModel('catalog/setup', 'catalog_setup')->addAttribute(Mage_Catalog_Model_Product::ENTITY, $code, [
-        'type' => 'static',
-        'backend' => Mage_Weee_Model_Attribute_Backend_Weee_Tax::getBackendModelName(),
-        'input' => 'weee',
-        'label' => 'WAP fixed tax',
-        'global' => Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_WEBSITE,
-        'required' => false,
-        'user_defined' => true,
-        'group' => 'General',
-    ]);
-    Mage::getSingleton('eav/config')->clear();
+    WeeeDiscountFixture::createFeeAttribute($code);
 }
 
 function wapCreateProduct(string $sku, string $attributeCode, array $websiteIds = [1]): array
 {
-    $store = Mage::app()->getStore(1);
-    $root = Mage::getModel('catalog/category')->setStoreId(0)->load($store->getRootCategoryId());
-    $category = Mage::getModel('catalog/category')->setStoreId(0)->setName('WAP ' . $sku)
-        ->setUrlKey(strtolower($sku))->setIsActive(1);
-    $category->setAttributeSetId($category->getDefaultAttributeSetId())->setPath($root->getPath())->save();
-
-    $product = Mage::getModel('catalog/product')->setStoreId(0)
-        ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
-        ->setAttributeSetId(Mage::getModel('catalog/product')->getDefaultAttributeSetId())
-        ->setSku($sku)
-        ->setName('WAP ' . $sku)
-        ->setPrice(80.0)
-        ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
-        ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
-        ->setTaxClassId(0)
-        ->setWebsiteIds($websiteIds)
-        ->setCategoryIds([(int) $category->getId()])
-        ->setStockData(['use_config_manage_stock' => 0, 'manage_stock' => 0, 'is_in_stock' => 1, 'qty' => 20]);
-    $country = (string) Mage::getModel('tax/calculation')->getRateRequest()->getCountryId();
-    $fees = [];
-    foreach ($websiteIds as $websiteId) {
-        $fees[] = [
-            'website_id' => $websiteId,
-            'country' => $country,
-            'state' => '*',
-            'price' => 10.0,
-        ];
-    }
-    $product->setData($attributeCode, $fees);
-    $product->save();
-
-    return ['category' => $category, 'product' => $product, 'country' => $country];
+    return WeeeDiscountFixture::createProduct($sku, $attributeCode, $websiteIds);
 }
 
 function wapCreateRule(
@@ -71,23 +32,7 @@ function wapCreateRule(
     ?string $matchedSku = null,
     string $action = 'by_percent',
 ): Mage_CatalogRule_Model_Rule {
-    $matchedSku ??= (string) $product->getSku();
-    $rule = Mage::getModel('catalogrule/rule')->setName('WAP 10 ' . uniqid())
-        ->setIsActive(true)
-        ->setFromDate(date('Y-m-d', time() - 86400))
-        ->setToDate(date('Y-m-d', time() + 86400))
-        ->setWebsiteIds($websiteIds)
-        ->setCustomerGroupIds($customerGroupIds)
-        ->setSortOrder($sortOrder)
-        ->setSimpleAction($action)
-        ->setDiscountAmount($amount)
-        ->setStopRulesProcessing($stop);
-    $rule->loadPost(['conditions' => [
-        '1' => ['type' => 'catalogrule/rule_condition_combine', 'aggregator' => 'all', 'value' => '1', 'new_child' => ''],
-        '1--1' => ['type' => 'catalogrule/rule_condition_product', 'attribute' => 'sku', 'operator' => '==', 'value' => $matchedSku],
-    ]]);
-    $rule->save();
-    return $rule;
+    return WeeeDiscountFixture::createRule($product, 'WAP 10 ' . uniqid(), $action, $amount, $sortOrder, $stop, $websiteIds, $customerGroupIds, $matchedSku);
 }
 
 function wapApplyAllRules(): void
@@ -160,33 +105,7 @@ beforeEach(function (): void {
 });
 
 afterEach(function (): void {
-    foreach (array_reverse($GLOBALS['wap_cleanup']['rules']) as $ruleId) {
-        try {
-            Mage::getModel('catalogrule/rule')->load($ruleId)->delete();
-        } catch (Throwable) {
-        }
-    }
-    foreach (array_reverse($GLOBALS['wap_cleanup']['products']) as $productId) {
-        try {
-            Mage::getModel('catalog/product')->load($productId)->delete();
-        } catch (Throwable) {
-        }
-    }
-    foreach (array_reverse($GLOBALS['wap_cleanup']['categories']) as $categoryId) {
-        try {
-            Mage::getModel('catalog/category')->load($categoryId)->delete();
-        } catch (Throwable) {
-        }
-    }
-    if ($GLOBALS['wap_cleanup']['attribute']) {
-        try {
-            Mage::getModel('catalog/resource_eav_attribute')
-                ->loadByCode(Mage_Catalog_Model_Product::ENTITY, $GLOBALS['wap_cleanup']['attribute'])
-                ->delete();
-            Mage::getSingleton('eav/config')->clear();
-        } catch (Throwable) {
-        }
-    }
+    WeeeDiscountFixture::cleanup($GLOBALS['wap_cleanup']);
     foreach ($this->wapPreviousConfig ?? [] as $storeId => $values) {
         foreach ($values as $path => $value) {
             Mage::app()->getStore((int) $storeId)->setConfig($path, $value);
@@ -209,7 +128,6 @@ it('refreshes native FPT discounts after a catalog rule refresh', function (): v
     $resources = Mage::getSingleton('core/resource');
     $rulePriceTable = $resources->getTableName('catalogrule/rule_product_price');
     $priceIndexTable = $resources->getTableName('catalog/product_index_price');
-    $discountTable = $resources->getTableName('weee/discount');
     $rulePrice = $read->fetchRow(
         "SELECT rule_price FROM {$rulePriceTable} WHERE product_id = ? AND website_id = ? AND customer_group_id = ? AND rule_date = ?",
         [$productId, 1, 0, Mage::app()->getLocale()->formatDateForDb(time(), withTime: false)],
@@ -218,12 +136,8 @@ it('refreshes native FPT discounts after a catalog rule refresh', function (): v
         "SELECT final_price, min_price FROM {$priceIndexTable} WHERE entity_id = ? AND website_id = ? AND customer_group_id = ?",
         [$productId, 1, 0],
     );
-    $loaded = Mage::getModel('catalog/product')->setStoreId(1)->load($productId)->setCustomerGroupId(0);
-    $runtimeFpt = (float) Mage::getModel('weee/tax')->getWeeeAmount($loaded, null, null, 1, false, false);
-    $discountRows = $read->fetchAll(
-        "SELECT entity_id, website_id, customer_group_id, value FROM {$discountTable} WHERE entity_id = ?",
-        [$productId],
-    );
+    $runtimeFpt = wapRuntimeFpt($productId);
+    $discountRows = wapDiscountRows($productId);
     expect($runtimeFpt)->toBe(9.0);
     expect((float) ($rulePrice['rule_price'] ?? 0))->toBe(72.0);
     expect((float) ($priceIndex['min_price'] ?? 0))->toBe(72.0);

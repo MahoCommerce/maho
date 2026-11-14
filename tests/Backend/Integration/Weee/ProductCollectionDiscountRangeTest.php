@@ -8,72 +8,23 @@
 
 declare(strict_types=1);
 
+use Tests\Helpers\WeeeDiscountFixture;
+
 uses(Tests\MahoBackendTestCase::class);
 
 function widcCreateFeeAttribute(string $code): void
 {
-    Mage::getResourceModel('catalog/setup', 'catalog_setup')->addAttribute(Mage_Catalog_Model_Product::ENTITY, $code, [
-        'type' => 'static',
-        'backend' => Mage_Weee_Model_Attribute_Backend_Weee_Tax::getBackendModelName(),
-        'input' => 'weee',
-        'label' => 'WIDC fixed tax',
-        'global' => Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_WEBSITE,
-        'required' => false,
-        'user_defined' => true,
-        'group' => 'General',
-    ]);
-    Mage::getSingleton('eav/config')->clear();
+    WeeeDiscountFixture::createFeeAttribute($code);
 }
 
 function widcCreateProduct(string $sku, string $attributeCode, float $price = 80.0, float $priceRange = 10.0): array
 {
-    $store = Mage::app()->getStore(1);
-    $root = Mage::getModel('catalog/category')->setStoreId(0)->load($store->getRootCategoryId());
-    $category = Mage::getModel('catalog/category')->setStoreId(0)->setName('WIDC ' . $sku)
-        ->setUrlKey(strtolower($sku))->setIsActive(1)->setData('filter_price_range', $priceRange);
-    $category->setAttributeSetId($category->getDefaultAttributeSetId())->setPath($root->getPath())->save();
-
-    $product = Mage::getModel('catalog/product')->setStoreId(0)
-        ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
-        ->setAttributeSetId(Mage::getModel('catalog/product')->getDefaultAttributeSetId())
-        ->setSku($sku)
-        ->setName('WIDC ' . $sku)
-        ->setPrice($price)
-        ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
-        ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
-        ->setTaxClassId(0)
-        ->setWebsiteIds([1])
-        ->setCategoryIds([(int) $category->getId()])
-        ->setStockData(['use_config_manage_stock' => 0, 'manage_stock' => 0, 'is_in_stock' => 1, 'qty' => 20]);
-    $country = (string) Mage::getModel('tax/calculation')->getRateRequest()->getCountryId();
-    $product->setData($attributeCode, [[
-        'website_id' => 1,
-        'country' => $country,
-        'state' => '*',
-        'price' => 10.0,
-    ]]);
-    $product->save();
-
-    return ['category' => $category, 'product' => $product, 'country' => $country];
+    return WeeeDiscountFixture::createProduct($sku, $attributeCode, [1], $price, $priceRange);
 }
 
 function widcCreateRule(Mage_Catalog_Model_Product $product, string $name, string $action, float $amount, int $sortOrder = 0): Mage_CatalogRule_Model_Rule
 {
-    $rule = Mage::getModel('catalogrule/rule')->setName($name)
-        ->setIsActive(true)
-        ->setFromDate(date('Y-m-d', time() - 86400))
-        ->setToDate(date('Y-m-d', time() + 86400))
-        ->setWebsiteIds([1])
-        ->setCustomerGroupIds([0])
-        ->setSortOrder($sortOrder)
-        ->setSimpleAction($action)
-        ->setDiscountAmount($amount)
-        ->setStopRulesProcessing(false);
-    $rule->loadPost(['conditions' => [
-        '1' => ['type' => 'catalogrule/rule_condition_combine', 'aggregator' => 'all', 'value' => '1', 'new_child' => ''],
-        '1--1' => ['type' => 'catalogrule/rule_condition_product', 'attribute' => 'sku', 'operator' => '==', 'value' => (string) $product->getSku()],
-    ]]);
-    $rule->save();
+    $rule = WeeeDiscountFixture::createRule($product, $name, $action, $amount, $sortOrder);
     // Use the native full rule refresh so catalogrule_after_apply runs.
     $rule->applyAll();
     return $rule;
@@ -136,33 +87,7 @@ beforeEach(function (): void {
 });
 
 afterEach(function (): void {
-    foreach (array_reverse($GLOBALS['widc_cleanup']['rules']) as $ruleId) {
-        try {
-            Mage::getModel('catalogrule/rule')->load($ruleId)->delete();
-        } catch (Throwable) {
-        }
-    }
-    foreach (array_reverse($GLOBALS['widc_cleanup']['products']) as $productId) {
-        try {
-            Mage::getModel('catalog/product')->load($productId)->delete();
-        } catch (Throwable) {
-        }
-    }
-    foreach (array_reverse($GLOBALS['widc_cleanup']['categories']) as $categoryId) {
-        try {
-            Mage::getModel('catalog/category')->load($categoryId)->delete();
-        } catch (Throwable) {
-        }
-    }
-    if ($GLOBALS['widc_cleanup']['attribute']) {
-        try {
-            Mage::getModel('catalog/resource_eav_attribute')
-                ->loadByCode(Mage_Catalog_Model_Product::ENTITY, $GLOBALS['widc_cleanup']['attribute'])
-                ->delete();
-            Mage::getSingleton('eav/config')->clear();
-        } catch (Throwable) {
-        }
-    }
+    WeeeDiscountFixture::cleanup($GLOBALS['widc_cleanup']);
     foreach ($this->widcPreviousConfig ?? [] as $path => $value) {
         Mage::app()->getStore(1)->setConfig($path, $value);
     }

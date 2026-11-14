@@ -80,6 +80,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
         $select = $observer->getEvent()->getSelect();
         $table = $observer->getEvent()->getTable();
 
+        $adapter = $select->getAdapter();
         $websiteId = (int) Mage::app()->getStore($storeId)->getWebsiteId();
         $customerGroupId = Mage::helper('customer')->getCurrentGroupId();
 
@@ -92,8 +93,8 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
         if ($attributes && Mage::helper('weee')->isDiscounted()) {
             $joinConditions = [
                 "discount_percent.entity_id = {$table}.entity_id",
-                $select->getAdapter()->quoteInto('discount_percent.website_id = ?', $websiteId),
-                $select->getAdapter()->quoteInto('discount_percent.customer_group_id = ?', $customerGroupId),
+                $adapter->quoteInto('discount_percent.website_id = ?', $websiteId),
+                $adapter->quoteInto('discount_percent.customer_group_id = ?', $customerGroupId),
             ];
             $tableWeeDiscount = Mage::getSingleton('weee/tax')->getResource()->getTable('weee/discount');
             $select->joinLeft(
@@ -102,7 +103,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
                 [],
             );
         }
-        $checkDiscountField = $select->getAdapter()->getCheckSql(
+        $checkDiscountField = $adapter->getCheckSql(
             'discount_percent.value IS NULL',
             '0',
             'discount_percent.value',
@@ -112,7 +113,6 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
             '(CASE WHEN (%1$s) < 0 THEN -FLOOR(-(%1$s)) ELSE FLOOR(%1$s) END)',
             $checkDiscountField,
         );
-        $adapter = $select->getAdapter();
         $clampedRemainingPercent = $adapter->getLeastSql(['100', $adapter->getGreatestSql(['0', $remainingPercent])]);
         $discountFactor = sprintf(
             '(CASE WHEN %1$s = 0 THEN 1.0 ELSE %2$s / 100.0 END)',
@@ -121,7 +121,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
         );
         foreach ($attributes as $attribute) {
             $fieldAlias = sprintf('weee_%s_table.value', $attribute);
-            $checkAdditionalCalculation = $select->getAdapter()->getCheckSql("{$fieldAlias} IS NULL", '0', $fieldAlias);
+            $checkAdditionalCalculation = $adapter->getCheckSql("{$fieldAlias} IS NULL", '0', $fieldAlias);
             if (Mage::helper('weee')->isDiscounted()) {
                 $additionalCalculations[] = sprintf('+(%s*%s)', $checkAdditionalCalculation, $discountFactor);
             } else {
@@ -138,7 +138,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
             $attributeId = (int) Mage::getSingleton('eav/entity_attribute')
                 ->getIdByCode(Mage_Catalog_Model_Product::ENTITY, $attribute);
             $tableAlias = sprintf('weee_%s_table', $attribute);
-            $quotedTableAlias = $select->getAdapter()->quoteTableAs($tableAlias);
+            $quotedTableAlias = $adapter->quoteTableAs($tableAlias);
             $attributeSelect = $this->_getSelect();
             $attributeSelect
                 ->from([$tableAlias => Mage::getSingleton('weee/tax')->getResource()->getTable('weee/tax')])

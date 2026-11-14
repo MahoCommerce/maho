@@ -45,6 +45,11 @@ function invoiceWeeeItem(int $storeId, string $type): Mage_Sales_Model_Order_Inv
             'weee_tax_applied_amount' => 5, 'base_weee_tax_applied_amount' => 5,
             'weee_tax_applied_row_amount' => 5, 'base_weee_tax_applied_row_amnt' => 5,
         ]);
+    if ($type === 'bundle') {
+        $orderItem->setId(1);
+        $item->setOrderItemId(1);
+        $invoice->addItem($item);
+    }
     Mage::helper('weee')->setApplied($item, [[
         'title' => 'Owned recycling fee', 'amount' => 5, 'base_amount' => 5,
         'row_amount' => 5, 'base_row_amount' => 5,
@@ -61,6 +66,7 @@ function invoiceWeeeHtml(Mage_Sales_Model_Order_Invoice_Item $item): string
         $items = Mage::app()->getLayout()->createBlock('adminhtml/sales_order_invoice_view_items');
         $items->addItemRender('default', 'adminhtml/sales_items_renderer_default', 'sales/order/invoice/view/items/renderer/default.phtml');
         $items->addItemRender('downloadable', 'adminhtml/sales_items_renderer_default', 'downloadable/sales/order/invoice/view/items/renderer/downloadable.phtml');
+        $items->addItemRender('bundle', 'bundle/adminhtml_sales_order_items_renderer', 'bundle/sales/invoice/view/items/renderer.phtml');
         $items->getItemRenderer($item->getOrderItem()->getProductType())->setOrder($item->getInvoice()->getOrder());
         return $items->getItemHtml($item);
     } finally {
@@ -87,7 +93,7 @@ it('renders invoice WEEE details using the invoice store regardless of the curre
     expect(str_contains($unitInclTax, 'Owned recycling fee'))->toBe($invoiceMode === 2)
         ->and($actual)->toBe($sameStore)
         ->and($item->getData())->toBe($before + ['store_id' => $this->scopeStores['invoice']]);
-})->with(['simple', 'configurable', 'downloadable'])->with([
+})->with(['simple', 'configurable', 'downloadable', 'bundle'])->with([
     'different store, separate WEEE' => [0, 2],
     'different store, included WEEE' => [2, 0],
     'same mode, separate WEEE' => [2, 2],
