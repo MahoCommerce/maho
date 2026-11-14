@@ -42,7 +42,7 @@ The forms of an address attribute:
 |---|---|
 | Admin Customer Address | The addresses of a customer, and the addresses of a new order, in the admin |
 | Address Book and Checkout | The address book of the customer account, and the billing and shipping steps of the checkout |
-| Customer Registration | The address section of the registration page, when the store asks for an address there |
+| Customer Registration | The address section of the registration page, when **Ask for an Address at Registration** is Yes in **System > Configuration > Customers > Customer Configuration > Create New Account Options** |
 
 The **Default** field applies to all the forms:
 

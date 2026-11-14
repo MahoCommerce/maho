@@ -17,6 +17,8 @@ declare(strict_types=1);
  */
 class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
 {
+    public const XML_PATH_SHOW_ADDRESS_FIELDS = 'customer/create_account/show_address_fields';
+
     /**
      * Address instance with data
      *
@@ -176,6 +178,15 @@ class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
     public function setErrorUrl(?string $value): static
     {
         return $this->setData('error_url', $value);
+    }
+
+    /**
+     * Return whether the form asks for an address: the setting of the store, or a layout that turns it on.
+     */
+    public function getShowAddressFields(): bool
+    {
+        return (bool) $this->getData('show_address_fields')
+            || Mage::getStoreConfigFlag(self::XML_PATH_SHOW_ADDRESS_FIELDS);
     }
 
     public function setShowAddressFields(?bool $value = true): static
