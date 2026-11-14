@@ -58,6 +58,8 @@ class Mage_Shipping_Model_Carrier_Tablerate extends Mage_Shipping_Model_Carrier_
             return false;
         }
 
+        $originalPackageValue = $request->getPackageValue();
+
         // exclude Virtual products price from Package value if pre-configured
         if (!$this->getConfigFlag('include_virtual_price') && $request->getAllItems()) {
             foreach ($request->getAllItems() as $item) {
@@ -174,6 +176,9 @@ class Mage_Shipping_Model_Carrier_Tablerate extends Mage_Shipping_Model_Carrier_
             $error->setErrorMessage($this->getConfigData('specificerrmsg'));
             $result->append($error);
         }
+
+        $request->setPackageValue($originalPackageValue);
+        $request->setPackageQty($oldQty);
 
         return $result;
     }

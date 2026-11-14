@@ -30,7 +30,7 @@ function tablerateFreeItemsQuoteItem(float $rowTotal, bool $freeShipping): Mage_
 /**
  * @param list<Mage_Sales_Model_Quote_Item> $items
  */
-function tablerateFreeItemsCollect(array $items): Mage_Shipping_Model_Rate_Result
+function tablerateFreeItemsCollect(array $items, ?float &$packageValueAfter = null): Mage_Shipping_Model_Rate_Result
 {
     $packageValue = 0.0;
     $freeWeight = 0.0;
@@ -61,7 +61,10 @@ function tablerateFreeItemsCollect(array $items): Mage_Shipping_Model_Rate_Resul
     $carrier = Mage::getModel('shipping/carrier_tablerate');
     $carrier->setStore(1);
 
-    return $carrier->collectRates($request);
+    $result = $carrier->collectRates($request);
+    $packageValueAfter = (float) $request->getPackageValue();
+
+    return $result;
 }
 
 function tablerateFreeItemsPrice(Mage_Shipping_Model_Rate_Result $result): ?float
@@ -151,5 +154,29 @@ describe('table rates by order subtotal with free shipping items', function () {
         ]);
 
         expect(tablerateFreeItemsPrice($result))->toBe(0.0);
+    });
+
+    test('ships for free when every item ships free and no rate starts at 0', function () {
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $adapter->delete(Mage::getSingleton('core/resource')->getTableName('shipping/tablerate'), [
+            'dest_zip = ?' => TABLERATE_FREE_ITEMS_ZIP,
+            'condition_value = ?' => 0,
+        ]);
+
+        $result = tablerateFreeItemsCollect([
+            tablerateFreeItemsQuoteItem(80.0, true),
+            tablerateFreeItemsQuoteItem(150.0, true),
+        ]);
+
+        expect(tablerateFreeItemsPrice($result))->toBe(0.0);
+    });
+
+    test('leaves the package value of the request as it was', function () {
+        tablerateFreeItemsCollect([
+            tablerateFreeItemsQuoteItem(80.0, true),
+            tablerateFreeItemsQuoteItem(150.0, false),
+        ], $packageValueAfter);
+
+        expect($packageValueAfter)->toBe(230.0);
     });
 });
