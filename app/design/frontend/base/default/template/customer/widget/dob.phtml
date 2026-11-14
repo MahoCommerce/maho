@@ -61,7 +61,7 @@ NOTE: Regarding styles - if we leave it this way, we'll move it to boxes.css
 ?>
     <?= $this->getSortedDateInputs() ?>
     <div class="dob-full" style="display:none;">
-        <input type="hidden" id="<?= $this->getFieldId('dob') ?>" name="<?= $this->getFieldName('dob') ?>">
+        <input type="hidden" id="<?= $this->getFieldId('dob') ?>" name="<?= $this->getFieldName('dob') ?>" value="<?= $this->escapeHtml($this->getIsoDate()) ?>">
     </div>
 
     <div class="validation-advice" style="display:none;"></div>
