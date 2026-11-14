@@ -15,10 +15,10 @@ it('asks for an address at registration when the setting or a layout turns it on
     $previous = $store->getConfig(Mage_Customer_Block_Form_Register::XML_PATH_SHOW_ADDRESS_FIELDS);
     try {
         $store->setConfig(Mage_Customer_Block_Form_Register::XML_PATH_SHOW_ADDRESS_FIELDS, '0');
-        $off = Mage::app()->getLayout()->createBlock('customer/form_register')->getShowAddressFields();
-        $layout = Mage::app()->getLayout()->createBlock('customer/form_register')->setShowAddressFields()->getShowAddressFields();
+        $off = new Mage_Customer_Block_Form_Register()->getShowAddressFields();
+        $layout = new Mage_Customer_Block_Form_Register()->setShowAddressFields()->getShowAddressFields();
         $store->setConfig(Mage_Customer_Block_Form_Register::XML_PATH_SHOW_ADDRESS_FIELDS, '1');
-        $setting = Mage::app()->getLayout()->createBlock('customer/form_register')->getShowAddressFields();
+        $setting = new Mage_Customer_Block_Form_Register()->getShowAddressFields();
     } finally {
         $store->setConfig(Mage_Customer_Block_Form_Register::XML_PATH_SHOW_ADDRESS_FIELDS, $previous);
     }

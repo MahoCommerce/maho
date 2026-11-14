@@ -279,7 +279,7 @@ describe('registration with an address', function () {
                 $customer->delete();
             }
             Mage::unregister('isSecureArea');
-            Mage::getResourceModel('eav/entity_attribute')->getConnection()->update(
+            Mage::getSingleton('core/resource')->getConnection('core_write')->update(
                 Mage::getSingleton('core/resource')->getTableName('eav/attribute'),
                 ['depends_on' => null],
                 ['attribute_id = ?' => (int) $pec->getId()],
