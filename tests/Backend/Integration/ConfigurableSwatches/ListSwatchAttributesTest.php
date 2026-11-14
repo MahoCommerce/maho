@@ -293,4 +293,43 @@ describe('the listing attribute of a product that uses two of them', function ()
         expect($parent->getListSwatchAttrId())->toBeNull()
             ->and($parent->getListSwatchAttrValues())->toBe([]);
     });
+
+    it('lists the child products of a label shared by two attributes as a JSON array', function (): void {
+        $resource = Mage::getSingleton('core/resource');
+        $optionTable = $resource->getTableName('eav/attribute_option');
+        $valueTable = $resource->getTableName('eav/attribute_option_value');
+        $sharedColorId = listSwatchOptionIds('color', 1)[0];
+        $this->adapter->insert($optionTable, ['attribute_id' => listSwatchAttributeId('size'), 'sort_order' => 99]);
+        $sizeId = (int) $this->adapter->lastInsertId($optionTable);
+        try {
+            foreach ($this->adapter->fetchAll(
+                $this->adapter->select()->from($valueTable, ['store_id', 'value'])->where('option_id = ?', $sharedColorId),
+            ) as $row) {
+                $this->adapter->insert($valueTable, ['option_id' => $sizeId, 'store_id' => $row['store_id'], 'value' => $row['value']]);
+            }
+            foreach (['color' => 0, 'size' => 1] as $code => $position) {
+                $this->adapter->update($this->table, ['position' => $position], [
+                    'product_id = ?' => $this->parentId,
+                    'attribute_id = ?' => listSwatchAttributeId($code),
+                ]);
+            }
+            $otherColorId = listSwatchOptionIds('color', 2)[1];
+            $parent = Mage::getModel('catalog/product')->setId($this->parentId)->setChildrenProducts([
+                listSwatchChild(900000, ['color' => $sharedColorId, 'size' => $sizeId]),
+                listSwatchChild(900001, ['color' => $otherColorId, 'size' => $sizeId]),
+            ]);
+            Mage::helper('configurableswatches/mediafallback')->attachProductChildrenAttributeMapping(
+                [$this->parentId => $parent],
+                (int) Mage::app()->getStore()->getId(),
+                true,
+            );
+            $mapping = $parent->getChildAttributeLabelMapping();
+        } finally {
+            $this->adapter->delete($valueTable, ['option_id = ?' => $sizeId]);
+            $this->adapter->delete($optionTable, ['option_id = ?' => $sizeId]);
+        }
+
+        expect($mapping)->toHaveCount(2)
+            ->and(array_map(fn(array $entry): bool => array_is_list($entry['product_ids']), $mapping))->not->toContain(false);
+    });
 });
