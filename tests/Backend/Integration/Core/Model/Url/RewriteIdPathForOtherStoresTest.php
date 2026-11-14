@@ -27,6 +27,20 @@ describe('Mage_Core_Model_Url_Rewrite::getIdPathForOtherStores', function () {
             ->and($withoutCategory->getIdPathForOtherStores())->toBe('product/7');
     });
 
+    it('gives the ID path of the product to an older custom rewrite of a product in a root category', function () {
+        $rootId = (int) Mage::app()->getDefaultStoreView()->getRootCategoryId();
+        $categoryId = (int) Mage::getModel('catalog/category')->getCollection()
+            ->addFieldToFilter('level', ['gt' => 1])
+            ->setPageSize(1)
+            ->getFirstItem()
+            ->getId();
+        $inRoot = Mage::getModel('core/url_rewrite')->setIsSystem(false)->setProductId(7)->setCategoryId($rootId)->setIdPath('product/7');
+        $movedByApi = Mage::getModel('core/url_rewrite')->setIsSystem(false)->setProductId(7)->setCategoryId($categoryId)->setIdPath('product/7');
+
+        expect($inRoot->getIdPathForOtherStores())->toBe('product/7')
+            ->and($movedByApi->getIdPathForOtherStores())->toBe('product/7/' . $categoryId);
+    });
+
     it('keeps the ID path of a system rewrite and of a rewrite without a product or a category', function () {
         $system = Mage::getModel('core/url_rewrite')->setIsSystem(true)->setProductId(7)->setIdPath('product/7');
         $custom = Mage::getModel('core/url_rewrite')->setIsSystem(false)->setIdPath('pest-alias');

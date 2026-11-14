@@ -100,7 +100,18 @@ class Mage_Core_Model_Url_Rewrite extends Mage_Core_Model_Abstract implements Ma
         if ($productId === null) {
             return 'category/' . $categoryId;
         }
-        return $categoryId === null ? 'product/' . $productId : 'product/' . $productId . '/' . $categoryId;
+        if ($categoryId === null) {
+            return 'product/' . $productId;
+        }
+        if ($this->getIdPath() === 'product/' . $productId) {
+            // An older custom rewrite of a product in a root category kept the category with this ID path.
+            return Mage::getSingleton('catalog/url')->generatePath(
+                'id',
+                new Maho\DataObject(['id' => $productId]),
+                Mage::getModel('catalog/category')->load($categoryId),
+            );
+        }
+        return 'product/' . $productId . '/' . $categoryId;
     }
 
     /**

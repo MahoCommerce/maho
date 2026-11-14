@@ -39,6 +39,7 @@ class Mage_Core_Service_Url_Rewrite
      * A rewrite with a product or a category gets the target path of that product or category. A system rewrite
      * also gets their ID path. A custom rewrite keeps its ID path or gets a new unique one, so that a product or a
      * category can have many custom rewrites in a store view.
+     * A product rewrite does not keep a root category, as the catalog does not.
      * The resource model checks the uniqueness of the request path and the ID path. A system rewrite keeps its
      * store view. The catalog URL indexer writes a system rewrite again when it reindexes its product or
      * category, so a change to a system rewrite lasts until then.
