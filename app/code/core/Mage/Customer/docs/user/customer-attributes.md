@@ -151,6 +151,50 @@ company:
 A customer in the United States sees none of these fields. A private customer in Italy sees only
 **Codice Fiscale**.
 
+### Example: a registration form for private and business customers
+
+In this example, an account is either private or a company, so the type goes on the customer. An
+address field reads it as **Customer: Account Type**. While the customer fills in the registration
+form, the address fields follow the **Account Type** of the same form.
+
+1. In **System > Configuration > Customers > Customer Configuration**, set **Ask for an Address at
+   Registration** to **Yes** in **Create New Account Options**. In **Name and Address Options**,
+   set **Show Date of Birth** and **Show Tax/VAT Number** to **Optional**.
+2. In **System > Attributes > Customers**, add a **Dropdown** with the label **Account Type**, the
+   options **Private** and **Company**, and the **Default** **Required**. In **Used in Forms**,
+   select **Customer Registration**, **Customer Account Edit** and **Admin Customer**. Set its
+   **Sort Order** to `1`, so that it shows at the top of the form.
+3. Add the customer fields of the table below, with the same forms. Then add the address fields,
+   with the address forms.
+4. Open each field, and add the rows of the table in **When the Field Shows**. Set **Default** to
+   **Required** where the table says so.
+
+| Field | Type | Shows when | Default |
+|---|---|---|---|
+| Your Role in the Company | Customer, Text Field | **Account Type** is **Company** | Required |
+| Tax/VAT Number (standard) | Customer | **Account Type** is **Company** | Required |
+| Date of Birth (standard) | Customer | **Account Type** is **Private** | Optional |
+| Interests | Customer, Multiple Select: Promotions, New Products, Events | Always | Optional |
+| Preferred Event City | Customer, Text Field | **Interests** is **Events** | Required |
+| How Did You Hear About Us? | Customer, Dropdown: Search Engine, A Friend, Other | Always | Optional |
+| Name of Your Friend | Customer, Text Field | **How Did You Hear About Us?** is **A Friend** | Optional |
+| Please Specify | Customer, Text Field | **How Did You Hear About Us?** is **Other** | Required |
+| Company (standard) | Address | **Customer: Account Type** is **Company** | Required |
+| Codice Fiscale | Address, Text Field | **Country** is **Italy** | Required |
+| SdI Code, PEC | Address, Text Field | **Customer: Account Type** is **Company**, and **Country** is **Italy** | Optional, and required as in the Italian invoice example |
+
+A private customer sees **Date of Birth**, and no company field:
+
+![The registration form of a private customer. Account Type is at the top, and Date of Birth shows](images/registration-private.webp)
+
+A company in Italy sees **Tax/VAT Number**, **Your Role in the Company**, the address **Company**,
+and the Italian invoice fields. The customer gave an **SdI Code**, so **PEC** is not required:
+
+![The registration form of an Italian company, with the company fields and the Italian invoice fields](images/registration-company.webp)
+
+When the customer changes **Account Type** before the form is sent, the form hides the fields of
+the other type, and the store does not save their values.
+
 The address forms of an order in the admin always show the field, and they do not mark it as
 required when it has a condition: the forms of a new order, and the form that changes an address of
 an order. A new order still requires the field when the conditions require it.
