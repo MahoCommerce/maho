@@ -89,47 +89,54 @@ class Mage_Weee_Model_Resource_Tax extends Mage_Core_Model_Resource_Db_Abstract
         }
         $select->where('(from_time <= ? OR from_time = 0)', $now)
                ->where('(to_time >= ? OR to_time = 0)', $now);
-        $adapter->delete($this->getTable('weee/discount'), $deleteCondition);
+        $adapter->beginTransaction();
+        try {
+            $adapter->delete($this->getTable('weee/discount'), $deleteCondition);
 
-        $select->order(['data.website_id', 'data.customer_group_id', 'data.product_id', 'data.sort_order']);
+            $select->order(['data.website_id', 'data.customer_group_id', 'data.product_id', 'data.sort_order']);
 
-        $data = $this->_getReadAdapter()->query($select);
+            $data = $this->_getReadAdapter()->query($select);
 
-        $productData = [];
-        $stops       = [];
-        $prevKey     = false;
-        while ($row = $data->fetch()) {
-            $key = "{$row['product_id']}-{$row['website_id']}-{$row['customer_group_id']}";
-            if (isset($stops[$key])) {
-                continue;
-            }
-
-            if ($prevKey && ($prevKey != $key)) {
-                foreach ($productData as $product) {
-                    $adapter->insert($this->getTable('weee/discount'), $product);
+            $productData = [];
+            $stops       = [];
+            $prevKey     = false;
+            while ($row = $data->fetch()) {
+                $key = "{$row['product_id']}-{$row['website_id']}-{$row['customer_group_id']}";
+                if (isset($stops[$key])) {
+                    continue;
                 }
-                $productData = [];
-            }
-            if ($row['action_operator'] == 'by_percent') {
-                if (isset($productData[$key])) {
-                    $productData[$key]['value'] -= $productData[$key]['value'] / 100 * $row['action_amount'];
-                } else {
-                    $productData[$key] = [
-                        'entity_id'         => $row['product_id'],
-                        'customer_group_id' => $row['customer_group_id'],
-                        'website_id'        => $row['website_id'],
-                        'value'             => 100 - max(0, min(100, $row['action_amount'])),
-                    ];
-                }
-            }
 
-            if ($row['action_stop']) {
-                $stops[$key] = true;
+                if ($prevKey && ($prevKey != $key)) {
+                    foreach ($productData as $product) {
+                        $adapter->insert($this->getTable('weee/discount'), $product);
+                    }
+                    $productData = [];
+                }
+                if ($row['action_operator'] == 'by_percent') {
+                    if (isset($productData[$key])) {
+                        $productData[$key]['value'] -= $productData[$key]['value'] / 100 * $row['action_amount'];
+                    } else {
+                        $productData[$key] = [
+                            'entity_id'         => $row['product_id'],
+                            'customer_group_id' => $row['customer_group_id'],
+                            'website_id'        => $row['website_id'],
+                            'value'             => 100 - max(0, min(100, $row['action_amount'])),
+                        ];
+                    }
+                }
+
+                if ($row['action_stop']) {
+                    $stops[$key] = true;
+                }
+                $prevKey = $key;
             }
-            $prevKey = $key;
-        }
-        foreach ($productData as $product) {
-            $adapter->insert($this->getTable('weee/discount'), $product);
+            foreach ($productData as $product) {
+                $adapter->insert($this->getTable('weee/discount'), $product);
+            }
+            $adapter->commit();
+        } catch (Throwable $e) {
+            $adapter->rollBack();
+            throw $e;
         }
 
         return $this;
