@@ -58,4 +58,22 @@ describe('Mage_Core_Model_Url_Rewrite::getIdPathForOtherStores', function () {
             $custom->delete();
         }
     });
+
+    it('stores no category on a custom rewrite of a product in a root category, as the catalog does', function () {
+        $storeId = (int) Mage::app()->getDefaultStoreView()->getId();
+        $productId = (int) Mage::getModel('catalog/product')->getCollection()->setPageSize(1)->getFirstItem()->getId();
+        $custom = Mage::getService('core/url_rewrite')->newRewrite()
+            ->setStoreId($storeId)
+            ->setProductId($productId)
+            ->setCategoryId((int) Mage::app()->getStore($storeId)->getRootCategoryId())
+            ->setRequestPath('pest-other-stores-root.html');
+        Mage::getService('core/url_rewrite')->save($custom);
+
+        try {
+            expect($custom->getCategoryId())->toBeNull()
+                ->and($custom->getIdPathForOtherStores())->toBe('product/' . $productId);
+        } finally {
+            $custom->delete();
+        }
+    });
 });

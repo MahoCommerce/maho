@@ -139,6 +139,10 @@ class Mage_Core_Service_Url_Rewrite
         $rewrite->setIdPath(
             $rewrite->getIsSystem() ? $idPath : ((string) $rewrite->getOrigData('id_path') ?: $catalogUrl->generateUniqueIdPath()),
         );
+        // The catalog keeps no category for a product in a root category, so the store switch finds the product page.
+        if ($product && $idPath === 'product/' . $product->getId()) {
+            $rewrite->setCategoryId(null);
+        }
 
         if (in_array($rewrite->getOptions(), ['R', 'RP'], true)) {
             $target = $this->newRewrite()->setStoreId((int) $rewrite->getStoreId())->loadByIdPath($idPath);
