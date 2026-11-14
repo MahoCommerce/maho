@@ -352,34 +352,28 @@ describe('Not Found report grid renderers', function () {
     });
 });
 
-describe('URL rewrite form prefill', function () {
+describe('URL rewrite edit page prefill', function () {
     it('fills a new custom rewrite from the request', function () {
-        Mage::unregister('current_urlrewrite');
-        Mage::unregister('current_product');
-        Mage::unregister('current_category');
-        Mage::register('current_urlrewrite', Mage::getModel('core/url_rewrite'));
-        Mage::register('current_product', Mage::getModel('catalog/product'));
-        Mage::register('current_category', Mage::getModel('catalog/category'));
         $storeId = (int) Mage::app()->getDefaultStoreView()->getId();
+        $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/index.php/admin/urlrewrite/edit', 'GET', [
+            'id' => '',
+            'request_path' => 'old-page.html',
+            'store_id' => (string) $storeId,
+        ]));
+        $request->setRouteName('adminhtml')->setControllerName('urlrewrite')->setActionName('edit')->setDispatched(true);
+        Mage::app()->setRequest($request);
 
-        $request = Mage::app()->getRequest();
-        $request->setParam('request_path', 'old-page.html');
-        $request->setParam('store_id', (string) $storeId);
         try {
-            $block = Mage::app()->getLayout()->createBlock('adminhtml/urlrewrite_edit_form');
-            $block->toHtml();
-            $form = $block->getForm();
-
-            expect($form->getElement('request_path')->getValue())->toBe('old-page.html');
-            expect($form->getElement('id_path')->getValue())->toBe('old-page.html');
-            expect($form->getElement('options')->getValue())->toBe('RP');
-            expect((int) $form->getElement('store_id')->getValue())->toBe($storeId);
-        } finally {
-            $request->setParam('request_path', null);
-            $request->setParam('store_id', null);
-            Mage::unregister('current_urlrewrite');
-            Mage::unregister('current_product');
-            Mage::unregister('current_category');
+            new Mage_Adminhtml_UrlrewriteController($request, new Mage_Core_Controller_Response_Http())->editAction();
+        } catch (Throwable) {
+            // The layout needs a full admin page. The rewrite is ready before it.
         }
+
+        $rewrite = Mage::registry('current_urlrewrite');
+        expect($rewrite->getId())->toBeNull();
+        expect($rewrite->getRequestPath())->toBe('old-page.html');
+        expect($rewrite->getIdPath())->toBe('old-page.html');
+        expect($rewrite->getOptions())->toBe('RP');
+        expect($rewrite->getStoreId())->toBe($storeId);
     });
 });

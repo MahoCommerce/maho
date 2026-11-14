@@ -49,14 +49,6 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit_Form extends Mage_Adminhtml_Block_Wid
             'options'      => $model->getOptions(),
             'description'  => $model->getDescription(),
         ];
-        $prefillPath = trim((string) $this->getRequest()->getParam('request_path', ''));
-        if (!$model->getId() && !$product->getId() && !$category->getId() && $prefillPath !== '') {
-            // Reports > Not Found opens the form to redirect a path that answered 404
-            $formValues['request_path'] = $prefillPath;
-            $formValues['id_path'] = $prefillPath;
-            $formValues['options'] = 'RP';
-            $formValues['store_id'] = (int) $this->getRequest()->getParam('store_id');
-        }
         if ($sessionData = Mage::getSingleton('adminhtml/session')->getData('urlrewrite_data', true)) {
             foreach (array_keys($formValues) as $key) {
                 if (isset($sessionData[$key])) {
