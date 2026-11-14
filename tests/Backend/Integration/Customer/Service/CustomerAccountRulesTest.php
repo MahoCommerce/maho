@@ -601,7 +601,12 @@ it('does not count the login that stops at the request for the 2FA code', functi
     foreach ([1, 2, 3] as $ignored) {
         expect(fn() => $this->auth->authenticate($email, ACCOUNT_RULES_PASSWORD, 1))->toThrow(Mage_Customer_Exception_SecondFactorRequired::class);
     }
-    $loggedIn = $this->auth->authenticate($email, ACCOUNT_RULES_PASSWORD, 1, \OTPHP\TOTP::createFromSecret($secret)->now());
+    $totp = \OTPHP\TOTP::createFromSecret($secret);
+    // The code must stay valid through a password check, so it must not come from the end of a period
+    if ($totp->expiresIn() < 5) {
+        sleep($totp->expiresIn() + 1);
+    }
+    $loggedIn = $this->auth->authenticate($email, ACCOUNT_RULES_PASSWORD, 1, $totp->now());
 
     expect((int) $loggedIn->getId())->toBe((int) $customer->getId())
         ->and(fn() => $this->auth->authenticate($email, ACCOUNT_RULES_PASSWORD, 1))->toThrow(Mage_Core_Exception_TooManyRequests::class);

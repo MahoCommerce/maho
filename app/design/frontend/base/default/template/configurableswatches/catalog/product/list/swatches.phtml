@@ -14,7 +14,7 @@ $_product = $this->getProduct();
 if (Mage::helper('configurableswatches')->isEnabled() && $_product && $_product->getId()
     && ($_attrValues = $_product->getListSwatchAttrValues()) && count($_attrValues) > 1):
     $_attrStockValues = $_product->getListSwatchAttrStockValues();
-    $_swatchAttribute = Mage::helper('configurableswatches/productlist')->getSwatchAttribute();
+    $_swatchAttribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $_product->getListSwatchAttrId());
 
     $_dimHelper = Mage::helper('configurableswatches/swatchdimensions');
     $_swatchInnerWidth = $_dimHelper->getInnerWidth(Mage_ConfigurableSwatches_Helper_Swatchdimensions::AREA_LISTING);

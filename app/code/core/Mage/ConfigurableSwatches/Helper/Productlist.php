@@ -14,11 +14,11 @@ class Mage_ConfigurableSwatches_Helper_Productlist extends Mage_Core_Helper_Abst
     protected $_moduleName = 'Mage_ConfigurableSwatches';
 
     /**
-     * ID of attribute to be used for swatches on product listing
+     * IDs of the attributes that can give the swatches of a product in the listing
      *
-     * @var string|false|null
+     * @var list<int>|null
      */
-    protected $_swatchAttributeId = null;
+    protected ?array $_swatchAttributeIds = null;
 
     /**
      * Attribute model to be used for swatches on product listing
@@ -28,11 +28,11 @@ class Mage_ConfigurableSwatches_Helper_Productlist extends Mage_Core_Helper_Abst
     protected $_swatchAttribute = null;
 
     /**
-     * The current value for the swatch attribute that the product list is being filtered by.
+     * The values of the listing swatch attributes that the product list is filtered by
      *
-     * @var int|false|null
+     * @var list<string>|null
      */
-    protected $_swatchAttributeFilteredValue = null;
+    protected ?array $_swatchAttributeFilteredValues = null;
 
     /**
      * Convert a catalog layer block with the right templates
@@ -67,18 +67,31 @@ class Mage_ConfigurableSwatches_Helper_Productlist extends Mage_Core_Helper_Abst
     }
 
     /**
-     * Get ID of the attribute that should be used for swatches on product listing
+     * Get the IDs of the attributes that can give the swatches of a product in the listing, in the
+     * order of the configuration. The attribute that comes first on the product wins, see
+     * Mage_ConfigurableSwatches_Helper_Mediafallback::attachProductChildrenAttributeMapping().
      *
-     * @return string
+     * @return list<int>
      */
-    public function getSwatchAttributeId()
+    public function getSwatchAttributeIds(): array
     {
-        $this->_swatchAttributeId ??= Mage::getStoreConfig(Mage_ConfigurableSwatches_Helper_Data::CONFIG_PATH_LIST_SWATCH_ATTRIBUTE);
-        return $this->_swatchAttributeId;
+        $this->_swatchAttributeIds ??= array_values(array_unique(array_filter(array_map(
+            intval(...),
+            explode(',', (string) Mage::getStoreConfig(Mage_ConfigurableSwatches_Helper_Data::CONFIG_PATH_LIST_SWATCH_ATTRIBUTE)),
+        ))));
+        return $this->_swatchAttributeIds;
     }
 
     /**
-     * Get model of attribute that should be used for swatches on product listing
+     * Get the ID of the first attribute of getSwatchAttributeIds()
+     */
+    public function getSwatchAttributeId(): ?int
+    {
+        return $this->getSwatchAttributeIds()[0] ?? null;
+    }
+
+    /**
+     * Get the model of the first attribute of getSwatchAttributeIds()
      *
      * @return Mage_Catalog_Model_Product_Type_Configurable_Attribute|Mage_Eav_Model_Entity_Attribute_Abstract|false
      */
@@ -90,35 +103,33 @@ class Mage_ConfigurableSwatches_Helper_Productlist extends Mage_Core_Helper_Abst
     }
 
     /**
-     * If the product list is currently filtered by the swatch attribute, get the selected value.
+     * Get the values of the listing swatch attributes that the product list is filtered by
      *
-     * @return int | false
+     * @return list<string>
      */
-    protected function _getSwatchAttributeFilteredValue()
+    protected function _getSwatchAttributeFilteredValues(): array
     {
-        if (is_null($this->_swatchAttributeFilteredValue)) {
-            $this->_swatchAttributeFilteredValue = false;
+        if ($this->_swatchAttributeFilteredValues === null) {
+            $this->_swatchAttributeFilteredValues = [];
             foreach (Mage::getSingleton('catalog/layer')->getState()->getFilters() as $filter) {
                 if (!$filter->getFilter()->hasAttributeModel()) {
                     continue;
                 }
 
-                if ($filter->getFilter()->getAttributeModel()->getAttributeId() == $this->getSwatchAttributeId()) {
-                    $this->_swatchAttributeFilteredValue = $filter->getValue();
+                $attributeId = (int) $filter->getFilter()->getAttributeModel()->getAttributeId();
+                if (in_array($attributeId, $this->getSwatchAttributeIds(), true)) {
+                    array_push($this->_swatchAttributeFilteredValues, ...array_map(strval(...), (array) $filter->getValue()));
                 }
             }
         }
-        return $this->_swatchAttributeFilteredValue;
+        return $this->_swatchAttributeFilteredValues;
     }
 
     /**
      * See if the swatch matches a filter currently applied to the product list.
-     *
-     * @param int $optionId
-     * @return bool
      */
-    public function swatchMatchesFilter($optionId)
+    public function swatchMatchesFilter(int|string $optionId): bool
     {
-        return ($optionId == $this->_getSwatchAttributeFilteredValue());
+        return in_array((string) $optionId, $this->_getSwatchAttributeFilteredValues(), true);
     }
 }
