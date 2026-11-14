@@ -248,4 +248,27 @@ describe('custom rewrites of a category', function () {
         expect($api['status'])->toBe(200)
             ->and($api['result']->targetPath)->toBe($this->category->getRequestPath());
     });
+
+    it('saves again an older custom redirect whose category has no system rewrite', function () {
+        $rootId = (int) Mage::app()->getStore($this->storeId)->getRootCategoryId();
+        $legacy = Mage::getModel('core/url_rewrite')
+            ->setStoreId($this->storeId)
+            ->setCategoryId($rootId)
+            ->setIdPath('category/' . $rootId)
+            ->setRequestPath('pest-parity-legacy-root.html')
+            ->setTargetPath('catalog/category/view/id/' . $rootId)
+            ->setOptions('RP')
+            ->setIsSystem(false)
+            ->save();
+        $fields = ['id' => (int) $legacy->getId(), 'store_id' => $this->storeId, 'request_path' => 'pest-parity-legacy-root.html', 'options' => 'RP'];
+
+        $first = urlRewriteViaAdmin($fields + ['description' => 'First']);
+        $second = urlRewriteViaAdmin($fields + ['description' => 'Changed']);
+
+        $reloaded = Mage::getModel('core/url_rewrite')->load($legacy->getId());
+        expect($first['errors'])->toBe([])
+            ->and($second['errors'])->toBe([])
+            ->and($reloaded->getDescription())->toBe('Changed')
+            ->and($reloaded->getIdPath())->toBe('category/' . $rootId);
+    });
 });
