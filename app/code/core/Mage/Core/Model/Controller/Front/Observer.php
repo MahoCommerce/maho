@@ -221,7 +221,7 @@ class Mage_Core_Model_Controller_Front_Observer
         }
 
         $currentStore = Mage::app()->getStore();
-        $rewrite->setStoreId($currentStore->getId())->loadByIdPath($rewrite->getIdPath());
+        $rewrite->setStoreId($currentStore->getId())->loadByIdPath($rewrite->getIdPathForOtherStores());
 
         $this->setStoreCodeCookie($currentStore->getCode());
         $response->setRedirect($currentStore->getBaseUrl() . $rewrite->getRequestPath(), 301);

@@ -87,6 +87,23 @@ class Mage_Core_Model_Url_Rewrite extends Mage_Core_Model_Abstract implements Ma
     }
 
     /**
+     * Return the ID path that loads the same page in another store view. A custom rewrite of a product or a
+     * category has an ID path of its own, so it returns the ID path of the system rewrite of that page.
+     */
+    public function getIdPathForOtherStores(): ?string
+    {
+        $productId = $this->getProductId();
+        $categoryId = $this->getCategoryId();
+        if ($this->getIsSystem() || ($productId === null && $categoryId === null)) {
+            return $this->getIdPath();
+        }
+        if ($productId === null) {
+            return 'category/' . $categoryId;
+        }
+        return $categoryId === null ? 'product/' . $productId : 'product/' . $productId . '/' . $categoryId;
+    }
+
+    /**
      * @param string|array $tags
      * @return $this
      */
