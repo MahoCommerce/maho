@@ -171,9 +171,10 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Tell whether the condition of $attribute hides its field for the data of $object. A hidden field is not
-     * required, and an address does not print it. The condition never changes a stored value. A condition that
-     * reads a field that $object does not hold, or holds as false (a store view that uses the default), does
-     * not hide the field.
+     * required, and an address does not print it. The condition never changes a stored value. A field that $object
+     * does not hold has no value, as in the forms: a loaded EAV record holds no key for an empty attribute. A field
+     * that $object holds as false (a store view that uses the default) has no known value, so the condition does not
+     * hide the field.
      */
     public function isHidden(\Maho\DataObject $object, Mage_Eav_Model_Entity_Attribute_Abstract $attribute): bool
     {
@@ -183,9 +184,8 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
         }
         $fields = \Maho\Data\Form\Condition::fields($condition);
         $data = $this->getConditionData($object, $fields);
-        // A partial load or update does not hold every field, so the field stays required
         foreach ($fields as $field) {
-            if (!array_key_exists($field, $data) || $data[$field] === false) {
+            if (($data[$field] ?? null) === false) {
                 return false;
             }
         }

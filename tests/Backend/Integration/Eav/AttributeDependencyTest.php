@@ -266,11 +266,13 @@ it('does not require a field that a condition can hide in the admin order addres
         ->and($form->getElement($this->code . '_a')->getRequired())->toBeTrue();
 });
 
-it('does not hide a field when a partial update does not hold the field that the condition reads', function () {
+it('takes a field that the record does not hold as empty, as the forms do', function () {
     $this->created[] = $attribute = dependencyAttribute('customer_address', ['attribute_code' => $this->code], dependencyItaly());
 
-    expect(Mage::helper('eav')->isHidden(new \Maho\DataObject([$this->code => 'kept']), $attribute))->toBeFalse()
-        ->and(Mage::helper('eav')->isHidden(new \Maho\DataObject(['country_id' => 'US']), $attribute))->toBeTrue();
+    // A loaded EAV address holds no key for an empty attribute, and its form shows no value there
+    expect(Mage::helper('eav')->isHidden(new \Maho\DataObject([$this->code => 'kept']), $attribute))->toBeTrue()
+        ->and(Mage::helper('eav')->isHidden(new \Maho\DataObject(['country_id' => 'US']), $attribute))->toBeTrue()
+        ->and(Mage::helper('eav')->isHidden(new \Maho\DataObject(['country_id' => 'IT']), $attribute))->toBeFalse();
 });
 
 it('does not require a hidden field in the API values, and keeps the value that the request sends', function () {

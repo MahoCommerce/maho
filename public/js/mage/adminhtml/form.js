@@ -706,6 +706,11 @@ class formElementDependenceController {
             return;
         }
         const required = this.evalCondition(condition);
+        // The validator no longer checks the field, so it would keep the message of an earlier check.
+        // reset() finds that message through the required-entry class, so it runs first.
+        if (!required && typeof Validation !== 'undefined') {
+            Validation.reset(el);
+        }
         el.classList.toggle('required-entry', required);
         const label = document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
         const star = label?.querySelector('span.required');
