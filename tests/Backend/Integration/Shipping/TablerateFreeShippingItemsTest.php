@@ -185,7 +185,7 @@ describe('table rates by order subtotal with free shipping items', function () {
         expect($packageValueAfter)->toBe(230.0);
     });
 
-    test('leaves the package quantity of the request as it was', function () {
+    test('leaves the package quantity of the request as it was when the cart ships free and no rate fits the subtotal', function () {
         $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
         $adapter->delete(Mage::getSingleton('core/resource')->getTableName('shipping/tablerate'), [
             'dest_zip = ?' => TABLERATE_FREE_ITEMS_ZIP,
@@ -195,7 +195,7 @@ describe('table rates by order subtotal with free shipping items', function () {
         tablerateFreeItemsCollect([
             tablerateFreeItemsQuoteItem(80.0, true),
             tablerateFreeItemsQuoteItem(150.0, false),
-        ], $packageValueAfter, $packageQtyAfter, true);
+        ], packageQtyAfter: $packageQtyAfter, freeShipping: true);
 
         expect($packageQtyAfter)->toBe(2.0);
     });
