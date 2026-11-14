@@ -86,10 +86,9 @@ class Mage_Weee_Model_Resource_Tax extends Mage_Core_Model_Resource_Db_Abstract
                 $select->where('product_id = ?', (int) $productCondition);
                 $deleteCondition = $adapter->quoteInto('entity_id = ?', (int) $productCondition);
             }
-        } else {
-            $select->where('(from_time <= ? OR from_time = 0)', $now)
-                   ->where('(to_time >= ? OR to_time = 0)', $now);
         }
+        $select->where('(from_time <= ? OR from_time = 0)', $now)
+               ->where('(to_time >= ? OR to_time = 0)', $now);
         $adapter->delete($this->getTable('weee/discount'), $deleteCondition);
 
         $select->order(['data.website_id', 'data.customer_group_id', 'data.product_id', 'data.sort_order']);
