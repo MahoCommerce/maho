@@ -400,6 +400,11 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
             return;
         }
         $helper = Mage::helper('eav');
+        // The configuration locks depends_on on a field that the models always require, for both conditions
+        if (in_array('depends_on', $this->getLockedFields(), true)) {
+            $errors->addError($column, $helper->__('The store always requires this field, so it cannot have a condition.'));
+            return;
+        }
         $condition = $this->decodeCondition($column);
         if ($condition === null) {
             $errors->addError($column, $helper->__('The condition is not valid JSON.'));

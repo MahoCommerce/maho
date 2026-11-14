@@ -515,9 +515,24 @@ it('does not require a standard customer field that its condition hides', functi
 });
 
 it('refuses a condition on a standard field that the address always requires', function () {
-    $telephone = dependencyService()->getByCode('telephone', 'customer_address')->setDependsOn(dependencyItaly());
+    $telephone = dependencyService()->getByCode('telephone', 'customer_address');
+    $required = dependencyService()->getByCode('telephone', 'customer_address');
 
-    expect(fn() => dependencyService()->save($telephone))->toThrow(Mage_Core_Exception_Input::class);
+    try {
+        expect(fn() => dependencyService()->save($telephone->setDependsOn(dependencyItaly())))
+            ->toThrow(Mage_Core_Exception_Input::class, 'The store always requires this field')
+            ->and(fn() => dependencyService()->save($required->setRequiredWhen(dependencyItaly())))
+            ->toThrow(Mage_Core_Exception_Input::class, 'The store always requires this field');
+    } finally {
+        // A failed check must not leave a condition on a field that every address test fills in
+        $resource = Mage::getSingleton('core/resource');
+        $resource->getConnection('core_write')->update(
+            $resource->getTableName('eav/attribute'),
+            ['depends_on' => null, 'required_when' => null],
+            ['attribute_id = ?' => (int) $telephone->getId()],
+        );
+        Mage::getSingleton('eav/config')->clear();
+    }
 });
 
 it('reads a text field with Any Value, and offers Any Value in the editor', function () {

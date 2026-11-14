@@ -8,6 +8,8 @@
  * @package Mage_Eav
  */
 
+declare(strict_types=1);
+
 class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
 {
     /**

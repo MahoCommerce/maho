@@ -153,8 +153,8 @@
 "Remove attribute from set","Remove attribute from set"
 "Rename","Rename"
 "Rename Group","Rename Group"
-"Require the field when","Require the field when"
 "Required","Required"
+"Require the field when","Require the field when"
 "Reset","Reset"
 "Save","Save"
 "Save and Continue","Save and Continue"
@@ -191,6 +191,7 @@ Save the Set,Save the Set
 These attributes leave the set: %s.,These attributes leave the set: %s.
 "The skeleton must be an attribute set of the same entity type.","The skeleton must be an attribute set of the same entity type."
 "The sort order must be 0 or more.","The sort order must be 0 or more."
+"The store always requires this field, so it cannot have a condition.","The store always requires this field, so it cannot have a condition."
 "The value of ""%s"" is too large.","The value of ""%s"" is too large."
 "The value of ""%s"" must be a date.","The value of ""%s"" must be a date."
 "The value of ""%s"" must be a number.","The value of ""%s"" must be a number."
