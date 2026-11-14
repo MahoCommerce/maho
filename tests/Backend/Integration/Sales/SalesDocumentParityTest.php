@@ -638,7 +638,7 @@ describe('rules that the admin pages get from the services', function (): void {
             ->and(Mage::getModel('sales/order_address')->load($address->getId())->getCountryId())->toBe('US');
     });
 
-    it('clears an order address field that the new country hides', function (): void {
+    it('keeps the value of an order address field that the new country hides', function (): void {
         $this->orders[] = $order = salesParityOrder();
         $code = 'pest_sales_sdi_' . substr(uniqid(), -6);
         /** @var Mage_Eav_Service_Attribute $attributes */
@@ -662,7 +662,7 @@ describe('rules that the admin pages get from the services', function (): void {
 
             Mage::getService('sales/order')->saveAddress($address->setCountryId('US')->setRegionId(12)->setPostcode('90210'));
 
-            expect(Mage::getModel('sales/order_address')->load($address->getId())->getData($code))->toBeNull();
+            expect(Mage::getModel('sales/order_address')->load($address->getId())->getData($code))->toBe('IT123');
         } finally {
             Mage::getModel('eav/entity_attribute')->load($attribute->getId())->delete();
             $resource = Mage::getSingleton('core/resource');

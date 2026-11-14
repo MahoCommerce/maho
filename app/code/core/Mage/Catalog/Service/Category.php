@@ -245,7 +245,6 @@ class Mage_Catalog_Service_Category
         ));
         $isAdminScope = (int) $category->getStoreId() === Mage_Core_Model_App::ADMIN_STORE_ID;
         $category->setData('use_post_data_config', $useConfig);
-        Mage::helper('eav')->clearHiddenValues($category, $category->getAttributes());
         try {
             foreach ($category->getAttributes() as $code => $attribute) {
                 $value = $category->getData($code);

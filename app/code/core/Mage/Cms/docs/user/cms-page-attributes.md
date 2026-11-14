@@ -80,9 +80,11 @@ A condition can read only a field with a list of values, such as a **Dropdown**,
 the **Status** or the **Layout** of the page. A field that a condition reads cannot have a condition
 of its own, and you cannot delete it while a condition reads it.
 
-When the condition hides a field, the edit page does not show it, the field is not required, and a
-save deletes its value. The API applies the same rule. A field on another tab reads the saved value
-of the field that decides, not the value that you just changed. Save the page to update it.
+When the condition hides a field, the edit page does not show it, and the field is not required. The
+field keeps its value, so the value comes back when the condition shows the field again. The table
+of values on the storefront does not show a hidden field. The API applies the same rule. A field on
+another tab reads the saved value of the field that decides, not the value that you just changed.
+Save the page to update it.
 
 ## Show a value on the storefront
 

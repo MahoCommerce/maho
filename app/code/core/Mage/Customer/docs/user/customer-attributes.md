@@ -90,13 +90,14 @@ When the condition hides a field:
   the customer selects a value that matches.
 - The field is not required, also when **Default** is **Required**. So **Required** with a condition
   means "required only when the field shows".
-- When the customer saves, the field loses its value. The API and the imports apply the same
-  rule.
+- The field keeps its value. If the customer selects a value that matches again, the field shows
+  with its old value. The API and the imports apply the same rule.
+- The address does not print the field: in the address book, at checkout, on the order pages, in
+  the emails and on the PDFs.
 
 The address forms of an order in the admin always show the field, and they do not mark it as
 required: the forms of a new order, and the form that changes an address of an order. A new order
-still requires the field when the condition shows it. When you save an address of an order, a field
-that the condition hides loses its value.
+still requires the field when the condition shows it.
 
 ## Check where a field shows
 
@@ -282,5 +283,5 @@ options, the required flag and the group title. The form is `customer_account_cr
 `customer_account_edit`, `checkout_register`, `customer_address_edit` or `customer_register_address`.
 Each field also has `dependsOn`: `null`, or the condition of the field, as
 `[{"operator": "AND", "condition": {"country_id": ["IT"]}}]`. A headless storefront shows the field
-only when the condition is true. When the condition is false, the API does not require the field and
-does not keep a value for it.
+only when the condition is true. When the condition is false, the API does not require the field. It
+still checks and saves a value that the request sends, and it returns the saved value.

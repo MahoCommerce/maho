@@ -161,7 +161,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
 
     /**
      * Tell whether the form shows the field. The condition of the attribute reads the values that the form sent, and
-     * the data of the entity for each field that the form did not send. A hidden field is valid with any value.
+     * the data of the entity for each field that the form did not send.
      */
     public function isShown(): bool
     {
@@ -171,6 +171,14 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
         }
         $sent = array_filter($this->_extractedData, static fn(mixed $value): bool => $value !== false);
         return $attribute->isDependencyMet($sent + ($this->_entity?->getData() ?? []));
+    }
+
+    /**
+     * Tell whether the field needs a value: the attribute is required and the form shows the field.
+     */
+    public function isRequired(): bool
+    {
+        return (bool) $this->getAttribute()->getIsRequired() && $this->isShown();
     }
 
     /**

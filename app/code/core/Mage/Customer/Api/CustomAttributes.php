@@ -156,8 +156,8 @@ final class CustomAttributes
      * A code that is not a user-defined attribute of the form is an error, and so is a required
      * attribute that a new $entity does not get. A storefront form takes only the attributes that
      * it shows on the website, and an admin form takes every attribute of the form. An attribute whose
-     * condition is not met is not required and gets no value. The condition reads $values, then
-     * $context, then the data of $entity.
+     * condition is not met is not required. The condition reads $values, then $context, then the data
+     * of $entity.
      *
      * @param array<string, mixed> $values
      * @param bool|null $isNew true when $values replace every value of $entity, null for a new $entity only
@@ -187,7 +187,6 @@ final class CustomAttributes
 
         $errors = new \Mage_Core_Exception_Input();
         $models = [];
-        $hidden = [];
         if ($isNew ?? !$entity->getId()) {
             Values::addMissingRequired($errors, $attributes, $values, field: $field, data: $data);
         }
@@ -196,10 +195,6 @@ final class CustomAttributes
             $attribute = $attributes[$code] ?? null;
             if ($attribute === null) {
                 $errors->addError("{$field}.{$code}", $helper->__('"%s" is not a custom attribute of this form.', $code));
-                continue;
-            }
-            if (!$attribute->isDependencyMet($data)) {
-                $hidden[] = $code;
                 continue;
             }
             // Only a multiselect and a multiline take a list, and a list holds only strings and numbers
@@ -217,6 +212,8 @@ final class CustomAttributes
                 continue;
             }
             $model = \Mage_Eav_Model_Attribute_Data::factory($attribute, $entity);
+            // The condition of the attribute reads the fields of the request, see isShown()
+            $model->setExtractedData($data);
             $value = $model->extractValue($request);
             $result = $model->validateValue($value);
             if (is_array($result)) {
@@ -231,9 +228,6 @@ final class CustomAttributes
 
         foreach ($models as [$model, $value]) {
             $model->compactValue($value);
-        }
-        foreach ($hidden as $code) {
-            $entity->setData($code);
         }
     }
 }

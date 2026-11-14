@@ -121,14 +121,14 @@ describe('Attribute dependencies (REST)', function (): void {
             ->and($unitedStates['status'])->toBeSuccessful();
     });
 
-    it('does not keep a value for a hidden field', function (): void {
+    it('keeps the value that the request sends for a hidden field', function (): void {
         $customerId = depAttrCustomer();
 
         $created = apiPost("/api/rest/v2/customers/{$customerId}/addresses", depAttrAddress('US', [DEP_ATTR_CODE => 'ABC1234']), adminToken());
         $read = apiGet('/api/rest/v2/addresses/' . (int) ($created['json']['id'] ?? 0), adminToken());
 
         expect($created['status'])->toBeSuccessful()
-            ->and($read['json']['customAttributes'] ?? [])->not->toHaveKey(DEP_ATTR_CODE);
+            ->and($read['json']['customAttributes'][DEP_ATTR_CODE] ?? null)->toBe('ABC1234');
     });
 
     it('keeps the value of a field that the country of the same place-order body shows', function (): void {

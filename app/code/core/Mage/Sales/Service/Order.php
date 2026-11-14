@@ -1009,19 +1009,13 @@ class Mage_Sales_Service_Order
     }
 
     /**
-     * Save the address $address of an order after a change of its fields. A field that its condition hides loses
-     * its value, the labels of its option attributes are set again, and the street lines are joined.
+     * Save the address $address of an order after a change of its fields. The labels of its option attributes are
+     * set again, and the street lines are joined.
      *
      * @throws Mage_Core_Exception_Input one error for each rule of the country that the address breaks
      */
     public function saveAddress(Mage_Sales_Model_Order_Address $address): Mage_Sales_Model_Order_Address
     {
-        /** @var Mage_Customer_Model_Form $form */
-        $form = Mage::getModel('customer/form')
-            ->setFormCode('adminhtml_customer_address')
-            ->setEntityType('customer_address')
-            ->setEntity($address);
-        Mage::helper('eav')->clearHiddenValues($address, $form->getAttributes());
         Mage::getModel('sales/observer_addressAttributes')->refreshOptionLabels($address);
         $address->implodeStreetAddress();
         Mage_Core_Exception_Input::assertValid($address->getFormatErrors() ?: true, 'address');

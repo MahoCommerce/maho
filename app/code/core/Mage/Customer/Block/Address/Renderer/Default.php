@@ -84,6 +84,10 @@ class Mage_Customer_Block_Address_Renderer_Default extends Mage_Core_Block_Abstr
             if (!$attribute->getIsVisible()) {
                 continue;
             }
+            // The address keeps the value of a field that its condition hides, but does not print it
+            if (Mage::helper('eav')->isHidden($address, $attribute)) {
+                continue;
+            }
             if ($attribute->getAttributeCode() == 'country_id') {
                 $data['country'] = $address->getCountryModel()->getName();
             } elseif ($attribute->getAttributeCode() == 'region') {

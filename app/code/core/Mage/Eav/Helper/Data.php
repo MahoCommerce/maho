@@ -148,32 +148,10 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Set to null the value of each attribute of $attributes whose condition $object does not meet, because a form
-     * hides that field. An attribute whose condition reads a field that $object does not hold, or holds as false,
-     * keeps its value: false is the value of a store view that uses the default.
-     *
-     * @param iterable<Mage_Eav_Model_Entity_Attribute_Abstract> $attributes
-     * @return list<string> the codes of the attributes that the condition hides
-     */
-    public function clearHiddenValues(\Maho\DataObject $object, iterable $attributes): array
-    {
-        $hidden = [];
-        foreach ($attributes as $attribute) {
-            if ($this->isHidden($object, $attribute)) {
-                $code = (string) $attribute->getAttributeCode();
-                $hidden[] = $code;
-                // An absent key would take the default value of the attribute when the record saves
-                if ($object->getData($code) !== null || !$object->hasData($code)) {
-                    $object->setData($code);
-                }
-            }
-        }
-        return $hidden;
-    }
-
-    /**
-     * Tell whether the condition of $attribute hides its field for the data of $object. A condition that reads a
-     * field that $object does not hold, or holds as false, does not hide it.
+     * Tell whether the condition of $attribute hides its field for the data of $object. A hidden field is not
+     * required, and an address does not print it. The condition never changes a stored value. A condition that
+     * reads a field that $object does not hold, or holds as false (a store view that uses the default), does
+     * not hide the field.
      */
     public function isHidden(\Maho\DataObject $object, Mage_Eav_Model_Entity_Attribute_Abstract $attribute): bool
     {
@@ -182,7 +160,7 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
             return false;
         }
         $data = $object->getData();
-        // A partial load or update does not hold every field, and an unknown value must not delete data
+        // A partial load or update does not hold every field, so the field stays required
         foreach (\Maho\Data\Form\Condition::fields($condition) as $field) {
             if (!array_key_exists($field, $data) || $data[$field] === false) {
                 return false;

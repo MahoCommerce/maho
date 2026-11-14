@@ -81,7 +81,7 @@ final class CustomAttributes
      * Check $values and set them on $model. A code that is not in $attributes is an error, and so is
      * a code that is not in $allowed when $allowed is a list. For a new record ($isNew), a required
      * attribute of $allowed with no default value that $values leaves out is an error too. An attribute
-     * whose condition $values and the data of $model do not meet is not required and gets no value.
+     * whose condition $values and the data of $model do not meet is not required.
      *
      * @param array<string, mixed> $values
      * @param array<string, \Mage_Eav_Model_Entity_Attribute_Abstract> $attributes
@@ -109,10 +109,6 @@ final class CustomAttributes
                 $errors->addError($field, $helper->__('"%s" is not in the attribute set of this record.', $code));
                 continue;
             }
-            if (!$attribute->isDependencyMet($data)) {
-                $checked[$code] = null;
-                continue;
-            }
             $value = is_bool($value) ? (int) $value : $value;
             if (is_array($value) && $attribute->getFrontendInput() === 'multiselect') {
                 $value = implode(',', $value);
@@ -123,7 +119,7 @@ final class CustomAttributes
             }
             $value = $value === null ? null : (string) $value;
             if ($value === null || $value === '') {
-                if ($attribute->getIsRequired()) {
+                if ($attribute->getIsRequired() && $attribute->isDependencyMet($data)) {
                     $errors->addError($field, $helper->__('"%s" is a required value.', $code));
                     continue;
                 }

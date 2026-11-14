@@ -31,9 +31,6 @@ class Mage_Eav_Model_Attribute_Data_Select extends Mage_Eav_Model_Attribute_Data
     #[\Override]
     public function validateValue($value)
     {
-        if (!$this->isShown()) {
-            return true;
-        }
         $errors     = [];
         $attribute  = $this->getAttribute();
         $label      = Mage::helper('eav')->__($attribute->getStoreLabel());
@@ -43,11 +40,11 @@ class Mage_Eav_Model_Attribute_Data_Select extends Mage_Eav_Model_Attribute_Data
             $value = $this->getEntity()->getData($attribute->getAttributeCode());
         }
 
-        if ($attribute->getIsRequired() && empty($value) && $value != '0') {
+        if ($this->isRequired() && empty($value) && $value != '0') {
             $errors[] = Mage::helper('eav')->__('"%s" is a required value.', $label);
         }
 
-        if (!$errors && !$attribute->getIsRequired() && empty($value)) {
+        if (!$errors && !$this->isRequired() && empty($value)) {
             return true;
         }
 

@@ -11,7 +11,7 @@ uses(Tests\MahoBackendTestCase::class);
 
 /**
  * An attribute can have a condition that shows it in a form only when other fields have some values (#1729). A
- * hidden field is not required, and a save does not keep its value.
+ * hidden field is not required, and an address does not print it. The condition never changes a stored value.
  */
 
 function dependencyService(): Mage_Eav_Service_Attribute
@@ -65,6 +65,7 @@ afterEach(function () {
         $connection->resetDdlCache($table);
     }
     Mage::getSingleton('eav/config')->clear();
+    Mage::unregister('_helper/customer/address');
 });
 
 it('stores the condition and reads the source field with its options', function () {
@@ -145,7 +146,7 @@ it('refuses to delete an attribute that the condition of another attribute reads
     expect(fn() => dependencyService()->delete($source))->toThrow(Mage_Core_Exception_Conflict::class, $this->code . '_r');
 });
 
-it('does not require a hidden field in the address form, and clears its value', function () {
+it('does not require a hidden field in the address form, and keeps its value', function () {
     $this->created[] = dependencyAttribute('customer_address', [
         'attribute_code' => $this->code,
         'is_required' => 1,
@@ -159,18 +160,21 @@ it('does not require a hidden field in the address form, and clears its value', 
 
     $usErrors = $form->validateData(['country_id' => 'US', $this->code => '']);
     $itErrors = $form->validateData(['country_id' => 'IT', $this->code => '']);
-    $form->compactData(['country_id' => 'US', $this->code => 'new']);
+    // The browser does not send a field that the form hides
+    $form->compactData(['country_id' => 'US']);
 
     expect(is_array($usErrors) ? $usErrors : [])->not->toContain($message)
         ->and($itErrors)->toContain($message)
-        ->and($address->getData($this->code))->toBeNull();
+        ->and($address->getData($this->code))->toBe('old');
 });
 
-it('clears the value of a hidden field when an address is saved', function () {
+it('keeps the value of a hidden field when an address is saved, and does not print it', function () {
     $this->created[] = dependencyAttribute('customer_address', [
         'attribute_code' => $this->code,
+        'is_visible' => 1,
         'used_in_forms' => ['customer_address_edit'],
     ], dependencyItaly());
+    Mage::unregister('_helper/customer/address');
 
     $this->customer = Mage::getModel('customer/customer')->setWebsiteId(1)->addData([
         'email' => $this->code . '@example.com',
@@ -188,16 +192,18 @@ it('clears the value of a hidden field when an address is saved', function () {
         'country_id' => 'IT',
         $this->code => 'IT123',
     ])->save();
-    $italian = Mage::getModel('customer/address')->load($address->getId())->getData($this->code);
+    $italian = Mage::getModel('customer/address')->load($address->getId());
 
-    Mage::getModel('customer/address')->load($address->getId())->setCountryId('US')->save();
-    $american = Mage::getModel('customer/address')->load($address->getId())->getData($this->code);
+    Mage::getModel('customer/address')->load($address->getId())->setCountryId('US')->setRegionId(12)->save();
+    $american = Mage::getModel('customer/address')->load($address->getId());
 
-    expect($italian)->toBe('IT123')
-        ->and($american)->toBeNull();
+    expect($italian->getData($this->code))->toBe('IT123')
+        ->and($italian->format('text'))->toContain('IT123')
+        ->and($american->getData($this->code))->toBe('IT123')
+        ->and($american->format('text'))->not->toContain('IT123');
 });
 
-it('gives no default value to a hidden field of a new address', function () {
+it('gives its default value to a hidden field of a new address', function () {
     $this->created[] = dependencyAttribute('customer_address', [
         'attribute_code' => $this->code,
         'default_value' => 'DEFAULT',
@@ -221,42 +227,7 @@ it('gives no default value to a hidden field of a new address', function () {
         'country_id' => 'US',
     ])->save();
 
-    expect(Mage::getModel('customer/address')->load($address->getId())->getData($this->code))->toBeNull();
-});
-
-it('clears a hidden field when the field that its condition reads takes its default value at save', function () {
-    $this->created[] = dependencyAttribute('customer_address', [
-        'attribute_code' => $this->code,
-        'frontend_input' => 'boolean',
-        'default_value' => '1',
-        'used_in_forms' => ['customer_address_edit'],
-    ]);
-    $this->created[] = dependencyAttribute('customer_address', [
-        'attribute_code' => $this->code . '_r',
-        'used_in_forms' => ['customer_address_edit'],
-    ], [$this->code => ['0']]);
-    $this->customer = Mage::getModel('customer/customer')->setWebsiteId(1)->addData([
-        'email' => $this->code . '@example.com',
-        'firstname' => 'Pest',
-        'lastname' => 'Dependency',
-    ])->save();
-
-    $address = Mage::getModel('customer/address')->addData([
-        'parent_id' => $this->customer->getId(),
-        'firstname' => 'Pest',
-        'lastname' => 'Dependency',
-        'street' => '1 Main St',
-        'city' => 'Los Angeles',
-        'region_id' => 12,
-        'postcode' => '90001',
-        'telephone' => '555',
-        'country_id' => 'US',
-        $this->code . '_r' => 'X',
-    ])->save();
-    $saved = Mage::getModel('customer/address')->load($address->getId());
-
-    expect((string) $saved->getData($this->code))->toBe('1')
-        ->and($saved->getData($this->code . '_r'))->toBeNull();
+    expect(Mage::getModel('customer/address')->load($address->getId())->getData($this->code))->toBe('DEFAULT');
 });
 
 it('does not require a field that a condition can hide in the admin order address forms', function () {
@@ -295,17 +266,14 @@ it('does not require a field that a condition can hide in the admin order addres
         ->and($form->getElement($this->code . '_a')->getRequired())->toBeTrue();
 });
 
-it('keeps the value when a partial update does not hold the field that the condition reads', function () {
+it('does not hide a field when a partial update does not hold the field that the condition reads', function () {
     $this->created[] = $attribute = dependencyAttribute('customer_address', ['attribute_code' => $this->code], dependencyItaly());
-    $object = new \Maho\DataObject([$this->code => 'kept']);
 
-    $hidden = Mage::helper('eav')->clearHiddenValues($object, [$attribute]);
-
-    expect($hidden)->toBe([])
-        ->and($object->getData($this->code))->toBe('kept');
+    expect(Mage::helper('eav')->isHidden(new \Maho\DataObject([$this->code => 'kept']), $attribute))->toBeFalse()
+        ->and(Mage::helper('eav')->isHidden(new \Maho\DataObject(['country_id' => 'US']), $attribute))->toBeTrue();
 });
 
-it('does not require a hidden field in the API values, and does not keep a value for it', function () {
+it('does not require a hidden field in the API values, and keeps the value that the request sends', function () {
     $this->created[] = dependencyAttribute('cms_page', [
         'attribute_code' => $this->code,
         'is_required' => 1,
@@ -316,12 +284,12 @@ it('does not require a hidden field in the API values, and does not keep a value
     \Maho\ApiPlatform\Service\CustomAttributes::apply($disabled, [$this->code => 'sent'], $attributes, isNew: true);
     $enabled = new \Maho\DataObject(['is_active' => 1]);
 
-    expect($disabled->getData($this->code))->toBeNull()
+    expect($disabled->getData($this->code))->toBe('sent')
         ->and(fn() => \Maho\ApiPlatform\Service\CustomAttributes::apply($enabled, [], $attributes, isNew: true))
         ->toThrow(Mage_Core_Exception_Input::class, 'required');
 });
 
-it('does not require a hidden field on a CMS page save, and clears its value', function () {
+it('does not require a hidden field on a CMS page save, and keeps its value', function () {
     $this->created[] = dependencyAttribute('cms_page', [
         'attribute_code' => $this->code,
         'is_required' => 1,
@@ -333,16 +301,14 @@ it('does not require a hidden field on a CMS page save, and clears its value', f
     $resource->prepareCustomAttributes($disabled);
     $enabled = Mage::getModel('cms/page')->setData(['is_active' => 1]);
 
-    expect($disabled->getData($this->code))->toBeNull()
+    expect($disabled->getData($this->code))->toBe('old')
         ->and(fn() => $resource->prepareCustomAttributes($enabled))->toThrow(Mage_Core_Exception_Input::class, 'required');
 });
 
-it('keeps the value when the field that the condition reads is false, the value of a store view that uses the default', function () {
+it('does not hide a field when the field that the condition reads is false, the value of a store view that uses the default', function () {
     $this->created[] = $attribute = dependencyAttribute('customer_address', ['attribute_code' => $this->code], dependencyItaly());
-    $object = new \Maho\DataObject(['country_id' => false, $this->code => 'kept']);
 
-    expect(Mage::helper('eav')->clearHiddenValues($object, [$attribute]))->toBe([])
-        ->and($object->getData($this->code))->toBe('kept');
+    expect(Mage::helper('eav')->isHidden(new \Maho\DataObject(['country_id' => false]), $attribute))->toBeFalse();
 });
 
 it('offers the Yes and No options of a Yes/No field that stores no source model', function () {
@@ -407,9 +373,14 @@ it('lets the condition of a blog attribute read the status', function (string $e
     expect(dependencyService()->getByCode($this->code, $entityType)->getDependsOn())->toBe($condition);
 })->with([Maho_Blog_Model_Post::ENTITY, Maho_Blog_Model_Category::ENTITY]);
 
-it('clears the value of a hidden field when the cart checks an address', function () {
+it('does not require a hidden field when the cart checks an address, and keeps the value of another one', function () {
     $this->created[] = dependencyAttribute('customer_address', [
         'attribute_code' => $this->code,
+        'used_in_forms' => ['customer_address_edit'],
+    ], dependencyItaly());
+    $this->created[] = dependencyAttribute('customer_address', [
+        'attribute_code' => $this->code . '_r',
+        'is_required' => 1,
         'used_in_forms' => ['customer_address_edit'],
     ], dependencyItaly());
     $address = Mage::getModel('sales/quote_address')->setData([
@@ -426,10 +397,11 @@ it('clears the value of a hidden field when the cart checks an address', functio
 
     Mage::getService('checkout/cart')->validateAddress($address);
 
-    expect($address->getData($this->code))->toBeNull();
+    expect($address->getData($this->code))->toBe('X')
+        ->and($address->getData($this->code . '_r'))->toBeNull();
 });
 
-it('does not require a hidden category field, and keeps no value for it', function () {
+it('does not require a hidden category field, and keeps its value', function () {
     $setId = (int) Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Category::ENTITY)->getDefaultAttributeSetId();
     $inSet = [
         'attribute_set_id' => $setId,
@@ -445,20 +417,22 @@ it('does not require a hidden category field, and keeps no value for it', functi
     $service = Mage::getService('catalog/category');
     $parentId = (int) Mage::app()->getDefaultStoreView()->getRootCategoryId();
     $newCategory = fn(string $isBrand) => $service->newCategory($parentId)
-        ->setName('Pest Dependency ' . $this->code)->setIsActive(1)->setIncludeInMenu(1)
+        ->setName('Pest Dependency ' . uniqid())->setIsActive(1)->setIncludeInMenu(1)
         ->setAvailableSortBy(['position'])->setDefaultSortBy('position')->setData($this->code, $isBrand);
     $hidden = $newCategory('0');
+    $hiddenWithValue = $newCategory('0')->setData($this->code . '_r', 'kept');
     $shown = $newCategory('1');
 
     try {
         $legacyCheck = $hidden->validate();
-        $saved = $service->save($hidden);
+        $service->save($hidden);
+        $saved = $service->save($hiddenWithValue);
         expect($legacyCheck)->toBeTrue()
-            ->and(Mage::getModel('catalog/category')->load($saved->getId())->getData($this->code . '_r'))->toBeNull()
+            ->and(Mage::getModel('catalog/category')->load($saved->getId())->getData($this->code . '_r'))->toBe('kept')
             ->and(fn() => $service->save($shown))->toThrow(Mage_Core_Exception_Input::class, 'required');
     } finally {
         Mage::register('isSecureArea', true, true);
-        foreach ([$hidden, $shown] as $category) {
+        foreach ([$hidden, $hiddenWithValue, $shown] as $category) {
             if ($category->getId()) {
                 Mage::getModel('catalog/category')->load($category->getId())->delete();
             }
