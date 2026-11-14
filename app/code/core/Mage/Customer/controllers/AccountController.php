@@ -452,18 +452,19 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     {
         $errors = [];
         $request = $this->getRequest();
-        if ($request->getPost('create_address')) {
-            $errors = $this->_getErrorsOnCustomerAddress($customer);
-        }
+        // The conditions of the address fields read the fields of the customer, so the customer data comes first
         $customerForm = $this->_getCustomerForm($customer);
         $customerData = $customerForm->extractData($request);
         $customerErrors = $customerForm->validateData($customerData);
         if ($customerErrors !== true) {
-            $errors = array_merge($customerErrors, $errors);
+            $errors = $customerErrors;
         } else {
             $customerForm->compactData($customerData);
             $customer->setPassword((string) $request->getPost('password'));
             $customer->setPasswordConfirmation((string) $request->getPost('confirmation'));
+        }
+        if ($request->getPost('create_address')) {
+            $errors = array_merge($errors, $this->_getErrorsOnCustomerAddress($customer));
         }
         return $errors;
     }
@@ -491,7 +492,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     protected function _getErrorsOnCustomerAddress($customer)
     {
         $errors = [];
-        $address = Mage::getModel('customer/address');
+        $address = Mage::getModel('customer/address')->setCustomer($customer);
         $addressForm = Mage::getModel('customer/form');
         $addressForm->setFormCode('customer_register_address')
             ->setEntity($address);

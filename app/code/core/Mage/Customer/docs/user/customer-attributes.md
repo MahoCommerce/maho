@@ -84,7 +84,9 @@ The rules of a condition:
 - A condition reads the fields of the same record. An address field can also read a field of the
   customer: these fields start with **Customer:** in the first list, such as **Customer: Group**.
   A guest at checkout has the group **NOT LOGGED IN**. A customer field gives the value that the
-  account holds, so a form that creates the account does not update it while the customer types.
+  account holds. On the registration page, it gives the value that the customer selects in the same
+  form, such as an **Account Type** above the address. At checkout, it does not update while the
+  customer types.
 - A condition can read a field with a list of values: a **Dropdown**, a **Multiple Select**, a
   **Yes/No** field, or a standard field such as **Country** or **Gender**.
 - A condition can also read a **Text Field**, a **Text Area** or a **Date**, such as **Company**.

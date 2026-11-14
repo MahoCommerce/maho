@@ -264,6 +264,8 @@ class FieldDependenceController {
 
     static ANY_VALUE = '__any__';
 
+    static CUSTOMER_PREFIX = 'customer.';
+
     static #controllers = new WeakMap();
 
     /**
@@ -283,6 +285,8 @@ class FieldDependenceController {
      * @param {Object<string, Object>} config.depends - the condition that shows each field, keyed by attribute code
      * @param {Object<string, Object>} [config.required] - the condition that makes each optional field required
      * @param {string} config.nameFormat - the format of the input names, for example billing[%s]
+     * @param {?string} [config.customerNameFormat] - the format of the names of the customer inputs in the same form,
+     *     which give the values of the customer.<code> fields of an address condition
      * @param {Object<string, string[]>} config.values - the values of the fields that the form does not have
      */
     constructor(anchor, config) {
@@ -311,7 +315,10 @@ class FieldDependenceController {
      * @returns {HTMLElement[]}
      */
     fieldElements(code) {
-        const name = this.config.nameFormat.replace('%s', code);
+        const customerFormat = this.config.customerNameFormat;
+        const name = customerFormat && code.startsWith(FieldDependenceController.CUSTOMER_PREFIX)
+            ? customerFormat.replace('%s', code.slice(FieldDependenceController.CUSTOMER_PREFIX.length))
+            : this.config.nameFormat.replace('%s', code);
         return [...this.form.querySelectorAll(`[name="${CSS.escape(name)}"], [name="${CSS.escape(name + '[]')}"]`)];
     }
 

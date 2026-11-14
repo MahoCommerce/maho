@@ -82,7 +82,7 @@
                 <div class="field">
                     <label for="country_register" class="required"><?= $this->__('Country') ?></label>
                     <div class="input-box">
-                        <?= $this->getCountryHtmlSelect('country_register') ?>
+                        <?= $this->getCountryHtmlSelect(null, 'country_id', 'country_register') ?>
                     </div>
                 </div>
                 <div class="field">
@@ -130,7 +130,8 @@
         <?php endfor ?>
         <?= $this->getLayout()->createBlock('customer/form_attributes')
             ->setCustomerForm('customer_register_address', $this->getAddress())
-            ->setValues($this->getFormData())->setIdPrefix('register_address_')->setPlacement(Mage_Customer_Block_Form_Attributes::PLACEMENT_BOTTOM)->toHtml() ?>
+            ->setValues($this->getFormData())->setIdPrefix('register_address_')->setCustomerNameFormat('%s')
+            ->setPlacement(Mage_Customer_Block_Form_Attributes::PLACEMENT_BOTTOM)->toHtml() ?>
         </ul>
         <input type="hidden" name="default_billing" value="1">
         <input type="hidden" name="default_shipping" value="1">

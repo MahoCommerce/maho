@@ -222,6 +222,75 @@ describe('registration', function () {
     });
 });
 
+describe('registration with an address', function () {
+    it('requires an address field that a condition on a customer field of the same form shows', function () {
+        /** @var Mage_Eav_Service_Attribute $service */
+        $service = Mage::getService('eav/attribute');
+        $suffix = substr(uniqid(), -6);
+        $kind = $service->newAttribute('customer')->addData([
+            'attribute_code' => 'pest_kind_' . $suffix,
+            'frontend_input' => 'select',
+            'frontend_label' => ['Pest Kind'],
+            'is_visible' => 1,
+            'used_in_forms' => ['customer_account_create'],
+        ]);
+        $service->save($kind);
+        $service->saveOptions($kind, ['option_0' => ['labels' => [0 => 'Private'], 'order' => 1], 'option_1' => ['labels' => [0 => 'Company'], 'order' => 2]]);
+        $options = [];
+        foreach ($service->getOptions($kind) as $id => $option) {
+            $options[(string) $option['labels'][0]] = (string) $id;
+        }
+        $pec = $service->newAttribute('customer_address')->addData([
+            'attribute_code' => 'pest_pec_' . $suffix,
+            'frontend_input' => 'text',
+            'frontend_label' => ['Pest PEC'],
+            'is_visible' => 1,
+            'is_required' => 1,
+            'used_in_forms' => ['customer_register_address'],
+        ]);
+        $pec->setDependsOn(['customer.' . $kind->getAttributeCode() => [$options['Company']]]);
+        $service->save($pec);
+        Mage::getSingleton('eav/config')->clear();
+
+        $register = fn(string $kindLabel, string $email) => customerParityWeb(Mage_Customer_AccountController::class, 'account', 'createPost', [
+            'firstname' => 'Parity',
+            'lastname' => 'Customer',
+            'email' => $email,
+            'password' => CUSTOMER_PARITY_PASSWORD,
+            'confirmation' => CUSTOMER_PARITY_PASSWORD,
+            $kind->getAttributeCode() => $options[$kindLabel],
+            'create_address' => '1',
+        ] + customerParityAddress());
+
+        try {
+            $companyEmail = customerParityEmail();
+            $company = $register('Company', $companyEmail);
+            $privateEmail = customerParityEmail();
+            $private = $register('Private', $privateEmail);
+
+            expect(implode(' ', $company['errors']))->toContain('"Pest PEC" is a required value.')
+                ->and(Mage::getService('customer/customer')->getByEmail($companyEmail))->toBeNull()
+                ->and($private['errors'])->toBe([])
+                ->and(Mage::getService('customer/customer')->getByEmail($privateEmail))->not->toBeNull();
+        } finally {
+            Mage::register('isSecureArea', true, true);
+            $customers = Mage::getResourceModel('customer/customer_collection')->addAttributeToFilter('email', ['like' => 'customer-parity-%@example.com']);
+            foreach ($customers as $customer) {
+                $customer->delete();
+            }
+            Mage::unregister('isSecureArea');
+            Mage::getResourceModel('eav/entity_attribute')->getConnection()->update(
+                Mage::getSingleton('core/resource')->getTableName('eav/attribute'),
+                ['depends_on' => null],
+                ['attribute_id = ?' => (int) $pec->getId()],
+            );
+            Mage::getModel('customer/attribute')->load($pec->getId())->delete();
+            Mage::getModel('customer/attribute')->load($kind->getId())->delete();
+            Mage::getSingleton('eav/config')->clear();
+        }
+    });
+});
+
 describe('login', function () {
     it('counts the storefront and the GraphQL login against one limit for each email', function () {
         $customer = customerParityCustomer();

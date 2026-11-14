@@ -59,6 +59,21 @@ class Mage_Customer_Block_Form_Attributes extends Mage_Core_Block_Template
     }
 
     /**
+     * Set the format of the names of the customer inputs in the same HTML form, for example %s on the registration
+     * form. An address condition then reads a customer.<code> field from that input while the customer types.
+     */
+    public function setCustomerNameFormat(?string $format): static
+    {
+        return $this->setData('customer_name_format', $format);
+    }
+
+    public function getCustomerNameFormat(): ?string
+    {
+        $value = $this->getData('customer_name_format');
+        return $value === null ? null : (string) $value;
+    }
+
+    /**
      * Return the visible user-defined attributes of the form, in the placement of the block.
      *
      * @return list<Mage_Customer_Model_Attribute>
@@ -226,6 +241,7 @@ class Mage_Customer_Block_Form_Attributes extends Mage_Core_Block_Template
             'depends' => (object) $depends,
             'required' => (object) $required,
             'nameFormat' => (string) ($this->getData('name_format') ?: '%s'),
+            'customerNameFormat' => $this->getCustomerNameFormat(),
             'values' => (object) $values,
         ]);
     }
