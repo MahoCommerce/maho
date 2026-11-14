@@ -145,6 +145,26 @@ it('refreshes native FPT discounts after a catalog rule refresh', function (): v
     expect((float) $discountRows[0]['value'])->toBe(90.0);
 });
 
+it('does not keep an FPT discount for one product when its catalog rule has ended', function (): void {
+    $fixture = wapCreateProduct('WAP-ENDED-' . uniqid(), $this->wapAttributeCode);
+    $product = $fixture['product'];
+    $productId = (int) $product->getId();
+    $GLOBALS['wap_cleanup']['categories'][] = (int) $fixture['category']->getId();
+    $GLOBALS['wap_cleanup']['products'][] = $productId;
+    $rule = wapCreateRule($product);
+    $GLOBALS['wap_cleanup']['rules'][] = (int) $rule->getId();
+    wapApplyAllRules();
+    expect(wapDiscountRows($productId))->toHaveCount(1);
+
+    $write = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $table = Mage::getSingleton('core/resource')->getTableName('catalogrule/rule_product');
+    $write->update($table, ['to_time' => time() - 3600], $write->quoteInto('product_id = ?', $productId));
+
+    Mage::getModel('weee/tax')->updateProductsDiscountPercent($productId);
+
+    expect(wapDiscountRows($productId))->toBeEmpty();
+});
+
 it('rebuilds the FPT remainder when a matched percentage rule changes', function (): void {
     $fixture = wapCreateProduct('WAP-CHANGE-' . uniqid(), $this->wapAttributeCode);
     $product = $fixture['product'];
