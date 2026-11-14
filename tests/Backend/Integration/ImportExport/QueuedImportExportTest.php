@@ -221,7 +221,7 @@ describe('Import/Export in the queue', function () {
         }
 
         expect($content)->toContain($customer->getEmail())
-            ->and($tempFile)->toStartWith(sys_get_temp_dir() . '/importexport_')
+            ->and($tempFile)->toStartWith(realpath(sys_get_temp_dir()) . '/importexport_')
             ->and(file_exists($tempFile))->toBeFalse();
     });
 
