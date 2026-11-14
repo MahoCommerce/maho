@@ -59,6 +59,19 @@ function accountRulesEnableTwofa(Mage_Customer_Model_Customer $customer): string
 
 const ACCOUNT_RULES_PASSWORD = 'Password123!';
 
+/**
+ * Return the 2FA code of $secret. When less than 5 seconds of the code period are left, wait for the next period
+ * first. A code from the end of a period fails after a slow step, such as a password check.
+ */
+function accountRulesTwofaCode(string $secret): string
+{
+    $totp = \OTPHP\TOTP::createFromSecret($secret);
+    if ($totp->expiresIn() < 5) {
+        sleep($totp->expiresIn() + 1);
+    }
+    return $totp->now();
+}
+
 function accountRulesEmail(): string
 {
     return 'account-rules-' . bin2hex(random_bytes(4)) . '@example.com';
@@ -370,12 +383,7 @@ it('turns 2FA on and off with the current password and the limit of the password
     $customer = accountRulesCustomer();
 
     $secret = $this->auth->getSecondFactorSecret($customer);
-    $totp = \OTPHP\TOTP::createFromSecret($secret);
-    // The code must stay valid through three password checks, so it must not come from the end of a period
-    if ($totp->expiresIn() < 5) {
-        sleep($totp->expiresIn() + 1);
-    }
-    $code = $totp->now();
+    $code = accountRulesTwofaCode($secret);
 
     expect(fn() => $this->auth->setSecondFactor($customer, 'WrongPassword1!', true, $code))->toThrow(Mage_Core_Exception::class, 'Current password is incorrect.')
         ->and(fn() => $this->auth->setSecondFactor($customer, ACCOUNT_RULES_PASSWORD, true, '000000x'))->toThrow(Mage_Core_Exception::class)
@@ -482,7 +490,7 @@ it('logs in with a magic link one time, and keeps the link when the 2FA code is 
     $store->setConfig(Mage_Customer_Service_Authentication::XML_PATH_ALLOW_2FA, '1');
     $customer = accountRulesCustomer();
     $secret = $this->auth->getSecondFactorSecret($customer);
-    $this->auth->setSecondFactor($customer, ACCOUNT_RULES_PASSWORD, true, \OTPHP\TOTP::createFromSecret($secret)->now());
+    $this->auth->setSecondFactor($customer, ACCOUNT_RULES_PASSWORD, true, accountRulesTwofaCode($secret));
     $token = Mage::helper('core')->getRandomString(32);
     $customer->setRpToken($token)->setRpTokenCreatedAt(Mage_Core_Model_Locale::nowUtc())->save();
 
@@ -498,7 +506,7 @@ it('logs in with a magic link one time, and keeps the link when the 2FA code is 
     } catch (Mage_Core_Exception_Unauthorized $e) {
         $wrong = $e->getErrorCode();
     }
-    $loggedIn = $this->auth->authenticateByMagicLink($token, \OTPHP\TOTP::createFromSecret($secret)->now());
+    $loggedIn = $this->auth->authenticateByMagicLink($token, accountRulesTwofaCode($secret));
 
     expect($error)->toBe('twofa_required')
         ->and($wrong)->toBe('twofa_invalid')
@@ -521,12 +529,7 @@ it('confirms an account and turns 2FA on through the API operations', function (
     // The key of an account that is already confirmed is not checked, so the answer has no customer data
     $other = $call(null, 'confirm_rest', ['customerId' => (int) $customer->getId(), 'key' => 'any']);
     $secret = $call($security, 'two_factor_secret_rest', []);
-    $totp = \OTPHP\TOTP::createFromSecret((string) $secret['result']?->twofaSecret);
-    // The code must stay valid through two password checks, so it must not come from the end of a period
-    if ($totp->expiresIn() < 5) {
-        sleep($totp->expiresIn() + 1);
-    }
-    $code = $totp->now();
+    $code = accountRulesTwofaCode((string) $secret['result']?->twofaSecret);
     $wrongPassword = $call($security, 'two_factor_rest', ['currentPassword' => 'WrongPassword1!', 'twofaEnabled' => true, 'twofaCode' => $code]);
     $enabled = $call($security, 'two_factor_rest', ['currentPassword' => ACCOUNT_RULES_PASSWORD, 'twofaEnabled' => true, 'twofaCode' => $code]);
 
@@ -581,7 +584,7 @@ it('refuses each login without a password for a customer who uses 2FA and gives 
         ->and(Mage::getModel('customer/customer')->load($pending->getId())->getConfirmation())->toBeEmpty()
         ->and($other)->toBe((int) $verified->getId())
         ->and($wrong)->toBe('twofa_invalid')
-        ->and((int) $this->auth->authenticateVerified($verified, \OTPHP\TOTP::createFromSecret($verifiedSecret)->now())->getId())->toBe((int) $verified->getId())
+        ->and((int) $this->auth->authenticateVerified($verified, accountRulesTwofaCode($verifiedSecret))->getId())->toBe((int) $verified->getId())
         ->and($secret)->not->toBe('');
 });
 
@@ -601,12 +604,7 @@ it('does not count the login that stops at the request for the 2FA code', functi
     foreach ([1, 2, 3] as $ignored) {
         expect(fn() => $this->auth->authenticate($email, ACCOUNT_RULES_PASSWORD, 1))->toThrow(Mage_Customer_Exception_SecondFactorRequired::class);
     }
-    $totp = \OTPHP\TOTP::createFromSecret($secret);
-    // The code must stay valid through a password check, so it must not come from the end of a period
-    if ($totp->expiresIn() < 5) {
-        sleep($totp->expiresIn() + 1);
-    }
-    $loggedIn = $this->auth->authenticate($email, ACCOUNT_RULES_PASSWORD, 1, $totp->now());
+    $loggedIn = $this->auth->authenticate($email, ACCOUNT_RULES_PASSWORD, 1, accountRulesTwofaCode($secret));
 
     expect((int) $loggedIn->getId())->toBe((int) $customer->getId())
         ->and(fn() => $this->auth->authenticate($email, ACCOUNT_RULES_PASSWORD, 1))->toThrow(Mage_Core_Exception_TooManyRequests::class);
