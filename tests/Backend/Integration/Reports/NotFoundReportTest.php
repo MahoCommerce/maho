@@ -275,6 +275,13 @@ describe('Not Found report with a URL rewrite that does not redirect', function 
         expect(($this->collection)(true)->getSize())->toBe(1);
     });
 
+    it('counts an http target of store 0 as a redirect when the store view has none', function () {
+        ($this->addRewrite)(Mage_Core_Model_App::ADMIN_STORE_ID, '', 'http://example.com/new-page');
+
+        expect(($this->collection)()->getFirstItem()->getData('redirect_target'))->toBe('http://example.com/new-page');
+        expect(($this->collection)(true)->getSize())->toBe(1);
+    });
+
     it('prefers the redirect of the store view over the redirect of store 0', function () {
         ($this->addRewrite)($this->storeId, 'RP', 'view-page.html');
         ($this->addRewrite)(Mage_Core_Model_App::ADMIN_STORE_ID, 'RP', 'default-page.html');
