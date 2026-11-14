@@ -249,7 +249,7 @@ describe('custom rewrites of a category', function () {
             ->and($api['result']->targetPath)->toBe($this->category->getRequestPath());
     });
 
-    it('saves again an older custom redirect whose category has no system rewrite', function () {
+    it('saves an old custom redirect two times when its category has no system rewrite', function () {
         $rootId = (int) Mage::app()->getStore($this->storeId)->getRootCategoryId();
         $legacy = Mage::getModel('core/url_rewrite')
             ->setStoreId($this->storeId)

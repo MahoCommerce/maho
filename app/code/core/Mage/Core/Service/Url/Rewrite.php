@@ -37,9 +37,8 @@ class Mage_Core_Service_Url_Rewrite
      * custom. Check the store view, the request path, the redirect type, the product and the category. A rewrite
      * without a product or a category needs an ID path and a target path. The request path is stored in lower case.
      * A rewrite with a product or a category gets the target path of that product or category. A system rewrite
-     * also gets their ID path. A custom rewrite keeps its ID path or gets a new unique one, so that a product or a
-     * category can have many custom rewrites in a store view.
-     * A product rewrite does not keep a root category, because the catalog keeps no root category for a product.
+     * gets the ID path of its product or category. A custom rewrite keeps its ID path, or it gets a new unique ID
+     * path. So a product or a category can have many custom rewrites in a store view.
      * The resource model checks the uniqueness of the request path and the ID path. A system rewrite keeps its
      * store view. The catalog URL indexer writes a system rewrite again when it reindexes its product or
      * category, so a change to a system rewrite lasts until then.
@@ -140,10 +139,6 @@ class Mage_Core_Service_Url_Rewrite
         $rewrite->setIdPath(
             $rewrite->getIsSystem() ? $idPath : ((string) $rewrite->getOrigData('id_path') ?: $catalogUrl->generateUniqueIdPath()),
         );
-        // The catalog keeps no category for a product in a root category, so the store switch finds the product page.
-        if ($product && $idPath === 'product/' . $product->getId()) {
-            $rewrite->setCategoryId(null);
-        }
 
         if (in_array($rewrite->getOptions(), ['R', 'RP'], true)) {
             $target = $this->newRewrite()->setStoreId((int) $rewrite->getStoreId())->loadByIdPath($idPath);

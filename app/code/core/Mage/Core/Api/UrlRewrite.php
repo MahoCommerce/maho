@@ -118,7 +118,7 @@ class UrlRewrite extends CrudResource
     #[ApiProperty(description: 'Free-text note shown in the admin grid')]
     public ?string $description = null;
 
-    #[ApiProperty(description: 'Category the rewrite points at, or null. A save of a product rewrite does not keep a root category, so the value becomes null.')]
+    #[ApiProperty(description: 'Category the rewrite points at, or null')]
     public ?int $categoryId = null;
 
     #[ApiProperty(description: 'Product the rewrite points at, or null')]

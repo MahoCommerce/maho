@@ -19,26 +19,24 @@ describe('Mage_Core_Model_Url_Rewrite::getIdPathForOtherStores', function () {
         expect($rewrite->getIdPathForOtherStores())->toBe('category/5');
     });
 
-    it('gives the ID path of the product to a custom rewrite of a product, with and without a category', function () {
-        $withCategory = Mage::getModel('core/url_rewrite')->setIsSystem(false)->setProductId(7)->setCategoryId(5)->setIdPath('17630_1');
-        $withoutCategory = Mage::getModel('core/url_rewrite')->setIsSystem(false)->setProductId(7)->setIdPath('17630_2');
-
-        expect($withCategory->getIdPathForOtherStores())->toBe('product/7/5')
-            ->and($withoutCategory->getIdPathForOtherStores())->toBe('product/7');
-    });
-
-    it('gives the ID path of the product to an older custom rewrite of a product in a root category', function () {
-        $rootId = (int) Mage::app()->getDefaultStoreView()->getRootCategoryId();
+    it('gives the ID path of the product and the category to a custom rewrite of a product in a category', function () {
         $categoryId = (int) Mage::getModel('catalog/category')->getCollection()
             ->addFieldToFilter('level', ['gt' => 1])
             ->setPageSize(1)
             ->getFirstItem()
             ->getId();
-        $inRoot = Mage::getModel('core/url_rewrite')->setIsSystem(false)->setProductId(7)->setCategoryId($rootId)->setIdPath('product/7');
-        $movedByApi = Mage::getModel('core/url_rewrite')->setIsSystem(false)->setProductId(7)->setCategoryId($categoryId)->setIdPath('product/7');
+        $rewrite = Mage::getModel('core/url_rewrite')->setIsSystem(false)->setProductId(7)->setCategoryId($categoryId)->setIdPath('17630_1');
+
+        expect($rewrite->getIdPathForOtherStores())->toBe('product/7/' . $categoryId);
+    });
+
+    it('gives the ID path of the product alone to a custom rewrite of a product in a root category or in no category', function () {
+        $rootId = (int) Mage::app()->getDefaultStoreView()->getRootCategoryId();
+        $inRoot = Mage::getModel('core/url_rewrite')->setIsSystem(false)->setProductId(7)->setCategoryId($rootId)->setIdPath('17630_2');
+        $withoutCategory = Mage::getModel('core/url_rewrite')->setIsSystem(false)->setProductId(7)->setIdPath('17630_3');
 
         expect($inRoot->getIdPathForOtherStores())->toBe('product/7')
-            ->and($movedByApi->getIdPathForOtherStores())->toBe('product/7/' . $categoryId);
+            ->and($withoutCategory->getIdPathForOtherStores())->toBe('product/7');
     });
 
     it('keeps the ID path of a system rewrite and of a rewrite without a product or a category', function () {
@@ -68,24 +66,6 @@ describe('Mage_Core_Model_Url_Rewrite::getIdPathForOtherStores', function () {
 
             expect($custom->getIdPath())->not->toBe($system->getIdPath())
                 ->and((int) $found->getId())->toBe((int) $system->getId());
-        } finally {
-            $custom->delete();
-        }
-    });
-
-    it('stores no category on a custom rewrite of a product in a root category, as the catalog does', function () {
-        $storeId = (int) Mage::app()->getDefaultStoreView()->getId();
-        $productId = (int) Mage::getModel('catalog/product')->getCollection()->setPageSize(1)->getFirstItem()->getId();
-        $custom = Mage::getService('core/url_rewrite')->newRewrite()
-            ->setStoreId($storeId)
-            ->setProductId($productId)
-            ->setCategoryId((int) Mage::app()->getStore($storeId)->getRootCategoryId())
-            ->setRequestPath('pest-other-stores-root.html');
-        Mage::getService('core/url_rewrite')->save($custom);
-
-        try {
-            expect($custom->getCategoryId())->toBeNull()
-                ->and($custom->getIdPathForOtherStores())->toBe('product/' . $productId);
         } finally {
             $custom->delete();
         }
