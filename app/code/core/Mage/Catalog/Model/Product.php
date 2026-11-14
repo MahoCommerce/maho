@@ -2702,6 +2702,17 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         return $this->setData('links_purchased_separately', $value);
     }
 
+    public function getListSwatchAttrId(): ?int
+    {
+        $value = $this->getData('list_swatch_attr_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setListSwatchAttrId(?int $value): static
+    {
+        return $this->setData('list_swatch_attr_id', $value);
+    }
+
     public function getListSwatchAttrValues(): ?array
     {
         return $this->getData('list_swatch_attr_values');

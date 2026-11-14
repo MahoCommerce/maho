@@ -22,14 +22,12 @@ class Mage_ConfigurableSwatches_Helper_List_Price extends Mage_Core_Helper_Abstr
      * Set swatch_price on products where swatch option_id is set
      * Depends on following product data:
      * - product must have children products attached and be configurable by type
+     * - product must have its list_swatch_attr_id, see Mage_ConfigurableSwatches_Helper_Mediafallback
      *
      * @param int $storeId
      */
     public function attachConfigurableProductChildrenPricesMapping(array $products, $storeId = null)
     {
-        $listSwatchAttrId = Mage::helper('configurableswatches/productlist')->getSwatchAttributeId();
-        $result = [];
-
         foreach ($products as $product) {
             /** @var Mage_Catalog_Model_Product $product */
             if ($product->getTypeId() !== Mage_Catalog_Model_Product_Type_Configurable::TYPE_CODE
@@ -38,12 +36,15 @@ class Mage_ConfigurableSwatches_Helper_List_Price extends Mage_Core_Helper_Abstr
                 continue;
             }
 
+            $listSwatchAttrId = $product->getListSwatchAttrId();
+            $result = [];
+
             /** @var Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
             $typeInstance = $product->getTypeInstance();
             $allowedAttributes = $typeInstance->getConfigurableAttributeCollection($product);
             foreach ($allowedAttributes as $attribute) {
                 /** @var Mage_Catalog_Model_Product_Type_Configurable_Attribute $attribute */
-                if ($attribute->getAttributeId() !== $listSwatchAttrId) {
+                if ((int) $attribute->getAttributeId() !== $listSwatchAttrId) {
                     continue;
                 }
 

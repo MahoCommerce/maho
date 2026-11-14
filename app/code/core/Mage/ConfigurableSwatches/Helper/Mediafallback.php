@@ -25,14 +25,10 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
      */
     public function attachProductChildrenAttributeMapping(array $parentProducts, $storeId, $onlyListAttributes = false)
     {
-        /** @var Mage_Eav_Model_Attribute $listSwatchAttr */
-        $listSwatchAttr = Mage::helper('configurableswatches/productlist')->getSwatchAttribute();
-        $swatchAttributeIds = [];
+        $listAttributeIds = Mage::helper('configurableswatches/productlist')->getSwatchAttributeIds();
+        $swatchAttributeIds = $listAttributeIds;
         if (!$onlyListAttributes) {
-            $swatchAttributeIds = Mage::helper('configurableswatches')->getSwatchAttributeIds();
-        }
-        if ($listSwatchAttr->getId()) {
-            $swatchAttributeIds[] = $listSwatchAttr->getId();
+            $swatchAttributeIds = array_merge(Mage::helper('configurableswatches')->getSwatchAttributeIds(), $swatchAttributeIds);
         }
         if (empty($swatchAttributeIds)) {
             return;
@@ -52,8 +48,13 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
         ;
 
         $optionLabels = [];
+        $listAttributePositions = [];
         foreach ($configAttributes as $attribute) {
             $optionLabels += $attribute->getOptionLabels();
+            if (in_array((int) $attribute->getAttributeId(), $listAttributeIds, true)) {
+                $listAttributePositions[(int) $attribute->getProductId()][(int) $attribute->getAttributeId()]
+                    = (int) $attribute->getPosition();
+            }
         }
 
         // normalize to all lower case before we start using them
@@ -98,11 +99,12 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
                     $mapping[$optionLabel]['default_label'] = $optionLabels[$optionId][0];
                     $mapping[$optionLabel]['labels'] = $optionLabels[$optionId];
 
-                    if ($attribute->getAttributeId() == $listSwatchAttr->getAttributeId()
-                        && !in_array($mapping[$optionLabel]['label'], $listSwatchValues)
+                    $attributeId = (int) $attribute->getAttributeId();
+                    if (isset($listAttributePositions[(int) $parentProduct->getId()][$attributeId])
+                        && !in_array($mapping[$optionLabel]['label'], $listSwatchValues[$attributeId] ?? [])
                     ) {
-                        $listSwatchValues[$optionId]      = $mapping[$optionLabel]['label'];
-                        $listSwatchStockValues[$optionId] = $isInStock;
+                        $listSwatchValues[$attributeId][$optionId]      = $mapping[$optionLabel]['label'];
+                        $listSwatchStockValues[$attributeId][$optionId] = $isInStock;
                     }
                 } // end looping child products
             } // end looping attributes
@@ -111,16 +113,55 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
                 $mapping[$key]['product_ids'] = array_unique($mapping[$key]['product_ids']);
             }
 
-            if (count($listSwatchValues)) {
-                $listSwatchValues = array_replace(
-                    array_intersect_key($optionLabels, $listSwatchValues),
-                    $listSwatchValues,
+            $listAttributeId = $this->_getListSwatchAttributeId(
+                $listAttributePositions[(int) $parentProduct->getId()] ?? [],
+                $listSwatchValues,
+                $listAttributeIds,
+            );
+            $listValues = $listSwatchValues[$listAttributeId] ?? [];
+            if (count($listValues)) {
+                $listValues = array_replace(
+                    array_intersect_key($optionLabels, $listValues),
+                    $listValues,
                 );
             }
             $parentProduct->setChildAttributeLabelMapping($mapping)
-                ->setListSwatchAttrValues($listSwatchValues)
-                ->setListSwatchAttrStockValues($listSwatchStockValues);
+                ->setListSwatchAttrId($listAttributeId)
+                ->setListSwatchAttrValues($listValues)
+                ->setListSwatchAttrStockValues($listSwatchStockValues[$listAttributeId] ?? []);
         } // end looping parent products
+    }
+
+    /**
+     * Get the attribute that gives the swatches of one product in the listing: the first one on
+     * the Associated Products tab with two values or more, else the first one with a value. The
+     * order of the configuration settles two attributes at the same position.
+     *
+     * @param array<int, int> $positions position of each listing attribute of the product
+     * @param array<int, array<int|string, string>> $values swatch values of each listing attribute
+     * @param list<int> $configOrder listing attribute IDs in the order of the configuration
+     */
+    protected function _getListSwatchAttributeId(array $positions, array $values, array $configOrder): ?int
+    {
+        $candidates = [];
+        foreach ($configOrder as $attributeId) {
+            if (isset($positions[$attributeId])) {
+                $candidates[$attributeId] = $positions[$attributeId];
+            }
+        }
+        asort($candidates);
+
+        $fallback = null;
+        foreach (array_keys($candidates) as $attributeId) {
+            $count = count($values[$attributeId] ?? []);
+            if ($count > 1) {
+                return $attributeId;
+            }
+            if ($count === 1) {
+                $fallback ??= $attributeId;
+            }
+        }
+        return $fallback;
     }
 
     /**
@@ -350,11 +391,14 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
      */
     protected function _getChildrenProductsAttributes()
     {
-        return [
-            'image',
-            'image_label',
-            Mage::helper('configurableswatches/productlist')->getSwatchAttribute()->getAttributeCode(),
-        ];
+        $attributes = ['image', 'image_label'];
+        foreach (Mage::helper('configurableswatches/productlist')->getSwatchAttributeIds() as $attributeId) {
+            $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $attributeId);
+            if ($attribute && $attribute->getAttributeCode()) {
+                $attributes[] = $attribute->getAttributeCode();
+            }
+        }
+        return $attributes;
     }
 
     /**
