@@ -175,6 +175,22 @@ it('lists a Yes/No value of 0 as No and leaves out an empty one', function () {
         ->and($codes(null))->not->toHaveKey($code);
 });
 
+it('leaves out a value that the condition of its attribute hides', function () {
+    $code = 'pest_dep_front_' . $this->suffix;
+    $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, $code, [
+        'is_visible_on_front' => 1,
+        'depends_on' => '{"is_active":["1"]}',
+    ]);
+    $codes = function (int $isActive) use ($code): array {
+        $post = Mage::getModel('blog/post')->setData(['entity_id' => 1, 'is_active' => $isActive, $code => 'kept']);
+        $rows = Mage::app()->getLayout()->createBlock('eav/frontend_attributes')->setData('entity', $post)->getAttributeValues();
+        return array_column($rows, 'value', 'code');
+    };
+
+    expect($codes(1))->toHaveKey($code)
+        ->and($codes(0))->not->toHaveKey($code);
+});
+
 it('shows the first group on the main tab of the post edit page and adds a tab for each other group', function () {
     $setId = (int) Mage::getSingleton('eav/config')->getEntityType(Maho_Blog_Model_Post::ENTITY)->getDefaultAttributeSetId();
     $group = Mage::getModel('eav/entity_attribute_group')

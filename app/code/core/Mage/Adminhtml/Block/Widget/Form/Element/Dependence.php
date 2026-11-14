@@ -14,10 +14,10 @@
  */
 class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml_Block_Abstract
 {
-    public const MODE_NOT = 'NOT';
-    public const MODE_AND = 'AND';
-    public const MODE_OR  = 'OR';
-    public const MODE_XOR = 'XOR';
+    public const MODE_NOT = \Maho\Data\Form\Condition::MODE_NOT;
+    public const MODE_AND = \Maho\Data\Form\Condition::MODE_AND;
+    public const MODE_OR  = \Maho\Data\Form\Condition::MODE_OR;
+    public const MODE_XOR = \Maho\Data\Form\Condition::MODE_XOR;
 
     /**
      * Optional field alias to ID map
@@ -52,13 +52,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
      */
     public function isLogicalOperator(?string $operator): bool
     {
-        $operators = [
-            self::MODE_NOT,
-            self::MODE_AND,
-            self::MODE_OR,
-            self::MODE_XOR,
-        ];
-        return in_array($operator, $operators);
+        return in_array($operator, \Maho\Data\Form\Condition::MODES, true);
     }
 
     /**
@@ -229,6 +223,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
      *     on_event: string,    // the event name that triggers condition evaluation, false to disable, defaults to "change"
      *     field_map: array,    // key/value pairs of field aliases to their associated DOM IDs.
      *     field_values: array, // key/value pairs of fallback values for fields not present in the form
+     *     keep_disabled: list<string>, // DOM IDs of fields that a condition hides and shows, and never enables
      *     levels_up: int,      // deprecated: the number of ancestor elements to find the parent element to hide
      *     can_edit_price: bool // deprecated: prevent enabling fields, only use if dependence block contains no other elements
      * }
@@ -242,8 +237,10 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
 
     /**
      * Add fallback values for fields not present in the form
+     *
+     * @param string|list<string> $value
      */
-    public function addFieldValue(string $field, string $value): self
+    public function addFieldValue(string $field, string|array $value): self
     {
         $this->_fieldValues[$field] = $value;
         return $this;
@@ -257,7 +254,8 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
     #[\Override]
     protected function _toHtml()
     {
-        if (!$this->_depends) {
+        // The required option alone also needs the controller, which marks a field as required
+        if (!$this->_depends && empty($this->_configOptions['required'])) {
             return '';
         }
         return "<script>new formElementDependenceController({$this->_getDependsJson()}, {$this->_getConfigJson()})</script>\n";

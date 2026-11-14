@@ -35,7 +35,7 @@ class Mage_Eav_Model_Attribute_Data_Date extends Mage_Eav_Model_Attribute_Data_A
         $attribute  = $this->getAttribute();
         $label      = $attribute->getStoreLabel();
 
-        if ($attribute->getIsRequired() && empty($value)) {
+        if ($this->isRequired() && empty($value)) {
             $errors[] = Mage::helper('eav')->__('"%s" is a required value.', $label);
         }
 
@@ -50,7 +50,7 @@ class Mage_Eav_Model_Attribute_Data_Date extends Mage_Eav_Model_Attribute_Data_A
             }
         }
 
-        if (!$errors && !$attribute->getIsRequired() && empty($value)) {
+        if (!$errors && !$this->isRequired() && empty($value)) {
             return true;
         }
 

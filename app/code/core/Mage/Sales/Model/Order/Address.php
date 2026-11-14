@@ -226,4 +226,32 @@ class Mage_Sales_Model_Order_Address extends Mage_Customer_Model_Address_Abstrac
         $value = $this->getData('store_id');
         return $value === null ? null : (int) $value;
     }
+
+    /**
+     * The customer whose fields the conditions of the address attributes read, loaded once.
+     */
+    protected ?Mage_Customer_Model_Customer $conditionCustomer = null;
+
+    #[\Override]
+    protected function getConditionCustomer(): ?Mage_Customer_Model_Customer
+    {
+        $customerId = (int) $this->getOrder()?->getCustomerId();
+        if (!$customerId) {
+            return null;
+        }
+        if ((int) $this->conditionCustomer?->getId() !== $customerId) {
+            $this->conditionCustomer = Mage::getModel('customer/customer')->load($customerId);
+        }
+        return $this->conditionCustomer->getId() ? $this->conditionCustomer : null;
+    }
+
+    /**
+     * The order keeps the group that its customer had when the order was placed.
+     */
+    #[\Override]
+    protected function getConditionCustomerGroupId(): int
+    {
+        $order = $this->getOrder();
+        return $order ? (int) $order->getCustomerGroupId() : parent::getConditionCustomerGroupId();
+    }
 }

@@ -114,6 +114,14 @@ class Form extends AbstractForm
         return isset($this->_elementsIndex[(string) $elementId]);
     }
 
+    /**
+     * Return every element of the form, the elements of the fieldsets included.
+     */
+    public function getAllElements(): ElementCollection
+    {
+        return $this->_allElements;
+    }
+
     public function addElementToCollection(Form\Element\AbstractElement $element): self
     {
         $this->_elementsIndex[(string) $element->getId()] = $element;

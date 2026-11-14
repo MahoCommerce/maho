@@ -251,3 +251,160 @@ class ZipUpdater {
         }
     }
 }
+
+/**
+ * Show the attribute fields of a storefront form only when the condition of each attribute is met, and disable the
+ * hidden fields so that the form does not send them. Mark an optional field as required while its required
+ * condition is met. A condition uses the format of
+ * Maho\Data\Form\Condition: {field: [values]} entries joined with AND, and {operator, condition} groups.
+ * The wanted value __any__ matches a field that holds any value that is not empty.
+ */
+class FieldDependenceController {
+    static MODES = ['NOT', 'AND', 'OR', 'XOR'];
+
+    static ANY_VALUE = '__any__';
+
+    static #controllers = new WeakMap();
+
+    /**
+     * Apply the conditions of a form again, after a script changed its values without a change event.
+     *
+     * @param {HTMLFormElement} form
+     */
+    static refresh(form) {
+        for (const controller of FieldDependenceController.#controllers.get(form) ?? []) {
+            controller.update();
+        }
+    }
+
+    /**
+     * @param {HTMLElement} anchor - an element inside the form
+     * @param {Object} config
+     * @param {Object<string, Object>} config.depends - the condition that shows each field, keyed by attribute code
+     * @param {Object<string, Object>} [config.required] - the condition that makes each optional field required
+     * @param {string} config.nameFormat - the format of the input names, for example billing[%s]
+     * @param {Object<string, string[]>} config.values - the values of the fields that the form does not have
+     */
+    constructor(anchor, config) {
+        this.form = anchor.closest('form') ?? document;
+        this.config = config;
+        const controllers = FieldDependenceController.#controllers.get(this.form) ?? [];
+        FieldDependenceController.#controllers.set(this.form, [...controllers, this]);
+        const sources = new Set();
+        for (const condition of [...Object.values(config.depends), ...Object.values(config.required ?? {})]) {
+            this.collectFields(condition, sources);
+        }
+        for (const field of sources) {
+            for (const el of this.fieldElements(field)) {
+                el.addEventListener('change', () => this.update());
+                // A text field changes on each key, so that Any Value shows the field while the customer types
+                if (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && !['checkbox', 'radio'].includes(el.type))) {
+                    el.addEventListener('input', () => this.update());
+                }
+            }
+        }
+        this.update();
+    }
+
+    /**
+     * @param {string} code
+     * @returns {HTMLElement[]}
+     */
+    fieldElements(code) {
+        const name = this.config.nameFormat.replace('%s', code);
+        return [...this.form.querySelectorAll(`[name="${CSS.escape(name)}"], [name="${CSS.escape(name + '[]')}"]`)];
+    }
+
+    collectFields(condition, fields) {
+        for (const [field, entry] of Object.entries(condition)) {
+            if (FieldDependenceController.MODES.includes(entry?.operator)) {
+                this.collectFields(entry.condition, fields);
+            } else {
+                fields.add(field);
+            }
+        }
+    }
+
+    /**
+     * @param {string} code
+     * @returns {string[]}
+     */
+    fieldValues(code) {
+        const elements = this.fieldElements(code);
+        if (!elements.length) {
+            return (this.config.values[code] ?? []).map(String);
+        }
+        const values = [];
+        for (const el of elements) {
+            if (el.tagName === 'SELECT') {
+                values.push(...Array.from(el.selectedOptions, (option) => option.value));
+            } else if (el.type === 'checkbox' || el.type === 'radio') {
+                if (el.checked) {
+                    values.push(el.value);
+                }
+            } else {
+                values.push(el.value);
+            }
+        }
+        return values;
+    }
+
+    evaluate(condition, mode = 'AND') {
+        const results = Object.entries(condition).map(([field, entry]) => {
+            if (FieldDependenceController.MODES.includes(entry?.operator)) {
+                return this.evaluate(entry.condition, entry.operator);
+            }
+            const wanted = (Array.isArray(entry) ? entry : [entry]).map(String);
+            const values = this.fieldValues(field);
+            return values.some((value) => wanted.includes(value))
+                || (wanted.includes(FieldDependenceController.ANY_VALUE) && values.some((value) => value.trim() !== ''));
+        });
+        if (!results.length) {
+            return true;
+        }
+        const met = results.filter(Boolean).length;
+        switch (mode) {
+            case 'NOT': return met === 0;
+            case 'OR': return met > 0;
+            case 'XOR': return met === 1;
+            default: return met === results.length;
+        }
+    }
+
+    update() {
+        for (const [code, condition] of Object.entries(this.config.depends)) {
+            const row = this.fieldElements(code)[0]?.closest('li, .field');
+            if (!row) {
+                continue;
+            }
+            const shown = this.evaluate(condition);
+            row.classList.toggle('no-display', !shown);
+            for (const el of row.querySelectorAll('input, select, textarea')) {
+                el.disabled = !shown;
+            }
+        }
+        for (const [code, condition] of Object.entries(this.config.required ?? {})) {
+            const elements = this.fieldElements(code);
+            const row = elements[0]?.closest('li, .field');
+            if (!row) {
+                continue;
+            }
+            const shown = !this.config.depends[code] || this.evaluate(this.config.depends[code]);
+            const required = shown && this.evaluate(condition);
+            for (const el of elements) {
+                // The validator no longer checks the field, so it would keep the message of an earlier check.
+                // reset() finds that message through the required-entry class, so it runs first.
+                if (!required && typeof Validation !== 'undefined') {
+                    Validation.reset(el);
+                }
+                el.classList.toggle('required-entry', required);
+                if (required) {
+                    el.setAttribute('aria-required', 'true');
+                } else {
+                    el.removeAttribute('aria-required');
+                }
+            }
+            row.querySelector('label')?.classList.toggle('required', required);
+        }
+    }
+}

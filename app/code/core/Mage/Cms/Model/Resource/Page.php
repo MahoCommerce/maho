@@ -203,7 +203,8 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
 
     /**
      * Turn the custom attribute values of $page into column values, and check the required and unique attributes.
-     * An attribute that $page does not hold keeps its stored value, and a new page gets its default value.
+     * An attribute that $page does not hold keeps its stored value, and a new page gets its default value. An
+     * attribute that its condition hides is not required, and a condition can make an optional attribute required.
      * Each error names the attribute code after $fieldPrefix, for example customAttributes. for the API.
      *
      * @throws Mage_Core_Exception_Input
@@ -212,20 +213,25 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
     {
         $helper = Mage::helper('eav');
         $errors = new Mage_Core_Exception_Input();
+        // A condition reads the values that a save writes: the defaults of a new page, and 0 or 1 for the status
+        if (!$page->getId()) {
+            foreach ($this->getCustomAttributes() as $code => $attribute) {
+                if (!$page->hasData($code) && (string) $attribute->getDefaultValue() !== '') {
+                    $page->setData($code, (string) $attribute->getDefaultValue());
+                }
+            }
+        }
+        if (is_bool($page->getData('is_active'))) {
+            $page->setData('is_active', (int) $page->getData('is_active'));
+        }
         foreach ($this->getCustomAttributes() as $code => $attribute) {
+            $isRequired = $helper->isRequired($page, $attribute);
             $label = (string) $attribute->getFrontend()->getLabel();
             if (!$page->hasData($code)) {
-                if ($page->getId()) {
-                    continue;
+                if (!$page->getId() && $isRequired) {
+                    $errors->addError($fieldPrefix . $code, $helper->__('"%s" is a required value.', $label));
                 }
-                $default = (string) $attribute->getDefaultValue();
-                if ($default === '') {
-                    if ($attribute->getIsRequired()) {
-                        $errors->addError($fieldPrefix . $code, $helper->__('"%s" is a required value.', $label));
-                    }
-                    continue;
-                }
-                $page->setData($code, $default);
+                continue;
             }
 
             $value = $page->getData($code);
@@ -254,7 +260,7 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
             $page->setData($code, $value);
 
             if ($value === null) {
-                if ($attribute->getIsRequired()) {
+                if ($isRequired) {
                     $errors->addError($fieldPrefix . $code, $helper->__('"%s" is a required value.', $label));
                 }
                 continue;

@@ -188,6 +188,8 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('default_value', Types::TEXT, length: 65535, notNull: false))
             ->addColumn(Schema::column('is_unique', Types::SMALLINT, unsigned: true, default: 0))
             ->addColumn(Schema::column('note', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('depends_on', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('required_when', Types::TEXT, length: 65535, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('attribute_id')->create())
             ->addIndex(
                 Index::editor()

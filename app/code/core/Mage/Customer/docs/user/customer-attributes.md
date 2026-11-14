@@ -54,7 +54,104 @@ A standard field, such as **Date of Birth**, gets its **Hidden** setting from **
 Configuration > Customers > Customer Configuration**. So its **Default** field offers only
 **Optional** and **Required**.
 
-**Sort Order** sets the place of the field in a form.
+**Sort Order** sets the place of the field in a form. The storefront forms show a new field after the
+standard fields. To show a field at the top of the form, before the name, give it a **Sort Order** that is
+lower than the **Sort Order** of each standard field of the form, for example `1`. Do this for a field that
+decides the other fields, such as a **Customer Type** with the values Private and Company.
+
+## Show a field only when another field has a value
+
+A condition shows a field only when other fields of the same form have some values. For example,
+an address field **SdI Code** can show only when the **Country** is Italy.
+
+1. Open the attribute in **System > Attributes > Customers** or **Customer Addresses**.
+2. Go to the **When the Field Shows** section.
+3. Click **Add**.
+4. In the first list, select the field that decides, for example **Country**.
+5. In the second list, select the values that show the field, for example **Italy**. Hold the Ctrl
+   or Cmd key to select more than one value. Select **Any Value** to show the field when the other
+   field has a value, whatever it is.
+6. To add more fields, click **Add** again. Then, in **Show the field when**, select how the rows
+   join:
+    - **Each row matches**: every row must match.
+    - **At least one row matches**: one row is enough.
+    - **No row matches**: the field shows only when no row matches.
+    - **Exactly one row matches**: one row must match, and the other rows must not.
+7. Click **Save**.
+
+The rules of a condition:
+
+- A condition reads the fields of the same record. An address field can also read a field of the
+  customer: these fields start with **Customer:** in the first list, such as **Customer: Group**.
+  A guest at checkout has the group **NOT LOGGED IN**. A customer field gives the value that the
+  account holds, so a form that creates the account does not update it while the customer types.
+- A condition can read a field with a list of values: a **Dropdown**, a **Multiple Select**, a
+  **Yes/No** field, or a standard field such as **Country** or **Gender**.
+- A condition can also read a **Text Field**, a **Text Area** or a **Date**, such as **Company**.
+  These fields have no list, so the only value is **Any Value**. For example, **VAT Number** can
+  show only when **Company** has a value. To show a field when another field is empty, select
+  **Any Value** and **No row matches**.
+- A field that a condition reads cannot have a condition of its own. A customer field that an
+  address condition reads is the exception: it can have one.
+- You cannot delete a field while a condition reads it. Remove the condition first.
+- A standard field, such as **Company**, **VAT Number**, **Tax/VAT Number**, **Date of Birth** or
+  **Gender**, can have a condition too. The store always requires some standard fields, so they
+  have no **When the Field Shows** section: the name, the email, the website and the group of a
+  customer, and the name, the street, the city, the country, the state, the zip code and the
+  telephone of an address.
+
+When the condition hides a field:
+
+- The forms of the storefront and the admin do not show the field. They show it again as soon as
+  the customer selects a value that matches.
+- The field is not required, also when **Default** is **Required**. So **Required** with a condition
+  means "required only when the field shows".
+- The field keeps its value. If the customer selects a value that matches again, the field shows
+  with its old value. The API and the imports apply the same rule.
+- The address does not print the field: in the address book, at checkout, on the order pages, in
+  the emails and on the PDFs.
+
+## Require a field only when another field has a value
+
+**Default** makes a field always required, or never. The section **When the Field Is Required**
+makes an optional field required only when other fields have some values. For example, **PEC** can
+be required only when **SdI Code** is empty.
+
+1. Open the attribute, and leave **Default** at **Optional**.
+2. In **When the Field Is Required**, add the rows as in **When the Field Shows**.
+3. Click **Save**.
+
+The forms mark the field as required as soon as the rows match. A field that **When the Field
+Shows** hides is never required. Unlike **When the Field Shows**, this section can read a field
+that has a condition of its own.
+
+### Example: the Italian invoice fields
+
+An Italian company needs its VAT number, and an SdI code or a PEC address, on its invoices. A private
+customer needs a Codice Fiscale. A customer in another country needs none of these fields. The
+customer type goes on the address, because one customer can buy as a private person and as a
+company:
+
+1. In **System > Attributes > Customer Addresses**, add a **Dropdown** with the label
+   **Customer Type** and the options **Private** and **Company**. In **Used in Forms**, select
+   the address forms.
+2. Add the text fields **SdI Code**, **PEC** and **Codice Fiscale**, with the same forms.
+3. Open **SdI Code**. In **When the Field Shows**, add the row **Customer Type** is **Company**,
+   then the row **Country** is **Italy**. In **Show the field when**, select **Each row matches**.
+4. Do the same for **PEC** and for the standard fields **Company** and **VAT Number**. Set the
+   **Default** of **Company** and **VAT Number** to **Required**.
+5. Open **PEC**. In **When the Field Is Required**, add the row **SdI Code** is **Any Value**, and
+   select **No row matches**. Open **SdI Code**, and add the row **PEC** is **Any Value** in the
+   same way. The customer must then fill in one of the two.
+6. Open **Codice Fiscale**. In **When the Field Shows**, add the rows **Customer Type** is
+   **Private** and **Country** is **Italy**, and set its **Default** to **Required**.
+
+A customer in the United States sees none of these fields. A private customer in Italy sees only
+**Codice Fiscale**.
+
+The address forms of an order in the admin always show the field, and they do not mark it as
+required when it has a condition: the forms of a new order, and the form that changes an address of
+an order. A new order still requires the field when the conditions require it.
 
 ## Check where a field shows
 
@@ -238,3 +335,7 @@ the storefront forms show to the customer group on the website, as on the storef
 storefront form for the customer group of the caller: the label in the store view, the input type, the
 options, the required flag and the group title. The form is `customer_account_create`,
 `customer_account_edit`, `checkout_register`, `customer_address_edit` or `customer_register_address`.
+Each field also has `dependsOn`: `null`, or the condition of the field, as
+`[{"operator": "AND", "condition": {"country_id": ["IT"]}}]`. A headless storefront shows the field
+only when the condition is true. When the condition is false, the API does not require the field. It
+still checks and saves a value that the request sends, and it returns the saved value.

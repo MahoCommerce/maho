@@ -637,4 +637,44 @@ describe('rules that the admin pages get from the services', function (): void {
             ->and(fn() => $service->saveAddress($saved->setCountryId('DE')))->toThrow(Mage_Core_Exception_Input::class)
             ->and(Mage::getModel('sales/order_address')->load($address->getId())->getCountryId())->toBe('US');
     });
+
+    it('keeps the value of an order address field that the new country hides', function (): void {
+        $this->orders[] = $order = salesParityOrder();
+        $code = 'pest_sales_sdi_' . substr(uniqid(), -6);
+        /** @var Mage_Eav_Service_Attribute $attributes */
+        $attributes = Mage::getService('eav/attribute');
+        $attribute = $attributes->newAttribute('customer_address')->addData([
+            'attribute_code' => $code,
+            'frontend_input' => 'text',
+            'frontend_label' => ['SdI Code'],
+            'used_in_forms' => ['adminhtml_customer_address'],
+        ])->setDependsOn([['operator' => 'AND', 'condition' => ['country_id' => ['IT']]]]);
+        $attributes->save($attribute);
+        Mage::getSingleton('eav/config')->clear();
+
+        try {
+            $address = Mage::getModel('sales/order_address')->setData([
+                'parent_id' => $order->getId(), 'address_type' => 'billing',
+                'firstname' => 'Parity', 'lastname' => 'Buyer', 'street' => 'Via Roma 1', 'city' => 'Milano',
+                'country_id' => 'IT', 'postcode' => '20121', 'telephone' => '555-1234', $code => 'IT123',
+            ])->save();
+            expect(Mage::getModel('sales/order_address')->load($address->getId())->getData($code))->toBe('IT123');
+
+            Mage::getService('sales/order')->saveAddress($address->setCountryId('US')->setRegionId(12)->setPostcode('90210'));
+
+            expect(Mage::getModel('sales/order_address')->load($address->getId())->getData($code))->toBe('IT123');
+        } finally {
+            Mage::getModel('eav/entity_attribute')->load($attribute->getId())->delete();
+            $resource = Mage::getSingleton('core/resource');
+            $connection = $resource->getConnection('core_write');
+            foreach (['sales/quote_address', 'sales/order_address'] as $table) {
+                $table = $resource->getTableName($table);
+                if ($connection->tableColumnExists($table, $code)) {
+                    $connection->dropColumn($table, $code);
+                }
+                $connection->resetDdlCache($table);
+            }
+            Mage::getSingleton('eav/config')->clear();
+        }
+    });
 });

@@ -26,6 +26,9 @@
             <legend class="visually-hidden"><?= $this->__('Billing Address') ?></legend>
             <input type="hidden" name="billing[address_id]" value="<?= $this->getAddress()->getId() ?>" id="billing:address_id">
             <ul>
+                <?= $this->getLayout()->createBlock('customer/form_attributes')
+                    ->setCustomerForm('customer_address_edit', $this->getAddress())
+                    ->setNameFormat('billing[%s]')->setIdPrefix('billing:')->setPlacement(Mage_Customer_Block_Form_Attributes::PLACEMENT_TOP)->toHtml() ?>
                 <li class="fields"><?= $this->getLayout()->createBlock('customer/widget_name')->setObject($this->getAddress()->getFirstname() ? $this->getAddress() : $this->getQuote()->getCustomer())->setForceUseCustomerRequiredAttributes(!$this->isCustomerLoggedIn())->setFieldIdFormat('billing:%s')->setFieldNameFormat('billing[%s]')->toHtml() ?></li>
                 <li class="fields">
                     <div class="field">
@@ -111,7 +114,7 @@
                 </li>
                 <?= $this->getLayout()->createBlock('customer/form_attributes')
                     ->setCustomerForm('customer_address_edit', $this->getAddress())
-                    ->setNameFormat('billing[%s]')->setIdPrefix('billing:')->toHtml() ?>
+                    ->setNameFormat('billing[%s]')->setIdPrefix('billing:')->setPlacement(Mage_Customer_Block_Form_Attributes::PLACEMENT_BOTTOM)->toHtml() ?>
                 <?php if (!$this->isCustomerLoggedIn()): ?>
                 <input type="hidden" name="checkout_method" value="guest">
         <?php $_dob = $this->getLayout()->createBlock('customer/widget_dob') ?>
