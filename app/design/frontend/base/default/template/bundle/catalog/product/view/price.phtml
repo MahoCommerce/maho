@@ -10,8 +10,9 @@
 /** @var Mage_Bundle_Block_Catalog_Product_Price $this */
 ?>
 <?php $_product = $this->getProduct() ?>
-<?php $_finalPrice = $_product->getFinalPrice() ?>
-<?php $_finalPriceInclTax = $_product->getFinalPrice() ?>
+<?php $_store = $_product->getStore() ?>
+<?php $_finalPrice = $_store->convertPrice($_product->getFinalPrice()) ?>
+<?php $_finalPriceInclTax = $_finalPrice ?>
 <?php $_weeeTaxAmount = 0; ?>
 <?php
 if ($_product->getPriceType() == 1) {
@@ -43,7 +44,7 @@ if (!$canApplyMAP && $_product->getCanShowPrice() !== false && !$this->getWithou
                 <span class="label"><?= Mage::helper('tax')->__('Excl. Tax:') ?></span>
                 <span class="price" id="price-excluding-tax-<?= $_product->getId() ?><?= $this->getIdSuffix() ?>">
                 <?php if (!$canApplyMAP): ?>
-                    <?= Mage::helper('core')->currency($_finalPrice, true, false) ?>
+                    <?= $_store->formatPrice($_finalPrice, false) ?>
                 <?php endif ?>
                 </span>
             </span>
@@ -67,7 +68,7 @@ if (!$canApplyMAP && $_product->getCanShowPrice() !== false && !$this->getWithou
                 <span class="label"><?= Mage::helper('tax')->__('Incl. Tax:') ?></span>
                 <span class="price" id="price-including-tax-<?= $_product->getId() ?><?= $this->getIdSuffix() ?>">
                 <?php if (!$canApplyMAP): ?>
-                    <?= Mage::helper('core')->currency($_finalPriceInclTax, true, false) ?>
+                    <?= $_store->formatPrice($_finalPriceInclTax, false) ?>
                 <?php endif ?>
                 </span>
             </span>
@@ -75,7 +76,7 @@ if (!$canApplyMAP && $_product->getCanShowPrice() !== false && !$this->getWithou
         <?php else: ?>
         <span class="price" id="product-price-<?= $_product->getId() ?><?= $this->getIdSuffix() ?>">
             <?php if (!$canApplyMAP): ?>
-                <?= Mage::helper('core')->currency($_finalPrice, true, false) ?>
+                <?= $_store->formatPrice($_finalPrice, false) ?>
             <?php endif ?>
         </span>
         <?php if ($_weeeTaxAmount && $_product->getPriceType() == 1 && Mage::helper('weee')->typeOfDisplay($_product, [2, 1, 4])): ?>

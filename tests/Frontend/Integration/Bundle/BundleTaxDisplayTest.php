@@ -149,11 +149,12 @@ it('shows the tax amounts in the configured price of an unavailable fixed bundle
         $store->setConfig('currency/options/allow', $baseCurrency . ',' . $otherCurrency);
         $store->unsetData('available_currency_codes')->unsetData('disallowed_base_currency_code_index');
         $store->clearCurrencyRateMemos()->setRequestedCurrencyCode($otherCurrency);
-        $updatePrice(100.01);
-        expect($capture('AT', false, $both)['including'])->toBe($format(360.04));
+        $updatePrice(100.004);
+        expect($capture('AT', false, $both))->toBe(['excluding' => $format(300.01), 'including' => $format(360.01)]);
     } finally {
         if ($transactionStarted) {
             $resource->rollBack();
         }
+        resetCurrencyState();
     }
 });

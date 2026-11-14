@@ -152,12 +152,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
             $product,
             $product->getStore()->roundPrice($price),
             $includeTax,
-            null,
-            null,
-            null,
-            null,
-            null,
-            false,
+            roundPrice: false,
         );
     }
 
