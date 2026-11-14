@@ -111,7 +111,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
             } // end looping attributes
 
             foreach (array_keys($mapping) as $key) {
-                $mapping[$key]['product_ids'] = array_unique($mapping[$key]['product_ids']);
+                $mapping[$key]['product_ids'] = array_values(array_unique($mapping[$key]['product_ids']));
             }
 
             $listAttributeId = $this->_getListSwatchAttributeId(
