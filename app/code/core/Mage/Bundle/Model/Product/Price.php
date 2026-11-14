@@ -143,13 +143,8 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
 
     /**
      * Round the price to cents, then add or remove the tax, as the cart does
-     *
-     * @param Mage_Catalog_Model_Product $product
-     * @param float|string|null $price
-     * @param bool|null $includeTax
-     * @return float
      */
-    public function getRoundedPriceWithTax($product, $price, $includeTax = null)
+    public function getRoundedPriceWithTax(Mage_Catalog_Model_Product $product, float|string|null $price, ?bool $includeTax = null): float
     {
         /** @var Mage_Tax_Helper_Data $taxHelper */
         $taxHelper = $this->_getHelperData('tax');
