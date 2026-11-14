@@ -200,4 +200,43 @@ describe('URL rewrite DB integration', function () {
         expect($rewrite->getId())->toBeGreaterThan(0);
         expect($rewrite->getTargetPath())->toBe('catalog/product/view/id/1');
     });
+
+    it('sends the store switch from a custom category rewrite to the system rewrite of the category', function () {
+        $current = Mage::app()->getStore();
+        $system = Mage::getModel('core/url_rewrite')->getCollection()
+            ->addFieldToFilter('store_id', $this->storeId)
+            ->addFieldToFilter('is_system', 1)
+            ->addFieldToFilter('id_path', ['like' => 'category/%'])
+            ->setPageSize(1)
+            ->getFirstItem();
+        $other = Mage::getModel('core/store')
+            ->setCode('switch_' . substr(uniqid(), -8))
+            ->setWebsiteId((int) $current->getWebsiteId())
+            ->setGroupId((int) $current->getGroupId())
+            ->setName('Switch second store')
+            ->setIsActive()
+            ->save();
+        Mage::app()->reinitStores();
+        Mage::app()->setCurrentStore($current);
+        $custom = Mage::getService('core/url_rewrite')->newRewrite()
+            ->setStoreId((int) $other->getId())
+            ->setCategoryId((int) $system->getCategoryId())
+            ->setRequestPath('pest-switch-alias.html');
+        Mage::getService('core/url_rewrite')->save($custom);
+
+        try {
+            $request = makeFrontendRequest('/pest-switch-alias.html');
+            $request->setQuery('___from_store', $other->getCode());
+            $response = new Mage_Core_Controller_Response_Http();
+            callRewriteDb($request, $response);
+
+            expect($response->getSymfonyResponse()->headers->get('Location'))
+                ->toBe($current->getBaseUrl() . $system->getRequestPath());
+        } finally {
+            unset($_GET['___from_store']);
+            $custom->delete();
+            $other->delete();
+            Mage::app()->reinitStores();
+        }
+    });
 });

@@ -602,7 +602,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
                 $currentIdPath = Mage::getModel('core/url_rewrite')
                     ->setStoreId($currentStoreId)
                     ->loadByRequestPath($currentUrl)
-                    ->getIdPath();
+                    ->getIdPathForOtherStores();
 
                 /** @var Mage_Core_Model_Store $store */
                 foreach ($activeStores as $store) {

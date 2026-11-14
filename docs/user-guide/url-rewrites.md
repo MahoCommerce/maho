@@ -104,6 +104,9 @@ the store fills in the paths for you.
 The store creates the rewrites of products and categories with the type **System**. The redirects
 for old URL keys have the type **Custom**.
 
+A product or a category can have many custom rewrites in a store view. For example, add one
+**Permanent (301)** redirect for each old URL of a category.
+
 A custom rewrite takes its request path. If a product later needs the same URL, the product gets a
 URL with a number (see [Why a URL is not the one you chose](#why-a-url-is-not-the-one-you-chose)).
 
