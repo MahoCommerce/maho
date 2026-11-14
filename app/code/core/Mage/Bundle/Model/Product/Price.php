@@ -142,6 +142,31 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
     }
 
     /**
+     * Round the price to cents, then add or remove the tax, as the cart does
+     *
+     * @param Mage_Catalog_Model_Product $product
+     * @param float|string|null $price
+     * @param bool|null $includeTax
+     * @return float
+     */
+    public function getRoundedPriceWithTax($product, $price, $includeTax = null)
+    {
+        /** @var Mage_Tax_Helper_Data $taxHelper */
+        $taxHelper = $this->_getHelperData('tax');
+        return $taxHelper->getPrice(
+            $product,
+            $product->getStore()->roundPrice($price),
+            $includeTax,
+            null,
+            null,
+            null,
+            null,
+            null,
+            false,
+        );
+    }
+
+    /**
      * Retrieve Price considering tier price
      *
      * @param Mage_Catalog_Model_Product $product
@@ -157,49 +182,16 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
         /** @var Mage_Tax_Helper_Data $taxHelper */
         $taxHelper = $this->_getHelperData('tax');
 
-        // The cart rounds the price to cents before it adds the tax, as the price template does.
-        $store = $product->getStore();
         if ($this->_isPricesCalculatedByIndex) {
-            $minimalPrice = $taxHelper->getPrice(
-                $product,
-                $store->roundPrice($product->getData('min_price')),
-                $includeTax,
-                null,
-                null,
-                null,
-                null,
-                null,
-                false,
-            );
-            $maximalPrice = $taxHelper->getPrice(
-                $product,
-                $store->roundPrice($product->getData('max_price')),
-                $includeTax,
-                null,
-                null,
-                null,
-                null,
-                null,
-                false,
-            );
+            $minimalPrice = $this->getRoundedPriceWithTax($product, $product->getData('min_price'), $includeTax);
+            $maximalPrice = $this->getRoundedPriceWithTax($product, $product->getData('max_price'), $includeTax);
         } else {
             $isPriceFixedType = ($product->getPriceType() == self::PRICE_TYPE_FIXED);
             /**
              * Check if product price is fixed
              */
-            $finalPrice = $store->roundPrice($product->getFinalPrice());
             if ($isPriceFixedType) {
-                $minimalPrice = $maximalPrice = $taxHelper->getPrice(
-                    $product,
-                    $finalPrice,
-                    $includeTax,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    false,
-                );
+                $minimalPrice = $maximalPrice = $this->getRoundedPriceWithTax($product, $product->getFinalPrice(), $includeTax);
             } else { // PRICE_TYPE_DYNAMIC
                 $minimalPrice = $maximalPrice = 0;
             }
