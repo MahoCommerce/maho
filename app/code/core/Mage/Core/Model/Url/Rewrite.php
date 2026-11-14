@@ -104,7 +104,7 @@ class Mage_Core_Model_Url_Rewrite extends Mage_Core_Model_Abstract implements Ma
             return 'product/' . $productId;
         }
         if ($this->getIdPath() === 'product/' . $productId) {
-            // An older custom rewrite of a product in a root category kept the category with this ID path.
+            // An old custom rewrite of a product in a root category has a category ID and the ID path product/{id}.
             return Mage::getSingleton('catalog/url')->generatePath(
                 'id',
                 new Maho\DataObject(['id' => $productId]),
