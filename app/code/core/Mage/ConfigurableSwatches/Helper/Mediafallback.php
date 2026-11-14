@@ -45,15 +45,16 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
             ->attachEavAttributes()
             ->addFieldToFilter('eav_attributes.attribute_id', ['in' => $swatchAttributeIds])
             ->setStoreId($storeId)
+            ->setOrder('main_table.position', Maho\Data\Collection::SORT_ORDER_ASC)
+            ->setOrder('main_table.product_super_attribute_id', Maho\Data\Collection::SORT_ORDER_ASC)
         ;
 
         $optionLabels = [];
-        $listAttributePositions = [];
+        $productListAttributes = [];
         foreach ($configAttributes as $attribute) {
             $optionLabels += $attribute->getOptionLabels();
             if (in_array((int) $attribute->getAttributeId(), $listAttributeIds, true)) {
-                $listAttributePositions[(int) $attribute->getProductId()][(int) $attribute->getAttributeId()]
-                    = (int) $attribute->getPosition();
+                $productListAttributes[(int) $attribute->getProductId()][(int) $attribute->getAttributeId()] = true;
             }
         }
 
@@ -100,7 +101,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
                     $mapping[$optionLabel]['labels'] = $optionLabels[$optionId];
 
                     $attributeId = (int) $attribute->getAttributeId();
-                    if (isset($listAttributePositions[(int) $parentProduct->getId()][$attributeId])
+                    if (isset($productListAttributes[(int) $parentProduct->getId()][$attributeId])
                         && !in_array($mapping[$optionLabel]['label'], $listSwatchValues[$attributeId] ?? [])
                     ) {
                         $listSwatchValues[$attributeId][$optionId]      = $mapping[$optionLabel]['label'];
@@ -114,45 +115,36 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
             }
 
             $listAttributeId = $this->_getListSwatchAttributeId(
-                $listAttributePositions[(int) $parentProduct->getId()] ?? [],
+                array_keys($productListAttributes[(int) $parentProduct->getId()] ?? []),
                 $listSwatchValues,
-                $listAttributeIds,
             );
-            $listValues = $listSwatchValues[$listAttributeId] ?? [];
-            if (count($listValues)) {
+            $listValues = [];
+            $listStockValues = [];
+            if ($listAttributeId !== null) {
                 $listValues = array_replace(
-                    array_intersect_key($optionLabels, $listValues),
-                    $listValues,
+                    array_intersect_key($optionLabels, $listSwatchValues[$listAttributeId]),
+                    $listSwatchValues[$listAttributeId],
                 );
+                $listStockValues = $listSwatchStockValues[$listAttributeId];
             }
             $parentProduct->setChildAttributeLabelMapping($mapping)
                 ->setListSwatchAttrId($listAttributeId)
                 ->setListSwatchAttrValues($listValues)
-                ->setListSwatchAttrStockValues($listSwatchStockValues[$listAttributeId] ?? []);
+                ->setListSwatchAttrStockValues($listStockValues);
         } // end looping parent products
     }
 
     /**
      * Get the attribute that gives the swatches of one product in the listing: the first one on
-     * the Associated Products tab with two values or more, else the first one with a value. The
-     * order of the configuration settles two attributes at the same position.
+     * the Associated Products tab with two values or more, else the first one with a value.
      *
-     * @param array<int, int> $positions position of each listing attribute of the product
+     * @param list<int> $attributeIds listing attributes of the product, in the order of the Associated Products tab
      * @param array<int, array<int|string, string>> $values swatch values of each listing attribute
-     * @param list<int> $configOrder listing attribute IDs in the order of the configuration
      */
-    protected function _getListSwatchAttributeId(array $positions, array $values, array $configOrder): ?int
+    protected function _getListSwatchAttributeId(array $attributeIds, array $values): ?int
     {
-        $candidates = [];
-        foreach ($configOrder as $attributeId) {
-            if (isset($positions[$attributeId])) {
-                $candidates[$attributeId] = $positions[$attributeId];
-            }
-        }
-        asort($candidates);
-
         $fallback = null;
-        foreach (array_keys($candidates) as $attributeId) {
+        foreach ($attributeIds as $attributeId) {
             $count = count($values[$attributeId] ?? []);
             if ($count > 1) {
                 return $attributeId;

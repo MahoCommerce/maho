@@ -85,6 +85,35 @@ describe('the listing swatches with more than one attribute', function (): void 
             ->and(count($products[$volumeId]->getListSwatchAttrValues()))->toBeGreaterThan(1);
     });
 
+    it('renders the swatches of the attribute that the product uses', function (): void {
+        Mage::app()->getStore()->setConfig(
+            Mage_ConfigurableSwatches_Helper_Data::CONFIG_PATH_LIST_SWATCH_ATTRIBUTE,
+            listSwatchAttributeId('color') . ',' . listSwatchAttributeId('volume'),
+        );
+        $volumeId = listSwatchParentIds('volume')[0];
+        $products = listSwatchProducts([$volumeId]);
+
+        $html = Mage::app()->getLayout()->createBlock('core/template')
+            ->setTemplate('configurableswatches/catalog/product/list/swatches.phtml')
+            ->setProduct($products[$volumeId])
+            ->toHtml();
+
+        expect($html)->toContain('configurable-swatch-volume')
+            ->and($html)->not->toContain('configurable-swatch-color');
+    });
+
+    it('shows the color picker for an attribute that is only in the listing setting', function (): void {
+        $store = Mage::app()->getStore();
+        $store->setConfig(Mage_ConfigurableSwatches_Helper_Data::CONFIG_PATH_SWATCH_ATTRIBUTES, '');
+        $store->setConfig(Mage_ConfigurableSwatches_Helper_Data::CONFIG_PATH_LIST_SWATCH_ATTRIBUTE, (string) listSwatchAttributeId('volume'));
+        Mage::register('entity_attribute', Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'volume'));
+        try {
+            expect(new Mage_Adminhtml_Block_Catalog_Product_Attribute_Edit_Tab_Options()->isConfigurableSwatchesEnabled())->toBeTrue();
+        } finally {
+            Mage::unregister('entity_attribute');
+        }
+    });
+
     it('keeps the first attribute for the code that reads one attribute', function (): void {
         Mage::app()->getStore()->setConfig(
             Mage_ConfigurableSwatches_Helper_Data::CONFIG_PATH_LIST_SWATCH_ATTRIBUTE,
@@ -221,5 +250,46 @@ describe('the listing attribute of a product that uses two of them', function ()
         ]);
 
         expect($parent->getListSwatchAttrId())->toBe(listSwatchAttributeId('size'));
+    });
+
+    it('takes the first attribute with one value when no attribute has two', function () use ($run): void {
+        $parent = $run->call($this, ['color' => 1, 'size' => 0], [
+            ['color' => 0, 'size' => 0],
+            ['color' => 0, 'size' => 0],
+        ]);
+
+        expect($parent->getListSwatchAttrId())->toBe(listSwatchAttributeId('size'))
+            ->and($parent->getListSwatchAttrValues())->toHaveCount(1);
+    });
+
+    it('takes the attribute that the product got first when two attributes have the same position', function () use ($run): void {
+        $parent = $run->call($this, ['color' => 0, 'size' => 0], [
+            ['color' => 0, 'size' => 0],
+            ['color' => 1, 'size' => 1],
+        ]);
+
+        expect($parent->getListSwatchAttrId())->toBe(listSwatchAttributeId('color'));
+    });
+
+    it('gives no listing attribute to a product that uses none of them', function () use ($run): void {
+        Mage::app()->getStore()->setConfig(
+            Mage_ConfigurableSwatches_Helper_Data::CONFIG_PATH_LIST_SWATCH_ATTRIBUTE,
+            (string) listSwatchAttributeId('volume'),
+        );
+        $wasDeveloperMode = Mage::getIsDeveloperMode();
+        $errorLevel = error_reporting(E_ALL);
+        Mage::setIsDeveloperMode(true);
+        try {
+            $parent = $run->call($this, ['color' => 0, 'size' => 1], [
+                ['color' => 0, 'size' => 0],
+                ['color' => 1, 'size' => 1],
+            ]);
+        } finally {
+            Mage::setIsDeveloperMode($wasDeveloperMode);
+            error_reporting($errorLevel);
+        }
+
+        expect($parent->getListSwatchAttrId())->toBeNull()
+            ->and($parent->getListSwatchAttrValues())->toBe([]);
     });
 });
