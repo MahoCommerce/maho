@@ -76,15 +76,13 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
                 foreach ($parentProduct->getChildrenProducts() as $childProduct) {
                     // product has no value for attribute or not available, we can't process it
                     $isInStock = $childProduct->getStockItem()->getIsInStock();
-                    if (!$childProduct->hasData($attribute->getAttributeCode())
-                        || (!$isInStock && !Mage::helper('cataloginventory')->isShowOutOfStock())
-                    ) {
+                    if (!$isInStock && !Mage::helper('cataloginventory')->isShowOutOfStock()) {
                         continue;
                     }
                     $optionId = $childProduct->getData($attribute->getAttributeCode());
 
                     // if we don't have a default label, skip it
-                    if (!isset($optionLabels[$optionId][0])) {
+                    if (!is_scalar($optionId) || !isset($optionLabels[$optionId][0])) {
                         continue;
                     }
 
