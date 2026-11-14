@@ -65,6 +65,21 @@ function csegMembers(array $response): array
     return $response['json']['member'] ?? $response['json']['hydra:member'] ?? (array_is_list($response['json']) ? $response['json'] : []);
 }
 
+/**
+ * Read every page of the segment list. Other tests leave segments behind, so a new segment can be past the first page.
+ */
+function csegListAll(#[\SensitiveParameter] string $token): array
+{
+    $all = [];
+    for ($page = 1; ; $page++) {
+        $members = csegMembers(apiGet(CSEG_PATH . "?itemsPerPage=100&page={$page}", $token));
+        $all = [...$all, ...$members];
+        if (count($members) < 100) {
+            return $all;
+        }
+    }
+}
+
 function csegLifetimeSalesTree(string $amount): array
 {
     return [
@@ -138,7 +153,7 @@ describe('Customer segment access', function (): void {
             $own = (int) csegCreate()['json']['id'];
             $token = serviceToken(['customer-segments/read', 'customer-segments/write'], [1]);
 
-            $listed = array_column(csegMembers(apiGet(CSEG_PATH, $token)), 'id');
+            $listed = array_column(csegListAll($token), 'id');
             expect($listed)->toContain($own)->not->toContain($foreign)
                 ->and(apiGet(CSEG_PATH . "/{$own}", $token)['status'])->toBe(200)
                 ->and(apiGet(CSEG_PATH . "/{$foreign}", $token)['status'])->toBe(404)
@@ -272,7 +287,7 @@ describe('Customer segment fields', function (): void {
 
     it('lists the segments with their trees', function (): void {
         $id = (int) csegCreate(['conditions' => csegLifetimeSalesTree('1')])['json']['id'];
-        $list = csegMembers(apiGet(CSEG_PATH . '?itemsPerPage=100', adminToken()));
+        $list = csegListAll(adminToken());
         $row = array_values(array_filter($list, fn(array $item): bool => $item['id'] === $id))[0] ?? null;
 
         expect($row)->not->toBeNull()

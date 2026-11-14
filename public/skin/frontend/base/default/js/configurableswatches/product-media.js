@@ -8,6 +8,10 @@ var ConfigurableMediaImages = {
     productImages: {},
     imageObjects: {},
 
+    // Only the image of the last call shows. An earlier image that loads late stays hidden.
+    swapGeneration: 0,
+    listGeneration: {},
+
     arrayIntersect: function(a, b) {
         return a.filter(value => b.includes(value));
     },
@@ -148,41 +152,43 @@ var ConfigurableMediaImages = {
         targetImage.classList.add('gallery-image');
 
         var imageGallery = document.querySelector('.product-image-gallery');
+        if (!imageGallery) {
+            return;
+        }
 
-        if (targetImage.complete) { // Image already loaded -- swap immediately
-            var galleryImages = imageGallery.querySelectorAll('.gallery-image');
-            galleryImages.forEach(function(image) {
+        var generation = ++ConfigurableMediaImages.swapGeneration;
+        var revealImage = function() {
+            if (generation !== ConfigurableMediaImages.swapGeneration) {
+                return;
+            }
+
+            // Remove spinner
+            imageGallery.classList.remove('loading');
+
+            // Hide old image
+            imageGallery.querySelectorAll('.gallery-image').forEach(function(image) {
                 image.classList.remove('visible');
             });
-
-            // Move target image to correct place, in case it's necessary
-            imageGallery.appendChild(targetImage);
 
             // Reveal new image, and scroll the phone carousel to its slide
             targetImage.classList.add('visible');
             imageGallery.scrollTo({ left: targetImage.offsetLeft });
+        };
+
+        // Move target image to correct place, in case it's necessary
+        imageGallery.appendChild(targetImage);
+
+        if (targetImage.complete) { // Image already loaded -- swap immediately
+            revealImage();
         } else { // Need to wait for image to load
             // Add spinner
             imageGallery.classList.add('loading');
-
-            // Move target image to correct place, in case it's necessary
-            imageGallery.appendChild(targetImage);
-
-            // Wait until image is loaded
-            targetImage.addEventListener('load', function() {
-                // Remove spinner
-                imageGallery.classList.remove('loading');
-
-                // Hide old image
-                var galleryImages = imageGallery.querySelectorAll('.gallery-image');
-                galleryImages.forEach(function(image) {
-                    image.classList.remove('visible');
-                });
-
-                // Reveal new image
-                targetImage.classList.add('visible');
-                imageGallery.scrollTo({ left: targetImage.offsetLeft });
-            });
+            targetImage.addEventListener('load', revealImage, { once: true });
+            targetImage.addEventListener('error', function() {
+                if (generation === ConfigurableMediaImages.swapGeneration) {
+                    imageGallery.classList.remove('loading');
+                }
+            }, { once: true });
         }
     },
 
@@ -197,8 +203,11 @@ var ConfigurableMediaImages = {
 
     swapListImage: function(productId, imageObject) {
         var originalImage = document.querySelector('#product-collection-image-' + productId);
+        var generation = ConfigurableMediaImages.listGeneration[productId] = (ConfigurableMediaImages.listGeneration[productId] || 0) + 1;
 
         if (imageObject.complete) { // Swap image immediately
+            originalImage.parentNode.classList.remove('loading');
+
             // Remove old image
             originalImage.classList.add('hidden');
             document.querySelectorAll('.product-collection-image-' + productId).forEach(function (image) {
@@ -214,7 +223,11 @@ var ConfigurableMediaImages = {
             wrapper.classList.add('loading');
 
             // Wait until image is loaded
-            imageObject.addEventListener('load', function () {
+            var reveal = function () {
+                if (generation !== ConfigurableMediaImages.listGeneration[productId]) {
+                    return;
+                }
+
                 // Remove spinner
                 wrapper.classList.remove('loading');
 
@@ -226,7 +239,13 @@ var ConfigurableMediaImages = {
 
                 // Add new image
                 originalImage.parentNode.insertBefore(imageObject, originalImage.nextSibling);
-            });
+            };
+            imageObject.addEventListener('load', reveal, { once: true });
+            imageObject.addEventListener('error', function () {
+                if (generation === ConfigurableMediaImages.listGeneration[productId]) {
+                    wrapper.classList.remove('loading');
+                }
+            }, { once: true });
         }
     },
 
