@@ -66,7 +66,8 @@ an address field **SdI Code** can show only when the **Country** is Italy.
 3. Click **Add**.
 4. In the first list, select the field that decides, for example **Country**.
 5. In the second list, select the values that show the field, for example **Italy**. Hold the Ctrl
-   or Cmd key to select more than one value.
+   or Cmd key to select more than one value. Select **Any Value** to show the field when the other
+   field has a value, whatever it is.
 6. To add more fields, click **Add** again. Then, in **Show the field when**, select how the rows
    join:
     - **Each row matches**: every row must match.
@@ -79,8 +80,12 @@ The rules of a condition:
 
 - A condition can read only the fields of the same record. An address field can read the
   **Country** or another address field, and never a field of the customer.
-- A condition can read only a field with a list of values: a **Dropdown**, a **Multiple Select**, a
+- A condition can read a field with a list of values: a **Dropdown**, a **Multiple Select**, a
   **Yes/No** field, or a standard field such as **Country** or **Gender**.
+- A condition can also read a **Text Field**, a **Text Area** or a **Date**, such as **Company**.
+  These fields have no list, so the only value is **Any Value**. For example, **VAT Number** can
+  show only when **Company** has a value. To show a field when another field is empty, select
+  **Any Value** and **No row matches**.
 - A field that a condition reads cannot have a condition of its own.
 - You cannot delete a field while a condition reads it. Remove the condition first.
 - A standard field, such as **Company**, **VAT Number**, **Tax/VAT Number**, **Date of Birth** or

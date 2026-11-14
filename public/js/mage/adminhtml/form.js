@@ -457,6 +457,9 @@ class formElementDependenceController {
     static MODE_OR  = 'OR';
     static MODE_XOR = 'XOR';
 
+    /** The wanted value that matches a field that holds any value that is not empty */
+    static ANY_VALUE = '__any__';
+
     /**
      * @param {Object.<string, Object>} elementsMap - key/value pairs of target fields and their conditions to be visible
      * @param {Object} [config] - config options, see Mage_Adminhtml_Block_Widget_Form_Element_Dependence::addConfigOptions()
@@ -631,7 +634,9 @@ class formElementDependenceController {
                         dependentValues = Array.isArray(fallbackValues) ? fallbackValues : [fallbackValues];
                     }
                 }
-                result = dependentValues.some((val) => refValues.includes(val));
+                result = dependentValues.some((val) => refValues.includes(val))
+                    || (refValues.includes(formElementDependenceController.ANY_VALUE)
+                        && dependentValues.some((val) => typeof val === 'string' && val.trim() !== ''));
             }
             results.push(result)
         }

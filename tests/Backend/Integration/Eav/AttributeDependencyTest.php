@@ -519,3 +519,55 @@ it('refuses a condition on a standard field that the address always requires', f
 
     expect(fn() => dependencyService()->save($telephone))->toThrow(Mage_Core_Exception_Input::class);
 });
+
+it('reads a text field with Any Value, and offers Any Value in the editor', function () {
+    $this->created[] = dependencyAttribute('customer_address', [
+        'attribute_code' => $this->code,
+        'is_visible' => 1,
+        'used_in_forms' => ['customer_address_edit'],
+    ]);
+    $this->created[] = $attribute = dependencyAttribute('customer_address', [
+        'attribute_code' => $this->code . '_r',
+        'used_in_forms' => ['customer_address_edit'],
+    ], [$this->code => [\Maho\Data\Form\Condition::ANY_VALUE]]);
+    $editor = Mage::app()->getLayout()->createBlock('eav/adminhtml_attribute_edit_dependence')
+        ->setData('attribute', dependencyService()->newAttribute('customer_address')->setAttributeCode($this->code . '_s'));
+
+    expect(Mage::helper('eav')->isHidden(new \Maho\DataObject([$this->code => '']), $attribute))->toBeTrue()
+        ->and(Mage::helper('eav')->isHidden(new \Maho\DataObject([$this->code => 'Maho Srl']), $attribute))->toBeFalse()
+        ->and($editor->getSources()[$this->code]['options'] ?? [])->toBe([['value' => '__any__', 'label' => 'Any Value']])
+        ->and(array_column($editor->getSources()['country_id']['options'] ?? [], 'value'))->toContain('__any__', 'IT');
+});
+
+it('refuses a fixed value on a text field, which has no options', function () {
+    $this->created[] = dependencyAttribute('customer_address', [
+        'attribute_code' => $this->code,
+        'is_visible' => 1,
+        'used_in_forms' => ['customer_address_edit'],
+    ]);
+
+    expect(fn() => dependencyAttribute('customer_address', ['attribute_code' => $this->code . '_r'], [$this->code => ['Maho']]))
+        ->toThrow(Mage_Core_Exception_Input::class, 'has no option with the value Maho');
+});
+
+it('gives no image of a field that its condition hides', function () {
+    $setId = (int) Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Category::ENTITY)->getDefaultAttributeSetId();
+    $inSet = [
+        'attribute_set_id' => $setId,
+        'attribute_group_id' => (int) Mage::getModel('eav/entity_attribute_set')->load($setId)->getDefaultGroupId(),
+    ];
+    $this->created[] = dependencyAttribute('catalog_category', ['attribute_code' => $this->code, 'frontend_input' => 'boolean'] + $inSet);
+    $this->created[] = dependencyAttribute(
+        'catalog_category',
+        ['attribute_code' => $this->code . '_logo', 'frontend_input' => 'image'] + $inSet,
+        [$this->code => ['1']],
+    );
+    $category = fn(string $isBrand) => Mage::getModel('catalog/category')->setData([
+        $this->code => $isBrand,
+        $this->code . '_logo' => 'brand/logo.png',
+    ]);
+
+    expect(Mage::helper('eav')->getImageSet($category('0'), $this->code . '_logo'))->toBeNull()
+        ->and(Mage::helper('eav')->getImageSet($category('1'), $this->code . '_logo'))->toBeInstanceOf(Mage_Core_Model_Image_Set::class)
+        ->and(Mage::helper('eav')->getImageSet($category('1'), $this->code))->toBeNull();
+});

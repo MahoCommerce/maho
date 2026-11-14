@@ -148,6 +148,26 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Return the resized files of the image that the image attribute $code of $record holds. Return null when the
+     * record has no image there, or when the condition of the attribute hides the field. A template shows a custom
+     * image, such as the logo of a brand category, with this method.
+     */
+    public function getImageSet(Mage_Core_Model_Abstract $record, string $code): ?Mage_Core_Model_Image_Set
+    {
+        $resource = $record->getResource();
+        $attribute = method_exists($resource, 'getAttribute') ? $resource->getAttribute($code) : false;
+        if (!$attribute instanceof Mage_Eav_Model_Entity_Attribute_Abstract) {
+            return null;
+        }
+        $backend = $attribute->getBackend();
+        $file = (string) $record->getData($code);
+        if (!$backend instanceof Mage_Eav_Model_Entity_Attribute_Backend_Image || $file === '' || $this->isHidden($record, $attribute)) {
+            return null;
+        }
+        return Mage::helper('core/image')->init($backend->getImageEntity(), $file);
+    }
+
+    /**
      * Tell whether the condition of $attribute hides its field for the data of $object. A hidden field is not
      * required, and an address does not print it. The condition never changes a stored value. A condition that
      * reads a field that $object does not hold, or holds as false (a store view that uses the default), does

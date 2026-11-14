@@ -20,6 +20,15 @@ declare(strict_types=1);
  */
 class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Abstract
 {
+    /** The input types whose fields a condition reads by option. */
+    public const OPTION_INPUTS = ['select', 'multiselect', 'boolean'];
+
+    /**
+     * The input types whose fields a condition reads only for a value or no value. A file, an image and a multiline
+     * field are not here: their form inputs do not hold the stored value in one input.
+     */
+    public const FREE_VALUE_INPUTS = ['text', 'textarea', 'date', 'datetime'];
+
     /**
      * Prefix of model events names
      *
@@ -269,7 +278,9 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
 
     /**
      * Return the fields that the condition of this attribute can read, keyed by code: each attribute of
-     * the entity type with a list of options, except this attribute. A subclass adds the fields of its
+     * the entity type with a list of options, and each visible attribute with a free value, such as a
+     * text, except this attribute. A field with a free value has no options: a condition can only ask
+     * whether it holds a value (Maho\Data\Form\Condition::ANY_VALUE). A subclass adds the fields of its
      * edit form that are not attributes.
      *
      * @return array<string, array{label: string, options: list<array{value: string, label: string}>}>
@@ -283,7 +294,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
         /** @var Mage_Eav_Model_Resource_Entity_Attribute_Collection $collection */
         $collection = Mage::getResourceModel($entityType->getEntityAttributeCollection());
         $collection->setEntityTypeFilter((int) $entityType->getId())
-            ->addFieldToFilter('main_table.frontend_input', ['in' => ['select', 'multiselect', 'boolean']])
+            ->addFieldToFilter('main_table.frontend_input', ['in' => [...self::OPTION_INPUTS, ...self::FREE_VALUE_INPUTS]])
             ->addFieldToFilter('main_table.frontend_label', ['notnull' => true])
             ->setOrder('main_table.frontend_label', 'ASC');
 
@@ -294,9 +305,14 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
             if ($code === $this->getAttributeCode() || (string) $attribute->getFrontendLabel() === '') {
                 continue;
             }
+            $hasOptions = in_array($attribute->getFrontendInput(), self::OPTION_INPUTS, true);
+            // A field with a free value that no form shows, such as a token of the customer, is not a choice
+            if (!$hasOptions && $attribute->hasData('is_visible') && !$attribute->getData('is_visible')) {
+                continue;
+            }
             try {
                 // A Yes/No attribute stores no source model, so usesSource() is false, but its default source has the options
-                $options = $attribute->usesSource() || $attribute->getFrontendInput() === 'boolean'
+                $options = $hasOptions && ($attribute->usesSource() || $attribute->getFrontendInput() === 'boolean')
                     ? $attribute->getSource()->getAllOptions()
                     : [];
             } catch (Mage_Core_Exception) {
@@ -370,14 +386,14 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
                 continue;
             }
             if (!isset($sources[$field])) {
-                $errors->addError('depends_on', $helper->__('The condition reads the field %s, which this form does not have or which has no options.', $field));
+                $errors->addError('depends_on', $helper->__('The condition reads the field %s, which this form does not have.', $field));
                 continue;
             }
             $source = $config->getAttribute($this->getEntityType(), $field);
             if ($source instanceof Mage_Eav_Model_Entity_Attribute_Abstract && $source->getDependsOn() !== null) {
                 $errors->addError('depends_on', $helper->__('The condition cannot read %s, because %s has a condition of its own.', $field, $field));
             }
-            $unknown = array_diff($values, array_column($sources[$field]['options'], 'value'));
+            $unknown = array_diff($values, [...array_column($sources[$field]['options'], 'value'), \Maho\Data\Form\Condition::ANY_VALUE]);
             if ($unknown) {
                 $errors->addError('depends_on', $helper->__('The field %s has no option with the value %s.', $field, implode(', ', $unknown)));
             }

@@ -40,6 +40,25 @@ describe('\Maho\Data\Form\Condition::evaluate()', function () {
             ->and(Condition::evaluate($condition, ['topics' => '3,8']))->toBeFalse();
     });
 
+    it('matches any value that is not empty with ANY_VALUE', function () {
+        $condition = ['company' => [Condition::ANY_VALUE]];
+
+        expect(Condition::evaluate($condition, ['company' => 'Maho Srl']))->toBeTrue()
+            ->and(Condition::evaluate($condition, ['company' => '0']))->toBeTrue()
+            ->and(Condition::evaluate($condition, ['company' => '  ']))->toBeFalse()
+            ->and(Condition::evaluate($condition, ['company' => '']))->toBeFalse()
+            ->and(Condition::evaluate($condition, ['company' => null]))->toBeFalse()
+            ->and(Condition::evaluate($condition, []))->toBeFalse()
+            ->and(Condition::evaluate(['topics' => [Condition::ANY_VALUE]], ['topics' => ['', '7']]))->toBeTrue();
+    });
+
+    it('shows a field when another field is empty, with ANY_VALUE in a NOT group', function () {
+        $condition = [['operator' => 'NOT', 'condition' => ['sdi_code' => [Condition::ANY_VALUE]]]];
+
+        expect(Condition::evaluate($condition, ['sdi_code' => '']))->toBeTrue()
+            ->and(Condition::evaluate($condition, ['sdi_code' => 'ABC1234']))->toBeFalse();
+    });
+
     it('joins the entries of one level with AND', function () {
         $condition = ['customer_type' => ['company'], 'country_id' => ['IT']];
 

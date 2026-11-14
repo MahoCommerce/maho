@@ -213,13 +213,17 @@ a map of a field code to its wanted values, and groups with an operator.
 
 The entries of one level are joined with AND. `AND` needs each entry, `OR` one entry, `NOT` no entry
 and `XOR` exactly one entry. Values are strings: an option ID, or `0` and `1` for a Yes/No field.
+The value `__any__` (`Maho\Data\Form\Condition::ANY_VALUE`) matches a field that holds any value
+that is not empty. It is the only value of a text, text area, date or datetime field.
 
 - `Maho\Data\Form\Condition::evaluate($condition, $values)` evaluates a condition in PHP. It
   follows `evalCondition()` of `formElementDependenceController` in `form.js`.
 - `getDependsOn()`, `setDependsOn()` and `isDependencyMet($values)` of the attribute read, write
   and evaluate it.
 - `getDependencySources()` lists the fields that a condition can read: each attribute of the type
-  with options. A subclass adds the fields of its edit page that are not attributes, as
+  with options, and each visible text, text area, date or datetime attribute, with no options. A
+  file, an image and a multiline field are not in the list, because their form inputs do not hold
+  the stored value in one input. A subclass adds the fields of its edit page that are not attributes, as
   `Mage_Cms_Model_Attribute` does for `is_active` and `root_template`.
 - `getValidationErrors()` refuses an unknown field, a value that is not an option, the attribute
   itself, a field that has a condition of its own, and a condition on a field that another
@@ -236,7 +240,7 @@ Where the condition applies:
 | Storefront forms | `Mage_Customer_Block_Form_Attributes::getDependenceJson()` and `FieldDependenceController` in `js/varien/form.js`. The configuration holds every visible field of the form that has a condition, also a standard field that the template renders itself, such as `company`. The controller finds each field by its name in the form, and hides the closest `li` or `.field`. |
 | Validation | `Mage_Eav_Model_Attribute_Data_Abstract::isRequired()` is true only when the attribute is required and `isShown()` is true. Each `validateValue()` uses it, so a hidden field is not required, and a value that the client sends is still checked. |
 | Values | A condition never changes a stored value. `Mage_Eav_Helper_Data::isHidden()` tells whether a condition hides an attribute for a record. The required check of `Mage_Eav_Model_Entity_Attribute_Backend_Abstract::validate()`, the CMS page resource and the blog post importer call it, and the CMS page importer calls the check of the CMS page resource, so each one accepts an empty hidden field. A condition that reads a field that the record does not hold, or holds as `false` (a store view that uses the default), does not hide the field, so the field stays required. The API helpers skip the required check of a hidden field. |
-| Output | `Mage_Customer_Block_Address_Renderer_Default::render()` does not print a hidden field of an address, and `Mage_Eav_Block_Frontend_Attributes::getAttributeValues()` leaves it out of the storefront table. A template that prints a value by its code checks `Mage::helper('eav')->isHidden($record, $attribute)` first. |
+| Output | `Mage_Customer_Block_Address_Renderer_Default::render()` does not print a hidden field of an address, and `Mage_Eav_Block_Frontend_Attributes::getAttributeValues()` leaves it out of the storefront table. A template that prints a value by its code checks `Mage::helper('eav')->isHidden($record, $attribute)` first. For an image attribute, `Mage::helper('eav')->getImageSet($record, $code)` returns the resized files, or null when the condition hides the field. |
 | API | `dependsOn` of `/custom-attributes` and of each field of `/customer-forms/{form}`. |
 
 A hidden field in the browser is disabled, so the form does not send it.

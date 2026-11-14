@@ -76,9 +76,11 @@ field **Campaign End** can show only when the **Layout** is a landing page layou
    or exactly one row must match.
 5. Click **Save**.
 
-A condition can read only a field with a list of values, such as a **Dropdown**, a **Yes/No** field,
-the **Status** or the **Layout** of the page. A field that a condition reads cannot have a condition
-of its own, and you cannot delete it while a condition reads it.
+A condition can read a field with a list of values, such as a **Dropdown**, a **Yes/No** field, the
+**Status** or the **Layout** of the page. It can also read a **Text Field**, a **Text Area** or a
+**Date**, with the value **Any Value**: the condition then asks only whether the field has a value.
+A field that a condition reads cannot have a condition of its own, and you cannot delete it while a
+condition reads it.
 
 When the condition hides a field, the edit page does not show it, and the field is not required. The
 field keeps its value, so the value comes back when the condition shows the field again. The table

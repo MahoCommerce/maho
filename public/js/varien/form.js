@@ -256,9 +256,12 @@ class ZipUpdater {
  * Show the custom attribute fields of a storefront form only when the condition of each attribute is met, and
  * disable the hidden fields so that the form does not send them. A condition uses the format of
  * Maho\Data\Form\Condition: {field: [values]} entries joined with AND, and {operator, condition} groups.
+ * The wanted value __any__ matches a field that holds any value that is not empty.
  */
 class FieldDependenceController {
     static MODES = ['NOT', 'AND', 'OR', 'XOR'];
+
+    static ANY_VALUE = '__any__';
 
     static #controllers = new WeakMap();
 
@@ -292,6 +295,10 @@ class FieldDependenceController {
         for (const field of sources) {
             for (const el of this.fieldElements(field)) {
                 el.addEventListener('change', () => this.update());
+                // A text field changes on each key, so that Any Value shows the field while the customer types
+                if (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && !['checkbox', 'radio'].includes(el.type))) {
+                    el.addEventListener('input', () => this.update());
+                }
             }
         }
         this.update();
@@ -346,7 +353,9 @@ class FieldDependenceController {
                 return this.evaluate(entry.condition, entry.operator);
             }
             const wanted = (Array.isArray(entry) ? entry : [entry]).map(String);
-            return this.fieldValues(field).some((value) => wanted.includes(value));
+            const values = this.fieldValues(field);
+            return values.some((value) => wanted.includes(value))
+                || (wanted.includes(FieldDependenceController.ANY_VALUE) && values.some((value) => value.trim() !== ''));
         });
         if (!results.length) {
             return true;

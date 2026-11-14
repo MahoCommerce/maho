@@ -23,7 +23,8 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit_Dependence extends Mage_Adminhtml_
     }
 
     /**
-     * Return the fields that a row can name. A field with a condition of its own is left out.
+     * Return the fields that a row can name, each with Any Value as its first option. A field with a condition of its
+     * own is left out.
      *
      * @return array<string, array{label: string, options: list<array{value: string, label: string}>}>
      */
@@ -37,6 +38,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit_Dependence extends Mage_Adminhtml_
             if ($sourceAttribute instanceof Mage_Eav_Model_Entity_Attribute_Abstract && $sourceAttribute->getDependsOn() !== null) {
                 continue;
             }
+            $source['options'] = [['value' => Condition::ANY_VALUE, 'label' => Mage::helper('eav')->__('Any Value')], ...$source['options']];
             $sources[$code] = $source;
         }
         return $sources;

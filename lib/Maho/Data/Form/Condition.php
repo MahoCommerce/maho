@@ -5,7 +5,8 @@
  *
  * A condition maps a field to its wanted values: ['country_id' => ['IT', 'SM']]. An entry with an
  * integer key and an 'operator' holds a group: ['operator' => 'OR', 'condition' => [...]]. The
- * entries of one level are joined with AND. The rules are the same as evalCondition() of
+ * entries of one level are joined with AND. The wanted value ANY_VALUE matches a field that holds
+ * any value that is not empty. The rules are the same as evalCondition() of
  * formElementDependenceController in public/js/mage/adminhtml/form.js.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
@@ -24,6 +25,9 @@ final class Condition
     public const MODE_XOR = 'XOR';
 
     public const MODES = [self::MODE_NOT, self::MODE_AND, self::MODE_OR, self::MODE_XOR];
+
+    /** The wanted value that matches any value that is not empty. */
+    public const ANY_VALUE = '__any__';
 
     public static function isGroup(mixed $entry): bool
     {
@@ -49,7 +53,9 @@ final class Condition
                 continue;
             }
             $wanted = array_map(strval(...), is_array($entry) ? $entry : [$entry]);
-            $results[] = array_intersect(self::fieldValues($values[$field] ?? null), $wanted) !== [];
+            $fieldValues = self::fieldValues($values[$field] ?? null);
+            $results[] = array_intersect($fieldValues, $wanted) !== []
+                || (in_array(self::ANY_VALUE, $wanted, true) && self::hasValue($fieldValues));
         }
         $met = count(array_filter($results));
         return match ($mode) {
@@ -126,6 +132,16 @@ final class Condition
             }
         }
         return $errors;
+    }
+
+    /**
+     * Tell whether $fieldValues, a result of fieldValues(), holds a value that is not empty.
+     *
+     * @param list<string> $fieldValues
+     */
+    public static function hasValue(array $fieldValues): bool
+    {
+        return array_filter($fieldValues, static fn(string $value): bool => trim($value) !== '') !== [];
     }
 
     /**
