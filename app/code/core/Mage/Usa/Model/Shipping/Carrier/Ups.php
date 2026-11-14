@@ -1092,7 +1092,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
             ],
         ];
         if ($request->getRecipientAddressStateOrProvinceCode()) {
-            $shipToData['Address']['StateProvinceCode'] = $request->getRecipientAddressRegionCode();
+            $shipToData['Address']['StateProvinceCode'] = $request->getRecipientAddressStateOrProvinceCode();
         }
         if ($this->getConfigData('dest_type') == 'RES') {
             $shipToData['Address']['ResidentialAddress'] = '';
@@ -1197,7 +1197,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
             $itemsDesc[] = $item->getName();
         }
 
-        return substr(implode(' ', $itemsDesc), 0, 35);
+        return mb_strcut(implode(' ', $itemsDesc), 0, 35, 'UTF-8');
     }
 
     /**

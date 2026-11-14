@@ -1763,7 +1763,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         } else {
             foreach ($packageItems as $item) {
                 $items[] = [
-                    'description' => substr($item['name'], 0, 50),
+                    'description' => mb_strcut($item['name'], 0, 50, 'UTF-8'),
                     'quantity' => (int) $item['qty'],
                     'value' => (float) $item['customs_value'],
                     'weight' => (float) $item['weight'],
