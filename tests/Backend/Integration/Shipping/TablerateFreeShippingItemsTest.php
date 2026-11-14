@@ -30,8 +30,12 @@ function tablerateFreeItemsQuoteItem(float $rowTotal, bool $freeShipping): Mage_
 /**
  * @param list<Mage_Sales_Model_Quote_Item> $items
  */
-function tablerateFreeItemsCollect(array $items, ?float &$packageValueAfter = null): Mage_Shipping_Model_Rate_Result
-{
+function tablerateFreeItemsCollect(
+    array $items,
+    ?float &$packageValueAfter = null,
+    ?float &$packageQtyAfter = null,
+    ?bool $freeShipping = null,
+): Mage_Shipping_Model_Rate_Result {
     $packageValue = 0.0;
     $freeWeight = 0.0;
     $allFree = true;
@@ -55,7 +59,7 @@ function tablerateFreeItemsCollect(array $items, ?float &$packageValueAfter = nu
         ->setPackageQty((float) count($items))
         ->setFreeMethodWeight($freeWeight)
         // The address ships free when every item does
-        ->setFreeShipping($allFree);
+        ->setFreeShipping($freeShipping ?? $allFree);
 
     /** @var Mage_Shipping_Model_Carrier_Tablerate $carrier */
     $carrier = Mage::getModel('shipping/carrier_tablerate');
@@ -63,6 +67,7 @@ function tablerateFreeItemsCollect(array $items, ?float &$packageValueAfter = nu
 
     $result = $carrier->collectRates($request);
     $packageValueAfter = (float) $request->getPackageValue();
+    $packageQtyAfter = (float) $request->getPackageQty();
 
     return $result;
 }
@@ -178,5 +183,20 @@ describe('table rates by order subtotal with free shipping items', function () {
         ], $packageValueAfter);
 
         expect($packageValueAfter)->toBe(230.0);
+    });
+
+    test('leaves the package quantity of the request as it was', function () {
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $adapter->delete(Mage::getSingleton('core/resource')->getTableName('shipping/tablerate'), [
+            'dest_zip = ?' => TABLERATE_FREE_ITEMS_ZIP,
+            'condition_value < ?' => 200,
+        ]);
+
+        tablerateFreeItemsCollect([
+            tablerateFreeItemsQuoteItem(80.0, true),
+            tablerateFreeItemsQuoteItem(150.0, false),
+        ], $packageValueAfter, $packageQtyAfter, true);
+
+        expect($packageQtyAfter)->toBe(2.0);
     });
 });
