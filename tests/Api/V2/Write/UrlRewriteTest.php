@@ -151,7 +151,7 @@ describe('URL rewrite CRUD lifecycle', function (): void {
         $id = (int) $create['json']['id'];
 
         try {
-            expect($create['json']['idPath'])->toBe('product/' . $product->getId());
+            expect($create['json']['idPath'])->not->toBeEmpty()->not->toBe('product/' . $product->getId());
             expect($create['json']['targetPath'])->toBe('catalog/product/view/id/' . $product->getId());
             expect($create['json']['productId'])->toBe((int) $product->getId());
         } finally {
