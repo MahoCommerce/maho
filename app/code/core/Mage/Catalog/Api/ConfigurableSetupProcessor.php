@@ -16,6 +16,7 @@ use ApiPlatform\Metadata\Post;
 use Mage_Catalog_Model_Product_Type;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -50,13 +51,33 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
         if ($operation instanceof Post) {
             $service->addChild($product, (int) ($body['childProductId'] ?? $body['child_product_id'] ?? $body['childId'] ?? 0), $websiteIds);
         } else {
-            $service->setSuperAttributes($product, array_values((array) ($body['superAttributes'] ?? $body['super_attributes'] ?? [])));
-            $childIds = array_map(intval(...), array_values((array) ($body['childProductIds'] ?? $body['child_product_ids'] ?? [])));
-            if ($childIds !== []) {
-                $service->setChildren($product, $childIds, $websiteIds);
-            }
+            $codes = $body['superAttributes'] ?? $body['super_attributes'] ?? [];
+            $service->setUp(
+                $product,
+                empty($codes) ? [] : self::attributeCodes($codes),
+                array_map(intval(...), array_values((array) ($body['childProductIds'] ?? $body['child_product_ids'] ?? []))),
+                $websiteIds,
+            );
         }
 
         return $this->provider->getSetup($this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE));
+    }
+
+    /**
+     * @return list<string>
+     * @throws BadRequestHttpException when $codes is not a list of attribute codes
+     */
+    private static function attributeCodes(mixed $codes): array
+    {
+        if (!is_array($codes) || !array_is_list($codes)) {
+            throw new BadRequestHttpException('superAttributes must be a list of attribute codes');
+        }
+        foreach ($codes as $code) {
+            if (!is_string($code) || $code === '') {
+                throw new BadRequestHttpException('superAttributes must be a list of attribute codes');
+            }
+        }
+
+        return $codes;
     }
 }
