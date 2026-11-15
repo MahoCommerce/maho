@@ -11,7 +11,7 @@
 class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Currency extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     #[\Override]
-    protected $_defaultWidth = 100;
+    protected ?int $_defaultWidth = 100;
 
     /**
      * Currency objects cache

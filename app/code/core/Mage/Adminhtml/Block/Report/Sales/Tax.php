@@ -23,7 +23,7 @@ class Mage_Adminhtml_Block_Report_Sales_Tax extends Mage_Adminhtml_Block_Widget_
         ]);
     }
 
-    public function getFilterUrl()
+    public function getFilterUrl(): string
     {
         $this->getRequest()->setParam('filter', null);
         return $this->getUrl('*/*/tax', ['_current' => true]);

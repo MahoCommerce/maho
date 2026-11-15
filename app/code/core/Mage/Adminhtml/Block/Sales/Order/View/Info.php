@@ -28,7 +28,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Info extends Mage_Adminhtml_Block_Sa
         return parent::_beforeToHtml();
     }
 
-    public function getOrderStoreName()
+    public function getOrderStoreName(): ?string
     {
         if ($this->getOrder()) {
             $storeId = $this->getOrder()->getStoreId();
@@ -47,7 +47,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Info extends Mage_Adminhtml_Block_Sa
         return null;
     }
 
-    public function getCustomerGroupName()
+    public function getCustomerGroupName(): ?string
     {
         if ($this->getOrder()) {
             return Mage::getModel('customer/group')->load((int) $this->getOrder()->getCustomerGroupId())->getCode();
@@ -55,7 +55,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Info extends Mage_Adminhtml_Block_Sa
         return null;
     }
 
-    public function getCustomerViewUrl()
+    public function getCustomerViewUrl(): string|false
     {
         if (!Mage::getSingleton('admin/session')->isAllowed('customer/manage')) {
             return false;

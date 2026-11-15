@@ -13,12 +13,12 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Totals_Grandtotal extends Mage_Adm
     #[\Override]
     protected $_template = 'sales/order/create/totals/grandtotal.phtml';
 
-    public function includeTax()
+    public function includeTax(): bool
     {
         return Mage::getSingleton('tax/config')->displayCartTaxWithGrandTotal();
     }
 
-    public function getTotalExclTax()
+    public function getTotalExclTax(): float
     {
         $excl = $this->getTotal()->getAddress()->getGrandTotal() - $this->getTotal()->getAddress()->getTaxAmount();
         $excl = max($excl, 0);

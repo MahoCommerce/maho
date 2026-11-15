@@ -23,7 +23,7 @@ class Mage_Adminhtml_Block_Report_Product_Viewed extends Mage_Adminhtml_Block_Wi
         ]);
     }
 
-    public function getFilterUrl()
+    public function getFilterUrl(): string
     {
         $this->getRequest()->setParam('filter', null);
         return $this->getUrl('*/*/viewed', ['_current' => true]);

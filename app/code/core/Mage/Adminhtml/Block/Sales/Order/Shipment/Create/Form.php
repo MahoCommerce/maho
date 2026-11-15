@@ -56,17 +56,17 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_Create_Form extends Mage_Adminht
         return $this;
     }
 
-    public function getPaymentHtml()
+    public function getPaymentHtml(): string
     {
         return $this->getChildHtml('order_payment');
     }
 
-    public function getItemsHtml()
+    public function getItemsHtml(): string
     {
         return $this->getChildHtml('order_items');
     }
 
-    public function getSaveUrl()
+    public function getSaveUrl(): string
     {
         return $this->getUrl('*/*/save', ['order_id' => $this->getShipment()->getOrderId()]);
     }
