@@ -12,11 +12,9 @@ class Mage_Catalog_Model_Resource_Category_Attribute_Source_Mode extends Mage_Ea
 {
     /**
      * Returns all mode options
-     *
-     * @return array
      */
     #[\Override]
-    public function getAllOptions()
+    public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array
     {
         if (!$this->_options) {
             $this->_options = [

@@ -12,11 +12,9 @@ class Mage_Catalog_Model_Resource_Category_Attribute_Source_Layout extends Mage_
 {
     /**
      * Return cms layout update options
-     *
-     * @return array
      */
     #[\Override]
-    public function getAllOptions()
+    public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array
     {
         if (!$this->_options) {
             foreach (Mage::getConfig()->getNode('global/cms/layouts')->children() as $layoutName => $layoutConfig) {

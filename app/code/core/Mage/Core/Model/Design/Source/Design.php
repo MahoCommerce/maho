@@ -39,10 +39,9 @@ class Mage_Core_Model_Design_Source_Design extends Mage_Eav_Model_Entity_Attribu
      * Retrieve All Design Theme Options
      *
      * @param bool $withEmpty add empty (please select) values to result
-     * @return array
      */
     #[\Override]
-    public function getAllOptions($withEmpty = true)
+    public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array
     {
         if (is_null($this->_options)) {
             $design = Mage::getModel('core/design_package')->getThemeList();

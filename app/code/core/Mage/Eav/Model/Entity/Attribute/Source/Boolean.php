@@ -18,11 +18,9 @@ class Mage_Eav_Model_Entity_Attribute_Source_Boolean extends Mage_Eav_Model_Enti
 
     /**
      * Retrieve all options array
-     *
-     * @return array
      */
     #[\Override]
-    public function getAllOptions()
+    public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array
     {
         $this->_options ??= [
             [

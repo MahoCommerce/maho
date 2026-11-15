@@ -11,11 +11,9 @@
 class Mage_Tax_Model_Class_Source_Product extends Mage_Eav_Model_Entity_Attribute_Source_Abstract
 {
     /**
-     * @param bool $withEmpty
-     * @return array
      */
     #[\Override]
-    public function getAllOptions($withEmpty = false)
+    public function getAllOptions(bool $withEmpty = false, bool $defaultValues = false): array
     {
         $this->_options ??= Mage::getResourceModel('tax/class_collection')
             ->addFieldToFilter('class_type', Mage_Tax_Model_Class::TAX_CLASS_TYPE_PRODUCT)

@@ -12,11 +12,9 @@ class Mage_Catalog_Model_Resource_Category_Attribute_Source_Page extends Mage_Ea
 {
     /**
      * Return all block options
-     *
-     * @return array
      */
     #[\Override]
-    public function getAllOptions()
+    public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array
     {
         if (!$this->_options) {
             $this->_options = Mage::getResourceModel('cms/block_collection')
