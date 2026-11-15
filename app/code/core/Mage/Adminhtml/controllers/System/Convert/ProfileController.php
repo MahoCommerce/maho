@@ -16,7 +16,7 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
      */
     public const ADMIN_RESOURCE = 'admin/system/convert/profiles';
 
-    protected function _initProfile($idFieldName = 'id')
+    protected function _initProfile(string $idFieldName = 'id'): static|false
     {
         $this->_title($this->__('System'))
              ->_title($this->__('Import and Export'))

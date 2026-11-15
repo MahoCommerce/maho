@@ -225,7 +225,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
      * Preview Newsletter template
      */
     #[Maho\Config\Route('/admin/newsletter_template/preview')]
-    public function previewAction()
+    public function previewAction(): void
     {
         $this->_setTitle();
         $this->loadLayout();
@@ -233,7 +233,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
         $data = $this->getRequest()->getParams();
         if (empty($data) || !isset($data['id'])) {
             $this->_forward('noRoute');
-            return $this;
+            return;
         }
 
         // set default value for selected store

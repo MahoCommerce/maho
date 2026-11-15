@@ -18,10 +18,7 @@ class Mage_Adminhtml_Model_Config extends \Maho\Simplexml\Config
     #[\Override]
     protected $_cacheId = 'mage_adminhtml_config_system_xml';
 
-    /**
-     * @var Mage_Core_Model_Config_Base
-     */
-    protected $_config;
+    protected ?\Maho\Simplexml\Config $_config = null;
 
     /**
      * @var \Maho\Simplexml\Element
@@ -260,10 +257,8 @@ class Mage_Adminhtml_Model_Config extends \Maho\Simplexml\Config
      * Config paths whose values are stored encrypted: every system.xml field with the encrypted
      * backend (resolved through config_path) plus every node in the merged default, website and
      * store config trees that declares that backend.
-     *
-     * @return array
      */
-    public function getEncryptedNodeEntriesPaths($explodePathToEntities = false)
+    public function getEncryptedNodeEntriesPaths(bool $explodePathToEntities = false): array
     {
         $this->_encryptedPaths ??= array_values(array_unique(array_merge(
             $this->_collectEncryptedSystemXmlPaths(),

@@ -457,10 +457,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      *   - CLI: throws exception
      *   - Other: 503 error
      *
-     * @return void
      * @throws Exception
      */
-    public function getCacheSaveLock($waitTime = null, $ignoreFailure = false)
+    public function getCacheSaveLock(?int $waitTime = null, bool $ignoreFailure = false): void
     {
         if (!Mage::app()->useCache('config')) {
             return;
@@ -737,14 +736,11 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * Create node by $path and set its value.
      *
      * @param string $path separated by slashes
-     * @param string $value
-     * @param bool $overwrite
-     * @return \Maho\Simplexml\Config
      */
     #[\Override]
-    public function setNode($path, $value, $overwrite = true)
+    public function setNode(string $path, mixed $value, bool $overwrite = true): static
     {
-        if ($this->_useCache && ($path !== null)) {
+        if ($this->_useCache) {
             $sectionPath = explode('/', $path);
             $config = $this->_getSectionConfig($sectionPath);
             if ($config) {
@@ -995,13 +991,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     /**
      * Iterate all active modules "etc" folders and combine data from
      * specidied xml file name to one object
-     *
-     * @param string $fileName
-     * @param null|Mage_Core_Model_Config_Base|\Maho\Simplexml\Config $mergeToObject
-     * @param \Maho\Simplexml\Config|null $mergeModel
-     * @return Mage_Core_Model_Config_Base|\Maho\Simplexml\Config
      */
-    public function loadModulesConfiguration($fileName, $mergeToObject = null, $mergeModel = null)
+    public function loadModulesConfiguration(string|array $fileName, ?\Maho\Simplexml\Config $mergeToObject = null, ?\Maho\Simplexml\Config $mergeModel = null): \Maho\Simplexml\Config
     {
         if ($mergeToObject === null) {
             $mergeToObject = clone $this->_prototype;

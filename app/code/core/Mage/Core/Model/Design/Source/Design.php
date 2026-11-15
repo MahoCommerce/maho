@@ -10,7 +10,7 @@
 
 class Mage_Core_Model_Design_Source_Design extends Mage_Eav_Model_Entity_Attribute_Source_Abstract
 {
-    protected $_isFullLabel = false;
+    protected bool $_isFullLabel = false;
 
     /**
      * Setter

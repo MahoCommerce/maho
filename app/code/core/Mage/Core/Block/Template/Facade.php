@@ -8,6 +8,8 @@
  * @package Mage_Core
  */
 
+declare(strict_types=1);
+
 /**
  * Block that can get data from layout or from registry.
  * Can compare its data values by specified keys
@@ -30,11 +32,8 @@ class Mage_Core_Block_Template_Facade extends Mage_Core_Block_Template
 
     /**
      * Also set data, but take the value from registry by registry key
-     *
-     * @param string $key
-     * @param string $registryKey
      */
-    public function setDataByKeyFromRegistry($key, $registryKey)
+    public function setDataByKeyFromRegistry(string $key, string $registryKey): void
     {
         $registryItem = Mage::registry($registryKey);
         if (empty($registryItem)) {

@@ -38,12 +38,8 @@ class Multiline extends AbstractElement
         return ['type', 'title', 'class', 'style', 'onclick', 'onchange', 'disabled', 'maxlength'];
     }
 
-    /**
-     * @param int $suffix
-     * @return string
-     */
     #[\Override]
-    public function getLabelHtml($suffix = 0)
+    public function getLabelHtml(string $suffix = '0'): string
     {
         return parent::getLabelHtml($suffix);
     }

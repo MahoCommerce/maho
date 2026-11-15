@@ -181,7 +181,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Retrieve response for deniedJsonAction()
      */
-    protected function _getDeniedJson()
+    protected function _getDeniedJson(): string
     {
         return Mage::helper('core')->jsonEncode([
             'ajaxExpired' => 1,
@@ -201,7 +201,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Retrieve response for deniedIframeAction()
      */
-    protected function _getDeniedIframe()
+    protected function _getDeniedIframe(): string
     {
         return '<script>parent.window.location = \''
             . $this->getUrl('*/index/login') . '\';</script>';

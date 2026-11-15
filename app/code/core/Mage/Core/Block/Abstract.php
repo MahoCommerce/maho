@@ -1283,7 +1283,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      *
      * @see Mage_Core_Helper_Data::jsonEncode()
      */
-    public function jsonEncode($valueToEncode): string
+    public function jsonEncode(mixed $valueToEncode): string
     {
         return Mage::helper('core')->jsonEncode($valueToEncode);
     }

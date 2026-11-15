@@ -77,7 +77,7 @@ class Mage_Core_Model_Resource
             $this->_connections[$name] = $this->_getDefaultConnection($name);
             return $this->_connections[$name];
         }
-        if (!$connConfig->is('active', 1)) {
+        if (!$connConfig->is('active', '1')) {
             return false;
         }
 

@@ -481,7 +481,7 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
                         $cloneModel = Mage::getModel((string) $groupConfig->clone_model);
                     } else {
                         Mage::throwException(
-                            $this->__('Config form fieldset clone model required to be able to clone fields'),
+                            Mage::helper('adminhtml')->__('Config form fieldset clone model required to be able to clone fields'),
                         );
                     }
                     foreach ($cloneModel->getPrefixes() as $prefix) {

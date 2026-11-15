@@ -15,11 +15,9 @@ class Parameter extends AbstractTokenizer
 {
     /**
      * Tokenize string and return getted parameters
-     *
-     * @return array
      */
     #[\Override]
-    public function tokenize()
+    public function tokenize(): array
     {
         $parameters = [];
         $parameterName = '';

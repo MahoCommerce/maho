@@ -33,10 +33,8 @@ class Mage_Adminhtml_Permissions_RoleController extends Mage_Adminhtml_Controlle
 
     /**
      * Initialize role model by passed parameter in request
-     *
-     * @return Mage_Admin_Model_Roles
      */
-    protected function _initRole($requestVariable = 'rid')
+    protected function _initRole(string $requestVariable = 'rid'): Mage_Admin_Model_Roles
     {
         $this->_title($this->__('System'))
              ->_title($this->__('Permissions'))

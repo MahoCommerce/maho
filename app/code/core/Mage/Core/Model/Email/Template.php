@@ -47,7 +47,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     /** @var Mage_Core_Model_Email_Attachment[] */
     protected array $_attachments = [];
 
-    protected static $_defaultTemplates;
+    protected static ?array $_defaultTemplates = null;
 
     #[\Override]
     protected function _construct()

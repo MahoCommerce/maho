@@ -94,18 +94,20 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
      * Edit tag action
      */
     #[Maho\Config\Route('/admin/tag/edit')]
-    public function editAction()
+    public function editAction(): void
     {
         $this->_title($this->__('Catalog'))
              ->_title($this->__('Tags'));
 
         if (!(int) $this->getRequest()->getParam('store')) {
-            return $this->_redirect('*/*/*/', ['store' => Mage::app()->getAnyStoreView()->getId(), '_current' => true]);
+            $this->_redirect('*/*/*/', ['store' => Mage::app()->getAnyStoreView()->getId(), '_current' => true]);
+            return;
         }
 
         if (!($model = $this->_initTag())) {
             Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('Wrong tag was specified.'));
-            return $this->_redirect('*/*/index', ['store' => $this->getRequest()->getParam('store')]);
+            $this->_redirect('*/*/index', ['store' => $this->getRequest()->getParam('store')]);
+            return;
         }
 
         // set entered data if was error when we do save
@@ -125,7 +127,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
      * Save tag action
      */
     #[Maho\Config\Route('/admin/tag/save')]
-    public function saveAction()
+    public function saveAction(): void
     {
         if ($postData = $this->getRequest()->getPost()) {
             $data['name']               = trim($postData['tag_name']);
@@ -135,7 +137,8 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
 
             if (!$model = $this->_initTag()) {
                 Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('Wrong tag was specified.'));
-                return $this->_redirect('*/*/index', ['store' => $data['store']]);
+                $this->_redirect('*/*/index', ['store' => $data['store']]);
+                return;
             }
 
             $model->addData($data);
@@ -154,18 +157,21 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
                 Mage::getSingleton('adminhtml/session')->setTagData(false);
 
                 if (($continue = $this->getRequest()->getParam('continue'))) {
-                    return $this->_redirect('*/tag/edit', ['tag_id' => $model->getId(), 'store' => $model->getStoreId(), 'ret' => $continue]);
+                    $this->_redirect('*/tag/edit', ['tag_id' => $model->getId(), 'store' => $model->getStoreId(), 'ret' => $continue]);
+                    return;
                 }
-                return $this->_redirect('*/tag/' . $this->getRequest()->getParam('ret', 'index'));
+                $this->_redirect('*/tag/' . $this->getRequest()->getParam('ret', 'index'));
+                return;
             } catch (Exception $e) {
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
                 Mage::getSingleton('adminhtml/session')->setTagData($data);
 
-                return $this->_redirect('*/*/edit', ['tag_id' => $model->getId(), 'store' => $model->getStoreId()]);
+                $this->_redirect('*/*/edit', ['tag_id' => $model->getId(), 'store' => $model->getStoreId()]);
+                return;
             }
         }
 
-        return $this->_redirect('*/tag/index', ['_current' => true]);
+        $this->_redirect('*/tag/index', ['_current' => true]);
     }
 
     /**

@@ -52,12 +52,7 @@ class Radios extends AbstractElement
         return $html;
     }
 
-    /**
-     * @param array|\Maho\DataObject $option
-     * @param $selected
-     * @return string
-     */
-    protected function _optionToHtml($option, $selected)
+    protected function _optionToHtml(array|\Maho\DataObject $option, mixed $selected): string
     {
         $html = '<input type="radio"' . $this->serialize(['name', 'class', 'style']);
         if (is_array($option)) {

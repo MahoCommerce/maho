@@ -115,9 +115,9 @@ class Uploader
      */
     protected $_dispretionPath = null;
 
-    protected $_fileExists = false;
+    protected bool $_fileExists = false;
 
-    protected $_allowedExtensions = null;
+    protected ?array $_allowedExtensions = null;
 
     /**
      * List of valid MIME-Types.
@@ -145,7 +145,7 @@ class Uploader
      */
     protected $_result;
 
-    public function __construct($fileId)
+    public function __construct(string|array $fileId)
     {
         $this->_setUploadFileId($fileId);
         if (empty($this->_file['tmp_name']) || !file_exists($this->_file['tmp_name'])) {
@@ -412,7 +412,7 @@ class Uploader
         return $fileName;
     }
 
-    protected static function _addDirSeparator($dir)
+    protected static function _addDirSeparator(string $dir): string
     {
         if (substr($dir, -1) != DIRECTORY_SEPARATOR) {
             $dir .= DIRECTORY_SEPARATOR;
@@ -504,7 +504,7 @@ class Uploader
         return $this;
     }
 
-    public function setAllowedExtensions($extensions = []): static
+    public function setAllowedExtensions(array|string $extensions = []): static
     {
         foreach ((array) $extensions as $extension) {
             $this->_allowedExtensions[] = strtolower($extension);
@@ -595,7 +595,7 @@ class Uploader
         return $this;
     }
 
-    public static function getNewFileName($destFile)
+    public static function getNewFileName(string $destFile): string
     {
         return self::uniqueName($destFile, DIRECTORY_SEPARATOR, file_exists(...));
     }
@@ -639,7 +639,7 @@ class Uploader
         return implode('/', $parts);
     }
 
-    public static function getDispretionPath($fileName)
+    public static function getDispretionPath(string $fileName): string
     {
         $char = 0;
         $dispretionPath = '';

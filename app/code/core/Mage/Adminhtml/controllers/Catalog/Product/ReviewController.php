@@ -19,7 +19,7 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
     protected $_publicActions = ['edit'];
 
     #[Maho\Config\Route('/admin/catalog_product_review/index')]
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('Catalog'))
              ->_title($this->__('Reviews and Ratings'))
@@ -28,7 +28,8 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         $this->_title($this->__('All Reviews'));
 
         if ($this->getRequest()->getParam('ajax')) {
-            return $this->_forward('reviewGrid');
+            $this->_forward('reviewGrid');
+            return;
         }
 
         $this->loadLayout();
@@ -40,7 +41,7 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
     }
 
     #[Maho\Config\Route('/admin/catalog_product_review/pending')]
-    public function pendingAction()
+    public function pendingAction(): void
     {
         $this->_title($this->__('Catalog'))
              ->_title($this->__('Reviews and Ratings'))
@@ -50,7 +51,8 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
 
         if ($this->getRequest()->getParam('ajax')) {
             Mage::register('usePendingFilter', true);
-            return $this->_forward('reviewGrid');
+            $this->_forward('reviewGrid');
+            return;
         }
 
         $this->loadLayout();
@@ -102,7 +104,7 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
     }
 
     #[Maho\Config\Route('/admin/catalog_product_review/save')]
-    public function saveAction()
+    public function saveAction(): void
     {
         if (($data = $this->getRequest()->getPost()) && ($reviewId = $this->getRequest()->getParam('id'))) {
             $session = Mage::getSingleton('adminhtml/session');
@@ -119,7 +121,8 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
                 $session->addException($e, Mage::helper('catalog')->__('An error occurred while saving this review.'));
             }
 
-            return $this->getResponse()->setRedirect($this->getUrl($this->getRequest()->getParam('ret') == 'pending' ? '*/*/pending' : '*/*/'));
+            $this->getResponse()->setRedirect($this->getUrl($this->getRequest()->getParam('ret') == 'pending' ? '*/*/pending' : '*/*/'));
+            return;
         }
         $this->_redirect('*/*/');
     }

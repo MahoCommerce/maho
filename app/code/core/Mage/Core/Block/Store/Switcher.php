@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_Core_Block_Store_Switcher extends Mage_Core_Block_Template
 {
     protected array $_groups = [];
-    protected $_stores = [];
+    protected array $_stores = [];
     protected bool $_loaded = false;
 
     public function __construct()
