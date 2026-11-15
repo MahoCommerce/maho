@@ -74,13 +74,13 @@ class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert
             $fieldNames = $this->getVar('map');
         } else {
             $fieldNames = [];
-            foreach ($batchIoAdapter->read(true, $fDel, $fEnc) as $v) {
+            foreach ($batchIoAdapter->readCsv($fDel, $fEnc) as $v) {
                 $fieldNames[$v] = $v;
             }
         }
 
         $countRows = 0;
-        while (($csvData = $batchIoAdapter->read(true, $fDel, $fEnc)) !== false) {
+        while (($csvData = $batchIoAdapter->readCsv($fDel, $fEnc)) !== false) {
             if (count($csvData) == 1 && $csvData[0] === null) {
                 continue;
             }

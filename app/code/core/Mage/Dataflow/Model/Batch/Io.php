@@ -132,15 +132,18 @@ class Mage_Dataflow_Model_Batch_Io
      * # length  bytes have been read
      * # EOF (end of file) is reached
      */
-    public function read(bool $csv = false, string $delimiter = ',', string $enclosure = '"'): array|string|false
+    public function read(): string|false
     {
-        if ($csv) {
-            $content = $this->getIoAdapter()->streamReadCsv($delimiter, $enclosure);
-        } else {
-            $content = $this->getIoAdapter()->streamRead(1024);
+        $content = $this->getIoAdapter()->streamRead(1024);
+        if ($content !== false) {
             $this->_fileSize += strlen($content);
         }
         return $content;
+    }
+
+    public function readCsv(string $delimiter = ',', string $enclosure = '"'): array|false
+    {
+        return $this->getIoAdapter()->streamReadCsv($delimiter, $enclosure);
     }
 
     /**

@@ -3961,6 +3961,18 @@ parameters:
 			path: app/code/core/Mage/Tax/data/tax_setup/data-install-1.6.0.0.php
 
 		-
+			rawMessage: 'Method Mage_Usa_Model_Shipping_Carrier_Abstract::getTrackingInfo() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Abstract.php
+
+		-
+			rawMessage: 'Method Mage_Usa_Model_Shipping_Carrier_Abstract::getTrackingInfo() has parameter $tracking with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Abstract.php
+
+		-
 			rawMessage: 'Parameter #1 $shippingDays of method Mage_Usa_Model_Shipping_Carrier_Dhl_Abstract::_determineShippingDay() expects array, string|false given.'
 			identifier: argument.type
 			count: 1
