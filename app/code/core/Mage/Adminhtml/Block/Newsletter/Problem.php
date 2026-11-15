@@ -48,17 +48,17 @@ class Mage_Adminhtml_Block_Newsletter_Problem extends Mage_Adminhtml_Block_Templ
         return parent::_prepareLayout();
     }
 
-    public function getUnsubscribeButtonHtml()
+    public function getUnsubscribeButtonHtml(): string
     {
         return $this->getChildHtml('unsubscribeButton');
     }
 
-    public function getDeleteButtonHtml()
+    public function getDeleteButtonHtml(): string
     {
         return $this->getChildHtml('deleteButton');
     }
 
-    public function getShowButtons()
+    public function getShowButtons(): bool
     {
         return  Mage::getResourceSingleton('newsletter/problem_collection')->getSize() > 0;
     }

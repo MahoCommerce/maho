@@ -10,9 +10,9 @@
 
 abstract class Mage_CatalogIndex_Model_Indexer_Abstract extends Mage_Core_Model_Abstract implements Mage_CatalogIndex_Model_Indexer_Interface
 {
-    protected $_processChildren = true;
-    protected $_processChildrenForConfigurable = true;
-    protected $_runOnce = false;
+    protected bool $_processChildren = true;
+    protected bool $_processChildrenForConfigurable = true;
+    protected bool $_runOnce = false;
 
     /**
      * @param int|string $forceId

@@ -288,11 +288,10 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
     /**
      * Prepare chart data
      *
-     * @return void
      * @throws Exception
      */
     #[\Override]
-    protected function _prepareData()
+    protected function _prepareData(): void
     {
         /** @var Mage_Adminhtml_Helper_Dashboard_Data $helper */
         $helper = $this->helper('adminhtml/dashboard_data');

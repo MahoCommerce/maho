@@ -36,7 +36,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      */
     protected $_columns = [];
 
-    protected $_lastColumnId;
+    protected int|string|null $_lastColumnId = null;
 
     /**
      * Collection object
@@ -47,14 +47,12 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
 
     /**
      * Page and sorting var names
-     *
-     * @var string
      */
-    protected $_varNameLimit    = 'limit';
-    protected $_varNamePage     = 'page';
-    protected $_varNameSort     = 'sort';
-    protected $_varNameDir      = 'dir';
-    protected $_varNameFilter   = 'filter';
+    protected string $_varNameLimit = 'limit';
+    protected string $_varNamePage = 'page';
+    protected string $_varNameSort = 'sort';
+    protected string $_varNameDir = 'dir';
+    protected string $_varNameFilter = 'filter';
 
     /**
      * @var int
@@ -510,7 +508,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
         return $this;
     }
 
-    public function getLastColumnId()
+    public function getLastColumnId(): int|string|null
     {
         return $this->_lastColumnId;
     }
@@ -892,47 +890,27 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
         return $this->_varNameFilter;
     }
 
-    /**
-     * @param string $name
-     * @return string
-     */
-    public function setVarNameLimit($name)
+    public function setVarNameLimit(string $name): string
     {
         return $this->_varNameLimit = $name;
     }
 
-    /**
-     * @param string $name
-     * @return string
-     */
-    public function setVarNamePage($name)
+    public function setVarNamePage(string $name): string
     {
         return $this->_varNamePage = $name;
     }
 
-    /**
-     * @param string $name
-     * @return string
-     */
-    public function setVarNameSort($name)
+    public function setVarNameSort(string $name): string
     {
         return $this->_varNameSort = $name;
     }
 
-    /**
-     * @param string $name
-     * @return string
-     */
-    public function setVarNameDir($name)
+    public function setVarNameDir(string $name): string
     {
         return $this->_varNameDir = $name;
     }
 
-    /**
-     * @param string $name
-     * @return string
-     */
-    public function setVarNameFilter($name)
+    public function setVarNameFilter(string $name): string
     {
         return $this->_varNameFilter = $name;
     }
@@ -1597,7 +1575,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
         return $this;
     }
 
-    public function resetSavedParametersInSession()
+    public function resetSavedParametersInSession(): void
     {
         $session = Mage::getSingleton('adminhtml/session');
 

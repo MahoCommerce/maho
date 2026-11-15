@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Catalog_Category_Widget_Chooser extends Mage_Adminhtml_Block_Catalog_Category_Abstract
 {
-    protected $_selectedCategories = [];
+    protected array $_selectedCategories = [];
 
     /**
      * Block construction

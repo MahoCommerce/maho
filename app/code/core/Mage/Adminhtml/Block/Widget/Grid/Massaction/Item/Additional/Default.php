@@ -10,11 +10,8 @@
 
 class Mage_Adminhtml_Block_Widget_Grid_Massaction_Item_Additional_Default extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Grid_Massaction_Item_Additional_Interface
 {
-    /**
-     * @return $this
-     */
     #[\Override]
-    public function createFromConfiguration(array $configuration)
+    public function createFromConfiguration(array $configuration): static
     {
         $form = new \Maho\Data\Form();
 

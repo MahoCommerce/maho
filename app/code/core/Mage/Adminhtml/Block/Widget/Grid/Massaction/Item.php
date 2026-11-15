@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Widget_Grid_Massaction_Item extends Mage_Adminhtml_Block_Widget
 {
-    protected $_massaction = null;
+    protected ?Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract $_massaction = null;
 
     /**
      * Set parent massaction block

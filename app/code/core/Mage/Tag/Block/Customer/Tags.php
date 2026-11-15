@@ -10,7 +10,7 @@
 
 class Mage_Tag_Block_Customer_Tags extends Mage_Customer_Block_Account_Dashboard
 {
-    protected $_tags;
+    protected ?array $_tags = null;
     protected $_minPopularity;
     protected $_maxPopularity;
 

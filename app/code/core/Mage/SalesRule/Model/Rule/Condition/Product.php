@@ -14,7 +14,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product extends Mage_Rule_Model_Condit
      * Add special attributes
      */
     #[\Override]
-    protected function _addSpecialAttributes(array &$attributes)
+    protected function _addSpecialAttributes(array &$attributes): void
     {
         parent::_addSpecialAttributes($attributes);
         $attributes['quote_item_qty'] = Mage::helper('salesrule')->__('Quantity in cart');

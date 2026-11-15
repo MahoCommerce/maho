@@ -31,7 +31,7 @@ class Mage_Adminhtml_Block_Report_Tag_Popular extends Mage_Adminhtml_Block_Widge
         return parent::_prepareLayout();
     }
 
-    public function getStoreSwitcherHtml()
+    public function getStoreSwitcherHtml(): string
     {
         return Mage::app()->isSingleStoreMode() ? '' : $this->getChildHtml('store_switcher');
     }

@@ -43,7 +43,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Form extends Mage_Admin
         return Mage::registry('current_creditmemo');
     }
 
-    public function getSaveUrl()
+    public function getSaveUrl(): string
     {
         return $this->getUrl('*/*/save', ['_current' => true]);
     }

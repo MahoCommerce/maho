@@ -107,11 +107,8 @@ abstract class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Abstract extends 
 
     /**
      * Prepare data index for indexable attributes
-     *
-     * @param array $entityIds      the entity ids limitation
-     * @param int $attributeId      the attribute id limitation
      */
-    abstract protected function _prepareIndex($entityIds = null, $attributeId = null);
+    abstract protected function _prepareIndex(?array $entityIds = null, ?int $attributeId = null): static;
 
     /**
      * Remove Not Visible products from temporary data index

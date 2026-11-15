@@ -43,7 +43,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
      */
     protected $_productAttributeSets;
 
-    protected $_stores;
+    protected ?array $_stores = null;
 
     /**
      * @var array

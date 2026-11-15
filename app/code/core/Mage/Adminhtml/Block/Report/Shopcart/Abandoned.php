@@ -31,7 +31,7 @@ class Mage_Adminhtml_Block_Report_Shopcart_Abandoned extends Mage_Adminhtml_Bloc
         return parent::_prepareLayout();
     }
 
-    public function getStoreSwitcherHtml()
+    public function getStoreSwitcherHtml(): string
     {
         return Mage::app()->isSingleStoreMode() ? '' : $this->getChildHtml('store_switcher');
     }

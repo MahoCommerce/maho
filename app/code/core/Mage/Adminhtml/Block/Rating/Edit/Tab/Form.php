@@ -93,7 +93,7 @@ class Mage_Adminhtml_Block_Rating_Edit_Tab_Form extends Mage_Adminhtml_Block_Wid
         return $this->_getWarningHtml() . parent::_toHtml();
     }
 
-    protected function _getWarningHtml()
+    protected function _getWarningHtml(): string
     {
         return '<div>
 <ul class="messages">

@@ -23,17 +23,17 @@ class Mage_Adminhtml_Block_Tag_Pending extends Mage_Adminhtml_Block_Template
         return parent::_prepareLayout();
     }
 
-    public function getCreateButtonHtml()
+    public function getCreateButtonHtml(): string
     {
         return '';
     }
 
-    public function getGridHtml()
+    public function getGridHtml(): string
     {
         return $this->getChildHtml('tagsGrid');
     }
 
-    public function getHeaderHtml()
+    public function getHeaderHtml(): string
     {
         return Mage::helper('tag')->__('Pending Tags');
     }

@@ -11,9 +11,9 @@
 class Mage_Page_Block_Html_Pager extends Mage_Core_Block_Template
 {
     protected $_collection = null;
-    protected $_pageVarName    = 'p';
-    protected $_limitVarName   = 'limit';
-    protected $_availableLimit = [10 => 10,20 => 20,50 => 50];
+    protected string $_pageVarName    = 'p';
+    protected string $_limitVarName   = 'limit';
+    protected array $_availableLimit = [10 => 10,20 => 20,50 => 50];
     protected int $_dispersion     = 3;
     protected int $_displayPages   = 5;
     protected $_showPerPage    = true;

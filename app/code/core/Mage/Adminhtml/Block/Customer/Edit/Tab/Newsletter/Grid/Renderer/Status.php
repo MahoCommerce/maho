@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid_Renderer_Status extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
-    protected static $_statuses;
+    protected static array $_statuses = [];
 
     public function __construct()
     {
@@ -30,7 +30,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid_Renderer_Status ext
         return Mage::helper('customer')->__(self::getStatus($row->getQueueStatus()));
     }
 
-    public static function getStatus($status)
+    public static function getStatus(?int $status): string
     {
         return self::$_statuses[$status] ?? Mage::helper('customer')->__('Unknown');
     }

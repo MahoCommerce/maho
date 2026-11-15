@@ -11,7 +11,7 @@
 class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Number extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     #[\Override]
-    protected $_defaultWidth = 100;
+    protected ?int $_defaultWidth = 100;
 
     /**
      * Returns value of the row

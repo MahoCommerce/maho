@@ -43,14 +43,14 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
     protected array $_internalFields = [];
     protected array $_externalFields = [];
 
-    protected $_inventoryItems = [];
+    protected array $_inventoryItems = [];
 
-    protected $_productModel;
+    protected string|false|null $_productModel = null;
 
     protected array $_setInstances = [];
 
-    protected $_store;
-    protected $_storeId;
+    protected ?Mage_Core_Model_Store $_store = null;
+    protected ?int $_storeId = null;
     protected array $_attributes = [];
 
     public function __construct()
