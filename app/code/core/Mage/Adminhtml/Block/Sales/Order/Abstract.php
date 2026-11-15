@@ -30,7 +30,7 @@ class Mage_Adminhtml_Block_Sales_Order_Abstract extends Mage_Adminhtml_Block_Wid
         Mage::throwException(Mage::helper('sales')->__('Cannot get order instance'));
     }
 
-    public function getPriceDataObject(): mixed
+    public function getPriceDataObject(): Mage_Core_Model_Abstract
     {
         $obj = $this->getData('price_data_object');
         if (is_null($obj)) {

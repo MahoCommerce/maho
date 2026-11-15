@@ -12,7 +12,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Radio extends Mage_Adminh
 {
     #[\Override]
     protected ?int $_defaultWidth = 55;
-    protected mixed $_values = null;
+    protected $_values;
 
     /**
      * Returns all values for the column

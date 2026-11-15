@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Items extends Mage_Adminhtml_Block_Sales_Items_Abstract
 {
-    protected mixed $_canReturnToStock = null;
+    protected ?bool $_canReturnToStock = null;
     /**
      * Prepare child blocks
      *
@@ -141,7 +141,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Items extends Mage_Admi
     public function canReturnItemsToStock()
     {
         if (is_null($this->_canReturnToStock)) {
-            if ($this->_canReturnToStock = Mage::getStoreConfig(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_CAN_SUBTRACT)) {
+            if ($this->_canReturnToStock = Mage::getStoreConfigFlag(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_CAN_SUBTRACT)) {
                 $canReturnToStock = false;
                 foreach ($this->getCreditmemo()->getAllItems() as $item) {
                     $product = Mage::getModel('catalog/product')->load($item->getOrderItem()->getProductId());

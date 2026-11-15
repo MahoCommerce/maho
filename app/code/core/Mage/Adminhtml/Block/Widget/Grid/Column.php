@@ -13,9 +13,9 @@ declare(strict_types=1);
 class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widget
 {
     protected ?Mage_Adminhtml_Block_Widget_Grid $_grid = null;
-    protected mixed $_renderer = null;
-    protected mixed $_filter = null;
-    protected mixed $_type = null;
+    protected $_renderer;
+    protected $_filter;
+    protected $_type;
     protected ?string $_cssClass = null;
 
     /**

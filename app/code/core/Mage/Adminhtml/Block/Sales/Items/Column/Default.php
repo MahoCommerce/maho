@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Sales_Items_Column_Default extends Mage_Adminhtml_Block_Template
 {
-    public function getItem(): mixed
+    public function getItem(): Mage_Sales_Model_Order_Item
     {
         if ($this->_getData('item') instanceof Mage_Sales_Model_Order_Item) {
             return $this->_getData('item');
@@ -54,7 +54,7 @@ class Mage_Adminhtml_Block_Sales_Items_Column_Default extends Mage_Adminhtml_Blo
         return $default;
     }
 
-    public function getSku(): mixed
+    public function getSku(): ?string
     {
         /*if ($this->getItem()->getProductType() == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
             return $this->getItem()->getProductOptionByCode('simple_sku');

@@ -108,9 +108,9 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Shipping_Method_Form extends Mage_
         return false;
     }
 
-    public function getIsRateRequest(): mixed
+    public function getIsRateRequest(): bool
     {
-        return $this->getRequest()->getParam('collect_shipping_rates');
+        return (bool) $this->getRequest()->getParam('collect_shipping_rates');
     }
 
     public function getShippingPrice($price, $flag)

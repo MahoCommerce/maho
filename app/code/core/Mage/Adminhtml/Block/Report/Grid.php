@@ -70,7 +70,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
      */
     protected $_locale;
 
-    protected mixed $_filterValues = null;
+    protected $_filterValues;
 
     /**
      * Mage_Adminhtml_Block_Report_Grid constructor.
@@ -335,14 +335,14 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
         return $this->getChildHtml('refresh_button');
     }
 
-    public function setFilter(int|string $name, mixed $value): void
+    public function setFilter($name, $value): void
     {
         if ($name) {
             $this->_filters[$name] = $value;
         }
     }
 
-    public function getFilter(string $name): mixed
+    public function getFilter($name)
     {
         return $this->_filters[$name] ?? (($this->getRequest()->getParam($name))
                 ? htmlspecialchars($this->getRequest()->getParam($name)) : '');

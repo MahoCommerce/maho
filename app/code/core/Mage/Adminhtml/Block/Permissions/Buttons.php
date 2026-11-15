@@ -85,7 +85,7 @@ class Mage_Adminhtml_Block_Permissions_Buttons extends Mage_Adminhtml_Block_Temp
         return $this->getChildHtml('deleteButton');
     }
 
-    public function getUser(): mixed
+    public function getUser(): ?Mage_Admin_Model_User
     {
         return Mage::registry('user_data');
     }

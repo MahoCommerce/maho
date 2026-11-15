@@ -12,7 +12,7 @@ abstract class Mage_Adminhtml_Block_Dashboard_Abstract extends Mage_Adminhtml_Bl
 {
     protected ?string $_dataHelperName = null;
 
-    public function getCollection(): mixed
+    public function getCollection()
     {
         return $this->getDataHelper()->getCollection();
     }

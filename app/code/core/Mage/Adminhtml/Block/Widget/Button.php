@@ -10,12 +10,12 @@
 
 class Mage_Adminhtml_Block_Widget_Button extends Mage_Adminhtml_Block_Widget
 {
-    public function getType(): mixed
+    public function getType()
     {
         return ($type = $this->getData('type')) ? $type : 'button';
     }
 
-    public function getOnClick(): mixed
+    public function getOnClick()
     {
         if (!$this->getData('on_click')) {
             return $this->getData('onclick');

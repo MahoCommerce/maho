@@ -30,10 +30,10 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar extends Mage_Adminhtml_Blo
         return parent::_prepareLayout();
     }
 
-    public function canDisplay(Mage_Core_Block_Abstract $child): mixed
+    public function canDisplay(Mage_Core_Block_Abstract $child): bool
     {
         if (method_exists($child, 'canDisplay')) {
-            return $child->canDisplay();
+            return (bool) $child->canDisplay();
         }
         return true;
     }

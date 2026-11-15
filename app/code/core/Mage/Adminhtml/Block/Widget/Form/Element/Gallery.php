@@ -35,7 +35,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Gallery extends Mage_Adminhtml_Bl
         return $this->_element;
     }
 
-    public function getValues(): mixed
+    public function getValues()
     {
         return $this->getElement()->getValue();
     }
