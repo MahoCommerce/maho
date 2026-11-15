@@ -46,12 +46,9 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Source extends Mage_Catalo
 
     /**
      * Prepare data index for indexable attributes
-     *
-     * @param array $entityIds      the entity ids limitation
-     * @param int $attributeId      the attribute id limitation
      */
     #[\Override]
-    protected function _prepareIndex($entityIds = null, $attributeId = null): static
+    protected function _prepareIndex(?array $entityIds = null, ?int $attributeId = null): static
     {
         $this->_prepareSelectIndex($entityIds, $attributeId);
         $this->_prepareMultiselectIndex($entityIds, $attributeId);

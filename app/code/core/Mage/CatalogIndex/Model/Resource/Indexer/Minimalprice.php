@@ -45,7 +45,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer_Minimalprice extends Mage_Catalog
      * @param int $attributeId
      */
     #[\Override]
-    public function cleanup($productId, $storeId = null, $attributeId = null): void
+    public function cleanup($productId, $storeId = null, $attributeId = null)
     {
         $conditions[] = $this->_getWriteAdapter()->quoteInto("{$this->_entityIdFieldName} = ?", $productId);
 

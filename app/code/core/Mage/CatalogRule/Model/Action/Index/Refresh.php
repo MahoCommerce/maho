@@ -533,9 +533,8 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
 
     /**
      * Prepare data for group website relation
-     * @param int $timestamp
      */
-    protected function _prepareGroupWebsite($timestamp): void
+    protected function _prepareGroupWebsite(int $timestamp): void
     {
         $this->_connection->delete($this->_resource->getTable('catalogrule/rule_group_website'), []);
         $select = $this->_connection->select()

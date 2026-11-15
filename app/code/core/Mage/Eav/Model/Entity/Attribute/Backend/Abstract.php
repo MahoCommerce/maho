@@ -150,9 +150,10 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      *
      * @param \Maho\DataObject $entity
      * @param int $valueId
+     * @return $this
      */
     #[\Override]
-    public function setEntityValueId($entity, $valueId): static
+    public function setEntityValueId($entity, $valueId)
     {
         if (!$entity || !$entity->getId()) {
             return $this->setValueId($valueId);

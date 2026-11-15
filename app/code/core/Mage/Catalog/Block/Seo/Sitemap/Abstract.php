@@ -12,10 +12,8 @@ abstract class Mage_Catalog_Block_Seo_Sitemap_Abstract extends Mage_Core_Block_T
 {
     /**
      * Init pager
-     *
-     * @param string $pagerName
      */
-    public function bindPager($pagerName): void
+    public function bindPager(string $pagerName): void
     {
         $pager = $this->getLayout()->getBlock($pagerName);
         /** @var Mage_Page_Block_Html_Pager $pager */

@@ -40,11 +40,9 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Category extends Mage_Catalog_Block_Se
 
     /**
      * Init pager
-     *
-     * @param string $pagerName
      */
     #[\Override]
-    public function bindPager($pagerName): void
+    public function bindPager(string $pagerName): void
     {
         $pager = $this->getLayout()->getBlock($pagerName);
         /** @var Mage_Catalog_Block_Seo_Sitemap_Tree_Pager $pager */

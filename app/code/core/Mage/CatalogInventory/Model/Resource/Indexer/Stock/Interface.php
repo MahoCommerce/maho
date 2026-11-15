@@ -19,17 +19,13 @@ interface Mage_CatalogInventory_Model_Resource_Indexer_Stock_Interface
 
     /**
      * Reindex stock status data for defined ids
-     *
-     * @param int|array $entityIds
      */
-    public function reindexEntity($entityIds): static;
+    public function reindexEntity(int|array $entityIds): static;
 
     /**
      * Set Product Type Id for indexer
-     *
-     * @param string $typeId
      */
-    public function setTypeId($typeId): static;
+    public function setTypeId(string $typeId): static;
 
     /**
      * Retrieve Product Type Id for indexer

@@ -4285,6 +4285,36 @@ parameters:
 			path: app/code/core/Mage/CatalogIndex/Model/Data/Abstract.php
 
 		-
+			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Data_Abstract::_prepareLinkFetchSelect() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: app/code/core/Mage/CatalogIndex/Model/Resource/Data/Abstract.php
+
+		-
+			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Data_Configurable::_prepareLinkFetchSelect() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: app/code/core/Mage/CatalogIndex/Model/Resource/Data/Configurable.php
+
+		-
+			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Data_Grouped::_prepareLinkFetchSelect() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: app/code/core/Mage/CatalogIndex/Model/Resource/Data/Grouped.php
+
+		-
+			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Indexer_Abstract::cleanup() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: app/code/core/Mage/CatalogIndex/Model/Resource/Indexer/Abstract.php
+
+		-
+			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Indexer_Minimalprice::cleanup() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: app/code/core/Mage/CatalogIndex/Model/Resource/Indexer/Minimalprice.php
+
+		-
 			rawMessage: 'Parameter #3 $storeIds of method Mage_CatalogIndex_Model_Resource_Setup::_setWebsiteInfo() expects array, Mage_Core_Model_Website given.'
 			identifier: argument.type
 			count: 1
@@ -5371,6 +5401,12 @@ parameters:
 			path: app/code/core/Mage/Downloadable/Block/Adminhtml/Catalog/Product/Edit/Tab/Downloadable.php
 
 		-
+			rawMessage: 'Method Mage_Downloadable_Helper_Download::getFilesize() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: app/code/core/Mage/Downloadable/Helper/Download.php
+
+		-
 			rawMessage: 'Parameter #2 $code of class Exception constructor expects int, string given.'
 			identifier: argument.type
 			count: 1
@@ -5474,6 +5510,12 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Backend_Interface::getValueId() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Backend/Interface.php
+
+		-
+			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Backend_Interface::setEntityValueId() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Backend/Interface.php
@@ -6929,6 +6971,12 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Widget/Model/Widget/Instance.php
+
+		-
+			rawMessage: 'Method Mage_Wishlist_Block_Customer_Wishlist_Item_Column::_beforeChildToHtml() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: app/code/core/Mage/Wishlist/Block/Customer/Wishlist/Item/Column.php
 
 		-
 			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, Closure(mixed): int<0, max> given.'

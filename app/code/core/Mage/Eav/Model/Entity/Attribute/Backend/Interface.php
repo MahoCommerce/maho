@@ -74,5 +74,5 @@ interface Mage_Eav_Model_Entity_Attribute_Backend_Interface
      * @param \Maho\DataObject $entity
      * @param int $valueId
      */
-    public function setEntityValueId($entity, $valueId): static;
+    public function setEntityValueId($entity, $valueId);
 }

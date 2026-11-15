@@ -128,7 +128,7 @@ class Mage_Eav_Model_Config
     /**
      * @throws Exception
      */
-    protected function _initializeStore(int|string|null $storeId = null): void
+    protected function _initializeStore(?int $storeId = null): void
     {
         if ($storeId === null) {
             $storeId = $this->_storeId();

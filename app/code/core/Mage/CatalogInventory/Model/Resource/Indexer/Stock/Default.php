@@ -50,11 +50,9 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Default extends Mage_Ca
 
     /**
      * Reindex stock data for defined product ids
-     *
-     * @param int|array $entityIds
      */
     #[\Override]
-    public function reindexEntity($entityIds): static
+    public function reindexEntity(int|array $entityIds): static
     {
         $this->_updateIndex($entityIds);
         return $this;
@@ -62,11 +60,9 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Default extends Mage_Ca
 
     /**
      * Set active Product Type Id
-     *
-     * @param string $typeId
      */
     #[\Override]
-    public function setTypeId($typeId): static
+    public function setTypeId(string $typeId): static
     {
         $this->_typeId = $typeId;
         return $this;
