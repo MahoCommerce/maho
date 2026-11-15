@@ -15,9 +15,12 @@ concurrency:
 permissions:
   contents: read
 
+# One job runs every quick check, so the setup runs once and the checks hold one runner.
+# Each check step runs also after another check failed (!cancelled()), so one run shows
+# every failure.
 jobs:
   lint:
-    name: PHP-CS-Fixer + Rector
+    name: Lint
     runs-on: [ubuntu-latest]
 
     steps:
@@ -26,8 +29,16 @@ jobs:
         with:
           php-version: 8.5
 
+      # The XML check and the missing translations check compare with older commits.
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: lts/*
+          cache: npm
 
       - name: Get composer cache directory
         id: composer-cache
@@ -40,14 +51,213 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
+      # Before the install: the postinstall hook of npm copies the JS libraries into public/js.
+      - name: Line endings
+        run: |
+          if files_with_crlf=$(git grep -Il $'\r'); then
+            echo "CR line endings found in the following files, please fix them:"
+            echo "$files_with_crlf"
+            exit 1
+          fi
+          echo "No CRLF line endings found."
+
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+        if: ${{ !cancelled() }}
+        run: |
+          composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+          npm ci
+
+      # composer install only warns when composer.lock does not match composer.json,
+      # and then installs the old versions. The validation fails in that case.
+      - name: Composer validation
+        if: ${{ !cancelled() }}
+        run: composer validate --strict --no-check-all
 
       - name: PHP-CS-Fixer
+        if: ${{ !cancelled() }}
         run: composer lint:cs-fixer
 
       - name: PHP-CS-Fixer (phtml)
+        if: ${{ !cancelled() }}
         run: composer lint:cs-fixer-phtml
 
       - name: Rector
+        if: ${{ !cancelled() }}
         run: composer lint:rector
+
+      - name: Get last successful commit
+        id: last-successful-commit
+        if: ${{ !cancelled() }}
+        uses: SamhammerAG/last-successful-build-action@e154c9a6ecef3a3e6b8619fa4ef43a8f9d8c4eba # v8
+        with:
+          branch: main
+          workflow: ${{ github.workflow }}
+          verify: true
+
+      - name: Get changed XML files
+        id: changed-xml
+        if: ${{ !cancelled() }}
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          base_sha: ${{ steps.last-successful-commit.outputs.sha }}
+          files: |
+            **/*.xml
+
+      - name: XML syntax
+        if: ${{ !cancelled() && steps.changed-xml.outputs.any_changed == 'true' }}
+        run: |
+          if ! command -v xmllint >/dev/null; then
+            sudo apt-get update && sudo apt-get -y install libxml2-utils
+          fi
+          set +e
+          ERROR=0
+          for FILE in ${{ steps.changed-xml.outputs.all_changed_files }}; do
+              MESSAGE=$(xmllint --noout "$FILE" 2>&1)
+              if [ $? -ne 0 ]; then
+                  ERROR=255
+                  LINE=$(echo "$MESSAGE" | head -n 1 | cut -d":" -f 2)
+                  echo "::error file=$FILE,line=$LINE::$MESSAGE"
+              fi
+          done
+          exit $ERROR
+
+      - name: Skip OM commits
+        id: skip-om
+        if: ${{ !cancelled() && github.event_name == 'push' }}
+        run: |
+          COMMIT_MSG=$(git log --format=%B -n 1 ${{ github.sha }})
+          if [[ "$COMMIT_MSG" =~ ^OM\ PR ]]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get changed files
+        id: changed-files
+        if: ${{ !cancelled() && (github.event_name == 'pull_request' || steps.skip-om.outputs.skip == 'false') }}
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+
+      - name: Copyright
+        if: ${{ !cancelled() && (github.event_name == 'pull_request' || steps.skip-om.outputs.skip == 'false') }}
+        shell: bash
+        run: |
+          CURRENT_YEAR=$(date +%Y)
+          ERROR=0
+
+          ignore="
+          .phpcs.xml
+          .php-cs-fixer.php
+          .php-cs-fixer.phtml.php
+          rector.php
+          public/js/altcha-i18n.min.js
+          public/js/chart.min.js
+          public/js/codemirror.js
+          public/js/deep-chat.js
+          public/js/purify.min.js
+          public/js/sortable.min.js
+          public/js/tailwindcss-browser.js
+          public/js/tailwindcss-design.js
+          public/js/tiptap.js
+          "
+
+          # Valid start years: 2024 to the current year. Valid end years: the current year or the next one.
+          NEXT_YEAR=$((CURRENT_YEAR + 1))
+          VALID_START_YEARS=""
+          for year in $(seq 2024 "$CURRENT_YEAR"); do
+            VALID_START_YEARS="${VALID_START_YEARS:+$VALID_START_YEARS|}$year"
+          done
+          PATTERN="SPDX-FileCopyrightText: ((${VALID_START_YEARS})-(${CURRENT_YEAR}|${NEXT_YEAR})|(${CURRENT_YEAR}|${NEXT_YEAR})) Maho <https://mahocommerce\.com>"
+
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            # A deleted file
+            if [ ! -f "$file" ]; then
+              continue
+            fi
+            extension="${file##*.}"
+            if ! [[ "${extension,,}" =~ ^(js|php|phtml)$ ]]; then
+              continue
+            fi
+            if echo $ignore | grep -w -q "$file"; then
+              continue
+            fi
+            if ! grep -E -q "$PATTERN" "$file"; then
+              echo "❌ Invalid or missing copyright notice in: $file"
+              echo "   Expected: SPDX-FileCopyrightText: [2024-${CURRENT_YEAR}]-(${CURRENT_YEAR}|${NEXT_YEAR}) or (${CURRENT_YEAR}|${NEXT_YEAR}) Maho <https://mahocommerce.com>"
+              ERROR=1
+            fi
+          done
+
+          if [ $ERROR -eq 1 ]; then
+            echo "❌ Error: Some files are missing the required copyright notice"
+            exit 1
+          fi
+          echo "✅ Success: All modified files contain the required copyright notice"
+
+      - name: Missing translations
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        run: |
+          output=$(git diff --name-only ${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }} | ./maho dev:translations:missing)
+          if [ -n "$output" ]; then
+            echo "❌ Found missing translations in changed files:"
+            echo "$output"
+            exit 1
+          fi
+          echo "✅ No missing translations found in changed files"
+
+      - name: Unused translations
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        run: |
+          output=$(./maho dev:translations:unused)
+          if [ -n "$output" ]; then
+            echo "❌ Found unused translations:"
+            echo "$output"
+            exit 1
+          fi
+          echo "✅ No unused translations found"
+
+      # This step and the next one rewrite files and then compare them with git. Each one
+      # compares only the files that it rewrites.
+      - name: Locale CSV sorting
+        if: ${{ !cancelled() }}
+        run: |
+          sort_csv='
+            foreach (glob("app/locale/en_US/*.csv") as $file) {
+              $lines = file($file, FILE_IGNORE_NEW_LINES);
+              usort($lines, function($a, $b) {
+                $a = str_getcsv($a)[0] ?? "";
+                $b = str_getcsv($b)[0] ?? "";
+                return strnatcasecmp($a, $b);
+              });
+              file_put_contents($file, implode(PHP_EOL, $lines) . PHP_EOL);
+            }
+          '
+          php -r "$sort_csv"
+          if ! git diff --quiet app/locale/en_US/; then
+            echo "❌ Some CSV files are not sorted alphabetically"
+            echo ""
+            echo "Files that need sorting:"
+            git diff --name-only app/locale/en_US/
+            echo ""
+            echo "Differences found:"
+            git diff app/locale/en_US/
+            echo ""
+            echo "Please run the following command to fix them:"
+            echo ""
+            echo "php -r '$sort_csv'"
+            exit 1
+          fi
+          echo "✅ All CSV files are correctly sorted"
+
+      - name: Compiled theme CSS
+        if: ${{ !cancelled() }}
+        run: |
+          ./maho dev:frontend:theme:build --no-content
+          ./maho dev:admin:theme:build
+          # The build overwrites the committed css/*.css bundles. If anything changed, the
+          # theme source (src/*.css) was edited without recompiling.
+          if ! git diff --exit-code -- public/skin/frontend public/skin/adminhtml; then
+            echo ""
+            echo "::error::Compiled theme CSS is out of date. You changed a theme source file (public/skin/*/*/*/src/*.css) but did not recompile. Run './maho dev:frontend:theme:build' or './maho dev:admin:theme:build' and commit the updated css/*.css bundles."
+            exit 1
+          fi
+          echo "Compiled theme CSS is up to date."

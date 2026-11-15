@@ -16,7 +16,7 @@ class Mage_Core_Model_Message_Collection
      * @var array
      */
     protected $_messages = [];
-    protected $_lastAddedMessage;
+    protected ?\Mage_Core_Model_Message_Abstract $_lastAddedMessage = null;
 
     /**
      * Adding new message to collection
@@ -109,7 +109,7 @@ class Mage_Core_Model_Message_Collection
     /**
      * @param string $identifier
      */
-    public function deleteMessageByIdentifier($identifier)
+    public function deleteMessageByIdentifier($identifier): void
     {
         foreach ($this->_messages as $type => $messages) {
             foreach ($messages as $id => $message) {

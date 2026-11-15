@@ -10,8 +10,8 @@
 
 class Mage_Adminhtml_Block_Dashboard_Bar extends Mage_Adminhtml_Block_Dashboard_Abstract
 {
-    protected $_totals = [];
-    protected $_currentCurrencyCode = null;
+    protected array $_totals = [];
+    protected ?Mage_Directory_Model_Currency $_currentCurrencyCode = null;
 
     /**
      * @var Mage_Directory_Model_Currency
@@ -25,12 +25,12 @@ class Mage_Adminhtml_Block_Dashboard_Bar extends Mage_Adminhtml_Block_Dashboard_
         $this->setTemplate('dashboard/bar.phtml');
     }
 
-    protected function getTotals()
+    protected function getTotals(): array
     {
         return $this->_totals;
     }
 
-    public function addTotal($label, $value, $isQuantity = false)
+    public function addTotal($label, $value, $isQuantity = false): static
     {
         if (!$isQuantity) {
             $value = $this->format($value);
@@ -69,7 +69,7 @@ class Mage_Adminhtml_Block_Dashboard_Bar extends Mage_Adminhtml_Block_Dashboard_
      *
      * @param Mage_Directory_Model_Currency $currency
      */
-    public function setCurrency($currency)
+    public function setCurrency($currency): void
     {
         $this->_currency = $currency;
     }

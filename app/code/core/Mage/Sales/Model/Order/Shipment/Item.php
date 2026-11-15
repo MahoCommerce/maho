@@ -22,8 +22,8 @@ class Mage_Sales_Model_Order_Shipment_Item extends Mage_Core_Model_Abstract
     #[\Override]
     protected $_eventObject = 'shipment_item';
 
-    protected $_shipment = null;
-    protected $_orderItem = null;
+    protected ?\Mage_Sales_Model_Order_Shipment $_shipment = null;
+    protected ?Mage_Sales_Model_Order_Item $_orderItem = null;
 
     #[\Override]
     protected function _construct()

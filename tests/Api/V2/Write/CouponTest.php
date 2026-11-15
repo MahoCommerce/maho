@@ -239,6 +239,94 @@ describe('Coupon rule-level knobs', function (): void {
 
 });
 
+describe('Coupon discount amount', function (): void {
+
+    it('creates a free shipping coupon with no discount, as the admin does', function (): void {
+        $token = adminToken();
+        $code = 'PestFreeShip' . substr(uniqid(), -6);
+
+        $create = apiPost('/api/rest/v2/coupons', [
+            'code' => $code,
+            'discountType' => 'fixed',
+            'discountAmount' => 0,
+            'simpleFreeShipping' => 1,
+        ], $token);
+
+        expect($create['status'])->toBeSuccessful();
+        $id = (int) $create['json']['id'];
+        expect((float) $create['json']['discountAmount'])->toBe(0.0);
+        expect(apiGet("/api/rest/v2/coupons/{$id}", $token)['json']['simpleFreeShipping'])->toBe(1);
+
+        expect(apiDelete("/api/rest/v2/coupons/{$id}", $token)['status'])->toBeIn([200, 204]);
+    });
+
+    it('refuses a negative amount and a percent above 100 with the messages of the admin', function (): void {
+        $token = adminToken();
+
+        $negative = apiPost('/api/rest/v2/coupons', ['code' => 'PestNeg' . substr(uniqid(), -6), 'discountType' => 'fixed', 'discountAmount' => -5], $token);
+        $percent = apiPost('/api/rest/v2/coupons', ['code' => 'PestPct' . substr(uniqid(), -6), 'discountType' => 'percent', 'discountAmount' => 150], $token);
+
+        expect($negative['status'])->toBe(422);
+        expect($negative['json']['details']['errors'][0]['message'])->toBe('The discount amount must be 0 or more.');
+        expect($percent['status'])->toBe(422);
+        expect($percent['json']['details']['errors'][0]['message'])->toBe('The discount amount must not be more than 100 for a percent discount.');
+    });
+
+});
+
+describe('Coupon code', function (): void {
+
+    it('saves a code with a space and a dot, as the admin does', function (): void {
+        $token = adminToken();
+        $code = 'SUMMER 2026.' . substr(uniqid(), -6);
+
+        $create = apiPost('/api/rest/v2/coupons', ['code' => $code, 'discountType' => 'percent', 'discountAmount' => 10], $token);
+        expect($create['status'])->toBeSuccessful()
+            ->and($create['json']['code'])->toBe($code);
+        $id = (int) $create['json']['id'];
+
+        $newCode = 'WINTER 2026.' . substr(uniqid(), -6);
+        expect(apiPut("/api/rest/v2/coupons/{$id}", ['code' => $newCode], $token)['status'])->toBe(200)
+            ->and(apiGet("/api/rest/v2/coupons/{$id}", $token)['json']['code'])->toBe($newCode);
+
+        expect(apiDelete("/api/rest/v2/coupons/{$id}", $token)['status'])->toBeIn([200, 204]);
+    });
+
+    it('saves a code of 255 characters and refuses a longer one, also for a generated coupon', function (): void {
+        $token = adminToken();
+        $message = 'The coupon code must have at most 255 characters.';
+        $long = str_repeat('A', 256);
+
+        $max = apiPost('/api/rest/v2/coupons', ['code' => str_repeat('B', 249) . substr(uniqid(), -6), 'discountType' => 'percent', 'discountAmount' => 10], $token);
+        expect($max['status'])->toBeSuccessful()
+            ->and(strlen($max['json']['code']))->toBe(255)
+            ->and(apiDelete("/api/rest/v2/coupons/{$max['json']['id']}", $token)['status'])->toBeIn([200, 204]);
+
+        $create = apiPost('/api/rest/v2/coupons', ['code' => $long, 'discountType' => 'percent', 'discountAmount' => 10], $token);
+        expect($create['status'])->toBe(422)
+            ->and(array_column($create['json']['details']['errors'], 'field'))->toBe(['code'])
+            ->and(array_column($create['json']['details']['errors'], 'message'))->toBe([$message]);
+
+        $rule = apiPost('/api/rest/v2/cart-price-rules', [
+            'name' => 'Pest long code ' . substr(uniqid(), -6),
+            'websiteIds' => [1],
+            'customerGroupIds' => [1],
+            'couponType' => 'auto',
+        ], $token);
+        $ruleId = (int) $rule['json']['id'];
+        $coupon = apiPost("/api/rest/v2/cart-price-rules/{$ruleId}/coupons/generate", ['qty' => 1], $token)['json']['coupons'][0];
+
+        $update = apiPut("/api/rest/v2/coupons/{$coupon['id']}", ['code' => $long], $token);
+        expect($update['status'])->toBe(422)
+            ->and(array_column($update['json']['details']['errors'], 'field'))->toBe(['code'])
+            ->and(array_column($update['json']['details']['errors'], 'message'))->toBe([$message])
+            ->and(apiGet("/api/rest/v2/coupons/{$coupon['id']}", $token)['json']['code'])->toBe($coupon['code']);
+
+        expect(apiDelete("/api/rest/v2/cart-price-rules/{$ruleId}", $token)['status'])->toBe(204);
+    });
+
+});
+
 describe('Coupon minimum subtotal', function (): void {
 
     it('saves, changes and removes the minimum subtotal condition', function (): void {
@@ -394,6 +482,74 @@ describe('Coupon and cart price rule', function (): void {
         expect(array_column($list['json']['member'] ?? [], 'id'))->toBe([$ruleId]);
 
         expect(apiDelete("/api/rest/v2/coupons/{$id}", $token)['status'])->toBeIn([200, 204]);
+    });
+
+});
+
+describe('GraphQL coupon mutations', function (): void {
+
+    $createCoupon = function (): int {
+        $create = apiPost('/api/rest/v2/coupons', [
+            'code' => 'PestGql' . substr(uniqid(), -6),
+            'discountType' => 'percent',
+            'discountAmount' => 10,
+        ], adminToken());
+        expect($create['status'])->toBeSuccessful();
+
+        return (int) $create['json']['id'];
+    };
+
+    it('updates a coupon that the id names as a plain ID', function () use ($createCoupon): void {
+        $id = $createCoupon();
+
+        $response = gqlQuery(
+            'mutation { updateCoupon(input: {id: ' . $id . ', discountAmount: 15}) { coupon { discountAmount } } }',
+            [],
+            adminToken(),
+        );
+
+        expect($response['json']['errors'] ?? [])->toBeEmpty()
+            ->and($response['json']['data']['updateCoupon']['coupon']['discountAmount'] ?? null)->toEqual(15)
+            ->and(apiGet("/api/rest/v2/coupons/{$id}", adminToken())['json']['discountAmount'])->toEqual(15);
+    });
+
+    it('updates a coupon that the id names as an IRI', function () use ($createCoupon): void {
+        $id = $createCoupon();
+
+        $response = gqlQuery(
+            'mutation { updateCoupon(input: {id: "/api/rest/v2/coupons/' . $id . '", discountAmount: 20}) { coupon { discountAmount } } }',
+            [],
+            adminToken(),
+        );
+
+        expect($response['json']['errors'] ?? [])->toBeEmpty()
+            ->and($response['json']['data']['updateCoupon']['coupon']['discountAmount'] ?? null)->toEqual(20);
+    });
+
+    it('deletes a coupon that the id names as an IRI', function () use ($createCoupon): void {
+        $id = $createCoupon();
+
+        $response = gqlQuery(
+            'mutation { deleteCoupon(input: {id: "/api/rest/v2/coupons/' . $id . '"}) { coupon { id } } }',
+            [],
+            adminToken(),
+        );
+
+        expect($response['json']['errors'] ?? [])->toBeEmpty()
+            ->and(apiGet("/api/rest/v2/coupons/{$id}", adminToken())['status'])->toBe(404);
+    });
+
+    it('deletes a coupon that the id names as a plain ID', function () use ($createCoupon): void {
+        $id = $createCoupon();
+
+        $response = gqlQuery(
+            'mutation { deleteCoupon(input: {id: "' . $id . '"}) { coupon { id } } }',
+            [],
+            adminToken(),
+        );
+
+        expect($response['json']['errors'] ?? [])->toBeEmpty()
+            ->and(apiGet("/api/rest/v2/coupons/{$id}", adminToken())['status'])->toBe(404);
     });
 
 });

@@ -171,7 +171,7 @@ class Node extends \Maho\DataObject
      * @param Node $node
      * @todo LTS implement
      */
-    public function isChildOf($node) {}
+    public function isChildOf($node): void {}
 
     /**
      * Load node children

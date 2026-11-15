@@ -81,11 +81,9 @@ class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_Agre
 
     /**
      * Initialize token
-     *
-     * @return string
      */
     #[\Override]
-    public function initToken()
+    public function initToken(): ?string
     {
         $this->getPaymentMethodInstance()
             ->initBillingAgreementToken($this);
@@ -95,11 +93,9 @@ class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_Agre
     /**
      * Get billing agreement details
      * Data from response is inside this object
-     *
-     * @return $this
      */
     #[\Override]
-    public function verifyToken()
+    public function verifyToken(): static
     {
         $this->getPaymentMethodInstance()
             ->getBillingAgreementTokenInfo();
@@ -120,11 +116,9 @@ class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_Agre
 
     /**
      * Create billing agreement
-     *
-     * @return $this
      */
     #[\Override]
-    public function place()
+    public function place(): static
     {
         $this->verifyToken();
 
@@ -142,11 +136,9 @@ class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_Agre
 
     /**
      * Cancel billing agreement
-     *
-     * @return $this
      */
     #[\Override]
-    public function cancel()
+    public function cancel(): static
     {
         $this->setStatus(self::STATUS_CANCELED);
         $this->getPaymentMethodInstance()->updateBillingAgreementStatus($this);
@@ -261,7 +253,7 @@ class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_Agre
     /**
      * Save related orders
      */
-    protected function _saveOrderRelations()
+    protected function _saveOrderRelations(): void
     {
         foreach ($this->_relatedOrders as $order) {
             $orderId = $order instanceof Mage_Sales_Model_Order ? $order->getId() : (int) $order;

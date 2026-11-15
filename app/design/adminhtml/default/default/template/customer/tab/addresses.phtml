@@ -111,6 +111,7 @@ class addressesModel {
         this.baseItemId = 'new_item';
 
         this.defaultCountries = <?= $this->getDefaultCountriesJson() ?>;
+        this.dependence = <?= $this->getAttributeDependenceJson() ?>;
         this.itemContentTemplate = '<?= $this->helper('customer/address')->getFormat('js_template') ?>';
 
         this.regionsUrl = '<?= $this->getRegionsUrl() ?>';
@@ -243,11 +244,45 @@ class addressesModel {
             this.addItemObservers(newItem);
             this.setActiveItem(newItem);
             this.bindCountryRegionRelation(newForm.id);
+            this.initDependence('_item' + this.itemCount);
 
             if (firstnameEl && firstnameEl.value) this.syncFormData({ target: firstnameEl });
             if (lastnameEl && lastnameEl.value) this.syncFormData({ target: lastnameEl });
         }
         this.reloadItemList();
+    }
+
+    /**
+     * Show the fields of the address form with the prefix that their conditions allow, and mark the optional fields
+     * that their required conditions make required. A field that the form does not have takes the saved value of the
+     * address $addressId, or the value of the customer for a new address.
+     *
+     * @param {string} prefix
+     * @param {number} [addressId]
+     */
+    initDependence(prefix, addressId) {
+        if (!this.dependence.fields.length) {
+            return;
+        }
+        const fieldMap = {};
+        const fieldValues = {};
+        const keepDisabled = [];
+        for (const code of this.dependence.fields) {
+            fieldMap[code] = prefix + code;
+            if (document.getElementById(prefix + code)?.disabled) {
+                keepDisabled.push(prefix + code);
+            }
+            const saved = this.dependence.values[addressId ?? 0]?.[code];
+            if (saved) {
+                fieldValues[prefix + code] = saved;
+            }
+        }
+        new formElementDependenceController(this.dependence.depends, {
+            field_map: fieldMap,
+            field_values: fieldValues,
+            keep_disabled: keepDisabled,
+            required: this.dependence.required,
+        });
     }
 
     prepareTemplate(template) {
@@ -649,6 +684,9 @@ class addressesModel {
 }
 
 const customerAddresses = new addressesModel();
+<?php foreach ($addressCollection as $_address): ?>
+customerAddresses.initDependence('_item<?= (int) $_address->getId() ?>', <?= (int) $_address->getId() ?>);
+<?php endforeach ?>
 
 <?php if (Mage::helper('customer')->isVatValidationEnabled()): ?>
 // Initialize VAT validation for existing addresses

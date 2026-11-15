@@ -40,7 +40,7 @@
     .blog_post_image {
         @apply mx-auto mb-8 max-w-full rounded-box object-contain shadow-[0_4px_16px_rgb(0_0_0/0.10)];
 
-        @media (width <= 768px) {
+        @media (width <= 770px) {
             max-width: calc(100% + 1rem);
             margin-inline: -0.5rem;
             border-radius: 0;

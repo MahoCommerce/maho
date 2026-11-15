@@ -16,7 +16,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups_Backend_OriginShipment extends Mage_Us
      * Set source model to get allowed values
      */
     #[\Override]
-    protected function _setSourceModelData()
+    protected function _setSourceModelData(): void
     {
         $this->_sourceModel = 'usa/shipping_carrier_ups_source_originShipment';
     }
@@ -25,7 +25,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups_Backend_OriginShipment extends Mage_Us
      * Set field name to display in error block
      */
     #[\Override]
-    protected function _setNameErrorField()
+    protected function _setNameErrorField(): void
     {
         $this->_nameErrorField = 'Ups origin of the Shipment';
     }

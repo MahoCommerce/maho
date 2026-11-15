@@ -151,9 +151,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_RestClient
     {
         $accessToken = $this->oauthClient->getAccessToken();
 
-        $client = \Maho\Http\Client::create([
-            'timeout' => 30,
-        ]);
+        $client = $this->_createHttpClient();
 
         $headers = [
             'Authorization' => 'Bearer ' . $accessToken,
@@ -224,33 +222,35 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_RestClient
                 'code' => $e->getCode(),
             ];
 
-            // Try to get the error response body for debugging
-            if (method_exists($e, 'getResponse')) {
-                try {
-                    $errorResponse = $e->getResponse();
-                    $errorContent = $errorResponse->getContent(false);
+            // The status check throws before the body is read. Read the body here to get the USPS error.
+            $errorMessage = null;
+            try {
+                if (isset($response)) {
+                    $errorContent = $response->getContent(false);
                     $debugData['error']['response_body'] = $errorContent;
-
-                    // Try to extract structured error message
-                    try {
-                        $errorData = Mage::helper('core')->jsonDecode($errorContent);
-                        if (isset($errorData['error'])) {
-                            $errorMessage = $this->extractErrorMessage($errorData);
-                            throw new Exception($errorMessage, $e->getCode(), $e);
-                        }
-                    } catch (Exception) {
-                        // Not JSON, use original exception
+                    $errorData = Mage::helper('core')->jsonDecode($errorContent);
+                    if (isset($errorData['error'])) {
+                        $errorMessage = $this->extractErrorMessage($errorData);
                     }
-                } catch (Exception) {
-                    // Ignore if we can't get the response body
                 }
+            } catch (Exception) {
+                // Keep the original exception when the response is unavailable or not JSON.
             }
 
             if ($this->debugMode) {
                 Mage::log($debugData, Mage::LOG_ERROR, 'usps_rest_api.log');
             }
 
+            if ($errorMessage !== null && $errorMessage !== $e->getMessage()) {
+                throw new Exception($errorMessage, $e->getCode(), $e);
+            }
+
             throw $e;
         }
+    }
+
+    protected function _createHttpClient(): \Symfony\Contracts\HttpClient\HttpClientInterface
+    {
+        return \Maho\Http\Client::create(['timeout' => 30]);
     }
 }

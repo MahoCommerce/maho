@@ -276,6 +276,7 @@ function missingRateOptionFromCollection(int $optionId, int $storeId): Mage_Cata
     /** @var Mage_Catalog_Model_Product_Option $option */
     $option = Mage::getResourceModel('catalog/product_option_collection')
         ->addFieldToFilter('main_table.option_id', $optionId)
+        ->addTitleToResult($storeId)
         ->addPriceToResult($storeId)
         ->getFirstItem();
 

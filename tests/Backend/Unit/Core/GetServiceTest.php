@@ -10,11 +10,6 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 describe('Mage::getService()', function () {
-    it('resolves an alias through the services class group of the module', function () {
-        expect(Mage::getService('customersegmentation/segment'))
-            ->toBeInstanceOf(Maho_CustomerSegmentation_Service_Segment::class);
-    });
-
     it('returns one instance for each alias', function () {
         expect(Mage::getService('customersegmentation/segment'))
             ->toBe(Mage::getService('customersegmentation/segment'));

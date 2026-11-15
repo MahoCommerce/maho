@@ -91,13 +91,14 @@ describe('Category Extended Fields (REST)', function (): void {
         // the empty-string clear is stored (and thus answered) as null.
         expect($update['json']['isAnchor'])->toBeFalse();
         expect($update['json']['availableSortBy'])->toBe(['position']);
-        expect($update['json']['defaultSortBy'])->toBeNull();
+        // Null fields are omitted from REST responses (skip_null_values)
+        expect($update['json'])->not->toHaveKey('defaultSortBy');
 
         $verify = apiGet("/api/rest/v2/categories/{$categoryId}");
         expect($verify['status'])->toBe(200);
         expect($verify['json']['isAnchor'])->toBeFalse();
         expect($verify['json']['availableSortBy'])->toBe(['position']);
-        expect($verify['json']['defaultSortBy'])->toBeNull();
+        expect($verify['json'])->not->toHaveKey('defaultSortBy');
 
         // A read resolves the admin scope as a fallback, so a clear that dropped only a
         // store-level row would still answer with the old value. Assert the value is gone
@@ -171,10 +172,10 @@ describe('Category Extended Fields (REST)', function (): void {
             'landingPageId' => 0,
         ], $categoryToken);
         expect($clear['status'])->toBe(200);
-        expect($clear['json']['landingPageId'])->toBeNull();
+        expect($clear['json'])->not->toHaveKey('landingPageId');
 
         $verify = apiGet("/api/rest/v2/categories/{$categoryId}");
-        expect($verify['json']['landingPageId'])->toBeNull();
+        expect($verify['json'])->not->toHaveKey('landingPageId');
     });
 
     it('rejects a landingPageId pointing to a missing CMS block', function (): void {
@@ -217,34 +218,26 @@ describe('Category Extended Fields (REST)', function (): void {
         expect($clear['status'])->toBe(200);
 
         $verify = apiGet("/api/rest/v2/categories/{$categoryId}", $token);
-        expect($verify['json']['customDesignFrom'])->toBeNull();
-        expect($verify['json']['customDesignTo'])->toBeNull();
+        expect($verify['json'])->not->toHaveKey('customDesignFrom');
+        expect($verify['json'])->not->toHaveKey('customDesignTo');
     });
 
-    it('rejects protected codes in customAttributesWrite and skips unknown ones', function (): void {
+    it('takes only user-defined attributes in customAttributes', function (): void {
         $token = serviceToken(['categories/write', 'categories/delete']);
         $suffix = substr(uniqid(), -8);
+        $fields = fn(array $response): array => array_column($response['json']['details']['errors'] ?? [], 'field');
 
-        $denied = apiPost('/api/rest/v2/categories', [
-            'name' => "Pest CustomAttr Denied {$suffix}",
-            'customAttributesWrite' => ['path' => '1/2/3'],
-        ], $token);
-        expect($denied['status'])->toBe(422);
-
-        $create = apiPost('/api/rest/v2/categories', [
-            'name' => "Pest CustomAttr Category {$suffix}",
-            'isActive' => true,
-            'customAttributesWrite' => [
-                'meta_robots' => 'NOINDEX,NOFOLLOW',
-                'definitely_not_an_attribute' => 'ignored',
-            ],
-        ], $token);
-        expect($create['status'])->toBeIn([200, 201]);
-        $categoryId = $create['json']['id'];
-        trackCreated('category', $categoryId);
-
-        $read = apiGet("/api/rest/v2/categories/{$categoryId}");
-        expect($read['json']['metaRobots'])->toBe('NOINDEX,NOFOLLOW');
+        foreach (['path' => '1/2/3', 'meta_robots' => 'NOINDEX,NOFOLLOW', 'definitely_not_an_attribute' => 'x'] as $code => $value) {
+            $response = apiPost('/api/rest/v2/categories', [
+                'name' => "Pest CustomAttr {$code} {$suffix}",
+                'customAttributes' => [$code => $value],
+            ], $token);
+            if (in_array($response['status'], [200, 201], true)) {
+                trackCreated('category', (int) $response['json']['id']);
+            }
+            expect($response['status'])->toBe(422)
+                ->and($fields($response))->toContain("customAttributes.{$code}");
+        }
     });
 
 });
@@ -302,12 +295,12 @@ describe('Category layout update validation (REST)', function (): void {
         expect($anonymous['json']['name'])->toBe("Pest Layout Category {$suffix}");
     });
 
-    it('applies the same validation to customAttributesWrite as to the dedicated fields', function (): void {
+    it('refuses the system attributes of the dedicated fields in customAttributes', function (): void {
         $token = serviceToken(['categories/write']);
 
         $layout = apiPost('/api/rest/v2/categories', [
             'name' => 'Pest Bag Layout Category',
-            'customAttributesWrite' => [
+            'customAttributes' => [
                 'custom_layout_update' => '<reference name="content">'
                     . '<block type="core/template" template="../../../../app/etc/local.xml"/>'
                     . '</reference>',
@@ -317,13 +310,13 @@ describe('Category layout update validation (REST)', function (): void {
 
         $image = apiPost('/api/rest/v2/categories', [
             'name' => 'Pest Bag Image Category',
-            'customAttributesWrite' => ['image' => '../../../app/etc/local.xml'],
+            'customAttributes' => ['image' => '../../../app/etc/local.xml'],
         ], $token);
         expect($image['status'])->toBe(422);
 
         $sortBy = apiPost('/api/rest/v2/categories', [
             'name' => 'Pest Bag SortBy Category',
-            'customAttributesWrite' => ['available_sort_by' => 'not_a_real_sort_code'],
+            'customAttributes' => ['available_sort_by' => 'not_a_real_sort_code'],
         ], $token);
         expect($sortBy['status'])->toBe(422);
     });

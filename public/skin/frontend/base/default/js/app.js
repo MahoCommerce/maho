@@ -7,11 +7,12 @@
 // Primary Break Points
 // =============================================
 
+// medium and large are the mobile and tablet breakpoints in theme.xml, which the head block writes
 var bp = {
     xsmall: 479,
     small: 599,
-    medium: 770,
-    large: 979,
+    medium: BREAKPOINTS.mobile,
+    large: BREAKPOINTS.tablet,
     xlarge: 1199
 };
 
@@ -593,7 +594,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3 column layout
     // ==============================================
 
-    // On viewports smaller than 1000px, move the right column into the left column
+    // Up to the tablet breakpoint, move the right column into the left column
     if (document.querySelector('.main-container.col3-layout')) {
         const reposition3rdColumn = (mq) => {
             const rightColumn = document.querySelector('.col-right');
@@ -606,9 +607,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        const maxWidth1000MediaQuery = window.matchMedia('(max-width: 1000px)');
-        maxWidth1000MediaQuery.addEventListener('change', reposition3rdColumn);
-        reposition3rdColumn(maxWidth1000MediaQuery);
+        maxWidthLargeMediaQuery.addEventListener('change', reposition3rdColumn);
+        reposition3rdColumn(maxWidthLargeMediaQuery);
     }
 
     // ==============================================
@@ -633,7 +633,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         };
-        maxWidthLargeMediaQuery.addEventListener(repositionGiftRegistry);
+        maxWidthLargeMediaQuery.addEventListener('change', repositionGiftRegistry);
         repositionGiftRegistry(maxWidthLargeMediaQuery);
     }
 
@@ -749,11 +749,21 @@ var ProductMediaManager = {
     swapImage: function(target) {
         const gallery = document.querySelector('.product-image-gallery');
         const current = gallery?.querySelector('.gallery-image.visible');
-        if (!gallery || target === current) return;
+        if (!gallery) return;
+
+        // Cancel a swatch image that is still loading, so it cannot replace this image
+        if (window.ConfigurableMediaImages) ConfigurableMediaImages.swapGeneration++;
+
+        if (target === current) {
+            gallery.classList.remove('loading');
+            return;
+        }
 
         target.removeAttribute('loading');
 
+        const generation = window.ConfigurableMediaImages?.swapGeneration;
         const doSwap = () => {
+            if (generation !== window.ConfigurableMediaImages?.swapGeneration) return;
             gallery.classList.remove('loading');
             if (current) current.classList.remove('visible');
             target.classList.add('gallery-image', 'visible');

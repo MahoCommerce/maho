@@ -42,7 +42,7 @@ class Ftp extends \Maho\Io
      */
     protected $_error;
 
-    protected $_tmpFilename;
+    protected string|false|null $_tmpFilename = null;
 
     /**
      * Open a connection
@@ -57,11 +57,9 @@ class Ftp extends \Maho\Io
      * - passive     default false
      * - path        default empty
      * - file_mode   default FTP_BINARY
-     *
-     * @return boolean
      */
     #[\Override]
-    public function open(array $args = [])
+    public function open(array $args = []): bool
     {
         if (empty($args['host'])) {
             $this->_error = self::ERROR_EMPTY_HOST;
@@ -128,61 +126,48 @@ class Ftp extends \Maho\Io
 
     /**
      * Close a connection
-     *
-     * @return boolean
      */
     #[\Override]
-    public function close()
+    public function close(): void
     {
-        return @ftp_close($this->_conn);
+        @ftp_close($this->_conn);
     }
 
     /**
      * Create a directory
      *
      * @todo implement $mode and $recursive
-     * @param string $dir
-     * @param int $mode
-     * @param boolean $recursive
-     * @return boolean
+     * @return string|false The name of the new directory
      */
     #[\Override]
-    public function mkdir($dir, $mode = 0777, $recursive = true)
+    public function mkdir(string $dir, int $mode = 0777, bool $recursive = true): string|false
     {
         return @ftp_mkdir($this->_conn, $dir);
     }
 
     /**
      * Delete a directory
-     *
-     * @param string $dir
-     * @return boolean
      */
     #[\Override]
-    public function rmdir($dir, $recursive = false)
+    public function rmdir(string $dir, bool $recursive = false): bool
     {
         return @ftp_rmdir($this->_conn, $dir);
     }
 
     /**
      * Get current working directory
-     *
-     * @return string
      */
     #[\Override]
-    public function pwd()
+    public function pwd(): string|false
     {
         return @ftp_pwd($this->_conn);
     }
 
     /**
      * Change current working directory
-     *
-     * @param string $dir
-     * @return boolean
      */
     #[\Override]
-    public function cd($dir)
+    public function cd(string $dir): bool
     {
         return @ftp_chdir($this->_conn, $dir);
     }
@@ -190,12 +175,10 @@ class Ftp extends \Maho\Io
     /**
      * Read a file to result, file or stream
      *
-     * @param string $filename
      * @param string|resource|null $dest destination file name, stream, or if null will return file contents
-     * @return bool|string
      */
     #[\Override]
-    public function read($filename, $dest = null)
+    public function read(string $filename, mixed $dest = null): string|bool
     {
         if (is_string($dest)) {
             $result = ftp_get($this->_conn, $dest, $filename, $this->_config['file_mode']);
@@ -225,12 +208,10 @@ class Ftp extends \Maho\Io
     /**
      * Write a file from string, file or stream
      *
-     * @param string $filename
      * @param string|resource $src filename, string data or source stream
-     * @return int|boolean
      */
     #[\Override]
-    public function write($filename, $src, $mode = null)
+    public function write(string $filename, mixed $src, ?int $mode = null): bool
     {
         if (is_string($src) && is_readable($src)) {
             return @ftp_put($this->_conn, $filename, $src, $this->_config['file_mode']);
@@ -254,25 +235,18 @@ class Ftp extends \Maho\Io
 
     /**
      * Delete a file
-     *
-     * @param string $filename
-     * @return boolean
      */
     #[\Override]
-    public function rm($filename)
+    public function rm(string $filename): bool
     {
         return @ftp_delete($this->_conn, $filename);
     }
 
     /**
      * Rename or move a directory or a file
-     *
-     * @param string $src
-     * @param string $dest
-     * @return boolean
      */
     #[\Override]
-    public function mv($src, $dest)
+    public function mv(string $src, string $dest): bool
     {
         return @ftp_rename($this->_conn, $src, $dest);
     }
@@ -280,18 +254,16 @@ class Ftp extends \Maho\Io
     /**
      * Change mode of a directory or a file
      *
-     * @param string $filename
-     * @param int $mode
-     * @return boolean
+     * @return int|false The new mode
      */
     #[\Override]
-    public function chmod($filename, $mode)
+    public function chmod(string $filename, int $mode): int|false
     {
         return @ftp_chmod($this->_conn, $mode, $filename);
     }
 
     #[\Override]
-    public function ls($grep = null)
+    public function ls(?string $grep = null): array
     {
         $ls = @ftp_nlist($this->_conn, '.');
 
@@ -306,10 +278,10 @@ class Ftp extends \Maho\Io
         return $list;
     }
 
-    protected function _tmpFilename($new = false)
+    protected function _tmpFilename(bool $new = false): string|false
     {
         if ($new || !$this->_tmpFilename) {
-            $this->_tmpFilename = tempnam(md5(uniqid(random_int(0, mt_getrandmax()), true)), '');
+            $this->_tmpFilename = tempnam(md5(uniqid((string) random_int(0, mt_getrandmax()), true)), '');
         }
         return $this->_tmpFilename;
     }

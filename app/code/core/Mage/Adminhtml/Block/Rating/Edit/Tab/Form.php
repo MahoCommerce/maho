@@ -53,32 +53,6 @@ class Mage_Adminhtml_Block_Rating_Edit_Tab_Form extends Mage_Adminhtml_Block_Wid
             }
         }
 
-        if (Mage::registry('rating_data')) {
-            $collection = Mage::getModel('rating/rating_option')
-                ->getResourceCollection()
-                ->addRatingFilter(Mage::registry('rating_data')->getId())
-                ->load();
-
-            $i = 1;
-            foreach ($collection->getItems() as $item) {
-                $fieldset->addField('option_code_' . $item->getId(), 'hidden', [
-                    'required' => true,
-                    'name' => 'option_title[' . $item->getId() . ']',
-                    'value' => $item->getCode() ?: $i,
-                ]);
-
-                $i++;
-            }
-        } else {
-            for ($i = 1; $i <= 5; $i++) {
-                $fieldset->addField('option_code_' . $i, 'hidden', [
-                    'required' => true,
-                    'name' => 'option_title[add_' . $i . ']',
-                    'value' => $i,
-                ]);
-            }
-        }
-
         $fieldset = $form->addFieldset('visibility_form', [
             'legend' => Mage::helper('rating')->__('Rating Visibility'),
         ]);
@@ -104,7 +78,7 @@ class Mage_Adminhtml_Block_Rating_Edit_Tab_Form extends Mage_Adminhtml_Block_Wid
         return parent::_prepareForm();
     }
 
-    protected function _setRatingCodes($ratingCodes)
+    protected function _setRatingCodes($ratingCodes): void
     {
         foreach ($ratingCodes as $store => $value) {
             if ($element = $this->getForm()->getElement('rating_code_' . $store)) {
@@ -119,7 +93,7 @@ class Mage_Adminhtml_Block_Rating_Edit_Tab_Form extends Mage_Adminhtml_Block_Wid
         return $this->_getWarningHtml() . parent::_toHtml();
     }
 
-    protected function _getWarningHtml()
+    protected function _getWarningHtml(): string
     {
         return '<div>
 <ul class="messages">

@@ -17,7 +17,7 @@ declare(strict_types=1);
  */
 class Mage_Customer_Block_Address_Edit extends Mage_Directory_Block_Data
 {
-    protected $_address;
+    protected ?Mage_Customer_Model_Address $_address = null;
     protected $_countryCollection;
     protected $_regionCollection;
 

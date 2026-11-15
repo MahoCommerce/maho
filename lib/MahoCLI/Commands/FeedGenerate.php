@@ -48,8 +48,9 @@ class FeedGenerate extends BaseMahoCommand
         $startTime = microtime(true);
 
         try {
-            $generator = new \Maho_FeedManager_Model_Generator();
-            $log = $generator->generate($feed);
+            /** @var \Maho_FeedManager_Service_Feed $service */
+            $service = Mage::getService('feedmanager/feed');
+            $log = $service->generate($feed);
 
             $duration = round(microtime(true) - $startTime, 2);
 
@@ -59,6 +60,9 @@ class FeedGenerate extends BaseMahoCommand
                 $output->writeln(sprintf('  Products: %d', $log->getProductCount()));
                 $output->writeln(sprintf('  File size: %s', $this->humanReadableSize((int) $feed->getLastFileSize())));
                 $output->writeln(sprintf('  Duration: %.2fs', $duration));
+                if ($log->getUploadStatus()) {
+                    $output->writeln(sprintf('  Upload: %s (%s)', $log->getUploadStatus(), $log->getUploadMessage()));
+                }
 
                 // Show any warnings
                 $errors = $log->getErrorMessagesArray();

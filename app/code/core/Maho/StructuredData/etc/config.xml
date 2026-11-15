@@ -28,15 +28,6 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Maho_StructuredData_Model</class>
             </structureddata>
         </models>
-        <translate>
-            <modules>
-                <Maho_StructuredData>
-                    <files>
-                        <default>Maho_StructuredData.csv</default>
-                    </files>
-                </Maho_StructuredData>
-            </modules>
-        </translate>
     </global>
     <frontend>
         <layout>
@@ -79,4 +70,16 @@ SPDX-License-Identifier: AFL-3.0
             </structured_data>
         </catalog>
     </default>
+
+    <adminhtml>
+        <translate>
+            <modules>
+                <Maho_StructuredData>
+                    <files>
+                        <default>Maho_StructuredData.csv</default>
+                    </files>
+                </Maho_StructuredData>
+            </modules>
+        </translate>
+    </adminhtml>
 </config>

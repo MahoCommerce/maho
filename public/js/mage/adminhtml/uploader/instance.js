@@ -243,7 +243,7 @@ class Uploader extends EventTarget {
      */
     _handleUpdateFile(file) {
         const html = this._renderFromTemplate(this.elements.templateFile, {
-            name: file.name,
+            name: escapeHtml(file.name),
             size: file.size ? `(${this._getPluralSize(file.size)})` : '',
             id: file.uniqueIdentifier
         });

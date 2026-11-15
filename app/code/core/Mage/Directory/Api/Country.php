@@ -69,11 +69,9 @@ class Country extends CrudResource
         $dto->name = $model->getName() ?? $model->getCountryId() ?? '';
 
         $regions = [];
-        /** @var \Mage_Directory_Model_Resource_Region_Collection $collection */
-        $collection = \Mage::getModel('directory/region')->getCollection();
-        $collection->addCountryFilter($model->getCountryId());
-
-        foreach ($collection as $mahoRegion) {
+        /** @var \Mage_Directory_Helper_Data $helper */
+        $helper = \Mage::helper('directory');
+        foreach ($model->getRegionCollection() as $mahoRegion) {
             // Plain array shape (not a Region DTO) to match the
             // array<int, array<string, mixed>> property type. Region is a
             // non-ApiResource DTO so the typed-array form trips GraphQL's
@@ -81,7 +79,7 @@ class Country extends CrudResource
             $regions[] = [
                 'id'   => (int) $mahoRegion->getRegionId(),
                 'code' => $mahoRegion->getCode() ?? '',
-                'name' => $mahoRegion->getDefaultName() ?? $mahoRegion->getName() ?? '',
+                'name' => $helper->getRegionName($mahoRegion),
             ];
         }
 

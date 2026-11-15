@@ -578,7 +578,7 @@ describe('Product Extended Fields (REST)', function (): void {
                 'name' => 'Pest Custom Attributes Read Product',
                 'price' => 9.99,
                 'websiteIds' => [1],
-                'customAttributesWrite' => [$code => 'pest-value'],
+                'customAttributes' => [$code => 'pest-value'],
             ], $token);
             expect($create['status'])->toBeIn([200, 201]);
             $productId = $create['json']['id'];
@@ -597,6 +597,39 @@ describe('Product Extended Fields (REST)', function (): void {
 
             $reread = apiGet("/api/rest/v2/products/{$productId}", $token);
             expect($reread['json']['customAttributes'][$code] ?? null)->toBe('pest-value');
+        } finally {
+            $setup->removeAttribute(\Mage_Catalog_Model_Product::ENTITY, $code);
+            \Mage::app()->getCache()->cleanType('eav');
+        }
+    });
+
+    it('refuses a user-defined attribute that is not in the attribute set of the product', function (): void {
+        Tests\Helpers\ApiV2Helper::ensureMahoBootstrapped();
+
+        $code = 'pest_noset_' . substr(uniqid(), -6);
+        $setup = new \Mage_Catalog_Model_Resource_Setup('catalog_setup');
+        $setup->addAttribute(\Mage_Catalog_Model_Product::ENTITY, $code, [
+            'type' => 'varchar',
+            'label' => 'Pest No Set Attribute',
+            'input' => 'text',
+            'required' => false,
+            'user_defined' => true,
+            'global' => \Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL,
+        ]);
+        \Mage::app()->getCache()->cleanType('eav');
+
+        try {
+            $suffix = substr(uniqid(), -8);
+            $create = apiPost('/api/rest/v2/products', [
+                'sku' => "PEST-CATTR-NOSET-{$suffix}",
+                'name' => 'Pest Custom Attribute Outside Set',
+                'price' => 9.99,
+                'websiteIds' => [1],
+                'customAttributes' => [$code => 'pest-value'],
+            ], serviceToken(['products/write', 'products/delete']));
+
+            expect($create['status'])->toBe(422)
+                ->and(array_column($create['json']['details']['errors'] ?? [], 'field'))->toContain("customAttributes.{$code}");
         } finally {
             $setup->removeAttribute(\Mage_Catalog_Model_Product::ENTITY, $code);
             \Mage::app()->getCache()->cleanType('eav');

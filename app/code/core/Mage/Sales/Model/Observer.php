@@ -252,7 +252,7 @@ class Mage_Sales_Model_Observer
      * @param \Maho\Event\Observer $observer
      */
     #[Maho\Config\Observer('payment_method_is_active', area: 'adminhtml', id: 'sales_billing_agreement')]
-    public function restrictAdminBillingAgreementUsage($observer)
+    public function restrictAdminBillingAgreementUsage($observer): void
     {
         $methodInstance = $observer->getEvent()->getMethodInstance();
         if (!($methodInstance instanceof Mage_Sales_Model_Payment_Method_Billing_AgreementAbstract)) {
@@ -305,7 +305,7 @@ class Mage_Sales_Model_Observer
      * Set Quote information about MSRP price enabled
      */
     #[Maho\Config\Observer('sales_quote_collect_totals_after', area: 'frontend', id: 'catalog_msrp')]
-    public function setQuoteCanApplyMsrp(\Maho\Event\Observer $observer)
+    public function setQuoteCanApplyMsrp(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Sales_Model_Quote $quote */
         $quote = $observer->getEvent()->getQuote();
@@ -327,7 +327,7 @@ class Mage_Sales_Model_Observer
      * Add VAT validation request date and identifier to order comments
      */
     #[Maho\Config\Observer('sales_order_place_after', id: 'sales_vat_request_params_order_comment')]
-    public function addVatRequestParamsOrderComment(\Maho\Event\Observer $observer)
+    public function addVatRequestParamsOrderComment(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Sales_Model_Order $orderInstance */
         $orderInstance = $observer->getOrder();
@@ -384,7 +384,7 @@ class Mage_Sales_Model_Observer
      * Handle customer VAT number if needed on collect_totals_before event of quote address
      */
     #[Maho\Config\Observer('sales_quote_address_collect_totals_before', area: 'frontend', id: 'sales_customer_validate_vat_number')]
-    public function changeQuoteCustomerGroupId(\Maho\Event\Observer $observer)
+    public function changeQuoteCustomerGroupId(\Maho\Event\Observer $observer): void
     {
         $addressHelper = Mage::helper('customer/address');
 
@@ -484,7 +484,7 @@ class Mage_Sales_Model_Observer
      * @param \Maho\Event\Observer $observer
      */
     #[Maho\Config\Observer('sales_quote_address_collect_totals_after', area: 'frontend', id: 'sales_customer_validate_vat_number')]
-    public function restoreQuoteCustomerGroupId($observer)
+    public function restoreQuoteCustomerGroupId($observer): void
     {
         /** @var Mage_Sales_Model_Quote_Address $quoteAddress */
         $quoteAddress = $observer->getQuoteAddress();

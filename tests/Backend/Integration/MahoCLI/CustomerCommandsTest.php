@@ -212,6 +212,32 @@ it('changes the password of the customer that the arguments name', function (): 
     expect(Mage::getModel('customer/customer')->load($customer->getId())->validatePassword('Changed456!'))->toBeTrue();
 });
 
+it('ends the other sessions and invalidates the reset link of the customer, as the admin does', function (): void {
+    $customer = customerCommandsSave($this->website);
+    $customer->setRpToken('cli-token')->setRpTokenCreatedAt(Mage_Core_Model_Locale::nowUtc())->setPasswordCreatedAt(1)->save();
+    $command = new MahoCLI\Commands\CustomerChangepassword('customer:change-password');
+    new Application()->addCommand($command);
+
+    $result = new CommandTester($command)->run(['email' => CUSTOMER_CREATE_EMAIL, 'password' => 'Changed456!', '--website' => $this->website->getCode()], interactive: false);
+
+    $this->assertCommandIsSuccessful($result);
+    $reloaded = Mage::getModel('customer/customer')->load($customer->getId());
+    expect((int) $reloaded->getData('password_created_at'))->toBeGreaterThan(1)
+        ->and($reloaded->getRpToken())->toBeNull();
+});
+
+it('refuses a password that is shorter than the minimum length', function (): void {
+    $customer = customerCommandsSave($this->website);
+    $command = new MahoCLI\Commands\CustomerChangepassword('customer:change-password');
+    new Application()->addCommand($command);
+
+    $result = new CommandTester($command)->run(['email' => CUSTOMER_CREATE_EMAIL, 'password' => 'abc', '--website' => $this->website->getCode()], interactive: false);
+
+    expect($result->statusCode)->toBe(Symfony\Component\Console\Command\Command::INVALID)
+        ->and($result->getDisplay())->toContain('The minimum password length is')
+        ->and(Mage::getModel('customer/customer')->load($customer->getId())->validatePassword('Password123!'))->toBeTrue();
+});
+
 it('deletes the customer that the argument names', function (): void {
     $customer = customerCommandsSave($this->website);
     $command = new MahoCLI\Commands\CustomerDelete('customer:delete');

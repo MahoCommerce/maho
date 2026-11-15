@@ -84,9 +84,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizedTokensController extends Mage_Adminht
             /** @var Mage_Oauth_Model_Token $item */
             foreach ($collection as $item) {
                 $item->load($item->getId());
-                $item->setRevoked($status)->save();
-
-                $this->_sendTokenStatusChangeNotification($item, $status ? $this->__('revoked') : $this->__('enabled'));
+                $item->changeRevoked((bool) $status, (int) Mage::getSingleton('admin/session')->getUser()->getId());
             }
             if ($status) {
                 $message = $this->__('Selected entries revoked.');
@@ -127,9 +125,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizedTokensController extends Mage_Adminht
 
             /** @var Mage_Oauth_Model_Token $item */
             foreach ($collection as $item) {
-                $item->delete();
-
-                $this->_sendTokenStatusChangeNotification($item, $this->__('deleted'));
+                $item->deleteAndNotify((int) Mage::getSingleton('admin/session')->getUser()->getId());
             }
             $this->_getSession()->addSuccess($this->__('Selected entries has been deleted.'));
         } catch (Mage_Core_Exception $e) {
@@ -155,6 +151,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizedTokensController extends Mage_Adminht
      * @param Mage_Oauth_Model_Token $token Token object
      * @param string $newStatus Name of new token status
      */
+    #[\Deprecated('No core code calls it. Use Mage_Oauth_Model_Token::changeRevoked() and deleteAndNotify().', since: '27.1')]
     protected function _sendTokenStatusChangeNotification(#[\SensitiveParameter]
         $token, $newStatus)
     {

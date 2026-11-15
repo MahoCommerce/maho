@@ -32,8 +32,8 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('group_id', Types::SMALLINT, unsigned: true, default: 0))
             ->addColumn(Schema::column('increment_id', Types::STRING, length: 50, notNull: false))
             ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false, default: 0))
-            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
-            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
             ->addColumn(Schema::column('is_active', Types::SMALLINT, unsigned: true, default: 1))
             ->addColumn(Schema::column('disable_auto_group_change', Types::SMALLINT, unsigned: true, default: 0))
             ->addColumn(Schema::column('twofa_enabled', Types::SMALLINT, default: 0))
@@ -73,8 +73,8 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('attribute_set_id', Types::SMALLINT, unsigned: true, default: 0))
             ->addColumn(Schema::column('increment_id', Types::STRING, length: 50, notNull: false))
             ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true, notNull: false))
-            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
-            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
             ->addColumn(Schema::column('is_active', Types::SMALLINT, unsigned: true, default: 1))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('parent_id'))
@@ -97,7 +97,7 @@ return function (SchemaEditor $schema): void {
     $valueTables = [
         'customer_address_entity_datetime' => [
             'parent' => 'customer_address_entity',
-            'value' => Schema::column('value', Types::DATETIME_MUTABLE, notNull: false),
+            'value' => Schema::column('value', Types::DATETIME_IMMUTABLE, notNull: false),
             'hasValueIndex' => true,
         ],
         'customer_address_entity_decimal' => [
@@ -122,7 +122,7 @@ return function (SchemaEditor $schema): void {
         ],
         'customer_entity_datetime' => [
             'parent' => 'customer_entity',
-            'value' => Schema::column('value', Types::DATETIME_MUTABLE, notNull: false),
+            'value' => Schema::column('value', Types::DATETIME_IMMUTABLE, notNull: false),
             'hasValueIndex' => true,
         ],
         'customer_entity_decimal' => [
@@ -201,9 +201,31 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('customer_group_id', Types::SMALLINT, unsigned: true, autoincrement: true))
             ->addColumn(Schema::column('customer_group_code', Types::STRING, length: 32))
             ->addColumn(Schema::column('tax_class_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('customer_attribute_set_id', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('customer_address_attribute_set_id', Types::SMALLINT, unsigned: true, notNull: false))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('customer_group_id')
+                    ->create(),
+            )
+            ->addIndex(Index::editor()->setUnquotedColumnNames('customer_attribute_set_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('customer_address_attribute_set_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('customer_attribute_set_id')
+                    ->setUnquotedReferencedTableName('eav_attribute_set')
+                    ->setUnquotedReferencedColumnNames('attribute_set_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::SET_NULL)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('customer_address_attribute_set_id')
+                    ->setUnquotedReferencedTableName('eav_attribute_set')
+                    ->setUnquotedReferencedColumnNames('attribute_set_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::SET_NULL)
                     ->create(),
             )
             ->setComment('Customer Group')

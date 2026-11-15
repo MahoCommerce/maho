@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
 {
-    protected $_defaults = [];
+    protected array $_defaults = [];
 
     /**
      * Available routers array
@@ -21,7 +21,7 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
      */
     protected $_routers = [];
 
-    protected $_urlCache = [];
+    protected array $_urlCache = [];
 
     public const XML_STORE_ROUTERS_PATH = 'web/routers';
 
@@ -80,11 +80,8 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
 
     /**
      * Adding new router
-     *
-     * @param   string $name
-     * @return  Mage_Core_Controller_Varien_Front
      */
-    public function addRouter($name, Mage_Core_Controller_Varien_Router_Abstract $router)
+    public function addRouter(string $name, Mage_Core_Controller_Varien_Router_Abstract $router): static
     {
         $router->setFront($this);
         $this->_routers[$name] = $router;
@@ -131,7 +128,7 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
                 if (isset($routerInfo['class'])) {
                     $router = new $routerInfo['class']();
                     if ($router instanceof Mage_Core_Controller_Varien_Router_Abstract) {
-                        $this->addRouter($routerCode, $router);
+                        $this->addRouter((string) $routerCode, $router);
                     }
                 }
             }

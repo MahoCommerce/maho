@@ -6,7 +6,7 @@
  * @package Maho_Blog
  */
 
-class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
+class Maho_Blog_Model_Resource_Post extends Maho_Blog_Model_Resource_Abstract
 {
     protected string $_storeTable;
 
@@ -45,7 +45,9 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
     }
 
     /**
-     * Get static attribute codes
+     * The codes of the attributes that are columns of the entity table.
+     *
+     * @return list<string>
      */
     public function getStaticAttributeCodes(): array
     {
@@ -75,22 +77,6 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         }
 
         return parent::_afterSave($object);
-    }
-
-    /**
-     * The value tables have a unique key on (entity_id, attribute_id, store_id). Without store_id
-     * in the row, SQLite and PostgreSQL do not find that key, so the update of a value fails.
-     */
-    #[\Override]
-    protected function _saveAttribute($object, $attribute, $value)
-    {
-        parent::_saveAttribute($object, $attribute, $value);
-
-        $table = $attribute->getBackend()->getTable();
-        $row = array_key_last($this->_attributeValuesToSave[$table]);
-        $this->_attributeValuesToSave[$table][$row]['store_id'] = Mage_Core_Model_App::ADMIN_STORE_ID;
-
-        return $this;
     }
 
     protected function _saveStoreRelations(\Maho\DataObject $post): void
@@ -175,6 +161,11 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
     {
         $coreHelper = Mage::helper('core');
 
+        $object->setData('attribute_set_id', Mage::helper('blog')->getValidAttributeSetId(
+            (int) $object->getData('attribute_set_id'),
+            $this->getEntityType(),
+        ));
+
         // Strip all HTML tags from title and meta fields
         $stringFields = ['title', 'url_key', 'meta_title', 'meta_keywords', 'meta_description'];
         foreach ($stringFields as $field) {
@@ -193,18 +184,11 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             $object->setData('publish_date', Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT));
         }
 
-        // Sanitize the markup authored in this field on save, keeping the template directives it
+        // Sanitize the markup authored in these fields on save, keeping the template directives it
         // contains intact. This is not a complete boundary: what a directive resolves to at render
-        // is not sanitized, so a crafted parameter still reaches the page. Links get
-        // target="_blank" — blog content is article-style, so an outbound link should not
-        // navigate the reader away from the post.
-        Mage::getSingleton('core/input_filter_maliciousCode')->sanitizeFields(
-            $object,
-            ['content', 'short_content'],
-            applyLinkFilter: true,
-            // Matches Maho_Blog_Model_Post::getFilteredContent(), which renders it.
-            renderer: Mage::helper('cms')->getPageTemplateProcessor(),
-        );
+        // is not sanitized, so a crafted parameter still reaches the page.
+        // Maho_Blog_Model_Post::getFilteredContent() renders the content with the same processor.
+        Mage::helper('blog')->sanitizeAttributeValues($object, $this->getEntityType(), ['content', 'short_content']);
 
         // Auto-generate URL key from title if empty
         if (empty($object->getData('url_key'))) {
@@ -222,7 +206,69 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             $object->setData('url_key', $urlkey);
         }
 
+        if ($object instanceof Maho_Blog_Model_Post) {
+            $this->_validate($object);
+        }
+
         return parent::_beforeSave($object);
+    }
+
+    /**
+     * A post that was saved before these checks keeps its URL key, so only a new or a changed URL key is checked.
+     *
+     * @throws Mage_Core_Exception_Input with one error for each invalid field
+     * @throws Mage_Core_Exception_Conflict when another post of the same store view has the URL key
+     */
+    protected function _validate(Maho_Blog_Model_Post $object): void
+    {
+        $helper = Mage::helper('blog');
+        $errors = new Mage_Core_Exception_Input();
+        if ((!$object->getId() || $object->hasData('title')) && (string) $object->getData('title') === '') {
+            $errors->addError('title', $helper->__('The post title is required.'));
+        }
+
+        $urlKey = (string) $object->getData('url_key');
+        $urlKeyChanged = !$object->getId() || $object->dataHasChangedFor('url_key');
+        if ($urlKeyChanged && !preg_match(Maho_Blog_Model_Post::URL_KEY_PATTERN, $urlKey)) {
+            $errors->addError('url_key', $helper->__('The URL key "%s" must have only lowercase letters, digits and dashes.', $urlKey));
+        }
+
+        $categoryIds = $object->hasData('categories') ? array_map(intval(...), (array) $object->getData('categories')) : [];
+        if ($categoryIds !== []) {
+            $known = Mage::getResourceModel('blog/category_collection')->addFieldToFilter('entity_id', ['in' => $categoryIds])->getAllIds();
+            $unknown = array_diff($categoryIds, array_map(intval(...), $known));
+            if ($unknown !== []) {
+                $errors->addError('category_ids', $helper->__('Unknown blog category ID(s): %s', implode(', ', $unknown)));
+            }
+        }
+        $errors->throwIfErrors();
+
+        if (($urlKeyChanged || $object->dataHasChangedFor('stores')) && $this->_isUrlKeyUsed($urlKey, $object)) {
+            throw new Mage_Core_Exception_Conflict($helper->__('Another post of the same store view has the URL key "%s".', $urlKey));
+        }
+    }
+
+    /**
+     * Return whether another post with $urlKey shares a store view with $post. A post of all store views shares every store view.
+     */
+    protected function _isUrlKeyUsed(string $urlKey, \Maho\DataObject $post): bool
+    {
+        $stores = array_map(intval(...), $post->hasData('stores') ? (array) $post->getData('stores') : $this->lookupStoreIds((int) $post->getId()));
+        if ($stores === []) {
+            return false;
+        }
+        $select = $this->_getReadAdapter()->select()
+            ->from(['bp' => $this->getEntityTable()], ['entity_id'])
+            ->join(['bps' => $this->_storeTable], 'bp.entity_id = bps.post_id', [])
+            ->where('bp.url_key = ?', $urlKey)
+            ->limit(1);
+        if (!in_array(Mage_Core_Model_App::ADMIN_STORE_ID, $stores, true)) {
+            $select->where('bps.store_id IN (?)', [Mage_Core_Model_App::ADMIN_STORE_ID, ...$stores]);
+        }
+        if ($post->getId()) {
+            $select->where('bp.entity_id != ?', (int) $post->getId());
+        }
+        return (bool) $this->_getReadAdapter()->fetchOne($select);
     }
 
     /**

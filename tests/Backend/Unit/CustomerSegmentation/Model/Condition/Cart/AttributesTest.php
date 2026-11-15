@@ -14,15 +14,6 @@ describe('Cart Attributes Condition', function () {
         $this->condition = Mage::getModel('customersegmentation/segment_condition_cart_attributes');
     });
 
-    test('can create new condition instance', function () {
-        expect($this->condition)->toBeInstanceOf(Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes::class);
-        expect($this->condition->getType())->toBe('customersegmentation/segment_condition_cart_attributes');
-    });
-
-    test('extends abstract condition', function () {
-        expect($this->condition)->toBeInstanceOf(Maho_CustomerSegmentation_Model_Segment_Condition_Abstract::class);
-    });
-
     test('has correct new child select options', function () {
         $options = $this->condition->getNewChildSelectOptions();
 
@@ -161,7 +152,9 @@ describe('Cart Attributes Condition', function () {
         $this->condition->setValue(2);
 
         $sql = $this->condition->getConditionsSql($adapter);
-        expect($sql)->toBeString();
+        expect($sql)->toContain('e.entity_id IN')
+            ->and($sql)->toContain('q.is_active')
+            ->and($sql)->toMatch("/q\\.items_count >= '?2'?/");
 
         // Test applied rules condition
         $this->condition->setAttribute('applied_rule_ids');
@@ -169,7 +162,8 @@ describe('Cart Attributes Condition', function () {
         $this->condition->setValue('123');
 
         $sql = $this->condition->getConditionsSql($adapter);
-        expect($sql)->toBeString();
+        expect($sql)->toContain('q.applied_rule_ids')
+            ->and($sql)->toContain('%123%');
     });
 
     test('returns false for unsupported attributes', function () {
@@ -199,74 +193,5 @@ describe('Cart Attributes Condition', function () {
         expect($conditionString)->toContain('Cart:');
         expect($conditionString)->toContain('Items Count');
         expect($conditionString)->toBeString();
-    });
-
-    test('validates cart data correctly', function () {
-        $this->condition->setAttribute('items_count');
-        $this->condition->setOperator('>=');
-        $this->condition->setValue('2');
-
-        // Mock cart data
-        $cartData = new Varien_Object([
-            'items_count' => 3,
-        ]);
-
-        expect($this->condition->validate($cartData))->toBe(true);
-
-        $cartData->setItemsCount(1);
-        expect($this->condition->validate($cartData))->toBe(false);
-    });
-
-    test('handles different operators correctly', function () {
-        $this->condition->setAttribute('base_subtotal');
-        $this->condition->setOperator('>=');
-        $this->condition->setValue('25.00');
-
-        // Just verify the condition configuration is set properly
-        expect($this->condition->getAttribute())->toBe('base_subtotal');
-        expect($this->condition->getOperator())->toBe('>=');
-        expect($this->condition->getValue())->toBe('25.00');
-    });
-
-    test('handles active status validation', function () {
-        $this->condition->setAttribute('is_active');
-        $this->condition->setOperator('==');
-        $this->condition->setValue(1);
-
-        $activeCart = new Varien_Object(['is_active' => 1]);
-        expect($this->condition->validate($activeCart))->toBe(true);
-
-        $inactiveCart = new Varien_Object(['is_active' => 0]);
-        expect($this->condition->validate($inactiveCart))->toBe(false);
-    });
-
-    test('handles coupon code validation', function () {
-        $this->condition->setAttribute('coupon_code');
-        $this->condition->setOperator('==');
-        $this->condition->setValue('SAVE10');
-
-        $cartWithCoupon = new Varien_Object(['coupon_code' => 'SAVE10']);
-        expect($this->condition->validate($cartWithCoupon))->toBe(true);
-
-        $cartWithoutCoupon = new Varien_Object(['coupon_code' => '']);
-        expect($this->condition->validate($cartWithoutCoupon))->toBe(false);
-    });
-
-    test('can export condition as array', function () {
-        $this->condition->setAttribute('items_count');
-        $this->condition->setOperator('>=');
-        $this->condition->setValue(2);
-
-        $array = $this->condition->asArray();
-
-        expect($array)->toHaveKey('type');
-        expect($array)->toHaveKey('attribute');
-        expect($array)->toHaveKey('operator');
-        expect($array)->toHaveKey('value');
-
-        expect($array['type'])->toBe('customersegmentation/segment_condition_cart_attributes');
-        expect($array['attribute'])->toBe('items_count');
-        expect($array['operator'])->toBe('>=');
-        expect($array['value'])->toBe(2);
     });
 });

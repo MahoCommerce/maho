@@ -88,7 +88,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Coupons_Form extends Mage_Adminh
             'name'  => 'dash',
             'label' => Mage::helper('salesrule')->__('Dash Every X Characters'),
             'title' => Mage::helper('salesrule')->__('Dash Every X Characters'),
-            'note'  => Mage::helper('salesrule')->__('If empty no separation.'),
+            'note'  => Mage::helper('salesrule')->__('Leave empty to use the default of the configuration.'),
             'value' => $couponHelper->getDefaultDashInterval(),
             'class' => 'validate-digits',
         ]);

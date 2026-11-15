@@ -196,10 +196,8 @@ class Mage_Core_Model_Image_Config
 
     /**
      * The <images> settings of the skin theme of the store view. A theme without a value takes
-     * the value of its parent theme, and the last parent takes the value of base/default. As in the
-     * design fallback, when the theme declares no parent, only the default theme of the store view
-     * and then the default theme of the package come before base/default. The slot list of an entity
-     * is one value: the list of a child theme replaces the list of its parent.
+     * the value of its parent theme, and the last parent takes the value of base/default. The slot
+     * list of an entity is one value: the list of a child theme replaces the list of its parent.
      *
      * @return array{slots?: array<string, int>, entities?: array<string, array{ratio?: string, fit?: string, slots?: array<string, int>}>}
      */
@@ -229,27 +227,7 @@ class Mage_Core_Model_Image_Config
      */
     protected function getThemeImagesNodes(int $storeId): array
     {
-        $designConfig = Mage::getSingleton('core/design_config');
-        $area = Mage_Core_Model_Design_Package::DEFAULT_AREA;
-        $package = (string) Mage::getStoreConfig('design/package/name', $storeId) ?: Mage_Core_Model_Design_Package::DEFAULT_PACKAGE;
-        $theme = (string) Mage::getStoreConfig('design/theme/skin', $storeId)
-            ?: (string) Mage::getStoreConfig('design/theme/default', $storeId)
-            ?: Mage_Core_Model_Design_Package::DEFAULT_THEME;
-
-        $steps = [
-            ...Mage::getModel('core/design_fallback', ['config' => $designConfig])->setStore($storeId)->getFallbackScheme($area, $package, $theme),
-            ['_package' => Mage_Core_Model_Design_Package::BASE_PACKAGE, '_theme' => Mage_Core_Model_Design_Package::DEFAULT_THEME],
-        ];
-        $nodes = [];
-        foreach ($steps as $step) {
-            $package = $step['_package'] ?? $package;
-            $theme = $step['_theme'] ?? $theme;
-            $node = $designConfig->getNode("{$area}/{$package}/{$theme}/images");
-            if ($node) {
-                $nodes[] = $node;
-            }
-        }
-        return $nodes;
+        return Mage::getSingleton('core/design_config')->getThemeNodes('images', $storeId);
     }
 
     /**

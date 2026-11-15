@@ -117,8 +117,6 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
                     Mage::getSingleton('catalog/session')->addSuccess(
                         $this->__('The product %s has been removed from comparison list.', $product->getName()),
                     );
-                    Mage::dispatchEvent('catalog_product_compare_remove_product', ['product' => $item]);
-                    Mage::helper('catalog/product_compare')->calculate();
                 }
             }
         }

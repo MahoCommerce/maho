@@ -40,10 +40,8 @@ final class StoreScopeWrite
                 $codes[$field->modelField] = true;
             }
         }
-        if ($data->customAttributesWrite !== null) {
-            foreach (array_keys($data->customAttributesWrite) as $code) {
-                $codes[(string) $code] = true;
-            }
+        foreach (array_keys($data->customAttributes ?? []) as $code) {
+            $codes[(string) $code] = true;
         }
         return $codes;
     }

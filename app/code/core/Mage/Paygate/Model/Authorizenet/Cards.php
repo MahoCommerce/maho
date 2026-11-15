@@ -165,7 +165,7 @@ class Mage_Paygate_Model_Authorizenet_Cards
      *
      * @throws Exception
      */
-    protected function _isPaymentValid()
+    protected function _isPaymentValid(): void
     {
         if (!$this->_payment) {
             throw new Exception('Payment instance is not set');
@@ -173,11 +173,8 @@ class Mage_Paygate_Model_Authorizenet_Cards
     }
     /**
      * Return total for cards data fields
-     *
-     * $param string $key
-     * @return float
      */
-    public function _getAmount($key)
+    public function _getAmount(string $key): float
     {
         $amount = 0;
         foreach ($this->_cards as $card) {

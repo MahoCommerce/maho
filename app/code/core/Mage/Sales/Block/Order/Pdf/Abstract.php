@@ -30,6 +30,20 @@ abstract class Mage_Sales_Block_Order_Pdf_Abstract extends Mage_Core_Block_Pdf
     }
 
     /**
+     * Return the label and the value of each customer attribute of the order that a storefront form
+     * shows, because the document goes to the customer.
+     *
+     * @return list<array{code: string, label: string, value: string}>
+     */
+    public function getCustomerAttributeRows(): array
+    {
+        if ($this->_order === null) {
+            return [];
+        }
+        return Mage::getSingleton('sales/observer_customerAttributes')->getDisplayValues($this->_order, true);
+    }
+
+    /**
      * Get store address from configuration
      */
     public function getStoreAddress(): string

@@ -89,10 +89,6 @@ class CustomerCreate extends BaseMahoCommand
         }
 
         $group ??= $this->getDefaultGroupId($websiteModel->getCode());
-        if (!array_key_exists($group, $this->getGroups())) {
-            $io->writeln("<error>Customer group not found with ID: $group</error>");
-            return Command::INVALID;
-        }
 
         $customer = Mage::getModel('customer/customer');
         $form = $this->getCustomerForm(self::FORM_CODE, $customer);
@@ -111,18 +107,20 @@ class CustomerCreate extends BaseMahoCommand
             'website_id' => (int) $websiteModel->getId(),
             'group_id' => $group,
         ]));
+        if (!$errors) {
+            try {
+                Mage::getService('customer/customer')->create($customer->setPassword($password), \Mage_Core_Model_App::ADMIN_STORE_ID);
+            } catch (\Mage_Core_Exception_Input $e) {
+                $errors = array_column($e->getErrors(), 'message');
+            } catch (\Mage_Core_Exception $e) {
+                $errors = [$e->getMessage()];
+            }
+        }
         if ($errors) {
             foreach ($errors as $error) {
                 $io->writeln("<error>$error</error>");
             }
             return Command::INVALID;
-        }
-
-        $customer->setPassword($password)->save();
-
-        if (!$customer->getId()) {
-            $io->writeln('<error>Unable to create customer</error>');
-            return Command::FAILURE;
         }
 
         $io->writeln("<info>Customer $email created successfully.</info>");

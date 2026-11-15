@@ -27,7 +27,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
     }
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('log/visitor', 'visitor_id');
     }

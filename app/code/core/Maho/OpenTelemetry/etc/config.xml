@@ -49,4 +49,16 @@ SPDX-License-Identifier: AFL-3.0
             </opentelemetry>
         </dev>
     </default>
+
+    <adminhtml>
+        <translate>
+            <modules>
+                <Maho_OpenTelemetry>
+                    <files>
+                        <default>Maho_OpenTelemetry.csv</default>
+                    </files>
+                </Maho_OpenTelemetry>
+            </modules>
+        </translate>
+    </adminhtml>
 </config>

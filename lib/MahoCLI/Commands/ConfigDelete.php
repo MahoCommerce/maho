@@ -26,6 +26,8 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 )]
 class ConfigDelete extends BaseMahoCommand
 {
+    use ConfigCommandTrait;
+
     public function __invoke(
         InputInterface $input,
         OutputInterface $output,
@@ -36,102 +38,55 @@ class ConfigDelete extends BaseMahoCommand
     ): int {
         $this->initMaho();
 
+        /** @var \Mage_Core_Service_Config $service */
+        $service = Mage::getService('core/config');
         try {
-            $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
-            $table = Mage::getSingleton('core/resource')->getTableName('core_config_data');
+            $row = $service->getById($configId);
+        } catch (\Mage_Core_Exception $e) {
+            $output->writeln('<error>' . $e->getMessage() . '</error>');
+            return Command::FAILURE;
+        }
 
-            // Check if the configuration exists
-            $select = $connection->select()
-                ->from($table)
-                ->where('config_id = ?', $configId);
+        $output->writeln('<info>Configuration to delete:</info>');
+        $output->writeln('');
 
-            $existing = $connection->fetchRow($select);
+        $tableOutput = new Table($output);
+        $tableOutput->setHeaders(['Config ID', 'Path', 'Scope', 'Scope ID', 'Name', 'Value']);
+        $tableOutput->addRow([
+            $row->getId(),
+            $row->getPath(),
+            $row->getScope(),
+            $row->getScopeId(),
+            $this->getScopeName((string) $row->getScope(), (int) $row->getScopeId()),
+            $row->getValue(),
+        ]);
+        $tableOutput->render();
 
-            if (!$existing) {
-                $output->writeln('<error>Configuration with ID ' . $configId . ' not found in database</error>');
-                return Command::FAILURE;
-            }
-
-            // Show what will be deleted in a table
-            $output->writeln('<info>Configuration to delete:</info>');
+        if (!$force) {
             $output->writeln('');
-
-            $tableOutput = new Table($output);
-            $tableOutput->setHeaders(['Config ID', 'Path', 'Scope', 'Scope ID', 'Name', 'Value']);
-            $tableOutput->addRow([
-                $existing['config_id'],
-                $existing['path'],
-                $existing['scope'],
-                $existing['scope_id'],
-                $this->getScopeName($existing['scope'], (int) $existing['scope_id']),
-                $existing['value'],
-            ]);
-            $tableOutput->render();
-
-            // Confirm deletion unless --force is used
-            if (!$force) {
-                $output->writeln('');
-                /** @var QuestionHelper $helper */
-                $helper = $this->getHelper('question');
-                $question = new ConfirmationQuestion(
-                    '<question>Are you sure you want to delete this configuration? [y/N]</question> ',
-                    false,
-                );
-
-                if (!$helper->ask($input, $output, $question)) {
-                    $output->writeln('<comment>Deletion cancelled</comment>');
-                    return Command::SUCCESS;
-                }
-            }
-
-
-            // Delete the configuration
-            $connection->delete(
-                $table,
-                ['config_id = ?' => $configId],
+            /** @var QuestionHelper $helper */
+            $helper = $this->getHelper('question');
+            $question = new ConfirmationQuestion(
+                '<question>Are you sure you want to delete this configuration? [y/N]</question> ',
+                false,
             );
 
-            // Clear configuration cache
-            Mage::app()->getCache()->clean(['config']);
+            if (!$helper->ask($input, $output, $question)) {
+                $output->writeln('<comment>Deletion cancelled</comment>');
+                return Command::SUCCESS;
+            }
+        }
 
-            $output->writeln('');
-            $output->writeln('<info>Configuration deleted successfully</info>');
-            $output->writeln('<info>Configuration cache has been cleared</info>');
-
-        } catch (\Exception $e) {
+        try {
+            $service->delete((string) $row->getPath(), (string) $row->getScope(), (int) $row->getScopeId());
+        } catch (\Mage_Core_Exception $e) {
             $output->writeln('<error>Error deleting configuration: ' . $e->getMessage() . '</error>');
             return Command::FAILURE;
         }
 
+        $output->writeln('');
+        $output->writeln('<info>Configuration deleted successfully</info>');
+
         return Command::SUCCESS;
-    }
-
-    private function getScopeName(string $scope, int $scopeId): string
-    {
-        if ($scopeId === 0) {
-            return 'Default Config';
-        }
-
-        try {
-            switch ($scope) {
-                case 'websites':
-                    $website = Mage::getModel('core/website')->load($scopeId);
-                    if ($website && $website->getId()) {
-                        return $website->getName() . ' (' . $website->getCode() . ')';
-                    }
-                    break;
-
-                case 'stores':
-                    $store = Mage::getModel('core/store')->load($scopeId);
-                    if ($store && $store->getId()) {
-                        return $store->getName() . ' (' . $store->getCode() . ')';
-                    }
-                    break;
-            }
-        } catch (\Exception) {
-            // Ignore errors when getting names
-        }
-
-        return '<comment>[Unknown]</comment>';
     }
 }

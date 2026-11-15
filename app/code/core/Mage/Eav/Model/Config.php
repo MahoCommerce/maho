@@ -29,7 +29,7 @@ class Mage_Eav_Model_Config
         'is_unique',
     ];
 
-    protected $_storeInitialized = [];
+    protected array $_storeInitialized = [];
 
     /**
      * @var Mage_Eav_Model_Entity_Type[]|null
@@ -117,7 +117,7 @@ class Mage_Eav_Model_Config
     /**
      * @throws Mage_Core_Model_Store_Exception
      */
-    protected function _storeId()
+    protected function _storeId(): ?int
     {
         if (isset($this->_currentStoreId) && $this->_currentStoreId !== false) {
             return $this->_currentStoreId;
@@ -128,7 +128,7 @@ class Mage_Eav_Model_Config
     /**
      * @throws Exception
      */
-    protected function _initializeStore($storeId = null)
+    protected function _initializeStore(?int $storeId = null): void
     {
         if ($storeId === null) {
             $storeId = $this->_storeId();
@@ -186,9 +186,11 @@ class Mage_Eav_Model_Config
             // Ensure eav entity type model class is defined, otherwise skip processing it.
             // This check prevents leftover eav_entity_type entries from disabled/removed modules creating errors and
             // is necessary because the entire EAV model is now loaded eagerly for performance optimization.
+            // getEntity() uses the resource model, so a type whose entity model is a resource only is valid too.
             $entityModelClass = $entityType['entity_model'];
             $fqEntityModelClass = Mage::getConfig()->getModelClassName($entityModelClass);
-            if (!class_exists($fqEntityModelClass)) {
+            $fqEntityResourceClass = Mage::getConfig()->getResourceModelClassName($entityModelClass);
+            if (!class_exists($fqEntityModelClass) && !($fqEntityResourceClass && class_exists($fqEntityResourceClass))) {
                 if (Mage::getIsDeveloperMode()) {
                     //throw new Exception('Failed loading of eav entity type because it does not exist: ' . $entityModelClass);
                 } else {
@@ -302,7 +304,7 @@ class Mage_Eav_Model_Config
         return true;
     }
 
-    protected function _saveToCache($storeId)
+    protected function _saveToCache(?int $storeId): void
     {
         $cacheData = [
             '_entityTypes' => [],

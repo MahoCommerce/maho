@@ -11,11 +11,22 @@ declare(strict_types=1);
 namespace Mage\Core\Api;
 
 use Maho\ApiPlatform\CrudProvider;
+use Maho\ApiPlatform\Resource;
 
 final class DesignChangeProvider extends CrudProvider
 {
     #[\Override]
     protected array $defaultSort = ['store_id' => 'ASC', 'date_from' => 'ASC'];
+
+    #[\Override]
+    protected function provideItem(int|string $id): ?Resource
+    {
+        try {
+            return $this->toDto(\Mage::getService('core/design')->getById((int) $id, $this->allowedStoreIds()));
+        } catch (\Mage_Core_Exception_NoSuchEntity) {
+            return null;
+        }
+    }
 
     /**
      * Design changes are admin data for every store view, so the current-store

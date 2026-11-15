@@ -189,7 +189,7 @@ class Mage_Adminhtml_Model_Url extends Mage_Core_Model_Url
     /**
      * Refresh admin menu cache etc.
      */
-    public function renewSecretUrls()
+    public function renewSecretUrls(): void
     {
         Mage::app()->cleanCache([Mage_Adminhtml_Block_Page_Menu::CACHE_TAGS]);
     }

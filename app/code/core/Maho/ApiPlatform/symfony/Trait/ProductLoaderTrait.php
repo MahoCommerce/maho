@@ -12,77 +12,46 @@ namespace Maho\ApiPlatform\Trait;
 
 use Mage;
 use Mage_Catalog_Model_Product;
-use Mage_Catalog_Model_Product_Status;
+use Mage_Catalog_Service_Product;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Loads a catalog product by ID within the current store context.
- *
- * Handles StoreContext initialization, store-scoped loading, and not-found
- * checks. Supports an optional product type constraint for typed sub-resources
- * (bundle, configurable, grouped, downloadable).
- *
- * Used by all product sub-resource providers and processors to replace 16
- * identical copies of the same loadProduct() method.
+ * Load the product of a product sub-resource through Mage_Catalog_Service_Product, in the store of the request.
+ * A typed sub-resource (bundle, configurable, grouped, downloadable) names the product type that it needs.
  */
 trait ProductLoaderTrait
 {
     use StoreAccessTrait;
 
+    /**
+     * @throws \Mage_Core_Exception_NoSuchEntity
+     */
     protected function loadProduct(int $id, ?string $requiredType = null): Mage_Catalog_Model_Product
     {
         StoreContext::ensureStore();
-        $storeId = StoreContext::getStoreId();
-
-        /** @var Mage_Catalog_Model_Product $product */
-        $product = Mage::getModel('catalog/product');
-        if ($storeId) {
-            $product->setStoreId($storeId);
-        }
-        $product->load($id);
-
-        if (!$product->getId()) {
-            throw new NotFoundHttpException('Product not found');
-        }
-
-        if ($requiredType !== null && $product->getTypeId() !== $requiredType) {
-            throw new NotFoundHttpException("Product is not a {$requiredType} product");
-        }
-
-        return $product;
+        return $this->assertProductType(self::productService()->getById($id, StoreContext::getStoreId()), $requiredType);
     }
 
     /**
-     * Load for a public sub-resource read: non-backend callers only reach
-     * enabled products on the current store's website (same rule as
-     * ProductProvider::loadProductDto), so hidden products 404 before the
-     * type check can disclose them.
+     * Load for a sub-resource read. A caller without backend access reaches only a product that the storefront of
+     * the store shows, so a hidden product is not found before the type check can disclose it.
+     *
+     * @throws \Mage_Core_Exception_NoSuchEntity
+     * @throws \Mage_Core_Exception_Forbidden
      */
     protected function loadProductForRead(int $id, ?string $requiredType = null): Mage_Catalog_Model_Product
     {
-        $product = $this->loadProduct($id);
-
-        if ($this->canReadBackendProducts()) {
-            if ($this->isApiUser()) {
-                $this->assertProductWebsitesAllowed($product, $this->requireUser());
-            }
-        } else {
-            $websiteId = (int) StoreContext::getStore()->getWebsiteId();
-            if (!in_array($websiteId, array_map(intval(...), $product->getWebsiteIds()), true)
-                || (int) $product->getStatus() !== Mage_Catalog_Model_Product_Status::STATUS_ENABLED
-            ) {
-                throw new NotFoundHttpException('Product not found');
-            }
+        StoreContext::ensureStore();
+        $service = self::productService();
+        if (!$this->canReadBackendProducts()) {
+            return $this->assertProductType($service->getVisibleById($id, StoreContext::getStoreId()), $requiredType);
         }
-
-        if ($requiredType !== null && $product->getTypeId() !== $requiredType) {
-            throw new NotFoundHttpException("Product is not a {$requiredType} product");
+        $product = $service->getById($id, StoreContext::getStoreId());
+        if ($this->isApiUser()) {
+            $service->assertInStores($product, $this->requireUser()->getAllowedStoreIds());
         }
-
-        return $product;
+        return $this->assertProductType($product, $requiredType);
     }
 
     /**
@@ -100,76 +69,37 @@ trait ProductLoaderTrait
      * into that store (the _canUpdateAttribute store-view rule), so writes must
      * not inherit the read context's default store. resolveWriteScope() keeps
      * store-restricted tokens off the global scope.
+     *
+     * @throws \Mage_Core_Exception_NoSuchEntity
      */
     protected function loadProductForWrite(int $id, ApiUser $user, ?string $requiredType = null): Mage_Catalog_Model_Product
     {
         StoreContext::ensureStore();
-        $storeId = $this->resolveWriteScope($user);
-
-        /** @var Mage_Catalog_Model_Product $product */
-        $product = Mage::getModel('catalog/product');
-        $product->setStoreId($storeId);
-        $product->load($id);
-
-        if (!$product->getId()) {
-            throw new NotFoundHttpException('Product not found');
-        }
-
-        if ($requiredType !== null && $product->getTypeId() !== $requiredType) {
-            throw new NotFoundHttpException("Product is not a {$requiredType} product");
-        }
-
-        return $product;
+        return $this->assertProductType(self::productService()->getById($id, $this->resolveWriteScope($user)), $requiredType);
     }
 
     /**
-     * Map a store-restricted API user's allowed STORE ids to their website ids.
-     *
-     * Returns null when the user is unrestricted (getAllowedStoreIds() === null),
-     * signalling "no website restriction": callers must treat null as "allow all".
-     * Single source of truth for the store-to-website scope shared by the main
-     * product CRUD (ProductProcessor) and every product sub-resource processor.
-     *
-     * @return int[]|null
-     */
-    protected function getAllowedWebsiteIds(ApiUser $user): ?array
-    {
-        $allowedStoreIds = $user->getAllowedStoreIds();
-        if ($allowedStoreIds === null) {
-            return null;
-        }
-
-        $websiteIds = [];
-        foreach ($allowedStoreIds as $storeId) {
-            try {
-                $websiteIds[] = (int) Mage::app()->getStore($storeId)->getWebsiteId();
-            } catch (\Mage_Core_Model_Store_Exception) {
-                // deleted or unknown store: grants access to no website
-            }
-        }
-
-        return array_values(array_unique($websiteIds));
-    }
-
-    /**
-     * Authorize a loaded product against a store-restricted API user: the product
-     * must belong to at least one website the user's allowed stores map to. No-op
-     * for unrestricted users (getAllowedStoreIds() === null). Applied identically
-     * by the main product CRUD and sub-resource writes (custom options, media,
-     * tier prices, links, bundle/configurable setup, …), so none can be used to
-     * reach a product outside the user's website scope.
+     * @throws \Mage_Core_Exception_Forbidden when the product is in no website of the store views of the user
      */
     protected function assertProductWebsitesAllowed(Mage_Catalog_Model_Product $product, ApiUser $user): void
     {
-        $allowedWebsiteIds = $this->getAllowedWebsiteIds($user);
-        if ($allowedWebsiteIds === null) {
-            return;
-        }
+        self::productService()->assertInStores($product, $user->getAllowedStoreIds());
+    }
 
-        $productWebsiteIds = array_map(intval(...), $product->getWebsiteIds());
+    private static function productService(): Mage_Catalog_Service_Product
+    {
+        /** @var Mage_Catalog_Service_Product */
+        return Mage::getService('catalog/product');
+    }
 
-        if (array_intersect($productWebsiteIds, $allowedWebsiteIds) === []) {
-            throw new AccessDeniedHttpException("Access denied for this product's websites");
+    /**
+     * @throws \Mage_Core_Exception_NoSuchEntity when the product is not of the type $requiredType
+     */
+    private function assertProductType(Mage_Catalog_Model_Product $product, ?string $requiredType): Mage_Catalog_Model_Product
+    {
+        if ($requiredType !== null && $product->getTypeId() !== $requiredType) {
+            throw new \Mage_Core_Exception_NoSuchEntity("Product is not a {$requiredType} product");
         }
+        return $product;
     }
 }

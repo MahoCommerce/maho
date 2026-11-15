@@ -51,6 +51,20 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
     }
 
     /**
+     * A script that sets BREAKPOINTS to the breakpoint presets of the skin theme, such as
+     * `{"mobile":770,"tablet":1023}`. app.js reads them, so its layout changes at the same widths as
+     * the CSS and the content images. The admin gets no script.
+     */
+    public function getBreakpointsScript(): string
+    {
+        if (Mage::getDesign()->getArea() !== Mage_Core_Model_Design_Package::DEFAULT_AREA) {
+            return '';
+        }
+        $json = Mage::helper('core')->jsonEncode(Mage::getSingleton('core/design_breakpoints')->getWidths());
+        return '<script>var BREAKPOINTS = ' . $json . ';</script>' . PHP_EOL;
+    }
+
+    /**
      * Add the web fonts the active skin identity declares in its etc/theme.xml.
      *
      * Keyed on the skin theme: an identity is skin-only, so a layout file inside
@@ -212,6 +226,9 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
             empty($items['js_css']) ? [] : $items['js_css'],
             empty($items['skin_css']) ? [] : $items['skin_css'],
         );
+
+        // Before the scripts, also when a theme has its own head template
+        $html .= $this->getBreakpointsScript();
 
         // static and skin javascripts
         $html .= $this->_prepareStaticAndSkinElements(
@@ -378,7 +395,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
      * @param string $itemName
      * @param array $itemThe
      */
-    protected function _separateOtherHtmlHeadElements(&$lines, $itemType, $itemParams, $itemName, $itemThe)
+    protected function _separateOtherHtmlHeadElements(&$lines, $itemType, $itemParams, $itemName, $itemThe): void
     {
         $params = $itemParams ? ' ' . $itemParams : '';
         $href   = $itemName;
@@ -585,7 +602,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
                 $currentIdPath = Mage::getModel('core/url_rewrite')
                     ->setStoreId($currentStoreId)
                     ->loadByRequestPath($currentUrl)
-                    ->getIdPath();
+                    ->getIdPathForOtherStores();
 
                 /** @var Mage_Core_Model_Store $store */
                 foreach ($activeStores as $store) {
@@ -644,7 +661,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
      * @param string|bool $before
      * @param string $type
      */
-    protected function _sortItems($referenceName, $before, $type)
+    protected function _sortItems($referenceName, $before, $type): void
     {
         // Convert string values ("true"/"false") to bool
         $before = filter_var($before, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);

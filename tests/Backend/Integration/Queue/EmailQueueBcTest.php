@@ -42,10 +42,6 @@ afterEach(function () {
     QueueManager::reset();
 });
 
-it('still instantiates via the legacy model alias', function () {
-    expect(Mage::getModel('core/email_queue'))->toBeInstanceOf(Mage_Core_Model_Email_Queue::class);
-});
-
 it('dispatches a SendMessage onto the email queue via addMessageToQueue', function () {
     makeLegacyEmailQueue()->addMessageToQueue();
 

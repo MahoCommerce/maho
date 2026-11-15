@@ -11,7 +11,7 @@
 class Mage_Tax_Model_Resource_Calculation_Rate extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('tax/tax_calculation_rate', 'tax_calculation_rate_id');
     }

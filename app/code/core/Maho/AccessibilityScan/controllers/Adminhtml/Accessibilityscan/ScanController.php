@@ -45,34 +45,14 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends 
     #[Maho\Config\Route('/admin/accessibilityscan_scan/start', methods: ['POST'])]
     public function startAction(): void
     {
-        $url = (string) $this->getRequest()->getParam('url');
-        if ($url === '' || !Mage::helper('core')->isValidUrl($url)) {
-            $this->getResponse()->setBodyJson([
-                'error' => true,
-                'message' => $this->__('Please provide a valid URL to scan'),
-            ]);
-            return;
-        }
-        // The store is derived from the URL: the scanner renders whatever the
-        // URL serves, so a separate store selector could only contradict it
-        $storeId = Mage::helper('accessibilityscan')->resolveScanUrlStoreId($url);
-        if ($storeId === null) {
-            $this->getResponse()->setBodyJson([
-                'error' => true,
-                'message' => $this->__('The URL to scan must belong to one of the configured store base URLs'),
-            ]);
-            return;
-        }
-
         try {
-            $helper = Mage::helper('accessibilityscan');
-            $scan = Mage::getModel('accessibilityscan/scan');
-            $scan->setUrl($url)
-                ->setStoreId($storeId)
-                ->setWcagLevel($helper->normalizeWcagLevel($this->getRequest()->getParam('wcag_level')))
-                ->setTriggeredBy(Maho_AccessibilityScan_Model_Scan::TRIGGER_MANUAL)
-                ->setStatus(Maho_AccessibilityScan_Model_Scan::STATUS_PENDING)
-                ->save();
+            /** @var Maho_AccessibilityScan_Service_Scan $service */
+            $service = Mage::getService('accessibilityscan/scan');
+            $scan = $service->start(
+                (string) $this->getRequest()->getParam('url'),
+                (string) $this->getRequest()->getParam('wcag_level'),
+                Maho_AccessibilityScan_Model_Scan::TRIGGER_MANUAL,
+            );
 
             $this->getResponse()->setBodyJson([
                 'success' => true,
@@ -80,6 +60,8 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends 
                 'run_url' => $this->getUrl('*/*/run', ['id' => $scan->getId()]),
                 'status_url' => $this->getUrl('*/*/status', ['id' => $scan->getId()]),
             ]);
+        } catch (Mage_Core_Exception $e) {
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         } catch (Throwable $e) {
             Mage::logException($e);
             $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);

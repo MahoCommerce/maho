@@ -23,7 +23,7 @@ return function (SchemaEditor $schema): void {
             ->setUnquotedName('adminnotification_inbox')
             ->addColumn(Schema::column('notification_id', Types::INTEGER, unsigned: true, autoincrement: true))
             ->addColumn(Schema::column('severity', Types::SMALLINT, unsigned: true, default: 0))
-            ->addColumn(Schema::column('date_added', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('date_added', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
             ->addColumn(Schema::column('title', Types::STRING, length: 255))
             ->addColumn(Schema::column('description', Types::TEXT, length: 65535, notNull: false))
             ->addColumn(Schema::column('url', Types::STRING, length: 255, notNull: false))

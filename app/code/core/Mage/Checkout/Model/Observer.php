@@ -11,13 +11,13 @@
 class Mage_Checkout_Model_Observer
 {
     #[Maho\Config\Observer('customer_logout', area: 'frontend')]
-    public function unsetAll()
+    public function unsetAll(): void
     {
         Mage::getSingleton('checkout/session')->unsetAll();
     }
 
     #[Maho\Config\Observer('customer_login', area: 'frontend')]
-    public function loadCustomerQuote()
+    public function loadCustomerQuote(): void
     {
         try {
             Mage::getSingleton('checkout/session')->loadCustomerQuote();
@@ -32,7 +32,7 @@ class Mage_Checkout_Model_Observer
     }
 
     #[Maho\Config\Observer('sales_quote_save_after', area: 'frontend')]
-    public function salesQuoteSaveAfter(\Maho\Event\Observer $observer)
+    public function salesQuoteSaveAfter(\Maho\Event\Observer $observer): void
     {
         $quote = $observer->getEvent()->getQuote();
         /** @var Mage_Sales_Model_Quote $quote */

@@ -17,7 +17,7 @@ declare(strict_types=1);
  */
 class Mage_ConfigurableSwatches_Block_Catalog_Product_View_Type_Configurable_Swatches extends Mage_Core_Block_Template
 {
-    protected $_initDone = false;
+    protected bool $_initDone = false;
 
     /**
      * Determine if the renderer should be used
@@ -42,7 +42,7 @@ class Mage_ConfigurableSwatches_Block_Catalog_Product_View_Type_Configurable_Swa
      *
      * @param string $jsonConfig
      */
-    protected function _init($jsonConfig)
+    protected function _init($jsonConfig): void
     {
         if (!$this->_initDone) {
             $this->setJsonConfig($jsonConfig);

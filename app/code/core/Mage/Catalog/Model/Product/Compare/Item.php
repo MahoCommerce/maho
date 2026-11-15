@@ -87,6 +87,20 @@ class Mage_Catalog_Model_Product_Compare_Item extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Tell the observers that the product left the compare list, and count the list of the session again. Each
+     * caller that deletes one item gets both: the storefront and the admin order create.
+     */
+    #[\Override]
+    protected function _afterDelete()
+    {
+        parent::_afterDelete();
+        Mage::dispatchEvent('catalog_product_compare_remove_product', ['product' => $this]);
+        Mage::helper('catalog/product_compare')->calculate();
+
+        return $this;
+    }
+
+    /**
      * Add customer data from customer object
      */
     public function addCustomerData(Mage_Customer_Model_Customer $customer): static

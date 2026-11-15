@@ -594,6 +594,17 @@ interface AdapterInterface
     public function prepareColumnValue(array $column, mixed $value): mixed;
 
     /**
+     * Return true when $column can hold $value. An integer column cannot hold a number that is out of its range,
+     * or a value that is not a whole number. Any other column can hold any value.
+     *
+     * A condition that compares the column with a value it cannot hold matches no row, and PostgreSQL refuses
+     * to run it. So check the value first, and do not run the query when the result is false.
+     *
+     * @param array $column     the column describe array
+     */
+    public function canColumnHoldValue(array $column, mixed $value): bool;
+
+    /**
      * Generate fragment of SQL, that check condition and return true or false value
      *
      * @param string|\Maho\Db\Expr $true          true value

@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Block_Widget_Form_Renderer_Element extends Mage_Adminhtml_Block_Template implements \Maho\Data\Form\Element\Renderer\RendererInterface
 {
-    protected $_element;
+    protected ?\Maho\Data\Form\Element\AbstractElement $_element = null;
 
     #[\Override]
     protected function _construct()
@@ -20,7 +20,7 @@ class Mage_Adminhtml_Block_Widget_Form_Renderer_Element extends Mage_Adminhtml_B
         $this->setTemplate('widget/form/renderer/element.phtml');
     }
 
-    public function getElement()
+    public function getElement(): ?\Maho\Data\Form\Element\AbstractElement
     {
         return $this->_element;
     }

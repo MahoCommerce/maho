@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 SPDX-FileCopyrightText: 2022-2025 The OpenMage Contributors <https://openmage.org>
 SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
 SPDX-License-Identifier: AFL-3.0
@@ -7,7 +8,7 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Mage_Contacts>
-            <version>2.0.0</version>
+            <version>2.0.1</version>
         </Mage_Contacts>
     </modules>
     <frontend>
@@ -29,6 +30,11 @@ SPDX-License-Identifier: AFL-3.0
         </layout>
     </frontend>
     <global>
+        <services>
+            <contacts>
+                <class>Mage_Contacts_Service</class>
+            </contacts>
+        </services>
         <template>
             <email>
                 <contacts_email_email_template translate="label" module="contacts">
@@ -59,6 +65,8 @@ SPDX-License-Identifier: AFL-3.0
         <system>
             <rate_limit>
                 <contact>3</contact>
+                <contact_ip>10</contact_ip>
+                <contact_auto_reply>3</contact_auto_reply>
             </rate_limit>
         </system>
         <contacts>
@@ -67,12 +75,9 @@ SPDX-License-Identifier: AFL-3.0
             </contacts>
             <api>
                 <enabled>1</enabled>
-                <honeypot_enabled>1</honeypot_enabled>
             </api>
             <abuse>
                 <honeypot_enabled>1</honeypot_enabled>
-                <ip_rate_limit_per_hour>10</ip_rate_limit_per_hour>
-                <recipient_rate_limit_per_hour>3</recipient_rate_limit_per_hour>
             </abuse>
             <email>
                 <recipient_email><![CDATA[hello@example.com]]></recipient_email>

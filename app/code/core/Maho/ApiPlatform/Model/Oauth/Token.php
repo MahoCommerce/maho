@@ -78,11 +78,18 @@ class Maho_ApiPlatform_Model_Oauth_Token extends Mage_Core_Model_Abstract
         return $expiresAt === null || (int) $expiresAt > time();
     }
 
-    public function markUsed(): self
+    /**
+     * Mark the row as used. False when another request used it first.
+     */
+    public function markUsed(): bool
     {
-        $this->setData('used_at', time());
-        $this->save();
-        return $this;
+        $usedAt = time();
+        if (!$this->resource()->markUsed((int) $this->getId(), $usedAt)) {
+            return false;
+        }
+
+        $this->setData('used_at', $usedAt);
+        return true;
     }
 
     /**

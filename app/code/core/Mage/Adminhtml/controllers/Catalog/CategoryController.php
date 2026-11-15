@@ -54,6 +54,12 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
         return $category;
     }
 
+    protected function _getService(): Mage_Catalog_Service_Category
+    {
+        /** @var Mage_Catalog_Service_Category */
+        return Mage::getService('catalog/category');
+    }
+
     /**
      * Catalog categories index action
      */
@@ -95,7 +101,8 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
                 if ($storeId && !$parent->getResource()->isInStore($parent, $storeId)) {
                     Mage::throwException(Mage::helper('catalog')->__('Parent category was not found.'));
                 }
-                $category->setPath($parent->getPath());
+                $category->setPath($parent->getPath())
+                    ->setAttributeSetId($parent->getAttributeSetId() ?: (int) $category->getDefaultAttributeSetId());
             }
         } catch (Mage_Core_Exception $e) {
             $error = $e->getMessage();
@@ -117,6 +124,20 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
         // Restore saved data in case of exception during save
         $data = Mage::getSingleton('adminhtml/session')->getCategoryData(true);
         $category->addData($data['general'] ?? []);
+
+        // The set select reloads the form with the fields of another set, and posts the values that the admin typed
+        $setId = (int) $this->getRequest()->getParam('set');
+        if ($setId) {
+            $posted = $this->getRequest()->getPost('general');
+            if (is_array($posted)) {
+                $category->addData(array_diff_key($posted, array_flip(['id', 'path', 'attribute_set_id'])));
+            }
+            try {
+                $category->assignAttributeSet($setId);
+            } catch (Mage_Core_Exception $e) {
+                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+            }
+        }
 
         $this->loadLayout();
 
@@ -212,9 +233,12 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
             if (!$category = $this->_initCategory()) {
                 Mage::throwException(Mage::helper('catalog')->__('Category was not found.'));
             }
+            if (!$category->getId()) {
+                $category = $this->_getService()->newCategory((int) $this->getRequest()->getParam('parent'), $storeId ? [$storeId] : null);
+            }
 
             // Add all POST data, except path which may have become stale if category was moved
-            unset($data['general']['path']);
+            unset($data['general']['path'], $data['general']['store_id']);
             $category->addData($data['general']);
 
             // Add dynamic category data if present
@@ -222,25 +246,15 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
                 $category->addData($data['category']);
             }
 
-            // If new category, set path to parent and other defaults
-            if (!$category->getId()) {
-                $parent = Mage::getModel('catalog/category')
-                    ->load((int) $this->getRequest()->getParam('parent'));
-                if ($storeId && !$parent->getResource()->isInStore($parent, $storeId)) {
-                    Mage::throwException(Mage::helper('catalog')->__('Parent category was not found.'));
-                }
-                $category
-                    ->setPath($parent->getPath())
-                    ->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID)
-                    ->setAttributeSetId($category->getDefaultAttributeSetId());
+            // Without a posted set, an existing category keeps its set
+            $setId = (int) ($data['general']['attribute_set_id'] ?? 0);
+            if (!$setId && $category->getId() && $category->getOrigData('attribute_set_id')) {
+                $category->setAttributeSetId((int) $category->getOrigData('attribute_set_id'));
+            } else {
+                $category->assignAttributeSet($setId ?: null);
             }
 
-            // Check "Use Default Value" checkboxes values
-            if ($useDefaults = $this->getRequest()->getPost('use_default')) {
-                foreach ($useDefaults as $attributeCode) {
-                    $category->setData($attributeCode, false);
-                }
-            }
+            $this->_getService()->useDefault($category, array_map(strval(...), (array) $this->getRequest()->getPost('use_default', [])));
 
             // Process "Use Config Settings" checkboxes
             if ($useConfig = $this->getRequest()->getPost('use_config')) {
@@ -276,25 +290,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
                 'request' => $this->getRequest(),
             ]);
 
-            // Set $_POST['use_config'] into category model for validation processing
-            $category->setData('use_post_data_config', $this->getRequest()->getPost('use_config'));
-
-            $validate = $category->validate();
-            if ($validate !== true) {
-                foreach ($validate as $code => $error) {
-                    if ($error === true) {
-                        $attributeLabel = $category->getResource()->getAttribute($code)->getFrontend()->getLabel();
-                        Mage::throwException(Mage::helper('catalog')->__('Attribute "%s" is required.', $attributeLabel));
-                    } else {
-                        Mage::throwException($error);
-                    }
-                }
-            }
-
-            // Unset $_POST['use_config'] before save
-            $category->unsetData('use_post_data_config');
-
-            $category->save();
+            $this->_getService()->save($category);
 
             // Add success message, will be displayed when frontend loads parent's edit form
             Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('catalog')->__('The category has been saved.'));
@@ -351,9 +347,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
             // Category id after which we have put our category
             $prevNodeId = $this->getRequest()->getPost('aid', false);
 
-            $category->setData('save_rewrites_history', Mage::helper('catalog')->shouldSaveUrlRewritesHistory());
-
-            $category->move($parentNodeId, $prevNodeId);
+            $this->_getService()->move($category, (int) $parentNodeId, $prevNodeId ? (int) $prevNodeId : null);
 
             $this->getResponse()->setBodyJson([
                 'success' => true,
@@ -385,8 +379,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
                 );
             }
 
-            Mage::dispatchEvent('catalog_controller_category_delete', ['category' => $category]);
-            $category->delete();
+            $this->_getService()->delete($category);
 
             // Add success message, will be displayed when frontend loads parent's edit form
             Mage::getSingleton('adminhtml/session')->addSuccess(

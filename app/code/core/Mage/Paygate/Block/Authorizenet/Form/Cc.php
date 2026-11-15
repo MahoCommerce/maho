@@ -80,10 +80,8 @@ class Mage_Paygate_Block_Authorizenet_Form_Cc extends Mage_Payment_Block_Form
 
     /**
      * Get notice message
-     *
-     * @return string
      */
-    public function showNoticeMessage($message)
+    public function showNoticeMessage(string $message): string
     {
         return $this->getLayout()->getMessagesBlock()
             ->addNotice($this->__($message))

@@ -52,6 +52,17 @@ class Mage_Catalog_Model_Template_Filter extends \Maho\Filter\Template
     }
 
     /**
+     * Breakpoint directive: {{breakpoint code=mobile}}
+     *
+     * @see Mage_Core_Model_Email_Template_Filter::breakpointDirective()
+     */
+    public function breakpointDirective(array $construction): string
+    {
+        $params = $this->_getIncludeParameters($construction[2]);
+        return Mage::getSingleton('core/design_breakpoints')->getMediaQuery((string) ($params['code'] ?? ''));
+    }
+
+    /**
      * Retrieve media file URL directive
      *
      * @param array $construction

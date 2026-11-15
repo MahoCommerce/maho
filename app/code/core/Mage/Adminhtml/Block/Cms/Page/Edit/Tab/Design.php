@@ -50,9 +50,6 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Design extends Mage_Adminhtml_Block
             'values'   => Mage::getSingleton('page/source_layout')->toOptionArray(),
             'disabled' => $isElementDisabled,
         ]);
-        if (!$model->getId()) {
-            $model->setRootTemplate(Mage::getSingleton('page/source_layout')->getDefaultValue());
-        }
 
         $layoutFieldset->addField('layout_update_xml', 'textarea', [
             'name'      => 'layout_update_xml',

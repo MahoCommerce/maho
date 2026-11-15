@@ -34,7 +34,7 @@ Available commands:
  admin
   admin:user:change-password    Change password of an admin users
   admin:user:create             Create an admin user
-  admin:user:disable            Enable an admin user
+  admin:user:disable            Disable an admin user
   admin:user:enable             Enable an admin user
   admin:user:list               List all admin users
   admin:user:twofa-reset        Remove the two-factor authentication of an admin user who lost their device
@@ -184,6 +184,30 @@ After a restore, run `./maho cache:flush`.
 On MySQL, `db:export` and `db:import` give the password to the client in the `MYSQL_PWD`
 variable. A `password=` line in an option file such as `~/.my.cnf` has priority over it. If the
 commands fail with "Access denied", remove that line or make it match `local.xml`.
+
+### Configuration values
+
+`config:set` saves one value, and `import:config` saves each row of a CSV file. The two commands
+save through the field of **System > Configuration**, as the admin page and the API do. Thus
+the backend model of the field runs: a password field is encrypted, and a value that the
+field does not accept is refused.
+
+```bash
+./maho config:set general/store_information/name "My Store" --scope default --scope-id 0
+./maho import:config var/import/config.csv
+```
+
+The operator of the server runs these commands, so they save any path at any scope that exists.
+A path that no field declares, for example the path of an extension that has no `system.xml`, is
+written as it is, with no check.
+
+To get the rules of the admin page, add `--strict`. The command then refuses a path that no field
+of **System > Configuration** declares, and a scope where the admin page does not show the field:
+
+```bash
+./maho config:set general/store_information/name "My Store" --scope default --scope-id 0 --strict
+./maho import:config var/import/config.csv --strict
+```
 
 ## Give the input on the command line
 

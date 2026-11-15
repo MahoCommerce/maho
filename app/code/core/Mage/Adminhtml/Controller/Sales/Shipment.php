@@ -63,7 +63,7 @@ class Mage_Adminhtml_Controller_Sales_Shipment extends Mage_Adminhtml_Controller
         }
     }
 
-    public function pdfshipmentsAction()
+    public function pdfshipmentsAction(): void
     {
         $shipmentIds = $this->getRequest()->getPost('shipment_ids');
         if (!empty($shipmentIds)) {
@@ -73,7 +73,8 @@ class Mage_Adminhtml_Controller_Sales_Shipment extends Mage_Adminhtml_Controller
                 ->load();
             $pdf = Mage::getModel('sales/order_pdf_shipment')->getPdf($shipments);
 
-            return $this->_prepareDownloadResponse('packingslip' . Mage::app()->getLocale()->utcToStore()->format('Y-m-d_H-i-s') . '.pdf', $pdf, 'application/pdf');
+            $this->_prepareDownloadResponse('packingslip' . Mage::app()->getLocale()->utcToStore()->format('Y-m-d_H-i-s') . '.pdf', $pdf, 'application/pdf');
+            return;
         }
         $this->_redirect('*/*/');
     }

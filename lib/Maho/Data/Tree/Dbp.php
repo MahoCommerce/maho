@@ -42,7 +42,7 @@ class Dbp extends Tree
      */
     protected $_table;
 
-    protected $_loaded = false;
+    protected bool $_loaded = false;
 
     /**
      * SQL select object
@@ -57,9 +57,9 @@ class Dbp extends Tree
      * @var string
      */
     protected $_idField;
-    protected $_pathField;
-    protected $_orderField;
-    protected $_levelField;
+    protected ?string $_pathField = null;
+    protected ?string $_orderField = null;
+    protected ?string $_levelField = null;
 
     /**
      * Db tree constructor
@@ -371,7 +371,7 @@ class Dbp extends Tree
      * @param bool $withChildren
      * @param int $level
      */
-    protected function _addChildNodes($children, $path, $parentNode, $withChildren = false, $level = 0)
+    protected function _addChildNodes($children, $path, $parentNode, $withChildren = false, $level = 0): void
     {
         if (isset($children[$path])) {
             foreach ($children[$path] as $child) {

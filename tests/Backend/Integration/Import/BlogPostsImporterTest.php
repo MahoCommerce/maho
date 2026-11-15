@@ -57,7 +57,7 @@ it('creates a post from a content file and updates it on rerun', function (): vo
         ['imp-post', $store, 'Imp Post', '2026-02-03', 'post.html', 'imp/pic.webp', 'Imp Meta'],
     ]);
 
-    expect((new BlogPosts())->import($path, $options)->created)->toBe(1);
+    expect(new BlogPosts()->import($path, $options)->created)->toBe(1);
     $post = Mage::getModel('blog/post')->load(Mage::getModel('blog/post')->getPostIdByUrlKey('imp-post', 1));
     expect($post->getTitle())->toBe('Imp Post');
     expect($post->getContent())->toBe('<p>Post body</p>');
@@ -66,7 +66,7 @@ it('creates a post from a content file and updates it on rerun', function (): vo
     expect(substr((string) $post->getPublishDate(), 0, 10))->toBe('2026-02-03');
 
     file_put_contents($contentDir . '/post.html', '<p>New body</p>');
-    $again = (new BlogPosts())->import($path, $options);
+    $again = new BlogPosts()->import($path, $options);
     expect($again->created)->toBe(0)->and($again->updated)->toBe(1);
     expect(Mage::getModel('blog/post')->getCollection()->addAttributeToFilter('url_key', 'imp-post')->count())->toBe(1);
     expect(Mage::getModel('blog/post')->load($post->getId())->getContent())->toBe('<p>New body</p>');
@@ -92,4 +92,123 @@ it('rejects a bad url key, a missing store list and a bad date', function (): vo
     $path = blogCsv([$header, ['imp-post', $store, 'T', 'someday', 'x']]);
     expect(fn() => $importer->validate($path))->toThrow(RowException::class, 'publish_date');
     unlink($path);
+});
+
+it('imports a user-defined attribute by option label and the attribute set by name', function (): void {
+    $type = Mage::getSingleton('eav/config')->getEntityType(Maho_Blog_Model_Post::ENTITY);
+    $code = 'imp_level_' . substr(uniqid(), -6);
+    $setId = (int) $type->getDefaultAttributeSetId();
+    $attribute = Mage::getModel('blog/resource_eav_attribute')->setData([
+        'entity_type_id' => (int) $type->getId(),
+        'attribute_set_id' => $setId,
+        'attribute_group_id' => (int) Mage::getResourceModel('eav/entity_attribute_group_collection')
+            ->setAttributeSetFilter($setId)
+            ->getFirstItem()
+            ->getId(),
+        'attribute_code' => $code,
+        'backend_type' => 'int',
+        'frontend_input' => 'select',
+        'source_model' => 'eav/entity_attribute_source_table',
+        'frontend_label' => 'Level',
+        'is_user_defined' => 1,
+        'is_global' => 1,
+        'option' => ['value' => ['o1' => ['Beginner'], 'o2' => ['Expert']], 'order' => ['o1' => 1, 'o2' => 2]],
+    ]);
+    $attribute->save();
+    Mage::getSingleton('eav/config')->clear();
+
+    $store = Mage::app()->getStore(1)->getCode();
+    $contentDir = sys_get_temp_dir() . '/imp-blog-' . uniqid();
+    mkdir($contentDir);
+    file_put_contents($contentDir . '/post.html', '<p>Body</p>');
+    $options = [AbstractCmsImporter::OPTION_CONTENT_DIR => $contentDir];
+    $path = blogCsv([
+        ['url_key', 'stores', 'title', 'content_file', '_attribute_set', $code],
+        ['imp-level', $store, 'Imp Level', 'post.html', 'Default', 'Expert'],
+    ]);
+    $badPath = blogCsv([
+        ['url_key', 'stores', 'title', 'content_file', $code],
+        ['imp-level-bad', $store, 'Imp Bad', 'post.html', 'Master'],
+    ]);
+
+    try {
+        expect(new BlogPosts()->import($path, $options)->created)->toBe(1);
+        $post = Mage::getModel('blog/post')->load(Mage::getModel('blog/post')->getPostIdByUrlKey('imp-level', 1));
+        expect($attribute->getSource()->getOptionText($post->getData($code)))->toBe('Expert')
+            ->and($post->getAttributeSetId())->toBe((int) $type->getDefaultAttributeSetId())
+            ->and(fn() => new BlogPosts()->validate($badPath, $options))->toThrow(RowException::class);
+    } finally {
+        $attribute->delete();
+        Mage::getSingleton('eav/config')->clear();
+        unlink($path);
+        unlink($badPath);
+        unlink($contentDir . '/post.html');
+        rmdir($contentDir);
+    }
+});
+
+it('requires a post attribute only when its condition, which reads an option label of the file, shows it', function (): void {
+    $type = Mage::getSingleton('eav/config')->getEntityType(Maho_Blog_Model_Post::ENTITY);
+    $setId = (int) $type->getDefaultAttributeSetId();
+    $code = 'imp_dep_' . substr(uniqid(), -6);
+    $inSet = [
+        'entity_type_id' => (int) $type->getId(),
+        'attribute_set_id' => $setId,
+        'attribute_group_id' => (int) Mage::getResourceModel('eav/entity_attribute_group_collection')
+            ->setAttributeSetFilter($setId)
+            ->getFirstItem()
+            ->getId(),
+        'is_user_defined' => 1,
+        'is_global' => 1,
+    ];
+    $level = Mage::getModel('blog/resource_eav_attribute')->setData($inSet + [
+        'attribute_code' => $code,
+        'backend_type' => 'int',
+        'frontend_input' => 'select',
+        'source_model' => 'eav/entity_attribute_source_table',
+        'frontend_label' => 'Level',
+        'option' => ['value' => ['o1' => ['Beginner'], 'o2' => ['Expert']], 'order' => ['o1' => 1, 'o2' => 2]],
+    ]);
+    $level->save();
+    $expert = (string) $level->getSource()->getOptionId('Expert');
+    $certificate = Mage::getModel('blog/resource_eav_attribute')->setData($inSet + [
+        'attribute_code' => $code . '_c',
+        'backend_type' => 'varchar',
+        'frontend_input' => 'text',
+        'frontend_label' => 'Certificate',
+        'is_required' => 1,
+        'depends_on' => '[{"operator":"AND","condition":{"' . $code . '":["' . $expert . '"]}}]',
+    ]);
+    $certificate->save();
+    Mage::getSingleton('eav/config')->clear();
+
+    $store = Mage::app()->getStore(1)->getCode();
+    $contentDir = sys_get_temp_dir() . '/imp-blog-' . uniqid();
+    mkdir($contentDir);
+    file_put_contents($contentDir . '/post.html', '<p>Body</p>');
+    $options = [AbstractCmsImporter::OPTION_CONTENT_DIR => $contentDir];
+    $beginner = blogCsv([['url_key', 'stores', 'title', 'content_file', $code], ['imp-dep-beginner', $store, 'Imp Beginner', 'post.html', 'Beginner']]);
+    $expertPath = blogCsv([['url_key', 'stores', 'title', 'content_file', $code], ['imp-dep-expert', $store, 'Imp Expert', 'post.html', 'Expert']]);
+    // A field that the post does not hold counts as empty, as in the form, so the condition hides the certificate
+    $noLevel = blogCsv([['url_key', 'stores', 'title', 'content_file', $code], ['imp-dep-none', $store, 'Imp None', 'post.html', '']]);
+
+    try {
+        expect(fn() => new BlogPosts()->validate($beginner, $options))->not->toThrow(RowException::class)
+            ->and(fn() => new BlogPosts()->validate($expertPath, $options))->toThrow(RowException::class, "{$code}_c is required")
+            ->and(fn() => new BlogPosts()->validate($noLevel, $options))->not->toThrow(RowException::class);
+
+        // With Expert as the default level, a row without a level gets Expert, which shows the certificate
+        Mage::getModel('blog/resource_eav_attribute')->load($level->getId())->setDefaultValue($expert)->save();
+        Mage::getSingleton('eav/config')->clear();
+        expect(fn() => new BlogPosts()->validate($noLevel, $options))->toThrow(RowException::class, "{$code}_c is required");
+    } finally {
+        $certificate->delete();
+        $level->delete();
+        Mage::getSingleton('eav/config')->clear();
+        unlink($beginner);
+        unlink($expertPath);
+        unlink($noLevel);
+        unlink($contentDir . '/post.html');
+        rmdir($contentDir);
+    }
 });

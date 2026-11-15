@@ -119,7 +119,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             if ($methodCode === Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT) {
                 $returnUrl = Mage::getUrl('paypal/checkout/approveOrder', ['_secure' => true]);
                 $cancelUrl = Mage::getUrl('checkout/cart', ['_secure' => true]);
-                $shippingCallbackUrl = Mage::getUrl('paypal/checkout/shippingCallback', ['_secure' => true]);
+                $shippingCallbackUrl = Mage::helper('paypal')->getShippingCallbackUrl($quote);
             }
 
             $orderRequest = $builder->buildFromQuote(
@@ -137,9 +137,8 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             // popup/approve round-trip), so validate the quote here, before the money
             // moves, just as the standard flow validates before its capture.
             if ($vaultPaypalTokenId) {
-                $quote->getPayment()->setMethod($methodCode);
-                $quote->collectTotals();
-                Mage::getModel('sales/service_quote', $quote)->validate();
+                Mage::getService('checkout/cart')->selectPaymentMethod($quote, ['method' => $methodCode]);
+                Mage::getService('sales/order')->validateQuote($quote, Mage_Checkout_Model_Actor::Customer);
             }
 
             /** @var Maho_Paypal_Model_Api_Client $client */
@@ -354,9 +353,10 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             $shippingAddress = $data['shipping_address'] ?? [];
             $selectedOption = $data['shipping_option'] ?? null;
 
-            // Find quote by PayPal order ID
+            $token = $this->getRequest()->getParam('token');
             $quote = $this->_findQuoteByPaypalOrderId($paypalOrderId);
-            if (!$quote || !$quote->getId() || $quote->isVirtual()) {
+            if (!$quote || !$quote->getId() || $quote->isVirtual() || !is_string($token)
+                || !Mage::helper('paypal')->isValidShippingCallbackToken($quote, $token)) {
                 $this->getResponse()->setHttpResponseCode(422);
                 return;
             }
@@ -371,25 +371,11 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                 $shippingAddr->setPostcode($shippingAddress['postal_code'] ?? '');
             }
 
-            $shippingAddr->setCollectShippingRates()->collectShippingRates();
-            $rates = $shippingAddr->getAllShippingRates();
-
-            if (count($rates) === 0) {
+            if (!Mage::helper('paypal')->selectShippingRate($quote, $selectedOption['id'] ?? null)) {
                 $this->getResponse()->setHttpResponseCode(422);
                 return;
             }
-
-            // If buyer selected a specific option, use it; otherwise select the first
-            $selectedCode = $selectedOption['id'] ?? null;
-            $validCodes = array_map(fn($r) => $r->getCode(), $rates);
-            if ($selectedCode && in_array($selectedCode, $validCodes)) {
-                $shippingAddr->setShippingMethod($selectedCode);
-            } else {
-                $shippingAddr->setShippingMethod($rates[0]->getCode());
-            }
-
-            $quote->collectTotals();
-            $quote->save();
+            $rates = $shippingAddr->getAllShippingRates();
 
             // Build response in PayPal's expected format
             $currency = $quote->getBaseCurrencyCode();

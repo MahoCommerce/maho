@@ -15,6 +15,7 @@ use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableEditor;
+use Doctrine\DBAL\Types\TypeRegistry;
 use Doctrine\DBAL\Types\Types;
 use Maho\Db\Schema\Applier;
 use Maho\Db\Schema\UnsupportedMigrationException;
@@ -79,7 +80,7 @@ it('re-asserts AUTO_INCREMENT after a primary-key rebuild on MySQL', function ()
         ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create())
         ->create();
 
-    $result = invokeApplierMethod('autoIncrementRestores', [new MySQLPlatform(), [$live], [$target]]);
+    $result = invokeApplierMethod('autoIncrementRestores', [new MySQLPlatform(), new TypeRegistry(), [$live], [$target]]);
 
     expect($result)->toHaveCount(1);
     expect($result[0])->toContain('MODIFY');
@@ -114,7 +115,7 @@ it('emits no restore when the primary key is unchanged', function () {
         ->addPrimaryKeyConstraint($pk())
         ->create();
 
-    $result = invokeApplierMethod('autoIncrementRestores', [new MySQLPlatform(), [$live], [$target]]);
+    $result = invokeApplierMethod('autoIncrementRestores', [new MySQLPlatform(), new TypeRegistry(), [$live], [$target]]);
 
     expect($result)->toBe([]);
 });
@@ -154,7 +155,7 @@ it('emits no restore for a table without an autoincrement column', function () {
         ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('code')->create())
         ->create();
 
-    $result = invokeApplierMethod('autoIncrementRestores', [new MySQLPlatform(), [$live], [$target]]);
+    $result = invokeApplierMethod('autoIncrementRestores', [new MySQLPlatform(), new TypeRegistry(), [$live], [$target]]);
 
     expect($result)->toBe([]);
 });
@@ -198,7 +199,7 @@ it('never emits an AUTO_INCREMENT restore on a non-MySQL platform', function () 
         ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create())
         ->create();
 
-    $result = invokeApplierMethod('autoIncrementRestores', [new PostgreSQLPlatform(), [$live], [$target]]);
+    $result = invokeApplierMethod('autoIncrementRestores', [new PostgreSQLPlatform(), new TypeRegistry(), [$live], [$target]]);
 
     expect($result)->toBe([]);
 });
@@ -396,6 +397,7 @@ it('skips the engine pass entirely on PostgreSQL and SQLite', function (string $
 it('converts an undeclared utf8mb3 table with CONVERT TO', function () {
     $result = invokeApplierMethod('charsetConversionStatements', [
         new MySQLPlatform(),
+        new TypeRegistry(),
         ['thirdparty_log' => 'utf8mb3_general_ci', 'thirdparty_key' => 'utf8_bin'],
         [],
     ]);
@@ -451,6 +453,7 @@ it('converts each utf8mb3 column of a declared table and keeps its type', functi
 
     $result = invokeApplierMethod('charsetConversionStatements', [
         new MySQLPlatform(),
+        new TypeRegistry(),
         ['cms_block' => 'utf8mb3_general_ci'],
         ['cms_block' => $live],
     ]);

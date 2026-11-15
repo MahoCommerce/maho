@@ -302,7 +302,10 @@ class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
      */
     public function saveOptions()
     {
-        foreach ($this->getOptions() as $option) {
+        // This model is a singleton, so a list that stays would go into the next product save of the process
+        $options = $this->getOptions();
+        $this->unsetOptions();
+        foreach ($options as $option) {
             $this->setData($option)
                 ->setData('product_id', $this->getProduct()->getId())
                 ->setData('store_id', $this->getProduct()->getStoreId());
@@ -377,6 +380,7 @@ class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
     protected function _beforeSave(): self
     {
         parent::_beforeSave();
+        $this->validateData();
 
         // Validate file extensions for file type options
         if ($this->getType() === self::OPTION_TYPE_FILE && $this->getFileExtension()) {
@@ -384,6 +388,37 @@ class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
         }
 
         return $this;
+    }
+
+    /**
+     * Check the title, the type and, for a select type, the values. A title that uses the default value of the
+     * store view is not checked.
+     *
+     * @throws Mage_Core_Exception_Input
+     */
+    protected function validateData(): void
+    {
+        $helper = Mage::helper('catalog');
+        $errors = new Mage_Core_Exception_Input();
+        if (!$this->getData('scope', 'title') && trim((string) $this->getTitle()) === '') {
+            $errors->addError('title', $helper->__('Title is required'));
+        }
+        if ((string) $this->getType() === '') {
+            $errors->addError('type', $helper->__('Type is required'));
+        } elseif ($this->getGroupByType() === '') {
+            $errors->addError('type', $helper->__('Invalid option type: %s', $this->getType()));
+        } elseif ($this->getGroupByType() === self::OPTION_GROUP_SELECT && is_array($this->getData('values'))) {
+            $values = array_filter($this->getData('values'), fn(mixed $value): bool => is_array($value) && empty($value['is_delete']));
+            if ($values === []) {
+                $errors->addError('values', $helper->__('Select-type options require at least one value'));
+            }
+            foreach ($values as $index => $value) {
+                if (empty($value['scope']['title']) && trim((string) ($value['title'] ?? '')) === '') {
+                    $errors->addError('values', $helper->__('Value at index %s must have a title', $index));
+                }
+            }
+        }
+        $errors->throwIfErrors();
     }
 
     /**

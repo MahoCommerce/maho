@@ -39,6 +39,15 @@ SPDX-License-Identifier: AFL-3.0
         </blocks>
     </global>
     <adminhtml>
+        <translate>
+            <modules>
+                <Maho_AdminActivityLog>
+                    <files>
+                        <default>Maho_AdminActivityLog.csv</default>
+                    </files>
+                </Maho_AdminActivityLog>
+            </modules>
+        </translate>
         <layout>
             <updates>
                 <adminactivitylog>

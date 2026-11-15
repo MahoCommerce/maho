@@ -28,7 +28,7 @@ class Maho_CustomerSegmentation_Model_RefreshMessageHandler
         $helper = Mage::helper('customersegmentation');
         Mage::helper('adminnotification')->runAndNotify(
             function () use ($service, $segment, $helper): string {
-                $service->refresh($segment);
+                $service->refresh($segment, Maho_CustomerSegmentation_Service_Segment::REFRESH_WAIT_SECONDS);
                 return $helper->__('The segment "%s" has %d customers.', $segment->getName(), (int) $segment->getMatchedCustomersCount());
             },
             $helper->__('The segment "%s" has been refreshed', $segment->getName()),

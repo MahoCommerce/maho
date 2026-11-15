@@ -24,11 +24,8 @@ class Mage_Wishlist_Model_Resource_Wishlist extends Mage_Core_Model_Resource_Db_
      */
     protected $_customerIdFieldName = 'customer_id';
 
-    /**
-     * Set main entity table name and primary key field name
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('wishlist/wishlist', 'wishlist_id');
     }

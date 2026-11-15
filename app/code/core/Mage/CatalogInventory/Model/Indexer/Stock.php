@@ -138,11 +138,8 @@ class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer
         return $result;
     }
 
-    /**
-     * Register data required by process in event object
-     */
     #[\Override]
-    protected function _registerEvent(Mage_Index_Model_Event $event)
+    protected function _registerEvent(Mage_Index_Model_Event $event): void
     {
         $event->addNewData(self::EVENT_MATCH_RESULT_KEY, true);
         switch ($event->getEntity()) {
@@ -181,7 +178,7 @@ class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer
     /**
      * Register data required by catalog product processes in event object
      */
-    protected function _registerCatalogProductEvent(Mage_Index_Model_Event $event)
+    protected function _registerCatalogProductEvent(Mage_Index_Model_Event $event): void
     {
         switch ($event->getType()) {
             case Mage_Index_Model_Event::TYPE_SAVE:
@@ -204,7 +201,7 @@ class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer
     /**
      * Register data required by cataloginventory stock item processes in event object
      */
-    protected function _registerCatalogInventoryStockItemEvent(Mage_Index_Model_Event $event)
+    protected function _registerCatalogInventoryStockItemEvent(Mage_Index_Model_Event $event): void
     {
         switch ($event->getType()) {
             case Mage_Index_Model_Event::TYPE_SAVE:
@@ -297,11 +294,8 @@ class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer
         return $this;
     }
 
-    /**
-     * Process event
-     */
     #[\Override]
-    protected function _processEvent(Mage_Index_Model_Event $event)
+    protected function _processEvent(Mage_Index_Model_Event $event): void
     {
         $data = $event->getNewData();
         if (!empty($data['cataloginventory_stock_reindex_all'])) {

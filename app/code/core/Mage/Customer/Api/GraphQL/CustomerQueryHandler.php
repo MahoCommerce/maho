@@ -13,9 +13,9 @@ namespace Mage\Customer\Api\GraphQL;
 use Mage\Customer\Api\Address;
 use Mage\Customer\Api\Customer;
 use Mage\Customer\Api\CustomerProvider;
-use Maho\ApiPlatform\Exception\NotFoundException;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\AdminAcl;
+use Maho\ApiPlatform\Service\StoreContext;
 
 /**
  * Customer Query Handler.
@@ -26,6 +26,12 @@ use Maho\ApiPlatform\Security\AdminAcl;
  */
 class CustomerQueryHandler
 {
+    /** The address fields that the input of an operation can hold: the field of the model => the key of the input. */
+    private const ADDRESS_FIELDS = [
+        'street' => 'street', 'city' => 'city', 'region' => 'region', 'region_id' => 'regionId',
+        'postcode' => 'postcode', 'country_id' => 'countryId', 'telephone' => 'telephone',
+    ];
+
     private readonly \Mage_Customer_Service_Customer $customerService;
 
     public function __construct(private CustomerProvider $customerProvider)
@@ -73,7 +79,7 @@ class CustomerQueryHandler
         if (!$id) {
             throw ValidationException::requiredField('customerId');
         }
-        $customer = $this->customerService->getById((int) $id);
+        $customer = $this->customerService->findById((int) $id);
         if ($customer) {
             $this->customerProvider->assertCustomerWebsiteAllowed($customer);
         }
@@ -81,9 +87,11 @@ class CustomerQueryHandler
     }
 
     /**
-     * Handle createCustomer mutation
+     * Handle createCustomer mutation on the store of the request. The customer gets a random password and the
+     * email with the link to set one. Address fields in the input become the default address, which must be
+     * complete.
      */
-    public function handleCreateCustomer(array $variables): array
+    public function handleCreateCustomer(array $variables, array $context): array
     {
         AdminAcl::checkResource(Customer::class);
         $input = $variables['input'] ?? $variables;
@@ -91,144 +99,85 @@ class CustomerQueryHandler
         $email = $input['email'] ?? null;
         $firstName = $input['firstName'] ?? null;
         $lastName = $input['lastName'] ?? null;
-
         if (!$email || !$firstName || !$lastName) {
             throw ValidationException::requiredField('email, firstName, lastName');
         }
 
-        $this->ensureEmailUnique($email);
-
-        // Create new customer
-        $customer = \Mage::getModel('customer/customer');
-        $customer->setWebsiteId(\Mage::app()->getWebsite()->getId());
-        $customer->setStore(\Mage::app()->getStore());
-        $customer->setEmail($email);
-        $customer->setFirstname($firstName);
-        $customer->setLastname($lastName);
-        $customer->setGroupId((int) ($input['groupId'] ?? 1));
-
-        // Generate random password (customer can reset via email)
-        $password = \Mage::helper('core')->getRandomString(12);
-        $customer->setPassword($password);
-
-        try {
-            $customer->save();
-
-            // If telephone provided, create a billing address
-            if (!empty($input['telephone'])) {
-                $address = \Mage::getModel('customer/address');
-                $address->setCustomerId($customer->getId())
+        $customer = \Mage::getModel('customer/customer')
+            ->setEmail($email)
+            ->setFirstname($firstName)
+            ->setLastname($lastName);
+        if (isset($input['groupId'])) {
+            $customer->setGroupId((int) $input['groupId']);
+        }
+        $storeId = (int) ($context['store_id'] ?? StoreContext::getDefaultStoreId());
+        if (array_intersect_key($input, array_flip(self::ADDRESS_FIELDS)) !== []) {
+            $customer->addAddress($this->fillAddress(
+                \Mage::getModel('customer/address')
                     ->setFirstname($firstName)
                     ->setLastname($lastName)
-                    ->setTelephone($input['telephone'])
-                    ->setStreet($input['street'] ?? 'TBC')
-                    ->setCity($input['city'] ?? 'TBC')
-                    ->setPostcode($input['postcode'] ?? '0000')
-                    ->setCountryId($input['countryId'] ?? \Maho\ApiPlatform\Service\StoreDefaults::getCountryId())
-                    ->setIsDefaultBilling()
-                    ->setIsDefaultShipping();
-                $address->save();
-            }
-
-            return ['createCustomer' => [
-                'customer' => $this->mapCustomer($customer),
-                'success' => true,
-            ]];
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            throw ValidationException::invalidValue('customer', 'failed to create the customer', $e);
+                    ->setCountryId(\Maho\ApiPlatform\Service\StoreDefaults::getCountryId($storeId))
+                    ->setIsDefaultBilling(true)
+                    ->setIsDefaultShipping(true),
+                $input,
+            ));
         }
+        $this->customerService->create($customer->setPassword(''), $storeId, $storeId);
+
+        return ['createCustomer' => [
+            'customer' => $this->mapCustomer($customer),
+            'success' => true,
+        ]];
     }
 
     /**
-     * Handle updateCustomerAddress mutation
+     * Handle updateCustomerAddress mutation: change the email of the customer and its default billing address,
+     * or create that address.
      */
     public function handleUpdateCustomerAddress(array $variables): array
     {
         AdminAcl::checkResource(Address::class);
-        $customerId = $variables['customerId'] ?? null;
+        $customerId = (int) ($variables['customerId'] ?? 0);
         $input = $variables['input'] ?? $variables;
-
         if (!$customerId) {
             throw ValidationException::requiredField('customerId');
         }
 
-        $customer = \Mage::getModel('customer/customer')->load($customerId);
-        if (!$customer->getId()) {
-            throw NotFoundException::customer();
+        $customer = $this->customerService->getById($customerId);
+        $this->customerProvider->assertCustomerWebsiteAllowed($customer);
+        if (isset($input['email'])) {
+            $this->customerService->save($customer->setEmail($input['email']));
         }
 
-        // Get or create default billing address
-        $billingAddressId = $customer->getDefaultBilling();
-        if ($billingAddressId) {
-            $address = \Mage::getModel('customer/address')->load($billingAddressId);
-        } else {
-            $address = \Mage::getModel('customer/address');
-            $address->setCustomerId($customer->getId());
-            $address->setFirstname($customer->getFirstname());
-            $address->setLastname($customer->getLastname());
-            $address->setIsDefaultBilling();
-            $address->setIsDefaultShipping();
-        }
+        $billingId = (int) $customer->getDefaultBilling();
+        $address = $billingId
+            ? \Mage::getService('customer/address')->getByCustomer($billingId, $customerId)
+            : \Mage::getModel('customer/address')
+                ->setCustomerId($customerId)
+                ->setFirstname($customer->getFirstname())
+                ->setLastname($customer->getLastname())
+                ->setCountryId(\Maho\ApiPlatform\Service\StoreDefaults::getCountryId())
+                ->setIsDefaultBilling(true)
+                ->setIsDefaultShipping(true);
+        \Mage::getService('customer/address')->save($this->fillAddress($address, $input));
 
-        // Update customer email if provided (email is on customer, not address).
-        // The actual save is deferred into the try block below so the email and address
-        // writes either both succeed or both surface the error to the caller.
-        $emailChanged = isset($input['email']) && $input['email'] !== $customer->getEmail();
-        if ($emailChanged) {
-            $customer->setEmail($input['email']);
-        }
-
-        // Update address fields
-        if (isset($input['street'])) {
-            $address->setStreet($input['street']);
-        }
-        if (isset($input['city'])) {
-            $address->setCity($input['city']);
-        }
-        if (isset($input['postcode'])) {
-            $address->setPostcode($input['postcode']);
-        }
-        if (isset($input['telephone'])) {
-            $address->setTelephone($input['telephone']);
-        }
-        if (isset($input['countryId'])) {
-            $address->setCountryId($input['countryId']);
-        } elseif (!$address->getCountryId()) {
-            $address->setCountryId(\Maho\ApiPlatform\Service\StoreDefaults::getCountryId());
-        }
-
-        try {
-            if ($emailChanged) {
-                $customer->save();
-            }
-            $address->save();
-
-            // Reload customer to get updated address
-            $customer = \Mage::getModel('customer/customer')->load($customerId);
-
-            return ['updateCustomerAddress' => [
-                'success' => true,
-                'customer' => $this->mapCustomer($customer),
-            ]];
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            throw ValidationException::invalidValue('address', 'failed to update the address', $e);
-        }
+        return ['updateCustomerAddress' => [
+            'success' => true,
+            'customer' => $this->mapCustomer($this->customerService->getById($customerId)),
+        ]];
     }
 
     /**
-     * Ensure no customer exists with the given email in the current website
-     *
-     * @throws ValidationException if a customer with this email already exists
+     * Write the address fields of $input into $address.
      */
-    private function ensureEmailUnique(#[\SensitiveParameter]
-        string $email): void
+    private function fillAddress(\Mage_Customer_Model_Address $address, array $input): \Mage_Customer_Model_Address
     {
-        $existing = $this->customerService->getByEmail($email);
-        if ($existing) {
-            throw ValidationException::invalidValue('email', 'a customer with this email already exists');
+        foreach (self::ADDRESS_FIELDS as $field => $key) {
+            if (isset($input[$key])) {
+                $address->setData($field, $input[$key]);
+            }
         }
+        return $address;
     }
 
     /**

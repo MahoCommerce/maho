@@ -13,6 +13,9 @@ use ArrayAccess;
 use JsonSerializable;
 use ReflectionClass;
 
+/**
+ * @implements ArrayAccess<string, mixed>
+ */
 class DataObject implements ArrayAccess, JsonSerializable
 {
     /**
@@ -24,9 +27,8 @@ class DataObject implements ArrayAccess, JsonSerializable
 
     /**
      * Data changes flag (true after setData|unsetData call)
-     * @var bool $_hasDataChange
      */
-    protected $_hasDataChanges = false;
+    protected bool $_hasDataChanges = false;
 
     /**
      * Name of object id field
@@ -59,7 +61,7 @@ class DataObject implements ArrayAccess, JsonSerializable
     /**
      * Map of fields to sync to other fields upon changing their data
      */
-    protected $_syncFieldsMap = [];
+    protected array $_syncFieldsMap = [];
 
     /**
      * @var array
@@ -89,7 +91,7 @@ class DataObject implements ArrayAccess, JsonSerializable
         $this->_construct();
     }
 
-    protected function _addFullNames()
+    protected function _addFullNames(): void
     {
         if (empty($this->_syncFieldsMap)) {
             return;
@@ -390,6 +392,10 @@ class DataObject implements ArrayAccess, JsonSerializable
     public function setDataUsingMethod($key, $args = [])
     {
         $method = 'set' . $this->_camelize($key);
+        if (!method_exists($this, $method)) {
+            // __call builds the key from the camelized method name, which drops the underscore in floor_2nd
+            return $this->setData($this->_underscore($key), $args);
+        }
         $this->$method($args);
         return $this;
     }
@@ -404,6 +410,9 @@ class DataObject implements ArrayAccess, JsonSerializable
     public function getDataUsingMethod($key, $args = null)
     {
         $method = 'get' . $this->_camelize($key);
+        if (!method_exists($this, $method)) {
+            return $this->getData($this->_underscore($key), $args);
+        }
         return $this->$method($args);
     }
 

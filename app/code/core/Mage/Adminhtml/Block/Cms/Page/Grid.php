@@ -113,7 +113,7 @@ class Mage_Adminhtml_Block_Cms_Page_Grid extends Mage_Adminhtml_Block_Widget_Gri
      * @param Mage_Cms_Model_Resource_Page_Collection $collection
      * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
      */
-    protected function _filterStoreCondition($collection, $column)
+    protected function _filterStoreCondition($collection, $column): void
     {
         if ($value = $column->getFilter()->getValue()) {
             $collection->addStoreFilter($value);

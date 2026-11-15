@@ -90,7 +90,7 @@ it('returns only storefront-visible shipment comments to a customer reader', fun
     $this->order = orderCommentVisibilityOrder();
     orderCommentVisibilityShipment($this->order);
 
-    $service = \Mage::getService('sales/order');
+    $service = \Mage::getService('sales/order_document');
 
     $all = array_column(\Mage\Sales\Api\Shipment::fromModel($service->getShipments($this->order)[0])->comments, 'comment');
     sort($all);
@@ -104,7 +104,7 @@ it('does not carry a filtered comment set into a later backend read', function (
     $this->order = orderCommentVisibilityOrder();
     orderCommentVisibilityShipment($this->order);
 
-    $service = \Mage::getService('sales/order');
+    $service = \Mage::getService('sales/order_document');
 
     $visible = array_column(\Mage\Sales\Api\Shipment::fromModel($service->getShipments($this->order, true)[0])->comments, 'comment');
     expect($visible)->toBe(['visible shipment note']);

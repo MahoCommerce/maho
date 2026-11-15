@@ -16,6 +16,9 @@ class Maho_Ai_Model_Platform_ModelFetcher
 {
     private ?HttpClientInterface $httpClient = null;
 
+    /** @var array<string, int|null> */
+    private array $refreshResults = [];
+
     public function setHttpClient(HttpClientInterface $httpClient): static
     {
         $this->httpClient = $httpClient;
@@ -43,40 +46,58 @@ class Maho_Ai_Model_Platform_ModelFetcher
     }
 
     /**
-     * Fetch the model list for the given provider and persist it to
-     * core_config_data under ai/models_cache/{provider}. Called from
-     * the API-key backend models on save so the dropdown auto-populates
-     * without a manual refresh button.
+     * Fetch the model list of $provider, keep it under ai/models_cache/{provider}, and return it.
      *
-     * Surfaces success/failure to the admin session. Never throws —
-     * a transient provider error shouldn't fail the config save.
+     * @return list<array{value: string, label: string}>
+     * @throws Mage_Core_Exception
      */
-    public function refreshCache(string $provider): void
+    public function cacheModels(string $provider, string $capability = 'chat'): array
+    {
+        $models = $this->fetchForProvider($provider, $capability);
+
+        Mage::getModel('core/config')->saveConfig(
+            "ai/models_cache/{$provider}",
+            Mage::helper('core')->jsonEncode($models),
+        );
+        Mage::app()->getCache()->cleanType('config');
+
+        return $models;
+    }
+
+    /**
+     * Cache the model list of $provider after a save of its API key or base URL.
+     * It never throws: a provider error must not fail the config save.
+     *
+     * @return int|null the number of models, or null when the provider gave no list
+     */
+    public function refreshCache(string $provider): ?int
     {
         // The Generic OpenAI-compatible provider doesn't have a known
         // /models endpoint shape; skip silently.
         if ($provider === 'generic') {
-            return;
+            return null;
         }
 
         try {
-            $models = $this->fetchForProvider($provider);
-
-            Mage::getModel('core/config')->saveConfig(
-                "ai/models_cache/{$provider}",
-                Mage::helper('core')->jsonEncode($models),
-            );
-            Mage::app()->getCache()->cleanType('config');
-
-            Mage::getSingleton('adminhtml/session')->addSuccess(
-                Mage::helper('ai')->__('AI: refreshed %d models for %s.', count($models), $provider),
-            );
+            $count = count($this->cacheModels($provider));
         } catch (\Throwable $e) {
             Mage::logException($e);
-            Mage::getSingleton('adminhtml/session')->addWarning(
-                Mage::helper('ai')->__('AI: could not refresh models for %s. See exception.log.', $provider),
-            );
+            $count = null;
         }
+        $this->refreshResults[$provider] = $count;
+        return $count;
+    }
+
+    /**
+     * Return the result of each refreshCache() since the last call, and forget them.
+     *
+     * @return array<string, int|null> the number of models by provider, or null for a provider that gave no list
+     */
+    public function takeRefreshResults(): array
+    {
+        $results = $this->refreshResults;
+        $this->refreshResults = [];
+        return $results;
     }
 
     private function getConfig(string $path): string

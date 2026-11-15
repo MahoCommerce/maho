@@ -56,6 +56,23 @@ class Mage_Adminhtml_Block_Customer_Group_Edit_Form extends Mage_Adminhtml_Block
             ],
         );
 
+        foreach ([
+            'customer_attribute_set_id' => ['customer', Mage::helper('customer')->__('Customer Attribute Set')],
+            'customer_address_attribute_set_id' => ['customer_address', Mage::helper('customer')->__('Address Attribute Set')],
+        ] as $field => [$entityTypeCode, $label]) {
+            $sets = Mage::getResourceModel('eav/entity_attribute_set_collection')
+                ->setEntityTypeFilter((int) Mage::getSingleton('eav/config')->getEntityType($entityTypeCode)->getId())
+                ->setOrder('attribute_set_name', 'asc')
+                ->toOptionArray();
+            $fieldset->addField($field, 'select', [
+                'name' => $field,
+                'label' => $label,
+                'title' => $label,
+                'note' => Mage::helper('customer')->__('The fields that the customers of this group fill in. Leave empty for the default set.'),
+                'values' => array_merge([['value' => '', 'label' => '']], $sets),
+            ]);
+        }
+
         if (!is_null($customerGroup->getId())) {
             // If edit add id
             $form->addField(

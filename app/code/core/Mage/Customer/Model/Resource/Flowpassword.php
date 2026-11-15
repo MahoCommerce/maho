@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_Customer_Model_Resource_Flowpassword extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('customer/flowpassword', 'flowpassword_id');
     }

@@ -103,7 +103,7 @@ class CatalogPriceRule extends \Maho\ApiPlatform\Resource
 
     public const ROOT_CONDITIONS = 'catalogrule/rule_condition_combine';
 
-    public const SIMPLE_ACTIONS = ['by_percent', 'by_fixed', 'to_percent', 'to_fixed'];
+    public const SIMPLE_ACTIONS = \Mage_CatalogRule_Model_Rule::SIMPLE_ACTIONS;
 
     private const TREE_SCHEMA = [
         'type' => 'object',
@@ -149,7 +149,7 @@ class CatalogPriceRule extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Rules with a lower sortOrder apply first')]
     public int $sortOrder = 0;
 
-    #[ApiProperty(description: 'by_percent (discount of a percentage of the price), by_fixed (discount of a fixed amount), to_percent (price becomes a percentage of the price) or to_fixed (price becomes a fixed amount)', extraProperties: [EnumSource::KEY => self::SIMPLE_ACTIONS])]
+    #[ApiProperty(description: 'by_percent (discount of a percentage of the price), by_fixed (discount of a fixed amount), to_percent (price becomes a percentage of the price) or to_fixed (price becomes a fixed amount), or an action that a module adds', extraProperties: [EnumSource::KEY => 'catalogrule/rule::getSimpleActions'])]
     public string $simpleAction = 'by_percent';
 
     #[ApiProperty(description: 'Percentage or amount of the action, 0 or more; at most 100 for by_percent and to_percent')]
@@ -158,7 +158,7 @@ class CatalogPriceRule extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Whether the rule also gives a discount on the sub products of a configurable or bundle product')]
     public bool $subIsEnable = false;
 
-    #[ApiProperty(description: 'Action for the sub products, same values as simpleAction, or null', extraProperties: [EnumSource::KEY => self::SIMPLE_ACTIONS])]
+    #[ApiProperty(description: 'Action for the sub products, same values as simpleAction, or null', extraProperties: [EnumSource::KEY => 'catalogrule/rule::getSimpleActions'])]
     public ?string $subSimpleAction = null;
 
     #[ApiProperty(description: 'Percentage or amount of the action for the sub products')]

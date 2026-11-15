@@ -27,7 +27,7 @@ function &orderDataCreated(): array
 function orderDataPlace(Mage_Sales_Model_Quote $quote): Mage_Sales_Model_Order
 {
     $cart = Mage::getService('checkout/cart');
-    $address = $cart->mapAddressInput([
+    $address = \Mage\Checkout\Api\CartRequest::mapAddress([
         'firstName' => 'Test', 'lastName' => 'Buyer', 'street' => ['123 Test St'], 'city' => 'Los Angeles',
         'region' => 'California', 'postcode' => '90210', 'countryId' => 'US', 'telephone' => '5550100',
     ]);
@@ -208,6 +208,8 @@ it('stores the selection attributes on each child line of a bundle', function ()
 });
 
 it('creates the purchased links of a downloadable line', function (): void {
+    // A guest cannot buy a downloadable product by default
+    Mage::app()->getStore(1)->setConfig(Mage_Downloadable_Model_Observer::XML_PATH_DISABLE_GUEST_CHECKOUT, '0');
     $product = orderDataDownloadable();
     $linkIds = array_keys($product->getTypeInstance(true)->getLinks($product));
 

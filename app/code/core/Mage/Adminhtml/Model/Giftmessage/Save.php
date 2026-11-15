@@ -17,7 +17,7 @@ declare(strict_types=1);
  */
 class Mage_Adminhtml_Model_Giftmessage_Save extends \Maho\DataObject
 {
-    protected $_saved = false;
+    protected bool $_saved = false;
 
     /**
      * Save all seted giftmessages
@@ -77,16 +77,14 @@ class Mage_Adminhtml_Model_Giftmessage_Save extends \Maho\DataObject
      */
     protected function _saveOne($entityId, $giftmessage)
     {
+        $entityType = $this->_getMappedType($giftmessage['type']);
+        if ($entityType === 'quote' || $entityType === 'quote_item') {
+            return $this->_saveOneInQuote($entityType === 'quote' ? null : (int) $entityId, $giftmessage);
+        }
+
         /** @var Mage_GiftMessage_Model_Message $giftmessageModel */
         $giftmessageModel = Mage::getModel('giftmessage/message');
-        $entityType = $this->_getMappedType($giftmessage['type']);
-
-        $entityModel = match ($entityType) {
-            'quote' => $this->_getQuote(),
-            'quote_item' => $this->_getQuote()->getItemById($entityId),
-            default => $giftmessageModel->getEntityModelByType($entityType)
-                ->load($entityId),
-        };
+        $entityModel = $giftmessageModel->getEntityModelByType($entityType)->load($entityId);
 
         if (!$entityModel) {
             return $this;
@@ -104,13 +102,35 @@ class Mage_Adminhtml_Model_Giftmessage_Save extends \Maho\DataObject
             $this->_saved = false;
         } elseif (!$giftmessageModel->isMessageEmpty()) {
             $giftmessageModel->save();
-            $entityModel->setGiftMessageId($giftmessageModel->getId());
-            if ($entityType != 'quote') {
-                $entityModel->save();
-            }
+            $entityModel->setGiftMessageId($giftmessageModel->getId())
+                ->save();
             $this->_saved = true;
         }
 
+        return $this;
+    }
+
+    /**
+     * Save the gift message of the quote, or of its item $itemId, through the cart service.
+     *
+     * @param array{sender?: string, recipient?: string, message?: string, ...} $giftmessage
+     * @return $this
+     */
+    protected function _saveOneInQuote(?int $itemId, array $giftmessage)
+    {
+        try {
+            /** @var Mage_Checkout_Service_Cart $service */
+            $service = Mage::getService('checkout/cart');
+            $service->setGiftMessage(
+                $this->_getQuote(),
+                $itemId,
+                (string) ($giftmessage['sender'] ?? ''),
+                (string) ($giftmessage['recipient'] ?? ''),
+                (string) ($giftmessage['message'] ?? ''),
+            );
+        } catch (Mage_Core_Exception) {
+            // The store does not allow this message, or the item is not in the quote
+        }
         return $this;
     }
 
@@ -264,7 +284,7 @@ class Mage_Adminhtml_Model_Giftmessage_Save extends \Maho\DataObject
         return $this;
     }
 
-    public function importAllowQuoteItemsFromItems($items)
+    public function importAllowQuoteItemsFromItems(array $items): static
     {
         $allowedItems = $this->getAllowQuoteItems();
         $deleteAllowedItems = [];

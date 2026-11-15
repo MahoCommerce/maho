@@ -112,7 +112,7 @@ class Mage_Catalog_Block_Product_View_Media extends Mage_Catalog_Block_Product_V
     /**
      * Disable gallery
      */
-    public function disableGallery()
+    public function disableGallery(): void
     {
         $this->_isGalleryDisabled = true;
     }

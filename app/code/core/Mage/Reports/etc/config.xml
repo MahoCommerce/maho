@@ -41,14 +41,25 @@ SPDX-License-Identifier: AFL-3.0
                     <viewed_aggregated_yearly>
                         <table>report_viewed_product_aggregated_yearly</table>
                     </viewed_aggregated_yearly>
+                    <not_found>
+                        <table>report_not_found</table>
+                    </not_found>
                 </entities>
             </reports_resource>
         </models>
+        <services>
+            <reports>
+                <class>Mage_Reports_Service</class>
+            </reports>
+        </services>
         <queue>
             <routing>
                 <reports>slow</reports>
             </routing>
         </queue>
+        <docs>
+            <user>docs/user</user>
+        </docs>
     </global>
     <adminhtml>
         <translate>
@@ -105,6 +116,12 @@ SPDX-License-Identifier: AFL-3.0
             <crontab>
                 <viewed_expr>0 0 * * *</viewed_expr>
             </crontab>
+            <not_found>
+                <enabled>1</enabled>
+                <log_rate_limit>100</log_rate_limit>
+                <days_to_keep>30</days_to_keep>
+                <max_rows>10000</max_rows>
+            </not_found>
         </reports>
     </default>
 </config>

@@ -95,7 +95,7 @@
 }
 
 @theme {
-    /* Matches the JS breakpoint bp.medium (770px) in app.js so CSS and JS switch together */
+    /* The mobile breakpoint in theme.xml (770px) plus one. app.js reads that value as bp.medium */
     --breakpoint-nav: 771px;
 
     /* The in-between steps of Maho's type scale (13/15/17px), named so the

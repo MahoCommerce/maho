@@ -11,7 +11,7 @@
 class Mage_Customer_Model_Resource_Address extends Mage_Eav_Model_Entity_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $resource = Mage::getSingleton('core/resource');
         $this->setType('customer_address')->setConnection(
@@ -42,6 +42,27 @@ class Mage_Customer_Model_Resource_Address extends Mage_Eav_Model_Entity_Abstrac
                 $customer->setDefaultShipping($address->getId());
             }
             $customer->save();
+        }
+        return $this;
+    }
+
+    /**
+     * Remove a deleted address from the default billing and shipping address of its customer.
+     *
+     * @return $this
+     */
+    #[\Override]
+    protected function _afterDelete(\Maho\DataObject $address)
+    {
+        parent::_afterDelete($address);
+        if (!$address->getCustomerId()) {
+            return $this;
+        }
+        $customer = Mage::getModel('customer/customer')->load($address->getCustomerId());
+        foreach (['default_billing', 'default_shipping'] as $code) {
+            if ($customer->getId() && (int) $customer->getData($code) === (int) $address->getId()) {
+                $customer->setData($code)->getResource()->saveAttribute($customer, $code);
+            }
         }
         return $this;
     }

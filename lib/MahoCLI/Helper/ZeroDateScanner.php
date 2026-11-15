@@ -29,9 +29,11 @@ class ZeroDateScanner
         // not be "fixed". MariaDB quotes literal defaults in information_schema (e.g.
         // '0000-00-00'), MySQL returns them bare (0000-00-00), so match both forms.
         $rows = $adapter->fetchAll(
-            'SELECT TABLE_NAME, COLUMN_NAME, IS_NULLABLE FROM information_schema.COLUMNS'
-            . " WHERE TABLE_SCHEMA = ? AND DATA_TYPE IN ('date', 'datetime', 'timestamp')"
-            . ' AND (COLUMN_DEFAULT LIKE ? OR COLUMN_DEFAULT LIKE ?)',
+            'SELECT c.TABLE_NAME, c.COLUMN_NAME, c.IS_NULLABLE FROM information_schema.COLUMNS c'
+            . ' INNER JOIN information_schema.TABLES t ON t.TABLE_SCHEMA = c.TABLE_SCHEMA AND t.TABLE_NAME = c.TABLE_NAME'
+            . " WHERE c.TABLE_SCHEMA = ? AND t.TABLE_TYPE = 'BASE TABLE'"
+            . " AND c.DATA_TYPE IN ('date', 'datetime', 'timestamp')"
+            . ' AND (c.COLUMN_DEFAULT LIKE ? OR c.COLUMN_DEFAULT LIKE ?)',
             [self::databaseName($adapter), '0000-00-00%', "'0000-00-00%"],
         );
 
@@ -55,8 +57,10 @@ class ZeroDateScanner
     public static function findZeroDateValues(Mysql $adapter): array
     {
         $columns = $adapter->fetchAll(
-            'SELECT TABLE_NAME, COLUMN_NAME, IS_NULLABLE FROM information_schema.COLUMNS'
-            . " WHERE TABLE_SCHEMA = ? AND DATA_TYPE IN ('date', 'datetime', 'timestamp')",
+            'SELECT c.TABLE_NAME, c.COLUMN_NAME, c.IS_NULLABLE FROM information_schema.COLUMNS c'
+            . ' INNER JOIN information_schema.TABLES t ON t.TABLE_SCHEMA = c.TABLE_SCHEMA AND t.TABLE_NAME = c.TABLE_NAME'
+            . " WHERE c.TABLE_SCHEMA = ? AND t.TABLE_TYPE = 'BASE TABLE'"
+            . " AND c.DATA_TYPE IN ('date', 'datetime', 'timestamp')",
             [self::databaseName($adapter)],
         );
 

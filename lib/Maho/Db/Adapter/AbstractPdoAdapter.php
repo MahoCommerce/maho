@@ -11,6 +11,7 @@ namespace Maho\Db\Adapter;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Types\Types;
 use Maho\Db\Ddl\Table;
 use Maho\Db\Exception;
 use Maho\Db\Expr;
@@ -281,7 +282,20 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         if ($this->_transactionLevel === 0) {
             $this->_debugTimer();
             $this->_connect();
-            $this->_connection->beginTransaction();
+            try {
+                $this->_connection->beginTransaction();
+            } catch (\Doctrine\DBAL\Exception $e) {
+                // DBAL counts the transaction before the database opens it, and keeps the count
+                // when the BEGIN fails, so the next BEGIN would be a savepoint. Its rollBack()
+                // resets the count first, and then fails because no transaction is open.
+                if ($this->_connection->isTransactionActive()) {
+                    try {
+                        $this->_connection->rollBack();
+                    } catch (\Throwable) {
+                    }
+                }
+                throw $e;
+            }
             $this->_debugStat(self::DEBUG_TRANSACTION, 'BEGIN');
         }
         ++$this->_transactionLevel;
@@ -1345,6 +1359,55 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         return sprintf('INSERT INTO %s (%s) VALUES %s', $tableName, $columns, $values);
     }
 
+    #[\Override]
+    public function canColumnHoldValue(array $column, mixed $value): bool
+    {
+        $bits = $this->_getIntegerColumnBits($column);
+        if ($bits === null || $value === null || is_bool($value) || is_array($value) || is_object($value)) {
+            return true;
+        }
+        $isUnsigned = ($column['UNSIGNED'] ?? false) === true;
+
+        if (is_float($value)) {
+            // 2 ** 63 is the first float above the largest integer of PHP
+            if (!is_finite($value) || floor($value) !== $value || $value < -(2 ** 63) || $value >= 2 ** 63) {
+                return false;
+            }
+            $value = (int) $value;
+        } elseif (is_string($value)) {
+            if (!preg_match('/^\s*([+-]?)0*(\d+)\s*$/', $value, $matches)) {
+                return false;
+            }
+            $integer = filter_var(($matches[1] === '-' ? '-' : '') . $matches[2], FILTER_VALIDATE_INT);
+            if ($integer === false) {
+                // An unsigned BIGINT column holds numbers above the largest integer of PHP
+                return $bits === 64 && $isUnsigned && $matches[1] !== '-'
+                    && (strlen($matches[2]) < 20 || strcmp($matches[2], '18446744073709551615') <= 0);
+            }
+            $value = $integer;
+        }
+
+        if ($isUnsigned) {
+            return $value >= 0 && ($bits === 64 || $value < 2 ** $bits);
+        }
+        return $bits === 64 || ($value >= -(2 ** ($bits - 1)) && $value < 2 ** ($bits - 1));
+    }
+
+    /**
+     * Return the number of bits of the integer column $column, or null when the column does not hold integers.
+     */
+    protected function _getIntegerColumnBits(array $column): ?int
+    {
+        return match (strtolower((string) ($column['DATA_TYPE'] ?? ''))) {
+            'tinyint' => 8,
+            'smallint' => 16,
+            'mediumint' => 24,
+            'int', 'integer' => 32,
+            'bigint' => 64,
+            default => null,
+        };
+    }
+
     // =========================================================================
     // Schema Introspection Methods
     // =========================================================================
@@ -1399,7 +1462,14 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             // Use getIdentifier()->getValue() to get the raw name without quotes
             $columnNameStr = $column->getObjectName()->getIdentifier()->getValue();
             $isPrimary = in_array(strtolower($columnNameStr), $primaryColumns);
-            $typeName = $column->getTypeName();
+            // DBAL introspects date and time columns as the immutable types. Callers match the plain names.
+            $typeName = match ($column->getTypeName()) {
+                Types::DATE_IMMUTABLE => 'date',
+                Types::TIME_IMMUTABLE => 'time',
+                Types::DATETIME_IMMUTABLE => 'datetime',
+                Types::DATETIMETZ_IMMUTABLE => 'datetimetz',
+                default => $column->getTypeName(),
+            };
 
             $result[$columnNameStr] = [
                 'SCHEMA_NAME'      => $schemaName ?? '',

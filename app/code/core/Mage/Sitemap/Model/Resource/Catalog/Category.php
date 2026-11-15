@@ -10,11 +10,11 @@
 
 class Mage_Sitemap_Model_Resource_Catalog_Category extends Mage_Sitemap_Model_Resource_Catalog_Abstract
 {
-    /**
-     * Init resource model (catalog/category)
-     */
     #[\Override]
-    protected function _construct()
+    protected string $_attributeEntityType = 'catalog_category';
+
+    #[\Override]
+    protected function _construct(): void
     {
         $this->_init('catalog/category', 'entity_id');
     }
@@ -54,53 +54,6 @@ class Mage_Sitemap_Model_Resource_Catalog_Category extends Mage_Sitemap_Model_Re
         $this->_addFilter($storeId, 'is_active', 1);
 
         return $this->_loadEntities();
-    }
-
-    /**
-     * Load category attributes for specific entity IDs
-     */
-    public function loadAttributesForIds(array $entityIds, int $storeId): array
-    {
-        if (empty($entityIds)) {
-            return [];
-        }
-
-        $nameAttr = Mage::getSingleton('eav/config')->getAttribute('catalog_category', 'name');
-        $imageAttr = Mage::getSingleton('eav/config')->getAttribute('catalog_category', 'image');
-        $attributeMap = [
-            $nameAttr->getId() => 'name',
-            $imageAttr->getId() => 'image',
-        ];
-
-        $read = $this->_getReadAdapter();
-        // Use CASE instead of MySQL's FIELD() for cross-database compatibility (SQLite)
-        // Store-specific values ($storeId) should come first, then default (0)
-        $storeOrder = new \Maho\Db\Expr(
-            'CASE WHEN store_id = ' . (int) $storeId . ' THEN 0 WHEN store_id = 0 THEN 1 ELSE 2 END',
-        );
-        $select = $read->select()
-            ->from(['attr' => 'catalog_category_entity_varchar'], ['entity_id', 'attribute_id', 'value', 'store_id'])
-            ->where('attr.entity_id IN (?)', $entityIds)
-            ->where('attr.attribute_id IN (?)', array_keys($attributeMap))
-            ->where('attr.store_id IN (?)', [0, $storeId])
-            ->order(['entity_id ASC', 'attribute_id ASC', $storeOrder]);
-
-        $results = $read->fetchAll($select);
-        $attributes = [];
-
-        // Process results with store fallback logic
-        foreach ($results as $row) {
-            $entityId = $row['entity_id'];
-            $attributeCode = $attributeMap[$row['attribute_id']];
-
-            // Only set if not already set (store-specific values come first due to ORDER BY)
-            if (!isset($attributes[$entityId][$attributeCode])) {
-                $attributes[$entityId] ??= [];
-                $attributes[$entityId][$attributeCode] = $row['value'];
-            }
-        }
-
-        return $attributes;
     }
 
     /**

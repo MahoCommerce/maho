@@ -31,31 +31,6 @@ final class NewsletterProvider extends CrudProvider
 
     private function getSubscriptionStatus(): NewsletterSubscription
     {
-        $customerId = $this->requireCustomerId();
-
-        $customer = \Mage::getModel('customer/customer')->load($customerId);
-        if (!$customer->getId()) {
-            $dto = new NewsletterSubscription();
-            $dto->status = 'error';
-            $dto->message = 'Customer not found';
-            return $dto;
-        }
-
-        $subscriber = \Mage::getModel('newsletter/subscriber')->loadByCustomer($customer);
-
-        if ($subscriber->getId()) {
-            $dto = NewsletterSubscription::fromModel($subscriber);
-            $dto->email = $customer->getEmail();
-            $dto->customerId = $customerId;
-            return $dto;
-        }
-
-        $dto = new NewsletterSubscription();
-        $dto->email = $customer->getEmail();
-        $dto->customerId = $customerId;
-        $dto->isSubscribed = false;
-        $dto->status = 'unsubscribed';
-
-        return $dto;
+        return NewsletterSubscription::fromModel(\Mage::getService('newsletter/subscriber')->getByCustomer($this->requireCustomerId()));
     }
 }

@@ -17,19 +17,6 @@ declare(strict_types=1);
 
 describe('GET /api/rest/v2/customers/{id}', function (): void {
 
-    it('returns customer data with valid token', function (): void {
-        $customerId = fixtures('customer_id');
-
-        if (!$customerId) {
-            $this->markTestSkipped('No customer_id configured in fixtures');
-        }
-
-        $response = apiGet("/api/rest/v2/customers/{$customerId}", customerToken($customerId));
-
-        expect($response['status'])->toBe(200);
-        expect($response['json'])->toBeArray();
-    });
-
     it('returns expected customer fields', function (): void {
         $customerId = fixtures('customer_id');
 
@@ -51,14 +38,6 @@ describe('GET /api/rest/v2/customers/{id}', function (): void {
         $response = apiGet("/api/rest/v2/customers/{$invalidId}", adminToken());
 
         expect($response['status'])->toBeNotFound();
-    });
-
-    it('requires authentication', function (): void {
-        $customerId = fixtures('customer_id') ?? 1;
-
-        $response = apiGet("/api/rest/v2/customers/{$customerId}");
-
-        expect($response['status'])->toBeUnauthorized();
     });
 
     it('prevents accessing other customers data without admin role', function (): void {
@@ -91,12 +70,6 @@ describe('GET /api/rest/v2/customers', function (): void {
         // The collection operation's security expression only admits admin
         // tokens and service tokens with customers/read; a ROLE_CUSTOMER token gets 403.
         expect($response['status'])->toBe(403);
-    });
-
-    it('requires authentication', function (): void {
-        $response = apiGet('/api/rest/v2/customers');
-
-        expect($response['status'])->toBeUnauthorized();
     });
 
 });

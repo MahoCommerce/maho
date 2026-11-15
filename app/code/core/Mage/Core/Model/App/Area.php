@@ -116,7 +116,7 @@ class Mage_Core_Model_App_Area
         return $this;
     }
 
-    protected function _initConfig() {}
+    protected function _initConfig(): void {}
 
     /**
      * @return $this

@@ -95,7 +95,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      */
     protected $_emulatedLocales = [];
 
-    protected static $_currencyCache = [];
+    protected static array $_currencyCache = [];
     /** @var NumberFormatter[] */
     protected static $_numberFormatterCache = [];
 
@@ -871,6 +871,19 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
         }
 
         return gmdate($format, (int) $date);
+    }
+
+    /**
+     * Return the UTC `Y-m-d H:i:s` string for $value, a bound of a date range.
+     * A date with no time is the whole day, so an upper bound gets the time 23:59:59.
+     */
+    public function formatDateBoundaryForDb(string $value, bool $isUpperBound): string
+    {
+        $value = trim($value);
+        if ($isUpperBound && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) === 1) {
+            $value .= ' 23:59:59';
+        }
+        return (string) $this->formatDateForDb($value);
     }
 
     /**

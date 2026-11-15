@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Websites extends Mage_Adminhtml_Block_Store_Switcher
 {
-    protected $_storeFromHtml;
+    protected ?string $_storeFromHtml = null;
 
     public function __construct()
     {

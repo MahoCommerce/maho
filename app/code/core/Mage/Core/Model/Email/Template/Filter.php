@@ -29,7 +29,7 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
 
     protected $_storeId = null;
 
-    protected $_plainTemplateMode = false;
+    protected bool $_plainTemplateMode = false;
 
     /**
      * @var bool|string
@@ -127,7 +127,7 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
         if (isset($blockParameters['type'])) {
             if ($this->_permissionBlock->isTypeAllowed($blockParameters['type'])) {
                 $type = $blockParameters['type'];
-                $block = $layout->createBlock($type, null, $blockParameters);
+                $block = $layout->createBlock($type, '', $blockParameters);
             } else {
                 Mage::log('Security problem: ' . $blockParameters['type'] . ' is not on the allowlist.');
             }
@@ -301,6 +301,19 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
         }
 
         return (string) preg_replace('/^<svg\s/', '<svg' . $attributes . ' ', $svg, 1);
+    }
+
+    /**
+     * Breakpoint directive: {{breakpoint code=mobile}}
+     *
+     * Write the media query of a breakpoint preset, for the media attribute of a <source>. An
+     * unknown preset gets a query that matches no device.
+     */
+    public function breakpointDirective(array $construction): string
+    {
+        $params = $this->_getIncludeParameters($construction[2]);
+        return Mage::getSingleton('core/design_breakpoints')
+            ->getMediaQuery((string) ($params['code'] ?? ''), $this->getStoreId());
     }
 
     /**

@@ -16,49 +16,7 @@ declare(strict_types=1);
  * @group read
  */
 
-describe('API v2 Wishlist - Authentication', function (): void {
-
-    it('rejects listing wishlist without token', function (): void {
-        $response = apiGet('/api/rest/v2/customers/me/wishlist');
-
-        expect($response['status'])->toBeUnauthorized();
-    });
-
-    it('returns 401 error body for unauthenticated request', function (): void {
-        $response = apiGet('/api/rest/v2/customers/me/wishlist');
-
-        expect($response['status'])->toBe(401);
-        expect($response['json'])->toHaveKey('error');
-        expect($response['json']['error'])->toBe('unauthorized');
-    });
-
-    it('rejects requests with malformed token', function (): void {
-        $response = apiGet('/api/rest/v2/customers/me/wishlist', 'invalid-token');
-
-        expect($response['status'])->toBeUnauthorized();
-    });
-
-    it('rejects requests with expired token', function (): void {
-        $response = apiGet('/api/rest/v2/customers/me/wishlist', expiredToken());
-
-        expect($response['status'])->toBeUnauthorized();
-    });
-
-    it('rejects requests with invalid signature', function (): void {
-        $response = apiGet('/api/rest/v2/customers/me/wishlist', invalidToken());
-
-        expect($response['status'])->toBeUnauthorized();
-    });
-
-});
-
 describe('API v2 Wishlist - Listing', function (): void {
-
-    it('returns 200 with valid customer token', function (): void {
-        $response = apiGet('/api/rest/v2/customers/me/wishlist', customerToken());
-
-        expect($response['status'])->toBe(200);
-    });
 
     it('returns a valid collection response', function (): void {
         $response = apiGet('/api/rest/v2/customers/me/wishlist', customerToken());

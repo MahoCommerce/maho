@@ -114,9 +114,7 @@ class Mage_Adminhtml_Customer_Wishlist_Product_Composite_WishlistController exte
             $buyRequest = new \Maho\DataObject($this->getRequest()->getPost());
             $buyRequest->unsFormKey();
 
-            $this->_wishlist
-                ->updateItem($this->_wishlistItem->getId(), $buyRequest)
-                ->save();
+            Mage::getService('wishlist/wishlist')->updateItem($this->_wishlist, $this->_wishlistItem, $buyRequest);
 
             $this->getResponse()->setBodyJson(['ok' => true]);
 

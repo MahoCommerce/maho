@@ -82,6 +82,8 @@ afterEach(function (): void {
     $session = Mage::getSingleton('admin/session');
     $session->setUser(null);
     $session->setAcl(null);
+    // The actions that the tests run add messages, which a later test file must not read
+    Mage::getSingleton('adminhtml/session')->getMessages(true);
 });
 
 it('checks the leaf of each action', function (string $class, string $action, array $params, array $granted, bool $expected): void {

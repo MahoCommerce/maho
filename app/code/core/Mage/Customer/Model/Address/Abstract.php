@@ -25,6 +25,9 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
     public const TYPE_BILLING  = 'billing';
     public const TYPE_SHIPPING = 'shipping';
 
+    /** The prefix of a customer field that the condition of an address attribute reads, as in customer.group_id. */
+    public const CUSTOMER_FIELD_PREFIX = 'customer.';
+
     /**
      * Prefix of model events
      *
@@ -175,7 +178,7 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
      *
      * To be used in controllers for views data
      */
-    public function explodeStreetAddress()
+    public function explodeStreetAddress(): static
     {
         $streetLines = $this->getStreet();
         foreach ($streetLines as $i => $line) {
@@ -187,7 +190,7 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
     /**
      * To be used when processing _POST
      */
-    public function implodeStreetAddress()
+    public function implodeStreetAddress(): static
     {
         $this->setStreet($this->getData('street'));
         return $this;
@@ -229,7 +232,7 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
     /**
      * Return 2 letter state code if available, otherwise full region name
      */
-    public function getRegionCode()
+    public function getRegionCode(): ?string
     {
         $regionId = $this->getData('region_id');
         $region   = $this->getData('region');
@@ -392,7 +395,7 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
     /**
      * Perform basic validation
      */
-    protected function _basicCheck()
+    protected function _basicCheck(): void
     {
         // Validate first name
         if (!Mage::helper('core')->isValidNotBlank($this->getFirstname())) {
@@ -728,5 +731,40 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
     {
         $value = $this->getData('should_ignore_validation');
         return $value === null ? null : (bool) $value;
+    }
+
+    /**
+     * Return the data of the address and the fields of its customer, each customer field with the prefix
+     * customer., for the conditions of the address attributes. A guest has the NOT LOGGED IN group.
+     *
+     * @return array<string, mixed>
+     */
+    public function getConditionData(): array
+    {
+        $data = $this->getData();
+        foreach ($this->getConditionCustomer()?->getData() ?? [] as $code => $value) {
+            if ($value === null || is_scalar($value) || is_array($value)) {
+                $data[self::CUSTOMER_FIELD_PREFIX . $code] = $value;
+            }
+        }
+        $data[self::CUSTOMER_FIELD_PREFIX . 'group_id'] = $this->getConditionCustomerGroupId();
+        return $data;
+    }
+
+    /**
+     * Return the customer whose fields the conditions of the address attributes read, or null for a guest.
+     */
+    protected function getConditionCustomer(): ?Mage_Customer_Model_Customer
+    {
+        return null;
+    }
+
+    /**
+     * Return the group whose ID the conditions of the address attributes read as customer.group_id.
+     */
+    protected function getConditionCustomerGroupId(): int
+    {
+        $customer = $this->getConditionCustomer();
+        return $customer ? (int) $customer->getGroupId() : Mage_Customer_Model_Group::NOT_LOGGED_IN_ID;
     }
 }

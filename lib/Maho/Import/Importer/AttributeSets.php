@@ -43,28 +43,27 @@ class AttributeSets extends AbstractImporter
     protected function write(CsvFile $file, array $rows, array $options, Reporter $reporter): Result
     {
         $result = new Result();
+        /** @var \Mage_Eav_Service_Attribute_Set $service */
+        $service = Mage::getService('eav/attribute_set');
         $entityTypeId = (int) Mage::getSingleton('eav/config')->getEntityType('catalog_product')->getId();
         foreach ($rows as $row) {
+            $sortOrder = ($row['sort_order'] ?? '') !== '' ? (int) $row['sort_order'] : null;
             $existing = Mage::getResourceModel('eav/entity_attribute_set_collection')
                 ->setEntityTypeFilter($entityTypeId)
                 ->addFieldToFilter('attribute_set_name', $row['name'])
                 ->getFirstItem();
             if ($existing->getId()) {
-                if (($row['sort_order'] ?? '') !== '') {
-                    Mage::getModel('eav/entity_attribute_set')->load($existing->getId())->setSortOrder((int) $row['sort_order'])->save();
+                if ($sortOrder !== null) {
+                    $service->save($service->getById((int) $existing->getId(), 'catalog_product')->setSortOrder($sortOrder));
                 }
                 $result->updated++;
                 continue;
             }
-            $set = Mage::getModel('eav/entity_attribute_set')
-                ->setEntityTypeId($entityTypeId)
-                ->setAttributeSetName($row['name']);
-            if (($row['sort_order'] ?? '') !== '') {
-                $set->setSortOrder((int) $row['sort_order']);
+            $set = $service->newSet('catalog_product')->setAttributeSetName($row['name']);
+            if ($sortOrder !== null) {
+                $set->setSortOrder($sortOrder);
             }
-            $set->validate();
-            $set->save();
-            $set->initFromSkeleton($this->resolver->attributeSetId($row['skeleton']))->save();
+            $service->save($set, $this->resolver->attributeSetId($row['skeleton']));
             $result->created++;
             $reporter->info("attribute set {$row['name']} created");
         }

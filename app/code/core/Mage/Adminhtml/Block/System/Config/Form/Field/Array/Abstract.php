@@ -65,7 +65,7 @@ abstract class Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract exte
      * @param string $name
      * @param array $params
      */
-    public function addColumn($name, $params)
+    public function addColumn($name, $params): void
     {
         $this->_columns[$name] = [
             'label'     => empty($params['label']) ? 'Column' : $params['label'],

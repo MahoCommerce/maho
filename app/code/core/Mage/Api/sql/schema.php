@@ -34,7 +34,7 @@ return function (SchemaEditor $schema): void {
         Table::editor()
             ->setUnquotedName('api_session')
             ->addColumn(Schema::column('user_id', Types::INTEGER, unsigned: true))
-            ->addColumn(Schema::column('logdate', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('logdate', Types::DATETIME_IMMUTABLE, notNull: false))
             ->addColumn(Schema::column('sessid', Types::STRING, length: 40, notNull: false))
             ->addIndex(Index::editor()->setUnquotedColumnNames('user_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('sessid'))

@@ -59,6 +59,12 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('wishlists/write')",
             description: 'Sync guest wishlist (localStorage) with customer wishlist',
         ),
+        new Post(
+            uriTemplate: '/customers/me/wishlist/share',
+            name: 'share_wishlist',
+            security: "is_granted('ROLE_CUSTOMER')",
+            description: 'Send the wishlist by email. Body: emails (1 to 5 addresses), message (optional), captchaToken (when the store uses a CAPTCHA)',
+        ),
     ],
     graphQlOperations: [
         // Row-level denial is converted to a null result by OwnershipDenialProvider.
@@ -103,6 +109,16 @@ use Maho\ApiPlatform\CrudResource;
                 'productIds' => ['type' => '[Int!]!', 'description' => 'Product IDs from localStorage'],
             ],
             security: "is_granted('ROLE_CUSTOMER') or is_granted('wishlists/write')",
+        ),
+        new Mutation(
+            name: 'share',
+            description: 'Send the wishlist by email',
+            args: [
+                'emails' => ['type' => '[String!]!', 'description' => '1 to 5 email addresses'],
+                'message' => ['type' => 'String', 'description' => 'Message of the customer for the email'],
+                'captchaToken' => ['type' => 'String', 'description' => 'CAPTCHA token from the client-side widget, when the store uses a CAPTCHA'],
+            ],
+            security: "is_granted('ROLE_CUSTOMER')",
         ),
     ],
 )]

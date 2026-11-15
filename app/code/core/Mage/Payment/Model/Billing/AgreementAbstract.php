@@ -29,22 +29,22 @@ abstract class Mage_Payment_Model_Billing_AgreementAbstract extends Mage_Core_Mo
     /**
      * Init billing agreement
      */
-    abstract public function initToken();
+    abstract public function initToken(): ?string;
 
     /**
      * Verify billing agreement details
      */
-    abstract public function verifyToken();
+    abstract public function verifyToken(): static;
 
     /**
      * Create billing agreement
      */
-    abstract public function place();
+    abstract public function place(): static;
 
     /**
      * Cancel billing agreement
      */
-    abstract public function cancel();
+    abstract public function cancel(): static;
 
     /**
      * Retrieve payment method instance

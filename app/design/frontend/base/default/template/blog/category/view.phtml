@@ -10,6 +10,8 @@ $category = $this->getCategory();
 $posts = $this->getPosts();
 ?>
 
+<?= $this->getChildHtml('attributes') ?>
+
 <?php if ($posts->getSize()): ?>
     <div id="blog_posts" class="blog-posts-grid">
         <?php foreach ($posts->getItems() as $post): ?>

@@ -18,11 +18,8 @@ class Mage_Sales_Model_Resource_Order_Status_History extends Mage_Sales_Model_Re
     #[\Override]
     protected $_eventPrefix    = 'sales_order_status_history_resource';
 
-    /**
-     * Model initialization
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('sales/order_status_history', 'entity_id');
     }

@@ -131,6 +131,37 @@ class Mage_Sales_Model_Order_Address extends Mage_Customer_Model_Address_Abstrac
         return $value === null ? null : (int) $value;
     }
 
+    /**
+     * Return the option labels of the custom address attributes, keyed by attribute code, as the
+     * customer saw them when the order was placed. A multiselect has a list of labels.
+     *
+     * @return array<string, string|list<string>>
+     */
+    public function getCustomAttributeLabels(): array
+    {
+        $value = $this->getData('custom_attribute_labels');
+        if (is_array($value)) {
+            return $value;
+        }
+        if (!is_string($value) || $value === '') {
+            return [];
+        }
+        try {
+            $labels = Mage::helper('core')->jsonDecode($value);
+        } catch (\JsonException) {
+            return [];
+        }
+        return is_array($labels) ? $labels : [];
+    }
+
+    /**
+     * @param array<string, string|list<string>> $value
+     */
+    public function setCustomAttributeLabels(array $value): static
+    {
+        return $this->setData('custom_attribute_labels', $value ? Mage::helper('core')->jsonEncode($value) : null);
+    }
+
     public function setCustomerAddressId(?int $value): static
     {
         return $this->setData('customer_address_id', $value);
@@ -194,5 +225,33 @@ class Mage_Sales_Model_Order_Address extends Mage_Customer_Model_Address_Abstrac
     {
         $value = $this->getData('store_id');
         return $value === null ? null : (int) $value;
+    }
+
+    /**
+     * The customer whose fields the conditions of the address attributes read, loaded once.
+     */
+    protected ?Mage_Customer_Model_Customer $conditionCustomer = null;
+
+    #[\Override]
+    protected function getConditionCustomer(): ?Mage_Customer_Model_Customer
+    {
+        $customerId = (int) $this->getOrder()?->getCustomerId();
+        if (!$customerId) {
+            return null;
+        }
+        if ((int) $this->conditionCustomer?->getId() !== $customerId) {
+            $this->conditionCustomer = Mage::getModel('customer/customer')->load($customerId);
+        }
+        return $this->conditionCustomer->getId() ? $this->conditionCustomer : null;
+    }
+
+    /**
+     * The order keeps the group that its customer had when the order was placed.
+     */
+    #[\Override]
+    protected function getConditionCustomerGroupId(): int
+    {
+        $order = $this->getOrder();
+        return $order ? (int) $order->getCustomerGroupId() : parent::getConditionCustomerGroupId();
     }
 }

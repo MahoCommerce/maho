@@ -21,22 +21,47 @@ describe('Legacy serialized data conversion via core/string helper', function ()
         $this->helper = Mage::helper('core/string');
     });
 
-    it('converts serialized product info_buyRequest', function () {
-        $original = [
+    it('converts a legacy serialized array with string keys, and reads it back from JSON', function (array $original) {
+        $result = $this->helper->unserialize(serialize($original));
+        expect($result)->toBe($original);
+
+        $json = Mage::helper('core')->jsonEncode($result);
+        expect($this->helper->unserialize($json))->toBe($original);
+    })->with([
+        'product info_buyRequest' => [[
             'uenc' => 'aHR0cDovL2xvY2FsaG9zdC9jYXRhbG9nL3Byb2R1Y3Qvdmlldw==',
             'product' => '42',
             'qty' => 1,
             'related_product' => '',
-        ];
-        $legacy = serialize($original);
-
-        $result = $this->helper->unserialize($legacy);
-        expect($result)->toBe($original);
-
-        // Re-encode as JSON and verify it roundtrips
-        $json = Mage::helper('core')->jsonEncode($result);
-        expect($this->helper->unserialize($json))->toBe($original);
-    });
+        ]],
+        'EAV validate_rules' => [['max_text_length' => 255, 'min_text_length' => 1]],
+        'admin_user extra data' => [[
+            'configState' => [
+                'general_country_grp_1' => '1',
+                'general_country_grp_2' => '0',
+                'general_country_grp_3' => '1',
+            ],
+        ]],
+        'payment additional_information' => [['method_title' => 'Check / Money order', 'mailing_address' => '123 Main St, Anytown USA']],
+        'widget_parameters' => [['template' => 'widget/recently_viewed_list.phtml', 'page_size' => '5', 'product_count' => '10']],
+        'index_event new_data' => [[
+            'Mage_Catalog_Model_Indexer_Url' => [
+                'reindex_all' => true,
+                'product_ids' => [42, 99],
+            ],
+        ]],
+        'email queue message_parameters' => [['return_path' => 'noreply@example.com', 'is_html' => true, 'subject' => 'Order Received']],
+        'currency symbols with unicode' => [['USD' => '$', 'EUR' => '€', 'GBP' => '£']],
+        'recurring profile order_info' => [['order_id' => '100', 'increment_id' => '100000001', 'state' => 'processing']],
+        'deeply nested structures' => [[
+            'level1' => [
+                'level2' => [
+                    'level3' => ['a', 'b', 'c'],
+                    'mixed' => [0 => 'zero', 'key' => 'value'],
+                ],
+            ],
+        ]],
+    ]);
 
     it('converts serialized configurable super_attribute with integer keys', function () {
         // super_attribute maps attribute_id (int) => option_value_id (string)
@@ -86,34 +111,6 @@ describe('Legacy serialized data conversion via core/string helper', function ()
         expect($this->helper->unserialize($json))->toBe($original);
     });
 
-    it('converts serialized EAV validate_rules', function () {
-        $original = ['max_text_length' => 255, 'min_text_length' => 1];
-        $legacy = serialize($original);
-
-        $result = $this->helper->unserialize($legacy);
-        expect($result)->toBe($original);
-
-        $json = Mage::helper('core')->jsonEncode($result);
-        expect($this->helper->unserialize($json))->toBe($original);
-    });
-
-    it('converts serialized admin_user extra data', function () {
-        $original = [
-            'configState' => [
-                'general_country_grp_1' => '1',
-                'general_country_grp_2' => '0',
-                'general_country_grp_3' => '1',
-            ],
-        ];
-        $legacy = serialize($original);
-
-        $result = $this->helper->unserialize($legacy);
-        expect($result)->toBe($original);
-
-        $json = Mage::helper('core')->jsonEncode($result);
-        expect($this->helper->unserialize($json))->toBe($original);
-    });
-
     it('converts serialized weee_tax_applied', function () {
         $original = [[
             'title' => 'ECO TAX',
@@ -127,44 +124,6 @@ describe('Legacy serialized data conversion via core/string helper', function ()
         $result = $this->helper->unserialize($legacy);
         expect($result[0]['title'])->toBe('ECO TAX')
             ->and($result[0]['base_amount'])->toBe('5.00');
-
-        $json = Mage::helper('core')->jsonEncode($result);
-        expect($this->helper->unserialize($json))->toBe($original);
-    });
-
-    it('converts serialized payment additional_information', function () {
-        $original = ['method_title' => 'Check / Money order', 'mailing_address' => '123 Main St, Anytown USA'];
-        $legacy = serialize($original);
-
-        $result = $this->helper->unserialize($legacy);
-        expect($result)->toBe($original);
-
-        $json = Mage::helper('core')->jsonEncode($result);
-        expect($this->helper->unserialize($json))->toBe($original);
-    });
-
-    it('converts serialized widget_parameters', function () {
-        $original = ['template' => 'widget/recently_viewed_list.phtml', 'page_size' => '5', 'product_count' => '10'];
-        $legacy = serialize($original);
-
-        $result = $this->helper->unserialize($legacy);
-        expect($result)->toBe($original);
-
-        $json = Mage::helper('core')->jsonEncode($result);
-        expect($this->helper->unserialize($json))->toBe($original);
-    });
-
-    it('converts serialized index_event new_data', function () {
-        $original = [
-            'Mage_Catalog_Model_Indexer_Url' => [
-                'reindex_all' => true,
-                'product_ids' => [42, 99],
-            ],
-        ];
-        $legacy = serialize($original);
-
-        $result = $this->helper->unserialize($legacy);
-        expect($result)->toBe($original);
 
         $json = Mage::helper('core')->jsonEncode($result);
         expect($this->helper->unserialize($json))->toBe($original);
@@ -232,57 +191,6 @@ describe('Legacy serialized data conversion via core/string helper', function ()
         $json = Mage::helper('core')->jsonEncode($result);
         $fromJson = $this->helper->unserialize($json);
         expect($fromJson[1]['weight'])->toBe(2.5);
-    });
-
-    it('converts serialized email queue message_parameters', function () {
-        $original = ['return_path' => 'noreply@example.com', 'is_html' => true, 'subject' => 'Order Received'];
-        $legacy = serialize($original);
-
-        $result = $this->helper->unserialize($legacy);
-        expect($result)->toBe($original);
-
-        $json = Mage::helper('core')->jsonEncode($result);
-        expect($this->helper->unserialize($json))->toBe($original);
-    });
-
-    it('converts serialized currency symbols with unicode', function () {
-        $original = ['USD' => '$', 'EUR' => '€', 'GBP' => '£'];
-        $legacy = serialize($original);
-
-        $result = $this->helper->unserialize($legacy);
-        expect($result)->toBe($original);
-
-        $json = Mage::helper('core')->jsonEncode($result);
-        expect($this->helper->unserialize($json))->toBe($original);
-    });
-
-    it('converts serialized recurring profile order_info', function () {
-        $original = ['order_id' => '100', 'increment_id' => '100000001', 'state' => 'processing'];
-        $legacy = serialize($original);
-
-        $result = $this->helper->unserialize($legacy);
-        expect($result)->toBe($original);
-
-        $json = Mage::helper('core')->jsonEncode($result);
-        expect($this->helper->unserialize($json))->toBe($original);
-    });
-
-    it('converts deeply nested serialized structures', function () {
-        $original = [
-            'level1' => [
-                'level2' => [
-                    'level3' => ['a', 'b', 'c'],
-                    'mixed' => [0 => 'zero', 'key' => 'value'],
-                ],
-            ],
-        ];
-        $legacy = serialize($original);
-
-        $result = $this->helper->unserialize($legacy);
-        expect($result)->toBe($original);
-
-        $json = Mage::helper('core')->jsonEncode($result);
-        expect($this->helper->unserialize($json))->toBe($original);
     });
 });
 

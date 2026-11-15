@@ -10,7 +10,7 @@
 
 class Mage_Tag_Block_Popular extends Mage_Core_Block_Template
 {
-    protected $_tags;
+    protected ?array $_tags = null;
     protected $_minPopularity;
     protected $_maxPopularity;
 

@@ -13,21 +13,24 @@
  */
 abstract class Mage_Dataflow_Model_Convert_Profile_Abstract implements Mage_Dataflow_Model_Convert_Profile_Interface
 {
-    protected $_actions;
+    protected array $_actions = [];
 
-    protected $_containers;
+    protected ?object $_containers = null;
 
-    protected $_exceptions = [];
+    protected array $_exceptions = [];
 
-    protected $_dryRun;
+    protected ?bool $_dryRun = null;
 
-    protected $_actionDefaultClass = 'Mage_Dataflow_Model_Convert_Action';
+    /** @var class-string<Mage_Dataflow_Model_Convert_Action_Interface> */
+    protected string $_actionDefaultClass = 'Mage_Dataflow_Model_Convert_Action';
 
-    protected $_containerCollectionDefaultClass = 'Mage_Dataflow_Model_Convert_Container_Collection';
+    /** @var class-string<Mage_Dataflow_Model_Convert_Container_Collection> */
+    protected string $_containerCollectionDefaultClass = 'Mage_Dataflow_Model_Convert_Container_Collection';
 
-    protected $_dataflow_profile = null;
+    protected ?array $_dataflow_profile = null;
 
-    public function addAction(?Mage_Dataflow_Model_Convert_Action_Interface $action = null)
+    #[\Override]
+    public function addAction(?Mage_Dataflow_Model_Convert_Action_Interface $action = null): Mage_Dataflow_Model_Convert_Action_Interface
     {
         $action ??= new $this->_actionDefaultClass();
         $this->_actions[] = $action;
@@ -35,13 +38,14 @@ abstract class Mage_Dataflow_Model_Convert_Profile_Abstract implements Mage_Data
         return $action;
     }
 
-    public function setContainers(Mage_Dataflow_Model_Convert_Container_Collection $containers)
+    #[\Override]
+    public function setContainers(Mage_Dataflow_Model_Convert_Container_Collection $containers): static
     {
         $this->_containers = $containers;
         return $this;
     }
 
-    public function getContainers()
+    public function getContainers(): Mage_Dataflow_Model_Convert_Container_Collection
     {
         if (!$this->_containers) {
             $this->_containers = new $this->_containerCollectionDefaultClass();
@@ -49,42 +53,46 @@ abstract class Mage_Dataflow_Model_Convert_Profile_Abstract implements Mage_Data
         return $this->_containers;
     }
 
-    public function getContainer($name = null)
+    #[\Override]
+    public function getContainer(string|int|null $name = null): Mage_Dataflow_Model_Convert_Container_Interface
     {
         $name ??= '_default';
         return $this->getContainers()->getItem($name);
     }
 
-    public function addContainer($name, Mage_Dataflow_Model_Convert_Container_Interface $container)
+    #[\Override]
+    public function addContainer(string|int|null $name, Mage_Dataflow_Model_Convert_Container_Interface $container): Mage_Dataflow_Model_Convert_Container_Interface
     {
         $container = $this->getContainers()->addItem($name, $container);
         $container->setProfile($this);
         return $container;
     }
 
-    public function getExceptions()
+    public function getExceptions(): array
     {
         return $this->_exceptions;
     }
 
-    public function getDryRun()
+    #[\Override]
+    public function getDryRun(): ?bool
     {
         return $this->_dryRun;
     }
 
-    public function setDryRun($flag)
+    public function setDryRun(bool $flag): static
     {
         $this->_dryRun = $flag;
         return $this;
     }
 
-    public function addException(Mage_Dataflow_Model_Convert_Exception $e)
+    #[\Override]
+    public function addException(Mage_Dataflow_Model_Convert_Exception $e): static
     {
         $this->_exceptions[] = $e;
         return $this;
     }
 
-    public function importXml(\Maho\Simplexml\Element $profileNode)
+    public function importXml(\Maho\Simplexml\Element $profileNode): static
     {
         foreach ($profileNode->action as $actionNode) {
             $action = $this->addAction();
@@ -95,7 +103,7 @@ abstract class Mage_Dataflow_Model_Convert_Profile_Abstract implements Mage_Data
     }
 
     #[\Override]
-    public function run()
+    public function run(): static
     {
         if (!$this->_actions) {
             $e = new Mage_Dataflow_Model_Convert_Exception('Could not find any actions for this profile');
@@ -118,7 +126,7 @@ abstract class Mage_Dataflow_Model_Convert_Profile_Abstract implements Mage_Data
         return $this;
     }
 
-    public function setDataflowProfile($profile)
+    public function setDataflowProfile(mixed $profile): static
     {
         if (is_array($profile)) {
             $this->_dataflow_profile = $profile;
@@ -126,7 +134,7 @@ abstract class Mage_Dataflow_Model_Convert_Profile_Abstract implements Mage_Data
         return $this;
     }
 
-    public function getDataflowProfile()
+    public function getDataflowProfile(): ?array
     {
         return $this->_dataflow_profile;
     }

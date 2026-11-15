@@ -35,7 +35,58 @@ class Mage_Customer_Model_Form extends Mage_Eav_Model_Form
     #[\Override]
     protected function _getFormAttributeCollection()
     {
-        return parent::_getFormAttributeCollection()
+        $collection = parent::_getFormAttributeCollection()
             ->addFieldToFilter('attribute_code', ['neq' => 'created_at']);
+        $setId = $this->getAttributeSetId();
+        if ($setId) {
+            $collection->addAttributeSetFilter($setId);
+        }
+        return $collection;
+    }
+
+    /**
+     * Return the attribute set of the customer group of the form, or null when there is no entity.
+     */
+    public function getAttributeSetId(): ?int
+    {
+        if ($this->_entity === null) {
+            return null;
+        }
+        return Mage::helper('customer')->getGroupAttributeSetId(
+            $this->getCustomerGroupId(),
+            (string) $this->getEntityType()->getEntityTypeCode(),
+        );
+    }
+
+    /**
+     * Return the customer group of the form: the one of the entity, then the one of the customer session.
+     */
+    public function getCustomerGroupId(): int
+    {
+        $entity = $this->_entity;
+        if ($entity instanceof Mage_Customer_Model_Customer) {
+            return (int) $entity->getGroupId();
+        }
+        if ($entity instanceof Mage_Sales_Model_Quote_Address) {
+            return (int) $entity->getQuote()?->getCustomerGroupId();
+        }
+        if ($entity instanceof Mage_Sales_Model_Order_Address) {
+            return (int) $entity->getOrder()?->getCustomerGroupId();
+        }
+        if ($entity instanceof Mage_Customer_Model_Address && $entity->getCustomer()) {
+            return (int) $entity->getCustomer()->getGroupId();
+        }
+
+        // On the admin customer page, a new address belongs to the customer of the page
+        $customer = Mage::registry('current_customer');
+        if ($customer instanceof Mage_Customer_Model_Customer) {
+            return (int) $customer->getGroupId();
+        }
+
+        // A new address without a customer belongs to a customer who registers now
+        $session = Mage::getSingleton('customer/session');
+        return $session->isLoggedIn()
+            ? (int) $session->getCustomerGroupId()
+            : Mage::helper('customer')->getDefaultCustomerGroupId($this->getStore());
     }
 }

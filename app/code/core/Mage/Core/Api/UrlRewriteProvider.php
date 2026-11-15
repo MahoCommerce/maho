@@ -11,11 +11,22 @@ declare(strict_types=1);
 namespace Mage\Core\Api;
 
 use Maho\ApiPlatform\CrudProvider;
+use Maho\ApiPlatform\Resource;
 
 final class UrlRewriteProvider extends CrudProvider
 {
     #[\Override]
     protected array $defaultSort = ['url_rewrite_id' => 'DESC'];
+
+    #[\Override]
+    protected function provideItem(int|string $id): ?Resource
+    {
+        try {
+            return $this->toDto(\Mage::getService('core/url_rewrite')->getById((int) $id, $this->allowedStoreIds()));
+        } catch (\Mage_Core_Exception_NoSuchEntity) {
+            return null;
+        }
+    }
 
     /**
      * Rewrites are admin data for every store view, so the current-store filter

@@ -6,6 +6,19 @@ SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <menu>
+        <system>
+            <children>
+                <attributes>
+                    <children>
+                        <catalog_category translate="title" module="catalog">
+                            <title>Categories</title>
+                            <action>adminhtml/eav_attribute/index/entity_type/catalog_category</action>
+                            <sort_order>30</sort_order>
+                        </catalog_category>
+                    </children>
+                </attributes>
+            </children>
+        </system>
         <catalog translate="title" module="catalog">
             <title>Catalog</title>
             <sort_order>30</sort_order>
@@ -50,6 +63,18 @@ SPDX-License-Identifier: AFL-3.0
         <resources>
             <admin>
                 <children>
+                    <system>
+                        <children>
+                            <attributes>
+                                <children>
+                                    <catalog_category translate="title" module="catalog">
+                                        <title>Categories</title>
+                                        <sort_order>30</sort_order>
+                                    </catalog_category>
+                                </children>
+                            </attributes>
+                        </children>
+                    </system>
                     <system>
                         <children>
                             <config>

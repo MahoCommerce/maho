@@ -9,7 +9,7 @@
 class Mage_Page_Model_Source_Robots extends Mage_Eav_Model_Entity_Attribute_Source_Abstract
 {
     #[\Override]
-    public function getAllOptions(): array
+    public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array
     {
         if (!$this->_options) {
             $this->_options = [

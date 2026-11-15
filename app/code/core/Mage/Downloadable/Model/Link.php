@@ -50,6 +50,7 @@ class Mage_Downloadable_Model_Link extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _beforeSave(): static
     {
+        $this->validateData();
         if ($this->getLinkType() === Mage_Downloadable_Helper_Download::LINK_TYPE_URL) {
             Mage_Downloadable_Helper_Download::checkUrl($this->getLinkUrl());
         }
@@ -57,6 +58,30 @@ class Mage_Downloadable_Model_Link extends Mage_Core_Model_Abstract
             Mage_Downloadable_Helper_Download::checkUrl($this->getSampleUrl());
         }
         return parent::_beforeSave();
+    }
+
+    /**
+     * Check the title, the link type, the URL of a URL link and the shareable setting.
+     *
+     * @throws Mage_Core_Exception_Input
+     */
+    protected function validateData(): void
+    {
+        $helper = Mage::helper('downloadable');
+        $errors = new Mage_Core_Exception_Input();
+        if (!$this->getData('use_default_title') && trim((string) $this->getTitle()) === '') {
+            $errors->addError('title', $helper->__('title is required'));
+        }
+        $linkType = $this->getLinkType();
+        if (!in_array($linkType, [Mage_Downloadable_Helper_Download::LINK_TYPE_URL, Mage_Downloadable_Helper_Download::LINK_TYPE_FILE], true)) {
+            $errors->addError('link_type', $helper->__('Invalid linkType: %s. Valid: url, file', (string) $linkType));
+        } elseif ($linkType === Mage_Downloadable_Helper_Download::LINK_TYPE_URL && (string) $this->getLinkUrl() === '') {
+            $errors->addError('link_url', $helper->__('linkUrl is required for url type links'));
+        }
+        if ($this->hasData('is_shareable') && !in_array((int) $this->getData('is_shareable'), [self::LINK_SHAREABLE_NO, self::LINK_SHAREABLE_YES, self::LINK_SHAREABLE_CONFIG], true)) {
+            $errors->addError('is_shareable', $helper->__('isShareable must be 0 (no), 1 (yes), or 2 (use config)'));
+        }
+        $errors->throwIfErrors();
     }
 
     #[\Override]

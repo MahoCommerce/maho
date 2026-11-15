@@ -13,19 +13,11 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Maho\ApiPlatform\Http\RequestInput;
 
 final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
 {
     use \Maho\ApiPlatform\Trait\OrderItemsTrait;
-
-    private const CAPTURE_CASES = [
-        \Mage_Sales_Model_Order_Invoice::CAPTURE_ONLINE,
-        \Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE,
-        \Mage_Sales_Model_Order_Invoice::NOT_CAPTURE,
-    ];
 
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Invoice
@@ -35,75 +27,43 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
         $this->normalizeGraphQlInput($context);
 
         return match ($operationName) {
-            'invoice_capture' => $this->executeLifecycleAction('capture', $uriVariables),
-            'invoice_void' => $this->executeLifecycleAction('void', $uriVariables),
-            'invoice_cancel' => $this->executeLifecycleAction('cancel', $uriVariables),
+            'invoice_capture' => $this->executeLifecycleAction('captureInvoice', $uriVariables),
+            'invoice_void' => $this->executeLifecycleAction('voidInvoice', $uriVariables),
+            'invoice_cancel' => $this->executeLifecycleAction('cancelInvoice', $uriVariables),
             default => $this->createInvoice($uriVariables, $context),
         };
     }
 
     private function createInvoice(array $uriVariables, array $context): Invoice
     {
-        $orderId = (int) ($uriVariables['orderId'] ?? 0);
-        $args = $context['args']['input'] ?? [];
-        $captureCase = $args['capture'] ?? null;
-        if ($captureCase !== null && !in_array($captureCase, self::CAPTURE_CASES, true)) {
-            throw new UnprocessableEntityHttpException('Invalid capture mode; expected one of: ' . implode(', ', self::CAPTURE_CASES));
-        }
+        $input = RequestInput::of($context['args']['input'] ?? []);
+        $captureCase = $input->string('capture');
+        $items = $input->rows('items');
+        $comment = $input->string('comment');
+        $notifyCustomer = $input->bool('notifyCustomer') ?? false;
 
-        $items = $args['items'] ?? null;
-        if ($items !== null && !is_array($items)) {
-            throw new BadRequestHttpException('Items must be a list of {orderItemId, qty} objects');
-        }
-
-        $comment = $args['comment'] ?? null;
-        if ($comment !== null && !is_string($comment)) {
-            throw new BadRequestHttpException('Comment must be a string');
-        }
-
-        $notifyCustomer = $args['notifyCustomer'] ?? false;
-        if (!is_scalar($notifyCustomer)) {
-            throw new BadRequestHttpException('notifyCustomer must be a boolean');
-        }
-
-        $order = \Mage::getModel('sales/order')->load($orderId);
-        if (!$order->getId()) {
-            throw new NotFoundHttpException('Order not found');
-        }
-
+        $service = \Mage::getService('sales/order_document');
+        $order = \Mage::getService('sales/order')->getById((int) ($uriVariables['orderId'] ?? 0));
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         $qtys = [];
-        foreach ($items ?? [] as $itemData) {
-            $entry = $this->parseOrderItemEntry($itemData, $order);
-            $qtys[(int) $entry['item']->getId()] = $entry['qty'];
+        foreach ($items ?? [] as $item) {
+            $entry = $this->parseOrderItemEntry($item);
+            $qtys[$entry['orderItemId']] = $entry['qty'];
         }
 
-        $invoice = \Mage::getService('sales/order')->invoice($order, $qtys, $captureCase, $comment, (bool) $notifyCustomer);
-
-        return Invoice::fromModel($invoice);
+        return Invoice::fromModel($service->invoice($order, $qtys, $captureCase, $comment, $notifyCustomer));
     }
 
     /**
-     * @param 'capture'|'void'|'cancel' $action
+     * @param 'captureInvoice'|'voidInvoice'|'cancelInvoice' $method
      */
-    private function executeLifecycleAction(string $action, array $uriVariables): Invoice
+    private function executeLifecycleAction(string $method, array $uriVariables): Invoice
     {
-        $invoiceId = (int) ($uriVariables['id'] ?? 0);
-        $invoice = \Mage::getModel('sales/order_invoice')->load($invoiceId);
-        if (!$invoice->getId()) {
-            throw new NotFoundHttpException('Invoice not found');
-        }
-
+        $service = \Mage::getService('sales/order_document');
+        $invoice = $service->requireInvoice((int) ($uriVariables['id'] ?? 0));
         $this->assertStoreAllowed($invoice->getStoreId(), $this->requireUser(), 'invoice');
 
-        $service = \Mage::getService('sales/order');
-        $invoice = match ($action) {
-            'capture' => $service->captureInvoice($invoice),
-            'void' => $service->voidInvoice($invoice),
-            'cancel' => $service->cancelInvoice($invoice),
-        };
-
-        return Invoice::fromModel($invoice);
+        return Invoice::fromModel($service->{$method}($invoice));
     }
 }

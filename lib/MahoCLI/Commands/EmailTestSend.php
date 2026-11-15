@@ -27,24 +27,18 @@ class EmailTestSend extends BaseMahoCommand
         string $recipient,
     ): int {
         $this->initMaho();
-        // Send immediately instead of queueing, so transport errors surface right here
-        Mage::setIsDeveloperMode(true);
-
-        $emailTemplate = Mage::getModel('core/email_template');
-        $emailTemplate
-            ->setSenderName(Mage::getStoreConfig('trans_email/ident_general/name'))
-            ->setSenderEmail(Mage::getStoreConfig('trans_email/ident_general/email'))
-            ->setTemplateType(\Mage_Core_Model_Template::TYPE_TEXT)
-            ->setTemplateText('This is just a test.')
-            ->setTemplateSubject('Test email');
-        $retult = $emailTemplate->send($recipient, 'Test email');
-
-        if ($retult) {
-            $output->writeln('Test email successfully sent!');
-            return Command::SUCCESS;
+        try {
+            /** @var \Mage_Core_Service_Email_Template $service */
+            $service = Mage::getService('core/email_template');
+            $service->sendTest($recipient);
+        } catch (\Mage_Core_Exception_Input $e) {
+            $output->writeln("<error>{$e->getMessage()}</error>");
+            return Command::INVALID;
+        } catch (\Mage_Core_Exception $e) {
+            $output->writeln("<error>{$e->getMessage()}</error>");
+            return Command::FAILURE;
         }
-
-        $output->writeln('Could not send test email, please check error logs.');
-        return Command::FAILURE;
+        $output->writeln('Test email successfully sent!');
+        return Command::SUCCESS;
     }
 }

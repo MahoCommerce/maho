@@ -285,12 +285,12 @@ class CategoryEditForm {
         );
     }
 
-    async updateContent(url) {
+    async updateContent(url, body = null) {
         if (!this.config.useAjax) {
             return setLocation(url);
         }
         try {
-            const result = await mahoFetch(url, { method: 'POST' });
+            const result = await mahoFetch(url, { method: 'POST', body });
 
             clearMessagesDiv();
 
@@ -331,6 +331,29 @@ class CategoryEditForm {
         } catch (error) {
             setMessagesDiv(error.message, 'error');
         }
+    }
+
+    /**
+     * Reload the form with the fields of the attribute set that the select shows.
+     * The form posts its values, so the values that the admin typed stay.
+     *
+     * @param {HTMLSelectElement} select
+     * @param {Object} options
+     * @param {?string} options.savedValue - the set of the saved category, null for a new category
+     * @param {Object<string, string>} options.questions - the confirmation for each set that loses values
+     */
+    async changeAttributeSet(select, { savedValue = null, questions = {} } = {}) {
+        const question = questions[select.value];
+        if (question && !confirm(question)) {
+            select.value = [...select.options].find((option) => option.defaultSelected)?.value ?? savedValue;
+            return;
+        }
+        const url = setRouteParams(window.location.href, {
+            set: select.value,
+            active_tab: window[this.config.tabsJsObjectName]?.activeTab?.name,
+        });
+        await this.updateContent(url, this.config.useAjax ? new FormData(this.formEl) : null);
+        history.replaceState(null, '', setRouteParams(window.location.href, { set: null }));
     }
 
     async switchStore(event, switcher) {

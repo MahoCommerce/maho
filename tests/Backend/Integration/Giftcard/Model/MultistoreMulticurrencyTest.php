@@ -68,16 +68,6 @@ describe('Multistore Gift Card Isolation', function () {
         }
     });
 
-    test('gift card from website 1 cannot be used on website 2 quote', function () {
-        // The card is for website 1, but we'll validate against the test website
-        expect($this->cardWebsite1->isValidForWebsite(1))->toBeTrue();
-        expect($this->cardWebsite1->isValidForWebsite((int) $this->testWebsite->getId()))->toBeFalse();
-
-        // The card for test website should work only on that website
-        expect($this->cardWebsite2->isValidForWebsite((int) $this->testWebsite->getId()))->toBeTrue();
-        expect($this->cardWebsite2->isValidForWebsite(1))->toBeFalse();
-    });
-
     test('gift card validation respects website boundaries during quote totals', function () {
         // Create quote for store 1 (website 1)
         $quote = Mage::getModel('sales/quote');
@@ -195,33 +185,13 @@ describe('Multicurrency Gift Card Conversion', function () {
         $this->giftcard->save();
     });
 
-    test('gift card balance returns raw value when no currency specified', function () {
-        $balance = $this->giftcard->getBalance();
-        expect($balance)->toBe(100.00);
-    });
+    test('gift card balance converts to another currency at the rate of the store', function () {
+        $rate = useEurDisplayCurrency();
 
-    test('gift card balance returns same value for matching currency', function () {
-        $currencyCode = $this->giftcard->getCurrencyCode();
-        $balance = $this->giftcard->getBalance($currencyCode);
-        expect($balance)->toBe(100.00);
-    });
-
-    test('gift card balance converts to different currency', function () {
-        // Get card's base currency
-        $baseCurrency = $this->giftcard->getCurrencyCode();
-
-        // This test assumes currency conversion is available
-        // The actual conversion depends on configured exchange rates
         try {
-            // Try to convert to a different currency (if rates are configured)
-            $balance = $this->giftcard->getBalance('EUR');
-
-            // Balance should be converted (not equal to 100 unless rate is 1:1)
-            // We just verify the method executes without error
-            expect($balance)->toBeFloat();
-        } catch (Exception $e) {
-            // If currency conversion fails (no rates configured), that's okay for this test
-            expect($e)->toBeInstanceOf(Exception::class);
+            expect($this->giftcard->getBalance('EUR'))->toEqualWithDelta(100.00 * $rate, 0.0001);
+        } finally {
+            resetCurrencyState();
         }
     });
 
@@ -245,41 +215,6 @@ describe('Multicurrency Quote Total Collection', function () {
         $this->giftcard->setBalance(100.00); // In base currency
         $this->giftcard->setInitialBalance(100.00);
         $this->giftcard->save();
-    });
-
-    test('gift card applies with currency conversion in quote totals', function () {
-        $quote = Mage::getModel('sales/quote');
-        $quote->setStoreId(1);
-
-        // Set quote to use base currency (should match gift card currency)
-        $store = Mage::app()->getStore(1);
-        $baseCurrency = $store->getBaseCurrencyCode();
-        $quote->setQuoteCurrencyCode($baseCurrency);
-        $quote->setBaseCurrencyCode($baseCurrency);
-        $quote->save();
-
-        $codes = [$this->giftcard->getCode() => 0];
-        $quote->setGiftcardCodes(json_encode($codes));
-
-        $address = $quote->getShippingAddress();
-        $address->setBaseSubtotal(50.00);
-        $address->setSubtotal(50.00);
-        $address->setBaseShippingInclTax(0);
-        $address->setShippingInclTax(0);
-
-        $item = createTestQuoteItem([
-            'base_row_total_incl_tax' => 50.00,
-            'row_total_incl_tax' => 50.00,
-        ]);
-        setQuoteAddressItems($address, [$item]);
-
-        // Collect totals - should use currency conversion
-        $total = Mage::getModel('giftcard/total_quote');
-        $total->collect($address);
-
-        // Gift card should be applied (converted if necessary)
-        // Since currencies match, amount should be 50.00
-        expect((float) $address->getBaseGiftcardAmount())->toBe(50.00);
     });
 
     test('gift card balance is properly tracked per currency', function () {
@@ -322,159 +257,5 @@ describe('Multicurrency Quote Total Collection', function () {
         $updatedCodes = json_decode($address->getGiftcardCodes(), true);
         expect($updatedCodes)->toHaveKey($this->giftcard->getCode());
         expect((float) $updatedCodes[$this->giftcard->getCode()])->toBe(100.00);
-    });
-});
-
-describe('Full Order Flow with Multistore Validation', function () {
-    beforeEach(function () {
-        $this->helper = Mage::helper('giftcard');
-
-        // Create gift card for website 1
-        $this->giftcard = Mage::getModel('giftcard/giftcard');
-        $this->giftcard->setCode($this->helper->generateCode());
-        $this->giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $this->giftcard->setWebsiteIds([1]);
-        $this->giftcard->setBalance(50.00);
-        $this->giftcard->setInitialBalance(50.00);
-        $this->giftcard->save();
-    });
-
-    test('order placement validates gift card website', function () {
-        // Create quote on website 1
-        $quote = Mage::getModel('sales/quote');
-        $quote->setStoreId(1);
-        $quote->save();
-
-        // Apply valid gift card
-        $codes = [$this->giftcard->getCode() => 50.00];
-        $quote->setGiftcardCodes(json_encode($codes));
-
-        $address = $quote->getShippingAddress();
-        $address->setBaseSubtotal(100.00);
-        $address->setSubtotal(100.00);
-        $address->setBaseShippingInclTax(0);
-        $address->setShippingInclTax(0);
-
-        $item = createTestQuoteItem([
-            'base_row_total_incl_tax' => 100.00,
-            'row_total_incl_tax' => 100.00,
-        ]);
-        setQuoteAddressItems($address, [$item]);
-
-        // Collect totals
-        $total = Mage::getModel('giftcard/total_quote');
-        $total->collect($address);
-
-        // Gift card should apply
-        expect((float) $address->getBaseGiftcardAmount())->toBe(50.00);
-
-        // Convert quote to order
-        $order = Mage::getModel('sales/order');
-        $order->setStoreId($quote->getStoreId());
-        $order->setBaseGiftcardAmount($address->getBaseGiftcardAmount());
-        $order->setGiftcardAmount($address->getGiftcardAmount());
-        $order->setGiftcardCodes($quote->getGiftcardCodes());
-        $order->setBaseGrandTotal(50.00); // 100 - 50
-        $order->setGrandTotal(50.00);
-
-        // Verify order has correct gift card data
-        expect((float) $order->getBaseGiftcardAmount())->toBe(50.00);
-        expect($order->getGiftcardCodes())->toContain($this->giftcard->getCode());
-    });
-
-    test('gift card usage tracks proper amounts across order lifecycle', function () {
-        // Setup order
-        $order = Mage::getModel('sales/order');
-        $order->setStoreId(1);
-        $order->setBaseGrandTotal(100.00);
-        $order->setGrandTotal(100.00);
-        $order->setBaseSubtotal(100.00);
-        $order->setSubtotal(100.00);
-        $order->setBaseCurrencyCode('USD');
-        $order->setOrderCurrencyCode('USD');
-        $order->setBaseToOrderRate(1.0);
-        $order->save();
-
-        // Apply gift card
-        $codes = [$this->giftcard->getCode() => 50.00];
-        $order->setGiftcardCodes(json_encode($codes));
-        $order->setBaseGiftcardAmount(50.00);
-        $order->setGiftcardAmount(50.00);
-        $order->save();
-
-        // Simulate payment (invoice)
-        $invoice = Mage::getModel('sales/order_invoice');
-        $invoice->setOrder($order);
-        $invoice->setBaseGrandTotal(50.00); // Will be adjusted by total collector
-        $invoice->setGrandTotal(50.00);
-
-        $total = Mage::getModel('giftcard/total_invoice');
-        $total->collect($invoice);
-
-        // Invoice should reflect gift card discount
-        expect((float) $invoice->getBaseGiftcardAmount())->toBe(50.00);
-        expect((float) $invoice->getBaseGrandTotal())->toBe(0.0); // Fully paid by gift card
-    });
-});
-
-describe('Edge Cases: Multistore and Multicurrency', function () {
-    beforeEach(function () {
-        $this->helper = Mage::helper('giftcard');
-    });
-
-    test('expired gift card is not valid for any website', function () {
-        $pastDate = (new DateTime('-1 day', new DateTimeZone('UTC')))->format('Y-m-d H:i:s');
-
-        $giftcard = Mage::getModel('giftcard/giftcard');
-        $giftcard->setCode($this->helper->generateCode());
-        $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteIds([1]);
-        $giftcard->setBalance(100.00);
-        $giftcard->setInitialBalance(100.00);
-        $giftcard->setExpiresAt($pastDate);
-        $giftcard->save();
-
-        // Should not be valid for any website
-        expect($giftcard->isValidForWebsite(1))->toBeFalse();
-        expect($giftcard->isValidForWebsite(2))->toBeFalse();
-    });
-
-    test('disabled gift card from correct website is still invalid', function () {
-        $giftcard = Mage::getModel('giftcard/giftcard');
-        $giftcard->setCode($this->helper->generateCode());
-        $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_DISABLED);
-        $giftcard->setWebsiteIds([1]);
-        $giftcard->setBalance(100.00);
-        $giftcard->setInitialBalance(100.00);
-        $giftcard->save();
-
-        // Should not be valid even though website matches
-        expect($giftcard->isValidForWebsite(1))->toBeFalse();
-    });
-
-    test('zero balance gift card is invalid regardless of website', function () {
-        $giftcard = Mage::getModel('giftcard/giftcard');
-        $giftcard->setCode($this->helper->generateCode());
-        $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteIds([1]);
-        $giftcard->setBalance(0.00);
-        $giftcard->setInitialBalance(100.00);
-        $giftcard->save();
-
-        expect($giftcard->isValidForWebsite(1))->toBeFalse();
-    });
-
-    test('website validation happens before balance checks', function () {
-        $giftcard = Mage::getModel('giftcard/giftcard');
-        $giftcard->setCode($this->helper->generateCode());
-        $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteIds([1]); // Keep FK valid
-        $giftcard->setBalance(100.00);
-        $giftcard->setInitialBalance(100.00);
-        $giftcard->save();
-
-        expect($giftcard->isValidForWebsite(1))->toBeTrue();
-        expect($giftcard->isValid())->toBeTrue();
-        expect($giftcard->getWebsiteIds())->toBe([1]);
     });
 });

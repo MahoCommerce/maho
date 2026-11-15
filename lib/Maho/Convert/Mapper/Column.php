@@ -14,7 +14,7 @@ namespace Maho\Convert\Mapper;
 class Column extends AbstractMapper
 {
     #[\Override]
-    public function map()
+    public function map(): static
     {
         $data = $this->getData();
         $this->validateDataGrid($data);

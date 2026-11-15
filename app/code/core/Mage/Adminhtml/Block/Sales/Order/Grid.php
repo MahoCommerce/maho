@@ -246,7 +246,7 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
         return $this->getUrl('*/*/grid', ['_current' => true]);
     }
 
-    public function decorateStatus($value, $row, $column, $isExport): string
+    public function decorateStatus(string $value, \Maho\DataObject $row, Mage_Adminhtml_Block_Widget_Grid_Column $column, bool $isExport): string
     {
         if ($this->orderStatusColors === null) {
             $this->orderStatusColors = [];

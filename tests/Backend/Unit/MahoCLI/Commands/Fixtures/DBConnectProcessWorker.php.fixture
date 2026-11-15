@@ -1,0 +1,44 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package MahoCLI
+ */
+
+declare(strict_types=1);
+
+if (PHP_SAPI !== 'cli' || !isset($argv[1], $argv[2], $argv[3], $argv[4])) {
+    exit(64);
+}
+
+$mode = $argv[1];
+$root = $argv[2];
+$bytes = (int) $argv[3];
+$exitCode = (int) $argv[4];
+if ($bytes < 0 || $bytes > 131072 || $exitCode < 0 || $exitCode > 255) {
+    exit(64);
+}
+
+if ($mode === 'child') {
+    fwrite(STDOUT, "native-client-output\n");
+    fwrite(STDERR, str_repeat('D', $bytes));
+    exit($exitCode);
+}
+if ($mode !== 'command') {
+    exit(64);
+}
+
+$autoload = getenv('MAHO_DB_CONNECT_TEST_AUTOLOAD') ?: $root . '/vendor/autoload.php';
+require $autoload;
+require $root . '/lib/MahoCLI/Commands/DBConnect.php';
+if (realpath(new ReflectionClass(MahoCLI\Commands\DBConnect::class)->getFileName())
+    !== realpath($root . '/lib/MahoCLI/Commands/DBConnect.php')) {
+    throw new RuntimeException('Unexpected db:connect source.');
+}
+
+$command = implode(' ', array_map(escapeshellarg(...), [
+    PHP_BINARY, __FILE__, 'child', $root, (string) $bytes, (string) $exitCode,
+]));
+$method = new ReflectionMethod(MahoCLI\Commands\DBConnect::class, 'runInteractiveCommand');
+exit($method->invoke(new MahoCLI\Commands\DBConnect(), $command));

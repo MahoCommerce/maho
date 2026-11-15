@@ -127,6 +127,20 @@ class Mage_Eav_Model_Resource_Form_Attribute_Collection extends Mage_Core_Model_
     }
 
     /**
+     * Keep only the attributes of attribute set $setId.
+     */
+    public function addAttributeSetFilter(int $setId): static
+    {
+        $entityAttributeTable = $this->getTable('eav/entity_attribute');
+        $this->getSelect()->where(
+            "EXISTS (SELECT 1 FROM {$entityAttributeTable} eea_set"
+            . ' WHERE eea_set.attribute_id = main_table.attribute_id AND eea_set.attribute_set_id = ?)',
+            $setId,
+        );
+        return $this;
+    }
+
+    /**
      * Set order by attribute sort order
      *
      * @param string $direction

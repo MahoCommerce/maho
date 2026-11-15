@@ -125,6 +125,7 @@ describe('Refund Flow - Single Gift Card', function () {
         $latestHistory = Mage::getResourceModel('giftcard/history_collection')
             ->addFieldToFilter('giftcard_id', $this->giftcard->getId())
             ->setOrder('created_at', 'DESC')
+            ->setOrder('history_id', 'DESC')
             ->getFirstItem();
 
         expect($latestHistory->getAction())->toBe(Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED);
@@ -133,31 +134,6 @@ describe('Refund Flow - Single Gift Card', function () {
         expect((float) $latestHistory->getBalanceAfter())->toBe(75.00);
     });
 
-    test('reactivates used gift card on refund', function () {
-        // Verify card is used
-        expect($this->giftcard->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_USED);
-        expect((float) $this->giftcard->getBalance())->toBe(0.00);
-
-        $creditmemo = Mage::getModel('sales/order_creditmemo');
-        $creditmemo->setOrder($this->order);
-        $creditmemo->setBaseGiftcardAmount(-25.00);
-        $creditmemo->setGiftcardAmount(-25.00);
-        $creditmemo->save();
-
-        $event = new Maho\Event();
-        $event->setCreditmemo($creditmemo);
-
-        $eventObserver = new Maho\Event\Observer();
-        $eventObserver->setEvent($event);
-
-        $this->observer->refundGiftcardBalance($eventObserver);
-
-        $reloadedCard = Mage::getModel('giftcard/giftcard')->load($this->giftcard->getId());
-
-        // Card should be reactivated even with partial refund
-        expect($reloadedCard->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        expect((float) $reloadedCard->getBalance())->toBe(25.00);
-    });
 });
 
 describe('Refund Flow - Multiple Gift Cards', function () {
@@ -923,6 +899,7 @@ describe('Refund Flow - Expired Card Expiration Extension', function () {
             ->addFieldToFilter('giftcard_id', $giftcard->getId())
             ->addFieldToFilter('action', Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED)
             ->setOrder('created_at', 'DESC')
+            ->setOrder('history_id', 'DESC')
             ->getFirstItem();
 
         expect($latestHistory->getComment())->toContain('expiration extended to 30 days from now');

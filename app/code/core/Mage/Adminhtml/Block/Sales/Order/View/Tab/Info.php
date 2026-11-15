@@ -54,12 +54,12 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Info extends Mage_Adminhtml_Bloc
         ];
     }
 
-    public function getTrackingHtml()
+    public function getTrackingHtml(): string
     {
         return $this->getChildHtml('order_tracking');
     }
 
-    public function getItemsHtml()
+    public function getItemsHtml(): string
     {
         return $this->getChildHtml('order_items');
     }
@@ -74,7 +74,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Info extends Mage_Adminhtml_Bloc
         return $this->getChildHtml('gift_options');
     }
 
-    public function getPaymentHtml()
+    public function getPaymentHtml(): string
     {
         return $this->getChildHtml('order_payment');
     }

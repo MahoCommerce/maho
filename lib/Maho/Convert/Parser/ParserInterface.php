@@ -13,7 +13,7 @@ namespace Maho\Convert\Parser;
 
 interface ParserInterface
 {
-    public function parse();
+    public function parse(): static;
 
-    public function unparse();
+    public function unparse(): static;
 }

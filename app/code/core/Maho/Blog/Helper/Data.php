@@ -11,9 +11,54 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
     #[\Override]
     protected $_moduleName = 'Maho_Blog';
 
-    public function isEnabled(): bool
+    /**
+     * Return $setId, or the default set of $entityType when $setId is 0.
+     *
+     * @throws Mage_Core_Exception when $setId is a set of another entity type
+     */
+    public function getValidAttributeSetId(int $setId, Mage_Eav_Model_Entity_Type $entityType): int
     {
-        return $this->isModuleEnabled() && $this->isModuleOutputEnabled();
+        if (!$setId) {
+            return (int) $entityType->getDefaultAttributeSetId();
+        }
+        Mage::helper('eav')->assertSetOfType($setId, $entityType);
+        return $setId;
+    }
+
+    /**
+     * Sanitize $fields of $object, and the values of its attributes that allow HTML or use the
+     * WYSIWYG editor. The directives stay, for the processor of the post content to resolve.
+     *
+     * @param list<string> $fields
+     */
+    public function sanitizeAttributeValues(\Maho\DataObject $object, Mage_Eav_Model_Entity_Type $entityType, array $fields = []): void
+    {
+        foreach (Mage::getSingleton('eav/config')->getAttributes($entityType) as $attribute) {
+            if ($attribute->getIsUserDefined()
+                && in_array($attribute->getFrontendInput(), ['text', 'textarea'], true)
+                && ($attribute->getData('is_html_allowed_on_front') || $attribute->getData('is_wysiwyg_enabled'))
+            ) {
+                $fields[] = (string) $attribute->getAttributeCode();
+            }
+        }
+        // Links get target="_blank": blog content is article-style, so an outbound link does not
+        // take the reader away from the post
+        Mage::getSingleton('core/input_filter_maliciousCode')->sanitizeFields(
+            $object,
+            array_values(array_unique($fields)),
+            applyLinkFilter: true,
+            renderer: Mage::helper('cms')->getPageTemplateProcessor(),
+        );
+    }
+
+    /**
+     * The blog is on for the store view $storeId, or for the current one, when the module is enabled and its
+     * output is not disabled there.
+     */
+    public function isEnabled(?int $storeId = null): bool
+    {
+        return $this->isModuleEnabled()
+            && !Mage::getStoreConfigFlag('advanced/modules_disable_output/Maho_Blog', $storeId ?? (int) Mage::app()->getStore()->getId());
     }
 
     public function shouldShowInNavigation(): bool
@@ -49,9 +94,15 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
         return $postsPerPage > 0 ? $postsPerPage : 20; // Default fallback
     }
 
-    public function areCategoriesEnabled(): bool
+    /**
+     * The blog categories are on for the store view $storeId, or for the current one, when the blog is on and
+     * "Enable Categories" is set there.
+     */
+    public function areCategoriesEnabled(?int $storeId = null): bool
     {
-        return $this->isEnabled() && Mage::getStoreConfigFlag('blog/general/enable_categories');
+        $storeId ??= (int) Mage::app()->getStore()->getId();
+        return $this->isEnabled($storeId)
+            && Mage::getStoreConfigFlag(Maho_Blog_Service_Category::XML_PATH_ENABLE_CATEGORIES, $storeId);
     }
 
     public function getCategoryUrlPrefix(): string

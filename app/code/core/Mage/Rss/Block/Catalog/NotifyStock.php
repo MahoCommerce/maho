@@ -87,7 +87,7 @@ class Mage_Rss_Block_Catalog_NotifyStock extends Mage_Rss_Block_Abstract
      *
      * @param array $args
      */
-    public function addNotifyItemXmlCallback($args)
+    public function addNotifyItemXmlCallback($args): void
     {
         $product = $args['product'];
         $product->setData($args['row']);

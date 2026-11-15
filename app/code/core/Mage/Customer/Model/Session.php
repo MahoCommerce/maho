@@ -272,7 +272,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
      */
     public function shouldChallengeTwofa(Mage_Customer_Model_Customer $customer): bool
     {
-        return Mage::getStoreConfigFlag('customer/password/allow_2fa') && (bool) $customer->getTwofaEnabled();
+        return $customer->isTwofaRequired();
     }
 
     /**
@@ -298,7 +298,10 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
-     * Verify the challenge code and, on success, complete the pending login
+     * Check the 2FA code of the pending customer with Mage_Customer_Service_Authentication::verifySecondFactor(). When the
+     * code is right, log the customer in.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests when the client or the email is over the login limit
      */
     public function completeTwofaChallenge(#[\SensitiveParameter] string $code): bool
     {
@@ -306,7 +309,11 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
         if (!$customer) {
             return false;
         }
-        if (!Mage::helper('core/security')->verifyTotpCode($customer->getTwofaSecret() ?? '', $code)) {
+        try {
+            Mage::getService('customer/authentication')->verifySecondFactor($customer, $code);
+        } catch (Mage_Core_Exception_TooManyRequests $e) {
+            throw $e;
+        } catch (Mage_Core_Exception) {
             return false;
         }
         $this->unsTwofaPendingCustomerId();

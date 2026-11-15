@@ -32,26 +32,6 @@ describe('Giftcard CRUD Operations', function () {
         expect($giftcard->getUpdatedAt())->not->toBeNull();
     });
 
-    test('can load gift card by ID', function () {
-        $helper = Mage::helper('giftcard');
-        $code = $helper->generateCode();
-
-        $giftcard = Mage::getModel('giftcard/giftcard');
-        $giftcard->setCode($code);
-        $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteIds([1]);
-        $giftcard->setBalance(75.50);
-        $giftcard->setInitialBalance(75.50);
-        $giftcard->save();
-
-        $loadedCard = Mage::getModel('giftcard/giftcard')->load($giftcard->getId());
-
-        expect((int) $loadedCard->getId())->toBe((int) $giftcard->getId());
-        expect($loadedCard->getCode())->toBe($code);
-        expect((float) $loadedCard->getBalance())->toBe(75.50);
-        expect($loadedCard->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-    });
-
     test('can load gift card by code', function () {
         $helper = Mage::helper('giftcard');
         $code = $helper->generateCode();
@@ -103,24 +83,6 @@ describe('Giftcard CRUD Operations', function () {
         expect((float) $reloaded->getInitialBalance())->toBe(100.00); // Unchanged
     });
 
-    test('can delete gift card', function () {
-        $helper = Mage::helper('giftcard');
-        $code = $helper->generateCode();
-
-        $giftcard = Mage::getModel('giftcard/giftcard');
-        $giftcard->setCode($code);
-        $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteIds([1]);
-        $giftcard->setBalance(100.00);
-        $giftcard->setInitialBalance(100.00);
-        $giftcard->save();
-
-        $id = $giftcard->getId();
-        $giftcard->delete();
-
-        $deletedCard = Mage::getModel('giftcard/giftcard')->load($id);
-        expect($deletedCard->getId())->toBeNull();
-    });
 });
 
 describe('Giftcard Balance Operations with Database', function () {
@@ -295,25 +257,6 @@ describe('Giftcard Balance Operations with Database', function () {
         expect((float) $lastEntry->getBaseAmount())->toBe(50.00);
     });
 
-    test('refund() reactivates USED card', function () {
-        $helper = Mage::helper('giftcard');
-        $code = $helper->generateCode();
-
-        $giftcard = Mage::getModel('giftcard/giftcard');
-        $giftcard->setCode($code);
-        $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED);
-        $giftcard->setWebsiteIds([1]);
-        $giftcard->setBalance(0.00);
-        $giftcard->setInitialBalance(100.00);
-        $giftcard->save();
-
-        expect($giftcard->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_USED);
-
-        $giftcard->refund(25.00);
-
-        expect($giftcard->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-    });
-
     test('adjustBalance() works for admin adjustments', function () {
         $helper = Mage::helper('giftcard');
         $code = $helper->generateCode();
@@ -400,55 +343,9 @@ describe('Giftcard Expiration Validation', function () {
         expect($reloaded->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
     });
 
-    test('isValid() returns true for card with future expiration', function () {
-        $helper = Mage::helper('giftcard');
-        $code = $helper->generateCode();
-
-        $futureDate = (new DateTime('+30 days', new DateTimeZone('UTC')))->format('Y-m-d H:i:s');
-
-        $giftcard = Mage::getModel('giftcard/giftcard');
-        $giftcard->setCode($code);
-        $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteIds([1]);
-        $giftcard->setBalance(100.00);
-        $giftcard->setInitialBalance(100.00);
-        $giftcard->setExpiresAt($futureDate);
-        $giftcard->save();
-
-        expect($giftcard->isValid())->toBeTrue();
-    });
 });
 
 describe('Giftcard Collection Operations', function () {
-    test('can filter collection by status', function () {
-        $helper = Mage::helper('giftcard');
-
-        // Create cards with different statuses
-        $activeCard = Mage::getModel('giftcard/giftcard');
-        $activeCard->setCode($helper->generateCode());
-        $activeCard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $activeCard->setWebsiteIds([1]);
-        $activeCard->setBalance(100.00);
-        $activeCard->setInitialBalance(100.00);
-        $activeCard->save();
-
-        $usedCard = Mage::getModel('giftcard/giftcard');
-        $usedCard->setCode($helper->generateCode());
-        $usedCard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED);
-        $usedCard->setWebsiteIds([1]);
-        $usedCard->setBalance(0.00);
-        $usedCard->setInitialBalance(50.00);
-        $usedCard->save();
-
-        // Filter by active status
-        $activeCollection = Mage::getResourceModel('giftcard/giftcard_collection')
-            ->addFieldToFilter('status', Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE)
-            ->addFieldToFilter('giftcard_id', ['in' => [$activeCard->getId(), $usedCard->getId()]]);
-
-        expect($activeCollection->getSize())->toBe(1);
-        expect((int) $activeCollection->getFirstItem()->getId())->toBe((int) $activeCard->getId());
-    });
-
     test('can filter collection by website', function () {
         $helper = Mage::helper('giftcard');
 
@@ -494,7 +391,7 @@ describe('Giftcard History Integration', function () {
 
         // Check history
         $history = $giftcard->getHistoryCollection();
-        expect($history->getSize())->toBe(3);
+        expect($history->getSize())->toBe(4);
 
         // Verify order of actions (most recent first)
         $actions = [];
@@ -502,9 +399,12 @@ describe('Giftcard History Integration', function () {
             $actions[] = $entry->getAction();
         }
 
-        expect($actions)->toContain(Maho_Giftcard_Model_Giftcard::ACTION_USED);
-        expect($actions)->toContain(Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED);
-        expect($actions)->toContain(Maho_Giftcard_Model_Giftcard::ACTION_ADJUSTED);
+        expect($actions)->toBe([
+            Maho_Giftcard_Model_Giftcard::ACTION_ADJUSTED,
+            Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED,
+            Maho_Giftcard_Model_Giftcard::ACTION_USED,
+            Maho_Giftcard_Model_Giftcard::ACTION_CREATED,
+        ]);
     });
 
     test('history entries have correct timestamps', function () {

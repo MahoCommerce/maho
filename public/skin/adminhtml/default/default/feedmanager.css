@@ -204,6 +204,69 @@
 .feed-generator-dialog {
   height: auto;
 }
+.feed-generator-dialog .gen-feed-entry {
+  padding: var(--maho-space-3) var(--maho-space-4);
+  border: 1px solid var(--maho-border);
+  border-radius: var(--maho-radius-md);
+  background: var(--maho-surface-sunken);
+  transition: background var(--maho-duration-fast) var(--maho-ease), border-color var(--maho-duration-fast) var(--maho-ease);
+}
+.feed-generator-dialog .gen-feed-entry + .gen-feed-entry {
+  margin-top: var(--maho-space-2);
+}
+.feed-generator-dialog .gen-feed-entry.active {
+  background: var(--maho-surface);
+  border-color: var(--maho-info-border);
+}
+.feed-generator-dialog .gen-feed-entry.completed {
+  background: var(--maho-success-bg);
+  border-color: var(--maho-success-border);
+}
+.feed-generator-dialog .gen-feed-entry.failed {
+  background: var(--maho-error-bg);
+  border-color: var(--maho-error-border);
+}
+.feed-generator-dialog .gen-feed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--maho-space-3);
+  margin-bottom: var(--maho-space-2);
+}
+.feed-generator-dialog .gen-feed-name {
+  font-weight: 600;
+}
+.feed-generator-dialog .gen-feed-status {
+  font-size: var(--maho-text-sm);
+  color: var(--maho-ink-muted);
+  white-space: nowrap;
+}
+.feed-generator-dialog .gen-status-ok {
+  color: var(--maho-success);
+}
+.feed-generator-dialog .gen-status-err {
+  color: var(--maho-error-strong);
+}
+.feed-generator-dialog .progress-bar-bg {
+  height: 6px;
+  border-radius: var(--maho-radius-pill);
+  background: var(--maho-border);
+  overflow: hidden;
+}
+.feed-generator-dialog .progress-bar {
+  width: 0;
+  height: 100%;
+  background: var(--maho-accent);
+  transition: width 0.3s;
+}
+.feed-generator-dialog .progress-bar.error {
+  background: var(--maho-error);
+}
+.feed-generator-dialog .progress-text {
+  margin-top: var(--maho-space-2);
+  font-size: var(--maho-text-sm);
+  color: var(--maho-ink-muted);
+}
 /* ============================================
    CSV Settings
    ============================================ */

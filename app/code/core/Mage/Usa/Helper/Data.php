@@ -52,11 +52,8 @@ class Mage_Usa_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Get name of measure by its type
-     *
-     * @param  $key
-     * @return string
      */
-    public function getMeasureWeightName($key)
+    public function getMeasureWeightName(?string $key): string
     {
         $units = Mass::listAllUnits();
         if (isset($units[$key])) {
@@ -73,11 +70,8 @@ class Mage_Usa_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Get name of measure by its type
-     *
-     * @param  $key
-     * @return string
      */
-    public function getMeasureDimensionName($key)
+    public function getMeasureDimensionName(?string $key): string
     {
         $units = Length::listAllUnits();
         if (isset($units[$key])) {

@@ -70,16 +70,13 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
             $this->assertCustomerAccess($requestedId);
         }
 
-        $mahoCustomer = $this->customerService->getById($requestedId);
+        $mahoCustomer = $this->customerService->findById($requestedId);
         if (!$mahoCustomer) {
             return null;
         }
 
-        // Website allowlist enforcement for backend tokens; a customer's
-        // own token was already limited to itself above.
-        if ($this->isAdmin() || $this->isApiUser()) {
-            $this->assertWebsiteAllowed($mahoCustomer->getWebsiteId(), $this->requireUser(), 'customer');
-        }
+        // The website allowlist for a backend token. The token of a customer was already limited to itself above.
+        $this->assertCustomerReachable($mahoCustomer);
 
         return $this->mapToDto($mahoCustomer);
     }
@@ -115,7 +112,7 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
      */
     private function getItem(int $id): ?Customer
     {
-        $mahoCustomer = $this->customerService->getById($id);
+        $mahoCustomer = $this->customerService->findById($id);
         return $mahoCustomer ? $this->mapToDto($mahoCustomer) : null;
     }
 

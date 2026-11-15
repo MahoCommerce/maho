@@ -102,11 +102,11 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     #[\Override]
     protected $_canUseCheckout          = true;
     #[\Override]
-    protected $_canSaveCc               = false;
+    protected bool $_canSaveCc = false;
     #[\Override]
     protected $_canFetchTransactionInfo = true;
 
-    protected $_allowCurrencyCode = ['USD'];
+    protected array $_allowCurrencyCode = ['USD'];
 
     /**
      * @var Mage_Paygate_Model_Authorizenet_Cards|null
@@ -474,7 +474,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     /**
      * Cancel partial authorizations and flush current split_tender_id record
      */
-    public function cancelPartialAuthorization(Mage_Payment_Model_Info $payment)
+    public function cancelPartialAuthorization(Mage_Payment_Model_Info $payment): void
     {
         if (!$payment->getAdditionalInformation($this->_splitTenderIdKey)) {
             Mage::throwException(Mage::helper('paygate')->__('Invalid split tenderId ID.'));
@@ -1001,7 +1001,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      *
      * @param Mage_Payment_Model_Info $payment
      */
-    protected function _initCardsStorage($payment)
+    protected function _initCardsStorage($payment): void
     {
         $this->_cardsStorage = Mage::getModel('paygate/authorizenet_cards')->setPayment($payment);
     }
@@ -1562,12 +1562,13 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      */
     protected function _getTransactionDetails($transactionId)
     {
-        $requestBody = sprintf(
-            '<?xml version="1.0" encoding="utf-8"?>'
+        $requestFormat = '<?xml version="1.0" encoding="utf-8"?>'
             . '<getTransactionDetailsRequest xmlns="AnetApi/xml/v1/schema/AnetApiSchema.xsd">'
             . '<merchantAuthentication><name>%s</name><transactionKey>%s</transactionKey></merchantAuthentication>'
             . '<transId>%s</transId>'
-            . '</getTransactionDetailsRequest>',
+            . '</getTransactionDetailsRequest>';
+        $requestBody = sprintf(
+            $requestFormat,
             $this->getConfigData('login'),
             $this->getConfigData('trans_key'),
             $transactionId,
@@ -1583,7 +1584,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
 
         $debugData = [
             'url' => $uri,
-            'request' => $requestBody,
+            'request' => sprintf($requestFormat, '***', '***', $transactionId),
         ];
 
         try {

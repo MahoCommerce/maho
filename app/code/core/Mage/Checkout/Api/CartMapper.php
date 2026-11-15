@@ -356,6 +356,22 @@ class CartMapper
     }
 
     /**
+     * Return the shipping methods that the store of $quote offers for its saved shipping address. A cart with no
+     * saved shipping address, or with no shipping country, has no methods.
+     *
+     * @return array<array{code: string, title: string, carrierCode: string, methodCode: string, carrierTitle: string, methodTitle: string, price: float, available: bool, errorMessage: string|null}>
+     */
+    public function getShippingMethodsOfCart(\Mage_Sales_Model_Quote $quote): array
+    {
+        $address = $quote->getShippingAddress();
+        if (!$address->getId()) {
+            return [];
+        }
+
+        return \Mage::getService('checkout/cart')->inQuoteStoreScope($quote, fn(): array => $this->getAvailableShippingMethods($address));
+    }
+
+    /**
      * Get available shipping methods for address
      *
      * A rate-collection failure propagates instead of masquerading as "no
@@ -456,7 +472,7 @@ class CartMapper
             // list never advertises a method the setter or place-order would reject
             $checks = \Mage_Payment_Model_Method_Abstract::checksForCurrentScope();
             foreach ($availableMethods as $method) {
-                if (\Mage::getService('checkout/cart')->isMethodUsableOverApi($method)
+                if (\Mage::getService('checkout/cart')->isUsableWithoutCardData($method)
                     && $method->isApplicableToQuote($quote, $checks)
                 ) {
                     $methods[] = [

@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Sales_Order_Create_Shipping_Method_Form extends Mage_Adminhtml_Block_Sales_Order_Create_Abstract
 {
-    protected $_rates;
+    protected ?array $_rates = null;
 
     public function __construct()
     {
@@ -108,9 +108,9 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Shipping_Method_Form extends Mage_
         return false;
     }
 
-    public function getIsRateRequest()
+    public function getIsRateRequest(): bool
     {
-        return $this->getRequest()->getParam('collect_shipping_rates');
+        return (bool) $this->getRequest()->getParam('collect_shipping_rates');
     }
 
     public function getShippingPrice($price, $flag)

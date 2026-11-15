@@ -10,27 +10,11 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 describe('Helper Data', function () {
-    test('can be instantiated via Mage::helper', function () {
-        $helper = Mage::helper('feedmanager');
-        expect($helper)->toBeInstanceOf(Maho_FeedManager_Helper_Data::class);
-    });
-
-    test('isEnabled returns boolean', function () {
-        $helper = Mage::helper('feedmanager');
-        expect($helper->isEnabled())->toBeBool();
-    });
-
     test('getOutputDirectory returns absolute path', function () {
         $helper = Mage::helper('feedmanager');
         $path = withoutDeprecations(fn() => $helper->getOutputDirectory());
         expect($path)->toBeString()
             ->and($path)->toStartWith('/');
-    });
-
-    test('getOutputDirectoryRelative returns string', function () {
-        $helper = Mage::helper('feedmanager');
-        $relative = $helper->getOutputDirectoryRelative();
-        expect($relative)->toBeString()->not->toBeEmpty();
     });
 
     test('getOutputDirectoryRelative defaults to feeds', function () {
@@ -67,53 +51,26 @@ describe('Helper Data', function () {
             ->and($options)->toHaveKey('jsonl');
     });
 
-    test('getConfigurableModeOptions returns non-empty array', function () {
+    test('getConfigurableModeOptions returns the modes of the feed model', function () {
         $helper = Mage::helper('feedmanager');
-        $options = $helper->getConfigurableModeOptions();
-        expect($options)->toBeArray()->not->toBeEmpty();
+        expect($helper->getConfigurableModeOptions())->toBe(Maho_FeedManager_Model_Feed::getConfigurableModeOptions());
     });
 });
 
 describe('Helper formatFileSize', function () {
-    test('formats bytes', function () {
-        $helper = Mage::helper('feedmanager');
-        expect($helper->formatFileSize(500))->toBe('500 B');
-    });
-
-    test('formats kilobytes', function () {
-        $helper = Mage::helper('feedmanager');
-        expect($helper->formatFileSize(1024))->toBe('1 KB');
-    });
-
-    test('formats megabytes', function () {
-        $helper = Mage::helper('feedmanager');
-        expect($helper->formatFileSize(1048576))->toBe('1 MB');
-    });
-
-    test('formats gigabytes', function () {
-        $helper = Mage::helper('feedmanager');
-        expect($helper->formatFileSize(1073741824))->toBe('1 GB');
-    });
-
-    test('formats zero bytes', function () {
-        $helper = Mage::helper('feedmanager');
-        expect($helper->formatFileSize(0))->toBe('0 B');
-    });
-
-    test('formats fractional kilobytes', function () {
-        $helper = Mage::helper('feedmanager');
-        expect($helper->formatFileSize(1536))->toBe('1.5 KB');
-    });
+    test('formats a file size', function (int $bytes, string $expected) {
+        expect(Mage::helper('feedmanager')->formatFileSize($bytes))->toBe($expected);
+    })->with([
+        'bytes' => [500, '500 B'],
+        'kilobytes' => [1024, '1 KB'],
+        'megabytes' => [1048576, '1 MB'],
+        'gigabytes' => [1073741824, '1 GB'],
+        'zero bytes' => [0, '0 B'],
+        'fractional kilobytes' => [1536, '1.5 KB'],
+    ]);
 });
 
 describe('Helper getPlatformFormats', function () {
-    test('returns formats for google', function () {
-        $helper = Mage::helper('feedmanager');
-        $formats = $helper->getPlatformFormats('google');
-        expect($formats)->toBeArray()
-            ->and($formats)->toContain('xml');
-    });
-
     test('returns formats for custom', function () {
         $helper = Mage::helper('feedmanager');
         $formats = $helper->getPlatformFormats('custom');

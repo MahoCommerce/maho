@@ -142,7 +142,7 @@ describe('Design change CRUD lifecycle', function (): void {
                 'dateFrom' => '2090-01-15',
                 'dateTo' => '2090-02-15',
             ], $writeToken);
-            expect($overlap['status'])->toBe(422);
+            expect($overlap['status'])->toBe(409);
 
             $update = apiPut("/api/rest/v2/design-changes/{$id}", [
                 'dateTo' => '2090-02-28',
@@ -155,7 +155,8 @@ describe('Design change CRUD lifecycle', function (): void {
                 'dateTo' => null,
             ], $writeToken);
             expect($clear['status'])->toBe(200);
-            expect($clear['json']['dateTo'])->toBeNull();
+            // Null fields are omitted from REST responses (skip_null_values)
+            expect($clear['json'])->not->toHaveKey('dateTo');
 
             expect(apiDelete("/api/rest/v2/design-changes/{$id}", $writeToken)['status'])->toBeForbidden();
 

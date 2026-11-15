@@ -11,199 +11,45 @@ uses(Tests\MahoBackendTestCase::class);
 
 describe('Order Items Condition Integration Tests', function () {
     beforeEach(function () {
-        createOrderItemsTestData();
+        $this->customers = createOrderItemsTestData();
     });
 
     describe('Product Attribute Conditions', function () {
-        test('filters customers by product name', function () {
-            $segment = createOrderItemsTestSegment('Bought T-Shirt', [
+        test('matches the customers by a field of one of their order items', function (string $attribute, string $operator, string $value, string $member, Closure $matches) {
+            $segment = createOrderItemsTestSegment('Order item ' . $attribute, [
                 'type' => 'customersegmentation/segment_condition_order_items',
-                'attribute' => 'product_name',
-                'operator' => 'like',
-                'value' => '%T-Shirt%',
+                'attribute' => $attribute,
+                'operator' => $operator,
+                'value' => $value,
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
-            expect(count($matchedCustomers))->toBeGreaterThan(0, 'Segment should match at least one customer with T-Shirt products');
+            expect($matchedCustomers)->toContain($this->customers[$member]);
 
-            // Verify each matched customer actually has T-Shirt products
             foreach ($matchedCustomers as $customerId) {
-                $hasTShirt = false;
+                $hasMatchingItem = false;
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
                     ->addFieldToFilter('status', ['neq' => 'canceled']);
-
                 foreach ($orders as $order) {
-                    $orderItems = $order->getAllItems();
-                    foreach ($orderItems as $item) {
-                        // LIKE ignores case, so a "T-shirt" matches too.
-                        if (stripos($item->getName(), 'T-Shirt') !== false) {
-                            $hasTShirt = true;
+                    foreach ($order->getAllItems() as $item) {
+                        if ($matches($item)) {
+                            $hasMatchingItem = true;
                             break 2;
                         }
                     }
                 }
-                expect($hasTShirt)->toBe(true);
+                expect($hasMatchingItem)->toBe(true, "Customer {$customerId} has no item with {$attribute} {$operator} {$value}");
             }
-        });
-
-        test('filters customers by product SKU', function () {
-            $segment = createOrderItemsTestSegment('Bought Specific SKU', [
-                'type' => 'customersegmentation/segment_condition_order_items',
-                'attribute' => 'product_sku',
-                'operator' => '==',
-                'value' => 'TEST-SKU-001',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
-
-            // Verify each matched customer actually has the specific SKU
-            foreach ($matchedCustomers as $customerId) {
-                $hasTargetSku = false;
-                $orders = Mage::getResourceModel('sales/order_collection')
-                    ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('status', ['neq' => 'canceled']);
-
-                foreach ($orders as $order) {
-                    $orderItems = $order->getAllItems();
-                    foreach ($orderItems as $item) {
-                        if ($item->getSku() === 'TEST-SKU-001') {
-                            $hasTargetSku = true;
-                            break 2;
-                        }
-                    }
-                }
-                expect($hasTargetSku)->toBe(true);
-            }
-        });
-
-        test('filters customers by product type', function () {
-            $segment = createOrderItemsTestSegment('Bought Simple Products', [
-                'type' => 'customersegmentation/segment_condition_order_items',
-                'attribute' => 'product_type',
-                'operator' => '==',
-                'value' => 'simple',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
-
-            // Verify each matched customer actually has simple products
-            foreach ($matchedCustomers as $customerId) {
-                $hasSimpleProduct = false;
-                $orders = Mage::getResourceModel('sales/order_collection')
-                    ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('status', ['neq' => 'canceled']);
-
-                foreach ($orders as $order) {
-                    $orderItems = $order->getAllItems();
-                    foreach ($orderItems as $item) {
-                        if ($item->getProductType() === 'simple') {
-                            $hasSimpleProduct = true;
-                            break 2;
-                        }
-                    }
-                }
-                expect($hasSimpleProduct)->toBe(true);
-            }
-        });
-    });
-
-    describe('Order Item Field Conditions', function () {
-        test('filters customers by quantity ordered', function () {
-            $segment = createOrderItemsTestSegment('High Quantity Items', [
-                'type' => 'customersegmentation/segment_condition_order_items',
-                'attribute' => 'qty_ordered',
-                'operator' => '>=',
-                'value' => '5',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
-
-            // Verify each matched customer has ordered at least 5 of some item
-            foreach ($matchedCustomers as $customerId) {
-                $hasHighQtyOrder = false;
-                $orders = Mage::getResourceModel('sales/order_collection')
-                    ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('status', ['neq' => 'canceled']);
-
-                foreach ($orders as $order) {
-                    $orderItems = $order->getAllItems();
-                    foreach ($orderItems as $item) {
-                        if ((float) $item->getQtyOrdered() >= 5) {
-                            $hasHighQtyOrder = true;
-                            break 2;
-                        }
-                    }
-                }
-                expect($hasHighQtyOrder)->toBe(true);
-            }
-        });
-
-        test('filters customers by row total', function () {
-            $segment = createOrderItemsTestSegment('High Value Items', [
-                'type' => 'customersegmentation/segment_condition_order_items',
-                'attribute' => 'row_total',
-                'operator' => '>=',
-                'value' => '100.00',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
-
-            // Verify each matched customer has items with row total >= $100
-            foreach ($matchedCustomers as $customerId) {
-                $hasHighValueItem = false;
-                $orders = Mage::getResourceModel('sales/order_collection')
-                    ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('status', ['neq' => 'canceled']);
-
-                foreach ($orders as $order) {
-                    $orderItems = $order->getAllItems();
-                    foreach ($orderItems as $item) {
-                        if ((float) $item->getRowTotal() >= 100.00) {
-                            $hasHighValueItem = true;
-                            break 2;
-                        }
-                    }
-                }
-                expect($hasHighValueItem)->toBe(true);
-            }
-        });
-
-        test('filters customers by discount amount', function () {
-            $segment = createOrderItemsTestSegment('Used Item Discounts', [
-                'type' => 'customersegmentation/segment_condition_order_items',
-                'attribute' => 'discount_amount',
-                'operator' => '>',
-                'value' => '0',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
-
-            // Verify each matched customer has items with discounts
-            foreach ($matchedCustomers as $customerId) {
-                $hasDiscountedItem = false;
-                $orders = Mage::getResourceModel('sales/order_collection')
-                    ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('status', ['neq' => 'canceled']);
-
-                foreach ($orders as $order) {
-                    $orderItems = $order->getAllItems();
-                    foreach ($orderItems as $item) {
-                        if ((float) $item->getDiscountAmount() > 0) {
-                            $hasDiscountedItem = true;
-                            break 2;
-                        }
-                    }
-                }
-                expect($hasDiscountedItem)->toBe(true);
-            }
-        });
+        })->with([
+            // LIKE ignores case, so a "T-shirt" matches too
+            'product name' => ['product_name', 'like', '%T-Shirt%', 'orderitemstest1', fn($i) => stripos((string) $i->getName(), 'T-Shirt') !== false],
+            'product SKU' => ['product_sku', '==', 'TEST-SKU-001', 'orderitemstest1', fn($i) => $i->getSku() === 'TEST-SKU-001'],
+            'product type' => ['product_type', '==', 'simple', 'orderitemstest1', fn($i) => $i->getProductType() === 'simple'],
+            'quantity ordered' => ['qty_ordered', '>=', '5', 'orderitemstest1', fn($i) => (float) $i->getQtyOrdered() >= 5],
+            'row total' => ['row_total', '>=', '100.00', 'orderitemstest2', fn($i) => (float) $i->getRowTotal() >= 100.00],
+            'discount amount' => ['discount_amount', '>', '0', 'orderitemstest3', fn($i) => (float) $i->getDiscountAmount() > 0],
+        ]);
     });
 
     describe('Complex Combinations', function () {
@@ -253,27 +99,6 @@ describe('Order Items Condition Integration Tests', function () {
     });
 
     describe('Edge Cases and Error Handling', function () {
-        test('handles empty attribute values gracefully', function () {
-            $segment = createOrderItemsTestSegment('Empty Product Name', [
-                'type' => 'customersegmentation/segment_condition_order_items',
-                'attribute' => 'product_name',
-                'operator' => '==',
-                'value' => '',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
-
-            // Validate empty product name condition - should only match orders with empty/null product names
-            expect(count($matchedCustomers) >= 0)->toBe(true);
-
-            // Validate functionality - condition should handle empty product names gracefully
-            expect(count($matchedCustomers) >= 0)->toBe(true);
-
-            // Test ensures graceful handling of edge case without SQL errors
-            expect($matchedCustomers)->not->toBeNull();
-        });
-
         test('handles invalid product attribute gracefully', function () {
             $segment = createOrderItemsTestSegment('Invalid Product Attribute', [
                 'type' => 'customersegmentation/segment_condition_order_items',
@@ -322,7 +147,10 @@ describe('Order Items Condition Integration Tests', function () {
     });
 });
 
-function createOrderItemsTestData(): void
+/**
+ * @return array<string, int> customer IDs keyed by the local part of their email
+ */
+function createOrderItemsTestData(): array
 {
     // Clean up existing test data - be more aggressive
     $orderItems = Mage::getResourceModel('sales/order_item_collection')
@@ -374,6 +202,12 @@ function createOrderItemsTestData(): void
     createOrderItemsTestOrder((int) $customer3->getId(), [
         ['name' => 'Sale Shirt', 'sku' => 'TEST-SKU-005', 'qty' => 4, 'price' => 30.00, 'type' => 'simple', 'discount' => 15.00],
     ]);
+
+    return [
+        'orderitemstest1' => (int) $customer1->getId(),
+        'orderitemstest2' => (int) $customer2->getId(),
+        'orderitemstest3' => (int) $customer3->getId(),
+    ];
 }
 
 function createOrderItemsTestCustomer(string $identifier): Mage_Customer_Model_Customer
@@ -387,7 +221,6 @@ function createOrderItemsTestCustomer(string $identifier): Mage_Customer_Model_C
     $customer->save();
     return $customer;
 }
-
 
 function createOrderItemsTestOrder(int $customerId, array $items, string $state = 'complete'): Mage_Sales_Model_Order
 {

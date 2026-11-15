@@ -21,6 +21,13 @@ use Symfony\Bundle\SecurityBundle\Security;
  */
 final class OrderProvider extends \Maho\ApiPlatform\Provider
 {
+    private const STRING_FILTERS = [
+        'status', 'state', 'email', 'emailLike', 'incrementId', 'search',
+        'createdFrom', 'createdTo', 'updatedSince', 'since',
+    ];
+
+    private const INT_FILTERS = ['customerId', 'storeId'];
+
     private \Mage_Sales_Service_Order $orderService;
 
     public function __construct(Security $security)
@@ -49,107 +56,22 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             return $this->getCollection($context);
         }
 
-        // Handle REST guest-order read via X-Order-Token header.
-        // Mirrors the GraphQL `guestOrder` query but consumes (clears) the
-        // token on a successful read so refreshing the page can't replay
-        // analytics or expose the order to a later viewer.
-        if ($operationName === 'get_order_by_token') {
-            // Public, unauthenticated endpoint: throttle by IP so the strong
-            // one-time token can't be brute-forced against a known increment ID.
-            $this->checkRateLimitByIp('guest_order_token', 'guest_order_lookup', 3600);
-
+        // A guest reads the order with its one-time token: REST in the X-Order-Token header, GraphQL in the
+        // `guestOrder` arguments. A token in the query string would leak into access logs and Referer headers.
+        if ($operationName === 'get_order_by_token' || $operationName === 'guest') {
             $request = $context['request'] ?? null;
-            $token = '';
-            if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
-                // Header only: a token in the query string would leak into web
-                // server / CDN access logs and Referer headers, surviving the
-                // one-time-use wipe below for the lifetime of those logs.
-                $token = (string) $request->headers->get('X-Order-Token', '');
-            }
-            $incrementId = (string) ($uriVariables['incrementId'] ?? '');
+            [$incrementId, $token] = $operationName === 'guest'
+                ? [$context['args']['incrementId'] ?? '', $context['args']['accessToken'] ?? '']
+                : [$uriVariables['incrementId'] ?? '', $request instanceof \Symfony\Component\HttpFoundation\Request ? $request->headers->get('X-Order-Token', '') : ''];
 
-            if ($token === '' || $incrementId === '') {
-                return null;
-            }
-
-            $order = $this->orderService->getForGuest($incrementId, $token);
+            $order = $this->orderService->getForGuest((string) $incrementId, (string) $token);
             if (!$order) {
                 return null;
             }
 
+            // The token is consumed only after the DTO is built, so a mapping failure cannot strand the guest
             $dto = $this->mapToDto($order);
-
-            // Issue an account-creation token if no customer exists for this email
-            $orderEmail = $order->getCustomerEmail();
-            if ($orderEmail) {
-                $existingCustomer = \Mage::getModel('customer/customer')
-                    ->setWebsiteId(\Mage::app()->getStore($order->getStoreId())->getWebsiteId())
-                    ->loadByEmail($orderEmail);
-
-                if (!$existingCustomer->getId()) {
-                    $dto->accountToken = \Mage::helper('sales/accountToken')->generate((int) $order->getId(), $orderEmail);
-                }
-            }
-
-            // One-time use: clear the token so refreshing the success page
-            // doesn't re-fire analytics or re-expose the order. Done only after
-            // the DTO is built so a mapping failure can't permanently strand the
-            // guest's access to their order.
-            $resource = \Mage::getSingleton('core/resource');
-            $resource->getConnection('core_write')->update(
-                $resource->getTableName('sales/order'),
-                ['guest_access_token' => null],
-                ['entity_id = ?' => $order->getId()],
-            );
-
-            return $dto;
-        }
-
-        // Handle guestOrder query - get order by increment ID and access token
-        if ($operationName === 'guest') {
-            // Same public token-lookup surface as the REST path above; throttle
-            // by IP so the one-time token can't be brute-forced via GraphQL.
-            $this->checkRateLimitByIp('guest_order_token', 'guest_order_lookup', 3600);
-
-            $incrementId = $context['args']['incrementId'] ?? null;
-            $accessToken = $context['args']['accessToken'] ?? null;
-
-            if (!$incrementId || !$accessToken) {
-                return null;
-            }
-
-            $order = $this->orderService->getForGuest($incrementId, $accessToken);
-            if (!$order) {
-                return null;
-            }
-
-            // Don't echo the access token back: it's consumed below (one-time
-            // use), so returning it would only leak a dead token into response
-            // bodies, logs and caches. Mirrors the REST get_order_by_token path.
-            $dto = $this->mapToDto($order);
-
-            // Issue an account-creation token if no customer exists for this email
-            $orderEmail = $order->getCustomerEmail();
-            if ($orderEmail) {
-                $existingCustomer = \Mage::getModel('customer/customer')
-                    ->setWebsiteId(\Mage::app()->getStore($order->getStoreId())->getWebsiteId())
-                    ->loadByEmail($orderEmail);
-
-                if (!$existingCustomer->getId()) {
-                    $dto->accountToken = \Mage::helper('sales/accountToken')->generate((int) $order->getId(), $orderEmail);
-                }
-            }
-
-            // One-time use: clear the token so it can't be replayed to re-expose
-            // the order. Mirrors the REST get_order_by_token path; done only after
-            // the DTO is built so a mapping failure can't strand the guest.
-            $resource = \Mage::getSingleton('core/resource');
-            $resource->getConnection('core_write')->update(
-                $resource->getTableName('sales/order'),
-                ['guest_access_token' => null],
-                ['entity_id = ?' => $order->getId()],
-            );
-
+            $dto->accountToken = $this->orderService->consumeGuestToken($order);
             return $dto;
         }
 
@@ -166,7 +88,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             $pageSize = max(1, min((int) ($context['args']['pageSize'] ?? 20), 100));
             $status = $context['args']['status'] ?? null;
 
-            $result = $this->orderService->getListForCustomer((int) $customerId, $page, $pageSize, $status);
+            $result = new OrderList()->getListVisibleToCustomer((int) $customerId, $page, $pageSize, $status);
 
             $orders = [];
             foreach ($result['orders'] as $order) {
@@ -183,19 +105,17 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        $order = $this->orderService->getById((int) $orderId);
+        $order = $this->orderService->findById((int) $orderId);
 
         if (!$order) {
             return null;
         }
 
-        // Ownership is not checked here: the operation's
-        // `is_owner(object, 'customerId')` expression does the denying post-read.
-
-        // Store allowlist enforcement for backend tokens; customer tokens
-        // are identity-bound by the ownership expression and stay untouched.
         if ($this->isAdmin() || $this->isApiUser()) {
             $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
+        } elseif (!$this->orderService->isVisibleToCustomer($order, $this->getAuthenticatedCustomerId())) {
+            // The same answer as a missing order, so that an order id is not an oracle
+            return null;
         }
 
         return $this->mapToDto($order);
@@ -216,7 +136,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 10, 100);
         $status = $this->stringFilter($context['filters'] ?? [], 'status');
 
-        $result = $this->orderService->getListForCustomer($customerId, $page, $pageSize, $status);
+        $result = new OrderList()->getListVisibleToCustomer($customerId, $page, $pageSize, $status);
 
         $orders = [];
         foreach ($result['orders'] as $order) {
@@ -234,10 +154,18 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
     private function getCollection(array $context): TraversablePaginator
     {
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context);
-        $result = $this->orderService->getList(
+        $input = $context['filters'] ?? [];
+        $filters = [];
+        foreach (self::STRING_FILTERS as $key) {
+            $filters[$key] = $this->stringFilter($input, $key);
+        }
+        foreach (self::INT_FILTERS as $key) {
+            $filters[$key] = $this->intFilter($input, $key);
+        }
+        $result = new OrderList()->getList(
             $page,
             $pageSize,
-            $context['filters'] ?? [],
+            $filters,
             $this->requireUser()->getAllowedStoreIds(),
         );
 
@@ -269,6 +197,8 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $dto->customerGender = $order->getCustomerGender() !== null ? (int) $order->getCustomerGender() : null;
         $dto->customerGroupId = $order->getCustomerGroupId() !== null ? (int) $order->getCustomerGroupId() : null;
         $dto->customerIsGuest = (bool) $order->getCustomerIsGuest();
+        $dto->customerCustomAttributes = \Mage\Customer\Api\CustomAttributes::readOrderCustomer($order);
+        $dto->customerCustomAttributeLabels = $order->getCustomerAttributeLabels();
         $dto->customerNote = $order->getCustomerNote();
         $dto->status = $order->getStatus();
         $dto->state = $order->getState();
@@ -371,12 +301,6 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             } else {
                 $dto->paymentMethodTitle = $payment->getMethod();
             }
-
-            // Get change amount for cash payments
-            $changeAmount = $payment->getAdditionalInformation('change_amount');
-            if ($changeAmount !== null) {
-                $dto->changeAmount = (float) $changeAmount;
-            }
         }
 
         if (!$isCollectionOrder) {
@@ -385,7 +309,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             $dto->statusHistory = $this->orderService->getNotes($order, $visibleOnly);
 
             // Map shipments with tracking
-            $dto->shipments = array_map(Shipment::fromModel(...), $this->orderService->getShipments($order, $visibleOnly));
+            $dto->shipments = array_map(Shipment::fromModel(...), \Mage::getService('sales/order_document')->getShipments($order, $visibleOnly));
 
             if (!$visibleOnly) {
                 // The statuses the admin comment form offers, which addOrderComment accepts

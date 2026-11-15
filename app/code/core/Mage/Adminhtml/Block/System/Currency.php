@@ -62,37 +62,37 @@ class Mage_Adminhtml_Block_System_Currency extends Mage_Adminhtml_Block_Template
         return parent::_prepareLayout();
     }
 
-    protected function getHeader()
+    protected function getHeader(): string
     {
         return Mage::helper('adminhtml')->__('Manage Currency Rates');
     }
 
-    protected function getSaveButtonHtml()
+    protected function getSaveButtonHtml(): string
     {
         return $this->getChildHtml('save_button');
     }
 
-    protected function getResetButtonHtml()
+    protected function getResetButtonHtml(): string
     {
         return $this->getChildHtml('reset_button');
     }
 
-    protected function getImportButtonHtml()
+    protected function getImportButtonHtml(): string
     {
         return $this->getChildHtml('import_button');
     }
 
-    protected function getServicesHtml()
+    protected function getServicesHtml(): string
     {
         return $this->getChildHtml('import_services');
     }
 
-    protected function getRatesMatrixHtml()
+    protected function getRatesMatrixHtml(): string
     {
         return $this->getChildHtml('rates_matrix');
     }
 
-    protected function getImportFormAction()
+    protected function getImportFormAction(): string
     {
         return $this->getUrl('*/*/fetchRates');
     }

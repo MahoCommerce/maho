@@ -23,6 +23,14 @@ final class TaxRateProvider extends CrudProvider
     protected array $defaultSort = ['code' => 'ASC'];
 
     #[\Override]
+    protected function provideItem(int|string $id): \Maho\ApiPlatform\Resource
+    {
+        /** @var \Mage_Tax_Service_Rate $service */
+        $service = \Mage::getService('tax/rate');
+        return $this->toDto($service->getById((int) $id));
+    }
+
+    #[\Override]
     protected function applyCollectionFilters(object $collection, array $filters): void
     {
         parent::applyCollectionFilters($collection, $filters);

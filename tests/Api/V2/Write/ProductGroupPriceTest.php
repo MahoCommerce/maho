@@ -129,6 +129,17 @@ describe('Product Group Prices, CRUD Lifecycle', function (): void {
         expect($response['status'])->toBe(422);
     });
 
+    it('rejects a body that is an object instead of a list', function (): void {
+        $productId = fixtures('product_id');
+        $token = serviceToken(['products/write']);
+
+        $response = apiPut("/api/rest/v2/products/{$productId}/group-prices", [
+            'a' => ['customerGroupId' => 0, 'price' => 5],
+        ], $token);
+        expect($response['status'])->toBe(400);
+        expect(json_encode($response['json']))->toContain('Request body must be an array of group prices');
+    });
+
 });
 
 describe('Product Group Prices, Storefront Scoping', function (): void {

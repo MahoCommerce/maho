@@ -18,16 +18,12 @@ class Mage_Eav_Model_Entity_Attribute_Frontend_Datetime extends Mage_Eav_Model_E
     #[\Override]
     public function getValue(\Maho\DataObject $object)
     {
-        $data = '';
         $value = parent::getValue($object);
-        $format = Mage::app()->getLocale()->getDateFormat(
-            Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM,
-        );
-
-        if ($value) {
-            $data = new DateTime($value)->format($format);
+        if (!$value) {
+            return '';
         }
 
-        return $data;
+        // A date value has no time zone, so a conversion to the store time zone can move it to another day
+        return Mage::helper('core')->formatTimezoneDate($value, Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, useTimezone: false);
     }
 }

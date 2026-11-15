@@ -18,8 +18,8 @@ class Mage_ConfigurableSwatches_Helper_Data extends Mage_Core_Helper_Abstract
     #[\Override]
     protected $_moduleName = 'Mage_ConfigurableSwatches';
 
-    protected $_enabled = null;
-    protected $_configAttributeIds = null;
+    protected ?bool $_enabled = null;
+    protected ?array $_configAttributeIds = null;
 
     /**
      * Is the extension enabled?

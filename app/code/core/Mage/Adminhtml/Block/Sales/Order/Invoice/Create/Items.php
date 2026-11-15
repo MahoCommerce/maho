@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items extends Mage_Adminhtml_Block_Sales_Items_Abstract
 {
-    protected $_disableSubmitButton = false;
+    protected bool $_disableSubmitButton = false;
 
     /**
      * Prepare child blocks
@@ -114,12 +114,12 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items extends Mage_Adminht
         return $this->getInvoice()->getOrder()->formatPrice($price);
     }
 
-    public function getUpdateButtonHtml()
+    public function getUpdateButtonHtml(): string
     {
         return $this->getChildHtml('update_button');
     }
 
-    public function getUpdateUrl()
+    public function getUpdateUrl(): string
     {
         return $this->getUrl('*/*/updateQty', ['order_id' => $this->getInvoice()->getOrderId()]);
     }
@@ -142,12 +142,8 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items extends Mage_Adminht
         return Mage::getSingleton('admin/session')->isAllowed('sales/order/actions/capture');
     }
 
-    /**
-     * Check if invoice can be captured
-     * @return bool
-     */
     #[\Override]
-    public function canCapture()
+    public function canCapture(): bool
     {
         return $this->getInvoice()->canCapture();
     }
@@ -161,7 +157,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items extends Mage_Adminht
         return $this->getInvoice()->getOrder()->getPayment()->getMethodInstance()->isGateway();
     }
 
-    public function canSendInvoiceEmail()
+    public function canSendInvoiceEmail(): bool
     {
         return Mage::helper('sales')->canSendNewInvoiceEmail($this->getOrder()->getStore()->getId());
     }

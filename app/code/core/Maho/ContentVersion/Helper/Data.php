@@ -88,7 +88,12 @@ class Maho_ContentVersion_Helper_Data extends Mage_Core_Helper_Abstract
         // version the current state before the save completes
         $snapshot = $version->getContentDataDecoded();
         $model->addData($snapshot);
-        $model->save();
+        match (true) {
+            $model instanceof Mage_Cms_Model_Page => Mage::getService('cms/page')->save($model),
+            $model instanceof Mage_Cms_Model_Block => Mage::getService('cms/block')->save($model),
+            $model instanceof Maho_Blog_Model_Post => Mage::getService('blog/post')->save($model),
+            default => $model->save(),
+        };
 
         return ['entity_type' => $entityType, 'entity_id' => $entityId];
     }

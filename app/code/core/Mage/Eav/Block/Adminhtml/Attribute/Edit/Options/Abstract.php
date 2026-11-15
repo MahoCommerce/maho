@@ -196,7 +196,11 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract extends 
      */
     public function isConfigurableSwatchesEnabled(): bool
     {
-        return $this->isModuleEnabled('Mage_ConfigurableSwatches')
-            && Mage::helper('configurableswatches')->attrIsSwatchType($this->getAttributeObject());
+        if (!$this->isModuleEnabled('Mage_ConfigurableSwatches')) {
+            return false;
+        }
+        $attribute = $this->getAttributeObject();
+        return Mage::helper('configurableswatches')->attrIsSwatchType($attribute)
+            || in_array((int) $attribute->getId(), Mage::helper('configurableswatches/productlist')->getSwatchAttributeIds(), true);
     }
 }

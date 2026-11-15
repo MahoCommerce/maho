@@ -32,6 +32,9 @@ $order = $this->getOrder();
             <?php if ($orderDate = $this->getOrderDate()): ?>
                 <?= $this->__('Order Date: %s', $orderDate) ?>
             <?php endif ?>
+            <?php foreach ($this->getCustomerAttributeRows() as $row): ?>
+                <br><?= $this->escapeHtml($row['label']) ?>: <?= $this->escapeHtml($row['value']) ?>
+            <?php endforeach ?>
         </div>
 
         <?php if ($storeAddress = $this->getStoreAddress()): ?>

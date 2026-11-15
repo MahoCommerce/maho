@@ -12,31 +12,18 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract extends Mage_Admin
 {
     /**
      * Column related to filter
-     *
-     * @var Mage_Adminhtml_Block_Widget_Grid_Column
      */
-    protected $_column;
+    protected ?Mage_Adminhtml_Block_Widget_Grid_Column $_column = null;
 
-    /**
-     * Set column related to filter
-     *
-     * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
-     * @return $this
-     */
     #[\Override]
-    public function setColumn($column)
+    public function setColumn(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
         $this->_column = $column;
         return $this;
     }
 
-    /**
-     * Retrieve column related to filter
-     *
-     * @return Mage_Adminhtml_Block_Widget_Grid_Column
-     */
     #[\Override]
-    public function getColumn()
+    public function getColumn(): ?Mage_Adminhtml_Block_Widget_Grid_Column
     {
         return $this->_column;
     }

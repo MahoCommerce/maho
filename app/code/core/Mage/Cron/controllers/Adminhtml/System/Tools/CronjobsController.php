@@ -121,57 +121,33 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
             return;
         }
 
-        /** @var Mage_Cron_Helper_Data $helper */
-        $helper = Mage::helper('cron');
-        $jobs = $helper->getConfiguredJobs();
-        if (!isset($jobs[$jobCode])) {
-            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Unknown cron job: %s', $jobCode)]);
+        try {
+            $this->getService()->run((string) $jobCode, $this->sendRunHandle(...));
+        } catch (Mage_Core_Exception $e) {
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
             return;
         }
 
-        $modelMethod = $jobs[$jobCode]['model_method'];
-        if (!preg_match(Mage_Cron_Model_Observer::REGEX_RUN_MODEL, $modelMethod, $run)) {
-            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Invalid model/method definition, expecting "model/class::method".')]);
-            return;
-        }
+        // Prevent framework from sending another response
+        exit;
+    }
 
-        $model = Mage::getModel($run[1]);
-        if (!$model || !method_exists($model, $run[2])) {
-            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Invalid callback: %s::%s does not exist', $run[1], $run[2])]);
-            return;
-        }
-
-        $schedule = Mage::getModel('cron/schedule');
-        $now = Mage::app()->getLocale()->formatDateForDb('now');
-        $schedule->setJobCode($jobCode)
-            ->setStatus(Mage_Cron_Model_Schedule::STATUS_RUNNING)
-            ->setCreatedAt($now)
-            ->setScheduledAt($now)
-            ->setExecutedAt($now)
-            ->save();
-
-        // Answer immediately with the run handle, then keep working in the background
+    /**
+     * Answer the run request with the handle of $schedule, then let the job keep working in the background.
+     */
+    protected function sendRunHandle(Mage_Cron_Model_Schedule $schedule): void
+    {
         $this->getResponse()->sendJsonAndDetach([
             'token' => (string) $schedule->getId(),
             'finished' => false,
             'steps' => [$this->_scheduleStep($schedule)],
         ]);
+    }
 
-        try {
-            call_user_func([$model, $run[2]], $schedule);
-
-            $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_SUCCESS)
-                ->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'))
-                ->save();
-        } catch (Exception $e) {
-            $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
-                ->setMessages($e->getMessage())
-                ->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'))
-                ->save();
-        }
-
-        // Prevent framework from sending another response
-        exit;
+    protected function getService(): Mage_Cron_Service_Job
+    {
+        /** @var Mage_Cron_Service_Job */
+        return Mage::getService('cron/job');
     }
 
     #[Maho\Config\Route('/admin/system_tools_cronjobs/runStatus')]

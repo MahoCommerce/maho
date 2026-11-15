@@ -11,6 +11,11 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_Admin>
     </modules>
     <global>
+        <services>
+            <admin>
+                <class>Mage_Admin_Service</class>
+            </admin>
+        </services>
         <models>
             <admin>
                 <class>Mage_Admin_Model</class>

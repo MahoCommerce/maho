@@ -46,11 +46,8 @@ class Mage_CatalogIndex_Model_Resource_Data_Abstract extends Mage_Core_Model_Res
         return $this->_linkSelect;
     }
 
-    /**
-     * Init resource
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalog/product', 'entity_id');
     }

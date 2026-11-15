@@ -16,7 +16,7 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
      */
     public const ADMIN_RESOURCE = 'catalog/search';
 
-    protected function _initAction()
+    protected function _initAction(): static
     {
         $this->loadLayout()
             ->_setActiveMenu('catalog/search')

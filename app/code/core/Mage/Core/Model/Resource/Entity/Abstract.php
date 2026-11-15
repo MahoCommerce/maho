@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 abstract class Mage_Core_Model_Resource_Entity_Abstract
 {
-    protected $_name = null;
+    protected ?string $_name = null;
     /**
      * Configuration object
      *

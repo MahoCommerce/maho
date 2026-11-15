@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * Give a tax class write to the tax class service.
+ *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Tax
@@ -11,27 +13,32 @@ declare(strict_types=1);
 namespace Mage\Tax\Api;
 
 use Maho\ApiPlatform\CrudProcessor;
-use Maho\ApiPlatform\CrudResource;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class TaxClassProcessor extends CrudProcessor
 {
     #[\Override]
-    protected function validate(CrudResource $data, object $model, bool $isNew): void
+    protected function loadModel(int $id): \Mage_Tax_Model_Class
     {
-        /** @var TaxClass $data */
+        return $this->service()->getById($id);
+    }
 
-        // Name is required on create; on update an omitted name leaves the existing value untouched.
-        if ($isNew && trim($data->className) === '') {
-            throw new UnprocessableEntityHttpException('Tax class name is required.');
-        }
+    #[\Override]
+    protected function saveModel(\Mage_Core_Model_Abstract $model): void
+    {
+        /** @var \Mage_Tax_Model_Class $model */
+        $this->service()->save($model);
+    }
 
-        $allowed = [
-            \Mage_Tax_Model_Class::TAX_CLASS_TYPE_PRODUCT,
-            \Mage_Tax_Model_Class::TAX_CLASS_TYPE_CUSTOMER,
-        ];
-        if (!in_array($data->classType, $allowed, true)) {
-            throw new UnprocessableEntityHttpException('Tax class type must be PRODUCT or CUSTOMER.');
-        }
+    #[\Override]
+    protected function deleteModel(\Mage_Core_Model_Abstract $model): void
+    {
+        /** @var \Mage_Tax_Model_Class $model */
+        $this->service()->delete($model);
+    }
+
+    private function service(): \Mage_Tax_Service_Class
+    {
+        /** @var \Mage_Tax_Service_Class */
+        return \Mage::getService('tax/class');
     }
 }

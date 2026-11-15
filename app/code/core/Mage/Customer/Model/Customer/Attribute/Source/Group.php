@@ -10,15 +10,8 @@
 
 class Mage_Customer_Model_Customer_Attribute_Source_Group extends Mage_Eav_Model_Entity_Attribute_Source_Table
 {
-    /**
-     * Retrieve Full Option values array
-     *
-     * @param bool $withEmpty       Argument has no effect, included for PHP 7.2 method signature compatibility
-     * @param bool $defaultValues   Argument has no effect, included for PHP 7.2 method signature compatibility
-     * @return array
-     */
     #[\Override]
-    public function getAllOptions($withEmpty = true, $defaultValues = false)
+    public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array
     {
         if (!$this->_options) {
             $this->_options = Mage::getResourceModel('customer/group_collection')

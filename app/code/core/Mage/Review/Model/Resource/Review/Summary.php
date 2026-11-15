@@ -10,11 +10,8 @@
 
 class Mage_Review_Model_Resource_Review_Summary extends Mage_Core_Model_Resource_Db_Abstract
 {
-    /**
-     * Define module
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('review/review_aggregate', 'entity_pk_value');
     }

@@ -28,13 +28,8 @@ class Mage_Customer_Block_Address_Renderer_Default extends Mage_Core_Block_Abstr
         return $this->_type;
     }
 
-    /**
-     * Retrieve format type object
-     *
-     * @return $this
-     */
     #[\Override]
-    public function setType(\Maho\DataObject $type)
+    public function setType(\Maho\DataObject $type): static
     {
         $this->_type = $type;
         return $this;
@@ -84,10 +79,20 @@ class Mage_Customer_Block_Address_Renderer_Default extends Mage_Core_Block_Abstr
             if (!$attribute->getIsVisible()) {
                 continue;
             }
+            // The address keeps the value of a field that its condition hides, but does not print it
+            if (Mage::helper('eav')->isHidden($address, $attribute)) {
+                continue;
+            }
             if ($attribute->getAttributeCode() == 'country_id') {
                 $data['country'] = $address->getCountryModel()->getName();
             } elseif ($attribute->getAttributeCode() == 'region') {
                 $data['region'] = Mage::helper('directory')->__($address->getRegion());
+            } elseif ($address instanceof Mage_Sales_Model_Order_Address
+                && isset($address->getCustomAttributeLabels()[$attribute->getAttributeCode()])
+            ) {
+                // The labels that the customer saw when the order was placed
+                $label = $address->getCustomAttributeLabels()[$attribute->getAttributeCode()];
+                $data[$attribute->getAttributeCode()] = is_array($label) ? implode(', ', $label) : (string) $label;
             } else {
                 $dataModel = Mage_Customer_Model_Attribute_Data::factory($attribute, $address);
                 $value     = $dataModel->outputValue($dataFormat);
@@ -112,7 +117,45 @@ class Mage_Customer_Block_Address_Renderer_Default extends Mage_Core_Block_Abstr
         $formater->setVariables($data);
         $format ??= $this->_prepareAddressTemplateData($this->getFormat($address));
 
-        return $formater->filter($format);
+        return $formater->filter($format) . $this->_renderUnlistedAttributes($attributes, $data, $format);
+    }
+
+    /**
+     * Return a "Label: value" line for each custom attribute that has a value and that $format does not name.
+     * An attribute that only the admin forms show stays out, because the customer emails use this renderer.
+     *
+     * @param iterable<Mage_Customer_Model_Attribute> $attributes
+     * @param array<string, mixed> $data the template variables, escaped when the type escapes HTML
+     */
+    protected function _renderUnlistedAttributes(iterable $attributes, array $data, string $format): string
+    {
+        $separator = match ($this->getType()->getCode()) {
+            'html' => '<br/>',
+            'pdf' => '|',
+            'oneline' => ', ',
+            default => "\n",
+        };
+
+        $lines = [];
+        foreach ($attributes as $attribute) {
+            $code = $attribute->getAttributeCode();
+            if (!$attribute->getIsUserDefined()
+                || !$attribute->getIsVisible()
+                || !isset($data[$code])
+                || $data[$code] === ''
+                || preg_match('/\{\{(?:var|depend|if)\s+' . preg_quote($code, '/') . '\b/', $format)
+                || !array_filter($attribute->getUsedInForms(), fn($form) => !str_starts_with($form, 'adminhtml_'))
+            ) {
+                continue;
+            }
+            $label = $attribute->getStoreLabel();
+            if ($this->getType()->getHtmlEscape()) {
+                $label = $this->escapeHtml($label);
+            }
+            $lines[] = $label . ': ' . $data[$code];
+        }
+
+        return $lines ? $separator . implode($separator, $lines) : '';
     }
 
     /**

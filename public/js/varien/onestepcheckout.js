@@ -653,11 +653,9 @@ class OneStepCheckout {
                 return false;
             }
 
-            // For virtual orders, save billing address to quote before placing order.
-            // This ensures address data is persisted even if the debounced
-            // auto-save hasn't fired yet (e.g. user filled form and clicked Place Order quickly).
-            // Non-virtual orders already have billing saved via estimateBilling during shipping estimation.
-            if (self.isVirtual && self.billingForm) {
+            // Save the billing step before the order. estimateBilling copies only the address, so this
+            // save gives the quote the customer fields (email, date of birth, custom fields) and checks them.
+            if (self.billingForm) {
                 const formData = new FormData(self.billingForm);
                 mahoFetch(self.urls.saveBilling, {
                     method: 'POST',

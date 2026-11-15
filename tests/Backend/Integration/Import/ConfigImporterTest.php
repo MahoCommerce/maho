@@ -183,6 +183,42 @@ it('saves the value of a field whose backend model reads only an upload', functi
     }
 });
 
+it('imports a path that no field declares, and refuses it with its line when the strict option is set', function (): void {
+    $path = configCsv([['path', 'value'], ['general/store_information/name', 'Kept'], ['catalog/frontend/imp_undeclared', 'x']]);
+
+    expect(fn() => (new Config())->validate($path, ['strict' => true]))
+        ->toThrow(RowException::class, "line 3: path 'catalog/frontend/imp_undeclared' is not a field of System > Configuration");
+
+    $result = (new Config())->import($path);
+    expect($result->updated)->toBe(2)
+        ->and(Mage::getConfig()->getNode('default/catalog/frontend/imp_undeclared') !== false)->toBeTrue();
+
+    Mage::getConfig()->deleteConfig('catalog/frontend/imp_undeclared');
+    unlink($path);
+});
+
+it('imports a field at a scope where the admin does not show it, and refuses it when the strict option is set', function (): void {
+    $path = configCsv([['path', 'value', 'scope', 'scope_code'], ['admin/security/twofa_required', '0', 'stores', 'default']]);
+    $storeId = (int) Mage::app()->getStore('default')->getId();
+
+    expect(fn() => (new Config())->validate($path, ['strict' => true]))
+        ->toThrow(RowException::class, "line 2: Field 'admin/security/twofa_required' cannot be set at scope 'stores'");
+
+    try {
+        $result = (new Config())->import($path);
+        $stored = Mage::getResourceModel('core/config_data_collection')
+            ->addFieldToFilter('path', 'admin/security/twofa_required')
+            ->addFieldToFilter('scope', 'stores')
+            ->addFieldToFilter('scope_id', $storeId);
+
+        expect($result->updated)->toBe(1)
+            ->and($stored->getSize())->toBe(1);
+    } finally {
+        Mage::getConfig()->deleteConfig('admin/security/twofa_required', 'stores', $storeId);
+        unlink($path);
+    }
+});
+
 it('rejects unknown scopes, codes and macros before writing', function (): void {
     $importer = new Config();
 

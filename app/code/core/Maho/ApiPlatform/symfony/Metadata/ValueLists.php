@@ -37,6 +37,62 @@ final class ValueLists
         return array_values(array_map(intval(...), $ids));
     }
 
+    /** @return list<int> */
+    public static function categoryAttributeSets(): array
+    {
+        return self::attributeSets(\Mage_Catalog_Model_Category::ENTITY);
+    }
+
+    /** @return list<int> */
+    public static function customerAttributeSets(): array
+    {
+        return self::attributeSets('customer');
+    }
+
+    /** @return list<int> */
+    public static function customerAddressAttributeSets(): array
+    {
+        return self::attributeSets('customer_address');
+    }
+
+    /** @return list<int> */
+    public static function blogPostAttributeSets(): array
+    {
+        return self::attributeSets('blog_post');
+    }
+
+    /** @return list<int> */
+    public static function blogCategoryAttributeSets(): array
+    {
+        return self::attributeSets('blog_category');
+    }
+
+    /**
+     * The entity types that System > Attributes manages.
+     *
+     * @return list<string>
+     */
+    public static function customAttributeEntityTypes(): array
+    {
+        $codes = [];
+        foreach (\Mage::getResourceModel('eav/entity_type_collection') as $entityType) {
+            if (\Mage::helper('eav')->getAdminPageSettings($entityType)) {
+                $codes[] = (string) $entityType->getEntityTypeCode();
+            }
+        }
+        sort($codes);
+        return $codes;
+    }
+
+    /** @return list<int> */
+    private static function attributeSets(string $entityTypeCode): array
+    {
+        $typeId = (int) \Mage::getSingleton('eav/config')->getEntityType($entityTypeCode)->getId();
+        $ids = \Mage::getResourceModel('eav/entity_attribute_set_collection')->setEntityTypeFilter($typeId)->getAllIds();
+
+        return array_values(array_map(intval(...), $ids));
+    }
+
     /** @return array<int, array{value: int|string, label: string}> every customer group, NOT LOGGED IN included: a rule can apply to guests */
     public static function ruleCustomerGroups(): array
     {

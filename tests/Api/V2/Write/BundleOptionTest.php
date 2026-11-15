@@ -90,6 +90,41 @@ describe('Bundle Options, CRUD Lifecycle', function (): void {
         expect(count($emptyOptions))->toBe(0);
     });
 
+    it('keeps no option when a selection is rejected', function (): void {
+        $token = serviceToken(['products/write', 'products/delete', 'products/read']);
+        $suffix = substr(uniqid(), -6);
+
+        $bundle = apiPost('/api/rest/v2/products', [
+            'sku' => "PEST-BUNDLE-REJ-{$suffix}",
+            'name' => 'Pest Bundle Rejected',
+            'type' => 'bundle',
+            'price' => 0,
+        ], $token);
+        expect($bundle['status'])->toBeIn([200, 201]);
+        $bundleId = $bundle['json']['id'];
+        trackCreated('product', $bundleId);
+
+        $child = apiPost('/api/rest/v2/products', [
+            'sku' => "PEST-BREJ-{$suffix}",
+            'name' => 'Bundle Rejected Selection',
+            'price' => 15,
+        ], $token);
+        expect($child['status'])->toBeIn([200, 201]);
+        $childId = $child['json']['id'];
+        trackCreated('product', $childId);
+
+        $response = apiPost("/api/rest/v2/products/{$bundleId}/bundle-options", [
+            'title' => 'Pest rejected',
+            'type' => 'radio',
+            'selections' => [['productId' => $childId, 'price' => -1]],
+        ], $token);
+        expect($response['status'])->toBe(422);
+
+        $read = apiGet("/api/rest/v2/products/{$bundleId}/bundle-options");
+        expect($read['status'])->toBe(200);
+        expect(getItems($read))->toBe([]);
+    });
+
     it('rejects bundle operations on a simple product', function (): void {
         $token = serviceToken(['products/write', 'products/delete']);
         $suffix = substr(uniqid(), -6);

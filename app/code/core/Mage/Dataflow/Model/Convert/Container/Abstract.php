@@ -10,30 +10,27 @@
 
 abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Dataflow_Model_Convert_Container_Interface
 {
-    protected $_batchParams = [];
+    protected array $_batchParams = [];
 
-    protected $_vars;
+    protected ?array $_vars = null;
 
-    protected $_profile;
+    protected ?\Mage_Dataflow_Model_Convert_Profile_Interface $_profile = null;
 
-    protected $_action;
+    protected ?\Mage_Dataflow_Model_Convert_Action_Interface $_action = null;
 
-    protected $_data;
+    protected mixed $_data = null;
 
-    protected $_position;
+    protected mixed $_position = null;
 
     /**
      * Detect serialization of data
-     *
-     * @param mixed $data
-     * @return bool
      */
-    protected function isSerialized($data)
+    protected function isSerialized(mixed $data): bool
     {
         return Mage::helper('core/string')->isSerializedArrayOrObject($data);
     }
 
-    public function getVar($key, $default = null)
+    public function getVar(string $key, mixed $default = null): mixed
     {
         if (!isset($this->_vars[$key]) || (!is_array($this->_vars[$key]) && strlen($this->_vars[$key]) == 0)) {
             return $default;
@@ -41,12 +38,13 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
         return $this->_vars[$key];
     }
 
-    public function getVars()
+    public function getVars(): ?array
     {
         return $this->_vars;
     }
 
-    public function setVar($key, $value = null)
+    #[\Override]
+    public function setVar(array|string $key, mixed $value = null): static
     {
         if (is_array($key) && is_null($value)) {
             $this->_vars = $key;
@@ -56,29 +54,32 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
         return $this;
     }
 
-    public function getAction()
+    public function getAction(): ?Mage_Dataflow_Model_Convert_Action_Interface
     {
         return $this->_action;
     }
 
-    public function setAction(Mage_Dataflow_Model_Convert_Action_Interface $action)
+    #[\Override]
+    public function setAction(Mage_Dataflow_Model_Convert_Action_Interface $action): static
     {
         $this->_action = $action;
         return $this;
     }
 
-    public function getProfile()
+    public function getProfile(): ?Mage_Dataflow_Model_Convert_Profile_Interface
     {
         return $this->_profile;
     }
 
-    public function setProfile(Mage_Dataflow_Model_Convert_Profile_Interface $profile)
+    #[\Override]
+    public function setProfile(Mage_Dataflow_Model_Convert_Profile_Interface $profile): static
     {
         $this->_profile = $profile;
         return $this;
     }
 
-    public function getData()
+    #[\Override]
+    public function getData(): mixed
     {
         if (is_null($this->_data) && $this->getProfile()) {
             $this->_data = $this->getProfile()->getContainer()->getData();
@@ -86,7 +87,8 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
         return $this->_data;
     }
 
-    public function setData($data)
+    #[\Override]
+    public function setData(mixed $data): static
     {
         if ($this->validateDataSerialized($data)) {
             if ($this->getProfile()) {
@@ -101,11 +103,8 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
 
     /**
      * Validate serialized data
-     *
-     * @param mixed $data
-     * @return bool
      */
-    public function validateDataSerialized($data = null)
+    public function validateDataSerialized(mixed $data = null): bool
     {
         $data ??= $this->getData();
 
@@ -125,7 +124,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
         return $result;
     }
 
-    public function validateDataString($data = null)
+    public function validateDataString(mixed $data = null): bool
     {
         $data ??= $this->getData();
         if (!is_string($data)) {
@@ -134,7 +133,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
         return true;
     }
 
-    public function validateDataArray($data = null)
+    public function validateDataArray(mixed $data = null): bool
     {
         $data ??= $this->getData();
         if (!is_array($data)) {
@@ -143,7 +142,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
         return true;
     }
 
-    public function validateDataGrid($data = null)
+    public function validateDataGrid(mixed $data = null): bool
     {
         $data ??= $this->getData();
         if (!is_array($data) || !is_array(current($data))) {
@@ -158,7 +157,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
         return true;
     }
 
-    public function getGridFields($grid)
+    public function getGridFields(array $grid): array
     {
         $fields = [];
         foreach ($grid as $row) {
@@ -171,7 +170,8 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
         return $fields;
     }
 
-    public function addException($error, $level = null)
+    #[\Override]
+    public function addException(string $error, string|int|null $level = null): Mage_Dataflow_Model_Convert_Exception
     {
         $e = new Mage_Dataflow_Model_Convert_Exception($error);
         $e->setLevel($level ?? Mage_Dataflow_Model_Convert_Exception::NOTICE);
@@ -185,18 +185,18 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
         return $e;
     }
 
-    public function getPosition()
+    public function getPosition(): mixed
     {
         return $this->_position;
     }
 
-    public function setPosition($position)
+    public function setPosition(mixed $position): static
     {
         $this->_position = $position;
         return $this;
     }
 
-    public function setBatchParams($data)
+    public function setBatchParams(mixed $data): static
     {
         if (is_array($data)) {
             $this->_batchParams = $data;
@@ -204,7 +204,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
         return $this;
     }
 
-    public function getBatchParams($key = null)
+    public function getBatchParams(?string $key = null): mixed
     {
         if (!empty($key)) {
             return $this->_batchParams[$key] ?? null;

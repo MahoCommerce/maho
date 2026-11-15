@@ -14,7 +14,6 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\DataObject;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class CacheTypeProvider extends \Maho\ApiPlatform\Provider
 {
@@ -24,47 +23,28 @@ final class CacheTypeProvider extends \Maho\ApiPlatform\Provider
         $this->requireUser();
 
         if ($operation instanceof CollectionOperationInterface) {
-            $items = array_values(array_map($this->toCacheTypeDto(...), $this->types()));
+            $items = array_values(array_map($this->toCacheTypeDto(...), self::service()->getTypes()));
             return new TraversablePaginator(new \ArrayIterator($items), 1, max(1, count($items)), count($items));
         }
 
-        return $this->cacheType((string) ($uriVariables['code'] ?? ''));
+        return $this->toCacheTypeDto(self::service()->getByCode((string) ($uriVariables['code'] ?? '')));
     }
 
-    public function cacheType(string $code): CacheType
+    public function toCacheTypeDto(DataObject $type): CacheType
     {
-        $type = $this->types()[$code] ?? null;
-        if ($type === null) {
-            throw new NotFoundHttpException("Cache type '$code' not found");
-        }
-
-        return $this->toCacheTypeDto($type);
-    }
-
-    /**
-     * @param array<string, bool>|null $enabledOverride Cache options just saved, which the cache model has not loaded again yet
-     */
-    public function toCacheTypeDto(DataObject $type, ?array $enabledOverride = null): CacheType
-    {
-        $code = (string) $type->getData('id');
-        $invalidated = \Mage::app()->getCache()->getInvalidatedTypes();
-
         $dto = new CacheType();
-        $dto->code = $code;
+        $dto->code = (string) $type->getData('id');
         $dto->label = (string) $type->getData('cache_type');
         $dto->description = (string) $type->getData('description') ?: null;
-        $dto->enabled = $enabledOverride === null ? (bool) $type->getData('status') : ($enabledOverride[$code] ?? false);
-        $dto->invalidated = isset($invalidated[$code]);
+        $dto->enabled = (bool) $type->getData('status');
+        $dto->invalidated = self::service()->isInvalidated($dto->code);
         $dto->tags = (string) $type->getData('tags') ?: null;
 
         return $dto;
     }
 
-    /**
-     * @return array<string, DataObject>
-     */
-    public function types(): array
+    public static function service(): \Mage_Core_Service_Cache
     {
-        return \Mage::app()->getCache()->getTypes();
+        return \Mage::getService('core/cache');
     }
 }

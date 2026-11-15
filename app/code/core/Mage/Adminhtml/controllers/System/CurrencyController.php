@@ -49,21 +49,11 @@ class Mage_Adminhtml_System_CurrencyController extends Mage_Adminhtml_Controller
     public function fetchRatesAction(): void
     {
         try {
-            $service = $this->getRequest()->getParam('rate_services');
-            $this->_getSession()->setCurrencyRateService($service);
-            if (!$service) {
-                throw new Exception(Mage::helper('adminhtml')->__('Invalid Import Service Specified'));
-            }
-            $serviceModel = Mage::getConfig()->getNode('global/currency/import/services/' . $service . '/model');
-            if (!$serviceModel) {
-                Mage::throwException(Mage::helper('adminhtml')->__('Invalid Import Service Specified'));
-            }
-            $importModel = Mage::getModel((string) $serviceModel);
-            if (!$importModel instanceof Mage_Directory_Model_Currency_Import_Abstract) {
-                Mage::throwException(Mage::helper('adminhtml')->__('Unable to initialize import model'));
-            }
-            $rates = $importModel->fetchRates();
-            $errors = $importModel->getMessages();
+            $code = (string) $this->getRequest()->getParam('rate_services');
+            $this->_getSession()->setCurrencyRateService($code);
+            /** @var Mage_Directory_Service_Currency $service */
+            $service = Mage::getService('directory/currency');
+            ['rates' => $rates, 'warnings' => $errors] = $service->fetchRates($code);
             if (count($errors)) {
                 foreach ($errors as $error) {
                     Mage::getSingleton('adminhtml/session')->addWarning($error);

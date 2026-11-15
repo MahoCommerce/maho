@@ -20,11 +20,6 @@ it('allows internal use for admin orders', function () {
     expect($method->canUseInternal())->toBeTrue();
 });
 
-it('can instantiate vault token model', function () {
-    $token = Mage::getModel('paypal/vault_token');
-    expect($token)->toBeInstanceOf(Maho_Paypal_Model_Vault_Token::class);
-});
-
 it('generates display label for card tokens', function () {
     $token = Mage::getModel('paypal/vault_token');
     $token->setPaymentSourceType('card');

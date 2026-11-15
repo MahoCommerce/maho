@@ -51,7 +51,7 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
         ],
     ];
 
-    protected $_relatedConfigSettings = [
+    protected array $_relatedConfigSettings = [
         Mage_Catalog_Helper_Data::XML_PATH_PRICE_SCOPE,
         Mage_CatalogInventory_Model_Stock_Item::XML_PATH_MANAGE_STOCK,
         Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE,
@@ -143,7 +143,7 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
     /**
      * Register data required by catalog product delete process
      */
-    protected function _registerCatalogProductDeleteEvent(Mage_Index_Model_Event $event)
+    protected function _registerCatalogProductDeleteEvent(Mage_Index_Model_Event $event): void
     {
         /** @var Mage_Catalog_Model_Product $product */
         $product = $event->getDataObject();
@@ -157,7 +157,7 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
     /**
      * Register data required by catalog product save process
      */
-    protected function _registerCatalogProductSaveEvent(Mage_Index_Model_Event $event)
+    protected function _registerCatalogProductSaveEvent(Mage_Index_Model_Event $event): void
     {
         /** @var Mage_Catalog_Model_Product $product */
         $product      = $event->getDataObject();
@@ -177,7 +177,7 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
         }
     }
 
-    protected function _registerCatalogProductMassActionEvent(Mage_Index_Model_Event $event)
+    protected function _registerCatalogProductMassActionEvent(Mage_Index_Model_Event $event): void
     {
         $actionObject = $event->getDataObject();
         $attributes   = $this->_getDependentAttributes();
@@ -205,11 +205,8 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
         }
     }
 
-    /**
-     * Register data required by process in event object
-     */
     #[\Override]
-    protected function _registerEvent(Mage_Index_Model_Event $event)
+    protected function _registerEvent(Mage_Index_Model_Event $event): void
     {
         $event->addNewData(self::EVENT_MATCH_RESULT_KEY, true);
         $entity = $event->getEntity();
@@ -245,11 +242,8 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
         }
     }
 
-    /**
-     * Process event
-     */
     #[\Override]
-    protected function _processEvent(Mage_Index_Model_Event $event)
+    protected function _processEvent(Mage_Index_Model_Event $event): void
     {
         $data = $event->getNewData();
         if ($event->getType() == self::EVENT_TYPE_REINDEX_PRICE) {

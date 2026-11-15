@@ -77,7 +77,7 @@ class Mage_Core_Model_Resource
             $this->_connections[$name] = $this->_getDefaultConnection($name);
             return $this->_connections[$name];
         }
-        if (!$connConfig->is('active', 1)) {
+        if (!$connConfig->is('active', '1')) {
             return false;
         }
 
@@ -445,7 +445,7 @@ class Mage_Core_Model_Resource
     }
 
     #[Maho\Config\Observer('controller_action_predispatch', area: 'install')]
-    public function checkDbConnection()
+    public function checkDbConnection(): void
     {
         if (!$this->getConnection('core_read')) {
             //Mage::app()->getResponse()->setRedirect(Mage::getUrl('install'));

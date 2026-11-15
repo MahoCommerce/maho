@@ -16,7 +16,7 @@ class Mage_Dataflow_Model_Convert
         $action->setParam('method', $method)->setParam('class', $class);
 
         $container = $action->getContainer();
-        $container->setData($data)->setVars($vars);
+        $container->setData($data)->setVar($vars);
 
         $action->run();
         return $action->getData();

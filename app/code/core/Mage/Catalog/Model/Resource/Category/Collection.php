@@ -77,11 +77,8 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
         $this->_factory = empty($args['factory']) ? Mage::getSingleton('catalog/factory') : $args['factory'];
     }
 
-    /**
-     * Init collection and determine table names
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalog/category');
 
@@ -213,7 +210,7 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
     /**
      * Load categories product count
      */
-    protected function _loadProductCount()
+    protected function _loadProductCount(): void
     {
         $this->loadProductCount($this->_items, true, true);
     }
@@ -273,7 +270,11 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
         if ($countAnchor) {
             // Retrieve Anchor categories product counts
             foreach ($anchor as $item) {
-                if ($item->getAllChildren()) {
+                // Core categories include their own ID in getAllChildren().
+                $hasOwnId = $item->getId()
+                    && $item::class === Mage_Catalog_Model_Category::class
+                    && $item->getResource()::class === Mage_Catalog_Model_Resource_Category::class;
+                if ($hasOwnId || $item->getAllChildren()) {
                     $bind = [
                         'entity_id' => $item->getId(),
                         'c_path'    => $item->getPath() . '/%',

@@ -15,7 +15,6 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Provider;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Reads revocation requests for the owning customer and for admins.
@@ -123,11 +122,9 @@ final class RevocationRequestProvider extends Provider
 
     private function requireCustomerEmail(): string
     {
-        $customerId = $this->requireCustomerId();
-        $customer = \Mage::getModel('customer/customer')->load($customerId);
-        $email = (string) $customer->getEmail();
+        $email = (string) \Mage::getService('customer/customer')->getById($this->requireCustomerId())->getEmail();
         if ($email === '') {
-            throw new NotFoundHttpException('Customer not found');
+            throw new \Mage_Core_Exception_NoSuchEntity('Customer not found');
         }
         return $email;
     }

@@ -36,6 +36,7 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
     protected $_matchedEntities = [
         Mage_Catalog_Model_Product::ENTITY => [
             Mage_Index_Model_Event::TYPE_SAVE,
+            Mage_Index_Model_Event::TYPE_MASS_ACTION,
         ],
         Mage_Catalog_Model_Category::ENTITY => [
             Mage_Index_Model_Event::TYPE_SAVE,
@@ -54,7 +55,7 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
         ],
     ];
 
-    protected $_relatedConfigSettings = [
+    protected array $_relatedConfigSettings = [
         Mage_Catalog_Helper_Category::XML_PATH_CATEGORY_URL_SUFFIX,
         Mage_Catalog_Helper_Product::XML_PATH_PRODUCT_URL_SUFFIX,
         Mage_Catalog_Helper_Product::XML_PATH_PRODUCT_URL_USE_CATEGORY,
@@ -97,7 +98,15 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
         }
 
         $entity = $event->getEntity();
-        if ($entity == Mage_Core_Model_Store::ENTITY) {
+        if ($entity == Mage_Catalog_Model_Product::ENTITY && $event->getType() === Mage_Index_Model_Event::TYPE_MASS_ACTION) {
+            // A mass action changes the URL rewrites of a product as a product save does: with its categories, its websites or its URL key
+            $action = $event->getDataObject();
+            $result = $action instanceof \Maho\DataObject && (
+                $action->hasData('category_ids')
+                || $action->hasData('website_ids')
+                || array_key_exists('url_key', (array) $action->getData('attributes_data'))
+            );
+        } elseif ($entity == Mage_Core_Model_Store::ENTITY) {
             $store = $event->getDataObject();
             if ($store && ($store->isObjectNew() || $store->dataHasChangedFor('group_id'))) {
                 $result = true;
@@ -130,13 +139,8 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
         return $result;
     }
 
-    /**
-     * Register data required by process in event object
-     *
-     * @return Mage_Catalog_Model_Indexer_Url
-     */
     #[\Override]
-    protected function _registerEvent(Mage_Index_Model_Event $event)
+    protected function _registerEvent(Mage_Index_Model_Event $event): void
     {
         $event->addNewData(self::EVENT_MATCH_RESULT_KEY, true);
         $entity = $event->getEntity();
@@ -160,14 +164,17 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
                 $process->changeStatus(Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX);
                 break;
         }
-        return $this;
     }
 
     /**
      * Register event data during product save process
      */
-    protected function _registerProductEvent(Mage_Index_Model_Event $event)
+    protected function _registerProductEvent(Mage_Index_Model_Event $event): void
     {
+        if ($event->getType() === Mage_Index_Model_Event::TYPE_MASS_ACTION) {
+            $event->addNewData('rewrite_product_ids', $event->getDataObject()->getProductIds());
+            return;
+        }
         $product = $event->getDataObject();
         $dataChange = $product->dataHasChangedFor('url_key')
             || $product->getIsChangedCategories()
@@ -181,7 +188,7 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
     /**
      * Register event data during category save process
      */
-    protected function _registerCategoryEvent(Mage_Index_Model_Event $event)
+    protected function _registerCategoryEvent(Mage_Index_Model_Event $event): void
     {
         $category = $event->getDataObject();
         if (!$category->getInitialSetupFlag() && $category->getLevel() > 1) {
@@ -197,11 +204,8 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
         }
     }
 
-    /**
-     * Process event
-     */
     #[\Override]
-    protected function _processEvent(Mage_Index_Model_Event $event)
+    protected function _processEvent(Mage_Index_Model_Event $event): void
     {
         $data = $event->getNewData();
         if (!empty($data['catalog_url_reindex_all'])) {
@@ -229,11 +233,8 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
         }
     }
 
-    /**
-     * Rebuild all index data
-     */
     #[\Override]
-    public function reindexAll()
+    public function reindexAll(): void
     {
         /** @var Mage_Catalog_Model_Resource_Url $resourceModel */
         $resourceModel = Mage::getResourceSingleton('catalog/url');

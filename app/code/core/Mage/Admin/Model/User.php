@@ -100,6 +100,9 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             // Change user password
             $data['password'] = $this->_getEncodedPassword($this->getNewPassword());
             $data['new_password'] = $data['password'];
+            // A new password ends the password reset link that the user asked for before
+            $data['rp_token'] = null;
+            $data['rp_token_created_at'] = null;
             $sessionUser = $this->getSession()->getUser();
             if ($sessionUser && $sessionUser->getId() == $this->getId()) {
                 $this->getSession()->setUserPasswordChanged();
@@ -468,7 +471,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
      * Validate and set new passkey data
      * @throws Mage_Core_Exception
      */
-    public function setPasskeyData($data)
+    public function setPasskeyData($data): void
     {
         $challenge = $this->getSession()->getPasskeyChallenge();
         $attestationObject = base64_decode($data['attestationObject']);
@@ -565,6 +568,10 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             $this->setId(null);
         } elseif ($isUserPasswordChanged) {
             $this->getSession()->setUserPasswordChanged(false);
+        }
+        // A disabled user loses the sessions that it opened before
+        if (!$this->getIsActive()) {
+            $this->setId(null);
         }
         return $this;
     }
@@ -679,7 +686,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             $errors->append(Mage::helper('adminhtml')->__('Last Name is required field.'));
         }
 
-        if (!Mage::helper('core')->isValidEmail($this->getEmail())) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getEmail()) || !Mage::helper('core')->isValidEmail($this->getEmail())) {
             $errors->append(Mage::helper('adminhtml')->__('Please enter a valid email.'));
         }
 

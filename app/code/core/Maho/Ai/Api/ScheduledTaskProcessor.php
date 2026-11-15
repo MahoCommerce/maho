@@ -12,7 +12,6 @@ namespace Maho\Ai\Api;
 
 use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
-use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\ApiUser;
 
 final class ScheduledTaskProcessor extends CrudProcessor
@@ -24,15 +23,11 @@ final class ScheduledTaskProcessor extends CrudProcessor
         /** @var \Mage_Admin_Model_User $owner */
         $owner = \Mage::getModel('admin/user')->load((int) $user->getAdminId());
         if (!$owner->getId()) {
-            throw new ValidationException('A scheduled task runs as an administrator: only an administrator can save one.', 'adminUserId');
+            throw new \Mage_Core_Exception_Forbidden('A scheduled task runs as an administrator: only an administrator can save one.');
         }
         if (!$model instanceof \Maho_Ai_Model_Task_Schedule) {
             throw new \LogicException('The scheduled task model is not configured.');
         }
-        try {
-            $model->validateFor($owner);
-        } catch (\Mage_Core_Exception $e) {
-            throw new ValidationException($e->getMessage(), previous: $e);
-        }
+        $model->validateFor($owner);
     }
 }

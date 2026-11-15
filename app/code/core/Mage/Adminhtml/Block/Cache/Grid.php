@@ -12,7 +12,7 @@ use Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract as MassAction;
 
 class Mage_Adminhtml_Block_Cache_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
-    protected $_invalidatedTypes = [];
+    protected array $_invalidatedTypes = [];
     /**
      * Class constructor
      */
@@ -87,12 +87,7 @@ class Mage_Adminhtml_Block_Cache_Grid extends Mage_Adminhtml_Block_Widget_Grid
         return parent::_prepareColumns();
     }
 
-    /**
-     * Decorate status column values
-     *
-     * @return string
-     */
-    public function decorateStatus($value, $row, $column, $isExport)
+    public function decorateStatus(string $value, \Maho\DataObject $row, Mage_Adminhtml_Block_Widget_Grid_Column $column, bool $isExport): string
     {
         if (isset($this->_invalidatedTypes[$row->getId()])) {
             $cell = '<span class="grid-severity-minor"><span>' . $this->__('Invalidated') . '</span></span>';

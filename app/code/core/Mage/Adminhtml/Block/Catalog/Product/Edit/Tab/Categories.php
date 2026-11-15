@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Categories extends Mage_Admi
      *
      * list<\Maho\Data\Tree\Node>
      */
-    protected $_selectedNodes = null;
+    protected ?array $_selectedNodes = null;
 
     public function __construct()
     {

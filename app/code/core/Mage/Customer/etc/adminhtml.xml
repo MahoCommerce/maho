@@ -6,6 +6,24 @@ SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <menu>
+        <system>
+            <children>
+                <attributes>
+                    <children>
+                        <customer translate="title" module="customer">
+                            <title>Customers</title>
+                            <action>adminhtml/eav_attribute/index/entity_type/customer</action>
+                            <sort_order>60</sort_order>
+                        </customer>
+                        <customer_address translate="title" module="customer">
+                            <title>Customer Addresses</title>
+                            <action>adminhtml/eav_attribute/index/entity_type/customer_address</action>
+                            <sort_order>50</sort_order>
+                        </customer_address>
+                    </children>
+                </attributes>
+            </children>
+        </system>
         <customer translate="title" module="customer">
             <title>Customers</title>
             <sort_order>40</sort_order>
@@ -33,6 +51,22 @@ SPDX-License-Identifier: AFL-3.0
         <resources>
             <admin>
                 <children>
+                    <system>
+                        <children>
+                            <attributes>
+                                <children>
+                                    <customer translate="title" module="customer">
+                                        <title>Customers</title>
+                                        <sort_order>60</sort_order>
+                                    </customer>
+                                    <customer_address translate="title" module="customer">
+                                        <title>Customer Addresses</title>
+                                        <sort_order>50</sort_order>
+                                    </customer_address>
+                                </children>
+                            </attributes>
+                        </children>
+                    </system>
                     <customer translate="title" module="customer">
                         <title>Customers</title>
                         <sort_order>40</sort_order>

@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -9,10 +10,10 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Allregion
 {
-    protected $_countries;
-    protected $_options;
+    protected ?array $_countries = null;
+    protected ?array $_options = null;
 
-    public function toOptionArray($isMultiselect = false)
+    public function toOptionArray(bool $isMultiselect = false): array
     {
         if (!$this->_options) {
             $countriesArray = Mage::getResourceModel('directory/country_collection')->load()
@@ -46,7 +47,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Allregion
         return $options;
     }
 
-    public function sortRegionCountries($a, $b)
+    public function sortRegionCountries(string $a, string $b): int
     {
         return strcmp($this->_countries[$a], $this->_countries[$b]);
     }

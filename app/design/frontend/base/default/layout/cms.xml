@@ -49,6 +49,7 @@ Default layout, loads most of the pages
                 <label>CMS Content Wrapper</label>
                 <action method="setElementClass"><value>std</value></action>
                 <block type="cms/page" name="cms_page"/>
+                <block type="cms/page_attributes" name="cms.page.attributes" after="cms_page"/>
             </block>
         </reference>
     </cms_page>

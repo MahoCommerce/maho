@@ -15,7 +15,7 @@ interface Mage_Payment_Model_Billing_Agreement_MethodInterface
     /**
      * Init billing agreement
      */
-    public function initBillingAgreementToken(Mage_Payment_Model_Billing_AgreementAbstract $agreement);
+    public function initBillingAgreementToken(Mage_Payment_Model_Billing_AgreementAbstract $agreement): static;
 
     /**
      * Retrieve billing agreement details
@@ -25,10 +25,10 @@ interface Mage_Payment_Model_Billing_Agreement_MethodInterface
     /**
      * Create billing agreement
      */
-    public function placeBillingAgreement(Mage_Payment_Model_Billing_AgreementAbstract $agreement);
+    public function placeBillingAgreement(Mage_Payment_Model_Billing_AgreementAbstract $agreement): static;
 
     /**
      * Update billing agreement status
      */
-    public function updateBillingAgreementStatus(Mage_Payment_Model_Billing_AgreementAbstract $agreement);
+    public function updateBillingAgreementStatus(Mage_Payment_Model_Billing_AgreementAbstract $agreement): static;
 }

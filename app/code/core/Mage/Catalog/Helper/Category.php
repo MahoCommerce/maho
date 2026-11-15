@@ -99,18 +99,15 @@ class Mage_Catalog_Helper_Category extends Mage_Core_Helper_Abstract
             $category = Mage::getModel('catalog/category')->load($category);
         }
 
-        if (!$category->getId()) {
+        // The root category of the store has no page
+        $store = Mage::app()->getStore();
+        if ((int) $category->getId() === (int) $store->getRootCategoryId()) {
             return false;
         }
 
-        if (!$category->getIsActive()) {
-            return false;
-        }
-        if (!$category->isInRootCategoryList()) {
-            return false;
-        }
-
-        return true;
+        /** @var Mage_Catalog_Service_Category $service */
+        $service = Mage::getService('catalog/category');
+        return $service->isVisibleInStore($category, (int) $store->getId());
     }
 
     /**

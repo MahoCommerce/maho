@@ -11,7 +11,7 @@
 class Mage_Catalog_Model_Resource_Layer_Filter_Decimal extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalog/product_index_eav_decimal', 'entity_id');
     }

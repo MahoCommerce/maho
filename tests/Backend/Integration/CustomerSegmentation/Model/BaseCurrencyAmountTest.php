@@ -23,7 +23,7 @@ describe('Amount conditions of a customer segment', function () {
 
         // The order currency amounts add up to 980 and the base currency amounts to 1100
         foreach ([['EUR', 900.00, 1000.00], ['GBP', 80.00, 100.00]] as [$orderCurrency, $grandTotal, $baseGrandTotal]) {
-            Mage::getModel('sales/order')
+            $order = Mage::getModel('sales/order')
                 ->setCustomerId($this->customerId)
                 ->setCustomerEmail($customer->getEmail())
                 ->setStoreId(1)
@@ -33,6 +33,13 @@ describe('Amount conditions of a customer segment', function () {
                 ->setBaseGrandTotal($baseGrandTotal)
                 ->setData('state', Mage_Sales_Model_Order::STATE_COMPLETE)
                 ->setStatus(Mage_Sales_Model_Order::STATE_COMPLETE)
+                ->save();
+            Mage::getModel('sales/order_invoice')
+                ->setOrderId($order->getId())
+                ->setStoreId(1)
+                ->setGrandTotal($grandTotal)
+                ->setBaseGrandTotal($baseGrandTotal)
+                ->setState(Mage_Sales_Model_Order_Invoice::STATE_PAID)
                 ->save();
         }
     });

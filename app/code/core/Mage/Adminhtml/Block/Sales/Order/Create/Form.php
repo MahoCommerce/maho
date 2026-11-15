@@ -72,7 +72,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Form extends Mage_Adminhtml_Block_
         return 'none';
     }
 
-    public function getOrderDataJson()
+    public function getOrderDataJson(): string
     {
         $data = [];
         if (!is_null($this->getCustomerId())) {

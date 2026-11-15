@@ -46,37 +46,34 @@ describe('Product attribute-set / tax-class / custom attribute writes', function
         expect($response['json']['taxClassId'])->toBe(0);
     });
 
-    it('writes an arbitrary EAV attribute through customAttributesWrite', function (): void {
+    it('refuses a system attribute in customAttributes', function (): void {
         $suffix = substr(uniqid(), -6);
-        $metaTitle = "Generic Meta {$suffix}";
 
-        // meta_title is a real catalog_product attribute. Setting it through the
-        // generic bag must round-trip back via the dedicated metaTitle read field.
+        // meta_title has its own field, metaTitle, so customAttributes refuses it
         $response = apiPost('/api/rest/v2/products', [
             'sku' => "PEST-CATTR-{$suffix}",
             'name' => 'Pest Custom Attr Product',
             'price' => 5.00,
             'websiteIds' => [1],
-            'customAttributesWrite' => [
-                'meta_title' => $metaTitle,
+            'customAttributes' => [
+                'meta_title' => "Generic Meta {$suffix}",
             ],
         ], adminToken());
 
-        expect($response['status'])->toBeSuccessful();
         if (!empty($response['json']['id'])) {
             trackCreated('product', (int) $response['json']['id']);
         }
-        expect($response['json']['metaTitle'])->toBe($metaTitle);
+        expect($response['status'])->toBe(422);
     });
 
-    it('rejects a denylisted system column in customAttributesWrite', function (): void {
+    it('rejects a denylisted system column in customAttributes', function (): void {
         $suffix = substr(uniqid(), -6);
         $response = apiPost('/api/rest/v2/products', [
             'sku' => "PEST-DENY-{$suffix}",
             'name' => 'Pest Deny Product',
             'price' => 5.00,
             'websiteIds' => [1],
-            'customAttributesWrite' => [
+            'customAttributes' => [
                 'type_id' => 'configurable',
             ],
         ], adminToken());

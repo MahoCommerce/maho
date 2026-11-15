@@ -168,9 +168,9 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
                 && $this->_getOrderCreateModel()->getShippingAddress()->getSameAsBilling()
                 && empty($shippingMethod)
             ) {
-                $this->_getOrderCreateModel()->setShippingAsBilling(1);
+                $this->_getOrderCreateModel()->setShippingAsBilling(true);
             } else {
-                $this->_getOrderCreateModel()->setShippingAsBilling((int) $syncFlag);
+                $this->_getOrderCreateModel()->setShippingAsBilling((bool) $syncFlag);
             }
         }
 
@@ -300,7 +300,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
          * Importing gift message allow items on update quote items
          */
         if ($this->getRequest()->getPost('update_items')) {
-            $items = $this->getRequest()->getPost('item', []);
+            $items = (array) $this->getRequest()->getPost('item', []);
             $this->_getGiftmessageSaveModel()->importAllowQuoteItemsFromItems($items);
         }
 
@@ -358,13 +358,14 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     }
 
     #[Maho\Config\Route('/admin/sales_order_create/reorder')]
-    public function reorderAction()
+    public function reorderAction(): void
     {
         $this->_getSession()->clear();
         $orderId = $this->getRequest()->getParam('order_id');
         $order = Mage::getModel('sales/order')->load($orderId);
-        if (!Mage::helper('sales/reorder')->canReorder($order)) {
-            return $this->_forward('noRoute');
+        if (!Mage::getService('sales/order')->canReorder($order, Mage_Checkout_Model_Actor::Staff)) {
+            $this->_forward('noRoute');
+            return;
         }
 
         if ($order->getId()) {
@@ -378,7 +379,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
         }
     }
 
-    protected function _reloadQuote()
+    protected function _reloadQuote(): static
     {
         $id = $this->_getQuote()->getId();
         $this->_getQuote()->load($id);
@@ -521,6 +522,11 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
             $message = $e->getMessage();
             if (!empty($message)) {
                 $this->_getSession()->addError($message);
+            }
+            $this->_redirect('*/*/');
+        } catch (Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $this->_getSession()->addError($error['message']);
             }
             $this->_redirect('*/*/');
         } catch (Mage_Core_Exception $e) {

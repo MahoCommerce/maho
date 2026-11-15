@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Items extends Mage_Adminhtml_Block_Sales_Items_Abstract
 {
-    protected $_canReturnToStock;
+    protected ?bool $_canReturnToStock = null;
     /**
      * Prepare child blocks
      *
@@ -112,17 +112,6 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Items extends Mage_Admi
         return $totalbarData;
     }
 
-    /**
-     * Retrieve creditmemo model instance
-     *
-     * @return Mage_Sales_Model_Order_Creditmemo
-     */
-    #[\Override]
-    public function getCreditmemo()
-    {
-        return Mage::registry('current_creditmemo');
-    }
-
     #[\Override]
     public function canEditQty()
     {
@@ -132,12 +121,12 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Items extends Mage_Admi
         return true;
     }
 
-    public function getUpdateButtonHtml()
+    public function getUpdateButtonHtml(): string
     {
         return $this->getChildHtml('update_button');
     }
 
-    public function getUpdateUrl()
+    public function getUpdateUrl(): string
     {
         return $this->getUrl('*/*/updateQty', [
             'order_id' => $this->getCreditmemo()->getOrderId(),
@@ -152,7 +141,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Items extends Mage_Admi
     public function canReturnItemsToStock()
     {
         if (is_null($this->_canReturnToStock)) {
-            if ($this->_canReturnToStock = Mage::getStoreConfig(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_CAN_SUBTRACT)) {
+            if ($this->_canReturnToStock = Mage::getStoreConfigFlag(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_CAN_SUBTRACT)) {
                 $canReturnToStock = false;
                 foreach ($this->getCreditmemo()->getAllItems() as $item) {
                     $product = Mage::getModel('catalog/product')->load($item->getOrderItem()->getProductId());
@@ -168,7 +157,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Items extends Mage_Admi
         return $this->_canReturnToStock;
     }
 
-    public function canSendCreditmemoEmail()
+    public function canSendCreditmemoEmail(): bool
     {
         return Mage::helper('sales')->canSendNewCreditmemoEmail($this->getOrder()->getStore()->getId());
     }

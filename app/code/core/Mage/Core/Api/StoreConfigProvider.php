@@ -26,16 +26,9 @@ final class StoreConfigProvider extends \Maho\ApiPlatform\Provider
     {
         $storeCode = $uriVariables['storeCode'] ?? null;
         if ($storeCode) {
-            try {
-                $store = \Mage::app()->getStore($storeCode);
-                if ($store && $store->getId() && $store->getIsActive()) {
-                    StoreContext::setStore((int) $store->getId());
-                } else {
-                    throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException("Store with code '$storeCode' not found");
-                }
-            } catch (\Mage_Core_Model_Store_Exception) {
-                throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException("Store with code '$storeCode' not found");
-            }
+            /** @var \Mage_Core_Service_Store $service */
+            $service = \Mage::getService('core/store');
+            StoreContext::setStore((int) $service->getActiveStore((string) $storeCode)->getId());
         } else {
             StoreContext::ensureStore();
         }

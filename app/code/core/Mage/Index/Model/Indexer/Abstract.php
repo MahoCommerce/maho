@@ -53,12 +53,12 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
     /**
      * Register indexer required data inside event object
      */
-    abstract protected function _registerEvent(Mage_Index_Model_Event $event);
+    abstract protected function _registerEvent(Mage_Index_Model_Event $event): void;
 
     /**
      * Process event based on event state data
      */
-    abstract protected function _processEvent(Mage_Index_Model_Event $event);
+    abstract protected function _processEvent(Mage_Index_Model_Event $event): void;
 
     /**
      * Register data required by process in event object
@@ -121,7 +121,7 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
     /**
      * Rebuild all index data
      */
-    public function reindexAll()
+    public function reindexAll(): void
     {
         $this->_getResource()->reindexAll();
     }

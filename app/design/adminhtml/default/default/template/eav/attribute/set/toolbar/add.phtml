@@ -1,0 +1,20 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
+ */
+
+/** @var Mage_Eav_Block_Adminhtml_Attribute_Set_Toolbar_Add $this */
+?>
+<div class="content-header">
+    <h3><?= $this->_getHeader() ?></h3>
+    <p class="content-buttons form-buttons">
+        <?= $this->getBackButtonHtml() ?>
+        <?= $this->getSaveButtonHtml() ?>
+    </p>
+</div>
+<?= $this->getFormHtml() ?>
+<script>
+    var addSet = new varienForm('<?= $this->getFormId() ?>');
+</script>

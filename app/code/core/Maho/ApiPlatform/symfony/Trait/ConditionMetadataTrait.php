@@ -57,6 +57,43 @@ trait ConditionMetadataTrait
     }
 
     /**
+     * Check the trees $keys of $body and put them into $rule. The stored tree of an update lets old values pass.
+     * A null tree resets it to an empty tree. The trees change only when $errors is empty.
+     *
+     * @param array<string, mixed> $body
+     * @param list<string> $keys
+     */
+    protected function readRuleTrees(\Mage_Rule_Model_Abstract $rule, array $body, array $keys, string $locale, \Mage_Core_Exception_Input $errors): void
+    {
+        $keys = array_values(array_filter($keys, fn(string $key) => array_key_exists($key, $body)));
+        if ($keys === []) {
+            return;
+        }
+
+        $document = $this->conditionMetadata($locale);
+        $validator = new \Mage_Rule_Model_Condition_TreeValidator($this->conditionMetadataModel(), $document);
+        $writer = new \Mage_Rule_Model_Condition_TreeWriter($document);
+
+        $cleanTrees = [];
+        foreach ($keys as $key) {
+            $tree = $body[$key] ?? ['type' => $document['roots'][$key], 'aggregator' => 'all', 'value' => true, 'conditions' => []];
+            $result = $validator->validate($key, $tree, $rule->getId() ? $writer->readTree($rule, $key) : null);
+            foreach ($result['errors'] as $error) {
+                $errors->addError($error['field'], $error['message']);
+            }
+            if ($result['tree'] !== null) {
+                $cleanTrees[$key] = $result['tree'];
+            }
+        }
+
+        if ($errors->getErrors() === []) {
+            foreach ($cleanTrees as $key => $cleanTree) {
+                $writer->replaceTree($rule, $key, $cleanTree);
+            }
+        }
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function buildConditionMetadata(string $locale): array

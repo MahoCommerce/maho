@@ -87,39 +87,19 @@ final class CmsPageProvider extends CrudProvider
     }
 
     /**
-     * Disabled pages must not be readable through the public GET /cms-pages/{id}
-     * route. The base provider only store-scopes; enforce is_active here so the
-     * numeric-id path matches the identifier and collection paths. Backend
-     * readers bypass both checks so drafts and foreign-store pages stay readable.
+     * A guest or a customer reads an enabled page of the store view. A backend reader reads any page of its store views.
      */
     #[\Override]
     protected function provideItem(int|string $id): ?CmsPage
     {
-        $page = \Mage::getModel('cms/page')->load($id);
-        if (!$page->getId()) {
+        $backend = $this->isBackendReader();
+        try {
+            $page = \Mage::getService('cms/page')->getById((int) $id, $backend ? null : StoreContext::getStoreId());
+        } catch (\Mage_Core_Exception_NoSuchEntity) {
             return null;
         }
-
-        if ($this->isBackendReader()) {
-            $resource = $page->getResource();
-            if (method_exists($resource, 'lookupStoreIds')) {
-                $this->assertReadableStores($resource->lookupStoreIds($page->getId()), 'page');
-            }
-
-            /** @var CmsPage */
-            return $this->toDto($page);
-        }
-
-        if (!$page->getIsActive()) {
-            return null;
-        }
-
-        $resource = $page->getResource();
-        if (method_exists($resource, 'lookupStoreIds')) {
-            $storeIds = $resource->lookupStoreIds($page->getId());
-            if (!StoreContext::isAvailableForStore($storeIds, StoreContext::getStoreId())) {
-                return null;
-            }
+        if ($backend) {
+            $this->assertReadableStores($page->getResource()->lookupStoreIds($page->getId()), 'page');
         }
 
         /** @var CmsPage */

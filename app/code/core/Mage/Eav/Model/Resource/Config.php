@@ -25,7 +25,7 @@ class Mage_Eav_Model_Resource_Config extends Mage_Core_Model_Resource_Db_Abstrac
     protected static $_attributes    = [];
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('eav/entity_type', 'entity_type_id');
     }

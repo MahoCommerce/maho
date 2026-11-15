@@ -22,9 +22,7 @@ class Maho_Paypal_Model_Webhook_Handler_AuthorizationVoided extends Maho_Paypal_
             return;
         }
 
-        if ($order->canCancel()) {
-            $order->cancel();
-        }
+        $this->_cancelOrder($order);
 
         $order->addStatusHistoryComment("PayPal authorization voided: {$authId}");
         $order->save();

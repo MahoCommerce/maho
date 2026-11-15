@@ -23,7 +23,7 @@ class Maho_Paypal_Model_Method_AdvancedCheckout extends Maho_Paypal_Model_Method
 
     #[\Override]
     protected $_canUseInternal = false;
-    protected $_canSaveCc = false;
+    protected bool $_canSaveCc = false;
 
     /**
      * Card data never touches the server — skip CC validation

@@ -14,12 +14,9 @@ use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use Mage;
-use Mage_Core_Model_File_Uploader;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Media State Processor.
@@ -55,84 +52,43 @@ final class MediaProcessor implements ProcessorInterface
     private function handleUpload(): Media
     {
         $request = $this->requestStack->getCurrentRequest();
-
         if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
-            throw new UnprocessableEntityHttpException('No valid file uploaded');
+            throw new \Mage_Core_Exception_Input()->addError('file', Mage::helper('cms')->__('No valid file uploaded'));
         }
 
-        // Storage::uploadFile() expects $_FILES['image']
-        $_FILES['image'] = $_FILES['file'];
-
-        $helper = Mage::helper('cms/wysiwyg_images');
-        $storage = $helper->getStorage();
-        $mount = $helper->getMount();
-
-        $targetDir = $helper->resolveFolder($request->request->get('folder', 'wysiwyg'))
-            ?? throw new UnprocessableEntityHttpException('Invalid folder path');
-
-        $result = $storage->uploadFile($targetDir, 'image');
-        if (!$result) {
-            throw new UnprocessableEntityHttpException('Failed to upload file');
-        }
-
-        $uploadedPath = $result['path'] . '/' . $result['file'];
-
-        // Convert to configured image format using Intervention Image
-        $targetType = Mage::getStoreConfigAsInt('system/media_storage_configuration/image_file_type') ?: IMAGETYPE_WEBP;
-        $targetExt = image_type_to_extension($targetType, false);
-        $quality = Mage::getStoreConfigAsInt('system/media_storage_configuration/image_quality');
-
-        $customFilename = $request->request->get('filename');
-        $baseName = $customFilename
-            ? pathinfo(Mage_Core_Model_File_Uploader::getCorrectFileName($customFilename . '.' . $targetExt), PATHINFO_FILENAME)
-            : pathinfo($result['file'], PATHINFO_FILENAME);
-
-        $targetFilename = $baseName . '.' . $targetExt;
-        $targetPath = $result['path'] . '/' . $targetFilename;
-        $counter = 1;
-        while ($targetPath !== $uploadedPath && $mount->fileExists($targetPath)) {
-            $targetFilename = $baseName . '_' . $counter . '.' . $targetExt;
-            $targetPath = $result['path'] . '/' . $targetFilename;
-            $counter++;
-        }
-
-        $image = \Maho::getImageManager()->decodeBinary($mount->read($uploadedPath));
-        $encoded = (string) $image->encodeUsingPath($targetPath, quality: $quality);
-        $mount->write($targetPath, $encoded);
-
-        if ($uploadedPath !== $targetPath) {
-            $mount->delete($uploadedPath);
-        }
-
-        $this->logActivity('upload', $targetPath);
+        $filename = $request?->request->get('filename');
+        $result = $this->mediaService()->upload(
+            (string) $request?->request->get('folder', 'wysiwyg'),
+            'file',
+            $filename === null ? null : (string) $filename,
+        );
+        $this->logActivity('upload', $result['path']);
 
         $media = new Media();
-        $media->url = $mount->publicUrl($targetPath);
-        $media->directive = sprintf('{{media url="%s"}}', $targetPath);
-        $media->size = strlen($encoded);
-        $media->dimensions = ['width' => $image->width(), 'height' => $image->height()];
-        $media->filename = $targetFilename;
-        $media->path = $targetPath;
+        $media->url = Mage::helper('cms/wysiwyg_images')->getMount()->publicUrl($result['path']);
+        $media->directive = sprintf('{{media url="%s"}}', $result['path']);
+        $media->size = $result['size'];
+        $media->dimensions = ['width' => $result['width'], 'height' => $result['height']];
+        $media->filename = $result['file'];
+        $media->path = $result['path'];
 
         return $media;
     }
 
     private function handleDelete(string $path): null
     {
-        $helper = Mage::helper('cms/wysiwyg_images');
-        $root = $helper->getStorageRootPath();
-        $relative = preg_replace('#^' . preg_quote($root, '#') . '(/|$)#', '', str_replace('\\', '/', $helper->correctPath($path)));
-        $fullPath = $relative === '' || $relative === null ? null : \Maho\Io::getPathWithinMount($helper->getMount(), $root, $relative);
-
-        if ($fullPath === null || !$helper->getMount()->fileExists($fullPath)) {
-            throw new NotFoundHttpException('File not found');
-        }
-
-        $helper->getStorage()->deleteFile($fullPath);
-
+        $path = str_replace('\\', '/', $path);
+        $service = $this->mediaService();
+        $service->delete($service->getFolder(dirname($path)), basename($path));
         $this->logActivity('delete', $path);
 
         return null;
+    }
+
+    private function mediaService(): \Mage_Cms_Service_Media
+    {
+        /** @var \Mage_Cms_Service_Media */
+        return Mage::getService('cms/media');
     }
 
     private function logActivity(string $action, string $path): void

@@ -345,6 +345,16 @@
         }
     }
 
+    /* A group of custom attributes inside a form list (customer/form/attributes.phtml): a titled
+       part of the form that the attribute set of the customer group defines */
+    .form-list > li.attribute-group > .fieldset {
+        @apply mt-2 mb-0;
+
+        .legend {
+            @apply mb-3 text-base;
+        }
+    }
+
     label.required em,
     span.required em,
     .form-list .required em,
@@ -517,8 +527,8 @@
         }
     }
 
-    /* app.js moves .col-right inside .col-wrapper below 1000px */
-    @media (min-width: 771px) and (max-width: 1000px) {
+    /* app.js moves .col-right inside .col-wrapper up to the tablet breakpoint of theme.xml */
+    @media (min-width: 771px) and (max-width: 1023px) {
         .col3-layout .main {
             grid-template-columns: minmax(0, 1fr);
             grid-template-areas:
@@ -2514,13 +2524,11 @@
         }
     }
 
-    /* Product attributes: a tidy spec sheet (the caption repeats the tab label) */
-    #product-attribute-specs-table {
+    /* Attributes as a spec sheet: the product details, and the eav/frontend/attributes.phtml
+       table of blog posts, blog categories and catalog categories */
+    #product-attribute-specs-table,
+    .attribute-specs-table {
         @apply w-full max-w-2xl;
-
-        caption {
-            @apply sr-only;
-        }
 
         th.label {
             @apply w-48 border-b border-line py-3 pr-6 text-left align-top text-sm font-medium text-base-content/70;
@@ -2532,6 +2540,46 @@
 
         tr:last-child :is(th, td) {
             @apply border-b-0;
+        }
+    }
+
+    /* The accordion row of the product repeats the caption */
+    #product-attribute-specs-table caption {
+        @apply sr-only;
+    }
+
+    .attribute-specs-table {
+        @apply mt-10;
+
+        caption {
+            @apply mb-2 text-left font-display text-lg font-semibold tracking-tight;
+        }
+
+        /* The rows align flush with the heading */
+        :is(th, td):first-child {
+            @apply pl-0;
+        }
+    }
+
+    /* The product list of a category follows the attributes */
+    .attribute-groups {
+        @apply mb-10;
+    }
+
+    /* A Text Area value of eav/frontend/attributes.phtml: a titled text under the table */
+    .attribute-group-title {
+        @apply mt-10 mb-2 font-display text-lg font-semibold tracking-tight;
+    }
+
+    .attribute-text {
+        @apply mt-8 max-w-2xl;
+
+        h3 {
+            @apply mb-2 font-display text-base font-semibold tracking-tight;
+        }
+
+        .std {
+            @apply text-sm leading-relaxed;
         }
     }
 
@@ -3240,9 +3288,20 @@
             @apply block h-full;
         }
 
+        picture {
+            @apply block h-full;
+        }
+
         img {
             /* Fills the slide when CMS CSS fixes its height; intrinsic ratio otherwise */
             @apply block h-full w-full max-w-none object-cover;
+        }
+
+        /* The image the browser picks among the alternatives keeps its own ratio, so the desktop,
+           tablet and mobile versions of a slide are never cropped into one another's shape. When
+           CMS CSS fixes the height of the slide, the image fits inside it */
+        picture img {
+            @apply h-auto max-h-full w-full max-w-none object-contain;
         }
     }
 

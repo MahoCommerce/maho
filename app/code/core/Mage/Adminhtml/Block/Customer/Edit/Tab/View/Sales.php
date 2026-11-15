@@ -17,8 +17,8 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales extends Mage_Adminhtml_B
      */
     protected $_collection;
 
-    protected $_groupedCollection;
-    protected $_websiteCounts;
+    protected ?array $_groupedCollection = null;
+    protected array $_websiteCounts = [];
 
     /**
      * Currency model
@@ -72,17 +72,17 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales extends Mage_Adminhtml_B
         return parent::_beforeToHtml();
     }
 
-    public function getWebsiteCount($websiteId)
+    public function getWebsiteCount(int $websiteId): int
     {
         return $this->_websiteCounts[$websiteId] ?? 0;
     }
 
-    public function getRows()
+    public function getRows(): ?array
     {
         return $this->_groupedCollection;
     }
 
-    public function getTotals()
+    public function getTotals(): \Maho\DataObject
     {
         return $this->_collection->getTotals();
     }

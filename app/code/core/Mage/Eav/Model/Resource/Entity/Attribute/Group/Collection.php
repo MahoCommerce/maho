@@ -33,6 +33,20 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Group_Collection extends Mage_Cor
     }
 
     /**
+     * Add the label of each group in $storeId as store_label, or null when the group has none.
+     * Mage_Eav_Model_Entity_Attribute_Group::getStoreLabel() then needs no query.
+     */
+    public function addStoreLabel(int $storeId): static
+    {
+        $this->getSelect()->joinLeft(
+            ['group_label' => $this->getTable('eav/attribute_group_label')],
+            $this->getConnection()->quoteInto('group_label.attribute_group_id = main_table.attribute_group_id AND group_label.store_id = ?', $storeId),
+            ['store_label' => 'value'],
+        );
+        return $this;
+    }
+
+    /**
      * Set sort order
      *
      * @param string $direction

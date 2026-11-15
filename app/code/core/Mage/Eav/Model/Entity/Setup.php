@@ -714,7 +714,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
      *
      * @param array $option
      */
-    public function addAttributeOption($option)
+    public function addAttributeOption($option): void
     {
         $optionTable        = $this->getTable('eav/attribute_option');
         $optionValueTable   = $this->getTable('eav/attribute_option_value');

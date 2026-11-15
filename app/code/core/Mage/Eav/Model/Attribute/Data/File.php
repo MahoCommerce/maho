@@ -147,14 +147,14 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
             return true;
         }
 
-        if (!$attribute->getIsRequired() && !$toUpload) {
+        if (!$this->isRequired() && !$toUpload) {
             if ($toDelete) {
                 $attribute->setAttributeValidationAsPassed();
             }
             return true;
         }
 
-        if ($attribute->getIsRequired() && !$toUpload) {
+        if ($this->isRequired() && !$toUpload) {
             $errors[] = Mage::helper('eav')->__('"%s" is a required value.', $label);
         }
 
@@ -192,7 +192,7 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
         $original  = $this->getEntity()->getData($attribute->getAttributeCode());
         $toDelete  = false;
         if ($original) {
-            if (!$attribute->getIsRequired() && !empty($value['delete'])) {
+            if (!$this->isRequired() && !empty($value['delete'])) {
                 $toDelete  = true;
             }
             if (!empty($value['tmp_name'])) {

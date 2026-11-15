@@ -82,3 +82,29 @@ it('detects legacy zero-date values and defaults, and rescans clean after the NU
         $adapter->query('SET SESSION sql_mode = ' . $adapter->quote($modeBefore));
     }
 });
+
+it('ignores views that select a zero-date column', function () {
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $table = 'zero_date_scanner_view_base';
+    $view = 'zero_date_scanner_view';
+    $modeBefore = (string) $adapter->fetchOne('SELECT @@SESSION.sql_mode');
+
+    try {
+        $adapter->query("SET SESSION sql_mode=''");
+        $adapter->query("CREATE TABLE {$table} (id INT PRIMARY KEY, d DATE NULL, d_def DATE NULL DEFAULT '0000-00-00')");
+        $adapter->query("INSERT INTO {$table} VALUES (1, '0000-00-00', NULL)");
+        $adapter->query("CREATE VIEW {$view} AS SELECT id, d, d_def FROM {$table}");
+        $adapter->query('SET SESSION sql_mode = ' . $adapter->quote($modeBefore));
+
+        $tables = fn(array $findings) => array_unique(array_column(
+            array_filter($findings, fn(array $f) => str_starts_with($f['table'], 'zero_date_scanner_view')),
+            'table',
+        ));
+        expect($tables(ZeroDateScanner::findZeroDateValues($adapter)))->toBe([$table]);
+        expect($tables(ZeroDateScanner::findZeroDateDefaults($adapter)))->toBe([$table]);
+    } finally {
+        $adapter->query("DROP VIEW IF EXISTS {$view}");
+        $adapter->query("DROP TABLE IF EXISTS {$table}");
+        $adapter->query('SET SESSION sql_mode = ' . $adapter->quote($modeBefore));
+    }
+});

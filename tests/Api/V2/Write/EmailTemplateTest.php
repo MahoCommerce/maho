@@ -182,7 +182,7 @@ describe('Email template CRUD lifecycle', function (): void {
                 'templateText' => 'x',
             ], $token);
             expect($noSubject['status'])->toBe(422);
-            expect($noSubject['json']['details']['field'] ?? null)->toBe('templateSubject');
+            expect($noSubject['json']['details']['errors'][0]['field'] ?? null)->toBe('templateSubject');
 
             $badType = apiPost('/api/rest/v2/email-templates', [
                 'templateCode' => $code . ' c',

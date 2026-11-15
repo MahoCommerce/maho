@@ -83,12 +83,6 @@ final class CountryProvider extends \Maho\ApiPlatform\Provider
 
         /** @var \Mage_Directory_Model_Resource_Country_Collection $collection */
         $collection = \Mage::getModel('directory/country')->getCollection();
-
-        $allowedCountries = explode(',', \Mage::getStoreConfig('general/country/allow') ?? '');
-        if (!empty($allowedCountries) && $allowedCountries[0] !== '') {
-            $collection->addFieldToFilter('main_table.country_id', ['in' => $allowedCountries]);
-        }
-
         $collection->loadByStore();
 
         foreach ($collection as $mahoCountry) {

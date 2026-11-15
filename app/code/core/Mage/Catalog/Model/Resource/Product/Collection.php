@@ -283,7 +283,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     }
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalog/product');
         $this->_initTables();
@@ -292,7 +292,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     /**
      * Define product website and category product tables
      */
-    protected function _initTables()
+    protected function _initTables(): void
     {
         $this->_productWebsiteTable = $this->getResource()->getTable('catalog/product_website');
         $this->_productCategoryTable = $this->getResource()->getTable('catalog/category_product');
@@ -902,7 +902,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     /**
      * Add URL rewrites to collection
      */
-    protected function _addUrlRewrite()
+    protected function _addUrlRewrite(): void
     {
         $urlRewrites = null;
         if ($this->_cacheConf) {

@@ -29,12 +29,12 @@ class Mage_Adminhtml_Block_Permissions_Tab_Rolesusers extends Mage_Adminhtml_Blo
         return parent::_prepareLayout();
     }
 
-    protected function _getGridHtml()
+    protected function _getGridHtml(): string
     {
         return $this->getChildHtml('userGrid');
     }
 
-    protected function _getJsObjectName()
+    protected function _getJsObjectName(): string
     {
         return $this->getChild('userGrid')->getJsObjectName();
     }

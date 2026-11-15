@@ -83,7 +83,7 @@ class Mage_Downloadable_Model_Link_Api_Validator
      * @param array $resource
      * @param string $resourceType
      */
-    public function validateAttributes(&$resource, $resourceType)
+    public function validateAttributes(&$resource, $resourceType): void
     {
         $fields = $this->_defaultAttributes[$resourceType];
         $this->_dispatch($resource, $fields);
@@ -97,7 +97,7 @@ class Mage_Downloadable_Model_Link_Api_Validator
      * @param array $resource
      * @param string $resourceType
      */
-    public function completeCheck(&$resource, $resourceType)
+    public function completeCheck(&$resource, $resourceType): void
     {
         if ($resourceType == 'link') {
             if ($resource['type'] == 'file') {
@@ -129,7 +129,7 @@ class Mage_Downloadable_Model_Link_Api_Validator
      *
      * @param mixed $var
      */
-    public function validateFileDetails(&$var)
+    public function validateFileDetails(&$var): void
     {
         if (!isset($var['name']) || !is_string($var['name']) || $var['name'] === '') {
             throw new Exception('no_filename');
@@ -148,7 +148,7 @@ class Mage_Downloadable_Model_Link_Api_Validator
      * @param array $resource
      * @param array $fields
      */
-    protected function _dispatch(&$resource, $fields)
+    protected function _dispatch(&$resource, $fields): void
     {
         foreach ($fields as $name => $validator) {
             if (is_string($validator) && $validator !== '' && array_key_exists($name, $resource)) {
@@ -166,7 +166,7 @@ class Mage_Downloadable_Model_Link_Api_Validator
      *
      * @param string $var
      */
-    public function validateTitle(&$var)
+    public function validateTitle(&$var): void
     {
         if (!is_string($var) || $var === '') {
             throw new Exception('no_title');
@@ -178,7 +178,7 @@ class Mage_Downloadable_Model_Link_Api_Validator
      *
      * @param float $var
      */
-    public function validatePrice(&$var)
+    public function validatePrice(&$var): void
     {
         $var = is_numeric($var) ? (float) $var : (float) 0;
     }
@@ -188,7 +188,7 @@ class Mage_Downloadable_Model_Link_Api_Validator
      *
      * @param int $var
      */
-    public function validateNumOfDownloads(&$var)
+    public function validateNumOfDownloads(&$var): void
     {
         $var = is_numeric($var) ? (int) $var : 0;
     }
@@ -199,7 +199,7 @@ class Mage_Downloadable_Model_Link_Api_Validator
      * @param int|bool $var
      * @param-out int $var
      */
-    public function validateUnlimited(&$var)
+    public function validateUnlimited(&$var): void
     {
         $var = ((is_numeric($var) && $var >= 0 && $var <= 1) || (is_bool($var))) ? (int) $var : 0;
     }
@@ -209,7 +209,7 @@ class Mage_Downloadable_Model_Link_Api_Validator
      *
      * @param int $var
      */
-    public function validateShareable(&$var)
+    public function validateShareable(&$var): void
     {
         $var = (is_numeric($var) && $var >= 0 && $var <= 2) ? (int) $var : 2;
     }
@@ -219,7 +219,7 @@ class Mage_Downloadable_Model_Link_Api_Validator
      *
      * @param array $var
      */
-    public function validateFile(&$var)
+    public function validateFile(&$var): void
     {
         $var = is_array($var) ? $var : null;
     }
@@ -247,7 +247,7 @@ class Mage_Downloadable_Model_Link_Api_Validator
      *
      * @param int $var
      */
-    public function validateOrder(&$var)
+    public function validateOrder(&$var): void
     {
         $var = is_numeric($var) ? (int) $var : 0;
     }
@@ -257,7 +257,7 @@ class Mage_Downloadable_Model_Link_Api_Validator
      *
      * @param string $var
      */
-    public function validateUploadType(&$var)
+    public function validateUploadType(&$var): void
     {
         $var = in_array($var, $this->_uploadTypes) ? $var : 'file';
     }

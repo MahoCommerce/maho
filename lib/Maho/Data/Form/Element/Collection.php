@@ -18,6 +18,10 @@ use IteratorAggregate;
 use Maho\Data\Form;
 use Maho\Data\Form\AbstractForm;
 
+/**
+ * @implements ArrayAccess<array-key, AbstractElement>
+ * @implements IteratorAggregate<array-key, AbstractElement>
+ */
 class Collection implements ArrayAccess, IteratorAggregate, Countable
 {
     /**
@@ -48,7 +52,7 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
     /**
      * Implementation of IteratorAggregate::getIterator()
      *
-     * @return ArrayIterator
+     * @return ArrayIterator<array-key, AbstractElement>
      */
     #[\Override]
     public function getIterator(): \Traversable

@@ -74,20 +74,6 @@ trait AuthenticationTrait
             : \Mage_Customer_Model_Group::NOT_LOGGED_IN_ID;
     }
 
-    protected function getAuthenticatedAdminId(): ?int
-    {
-        if ($this->security === null) {
-            return null;
-        }
-
-        $user = $this->security->getUser();
-        if ($user instanceof ApiUser) {
-            return $user->getAdminId();
-        }
-
-        return null;
-    }
-
     protected function isAdmin(): bool
     {
         return $this->security !== null && $this->security->isGranted('ROLE_ADMIN');
@@ -146,14 +132,25 @@ trait AuthenticationTrait
         }
     }
 
-    protected function canAccessCustomer(int $customerId): bool
+    /**
+     * Refuse a caller that may not reach the data of $customer, such as its addresses. A customer token reaches
+     * its own customer. A backend token (an admin token or a service token, whose permission the operation
+     * checks) reaches a customer of a website in its allowlist.
+     */
+    protected function assertCustomerReachable(\Mage_Customer_Model_Customer $customer, string $message = 'You can only access your own data'): void
     {
-        if ($this->isAdmin()) {
-            return true;
+        $user = $this->security?->getUser();
+        if ($user instanceof ApiUser && ($this->isAdmin() || $user->isApiUser())) {
+            /** @var \Mage_Catalog_Service_Product $catalog */
+            $catalog = \Mage::getService('catalog/product');
+            $websiteIds = $catalog->getWebsiteIds($user->getAllowedStoreIds());
+            if ($websiteIds !== null && !in_array((int) $customer->getWebsiteId(), $websiteIds, true)) {
+                throw new AccessDeniedHttpException("Access denied for this customer's website");
+            }
+            return;
         }
 
-        $authenticatedCustomerId = $this->getAuthenticatedCustomerId();
-        return $authenticatedCustomerId !== null && $authenticatedCustomerId === $customerId;
+        $this->assertCustomerAccess((int) $customer->getId(), $message);
     }
 
     /**

@@ -47,7 +47,7 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
      */
     public const HISTORY_ENTITY_NAME = 'creditmemo';
 
-    protected static $_states;
+    protected static ?array $_states = null;
 
     /**
      * @var Mage_Sales_Model_Resource_Order_Creditmemo_Item_Collection|Mage_Sales_Model_Order_Creditmemo_Item[]|null
@@ -309,23 +309,17 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
      */
     public function refund()
     {
+        $store = Mage::app()->getStore();
+        // An inflated adjustment must not refund more than the customer paid, or mint store credit
+        if ($store->roundPrice($this->getOrder()->getBaseTotalRefunded() + $this->getBaseGrandTotal()) > $store->roundPrice($this->getOrder()->getBaseTotalPaid())) {
+            Mage::throwException(Mage::helper('sales')->__('Refund amount exceeds the order\'s refundable balance'));
+        }
+
         Mage::dispatchEvent('sales_order_creditmemo_refund_before', [$this->_eventObject => $this]);
 
         $this->setState(self::STATE_REFUNDED);
-        $orderRefund = Mage::app()->getStore()->roundPrice(
-            $this->getOrder()->getTotalRefunded() + $this->getGrandTotal(),
-        );
-        $baseOrderRefund = Mage::app()->getStore()->roundPrice(
-            $this->getOrder()->getBaseTotalRefunded() + $this->getBaseGrandTotal(),
-        );
-
-        if ($baseOrderRefund > Mage::app()->getStore()->roundPrice($this->getOrder()->getBaseTotalPaid())) {
-            $baseAvailableRefund = $this->getOrder()->getBaseTotalPaid() - $this->getOrder()->getBaseTotalRefunded();
-
-            Mage::throwException(
-                Mage::helper('sales')->__('Maximum amount available to refund is %s', $this->getOrder()->formatBasePrice($baseAvailableRefund)),
-            );
-        }
+        $orderRefund = $store->roundPrice($this->getOrder()->getTotalRefunded() + $this->getGrandTotal());
+        $baseOrderRefund = $store->roundPrice($this->getOrder()->getBaseTotalRefunded() + $this->getBaseGrandTotal());
         $order = $this->getOrder();
         $order->setBaseTotalRefunded($baseOrderRefund);
         $order->setTotalRefunded($orderRefund);

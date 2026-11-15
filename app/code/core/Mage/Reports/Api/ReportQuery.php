@@ -15,7 +15,6 @@ namespace Mage\Reports\Api;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Trait\FilterValueTrait;
 use Maho\ApiPlatform\Trait\StoreRestrictionTrait;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class ReportQuery
@@ -296,9 +295,7 @@ final class ReportQuery
             if (!in_array($storeId, $allStoreIds, true)) {
                 throw new BadRequestHttpException('storeId is not the ID of a store view');
             }
-            if ($allowed !== null && !in_array($storeId, $allowed, true)) {
-                throw new AccessDeniedHttpException('Access denied for this store');
-            }
+            $this->assertRequestedStoreAllowed($storeId, $user);
             $this->storeId = $storeId;
             $this->storeIds = [$storeId];
             $this->scoped = true;
@@ -311,10 +308,7 @@ final class ReportQuery
             if ($website === null) {
                 throw new BadRequestHttpException('websiteId is not the ID of a website');
             }
-            $allowedWebsites = $this->allowedWebsiteIds($user);
-            if ($allowedWebsites !== null && !in_array($websiteId, $allowedWebsites, true)) {
-                throw new AccessDeniedHttpException('Access denied for this website');
-            }
+            $this->assertRequestedWebsiteAllowed($websiteId, $user);
             $storeIds = array_map(intval(...), array_values((array) $website->getStoreIds()));
             if ($allowed !== null) {
                 $storeIds = array_values(array_intersect($storeIds, $allowed));

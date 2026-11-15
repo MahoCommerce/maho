@@ -24,6 +24,20 @@ The order keeps the tax that the store calculated at the moment the customer pla
 A rate applies when the address, the customer tax class and the product tax class all match a tax
 rule.
 
+The admin and the API refuse these changes:
+
+| Change | Error message |
+|--------|---------------|
+| A rate with a country that the store does not know | One of the country has invalid code. |
+| A post code range whose **Range To** is lower than its **Range From** | Range To should be equal or greater than Range From. |
+| A rule for a rate, a customer tax class and a product tax class that another rule already has | Rules (...) already exist for the specified Tax Rate, Customer Tax Class and Product Tax Class combinations |
+| Delete a rate that a rule uses | Tax rate cannot be removed. It exists in tax rule |
+| Delete a tax class that a rule uses | You cannot delete this tax class as it is used in Tax Rules. You have to delete the rules it is used in first. |
+| Delete a customer tax class that a customer group uses, or a product tax class that a product uses | You cannot delete this tax class as it is used for ... customer groups. (or products) |
+
+**Sales > Tax > Import / Export Tax Rates** imports the other rows of a file when a row has an error,
+and shows one message for each row that it refuses.
+
 ## Which address the store uses
 
 Go to **System > Configuration > Sales > Tax > Calculation Settings** and look at
@@ -120,6 +134,8 @@ amount.
 | Shipping has no tax | **Tax Class for Shipping** is empty | Select a product tax class for shipping, and add a tax rule for it |
 | A gross price is 14.01 when you expected 14.00 | **Catalog Prices** is **Excluding Tax**, and the store adds the tax to the net price rounded to cents | Set **Catalog Prices** to **Including Tax** and enter the gross price |
 | The order tax and the sum of the line taxes differ by a cent | The rounding of **Tax Calculation Method Based On** | Use the same method for all your stores. **Total** rounds once on the total |
+| The admin shows the notice "Warning tax configuration can result in rounding errors" | A price display setting is **Including and Excluding Tax**, and **Tax Calculation Method Based On** is **Row Total** or **Total**. The two prices can differ by a cent | In the default configuration and in each store that the notice names, set each display setting that is **Including and Excluding Tax** to **Including Tax** or **Excluding Tax**, or set **Tax Calculation Method Based On** to **Unit Price**. To hide the notice, select **Ignore this notification** |
+| The admin shows the notice "Warning tax discount configuration might result in different discounts than a customer might expect" | **Apply Customer Tax** is **Before Discount** | Set **Apply Customer Tax** to **After Discount**. To hide the notice, select **Ignore this notification** |
 | A downloadable product has the tax of the wrong country | The cart has no shipping address, so the store uses the billing address | Check the billing address of the order |
 
 ## Related

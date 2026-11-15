@@ -14,7 +14,7 @@ class Mage_Core_Model_File_Validator_Image
 
     protected ?string $_originalFileName = null;
 
-    protected $_allowedImageTypes = [
+    protected array $_allowedImageTypes = [
         IMAGETYPE_WEBP,
         IMAGETYPE_AVIF,
         IMAGETYPE_JPEG,
@@ -78,7 +78,7 @@ class Mage_Core_Model_File_Validator_Image
      * @param  string $filePath Path to temporary uploaded file
      * @throws Mage_Core_Exception
      */
-    public function validate($filePath)
+    public function validate(string $filePath): void
     {
         // Skip SVG files - they are handled by Mage_Core_Model_File_Validator_Svg
         // Use original filename if available (temp files don't have extensions)
@@ -86,7 +86,7 @@ class Mage_Core_Model_File_Validator_Image
         $extension = strtolower(pathinfo($filenameToCheck, PATHINFO_EXTENSION));
 
         if ($extension === 'svg') {
-            return null;
+            return;
         }
 
         [$imageWidth, $imageHeight, $fileType] = \Maho\Io::getImageSize($filePath);
@@ -135,7 +135,7 @@ class Mage_Core_Model_File_Validator_Image
                             break;
                     }
 
-                    return null;
+                    return;
                 }
                 throw Mage::exception('Mage_Core', Mage::helper('core')->__('Invalid image.'));
             }

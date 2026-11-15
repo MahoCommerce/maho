@@ -33,7 +33,7 @@ class Mage_Adminhtml_Block_System_Config_Tabs extends Mage_Adminhtml_Block_Widge
         return (int) $a->sort_order <=> (int) $b->sort_order;
     }
 
-    public function initTabs()
+    public function initTabs(): static
     {
         $current = $this->getRequest()->getParam('section');
         $websiteCode = $this->getRequest()->getParam('website');

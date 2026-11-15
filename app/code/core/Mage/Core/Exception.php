@@ -10,7 +10,7 @@
 
 class Mage_Core_Exception extends Exception
 {
-    protected $_messages = [];
+    protected array $_messages = [];
 
     /**
      * @return $this

@@ -25,11 +25,8 @@ class Mage_CatalogIndex_Model_Resource_Indexer_Abstract extends Mage_Core_Model_
      */
     protected $_storeIdFieldName;
 
-    /**
-     * should be defined because abstract
-     */
     #[\Override]
-    protected function _construct() {}
+    protected function _construct(): void {}
 
     /**
      * @param array $data
@@ -46,7 +43,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer_Abstract extends Mage_Core_Model_
      * @param int $storeId
      * @param int $productId
      */
-    public function saveIndices(array $data, $storeId, $productId)
+    public function saveIndices(array $data, $storeId, $productId): void
     {
         $this->_executeReplace($data, $storeId, $productId);
     }

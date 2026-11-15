@@ -11,6 +11,7 @@ namespace MahoCLI\Commands;
 
 use Mage;
 use Maho_Queue_Model_Message;
+use Maho\Queue\QueueManager;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
@@ -62,7 +63,6 @@ class EmailQueueClear extends BaseMahoCommand
         if (in_array($status, $validStatuses, true)) {
             $collection->addFieldToFilter('status', $status);
         } elseif ($status === 'all') {
-            // Never delete rows a worker currently holds.
             $collection->addFieldToFilter('status', ['in' => $validStatuses]);
         } else {
             $output->writeln('<error>Invalid status. Use: pending, failed, completed, or all</error>');
@@ -115,8 +115,9 @@ class EmailQueueClear extends BaseMahoCommand
 
         $deleted = 0;
         foreach ($collection as $message) {
-            $message->delete();
-            $deleted++;
+            if (QueueManager::discardStoredMessage((int) $message->getId())) {
+                $deleted++;
+            }
         }
 
         $output->writeln("<info>Deleted {$deleted} email message(s) from the queue.</info>");

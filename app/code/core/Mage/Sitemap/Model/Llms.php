@@ -176,7 +176,7 @@ class Mage_Sitemap_Model_Llms
         }
 
         if (Mage::helper('core')->isModuleEnabled('Maho_Blog')
-            && !Mage::getStoreConfigFlag('advanced/modules_disable_output/Maho_Blog', $store->getId())
+            && Mage::getService('blog/post')->isEnabled((int) $store->getId())
         ) {
             /** @var Maho_Blog_Helper_Data $blog */
             $blog = Mage::helper('blog');

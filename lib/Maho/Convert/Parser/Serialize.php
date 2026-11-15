@@ -12,14 +12,14 @@ namespace Maho\Convert\Parser;
 class Serialize extends AbstractParser
 {
     #[\Override]
-    public function parse()
+    public function parse(): static
     {
         $this->setData(unserialize($this->getData(), ['allowed_classes' => false]));
         return $this;
     }
 
     #[\Override]
-    public function unparse()
+    public function unparse(): static
     {
         $this->setData(serialize($this->getData()));
         return $this;

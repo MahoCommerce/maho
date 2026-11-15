@@ -105,7 +105,7 @@ describe('Blog Post Basic Integration', function () {
 
     test('strips malicious code smuggled into something that looks like a directive', function () {
         // Regression: the mask pattern accepted any body after the leading keyword characters,
-        // so {{a<script>…}} was treated as a real directive and restored verbatim — and the
+        // so {{a<script>…}} was treated as a real directive and restored verbatim, and the
         // template filter leaves an unknown directive in the output as-is, so it reached the page.
         $post = Mage::getModel('blog/post');
         $post->setTitle('Smuggled XSS Post');
@@ -118,18 +118,6 @@ describe('Blog Post Basic Integration', function () {
         expect($rendered)->not->toContain('<script');
 
         $post->delete();
-    });
-
-    test('blog module models are properly registered', function () {
-        // Test that blog models can be instantiated via Mage factory
-        $post = Mage::getModel('blog/post');
-        expect($post)->toBeInstanceOf(Maho_Blog_Model_Post::class);
-
-        $collection = Mage::getResourceModel('blog/post_collection');
-        expect($collection)->toBeInstanceOf(Maho_Blog_Model_Resource_Post_Collection::class);
-
-        $helper = Mage::helper('blog');
-        expect($helper)->toBeInstanceOf(Maho_Blog_Helper_Data::class);
     });
 
     test('can handle store relationships', function () {

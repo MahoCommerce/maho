@@ -189,7 +189,7 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit_Form extends Mage_Adminhtml_Block_Wid
 
             if ($newCategory || $newProduct) {
                 $catalogUrlModel = Mage::getSingleton('catalog/url');
-                $idPath->setValue($catalogUrlModel->generatePath('id', $newProduct, $newCategory));
+                $idPath->setNote(Mage::helper('adminhtml')->__('The store creates the ID path when you save.'));
                 if (!isset($sessionData['request_path'])) {
                     $requestPath->setValue($catalogUrlModel->generatePath('request', $newProduct, $newCategory, ''));
                 }

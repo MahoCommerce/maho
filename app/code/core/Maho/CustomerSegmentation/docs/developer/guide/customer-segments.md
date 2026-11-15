@@ -236,6 +236,12 @@ AND e.group_id IN (1, 2, 3);
 ]
 ```
 
+<span class="version-badge">v27.1+</span> The list also has each user-defined customer attribute, except a `file`, an `image` and a
+`multiline` one. `Maho_CustomerSegmentation_Model_Segment_Condition_Abstract::getCustomAttributes()`
+finds them, and `buildCustomAttributeCondition()` builds the SQL. A `select` or a `boolean` takes
+`==` and `!=`. A `multiselect` takes `{}` and `!{}` with one option ID, and matches it in the list
+of IDs that the value holds.
+
 **SQL Pattern**:
 ```php
 // For direct fields
@@ -271,6 +277,8 @@ WHERE DATEDIFF(NOW(), e.created_at) > 30  -- Days since registration
     'telephone' => 'Telephone',
 ]
 ```
+
+The list also has each user-defined address attribute, with the rules of the customer attributes.
 
 **SQL Pattern**:
 ```php
@@ -313,6 +321,8 @@ WHERE e.entity_id IN (
     WHERE clv.total > 1000
 )
 ```
+
+Lifetime Profit starts from `customer_entity` in the same way. It sums the `base_grand_total` of the invoices in state `Mage_Sales_Model_Order_Invoice::STATE_PAID`, and subtracts the `base_grand_total` of the credit memos in state `Mage_Sales_Model_Order_Creditmemo::STATE_REFUNDED`. The order state does not count. Lifetime Refunds sums the same refunded credit memos.
 
 ---
 

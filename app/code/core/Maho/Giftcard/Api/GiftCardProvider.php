@@ -28,22 +28,11 @@ final class GiftCardProvider extends CrudProvider
     protected function handleOperation(string $name, array $context, array $uriVariables): mixed
     {
         if ($name === 'checkBalance') {
-            // Public balance check: throttle to stop code probing / enumeration.
-            $this->checkRateLimitByIp('giftcard_balance', 'giftcard_balance', 60);
-
-            $code = $context['args']['code'] ?? null;
-            if (!$code) {
-                throw new \RuntimeException('Gift card code is required');
-            }
-
-            $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode(trim($code));
-            // A website the card is not associated with must not answer for it
-            if (!$giftcard->getId()
-                || !$giftcard->isAvailableOnWebsite((int) StoreContext::getStore()->getWebsiteId())
-            ) {
-                throw new \RuntimeException('Gift card not found');
-            }
-
+            $giftcard = \Mage::getService('giftcard/giftcard')->checkBalance(
+                (string) ($context['args']['code'] ?? ''),
+                (int) StoreContext::getStore()->getWebsiteId(),
+                $this->getAuthenticatedCustomerId(),
+            );
             return $this->toBalanceDto($giftcard);
         }
 

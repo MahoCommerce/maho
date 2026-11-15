@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -39,7 +40,7 @@ class Mage_Shipping_Model_Rate_Result
      *
      * @param bool $error
      */
-    public function setError($error)
+    public function setError($error): void
     {
         $this->_error = $error;
     }

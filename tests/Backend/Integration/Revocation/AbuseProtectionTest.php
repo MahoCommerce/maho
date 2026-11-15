@@ -87,7 +87,7 @@ describe('Revocation per-IP rate limit', function () {
     });
 
     it('is disabled when the limit is configured to 0', function () {
-        Mage::app()->getStore()->setConfig('revocation/abuse/ip_rate_limit_per_hour', '0');
+        Mage::app()->getStore()->setConfig(Maho_Revocation_Helper_Data::XML_PATH_IP_RATE_LIMIT, '0');
         $helper = Mage::helper('revocation');
 
         for ($i = 0; $i < 20; $i++) {

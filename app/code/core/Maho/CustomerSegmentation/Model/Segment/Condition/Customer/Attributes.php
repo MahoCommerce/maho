@@ -44,6 +44,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
             'days_since_registration' => Mage::helper('customersegmentation')->__('Days Since Registration'),
             'days_until_birthday' => Mage::helper('customersegmentation')->__('Days Until Birthday'),
         ];
+        $attributes = $this->addCustomAttributeOptions($attributes, 'customer');
 
         asort($attributes);
         $this->setAttributeOption($attributes);
@@ -53,6 +54,10 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
     #[\Override]
     public function getInputType(): string
     {
+        $custom = $this->getSelectedCustomAttribute('customer');
+        if ($custom) {
+            return $this->getCustomInputType($custom);
+        }
         return match ($this->getAttribute()) {
             'gender' => 'select',
             'group_id', 'store_id' => 'multiselect',
@@ -65,6 +70,10 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
     #[\Override]
     public function getValueElementType(): string
     {
+        $custom = $this->getSelectedCustomAttribute('customer');
+        if ($custom) {
+            return $this->getCustomValueElementType($custom);
+        }
         return match ($this->getAttribute()) {
             'gender', 'group_id', 'store_id' => 'select',
             'dob', 'created_at' => 'date',
@@ -75,6 +84,10 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
     #[\Override]
     public function getOperatorSelectOptions(): array
     {
+        $custom = $this->getSelectedCustomAttribute('customer');
+        if ($custom && ($customOperators = $this->getCustomOperatorOptions($custom)) !== null) {
+            return $customOperators;
+        }
         $operators = parent::getOperatorSelectOptions();
 
         // For selection fields, use simple is/is not operators
@@ -92,7 +105,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
     public function getValueSelectOptions(): array
     {
         if (!$this->hasData('value_select_options')) {
-            $options = match ($this->getAttribute()) {
+            $custom = $this->getSelectedCustomAttribute('customer');
+            $options = $custom ? $this->getCustomValueOptions($custom) : match ($this->getAttribute()) {
                 'gender' => Mage::getResourceSingleton('customer/customer')
                     ->getAttribute('gender')
                     ->getSource()
@@ -138,6 +152,11 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
 
             case 'days_until_birthday':
                 return $this->buildDaysUntilBirthdayCondition($adapter, $operator, $value);
+        }
+
+        $custom = $this->getSelectedCustomAttribute('customer');
+        if ($custom) {
+            return $this->buildCustomAttributeCondition($adapter, $custom, 'e.entity_id');
         }
 
         return false;
