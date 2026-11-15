@@ -341,7 +341,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     /**
      * Remove old index data
      */
-    protected function _removeOldIndexData(Mage_Core_Model_Website $website)
+    protected function _removeOldIndexData(Mage_Core_Model_Website $website): void
     {
         $this->_connection->delete(
             $this->_resource->getTable('catalogrule/rule_product_price'),
@@ -535,7 +535,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
      * Prepare data for group website relation
      * @param int $timestamp
      */
-    protected function _prepareGroupWebsite($timestamp)
+    protected function _prepareGroupWebsite($timestamp): void
     {
         $this->_connection->delete($this->_resource->getTable('catalogrule/rule_group_website'), []);
         $select = $this->_connection->select()

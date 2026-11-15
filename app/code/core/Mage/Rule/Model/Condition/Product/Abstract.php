@@ -149,7 +149,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
     /**
      * Add special attributes
      */
-    protected function _addSpecialAttributes(array &$attributes)
+    protected function _addSpecialAttributes(array &$attributes): void
     {
         $attributes['attribute_set_id'] = Mage::helper('catalog')->__('Attribute Set');
         $attributes['category_ids'] = Mage::helper('catalog')->__('Category');

@@ -21,10 +21,9 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Decimal extends Mage_Catal
      *
      * @param array $entityIds      the entity ids limitation
      * @param int $attributeId      the attribute id limitation
-     * @return $this
      */
     #[\Override]
-    protected function _prepareIndex($entityIds = null, $attributeId = null)
+    protected function _prepareIndex($entityIds = null, $attributeId = null): static
     {
         $write      = $this->_getWriteAdapter();
         $idxTable   = $this->getIdxTable();

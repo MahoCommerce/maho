@@ -14,10 +14,9 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Configurable extends Ma
      * Reindex stock data for defined configurable product ids
      *
      * @param int|array $entityIds
-     * @return $this
      */
     #[\Override]
-    public function reindexEntity($entityIds)
+    public function reindexEntity($entityIds): static
     {
         $this->_updateIndex($entityIds);
         return $this;

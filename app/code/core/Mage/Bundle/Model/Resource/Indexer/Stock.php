@@ -14,10 +14,9 @@ class Mage_Bundle_Model_Resource_Indexer_Stock extends Mage_CatalogInventory_Mod
      * Reindex temporary (price result data) for defined product(s)
      *
      * @param int|array $entityIds
-     * @return $this
      */
     #[\Override]
-    public function reindexEntity($entityIds)
+    public function reindexEntity($entityIds): static
     {
         $this->_updateIndex($entityIds);
 

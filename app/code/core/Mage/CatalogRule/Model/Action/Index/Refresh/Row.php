@@ -39,7 +39,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh_Row extends Mage_CatalogRule_M
      * @param int $timestamp
      */
     #[\Override]
-    protected function _prepareGroupWebsite($timestamp) {}
+    protected function _prepareGroupWebsite($timestamp): void {}
 
     /**
      * Prepare temporary data
@@ -57,7 +57,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh_Row extends Mage_CatalogRule_M
      * Remove old index data
      */
     #[\Override]
-    protected function _removeOldIndexData(Mage_Core_Model_Website $website)
+    protected function _removeOldIndexData(Mage_Core_Model_Website $website): void
     {
         $this->_connection->query(
             $this->_connection->deleteFromSelect(

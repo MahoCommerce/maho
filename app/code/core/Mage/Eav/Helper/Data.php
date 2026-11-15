@@ -22,7 +22,7 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
 
     protected array $_attributesLockedFields = [];
 
-    protected $_entityTypeFrontendClasses = [];
+    protected array $_entityTypeFrontendClasses = [];
 
     /**
      * Return default frontend classes value labal array

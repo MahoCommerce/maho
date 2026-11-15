@@ -32,11 +32,9 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Default extends Mage_Ca
 
     /**
      * Reindex all stock status data for default logic product type
-     *
-     * @return $this
      */
     #[\Override]
-    public function reindexAll()
+    public function reindexAll(): static
     {
         $this->useIdxTable(true);
         $this->beginTransaction();
@@ -54,10 +52,9 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Default extends Mage_Ca
      * Reindex stock data for defined product ids
      *
      * @param int|array $entityIds
-     * @return $this
      */
     #[\Override]
-    public function reindexEntity($entityIds)
+    public function reindexEntity($entityIds): static
     {
         $this->_updateIndex($entityIds);
         return $this;
@@ -67,10 +64,9 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Default extends Mage_Ca
      * Set active Product Type Id
      *
      * @param string $typeId
-     * @return $this
      */
     #[\Override]
-    public function setTypeId($typeId)
+    public function setTypeId($typeId): static
     {
         $this->_typeId = $typeId;
         return $this;
@@ -80,11 +76,9 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Default extends Mage_Ca
      * Retrieve active Product Type Id
      *
      * @throws Mage_Core_Exception
-     *
-     * @return string
      */
     #[\Override]
-    public function getTypeId()
+    public function getTypeId(): string
     {
         if (is_null($this->_typeId)) {
             Mage::throwException(Mage::helper('cataloginventory')->__('Undefined product type.'));

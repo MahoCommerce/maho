@@ -76,22 +76,18 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
 
     /**
      * Get backend type of the attribute
-     *
-     * @return string
      */
     #[\Override]
-    public function getType()
+    public function getType(): ?string
     {
         return $this->getAttribute()->getBackendType();
     }
 
     /**
      * Check whether the attribute is a real field in the entity table
-     *
-     * @return bool
      */
     #[\Override]
-    public function isStatic()
+    public function isStatic(): bool
     {
         return $this->getAttribute()->isStatic();
     }
@@ -121,11 +117,9 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
 
     /**
      * Get entity_id field in the attribute values tables
-     *
-     * @return string
      */
     #[\Override]
-    public function getEntityIdField()
+    public function getEntityIdField(): ?string
     {
         if (empty($this->_entityIdField)) {
             if ($this->getAttribute()->getEntityIdField()) {
@@ -156,10 +150,9 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      *
      * @param \Maho\DataObject $entity
      * @param int $valueId
-     * @return $this
      */
     #[\Override]
-    public function setEntityValueId($entity, $valueId)
+    public function setEntityValueId($entity, $valueId): static
     {
         if (!$entity || !$entity->getId()) {
             return $this->setValueId($valueId);

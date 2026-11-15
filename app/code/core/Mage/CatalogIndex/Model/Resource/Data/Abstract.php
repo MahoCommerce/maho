@@ -158,7 +158,7 @@ class Mage_CatalogIndex_Model_Resource_Data_Abstract extends Mage_Core_Model_Res
      * @param int $id
      * @param array $additionalWheres
      */
-    protected function _prepareLinkFetchSelect($store, $table, $idField, $whereField, $id, $additionalWheres = []) {}
+    protected function _prepareLinkFetchSelect($store, $table, $idField, $whereField, $id, $additionalWheres = []): void {}
 
     /**
      * Return minimal prices for specified products

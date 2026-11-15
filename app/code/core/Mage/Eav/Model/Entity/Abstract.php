@@ -105,7 +105,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @var string
      */
-    protected $_entityTablePrefix;
+    protected ?string $_entityTablePrefix = null;
 
     /**
      * Partial load flag

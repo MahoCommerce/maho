@@ -1429,7 +1429,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      *
      * return array
      */
-    public function getLoadedIds()
+    public function getLoadedIds(): array
     {
         return array_keys($this->_items);
     }

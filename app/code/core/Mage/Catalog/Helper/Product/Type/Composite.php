@@ -87,7 +87,7 @@ class Mage_Catalog_Helper_Product_Type_Composite extends Mage_Core_Helper_Abstra
      *
      * @return Mage_Core_Model_Store
      */
-    public function getCurrentStore($storeId = null)
+    public function getCurrentStore(bool|int|string|Mage_Core_Model_Store|null $storeId = null)
     {
         return Mage::app()->getStore($storeId);
     }

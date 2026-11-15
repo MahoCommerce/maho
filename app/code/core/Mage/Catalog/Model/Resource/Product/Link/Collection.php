@@ -26,10 +26,8 @@ class Mage_Catalog_Model_Resource_Product_Link_Collection extends Mage_Core_Mode
 
     /**
      * Product Link Type identifier
-     *
-     * @var Mage_Catalog_Model_Product_Type
      */
-    protected $_linkTypeId;
+    protected ?int $_linkTypeId = null;
 
     #[\Override]
     protected function _construct()
