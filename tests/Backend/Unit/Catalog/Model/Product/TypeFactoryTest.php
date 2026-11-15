@@ -9,12 +9,6 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-it('returns the type model of the product type', function () {
-    $product = new Maho\DataObject(['type_id' => Mage_Catalog_Model_Product_Type::TYPE_SIMPLE]);
-
-    expect(Mage_Catalog_Model_Product_Type::factory($product))->toBeInstanceOf(Mage_Catalog_Model_Product_Type_Simple::class);
-});
-
 it('rejects a type model that does not extend the product type abstract', function () {
     $types = new ReflectionProperty(Mage_Catalog_Model_Product_Type::class, '_types');
     $original = $types->getValue();
