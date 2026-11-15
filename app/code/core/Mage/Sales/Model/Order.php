@@ -148,7 +148,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      */
     protected $_creditmemos;
 
-    protected $_relatedObjects  = [];
+    protected array $_relatedObjects  = [];
     protected $_orderCurrency   = null;
     protected $_baseCurrency    = null;
 

@@ -33,7 +33,7 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
      */
     protected $_productUrlSuffix = [];
 
-    protected $_statuses;
+    protected ?array $_statuses = null;
 
     protected $_priceBlock;
 

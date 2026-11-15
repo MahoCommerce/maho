@@ -10,8 +10,8 @@
 
 class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Store extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
-    protected $_skipAllStoresLabel = false;
-    protected $_skipEmptyStoresLabel = false;
+    protected bool $_skipAllStoresLabel = false;
+    protected bool $_skipEmptyStoresLabel = false;
 
     /**
      * Retrieve System Store model

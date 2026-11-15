@@ -68,7 +68,7 @@ class Config
      *
      * @example <allResources extends="/config/modules//resource"/>
      */
-    protected $_xpathExtends = '//*[@extends]';
+    protected string $_xpathExtends = '//*[@extends]';
 
     /**
      * Constructor

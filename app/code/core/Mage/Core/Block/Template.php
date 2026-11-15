@@ -36,10 +36,10 @@ class Mage_Core_Block_Template extends Mage_Core_Block_Abstract
 
     protected $_jsUrl;
 
-    protected static $_showTemplateHintsAdmin;
-    protected static $_showTemplateHintsBlocksAdmin;
-    protected static $_showTemplateHints;
-    protected static $_showTemplateHintsBlocks;
+    protected static ?bool $_showTemplateHintsAdmin = null;
+    protected static ?bool $_showTemplateHintsBlocksAdmin = null;
+    protected static ?bool $_showTemplateHints = null;
+    protected static ?bool $_showTemplateHintsBlocks = null;
 
     /**
      * Path to template file in theme.

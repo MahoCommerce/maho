@@ -21,8 +21,8 @@ class Mage_Core_Model_Design_Package
     public const PREVIEW_PACKAGE_PARAM = '___package';
     public const PREVIEW_SKIN_PARAM = '___skin';
 
-    private static $_regexMatchCache      = [];
-    private static $_customThemeTypeCache = [];
+    private static array $_regexMatchCache      = [];
+    private static array $_customThemeTypeCache = [];
 
     /**
      * Current Store for generation ofr base_dir and base_url

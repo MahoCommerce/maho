@@ -17,8 +17,8 @@ class Mage_Core_Controller_Varien_Exception extends Exception
 
     protected $_resultCallback       = null;
     protected $_resultCallbackParams = [];
-    protected $_defaultActionName    = 'noroute';
-    protected $_flags                = [];
+    protected string $_defaultActionName    = 'noroute';
+    protected array $_flags                = [];
 
     /**
      * Prepare data for forwarding action

@@ -10,7 +10,7 @@
 
 class Mage_Shipping_Model_Tracking_Result
 {
-    protected $_trackings = [];
+    protected array $_trackings = [];
     protected $_error = null;
 
     /**

@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Block_Widget_Form_Renderer_Fieldset extends Mage_Adminhtml_Block_Template implements \Maho\Data\Form\Element\Renderer\RendererInterface
 {
-    protected $_element;
+    protected ?\Maho\Data\Form\Element\AbstractElement $_element = null;
 
     #[\Override]
     protected function _construct()

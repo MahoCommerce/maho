@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Review_Block_Product_View_List extends Mage_Review_Block_Product_View
 {
-    protected $_forceHasOptions = false;
+    protected bool $_forceHasOptions = false;
 
     #[\Override]
     public function getProductId(): ?int

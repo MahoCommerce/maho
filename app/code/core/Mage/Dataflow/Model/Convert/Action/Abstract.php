@@ -33,7 +33,7 @@ abstract class Mage_Dataflow_Model_Convert_Action_Abstract implements Mage_Dataf
      */
     protected $_profile;
 
-    protected $_actions = [];
+    protected array $_actions = [];
 
     /**
      * Action's container
@@ -42,7 +42,7 @@ abstract class Mage_Dataflow_Model_Convert_Action_Abstract implements Mage_Dataf
      */
     protected $_container;
 
-    protected $_actionDefaultClass = 'Mage_Dataflow_Model_Convert_Action';
+    protected string $_actionDefaultClass = 'Mage_Dataflow_Model_Convert_Action';
 
     /**
      * Get action parameter

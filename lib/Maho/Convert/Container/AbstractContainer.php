@@ -17,7 +17,7 @@ use Maho\Convert\Profile\AbstractProfile;
 abstract class AbstractContainer implements ContainerInterface
 {
     protected $_vars;
-    protected $_profile;
+    protected ?\Maho\Convert\Profile\AbstractProfile $_profile = null;
     protected $_data;
     protected $_position;
 

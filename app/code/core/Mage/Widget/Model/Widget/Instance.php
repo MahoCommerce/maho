@@ -30,7 +30,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
 
     public const XML_NODE_RELATED_CACHE = 'global/widget/related_cache_types';
 
-    protected $_layoutHandles = [];
+    protected array $_layoutHandles = [];
 
     protected $_specificEntitiesLayoutHandles = [];
 

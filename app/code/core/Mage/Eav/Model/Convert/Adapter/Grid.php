@@ -10,7 +10,7 @@
 
 class Mage_Eav_Model_Convert_Adapter_Grid extends Mage_Dataflow_Model_Convert_Adapter_Abstract
 {
-    protected $_entity;
+    protected ?\Mage_Eav_Model_Entity_Interface $_entity = null;
 
     /**
      * @var string

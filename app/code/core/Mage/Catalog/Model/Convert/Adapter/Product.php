@@ -13,7 +13,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
     public const MULTI_DELIMITER   = ' , ';
     public const ENTITY            = 'catalog_product_import';
 
-    protected $_eventPrefix = 'catalog_product_import';
+    protected string $_eventPrefix = 'catalog_product_import';
 
     /**
      * Product model
@@ -50,13 +50,13 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
      */
     protected $_storesIdCode = [];
 
-    protected $_attributes = [];
+    protected array $_attributes = [];
 
-    protected $_configs = [];
+    protected array $_configs = [];
 
-    protected $_requiredFields = [];
+    protected array $_requiredFields = [];
 
-    protected $_ignoreFields = [];
+    protected array $_ignoreFields = [];
 
     /**
      * Inventory Fields array
@@ -72,7 +72,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
      */
     protected $_inventoryFieldsProductTypes = [];
 
-    protected $_toNumber = [];
+    protected array $_toNumber = [];
 
     /**
      * Gallery backend model
@@ -354,7 +354,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
         }
     }
 
-    protected $_productId = '';
+    protected string $_productId = '';
 
     /**
      * Initialize convert adapter model for products collection

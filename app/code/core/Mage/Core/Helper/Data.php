@@ -64,7 +64,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      */
     protected $_encryptor = null;
 
-    protected $_allowedFormats = [
+    protected array $_allowedFormats = [
         Mage_Core_Model_Locale::FORMAT_TYPE_FULL,
         Mage_Core_Model_Locale::FORMAT_TYPE_LONG,
         Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM,

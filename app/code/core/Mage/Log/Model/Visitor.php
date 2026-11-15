@@ -19,7 +19,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
     public const VISITOR_TYPE_CUSTOMER = 'c';
     public const VISITOR_TYPE_VISITOR  = 'v';
 
-    protected $_skipRequestLogging = false;
+    protected bool $_skipRequestLogging = false;
 
     /**
      * @var Mage_Log_Helper_Data

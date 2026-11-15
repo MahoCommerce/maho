@@ -17,7 +17,7 @@ class Csv
     protected $_lineLength = 0;
     protected $_delimiter = ',';
     protected $_enclosure = '"';
-    protected $_escape = '\\';
+    protected string $_escape = '\\';
 
     public function __construct() {}
 

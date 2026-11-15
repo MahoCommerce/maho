@@ -10,7 +10,7 @@
 
 class Mage_Bundle_Block_Catalog_Product_List_Partof extends Mage_Catalog_Block_Product_Abstract
 {
-    protected $_columnCount = 4;
+    protected int $_columnCount = 4;
     protected $_items;
     protected $_itemCollection;
     protected $_product = null;

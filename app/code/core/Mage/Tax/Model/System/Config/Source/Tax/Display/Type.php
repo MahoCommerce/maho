@@ -10,7 +10,7 @@
 
 class Mage_Tax_Model_System_Config_Source_Tax_Display_Type
 {
-    protected $_options;
+    protected ?array $_options = null;
 
     public function toOptionArray(): array
     {

@@ -20,7 +20,7 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
     #[\Override]
     protected $_moduleName = 'Mage_Eav';
 
-    protected $_attributesLockedFields = [];
+    protected array $_attributesLockedFields = [];
 
     protected $_entityTypeFrontendClasses = [];
 

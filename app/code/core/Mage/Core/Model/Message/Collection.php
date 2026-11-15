@@ -16,7 +16,7 @@ class Mage_Core_Model_Message_Collection
      * @var array
      */
     protected $_messages = [];
-    protected $_lastAddedMessage;
+    protected ?\Mage_Core_Model_Message_Abstract $_lastAddedMessage = null;
 
     /**
      * Adding new message to collection

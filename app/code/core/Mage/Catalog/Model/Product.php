@@ -60,7 +60,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     protected $_eventPrefix      = 'catalog_product';
     #[\Override]
     protected $_eventObject      = 'product';
-    protected $_canAffectOptions = false;
+    protected bool $_canAffectOptions = false;
 
     /**
      * Product type instance
@@ -98,11 +98,11 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     protected static $_url;
     protected static $_urlRewrite;
 
-    protected $_errors = [];
+    protected array $_errors = [];
 
     protected $_optionInstance;
 
-    protected $_options = [];
+    protected array $_options = [];
 
     /**
      * Flag for available duplicate function

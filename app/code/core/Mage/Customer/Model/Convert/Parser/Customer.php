@@ -36,7 +36,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
      */
     protected $_websites;
 
-    protected $_attributes = [];
+    protected array $_attributes = [];
 
     protected $_fields;
 
