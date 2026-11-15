@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items extends Mage_Adminhtml_Block_Sales_Items_Abstract
 {
-    protected $_disableSubmitButton = false;
+    protected bool $_disableSubmitButton = false;
 
     /**
      * Prepare child blocks

@@ -17,7 +17,7 @@ declare(strict_types=1);
  */
 class Mage_ConfigurableSwatches_Block_Catalog_Layer_State_Swatch extends Mage_Core_Block_Template
 {
-    protected $_initDone = false;
+    protected bool $_initDone = false;
 
     /**
      * Determine if we should use this block to render a state filter

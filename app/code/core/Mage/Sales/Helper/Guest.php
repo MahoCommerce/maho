@@ -16,8 +16,8 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
     /**
      * Cookie params
      */
-    protected $_cookieName  = 'guest-view';
-    protected $_lifeTime    = 600;
+    protected string $_cookieName  = 'guest-view';
+    protected int $_lifeTime    = 600;
 
     /**
      * Try to load valid order by $_POST or $_COOKIE

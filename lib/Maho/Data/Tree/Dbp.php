@@ -42,7 +42,7 @@ class Dbp extends Tree
      */
     protected $_table;
 
-    protected $_loaded = false;
+    protected bool $_loaded = false;
 
     /**
      * SQL select object

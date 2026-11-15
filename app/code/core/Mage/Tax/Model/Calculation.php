@@ -46,15 +46,15 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
     /**
      * Identifier constant for unit based calculation
      */
-    protected $_rates                           = [];
+    protected array $_rates                           = [];
     /**
      * Identifier constant for row based calculation
      */
-    protected $_ctc                             = [];
+    protected array $_ctc                             = [];
     /**
      * Identifier constant for total based calculation
      */
-    protected $_ptc                             = [];
+    protected array $_ptc                             = [];
 
     /**
      * CALC_UNIT_BASE

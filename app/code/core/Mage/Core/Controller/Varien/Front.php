@@ -21,7 +21,7 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
      */
     protected $_routers = [];
 
-    protected $_urlCache = [];
+    protected array $_urlCache = [];
 
     public const XML_STORE_ROUTERS_PATH = 'web/routers';
 

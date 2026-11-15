@@ -11,7 +11,7 @@ namespace Maho\Convert\Container;
 
 class Collection
 {
-    protected $_items = [];
+    protected array $_items = [];
     protected $_defaultClass = \Maho\Convert\Container\Generic::class;
 
     public function setDefaultClass($className): static

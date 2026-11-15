@@ -12,7 +12,7 @@ class Mage_Rss_Block_List extends Mage_Core_Block_Template
 {
     public const XML_PATH_RSS_METHODS = 'rss';
 
-    protected $_rssFeeds = [];
+    protected array $_rssFeeds = [];
 
     /**
      * Add Link elements to head

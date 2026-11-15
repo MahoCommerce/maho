@@ -55,7 +55,7 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
         ],
     ];
 
-    protected $_relatedConfigSettings = [
+    protected array $_relatedConfigSettings = [
         Mage_Catalog_Helper_Category::XML_PATH_CATEGORY_URL_SUFFIX,
         Mage_Catalog_Helper_Product::XML_PATH_PRODUCT_URL_SUFFIX,
         Mage_Catalog_Helper_Product::XML_PATH_PRODUCT_URL_USE_CATEGORY,

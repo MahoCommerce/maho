@@ -42,7 +42,7 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
      * @var array
      */
     protected $_streetLines     = [];
-    protected $_formatTemplate  = [];
+    protected array $_formatTemplate  = [];
 
     /**
      * Addresses url

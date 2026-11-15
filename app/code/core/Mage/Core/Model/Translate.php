@@ -39,7 +39,7 @@ class Mage_Core_Model_Translate
      */
     protected $_config;
 
-    protected $_useCache = true;
+    protected bool $_useCache = true;
 
     /**
      * Cache identifier

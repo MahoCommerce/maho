@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Sales_Order_Totalbar extends Mage_Adminhtml_Block_Sales_Order_Abstract
 {
-    protected $_totals = [];
+    protected array $_totals = [];
 
     /**
      * Retrieve required options from parent

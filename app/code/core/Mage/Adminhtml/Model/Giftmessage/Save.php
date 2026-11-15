@@ -17,7 +17,7 @@ declare(strict_types=1);
  */
 class Mage_Adminhtml_Model_Giftmessage_Save extends \Maho\DataObject
 {
-    protected $_saved = false;
+    protected bool $_saved = false;
 
     /**
      * Save all seted giftmessages

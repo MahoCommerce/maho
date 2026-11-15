@@ -10,7 +10,7 @@
 
 class Mage_Sales_Block_Order_Info extends Mage_Core_Block_Template
 {
-    protected $_links = [];
+    protected array $_links = [];
 
     #[\Override]
     protected function _construct()

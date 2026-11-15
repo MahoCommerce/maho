@@ -32,9 +32,9 @@ class Form extends AbstractForm
      */
     protected $_elementsIndex;
 
-    protected static $_defaultElementRenderer;
-    protected static $_defaultFieldsetRenderer;
-    protected static $_defaultFieldsetElementRenderer;
+    protected static ?\Maho\Data\Form\Element\Renderer\RendererInterface $_defaultElementRenderer = null;
+    protected static ?\Maho\Data\Form\Element\Renderer\RendererInterface $_defaultFieldsetRenderer = null;
+    protected static ?\Maho\Data\Form\Element\Renderer\RendererInterface $_defaultFieldsetElementRenderer = null;
 
     public function __construct($attributes = [])
     {

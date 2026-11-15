@@ -10,21 +10,21 @@
 
 class Mage_Dataflow_Model_Convert_Profile_Collection
 {
-    protected $_xml;
+    protected ?\SimpleXMLElement $_xml = null;
 
-    protected $_containers;
+    protected ?object $_containers = null;
 
-    protected $_profiles = [];
+    protected array $_profiles = [];
 
-    protected $_simplexmlDefaultClass = \Maho\Simplexml\Element::class;
+    protected string $_simplexmlDefaultClass = \Maho\Simplexml\Element::class;
 
-    protected $_profileDefaultClass = 'Mage_Dataflow_Model_Convert_Profile';
+    protected string $_profileDefaultClass = 'Mage_Dataflow_Model_Convert_Profile';
 
-    protected $_profileCollectionDefaultClass = 'Mage_Dataflow_Model_Convert_Profile_Collection';
+    protected string $_profileCollectionDefaultClass = 'Mage_Dataflow_Model_Convert_Profile_Collection';
 
     protected $_containerDefaultClass = 'Mage_Dataflow_Model_Convert_Container_Generic';
 
-    protected $_containerCollectionDefaultClass = 'Mage_Dataflow_Model_Convert_Container_Collection';
+    protected string $_containerCollectionDefaultClass = 'Mage_Dataflow_Model_Convert_Container_Collection';
 
     public function getContainers()
     {

@@ -14,7 +14,7 @@ class Mage_Core_Model_File_Validator_Image
 
     protected ?string $_originalFileName = null;
 
-    protected $_allowedImageTypes = [
+    protected array $_allowedImageTypes = [
         IMAGETYPE_WEBP,
         IMAGETYPE_AVIF,
         IMAGETYPE_JPEG,

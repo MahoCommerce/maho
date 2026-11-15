@@ -35,23 +35,23 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
      */
     protected $_productTypes;
 
-    protected $_inventoryFields = [];
+    protected array $_inventoryFields = [];
 
-    protected $_imageFields = [];
+    protected array $_imageFields = [];
 
-    protected $_systemFields = [];
-    protected $_internalFields = [];
-    protected $_externalFields = [];
+    protected array $_systemFields = [];
+    protected array $_internalFields = [];
+    protected array $_externalFields = [];
 
     protected $_inventoryItems = [];
 
     protected $_productModel;
 
-    protected $_setInstances = [];
+    protected array $_setInstances = [];
 
     protected $_store;
     protected $_storeId;
-    protected $_attributes = [];
+    protected array $_attributes = [];
 
     public function __construct()
     {

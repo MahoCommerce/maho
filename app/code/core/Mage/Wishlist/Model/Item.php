@@ -75,7 +75,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
     /**
      * Flag stating that options were successfully saved
      */
-    protected $_flagOptionsSaved = null;
+    protected ?bool $_flagOptionsSaved = null;
 
     #[\Override]
     protected function _construct()

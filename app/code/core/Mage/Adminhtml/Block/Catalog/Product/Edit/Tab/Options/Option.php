@@ -12,7 +12,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
 {
     protected $_product;
     protected $_productInstance;
-    protected $_values;
+    protected ?array $_values = null;
     protected $_itemCount = 1;
 
     public function __construct()

@@ -199,12 +199,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Ajax/Serializer.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Categories::$_selectedNodes has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Categories.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Inventory::getBackordersOption() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -367,18 +361,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options/Option.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option::$_values has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options/Option.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Type_Abstract::$_name has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options/Type/Abstract.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Type_Select::getAddButtonHtml() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -425,12 +407,6 @@ parameters:
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Super/Config/Simple.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Websites::$_storeFromHtml has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Websites.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs::setAttributeTabBlock() has parameter $attributeTabBlock with no type specified.'
@@ -619,22 +595,10 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Sales.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales::$_groupedCollection has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Sales.php
-
-		-
 			rawMessage: Property Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales::$_websiteCounts has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Sales.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Customer_Edit_Tab_Wishlist::$_productHelpers has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/Wishlist.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Customer_Online::getFilterFormHtml() has no return type specified.'
@@ -722,12 +686,6 @@ parameters:
 
 		-
 			rawMessage: Property Mage_Adminhtml_Block_Dashboard_Bar::$_currentCurrencyCode has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Dashboard/Bar.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Dashboard_Bar::$_totals has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Dashboard/Bar.php
@@ -889,24 +847,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Rating/Edit/Tab/Form.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Block_Report_Filter_Form::$_fieldOptions has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Filter/Form.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Report_Filter_Form::$_fieldVisibility has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Filter/Form.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Report_Filter_Form::$_reportTypeOptions has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Filter/Form.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Report_Grid::addGrandTotals() has parameter $total with no type specified.'
 			identifier: missingType.parameter
 			count: 1
@@ -1009,19 +949,7 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Report/Grid.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Block_Report_Grid::$_errors has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Grid.php
-
-		-
 			rawMessage: Property Mage_Adminhtml_Block_Report_Grid::$_filterValues has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Grid.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Report_Grid::$_grandTotals has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Report/Grid.php
@@ -1459,12 +1387,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Totals.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Block_Sales_Order_Create_Totals::$_defaultRenderer has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Totals.php
-
-		-
 			rawMessage: Property Mage_Adminhtml_Block_Sales_Order_Create_Totals::$_totalRenderers has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -1617,12 +1539,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items::getUpdateUrl() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Invoice/Create/Items.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items::$_disableSubmitButton has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Invoice/Create/Items.php
 
@@ -1809,12 +1725,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Sales_Order_Totalbar::getTotals() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Totalbar.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Sales_Order_Totalbar::$_totals has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Totalbar.php
 
@@ -2089,12 +1999,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Modules/DisableOutput.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput::$_dummyElement has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Modules/DisableOutput.php
-
-		-
 			rawMessage: Property Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput::$_fieldRenderer has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -2139,12 +2043,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_System_Config_Form_Fieldset_Order_Statuses::_getFieldRenderer() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Order/Statuses.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_System_Config_Form_Fieldset_Order_Statuses::$_dummyElement has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Order/Statuses.php
 
@@ -2341,12 +2239,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/System/Email/Template/Edit.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Block_System_Email_Template_Grid_Filter_Type::$_types has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Email/Template/Grid/Filter/Type.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_System_Email_Template_Grid_Renderer_Action::_actionsToHtml() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -2363,12 +2255,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/System/Email/Template/Grid/Renderer/Action.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_System_Email_Template_Grid_Renderer_Type::$_types has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Email/Template/Grid/Renderer/Type.php
 
 		-
 			rawMessage: Property Mage_Adminhtml_Block_Tag_Assigned_Grid::$_currentTagModel has no type specified.
@@ -2427,12 +2313,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Tax_Rate_Title::getTitles() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Tax/Rate/Title.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Tax_Rate_Title::$_titles has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Tax/Rate/Title.php
 
@@ -2599,32 +2479,14 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element/Gallery.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Block_Widget_Form_Element_Gallery::$_element has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element/Gallery.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Widget_Form_Renderer_Element::getElement() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Renderer/Element.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Block_Widget_Form_Renderer_Element::$_element has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Renderer/Element.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Widget_Form_Renderer_Fieldset::getElement() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Renderer/Fieldset.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Widget_Form_Renderer_Fieldset::$_element has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Renderer/Fieldset.php
 
@@ -2899,12 +2761,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Checkbox.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Currency::$_currencies has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Currency.php
-
-		-
 			rawMessage: Property Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Currency::$_defaultWidth has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -2941,12 +2797,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Number.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Price::$_currencies has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Price.php
-
-		-
 			rawMessage: Property Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Price::$_defaultWidth has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -2963,18 +2813,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Radio.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Store::$_skipAllStoresLabel has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Store.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Store::$_skipEmptyStoresLabel has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Store.php
 
 		-
 			rawMessage: Property Mage_Adminhtml_Block_Widget_Grid_Massaction_Item::$_massaction has no type specified.
@@ -3021,12 +2859,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Widget_View_Container::getViewHtml() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/View/Container.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Widget_View_Container::$_objectId has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Widget/View/Container.php
 
@@ -3207,12 +3039,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Adminhtml_Model_Giftmessage_Save::importAllowQuoteItemsFromItems() has parameter $items with no type specified.'
 			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Giftmessage/Save.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Model_Giftmessage_Save::$_saved has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/Giftmessage/Save.php
 
@@ -3565,12 +3391,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Allregion.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Model_System_Config_Source_Allregion::$_options has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Allregion.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Model_System_Config_Source_Category::toOptionArray() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -3651,12 +3471,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Adminhtml_Model_System_Config_Source_Currency_Service::toOptionArray() has parameter $isMultiselect with no type specified.'
 			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Currency/Service.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Model_System_Config_Source_Currency_Service::$_options has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Currency/Service.php
 
@@ -3749,12 +3563,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Store.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Model_System_Config_Source_Website::$_options has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Website.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Catalog_Category_WidgetController::_getCategoryTreeBlock() has no return type specified.'
@@ -3937,12 +3745,6 @@ parameters:
 			path: app/code/core/Mage/Bundle/Block/Adminhtml/Catalog/Product/Edit/Tabs.php
 
 		-
-			rawMessage: Property Mage_Bundle_Block_Catalog_Product_List_Partof::$_columnCount has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Bundle/Block/Catalog/Product/List/Partof.php
-
-		-
 			rawMessage: Property Mage_Bundle_Block_Catalog_Product_List_Partof::$_itemCollection has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -4057,12 +3859,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Navigation.php
 
 		-
-			rawMessage: Property Mage_Catalog_Block_Product::$_finalPrice has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Block_Product_Abstract::addPriceBlockType() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -4087,19 +3883,7 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Product/List/Toolbar.php
 
 		-
-			rawMessage: Property Mage_Catalog_Block_Product_List_Upsell::$_columnCount has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/List/Upsell.php
-
-		-
 			rawMessage: Property Mage_Catalog_Block_Product_List_Upsell::$_itemCollection has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/List/Upsell.php
-
-		-
-			rawMessage: Property Mage_Catalog_Block_Product_List_Upsell::$_itemLimits has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Product/List/Upsell.php
@@ -4115,12 +3899,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Product/Price.php
-
-		-
-			rawMessage: Property Mage_Catalog_Block_Product_View_Additional::$_list has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/View/Additional.php
 
 		-
 			rawMessage: 'Parameter #1 $price of method Mage_Core_Model_Store::convertPrice() expects float, string given.'
@@ -4139,12 +3917,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Product/View/Description.php
-
-		-
-			rawMessage: Property Mage_Catalog_Block_Product_View_Options::$_optionRenders has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/View/Options.php
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Core_Block_Html_Select::addOption() expects string, int|null given.'
@@ -4208,12 +3980,6 @@ parameters:
 
 		-
 			rawMessage: Property Mage_Catalog_Block_Seo_Sitemap_Tree_Category::$_currentPage has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Seo/Sitemap/Tree/Category.php
-
-		-
-			rawMessage: Property Mage_Catalog_Block_Seo_Sitemap_Tree_Category::$_from has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Seo/Sitemap/Tree/Category.php
@@ -4309,12 +4075,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Helper/Product.php
 
 		-
-			rawMessage: Property Mage_Catalog_Helper_Product::$_statuses has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Helper/Product.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Helper_Product_Compare::_getUrlCustomParams() has parameter $url with no type specified.'
 			identifier: missingType.parameter
 			count: 1
@@ -4331,18 +4091,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: app/code/core/Mage/Catalog/Helper/Product/Type/Composite.php
-
-		-
-			rawMessage: Property Mage_Catalog_Helper_Product_View::$ERR_BAD_CONTROLLER_INTERFACE has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Helper/Product/View.php
-
-		-
-			rawMessage: Property Mage_Catalog_Helper_Product_View::$ERR_NO_PRODUCT_LOADED has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Helper/Product/View.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Core_Model_Resource_Db_Collection_Abstract::setStoreId().'
@@ -4381,30 +4129,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Config.php
 
 		-
-			rawMessage: Property Mage_Catalog_Model_Config::$_attributeGroupsById has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Config.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Config::$_attributeGroupsByName has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Config.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Config::$_attributeSetsById has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Config.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Config::$_attributeSetsByName has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Config.php
-
-		-
 			rawMessage: Property Mage_Catalog_Model_Config::$_storeId has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -4429,55 +4153,13 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
 
 		-
-			rawMessage: Property Mage_Catalog_Model_Convert_Adapter_Product::$_attributes has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Convert_Adapter_Product::$_configs has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Convert_Adapter_Product::$_eventPrefix has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
-
-		-
 			rawMessage: 'Property Mage_Catalog_Model_Convert_Adapter_Product::$_galleryBackendModel (Mage_Catalog_Model_Product_Attribute_Backend_Media) does not accept Mage_Eav_Model_Entity_Attribute_Backend_Abstract.'
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
 
 		-
-			rawMessage: Property Mage_Catalog_Model_Convert_Adapter_Product::$_ignoreFields has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Convert_Adapter_Product::$_productId has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Convert_Adapter_Product::$_requiredFields has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
-
-		-
 			rawMessage: Property Mage_Catalog_Model_Convert_Adapter_Product::$_stores has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Convert_Adapter_Product::$_toNumber has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
@@ -4491,36 +4173,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Convert_Parser_Product::parse() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Convert_Parser_Product::$_attributes has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Convert_Parser_Product::$_externalFields has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Convert_Parser_Product::$_imageFields has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Convert_Parser_Product::$_internalFields has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Convert_Parser_Product::$_inventoryFields has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
 
@@ -4543,12 +4195,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
 
 		-
-			rawMessage: Property Mage_Catalog_Model_Convert_Parser_Product::$_setInstances has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
-
-		-
 			rawMessage: Property Mage_Catalog_Model_Convert_Parser_Product::$_store has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -4556,12 +4202,6 @@ parameters:
 
 		-
 			rawMessage: Property Mage_Catalog_Model_Convert_Parser_Product::$_storeId has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Convert_Parser_Product::$_systemFields has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
@@ -4587,12 +4227,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Indexer_Url::reindexAll() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Indexer/Url.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Indexer_Url::$_relatedConfigSettings has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Indexer/Url.php
 
@@ -4675,25 +4309,7 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product.php
 
 		-
-			rawMessage: Property Mage_Catalog_Model_Product::$_canAffectOptions has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Product::$_errors has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product.php
-
-		-
 			rawMessage: Property Mage_Catalog_Model_Product::$_optionInstance has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Product::$_options has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product.php
@@ -4747,12 +4363,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Indexer/Price.php
 
 		-
-			rawMessage: Property Mage_Catalog_Model_Product_Indexer_Price::$_relatedConfigSettings has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Indexer/Price.php
-
-		-
 			rawMessage: Property Mage_Catalog_Model_Product_Link::$_attributeCollection has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -4775,12 +4385,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Option/Type/File.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Product_Option_Value::$_option has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Option/Value.php
 
 		-
 			rawMessage: Property Mage_Catalog_Model_Product_Option_Value::$_product has no type specified.
@@ -4807,12 +4411,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Type.php
 
 		-
-			rawMessage: Property Mage_Catalog_Model_Product_Type::$_compositeTypes has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Type.php
-
-		-
 			rawMessage: Property Mage_Catalog_Model_Product_Type::$_priceModels has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -4820,12 +4418,6 @@ parameters:
 
 		-
 			rawMessage: Property Mage_Catalog_Model_Product_Type::$_types has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Type.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Product_Type::$_typesPriority has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Type.php
@@ -4901,12 +4493,6 @@ parameters:
 			identifier: method.notFound
 			count: 2
 			path: app/code/core/Mage/Catalog/Model/Resource/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media::$_eventPrefix has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Attribute/Backend/Media.php
 
 		-
 			rawMessage: 'Parameter #2 $resourceModel of method Mage_Core_Model_Resource_Db_Collection_Abstract::_init() expects Mage_Core_Model_Resource_Db_Abstract|null, string given.'
@@ -5065,18 +4651,6 @@ parameters:
 			path: app/code/core/Mage/CatalogIndex/Model/Indexer/Tierprice.php
 
 		-
-			rawMessage: Property Mage_CatalogIndex_Model_Observer::$_parentProductIds has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Observer.php
-
-		-
-			rawMessage: Property Mage_CatalogIndex_Model_Observer::$_productIdsMassupdate has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Observer.php
-
-		-
 			rawMessage: Property Mage_CatalogIndex_Model_Resource_Abstract::$_storeId has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -5123,12 +4697,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/CatalogIndex/Model/Resource/Setup.php
-
-		-
-			rawMessage: Property Mage_CatalogIndex_Model_Retreiver::$_attributeIdCache has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Retreiver.php
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Core_Block_Html_Select::addOption() expects string, int given.'
@@ -5371,12 +4939,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Block/Cart/Item/Renderer/Grouped.php
 
 		-
-			rawMessage: Property Mage_Checkout_Block_Cart_Totals::$_defaultRenderer has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Checkout/Block/Cart/Totals.php
-
-		-
 			rawMessage: Property Mage_Checkout_Block_Cart_Totals::$_totalRenderers has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -5479,18 +5041,6 @@ parameters:
 			path: app/code/core/Mage/Cms/controllers/PageController.php
 
 		-
-			rawMessage: Property Mage_ConfigurableSwatches_Block_Catalog_Layer_State_Swatch::$_initDone has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/ConfigurableSwatches/Block/Catalog/Layer/State/Swatch.php
-
-		-
-			rawMessage: Property Mage_ConfigurableSwatches_Block_Catalog_Product_View_Type_Configurable_Swatches::$_initDone has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/ConfigurableSwatches/Block/Catalog/Product/View/Type/Configurable/Swatches.php
-
-		-
 			rawMessage: Property Mage_ConfigurableSwatches_Helper_Data::$_configAttributeIds has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -5533,18 +5083,6 @@ parameters:
 			path: app/code/core/Mage/Core/Block/Profiler.php
 
 		-
-			rawMessage: Property Mage_Core_Block_Store_Switcher::$_groups has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Block/Store/Switcher.php
-
-		-
-			rawMessage: Property Mage_Core_Block_Store_Switcher::$_loaded has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Block/Store/Switcher.php
-
-		-
 			rawMessage: Property Mage_Core_Block_Store_Switcher::$_stores has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -5558,30 +5096,6 @@ parameters:
 
 		-
 			rawMessage: Property Mage_Core_Block_Template::$_jsUrl has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Block/Template.php
-
-		-
-			rawMessage: Property Mage_Core_Block_Template::$_showTemplateHints has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Block/Template.php
-
-		-
-			rawMessage: Property Mage_Core_Block_Template::$_showTemplateHintsAdmin has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Block/Template.php
-
-		-
-			rawMessage: Property Mage_Core_Block_Template::$_showTemplateHintsBlocks has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Block/Template.php
-
-		-
-			rawMessage: Property Mage_Core_Block_Template::$_showTemplateHintsBlocksAdmin has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Core/Block/Template.php
@@ -5617,18 +5131,6 @@ parameters:
 			path: app/code/core/Mage/Core/Controller/Varien/Action.php
 
 		-
-			rawMessage: Property Mage_Core_Controller_Varien_Exception::$_defaultActionName has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Exception.php
-
-		-
-			rawMessage: Property Mage_Core_Controller_Varien_Exception::$_flags has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Exception.php
-
-		-
 			rawMessage: Property Mage_Core_Controller_Varien_Exception::$_resultCallback has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -5653,28 +5155,10 @@ parameters:
 			path: app/code/core/Mage/Core/Controller/Varien/Front.php
 
 		-
-			rawMessage: Property Mage_Core_Controller_Varien_Front::$_urlCache has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Front.php
-
-		-
 			rawMessage: Property Mage_Core_Controller_Varien_Router_Abstract::$_front has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Core/Controller/Varien/Router/Abstract.php
-
-		-
-			rawMessage: Property Mage_Core_Exception::$_messages has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Exception.php
-
-		-
-			rawMessage: Property Mage_Core_Helper_Data::$_allowedFormats has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Helper/Data.php
 
 		-
 			rawMessage: 'Parameter #2 $arguments of static method Mage::getResourceModel() expects array, object given.'
@@ -5725,12 +5209,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Config.php
 
 		-
-			rawMessage: Property Mage_Core_Model_Cookie::$_lifetime has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Cookie.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Core_Model_Resource_Design::validate().'
 			identifier: method.notFound
 			count: 1
@@ -5747,18 +5225,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Core/Model/Design/Config.php
-
-		-
-			rawMessage: Property Mage_Core_Model_Design_Package::$_customThemeTypeCache has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Design/Package.php
-
-		-
-			rawMessage: Property Mage_Core_Model_Design_Package::$_regexMatchCache has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Design/Package.php
 
 		-
 			rawMessage: Property Mage_Core_Model_Design_Source_Design::$_isFullLabel has no type specified.
@@ -5779,19 +5245,7 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Email/Template.php
 
 		-
-			rawMessage: Property Mage_Core_Model_Email_Template::$_bccEmails has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Email/Template.php
-
-		-
 			rawMessage: Property Mage_Core_Model_Email_Template::$_defaultTemplates has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Email/Template.php
-
-		-
-			rawMessage: Property Mage_Core_Model_Email_Template::$_preprocessFlag has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Core/Model/Email/Template.php
@@ -5803,20 +5257,8 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Email/Template.php
 
 		-
-			rawMessage: Property Mage_Core_Model_Email_Template_Abstract::$_cssFileCache has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Email/Template/Abstract.php
-
-		-
 			rawMessage: 'Parameter #2 $name of method Mage_Core_Model_Layout::createBlock() expects string, null given.'
 			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Email/Template/Filter.php
-
-		-
-			rawMessage: Property Mage_Core_Model_Email_Template_Filter::$_plainTemplateMode has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Core/Model/Email/Template/Filter.php
 
@@ -5829,12 +5271,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Core_Model_File_Validator_Image::validate() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/File/Validator/Image.php
-
-		-
-			rawMessage: Property Mage_Core_Model_File_Validator_Image::$_allowedImageTypes has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Core/Model/File/Validator/Image.php
 
@@ -5861,18 +5297,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Core/Model/Layout.php
-
-		-
-			rawMessage: Property Mage_Core_Model_Layout::$invalidActions has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Layout.php
-
-		-
-			rawMessage: Property Mage_Core_Model_Locale::$_currencyCache has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Locale.php
 
 		-
 			rawMessage: Property Mage_Core_Model_Message_Abstract::$_class has no type specified.
@@ -5909,12 +5333,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Core/Model/Message/Abstract.php
-
-		-
-			rawMessage: Property Mage_Core_Model_Message_Collection::$_lastAddedMessage has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Message/Collection.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Core_Model_Resource_Type_Abstract::getConnection().'
@@ -5973,12 +5391,6 @@ parameters:
 		-
 			rawMessage: 'Parameter #2 $scope of method Mage_Core_Model_Translate::_addData() expects string, false given.'
 			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Translate.php
-
-		-
-			rawMessage: Property Mage_Core_Model_Translate::$_useCache has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Core/Model/Translate.php
 
@@ -6103,12 +5515,6 @@ parameters:
 			path: app/code/core/Mage/Customer/Helper/Address.php
 
 		-
-			rawMessage: Property Mage_Customer_Helper_Address::$_formatTemplate has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Customer/Helper/Address.php
-
-		-
 			rawMessage: 'Property Mage_Customer_Helper_Data::$_groups (Mage_Customer_Model_Entity_Group_Collection|null) does not accept Mage_Customer_Model_Resource_Group_Collection.'
 			identifier: assign.propertyType
 			count: 1
@@ -6139,43 +5545,7 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
 
 		-
-			rawMessage: Property Mage_Customer_Model_Convert_Adapter_Customer::$_addressFields has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
-
-		-
-			rawMessage: Property Mage_Customer_Model_Convert_Adapter_Customer::$_attributes has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
-
-		-
 			rawMessage: Property Mage_Customer_Model_Convert_Adapter_Customer::$_billingAddressModel has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
-
-		-
-			rawMessage: Property Mage_Customer_Model_Convert_Adapter_Customer::$_billingFields has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
-
-		-
-			rawMessage: Property Mage_Customer_Model_Convert_Adapter_Customer::$_billingMappedFields has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
-
-		-
-			rawMessage: Property Mage_Customer_Model_Convert_Adapter_Customer::$_billingRequiredFields has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
-
-		-
-			rawMessage: Property Mage_Customer_Model_Convert_Adapter_Customer::$_billingStreetFields has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
@@ -6187,61 +5557,7 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
 
 		-
-			rawMessage: Property Mage_Customer_Model_Convert_Adapter_Customer::$_customerGroups has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
-
-		-
-			rawMessage: Property Mage_Customer_Model_Convert_Adapter_Customer::$_customerId has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
-
-		-
-			rawMessage: Property Mage_Customer_Model_Convert_Adapter_Customer::$_ignoreFields has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
-
-		-
-			rawMessage: Property Mage_Customer_Model_Convert_Adapter_Customer::$_regions has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
-
-		-
-			rawMessage: Property Mage_Customer_Model_Convert_Adapter_Customer::$_requiredFields has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
-
-		-
 			rawMessage: Property Mage_Customer_Model_Convert_Adapter_Customer::$_shippingAddressModel has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
-
-		-
-			rawMessage: Property Mage_Customer_Model_Convert_Adapter_Customer::$_shippingFields has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
-
-		-
-			rawMessage: Property Mage_Customer_Model_Convert_Adapter_Customer::$_shippingMappedFields has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
-
-		-
-			rawMessage: Property Mage_Customer_Model_Convert_Adapter_Customer::$_shippingRequiredFields has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
-
-		-
-			rawMessage: Property Mage_Customer_Model_Convert_Adapter_Customer::$_shippingStreetFields has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
@@ -6267,12 +5583,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Customer_Model_Convert_Parser_Customer::parse() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Parser/Customer.php
-
-		-
-			rawMessage: Property Mage_Customer_Model_Convert_Parser_Customer::$_attributes has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Convert/Parser/Customer.php
 
@@ -6465,18 +5775,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Action_Abstract::addAction() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Action/Abstract.php
-
-		-
-			rawMessage: Property Mage_Dataflow_Model_Convert_Action_Abstract::$_actionDefaultClass has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Action/Abstract.php
-
-		-
-			rawMessage: Property Mage_Dataflow_Model_Convert_Action_Abstract::$_actions has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Convert/Action/Abstract.php
 
@@ -6691,12 +5989,6 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert/Container/Abstract.php
 
 		-
-			rawMessage: Property Mage_Dataflow_Model_Convert_Container_Abstract::$_action has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Container/Abstract.php
-
-		-
 			rawMessage: Property Mage_Dataflow_Model_Convert_Container_Abstract::$_batchParams has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -6710,12 +6002,6 @@ parameters:
 
 		-
 			rawMessage: Property Mage_Dataflow_Model_Convert_Container_Abstract::$_position has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Container/Abstract.php
-
-		-
-			rawMessage: Property Mage_Dataflow_Model_Convert_Container_Abstract::$_profile has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Convert/Container/Abstract.php
@@ -6776,12 +6062,6 @@ parameters:
 
 		-
 			rawMessage: Property Mage_Dataflow_Model_Convert_Container_Collection::$_defaultClass has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Container/Collection.php
-
-		-
-			rawMessage: Property Mage_Dataflow_Model_Convert_Container_Collection::$_items has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Convert/Container/Collection.php
@@ -6949,12 +6229,6 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert/Parser/Csv.php
 
 		-
-			rawMessage: Property Mage_Dataflow_Model_Convert_Parser_Csv::$_mapfields has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Parser/Csv.php
-
-		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Parser_Interface::parse() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -7051,25 +6325,7 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert/Profile/Abstract.php
 
 		-
-			rawMessage: Property Mage_Dataflow_Model_Convert_Profile_Abstract::$_actionDefaultClass has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Profile/Abstract.php
-
-		-
 			rawMessage: Property Mage_Dataflow_Model_Convert_Profile_Abstract::$_actions has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Profile/Abstract.php
-
-		-
-			rawMessage: Property Mage_Dataflow_Model_Convert_Profile_Abstract::$_containerCollectionDefaultClass has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Profile/Abstract.php
-
-		-
-			rawMessage: Property Mage_Dataflow_Model_Convert_Profile_Abstract::$_containers has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Convert/Profile/Abstract.php
@@ -7082,12 +6338,6 @@ parameters:
 
 		-
 			rawMessage: Property Mage_Dataflow_Model_Convert_Profile_Abstract::$_dryRun has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Profile/Abstract.php
-
-		-
-			rawMessage: Property Mage_Dataflow_Model_Convert_Profile_Abstract::$_exceptions has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Convert/Profile/Abstract.php
@@ -7183,49 +6433,7 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert/Profile/Collection.php
 
 		-
-			rawMessage: Property Mage_Dataflow_Model_Convert_Profile_Collection::$_containerCollectionDefaultClass has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Profile/Collection.php
-
-		-
 			rawMessage: Property Mage_Dataflow_Model_Convert_Profile_Collection::$_containerDefaultClass has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Profile/Collection.php
-
-		-
-			rawMessage: Property Mage_Dataflow_Model_Convert_Profile_Collection::$_containers has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Profile/Collection.php
-
-		-
-			rawMessage: Property Mage_Dataflow_Model_Convert_Profile_Collection::$_profileCollectionDefaultClass has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Profile/Collection.php
-
-		-
-			rawMessage: Property Mage_Dataflow_Model_Convert_Profile_Collection::$_profileDefaultClass has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Profile/Collection.php
-
-		-
-			rawMessage: Property Mage_Dataflow_Model_Convert_Profile_Collection::$_profiles has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Profile/Collection.php
-
-		-
-			rawMessage: Property Mage_Dataflow_Model_Convert_Profile_Collection::$_simplexmlDefaultClass has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Profile/Collection.php
-
-		-
-			rawMessage: Property Mage_Dataflow_Model_Convert_Profile_Collection::$_xml has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Convert/Profile/Collection.php
@@ -7247,12 +6455,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Convert/Validator/Interface.php
-
-		-
-			rawMessage: Property Mage_Directory_Model_Country::$_format has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Directory/Model/Country.php
 
 		-
 			rawMessage: Property Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable::$_config has no type specified.
@@ -7289,12 +6491,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Eav/Block/Adminhtml/Attribute/Edit/Main/Abstract.php
-
-		-
-			rawMessage: Property Mage_Eav_Helper_Data::$_attributesLockedFields has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Eav/Helper/Data.php
 
 		-
 			rawMessage: Property Mage_Eav_Helper_Data::$_entityTypeFrontendClasses has no type specified.
@@ -7339,12 +6535,6 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Config.php
 
 		-
-			rawMessage: Property Mage_Eav_Model_Config::$_storeInitialized has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Config.php
-
-		-
 			rawMessage: Property Mage_Eav_Model_Convert_Adapter_Entity::$_attrToDb has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -7369,32 +6559,8 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Entity.php
 
 		-
-			rawMessage: Property Mage_Eav_Model_Convert_Adapter_Entity::$_joinFilter has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Entity.php
-
-		-
-			rawMessage: Property Mage_Eav_Model_Convert_Adapter_Grid::$_entity has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Grid.php
-
-		-
 			rawMessage: 'Parameter #2 $string of function explode expects string, array given.'
 			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Parser/Abstract.php
-
-		-
-			rawMessage: Property Mage_Eav_Model_Convert_Parser_Abstract::$_attributeSetsById has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Parser/Abstract.php
-
-		-
-			rawMessage: Property Mage_Eav_Model_Convert_Parser_Abstract::$_attributeSetsByName has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Convert/Parser/Abstract.php
 
@@ -7699,18 +6865,6 @@ parameters:
 			path: app/code/core/Mage/ImportExport/Model/Import/Uploader.php
 
 		-
-			rawMessage: Property Mage_ImportExport_Model_Import_Uploader::$_allowedMimeTypes has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Import/Uploader.php
-
-		-
-			rawMessage: Property Mage_ImportExport_Model_Import_Uploader::$_tmpDir has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Import/Uploader.php
-
-		-
 			rawMessage: 'Class Mage_ImportExport_Model_Resource_Import_Data implements generic interface IteratorAggregate but does not specify its types: TKey, TValue'
 			identifier: missingType.generics
 			count: 1
@@ -7753,12 +6907,6 @@ parameters:
 			path: app/code/core/Mage/Index/Model/Process.php
 
 		-
-			rawMessage: Property Mage_Log_Model_Visitor::$_skipRequestLogging has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Log/Model/Visitor.php
-
-		-
 			rawMessage: 'Parameter #1 $e of static method Mage::logException() expects Throwable, string given.'
 			identifier: argument.type
 			count: 1
@@ -7789,18 +6937,6 @@ parameters:
 			path: app/code/core/Mage/Page/Block/Html/Pager.php
 
 		-
-			rawMessage: Property Mage_Page_Block_Html_Pager::$_dispersion has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Page/Block/Html/Pager.php
-
-		-
-			rawMessage: Property Mage_Page_Block_Html_Pager::$_displayPages has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Page/Block/Html/Pager.php
-
-		-
 			rawMessage: Property Mage_Page_Block_Html_Pager::$_limit has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -7808,12 +6944,6 @@ parameters:
 
 		-
 			rawMessage: Property Mage_Page_Block_Html_Pager::$_limitVarName has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Page/Block/Html/Pager.php
-
-		-
-			rawMessage: Property Mage_Page_Block_Html_Pager::$_outputRequired has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Page/Block/Html/Pager.php
@@ -7867,12 +6997,6 @@ parameters:
 			path: app/code/core/Mage/Paygate/Model/Authorizenet.php
 
 		-
-			rawMessage: Property Mage_Paygate_Model_Authorizenet::$_allowCurrencyCode has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paygate/Model/Authorizenet.php
-
-		-
 			rawMessage: Property Mage_Paygate_Model_Authorizenet::$_canSaveCc has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -7889,18 +7013,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Paygate/Model/Authorizenet/Cards.php
-
-		-
-			rawMessage: Property Mage_Payment_Block_Info_Checkmo::$_mailingAddress has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Payment/Block/Info/Checkmo.php
-
-		-
-			rawMessage: Property Mage_Payment_Block_Info_Checkmo::$_payableTo has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Payment/Block/Info/Checkmo.php
 
 		-
 			rawMessage: Property Mage_Payment_Exception::$_code has no type specified.
@@ -8125,24 +7237,6 @@ parameters:
 			path: app/code/core/Mage/Review/Block/Product/View.php
 
 		-
-			rawMessage: Property Mage_Review_Block_Product_View_List::$_forceHasOptions has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Review/Block/Product/View/List.php
-
-		-
-			rawMessage: Property Mage_Rss_Block_Catalog_Abstract::$_priceBlockDefaultType has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Rss/Block/Catalog/Abstract.php
-
-		-
-			rawMessage: Property Mage_Rss_Block_List::$_rssFeeds has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Rss/Block/List.php
-
-		-
 			rawMessage: 'Method Mage_Rss_Block_Wishlist::addPriceBlockType() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -8227,12 +7321,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Block/Order/Creditmemo/Totals.php
 
 		-
-			rawMessage: Property Mage_Sales_Block_Order_Info::$_links has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Sales/Block/Order/Info.php
-
-		-
 			rawMessage: Property Mage_Sales_Block_Order_Invoice_Totals::$_invoice has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -8243,18 +7331,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Sales/Block/Order/Totals.php
-
-		-
-			rawMessage: Property Mage_Sales_Helper_Guest::$_cookieName has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Sales/Helper/Guest.php
-
-		-
-			rawMessage: Property Mage_Sales_Helper_Guest::$_lifeTime has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Sales/Helper/Guest.php
 
 		-
 			rawMessage: 'Call to an undefined method Maho\Simplexml\Element::getClassName().'
@@ -8281,22 +7357,10 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Order.php
 
 		-
-			rawMessage: Property Mage_Sales_Model_Order::$_relatedObjects has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order.php
-
-		-
 			rawMessage: Property Mage_Sales_Model_Order_Creditmemo::$_states has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Order/Creditmemo.php
-
-		-
-			rawMessage: Property Mage_Sales_Model_Order_Creditmemo_Item::$_creditmemo has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Creditmemo/Item.php
 
 		-
 			rawMessage: Property Mage_Sales_Model_Order_Creditmemo_Item::$_orderItem has no type specified.
@@ -8313,12 +7377,6 @@ parameters:
 		-
 			rawMessage: 'Cannot call method addAttributeToFilter() on Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
 			identifier: method.nonObject
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Invoice.php
-
-		-
-			rawMessage: Property Mage_Sales_Model_Order_Invoice::$_saveBeforeDestruct has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Order/Invoice.php
 
@@ -8395,12 +7453,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Order/Shipment/Item.php
 
 		-
-			rawMessage: Property Mage_Sales_Model_Order_Shipment_Item::$_shipment has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Shipment/Item.php
-
-		-
 			rawMessage: Property Mage_Sales_Model_Order_Shipment_Track::$_shipment has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -8449,18 +7501,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote/Address/Item.php
 
 		-
-			rawMessage: Property Mage_Sales_Model_Quote_Address_Rate::$_address has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Rate.php
-
-		-
-			rawMessage: Property Mage_Sales_Model_Quote_Address_Total_Abstract::$_canSetAddressAmount has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Abstract.php
-
-		-
 			rawMessage: 'Parameter #2 $totalConfig of method Mage_Sales_Model_Config_Ordered::_prepareConfigArray() expects Mage_Core_Model_Config_Element, array given.'
 			identifier: argument.type
 			count: 1
@@ -8473,12 +7513,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Collector.php
 
 		-
-			rawMessage: Property Mage_Sales_Model_Quote_Item::$_flagOptionsSaved has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Item.php
-
-		-
 			rawMessage: Property Mage_Sales_Model_Quote_Item_Option::$_item has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -8489,12 +7523,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Quote/Item/Option.php
-
-		-
-			rawMessage: Property Mage_Sales_Model_Quote_Payment::$_quote has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Payment.php
 
 		-
 			rawMessage: 'Parameter #1 $attribute of method Mage_Sales_Model_Resource_Collection_Abstract::addAttributeToFilter() expects Mage_Eav_Model_Entity_Attribute|string, array given.'
@@ -8636,12 +7664,6 @@ parameters:
 
 		-
 			rawMessage: Property Mage_Shipping_Model_Tracking_Result::$_error has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Tracking/Result.php
-
-		-
-			rawMessage: Property Mage_Shipping_Model_Tracking_Result::$_trackings has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Shipping/Model/Tracking/Result.php
@@ -8803,26 +7825,8 @@ parameters:
 			path: app/code/core/Mage/Tax/Model/Calculation.php
 
 		-
-			rawMessage: Property Mage_Tax_Model_Calculation::$_ctc has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Calculation.php
-
-		-
 			rawMessage: 'Property Mage_Tax_Model_Calculation::$_defaultCustomerTaxClass (string) does not accept int.'
 			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Calculation.php
-
-		-
-			rawMessage: Property Mage_Tax_Model_Calculation::$_ptc has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Calculation.php
-
-		-
-			rawMessage: Property Mage_Tax_Model_Calculation::$_rates has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Tax/Model/Calculation.php
 
@@ -8923,12 +7927,6 @@ parameters:
 			path: app/code/core/Mage/Tax/Model/System/Config/Source/Tax/Country.php
 
 		-
-			rawMessage: Property Mage_Tax_Model_System_Config_Source_Tax_Display_Type::$_options has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Tax/Model/System/Config/Source/Tax/Display/Type.php
-
-		-
 			rawMessage: 'Parameter #2 $arguments of static method Mage::getResourceModel() expects array, string given.'
 			identifier: argument.type
 			count: 1
@@ -8955,12 +7953,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Usa_Model_Shipping_Carrier_Abstract::getTrackingInfo() has parameter $tracking with no type specified.'
 			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Abstract.php
-
-		-
-			rawMessage: Property Mage_Usa_Model_Shipping_Carrier_Abstract::$_quotesCache has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Abstract.php
 
@@ -9259,12 +8251,6 @@ parameters:
 			path: app/code/core/Mage/Widget/Block/Adminhtml/Widget/Options.php
 
 		-
-			rawMessage: Property Mage_Widget_Model_Widget_Instance::$_layoutHandles has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Widget/Model/Widget/Instance.php
-
-		-
 			rawMessage: Property Mage_Widget_Model_Widget_Instance::$_specificEntitiesLayoutHandles has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -9297,12 +8283,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Wishlist_Model_Item::getCustomDownloadUrl() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Wishlist/Model/Item.php
-
-		-
-			rawMessage: Property Mage_Wishlist_Model_Item::$_flagOptionsSaved has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Wishlist/Model/Item.php
 
@@ -9374,12 +8354,6 @@ parameters:
 			identifier: classConstant.deprecatedClass
 			count: 1
 			path: app/code/core/Maho/ApiPlatform/controllers/IndexController.php
-
-		-
-			rawMessage: Property Maho_Paypal_Model_Method_AdvancedCheckout::$_canSaveCc has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Maho/Paypal/Model/Method/AdvancedCheckout.php
 
 		-
 			rawMessage: '''
@@ -9571,12 +8545,6 @@ parameters:
 			path: lib/Maho/Convert/Container/AbstractContainer.php
 
 		-
-			rawMessage: Property Maho\Convert\Container\AbstractContainer::$_profile has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/Convert/Container/AbstractContainer.php
-
-		-
 			rawMessage: Property Maho\Convert\Container\AbstractContainer::$_vars has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -9632,12 +8600,6 @@ parameters:
 
 		-
 			rawMessage: Property Maho\Convert\Container\Collection::$_defaultClass has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/Convert/Container/Collection.php
-
-		-
-			rawMessage: Property Maho\Convert\Container\Collection::$_items has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: lib/Maho/Convert/Container/Collection.php
@@ -9817,37 +8779,13 @@ parameters:
 			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: Property Maho\Convert\Profile\AbstractProfile::$_actionDefaultClass has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/Convert/Profile/AbstractProfile.php
-
-		-
 			rawMessage: Property Maho\Convert\Profile\AbstractProfile::$_actions has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: Property Maho\Convert\Profile\AbstractProfile::$_containerCollectionDefaultClass has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/Convert/Profile/AbstractProfile.php
-
-		-
-			rawMessage: Property Maho\Convert\Profile\AbstractProfile::$_containers has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/Convert/Profile/AbstractProfile.php
-
-		-
 			rawMessage: Property Maho\Convert\Profile\AbstractProfile::$_dryRun has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/Convert/Profile/AbstractProfile.php
-
-		-
-			rawMessage: Property Maho\Convert\Profile\AbstractProfile::$_exceptions has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: lib/Maho/Convert/Profile/AbstractProfile.php
@@ -9943,49 +8881,7 @@ parameters:
 			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: Property Maho\Convert\Profile\Collection::$_containerCollectionDefaultClass has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/Convert/Profile/Collection.php
-
-		-
 			rawMessage: Property Maho\Convert\Profile\Collection::$_containerDefaultClass has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/Convert/Profile/Collection.php
-
-		-
-			rawMessage: Property Maho\Convert\Profile\Collection::$_containers has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/Convert/Profile/Collection.php
-
-		-
-			rawMessage: Property Maho\Convert\Profile\Collection::$_profileCollectionDefaultClass has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/Convert/Profile/Collection.php
-
-		-
-			rawMessage: Property Maho\Convert\Profile\Collection::$_profileDefaultClass has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/Convert/Profile/Collection.php
-
-		-
-			rawMessage: Property Maho\Convert\Profile\Collection::$_profiles has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/Convert/Profile/Collection.php
-
-		-
-			rawMessage: Property Maho\Convert\Profile\Collection::$_simplexmlDefaultClass has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/Convert/Profile/Collection.php
-
-		-
-			rawMessage: Property Maho\Convert\Profile\Collection::$_xml has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: lib/Maho/Convert/Profile/Collection.php
@@ -10055,24 +8951,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Maho/Data/Collection/Db.php
-
-		-
-			rawMessage: Property Maho\Data\Form::$_defaultElementRenderer has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/Data/Form.php
-
-		-
-			rawMessage: Property Maho\Data\Form::$_defaultFieldsetElementRenderer has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/Data/Form.php
-
-		-
-			rawMessage: Property Maho\Data\Form::$_defaultFieldsetRenderer has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/Data/Form.php
 
 		-
 			rawMessage: Property Maho\Data\Form\Element\AbstractElement::$_form has no type specified.
@@ -10160,12 +9038,6 @@ parameters:
 
 		-
 			rawMessage: Property Maho\Data\Tree\Dbp::$_levelField has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/Data/Tree/Dbp.php
-
-		-
-			rawMessage: Property Maho\Data\Tree\Dbp::$_loaded has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: lib/Maho/Data/Tree/Dbp.php
@@ -10328,12 +9200,6 @@ parameters:
 
 		-
 			rawMessage: Property Maho\File\Csv::$_enclosure has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/File/Csv.php
-
-		-
-			rawMessage: Property Maho\File\Csv::$_escape has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: lib/Maho/File/Csv.php
@@ -10665,12 +9531,6 @@ parameters:
 		-
 			rawMessage: 'Parameter #1 $prefix of function uniqid expects string, int<0, max> given.'
 			identifier: argument.type
-			count: 1
-			path: lib/Maho/Io/Ftp.php
-
-		-
-			rawMessage: Property Maho\Io\Ftp::$_tmpFilename has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: lib/Maho/Io/Ftp.php
 
@@ -11021,12 +9881,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Maho/Io/Sftp.php
-
-		-
-			rawMessage: Property Maho\Simplexml\Config::$_xpathExtends has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/Simplexml/Config.php
 
 		-
 			rawMessage: 'Method Maho\Simplexml\Element::getAttribute() has parameter $name with no type specified.'
