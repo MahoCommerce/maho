@@ -10,9 +10,9 @@
 
 class Mage_Tag_Model_Entity_Customer_Collection extends Mage_Customer_Model_Entity_Customer_Collection
 {
-    protected $_tagTable;
+    protected ?string $_tagTable = null;
 
-    protected $_tagRelTable;
+    protected ?string $_tagRelTable = null;
 
     public function __construct()
     {

@@ -10,9 +10,9 @@
 
 class Mage_CatalogIndex_Model_Resource_Abstract extends Mage_Core_Model_Resource_Db_Abstract
 {
-    protected $_storeId    = 0;
+    protected ?int $_storeId = 0;
 
-    protected $_websiteId  = null;
+    protected ?int $_websiteId = null;
 
     #[\Override]
     protected function _construct(): void {}

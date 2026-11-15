@@ -73,7 +73,7 @@ class Mage_Wishlist_SharedController extends Mage_Wishlist_Controller_Abstract
      * to product view page with message about needed defined required options
      */
     #[Maho\Config\Route('/wishlist/shared/cart', name: 'wishlist.shared.cart', methods: ['POST'])]
-    public function cartAction()
+    public function cartAction(): static
     {
         $itemId = (int) $this->getRequest()->getParam('item');
         $code = $this->getRequest()->getParam('code');

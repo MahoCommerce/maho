@@ -72,7 +72,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      * Product type instance as singleton
      */
-    protected $_typeInstanceSingleton   = null;
+    protected ?Mage_Catalog_Model_Product_Type_Abstract $_typeInstanceSingleton = null;
 
     /**
      * Product link instance
@@ -100,7 +100,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
     protected array $_errors = [];
 
-    protected $_optionInstance;
+    protected ?Mage_Catalog_Model_Product_Option $_optionInstance = null;
 
     protected array $_options = [];
 

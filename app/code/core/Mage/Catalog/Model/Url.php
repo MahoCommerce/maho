@@ -90,17 +90,13 @@ class Mage_Catalog_Model_Url
 
     /**
      * Singleton of category resource model to check default url_key
-     *
-     * @var Mage_Catalog_Model_Category
      */
-    protected static $_categoryResourceSingleton;
+    protected static ?Mage_Catalog_Model_Resource_Category $_categoryResourceSingleton = null;
 
     /**
      * Singleton of product resource model to check default url_key
-     *
-     * @var Mage_Catalog_Model_Category
      */
-    protected static $_productResourceSingleton;
+    protected static ?Mage_Catalog_Model_Resource_Product $_productResourceSingleton = null;
 
     /**
      * Array of categories id without default url_key before reindex

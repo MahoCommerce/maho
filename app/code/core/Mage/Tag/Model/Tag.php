@@ -200,7 +200,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
     /**
      * getter for self::STATUS_APPROVED
      */
-    public function getApprovedStatus()
+    public function getApprovedStatus(): int
     {
         return self::STATUS_APPROVED;
     }
@@ -208,7 +208,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
     /**
      * getter for self::STATUS_PENDING
      */
-    public function getPendingStatus()
+    public function getPendingStatus(): int
     {
         return self::STATUS_PENDING;
     }
@@ -216,7 +216,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
     /**
      * getter for self::STATUS_DISABLED
      */
-    public function getDisabledStatus()
+    public function getDisabledStatus(): int
     {
         return self::STATUS_DISABLED;
     }
