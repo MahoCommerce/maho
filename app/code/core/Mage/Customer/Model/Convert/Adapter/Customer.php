@@ -239,6 +239,10 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
         }
     }
 
+    /**
+     * @throws Mage_Core_Model_Store_Exception
+     * @throws \Maho\Convert\Exception
+     */
     #[\Override]
     public function load(): static
     {
@@ -337,6 +341,9 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
         return Mage::objects()->load(Mage::registry('Object_Cache_Customer'));
     }
 
+    /**
+     * @throws Mage_Core_Exception
+     */
     #[\Override]
     public function save(): static
     {

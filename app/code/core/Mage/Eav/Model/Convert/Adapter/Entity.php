@@ -236,6 +236,9 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
         }
     }
 
+    /**
+     * @throws \Maho\Convert\Exception
+     */
     #[\Override]
     public function load(): static
     {
@@ -314,6 +317,9 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
         return Mage::getResourceModel($entityType . '_collection');
     }
 
+    /**
+     * @throws \Maho\Convert\Exception
+     */
     #[\Override]
     public function save(): static
     {

@@ -14,6 +14,9 @@ class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert
 
     protected array $_mapfields = [];
 
+    /**
+     * @throws Throwable
+     */
     #[\Override]
     public function parse(): static
     {
@@ -135,6 +138,9 @@ class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert
         return $resultRow;
     }
 
+    /**
+     * Read data collection and write to temporary file
+     */
     #[\Override]
     public function unparse(): static
     {

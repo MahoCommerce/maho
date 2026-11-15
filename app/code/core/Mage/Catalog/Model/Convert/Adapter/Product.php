@@ -138,6 +138,9 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
         return $this;
     }
 
+    /**
+     * Load product collection Id(s)
+     */
     #[\Override]
     public function load(): static
     {

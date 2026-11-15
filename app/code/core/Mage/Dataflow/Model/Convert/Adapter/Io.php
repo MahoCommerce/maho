@@ -66,6 +66,9 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
         return $this;
     }
 
+    /**
+     * Save result to destination file from temporary
+     */
     #[\Override]
     public function save(): static
     {
