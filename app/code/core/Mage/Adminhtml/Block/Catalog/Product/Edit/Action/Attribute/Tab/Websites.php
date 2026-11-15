@@ -10,17 +10,17 @@
 
 class Mage_Adminhtml_Block_Catalog_Product_Edit_Action_Attribute_Tab_Websites extends Mage_Adminhtml_Block_Widget implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
-    public function getWebsiteCollection()
+    public function getWebsiteCollection(): array
     {
         return Mage::app()->getWebsites();
     }
 
-    public function getGroupCollection(Mage_Core_Model_Website $website)
+    public function getGroupCollection(Mage_Core_Model_Website $website): array
     {
         return $website->getGroups();
     }
 
-    public function getStoreCollection(Mage_Core_Model_Store_Group $group)
+    public function getStoreCollection(Mage_Core_Model_Store_Group $group): array
     {
         return $group->getStores();
     }

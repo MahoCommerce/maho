@@ -11,7 +11,7 @@
 class Mage_Cms_PageController extends Mage_Core_Controller_Front_Action
 {
     #[Maho\Config\Route('/cms/page/view/{page_id}', name: 'cms.page.view', requirements: ['page_id' => '\d+'])]
-    public function viewAction()
+    public function viewAction(): void
     {
         $pageId = $this->getRequest()
             ->getParam('page_id', $this->getRequest()->getParam('id', false));
@@ -24,7 +24,7 @@ class Mage_Cms_PageController extends Mage_Core_Controller_Front_Action
             return;
         }
         if ($helper->isNoRoutePage($page) || !$helper->renderPage($this, $page->getId())) {
-            return $this->_forward('noRoute');
+            $this->_forward('noRoute');
         }
     }
 }

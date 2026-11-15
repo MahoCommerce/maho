@@ -90,7 +90,7 @@ class Mage_AdminNotification_Model_Resource_Inbox extends Mage_Core_Model_Resour
     /**
      * Save notifications (if not exists)
      */
-    public function parse(Mage_AdminNotification_Model_Inbox $object, array $data)
+    public function parse(Mage_AdminNotification_Model_Inbox $object, array $data): void
     {
         $adapter = $this->_getWriteAdapter();
         foreach ($data as $item) {

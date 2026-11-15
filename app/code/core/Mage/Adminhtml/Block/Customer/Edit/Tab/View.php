@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View extends Mage_Adminhtml_Block_T
      */
     protected $_customer;
 
-    protected $_customerLog;
+    protected ?Mage_Log_Model_Customer $_customerLog = null;
 
     /**
      * @return Mage_Customer_Model_Customer
@@ -155,7 +155,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View extends Mage_Adminhtml_Block_T
         return Mage::app()->getStore($this->getCustomer()->getStoreId())->getName();
     }
 
-    public function getStoreId()
+    public function getStoreId(): ?int
     {
         return $this->getCustomer()->getStoreId();
     }

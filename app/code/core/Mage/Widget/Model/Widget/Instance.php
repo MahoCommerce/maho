@@ -32,7 +32,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
 
     protected array $_layoutHandles = [];
 
-    protected $_specificEntitiesLayoutHandles = [];
+    protected array $_specificEntitiesLayoutHandles = [];
 
     /**
      * @var \Maho\Simplexml\Element

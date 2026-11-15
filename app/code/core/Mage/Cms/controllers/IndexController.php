@@ -12,15 +12,13 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
 {
     /**
      * Renders CMS Home page
-     *
-     * @param string $coreRoute
      */
     #[Maho\Config\Route('/', name: 'cms.home', methods: ['GET'])]
-    public function indexAction($coreRoute = null)
+    public function indexAction(?string $coreRoute = null): void
     {
         $pageId = Mage::getStoreConfig(Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE);
         if (!Mage::helper('cms/page')->renderPage($this, $pageId)) {
-            return $this->_forward('defaultIndex');
+            $this->_forward('defaultIndex');
         }
     }
 

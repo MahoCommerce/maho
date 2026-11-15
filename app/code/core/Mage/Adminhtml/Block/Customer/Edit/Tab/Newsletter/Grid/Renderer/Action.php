@@ -32,12 +32,12 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid_Renderer_Action ext
         return $this->_actionsToHtml($actions);
     }
 
-    protected function _getEscapedValue($value)
+    protected function _getEscapedValue(string $value): string
     {
         return addcslashes(htmlspecialchars($value), '\\\'');
     }
 
-    protected function _actionsToHtml(array $actions)
+    protected function _actionsToHtml(array $actions): string
     {
         $html = [];
         $attributesObject = new \Maho\DataObject();

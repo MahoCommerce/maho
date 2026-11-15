@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Page_Block_Html extends Mage_Core_Block_Template
 {
-    protected $_urls = [];
+    protected array $_urls = [];
     protected $_title = '';
 
     public function __construct()

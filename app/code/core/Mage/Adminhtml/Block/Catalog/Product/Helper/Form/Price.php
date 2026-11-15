@@ -51,11 +51,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Price extends \Maho\Data\
         return $html;
     }
 
-    /**
-     * @param $attribute
-     * @return string
-     */
-    protected function _getTaxObservingCode($attribute)
+    protected function _getTaxObservingCode(\Maho\DataObject $attribute): string
     {
         return "<script>if (dynamicTaxes == undefined) var dynamicTaxes = new Array(); dynamicTaxes[dynamicTaxes.length]='{$attribute->getAttributeCode()}'</script>";
     }

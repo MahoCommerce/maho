@@ -15,7 +15,7 @@ declare(strict_types=1);
  */
 class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Block extends Mage_Adminhtml_Block_Widget
 {
-    protected $_layoutHandlesXml = null;
+    protected \SimpleXMLElement|false|null $_layoutHandlesXml = null;
 
     /**
      * @var \Maho\Simplexml\Element[]
@@ -27,11 +27,11 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Block extends Mag
      */
     protected $_layoutHandleUpdatesXml = null;
 
-    protected $_layoutHandle = [];
+    protected array $_layoutHandle = [];
 
-    protected $_blocks = [];
+    protected array $_blocks = [];
 
-    protected $_allowedBlocks = [];
+    protected array $_allowedBlocks = [];
 
     /**
      * Setter
