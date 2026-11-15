@@ -36,7 +36,9 @@ use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
  * types the methods that PHPStan reports as missingType.return. The stock Rector rules check
  * the parents of a method, but not its children, and they skip protected methods and abstract
  * classes. This rule finds the children through MethodOverrideIndex, so it can type those too.
- * It skips deprecated classes and methods, because PHPStan does not report errors in them.
+ * It skips deprecated classes and methods, because PHPStan does not report errors in them. It
+ * skips a public getter or setter in a file without strict types, because a typed accessor
+ * needs a strict file.
  *
  *  - void: the body returns no value and does not yield. A body that only throws stays as it is,
  *    because it is a placeholder that a subclass of another package can replace with a value.
@@ -136,6 +138,10 @@ CODE_SAMPLE,
             return false;
         }
 
+        if ($this->isAccessorInWeakFile($classMethod)) {
+            return false;
+        }
+
         $scope = ScopeFetcher::fetch($classMethod);
         $classReflection = $scope->getClassReflection();
         if (!$classReflection instanceof ClassReflection || !$classReflection->isClass() || $scope->isInTrait()) {
@@ -158,6 +164,19 @@ CODE_SAMPLE,
         }
 
         return !MethodOverrideIndex::get()->hasOverride($classReflection->getName(), $methodName);
+    }
+
+    /**
+     * A typed accessor holds its type only in a file with strict types, as
+     * TypedAccessorStrictTypesTest checks. The typed accessor work (#1283) types these methods.
+     */
+    private function isAccessorInWeakFile(ClassMethod $classMethod): bool
+    {
+        if (!$classMethod->isPublic() || preg_match('/^(get|set)[A-Z]/', $classMethod->name->toString()) !== 1) {
+            return false;
+        }
+
+        return !str_contains($this->getFile()->getFileContent(), 'declare(strict_types=1)');
     }
 
     private function hasReturnTag(ClassMethod $classMethod): bool

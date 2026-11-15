@@ -52,7 +52,7 @@ class Mage_Newsletter_Model_Resource_Subscriber extends Mage_Core_Model_Resource
      *
      * @param string $scope
      */
-    public function setMessagesScope($scope): void
+    public function setMessagesScope($scope)
     {
         $this->_messagesScope = $scope;
     }

@@ -88,7 +88,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
         return $this->getValue();
     }
 
-    public function setValue($value): static
+    public function setValue($value)
     {
         if (isset($value['locale'])) {
             if (!empty($value['from'])) {

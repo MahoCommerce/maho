@@ -32,7 +32,7 @@ abstract class Mage_Adminhtml_Block_Dashboard_Abstract extends Mage_Adminhtml_Bl
         return $this->_dataHelperName;
     }
 
-    public function setDataHelperName($dataHelperName): static
+    public function setDataHelperName($dataHelperName)
     {
         $this->_dataHelperName = $dataHelperName;
         return $this;

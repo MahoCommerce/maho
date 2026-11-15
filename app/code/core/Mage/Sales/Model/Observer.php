@@ -305,7 +305,7 @@ class Mage_Sales_Model_Observer
      * Set Quote information about MSRP price enabled
      */
     #[Maho\Config\Observer('sales_quote_collect_totals_after', area: 'frontend', id: 'catalog_msrp')]
-    public function setQuoteCanApplyMsrp(\Maho\Event\Observer $observer): void
+    public function setQuoteCanApplyMsrp(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Quote $quote */
         $quote = $observer->getEvent()->getQuote();

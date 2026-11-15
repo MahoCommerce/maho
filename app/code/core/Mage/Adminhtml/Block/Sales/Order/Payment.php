@@ -23,7 +23,7 @@ class Mage_Adminhtml_Block_Sales_Order_Payment extends Mage_Adminhtml_Block_Temp
         return parent::_beforeToHtml();
     }
 
-    public function setPayment($payment): static
+    public function setPayment($payment)
     {
         $paymentInfoBlock = Mage::helper('payment')->getInfoBlock($payment);
         $this->setChild('info', $paymentInfoBlock);

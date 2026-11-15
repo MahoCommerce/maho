@@ -511,7 +511,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
      * @param string $property
      * @param string $value
      */
-    public function setWeeeTaxesAppliedProperty($item, $title, $property, $value): void
+    public function setWeeeTaxesAppliedProperty($item, $title, $property, $value)
     {
         $weeeTaxAppliedAmounts = $this->getApplied($item);
         foreach ($weeeTaxAppliedAmounts as &$weeeTaxAppliedAmount) {

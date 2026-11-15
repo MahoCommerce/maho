@@ -328,7 +328,7 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
      * @throws Mage_Core_Exception
      * @throws \Maho\Exception
      */
-    public function setCustomer(Mage_Customer_Model_Customer $customer): void
+    public function setCustomer(Mage_Customer_Model_Customer $customer)
     {
         $id = Mage::objects()->save($customer);
         Mage::register('Object_Cache_Customer', $id);

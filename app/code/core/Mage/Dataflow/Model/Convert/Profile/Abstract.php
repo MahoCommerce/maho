@@ -35,7 +35,7 @@ abstract class Mage_Dataflow_Model_Convert_Profile_Abstract implements Mage_Data
         return $action;
     }
 
-    public function setContainers(Mage_Dataflow_Model_Convert_Container_Collection $containers): static
+    public function setContainers(Mage_Dataflow_Model_Convert_Container_Collection $containers)
     {
         $this->_containers = $containers;
         return $this;
@@ -72,7 +72,7 @@ abstract class Mage_Dataflow_Model_Convert_Profile_Abstract implements Mage_Data
         return $this->_dryRun;
     }
 
-    public function setDryRun($flag): static
+    public function setDryRun($flag)
     {
         $this->_dryRun = $flag;
         return $this;
@@ -118,7 +118,7 @@ abstract class Mage_Dataflow_Model_Convert_Profile_Abstract implements Mage_Data
         return $this;
     }
 
-    public function setDataflowProfile($profile): static
+    public function setDataflowProfile($profile)
     {
         if (is_array($profile)) {
             $this->_dataflow_profile = $profile;

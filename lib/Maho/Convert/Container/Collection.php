@@ -14,7 +14,7 @@ class Collection
     protected $_items = [];
     protected $_defaultClass = \Maho\Convert\Container\Generic::class;
 
-    public function setDefaultClass($className): static
+    public function setDefaultClass($className)
     {
         $this->_defaultClass = $className;
         return $this;

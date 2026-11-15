@@ -155,7 +155,7 @@ class Mage_Checkout_Block_Onepage_Billing extends Mage_Checkout_Block_Onepage_Ab
         return !$this->getQuote()->isVirtual();
     }
 
-    public function getSaveUrl(): void {}
+    public function getSaveUrl() {}
 
     /**
      * Get Customer Taxvat Widget block

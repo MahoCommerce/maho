@@ -24,7 +24,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Gallery extends Mage_Adminhtml_Bl
         return $this->toHtml();
     }
 
-    public function setElement(\Maho\Data\Form\Element\AbstractElement $element): static
+    public function setElement(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $this->_element = $element;
         return $this;

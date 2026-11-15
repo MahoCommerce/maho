@@ -253,7 +253,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
      *
      * @param string $dirtyRulesNoticeMessage
      */
-    public function setDirtyRulesNoticeMessage($dirtyRulesNoticeMessage): void
+    public function setDirtyRulesNoticeMessage($dirtyRulesNoticeMessage)
     {
         $this->_dirtyRulesNoticeMessage = $dirtyRulesNoticeMessage;
     }

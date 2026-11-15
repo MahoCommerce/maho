@@ -50,7 +50,7 @@ class Template
     /**
      * Sets template variables that's can be called through {var ...} statement
      */
-    public function setVariables(array $variables): static
+    public function setVariables(array $variables)
     {
         foreach ($variables as $name => $value) {
             $this->_templateVars[$name] = $value;
@@ -64,7 +64,7 @@ class Template
      *
      * @param callable $callback it must return string
      */
-    public function setTemplateProcessor(callable $callback): static
+    public function setTemplateProcessor(callable $callback)
     {
         $this->_templateProcessor = $callback;
         return $this;
@@ -85,7 +85,7 @@ class Template
      *
      * @param callable $callback it must return string
      */
-    public function setIncludeProcessor(callable $callback): static
+    public function setIncludeProcessor(callable $callback)
     {
         $this->_includeProcessor = $callback;
         return $this;

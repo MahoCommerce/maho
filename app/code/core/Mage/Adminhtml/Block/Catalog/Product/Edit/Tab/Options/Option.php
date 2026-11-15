@@ -28,7 +28,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
         return $this->_itemCount;
     }
 
-    public function setItemCount($itemCount): static
+    public function setItemCount($itemCount)
     {
         $this->_itemCount = max($this->_itemCount, $itemCount);
         return $this;

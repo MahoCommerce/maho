@@ -197,7 +197,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
      * @param array $joinAttr
      * @throws Exception
      */
-    public function setJoinAttr($joinAttr): void
+    public function setJoinAttr($joinAttr)
     {
         if (is_array($joinAttr)) {
             $joinArrAttr = [];
@@ -229,7 +229,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
      *         ]
      *     NOTE: Optional key must be have NULL at least
      */
-    public function setJoinField($joinField): void
+    public function setJoinField($joinField)
     {
         if (is_array($joinField)) {
             $this->_joinField[] = $joinField;

@@ -380,7 +380,7 @@ class Element extends SimpleXMLElement
         return $this;
     }
 
-    public function setNode($path, $value, $overwrite = true): static
+    public function setNode($path, $value, $overwrite = true)
     {
         $arr1 = explode('/', $path);
         $arr = [];

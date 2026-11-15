@@ -68,7 +68,7 @@ class Mage_ProductAlert_Model_Email extends Mage_Core_Model_Abstract
      *
      * @param string $type
      */
-    public function setType($type): void
+    public function setType($type)
     {
         $this->_type = $type;
     }

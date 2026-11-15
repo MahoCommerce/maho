@@ -1,7 +1,6 @@
 <?php
 
 /**
- * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -23,7 +22,7 @@ class Mage_Core_Block_Template_Facade extends Mage_Core_Block_Template
      * @param string $key
      * @param string $value
      */
-    public function setDataByKey($key, $value): void
+    public function setDataByKey($key, $value)
     {
         $this->_data[$key] = $value;
     }
@@ -34,7 +33,7 @@ class Mage_Core_Block_Template_Facade extends Mage_Core_Block_Template
      * @param string $key
      * @param string $registryKey
      */
-    public function setDataByKeyFromRegistry($key, $registryKey): void
+    public function setDataByKeyFromRegistry($key, $registryKey)
     {
         $registryItem = Mage::registry($registryKey);
         if (empty($registryItem)) {

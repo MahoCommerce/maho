@@ -47,13 +47,13 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
     /**
      * Addresses url
      */
-    public function getBookUrl(): void {}
+    public function getBookUrl() {}
 
-    public function getEditUrl(): void {}
+    public function getEditUrl() {}
 
-    public function getDeleteUrl(): void {}
+    public function getDeleteUrl() {}
 
-    public function getCreateUrl(): void {}
+    public function getCreateUrl() {}
 
     /**
      * @param mixed $renderer

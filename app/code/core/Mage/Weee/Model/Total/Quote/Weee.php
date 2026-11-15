@@ -338,7 +338,7 @@ class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_
      *
      * @param Mage_Weee_Helper_Data $helper
      */
-    public function setHelper($helper): void
+    public function setHelper($helper)
     {
         $this->_helper = $helper;
     }
@@ -348,7 +348,7 @@ class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_
      *
      * @param  Mage_Core_Model_Store $store
      */
-    public function setStore($store): void
+    public function setStore($store)
     {
         $this->_store = $store;
     }

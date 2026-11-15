@@ -504,7 +504,7 @@ class Uploader
         return $this;
     }
 
-    public function setAllowedExtensions($extensions = []): static
+    public function setAllowedExtensions($extensions = [])
     {
         foreach ((array) $extensions as $extension) {
             $this->_allowedExtensions[] = strtolower($extension);

@@ -77,7 +77,7 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Set current customer
      */
-    public function setCustomer(Mage_Customer_Model_Customer $customer): void
+    public function setCustomer(Mage_Customer_Model_Customer $customer)
     {
         $this->_currentCustomer = $customer;
     }
