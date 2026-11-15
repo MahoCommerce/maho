@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -14,7 +15,7 @@ class Mage_Wishlist_Model_Config
     /**
      * Get product attributes that need in wishlist
      */
-    public function getProductAttributes()
+    public function getProductAttributes(): array
     {
         $attrsForCatalog  = Mage::getSingleton('catalog/config')->getProductAttributes();
         $attrsForWishlist = Mage::getConfig()->getNode(self::XML_PATH_PRODUCT_ATTRIBUTES)->asArray();

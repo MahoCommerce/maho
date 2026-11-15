@@ -396,7 +396,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
      * to product view page with message about needed defined required options
      */
     #[Maho\Config\Route('/wishlist/index/cart', name: 'wishlist.index.cart', methods: ['POST'])]
-    public function cartAction()
+    public function cartAction(): static
     {
         $itemId = (int) $this->getRequest()->getParam('item');
 

@@ -636,7 +636,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
             return $path;
         }
 
-        if ($this->getLevel() !== null && (int) $this->getLevel() <= 1) {
+        if ($this->getLevel() <= 1) {
             $this->setUrlPath('');
             return '';
         }
@@ -800,17 +800,12 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
         return $ids;
     }
 
-    /**
-     * Retrieve level
-     *
-     * @return int
-     */
-    public function getLevel()
+    public function getLevel(): int
     {
         if (!$this->hasLevel()) {
             return count(explode('/', (string) $this->getPath())) - 1;
         }
-        return $this->getData('level');
+        return (int) $this->getData('level');
     }
 
     /**

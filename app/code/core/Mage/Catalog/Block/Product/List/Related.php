@@ -18,7 +18,7 @@ class Mage_Catalog_Block_Product_List_Related extends Mage_Catalog_Block_Product
     #[\Override]
     protected $_mapRenderer = 'msrp_noform';
 
-    protected $_itemCollection;
+    protected ?Mage_Catalog_Model_Resource_Product_Link_Product_Collection $_itemCollection = null;
 
     /**
      * @return $this

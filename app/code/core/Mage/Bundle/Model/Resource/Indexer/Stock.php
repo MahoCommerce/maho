@@ -11,20 +11,6 @@
 class Mage_Bundle_Model_Resource_Indexer_Stock extends Mage_CatalogInventory_Model_Resource_Indexer_Stock_Default
 {
     /**
-     * Reindex temporary (price result data) for defined product(s)
-     *
-     * @param int|array $entityIds
-     * @return $this
-     */
-    #[\Override]
-    public function reindexEntity($entityIds)
-    {
-        $this->_updateIndex($entityIds);
-
-        return $this;
-    }
-
-    /**
      * Retrieve table name for temporary bundle option stock index
      *
      * @return string
