@@ -205,11 +205,8 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
         }
     }
 
-    /**
-     * Register data required by process in event object
-     */
     #[\Override]
-    protected function _registerEvent(Mage_Index_Model_Event $event)
+    protected function _registerEvent(Mage_Index_Model_Event $event): void
     {
         $event->addNewData(self::EVENT_MATCH_RESULT_KEY, true);
         $entity = $event->getEntity();
@@ -245,11 +242,8 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
         }
     }
 
-    /**
-     * Process event
-     */
     #[\Override]
-    protected function _processEvent(Mage_Index_Model_Event $event)
+    protected function _processEvent(Mage_Index_Model_Event $event): void
     {
         $data = $event->getNewData();
         if ($event->getType() == self::EVENT_TYPE_REINDEX_PRICE) {

@@ -4105,12 +4105,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Category/Dynamic/Rule.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Category_Indexer_Product::_processEvent() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Category/Indexer/Product.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Catalog_Model_Config::_init().'
 			identifier: method.notFound
 			count: 1
@@ -4199,18 +4193,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Index.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Indexer_Url::_processEvent() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Indexer/Url.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Indexer_Url::reindexAll() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Indexer/Url.php
 
 		-
 			rawMessage: 'Parameter #1 $attribute of method Mage_Catalog_Model_Layer::_filterFilterableAttributes() expects Mage_Catalog_Model_Resource_Eav_Attribute, Mage_Eav_Model_Entity_Attribute_Abstract|false given.'
@@ -4319,30 +4301,6 @@ parameters:
 			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Indexer/Eav.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Product_Indexer_Eav::_processEvent() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Indexer/Eav.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Product_Indexer_Eav::_registerEvent() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Indexer/Eav.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Product_Indexer_Price::_processEvent() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Indexer/Price.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Product_Indexer_Price::_registerEvent() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Indexer/Price.php
 
 		-
 			rawMessage: Property Mage_Catalog_Model_Product_Link::$_attributeCollection has no type specified.
@@ -4699,18 +4657,6 @@ parameters:
 			path: app/code/core/Mage/CatalogInventory/Block/Adminhtml/Form/Field/Minsaleqty.php
 
 		-
-			rawMessage: 'Method Mage_CatalogInventory_Model_Indexer_Stock::_processEvent() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Model/Indexer/Stock.php
-
-		-
-			rawMessage: 'Method Mage_CatalogInventory_Model_Indexer_Stock::_registerEvent() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Model/Indexer/Stock.php
-
-		-
 			rawMessage: 'Cannot call method setTypeId() on Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
 			identifier: method.nonObject
 			count: 1
@@ -4817,24 +4763,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/CatalogSearch/Helper/Data.php
-
-		-
-			rawMessage: 'Method Mage_CatalogSearch_Model_Indexer_Fulltext::_processEvent() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Model/Indexer/Fulltext.php
-
-		-
-			rawMessage: 'Method Mage_CatalogSearch_Model_Indexer_Fulltext::_registerEvent() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Model/Indexer/Fulltext.php
-
-		-
-			rawMessage: 'Method Mage_CatalogSearch_Model_Indexer_Fulltext::reindexAll() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Model/Indexer/Fulltext.php
 
 		-
 			rawMessage: 'Parameter #1 $product of method Mage_Catalog_Model_Product_Type_Abstract::getSearchableData() expects Mage_Catalog_Model_Product|null, Maho\DataObject given.'
@@ -6823,24 +6751,6 @@ parameters:
 			path: app/code/core/Mage/Index/Model/Event.php
 
 		-
-			rawMessage: 'Method Mage_Index_Model_Indexer_Abstract::_processEvent() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Index/Model/Indexer/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Index_Model_Indexer_Abstract::_registerEvent() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Index/Model/Indexer/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Index_Model_Indexer_Abstract::reindexAll() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Index/Model/Indexer/Abstract.php
-
-		-
 			rawMessage: 'Method Mage_Index_Model_Process::reindexAll() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -7679,18 +7589,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Tag/Model/Entity/Customer/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Tag_Model_Indexer_Summary::_processEvent() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tag/Model/Indexer/Summary.php
-
-		-
-			rawMessage: 'Method Mage_Tag_Model_Indexer_Summary::_registerEvent() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tag/Model/Indexer/Summary.php
 
 		-
 			rawMessage: 'Parameter #1 $model of method Mage_Tag_Model_Resource_Tag::loadByName() expects Mage_Tag_Model_Tag, Maho\DataObject given.'
