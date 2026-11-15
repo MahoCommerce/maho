@@ -10,11 +10,8 @@
 
 class Mage_Weee_Model_Resource_Attribute_Backend_Weee_Tax extends Mage_Core_Model_Resource_Db_Abstract
 {
-    /**
-     * Defines main resource table and table identifier field
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('weee/tax', 'value_id');
     }

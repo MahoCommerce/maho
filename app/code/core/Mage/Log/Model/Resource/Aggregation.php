@@ -11,7 +11,7 @@
 class Mage_Log_Model_Resource_Aggregation extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('log/summary_table', 'log_summary_id');
     }

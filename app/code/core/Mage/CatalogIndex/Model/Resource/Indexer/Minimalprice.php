@@ -11,7 +11,7 @@
 class Mage_CatalogIndex_Model_Resource_Indexer_Minimalprice extends Mage_CatalogIndex_Model_Resource_Indexer_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalogindex/minimal_price', 'index_id');
 

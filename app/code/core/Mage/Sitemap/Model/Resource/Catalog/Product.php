@@ -14,7 +14,7 @@ class Mage_Sitemap_Model_Resource_Catalog_Product extends Mage_Sitemap_Model_Res
     protected string $_attributeEntityType = 'catalog_product';
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalog/product', 'entity_id');
     }

@@ -53,7 +53,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
     protected $_storesInfo;
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalog/category_product_index', 'category_id');
         $this->_categoryTable        = $this->getTable('catalog/category');

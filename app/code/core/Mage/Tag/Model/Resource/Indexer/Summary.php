@@ -11,7 +11,7 @@
 class Mage_Tag_Model_Resource_Indexer_Summary extends Mage_Catalog_Model_Resource_Product_Indexer_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('tag/summary', 'tag_id');
     }

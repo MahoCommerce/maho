@@ -11,7 +11,7 @@
 class Mage_Catalog_Model_Resource_Product_Option_Value extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalog/product_option_type_value', 'option_type_id');
     }

@@ -13,11 +13,8 @@ class Mage_Sitemap_Model_Resource_Catalog_Category extends Mage_Sitemap_Model_Re
     #[\Override]
     protected string $_attributeEntityType = 'catalog_category';
 
-    /**
-     * Init resource model (catalog/category)
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalog/category', 'entity_id');
     }

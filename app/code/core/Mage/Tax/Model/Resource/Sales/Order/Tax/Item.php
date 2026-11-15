@@ -11,7 +11,7 @@
 class Mage_Tax_Model_Resource_Sales_Order_Tax_Item extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('tax/sales_order_tax_item', 'tax_item_id');
     }

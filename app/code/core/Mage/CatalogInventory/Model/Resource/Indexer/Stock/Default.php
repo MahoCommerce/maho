@@ -25,7 +25,7 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Default extends Mage_Ca
     protected $_isComposite    = false;
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('cataloginventory/stock_status', 'product_id');
     }

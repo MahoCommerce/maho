@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_CatalogIndex_Model_Resource_Indexer_Eav extends Mage_CatalogIndex_Model_Resource_Indexer_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalogindex/eav', 'index_id');
 

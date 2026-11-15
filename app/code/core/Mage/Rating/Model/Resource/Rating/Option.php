@@ -67,7 +67,7 @@ class Mage_Rating_Model_Resource_Rating_Option extends Mage_Core_Model_Resource_
     protected $_optionId;
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('rating/rating_option', 'option_id');
 

@@ -29,11 +29,8 @@ class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstra
         ],
     ];
 
-    /**
-     * Initialize main table and table id field
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('salesrule/rule', 'rule_id');
     }

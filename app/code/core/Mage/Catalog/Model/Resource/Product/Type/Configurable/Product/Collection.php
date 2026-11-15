@@ -19,11 +19,8 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable_Product_Collection e
      */
     protected $_linkTable;
 
-    /**
-     * Assign link table name
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         parent::_construct();
         $this->_linkTable = $this->getTable('catalog/product_super_link');

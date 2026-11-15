@@ -10,11 +10,8 @@
 
 class Mage_CatalogSearch_Model_Resource_Query extends Mage_Core_Model_Resource_Db_Abstract
 {
-    /**
-     * Init resource data
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalogsearch/search_query', 'query_id');
     }

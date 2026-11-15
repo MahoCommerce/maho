@@ -38,11 +38,8 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
      */
     protected $_storesIds           = [];
 
-    /**
-     * Define module
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalog/product');
         $this->setRowIdFieldName('review_id');

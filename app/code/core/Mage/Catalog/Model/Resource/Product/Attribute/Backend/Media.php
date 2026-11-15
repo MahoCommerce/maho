@@ -18,7 +18,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media extends Mage_C
     private ?int $_attributeId = null;
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init(self::GALLERY_TABLE, 'value_id');
     }

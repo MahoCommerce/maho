@@ -14,11 +14,8 @@ class Mage_CatalogIndex_Model_Resource_Abstract extends Mage_Core_Model_Resource
 
     protected $_websiteId  = null;
 
-    /**
-     * Initialize model
-     */
     #[\Override]
-    protected function _construct() {}
+    protected function _construct(): void {}
 
     /**
      * storeId setter

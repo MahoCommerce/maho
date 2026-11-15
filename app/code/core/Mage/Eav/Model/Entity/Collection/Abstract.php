@@ -104,12 +104,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
         $this->_initSelect();
     }
 
-    /**
-     * Initialize collection
-     *
-     * @return void
-     */
-    protected function _construct() {}
+    protected function _construct(): void {}
 
     /**
      * Retrieve table name

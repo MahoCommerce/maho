@@ -11,7 +11,7 @@
 class Mage_Customer_Model_Resource_Address extends Mage_Eav_Model_Entity_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $resource = Mage::getSingleton('core/resource');
         $this->setType('customer_address')->setConnection(

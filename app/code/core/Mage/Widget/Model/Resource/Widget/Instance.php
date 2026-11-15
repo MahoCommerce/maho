@@ -11,7 +11,7 @@
 class Mage_Widget_Model_Resource_Widget_Instance extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('widget/widget_instance', 'instance_id');
     }

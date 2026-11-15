@@ -53,7 +53,7 @@ class Mage_Log_Model_Resource_Customer extends Mage_Core_Model_Resource_Db_Abstr
     protected $_quoteTable;
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('log/customer', 'log_id');
 

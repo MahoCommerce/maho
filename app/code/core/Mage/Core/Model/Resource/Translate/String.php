@@ -11,7 +11,7 @@
 class Mage_Core_Model_Resource_Translate_String extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('core/translate', 'key_id');
     }

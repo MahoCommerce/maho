@@ -10,11 +10,8 @@
 
 class Mage_AdminNotification_Model_Resource_Inbox extends Mage_Core_Model_Resource_Db_Abstract
 {
-    /**
-     * AdminNotification Resource initialization
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('adminnotification/inbox', 'notification_id');
     }

@@ -20,11 +20,8 @@ class Mage_Sales_Model_Resource_Quote_Payment extends Mage_Sales_Model_Resource_
         'additional_information' => [null, []],
     ];
 
-    /**
-     * Main table and field initialization
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('sales/quote_payment', 'payment_id');
     }

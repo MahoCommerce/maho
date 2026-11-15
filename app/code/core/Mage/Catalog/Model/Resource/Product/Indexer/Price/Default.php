@@ -30,11 +30,8 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
      */
     protected $_isComposite    = false;
 
-    /**
-     * Define main price index table
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalog/product_index_price', 'entity_id');
     }
