@@ -38,13 +38,8 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
         return $this->_resource;
     }
 
-    /**
-     * Load data
-     *
-     * @return $this
-     */
     #[\Override]
-    public function load()
+    public function load(): static
     {
         if ($this->isStorageType()) {
             $this->loadFromStorage();
@@ -71,13 +66,8 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
         return $this;
     }
 
-    /**
-     * Save result to destination file from temporary
-     *
-     * @return $this
-     */
     #[\Override]
-    public function save()
+    public function save(): static
     {
         if ($this->isStorageType()) {
             $this->saveToStorage();

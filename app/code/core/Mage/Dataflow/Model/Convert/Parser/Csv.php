@@ -14,12 +14,8 @@ class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert
 
     protected array $_mapfields = [];
 
-    /**
-     * @return $this
-     * @throws Throwable
-     */
     #[\Override]
-    public function parse()
+    public function parse(): static
     {
         // fixed for multibyte characters
         setlocale(LC_ALL, Mage::app()->getLocale()->getLocaleCode() . '.UTF-8');
@@ -139,13 +135,8 @@ class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert
         return $resultRow;
     }
 
-    /**
-     * Read data collection and write to temporary file
-     *
-     * @return $this
-     */
     #[\Override]
-    public function unparse()
+    public function unparse(): static
     {
         $batchExport = $this->getBatchExportModel()
             ->setBatchId($this->getBatchModel()->getId());

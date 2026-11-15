@@ -25,7 +25,7 @@ class Mage_Dataflow_Model_Convert_Parser_Xml_Excel extends Mage_Dataflow_Model_C
     protected $_parseFieldNames;
 
     #[\Override]
-    public function parse()
+    public function parse(): static
     {
         $adapterName   = $this->getVar('adapter');
         $adapterMethod = $this->getVar('method', 'saveRow');
@@ -233,7 +233,7 @@ class Mage_Dataflow_Model_Convert_Parser_Xml_Excel extends Mage_Dataflow_Model_C
     }
 
     #[\Override]
-    public function unparse()
+    public function unparse(): static
     {
         $batchExport = $this->getBatchExportModel()
             ->setBatchId($this->getBatchModel()->getId());

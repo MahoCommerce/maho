@@ -71,7 +71,7 @@ class Mage_Dataflow_Model_Convert_Mapper_Column extends Mage_Dataflow_Model_Conv
     }
 
     #[\Override]
-    public function map()
+    public function map(): static
     {
         $batchModel  = $this->getBatchModel();
         $batchExport = $this->getBatchExportModel();

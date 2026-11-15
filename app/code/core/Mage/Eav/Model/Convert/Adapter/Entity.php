@@ -236,12 +236,8 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
         }
     }
 
-    /**
-     * @return $this
-     * @throws \Maho\Convert\Exception
-     */
     #[\Override]
-    public function load()
+    public function load(): static
     {
         if (!($entityType = $this->getVar('entity_type'))
             || !(Mage::getResourceSingleton($entityType) instanceof Mage_Eav_Model_Entity_Interface)
@@ -318,12 +314,8 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
         return Mage::getResourceModel($entityType . '_collection');
     }
 
-    /**
-     * @return $this
-     * @throws \Maho\Convert\Exception
-     */
     #[\Override]
-    public function save()
+    public function save(): static
     {
         $collection = $this->getData();
         if ($collection instanceof Mage_Eav_Model_Entity_Collection_Abstract) {

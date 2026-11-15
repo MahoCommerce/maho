@@ -138,11 +138,8 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
         return $this;
     }
 
-    /**
-     * Load product collection Id(s)
-     */
     #[\Override]
-    public function load()
+    public function load(): static
     {
         $attrFilterArray = [];
         $attrFilterArray ['name']           = 'like';
@@ -452,11 +449,8 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
         return Mage::objects()->load(Mage::registry('Object_Cache_StockItem'));
     }
 
-    /**
-     * @return $this|Mage_Eav_Model_Convert_Adapter_Entity
-     */
     #[\Override]
-    public function save()
+    public function save(): static
     {
         $stores = [];
         foreach (Mage::getConfig()->getNode('stores')->children() as $storeNode) {
