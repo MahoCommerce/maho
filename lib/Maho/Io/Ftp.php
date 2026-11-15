@@ -42,7 +42,7 @@ class Ftp extends \Maho\Io
      */
     protected $_error;
 
-    protected string|bool|null $_tmpFilename = null;
+    protected string|false|null $_tmpFilename = null;
 
     /**
      * Open a connection
