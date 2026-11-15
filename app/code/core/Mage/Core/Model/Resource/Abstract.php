@@ -28,6 +28,9 @@ abstract class Mage_Core_Model_Resource_Abstract
      */
     protected static $_commitCallbacks = [];
 
+    /**
+     * @return void
+     */
     abstract protected function _construct();
 
     /**

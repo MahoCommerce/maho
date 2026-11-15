@@ -53,6 +53,9 @@ class Mage_Catalog_Model_Config extends Mage_Eav_Model_Config
 
     public const XML_PATH_PRODUCT_COLLECTION_ATTRIBUTES = 'frontend/product/collection/attributes';
 
+    /**
+     * @return void
+     */
     protected function _construct()
     {
         $this->_init('catalog/config');

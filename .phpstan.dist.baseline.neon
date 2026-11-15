@@ -97,58 +97,16 @@ parameters:
 			path: app/code/core/Mage/Admin/Model/Resource/Acl.php
 
 		-
-			rawMessage: 'Method Mage_Admin_Model_Resource_Acl::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Admin/Model/Resource/Acl.php
-
-		-
-			rawMessage: 'Method Mage_Admin_Model_Resource_Block::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Admin/Model/Resource/Block.php
-
-		-
-			rawMessage: 'Method Mage_Admin_Model_Resource_Role::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Admin/Model/Resource/Role.php
-
-		-
-			rawMessage: 'Method Mage_Admin_Model_Resource_Roles::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Admin/Model/Resource/Roles.php
-
-		-
 			rawMessage: 'Parameter #1 $role of method Mage_Admin_Model_Resource_Roles::_updateRoleUsersAcl() expects Mage_Admin_Model_Roles, Mage_Core_Model_Abstract given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Admin/Model/Resource/Roles.php
 
 		-
-			rawMessage: 'Method Mage_Admin_Model_Resource_Rules::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Admin/Model/Resource/Rules.php
-
-		-
 			rawMessage: 'Method Mage_Admin_Model_Resource_Rules::saveRel() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Admin/Model/Resource/Rules.php
-
-		-
-			rawMessage: 'Method Mage_Admin_Model_Resource_User::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Admin/Model/Resource/User.php
-
-		-
-			rawMessage: 'Method Mage_Admin_Model_Resource_Variable::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Admin/Model/Resource/Variable.php
 
 		-
 			rawMessage: 'Method Mage_Admin_Model_Resource_Variable::_generateCache() has no return type specified.'
@@ -209,12 +167,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/AdminNotification/Model/Observer.php
-
-		-
-			rawMessage: 'Method Mage_AdminNotification_Model_Resource_Inbox::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/AdminNotification/Model/Resource/Inbox.php
 
 		-
 			rawMessage: 'Method Mage_AdminNotification_Model_Resource_Inbox::parse() has no return type specified.'
@@ -4927,40 +4879,16 @@ parameters:
 			path: app/code/core/Mage/Bundle/Model/Resource/Bundle.php
 
 		-
-			rawMessage: 'Method Mage_Bundle_Model_Resource_Option::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Bundle/Model/Resource/Option.php
-
-		-
 			rawMessage: 'Parameter #1 $selection of method Mage_Bundle_Model_Option::addSelection() expects Mage_Bundle_Model_Selection, Mage_Catalog_Model_Product given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Bundle/Model/Resource/Option/Collection.php
 
 		-
-			rawMessage: 'Method Mage_Bundle_Model_Resource_Price_Index::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Bundle/Model/Resource/Price/Index.php
-
-		-
-			rawMessage: 'Method Mage_Bundle_Model_Resource_Selection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Bundle/Model/Resource/Selection.php
-
-		-
 			rawMessage: 'Method Mage_Bundle_Model_Resource_Selection::saveSelectionPrice() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Bundle/Model/Resource/Selection.php
-
-		-
-			rawMessage: 'Method Mage_Bundle_Model_Resource_Selection_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Bundle/Model/Resource/Selection/Collection.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Core_Model_Abstract::apply().'
@@ -5349,12 +5277,6 @@ parameters:
 		-
 			rawMessage: 'Call to an undefined method Mage_Catalog_Model_Config::_init().'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Config.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Config::_construct() has no return type specified.'
-			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Config.php
 
@@ -6013,22 +5935,10 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Category.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Category_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Category/Collection.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Category_Collection::_loadProductCount() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Category/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Category_Indexer_Product::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Category/Indexer/Product.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Category_Indexer_Product::catalogCategorySave() has no return type specified.'
@@ -6049,64 +5959,16 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Category/Tree.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Config::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Config.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Layer_Filter_Attribute::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Layer/Filter/Attribute.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Layer_Filter_Decimal::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Layer/Filter/Decimal.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Layer_Filter_Price::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Layer/Filter/Price.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Catalog_Model_Resource_Category::refreshProductIndex().'
 			identifier: method.notFound
 			count: 2
 			path: app/code/core/Mage/Catalog/Model/Resource/Product.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Action::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Action.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Attribute_Backend_Groupprice::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Attribute/Backend/Groupprice.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Attribute/Backend/Media.php
-
-		-
 			rawMessage: Property Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media::$_eventPrefix has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Attribute/Backend/Media.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Attribute_Backend_Tierprice::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Attribute/Backend/Tierprice.php
 
 		-
 			rawMessage: 'Parameter #2 $resourceModel of method Mage_Core_Model_Resource_Db_Collection_Abstract::_init() expects Mage_Core_Model_Resource_Db_Abstract|null, string given.'
@@ -6121,28 +5983,10 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Collection::_initTables() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Compare_Item::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Compare/Item.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Compare_Item_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Compare/Item/Collection.php
 
 		-
 			rawMessage: 'Parameter #1 $object of method Mage_Eav_Model_Entity_Collection_Abstract::setObject() expects Maho\DataObject|null, string given.'
@@ -6151,28 +5995,10 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Compare/Item/Collection.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Indexer_Eav::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Indexer/Eav.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Indexer_Eav_Abstract::_prepareIndex() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Indexer/Eav/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Indexer_Eav_Decimal::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Indexer/Eav/Decimal.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Indexer_Eav_Source::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Indexer/Eav/Source.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Catalog_Model_Resource_Product_Indexer_Price_Interface::getIsComposite().'
@@ -6185,18 +6011,6 @@ parameters:
 			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Indexer/Price.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Indexer_Price::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Indexer/Price.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Indexer_Price_Default::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Indexer/Price/Default.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Indexer_Price_Default::registerEvent() has no return type specified.'
@@ -6223,34 +6037,16 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Indexer/Price/Interface.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Link::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Link.php
-
-		-
 			rawMessage: 'Property Mage_Catalog_Model_Resource_Product_Link_Collection::$_linkTypeId (Mage_Catalog_Model_Product_Type) does not accept int|null.'
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Link/Collection.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Option::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Option.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Option::_saveValueTitles() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Option.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Option_Value::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Option/Value.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Option_Value::_saveValuePrices() has no return type specified.'
@@ -6271,18 +6067,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Option/Value.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Relation::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Relation.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Status::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Status.php
-
-		-
 			rawMessage: 'Parameter #1 $store of method Mage_Catalog_Model_Resource_Product::refreshEnabledIndex() expects Mage_Core_Model_Store|null, int<min, -1>|int<1, max> given.'
 			identifier: argument.type
 			count: 1
@@ -6293,36 +6077,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Status.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Type_Configurable::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Type/Configurable.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Type/Configurable/Attribute.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Type_Configurable_Product_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Type/Configurable/Product/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Website::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Website.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Url::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Url.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Url::deleteRewrite() has no return type specified.'
@@ -6469,12 +6223,6 @@ parameters:
 			path: app/code/core/Mage/CatalogIndex/Model/Price.php
 
 		-
-			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Abstract::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Abstract.php
-
-		-
 			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Abstract::setStoreId() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -6491,24 +6239,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/CatalogIndex/Model/Resource/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Aggregation::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Aggregation.php
-
-		-
-			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Attribute::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Attribute.php
-
-		-
-			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Data_Abstract::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Data/Abstract.php
 
 		-
 			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Data_Abstract::_prepareLinkFetchSelect() has no return type specified.'
@@ -6529,22 +6259,10 @@ parameters:
 			path: app/code/core/Mage/CatalogIndex/Model/Resource/Data/Grouped.php
 
 		-
-			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Indexer::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Indexer.php
-
-		-
 			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Indexer::clear() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/CatalogIndex/Model/Resource/Indexer.php
-
-		-
-			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Indexer_Abstract::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Indexer/Abstract.php
 
 		-
 			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Indexer_Abstract::cleanup() has no return type specified.'
@@ -6559,34 +6277,10 @@ parameters:
 			path: app/code/core/Mage/CatalogIndex/Model/Resource/Indexer/Abstract.php
 
 		-
-			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Indexer_Eav::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Indexer/Eav.php
-
-		-
-			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Indexer_Minimalprice::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Indexer/Minimalprice.php
-
-		-
 			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Indexer_Minimalprice::cleanup() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/CatalogIndex/Model/Resource/Indexer/Minimalprice.php
-
-		-
-			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Indexer_Price::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Indexer/Price.php
-
-		-
-			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Price::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Price.php
 
 		-
 			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Price::setCustomerGroupId() has no return type specified.'
@@ -6599,12 +6293,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/CatalogIndex/Model/Resource/Price.php
-
-		-
-			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Retreiver::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Retreiver.php
 
 		-
 			rawMessage: 'Parameter #3 $storeIds of method Mage_CatalogIndex_Model_Resource_Setup::_setWebsiteInfo() expects array, Mage_Core_Model_Website given.'
@@ -6685,18 +6373,6 @@ parameters:
 			path: app/code/core/Mage/CatalogInventory/Model/Resource/Indexer/Stock.php
 
 		-
-			rawMessage: 'Method Mage_CatalogInventory_Model_Resource_Indexer_Stock::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Model/Resource/Indexer/Stock.php
-
-		-
-			rawMessage: 'Method Mage_CatalogInventory_Model_Resource_Indexer_Stock_Default::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Model/Resource/Indexer/Stock/Default.php
-
-		-
 			rawMessage: 'Method Mage_CatalogInventory_Model_Resource_Indexer_Stock_Interface::getTypeId() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -6721,12 +6397,6 @@ parameters:
 			path: app/code/core/Mage/CatalogInventory/Model/Resource/Indexer/Stock/Interface.php
 
 		-
-			rawMessage: 'Method Mage_CatalogInventory_Model_Resource_Stock::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Model/Resource/Stock.php
-
-		-
 			rawMessage: 'Method Mage_CatalogInventory_Model_Resource_Stock::_initConfig() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -6749,18 +6419,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/CatalogInventory/Model/Resource/Stock.php
-
-		-
-			rawMessage: 'Method Mage_CatalogInventory_Model_Resource_Stock_Item::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Model/Resource/Stock/Item.php
-
-		-
-			rawMessage: 'Method Mage_CatalogInventory_Model_Resource_Stock_Status::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Model/Resource/Stock/Status.php
 
 		-
 			rawMessage: 'Parameter #1 $products of method Mage_CatalogInventory_Model_Resource_Stock_Item_Collection::addProductsFilter() expects array<Mage_Catalog_Model_Product>, Mage_Catalog_Model_Resource_Product_Collection given.'
@@ -6871,12 +6529,6 @@ parameters:
 			path: app/code/core/Mage/CatalogRule/Model/Observer.php
 
 		-
-			rawMessage: 'Method Mage_CatalogRule_Model_Resource_Rule::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogRule/Model/Resource/Rule.php
-
-		-
 			rawMessage: 'Method Mage_CatalogRule_Model_Resource_Rule::_reindexCatalogRule() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -6893,12 +6545,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/CatalogRule/Model/Resource/Rule.php
-
-		-
-			rawMessage: 'Method Mage_CatalogRule_Model_Resource_Rule_Product_Price::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogRule/Model/Resource/Rule/Product/Price.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Rule_Model_Condition_Combine::collectValidatedAttributes().'
@@ -7021,18 +6667,6 @@ parameters:
 			path: app/code/core/Mage/CatalogSearch/Model/Query.php
 
 		-
-			rawMessage: 'Method Mage_CatalogSearch_Model_Resource_Advanced::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Model/Resource/Advanced.php
-
-		-
-			rawMessage: 'Method Mage_CatalogSearch_Model_Resource_Fulltext::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Model/Resource/Fulltext.php
-
-		-
 			rawMessage: 'Parameter #1 $product of method Mage_Catalog_Model_Product_Type_Abstract::getSearchableData() expects Mage_Catalog_Model_Product|null, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
@@ -7051,28 +6685,10 @@ parameters:
 			path: app/code/core/Mage/CatalogSearch/Model/Resource/Fulltext.php
 
 		-
-			rawMessage: 'Method Mage_CatalogSearch_Model_Resource_Fulltext_Engine::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Model/Resource/Fulltext/Engine.php
-
-		-
 			rawMessage: 'Method Mage_CatalogSearch_Model_Resource_Fulltext_Engine::getResourceName() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/CatalogSearch/Model/Resource/Fulltext/Engine.php
-
-		-
-			rawMessage: 'Method Mage_CatalogSearch_Model_Resource_Indexer_Fulltext::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Model/Resource/Indexer/Fulltext.php
-
-		-
-			rawMessage: 'Method Mage_CatalogSearch_Model_Resource_Query::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Model/Resource/Query.php
 
 		-
 			rawMessage: 'Method Mage_Checkout_Block_Cart::chooseTemplate() has no return type specified.'
@@ -7249,18 +6865,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Observer.php
 
 		-
-			rawMessage: 'Method Mage_Checkout_Model_Resource_Agreement::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Resource/Agreement.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_Model_Resource_Cart::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Resource/Cart.php
-
-		-
 			rawMessage: 'Method Mage_Checkout_Model_Session::clearHelperData() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -7315,34 +6919,16 @@ parameters:
 			path: app/code/core/Mage/Cms/Controller/Router.php
 
 		-
-			rawMessage: 'Method Mage_Cms_Model_Resource_Block::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Cms/Model/Resource/Block.php
-
-		-
 			rawMessage: 'Method Mage_Cms_Model_Resource_Block_Collection::_renderFiltersBefore() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Cms/Model/Resource/Block/Collection.php
 
 		-
-			rawMessage: 'Method Mage_Cms_Model_Resource_Page::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Cms/Model/Resource/Page.php
-
-		-
 			rawMessage: 'Method Mage_Cms_Model_Resource_Page_Collection::_renderFiltersBefore() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Cms/Model/Resource/Page/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Cms_Model_Resource_Page_Service::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Cms/Model/Resource/Page/Service.php
 
 		-
 			rawMessage: 'Method Mage_Cms_Model_Wysiwyg_Images_Storage::deleteDirectory() has no return type specified.'
@@ -8048,34 +7634,10 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource.php
 
 		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Abstract::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Abstract.php
-
-		-
 			rawMessage: 'Method Mage_Core_Model_Resource_Abstract::_unserializeField() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Cache::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Cache.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Config::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Config.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Config_Data::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Config/Data.php
 
 		-
 			rawMessage: 'Method Mage_Core_Model_Resource_Db_Abstract::_init() has no return type specified.'
@@ -8114,52 +7676,16 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Db/Collection/Abstract.php
 
 		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Design::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Design.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Email_Template::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Email/Template.php
-
-		-
 			rawMessage: Property Mage_Core_Model_Resource_Entity_Abstract::$_name has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Entity/Abstract.php
 
 		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Flag::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Flag.php
-
-		-
 			rawMessage: PHPDoc tag @param for parameter $callbacks with type array|string is not subtype of native type array.
 			identifier: parameter.phpDocType
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Iterator.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Language::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Language.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Layout::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Layout.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Resource::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Resource.php
 
 		-
 			rawMessage: 'Method Mage_Core_Model_Resource_Setup::applyAllDataUpdates() has no return type specified.'
@@ -8174,52 +7700,10 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Setup.php
 
 		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Store::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Store.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Store_Group::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Store/Group.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Translate::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Translate.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Translate_String::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Translate/String.php
-
-		-
 			rawMessage: 'Method Mage_Core_Model_Resource_Type_Abstract::setName() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Type/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Url_Rewrite::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Url/Rewrite.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Variable::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Variable.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Website::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Website.php
 
 		-
 			rawMessage: 'Method Mage_Core_Model_Session::renewFormKey() has no return type specified.'
@@ -8382,12 +7866,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Cron/Model/Observer.php
-
-		-
-			rawMessage: 'Method Mage_Cron_Model_Resource_Schedule::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Cron/Model/Resource/Schedule.php
 
 		-
 			rawMessage: 'Method Mage_Customer_Block_Account_Dashboard::getTagsUrl() has no return type specified.'
@@ -8786,46 +8264,16 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Observer.php
 
 		-
-			rawMessage: 'Method Mage_Customer_Model_Resource_Address::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Resource/Address.php
-
-		-
-			rawMessage: 'Method Mage_Customer_Model_Resource_Address_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Resource/Address/Collection.php
-
-		-
 			rawMessage: 'Parameter #1 $customer of method Mage_Customer_Model_Resource_Customer::_saveAddresses() expects Mage_Customer_Model_Customer, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Resource/Customer.php
 
 		-
-			rawMessage: 'Method Mage_Customer_Model_Resource_Customer_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Resource/Customer/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Customer_Model_Resource_Form_Attribute::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Resource/Form/Attribute.php
-
-		-
 			rawMessage: 'Parameter #2 $resourceModel of method Mage_Core_Model_Resource_Db_Collection_Abstract::_init() expects Mage_Core_Model_Resource_Db_Abstract|null, string given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Resource/Form/Attribute/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Customer_Model_Resource_Group::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Resource/Group.php
 
 		-
 			rawMessage: 'Method Mage_Customer_Model_Resource_Setup::installCustomerForms() has no return type specified.'
@@ -9914,52 +9362,10 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Profile.php
 
 		-
-			rawMessage: 'Method Mage_Dataflow_Model_Resource_Batch::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Resource/Batch.php
-
-		-
 			rawMessage: 'Method Mage_Dataflow_Model_Resource_Batch_Collection::addExpireFilter() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Resource/Batch/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Resource_Batch_Export::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Resource/Batch/Export.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Resource_Batch_Import::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Resource/Batch/Import.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Resource_Import::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Resource/Import.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Resource_Profile::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Resource/Profile.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Resource_Profile_History::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Resource/Profile/History.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Resource_Session::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Resource/Session.php
 
 		-
 			rawMessage: 'Method Mage_Directory_Helper_Url::getLoadRegionsUrl() has no return type specified.'
@@ -9984,30 +9390,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Directory/Model/Observer.php
-
-		-
-			rawMessage: 'Method Mage_Directory_Model_Resource_Country::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Directory/Model/Resource/Country.php
-
-		-
-			rawMessage: 'Method Mage_Directory_Model_Resource_Country_Format::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Directory/Model/Resource/Country/Format.php
-
-		-
-			rawMessage: 'Method Mage_Directory_Model_Resource_Currency::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Directory/Model/Resource/Currency.php
-
-		-
-			rawMessage: 'Method Mage_Directory_Model_Resource_Region::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Directory/Model/Resource/Region.php
 
 		-
 			rawMessage: Property Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable::$_config has no type specified.
@@ -10104,30 +9486,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Downloadable/Model/Link/Api/Validator.php
-
-		-
-			rawMessage: 'Method Mage_Downloadable_Model_Resource_Link::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Downloadable/Model/Resource/Link.php
-
-		-
-			rawMessage: 'Method Mage_Downloadable_Model_Resource_Link_Purchased::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Downloadable/Model/Resource/Link/Purchased.php
-
-		-
-			rawMessage: 'Method Mage_Downloadable_Model_Resource_Link_Purchased_Item::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Downloadable/Model/Resource/Link/Purchased/Item.php
-
-		-
-			rawMessage: 'Method Mage_Downloadable_Model_Resource_Sample::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Downloadable/Model/Resource/Sample.php
 
 		-
 			rawMessage: 'Method Mage_Downloadable_Adminhtml_Downloadable_Product_EditController::_processDownload() has no return type specified.'
@@ -10298,12 +9656,6 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Convert/Parser/Abstract.php
 
 		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Abstract::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
-
-		-
 			rawMessage: 'Parameter #1 $object of method Mage_Eav_Model_Entity_Abstract::load() expects Mage_Core_Model_Abstract, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
@@ -10430,12 +9782,6 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Collection/Abstract.php
 
 		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Collection_Abstract::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Collection/Abstract.php
-
-		-
 			rawMessage: 'Method Mage_Eav_Model_Entity_Collection_Abstract::delete() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -10502,76 +9848,10 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Observer.php
 
 		-
-			rawMessage: 'Method Mage_Eav_Model_Resource_Config::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Resource/Config.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Resource_Entity_Attribute::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Resource/Entity/Attribute.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Resource_Entity_Attribute_Group::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Resource/Entity/Attribute/Group.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Eav_Model_Entity_Collection_Abstract::getStoreId().'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Resource/Entity/Attribute/Option.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Resource_Entity_Attribute_Option::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Resource/Entity/Attribute/Option.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Resource_Entity_Attribute_Option_Swatch::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Resource/Entity/Attribute/Option/Swatch.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Resource_Entity_Attribute_Set::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Resource/Entity/Attribute/Set.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Resource_Entity_Store::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Resource/Entity/Store.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Resource_Entity_Type::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Resource/Entity/Type.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Resource_Form_Element::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Resource/Form/Element.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Resource_Form_Fieldset::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Resource/Form/Fieldset.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Resource_Form_Type::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Resource/Form/Type.php
 
 		-
 			rawMessage: Property Mage_GiftMessage_Block_Message_Inline::$_entity has no type specified.
@@ -10596,12 +9876,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/GiftMessage/Model/Observer.php
-
-		-
-			rawMessage: 'Method Mage_GiftMessage_Model_Resource_Message::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Model/Resource/Message.php
 
 		-
 			rawMessage: 'Parameter #2 $arguments of static method Mage::getResourceModel() expects array, string given.'
@@ -10772,12 +10046,6 @@ parameters:
 			path: app/code/core/Mage/ImportExport/Model/Resource/Import/Data.php
 
 		-
-			rawMessage: 'Method Mage_ImportExport_Model_Resource_Import_Data::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Resource/Import/Data.php
-
-		-
 			rawMessage: 'Method Mage_ImportExport_Adminhtml_ExportController::getFilterAction() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -10868,28 +10136,10 @@ parameters:
 			path: app/code/core/Mage/Index/Model/Resource/Abstract.php
 
 		-
-			rawMessage: 'Method Mage_Index_Model_Resource_Event::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Index/Model/Resource/Event.php
-
-		-
-			rawMessage: 'Method Mage_Index_Model_Resource_Process::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Index/Model/Resource/Process.php
-
-		-
 			rawMessage: 'Method Mage_Log_Model_Aggregation::run() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Log/Model/Aggregation.php
-
-		-
-			rawMessage: 'Method Mage_Log_Model_Resource_Aggregation::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Log/Model/Resource/Aggregation.php
 
 		-
 			rawMessage: 'Method Mage_Log_Model_Resource_Aggregation::removeEmpty() has no return type specified.'
@@ -10904,34 +10154,10 @@ parameters:
 			path: app/code/core/Mage/Log/Model/Resource/Aggregation.php
 
 		-
-			rawMessage: 'Method Mage_Log_Model_Resource_Customer::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Log/Model/Resource/Customer.php
-
-		-
-			rawMessage: 'Method Mage_Log_Model_Resource_Log::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Log/Model/Resource/Log.php
-
-		-
-			rawMessage: 'Method Mage_Log_Model_Resource_Visitor::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Log/Model/Resource/Visitor.php
-
-		-
 			rawMessage: 'Method Mage_Log_Model_Resource_Visitor_Collection::addVisitorStoreFilter() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Log/Model/Resource/Visitor/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Log_Model_Resource_Visitor_Online::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Log/Model/Resource/Visitor/Online.php
 
 		-
 			rawMessage: Property Mage_Log_Model_Visitor::$_skipRequestLogging has no type specified.
@@ -10940,22 +10166,10 @@ parameters:
 			path: app/code/core/Mage/Log/Model/Visitor.php
 
 		-
-			rawMessage: 'Method Mage_Newsletter_Model_Resource_Problem::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Newsletter/Model/Resource/Problem.php
-
-		-
 			rawMessage: 'Method Mage_Newsletter_Model_Resource_Problem_Collection::_addCustomersData() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Newsletter/Model/Resource/Problem/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Newsletter_Model_Resource_Queue::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Newsletter/Model/Resource/Queue.php
 
 		-
 			rawMessage: 'Method Mage_Newsletter_Model_Resource_Queue::addSubscribersToQueue() has no return type specified.'
@@ -10964,22 +10178,10 @@ parameters:
 			path: app/code/core/Mage/Newsletter/Model/Resource/Queue.php
 
 		-
-			rawMessage: 'Method Mage_Newsletter_Model_Resource_Subscriber::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Newsletter/Model/Resource/Subscriber.php
-
-		-
 			rawMessage: 'Method Mage_Newsletter_Model_Resource_Subscriber::setMessagesScope() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Newsletter/Model/Resource/Subscriber.php
-
-		-
-			rawMessage: 'Method Mage_Newsletter_Model_Resource_Template::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Newsletter/Model/Resource/Template.php
 
 		-
 			rawMessage: 'Method Mage_Newsletter_Model_Subscriber::unsubscribe() has no return type specified.'
@@ -11342,36 +10544,6 @@ parameters:
 			path: app/code/core/Mage/ProductAlert/Model/Email.php
 
 		-
-			rawMessage: 'Method Mage_ProductAlert_Model_Resource_Price::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/ProductAlert/Model/Resource/Price.php
-
-		-
-			rawMessage: 'Method Mage_ProductAlert_Model_Resource_Stock::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/ProductAlert/Model/Resource/Stock.php
-
-		-
-			rawMessage: 'Method Mage_Rating_Model_Resource_Rating::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Rating/Model/Resource/Rating.php
-
-		-
-			rawMessage: 'Method Mage_Rating_Model_Resource_Rating_Entity::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Rating/Model/Resource/Rating/Entity.php
-
-		-
-			rawMessage: 'Method Mage_Rating_Model_Resource_Rating_Option::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option.php
-
-		-
 			rawMessage: 'Method Mage_Rating_Model_Resource_Rating_Option::aggregate() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -11388,12 +10560,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Rating_Model_Resource_Rating_Option_Vote::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option/Vote.php
 
 		-
 			rawMessage: 'Cannot call method addAttributeToSelect() on Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
@@ -11462,18 +10628,6 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Resource/Event.php
 
 		-
-			rawMessage: 'Method Mage_Reports_Model_Resource_Event::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Event.php
-
-		-
-			rawMessage: 'Method Mage_Reports_Model_Resource_Event_Type::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Event/Type.php
-
-		-
 			rawMessage: 'Parameter #2 $customStart of method Mage_Reports_Model_Resource_Order_Collection::getDateRange() expects string, int given.'
 			identifier: argument.type
 			count: 1
@@ -11498,18 +10652,6 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Resource/Product/Index/Collection/Abstract.php
 
 		-
-			rawMessage: 'Method Mage_Reports_Model_Resource_Product_Index_Compared::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Product/Index/Compared.php
-
-		-
-			rawMessage: 'Method Mage_Reports_Model_Resource_Product_Index_Viewed::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Product/Index/Viewed.php
-
-		-
 			rawMessage: 'Parameter #1 $from of method Mage_Reports_Model_Resource_Product_Ordered_Collection::_joinFields() expects string, int given.'
 			identifier: argument.type
 			count: 1
@@ -11520,12 +10662,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Reports/Model/Resource/Product/Ordered/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Reports_Model_Resource_Product_Sold_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Product/Sold/Collection.php
 
 		-
 			rawMessage: Property Mage_Reports_Model_Resource_Quote_Collection::$_selectCountSqlType has no type specified.
@@ -11540,40 +10676,10 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Resource/Report/Abstract.php
 
 		-
-			rawMessage: 'Method Mage_Reports_Model_Resource_Report_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Report/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Reports_Model_Resource_Report_Product_Viewed::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Report/Product/Viewed.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Reports_Model_Resource_Review_Collection::_joinFields().'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Reports/Model/Resource/Review/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Reports_Model_Resource_Review_Product_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Review/Product/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Reports_Model_Resource_Tag_Customer_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Tag/Customer/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Reports_Model_Resource_Tag_Product_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Tag/Product/Collection.php
 
 		-
 			rawMessage: 'Return type (string) of method Mage_Review_Block_Form::getAction() should be compatible with return type (Mage_Core_Controller_Varien_Action) of method Mage_Core_Block_Abstract::getAction()'
@@ -11606,12 +10712,6 @@ parameters:
 			path: app/code/core/Mage/Review/Block/Product/View/List.php
 
 		-
-			rawMessage: 'Method Mage_Review_Model_Resource_Review::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Review/Model/Resource/Review.php
-
-		-
 			rawMessage: 'Method Mage_Review_Model_Resource_Review::aggregate() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -11634,24 +10734,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Review/Model/Resource/Review/Product/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Review_Model_Resource_Review_Product_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Review/Model/Resource/Review/Product/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Review_Model_Resource_Review_Status::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Review/Model/Resource/Review/Status.php
-
-		-
-			rawMessage: 'Method Mage_Review_Model_Resource_Review_Summary::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Review/Model/Resource/Review/Summary.php
 
 		-
 			rawMessage: 'Method Mage_Review_Model_Review::getEntitySummary() has no return type specified.'
@@ -12266,76 +11348,10 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote/Payment.php
 
 		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Billing_Agreement::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Billing/Agreement.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Order::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Order_Address::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Address.php
-
-		-
 			rawMessage: 'Parameter #1 $attribute of method Mage_Sales_Model_Resource_Collection_Abstract::addAttributeToFilter() expects Mage_Eav_Model_Entity_Attribute|string, array given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Resource/Order/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Order_Creditmemo::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Creditmemo.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Order_Creditmemo_Comment::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Creditmemo/Comment.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Order_Creditmemo_Item::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Creditmemo/Item.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Order_Invoice::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Invoice.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Order_Invoice_Comment::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Invoice/Comment.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Order_Invoice_Item::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Invoice/Item.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Order_Item::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Item.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Order_Payment::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Payment.php
 
 		-
 			rawMessage: 'Method Mage_Sales_Model_Resource_Order_Payment::_unserializeField() has no return type specified.'
@@ -12346,12 +11362,6 @@ parameters:
 		-
 			rawMessage: 'Call to an undefined method Mage_Core_Model_Abstract::isFailsafe().'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Payment/Transaction.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Order_Payment_Transaction::_construct() has no return type specified.'
-			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Resource/Order/Payment/Transaction.php
 
@@ -12374,36 +11384,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Resource/Order/Payment/Transaction.php
 
 		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Order_Shipment::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Shipment.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Order_Shipment_Comment::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Shipment/Comment.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Order_Shipment_Item::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Shipment/Item.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Order_Shipment_Track::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Shipment/Track.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Order_Status::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Status.php
-
-		-
 			rawMessage: 'Parameter #3 $object of method Mage_Core_Model_Resource_Db_Abstract::_getLoadSelect() expects Mage_Core_Model_Abstract, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
@@ -12416,119 +11396,16 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Resource/Order/Status/Collection.php
 
 		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Order_Status_History::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Status/History.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Order_Tax::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Tax.php
-
-		-
 			rawMessage: 'Parameter #2 $resourceModel of method Mage_Core_Model_Resource_Db_Collection_Abstract::_init() expects Mage_Core_Model_Resource_Db_Abstract|null, string given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Resource/Order/Tax/Collection.php
 
 		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Quote::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Quote.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Quote_Address::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Quote/Address.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Quote_Address_Item::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Quote/Address/Item.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Quote_Address_Rate::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Quote/Address/Rate.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Quote_Item::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Quote/Item.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Quote_Item_Option::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Quote/Item/Option.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Quote_Payment::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Quote/Payment.php
-
-		-
 			rawMessage: 'Method Mage_Sales_Model_Resource_Quote_Payment::_unserializeField() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Resource/Quote/Payment.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Report::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Report.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Report_Bestsellers::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Report/Bestsellers.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Report_Invoiced::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Report/Invoiced.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Report_Order::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Report/Order.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Report_Order_Createdat::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Report/Order/Createdat.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Report_Order_Updatedat::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Report/Order/Updatedat.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Report_Refunded::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Report/Refunded.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Report_Shipping::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Report/Shipping.php
-
 
 		-
 			rawMessage: 'Method Mage_SalesRule_Model_Observer::_removeAttributeFromConditions() has no return type specified.'
@@ -12543,64 +11420,16 @@ parameters:
 			path: app/code/core/Mage/SalesRule/Model/Observer.php
 
 		-
-			rawMessage: 'Method Mage_SalesRule_Model_Resource_Coupon::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Resource/Coupon.php
-
-		-
 			rawMessage: 'Method Mage_SalesRule_Model_Resource_Coupon_Collection::addIsUsedFilterCallback() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/SalesRule/Model/Resource/Coupon/Collection.php
 
 		-
-			rawMessage: 'Method Mage_SalesRule_Model_Resource_Coupon_Usage::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Resource/Coupon/Usage.php
-
-		-
 			rawMessage: 'Method Mage_SalesRule_Model_Resource_Coupon_Usage::updateCustomerCouponTimesUsed() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/SalesRule/Model/Resource/Coupon/Usage.php
-
-		-
-			rawMessage: 'Method Mage_SalesRule_Model_Resource_Report_Rule::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Resource/Report/Rule.php
-
-		-
-			rawMessage: 'Method Mage_SalesRule_Model_Resource_Report_Rule_Createdat::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Resource/Report/Rule/Createdat.php
-
-		-
-			rawMessage: 'Method Mage_SalesRule_Model_Resource_Report_Rule_Updatedat::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Resource/Report/Rule/Updatedat.php
-
-		-
-			rawMessage: 'Method Mage_SalesRule_Model_Resource_Rule::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Resource/Rule.php
-
-		-
-			rawMessage: 'Method Mage_SalesRule_Model_Resource_Rule_Customer::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Resource/Rule/Customer.php
-
-		-
-			rawMessage: 'Method Mage_SalesRule_Model_Resource_Rule_Product::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Resource/Rule/Product.php
 
 		-
 			rawMessage: 'Method Mage_SalesRule_Model_Rule::setCouponCodeGenerator() has no return type specified.'
@@ -12711,12 +11540,6 @@ parameters:
 			path: app/code/core/Mage/Shipping/Model/Rate/Result.php
 
 		-
-			rawMessage: 'Method Mage_Shipping_Model_Resource_Carrier_Tablerate::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Resource/Carrier/Tablerate.php
-
-		-
 			rawMessage: 'Method Mage_Shipping_Model_Shipping::setOrigData() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -12757,30 +11580,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Sitemap/Model/Observer.php
-
-		-
-			rawMessage: 'Method Mage_Sitemap_Model_Resource_Catalog_Category::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sitemap/Model/Resource/Catalog/Category.php
-
-		-
-			rawMessage: 'Method Mage_Sitemap_Model_Resource_Catalog_Product::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sitemap/Model/Resource/Catalog/Product.php
-
-		-
-			rawMessage: 'Method Mage_Sitemap_Model_Resource_Cms_Page::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sitemap/Model/Resource/Cms/Page.php
-
-		-
-			rawMessage: 'Method Mage_Sitemap_Model_Resource_Sitemap::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sitemap/Model/Resource/Sitemap.php
 
 		-
 			rawMessage: Property Mage_Tag_Block_All::$_maxPopularity has no type specified.
@@ -12939,18 +11738,6 @@ parameters:
 			path: app/code/core/Mage/Tag/Model/Resource/Customer/Collection.php
 
 		-
-			rawMessage: 'Method Mage_Tag_Model_Resource_Indexer_Summary::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tag/Model/Resource/Indexer/Summary.php
-
-		-
-			rawMessage: 'Method Mage_Tag_Model_Resource_Tag::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tag/Model/Resource/Tag.php
-
-		-
 			rawMessage: 'Parameter #1 $model of method Mage_Tag_Model_Resource_Tag::loadByName() expects Mage_Tag_Model_Tag, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
@@ -12961,12 +11748,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: app/code/core/Mage/Tag/Model/Resource/Tag/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Tag_Model_Resource_Tag_Relation::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tag/Model/Resource/Tag/Relation.php
 
 		-
 			rawMessage: 'Method Mage_Tag_Model_Tag::getApprovedStatus() has no return type specified.'
@@ -13119,70 +11900,10 @@ parameters:
 			path: app/code/core/Mage/Tax/Model/Observer.php
 
 		-
-			rawMessage: 'Method Mage_Tax_Model_Resource_Calculation::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Resource/Calculation.php
-
-		-
-			rawMessage: 'Method Mage_Tax_Model_Resource_Calculation_Rate::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Resource/Calculation/Rate.php
-
-		-
-			rawMessage: 'Method Mage_Tax_Model_Resource_Calculation_Rate_Title::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Resource/Calculation/Rate/Title.php
-
-		-
 			rawMessage: 'Parameter #2 $resourceModel of method Mage_Core_Model_Resource_Db_Collection_Abstract::_init() expects Mage_Core_Model_Resource_Db_Abstract|null, string given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Tax/Model/Resource/Calculation/Rate/Title/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Tax_Model_Resource_Calculation_Rule::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Resource/Calculation/Rule.php
-
-		-
-			rawMessage: 'Method Mage_Tax_Model_Resource_Class::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Resource/Class.php
-
-		-
-			rawMessage: 'Method Mage_Tax_Model_Resource_Report_Tax::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Resource/Report/Tax.php
-
-		-
-			rawMessage: 'Method Mage_Tax_Model_Resource_Report_Tax_Createdat::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Resource/Report/Tax/Createdat.php
-
-		-
-			rawMessage: 'Method Mage_Tax_Model_Resource_Report_Tax_Updatedat::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Resource/Report/Tax/Updatedat.php
-
-		-
-			rawMessage: 'Method Mage_Tax_Model_Resource_Sales_Order_Tax::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Resource/Sales/Order/Tax.php
-
-		-
-			rawMessage: 'Method Mage_Tax_Model_Resource_Sales_Order_Tax_Item::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Resource/Sales/Order/Tax/Item.php
 
 		-
 			rawMessage: 'Parameter #2 $rate of method Mage_Tax_Model_Sales_Total_Quote_Shipping::_round() expects string, float given.'
@@ -13611,18 +12332,6 @@ parameters:
 			path: app/code/core/Mage/Weee/Model/Resource/Attribute/Backend/Weee/Tax.php
 
 		-
-			rawMessage: 'Method Mage_Weee_Model_Resource_Attribute_Backend_Weee_Tax::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Resource/Attribute/Backend/Weee/Tax.php
-
-		-
-			rawMessage: 'Method Mage_Weee_Model_Resource_Tax::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Resource/Tax.php
-
-		-
 			rawMessage: 'Parameter #2 $shipping of method Mage_Weee_Model_Tax::getProductWeeeAttributes() expects Mage_Sales_Model_Quote_Address|null, Mage_Customer_Model_Address_Abstract|null given.'
 			identifier: argument.type
 			count: 1
@@ -13731,18 +12440,6 @@ parameters:
 			path: app/code/core/Mage/Widget/Block/Adminhtml/Widget/Options.php
 
 		-
-			rawMessage: 'Method Mage_Widget_Model_Resource_Widget::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Widget/Model/Resource/Widget.php
-
-		-
-			rawMessage: 'Method Mage_Widget_Model_Resource_Widget_Instance::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Widget/Model/Resource/Widget/Instance.php
-
-		-
 			rawMessage: Property Mage_Widget_Model_Widget_Instance::$_layoutHandles has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -13825,24 +12522,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Wishlist/Model/Observer.php
-
-		-
-			rawMessage: 'Method Mage_Wishlist_Model_Resource_Item::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Wishlist/Model/Resource/Item.php
-
-		-
-			rawMessage: 'Method Mage_Wishlist_Model_Resource_Item_Option::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Wishlist/Model/Resource/Item/Option.php
-
-		-
-			rawMessage: 'Method Mage_Wishlist_Model_Resource_Wishlist::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Wishlist/Model/Resource/Wishlist.php
 
 		-
 			rawMessage: 'Method Mage_Wishlist_IndexController::cartAction() has no return type specified.'

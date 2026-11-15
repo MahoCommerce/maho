@@ -106,6 +106,8 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
 
     /**
      * Initialize collection
+     *
+     * @return void
      */
     protected function _construct() {}
 
