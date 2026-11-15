@@ -20,9 +20,6 @@ class Mage_Catalog_Model_Category_Attribute_Source_Sortby extends Mage_Eav_Model
         return Mage::getSingleton('catalog/config');
     }
 
-    /**
-     * Retrieve All options
-     */
     #[\Override]
     public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array
     {

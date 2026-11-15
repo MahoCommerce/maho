@@ -10,9 +10,6 @@
 
 class Mage_Catalog_Model_Product_Attribute_Source_Boolean extends Mage_Eav_Model_Entity_Attribute_Source_Boolean
 {
-    /**
-     * Retrieve all attribute options
-     */
     #[\Override]
     public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array
     {

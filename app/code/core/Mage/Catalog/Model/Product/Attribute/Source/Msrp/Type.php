@@ -25,9 +25,6 @@ class Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type extends Mage_Eav_Mod
      */
     public const TYPE_BEFORE_ORDER_CONFIRM = '3';
 
-    /**
-     * Get all options
-     */
     #[\Override]
     public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array
     {

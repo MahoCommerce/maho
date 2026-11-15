@@ -15,9 +15,6 @@ class Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type_Price extends Mage_C
      */
     public const TYPE_USE_CONFIG = '4';
 
-    /**
-     * Get all options
-     */
     #[\Override]
     public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array
     {

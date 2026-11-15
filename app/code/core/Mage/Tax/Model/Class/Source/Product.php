@@ -10,8 +10,6 @@
 
 class Mage_Tax_Model_Class_Source_Product extends Mage_Eav_Model_Entity_Attribute_Source_Abstract
 {
-    /**
-     */
     #[\Override]
     public function getAllOptions(bool $withEmpty = false, bool $defaultValues = false): array
     {

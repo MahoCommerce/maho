@@ -21,12 +21,6 @@ class Mage_Customer_Model_Entity_Address_Attribute_Source_Country extends Mage_C
     {
         $this->_factory = empty($args['factory']) ? Mage::getSingleton('core/factory') : $args['factory'];
     }
-    /**
-     * Retrieve all options
-     *
-     * @param bool $withEmpty       Argument has no effect, included for PHP 7.2 method signature compatibility
-     * @param bool $defaultValues   Argument has no effect, included for PHP 7.2 method signature compatibility
-     */
     #[\Override]
     public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array
     {
