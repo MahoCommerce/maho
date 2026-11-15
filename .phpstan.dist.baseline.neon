@@ -403,12 +403,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Super/Config/Grid/Renderer/Checkbox.php
 
 		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Source_Interface::getAllOptions() invoked with 2 parameters, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Super/Config/Simple.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs::setAttributeTabBlock() has parameter $attributeTabBlock with no type specified.'
 			identifier: missingType.parameter
 			count: 1
@@ -2407,12 +2401,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Button.php
 
 		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Source_Interface::getAllOptions() invoked with 2 parameters, 0 required.'
-			identifier: arguments.count
-			count: 2
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form.php
-
-		-
 			rawMessage: Property Mage_Adminhtml_Block_Widget_Form_Container::$_blockGroup has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -4147,12 +4135,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
 
 		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Source_Interface::getAllOptions() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
-
-		-
 			rawMessage: 'Property Mage_Catalog_Model_Convert_Adapter_Product::$_galleryBackendModel (Mage_Catalog_Model_Product_Attribute_Backend_Media) does not accept Mage_Eav_Model_Entity_Attribute_Backend_Abstract.'
 			identifier: assign.propertyType
 			count: 1
@@ -4807,12 +4789,6 @@ parameters:
 			path: app/code/core/Mage/CatalogRule/Model/Rule.php
 
 		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Source_Interface::getAllOptions() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Block/Advanced/Form.php
-
-		-
 			rawMessage: 'Method Mage_CatalogSearch_Block_Layer::_initBlocks() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -5051,12 +5027,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/ConfigurableSwatches/Helper/Data.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Source_Interface::getAllOptions() invoked with 2 parameters, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/ConfigurableSwatches/Helper/Productimg.php
 
 		-
 			rawMessage: 'Method Mage_Core_Block_Abstract::_beforeChildToHtml() has no return type specified.'
@@ -5531,12 +5501,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Address/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Source_Interface::getAllOptions() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
 
 		-
 			rawMessage: Property Mage_Customer_Model_Convert_Adapter_Customer::$_address has no type specified.
@@ -6781,12 +6745,6 @@ parameters:
 			path: app/code/core/Mage/GoogleAnalytics/Helper/Data.php
 
 		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Source_Interface::getAllOptions() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 2
-			path: app/code/core/Mage/ImportExport/Block/Adminhtml/Export/Filter.php
-
-		-
 			rawMessage: 'Parameter #1 $limit of method Mage_Adminhtml_Block_Widget_Grid::setDefaultLimit() expects int, null given.'
 			identifier: argument.type
 			count: 1
@@ -6803,18 +6761,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/ImportExport/Model/Export/Adapter/Csv.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Source_Interface::getAllOptions() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Export/Entity/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Source_Interface::getAllOptions() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Export/Entity/Customer.php
 
 		-
 			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getTypeInstance() expects int|string|null, true given.'
@@ -6839,12 +6785,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/ImportExport/Model/Import/Adapter/Csv.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Source_Interface::getAllOptions() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Abstract.php
 
 		-
 			rawMessage: 'Method Mage_ImportExport_Model_Import_Entity_Product::_getUploader() has no return type specified.'
@@ -7295,12 +7235,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Rule/Model/Condition/Combine.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Source_Interface::getAllOptions() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Rule/Model/Condition/Product/Abstract.php
 
 		-
 			rawMessage: 'Method Mage_Rule_Model_Condition_Product_Abstract::_addSpecialAttributes() has no return type specified.'

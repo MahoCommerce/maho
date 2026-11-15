@@ -25,13 +25,8 @@ class Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type_Enabled extends Mage
      */
     public const MSRP_ENABLE_USE_CONFIG = 2;
 
-    /**
-     * Retrieve all attribute options
-     *
-     * @return array
-     */
     #[\Override]
-    public function getAllOptions()
+    public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array
     {
         if (!$this->_options) {
             $this->_options = [

@@ -21,14 +21,8 @@ class Mage_Eav_Model_Entity_Attribute_Source_Config extends Mage_Eav_Model_Entit
      */
     protected $_configNodePath;
 
-    /**
-     * Retrieve all options for the source from configuration
-     *
-     * @throws Mage_Eav_Exception
-     * @return array
-     */
     #[\Override]
-    public function getAllOptions()
+    public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array
     {
         if ($this->_options === null) {
             $this->_options = [];
