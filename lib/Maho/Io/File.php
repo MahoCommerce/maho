@@ -110,7 +110,7 @@ class File extends \Maho\Io
      * @param string $mode
      * @return bool
      */
-    public function streamOpen($fileName, $mode = 'w+', $chmod = 0666)
+    public function streamOpen($fileName, $mode = 'w+', int $chmod = 0666)
     {
         $writeableMode = preg_match('#^[wax]#i', $mode);
         if ($writeableMode && !is_writeable($this->_cwd)) {
@@ -195,7 +195,7 @@ class File extends \Maho\Io
      *
      * @return array|false|null
      */
-    public function streamReadCsv($delimiter = ',', $enclosure = '"')
+    public function streamReadCsv(string $delimiter = ',', string $enclosure = '"')
     {
         if (!$this->_streamHandler) {
             return false;
@@ -290,11 +290,9 @@ class File extends \Maho\Io
      *
      * Possible arguments:
      * - path     default current path
-     *
-     * @return bool
      */
     #[\Override]
-    public function open(array $args = [])
+    public function open(array $args = []): bool
     {
         if (!empty($args['path']) && $this->_allowCreateFolders) {
             $this->checkAndCreateFolder($args['path']);
@@ -321,14 +319,9 @@ class File extends \Maho\Io
 
     /**
      * Close a connection
-     *
-     * @return bool
      */
     #[\Override]
-    public function close()
-    {
-        return true;
-    }
+    public function close(): void {}
 
     /**
      * Create a directory
@@ -336,10 +329,9 @@ class File extends \Maho\Io
      * @param string $dir
      * @param int $mode
      * @param bool $recursive
-     * @return bool
      */
     #[\Override]
-    public function mkdir($dir, $mode = 0777, $recursive = true)
+    public function mkdir($dir, $mode = 0777, $recursive = true): bool
     {
         if ($this->_cwd) {
             chdir($this->_cwd);
@@ -359,10 +351,9 @@ class File extends \Maho\Io
      * Delete a directory
      *
      * @param string $dir
-     * @return bool
      */
     #[\Override]
-    public function rmdir($dir, $recursive = false)
+    public function rmdir($dir, bool $recursive = false): bool
     {
         if ($this->_cwd) {
             @chdir($this->_cwd);
@@ -402,12 +393,10 @@ class File extends \Maho\Io
     }
 
     /**
-     * Get current working directory
-     *
-     * @return string
+     * Get current working directory, or null before open()
      */
     #[\Override]
-    public function pwd()
+    public function pwd(): string|false|null
     {
         return $this->_cwd;
     }
@@ -416,11 +405,10 @@ class File extends \Maho\Io
      * Change current working directory
      *
      * @param string $dir
-     * @return bool
      * @throws \Exception
      */
     #[\Override]
-    public function cd($dir)
+    public function cd($dir): bool
     {
         if (is_dir($dir)) {
             @chdir($this->_iwd);
@@ -438,10 +426,9 @@ class File extends \Maho\Io
      *
      * @param string $filename
      * @param string|resource $dest
-     * @return bool|string
      */
     #[\Override]
-    public function read($filename, $dest = null)
+    public function read($filename, $dest = null): string|bool
     {
         if (!is_null($dest)) {
             chdir($this->_cwd);
@@ -464,11 +451,10 @@ class File extends \Maho\Io
      * @param string|resource $src
      * @param int $mode
      *
-     * @return int|bool
      * @throws \Exception
      */
     #[\Override]
-    public function write($filename, $src, $mode = null)
+    public function write($filename, $src, $mode = null): int|bool
     {
         $this->_assertInsideCwd($filename);
 
@@ -598,7 +584,7 @@ class File extends \Maho\Io
         return $result;
     }
 
-    public function fileExists($file, $onlyFile = true)
+    public function fileExists(string $file, bool $onlyFile = true): bool
     {
         if ($this->_cwd) {
             @chdir($this->_cwd);
@@ -613,7 +599,7 @@ class File extends \Maho\Io
         return $result;
     }
 
-    public function isWriteable($path)
+    public function isWriteable(string $path): bool
     {
         if ($this->_cwd) {
             @chdir($this->_cwd);
@@ -625,7 +611,7 @@ class File extends \Maho\Io
         return $result;
     }
 
-    public function getDestinationFolder($filepath)
+    public function getDestinationFolder(string $filepath): string|false
     {
         preg_match('/^(.*[!\/])/', $filepath, $mathces);
         return $mathces[0] ?? false;
@@ -671,10 +657,9 @@ class File extends \Maho\Io
      * Delete a file
      *
      * @param string $filename
-     * @return bool
      */
     #[\Override]
-    public function rm($filename)
+    public function rm($filename): bool
     {
         $this->_assertInsideCwd($filename);
         if ($this->_cwd) {
@@ -692,10 +677,9 @@ class File extends \Maho\Io
      *
      * @param string $src
      * @param string $dest
-     * @return bool
      */
     #[\Override]
-    public function mv($src, $dest)
+    public function mv($src, $dest): bool
     {
         $this->_assertInsideCwd($dest);
         if ($this->_cwd) {
@@ -733,10 +717,9 @@ class File extends \Maho\Io
      *
      * @param string $filename
      * @param int $mode
-     * @return bool
      */
     #[\Override]
-    public function chmod($filename, $mode)
+    public function chmod($filename, $mode): bool
     {
         if ($this->_cwd) {
             chdir($this->_cwd);
@@ -758,12 +741,12 @@ class File extends \Maho\Io
      *   - LS_FILES = 2
      *   - LS_ALL   = 3
      *
-     * @param File $grep const
+     * $grep is self::GREP_DIRS, self::GREP_FILES, or null for both.
+     *
      * @access public
-     * @return array
      */
     #[\Override]
-    public function ls($grep = null)
+    public function ls(?string $grep = null): array
     {
         $ignoredDirectories = ['.', '..'];
 
@@ -909,17 +892,20 @@ class File extends \Maho\Io
     }
 
     #[\Override]
-    public function dirsep()
+    public function dirsep(): string
     {
         return DIRECTORY_SEPARATOR;
     }
 
-    public function dirname($file)
+    public function dirname(string $file): string
     {
         return $this->getCleanPath(dirname($file));
     }
 
-    public function getStreamHandler()
+    /**
+     * @return resource|null
+     */
+    public function getStreamHandler(): mixed
     {
         return $this->_streamHandler;
     }
