@@ -10,7 +10,7 @@
 
 class Mage_Review_Block_Product_View extends Mage_Catalog_Block_Product_View
 {
-    protected $_reviewsCollection;
+    protected ?Mage_Review_Model_Resource_Review_Collection $_reviewsCollection = null;
 
     /**
      * @throws Mage_Core_Exception

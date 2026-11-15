@@ -59,7 +59,7 @@ class Mage_Catalog_Block_Layer_View extends Mage_Core_Block_Template
     /**
      * Initialize blocks names
      */
-    protected function _initBlocks()
+    protected function _initBlocks(): void
     {
         $this->_stateBlockName              = 'catalog/layer_state';
         $this->_categoryBlockName           = 'catalog/layer_filter_category';

@@ -17,9 +17,9 @@ declare(strict_types=1);
  */
 class Mage_Catalog_Model_Product_Option_Value extends Mage_Core_Model_Abstract
 {
-    protected $_values = [];
+    protected array $_values = [];
 
-    protected $_product;
+    protected ?Mage_Catalog_Model_Product $_product = null;
 
     protected ?\Mage_Catalog_Model_Product_Option $_option = null;
 
