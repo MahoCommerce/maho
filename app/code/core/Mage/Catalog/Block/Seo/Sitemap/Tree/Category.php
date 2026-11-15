@@ -13,7 +13,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Category extends Mage_Catalog_Block_Se
     public const XML_PATH_LINES_PER_PAGE = 'catalog/sitemap/lines_perpage';
 
     protected ?string $_storeRootCategoryPath = '';
-    protected int|string $_storeRootCategoryLevel = 0;
+    protected int $_storeRootCategoryLevel = 0;
     protected int $_total = 0;
     protected int|float $_from = 0;
     protected int $_to = 0;
