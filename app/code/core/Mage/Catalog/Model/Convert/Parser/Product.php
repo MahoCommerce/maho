@@ -45,7 +45,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
 
     protected array $_inventoryItems = [];
 
-    protected string|false|null $_productModel = null;
+    protected ?Mage_Catalog_Model_Product $_productModel = null;
 
     protected array $_setInstances = [];
 
@@ -129,18 +129,9 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
         return false;
     }
 
-    /**
-     * Retrieve product model cache
-     *
-     * @return Mage_Catalog_Model_Product|object
-     */
-    public function getProductModel()
+    public function getProductModel(): Mage_Catalog_Model_Product
     {
-        if (is_null($this->_productModel)) {
-            $productModel = Mage::getModel('catalog/product');
-            $this->_productModel = Mage::objects()->save($productModel);
-        }
-        return Mage::objects()->load($this->_productModel);
+        return $this->_productModel ??= Mage::getModel('catalog/product');
     }
 
     /**

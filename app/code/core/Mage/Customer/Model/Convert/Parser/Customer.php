@@ -21,9 +21,9 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
      */
     protected $_collections;
 
-    protected string|false|null $_customerModel = null;
-    protected string|false|null $_customerAddressModel = null;
-    protected string|false|null $_newsletterModel = null;
+    protected ?Mage_Customer_Model_Customer $_customerModel = null;
+    protected ?Mage_Customer_Model_Address $_customerAddressModel = null;
+    protected ?Mage_Newsletter_Model_Subscriber $_newsletterModel = null;
     protected ?Mage_Core_Model_Store $_store = null;
     protected ?int $_storeId = null;
 
@@ -57,46 +57,19 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
         return $this->_fields;
     }
 
-    /**
-     * Retrieve customer model cache
-     *
-     * @return Mage_Customer_Model_Customer|object
-     */
-    public function getCustomerModel()
+    public function getCustomerModel(): Mage_Customer_Model_Customer
     {
-        if (is_null($this->_customerModel)) {
-            $object = Mage::getModel('customer/customer');
-            $this->_customerModel = Mage::objects()->save($object);
-        }
-        return Mage::objects()->load($this->_customerModel);
+        return $this->_customerModel ??= Mage::getModel('customer/customer');
     }
 
-    /**
-     * Retrieve customer address model cache
-     *
-     * @return Mage_Customer_Model_Address|object
-     */
-    public function getCustomerAddressModel()
+    public function getCustomerAddressModel(): Mage_Customer_Model_Address
     {
-        if (is_null($this->_customerAddressModel)) {
-            $object = Mage::getModel('customer/address');
-            $this->_customerAddressModel = Mage::objects()->save($object);
-        }
-        return Mage::objects()->load($this->_customerAddressModel);
+        return $this->_customerAddressModel ??= Mage::getModel('customer/address');
     }
 
-    /**
-     * Retrieve newsletter subscribers model cache
-     *
-     * @return Mage_Newsletter_Model_Subscriber|object
-     */
-    public function getNewsletterModel()
+    public function getNewsletterModel(): Mage_Newsletter_Model_Subscriber
     {
-        if (is_null($this->_newsletterModel)) {
-            $object = Mage::getModel('newsletter/subscriber');
-            $this->_newsletterModel = Mage::objects()->save($object);
-        }
-        return Mage::objects()->load($this->_newsletterModel);
+        return $this->_newsletterModel ??= Mage::getModel('newsletter/subscriber');
     }
 
     /**

@@ -12,19 +12,14 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
 {
     public const MULTI_DELIMITER = ' , ';
 
-    /**
-     * Customer model
-     *
-     * @var Mage_Customer_Model_Customer|string|null
-     */
-    protected $_customerModel;
+    protected ?Mage_Customer_Model_Customer $_customerModel = null;
 
     protected ?array $_stores = null;
     protected array $_attributes = [];
     protected ?array $_customerGroups = null;
 
-    protected string|false|null $_billingAddressModel = null;
-    protected string|false|null $_shippingAddressModel = null;
+    protected ?Mage_Customer_Model_Address $_billingAddressModel = null;
+    protected ?Mage_Customer_Model_Address $_shippingAddressModel = null;
 
     protected array $_requiredFields = [];
 
@@ -56,46 +51,19 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
 
     protected string $_customerId = '';
 
-    /**
-     * Retrieve customer model cache
-     *
-     * @return Mage_Customer_Model_Customer|object
-     */
-    public function getCustomerModel()
+    public function getCustomerModel(): Mage_Customer_Model_Customer
     {
-        if (is_null($this->_customerModel)) {
-            $object = Mage::getModel('customer/customer');
-            $this->_customerModel = Mage::objects()->save($object);
-        }
-        return Mage::objects()->load($this->_customerModel);
+        return $this->_customerModel ??= Mage::getModel('customer/customer');
     }
 
-    /**
-     * Retrieve customer address model cache
-     *
-     * @return Mage_Customer_Model_Address|object
-     */
-    public function getBillingAddressModel()
+    public function getBillingAddressModel(): Mage_Customer_Model_Address
     {
-        if (is_null($this->_billingAddressModel)) {
-            $object = Mage::getModel('customer/address');
-            $this->_billingAddressModel = Mage::objects()->save($object);
-        }
-        return Mage::objects()->load($this->_billingAddressModel);
+        return $this->_billingAddressModel ??= Mage::getModel('customer/address');
     }
 
-    /**
-     * Retrieve customer address model cache
-     *
-     * @return Mage_Customer_Model_Address|object
-     */
-    public function getShippingAddressModel()
+    public function getShippingAddressModel(): Mage_Customer_Model_Address
     {
-        if (is_null($this->_shippingAddressModel)) {
-            $object = Mage::getModel('customer/address');
-            $this->_shippingAddressModel = Mage::objects()->save($object);
-        }
-        return Mage::objects()->load($this->_shippingAddressModel);
+        return $this->_shippingAddressModel ??= Mage::getModel('customer/address');
     }
 
     /**

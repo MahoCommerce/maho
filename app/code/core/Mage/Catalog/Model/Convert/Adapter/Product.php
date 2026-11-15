@@ -15,12 +15,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
 
     protected string $_eventPrefix = 'catalog_product_import';
 
-    /**
-     * Product model
-     *
-     * @var Mage_Catalog_Model_Product|string|null
-     */
-    protected $_productModel;
+    protected ?Mage_Catalog_Model_Product $_productModel = null;
 
     /**
      * product types collection array
@@ -196,18 +191,9 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
         return parent::load();
     }
 
-    /**
-     * Retrieve product model cache
-     *
-     * @return Mage_Catalog_Model_Product|object
-     */
-    public function getProductModel()
+    public function getProductModel(): Mage_Catalog_Model_Product
     {
-        if (is_null($this->_productModel)) {
-            $productModel = Mage::getModel('catalog/product');
-            $this->_productModel = Mage::objects()->save($productModel);
-        }
-        return Mage::objects()->load($this->_productModel);
+        return $this->_productModel ??= Mage::getModel('catalog/product');
     }
 
     /**
