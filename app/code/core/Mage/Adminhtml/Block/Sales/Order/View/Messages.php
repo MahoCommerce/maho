@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Block_Sales_Order_View_Messages extends Mage_Adminhtml_Block_Messages
 {
-    protected function _getOrder()
+    protected function _getOrder(): ?Mage_Sales_Model_Order
     {
         return Mage::registry('sales_order');
     }

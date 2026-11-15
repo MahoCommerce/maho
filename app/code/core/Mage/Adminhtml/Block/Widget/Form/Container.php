@@ -12,11 +12,11 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Block_Widget_Form_Container extends Mage_Adminhtml_Block_Widget_Container
 {
-    protected $_objectId = 'id';
-    protected $_formScripts = [];
-    protected $_formInitScripts = [];
-    protected $_mode = 'edit';
-    protected $_blockGroup = 'adminhtml';
+    protected string $_objectId = 'id';
+    protected array $_formScripts = [];
+    protected array $_formInitScripts = [];
+    protected ?string $_mode = 'edit';
+    protected ?string $_blockGroup = 'adminhtml';
 
     protected ?string $_gridNavigationId = null;
     protected string $_gridNavigationRoute = '*/*/view';

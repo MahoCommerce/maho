@@ -271,13 +271,13 @@ class Mage_Adminhtml_Block_Report_Grid_Abstract extends Mage_Adminhtml_Block_Wid
         return parent::getSubTotals();
     }
 
-    public function setStoreIds($storeIds): static
+    public function setStoreIds(array $storeIds): static
     {
         $this->_storeIds = $storeIds;
         return $this;
     }
 
-    public function getCurrentCurrencyCode()
+    public function getCurrentCurrencyCode(): ?string
     {
         $this->_currentCurrencyCode ??= (count($this->_storeIds) > 0)
             ? Mage::app()->getStore(array_shift($this->_storeIds))->getBaseCurrencyCode()

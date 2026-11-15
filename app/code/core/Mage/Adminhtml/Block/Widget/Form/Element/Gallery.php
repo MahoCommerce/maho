@@ -30,7 +30,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Gallery extends Mage_Adminhtml_Bl
         return $this;
     }
 
-    public function getElement()
+    public function getElement(): ?\Maho\Data\Form\Element\AbstractElement
     {
         return $this->_element;
     }
@@ -65,12 +65,12 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Gallery extends Mage_Adminhtml_Bl
         return parent::_prepareLayout();
     }
 
-    public function getAddButtonHtml()
+    public function getAddButtonHtml(): string
     {
         return $this->getChildHtml('add_button');
     }
 
-    public function getDeleteButtonHtml($image)
+    public function getDeleteButtonHtml(string $image): string
     {
         return str_replace('#image#', $image, $this->getChildHtml('delete_button'));
     }

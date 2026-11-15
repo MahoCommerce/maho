@@ -32,12 +32,12 @@ class Mage_Adminhtml_Block_Sales_Order_Totalbar extends Mage_Adminhtml_Block_Sal
         return parent::_beforeToHtml();
     }
 
-    protected function getTotals()
+    protected function getTotals(): array
     {
         return $this->_totals;
     }
 
-    public function addTotal($label, $value, $grand = false): static
+    public function addTotal(string $label, string $value, bool $grand = false): static
     {
         $this->_totals[] = [
             'label' => $label,

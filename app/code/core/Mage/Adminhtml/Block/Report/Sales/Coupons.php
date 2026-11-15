@@ -23,7 +23,7 @@ class Mage_Adminhtml_Block_Report_Sales_Coupons extends Mage_Adminhtml_Block_Wid
         ]);
     }
 
-    public function getFilterUrl()
+    public function getFilterUrl(): string
     {
         $this->getRequest()->setParam('filter', null);
         return $this->getUrl('*/*/coupons', ['_current' => true]);

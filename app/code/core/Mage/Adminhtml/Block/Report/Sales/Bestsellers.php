@@ -23,7 +23,7 @@ class Mage_Adminhtml_Block_Report_Sales_Bestsellers extends Mage_Adminhtml_Block
         ]);
     }
 
-    public function getFilterUrl()
+    public function getFilterUrl(): string
     {
         $this->getRequest()->setParam('filter', null);
         return $this->getUrl('*/*/bestsellers', ['_current' => true]);
