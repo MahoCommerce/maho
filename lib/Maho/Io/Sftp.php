@@ -28,7 +28,7 @@ class Sftp extends \Maho\Io
      * @throws \Exception
      */
     #[\Override]
-    public function open(array $args = [])
+    public function open(array $args = []): bool
     {
         $args['timeout'] ??= self::REMOTE_TIMEOUT;
         if (str_contains($args['host'], ':')) {
@@ -64,7 +64,7 @@ class Sftp extends \Maho\Io
      * No rollback is performed.
      */
     #[\Override]
-    public function mkdir($dir, $mode = 0777, $recursive = true)
+    public function mkdir(string $dir, int $mode = 0777, bool $recursive = true): bool
     {
         if ($recursive) {
             $no_errors = true;
@@ -84,7 +84,7 @@ class Sftp extends \Maho\Io
      * Delete a directory
      */
     #[\Override]
-    public function rmdir($dir, $recursive = false)
+    public function rmdir(string $dir, bool $recursive = false): bool
     {
         if ($recursive) {
             $no_errors = true;
@@ -116,7 +116,7 @@ class Sftp extends \Maho\Io
      * Get current working directory
      */
     #[\Override]
-    public function pwd()
+    public function pwd(): string|false
     {
         return $this->_connection->pwd(); // @phpstan-ignore class.notFound
     }
@@ -125,7 +125,7 @@ class Sftp extends \Maho\Io
      * Change current working directory
      */
     #[\Override]
-    public function cd($dir)
+    public function cd(string $dir): bool
     {
         return $this->_connection->chdir($dir); // @phpstan-ignore class.notFound
     }
@@ -134,7 +134,7 @@ class Sftp extends \Maho\Io
      * Read a file
      */
     #[\Override]
-    public function read($filename, $dest = null)
+    public function read(string $filename, mixed $dest = null): string|bool
     {
         $dest ??= false;
         return $this->_connection->get($filename, $dest); // @phpstan-ignore class.notFound
@@ -145,7 +145,7 @@ class Sftp extends \Maho\Io
      * @param $src Must be a local file name
      */
     #[\Override]
-    public function write($filename, $src, $mode = null)
+    public function write(string $filename, mixed $src, ?int $mode = null): bool
     {
         return $this->_connection->put($filename, $src); // @phpstan-ignore class.notFound
     }
@@ -154,7 +154,7 @@ class Sftp extends \Maho\Io
      * Delete a file
      */
     #[\Override]
-    public function rm($filename)
+    public function rm(string $filename): bool
     {
         return $this->_connection->delete($filename); // @phpstan-ignore class.notFound
     }
@@ -163,16 +163,18 @@ class Sftp extends \Maho\Io
      * Rename or move a directory or a file
      */
     #[\Override]
-    public function mv($src, $dest)
+    public function mv(string $src, string $dest): bool
     {
         return $this->_connection->rename($src, $dest); // @phpstan-ignore class.notFound
     }
 
     /**
-     * Chamge mode of a directory or a file
+     * Change mode of a directory or a file
+     *
+     * @return int|bool The new mode
      */
     #[\Override]
-    public function chmod($filename, $mode)
+    public function chmod(string $filename, int $mode): int|bool
     {
         return $this->_connection->chmod($mode, $filename); // @phpstan-ignore class.notFound
     }
@@ -181,7 +183,7 @@ class Sftp extends \Maho\Io
      * Get list of cwd subdirectories and files
      */
     #[\Override]
-    public function ls($grep = null)
+    public function ls(?string $grep = null): array
     {
         $list = $this->_connection->nlist(); // @phpstan-ignore class.notFound
         $pwd = $this->pwd();
@@ -195,7 +197,7 @@ class Sftp extends \Maho\Io
         return $result;
     }
 
-    public function rawls()
+    public function rawls(): array|false
     {
         $list = $this->_connection->rawlist(); // @phpstan-ignore class.notFound
         return $list;
