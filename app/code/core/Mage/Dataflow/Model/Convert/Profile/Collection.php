@@ -54,7 +54,7 @@ class Mage_Dataflow_Model_Convert_Profile_Collection
         return $this->_profiles;
     }
 
-    public function getProfile(string $name): ?Mage_Dataflow_Model_Convert_Profile_Abstract
+    public function getProfile(string $name): ?Mage_Dataflow_Model_Convert_Profile_Interface
     {
         if (!isset($this->_profiles[$name])) {
             $this->importProfileXml($name);

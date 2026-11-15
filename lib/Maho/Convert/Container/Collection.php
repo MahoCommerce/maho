@@ -24,9 +24,16 @@ class Collection
     public function addItem(string|int|null $name, ContainerInterface $item): ContainerInterface
     {
         // No core container has a name, but an extension container can have one
-        $name ??= method_exists($item, 'getName') && $item->getName() ? $item->getName() : count($this->_items);
+        if ($name === null && method_exists($item, 'getName') && $item->getName()) {
+            $name = $item->getName();
+        }
 
-        $this->_items[$name] = $item;
+        // A nameless container takes the next free index, so it never replaces another one
+        if ($name === null) {
+            $this->_items[] = $item;
+        } else {
+            $this->_items[$name] = $item;
+        }
 
         return $item;
     }
