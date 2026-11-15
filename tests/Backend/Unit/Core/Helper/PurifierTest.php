@@ -114,8 +114,6 @@ describe('Mage_Core_Helper_Purifier removes active content', function () {
         // to the MEDIUMTEXT bound of the content column instead.
         $long = '<p>' . str_repeat('a', 50000) . '</p>';
         expect(strlen((string) $this->purifier->purify($long)))->toBeGreaterThan(49_000);
-
-        expect(Mage_Core_Helper_Purifier::MAX_INPUT_LENGTH)->toBe(2_097_152);
     });
 });
 

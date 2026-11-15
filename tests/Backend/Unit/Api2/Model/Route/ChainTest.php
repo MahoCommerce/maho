@@ -94,36 +94,28 @@ describe('Mage_Api2_Model_Route_Chain', function () {
     });
 
     describe('Custom Separators', function () {
-        it('chains routes with custom separator', function () {
-            $route1 = new Mage_Api2_Model_Route_Base('api');
-            $route2 = new Mage_Api2_Model_Route_Base('products');
+        it('chains routes with the given separator', function (string $separator, string $path) {
+            $chain = new Mage_Api2_Model_Route_Chain(
+                new Mage_Api2_Model_Route_Base('api'),
+                $separator,
+                new Mage_Api2_Model_Route_Base('products'),
+            );
 
-            $chain = new Mage_Api2_Model_Route_Chain($route1, '-', $route2);
+            expect($chain->match($path))->toBeArray();
+        })->with([
+            'one character' => ['-', 'api-products'],
+            'empty' => ['', 'apiproducts'],
+            'several characters' => ['::', 'api::products'],
+        ]);
 
-            $result = $chain->match('api-products');
-            expect($result)->toBeArray();
+        it('does not match a path that uses another separator', function () {
+            $chain = new Mage_Api2_Model_Route_Chain(
+                new Mage_Api2_Model_Route_Base('api'),
+                '-',
+                new Mage_Api2_Model_Route_Base('products'),
+            );
 
             expect($chain->match('api/products'))->toBeFalse();
-        });
-
-        it('handles empty separator', function () {
-            $route1 = new Mage_Api2_Model_Route_Base('api');
-            $route2 = new Mage_Api2_Model_Route_Base('v1');
-
-            $chain = new Mage_Api2_Model_Route_Chain($route1, '', $route2);
-
-            $result = $chain->match('apiv1');
-            expect($result)->toBeArray();
-        });
-
-        it('handles multi-character separator', function () {
-            $route1 = new Mage_Api2_Model_Route_Base('module');
-            $route2 = new Mage_Api2_Model_Route_Base('action');
-
-            $chain = new Mage_Api2_Model_Route_Chain($route1, '::', $route2);
-
-            $result = $chain->match('module::action');
-            expect($result)->toBeArray();
         });
     });
 
@@ -139,17 +131,6 @@ describe('Mage_Api2_Model_Route_Chain', function () {
             expect($result['version'])->toBe('v1');
             expect($result['id'])->toBe('123');
             expect($chain->getMatchedPath())->toBe('api/v1/products/123');
-        });
-
-        it('returns matched path for partial matches', function () {
-            $route1 = new Mage_Api2_Model_Route_Base('store/:code');
-            $route2 = new Mage_Api2_Model_Route_Base('catalog');
-
-            $chain = new Mage_Api2_Model_Route_Chain($route1, '/', $route2);
-
-            $result = $chain->match('store/us/catalog/products/123', true);
-            expect($result)->toBeArray();
-            expect($chain->getMatchedPath())->toBe('store/us/catalog');
         });
     });
 
@@ -167,19 +148,6 @@ describe('Mage_Api2_Model_Route_Chain', function () {
             expect($result)->toBeArray();
             expect($result['version'])->toBe('v1');
             expect($result['id'])->toBe('123');
-        });
-
-        it('handles API versioning patterns', function () {
-            $apiRoute = new Mage_Api2_Model_Route_Base('api/:api_type');
-            $resourceRoute = new Mage_Api2_Model_Route_Base(':resource/:id');
-
-            $chain = new Mage_Api2_Model_Route_Chain($apiRoute, '/', $resourceRoute);
-
-            $result = $chain->match('api/rest/customers/42');
-            expect($result)->toBeArray();
-            expect($result['api_type'])->toBe('rest');
-            expect($result['resource'])->toBe('customers');
-            expect($result['id'])->toBe('42');
         });
 
         it('handles store and locale patterns', function () {
@@ -228,35 +196,19 @@ describe('Mage_Api2_Model_Route_Chain', function () {
     });
 
     describe('Edge Cases', function () {
-        it('handles empty first route', function () {
-            $route1 = new Mage_Api2_Model_Route_Base('');
-            $route2 = new Mage_Api2_Model_Route_Base('products');
+        it('handles an empty route in the chain', function (string $first, string $second, string $path) {
+            $chain = new Mage_Api2_Model_Route_Chain(
+                new Mage_Api2_Model_Route_Base($first),
+                '/',
+                new Mage_Api2_Model_Route_Base($second),
+            );
 
-            $chain = new Mage_Api2_Model_Route_Chain($route1, '/', $route2);
-
-            $result = $chain->match('products');
-            expect($result)->toBeArray();
-        });
-
-        it('handles empty second route', function () {
-            $route1 = new Mage_Api2_Model_Route_Base('api');
-            $route2 = new Mage_Api2_Model_Route_Base('');
-
-            $chain = new Mage_Api2_Model_Route_Chain($route1, '/', $route2);
-
-            $result = $chain->match('api/');
-            expect($result)->toBeArray();
-        });
-
-        it('handles both routes being empty', function () {
-            $route1 = new Mage_Api2_Model_Route_Base('');
-            $route2 = new Mage_Api2_Model_Route_Base('');
-
-            $chain = new Mage_Api2_Model_Route_Chain($route1, '/', $route2);
-
-            $result = $chain->match('/');
-            expect($result)->toBeArray();
-        });
+            expect($chain->match($path))->toBeArray();
+        })->with([
+            'empty first route' => ['', 'products', 'products'],
+            'empty second route' => ['api', '', 'api/'],
+            'both routes empty' => ['', '', '/'],
+        ]);
 
         it('preserves matched path through chain', function () {
             $route1 = new Mage_Api2_Model_Route_Base('start/:var1');

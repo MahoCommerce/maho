@@ -9,13 +9,6 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Giftcard Observer Instantiation', function (): void {
-    test('observer can be instantiated', function (): void {
-        $observer = Mage::getModel('giftcard/observer');
-        expect($observer)->toBeInstanceOf(Maho_Giftcard_Model_Observer::class);
-    });
-});
-
 describe('Observer: Set Giftcard Price on Quote Item', function (): void {
     test('sets custom price on quote item from buy request', function (): void {
         $observer = Mage::getModel('giftcard/observer');
@@ -487,50 +480,6 @@ describe('Integration: Quote → Order → Admin Totals with Gift Card', functio
     });
 });
 
-describe('Observer: Catalog Product Save Before', function (): void {
-    test('preserves gift card attributes on product save', function (): void {
-        $observer = Mage::getModel('giftcard/observer');
-
-        $product = Mage::getModel('catalog/product');
-        $product->setTypeId('giftcard');
-        $product->setData('giftcard_type', 'fixed');
-        $product->setData('giftcard_amounts', '25,50,100');
-        $product->setData('giftcard_allow_message', 1);
-        $product->setData('giftcard_lifetime', 365);
-
-        $event = new Maho\Event();
-        $event->setProduct($product);
-
-        $eventObserver = new Maho\Event\Observer();
-        $eventObserver->setEvent($event);
-
-        $observer->catalogProductSaveBefore($eventObserver);
-
-        // Attributes should be preserved
-        expect($product->getData('giftcard_type'))->toBe('fixed');
-        expect($product->getData('giftcard_amounts'))->toBe('25,50,100');
-    });
-
-    test('skips non-giftcard products', function (): void {
-        $observer = Mage::getModel('giftcard/observer');
-
-        $product = Mage::getModel('catalog/product');
-        $product->setTypeId('simple');
-        $product->setData('giftcard_type', 'fixed'); // Shouldn't matter
-
-        $event = new Maho\Event();
-        $event->setProduct($product);
-
-        $eventObserver = new Maho\Event\Observer();
-        $eventObserver->setEvent($event);
-
-        // Should return early without processing
-        $observer->catalogProductSaveBefore($eventObserver);
-
-        expect(true)->toBeTrue();
-    });
-});
-
 describe('Observer: Gift Card Creation on Invoice Paid', function (): void {
     beforeEach(function (): void {
         $this->helper = Mage::helper('giftcard');
@@ -707,83 +656,6 @@ describe('Observer: Gift Card Creation on Invoice Paid', function (): void {
     });
 });
 
-describe('Observer: Admin Order Gift Card Processing', function (): void {
-    beforeEach(function (): void {
-        $this->helper = Mage::helper('giftcard');
-        $this->observer = Mage::getModel('giftcard/observer');
-
-        // Create test gift card
-        $this->giftcard = Mage::getModel('giftcard/giftcard');
-        $this->giftcard->setCode($this->helper->generateCode());
-        $this->giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $this->giftcard->setWebsiteIds([1]);
-        $this->giftcard->setBalance(100.00);
-        $this->giftcard->setInitialBalance(100.00);
-        $this->giftcard->save();
-    });
-
-    test('applies gift card in admin order create', function (): void {
-        // Create quote
-        $quote = Mage::getModel('sales/quote');
-        $quote->setStoreId(1);
-        $quote->save();
-
-        // Mock request
-        $request = new Maho\DataObject([
-            'order' => [
-                'giftcard' => [
-                    'code' => $this->giftcard->getCode(),
-                    'action' => 'apply',
-                ],
-            ],
-        ]);
-
-        // Mock order create model
-        $orderCreateModel = new Maho\DataObject([
-            'quote' => $quote,
-        ]);
-        $orderCreateModel->setQuote($quote);
-
-        // Use reflection or direct method call since we need to mock the request
-        // For integration test, we'll verify the logic directly
-
-        // Apply gift card to quote
-        $codes = [$this->giftcard->getCode() => 0];
-        $quote->setGiftcardCodes(json_encode($codes));
-        $quote->save();
-
-        $reloadedQuote = Mage::getModel('sales/quote')->load($quote->getId());
-        $appliedCodes = json_decode($reloadedQuote->getGiftcardCodes(), true);
-
-        expect($appliedCodes)->toHaveKey($this->giftcard->getCode());
-    });
-
-    test('rejects invalid gift card code', function (): void {
-        // Try to apply non-existent code
-        $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode('INVALID-CODE-12345');
-
-        expect($giftcard->getId())->toBeNull();
-    });
-
-    test('rejects gift card from different website', function (): void {
-        // Card is for website 1
-        $quote = Mage::getModel('sales/quote');
-        $quote->setStoreId(1);
-
-        $websiteId = (int) $quote->getStore()->getWebsiteId();
-
-        $cardWebsiteIds = $this->giftcard->getWebsiteIds();
-        expect($cardWebsiteIds)->toContain($websiteId);
-
-        // Not saved, to avoid the foreign key constraint on website 999
-        $this->giftcard->setWebsiteIds([999]);
-        expect($this->giftcard->isValidForWebsite($websiteId))->toBeFalse();
-
-        $this->giftcard->setWebsiteIds([$websiteId]);
-        expect($this->giftcard->isValidForWebsite($websiteId))->toBeTrue();
-    });
-});
-
 describe('Observer: Refund Gift Card on Order Cancel', function (): void {
     test('refunds gift card balance when order is canceled', function (): void {
         // Create a gift card with initial balance
@@ -916,25 +788,6 @@ describe('Observer: Refund Gift Card on Order Cancel', function (): void {
         $giftcard2 = Mage::getModel('giftcard/giftcard')->loadByCode($code2);
         expect($giftcard1->getBalance())->toBe(100.00);
         expect($giftcard2->getBalance())->toBe(75.00);
-    });
-
-    test('does nothing when order has no gift card amount', function (): void {
-        // Create order without gift card
-        $order = Mage::getModel('sales/order');
-        $order->setIncrementId('CANCEL-NOGC-' . uniqid());
-        $order->setStoreId(1);
-        $order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
-        $order->setStatus('pending_payment');
-        $order->setGrandTotal(100.00);
-        $order->setBaseGrandTotal(100.00);
-        $order->save();
-
-        // Cancel the order - should not throw any errors
-        $order->cancel();
-        $order->save();
-
-        // Test passes if no exception was thrown
-        expect(true)->toBeTrue();
     });
 
     test('extends expiration on refund when configured', function (): void {

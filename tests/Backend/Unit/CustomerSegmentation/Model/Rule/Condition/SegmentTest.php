@@ -9,6 +9,35 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
+/**
+ * Create a segment and a customer of website 1. Make the customer a member when $member is true.
+ *
+ * @return array{customer_id: int, segment_id: int}
+ */
+function ruleSegmentConditionFixture(bool $member, bool $active = true): array
+{
+    $customer = Mage::getModel('customer/customer')
+        ->setEmail('rule.segment.' . uniqid('', true) . '@test.com')
+        ->setFirstname('Rule')
+        ->setLastname('Segment')
+        ->setWebsiteId(1)
+        ->setGroupId(1);
+    $customer->save();
+
+    $segment = Mage::getModel('customersegmentation/segment')
+        ->setName('Rule Segment ' . uniqid())
+        ->setWebsiteIds([1])
+        ->setIsActive($active);
+    $segment->save();
+
+    if ($member) {
+        Mage::getResourceModel('customersegmentation/segment')
+            ->updateCustomerMembership($segment, [(int) $customer->getId()]);
+    }
+
+    return ['customer_id' => (int) $customer->getId(), 'segment_id' => (int) $segment->getId()];
+}
+
 describe('Rule Condition Segment', function () {
     beforeEach(function () {
         $this->segmentCondition = Mage::getModel('customersegmentation/rule_condition_segment');
@@ -17,10 +46,6 @@ describe('Rule Condition Segment', function () {
     test('can create new segment condition instance', function () {
         expect($this->segmentCondition)->toBeInstanceOf(Maho_CustomerSegmentation_Model_Rule_Condition_Segment::class);
         expect($this->segmentCondition->getType())->toBe('customersegmentation/rule_condition_segment');
-    });
-
-    test('extends rule condition abstract', function () {
-        expect($this->segmentCondition)->toBeInstanceOf(Mage_Rule_Model_Condition_Abstract::class);
     });
 
     test('has correct attribute options', function () {
@@ -40,72 +65,34 @@ describe('Rule Condition Segment', function () {
         expect($this->segmentCondition->getValueElementType())->toBe('select');
     });
 
-    test('can load value select options from active segments', function () {
-        // Test that the method returns an array (actual segments will depend on test data)
-        $options = $this->segmentCondition->getValueSelectOptions();
+    test('offers the active segments and not the inactive segments', function () {
+        $active = ruleSegmentConditionFixture(false);
+        $inactive = ruleSegmentConditionFixture(false, false);
 
-        expect($options)->toBeArray();
+        $values = array_map(intval(...), array_column($this->segmentCondition->getValueSelectOptions(), 'value'));
 
-        // Each option should have value and label keys
-        foreach ($options as $option) {
-            expect($option)->toHaveKey('value');
-            expect($option)->toHaveKey('label');
-            expect($option['value'])->toBeNumeric();
-            expect($option['label'])->toBeString();
-        }
+        expect($values)->toContain($active['segment_id'])
+            ->and($values)->not->toContain($inactive['segment_id']);
     });
 
-    test('validates customer segment membership correctly', function () {
+    test('validates the segment membership of a customer', function (bool $member, ?int $websiteId, bool $expected) {
+        $fixture = ruleSegmentConditionFixture($member);
         $this->segmentCondition->setAttribute('customer_segment');
         $this->segmentCondition->setOperator('==');
-        $this->segmentCondition->setValue(1); // Segment ID 1
+        $this->segmentCondition->setValue((string) $fixture['segment_id']);
 
-        // Create a simple test where we mock the validateAttribute method behavior
-        // Since validateAttribute is protected, we'll test the overall validation
-
-        // Create test object with customer ID
-        $testObject = new Varien_Object([
-            'customer_id' => 123,
-            'store' => null,
+        $object = new \Maho\DataObject([
+            'customer_id' => $fixture['customer_id'],
+            'store' => $websiteId === null ? null : new \Maho\DataObject(['website_id' => $websiteId]),
         ]);
 
-        // The actual test will depend on the implementation - for now verify it doesn't crash
-        $result = $this->segmentCondition->validate($testObject);
-        expect($result)->toBeBool(); // Should return boolean
-    });
-
-    test('validates customer not in segment correctly', function () {
-        $this->segmentCondition->setAttribute('customer_segment');
-        $this->segmentCondition->setOperator('==');
-        $this->segmentCondition->setValue(999); // Non-existent segment
-
-        // Create test object with customer ID
-        $testObject = new Varien_Object([
-            'customer_id' => 123,
-            'store' => null,
-        ]);
-
-        $result = $this->segmentCondition->validate($testObject);
-        expect($result)->toBeBool(); // Should return boolean
-    });
-
-    test('validates with website context correctly', function () {
-        $this->segmentCondition->setAttribute('customer_segment');
-        $this->segmentCondition->setOperator('==');
-        $this->segmentCondition->setValue(1);
-
-        // Mock store to return website ID
-        $store = new Varien_Object(['website_id' => 2]);
-
-        // Create test object with customer ID and store
-        $testObject = new Varien_Object([
-            'customer_id' => 456,
-            'store' => $store,
-        ]);
-
-        $result = $this->segmentCondition->validate($testObject);
-        expect($result)->toBeBool(); // Should return boolean
-    });
+        expect($this->segmentCondition->validate($object))->toBe($expected);
+    })->with([
+        'a member' => [true, null, true],
+        'a customer outside the segment' => [false, null, false],
+        'a member in the website of the membership' => [true, 1, true],
+        'a member in another website' => [true, 2, false],
+    ]);
 
     test('handles guest customers correctly', function () {
         $this->segmentCondition->setAttribute('customer_segment');
@@ -113,7 +100,7 @@ describe('Rule Condition Segment', function () {
         $this->segmentCondition->setValue('1');
 
         // Create test object without customer ID (guest)
-        $testObject = new Varien_Object([
+        $testObject = new \Maho\DataObject([
             'customer_id' => null,
             'store' => null,
         ]);
@@ -127,46 +114,29 @@ describe('Rule Condition Segment', function () {
         expect($result)->toBe(false);
     });
 
-    test('handles empty segment list correctly', function () {
+    test('applies each operator to a member of the segment', function (string $operator, bool $expected) {
+        $fixture = ruleSegmentConditionFixture(true);
         $this->segmentCondition->setAttribute('customer_segment');
-        $this->segmentCondition->setOperator('==');
-        $this->segmentCondition->setValue(1);
+        $this->segmentCondition->setOperator($operator);
+        $this->segmentCondition->setValue((string) $fixture['segment_id']);
 
-        // Create test object with customer ID - without segments, should return false
-        $testObject = new Varien_Object([
-            'customer_id' => 123,
-            'store' => null,
-        ]);
+        $object = new \Maho\DataObject(['customer_id' => $fixture['customer_id'], 'store' => null]);
 
-        $result = $this->segmentCondition->validate($testObject);
-        expect($result)->toBeBool(); // Should return boolean
-    });
-
-    test('works with different operators', function () {
-        $this->segmentCondition->setAttribute('customer_segment');
-        $this->segmentCondition->setValue(1);
-
-        $testObject = new Varien_Object([
-            'customer_id' => 123,
-            'store' => null,
-        ]);
-
-        // Test different operators - just verify they don't crash
-        $operators = ['==', '!=', '()', '!()'];
-        foreach ($operators as $operator) {
-            $this->segmentCondition->setOperator($operator);
-            $result = $this->segmentCondition->validate($testObject);
-            expect($result)->toBeBool(); // Should always return boolean
-        }
-    });
-
+        expect($this->segmentCondition->validate($object))->toBe($expected);
+    })->with([
+        'is' => ['==', true],
+        'is not' => ['!=', false],
+        'is one of' => ['()', true],
+        'is not one of' => ['!()', false],
+    ]);
 
     test('caches value select options', function () {
-        // Test that options are cached by calling twice and ensuring we get same result
-        $options1 = $this->segmentCondition->getValueSelectOptions();
-        $options2 = $this->segmentCondition->getValueSelectOptions();
+        $options = $this->segmentCondition->getValueSelectOptions();
+        $later = ruleSegmentConditionFixture(false);
 
-        expect($options1)->toEqual($options2);
-        expect($options1)->toBeArray();
+        $cached = $this->segmentCondition->getValueSelectOptions();
+
+        expect($cached)->toEqual($options)
+            ->and(array_map(intval(...), array_column($cached, 'value')))->not->toContain($later['segment_id']);
     });
 });

@@ -110,7 +110,7 @@ describe('Select Query Builder - JOINs', function () {
         expect($sql)->toContain('LEFT JOIN');
     });
 
-    it('executes JOIN query correctly', function () {
+    it('executes a JOIN query', function () {
         $storeTable = $this->adapter->getTableName('core_store');
 
         $select = $this->adapter->select()
@@ -120,16 +120,14 @@ describe('Select Query Builder - JOINs', function () {
                 'c.scope_id = s.store_id',
                 ['code'],
             )
-            ->where('c.scope = ?', 'stores')
+            ->where('c.scope = ?', 'default')
             ->limit(5);
 
         $results = $this->adapter->fetchAll($select);
 
-        expect($results)->toBeArray();
-        if (count($results) > 0) {
-            expect($results[0])->toHaveKey('path');
-            expect($results[0])->toHaveKey('code');
-        }
+        expect($results)->not->toBeEmpty()
+            ->and($results[0])->toHaveKey('path')
+            ->and($results[0])->toHaveKey('code');
     });
 });
 
@@ -184,7 +182,11 @@ describe('Select Query Builder - Aggregates and Grouping', function () {
 
         $results = $this->adapter->fetchAll($select);
 
-        expect($results)->toBeArray();
+        expect($results)->not->toBeEmpty();
+        foreach (array_slice($results, 1) as $index => $row) {
+            $previous = $results[$index];
+            expect([$previous['scope'], (int) $previous['scope_id']] <= [$row['scope'], (int) $row['scope_id']])->toBeTrue();
+        }
     });
 });
 
@@ -280,7 +282,7 @@ describe('Select Query Builder - Complex Queries', function () {
         expect($sql)->toContain('UNION');
     });
 
-    it('handles complex WHERE with OR conditions', function () {
+    it('joins the WHERE conditions in the order that they were added', function () {
         $select = $this->adapter->select()
             ->from($this->configTable, ['scope', 'path'])
             ->where('scope = ?', 'default')
@@ -290,7 +292,10 @@ describe('Select Query Builder - Complex Queries', function () {
 
         $results = $this->adapter->fetchAll($select);
 
-        expect($results)->toBeArray();
+        expect($results)->not->toBeEmpty();
+        foreach ($results as $row) {
+            expect($row['scope'] === 'default' || ($row['scope'] === 'websites' && (int) $row['scope_id'] === 0))->toBeTrue();
+        }
     });
 
     it('resets unused LEFT JOINs', function () {
@@ -315,8 +320,7 @@ describe('Select Query Builder - Complex Queries', function () {
 
         $sql = $select->assemble();
 
-        // JOIN might be removed if not used
-        expect($sql)->toContain('SELECT');
+        expect($sql)->not->toContain('LEFT JOIN');
     });
 });
 
@@ -414,17 +418,5 @@ describe('Select Query Builder - toString Conversion', function () {
 
         expect($sql)->toContain('SELECT');
         expect($sql)->toContain('FROM');
-    });
-
-    it('can be used directly in query methods', function () {
-        $select = $this->adapter->select()
-            ->from($this->configTable, ['scope'])
-            ->where('scope = ?', 'default')
-            ->limit(5);
-
-        // Pass Select object directly to fetchAll
-        $results = $this->adapter->fetchAll($select);
-
-        expect($results)->toBeArray();
     });
 });

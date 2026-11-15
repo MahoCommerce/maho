@@ -271,29 +271,6 @@ describe('Segment Matching Integration', function () {
         }
     });
 
-    test('segment matching respects website restrictions', function () {
-        $segment = createMatchingTestSegment('Website Specific Segment', [
-            'type' => 'customersegmentation/segment_condition_customer_attributes',
-            'attribute' => 'email',
-            'operator' => '{}',
-            'value' => '@test.com',
-        ]);
-
-        // Set specific website restriction
-        $segment->setWebsiteIds([1]);
-        $segment->save();
-
-        $matchedCustomers = $segment->getMatchingCustomerIds();
-
-        expect($matchedCustomers)->toBeArray();
-
-        // Verify all matched customers belong to website 1
-        foreach ($matchedCustomers as $customerId) {
-            $customer = Mage::getModel('customer/customer')->load($customerId);
-            expect((int) $customer->getWebsiteId())->toBe(1);
-        }
-    });
-
     test('segment properly excludes customers from different websites', function () {
         createMultiWebsiteTestCustomers();
 
@@ -487,32 +464,6 @@ describe('Segment Matching Integration', function () {
         createClvTestCustomers();
 
         $segment = createMatchingTestSegment('Zero Orders Segment', [
-            'type' => 'customersegmentation/segment_condition_customer_clv',
-            'attribute' => 'number_of_orders',
-            'operator' => '==',
-            'value' => '0',
-        ]);
-
-        $matchedCustomers = $segment->getMatchingCustomerIds();
-
-        expect($matchedCustomers)->toBeArray();
-        expect(count($matchedCustomers))->toBeGreaterThan(0);
-
-        // Verify matched customers actually have 0 orders
-        foreach ($matchedCustomers as $customerId) {
-            $orderCount = Mage::getResourceModel('sales/order_collection')
-                ->addFieldToFilter('customer_id', $customerId)
-                ->addFieldToFilter('state', ['nin' => ['canceled', 'closed']])
-                ->getSize();
-            expect($orderCount)->toBe(0);
-        }
-    });
-
-    test('can match customers with zero orders using customer attributes condition', function () {
-        // Create customers specifically for testing
-        createClvTestCustomers();
-
-        $segment = createMatchingTestSegment('Zero Orders Segment (Customer Attrs)', [
             'type' => 'customersegmentation/segment_condition_customer_clv',
             'attribute' => 'number_of_orders',
             'operator' => '==',
@@ -767,7 +718,6 @@ describe('Segment Matching Integration', function () {
             $customer->setGroupId($customerData['group_id']);
             $customer->setWebsiteId($customerData['website_id']);
             $customer->save();
-
 
             // Create orders for this customer
             $orderCount = $customerData['order_count'];

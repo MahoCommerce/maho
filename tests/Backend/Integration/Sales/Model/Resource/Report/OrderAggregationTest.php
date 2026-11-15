@@ -88,35 +88,6 @@ describe('Order Report Aggregation Integration', function () {
         }
     });
 
-    it('aggregates orders by created_at date', function () {
-        $reportResource = Mage::getResourceModel('sales/report_order_createdat');
-
-        $from = date('Y-m-d', strtotime('-1 day'));
-        $to = date('Y-m-d', strtotime('+1 day'));
-
-        // Run aggregation - this should not throw SQL errors on any database
-        $reportResource->aggregate($from, $to);
-
-        // Verify aggregation completed by checking the table has data
-        $aggregatedTable = $this->resource->getTableName('sales/order_aggregated_created');
-        $count = (int) $this->adapter->fetchOne(
-            "SELECT COUNT(*) FROM {$aggregatedTable}",
-        );
-
-        // Should have at least some aggregated data
-        expect($count)->toBeGreaterThanOrEqual(0);
-    });
-
-    it('handles aggregation with specific date range', function () {
-        $reportResource = Mage::getResourceModel('sales/report_order_createdat');
-        $today = date('Y-m-d');
-
-        // Run aggregation for today only
-        $reportResource->aggregate($today, $today);
-
-        expect(true)->toBeTrue();
-    });
-
     it('aggregates orders with correct data', function () {
         $reportResource = Mage::getResourceModel('sales/report_order_createdat');
 
@@ -131,11 +102,8 @@ describe('Order Report Aggregation Integration', function () {
             "SELECT * FROM {$aggregatedTable} WHERE store_id = 1 ORDER BY period DESC LIMIT 1",
         );
 
-        // Should have some data (may include more than just our test order)
-        expect($result)->not->toBeNull();
-        if ($result) {
-            expect((int) $result['orders_count'])->toBeGreaterThanOrEqual(1);
-        }
+        expect($result)->toBeArray()
+            ->and((int) $result['orders_count'])->toBeGreaterThanOrEqual(1);
     });
 });
 

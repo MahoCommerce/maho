@@ -19,13 +19,6 @@ describe('API v2 Authentication', function (): void {
 
     describe('without token', function (): void {
 
-        it('rejects requests to protected endpoints without token', function (): void {
-            // Use /api/rest/v2/customers/me which requires authentication (not public like /api/rest/v2/products)
-            $response = apiGet('/api/rest/v2/customers/me');
-
-            expect($response['status'])->toBeUnauthorized();
-        });
-
         it('returns proper error message for missing token', function (): void {
             $response = apiGet('/api/rest/v2/customers/me');
 
@@ -34,6 +27,28 @@ describe('API v2 Authentication', function (): void {
             expect($response['json'])->toHaveKey('error');
             expect($response['json']['error'])->toBe('unauthorized');
         });
+
+        // Each operation sets its own security expression, so each protected path needs its own check.
+        it('rejects a protected endpoint without token', function (string $path): void {
+            expect(apiGet($path)['status'])->toBeUnauthorized();
+        })->with([
+            'my addresses' => ['/api/rest/v2/customers/me/addresses'],
+            'cart' => ['/api/rest/v2/carts/1'],
+            'order invoices' => ['/api/rest/v2/orders/1/invoices'],
+            'my order invoices' => ['/api/rest/v2/customers/me/orders/1/invoices'],
+            'invoice pdf' => ['/api/rest/v2/orders/1/invoices/1/pdf'],
+            'my invoice pdf' => ['/api/rest/v2/customers/me/orders/1/invoices/1/pdf'],
+            'orders' => ['/api/rest/v2/orders'],
+            'my orders' => ['/api/rest/v2/customers/me/orders'],
+            'my reviews' => ['/api/rest/v2/customers/me/reviews'],
+            'my wishlist' => ['/api/rest/v2/customers/me/wishlist'],
+            'customer' => ['/api/rest/v2/customers/1'],
+            'customers' => ['/api/rest/v2/customers'],
+            'gift card' => ['/api/rest/v2/giftcards/1'],
+            'my revocation requests' => ['/api/rest/v2/customers/me/revocation-requests'],
+            'revocation requests' => ['/api/rest/v2/revocation-requests'],
+            'revocation request' => ['/api/rest/v2/revocation-requests/1'],
+        ]);
 
     });
 
@@ -84,12 +99,6 @@ describe('API v2 Authentication', function (): void {
 
     describe('with valid customer token', function (): void {
 
-        it('accepts requests with valid customer token', function (): void {
-            $response = apiGet('/api/rest/v2/products', customerToken());
-
-            expect($response['status'])->toBeSuccessful();
-        });
-
         it('can access product list', function (): void {
             $response = apiGet('/api/rest/v2/products', customerToken());
 
@@ -105,15 +114,6 @@ describe('API v2 Authentication', function (): void {
         it('accepts requests with valid admin token', function (): void {
             $response = apiGet('/api/rest/v2/products', adminToken());
 
-            expect($response['status'])->toBeSuccessful();
-        });
-
-        it('can access admin-level endpoints', function (): void {
-            // Test with a single order endpoint instead of collection
-            // Collection endpoints require additional provider implementation
-            $response = apiGet('/api/rest/v2/products', adminToken());
-
-            // Admin should be able to access protected endpoints
             expect($response['status'])->toBeSuccessful();
         });
 

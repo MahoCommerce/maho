@@ -21,12 +21,6 @@ describe('API v2 Categories', function (): void {
 
     describe('public access (no auth)', function (): void {
 
-        it('allows listing categories without authentication', function (): void {
-            $response = apiGet('/api/rest/v2/categories');
-
-            expect($response['status'])->toBeSuccessful();
-        });
-
         it('returns category collection in JSON-LD format', function (): void {
             $response = apiGet('/api/rest/v2/categories');
 
@@ -41,15 +35,11 @@ describe('API v2 Categories', function (): void {
             // Get the list first to find a valid ID
             $list = apiGet('/api/rest/v2/categories');
             $members = $list['json']['member'] ?? $list['json']['hydra:member'] ?? [];
+            expect($members)->not->toBeEmpty();
 
-            if (!empty($members) && isset($members[0]['id'])) {
-                $categoryId = $members[0]['id'];
-                $response = apiGet("/api/rest/v2/categories/{$categoryId}");
+            $response = apiGet("/api/rest/v2/categories/{$members[0]['id']}");
 
-                expect($response['status'])->toBeSuccessful();
-            } else {
-                $this->markTestSkipped('No categories available to fetch individually');
-            }
+            expect($response['status'])->toBeSuccessful();
         });
 
         it('returns 404 for non-existent category', function (): void {
@@ -61,12 +51,6 @@ describe('API v2 Categories', function (): void {
     });
 
     describe('with authentication', function (): void {
-
-        it('allows listing categories with valid token', function (): void {
-            $response = apiGet('/api/rest/v2/categories', customerToken());
-
-            expect($response['status'])->toBeSuccessful();
-        });
 
         it('allows listing categories with admin token', function (): void {
             $response = apiGet('/api/rest/v2/categories', adminToken());
@@ -82,15 +66,9 @@ describe('API v2 Categories', function (): void {
             $response = apiGet('/api/rest/v2/categories');
             $members = $response['json']['member'] ?? $response['json']['hydra:member'] ?? [];
 
-            if (!empty($members) && isset($members[0])) {
-                $category = $members[0];
-
-                // Categories should have these basic fields
-                expect($category)->toHaveKey('id');
-                expect($category)->toHaveKey('name');
-            } else {
-                $this->markTestSkipped('No categories in response to verify fields');
-            }
+            expect($members)->not->toBeEmpty();
+            expect($members[0])->toHaveKey('id');
+            expect($members[0])->toHaveKey('name');
         });
 
     });

@@ -28,7 +28,7 @@ describe('is_empty / is_not_empty operators', function () {
         $condition = feedManagerProductCondition('is_empty');
         $condition->loadOperatorOptions();
         $map = $condition->getOperatorByInputType();
-        expect($map)->toBeArray();
+        expect($map)->toBeArray()->not->toBeEmpty();
         foreach ($map as $operators) {
             expect($operators)->toContain('is_empty')
                 ->and($operators)->toContain('is_not_empty');

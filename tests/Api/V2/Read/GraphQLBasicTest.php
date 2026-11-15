@@ -20,12 +20,6 @@ declare(strict_types=1);
 
 describe('GraphQL Endpoint - Authentication', function (): void {
 
-    it('allows unauthenticated access to public queries', function (): void {
-        $response = gqlQuery('{ __typename }');
-
-        expect($response['status'])->toBeSuccessful();
-    });
-
     it('denies unauthenticated access to protected operations', function (): void {
         $query = '{ myWishlistItems(first: 1) { edges { node { _id } } } }';
         $response = gqlQuery($query);
@@ -46,18 +40,6 @@ describe('GraphQL Endpoint - Authentication', function (): void {
         $response = gqlQuery('{ __typename }', [], expiredToken());
 
         expect($response['status'])->toBeUnauthorized();
-    });
-
-    it('accepts GraphQL requests with valid customer token', function (): void {
-        $response = gqlQuery('{ __typename }', [], customerToken());
-
-        expect($response['status'])->toBeSuccessful();
-    });
-
-    it('accepts GraphQL requests with valid admin token', function (): void {
-        $response = gqlQuery('{ __typename }', [], adminToken());
-
-        expect($response['status'])->toBeSuccessful();
     });
 
 });
@@ -152,7 +134,7 @@ describe('GraphQL Endpoint - Error Handling', function (): void {
 
         // The bare-int arg must resolve gracefully to a null field (HTTP 200 with
         // a null node), not blow up the pipeline as a 500. `?? 'missing'` would be
-        // self-defeating here — `null ?? 'missing'` is 'missing' — so assert the
+        // self-defeating here (`null ?? 'missing'` is 'missing'), so assert the
         // null node directly.
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');

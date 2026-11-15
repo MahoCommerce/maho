@@ -25,12 +25,6 @@ describe('API v2 Currencies', function (): void {
         // self-rates), so this collection always carries at least one rate. On
         // MySQL and PostgreSQL the DECIMAL column comes back as a PHP string,
         // which used to hit the ?float DTO property and 500 the whole endpoint.
-        it('allows listing currencies without authentication', function (): void {
-            $response = apiGet('/api/rest/v2/stores/currencies');
-
-            expect($response['status'])->toBe(200);
-        });
-
         it('returns currencies collection', function (): void {
             $response = apiGet('/api/rest/v2/stores/currencies');
 

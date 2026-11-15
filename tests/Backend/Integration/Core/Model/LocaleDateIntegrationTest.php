@@ -29,108 +29,40 @@ function withStoreTimezone(string $timezone, callable $fn): mixed
 // utcToStore — exact timezone shifts
 // ===========================================================================
 describe('utcToStore() timezone conversion', function () {
-    it('shifts UTC to America/New_York (UTC-5 in winter)', function () {
-        withStoreTimezone('America/New_York', function () {
-            $locale = Mage::app()->getLocale();
-            // 2025-01-15 is winter — EST = UTC-5
-            $result = $locale->utcToStore(null, '2025-01-15 20:00:00');
+    it('shifts a UTC date to the timezone of the store', function (string $timezone, string $utc, string $expected) {
+        withStoreTimezone($timezone, function () use ($timezone, $utc, $expected) {
+            $result = Mage::app()->getLocale()->utcToStore(null, $utc);
 
-            expect($result->format(Mage_Core_Model_Locale::DATETIME_FORMAT))
-                ->toBe('2025-01-15 15:00:00');
-            expect($result->getTimezone()->getName())
-                ->toBe('America/New_York');
+            expect($result->format(Mage_Core_Model_Locale::DATETIME_FORMAT))->toBe($expected)
+                ->and($result->getTimezone()->getName())->toBe($timezone);
         });
-    });
-
-    it('shifts UTC to America/New_York (UTC-4 in summer / EDT)', function () {
-        withStoreTimezone('America/New_York', function () {
-            $locale = Mage::app()->getLocale();
-            // 2025-06-15 is summer — EDT = UTC-4
-            $result = $locale->utcToStore(null, '2025-06-15 20:00:00');
-
-            expect($result->format(Mage_Core_Model_Locale::DATETIME_FORMAT))
-                ->toBe('2025-06-15 16:00:00');
-        });
-    });
-
-    it('shifts UTC to Asia/Kolkata (UTC+5:30)', function () {
-        withStoreTimezone('Asia/Kolkata', function () {
-            $locale = Mage::app()->getLocale();
-            $result = $locale->utcToStore(null, '2025-06-15 10:00:00');
-
-            expect($result->format(Mage_Core_Model_Locale::DATETIME_FORMAT))
-                ->toBe('2025-06-15 15:30:00');
-        });
-    });
-
-    it('shifts UTC to Pacific/Auckland (UTC+12 in winter / NZST)', function () {
-        withStoreTimezone('Pacific/Auckland', function () {
-            $locale = Mage::app()->getLocale();
-            // July is winter in NZ — NZST = UTC+12
-            $result = $locale->utcToStore(null, '2025-07-01 08:00:00');
-
-            expect($result->format(Mage_Core_Model_Locale::DATETIME_FORMAT))
-                ->toBe('2025-07-01 20:00:00');
-        });
-    });
-
-    it('is a no-op when store timezone is UTC', function () {
-        withStoreTimezone('UTC', function () {
-            $locale = Mage::app()->getLocale();
-            $result = $locale->utcToStore(null, '2025-06-15 10:00:00');
-
-            expect($result->format(Mage_Core_Model_Locale::DATETIME_FORMAT))
-                ->toBe('2025-06-15 10:00:00');
-        });
-    });
-
-    it('handles date crossing midnight boundary', function () {
-        withStoreTimezone('America/New_York', function () {
-            $locale = Mage::app()->getLocale();
-            // 2025-01-16 03:00 UTC → 2025-01-15 22:00 EST (previous day)
-            $result = $locale->utcToStore(null, '2025-01-16 03:00:00');
-
-            expect($result->format(Mage_Core_Model_Locale::DATETIME_FORMAT))
-                ->toBe('2025-01-15 22:00:00');
-        });
-    });
+    })->with([
+        'America/New_York in winter (UTC-5)' => ['America/New_York', '2025-01-15 20:00:00', '2025-01-15 15:00:00'],
+        'America/New_York in summer (UTC-4)' => ['America/New_York', '2025-06-15 20:00:00', '2025-06-15 16:00:00'],
+        'Asia/Kolkata (UTC+5:30)' => ['Asia/Kolkata', '2025-06-15 10:00:00', '2025-06-15 15:30:00'],
+        'Pacific/Auckland in winter (UTC+12)' => ['Pacific/Auckland', '2025-07-01 08:00:00', '2025-07-01 20:00:00'],
+        'UTC, with no change' => ['UTC', '2025-06-15 10:00:00', '2025-06-15 10:00:00'],
+        'America/New_York, on the previous day' => ['America/New_York', '2025-01-16 03:00:00', '2025-01-15 22:00:00'],
+        'America/New_York, after the spring-forward gap' => ['America/New_York', '2025-03-09 07:00:00', '2025-03-09 03:00:00'],
+    ]);
 });
 
 // ===========================================================================
 // storeToUtc — inverse conversion
 // ===========================================================================
 describe('storeToUtc() timezone conversion', function () {
-    it('shifts America/New_York winter time to UTC', function () {
-        withStoreTimezone('America/New_York', function () {
-            $locale = Mage::app()->getLocale();
-            $result = $locale->storeToUtc(null, '2025-01-15 15:00:00');
+    it('shifts a date of the store timezone to UTC', function (string $timezone, string $local, string $expected) {
+        withStoreTimezone($timezone, function () use ($local, $expected) {
+            $result = Mage::app()->getLocale()->storeToUtc(null, $local);
 
-            expect($result->format(Mage_Core_Model_Locale::DATETIME_FORMAT))
-                ->toBe('2025-01-15 20:00:00');
-            expect($result->getTimezone()->getName())
-                ->toBe('UTC');
+            expect($result->format(Mage_Core_Model_Locale::DATETIME_FORMAT))->toBe($expected)
+                ->and($result->getTimezone()->getName())->toBe('UTC');
         });
-    });
-
-    it('shifts Asia/Kolkata time to UTC', function () {
-        withStoreTimezone('Asia/Kolkata', function () {
-            $locale = Mage::app()->getLocale();
-            $result = $locale->storeToUtc(null, '2025-06-15 15:30:00');
-
-            expect($result->format(Mage_Core_Model_Locale::DATETIME_FORMAT))
-                ->toBe('2025-06-15 10:00:00');
-        });
-    });
-
-    it('is a no-op when store timezone is UTC', function () {
-        withStoreTimezone('UTC', function () {
-            $locale = Mage::app()->getLocale();
-            $result = $locale->storeToUtc(null, '2025-06-15 10:00:00');
-
-            expect($result->format(Mage_Core_Model_Locale::DATETIME_FORMAT))
-                ->toBe('2025-06-15 10:00:00');
-        });
-    });
+    })->with([
+        'America/New_York in winter' => ['America/New_York', '2025-01-15 15:00:00', '2025-01-15 20:00:00'],
+        'Asia/Kolkata' => ['Asia/Kolkata', '2025-06-15 15:30:00', '2025-06-15 10:00:00'],
+        'UTC, with no change' => ['UTC', '2025-06-15 10:00:00', '2025-06-15 10:00:00'],
+    ]);
 });
 
 // ===========================================================================
@@ -338,19 +270,6 @@ describe('parseDate input handling via utcToStore', function () {
 // DST edge cases
 // ===========================================================================
 describe('DST boundary handling', function () {
-    it('handles spring-forward gap (2:30 AM does not exist in New York on 2025-03-09)', function () {
-        withStoreTimezone('America/New_York', function () {
-            $locale = Mage::app()->getLocale();
-
-            // 2025-03-09 02:00 EST → clocks jump to 03:00 EDT
-            // 2025-03-09 07:00 UTC = 2025-03-09 03:00 EDT (spring forward happened)
-            $result = $locale->utcToStore(null, '2025-03-09 07:00:00');
-
-            expect($result->format(Mage_Core_Model_Locale::DATETIME_FORMAT))
-                ->toBe('2025-03-09 03:00:00');
-        });
-    });
-
     it('handles fall-back overlap (1:30 AM exists twice in New York on 2025-11-02)', function () {
         withStoreTimezone('America/New_York', function () {
             $locale = Mage::app()->getLocale();

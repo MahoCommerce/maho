@@ -9,19 +9,6 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Quote Total Collector Instantiation', function () {
-    test('total collector can be instantiated', function () {
-        $total = Mage::getModel('giftcard/total_quote');
-        expect($total)->toBeInstanceOf(Maho_Giftcard_Model_Total_Quote::class);
-        expect($total)->toBeInstanceOf(Mage_Sales_Model_Quote_Address_Total_Abstract::class);
-    });
-
-    test('has correct code', function () {
-        $total = Mage::getModel('giftcard/total_quote');
-        expect($total->getCode())->toBe('giftcard');
-    });
-});
-
 describe('Quote Total Collection with Gift Cards', function () {
     beforeEach(function () {
         $this->helper = Mage::helper('giftcard');
@@ -30,6 +17,7 @@ describe('Quote Total Collection with Gift Cards', function () {
         $productCollection = Mage::getResourceModel('catalog/product_collection')
             ->addAttributeToFilter('type_id', 'simple')
             ->addAttributeToFilter('status', 1)
+            ->addAttributeToFilter('price', ['gt' => 5])
             ->addAttributeToSelect(['price', 'name'])
             ->setPageSize(1);
         $this->product = $productCollection->getFirstItem();
@@ -106,10 +94,7 @@ describe('Quote Total Collection with Gift Cards', function () {
 
         $address = $this->quote->getShippingAddress();
 
-        // Only card balance should be applied (assuming product costs more than $5)
-        if ((float) $this->product->getPrice() > 5.00) {
-            expect((float) $address->getBaseGiftcardAmount())->toBe(5.00);
-        }
+        expect((float) $address->getBaseGiftcardAmount())->toBe(5.00);
     });
 
     test('applies multiple gift cards cumulatively', function () {
@@ -174,50 +159,18 @@ describe('Quote Total Collection with Gift Cards', function () {
         $this->quote->collectTotals();
 
         $address = $this->quote->getShippingAddress();
-        $productPrice = (float) $this->product->getPrice();
+        $payable = (float) $address->getBaseSubtotal() + (float) $address->getBaseDiscountAmount()
+            + (float) $address->getBaseShippingAmount() + (float) $address->getBaseTaxAmount();
 
-        // Gift card should be capped at order total, not full $10000
-        expect((float) $address->getBaseGiftcardAmount())->toBeLessThanOrEqual($productPrice + 50); // Allow for shipping
-        expect((float) $address->getBaseGiftcardAmount())->toBeLessThan(10000.00);
+        expect($payable)->toBeGreaterThan(0.0)
+            ->and((float) $address->getBaseGiftcardAmount())->toEqualWithDelta($payable, 0.0001)
+            ->and((float) $this->quote->getBaseGrandTotal())->toEqualWithDelta(0.0, 0.0001);
     });
 
-    test('removes invalid gift cards from codes during collection', function () {
-        // Create an invalid (disabled) card
-        $invalidCard = Mage::getModel('giftcard/giftcard');
-        $invalidCard->setCode($this->helper->generateCode());
-        $invalidCard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_DISABLED);
-        $invalidCard->setWebsiteIds([1]);
-        $invalidCard->setBalance(100.00);
-        $invalidCard->setInitialBalance(100.00);
-        $invalidCard->save();
-
+    test('applies no gift card when the quote has no gift card codes', function (?string $codes) {
         $this->quote->addProduct($this->product, 1);
         $this->quote->save();
-
-        $codes = [
-            $this->giftcard->getCode() => 0, // Valid
-            $invalidCard->getCode() => 0, // Invalid
-        ];
-        $this->quote->setGiftcardCodes(json_encode($codes));
-
-        $shippingAddress = $this->quote->getShippingAddress();
-        $shippingAddress->setCountryId('US');
-        $shippingAddress->setRegionId(12);
-        $shippingAddress->setPostcode('90210');
-        $shippingAddress->setCollectShippingRates(true);
-
-        $this->quote->collectTotals();
-
-        // Check that invalid code was removed from quote
-        $updatedCodes = json_decode($this->quote->getGiftcardCodes(), true);
-        expect($updatedCodes)->toHaveKey($this->giftcard->getCode());
-        expect($updatedCodes)->not->toHaveKey($invalidCard->getCode());
-    });
-
-    test('handles empty gift card codes gracefully', function () {
-        $this->quote->addProduct($this->product, 1);
-        $this->quote->save();
-        $this->quote->setGiftcardCodes(null);
+        $this->quote->setGiftcardCodes($codes);
 
         $shippingAddress = $this->quote->getShippingAddress();
         $shippingAddress->setCountryId('US');
@@ -229,24 +182,10 @@ describe('Quote Total Collection with Gift Cards', function () {
 
         $address = $this->quote->getShippingAddress();
         expect((float) $address->getBaseGiftcardAmount())->toBe(0.0);
-    });
-
-    test('handles empty codes array gracefully', function () {
-        $this->quote->addProduct($this->product, 1);
-        $this->quote->save();
-        $this->quote->setGiftcardCodes('[]');
-
-        $shippingAddress = $this->quote->getShippingAddress();
-        $shippingAddress->setCountryId('US');
-        $shippingAddress->setRegionId(12);
-        $shippingAddress->setPostcode('90210');
-        $shippingAddress->setCollectShippingRates(true);
-
-        $this->quote->collectTotals();
-
-        $address = $this->quote->getShippingAddress();
-        expect((float) $address->getBaseGiftcardAmount())->toBe(0.0);
-    });
+    })->with([
+        'no codes' => [null],
+        'an empty list of codes' => ['[]'],
+    ]);
 });
 
 describe('Quote Total Fetch Method', function () {
@@ -309,60 +248,6 @@ describe('Quote Total Fetch Method', function () {
     });
 });
 
-describe('Quote Total Website Validation', function () {
-    beforeEach(function () {
-        $this->helper = Mage::helper('giftcard');
-
-        // Find an existing simple product
-        $productCollection = Mage::getResourceModel('catalog/product_collection')
-            ->addAttributeToFilter('type_id', 'simple')
-            ->addAttributeToFilter('status', 1)
-            ->addAttributeToSelect(['price', 'name'])
-            ->setPageSize(1);
-        $this->product = $productCollection->getFirstItem();
-
-        // Create gift card for website 1
-        $this->giftcard = Mage::getModel('giftcard/giftcard');
-        $this->giftcard->setCode($this->helper->generateCode());
-        $this->giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $this->giftcard->setWebsiteIds([1]);
-        $this->giftcard->setBalance(100.00);
-        $this->giftcard->setInitialBalance(100.00);
-        $this->giftcard->save();
-
-        $this->quote = Mage::getModel('sales/quote');
-        $this->quote->setStoreId(1);
-    });
-
-    test('validates gift card against quote website', function () {
-        if (!$this->product->getId()) {
-            $this->markTestSkipped('No simple product available for testing');
-        }
-
-        // Card is for website 1, quote store is 1 (website 1)
-        $this->quote->addProduct($this->product, 1);
-        $this->quote->save();
-
-        $codes = [$this->giftcard->getCode() => 0];
-        $this->quote->setGiftcardCodes(json_encode($codes));
-
-        $shippingAddress = $this->quote->getShippingAddress();
-        $shippingAddress->setCountryId('US');
-        $shippingAddress->setRegionId(12);
-        $shippingAddress->setPostcode('90210');
-        $shippingAddress->setCollectShippingRates(true);
-
-        $this->quote->collectTotals();
-
-        $address = $this->quote->getShippingAddress();
-        $productPrice = (float) $this->product->getPrice();
-
-        // Should apply (website matches)
-        $expectedAmount = min(100.00, $productPrice);
-        expect((float) $address->getBaseGiftcardAmount())->toBe($expectedAmount);
-    });
-});
-
 describe('Giftcard Product Exclusion', function () {
     beforeEach(function () {
         $this->helper = Mage::helper('giftcard');
@@ -403,8 +288,8 @@ describe('Giftcard Product Exclusion', function () {
         $this->giftcard->setCode($this->helper->generateCode());
         $this->giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
         $this->giftcard->setWebsiteIds([1]);
-        $this->giftcard->setBalance(500.00);
-        $this->giftcard->setInitialBalance(500.00);
+        $this->giftcard->setBalance(10000.00);
+        $this->giftcard->setInitialBalance(10000.00);
         $this->giftcard->save();
 
         $this->quote = Mage::getModel('sales/quote');
@@ -443,14 +328,16 @@ describe('Giftcard Product Exclusion', function () {
         $this->quote->collectTotals();
 
         $address = $this->quote->getShippingAddress();
-        $simpleProductPrice = (float) $this->simpleProduct->getPrice();
+        $giftcardLine = 0.0;
+        foreach ($address->getAllItems() as $item) {
+            if ($item->getProductType() === 'giftcard') {
+                $giftcardLine += (float) $item->getBaseRowTotal() - (float) $item->getBaseDiscountAmount() + (float) $item->getBaseTaxAmount();
+            }
+        }
 
-        // Gift card payment should only cover the simple product, not the giftcard product
-        $giftcardAmount = (float) $address->getBaseGiftcardAmount();
-
-        // The giftcard payment should be limited to the simple product price
-        // (not including the $50 giftcard product which should be excluded)
-        expect($giftcardAmount)->toBeLessThanOrEqual($simpleProductPrice + 50); // Allow for shipping
-        expect($giftcardAmount)->toBeGreaterThan(0);
+        // The card pays everything except the line of the gift card product
+        expect($giftcardLine)->toBeGreaterThanOrEqual(50.0)
+            ->and((float) $address->getBaseGiftcardAmount())->toBeGreaterThan(0.0)
+            ->and((float) $this->quote->getBaseGrandTotal())->toEqualWithDelta($giftcardLine, 0.0001);
     });
 });

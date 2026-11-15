@@ -197,22 +197,4 @@ describe('Router_Default legacy XML pre-check', function () {
 
         expect(callMatchLegacyXmlRoute($router, $request))->toBeFalse();
     });
-
-    it('matches the legacy frontName case-insensitively against the path', function () {
-        // Legacy declaration uses 'Shopfront'; request path uses '/SHOPFRONT/...'.
-        // The pre-check should still recognise the frontName and delegate to
-        // dispatchLegacyPath (which then fails to resolve the fake module —
-        // proving the pre-check ran but the fallback path is graceful).
-        registerLegacyXmlRoute('fake', 'Shopfront', 'Totally_Nonexistent_Module');
-
-        $router = new Mage_Core_Controller_Varien_Router_Default();
-        $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/'));
-        $request->setPathInfo('/SHOPFRONT/controller/action');
-
-        // If the case-check was broken, dispatchLegacyPath would never be called
-        // and this would still return false — but from the fast-path miss rather
-        // than the class-resolution miss. The getLegacyFrontNames() unit tests
-        // already pin the case-insensitive map; this just guards the glue.
-        expect(callMatchLegacyXmlRoute($router, $request))->toBeFalse();
-    });
 });

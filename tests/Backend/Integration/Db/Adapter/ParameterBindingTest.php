@@ -82,14 +82,14 @@ describe('Parameter Binding and SQL Injection Protection', function () {
     it('handles array parameters for IN clauses', function () {
         $scopes = ['default', 'websites', 'stores'];
 
-        $result = $this->adapter->fetchAll(
-            "SELECT DISTINCT scope FROM {$this->testTable} WHERE scope IN (?)",
-            [$scopes],
-        );
+        $select = $this->adapter->select()
+            ->distinct()
+            ->from($this->testTable, ['scope'])
+            ->where('scope IN (?)', $scopes);
 
-        expect($result)->toBeArray();
-        $returnedScopes = array_column($result, 'scope');
-        expect($returnedScopes)->toBeArray();
+        $returnedScopes = $this->adapter->fetchCol($select);
+        expect($returnedScopes)->toContain('default')
+            ->and(array_diff($returnedScopes, $scopes))->toBe([]);
     });
 
     it('handles NULL values correctly', function () {

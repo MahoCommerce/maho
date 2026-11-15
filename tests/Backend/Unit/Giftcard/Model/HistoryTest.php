@@ -10,21 +10,6 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 describe('Giftcard History Model', function () {
-    test('can be instantiated via Mage factory', function () {
-        $history = Mage::getModel('giftcard/history');
-        expect($history)->toBeInstanceOf(Maho_Giftcard_Model_History::class);
-    });
-
-    test('resource model is properly configured', function () {
-        $history = Mage::getModel('giftcard/history');
-        expect($history->getResource())->toBeInstanceOf(Maho_Giftcard_Model_Resource_History::class);
-    });
-
-    test('collection can be instantiated', function () {
-        $collection = Mage::getResourceModel('giftcard/history_collection');
-        expect($collection)->toBeInstanceOf(Maho_Giftcard_Model_Resource_History_Collection::class);
-    });
-
     test('can set and get all history fields', function () {
         $history = Mage::getModel('giftcard/history');
 

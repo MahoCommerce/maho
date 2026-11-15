@@ -344,7 +344,6 @@ The module observes these events:
 | `order_cancel_after` | `refundGiftcardOnOrderCancel` | Refund balance when order is canceled |
 | `sales_quote_add_item` | `setGiftcardPrice` | Set custom price for gift card items |
 | `sales_convert_quote_address_to_order` | `applyGiftcardToOrder` | Copy gift card data to order |
-| `catalog_product_save_before` | `catalogProductSaveBefore` | Preserve gift card attributes |
 | `adminhtml_sales_order_create_process_data_before` | `processAdminOrderGiftcard` | Handle admin order gift cards |
 | `payment_method_is_active` | `filterPaymentMethodsForZeroTotal` | When the gift card covers the full total, force-enable the `free` method and disable the others |
 

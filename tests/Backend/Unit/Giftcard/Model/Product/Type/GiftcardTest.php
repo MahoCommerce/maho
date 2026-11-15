@@ -15,16 +15,6 @@ describe('Giftcard Product Type Constants', function () {
     });
 });
 
-describe('Giftcard Product Type Instantiation', function () {
-    test('extends Virtual product type', function () {
-        $type = Mage::getSingleton('catalog/product_type')->factory(
-            Mage::getModel('catalog/product')->setTypeId('giftcard'),
-        );
-        expect($type)->toBeInstanceOf(Maho_Giftcard_Model_Product_Type_Giftcard::class);
-        expect($type)->toBeInstanceOf(Mage_Catalog_Model_Product_Type_Virtual::class);
-    });
-});
-
 describe('Giftcard Product Type Properties', function () {
     beforeEach(function () {
         $this->product = Mage::getModel('catalog/product');

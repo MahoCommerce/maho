@@ -84,34 +84,6 @@ function cleanupTestFeed(Maho_FeedManager_Model_Feed $feed): void
 }
 
 describe('Feed Generation - CSV', function () {
-    test('generates a valid CSV feed from real products', function () {
-        $feed = createTestFeed('csv');
-
-        try {
-            $generator = new Maho_FeedManager_Model_Generator();
-            $log = $generator->generate($feed);
-
-            expect($log)->toBeInstanceOf(Maho_FeedManager_Model_Log::class);
-            if ($log->getStatus() === 'failed') {
-                $errors = $log->getErrorsArray();
-                $messages = array_map(fn($e) => is_array($e) ? ($e['message'] ?? json_encode($e)) : (string) $e, $errors);
-                $errorMsg = implode("\n", array_slice($messages, 0, 5));
-                throw new RuntimeException("CSV feed generation failed with errors:\n{$errorMsg}");
-            }
-            expect($log->getProductCount())->toBeGreaterThan(0);
-
-            $outputPath = feedOutputPath($feed);
-            expect(file_exists($outputPath))->toBeTrue();
-            expect(filesize($outputPath))->toBeGreaterThan(0);
-
-            // Validate the output with the Validator
-            $validator = new Maho_FeedManager_Model_Validator();
-            expect($validator->validate($outputPath, 'csv'))->toBeTrue();
-        } finally {
-            cleanupTestFeed($feed);
-        }
-    });
-
     test('validates the generated feed with its delimiter and enclosure', function (string $delimiter, string $enclosure, string $title): void {
         $feed = createTestFeed('csv');
 
@@ -133,78 +105,6 @@ describe('Feed Generation - CSV', function () {
         'pipe delimiter' => ['|', '"', 'red,blue'],
         'no enclosure' => [',', '', '"red'],
     ]);
-});
-
-describe('Feed Generation - JSON', function () {
-    test('generates a valid JSON feed from real products', function () {
-        $feed = createTestFeed('json');
-
-        try {
-            $generator = new Maho_FeedManager_Model_Generator();
-            $log = $generator->generate($feed);
-
-            expect($log)->toBeInstanceOf(Maho_FeedManager_Model_Log::class);
-            if ($log->getStatus() === 'failed') {
-                $errors = $log->getErrorsArray();
-                $messages = array_map(fn($e) => is_array($e) ? ($e['message'] ?? json_encode($e)) : (string) $e, $errors);
-                $errorMsg = implode("\n", array_slice($messages, 0, 5));
-                throw new RuntimeException("JSON feed generation failed with errors:\n{$errorMsg}");
-            }
-            expect($log->getProductCount())->toBeGreaterThan(0);
-
-            $outputPath = feedOutputPath($feed);
-            expect(file_exists($outputPath))->toBeTrue();
-            expect(filesize($outputPath))->toBeGreaterThan(0);
-
-            // Validate the output with the Validator
-            $validator = new Maho_FeedManager_Model_Validator();
-            expect($validator->validate($outputPath, 'json'))->toBeTrue();
-
-            // Verify JSON structure
-            $content = file_get_contents($outputPath);
-            $data = json_decode($content, true);
-            expect(json_last_error())->toBe(JSON_ERROR_NONE);
-            expect($data)->toHaveKey('products');
-            expect(count($data['products']))->toBeGreaterThan(0);
-        } finally {
-            cleanupTestFeed($feed);
-        }
-    });
-});
-
-describe('Feed Generation - XML', function () {
-    test('generates a valid XML feed from real products', function () {
-        $feed = createTestFeed('xml');
-
-        try {
-            $generator = new Maho_FeedManager_Model_Generator();
-            $log = $generator->generate($feed);
-
-            expect($log)->toBeInstanceOf(Maho_FeedManager_Model_Log::class);
-            if ($log->getStatus() === 'failed') {
-                $errors = $log->getErrorsArray();
-                $messages = array_map(fn($e) => is_array($e) ? ($e['message'] ?? json_encode($e)) : (string) $e, $errors);
-                $errorMsg = implode("\n", array_slice($messages, 0, 5));
-                throw new RuntimeException("XML feed generation failed with errors:\n{$errorMsg}");
-            }
-            expect($log->getProductCount())->toBeGreaterThan(0);
-
-            $outputPath = feedOutputPath($feed);
-            expect(file_exists($outputPath))->toBeTrue();
-            expect(filesize($outputPath))->toBeGreaterThan(0);
-
-            // Validate the output with the Validator
-            $validator = new Maho_FeedManager_Model_Validator();
-            expect($validator->validate($outputPath, 'xml'))->toBeTrue();
-
-            // Verify XML is parseable
-            $content = file_get_contents($outputPath);
-            $xml = simplexml_load_string($content);
-            expect($xml)->not()->toBeFalse();
-        } finally {
-            cleanupTestFeed($feed);
-        }
-    });
 });
 
 /**
@@ -258,8 +158,8 @@ function cleanupTestFeedAndDirectory(Maho_FeedManager_Model_Feed $feed, string $
 }
 
 describe('Feed Generation - Fresh Output Directory', function () {
-    test('generates CSV feed into non-existent directory', function () {
-        [$feed, $relativeDir] = createTestFeedInFreshDirectory('csv');
+    test('generates a feed into a directory that does not exist', function (string $format) {
+        [$feed, $relativeDir] = createTestFeedInFreshDirectory($format);
 
         try {
             $generator = new Maho_FeedManager_Model_Generator();
@@ -276,69 +176,18 @@ describe('Feed Generation - Fresh Output Directory', function () {
             expect($log->getProductCount())->toBeGreaterThan(0);
 
             $validator = new Maho_FeedManager_Model_Validator();
-            expect($validator->validate($outputPath, 'csv'))->toBeTrue();
+            expect($validator->validate($outputPath, $format))->toBeTrue();
+
+            $content = (string) file_get_contents($outputPath);
+            match ($format) {
+                'csv' => expect($content)->not->toBeEmpty(),
+                'json' => expect(json_decode($content, true, flags: JSON_THROW_ON_ERROR)['products'] ?? [])->not->toBeEmpty(),
+                'xml' => expect(simplexml_load_string($content))->not->toBeFalse(),
+            };
         } finally {
             cleanupTestFeedAndDirectory($feed, $relativeDir);
         }
-    });
-
-    test('generates JSON feed into non-existent directory', function () {
-        [$feed, $relativeDir] = createTestFeedInFreshDirectory('json');
-
-        try {
-            $generator = new Maho_FeedManager_Model_Generator();
-            $log = $generator->generate($feed);
-
-            $absoluteDir = Mage::getBaseDir('media') . DS . $relativeDir;
-            expect(is_dir($absoluteDir))->toBeTrue('Output directory should have been created');
-
-            $outputPath = feedOutputPath($feed);
-            expect(file_exists($outputPath))->toBeTrue('Feed file should exist on disk');
-            expect(filesize($outputPath))->toBeGreaterThan(0);
-
-            expect($log->getStatus())->toBe('completed');
-            expect($log->getProductCount())->toBeGreaterThan(0);
-
-            $validator = new Maho_FeedManager_Model_Validator();
-            expect($validator->validate($outputPath, 'json'))->toBeTrue();
-
-            $content = file_get_contents($outputPath);
-            $data = json_decode($content, true);
-            expect(json_last_error())->toBe(JSON_ERROR_NONE);
-            expect($data)->toHaveKey('products');
-            expect(count($data['products']))->toBeGreaterThan(0);
-        } finally {
-            cleanupTestFeedAndDirectory($feed, $relativeDir);
-        }
-    });
-
-    test('generates XML feed into non-existent directory', function () {
-        [$feed, $relativeDir] = createTestFeedInFreshDirectory('xml');
-
-        try {
-            $generator = new Maho_FeedManager_Model_Generator();
-            $log = $generator->generate($feed);
-
-            $absoluteDir = Mage::getBaseDir('media') . DS . $relativeDir;
-            expect(is_dir($absoluteDir))->toBeTrue('Output directory should have been created');
-
-            $outputPath = feedOutputPath($feed);
-            expect(file_exists($outputPath))->toBeTrue('Feed file should exist on disk');
-            expect(filesize($outputPath))->toBeGreaterThan(0);
-
-            expect($log->getStatus())->toBe('completed');
-            expect($log->getProductCount())->toBeGreaterThan(0);
-
-            $validator = new Maho_FeedManager_Model_Validator();
-            expect($validator->validate($outputPath, 'xml'))->toBeTrue();
-
-            $content = file_get_contents($outputPath);
-            $xml = simplexml_load_string($content);
-            expect($xml)->not()->toBeFalse();
-        } finally {
-            cleanupTestFeedAndDirectory($feed, $relativeDir);
-        }
-    });
+    })->with(['csv', 'json', 'xml']);
 
     test('generates feed into nested non-existent directory', function () {
         $relativeDir = 'feeds/deep/nested/test-' . uniqid();
@@ -386,33 +235,6 @@ describe('Validator', function () {
         }
     });
 
-    test('validates valid CSV file', function () {
-        $tempFile = sys_get_temp_dir() . '/test_valid_' . uniqid() . '.csv';
-        $handle = fopen($tempFile, 'w');
-        fputcsv($handle, ['id', 'title', 'price']);
-        fputcsv($handle, ['1', 'Product A', '10.00']);
-        fclose($handle);
-
-        try {
-            $validator = new Maho_FeedManager_Model_Validator();
-            expect($validator->validate($tempFile, 'csv'))->toBeTrue();
-        } finally {
-            @unlink($tempFile);
-        }
-    });
-
-    test('validates valid JSON file', function () {
-        $tempFile = sys_get_temp_dir() . '/test_valid_' . uniqid() . '.json';
-        file_put_contents($tempFile, json_encode(['products' => [['id' => '1']]]));
-
-        try {
-            $validator = new Maho_FeedManager_Model_Validator();
-            expect($validator->validate($tempFile, 'json'))->toBeTrue();
-        } finally {
-            @unlink($tempFile);
-        }
-    });
-
     test('rejects invalid JSON file', function () {
         $tempFile = sys_get_temp_dir() . '/test_invalid_' . uniqid() . '.json';
         file_put_contents($tempFile, '{"broken": [}');
@@ -421,18 +243,6 @@ describe('Validator', function () {
             $validator = new Maho_FeedManager_Model_Validator();
             expect($validator->validate($tempFile, 'json'))->toBeFalse();
             expect($validator->getErrors())->not()->toBeEmpty();
-        } finally {
-            @unlink($tempFile);
-        }
-    });
-
-    test('validates valid XML file', function () {
-        $tempFile = sys_get_temp_dir() . '/test_valid_' . uniqid() . '.xml';
-        file_put_contents($tempFile, '<?xml version="1.0"?><feed><item><id>1</id></item></feed>');
-
-        try {
-            $validator = new Maho_FeedManager_Model_Validator();
-            expect($validator->validate($tempFile, 'xml'))->toBeTrue();
         } finally {
             @unlink($tempFile);
         }

@@ -37,17 +37,6 @@ describe('SQL Helper Methods - String Functions', function () {
         expect($result)->toBe('JohnDoe');
     });
 
-    it('handles NULL values in concatenation', function () {
-        $expr = $this->adapter->getConcatSql(['firstname', 'lastname'], ' ');
-
-        $result = $this->adapter->fetchOne(
-            "SELECT {$expr} as full_name FROM (SELECT 'John' as firstname, 'Doe' as lastname) as t",
-        );
-
-        // Test proper concatenation without NULL values
-        expect($result)->toBe('John Doe');
-    });
-
     it('gets string length correctly', function () {
         $expr = $this->adapter->getLengthSql('email');
 
@@ -80,45 +69,17 @@ describe('SQL Helper Methods - String Functions', function () {
 });
 
 describe('SQL Helper Methods - Conditional Logic', function () {
-    it('generates IF/CASE SQL for checkSql', function () {
-        $condition = 'status = 1';
-        $trueValue = $this->adapter->quote('Active');
-        $falseValue = $this->adapter->quote('Inactive');
+    it('picks the value of getCheckSql() by the condition', function (string $condition, string $true, string $false, string $from, string $expected) {
+        $expr = $this->adapter->getCheckSql($condition, $true, $false);
 
-        $expr = $this->adapter->getCheckSql($condition, $trueValue, $falseValue);
+        $result = $this->adapter->fetchOne("SELECT {$expr} AS checked FROM ({$from}) AS t");
 
-        $result = $this->adapter->fetchOne(
-            "SELECT {$expr} as status_text FROM (SELECT 1 as status) as t",
-        );
-
-        expect($result)->toBe('Active');
-    });
-
-    it('evaluates false condition in checkSql', function () {
-        $condition = 'status = 1';
-        $trueValue = $this->adapter->quote('Active');
-        $falseValue = $this->adapter->quote('Inactive');
-
-        $expr = $this->adapter->getCheckSql($condition, $trueValue, $falseValue);
-
-        $result = $this->adapter->fetchOne(
-            "SELECT {$expr} as status_text FROM (SELECT 0 as status) as t",
-        );
-
-        expect($result)->toBe('Inactive');
-    });
-
-    it('handles numeric values in checkSql', function () {
-        $condition = 'qty > 0';
-        $expr = $this->adapter->getCheckSql($condition, '1', '0');
-
-        $result = $this->adapter->fetchOne(
-            "SELECT {$expr} as in_stock FROM (SELECT 5 as qty) as t",
-        );
-
-        // Doctrine may return 1 or '1' - both are truthy
-        expect((int) $result)->toBe(1);
-    });
+        expect((string) $result)->toBe($expected);
+    })->with([
+        'a true condition' => ['status = 1', "'Active'", "'Inactive'", 'SELECT 1 AS status', 'Active'],
+        'a false condition' => ['status = 1', "'Active'", "'Inactive'", 'SELECT 0 AS status', 'Inactive'],
+        'numeric values' => ['qty > 0', '1', '0', 'SELECT 5 AS qty', '1'],
+    ]);
 
     it('generates CASE SQL for multiple conditions', function () {
         $valueName = 'status';
@@ -265,27 +226,14 @@ describe('SQL Helper Methods - Date Functions', function () {
         expect($result)->toBe('2025-01-15');
     });
 
-    it('extracts year from date', function () {
-        $expr = $this->adapter->getDateExtractSql(
-            $this->adapter->quote('2025-01-15'),
-            AdapterInterface::INTERVAL_YEAR,
-        );
+    it('extracts a part of a date', function (string $date, string $unit, int $expected) {
+        $expr = $this->adapter->getDateExtractSql($this->adapter->quote($date), $unit);
 
-        $result = $this->adapter->fetchOne("SELECT {$expr} as year");
-
-        expect((int) $result)->toBe(2025);
-    });
-
-    it('extracts month from date', function () {
-        $expr = $this->adapter->getDateExtractSql(
-            $this->adapter->quote('2025-03-15'),
-            AdapterInterface::INTERVAL_MONTH,
-        );
-
-        $result = $this->adapter->fetchOne("SELECT {$expr} as month");
-
-        expect((int) $result)->toBe(3);
-    });
+        expect((int) $this->adapter->fetchOne("SELECT {$expr} AS part"))->toBe($expected);
+    })->with([
+        'year' => ['2025-01-15', AdapterInterface::INTERVAL_YEAR, 2025],
+        'month' => ['2025-03-15', AdapterInterface::INTERVAL_MONTH, 3],
+    ]);
 
     it('converts to unix timestamp', function () {
         $expr = $this->adapter->getUnixTimestamp(
@@ -294,9 +242,7 @@ describe('SQL Helper Methods - Date Functions', function () {
 
         $result = $this->adapter->fetchOne("SELECT {$expr} as timestamp");
 
-        // Should be around 2025-01-01 (timezone may vary)
-        expect((int) $result)->toBeGreaterThan(1700000000); // After 2023
-        expect((int) $result)->toBeLessThan(1800000000); // Before 2027
+        expect((int) $result)->toBe(1735689600);
     });
 
     it('converts from unix timestamp', function () {

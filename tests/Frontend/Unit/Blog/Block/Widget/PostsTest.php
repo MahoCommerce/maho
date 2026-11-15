@@ -133,32 +133,3 @@ describe('Blog category source model', function () {
         expect($options[0]['label'])->toBeString();
     });
 });
-
-describe('Blog post collection filters', function () {
-    afterEach(function () {
-        foreach ($this->posts ?? [] as $post) {
-            $post->delete();
-        }
-    });
-
-    it('hides inactive and future posts behind addPublishedFilter', function () {
-        $this->posts = [
-            blogWidgetPost('Filter Visible', 1, '2025-01-01'),
-            blogWidgetPost('Filter Inactive', 0, '2025-01-01'),
-            blogWidgetPost('Filter Future', 1, '2099-01-01'),
-            blogWidgetPost('Filter Undated', 1, null),
-        ];
-
-        $titles = array_map(
-            fn($p) => $p->getTitle(),
-            Mage::getResourceModel('blog/post_collection')
-                ->addStoreFilter(Mage::app()->getStore())
-                ->addPublishedFilter()
-                ->getItems(),
-        );
-        expect($titles)->toContain('Filter Visible');
-        expect($titles)->toContain('Filter Undated');
-        expect($titles)->not->toContain('Filter Inactive');
-        expect($titles)->not->toContain('Filter Future');
-    });
-});

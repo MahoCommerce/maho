@@ -27,26 +27,14 @@ afterAll(function (): void {
 
 describe('GET /api/rest/v2/guest-carts/{id}', function (): void {
 
-    it('returns 404 for non-existent masked ID', function (): void {
-        // Numeric values are not valid masked IDs and will not resolve
-        $response = apiGet('/api/rest/v2/guest-carts/999999999');
-
-        expect($response['status'])->toBeNotFound();
-    });
-
-    it('returns 404 for invalid cart ID format', function (): void {
-        $response = apiGet('/api/rest/v2/guest-carts/invalid-id');
-
-        expect($response['status'])->toBeNotFound();
-    });
-
-    it('does not resolve numeric IDs as masked IDs', function (): void {
-        // Guest carts are only accessible via masked ID (32-char hex token)
-        // A bare numeric ID is not a valid masked ID and returns 404
-        $response = apiGet('/api/rest/v2/guest-carts/1');
-
-        expect($response['status'])->toBeNotFound();
-    });
+    // Guest carts are only accessible via masked ID (32-char hex token)
+    it('returns 404 for a cart id that is not a masked id', function (string $cartId): void {
+        expect(apiGet("/api/rest/v2/guest-carts/{$cartId}")['status'])->toBeNotFound();
+    })->with([
+        'large number' => ['999999999'],
+        'invalid format' => ['invalid-id'],
+        'small number' => ['1'],
+    ]);
 
 });
 
@@ -192,42 +180,24 @@ describe('POST /api/rest/v2/guest-carts/{id}/shipping-methods', function (): voi
         }
 
         expect($response['status'])->toBe(200);
-        expect($response['json'])->toBeArray();
+        expect($response['json'])->not->toBeEmpty();
 
-        if (count($response['json']) > 0) {
-            $method = $response['json'][0];
-            expect($method)->toHaveKey('code');
-            expect($method)->toHaveKey('title');
-            expect($method)->toHaveKey('price');
-        }
+        $method = $response['json'][0];
+        expect($method)->toHaveKey('code');
+        expect($method)->toHaveKey('title');
+        expect($method)->toHaveKey('price');
     });
 
 });
 
 describe('GET /api/rest/v2/guest-carts/{id}/payment-methods', function (): void {
 
-    it('returns 404 for non-existent cart', function (): void {
-        $response = apiGet('/api/rest/v2/guest-carts/999999999/payment-methods');
-
-        expect($response['status'])->toBeNotFound();
-    });
-
-    it('returns payment methods array for valid cart', function (): void {
-        $cartId = fixtures('existing_cart_id');
-
-        if (!$cartId) {
-            $this->markTestSkipped('No existing_cart_id configured in fixtures');
-        }
-
-        $response = apiGet("/api/rest/v2/guest-carts/{$cartId}/payment-methods");
-
-        if ($response['status'] === 404) {
-            $this->markTestSkipped('Test cart no longer exists');
-        }
-
-        expect($response['status'])->toBe(200);
-        expect($response['json'])->toBeArray();
-    });
+    it('returns 404 for a cart id that is not a masked id', function (string $cartId): void {
+        expect(apiGet("/api/rest/v2/guest-carts/{$cartId}/payment-methods")['status'])->toBeNotFound();
+    })->with([
+        'large number' => ['999999999'],
+        'small number' => ['1'],
+    ]);
 
     it('returns payment methods with expected structure', function (): void {
         $cartId = fixtures('existing_cart_id');
@@ -244,22 +214,18 @@ describe('GET /api/rest/v2/guest-carts/{id}/payment-methods', function (): void 
 
         expect($response['status'])->toBe(200);
 
-        // Should have at least one payment method configured
-        if (count($response['json']) > 0) {
-            $method = $response['json'][0];
+        expect($response['json'])->not->toBeEmpty();
+        $method = $response['json'][0];
 
-            // Required fields
-            expect($method)->toHaveKey('code');
-            expect($method)->toHaveKey('title');
-            expect($method)->toHaveKey('sortOrder');
-            expect($method)->toHaveKey('isOffline');
+        expect($method)->toHaveKey('code');
+        expect($method)->toHaveKey('title');
+        expect($method)->toHaveKey('sortOrder');
+        expect($method)->toHaveKey('isOffline');
 
-            // Type checks
-            expect($method['code'])->toBeString();
-            expect($method['title'])->toBeString();
-            expect($method['sortOrder'])->toBeInt();
-            expect($method['isOffline'])->toBeBool();
-        }
+        expect($method['code'])->toBeString();
+        expect($method['title'])->toBeString();
+        expect($method['sortOrder'])->toBeInt();
+        expect($method['isOffline'])->toBeBool();
     });
 
     it('returns methods sorted by sortOrder', function (): void {
@@ -286,13 +252,6 @@ describe('GET /api/rest/v2/guest-carts/{id}/payment-methods', function (): void 
 
             expect($sortOrders)->toBe($sortedOrders, 'Payment methods should be sorted by sortOrder');
         }
-    });
-
-    it('does not resolve numeric cart ID as masked ID', function (): void {
-        // Payment methods require a valid masked cart ID
-        $response = apiGet('/api/rest/v2/guest-carts/1/payment-methods');
-
-        expect($response['status'])->toBeNotFound();
     });
 
 });
