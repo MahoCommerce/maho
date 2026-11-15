@@ -82,7 +82,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
      * Cancel billing agreement action
      */
     #[Maho\Config\Route('/admin/sales_billing_agreement/cancel')]
-    public function cancelAction()
+    public function cancelAction(): void
     {
         $agreementModel = $this->_initBillingAgreement();
 
@@ -100,7 +100,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
             }
             $this->_redirect('*/*/view', ['_current' => true]);
         }
-        return $this->_redirect('*/*/');
+        $this->_redirect('*/*/');
     }
 
     /**

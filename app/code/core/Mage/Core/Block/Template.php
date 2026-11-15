@@ -32,9 +32,9 @@ class Mage_Core_Block_Template extends Mage_Core_Block_Abstract
      */
     protected $_viewVars = [];
 
-    protected $_baseUrl;
+    protected ?string $_baseUrl = null;
 
-    protected $_jsUrl;
+    protected ?string $_jsUrl = null;
 
     protected static ?bool $_showTemplateHintsAdmin = null;
     protected static ?bool $_showTemplateHintsBlocksAdmin = null;

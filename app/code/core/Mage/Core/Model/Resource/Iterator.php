@@ -14,7 +14,6 @@ class Mage_Core_Model_Resource_Iterator extends \Maho\DataObject
      * Walk over records fetched from query one by one using callback function
      *
      * @param \Maho\Db\Statement\StatementInterface|\Maho\Db\Select|string $query
-     * @param array|string $callbacks
      * @param \Maho\Db\Adapter\AdapterInterface $adapter
      * @return $this
      */

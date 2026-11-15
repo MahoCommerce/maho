@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Category
 {
-    public function toOptionArray($addEmpty = true)
+    public function toOptionArray(bool $addEmpty = true): array
     {
         $collection = Mage::getResourceModel('catalog/category_collection');
 

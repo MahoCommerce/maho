@@ -13,15 +13,14 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
     /**
      * Get requested items qtys and return to stock flags
      */
-    protected function _getItemData()
+    protected function _getItemData(): array
     {
         $data = $this->getRequest()->getParam('creditmemo');
         if (!$data) {
             $data = Mage::getSingleton('adminhtml/session')->getFormData(true);
         }
 
-        $qtys = $data['items'] ?? [];
-        return $qtys;
+        return (array) ($data['items'] ?? []);
     }
 
     /**
@@ -63,10 +62,9 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
     /**
      * Initialize creditmemo model instance
      *
-     * @return Mage_Sales_Model_Order_Creditmemo|false
      * @throws Mage_Core_Exception
      */
-    protected function _initCreditmemo($update = false)
+    protected function _initCreditmemo(bool $update = false): Mage_Sales_Model_Order_Creditmemo|false
     {
         $this->_title($this->__('Sales'))->_title($this->__('Credit Memos'));
 

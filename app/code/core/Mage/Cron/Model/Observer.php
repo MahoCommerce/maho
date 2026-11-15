@@ -26,7 +26,7 @@ class Mage_Cron_Model_Observer
 
     public const REGEX_RUN_MODEL = '#^([a-z0-9_]+/[a-z0-9_]+)::([a-z0-9_]+)$#i';
 
-    protected $_pendingSchedules;
+    protected ?Mage_Cron_Model_Resource_Schedule_Collection $_pendingSchedules = null;
 
     /**
      * Check if cron is running and warn admin users if not

@@ -85,11 +85,11 @@ class Collection implements IteratorAggregate, Countable
      */
     protected $_isCollectionLoaded;
 
-    protected $_cacheKey;
+    protected ?string $_cacheKey = null;
 
-    protected $_cacheTags = [];
+    protected array $_cacheTags = [];
 
-    protected $_cacheLifetime = 86400;
+    protected int $_cacheLifetime = 86400;
 
     /**
      * Additional collection flags
@@ -155,6 +155,7 @@ class Collection implements IteratorAggregate, Countable
                 return $filter;
             }
         }
+        return null;
     }
 
     /**

@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 abstract class Mage_Core_Controller_Varien_Router_Abstract
 {
-    protected $_front;
+    protected ?Mage_Core_Controller_Varien_Front $_front = null;
 
     /**
      * @param Mage_Core_Controller_Varien_Front $front

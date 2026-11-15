@@ -42,7 +42,7 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
     /**
      * Used module name in current adminhtml controller
      */
-    protected $_usedModuleName = 'adminhtml';
+    protected string $_usedModuleName = 'adminhtml';
 
     /**
      * Currently used area
@@ -92,19 +92,14 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
 
     /**
      * Define active menu item in menu block
-     *
-     * @return $this
      */
-    protected function _setActiveMenu($menuPath)
+    protected function _setActiveMenu(string $menuPath): static
     {
         $this->getLayout()->getBlock('menu')->setActive($menuPath);
         return $this;
     }
 
-    /**
-     * @return $this
-     */
-    protected function _addBreadcrumb($label, $title, $link = null)
+    protected function _addBreadcrumb(string $label, ?string $title, ?string $link = null): static
     {
         /** @var Mage_Adminhtml_Block_Widget_Breadcrumbs $block */
         $block = $this->getLayout()->getBlock('breadcrumbs');

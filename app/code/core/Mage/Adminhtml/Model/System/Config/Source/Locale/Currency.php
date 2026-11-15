@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Locale_Currency
 {
-    protected $_option;
+    protected ?array $_option = null;
 
     public function toOptionArray(): array
     {

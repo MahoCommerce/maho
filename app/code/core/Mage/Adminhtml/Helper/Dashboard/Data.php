@@ -13,8 +13,8 @@ class Mage_Adminhtml_Helper_Dashboard_Data extends Mage_Core_Helper_Data
     #[\Override]
     protected $_moduleName = 'Mage_Adminhtml';
 
-    protected $_locale = null;
-    protected $_stores = null;
+    protected ?Mage_Core_Model_Locale $_locale = null;
+    protected ?Mage_Core_Model_Resource_Store_Collection $_stores = null;
 
     /**
      * Retrieve stores configured in system.

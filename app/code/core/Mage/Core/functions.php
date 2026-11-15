@@ -10,10 +10,8 @@
 
 /**
  * Object destructor
- *
- * @param mixed $object
  */
-function destruct($object)
+function destruct(mixed $object): void
 {
     if (is_array($object)) {
         foreach ($object as $obj) {
@@ -179,20 +177,11 @@ function mageDebugBacktrace($return = false, $html = true, $showFirst = false)
     return null;
 }
 
-function mageSendErrorHeader()
-{
-    return;
-}
+function mageSendErrorHeader(): void {}
 
-function mageSendErrorFooter()
-{
-    return;
-}
+function mageSendErrorFooter(): void {}
 
-/**
- * @param string $path
- */
-function mageDelTree($path)
+function mageDelTree(string $path): void
 {
     if (is_dir($path)) {
         $entries = scandir($path);
@@ -249,7 +238,7 @@ function isDirWriteable(string $dir): bool
     if (is_dir($dir) && is_writable($dir)) {
         if (stripos(PHP_OS, 'win') === 0) {
             $dir    = ltrim($dir, DIRECTORY_SEPARATOR);
-            $file   = $dir . DIRECTORY_SEPARATOR . uniqid(mt_rand()) . '.tmp';
+            $file   = $dir . DIRECTORY_SEPARATOR . uniqid((string) mt_rand()) . '.tmp';
             $exist  = file_exists($file);
             $fp     = @fopen($file, 'a');
             if ($fp === false) {

@@ -14,9 +14,9 @@ namespace Maho\File;
  */
 class Csv
 {
-    protected $_lineLength = 0;
-    protected $_delimiter = ',';
-    protected $_enclosure = '"';
+    protected int $_lineLength = 0;
+    protected string $_delimiter = ',';
+    protected string $_enclosure = '"';
     protected string $_escape = '\\';
 
     public function __construct() {}
@@ -115,7 +115,7 @@ class Csv
         return $this;
     }
 
-    public function fputcsv(&$handle, $fields = [], $delimiter = ',', $enclosure = '"')
+    public function fputcsv(mixed &$handle, array $fields = [], string $delimiter = ',', string $enclosure = '"'): int|false
     {
         $str = '';
         $escape_char = '\\';

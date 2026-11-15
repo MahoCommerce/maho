@@ -203,7 +203,7 @@ class Template
         return $replacedValue;
     }
 
-    public function dependDirective($construction)
+    public function dependDirective(array $construction): string
     {
         if (count($this->_templateVars) == 0) {
             // If template preprocessing
@@ -216,7 +216,7 @@ class Template
         return $construction[2];
     }
 
-    public function ifDirective($construction)
+    public function ifDirective(array $construction): string
     {
         if (count($this->_templateVars) == 0) {
             return $construction[0];
