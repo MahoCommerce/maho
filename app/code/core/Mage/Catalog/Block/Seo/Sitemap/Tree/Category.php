@@ -12,13 +12,13 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Category extends Mage_Catalog_Block_Se
 {
     public const XML_PATH_LINES_PER_PAGE = 'catalog/sitemap/lines_perpage';
 
-    protected $_storeRootCategoryPath = '';
-    protected $_storeRootCategoryLevel = 0;
-    protected $_total = 0;
+    protected ?string $_storeRootCategoryPath = '';
+    protected int $_storeRootCategoryLevel = 0;
+    protected int $_total = 0;
     protected int|float $_from = 0;
-    protected $_to = 0;
-    protected $_currentPage = 0;
-    protected $_categoriesToPages = [];
+    protected int $_to = 0;
+    protected int $_currentPage = 0;
+    protected array $_categoriesToPages = [];
     /**
      * Initialize categories collection
      *
@@ -40,11 +40,9 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Category extends Mage_Catalog_Block_Se
 
     /**
      * Init pager
-     *
-     * @param string $pagerName
      */
     #[\Override]
-    public function bindPager($pagerName)
+    public function bindPager(string $pagerName): void
     {
         $pager = $this->getLayout()->getBlock($pagerName);
         /** @var Mage_Catalog_Block_Seo_Sitemap_Tree_Pager $pager */

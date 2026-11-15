@@ -11,19 +11,6 @@
 class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Grouped extends Mage_CatalogInventory_Model_Resource_Indexer_Stock_Default
 {
     /**
-     * Reindex stock data for defined configurable product ids
-     *
-     * @param int|array $entityIds
-     * @return $this
-     */
-    #[\Override]
-    public function reindexEntity($entityIds)
-    {
-        $this->_updateIndex($entityIds);
-        return $this;
-    }
-
-    /**
      * Get the select object for get stock status by product ids
      *
      * @param int|array $entityIds

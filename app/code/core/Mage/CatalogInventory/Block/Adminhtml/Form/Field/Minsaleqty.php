@@ -40,7 +40,7 @@ class Mage_CatalogInventory_Block_Adminhtml_Form_Field_Minsaleqty extends Mage_A
      * Prepare to render
      */
     #[\Override]
-    protected function _prepareToRender()
+    protected function _prepareToRender(): void
     {
         $this->addColumn('customer_group_id', [
             'label' => Mage::helper('customer')->__('Customer Group'),
@@ -57,7 +57,7 @@ class Mage_CatalogInventory_Block_Adminhtml_Form_Field_Minsaleqty extends Mage_A
      * Prepare existing row data object
      */
     #[\Override]
-    protected function _prepareArrayRow(\Maho\DataObject $row)
+    protected function _prepareArrayRow(\Maho\DataObject $row): void
     {
         $row->setData(
             'option_extra_attr_' . $this->_getGroupRenderer()->calcOptionHash($row->getData('customer_group_id')),

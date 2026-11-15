@@ -24,7 +24,7 @@ class Mage_CatalogSearch_Block_Layer extends Mage_Catalog_Block_Layer_View
      * Initialize blocks names
      */
     #[\Override]
-    protected function _initBlocks()
+    protected function _initBlocks(): void
     {
         parent::_initBlocks();
 

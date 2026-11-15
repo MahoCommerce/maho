@@ -31,9 +31,9 @@ class Mage_CatalogIndex_Model_Indexer_Minimalprice extends Mage_CatalogIndex_Mod
     protected $_customerGroups;
 
     #[\Override]
-    protected $_runOnce = true;
+    protected bool $_runOnce = true;
     #[\Override]
-    protected $_processChildren = false;
+    protected bool $_processChildren = false;
 
     #[\Override]
     protected function _construct()

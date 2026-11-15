@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -13,8 +14,8 @@ class Mage_CatalogSearch_Block_Term extends Mage_Core_Block_Template
      * @var array
      */
     protected $_terms;
-    protected $_minPopularity;
-    protected $_maxPopularity;
+    protected ?int $_minPopularity = null;
+    protected ?int $_maxPopularity = null;
 
     /**
      * Load terms and try to sort it by names

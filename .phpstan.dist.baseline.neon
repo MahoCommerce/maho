@@ -2593,24 +2593,6 @@ parameters:
 			path: app/code/core/Mage/Bundle/Block/Adminhtml/Catalog/Product/Edit/Tabs.php
 
 		-
-			rawMessage: Property Mage_Bundle_Block_Catalog_Product_List_Partof::$_itemCollection has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Bundle/Block/Catalog/Product/List/Partof.php
-
-		-
-			rawMessage: Property Mage_Bundle_Block_Catalog_Product_List_Partof::$_items has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Bundle/Block/Catalog/Product/List/Partof.php
-
-		-
-			rawMessage: Property Mage_Bundle_Block_Catalog_Product_List_Partof::$_product has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Bundle/Block/Catalog/Product/List/Partof.php
-
-		-
 			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getAddToCartUrl() expects int|string|null, Mage_Catalog_Model_Product given.'
 			identifier: argument.type
 			count: 1
@@ -2695,12 +2677,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Layer/View.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Block_Layer_View::_initBlocks() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Layer/View.php
-
-		-
 			rawMessage: 'Argument of an invalid type string supplied for foreach, only iterables are supported.'
 			identifier: foreach.nonIterable
 			count: 1
@@ -2711,12 +2687,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Product/Abstract.php
-
-		-
-			rawMessage: Property Mage_Catalog_Block_Product_List_Related::$_itemCollection has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/List/Related.php
 
 		-
 			rawMessage: 'Parameter #1 $limit of method Mage_Page_Block_Html_Pager::setLimit() expects int, string given.'
@@ -2731,18 +2701,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Product/List/Toolbar.php
 
 		-
-			rawMessage: Property Mage_Catalog_Block_Product_List_Upsell::$_itemCollection has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/List/Upsell.php
-
-		-
-			rawMessage: Property Mage_Catalog_Block_Product_List_Upsell::$_items has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/List/Upsell.php
-
-		-
 			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getPriceHtml() expects int|string|null, Mage_Catalog_Model_Product given.'
 			identifier: argument.type
 			count: 1
@@ -2753,18 +2711,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Product/View/Attributes.php
-
-		-
-			rawMessage: Property Mage_Catalog_Block_Product_View_Attributes::$_product has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/View/Attributes.php
-
-		-
-			rawMessage: Property Mage_Catalog_Block_Product_View_Description::$_product has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/View/Description.php
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Core_Block_Html_Select::addOption() expects string, int|null given.'
@@ -2797,12 +2743,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Product/View/Type/Configurable.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Block_Seo_Sitemap_Abstract::bindPager() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Seo/Sitemap/Abstract.php
-
-		-
 			rawMessage: 'Parameter #1 $category (Mage_Catalog_Model_Category) of method Mage_Catalog_Block_Seo_Sitemap_Category::getItemUrl() should be compatible with parameter $item (Mage_Catalog_Block_Seo_Sitemap_Abstract) of method Mage_Catalog_Block_Seo_Sitemap_Abstract::getItemUrl()'
 			identifier: method.childParameterType
 			count: 1
@@ -2815,73 +2755,7 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Seo/Sitemap/Product.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Block_Seo_Sitemap_Tree_Category::bindPager() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Seo/Sitemap/Tree/Category.php
-
-		-
-			rawMessage: Property Mage_Catalog_Block_Seo_Sitemap_Tree_Category::$_categoriesToPages has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Seo/Sitemap/Tree/Category.php
-
-		-
-			rawMessage: Property Mage_Catalog_Block_Seo_Sitemap_Tree_Category::$_currentPage has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Seo/Sitemap/Tree/Category.php
-
-		-
-			rawMessage: Property Mage_Catalog_Block_Seo_Sitemap_Tree_Category::$_storeRootCategoryLevel has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Seo/Sitemap/Tree/Category.php
-
-		-
-			rawMessage: Property Mage_Catalog_Block_Seo_Sitemap_Tree_Category::$_storeRootCategoryPath has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Seo/Sitemap/Tree/Category.php
-
-		-
-			rawMessage: Property Mage_Catalog_Block_Seo_Sitemap_Tree_Category::$_to has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Seo/Sitemap/Tree/Category.php
-
-		-
-			rawMessage: Property Mage_Catalog_Block_Seo_Sitemap_Tree_Category::$_total has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Seo/Sitemap/Tree/Category.php
-
-		-
-			rawMessage: Property Mage_Catalog_Block_Seo_Sitemap_Tree_Pager::$_firstNum has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Seo/Sitemap/Tree/Pager.php
-
-		-
-			rawMessage: Property Mage_Catalog_Block_Seo_Sitemap_Tree_Pager::$_lastNum has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Seo/Sitemap/Tree/Pager.php
-
-		-
-			rawMessage: Property Mage_Catalog_Block_Seo_Sitemap_Tree_Pager::$_lastPageNumber has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Seo/Sitemap/Tree/Pager.php
-
-		-
 			rawMessage: Property Mage_Catalog_Block_Seo_Sitemap_Tree_Pager::$_showPerPage has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Seo/Sitemap/Tree/Pager.php
-
-		-
-			rawMessage: Property Mage_Catalog_Block_Seo_Sitemap_Tree_Pager::$_totalNum has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Seo/Sitemap/Tree/Pager.php
@@ -2923,22 +2797,10 @@ parameters:
 			path: app/code/core/Mage/Catalog/Helper/Product.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Helper_Product_Compare::_getUrlCustomParams() has parameter $url with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Catalog/Helper/Product/Compare.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Catalog_Model_Product_Option_Type_Default::setConfigurationItemOption() expects Maho\DataObject|null, Mage_Catalog_Model_Product_Configuration_Item_Option_Interface given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Helper/Product/Configuration.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Helper_Product_Type_Composite::getCurrentStore() has parameter $storeId with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Catalog/Helper/Product/Type/Composite.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Core_Model_Resource_Db_Collection_Abstract::setStoreId().'
@@ -2995,26 +2857,8 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
 
 		-
-			rawMessage: Property Mage_Catalog_Model_Convert_Adapter_Product::$_stores has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Eav_Model_Entity_Abstract::setStore().'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Convert_Parser_Product::$_inventoryItems has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Convert_Parser_Product::$_productModel has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
 
@@ -3023,24 +2867,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Convert_Parser_Product::$_store has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Convert_Parser_Product::$_storeId has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
-
-		-
-			rawMessage: 'Property Mage_Catalog_Model_Entity_Product_Attribute_Design_Options_Container::$_configNodePath (Mage_Core_Model_Config_Element) does not accept string.'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Entity/Product/Attribute/Design/Options/Container.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Catalog_Model_Resource_Category::refreshProductIndex().'
@@ -3127,18 +2953,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product.php
 
 		-
-			rawMessage: Property Mage_Catalog_Model_Product::$_optionInstance has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Product::$_typeInstanceSingleton has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product.php
-
-		-
 			rawMessage: Property Mage_Catalog_Model_Product::$_url has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -3181,18 +2995,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Option/Type/File.php
 
 		-
-			rawMessage: Property Mage_Catalog_Model_Product_Option_Value::$_product has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Option/Value.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Product_Option_Value::$_values has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Option/Value.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Eav_Model_Entity_Collection_Abstract::getStoreId().'
 			identifier: method.notFound
 			count: 1
@@ -3201,18 +3003,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Product_Type::priceFactory() should return Mage_Catalog_Model_Product_Type_Price but returns Mage_Core_Model_Abstract|false.'
 			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Type.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Product_Type::$_priceModels has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Type.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Product_Type::$_types has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Type.php
 
@@ -3227,12 +3017,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Type/Grouped.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Product_Type_Price::$attributeCache has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Type/Price.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Eav_Model_Entity_Attribute_Abstract::isScopeStore().'
@@ -3301,12 +3085,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Compare/Item/Collection.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Indexer_Eav_Abstract::_prepareIndex() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Indexer/Eav/Abstract.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Catalog_Model_Resource_Product_Indexer_Price_Interface::getIsComposite().'
 			identifier: method.notFound
 			count: 2
@@ -3317,18 +3095,6 @@ parameters:
 			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Indexer/Price.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Indexer_Price_Default::registerEvent() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Indexer/Price/Default.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Indexer_Price_Interface::registerEvent() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Indexer/Price/Interface.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Indexer_Price_Interface::reindexAll() has no return type specified.'
@@ -3343,12 +3109,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Indexer/Price/Interface.php
 
 		-
-			rawMessage: 'Property Mage_Catalog_Model_Resource_Product_Link_Collection::$_linkTypeId (Mage_Catalog_Model_Product_Type) does not accept int|null.'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Link/Collection.php
-
-		-
 			rawMessage: 'Parameter #1 $store of method Mage_Catalog_Model_Resource_Product::refreshEnabledIndex() expects Mage_Core_Model_Store|null, int<min, -1>|int<1, max> given.'
 			identifier: argument.type
 			count: 1
@@ -3359,18 +3119,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Status.php
-
-		-
-			rawMessage: 'Static property Mage_Catalog_Model_Url::$_categoryResourceSingleton (Mage_Catalog_Model_Category) does not accept Mage_Catalog_Model_Resource_Category.'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Url.php
-
-		-
-			rawMessage: 'Static property Mage_Catalog_Model_Url::$_productResourceSingleton (Mage_Catalog_Model_Category) does not accept Mage_Catalog_Model_Resource_Product.'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Url.php
 
 		-
 			rawMessage: 'Parameter #2 $attributeSetId of method Mage_Eav_Model_Entity_Setup::getDefaultAttributeGroupId() expects int|null, string given.'
@@ -3395,66 +3143,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/CatalogIndex/Model/Data/Abstract.php
-
-		-
-			rawMessage: Property Mage_CatalogIndex_Model_Indexer_Abstract::$_processChildren has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Indexer/Abstract.php
-
-		-
-			rawMessage: Property Mage_CatalogIndex_Model_Indexer_Abstract::$_processChildrenForConfigurable has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Indexer/Abstract.php
-
-		-
-			rawMessage: Property Mage_CatalogIndex_Model_Indexer_Abstract::$_runOnce has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Indexer/Abstract.php
-
-		-
-			rawMessage: Property Mage_CatalogIndex_Model_Indexer_Minimalprice::$_processChildren has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Indexer/Minimalprice.php
-
-		-
-			rawMessage: Property Mage_CatalogIndex_Model_Indexer_Minimalprice::$_runOnce has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Indexer/Minimalprice.php
-
-		-
-			rawMessage: Property Mage_CatalogIndex_Model_Indexer_Price::$_customerGroups has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Indexer/Price.php
-
-		-
-			rawMessage: Property Mage_CatalogIndex_Model_Indexer_Price::$_processChildrenForConfigurable has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Indexer/Price.php
-
-		-
-			rawMessage: Property Mage_CatalogIndex_Model_Indexer_Tierprice::$_processChildren has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Indexer/Tierprice.php
-
-		-
-			rawMessage: Property Mage_CatalogIndex_Model_Resource_Abstract::$_storeId has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Abstract.php
-
-		-
-			rawMessage: Property Mage_CatalogIndex_Model_Resource_Abstract::$_websiteId has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Abstract.php
 
 		-
 			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Data_Abstract::_prepareLinkFetchSelect() has no return type specified.'
@@ -3499,46 +3187,10 @@ parameters:
 			path: app/code/core/Mage/CatalogInventory/Block/Adminhtml/Form/Field/Customergroup.php
 
 		-
-			rawMessage: 'Method Mage_CatalogInventory_Block_Adminhtml_Form_Field_Minsaleqty::_prepareArrayRow() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Block/Adminhtml/Form/Field/Minsaleqty.php
-
-		-
-			rawMessage: 'Method Mage_CatalogInventory_Block_Adminhtml_Form_Field_Minsaleqty::_prepareToRender() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Block/Adminhtml/Form/Field/Minsaleqty.php
-
-		-
 			rawMessage: 'Cannot call method setTypeId() on Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
 			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/CatalogInventory/Model/Resource/Indexer/Stock.php
-
-		-
-			rawMessage: 'Method Mage_CatalogInventory_Model_Resource_Indexer_Stock_Interface::getTypeId() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Model/Resource/Indexer/Stock/Interface.php
-
-		-
-			rawMessage: 'Method Mage_CatalogInventory_Model_Resource_Indexer_Stock_Interface::reindexAll() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Model/Resource/Indexer/Stock/Interface.php
-
-		-
-			rawMessage: 'Method Mage_CatalogInventory_Model_Resource_Indexer_Stock_Interface::reindexEntity() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Model/Resource/Indexer/Stock/Interface.php
-
-		-
-			rawMessage: 'Method Mage_CatalogInventory_Model_Resource_Indexer_Stock_Interface::setTypeId() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Model/Resource/Indexer/Stock/Interface.php
 
 		-
 			rawMessage: 'Parameter #1 $products of method Mage_CatalogInventory_Model_Resource_Stock_Item_Collection::addProductsFilter() expects array<Mage_Catalog_Model_Product>, Mage_Catalog_Model_Resource_Product_Collection given.'
@@ -3553,30 +3205,6 @@ parameters:
 			path: app/code/core/Mage/CatalogRule/Model/Action/Index/Refresh.php
 
 		-
-			rawMessage: 'Method Mage_CatalogRule_Model_Action_Index_Refresh::_prepareGroupWebsite() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogRule/Model/Action/Index/Refresh.php
-
-		-
-			rawMessage: 'Method Mage_CatalogRule_Model_Action_Index_Refresh::_removeOldIndexData() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogRule/Model/Action/Index/Refresh.php
-
-		-
-			rawMessage: 'Method Mage_CatalogRule_Model_Action_Index_Refresh_Row::_prepareGroupWebsite() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogRule/Model/Action/Index/Refresh/Row.php
-
-		-
-			rawMessage: 'Method Mage_CatalogRule_Model_Action_Index_Refresh_Row::_removeOldIndexData() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogRule/Model/Action/Index/Refresh/Row.php
-
-		-
 			rawMessage: 'Parameter #1 $combine of method Mage_CatalogRule_Model_Observer::_removeAttributeFromConditions() expects Mage_CatalogRule_Model_Rule_Condition_Combine, Mage_Rule_Model_Condition_Combine given.'
 			identifier: argument.type
 			count: 1
@@ -3587,24 +3215,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/CatalogRule/Model/Rule.php
-
-		-
-			rawMessage: 'Method Mage_CatalogSearch_Block_Layer::_initBlocks() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Block/Layer.php
-
-		-
-			rawMessage: Property Mage_CatalogSearch_Block_Term::$_maxPopularity has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Block/Term.php
-
-		-
-			rawMessage: Property Mage_CatalogSearch_Block_Term::$_minPopularity has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Block/Term.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Core_Model_Resource_Db_Collection_Abstract::test().'
@@ -3635,12 +3245,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/CatalogSearch/Model/Resource/Fulltext.php
-
-		-
-			rawMessage: 'Method Mage_CatalogSearch_Model_Resource_Fulltext_Engine::getResourceName() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Model/Resource/Fulltext/Engine.php
 
 		-
 			rawMessage: Property Mage_Checkout_Block_Cart_Abstract::$_checkout has no type specified.
@@ -3797,18 +3401,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Cms/controllers/PageController.php
-
-		-
-			rawMessage: Property Mage_ConfigurableSwatches_Helper_Data::$_configAttributeIds has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/ConfigurableSwatches/Helper/Data.php
-
-		-
-			rawMessage: Property Mage_ConfigurableSwatches_Helper_Data::$_enabled has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/ConfigurableSwatches/Helper/Data.php
 
 		-
 			rawMessage: 'Method Mage_Core_Block_Abstract::_beforeChildToHtml() has no return type specified.'
@@ -4681,28 +4273,10 @@ parameters:
 			path: app/code/core/Mage/Downloadable/Model/Link/Api/Uploader.php
 
 		-
-			rawMessage: 'Method Mage_Downloadable_DownloadController::linkSampleAction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Downloadable/controllers/DownloadController.php
-
-		-
-			rawMessage: 'Method Mage_Downloadable_DownloadController::sampleAction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Downloadable/controllers/DownloadController.php
-
-		-
 			rawMessage: Property Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract::$_attribute has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Eav/Block/Adminhtml/Attribute/Edit/Main/Abstract.php
-
-		-
-			rawMessage: Property Mage_Eav_Helper_Data::$_entityTypeFrontendClasses has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Eav/Helper/Data.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Eav_Model_Resource_Entity_Attribute::getUsedInForms().'
@@ -4721,36 +4295,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Attribute/Data/File.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Config::_initializeStore() has parameter $storeId with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Config.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Config::_saveToCache() has parameter $storeId with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Config.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Config::_storeId() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Config.php
-
-		-
-			rawMessage: Property Mage_Eav_Model_Convert_Adapter_Entity::$_attrToDb has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Entity.php
-
-		-
-			rawMessage: Property Mage_Eav_Model_Convert_Adapter_Entity::$_filter has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Entity.php
 
 		-
 			rawMessage: Property Mage_Eav_Model_Convert_Adapter_Entity::$_joinAttr has no type specified.
@@ -4779,12 +4323,6 @@ parameters:
 		-
 			rawMessage: 'Parameter #1 $object of method Mage_Eav_Model_Entity_Abstract::load() expects Mage_Core_Model_Abstract, Maho\DataObject given.'
 			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
-
-		-
-			rawMessage: Property Mage_Eav_Model_Entity_Abstract::$_entityTablePrefix has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
 
@@ -4819,12 +4357,6 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
 
 		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Backend_Interface::getEntityIdField() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Backend/Interface.php
-
-		-
 			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Backend_Interface::getEntityValueId() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -4837,19 +4369,7 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Backend/Interface.php
 
 		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Backend_Interface::getType() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Backend/Interface.php
-
-		-
 			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Backend_Interface::getValueId() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Backend/Interface.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Backend_Interface::isStatic() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Backend/Interface.php
@@ -4897,12 +4417,6 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Collection/Abstract.php
 
 		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Collection_Abstract::getLoadedIds() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Collection/Abstract.php
-
-		-
 			rawMessage: 'Parameter #1 $className of method Maho\Data\Collection::setItemObjectClass() expects string, null given.'
 			identifier: argument.type
 			count: 1
@@ -4913,12 +4427,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Collection/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Increment_Interface::getNextId() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Increment/Interface.php
 
 		-
 			rawMessage: 'Parameter #1 $code of method Mage_Eav_Model_Entity_Setup::updateEntityType() expects string, int given.'
@@ -5389,18 +4897,6 @@ parameters:
 			path: app/code/core/Mage/Review/Block/Form.php
 
 		-
-			rawMessage: Property Mage_Review_Block_Helper::$_availableTemplates has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Review/Block/Helper.php
-
-		-
-			rawMessage: Property Mage_Review_Block_Product_View::$_reviewsCollection has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Review/Block/Product/View.php
-
-		-
 			rawMessage: 'Method Mage_Rss_Block_Wishlist::addPriceBlockType() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -5449,22 +4945,10 @@ parameters:
 			path: app/code/core/Mage/Rule/Model/Action/Collection.php
 
 		-
-			rawMessage: 'Method Mage_Rule_Model_Condition_Combine::_getRecursiveChildSelectOption() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Rule/Model/Condition/Combine.php
-
-		-
 			rawMessage: 'Parameter #1 $arr of method Mage_Rule_Model_Condition_Combine::loadArray() expects array, $this(Mage_Rule_Model_Condition_Combine) given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Rule/Model/Condition/Combine.php
-
-		-
-			rawMessage: 'Method Mage_Rule_Model_Condition_Product_Abstract::_addSpecialAttributes() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Rule/Model/Condition/Product/Abstract.php
 
 		-
 			rawMessage: 'Method Mage_Rule_Model_Condition_Product_Abstract::getAttributeObject() should return Mage_Catalog_Model_Resource_Eav_Attribute but returns Mage_Eav_Model_Entity_Attribute_Abstract|Maho\DataObject|false.'
@@ -5725,12 +5209,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Resource/Quote/Payment.php
 
 		-
-			rawMessage: 'Method Mage_SalesRule_Model_Rule_Condition_Product::_addSpecialAttributes() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Rule/Condition/Product.php
-
-		-
 			rawMessage: 'Parameter #2 $title of method Mage_Weee_Helper_Data::setWeeeTaxesAppliedProperty() expects string, null given.'
 			identifier: argument.type
 			count: 2
@@ -5839,12 +5317,6 @@ parameters:
 			path: app/code/core/Mage/Tag/Block/All.php
 
 		-
-			rawMessage: Property Mage_Tag_Block_All::$_tags has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Tag/Block/All.php
-
-		-
 			rawMessage: Property Mage_Tag_Block_Customer_Tags::$_maxPopularity has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -5852,12 +5324,6 @@ parameters:
 
 		-
 			rawMessage: Property Mage_Tag_Block_Customer_Tags::$_minPopularity has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Tag/Block/Customer/Tags.php
-
-		-
-			rawMessage: Property Mage_Tag_Block_Customer_Tags::$_tags has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Tag/Block/Customer/Tags.php
@@ -5875,12 +5341,6 @@ parameters:
 			path: app/code/core/Mage/Tag/Block/Popular.php
 
 		-
-			rawMessage: Property Mage_Tag_Block_Popular::$_tags has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Tag/Block/Popular.php
-
-		-
 			rawMessage: Property Mage_Tag_Block_Product_List::$_collection has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -5889,18 +5349,6 @@ parameters:
 		-
 			rawMessage: Access to an undefined property Mage_Tag_Model_Entity_Customer_Collection::$_read.
 			identifier: property.notFound
-			count: 1
-			path: app/code/core/Mage/Tag/Model/Entity/Customer/Collection.php
-
-		-
-			rawMessage: Property Mage_Tag_Model_Entity_Customer_Collection::$_tagRelTable has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Tag/Model/Entity/Customer/Collection.php
-
-		-
-			rawMessage: Property Mage_Tag_Model_Entity_Customer_Collection::$_tagTable has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Tag/Model/Entity/Customer/Collection.php
 
@@ -5915,24 +5363,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: app/code/core/Mage/Tag/Model/Resource/Tag/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Tag_Model_Tag::getApprovedStatus() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tag/Model/Tag.php
-
-		-
-			rawMessage: 'Method Mage_Tag_Model_Tag::getDisabledStatus() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tag/Model/Tag.php
-
-		-
-			rawMessage: 'Method Mage_Tag_Model_Tag::getPendingStatus() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tag/Model/Tag.php
 
 		-
 			rawMessage: 'Parameter #1 $store of method Mage_Weee_Helper_Data::validateCatalogPricesAndFptConfiguration() expects Mage_Core_Model_Store|null, int given.'
@@ -6409,52 +5839,16 @@ parameters:
 			path: app/code/core/Mage/Wishlist/Block/Customer/Wishlist/Item/Column.php
 
 		-
-			rawMessage: 'Method Mage_Wishlist_Block_Render_Item_Price::getCleanProductPriceHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Wishlist/Block/Render/Item/Price.php
-
-		-
 			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, Closure(mixed): int<0, max> given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Wishlist/Controller/Abstract.php
 
 		-
-			rawMessage: 'Method Mage_Wishlist_Model_Config::getProductAttributes() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Wishlist/Model/Config.php
-
-		-
 			rawMessage: 'Method Mage_Wishlist_Model_Item::getCustomDownloadUrl() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Wishlist/Model/Item.php
-
-		-
-			rawMessage: Property Mage_Wishlist_Model_Item_Option::$_item has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Wishlist/Model/Item/Option.php
-
-		-
-			rawMessage: Property Mage_Wishlist_Model_Item_Option::$_product has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Wishlist/Model/Item/Option.php
-
-		-
-			rawMessage: 'Method Mage_Wishlist_IndexController::cartAction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Wishlist/controllers/IndexController.php
-
-		-
-			rawMessage: 'Method Mage_Wishlist_SharedController::cartAction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Wishlist/controllers/SharedController.php
 
 		-
 			rawMessage: '''

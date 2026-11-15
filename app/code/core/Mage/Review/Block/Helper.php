@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Review_Block_Helper extends Mage_Core_Block_Template
 {
-    protected $_availableTemplates = [
+    protected array $_availableTemplates = [
         'default' => 'review/helper/summary.phtml',
         'short'   => 'review/helper/summary_short.phtml',
     ];

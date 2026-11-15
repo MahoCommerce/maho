@@ -12,7 +12,7 @@ class Mage_Catalog_Model_Product_Type_Price
 {
     public const CACHE_TAG = 'PRODUCT_PRICE';
 
-    public static $attributeCache = [];
+    public static array $attributeCache = [];
 
     /**
      * Default action to get price of product
