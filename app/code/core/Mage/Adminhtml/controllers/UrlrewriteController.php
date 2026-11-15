@@ -74,6 +74,17 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     public function editAction(): void
     {
         $this->_initRegistry();
+        $rewrite = Mage::registry('current_urlrewrite');
+        $requestPath = trim((string) $this->getRequest()->getParam('request_path', ''));
+        if ($requestPath !== '' && !$rewrite->getId()
+            && !Mage::registry('current_product')->getId() && !Mage::registry('current_category')->getId()
+        ) {
+            // Reports > 404 Errors opens a new rewrite that redirects a path that answered 404
+            $rewrite->setRequestPath($requestPath)
+                ->setIdPath($requestPath)
+                ->setOptions('RP')
+                ->setStoreId((int) $this->getRequest()->getParam('store_id'));
+        }
 
         $this->_title($this->__('URL Rewrite'));
 

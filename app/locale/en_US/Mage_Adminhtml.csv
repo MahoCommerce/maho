@@ -34,6 +34,7 @@
 "12h AM/PM","12h AM/PM"
 "24 Hours","24 Hours"
 "24h","24h"
+"404 Errors","404 Errors"
 ":root { --color-primary: oklch(77% 0.2 61); ... }",":root { --color-primary: oklch(77% 0.2 61); ... }"
 "<h1 class=""page-heading"">404 Error</h1><p>Page not found.</p>","<h1 class=""page-heading"">404 Error</h1><p>Page not found.</p>"
 "<strong>%s</strong> requests access to your account","<strong>%s</strong> requests access to your account"

@@ -883,7 +883,7 @@ XML;
                 $value = (string) $value;
 
                 $firstLetter = substr($value, 0, 1);
-                if ($firstLetter && in_array($firstLetter, ['=', '+', '-'])) {
+                if ($firstLetter && in_array($firstLetter, ['=', '+', '-', '@'])) {
                     $data[$key] = ' ' . $value;
                 }
             }
@@ -903,7 +903,7 @@ XML;
             foreach ($data as $key => $value) {
                 $value = (string) $value;
 
-                if (preg_match("/^ [=\-+]/", $value)) {
+                if (preg_match("/^ [=\-+@]/", $value)) {
                     $data[$key] = ltrim($value);
                 }
             }
