@@ -135,7 +135,7 @@ class Mage_CatalogSearch_Model_Query extends Mage_Core_Model_Abstract
      *
      * @param int $storeId
      */
-    public function setStoreId($storeId)
+    public function setStoreId($storeId): void
     {
         $this->setData('store_id', $storeId);
     }

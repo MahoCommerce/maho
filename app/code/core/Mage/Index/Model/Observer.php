@@ -31,7 +31,7 @@ class Mage_Index_Model_Observer
      * @throws Throwable
      */
     #[Maho\Config\Observer('store_save_commit_after')]
-    public function processStoreSave(\Maho\Event\Observer $observer)
+    public function processStoreSave(\Maho\Event\Observer $observer): void
     {
         $store = $observer->getEvent()->getStore();
         $this->_indexer->processEntityAction(
@@ -47,7 +47,7 @@ class Mage_Index_Model_Observer
      * @throws Throwable
      */
     #[Maho\Config\Observer('store_group_save_commit_after')]
-    public function processStoreGroupSave(\Maho\Event\Observer $observer)
+    public function processStoreGroupSave(\Maho\Event\Observer $observer): void
     {
         $storeGroup = $observer->getEvent()->getStoreGroup();
         $this->_indexer->processEntityAction(
@@ -63,7 +63,7 @@ class Mage_Index_Model_Observer
      * @throws Throwable
      */
     #[Maho\Config\Observer('website_save_commit_after')]
-    public function processWebsiteSave(\Maho\Event\Observer $observer)
+    public function processWebsiteSave(\Maho\Event\Observer $observer): void
     {
         $website = $observer->getEvent()->getWebsite();
         $this->_indexer->processEntityAction(
@@ -79,7 +79,7 @@ class Mage_Index_Model_Observer
      * @throws Throwable
      */
     #[Maho\Config\Observer('store_delete_commit_after')]
-    public function processStoreDelete(\Maho\Event\Observer $observer)
+    public function processStoreDelete(\Maho\Event\Observer $observer): void
     {
         $store = $observer->getEvent()->getStore();
         $this->_indexer->processEntityAction(
@@ -95,7 +95,7 @@ class Mage_Index_Model_Observer
      * @throws Throwable
      */
     #[Maho\Config\Observer('store_group_delete_commit_after')]
-    public function processStoreGroupDelete(\Maho\Event\Observer $observer)
+    public function processStoreGroupDelete(\Maho\Event\Observer $observer): void
     {
         $storeGroup = $observer->getEvent()->getStoreGroup();
         $this->_indexer->processEntityAction(
@@ -111,7 +111,7 @@ class Mage_Index_Model_Observer
      * @throws Throwable
      */
     #[Maho\Config\Observer('website_delete_commit_after')]
-    public function processWebsiteDelete(\Maho\Event\Observer $observer)
+    public function processWebsiteDelete(\Maho\Event\Observer $observer): void
     {
         $website = $observer->getEvent()->getWebsite();
         $this->_indexer->processEntityAction(
@@ -127,7 +127,7 @@ class Mage_Index_Model_Observer
      * @throws Throwable
      */
     #[Maho\Config\Observer('core_config_data_save_commit_after')]
-    public function processConfigDataSave(\Maho\Event\Observer $observer)
+    public function processConfigDataSave(\Maho\Event\Observer $observer): void
     {
         $configData = $observer->getEvent()->getConfigData();
         $this->_indexer->processEntityAction(

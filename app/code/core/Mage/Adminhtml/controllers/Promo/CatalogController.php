@@ -27,7 +27,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
      */
     protected $_dirtyRulesNoticeMessage;
 
-    protected function _initAction()
+    protected function _initAction(): static
     {
         $this->loadLayout()
             ->_setActiveMenu('promo/catalog')
@@ -253,7 +253,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
      *
      * @param string $dirtyRulesNoticeMessage
      */
-    public function setDirtyRulesNoticeMessage($dirtyRulesNoticeMessage)
+    public function setDirtyRulesNoticeMessage($dirtyRulesNoticeMessage): void
     {
         $this->_dirtyRulesNoticeMessage = $dirtyRulesNoticeMessage;
     }

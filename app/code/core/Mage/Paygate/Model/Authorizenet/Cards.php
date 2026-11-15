@@ -165,7 +165,7 @@ class Mage_Paygate_Model_Authorizenet_Cards
      *
      * @throws Exception
      */
-    protected function _isPaymentValid()
+    protected function _isPaymentValid(): void
     {
         if (!$this->_payment) {
             throw new Exception('Payment instance is not set');

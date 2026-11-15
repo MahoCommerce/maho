@@ -202,7 +202,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     /**
      * Process hidden taxes for items and shipping (in accordance with hidden tax type)
      */
-    protected function _processHiddenTaxes()
+    protected function _processHiddenTaxes(): void
     {
         $this->_getAddress()->setTotalAmount('hidden_tax', 0);
         $this->_getAddress()->setBaseTotalAmount('hidden_tax', 0);
@@ -265,7 +265,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
         $rate,
         $appliedRates,
         $taxId = null,
-    ) {
+    ): void {
         $inclTax = $address->getIsShippingInclTax();
         $shipping = $address->getShippingTaxable();
         $baseShipping = $address->getBaseShippingTaxable();
@@ -435,7 +435,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
         $taxRateRequest,
         &$itemTaxGroups,
         $catalogPriceInclTax,
-    ) {
+    ): void {
         $taxRateRequest->setProductClassId($item->getProduct()->getTaxClassId());
         $rate = $this->_calculator->getRate($taxRateRequest);
 
@@ -703,7 +703,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
      * @param array $itemTaxGroups
      * @param bool $catalogPriceInclTax
      */
-    protected function _rowBaseProcessItemTax($address, $item, $taxRateRequest, &$itemTaxGroups, $catalogPriceInclTax)
+    protected function _rowBaseProcessItemTax($address, $item, $taxRateRequest, &$itemTaxGroups, $catalogPriceInclTax): void
     {
         $taxRateRequest->setProductClassId($item->getProduct()->getTaxClassId());
         $rate = $this->_calculator->getRate($taxRateRequest);
@@ -1233,7 +1233,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
      * @param array $appliedRates
      * @param bool $base
      */
-    protected function _calculateWeeeAmountInclTax($item, $appliedRates, $base = true)
+    protected function _calculateWeeeAmountInclTax($item, $appliedRates, $base = true): void
     {
         foreach ($this->_weeeHelper->getApplied($item) as $tax) {
             if ($base) {
@@ -1481,7 +1481,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
         $amount,
         $baseAmount,
         $rate,
-    ) {
+    ): void {
         $previouslyAppliedTaxes = $address->getAppliedTaxes();
         $process = count($previouslyAppliedTaxes);
 

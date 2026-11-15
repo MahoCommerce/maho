@@ -283,7 +283,7 @@ abstract class Mage_Wishlist_Block_Abstract extends Mage_Catalog_Block_Product_A
      * @param string $block
      * @param string $template
      */
-    public function addItemPriceBlockType($type, $block = '', $template = '')
+    public function addItemPriceBlockType($type, $block = '', $template = ''): void
     {
         if ($type) {
             $this->_itemPriceBlockTypes[$type] = [

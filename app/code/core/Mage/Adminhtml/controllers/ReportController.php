@@ -11,7 +11,7 @@
 class Mage_Adminhtml_ReportController extends Mage_Adminhtml_Controller_Action
 {
     #[Maho\Config\Route('/admin/report/_init')]
-    public function _initAction()
+    public function _initAction(): static
     {
         $this->loadLayout()
             ->_addBreadcrumb(Mage::helper('adminhtml')->__('Reports'), Mage::helper('adminhtml')->__('Reports'));

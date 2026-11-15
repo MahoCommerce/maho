@@ -46,7 +46,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
         return $this->_vars;
     }
 
-    public function setVar($key, $value = null)
+    public function setVar($key, $value = null): static
     {
         if (is_array($key) && is_null($value)) {
             $this->_vars = $key;
@@ -61,7 +61,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
         return $this->_action;
     }
 
-    public function setAction(Mage_Dataflow_Model_Convert_Action_Interface $action)
+    public function setAction(Mage_Dataflow_Model_Convert_Action_Interface $action): static
     {
         $this->_action = $action;
         return $this;
@@ -72,7 +72,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
         return $this->_profile;
     }
 
-    public function setProfile(Mage_Dataflow_Model_Convert_Profile_Interface $profile)
+    public function setProfile(Mage_Dataflow_Model_Convert_Profile_Interface $profile): static
     {
         $this->_profile = $profile;
         return $this;
@@ -190,13 +190,13 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
         return $this->_position;
     }
 
-    public function setPosition($position)
+    public function setPosition($position): static
     {
         $this->_position = $position;
         return $this;
     }
 
-    public function setBatchParams($data)
+    public function setBatchParams($data): static
     {
         if (is_array($data)) {
             $this->_batchParams = $data;

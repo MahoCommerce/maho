@@ -160,7 +160,7 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
     /**
      * Register event data during product save process
      */
-    protected function _registerProductEvent(Mage_Index_Model_Event $event)
+    protected function _registerProductEvent(Mage_Index_Model_Event $event): void
     {
         $eventType = $event->getType();
         if ($eventType == Mage_Index_Model_Event::TYPE_SAVE) {
@@ -205,7 +205,7 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
     /**
      * Register event data during category save process
      */
-    protected function _registerCategoryEvent(Mage_Index_Model_Event $event)
+    protected function _registerCategoryEvent(Mage_Index_Model_Event $event): void
     {
         $category = $event->getDataObject();
         /**

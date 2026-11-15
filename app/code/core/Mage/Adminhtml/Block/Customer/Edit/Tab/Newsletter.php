@@ -16,7 +16,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter extends Mage_Adminhtml_B
         $this->setTemplate('customer/tab/newsletter.phtml');
     }
 
-    public function initForm()
+    public function initForm(): static
     {
         $form = new \Maho\Data\Form();
         $form->setHtmlIdPrefix('_newsletter');

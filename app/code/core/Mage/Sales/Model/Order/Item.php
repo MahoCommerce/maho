@@ -496,7 +496,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      *
      * @param Mage_Sales_Model_Order_Item $item
      */
-    public function addChildItem($item)
+    public function addChildItem($item): void
     {
         if ($item instanceof Mage_Sales_Model_Order_Item) {
             $this->_children[] = $item;

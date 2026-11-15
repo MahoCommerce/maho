@@ -14,7 +14,7 @@ class Mage_Core_Model_Observer
      * Cron job method to clean old cache resources
      */
     #[Maho\Config\CronJob('core_clean_cache', configPath: 'system/cache/flush_cron_expr')]
-    public function cleanCache(Mage_Cron_Model_Schedule $schedule)
+    public function cleanCache(Mage_Cron_Model_Schedule $schedule): void
     {
         Mage::app()->getCache()->prune();
         Mage::dispatchEvent('core_clean_cache');

@@ -178,7 +178,7 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
      *
      * To be used in controllers for views data
      */
-    public function explodeStreetAddress()
+    public function explodeStreetAddress(): static
     {
         $streetLines = $this->getStreet();
         foreach ($streetLines as $i => $line) {
@@ -190,7 +190,7 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
     /**
      * To be used when processing _POST
      */
-    public function implodeStreetAddress()
+    public function implodeStreetAddress(): static
     {
         $this->setStreet($this->getData('street'));
         return $this;
@@ -395,7 +395,7 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
     /**
      * Perform basic validation
      */
-    protected function _basicCheck()
+    protected function _basicCheck(): void
     {
         // Validate first name
         if (!Mage::helper('core')->isValidNotBlank($this->getFirstname())) {

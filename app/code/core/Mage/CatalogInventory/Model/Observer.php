@@ -585,7 +585,7 @@ class Mage_CatalogInventory_Model_Observer
      * @param \Maho\Event\Observer $observer
      */
     #[Maho\Config\Observer('sales_model_service_quote_submit_failure', type: 'singleton')]
-    public function revertQuoteInventory($observer)
+    public function revertQuoteInventory($observer): void
     {
         /** @var Mage_Sales_Model_Quote $quote */
         $quote = $observer->getEvent()->getQuote();
@@ -609,7 +609,7 @@ class Mage_CatalogInventory_Model_Observer
      * @param Mage_Sales_Model_Quote_Item $quoteItem
      * @param array $items
      */
-    protected function _addItemToQtyArray($quoteItem, &$items)
+    protected function _addItemToQtyArray($quoteItem, &$items): void
     {
         $productId = $quoteItem->getProductId();
         if (!$productId) {
@@ -727,7 +727,7 @@ class Mage_CatalogInventory_Model_Observer
      * @param \Maho\Event\Observer $observer
      */
     #[Maho\Config\Observer('sales_order_creditmemo_save_after', type: 'singleton')]
-    public function refundOrderInventory($observer)
+    public function refundOrderInventory($observer): void
     {
         /** @var Mage_Sales_Model_Order_Creditmemo $creditmemo */
         $creditmemo = $observer->getEvent()->getCreditmemo();

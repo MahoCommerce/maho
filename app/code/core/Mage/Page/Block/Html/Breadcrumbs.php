@@ -65,7 +65,7 @@ class Mage_Page_Block_Html_Breadcrumbs extends Mage_Core_Block_Template
      * @param array $crumbInfo
      * @param string|false $before
      */
-    public function addCrumbBefore($crumbName, $crumbInfo, $before = false)
+    public function addCrumbBefore($crumbName, $crumbInfo, $before = false): void
     {
         if ($before && isset($this->_crumbs[$before])) {
             $keys   = array_keys($this->_crumbs);
@@ -85,7 +85,7 @@ class Mage_Page_Block_Html_Breadcrumbs extends Mage_Core_Block_Template
     /**
      * @param string $crumbName
      */
-    public function removeCrumb($crumbName)
+    public function removeCrumb($crumbName): void
     {
         if (isset($this->_crumbs[$crumbName])) {
             unset($this->_crumbs[$crumbName]);

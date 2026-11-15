@@ -676,7 +676,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      *
      * @param  $freeMethod
      */
-    protected function _setFreeMethodRequest($freeMethod)
+    protected function _setFreeMethodRequest($freeMethod): void
     {
         $r = $this->_rawRequest;
 

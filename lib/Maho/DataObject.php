@@ -89,7 +89,7 @@ class DataObject implements ArrayAccess, JsonSerializable
         $this->_construct();
     }
 
-    protected function _addFullNames()
+    protected function _addFullNames(): void
     {
         if (empty($this->_syncFieldsMap)) {
             return;

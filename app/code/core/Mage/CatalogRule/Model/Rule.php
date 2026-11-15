@@ -237,7 +237,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @param string $now
      */
-    public function setNow($now)
+    public function setNow($now): void
     {
         $this->_now = $now;
     }
@@ -280,7 +280,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @param array $args
      */
-    public function callbackValidateProduct($args)
+    public function callbackValidateProduct($args): void
     {
         $product = clone $args['product'];
         $product->setData($args['row']);
@@ -315,7 +315,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      * @param int|Mage_Catalog_Model_Product $product
      * @param array|null $websiteIds
      */
-    public function applyToProduct($product, $websiteIds = null)
+    public function applyToProduct($product, $websiteIds = null): void
     {
         if (is_numeric($product)) {
             /** @var Mage_Catalog_Model_Product $product */
@@ -333,7 +333,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @throws Exception
      */
-    public function applyAll()
+    public function applyAll(): void
     {
         // The queue, the cron job and the REST API can start a run at the same time, so a run waits for the other one
         $lock = Mage::getSingleton('core/lock');
@@ -474,7 +474,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @param  int|array $productIds
      */
-    public function setProductsFilter($productIds)
+    public function setProductsFilter($productIds): void
     {
         $this->_productsFilter = $productIds;
     }

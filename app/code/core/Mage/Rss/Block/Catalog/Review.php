@@ -73,7 +73,7 @@ class Mage_Rss_Block_Catalog_Review extends Mage_Rss_Block_Abstract
      *
      * @param array $args
      */
-    public function addReviewItemXmlCallback($args)
+    public function addReviewItemXmlCallback($args): void
     {
         $rssObj = $args['rssObj'];
         $row = $args['row'];

@@ -201,7 +201,7 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
     /**
      * Load group collection and set internal data
      */
-    protected function _loadGroups()
+    protected function _loadGroups(): void
     {
         $this->_groups = [];
         $this->_groupsCount = 0;
@@ -308,7 +308,7 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
     /**
      * Load store collection and set internal data
      */
-    protected function _loadStores()
+    protected function _loadStores(): void
     {
         $this->_stores = [];
         $this->_storesCount = 0;
@@ -329,7 +329,7 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
      *
      * @param array $stores
      */
-    public function setStores($stores)
+    public function setStores($stores): void
     {
         $this->_stores = [];
         $this->_storesCount = 0;

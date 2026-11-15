@@ -37,7 +37,7 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
      * @param string $resourceType
      * @throws Exception
      */
-    protected function _processDownload($resource, $resourceType)
+    protected function _processDownload($resource, $resourceType): void
     {
         $helper = Mage::helper('downloadable/download');
         $helper->setResource($resource, $resourceType);

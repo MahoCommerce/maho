@@ -195,7 +195,7 @@ class Mage_Adminhtml_System_ConfigController extends Mage_Adminhtml_Controller_A
     /**
      *  Custom save logic for section
      */
-    protected function _saveSection()
+    protected function _saveSection(): void
     {
         $method = '_save' . uc_words($this->getRequest()->getParam('section'), '');
         if (method_exists($this, $method)) {

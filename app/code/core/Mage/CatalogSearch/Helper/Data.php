@@ -309,7 +309,7 @@ class Mage_CatalogSearch_Helper_Data extends Mage_Core_Helper_Abstract
      *
      * @param mixed $store
      */
-    public function checkNotes($store = null)
+    public function checkNotes($store = null): void
     {
         if ($this->_isMaxLength) {
             $this->addNoteMessage($this->__('Maximum Search query length is %s. Your query was cut.', $this->getMaxQueryLength()));

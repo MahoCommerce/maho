@@ -50,7 +50,7 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
      *
      * @throws Mage_Core_Exception
      */
-    public function validate()
+    public function validate(): void
     {
         $errorMessages = [];
         $helper = Mage::helper('core');

@@ -271,7 +271,7 @@ class Mage_Core_Model_Resource_Setup
         return true;
     }
 
-    public static function applyAllDataUpdates()
+    public static function applyAllDataUpdates(): void
     {
         if (!self::$_schemaUpdatesChecked) {
             return;

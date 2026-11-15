@@ -1445,7 +1445,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     /**
      * Clean all addresses
      */
-    public function cleanAllAddresses()
+    public function cleanAllAddresses(): void
     {
         $this->_addressesCollection = null;
         $this->_addresses           = null;

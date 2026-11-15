@@ -172,7 +172,7 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
      *
      * @param Mage_Core_Model_Layout_Element|\Maho\Simplexml\Element|null $parent
      */
-    public function generateBlocks($parent = null)
+    public function generateBlocks($parent = null): void
     {
         if (empty($parent)) {
             $parent = $this->getNode();
@@ -347,7 +347,7 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
      * @param \Maho\Simplexml\Element $node
      * @param array $args
      **/
-    protected function _translateLayoutNode($node, &$args)
+    protected function _translateLayoutNode($node, &$args): void
     {
         if (isset($node['translate'])) {
             // Translate value by core module if module attribute was not set

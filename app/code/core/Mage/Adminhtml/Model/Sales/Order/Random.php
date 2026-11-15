@@ -105,7 +105,7 @@ class Mage_Adminhtml_Model_Sales_Order_Random
         return $this->_store;
     }
 
-    public function render()
+    public function render(): static
     {
         $customer = $this->_getCustomer();
         $this->_quote->setStore($this->_getStore())
@@ -137,7 +137,7 @@ class Mage_Adminhtml_Model_Sales_Order_Random
         return date(Mage_Core_Model_Locale::DATETIME_FORMAT, $timestamp);
     }
 
-    public function save()
+    public function save(): static
     {
         $this->_order->setStoreId($this->_getStore()->getId());
         $this->_order->createFromQuoteAddress($this->_quote->getShippingAddress());

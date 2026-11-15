@@ -128,7 +128,7 @@ class Mage_Eav_Model_Config
     /**
      * @throws Exception
      */
-    protected function _initializeStore($storeId = null)
+    protected function _initializeStore($storeId = null): void
     {
         if ($storeId === null) {
             $storeId = $this->_storeId();
@@ -304,7 +304,7 @@ class Mage_Eav_Model_Config
         return true;
     }
 
-    protected function _saveToCache($storeId)
+    protected function _saveToCache($storeId): void
     {
         $cacheData = [
             '_entityTypes' => [],

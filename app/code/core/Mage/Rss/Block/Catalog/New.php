@@ -96,7 +96,7 @@ class Mage_Rss_Block_Catalog_New extends Mage_Rss_Block_Catalog_Abstract
      *
      * @param array $args
      */
-    public function addNewItemXmlCallback($args)
+    public function addNewItemXmlCallback($args): void
     {
         $product = $args['product'];
 

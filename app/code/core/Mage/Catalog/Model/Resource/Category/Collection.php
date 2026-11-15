@@ -210,7 +210,7 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
     /**
      * Load categories product count
      */
-    protected function _loadProductCount()
+    protected function _loadProductCount(): void
     {
         $this->loadProductCount($this->_items, true, true);
     }

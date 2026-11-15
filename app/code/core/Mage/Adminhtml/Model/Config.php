@@ -121,7 +121,7 @@ class Mage_Adminhtml_Model_Config extends \Maho\Simplexml\Config
     /**
      * Init modules configuration
      */
-    protected function _initSectionsAndTabs()
+    protected function _initSectionsAndTabs(): void
     {
         $config = $this->_config;
         Mage::dispatchEvent('adminhtml_init_system_config', ['config' => $config]);

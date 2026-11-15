@@ -112,7 +112,7 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
      * @param int|string $storeId
      * @param string $area
      */
-    public function emulateDesign($storeId, $area = self::DEFAULT_DESIGN_AREA)
+    public function emulateDesign($storeId, $area = self::DEFAULT_DESIGN_AREA): void
     {
         if ($storeId) {
             // save current design settings
@@ -129,7 +129,7 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
     /**
      * Revert to last design config, used before emulation
      */
-    public function revertDesign()
+    public function revertDesign(): void
     {
         if ($this->_emulatedDesignConfig) {
             $this->setDesignConfig($this->_emulatedDesignConfig->getData());

@@ -1920,7 +1920,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      *
      * @param array $rowData
      */
-    protected function _filterRowData(&$rowData)
+    protected function _filterRowData(&$rowData): void
     {
         $rowData = array_filter($rowData, fn($tmpString) => strlen($tmpString ?? ''));
         // Exceptions - for sku - put them back in
@@ -2124,7 +2124,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      * @param int $rowNum
      * @param string|false|null $sku
      */
-    protected function _validate($rowData, $rowNum, $sku)
+    protected function _validate($rowData, $rowNum, $sku): void
     {
         $this->_isProductWebsiteValid($rowData, $rowNum);
         $this->_isProductCategoryValid($rowData, $rowNum);

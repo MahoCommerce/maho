@@ -474,7 +474,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     /**
      * Cancel partial authorizations and flush current split_tender_id record
      */
-    public function cancelPartialAuthorization(Mage_Payment_Model_Info $payment)
+    public function cancelPartialAuthorization(Mage_Payment_Model_Info $payment): void
     {
         if (!$payment->getAdditionalInformation($this->_splitTenderIdKey)) {
             Mage::throwException(Mage::helper('paygate')->__('Invalid split tenderId ID.'));
@@ -1001,7 +1001,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      *
      * @param Mage_Payment_Model_Info $payment
      */
-    protected function _initCardsStorage($payment)
+    protected function _initCardsStorage($payment): void
     {
         $this->_cardsStorage = Mage::getModel('paygate/authorizenet_cards')->setPayment($payment);
     }

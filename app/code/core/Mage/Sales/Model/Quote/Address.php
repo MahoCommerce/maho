@@ -165,7 +165,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     /**
      * Set the required fields
      */
-    protected function _populateBeforeSaveData()
+    protected function _populateBeforeSaveData(): void
     {
         if ($this->getQuote()) {
             $this->_dataSaveAllowed = (bool) $this->getQuote()->getId();

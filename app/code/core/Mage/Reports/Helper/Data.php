@@ -104,7 +104,7 @@ class Mage_Reports_Helper_Data extends Mage_Core_Helper_Abstract
      * @param string $to
      * @param string $periodType
      */
-    public function prepareIntervalsCollection($collection, $from, $to, $periodType = self::REPORT_PERIOD_TYPE_DAY)
+    public function prepareIntervalsCollection($collection, $from, $to, $periodType = self::REPORT_PERIOD_TYPE_DAY): void
     {
         $intervals = $this->getIntervals($from, $to, $periodType);
 

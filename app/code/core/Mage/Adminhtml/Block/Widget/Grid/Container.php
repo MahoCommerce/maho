@@ -94,7 +94,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Container extends Mage_Adminhtml_Block_Wi
         return $this->_backButtonLabel;
     }
 
-    protected function _addBackButton()
+    protected function _addBackButton(): void
     {
         $this->_addButton('back', [
             'label'     => $this->getBackButtonLabel(),

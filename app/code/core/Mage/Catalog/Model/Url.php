@@ -124,7 +124,7 @@ class Mage_Catalog_Model_Url
      *
      * @param \Maho\DataObject|Mage_Catalog_Model_Category $category
      */
-    protected function _addCategoryUrlPath($category)
+    protected function _addCategoryUrlPath($category): void
     {
         if (!($category instanceof \Maho\DataObject) || $category->getUrlPath()) {
             return;

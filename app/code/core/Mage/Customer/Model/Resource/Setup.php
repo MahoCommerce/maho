@@ -36,7 +36,7 @@ class Mage_Customer_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
     /**
      * Add customer attributes to customer forms
      */
-    public function installCustomerForms()
+    public function installCustomerForms(): void
     {
         $customer           = (int) $this->getEntityTypeId('customer');
         $customerAddress    = (int) $this->getEntityTypeId('customer_address');

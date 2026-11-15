@@ -445,7 +445,7 @@ class Mage_Core_Model_Resource
     }
 
     #[Maho\Config\Observer('controller_action_predispatch', area: 'install')]
-    public function checkDbConnection()
+    public function checkDbConnection(): void
     {
         if (!$this->getConnection('core_read')) {
             //Mage::app()->getResponse()->setRedirect(Mage::getUrl('install'));

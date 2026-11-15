@@ -14,7 +14,7 @@ class Mage_GoogleAnalytics_Model_Observer
      * Add order information into GA block to render on checkout success pages
      */
     #[Maho\Config\Observer('checkout_onepage_controller_success_action', area: 'frontend')]
-    public function setGoogleAnalyticsOnOrderSuccessPageView(\Maho\Event\Observer $observer)
+    public function setGoogleAnalyticsOnOrderSuccessPageView(\Maho\Event\Observer $observer): void
     {
         $orderIds = $observer->getEvent()->getOrderIds();
         if (empty($orderIds) || !is_array($orderIds)) {

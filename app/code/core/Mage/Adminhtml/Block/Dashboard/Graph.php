@@ -83,7 +83,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
      *
      * @param mixed $rows
      */
-    public function setDataRows($rows)
+    public function setDataRows($rows): void
     {
         $this->_dataRows = (array) $rows;
     }
@@ -93,7 +93,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
      *
      * @param string $seriesId
      */
-    public function addSeries($seriesId, array $options)
+    public function addSeries($seriesId, array $options): void
     {
         $this->_allSeries[$seriesId] = $options;
     }
@@ -239,7 +239,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
      * @param string $axis
      * @param array $labels
      */
-    public function setAxisLabels($axis, $labels)
+    public function setAxisLabels($axis, $labels): void
     {
         $this->_axisLabels[$axis] = $labels;
     }
@@ -249,7 +249,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
      *
      * @param string $htmlId
      */
-    public function setHtmlId($htmlId)
+    public function setHtmlId($htmlId): void
     {
         $this->_htmlId = $htmlId;
     }

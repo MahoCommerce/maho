@@ -451,7 +451,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
      *
      * @param Exception $exception
      */
-    protected function _logException($exception)
+    protected function _logException($exception): void
     {
         Mage::logException($exception);
     }

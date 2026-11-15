@@ -371,7 +371,7 @@ class Dbp extends Tree
      * @param bool $withChildren
      * @param int $level
      */
-    protected function _addChildNodes($children, $path, $parentNode, $withChildren = false, $level = 0)
+    protected function _addChildNodes($children, $path, $parentNode, $withChildren = false, $level = 0): void
     {
         if (isset($children[$path])) {
             foreach ($children[$path] as $child) {

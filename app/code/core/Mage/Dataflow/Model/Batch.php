@@ -77,7 +77,7 @@ class Mage_Dataflow_Model_Batch extends Mage_Core_Model_Abstract
      *
      * @param array $row
      */
-    public function parseFieldList($row)
+    public function parseFieldList($row): void
     {
         foreach (array_keys($row) as $fieldName) {
             if (!in_array($fieldName, $this->_fieldList)) {
@@ -150,7 +150,7 @@ class Mage_Dataflow_Model_Batch extends Mage_Core_Model_Abstract
     /**
      * Run finish actions for Adapter
      */
-    public function beforeFinish()
+    public function beforeFinish(): void
     {
         if ($this->getAdapter()) {
             $adapter = Mage::getModel($this->getAdapter());

@@ -200,7 +200,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
      *
      * @param string $fileName
      */
-    public function placeholder($fileName)
+    public function placeholder($fileName): void
     {
         $this->placeholder = $fileName;
     }

@@ -304,7 +304,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
      * @param string $internalValue Datetime value in internal format
      * @throws Mage_Core_Exception
      */
-    protected function _setInternalInRequest($internalValue)
+    protected function _setInternalInRequest($internalValue): void
     {
         $requestOptions = $this->getRequest()->getOptions();
         $requestOptions[$this->getOption()->getId()] ??= [];

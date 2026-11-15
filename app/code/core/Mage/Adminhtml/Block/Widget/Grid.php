@@ -326,7 +326,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      *
      * @param Mage_Core_Model_Resource_Db_Collection_Abstract|\Maho\Data\Collection\Db $collection
      */
-    public function setCollection($collection)
+    public function setCollection($collection): void
     {
         $this->_collection = $collection;
     }
@@ -678,7 +678,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      *
      * @param string $value
      */
-    protected function _decodeFilter(&$value)
+    protected function _decodeFilter(&$value): void
     {
         /** @var Mage_Adminhtml_Helper_Data $helper */
         $helper = $this->helper('adminhtml');
@@ -942,7 +942,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      *
      * @param bool $visible
      */
-    public function setHeadersVisibility($visible = true)
+    public function setHeadersVisibility($visible = true): void
     {
         $this->_headersVisibility = $visible;
     }
@@ -962,7 +962,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      *
      * @param bool $visible
      */
-    public function setPagerVisibility($visible = true)
+    public function setPagerVisibility($visible = true): void
     {
         $this->_pagerVisibility = $visible;
     }
@@ -982,7 +982,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      *
      * @param bool $visible
      */
-    public function setFilterVisibility($visible = true)
+    public function setFilterVisibility($visible = true): void
     {
         $this->_filterVisibility = $visible;
     }
@@ -1002,7 +1002,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      *
      * @param bool $visible
      */
-    public function setMessageBlockVisibility($visible = true)
+    public function setMessageBlockVisibility($visible = true): void
     {
         $this->_messageBlockVisibility = $visible;
     }
@@ -1205,7 +1205,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      * @param string $callback
      * @param array $args additional arguments for callback method
      */
-    public function _exportIterateCollection($callback, array $args)
+    public function _exportIterateCollection($callback, array $args): void
     {
         $originalCollection = $this->getCollection();
         $count = null;
@@ -1238,7 +1238,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Write item data to csv export file
      */
-    protected function _exportCsvItem(\Maho\DataObject $item, \Maho\Io\File $adapter)
+    protected function _exportCsvItem(\Maho\DataObject $item, \Maho\Io\File $adapter): void
     {
         $row = [];
         foreach ($this->_columns as $column) {
@@ -1408,7 +1408,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      *
      * @param \Maho\Convert\Parser\Xml\Excel $parser
      */
-    protected function _exportExcelItem(\Maho\DataObject $item, \Maho\Io\File $adapter, $parser = null)
+    protected function _exportExcelItem(\Maho\DataObject $item, \Maho\Io\File $adapter, $parser = null): void
     {
         $parser ??= new \Maho\Convert\Parser\Xml\Excel();
 
@@ -1755,7 +1755,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      *
      * @param bool $count
      */
-    public function setCountTotals($count = true)
+    public function setCountTotals($count = true): void
     {
         $this->_countTotals = $count;
     }
@@ -1773,7 +1773,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Set totals
      */
-    public function setTotals(\Maho\DataObject $totals)
+    public function setTotals(\Maho\DataObject $totals): void
     {
         $this->_varTotals = $totals;
     }

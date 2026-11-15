@@ -438,7 +438,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      *                                    'src_name'=>'filename',
      *                                    'dst_name'=>'filename2'])
      */
-    public function addFileQueue($queueOptions)
+    public function addFileQueue($queueOptions): void
     {
         $this->_fileQueue[] = $queueOptions;
     }
@@ -600,7 +600,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      *
      * @param Mage_Catalog_Model_Product $product
      */
-    protected function _removeNotApplicableAttributes($product = null)
+    protected function _removeNotApplicableAttributes($product = null): void
     {
         $product    = $this->getProduct($product);
         $eavConfig  = Mage::getSingleton('eav/config');

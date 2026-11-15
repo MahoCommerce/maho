@@ -569,7 +569,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
      *
      * @param mixed $debugData
      */
-    public function debugData($debugData)
+    public function debugData($debugData): void
     {
         $this->_debug($debugData);
     }

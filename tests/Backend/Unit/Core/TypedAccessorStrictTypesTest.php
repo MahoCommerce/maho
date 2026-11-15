@@ -32,6 +32,8 @@ function holdsTypedAccessor(string $code): bool
     }
 
     foreach ($matches[1] as $body) {
+        // The window can run past a short method, so it stops at the next method declaration
+        $body = preg_split('/(?:public|protected|private)\s+(?:static\s+)?function\s/', $body)[0];
         if (str_contains($body, '->getData(') || str_contains($body, '->setData(')) {
             return true;
         }

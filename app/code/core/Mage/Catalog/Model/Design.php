@@ -19,7 +19,7 @@ class Mage_Catalog_Model_Design extends Mage_Core_Model_Abstract
      * @param string $package
      * @param string $theme
      */
-    protected function _apply($package, $theme)
+    protected function _apply($package, $theme): void
     {
         Mage::getSingleton('core/design_package')
             ->setPackageName($package)

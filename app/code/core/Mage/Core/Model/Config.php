@@ -1765,7 +1765,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      *
      * @param string $area
      */
-    protected function _makeEventsLowerCase($area, \Maho\Simplexml\Config $mergeModel)
+    protected function _makeEventsLowerCase($area, \Maho\Simplexml\Config $mergeModel): void
     {
         $events = $mergeModel->getNode($area . '/' . Mage_Core_Model_App_Area::PART_EVENTS);
         if ($events !== false) {

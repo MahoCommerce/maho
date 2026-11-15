@@ -63,7 +63,7 @@ class Mage_Adminhtml_Block_Sales_Reorder_Renderer_Action extends Mage_Adminhtml_
      *
      * @param array $actionArray
      */
-    public function addToActions($actionArray)
+    public function addToActions($actionArray): void
     {
         $this->_actions[] = $actionArray;
     }

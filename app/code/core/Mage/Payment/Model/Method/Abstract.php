@@ -777,7 +777,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
      *
      * @param mixed $debugData
      */
-    public function debugData($debugData)
+    public function debugData($debugData): void
     {
         $this->_debug($debugData);
     }

@@ -126,7 +126,7 @@ class Mage_Catalog_Block_Product_List_Upsell extends Mage_Catalog_Block_Product_
         return $this->_columnCount;
     }
 
-    public function resetItemsIterator()
+    public function resetItemsIterator(): void
     {
         $this->getItems();
         reset($this->_items);

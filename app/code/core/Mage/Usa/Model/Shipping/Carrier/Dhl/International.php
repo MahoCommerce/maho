@@ -221,7 +221,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      *
      * @param string $freeMethod
      */
-    protected function _setFreeMethodRequest($freeMethod)
+    protected function _setFreeMethodRequest($freeMethod): void
     {
         $rawRequest = $this->_rawRequest;
 
@@ -641,7 +641,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Make pieces
      */
-    protected function _makePieces(SimpleXMLElement $nodeBkgDetails)
+    protected function _makePieces(SimpleXMLElement $nodeBkgDetails): void
     {
         $divideOrderWeight = (string) $this->getConfigData('divide_order_weight');
         $nodePieces = $nodeBkgDetails->addChild('Pieces', '', '');
@@ -745,7 +745,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      *
      * @param SimpleXMLElement $nodePiece
      */
-    protected function _addDimension($nodePiece)
+    protected function _addDimension($nodePiece): void
     {
         $sizeChecker = (string) $this->getConfigData('size');
 
@@ -1176,7 +1176,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Map request to shipment
      */
-    protected function _mapRequestToShipment(\Maho\DataObject $request)
+    protected function _mapRequestToShipment(\Maho\DataObject $request): void
     {
         $request->setOrigCountryId($request->getShipperAddressCountryCode());
         $this->_rawRequest = $request;
@@ -1412,7 +1412,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      * @param Mage_Shipping_Model_Rate_Request|\Maho\DataObject $rawRequest
      * @param string $originRegion
      */
-    protected function _shipmentDetails($xml, $rawRequest, $originRegion = '')
+    protected function _shipmentDetails($xml, $rawRequest, $originRegion = ''): void
     {
         $nodeShipmentDetails = $xml->addChild('ShipmentDetails', '', '');
         $nodeShipmentDetails->addChild('NumberOfPieces', (string) count($rawRequest->getPackages()));
@@ -1611,7 +1611,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      * @param array $trackings
      * @param string $response
      */
-    protected function _parseXmlTrackingResponse($trackings, $response)
+    protected function _parseXmlTrackingResponse($trackings, $response): void
     {
         $errorTitle = Mage::helper('usa')->__('Unable to retrieve tracking');
         $resultArr = [];

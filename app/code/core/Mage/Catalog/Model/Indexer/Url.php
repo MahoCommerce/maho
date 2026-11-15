@@ -175,7 +175,7 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
     /**
      * Register event data during product save process
      */
-    protected function _registerProductEvent(Mage_Index_Model_Event $event)
+    protected function _registerProductEvent(Mage_Index_Model_Event $event): void
     {
         if ($event->getType() === Mage_Index_Model_Event::TYPE_MASS_ACTION) {
             $event->addNewData('rewrite_product_ids', $event->getDataObject()->getProductIds());
@@ -194,7 +194,7 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
     /**
      * Register event data during category save process
      */
-    protected function _registerCategoryEvent(Mage_Index_Model_Event $event)
+    protected function _registerCategoryEvent(Mage_Index_Model_Event $event): void
     {
         $category = $event->getDataObject();
         if (!$category->getInitialSetupFlag() && $category->getLevel() > 1) {

@@ -271,7 +271,7 @@ class Mage_Adminhtml_Block_Report_Grid_Abstract extends Mage_Adminhtml_Block_Wid
         return parent::getSubTotals();
     }
 
-    public function setStoreIds($storeIds)
+    public function setStoreIds($storeIds): static
     {
         $this->_storeIds = $storeIds;
         return $this;

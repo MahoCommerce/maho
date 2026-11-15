@@ -288,7 +288,7 @@ class Mage_CatalogRule_Model_Observer
     /**
      * Clean out calculated catalog rule prices for products
      */
-    public function flushPriceCache()
+    public function flushPriceCache(): void
     {
         $this->_rulePrices = [];
     }
@@ -366,7 +366,7 @@ class Mage_CatalogRule_Model_Observer
      *
      * @param string $attributeCode
      */
-    protected function _removeAttributeFromConditions($combine, $attributeCode)
+    protected function _removeAttributeFromConditions($combine, $attributeCode): void
     {
         $conditions = $combine->getConditions();
         foreach ($conditions as $conditionId => $condition) {
@@ -463,7 +463,7 @@ class Mage_CatalogRule_Model_Observer
      * Create catalog rule relations for imported products
      */
     #[Maho\Config\Observer('catalog_product_import_finish_before', area: 'adminhtml', type: 'singleton')]
-    public function createCatalogRulesRelations(\Maho\Event\Observer $observer)
+    public function createCatalogRulesRelations(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_ImportExport_Model_Import_Entity_Product $adapter */
         $adapter = $observer->getEvent()->getAdapter();
@@ -486,7 +486,7 @@ class Mage_CatalogRule_Model_Observer
     /**
      * Runs Catalog Product Price Reindex
      */
-    public function runCatalogProductPriceReindex(\Maho\Event\Observer $observer)
+    public function runCatalogProductPriceReindex(\Maho\Event\Observer $observer): void
     {
         $indexProcess = Mage::getSingleton('index/indexer')->getProcessByCode('catalog_product_price');
         if ($indexProcess) {

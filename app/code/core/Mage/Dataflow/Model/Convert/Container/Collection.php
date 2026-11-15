@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -13,7 +14,7 @@ class Mage_Dataflow_Model_Convert_Container_Collection
 
     protected $_defaultClass = 'Mage_Dataflow_Model_Convert_Container_Generic';
 
-    public function setDefaultClass($className)
+    public function setDefaultClass($className): static
     {
         $this->_defaultClass = $className;
         return $this;

@@ -66,7 +66,7 @@ class Collection
         return $profile;
     }
 
-    public function run($profile)
+    public function run($profile): static
     {
         $this->getProfile($profile)->run();
         return $this;
@@ -77,7 +77,7 @@ class Collection
         return $type;
     }
 
-    public function importXml($xml)
+    public function importXml($xml): static
     {
         if (is_string($xml)) {
             $xml = simplexml_load_string($xml, $this->_simplexmlDefaultClass);
@@ -101,7 +101,7 @@ class Collection
         return $this;
     }
 
-    public function importProfileXml($name)
+    public function importProfileXml($name): static
     {
         if (!$this->_xml) {
             return $this;

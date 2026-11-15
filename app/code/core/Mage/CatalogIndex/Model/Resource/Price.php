@@ -34,7 +34,7 @@ class Mage_CatalogIndex_Model_Resource_Price extends Mage_CatalogIndex_Model_Res
     /**
      * @param float $rate
      */
-    public function setRate($rate)
+    public function setRate($rate): void
     {
         $this->_rate = $rate;
     }
@@ -53,7 +53,7 @@ class Mage_CatalogIndex_Model_Resource_Price extends Mage_CatalogIndex_Model_Res
     /**
      * @param int $customerGroupId
      */
-    public function setCustomerGroupId($customerGroupId)
+    public function setCustomerGroupId($customerGroupId): void
     {
         $this->_customerGroupId = $customerGroupId;
     }

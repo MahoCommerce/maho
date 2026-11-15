@@ -117,7 +117,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
      * @param string $mainTable
      * @param string $idFieldName
      */
-    protected function _init($mainTable, $idFieldName)
+    protected function _init($mainTable, $idFieldName): void
     {
         $this->_setMainTable($mainTable, $idFieldName);
     }
@@ -502,7 +502,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Un-serialize serializable object fields
      */
-    public function unserializeFields(Mage_Core_Model_Abstract $object)
+    public function unserializeFields(Mage_Core_Model_Abstract $object): void
     {
         foreach ($this->_serializableFields as $field => $parameters) {
             [, $unserializeDefault] = $parameters;
@@ -652,7 +652,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * After load
      */
-    public function afterLoad(Mage_Core_Model_Abstract $object)
+    public function afterLoad(Mage_Core_Model_Abstract $object): void
     {
         $this->_afterLoad($object);
     }
@@ -710,7 +710,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Serialize serializable fields of the object
      */
-    protected function _serializeFields(Mage_Core_Model_Abstract $object)
+    protected function _serializeFields(Mage_Core_Model_Abstract $object): void
     {
         foreach ($this->_serializableFields as $field => $parameters) {
             [$serializeDefault] = $parameters;

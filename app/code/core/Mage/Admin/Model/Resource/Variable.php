@@ -18,7 +18,7 @@ class Mage_Admin_Model_Resource_Variable extends Mage_Core_Model_Resource_Db_Abs
         $this->_init('admin/permission_variable', 'variable_id');
     }
 
-    protected function _generateCache()
+    protected function _generateCache(): void
     {
         /** @var Mage_Admin_Model_Resource_Variable_Collection $collection */
         $collection = Mage::getResourceModel('admin/variable_collection');

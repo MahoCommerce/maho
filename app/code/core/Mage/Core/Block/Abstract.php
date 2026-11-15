@@ -766,7 +766,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      *
      * @param string $groupName
      */
-    public function addToChildGroup($groupName, Mage_Core_Block_Abstract $child)
+    public function addToChildGroup($groupName, Mage_Core_Block_Abstract $child): void
     {
         $this->_childGroups[$groupName] ??= [];
         if (!in_array($child->getBlockAlias(), $this->_childGroups[$groupName])) {

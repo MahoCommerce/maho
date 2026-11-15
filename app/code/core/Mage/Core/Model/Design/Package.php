@@ -650,7 +650,7 @@ class Mage_Core_Model_Design_Package
      *
      * @param string $file
      */
-    protected function _setCallbackFileDir($file)
+    protected function _setCallbackFileDir($file): void
     {
         $file = str_replace(Mage::getBaseDir() . DS, '', $file);
         $this->_callbackFileDir = dirname($file);

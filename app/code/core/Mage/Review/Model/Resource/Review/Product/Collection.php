@@ -410,7 +410,7 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
     /**
      * Add store data
      */
-    protected function _addStoreData()
+    protected function _addStoreData(): void
     {
         $adapter = $this->getConnection();
         //$this->_getConditionSql('rdt.customer_id', array('null' => null));

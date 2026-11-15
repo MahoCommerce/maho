@@ -87,7 +87,7 @@ class Mage_Authorizenet_Helper_Data extends Mage_Core_Helper_Abstract
      * Update all child and parent order's edit increment numbers.
      * Needed for Admin area.
      */
-    public function updateOrderEditIncrements(Mage_Sales_Model_Order $order)
+    public function updateOrderEditIncrements(Mage_Sales_Model_Order $order): void
     {
         if ($order->getId() && $order->getOriginalIncrementId()) {
             $collection = $order->getCollection();
