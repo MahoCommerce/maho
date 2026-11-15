@@ -60,7 +60,7 @@ class Mage_Shipping_Model_Tracking_Result
     /**
      * Return all trackings in the result
      */
-    public function getAllTrackings()
+    public function getAllTrackings(): array
     {
         return $this->_trackings;
     }

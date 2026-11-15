@@ -170,7 +170,7 @@ class Mage_Dataflow_Model_Convert_Parser_Xml_Excel extends Mage_Dataflow_Model_C
         return $xmlString;
     }
 
-    protected function _saveParsedRow($xmlString): static
+    protected function _saveParsedRow(string $xmlString): static
     {
         $xml = '<' . '?xml version="1.0"?' . '><' . '?mso-application progid="Excel.Sheet"?'
             . '><Workbook'

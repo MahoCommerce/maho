@@ -10,7 +10,7 @@
 
 class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert_Parser_Abstract
 {
-    protected $_fields;
+    protected ?array $_fields = null;
 
     protected array $_mapfields = [];
 
@@ -114,7 +114,7 @@ class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert
         return $this;
     }
 
-    public function parseRow($i, $line)
+    public function parseRow(int $i, array $line): array|false|null
     {
         if (count($line) === 1) {
             return false;
@@ -123,7 +123,7 @@ class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert
         if ($i == 0) {
             if ($this->getVar('fieldnames')) {
                 $this->_fields = $line;
-                return;
+                return null;
             }
             foreach ($line as $j => $f) {
                 $this->_fields[$j] = $this->_mapfields[$j];

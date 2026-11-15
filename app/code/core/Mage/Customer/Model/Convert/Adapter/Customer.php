@@ -19,12 +19,12 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
      */
     protected $_customerModel;
 
-    protected $_stores;
+    protected ?array $_stores = null;
     protected array $_attributes = [];
     protected ?array $_customerGroups = null;
 
-    protected $_billingAddressModel;
-    protected $_shippingAddressModel;
+    protected string|false|null $_billingAddressModel = null;
+    protected string|false|null $_shippingAddressModel = null;
 
     protected array $_requiredFields = [];
 
@@ -49,7 +49,7 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
     protected array $_addressFields = [];
 
     protected ?array $_regions = null;
-    protected $_websites;
+    protected ?array $_websites = null;
 
     protected $_customer = null;
     protected $_address = null;

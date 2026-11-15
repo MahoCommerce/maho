@@ -259,12 +259,8 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Sets applied weee taxes
-     *
-     * @param Mage_Sales_Model_Quote_Item_Abstract $item
-     * @param array                                $value
-     * @return $this
      */
-    public function setApplied($item, $value)
+    public function setApplied(\Maho\DataObject $item, array $value): static
     {
         $item->setWeeeTaxApplied(Mage::helper('core')->jsonEncode($value));
         return $this;
@@ -454,10 +450,8 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Set the store for the current quote
-     *
-     * @param Mage_Core_Model_Store $store
      */
-    public function setStore($store)
+    public function setStore(Mage_Core_Model_Store $store): void
     {
         $this->_store = $store;
     }
@@ -505,13 +499,8 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Set a value to a specific property searching FPT by title for the Item
-     *
-     * @param Mage_Core_Model_Abstract $item
-     * @param string $title
-     * @param string $property
-     * @param string $value
      */
-    public function setWeeeTaxesAppliedProperty($item, $title, $property, $value): void
+    public function setWeeeTaxesAppliedProperty(\Maho\DataObject $item, ?string $title, string $property, mixed $value): void
     {
         $weeeTaxAppliedAmounts = $this->getApplied($item);
         foreach ($weeeTaxAppliedAmounts as &$weeeTaxAppliedAmount) {

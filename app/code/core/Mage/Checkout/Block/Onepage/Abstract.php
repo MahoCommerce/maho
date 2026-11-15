@@ -15,11 +15,11 @@ declare(strict_types=1);
  */
 abstract class Mage_Checkout_Block_Onepage_Abstract extends Mage_Core_Block_Template
 {
-    protected $_customer;
-    protected $_checkout;
-    protected $_quote;
-    protected $_countryCollection;
-    protected $_regionCollection;
+    protected ?Mage_Customer_Model_Customer $_customer = null;
+    protected ?Mage_Checkout_Model_Session $_checkout = null;
+    protected ?Mage_Sales_Model_Quote $_quote = null;
+    protected ?Mage_Directory_Model_Resource_Country_Collection $_countryCollection = null;
+    protected ?Mage_Directory_Model_Resource_Region_Collection $_regionCollection = null;
     protected $_addressesCollection;
 
     /**

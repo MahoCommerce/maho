@@ -985,20 +985,13 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
         return $this;
     }
 
-    /**
-     * @param Mage_Sales_Model_Quote_Item_Abstract $item
-     * @param \Maho\DataObject $taxRateRequest
-     * @param array $taxGroups
-     * @param array $itemTaxGroups
-     * @param bool $catalogPriceInclTax
-     */
     protected function _totalBaseProcessItemTax(
-        $item,
-        $taxRateRequest,
-        &$taxGroups,
-        &$itemTaxGroups,
-        $catalogPriceInclTax,
-    ) {
+        Mage_Sales_Model_Quote_Item_Abstract $item,
+        \Maho\DataObject $taxRateRequest,
+        array &$taxGroups,
+        array &$itemTaxGroups,
+        bool $catalogPriceInclTax,
+    ): void {
         $taxRateRequest->setProductClassId($item->getProduct()->getTaxClassId());
         $rate = $this->_calculator->getRate($taxRateRequest);
 

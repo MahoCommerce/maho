@@ -149,8 +149,8 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     protected $_creditmemos;
 
     protected array $_relatedObjects  = [];
-    protected $_orderCurrency   = null;
-    protected $_baseCurrency    = null;
+    protected ?Mage_Directory_Model_Currency $_orderCurrency = null;
+    protected ?Mage_Directory_Model_Currency $_baseCurrency = null;
 
     /**
      * Array of action flags for canUnhold, canEdit, etc.

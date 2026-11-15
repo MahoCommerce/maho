@@ -173,11 +173,8 @@ class Mage_Paygate_Model_Authorizenet_Cards
     }
     /**
      * Return total for cards data fields
-     *
-     * $param string $key
-     * @return float
      */
-    public function _getAmount($key)
+    public function _getAmount(string $key): float
     {
         $amount = 0;
         foreach ($this->_cards as $card) {

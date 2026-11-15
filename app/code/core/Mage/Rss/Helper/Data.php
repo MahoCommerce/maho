@@ -22,9 +22,9 @@ class Mage_Rss_Helper_Data extends Mage_Core_Helper_Abstract
     #[\Override]
     protected $_moduleName = 'Mage_Rss';
 
-    protected $_rssSession;
+    protected Mage_Rss_Model_Session $_rssSession;
 
-    protected $_adminSession;
+    protected Mage_Admin_Model_Session $_adminSession;
 
     public function __construct(array $params = [])
     {

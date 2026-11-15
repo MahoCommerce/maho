@@ -42,7 +42,7 @@ class Mage_ImportExport_Model_Import_Adapter_Csv extends Mage_ImportExport_Model
      * Close file handler
      */
     #[\Override]
-    public function destruct()
+    public function destruct(): void
     {
         if (is_resource($this->_fileHandler)) {
             fclose($this->_fileHandler);

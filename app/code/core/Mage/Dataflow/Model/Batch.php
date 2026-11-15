@@ -41,17 +41,13 @@ class Mage_Dataflow_Model_Batch extends Mage_Core_Model_Abstract
 
     /**
      * Dataflow batch export model
-     *
-     * @var Mage_Dataflow_Model_Batch_Export|null
      */
-    protected $_batchExport;
+    protected string|false|null $_batchExport = null;
 
     /**
      * Dataflow batch import model
-     *
-     * @var Mage_Dataflow_Model_Batch_Import|null
      */
-    protected $_batchImport;
+    protected string|false|null $_batchImport = null;
 
     /**
      * Init model

@@ -21,13 +21,13 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
      */
     protected $_collections;
 
-    protected $_customerModel;
-    protected $_customerAddressModel;
-    protected $_newsletterModel;
-    protected $_store;
-    protected $_storeId;
+    protected string|false|null $_customerModel = null;
+    protected string|false|null $_customerAddressModel = null;
+    protected string|false|null $_newsletterModel = null;
+    protected ?Mage_Core_Model_Store $_store = null;
+    protected ?int $_storeId = null;
 
-    protected $_stores;
+    protected ?array $_stores = null;
 
     /**
      * Website collection array

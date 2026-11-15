@@ -232,7 +232,7 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
     /**
      * Return 2 letter state code if available, otherwise full region name
      */
-    public function getRegionCode()
+    public function getRegionCode(): ?string
     {
         $regionId = $this->getData('region_id');
         $region   = $this->getData('region');

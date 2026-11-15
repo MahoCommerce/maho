@@ -10,12 +10,12 @@
 
 abstract class Mage_Checkout_Block_Cart_Abstract extends Mage_Core_Block_Template
 {
-    protected $_customer = null;
-    protected $_checkout = null;
-    protected $_quote    = null;
+    protected ?Mage_Customer_Model_Customer $_customer = null;
+    protected ?Mage_Checkout_Model_Session $_checkout = null;
+    protected ?Mage_Sales_Model_Quote $_quote = null;
 
-    protected $_totals;
-    protected $_itemRenders = [];
+    protected ?array $_totals = null;
+    protected array $_itemRenders = [];
 
     public function __construct()
     {

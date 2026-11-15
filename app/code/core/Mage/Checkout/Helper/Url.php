@@ -38,7 +38,7 @@ class Mage_Checkout_Helper_Url extends Mage_Core_Helper_Url
     /**
      * One Page (OP) checkout urls
      */
-    public function getOPCheckoutUrl()
+    public function getOPCheckoutUrl(): string
     {
         return $this->_getUrl('checkout/onepage');
     }

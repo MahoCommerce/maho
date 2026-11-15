@@ -25,7 +25,7 @@ class Mage_Sales_Model_Order_Creditmemo_Item extends Mage_Core_Model_Abstract
     #[\Override]
     protected $_eventObject = 'creditmemo_item';
     protected ?\Mage_Sales_Model_Order_Creditmemo $_creditmemo = null;
-    protected $_orderItem = null;
+    protected ?Mage_Sales_Model_Order_Item $_orderItem = null;
 
     #[\Override]
     protected function _construct()

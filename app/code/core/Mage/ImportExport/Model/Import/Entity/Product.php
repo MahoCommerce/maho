@@ -1664,7 +1664,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     /**
      * Returns an object for upload a media files
      */
-    protected function _getUploader()
+    protected function _getUploader(): Mage_ImportExport_Model_Import_Uploader
     {
         if (is_null($this->_fileUploader)) {
             $this->_fileUploader    = new Mage_ImportExport_Model_Import_Uploader();
