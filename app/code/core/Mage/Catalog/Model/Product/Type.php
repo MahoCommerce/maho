@@ -30,12 +30,8 @@ class Mage_Catalog_Model_Product_Type
 
     /**
      * Product type instance factory
-     *
-     * @param \Maho\DataObject|Mage_Catalog_Model_Product $product
-     * @param bool $singleton
-     * @return false|Mage_Core_Model_Abstract
      */
-    public static function factory($product, $singleton = false)
+    public static function factory(\Maho\DataObject $product, bool $singleton = false): Mage_Catalog_Model_Product_Type_Abstract
     {
         $types = self::getTypes();
         $typeId = (string) $product->getTypeId();
@@ -47,10 +43,11 @@ class Mage_Catalog_Model_Product_Type
             $typeId = self::DEFAULT_TYPE;
         }
 
-        if ($singleton === true) {
-            $typeModel = Mage::getSingleton($typeModelName);
-        } else {
-            $typeModel = Mage::getModel($typeModelName);
+        $typeModel = $singleton ? Mage::getSingleton($typeModelName) : Mage::getModel($typeModelName);
+        if (!$typeModel instanceof Mage_Catalog_Model_Product_Type_Abstract) {
+            throw new \UnexpectedValueException("The model {$typeModelName} of the product type {$typeId} must extend Mage_Catalog_Model_Product_Type_Abstract.");
+        }
+        if (!$singleton) {
             $typeModel->setProduct($product);
         }
         $typeModel->setConfig($types[$typeId]);
