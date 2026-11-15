@@ -11,8 +11,8 @@
 class Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput extends Mage_Adminhtml_Block_System_Config_Form_Fieldset
 {
     protected ?\Maho\DataObject $_dummyElement = null;
-    protected $_fieldRenderer;
-    protected $_values;
+    protected ?Mage_Adminhtml_Block_System_Config_Form_Field $_fieldRenderer = null;
+    protected ?array $_values = null;
 
     #[\Override]
     public function render(\Maho\Data\Form\Element\AbstractElement $element)
@@ -41,7 +41,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput ext
         return $html;
     }
 
-    protected function _getDummyElement()
+    protected function _getDummyElement(): \Maho\DataObject
     {
         if (empty($this->_dummyElement)) {
             $this->_dummyElement = new \Maho\DataObject(['show_in_default' => 1, 'show_in_website' => 1]);
@@ -49,7 +49,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput ext
         return $this->_dummyElement;
     }
 
-    protected function _getFieldRenderer()
+    protected function _getFieldRenderer(): Mage_Adminhtml_Block_System_Config_Form_Field
     {
         if (empty($this->_fieldRenderer)) {
             $this->_fieldRenderer = Mage::getBlockSingleton('adminhtml/system_config_form_field');
@@ -57,7 +57,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput ext
         return $this->_fieldRenderer;
     }
 
-    protected function _getValues()
+    protected function _getValues(): array
     {
         if (empty($this->_values)) {
             $this->_values = [
@@ -68,7 +68,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput ext
         return $this->_values;
     }
 
-    protected function _getFieldHtml($fieldset, $moduleName)
+    protected function _getFieldHtml(\Maho\Data\Form\Element\AbstractElement $fieldset, string $moduleName): string
     {
         $configData = $this->getConfigData();
         $path = 'advanced/modules_disable_output/' . $moduleName; //TODO: move as property of form

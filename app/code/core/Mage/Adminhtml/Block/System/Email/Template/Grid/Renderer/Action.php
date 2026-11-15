@@ -26,12 +26,12 @@ class Mage_Adminhtml_Block_System_Email_Template_Grid_Renderer_Action extends Ma
         return parent::render($row);
     }
 
-    protected function _getEscapedValue($value)
+    protected function _getEscapedValue(string $value): string
     {
         return addcslashes(htmlspecialchars($value), '\\\'');
     }
 
-    protected function _actionsToHtml(array $actions)
+    protected function _actionsToHtml(array $actions): string
     {
         $html = [];
         $attributesObject = new \Maho\DataObject();

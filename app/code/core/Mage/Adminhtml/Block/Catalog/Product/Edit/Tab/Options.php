@@ -37,12 +37,12 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options extends Mage_Adminht
         return parent::_prepareLayout();
     }
 
-    public function getAddButtonHtml()
+    public function getAddButtonHtml(): string
     {
         return $this->getChildHtml('add_button');
     }
 
-    public function getOptionsBoxHtml()
+    public function getOptionsBoxHtml(): string
     {
         return $this->getChildHtml('options_box');
     }

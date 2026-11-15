@@ -61,7 +61,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Settings extends Mage_Adminh
         return $this;
     }
 
-    public function getContinueUrl()
+    public function getContinueUrl(): string
     {
         return $this->getUrl('*/*/new', [
             '_current'  => true,
