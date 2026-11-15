@@ -24,9 +24,9 @@ class Mage_Catalog_Model_Product_Type
     public const DEFAULT_PRICE_MODEL   = 'catalog/product_type_price';
 
     protected static $_types;
-    protected static $_compositeTypes;
+    protected static ?array $_compositeTypes = null;
     protected static $_priceModels;
-    protected static $_typesPriority;
+    protected static ?array $_typesPriority = null;
 
     /**
      * Product type instance factory

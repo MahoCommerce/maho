@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Price extends Mage_Adminh
     /**
      * Currency objects cache
      */
-    protected static $_currencies = [];
+    protected static array $_currencies = [];
 
     /**
      * Renders grid column

@@ -13,17 +13,17 @@ class Mage_Adminhtml_Block_Report_Filter_Form extends Mage_Adminhtml_Block_Widge
     /**
      * Report type options
      */
-    protected $_reportTypeOptions = [];
+    protected array $_reportTypeOptions = [];
 
     /**
      * Report field visibility
      */
-    protected $_fieldVisibility = [];
+    protected array $_fieldVisibility = [];
 
     /**
      * Report field options
      */
-    protected $_fieldOptions = [];
+    protected array $_fieldOptions = [];
 
     /**
      * Set field visibility

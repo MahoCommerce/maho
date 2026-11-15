@@ -21,7 +21,7 @@ class Mage_Catalog_Model_Product_Option_Value extends Mage_Core_Model_Abstract
 
     protected $_product;
 
-    protected $_option;
+    protected ?\Mage_Catalog_Model_Product_Option $_option = null;
 
     #[\Override]
     protected function _construct()

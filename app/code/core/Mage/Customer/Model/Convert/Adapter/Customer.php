@@ -20,41 +20,41 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
     protected $_customerModel;
 
     protected $_stores;
-    protected $_attributes = [];
-    protected $_customerGroups;
+    protected array $_attributes = [];
+    protected ?array $_customerGroups = null;
 
     protected $_billingAddressModel;
     protected $_shippingAddressModel;
 
-    protected $_requiredFields = [];
+    protected array $_requiredFields = [];
 
-    protected $_ignoreFields = [];
+    protected array $_ignoreFields = [];
 
-    protected $_billingFields = [];
+    protected array $_billingFields = [];
 
-    protected $_billingMappedFields = [];
+    protected array $_billingMappedFields = [];
 
-    protected $_billingStreetFields = [];
+    protected array $_billingStreetFields = [];
 
-    protected $_billingRequiredFields = [];
+    protected array $_billingRequiredFields = [];
 
-    protected $_shippingFields = [];
+    protected array $_shippingFields = [];
 
-    protected $_shippingMappedFields = [];
+    protected array $_shippingMappedFields = [];
 
-    protected $_shippingStreetFields = [];
+    protected array $_shippingStreetFields = [];
 
-    protected $_shippingRequiredFields = [];
+    protected array $_shippingRequiredFields = [];
 
-    protected $_addressFields = [];
+    protected array $_addressFields = [];
 
-    protected $_regions;
+    protected ?array $_regions = null;
     protected $_websites;
 
     protected $_customer = null;
     protected $_address = null;
 
-    protected $_customerId = '';
+    protected string $_customerId = '';
 
     /**
      * Retrieve customer model cache

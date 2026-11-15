@@ -10,8 +10,8 @@
 
 class Mage_CatalogIndex_Model_Observer extends Mage_Core_Model_Abstract
 {
-    protected $_parentProductIds = [];
-    protected $_productIdsMassupdate = [];
+    protected array $_parentProductIds = [];
+    protected array $_productIdsMassupdate = [];
 
     /**
      * Get indexer object

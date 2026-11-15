@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_System_Config_Form_Fieldset_Order_Statuses extends Mage_Adminhtml_Block_System_Config_Form_Fieldset
 {
-    protected $_dummyElement;
+    protected ?\Maho\DataObject $_dummyElement = null;
     protected $_fieldRenderer;
     protected $_values;
 

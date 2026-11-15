@@ -15,7 +15,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Category extends Mage_Catalog_Block_Se
     protected $_storeRootCategoryPath = '';
     protected $_storeRootCategoryLevel = 0;
     protected $_total = 0;
-    protected $_from = 0;
+    protected int|float $_from = 0;
     protected $_to = 0;
     protected $_currentPage = 0;
     protected $_categoriesToPages = [];

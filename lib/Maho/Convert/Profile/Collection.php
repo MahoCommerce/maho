@@ -16,15 +16,15 @@ use Maho\Simplexml\Element;
 
 class Collection
 {
-    protected $_xml;
-    protected $_containers;
-    protected $_profiles = [];
+    protected ?\SimpleXMLElement $_xml = null;
+    protected ?object $_containers = null;
+    protected array $_profiles = [];
 
-    protected $_simplexmlDefaultClass = \Maho\Simplexml\Element::class;
-    protected $_profileDefaultClass = \Maho\Convert\Profile::class;
-    protected $_profileCollectionDefaultClass = \Maho\Convert\Profile\Collection::class;
+    protected string $_simplexmlDefaultClass = \Maho\Simplexml\Element::class;
+    protected string $_profileDefaultClass = \Maho\Convert\Profile::class;
+    protected string $_profileCollectionDefaultClass = \Maho\Convert\Profile\Collection::class;
     protected $_containerDefaultClass = \Maho\Convert\Container\Generic::class;
-    protected $_containerCollectionDefaultClass = \Maho\Convert\Container\Collection::class;
+    protected string $_containerCollectionDefaultClass = \Maho\Convert\Container\Collection::class;
 
     public function getContainers()
     {

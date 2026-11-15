@@ -15,15 +15,15 @@ abstract class Mage_Dataflow_Model_Convert_Profile_Abstract implements Mage_Data
 {
     protected $_actions;
 
-    protected $_containers;
+    protected ?object $_containers = null;
 
-    protected $_exceptions = [];
+    protected array $_exceptions = [];
 
     protected $_dryRun;
 
-    protected $_actionDefaultClass = 'Mage_Dataflow_Model_Convert_Action';
+    protected string $_actionDefaultClass = 'Mage_Dataflow_Model_Convert_Action';
 
-    protected $_containerCollectionDefaultClass = 'Mage_Dataflow_Model_Convert_Container_Collection';
+    protected string $_containerCollectionDefaultClass = 'Mage_Dataflow_Model_Convert_Container_Collection';
 
     protected $_dataflow_profile = null;
 

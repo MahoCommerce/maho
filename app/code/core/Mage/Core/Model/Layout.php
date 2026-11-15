@@ -52,7 +52,7 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
      */
     protected $_directOutput = false;
 
-    protected $invalidActions
+    protected array $invalidActions
         = [
             // explicitly not using class constant here Mage_Page_Block_Html_Topmenu_Renderer::class
             // if the class does not exists it breaks.

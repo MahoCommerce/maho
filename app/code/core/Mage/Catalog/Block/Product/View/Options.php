@@ -15,7 +15,7 @@ class Mage_Catalog_Block_Product_View_Options extends Mage_Core_Block_Template
      */
     protected $_product;
 
-    protected $_optionRenders = [];
+    protected array $_optionRenders = [];
 
     public function __construct()
     {

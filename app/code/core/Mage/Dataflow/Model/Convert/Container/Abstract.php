@@ -14,9 +14,9 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
 
     protected $_vars;
 
-    protected $_profile;
+    protected ?\Mage_Dataflow_Model_Convert_Profile_Interface $_profile = null;
 
-    protected $_action;
+    protected ?\Mage_Dataflow_Model_Convert_Action_Interface $_action = null;
 
     protected $_data;
 

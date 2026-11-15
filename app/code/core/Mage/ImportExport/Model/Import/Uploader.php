@@ -10,11 +10,11 @@
 
 class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploader
 {
-    protected $_tmpDir  = '';
+    protected string $_tmpDir  = '';
     private string $_destStoragePath = '';
     private bool $_validated = false;
     private bool $_trustedMedia = false;
-    protected $_allowedMimeTypes = [
+    protected array $_allowedMimeTypes = [
         'webp' => 'image/webp',
         'avif' => 'image/avif',
         'jpg' => 'image/jpeg',

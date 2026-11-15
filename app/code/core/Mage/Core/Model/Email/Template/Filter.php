@@ -29,7 +29,7 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
 
     protected $_storeId = null;
 
-    protected $_plainTemplateMode = false;
+    protected bool $_plainTemplateMode = false;
 
     /**
      * @var bool|string

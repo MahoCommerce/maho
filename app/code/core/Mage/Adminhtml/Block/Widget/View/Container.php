@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Widget_View_Container extends Mage_Adminhtml_Block_Widget_Container
 {
-    protected $_objectId = 'id';
+    protected string $_objectId = 'id';
 
     public function __construct()
     {

@@ -24,7 +24,7 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
     #[\Override]
     protected $_eventObject = 'payment';
 
-    protected $_quote;
+    protected ?\Mage_Sales_Model_Quote $_quote = null;
 
     #[\Override]
     protected function _construct()

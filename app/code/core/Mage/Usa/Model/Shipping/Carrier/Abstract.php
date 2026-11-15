@@ -15,7 +15,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
     public const GUAM_COUNTRY_ID = 'GU';
     public const GUAM_REGION_CODE = 'GU';
 
-    protected static $_quotesCache = [];
+    protected static array $_quotesCache = [];
 
     /**
      * Flag for check carriers for activity

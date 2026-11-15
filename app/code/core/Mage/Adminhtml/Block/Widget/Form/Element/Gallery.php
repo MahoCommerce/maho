@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Widget_Form_Element_Gallery extends Mage_Adminhtml_Block_Template implements \Maho\Data\Form\Element\Renderer\RendererInterface
 {
-    protected $_element = null;
+    protected ?\Maho\Data\Form\Element\AbstractElement $_element = null;
 
     public function __construct()
     {

@@ -29,7 +29,7 @@ class Mage_Eav_Model_Config
         'is_unique',
     ];
 
-    protected $_storeInitialized = [];
+    protected array $_storeInitialized = [];
 
     /**
      * @var Mage_Eav_Model_Entity_Type[]|null

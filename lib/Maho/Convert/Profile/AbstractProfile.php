@@ -17,12 +17,12 @@ use Maho\Convert\Exception;
 abstract class AbstractProfile
 {
     protected $_actions;
-    protected $_containers;
-    protected $_exceptions = [];
+    protected ?object $_containers = null;
+    protected array $_exceptions = [];
     protected $_dryRun;
 
-    protected $_actionDefaultClass = \Maho\Convert\Action::class;
-    protected $_containerCollectionDefaultClass = \Maho\Convert\Container\Collection::class;
+    protected string $_actionDefaultClass = \Maho\Convert\Action::class;
+    protected string $_containerCollectionDefaultClass = \Maho\Convert\Container\Collection::class;
 
     public function addAction(?ActionInterface $action = null)
     {

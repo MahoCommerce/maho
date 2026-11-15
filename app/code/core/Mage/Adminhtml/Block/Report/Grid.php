@@ -56,9 +56,9 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
      */
     protected $_subReportSize = 5;
 
-    protected $_grandTotals;
+    protected ?\Maho\DataObject $_grandTotals = null;
 
-    protected $_errors = [];
+    protected array $_errors = [];
 
     /**
      * stores current currency code

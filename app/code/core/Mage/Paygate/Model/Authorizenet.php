@@ -106,7 +106,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     #[\Override]
     protected $_canFetchTransactionInfo = true;
 
-    protected $_allowCurrencyCode = ['USD'];
+    protected array $_allowCurrencyCode = ['USD'];
 
     /**
      * @var Mage_Paygate_Model_Authorizenet_Cards|null
