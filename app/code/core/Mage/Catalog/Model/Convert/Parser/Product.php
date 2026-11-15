@@ -217,7 +217,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
 
     #[\Override]
     #[\Deprecated(message: 'not used anymore')]
-    public function parse()
+    public function parse(): static
     {
         $data            = $this->getData();
         $entityTypeId    = Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Product::ENTITY)->getId();
@@ -359,11 +359,9 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
 
     /**
      * Unparse (prepare data) loaded products
-     *
-     * @return $this
      */
     #[\Override]
-    public function unparse()
+    public function unparse(): static
     {
         $entityIds = $this->getData();
 

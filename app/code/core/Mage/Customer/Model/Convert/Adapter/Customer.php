@@ -240,12 +240,11 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
     }
 
     /**
-     * @return Mage_Eav_Model_Convert_Adapter_Entity
      * @throws Mage_Core_Model_Store_Exception
      * @throws \Maho\Convert\Exception
      */
     #[\Override]
-    public function load()
+    public function load(): static
     {
         $addressType = $this->getVar('filter/adressType'); //error in key filter addressType
         if ($addressType == 'both') {
@@ -343,11 +342,10 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
     }
 
     /**
-     * @return $this
      * @throws Mage_Core_Exception
      */
     #[\Override]
-    public function save()
+    public function save(): static
     {
         $stores = [];
         foreach (Mage::getConfig()->getNode('stores')->children() as $storeNode) {

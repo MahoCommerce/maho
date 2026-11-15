@@ -4147,12 +4147,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Convert_Parser_Product::parse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
-
-		-
 			rawMessage: Property Mage_Catalog_Model_Convert_Parser_Product::$_inventoryItems has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -5473,12 +5467,6 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Convert/Parser/Customer.php
 
 		-
-			rawMessage: 'Method Mage_Customer_Model_Convert_Parser_Customer::parse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Parser/Customer.php
-
-		-
 			rawMessage: Property Mage_Customer_Model_Convert_Parser_Customer::$_customerAddressModel has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -5687,30 +5675,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Http::load() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Http.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Http::save() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Http.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Interface::load() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Interface.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Interface::save() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Interface.php
 
 		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Io::getResource() has parameter $forWrite with no type specified.'
@@ -6049,18 +6013,6 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator.php
 
 		-
-			rawMessage: 'Method Mage_Dataflow_Model_Session_Adapter_Iterator::load() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Session_Adapter_Iterator::save() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator.php
-
-		-
 			rawMessage: 'Method Mage_Dataflow_Model_Session_Adapter_Iterator::updateProgress() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -6071,18 +6023,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Mapper_Column::map() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Mapper/Column.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Mapper_Interface::map() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Mapper/Interface.php
 
 		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Parser_Abstract::_copy() has no return type specified.'
@@ -6121,32 +6061,8 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert/Parser/Csv.php
 
 		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Parser_Interface::parse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Parser/Interface.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Parser_Interface::unparse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Parser/Interface.php
-
-		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Parser_Xml_Excel::_saveParsedRow() has parameter $xmlString with no type specified.'
 			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Parser/Xml/Excel.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Parser_Xml_Excel::parse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Parser/Xml/Excel.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Parser_Xml_Excel::unparse() has no return type specified.'
-			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Convert/Parser/Xml/Excel.php
 
@@ -6329,24 +6245,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Convert/Profile/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Validator_Column::validate() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Validator/Column.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Validator_Dryrun::validate() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Validator/Dryrun.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Validator_Interface::validate() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Validator/Interface.php
 
 		-
 			rawMessage: Property Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable::$_config has no type specified.
@@ -8489,66 +8387,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: lib/Maho/Convert/Exception.php
-
-		-
-			rawMessage: 'Method Maho\Convert\Mapper\Column::map() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/Convert/Mapper/Column.php
-
-		-
-			rawMessage: 'Method Maho\Convert\Mapper\MapperInterface::map() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/Convert/Mapper/MapperInterface.php
-
-		-
-			rawMessage: 'Method Maho\Convert\Parser\Csv::parse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/Convert/Parser/Csv.php
-
-		-
-			rawMessage: 'Method Maho\Convert\Parser\Csv::unparse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/Convert/Parser/Csv.php
-
-		-
-			rawMessage: 'Method Maho\Convert\Parser\ParserInterface::parse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/Convert/Parser/ParserInterface.php
-
-		-
-			rawMessage: 'Method Maho\Convert\Parser\ParserInterface::unparse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/Convert/Parser/ParserInterface.php
-
-		-
-			rawMessage: 'Method Maho\Convert\Parser\Serialize::parse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/Convert/Parser/Serialize.php
-
-		-
-			rawMessage: 'Method Maho\Convert\Parser\Serialize::unparse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/Convert/Parser/Serialize.php
-
-		-
-			rawMessage: 'Method Maho\Convert\Parser\Xml\Excel::parse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/Convert/Parser/Xml/Excel.php
-
-		-
-			rawMessage: 'Method Maho\Convert\Parser\Xml\Excel::unparse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/Convert/Parser/Xml/Excel.php
 
 		-
 			rawMessage: 'Method Maho\Convert\Profile\AbstractProfile::addAction() has no return type specified.'

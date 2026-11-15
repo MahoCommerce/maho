@@ -177,11 +177,10 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
     }
 
     /**
-     * @return $this
      * @throws Mage_Core_Exception
      */
     #[\Override]
-    public function unparse()
+    public function unparse(): static
     {
         $systemFields = [];
         foreach ($this->getFields() as $code => $node) {
@@ -408,7 +407,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
 
     #[\Override]
     #[\Deprecated(message: 'not used anymore')]
-    public function parse()
+    public function parse(): static
     {
         $data = $this->getData();
 

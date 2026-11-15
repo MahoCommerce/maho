@@ -11,13 +11,13 @@
 class Mage_Dataflow_Model_Session_Adapter_Iterator extends Mage_Dataflow_Model_Convert_Adapter_Abstract
 {
     #[\Override]
-    public function load()
+    public function load(): static
     {
         return $this;
     }
 
     #[\Override]
-    public function save()
+    public function save(): static
     {
         return $this;
     }

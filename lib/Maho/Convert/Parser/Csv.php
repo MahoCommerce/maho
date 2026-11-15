@@ -14,7 +14,7 @@ use Maho\Convert\Mapper\Column;
 class Csv extends AbstractParser
 {
     #[\Override]
-    public function parse()
+    public function parse(): static
     {
         $fDel = $this->getVar('delimiter', ',');
         $fEnc = $this->getVar('enclose', '"');
@@ -105,7 +105,7 @@ class Csv extends AbstractParser
     }
 
     #[\Override]
-    public function unparse()
+    public function unparse(): static
     {
         $fDel = $this->getVar('delimiter', ',');
         $fEnc = $this->getVar('enclose', '"');
