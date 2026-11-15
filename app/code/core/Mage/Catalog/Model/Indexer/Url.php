@@ -139,13 +139,8 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
         return $result;
     }
 
-    /**
-     * Register data required by process in event object
-     *
-     * @return Mage_Catalog_Model_Indexer_Url
-     */
     #[\Override]
-    protected function _registerEvent(Mage_Index_Model_Event $event)
+    protected function _registerEvent(Mage_Index_Model_Event $event): void
     {
         $event->addNewData(self::EVENT_MATCH_RESULT_KEY, true);
         $entity = $event->getEntity();
@@ -169,7 +164,6 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
                 $process->changeStatus(Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX);
                 break;
         }
-        return $this;
     }
 
     /**
@@ -210,11 +204,8 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
         }
     }
 
-    /**
-     * Process event
-     */
     #[\Override]
-    protected function _processEvent(Mage_Index_Model_Event $event)
+    protected function _processEvent(Mage_Index_Model_Event $event): void
     {
         $data = $event->getNewData();
         if (!empty($data['catalog_url_reindex_all'])) {
@@ -242,11 +233,8 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
         }
     }
 
-    /**
-     * Rebuild all index data
-     */
     #[\Override]
-    public function reindexAll()
+    public function reindexAll(): void
     {
         /** @var Mage_Catalog_Model_Resource_Url $resourceModel */
         $resourceModel = Mage::getResourceSingleton('catalog/url');

@@ -76,11 +76,8 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
         ];
     }
 
-    /**
-     * Register data required by process in event object
-     */
     #[\Override]
-    protected function _registerEvent(Mage_Index_Model_Event $event)
+    protected function _registerEvent(Mage_Index_Model_Event $event): void
     {
         if ($event->getEntity() == Mage_Catalog_Model_Product::ENTITY) {
             $this->_registerCatalogProduct($event);
@@ -189,11 +186,8 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
         }
     }
 
-    /**
-     * Process event
-     */
     #[\Override]
-    protected function _processEvent(Mage_Index_Model_Event $event)
+    protected function _processEvent(Mage_Index_Model_Event $event): void
     {
         $this->callEventHandler($event);
     }

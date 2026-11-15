@@ -81,11 +81,8 @@ class Mage_Catalog_Model_Product_Indexer_Eav extends Mage_Index_Model_Indexer_Ab
         $this->_init('catalog/product_indexer_eav');
     }
 
-    /**
-     * Register data required by process in event object
-     */
     #[\Override]
-    protected function _registerEvent(Mage_Index_Model_Event $event)
+    protected function _registerEvent(Mage_Index_Model_Event $event): void
     {
         $entity = $event->getEntity();
 
@@ -265,11 +262,8 @@ class Mage_Catalog_Model_Product_Indexer_Eav extends Mage_Index_Model_Indexer_Ab
         return $this;
     }
 
-    /**
-     * Process event
-     */
     #[\Override]
-    protected function _processEvent(Mage_Index_Model_Event $event)
+    protected function _processEvent(Mage_Index_Model_Event $event): void
     {
         $data = $event->getNewData();
         if (!empty($data['catalog_product_eav_reindex_all'])) {

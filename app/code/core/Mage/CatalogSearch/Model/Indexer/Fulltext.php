@@ -173,11 +173,8 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
         return $result;
     }
 
-    /**
-     * Register data required by process in event object
-     */
     #[\Override]
-    protected function _registerEvent(Mage_Index_Model_Event $event)
+    protected function _registerEvent(Mage_Index_Model_Event $event): void
     {
         $event->addNewData(self::EVENT_MATCH_RESULT_KEY, true);
         switch ($event->getEntity()) {
@@ -340,7 +337,7 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
     }
 
     #[\Override]
-    protected function _processEvent(Mage_Index_Model_Event $event)
+    protected function _processEvent(Mage_Index_Model_Event $event): void
     {
         $data = $event->getNewData();
 
@@ -414,7 +411,7 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
     }
 
     #[\Override]
-    public function reindexAll()
+    public function reindexAll(): void
     {
         // No transaction here: the rebuild opens its own when it runs in place,
         // and the staged path swaps with DDL, which a transaction cannot hold.
