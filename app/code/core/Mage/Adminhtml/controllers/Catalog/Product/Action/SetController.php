@@ -26,23 +26,25 @@ class Mage_Adminhtml_Catalog_Product_Action_SetController extends Mage_Adminhtml
     {
         try {
             $data = $this->getRequest()->getPost();
-            if (!isset($data['attribute_set']) || !is_array($data['product'])) {
+            if (!isset($data['attribute_set']) || !is_array($data['product'] ?? null)) {
                 Mage::throwException($this->__('Invalid data'));
             }
 
-            $collection = Mage::getResourceModel('catalog/product_collection');
-            $rowCount = $collection->getConnection()->update(
-                $collection->getTable('catalog/product'),
-                ['attribute_set_id' => $data['attribute_set']],
-                ['entity_id IN (?)' => $data['product']],
-            );
+            /** @var Mage_Catalog_Service_Product $service */
+            $service = Mage::getService('catalog/product');
+            $rowCount = $service->changeAttributeSet($data['product'], (int) $data['attribute_set']);
 
             $this->_getSession()->addSuccess(
                 $this->__('%d product(s) were updated', $rowCount),
             );
+        } catch (Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $this->_getSession()->addError($error['message']);
+            }
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
-        } catch (Exception) {
+        } catch (Exception $e) {
+            Mage::logException($e);
             $this->_getSession()->addError($this->__('Internal Error'));
         }
         $this->_redirect('*/catalog_product/', ['_current' => true]);

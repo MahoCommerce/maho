@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Widget_View_Container extends Mage_Adminhtml_Block_Widget_Container
 {
-    protected $_objectId = 'id';
+    protected string $_objectId = 'id';
 
     public function __construct()
     {
@@ -38,12 +38,12 @@ class Mage_Adminhtml_Block_Widget_View_Container extends Mage_Adminhtml_Block_Wi
         return parent::_prepareLayout();
     }
 
-    public function getEditUrl()
+    public function getEditUrl(): string
     {
         return $this->getUrl('*/*/edit', [$this->_objectId => $this->getRequest()->getParam($this->_objectId)]);
     }
 
-    public function getViewHtml()
+    public function getViewHtml(): string
     {
         return $this->getChildHtml('plane');
     }

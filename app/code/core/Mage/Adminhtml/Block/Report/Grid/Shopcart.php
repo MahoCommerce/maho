@@ -13,20 +13,14 @@ class Mage_Adminhtml_Block_Report_Grid_Shopcart extends Mage_Adminhtml_Block_Wid
     /**
      * stores current currency code
      */
-    protected $_currentCurrencyCode = null;
+    protected ?string $_currentCurrencyCode = null;
 
     /**
      * ids of current stores
      */
-    protected $_storeIds            = [];
+    protected array $_storeIds = [];
 
-    /**
-     * storeIds setter
-     *
-     * @param  array $storeIds
-     * @return $this
-     */
-    public function setStoreIds($storeIds)
+    public function setStoreIds(array $storeIds): static
     {
         $this->_storeIds = $storeIds;
         return $this;

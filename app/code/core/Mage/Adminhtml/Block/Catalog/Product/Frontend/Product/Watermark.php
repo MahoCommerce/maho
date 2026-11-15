@@ -58,7 +58,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Frontend_Product_Watermark extends Ma
         return $html;
     }
 
-    protected function _getHeaderHtml($element)
+    protected function _getHeaderHtml(\Maho\Data\Form\Element\AbstractElement $element): string
     {
         $default = !$this->getRequest()->getParam('website') && !$this->getRequest()->getParam('store');
 
@@ -76,7 +76,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Frontend_Product_Watermark extends Ma
         return $html;
     }
 
-    protected function _getFooterHtml($element)
+    protected function _getFooterHtml(\Maho\Data\Form\Element\AbstractElement $element): string
     {
         return '</tbody></table></fieldset>';
     }

@@ -86,9 +86,6 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Main extends Mage_Adminhtml_Block_W
             'options'   => $model->getAvailableStatuses(),
             'disabled'  => $isElementDisabled,
         ]);
-        if (!$model->getId()) {
-            $model->setData('is_active', $isElementDisabled ? '0' : '1');
-        }
 
         $groups = Mage::getResourceSingleton('cms/page')->getCustomAttributeGroups();
         $this->addAttributeFields($fieldset, $groups[0]['attributes'] ?? [], $model);

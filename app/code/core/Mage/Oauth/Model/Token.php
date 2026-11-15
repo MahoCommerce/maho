@@ -245,6 +245,45 @@ class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
         return $this->getData('consumer');
     }
 
+    /**
+     * Set the revoked flag of the token to $revoked, save the token, and tell its owner by email. $actorAdminId is
+     * the admin who does the change. An admin gets no email about an own token.
+     */
+    public function changeRevoked(bool $revoked, ?int $actorAdminId = null): static
+    {
+        $this->setRevoked($revoked)->save();
+        $this->notifyOwner($revoked ? Mage::helper('oauth')->__('revoked') : Mage::helper('oauth')->__('enabled'), $actorAdminId);
+
+        return $this;
+    }
+
+    /**
+     * Delete the token, and tell its owner by email. See changeRevoked() for $actorAdminId.
+     */
+    public function deleteAndNotify(?int $actorAdminId = null): static
+    {
+        $this->delete();
+        $this->notifyOwner(Mage::helper('oauth')->__('deleted'), $actorAdminId);
+
+        return $this;
+    }
+
+    private function notifyOwner(string $status, ?int $actorAdminId): void
+    {
+        $adminId = $this->getAdminId();
+        if ($adminId) {
+            if ($adminId === $actorAdminId) {
+                return;
+            }
+            $owner = Mage::getModel('admin/user')->load($adminId);
+            $name = $owner->getName(' ');
+        } else {
+            $owner = Mage::getModel('customer/customer')->load($this->getCustomerId());
+            $name = $owner->getName();
+        }
+        Mage::helper('oauth')->sendNotificationOnTokenStatusChange($owner->getEmail(), $name, $this->getConsumer()->getName(), $status);
+    }
+
     public function getAdminId(): ?int
     {
         $value = $this->getData('admin_id');

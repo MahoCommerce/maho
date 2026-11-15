@@ -125,7 +125,7 @@ class Mage_Catalog_Model_Observer
      * Checking whether the using static urls in WYSIWYG allowed event
      */
     #[Maho\Config\Observer('cms_wysiwyg_images_static_urls_allowed', area: 'adminhtml')]
-    public function catalogCheckIsUsingStaticUrlsAllowed(\Maho\Event\Observer $observer)
+    public function catalogCheckIsUsingStaticUrlsAllowed(\Maho\Event\Observer $observer): void
     {
         $storeId = $observer->getEvent()->getData('store_id');
         $result  = $observer->getEvent()->getData('result');
@@ -136,7 +136,7 @@ class Mage_Catalog_Model_Observer
      * Cron job method for product prices to reindex
      */
     #[Maho\Config\CronJob('catalog_product_index_price_reindex_all', schedule: '0 2 * * *')]
-    public function reindexProductPrices(Mage_Cron_Model_Schedule $schedule)
+    public function reindexProductPrices(Mage_Cron_Model_Schedule $schedule): void
     {
         $indexProcess = Mage::getSingleton('index/indexer')->getProcessByCode('catalog_product_price');
         if ($indexProcess) {
@@ -177,7 +177,7 @@ class Mage_Catalog_Model_Observer
      * Adds catalog categories to top menu
      */
     #[Maho\Config\Observer('page_block_html_topmenu_gethtml_before')]
-    public function addCatalogToTopmenuItems(\Maho\Event\Observer $observer)
+    public function addCatalogToTopmenuItems(\Maho\Event\Observer $observer): void
     {
         $block = $observer->getEvent()->getBlock();
         $block->addCacheTag(Mage_Catalog_Model_Category::CACHE_TAG);
@@ -196,7 +196,7 @@ class Mage_Catalog_Model_Observer
      * @param Mage_Page_Block_Html_Topmenu $menuBlock
      * @param bool $addTags
      */
-    protected function _addCategoriesToMenu($categories, $parentCategoryNode, $menuBlock, $addTags = false)
+    protected function _addCategoriesToMenu($categories, $parentCategoryNode, $menuBlock, $addTags = false): void
     {
         $categoryModel = Mage::getModel('catalog/category');
         foreach ($categories as $category) {
@@ -247,28 +247,6 @@ class Mage_Catalog_Model_Observer
 
         $categoryPathIds = explode(',', $currentCategory->getPathInStore());
         return in_array($category->getId(), $categoryPathIds);
-    }
-
-    /**
-     * Checks whether attribute_code by current module is reserved
-     *
-     * @throws Mage_Core_Exception
-     */
-    #[Maho\Config\Observer('catalog_entity_attribute_save_before')]
-    public function checkReservedAttributeCodes(\Maho\Event\Observer $observer)
-    {
-        /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
-        $attribute = $observer->getEvent()->getAttribute();
-        if (!is_object($attribute)) {
-            return;
-        }
-        /** @var Mage_Catalog_Model_Product $product */
-        $product = Mage::getModel('catalog/product');
-        if ($product->isReservedAttribute($attribute)) {
-            throw new Mage_Core_Exception(
-                Mage::helper('catalog')->__('The attribute code \'%s\' is reserved by system. Please try another attribute code', $attribute->getAttributeCode()),
-            );
-        }
     }
 
     /**
@@ -330,6 +308,20 @@ class Mage_Catalog_Model_Observer
             Mage::getSingleton('core/image_size')->preload(
                 Mage_Catalog_Model_Product_Image_Provider::ENTITY,
                 array_map(fn(Mage_Catalog_Model_Product $product): mixed => $product->getData('image'), $collection->getItems()),
+            );
+        }
+    }
+
+    /**
+     * @throws Mage_Core_Exception
+     */
+    #[\Deprecated('Mage_Catalog_Model_Resource_Eav_Attribute checks the reserved codes before a save')]
+    public function checkReservedAttributeCodes(\Maho\Event\Observer $observer): void
+    {
+        $attribute = $observer->getEvent()->getAttribute();
+        if (is_object($attribute) && Mage::getModel('catalog/product')->isReservedAttribute($attribute)) {
+            throw new Mage_Core_Exception(
+                Mage::helper('catalog')->__('The attribute code \'%s\' is reserved by system. Please try another attribute code', $attribute->getAttributeCode()),
             );
         }
     }

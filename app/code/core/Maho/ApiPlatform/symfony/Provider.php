@@ -18,7 +18,6 @@ use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Maho\ApiPlatform\Trait\FilterValueTrait;
 use Maho\ApiPlatform\Trait\PaginationTrait;
-use Maho\ApiPlatform\Trait\RateLimitTrait;
 use Maho\ApiPlatform\Trait\RawResponseTrait;
 use Maho\ApiPlatform\Trait\StoreRestrictionTrait;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -41,7 +40,6 @@ abstract class Provider implements ProviderInterface
     use AuthenticationTrait;
     use FilterValueTrait;
     use PaginationTrait;
-    use RateLimitTrait;
     use RawResponseTrait;
     use StoreRestrictionTrait;
 

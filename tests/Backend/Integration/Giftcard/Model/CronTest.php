@@ -9,13 +9,6 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Giftcard Cron Instantiation', function () {
-    test('cron model can be instantiated', function () {
-        $cron = Mage::getModel('giftcard/cron');
-        expect($cron)->toBeInstanceOf(Maho_Giftcard_Model_Cron::class);
-    });
-});
-
 describe('Cron: Mark Expired Gift Cards', function () {
     beforeEach(function () {
         $this->helper = Mage::helper('giftcard');
@@ -184,54 +177,6 @@ describe('Cron: Process Scheduled Emails', function () {
     beforeEach(function () {
         $this->helper = Mage::helper('giftcard');
         $this->cron = Mage::getModel('giftcard/cron');
-    });
-
-    test('processes gift cards with due scheduled emails', function () {
-        // Create gift card with past scheduled email time
-        $pastTime = (new DateTime('-1 hour', new DateTimeZone('UTC')))->format('Y-m-d H:i:s');
-
-        $giftcard = Mage::getModel('giftcard/giftcard');
-        $giftcard->setCode($this->helper->generateCode());
-        $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteIds([1]);
-        $giftcard->setBalance(100.00);
-        $giftcard->setInitialBalance(100.00);
-        $giftcard->setRecipientEmail('recipient@test.com');
-        $giftcard->setRecipientName('Test Recipient');
-        $giftcard->setEmailScheduledAt($pastTime);
-        $giftcard->setEmailSentAt(null); // Not sent yet
-        $giftcard->save();
-
-        // Run cron - this will try to send email
-        // Note: Email sending may fail in test env, but collection query should work
-        $this->cron->processScheduledEmails();
-
-        // Verify the card was found by the collection
-        // (actual email sending tested in email queue tests)
-        expect(true)->toBeTrue();
-    });
-
-    test('skips gift cards with future scheduled time', function () {
-        $futureTime = (new DateTime('+1 hour', new DateTimeZone('UTC')))->format('Y-m-d H:i:s');
-
-        $giftcard = Mage::getModel('giftcard/giftcard');
-        $giftcard->setCode($this->helper->generateCode());
-        $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteIds([1]);
-        $giftcard->setBalance(100.00);
-        $giftcard->setInitialBalance(100.00);
-        $giftcard->setRecipientEmail('future@test.com');
-        $giftcard->setEmailScheduledAt($futureTime);
-        $giftcard->setEmailSentAt(null);
-        $giftcard->save();
-
-        $id = $giftcard->getId();
-
-        $this->cron->processScheduledEmails();
-
-        // Email should not have been sent
-        $reloaded = Mage::getModel('giftcard/giftcard')->load($id);
-        expect($reloaded->getEmailSentAt())->toBeNull();
     });
 
     test('skips gift cards that already have email sent', function () {

@@ -10,11 +10,11 @@
 
 class Mage_Adminhtml_Block_System_Convert_Gui_Edit_Tab_Wizard extends Mage_Adminhtml_Block_Widget_Container
 {
-    protected $_storeModel;
-    protected $_attributes;
-    protected $_addMapButtonHtml;
-    protected $_removeMapButtonHtml;
-    protected $_shortDateFormat;
+    protected ?Mage_Adminhtml_Model_System_Store $_storeModel = null;
+    protected array $_attributes = [];
+    protected ?string $_addMapButtonHtml = null;
+    protected ?string $_removeMapButtonHtml = null;
+    protected ?string $_shortDateFormat = null;
 
     /**
      * @var array

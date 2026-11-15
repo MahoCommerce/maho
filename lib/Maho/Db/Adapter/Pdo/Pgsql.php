@@ -1502,53 +1502,7 @@ class Pgsql extends AbstractPdoAdapter
      */
     protected function _splitMultiQuery(string $sql): array
     {
-        $parts = preg_split(
-            '#(;|\'|"|\\\\|//|--|\n|/\*|\*/)#',
-            $sql,
-            -1,
-            PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE,
-        );
-
-        $q = false;
-        $c = false;
-        $stmts = [];
-        $s = '';
-
-        foreach ($parts as $i => $part) {
-            if (($part === "'" || $part === '"') && ($i === 0 || $parts[$i - 1] !== '\\')) {
-                if ($q === false) {
-                    $q = $part;
-                } elseif ($q === $part) {
-                    $q = false;
-                }
-            }
-
-            if (($part === '//' || $part === '--') && ($i === 0 || $parts[$i - 1] === "\n")) {
-                $c = $part;
-            } elseif ($part === "\n" && ($c === '//' || $c === '--')) {
-                $c = false;
-            }
-
-            if ($part === '/*' && $c === false) {
-                $c = '/*';
-            } elseif ($part === '*/' && $c === '/*') {
-                $c = false;
-            }
-
-            if ($part === ';' && $q === false && $c === false) {
-                if (trim($s) !== '') {
-                    $stmts[] = trim($s);
-                    $s = '';
-                }
-            } else {
-                $s .= $part;
-            }
-        }
-        if (trim($s) !== '') {
-            $stmts[] = trim($s);
-        }
-
-        return $stmts;
+        return \Maho\Db\Sql\StatementSplitter::split($sql, 'pgsql');
     }
 
     /**
@@ -1987,8 +1941,11 @@ class Pgsql extends AbstractPdoAdapter
         if ($mode == self::INSERT_IGNORE) {
             $query .= ' ON CONFLICT DO NOTHING';
         } elseif ($mode == self::INSERT_ON_DUPLICATE) {
-            if (!$fields) {
+            if ($fields) {
+                $insertCols = array_values(array_filter($fields, is_string(...)));
+            } else {
                 $describe = $this->describeTable($table);
+                $insertCols = array_keys($describe);
                 foreach ($describe as $column) {
                     if ($column['PRIMARY'] === false) {
                         $fields[] = $column['COLUMN_NAME'];
@@ -1996,7 +1953,11 @@ class Pgsql extends AbstractPdoAdapter
                 }
             }
 
+            // MySQL reacts to each unique key. A select that gives no primary key can only hit a unique index.
             $primaryKeys = $this->_getPrimaryKeyColumns($table);
+            if ($primaryKeys === [] || array_diff($primaryKeys, $insertCols)) {
+                $primaryKeys = $this->_getConflictColumns($table, $insertCols, []) ?: $primaryKeys;
+            }
             if (!empty($primaryKeys)) {
                 $update = [];
                 foreach ($fields as $k => $v) {

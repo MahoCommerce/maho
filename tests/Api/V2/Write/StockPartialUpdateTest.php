@@ -65,9 +65,10 @@ describe('PUT /api/rest/v2/inventory partial update', function (): void {
         $response = apiPut('/api/rest/v2/inventory', ['sku' => $sku, 'isInStock' => false], $token);
         expect($response['status'])->toBeIn([200, 201]);
 
-        // qty must be preserved, not zeroed.
+        // qty must be preserved, not zeroed. The stock item model applies Sync Stock Availability with Qty,
+        // which is on by default, so a product with qty above the threshold stays in stock, as in the admin.
         expect((float) $response['json']['qty'])->toBe(50.0);
-        expect($response['json']['isInStock'])->toBeFalse();
+        expect($response['json']['isInStock'])->toBeTrue();
 
         // Confirm against a fresh read of the row too.
         $verify = apiPut('/api/rest/v2/inventory', ['sku' => $sku, 'isInStock' => true], $token);

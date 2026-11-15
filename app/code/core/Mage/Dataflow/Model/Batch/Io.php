@@ -75,10 +75,8 @@ class Mage_Dataflow_Model_Batch_Io
 
     /**
      * Retrieve tmp filename
-     *
-     * @return string
      */
-    public function getFile($withPath = false)
+    public function getFile(bool $withPath = false): string
     {
         $this->_filename ??= sprintf(self::TMP_NAME, $this->_batchModel->getId());
         if ($withPath) {
@@ -100,10 +98,8 @@ class Mage_Dataflow_Model_Batch_Io
 
     /**
      * Open file in stream mode
-     *
-     * @return $this
      */
-    public function open($write = true)
+    public function open(bool $write = true): static
     {
         $mode = $write ? 'w+' : 'r+';
         $ioConfig = [
@@ -135,18 +131,19 @@ class Mage_Dataflow_Model_Batch_Io
      * Reading stops as soon as one of the following conditions is met:
      * # length  bytes have been read
      * # EOF (end of file) is reached
-     *
-     * @return array|false|null|string
      */
-    public function read($csv = false, $delimiter = ',', $enclosure = '"')
+    public function read(): string|false
     {
-        if ($csv) {
-            $content = $this->getIoAdapter()->streamReadCsv($delimiter, $enclosure);
-        } else {
-            $content = $this->getIoAdapter()->streamRead(1024);
+        $content = $this->getIoAdapter()->streamRead(1024);
+        if ($content !== false) {
             $this->_fileSize += strlen($content);
         }
         return $content;
+    }
+
+    public function readCsv(string $delimiter = ',', string $enclosure = '"'): array|false
+    {
+        return $this->getIoAdapter()->streamReadCsv($delimiter, $enclosure);
     }
 
     /**
@@ -159,7 +156,7 @@ class Mage_Dataflow_Model_Batch_Io
         return $this->getIoAdapter()->streamClose();
     }
 
-    public function clear()
+    public function clear(): bool
     {
         return $this->getIoAdapter()->rm($this->getFile(true));
     }

@@ -103,7 +103,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tabs extends Mage_Adminhtml_Block_Widge
     /**
      * @throws Exception
      */
-    protected function _updateActiveTab()
+    protected function _updateActiveTab(): void
     {
         $tabId = $this->getRequest()->getParam('tab');
         if ($tabId) {

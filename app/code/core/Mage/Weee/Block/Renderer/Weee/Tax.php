@@ -194,7 +194,7 @@ class Mage_Weee_Block_Renderer_Weee_Tax extends Mage_Adminhtml_Block_Widget impl
     /**
      * Set add button and its properties
      */
-    protected function _setAddButton()
+    protected function _setAddButton(): void
     {
         $this->setChild(
             'add_button',

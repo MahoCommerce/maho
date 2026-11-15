@@ -135,11 +135,16 @@ class CustomerAddressCreate extends BaseMahoCommand
             $data['company'] = $company;
         }
 
-        // The storefront checks an address with its form, then with validate(), and shows both lists.
         $errors = $this->validateAndCompactData($form, $this->askMissingAttributes($input, $io, $form, $data));
-        $modelErrors = $address->validate();
-        if (is_array($modelErrors)) {
-            $errors = array_values(array_unique([...$errors, ...$modelErrors]));
+        if (!$errors) {
+            $address->setCustomerId((int) $customer->getId())
+                ->setIsDefaultBilling($defaultBilling ?: null)
+                ->setIsDefaultShipping($defaultShipping ?: null);
+            try {
+                Mage::getService('customer/address')->save($address);
+            } catch (\Mage_Core_Exception_Input $e) {
+                $errors = array_column($e->getErrors(), 'message');
+            }
         }
         if ($errors) {
             foreach ($errors as $error) {
@@ -147,13 +152,6 @@ class CustomerAddressCreate extends BaseMahoCommand
             }
             return Command::INVALID;
         }
-
-        // The storefront makes the first address of a customer the default billing and shipping address.
-        $isFirst = $customer->getAddresses() === [];
-        $address->setCustomerId($customer->getId())
-            ->setIsDefaultBilling($defaultBilling || $isFirst)
-            ->setIsDefaultShipping($defaultShipping || $isFirst)
-            ->save();
 
         $io->writeln("<info>Address created with ID {$address->getId()} for customer $email.</info>");
         return Command::SUCCESS;

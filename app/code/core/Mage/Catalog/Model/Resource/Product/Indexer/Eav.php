@@ -17,11 +17,8 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav extends Mage_Catalog_Model
      */
     protected $_types;
 
-    /**
-     * Define main index table
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalog/product_index_eav', 'entity_id');
     }

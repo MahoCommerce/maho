@@ -66,44 +66,36 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
             ->renderLayout();
     }
 
-    /**
-     * Save Rate and Data
-     *
-     * @return true|void
-     * @throws Throwable
-     */
     #[Maho\Config\Route('/admin/tax_rate/save')]
-    public function saveAction()
+    public function saveAction(): void
     {
         $ratePost = $this->getRequest()->getPost();
-        if ($ratePost) {
-            $rateId = $this->getRequest()->getParam('tax_calculation_rate_id');
-            if ($rateId) {
-                $rateModel = Mage::getSingleton('tax/calculation_rate')->load($rateId);
-                if (!$rateModel->getId()) {
-                    unset($ratePost['tax_calculation_rate_id']);
-                }
-            }
-
-            $rateModel = Mage::getModel('tax/calculation_rate')->setData($ratePost);
-
-            try {
-                $rateModel->save();
-
-                Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('tax')->__('The tax rate has been saved.'));
-                $this->getResponse()->setRedirect($this->getUrl('*/*/'));
-                return true;
-            } catch (Mage_Core_Exception $e) {
-                Mage::getSingleton('adminhtml/session')->setFormData($ratePost);
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-            }
-
-            $this->_redirectReferer();
+        if (!$ratePost) {
+            $this->getResponse()->setRedirect($this->getUrl('*/tax_rate'));
             return;
         }
-        $this->getResponse()->setRedirect($this->getUrl('*/tax_rate'));
+
+        $session = Mage::getSingleton('adminhtml/session');
+        try {
+            $rateId = (int) $this->getRequest()->getParam('tax_calculation_rate_id');
+            $rate = $rateId ? $this->rateService()->getById($rateId) : $this->rateService()->newRate();
+            // The model checks the values as the form posts them
+            $this->rateService()->save($rate->addData($ratePost));
+            $session->addSuccess(Mage::helper('tax')->__('The tax rate has been saved.'));
+            $this->getResponse()->setRedirect($this->getUrl('*/*/'));
+            return;
+        } catch (Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $session->addError($error['message']);
+            }
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+        } catch (Exception $e) {
+            $session->addException($e, Mage::helper('tax')->__('An error occurred while saving this rate.'));
+        }
+
+        $session->setFormData($ratePost);
+        $this->_redirectReferer();
     }
 
     /**
@@ -147,39 +139,25 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
             ->renderLayout();
     }
 
-    /**
-     * Delete Rate and Data
-     *
-     * @return true|void
-     * @throws Throwable
-     */
     #[Maho\Config\Route('/admin/tax_rate/delete')]
-    public function deleteAction()
+    public function deleteAction(): void
     {
-        if ($rateId = $this->getRequest()->getParam('rate')) {
-            $rateModel = Mage::getModel('tax/calculation_rate')->load($rateId);
-            if ($rateModel->getId()) {
-                try {
-                    $rateModel->delete();
-
-                    Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('tax')->__('The tax rate has been deleted.'));
-                    $this->getResponse()->setRedirect($this->getUrl('*/*/'));
-                    return true;
-                } catch (Mage_Core_Exception $e) {
-                    Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                } catch (Exception) {
-                    Mage::getSingleton('adminhtml/session')->addError(Mage::helper('tax')->__('An error occurred while deleting this rate.'));
-                }
-                if ($referer = $this->getRequest()->getServer('HTTP_REFERER')) {
-                    $this->getResponse()->setRedirect($referer);
-                } else {
-                    $this->getResponse()->setRedirect($this->getUrl('*/*/'));
-                }
-            } else {
-                Mage::getSingleton('adminhtml/session')->addError(Mage::helper('tax')->__('An error occurred while deleting this rate. Incorrect rate ID.'));
-                $this->getResponse()->setRedirect($this->getUrl('*/*/'));
-            }
+        $session = Mage::getSingleton('adminhtml/session');
+        try {
+            $this->rateService()->delete($this->rateService()->getById((int) $this->getRequest()->getParam('rate')));
+            $session->addSuccess(Mage::helper('tax')->__('The tax rate has been deleted.'));
+            $this->getResponse()->setRedirect($this->getUrl('*/*/'));
+            return;
+        } catch (Mage_Core_Exception_NoSuchEntity $e) {
+            $session->addError($e->getMessage());
+            $this->getResponse()->setRedirect($this->getUrl('*/*/'));
+            return;
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+        } catch (Exception $e) {
+            $session->addException($e, Mage::helper('tax')->__('An error occurred while deleting this rate.'));
         }
+        $this->_redirectReferer($this->getUrl('*/*/'));
     }
 
     /**
@@ -234,139 +212,28 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
             ->renderLayout();
     }
 
-    /**
-     * Import action from import/export tax
-     */
     #[Maho\Config\Route('/admin/tax_rate/importPost')]
     public function importPostAction(): void
     {
-        if ($this->getRequest()->isPost() && !empty($_FILES['import_rates_file']['tmp_name'])) {
-            try {
-                $this->_importRates();
+        $session = Mage::getSingleton('adminhtml/session');
+        $fileName = $_FILES['import_rates_file']['tmp_name'] ?? '';
+        if (!$this->getRequest()->isPost() || $fileName === '') {
+            $session->addError(Mage::helper('tax')->__('Invalid file upload attempt'));
+            $this->_redirect('*/*/importExport');
+            return;
+        }
 
-                Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('tax')->__('The tax rate has been imported.'));
-            } catch (Mage_Core_Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-            } catch (Exception) {
-                Mage::getSingleton('adminhtml/session')->addError(Mage::helper('tax')->__('Invalid file upload attempt'));
+        try {
+            foreach ($this->rateService()->import(new \Maho\File\Csv()->getData($fileName)) as $error) {
+                $session->addError($error);
             }
-        } else {
-            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('tax')->__('Invalid file upload attempt'));
+            $session->addSuccess(Mage::helper('tax')->__('The tax rate has been imported.'));
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+        } catch (Exception $e) {
+            $session->addException($e, Mage::helper('tax')->__('Invalid file upload attempt'));
         }
         $this->_redirect('*/*/importExport');
-    }
-
-    protected function _importRates()
-    {
-        $fileName   = $_FILES['import_rates_file']['tmp_name'];
-        $csvObject  = new \Maho\File\Csv();
-        $csvData = $csvObject->getData($fileName);
-
-        /** checks columns */
-        $csvFields  = [
-            0   => Mage::helper('tax')->__('Code'),
-            1   => Mage::helper('tax')->__('Country'),
-            2   => Mage::helper('tax')->__('State'),
-            3   => Mage::helper('tax')->__('Zip/Post Code'),
-            4   => Mage::helper('tax')->__('Rate'),
-            5   => Mage::helper('tax')->__('Zip/Post is Range'),
-            6   => Mage::helper('tax')->__('Range From'),
-            7   => Mage::helper('tax')->__('Range To'),
-        ];
-
-        $stores = [];
-        $unset = [];
-        $storeCollection = Mage::getModel('core/store')->getCollection()->setLoadDefault(false);
-        $cvsFieldsNum = count($csvFields);
-        $cvsDataNum   = count($csvData[0]);
-        for ($i = $cvsFieldsNum; $i < $cvsDataNum; $i++) {
-            $header = $csvData[0][$i];
-            $found = false;
-            foreach ($storeCollection as $store) {
-                if ($header == $store->getCode()) {
-                    $csvFields[$i] = $store->getCode();
-                    $stores[$i] = $store->getId();
-                    $found = true;
-                }
-            }
-            if (!$found) {
-                $unset[] = $i;
-            }
-        }
-
-        $regions = [];
-
-        if ($unset) {
-            foreach ($unset as $u) {
-                unset($csvData[0][$u]);
-            }
-        }
-        if ($csvData[0] == $csvFields) {
-            foreach ($csvData as $k => $v) {
-                if ($k == 0) {
-                    continue;
-                }
-
-                //end of file has more then one empty lines
-                if (count($v) <= 1 && !strlen($v[0])) {
-                    continue;
-                }
-                if ($unset) {
-                    foreach ($unset as $u) {
-                        unset($v[$u]);
-                    }
-                }
-
-                if (count($csvFields) != count($v)) {
-                    Mage::getSingleton('adminhtml/session')->addError(Mage::helper('tax')->__('Invalid file upload attempt'));
-                }
-
-                $country = Mage::getModel('directory/country')->loadByCode($v[1]);
-                if (!$country->getId()) {
-                    Mage::getSingleton('adminhtml/session')->addError(Mage::helper('tax')->__('One of the country has invalid code.'));
-                    continue;
-                }
-
-                if (!isset($regions[$v[1]])) {
-                    $regions[$v[1]]['*'] = '*';
-                    $regionCollection = Mage::getModel('directory/region')->getCollection()
-                        ->addCountryFilter($v[1]);
-                    if ($regionCollection->getSize()) {
-                        foreach ($regionCollection as $region) {
-                            $regions[$v[1]][$region->getCode()] = $region->getRegionId();
-                        }
-                    }
-                }
-
-                if (!empty($regions[$v[1]][$v[2]])) {
-                    $rateData  = [
-                        'code'           => $v[0],
-                        'tax_country_id' => $v[1],
-                        'tax_region_id'  => ($regions[$v[1]][$v[2]] == '*') ? 0 : $regions[$v[1]][$v[2]],
-                        'tax_postcode'   => empty($v[3]) ? null : $v[3],
-                        'rate'           => $v[4],
-                        'zip_is_range'   => $v[5],
-                        'zip_from'       => $v[6],
-                        'zip_to'         => $v[7],
-                    ];
-
-                    $rateModel = Mage::getModel('tax/calculation_rate')->loadByCode($rateData['code']);
-                    foreach ($rateData as $dataName => $dataValue) {
-                        $rateModel->setData($dataName, $dataValue);
-                    }
-
-                    $titles = [];
-                    foreach ($stores as $field => $id) {
-                        $titles[$id] = $v[$field];
-                    }
-
-                    $rateModel->setTitle($titles);
-                    $rateModel->save();
-                }
-            }
-        } else {
-            Mage::throwException(Mage::helper('tax')->__('Invalid file format upload attempt'));
-        }
     }
 
     /**
@@ -376,16 +243,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
     public function exportPostAction(): void
     {
         /** start csv content and set template */
-        $headers = new \Maho\DataObject([
-            'code'         => Mage::helper('tax')->__('Code'),
-            'country_name' => Mage::helper('tax')->__('Country'),
-            'region_name'  => Mage::helper('tax')->__('State'),
-            'tax_postcode' => Mage::helper('tax')->__('Zip/Post Code'),
-            'rate'         => Mage::helper('tax')->__('Rate'),
-            'zip_is_range' => Mage::helper('tax')->__('Zip/Post is Range'),
-            'zip_from'     => Mage::helper('tax')->__('Range From'),
-            'zip_to'       => Mage::helper('tax')->__('Range To'),
-        ]);
+        $headers = new \Maho\DataObject($this->rateService()->getCsvHeaders());
         $template = '"{{code}}","{{country_name}}","{{region_name}}","{{tax_postcode}}","{{rate}}"'
                 . ',"{{zip_is_range}}","{{zip_from}}","{{zip_to}}"';
         $content = $headers->toString($template);
@@ -433,6 +291,11 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
         }
 
         $this->_prepareDownloadResponse('tax_rates.csv', $content);
+    }
+
+    protected function rateService(): Mage_Tax_Service_Rate
+    {
+        return Mage::getService('tax/rate');
     }
 
     #[\Override]

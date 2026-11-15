@@ -16,6 +16,9 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
 {
     public const ENTITY = 'blog_post';
 
+    /** Lowercase letters and digits, in groups that one dash separates. */
+    public const URL_KEY_PATTERN = '/^[a-z0-9]+(-[a-z0-9]+)*$/';
+
     #[\Override]
     protected $_eventPrefix = 'blog_post';
     #[\Override]
@@ -26,6 +29,27 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
     protected function _construct()
     {
         $this->_init('blog/post');
+    }
+
+    /**
+     * Tell whether a visitor of the store view $storeId can read the post: it is active and published, and it is in
+     * that store view or in all store views.
+     */
+    public function isVisibleInStore(int $storeId): bool
+    {
+        return $this->getIsActive()
+            && $this->isPublished($storeId)
+            && array_intersect([Mage_Core_Model_App::ADMIN_STORE_ID, $storeId], array_map(intval(...), $this->getStores())) !== [];
+    }
+
+    /**
+     * publish_date is a date of the store view, so a post published today shows from 00:00 in the time zone of the store.
+     */
+    public function isPublished(int $storeId): bool
+    {
+        $publishDate = $this->getPublishDate();
+        return empty($publishDate)
+            || $publishDate <= Mage::app()->getLocale()->utcToStore($storeId)->format(Mage_Core_Model_Locale::DATE_FORMAT);
     }
 
     public function getStores(): array

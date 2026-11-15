@@ -212,34 +212,16 @@ class Mage_CurrencySymbol_Model_System_Currencysymbol
                 }
             }
         }
+        // No field of system.xml declares the path, so the service saves the value as it is
+        /** @var Mage_Core_Service_Config $service */
+        $service = Mage::getService('core/config');
         if ($symbols) {
-            $value['options']['fields']['customsymbol']['value'] = Mage::helper('core')->jsonEncode($symbols);
+            $service->save(self::XML_PATH_CUSTOM_CURRENCY_SYMBOL, Mage::helper('core')->jsonEncode($symbols), allowUndeclared: true);
         } else {
-            $value['options']['fields']['customsymbol']['inherit'] = 1;
+            $service->delete(self::XML_PATH_CUSTOM_CURRENCY_SYMBOL, Mage_Adminhtml_Model_Config_Data::SCOPE_DEFAULT, 0);
         }
 
-        Mage::getModel('adminhtml/config_data')
-            ->setSection(self::CONFIG_SECTION)
-            ->setWebsite(null)
-            ->setStore(null)
-            ->setGroups($value)
-            ->save();
-
-        Mage::dispatchEvent(
-            'admin_system_config_changed_section_currency_before_reinit',
-            ['website' => $this->_websiteId, 'store' => $this->_storeId],
-        );
-
-        // reinit configuration
-        Mage::getConfig()->reinit();
-        Mage::app()->reinitStores();
-
         $this->clearCache();
-
-        Mage::dispatchEvent(
-            'admin_system_config_changed_section_currency',
-            ['website' => $this->_websiteId, 'store' => $this->_storeId],
-        );
 
         return $this;
     }

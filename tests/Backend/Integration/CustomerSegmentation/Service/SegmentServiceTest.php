@@ -29,7 +29,7 @@ describe('Customer segment service', function () {
             $this->fail('The service saved an invalid segment');
         } catch (Mage_Core_Exception_Input $e) {
             expect(array_column($e->getErrors(), 'field'))
-                ->toBe(['name', 'website_ids', 'customer_group_ids', 'refresh_mode', 'priority'])
+                ->toBe(['name', 'refresh_mode', 'priority', 'website_ids', 'customer_group_ids'])
                 ->and(explode("\n", $e->getMessage()))->toHaveCount(5);
         }
 
@@ -114,6 +114,53 @@ describe('Customer segment service', function () {
                 ->and(pestSegmentService()->getById((int) $segment->getId())->getAutoEmailActive())->toBeFalse();
         } finally {
             pestSegmentService()->delete($segment);
+        }
+    });
+
+    it('checks the name, the websites, the refresh mode and the priority on a direct model save', function () {
+        $segment = Mage::getModel('customersegmentation/segment')
+            ->setName(str_repeat('n', 256))
+            ->setWebsiteIds([])
+            ->setRefreshMode('often')
+            ->setPriority(-1);
+
+        try {
+            $segment->save();
+            $this->fail('The model saved an invalid segment');
+        } catch (Mage_Core_Exception_Input $e) {
+            expect(array_column($e->getErrors(), 'field'))->toBe(['name', 'website_ids', 'refresh_mode', 'priority']);
+        }
+        expect($segment->getId())->toBeNull();
+
+        $saved = Mage::getModel('customersegmentation/segment')->setName('  Pest direct ' . uniqid() . '  ')->setWebsiteIds([1]);
+        $saved->save();
+        try {
+            expect($saved->getName())->toBe(trim((string) $saved->getName()))
+                ->and(Mage::getModel('customersegmentation/segment')->load($saved->getId())->getName())->toStartWith('Pest direct');
+        } finally {
+            $saved->delete();
+        }
+    });
+
+    it('lets a client of some websites change only a segment whose websites are all among them', function () {
+        $segment = pestSegmentService()->save(
+            pestSegmentService()->newSegment()->setName('Pest forbidden ' . uniqid())->setWebsiteIds([1]),
+        );
+        $id = (int) $segment->getId();
+
+        try {
+            expect(fn() => pestSegmentService()->save(pestSegmentService()->getById($id)->setPriority(4), [999]))
+                ->toThrow(Mage_Core_Exception_Forbidden::class)
+                ->and(fn() => pestSegmentService()->save(pestSegmentService()->getById($id)->setWebsiteIds([1, 999]), [1]))
+                ->toThrow(Mage_Core_Exception_Forbidden::class)
+                ->and(fn() => pestSegmentService()->delete(pestSegmentService()->getById($id), [999]))
+                ->toThrow(Mage_Core_Exception_Forbidden::class)
+                ->and(fn() => pestSegmentService()->refresh(pestSegmentService()->getById($id), websiteIds: [999]))
+                ->toThrow(Mage_Core_Exception_Forbidden::class)
+                ->and(pestSegmentService()->getById($id)->getPriority())->toBe(0)
+                ->and(pestSegmentService()->save(pestSegmentService()->getById($id)->setPriority(4), [1])->getPriority())->toBe(4);
+        } finally {
+            pestSegmentService()->delete(pestSegmentService()->getById($id));
         }
     });
 });

@@ -93,6 +93,36 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             description: 'Create customer account from a placed guest order',
             security: 'true',
         ),
+        new Post(
+            uriTemplate: '/customers/magic-link',
+            name: 'magic_link_rest',
+            description: 'Request an email with a login link. Body: email',
+            security: 'true',
+        ),
+        new Post(
+            uriTemplate: '/customers/confirm',
+            name: 'confirm_rest',
+            description: 'Confirm an account with the customer ID and the key of the confirmation email. Body: customerId, key',
+            security: 'true',
+        ),
+        new Post(
+            uriTemplate: '/customers/confirmation-link',
+            name: 'confirmation_link_rest',
+            description: 'Send the account confirmation email again. Body: email, captchaToken',
+            security: 'true',
+        ),
+        new Post(
+            uriTemplate: '/customers/me/two-factor',
+            name: 'two_factor_rest',
+            description: 'Turn two-factor authentication on or off for the current customer. Body: currentPassword, twofaEnabled, twofaCode',
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('customers/write')",
+        ),
+        new Post(
+            uriTemplate: '/customers/me/two-factor/secret',
+            name: 'two_factor_secret_rest',
+            description: 'Get the secret for the authenticator app of the current customer, before two-factor authentication is turned on',
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('customers/write')",
+        ),
     ],
     graphQlOperations: [
         new Query(name: 'item_query', description: 'Get a customer by ID', security: "is_granted('ROLE_ADMIN') or is_granted('customers/read')"),
@@ -126,17 +156,6 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             resolver: CustomQueryResolver::class,
         ),
         new Mutation(
-            name: 'quickCreate',
-            description: 'Quick customer creation by an admin or API integration',
-            args: [
-                'email' => ['type' => 'String!', 'description' => 'Customer email'],
-                'firstname' => ['type' => 'String!', 'description' => 'First name'],
-                'lastname' => ['type' => 'String!', 'description' => 'Last name'],
-                'telephone' => ['type' => 'String', 'description' => 'Phone number'],
-            ],
-            security: "is_granted('ROLE_ADMIN') or is_granted('customers/create')",
-        ),
-        new Mutation(
             security: 'true',
             name: 'login',
             description: 'Customer login',
@@ -152,6 +171,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
                 'firstName' => ['type' => 'String'],
                 'lastName' => ['type' => 'String'],
                 'email' => ['type' => 'String'],
+                'currentPassword' => ['type' => 'String', 'description' => 'Required to change the email'],
                 'customAttributes' => ['type' => 'Iterable', 'description' => 'Values of the custom attributes of the Customer Account Edit form, keyed by attribute code'],
             ],
             description: 'Update authenticated customer profile',
@@ -171,6 +191,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             name: 'forgotPassword',
             args: [
                 'email' => ['type' => 'String!'],
+                'captchaToken' => ['type' => 'String', 'description' => 'CAPTCHA token from the client-side widget, when the store uses a CAPTCHA'],
             ],
             description: 'Send password reset email',
         ),
@@ -183,6 +204,47 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             ],
             description: 'Reset password with token',
             security: 'true',
+        ),
+        new Mutation(
+            security: 'true',
+            name: 'requestMagicLink',
+            args: [
+                'email' => ['type' => 'String!'],
+            ],
+            description: 'Send an email with a login link',
+        ),
+        new Mutation(
+            security: 'true',
+            name: 'confirm',
+            args: [
+                'customerId' => ['type' => 'ID!', 'description' => 'Customer ID of the confirmation link'],
+                'key' => ['type' => 'String!', 'description' => 'Key of the confirmation link'],
+            ],
+            description: 'Confirm an account with the key of the confirmation email',
+        ),
+        new Mutation(
+            security: 'true',
+            name: 'sendConfirmationLink',
+            args: [
+                'email' => ['type' => 'String!'],
+                'captchaToken' => ['type' => 'String', 'description' => 'CAPTCHA token from the client-side widget, when the store uses a CAPTCHA'],
+            ],
+            description: 'Send the account confirmation email again',
+        ),
+        new Mutation(
+            name: 'setTwoFactor',
+            args: [
+                'currentPassword' => ['type' => 'String!'],
+                'twofaEnabled' => ['type' => 'Boolean!', 'description' => 'true turns two-factor authentication on, false turns it off'],
+                'twofaCode' => ['type' => 'String', 'description' => 'Code of the authenticator app, required to turn two-factor authentication on'],
+            ],
+            description: 'Turn two-factor authentication on or off for the authenticated customer',
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('customers/write')",
+        ),
+        new Mutation(
+            name: 'createTwoFactorSecret',
+            description: 'Get the secret for the authenticator app of the authenticated customer',
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('customers/write')",
         ),
     ],
 )]
@@ -274,13 +336,25 @@ class Customer extends CrudResource
     #[ApiProperty(writable: true, readable: false)]
     public ?string $password = null;
 
-    /** @var string|null Current password for password change */
+    /** @var string|null Current password for a password change, or for a profile update that changes the email */
     #[ApiProperty(writable: true, readable: false)]
     public ?string $currentPassword = null;
 
     /** @var string|null New password for password change */
     #[ApiProperty(writable: true, readable: false)]
     public ?string $newPassword = null;
+
+    #[ApiProperty(description: 'CAPTCHA token from the client-side widget, when the store uses a CAPTCHA. For a registration, a password reset email and a confirmation email', writable: true, readable: false, extraProperties: ['computed' => true])]
+    public ?string $captchaToken = null;
+
+    #[ApiProperty(description: 'true turns two-factor authentication on, false turns it off (POST /customers/me/two-factor)', writable: true, readable: false, extraProperties: ['computed' => true])]
+    public ?bool $twofaEnabled = null;
+
+    #[ApiProperty(description: 'Code of the authenticator app, required to turn two-factor authentication on', writable: true, readable: false, extraProperties: ['computed' => true])]
+    public ?string $twofaCode = null;
+
+    #[ApiProperty(description: 'Secret for the authenticator app. Only POST /customers/me/two-factor/secret returns it', writable: false, security: "is_granted('ROLE_CUSTOMER')", extraProperties: ['computed' => true])]
+    public ?string $twofaSecret = null;
 
     public static function afterLoad(self $dto, object $model): void
     {

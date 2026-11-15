@@ -37,7 +37,7 @@ class Maho_Ai_Model_System_Config_Backend_FetchTrigger extends Mage_Core_Model_C
         }
 
         if (preg_match('#^ai/general/([a-z]+)_base_url$#', (string) $this->getPath(), $m)) {
-            Mage::getModel('ai/platform_modelFetcher')->refreshCache($m[1]);
+            Mage::getSingleton('ai/platform_modelFetcher')->refreshCache($m[1]);
         }
 
         return $this;

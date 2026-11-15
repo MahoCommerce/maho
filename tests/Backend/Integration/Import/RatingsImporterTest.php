@@ -38,7 +38,7 @@ function ratingsCleanup(): void
 beforeEach(fn() => ratingsCleanup());
 afterEach(fn() => ratingsCleanup());
 
-it('creates a rating with five options on every store, hides the others and is idempotent', function (): void {
+it('creates a rating with five options on every store, hides the others from the store views and is idempotent', function (): void {
     $path = ratingsCsv([
         ['code', 'position'],
         ['Imp Rating', '1'],
@@ -53,7 +53,7 @@ it('creates a rating with five options on every store, hides the others and is i
     expect(array_map('intval', (array) $rating->getStores()))->toContain(1);
     expect(Mage::getResourceModel('rating/rating_option_collection')->addRatingFilter($rating->getId())->count())->toBe(5);
     $quality = Mage::getModel('rating/rating')->load('Quality', 'rating_code');
-    expect((array) $quality->getStores())->toBe([]);
+    expect(array_diff(array_map('intval', (array) $quality->getStores()), [0]))->toBe([]);
 
     $again = (new Ratings())->import($path);
     expect($again->created)->toBe(0)->and($again->updated)->toBe(1);
@@ -61,7 +61,7 @@ it('creates a rating with five options on every store, hides the others and is i
     unlink($path);
 });
 
-it('limits a rating to the listed stores', function (): void {
+it('limits a rating to the listed stores and the admin store', function (): void {
     $store = Mage::app()->getStore(1)->getCode();
     $path = ratingsCsv([
         ['code', 'stores'],
@@ -69,7 +69,9 @@ it('limits a rating to the listed stores', function (): void {
     ]);
     (new Ratings())->import($path);
     $rating = Mage::getModel('rating/rating')->load('Imp Rating', 'rating_code');
-    expect(array_map('intval', (array) $rating->getStores()))->toBe([1]);
+    $stores = array_map('intval', (array) $rating->getStores());
+    sort($stores);
+    expect($stores)->toBe([0, 1]);
     unlink($path);
 });
 

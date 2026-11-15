@@ -77,7 +77,7 @@ Two rules control the order:
 
 `rest.php` boots the Symfony API Platform kernel directly. `index.php` boots the full Maho
 front-controller stack and then hands off to Symfony. The first path saves 50 to 100 ms per request.
-That matters for a client that makes 5 to 10 calls per user action, such as a POS terminal or a
+That matters for a client that makes 5 to 10 calls per user action, such as a staff application or a
 headless storefront. Both paths reach the same kernel. Maho is still initialised inside `rest.php`,
 so store context, models and configuration stay available.
 

@@ -25,8 +25,8 @@ use Maho\Data\Form\Element\Renderer\RendererInterface;
 abstract class AbstractElement extends AbstractForm
 {
     protected $_id;
-    protected $_type;
-    protected $_form;
+    protected ?string $_type = null;
+    protected ?AbstractForm $_form = null;
     #[\Override]
     protected $_elements;
 
@@ -250,11 +250,8 @@ abstract class AbstractElement extends AbstractForm
 
     /**
      * Render HTML for element's label
-     *
-     * @param string $idSuffix
-     * @return string
      */
-    public function getLabelHtml($idSuffix = '')
+    public function getLabelHtml(string $idSuffix = ''): string
     {
         if (!is_null($this->getLabel())) {
             $html = '<label for="' . $this->getHtmlId() . $idSuffix . '">' . $this->_escape($this->getLabel())

@@ -103,7 +103,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
         $batchUrl = $this->getUrl('*/*/generateBatch');
         $finalizeUrl = $this->getUrl('*/*/generateFinalize');
         $cancelUrl = $this->getUrl('*/*/generateCancel');
-        $resetUrl = $this->getUrl('*/*/forceReset');
         $uploadUrl = $this->getUrl('*/*/upload');
 
         // Auto-generation is armed only by the save/generate actions (form key or secret key
@@ -137,8 +136,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
             'progress_filtered' => $this->__('%i included + %e excluded / %t (%p%)'),
             'excluded_summary' => $this->__('%s excluded due to filters'),
             'confirm' => $this->__('Are you sure you want to generate this feed now?'),
-            'confirm_reset' => $this->__('This will clear any stuck generation status. Continue?'),
-            'reset_success' => $this->__('Generation status has been reset.'),
         ]);
 
         return <<<JS
@@ -178,7 +175,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                     batch: '{$batchUrl}',
                     finalize: '{$finalizeUrl}',
                     cancel: '{$cancelUrl}',
-                    reset: '{$resetUrl}',
                     upload: '{$uploadUrl}'
                 },
                 translations: {$translations},
@@ -249,28 +245,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                     })
                     .catch(error => {
                         this.showError(error.message || 'Network error');
-                    });
-                },
-
-                reset(feedId) {
-                    if (!confirm(this.translations.confirm_reset)) {
-                        return;
-                    }
-
-                    mahoFetch(this.urls.reset, {
-                        method: 'POST',
-                        body: new URLSearchParams({ id: feedId, form_key: FORM_KEY }),
-                        loaderArea: false
-                    })
-                    .then(data => {
-                        if (data.error) {
-                            alert(data.message);
-                        } else {
-                            alert(this.translations.reset_success);
-                        }
-                    })
-                    .catch(error => {
-                        alert(error.message || 'Error resetting generation');
                     });
                 },
 

@@ -67,7 +67,7 @@ class Mage_Rating_Model_Resource_Rating_Option extends Mage_Core_Model_Resource_
     protected $_optionId;
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('rating/rating_option', 'option_id');
 
@@ -131,7 +131,7 @@ class Mage_Rating_Model_Resource_Rating_Option extends Mage_Core_Model_Resource_
      *
      * @param Mage_Rating_Model_Rating_Option $option
      */
-    public function aggregate($option)
+    public function aggregate($option): void
     {
         $vote = Mage::getModel('rating/rating_option_vote')->load($option->getVoteId());
         $this->aggregateEntityByRatingId($vote->getRatingId(), $vote->getEntityPkValue());
@@ -143,7 +143,7 @@ class Mage_Rating_Model_Resource_Rating_Option extends Mage_Core_Model_Resource_
      * @param int $ratingId
      * @param int $entityPkValue
      */
-    public function aggregateEntityByRatingId($ratingId, $entityPkValue)
+    public function aggregateEntityByRatingId($ratingId, $entityPkValue): void
     {
         $readAdapter  = $this->_getReadAdapter();
         $writeAdapter = $this->_getWriteAdapter();
@@ -199,8 +199,9 @@ class Mage_Rating_Model_Resource_Rating_Option extends Mage_Core_Model_Resource_
                 'entity_pk_value'  => $entityPkValue,
                 'vote_count'       => $row['vote_count'],
                 'vote_value_sum'   => $row['vote_value_sum'],
-                'percent'          => (($row['vote_value_sum'] / $row['vote_count']) / 5) * 100,
-                'percent_approved' => ($row['app_vote_count'] ? ((($row['app_vote_value_sum'] / $row['app_vote_count']) / 5) * 100) : 0),
+                // The percent columns are SMALLINT, and PostgreSQL refuses a fraction
+                'percent'          => (int) round((($row['vote_value_sum'] / $row['vote_count']) / 5) * 100),
+                'percent_approved' => $row['app_vote_count'] ? (int) round((($row['app_vote_value_sum'] / $row['app_vote_count']) / 5) * 100) : 0,
                 'store_id'         => $row['store_id'],
             ];
 

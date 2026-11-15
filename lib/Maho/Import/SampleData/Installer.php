@@ -111,7 +111,7 @@ final class Installer
         }
 
         $this->step($done + 1, $steps, 'Cache');
-        Mage::app()->getCache()->flush();
+        Mage::getService('core/cache')->flush();
         $this->reporter->finish();
         return $result;
     }
@@ -232,11 +232,8 @@ final class Installer
     private function reindexAll(): void
     {
         $this->reinitStores();
-        foreach (Mage::getModel('index/runner')->buildQueue() as $process) {
-            if ($process->isLocked()) {
-                $process->unlock();
-            }
-            $process->reindexEverything();
-        }
+        /** @var \Mage_Index_Service_Process $service */
+        $service = Mage::getService('index/process');
+        $service->reindexAll($service->getQueue());
     }
 }

@@ -24,6 +24,20 @@ The order keeps the tax that the store calculated at the moment the customer pla
 A rate applies when the address, the customer tax class and the product tax class all match a tax
 rule.
 
+The admin and the API refuse these changes:
+
+| Change | Error message |
+|--------|---------------|
+| A rate with a country that the store does not know | One of the country has invalid code. |
+| A post code range whose **Range To** is lower than its **Range From** | Range To should be equal or greater than Range From. |
+| A rule for a rate, a customer tax class and a product tax class that another rule already has | Rules (...) already exist for the specified Tax Rate, Customer Tax Class and Product Tax Class combinations |
+| Delete a rate that a rule uses | Tax rate cannot be removed. It exists in tax rule |
+| Delete a tax class that a rule uses | You cannot delete this tax class as it is used in Tax Rules. You have to delete the rules it is used in first. |
+| Delete a customer tax class that a customer group uses, or a product tax class that a product uses | You cannot delete this tax class as it is used for ... customer groups. (or products) |
+
+**Sales > Tax > Import / Export Tax Rates** imports the other rows of a file when a row has an error,
+and shows one message for each row that it refuses.
+
 ## Which address the store uses
 
 Go to **System > Configuration > Sales > Tax > Calculation Settings** and look at

@@ -77,7 +77,7 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Set current customer
      */
-    public function setCustomer(Mage_Customer_Model_Customer $customer)
+    public function setCustomer(Mage_Customer_Model_Customer $customer): void
     {
         $this->_currentCustomer = $customer;
     }
@@ -338,10 +338,8 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function isAllow()
     {
-        if ($this->isModuleOutputEnabled() && Mage::getStoreConfig('wishlist/general/active')) {
-            return true;
-        }
-        return false;
+        return $this->isModuleOutputEnabled()
+            && Mage::getService('wishlist/wishlist')->isEnabled((int) Mage::app()->getStore()->getId());
     }
 
     /**

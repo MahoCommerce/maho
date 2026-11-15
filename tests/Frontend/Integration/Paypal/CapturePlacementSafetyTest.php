@@ -73,6 +73,10 @@ it('prepareQuoteForPaypalOrder accepts a placeable express quote and assigns a s
         $this->markTestSkipped('No simple product available for testing');
     }
     $quote->save();
+    // prepare checks that the cart can use the method, as the payment step of the checkout does
+    Mage::app()->getStore()->setConfig('paypal/credentials/client_id', 'pest-client');
+    Mage::app()->getStore()->setConfig('paypal/credentials/client_secret', 'pest-secret');
+    Mage::app()->getStore()->setConfig('payment/paypal_standard_checkout/active', '1');
 
     // Express-style PayPal result carrying a full shipping address. prepare must
     // import it, collect rates and assign the (active, default) flatrate method,

@@ -42,7 +42,7 @@ class Mage_Adminhtml_Block_Permissions_Tab_Roleinfo extends Mage_Adminhtml_Block
         return parent::_beforeToHtml();
     }
 
-    protected function _initForm()
+    protected function _initForm(): void
     {
         $form = new \Maho\Data\Form();
 

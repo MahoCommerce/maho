@@ -115,3 +115,40 @@ it('makes a table cell with width 1% as wide as the icon in it, as the storefron
 
     expect($overflow)->toBeLessThanOrEqual(0);
 });
+
+it('keeps the image priority of a slideshow and loads the other images lazily', function (string $firstSlide, string $secondSlide, string $firstImageSelector, ?string $priority) {
+    $this->holder->setContent('<div class="slideshow"><ul><li>' . $firstSlide . '</li><li>' . $secondSlide . '</li></ul></div>')->save();
+
+    $page = adminLoginAndVisit(
+        WYSIWYG_RENDER_ADMIN_USER,
+        WYSIWYG_RENDER_ADMIN_PASSWORD,
+        '/admin/cms_block/edit/block_id/' . $this->holder->getId(),
+        '#block_content',
+    );
+    waitForScript($page, '!!window.tiptapEditors?.get("block_content")?.editor', 20);
+
+    $html = 'document.createRange().createContextualFragment(window.tiptapEditors.get("block_content").editor.getHTML())';
+
+    expect($page->script($html . '.querySelector(' . json_encode($firstImageSelector) . ').getAttribute("fetchpriority")'))->toBe($priority)
+        ->and($page->script($html . '.querySelector(' . json_encode($firstImageSelector) . ').getAttribute("loading")'))->toBeNull()
+        ->and($page->script($html . '.querySelector(".slideshow li:nth-child(2) img").getAttribute("loading")'))->toBe('lazy');
+})->with([
+    'first image has high priority' => [
+        '<img src="/media/a.jpg" alt="a" fetchpriority="high">',
+        '<img src="/media/b.jpg" alt="b">',
+        '.slideshow li:nth-child(1) img',
+        'high',
+    ],
+    'slideshow saved before has no priority' => [
+        '<img src="/media/a.jpg" alt="a">',
+        '<img src="/media/b.jpg" alt="b">',
+        '.slideshow li:nth-child(1) img',
+        null,
+    ],
+    'image in a picture gets the attributes' => [
+        '<picture><source media="(max-width: 767px)" srcset="/media/m.jpg"><img src="/media/a.jpg" alt="a" fetchpriority="high"></picture>',
+        '<img src="/media/b.jpg" alt="b">',
+        '.slideshow picture img',
+        'high',
+    ],
+]);

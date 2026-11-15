@@ -25,24 +25,18 @@ final class ProductAttributeProvider extends CrudProvider
     #[\Override]
     protected array $defaultSort = ['attribute_code' => 'ASC'];
 
-    private ?int $productEntityTypeId = null;
-
-    private function getProductEntityTypeId(): int
+    private static function service(): \Mage_Eav_Service_Attribute
     {
-        return $this->productEntityTypeId ??= (int) \Mage::getSingleton('eav/config')
-            ->getEntityType(\Mage_Catalog_Model_Product::ENTITY)
-            ->getId();
+        /** @var \Mage_Eav_Service_Attribute */
+        return \Mage::getService('eav/attribute');
     }
 
-    /**
-     * Load a single attribute and verify it belongs to catalog_product.
-     */
     #[\Override]
     protected function provideItem(int|string $id): ?ProductAttribute
     {
-        /** @var \Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
-        $attribute = $this->loadById('catalog/resource_eav_attribute', $id);
-        if (!$attribute->getId() || (int) $attribute->getEntityTypeId() !== $this->getProductEntityTypeId()) {
+        try {
+            $attribute = self::service()->getById((int) $id, \Mage_Catalog_Model_Product::ENTITY);
+        } catch (\Mage_Core_Exception_NoSuchEntity) {
             return null;
         }
 
@@ -114,9 +108,9 @@ final class ProductAttributeProvider extends CrudProvider
      */
     private function getByCode(string $code): ?ProductAttribute
     {
-        $attribute = \Mage::getSingleton('eav/config')
-            ->getAttribute(\Mage_Catalog_Model_Product::ENTITY, $code);
-        if (!$attribute || !$attribute->getId()) {
+        try {
+            $attribute = self::service()->getByCode($code, \Mage_Catalog_Model_Product::ENTITY);
+        } catch (\Mage_Core_Exception_NoSuchEntity) {
             return null;
         }
 

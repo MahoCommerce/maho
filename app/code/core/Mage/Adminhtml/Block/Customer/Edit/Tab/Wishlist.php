@@ -35,7 +35,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Wishlist extends Mage_Adminhtml_Blo
     /**
      * List of helpers to show options for product cells
      */
-    protected $_productHelpers = [];
+    protected array $_productHelpers = [];
 
     /**
      * Initialize Grid

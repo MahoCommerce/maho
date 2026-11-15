@@ -50,7 +50,7 @@ use Maho\ApiPlatform\Metadata\ListFilter;
             read: false,
             deserialize: false,
             security: "is_granted('ROLE_ADMIN') or is_granted('cart-price-rules/write')",
-            description: 'Generate coupons for a rule with couponType "auto". Body: qty (1 to 1000), length (1 to 32), format (alphanum, alpha, num), prefix, suffix (at most 32 of A-Z, a-z, 0-9, _ and -), dash (0 to length). The fields that the body leaves out get the defaults of the configuration. Response: generatedCount and coupons',
+            description: 'Generate coupons for a rule with couponType "auto". Body: qty (1 to 1000), length (1 to 255), format (alphanum, alpha, num), prefix, suffix, dash (0 to length). A code with its prefix, suffix and dashes has at most 255 characters. The fields that the body leaves out get the defaults of the configuration. Response: generatedCount and coupons',
             extraProperties: ['maho_mcp' => false],
         ),
         new Delete(

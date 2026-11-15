@@ -28,6 +28,9 @@ SPDX-License-Identifier: AFL-3.0
         <invalid-slide-length translate="message">
             <message>Please add at least one image to the slideshow</message>
         </invalid-slide-length>
+        <slideshow-priority translate="message">
+            <message>Load the first image with high priority on the page</message>
+        </slideshow-priority>
         <add-mobile-image translate="message">
             <message>Add mobile image</message>
         </add-mobile-image>

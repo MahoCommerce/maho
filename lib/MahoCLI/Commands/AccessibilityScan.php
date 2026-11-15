@@ -43,30 +43,17 @@ class AccessibilityScan extends BaseMahoCommand
     ): int {
         $this->initMaho();
 
-        $url = (string) $url;
-        if ($url === '' || !Mage::helper('core')->isValidUrl($url)) {
-            $output->writeln('<error>Please provide a valid URL with --url</error>');
+        try {
+            /** @var \Maho_AccessibilityScan_Service_Scan $service */
+            $service = Mage::getService('accessibilityscan/scan');
+            $scan = $service->start((string) $url, $level, Maho_AccessibilityScan_Model_Scan::TRIGGER_CLI);
+        } catch (\Mage_Core_Exception $e) {
+            $output->writeln('<error>' . $e->getMessage() . '</error>');
             return 2;
         }
-
-        $helper = Mage::helper('accessibilityscan');
-        $storeId = $helper->resolveScanUrlStoreId($url);
-        if ($storeId === null) {
-            $output->writeln('<error>The URL to scan must belong to one of the configured store base URLs</error>');
-            return 2;
-        }
-        $level = $helper->normalizeWcagLevel($level ?? $helper->getDefaultWcagLevel());
-
-        $scan = Mage::getModel('accessibilityscan/scan');
-        $scan->setUrl($url)
-            ->setStoreId($storeId)
-            ->setWcagLevel($level)
-            ->setTriggeredBy(Maho_AccessibilityScan_Model_Scan::TRIGGER_CLI)
-            ->setStatus(Maho_AccessibilityScan_Model_Scan::STATUS_PENDING)
-            ->save();
 
         if ($format !== 'json') {
-            $output->writeln(sprintf('Scanning <comment>%s</comment> (WCAG %s)...', $url, $level));
+            $output->writeln(sprintf('Scanning <comment>%s</comment> (WCAG %s)...', $scan->getUrl(), $scan->getWcagLevel()));
         }
 
         $runner = Mage::getModel('accessibilityscan/runner');

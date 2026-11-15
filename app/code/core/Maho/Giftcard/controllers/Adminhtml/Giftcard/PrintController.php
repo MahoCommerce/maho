@@ -89,42 +89,29 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
     #[Maho\Config\Route('/admin/giftcard_print/email')]
     public function emailAction(): void
     {
-        $id = $this->getRequest()->getParam('id');
-        $scheduleAt = $this->getRequest()->getParam('schedule_at');
+        $id = (int) $this->getRequest()->getParam('id');
+        /** @var Maho_Giftcard_Service_Giftcard $service */
+        $service = Mage::getService('giftcard/giftcard');
 
-        $giftcard = Mage::getModel('giftcard/giftcard')->load($id);
-
-        if (!$giftcard->getId()) {
-            $this->_getSession()->addError('Gift card not found.');
+        try {
+            $giftcard = $service->getById($id);
+        } catch (Mage_Core_Exception_NoSuchEntity $e) {
+            $this->_getSession()->addError($e->getMessage());
             $this->_redirect('*/giftcard/index');
             return;
         }
 
-        if (!$giftcard->getRecipientEmail()) {
-            $this->_getSession()->addError('No recipient email address set.');
-            $this->_redirect('*/giftcard/edit', ['id' => $id]);
-            return;
-        }
-
         try {
-            if ($scheduleAt) {
-                // Schedule email for later
-                $scheduleDate = new DateTime($scheduleAt);
-                Mage::helper('giftcard')->scheduleGiftcardEmail($giftcard, $scheduleDate);
-                $this->_getSession()->addSuccess(
-                    sprintf('Gift card email scheduled for %s', $scheduleDate->format('Y-m-d H:i')),
-                );
-            } else {
-                // Send immediately
-                Mage::helper('giftcard')->sendGiftcardEmail($giftcard);
-                $this->_getSession()->addSuccess('Gift card email sent successfully.');
+            $service->sendEmail($giftcard);
+            $this->_getSession()->addSuccess('Gift card email sent successfully.');
+        } catch (Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $this->_getSession()->addError($error['message']);
             }
-
-            $this->_redirect('*/giftcard/edit', ['id' => $id]);
         } catch (Exception $e) {
             Mage::logException($e);
             $this->_getSession()->addError('Failed to send email: ' . $e->getMessage());
-            $this->_redirect('*/giftcard/edit', ['id' => $id]);
         }
+        $this->_redirect('*/giftcard/edit', ['id' => $id]);
     }
 }

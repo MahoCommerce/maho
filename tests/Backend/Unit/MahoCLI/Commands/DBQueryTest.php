@@ -102,14 +102,43 @@ it('refuses a result set with duplicate column names instead of dropping a colum
 });
 
 it('detects multiple statements while ignoring literals, identifiers, and comments', function () {
-    expect(dbQueryReflect('containsMultipleStatements', 'SELECT 1'))->toBeFalse()
-        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1;'))->toBeFalse()
-        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1; SELECT 2'))->toBeTrue()
-        ->and(dbQueryReflect('containsMultipleStatements', "SELECT 'a;b'"))->toBeFalse()
-        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT "x;y"'))->toBeFalse()
-        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT `a;b`'))->toBeFalse()
-        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1 /* ; */ , 2'))->toBeFalse()
-        ->and(dbQueryReflect('containsMultipleStatements', 'UPDATE a SET x=1; UPDATE b SET y=2'))->toBeTrue();
+    expect(dbQueryReflect('containsMultipleStatements', 'SELECT 1', 'mysql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1;', 'mysql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1; SELECT 2', 'mysql'))->toBeTrue()
+        ->and(dbQueryReflect('containsMultipleStatements', "SELECT 'a;b'", 'mysql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT "x;y"', 'mysql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT `a;b`', 'mysql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1 /* ; */ , 2', 'mysql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'UPDATE a SET x=1; UPDATE b SET y=2', 'mysql'))->toBeTrue();
+});
+
+it('splits MySQL strings by quote escaping and only recognizes comments outside quotes', function () {
+    expect(dbQueryReflect('containsMultipleStatements', "SELECT 'a\\\\'; SELECT 2", 'mysql'))->toBeTrue()
+        ->and(dbQueryReflect('containsMultipleStatements', "SELECT 'a\\';b'", 'mysql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', "SELECT 'it''s; fine'", 'mysql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', "SELECT '/* ; */'; SELECT 2", 'mysql'))->toBeTrue()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT /*!40101 1; */ 2', 'mysql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1; /* trailing comment */', 'mysql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', '/* ordinary comment */', 'mysql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1; /*!40101 SET @x = 1 */', 'mysql'))->toBeTrue()
+        ->and(dbQueryReflect('containsMultipleStatements', "SELECT 'a\\'; SELECT 2", 'mysql', 'NO_BACKSLASH_ESCAPES'))->toBeTrue()
+        ->and(dbQueryReflect('containsMultipleStatements', "SELECT 'a\\'; SELECT 2", 'mysql'))->toBeFalse();
+});
+
+it('uses PostgreSQL string and dollar-quote rules when detecting statement boundaries', function () {
+    expect(dbQueryReflect('containsMultipleStatements', 'SELECT $$a;b$$', 'pgsql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT $body$a;b$body$', 'pgsql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', "SELECT 'a\\'; SELECT 2", 'pgsql'))->toBeTrue()
+        ->and(dbQueryReflect('containsMultipleStatements', "SELECT E'a\\';b'", 'pgsql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT $$a;b$$; SELECT 2', 'pgsql'))->toBeTrue()
+        ->and(dbQueryReflect('containsMultipleStatements', "SELECT 1--comment; still comment\n", 'pgsql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1; /* trailing comment */', 'pgsql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', "SELECT 1; -- trailing comment\n", 'pgsql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', '/* ordinary comment */', 'pgsql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1 /* ; */', 'pgsql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1; /* trailing comment */', 'sqlite'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', "SELECT 1; -- trailing comment\n", 'sqlite'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', '/* ordinary comment */', 'sqlite'))->toBeFalse();
 });
 
 it('maps each engine to its client binary name', function () {
@@ -121,4 +150,12 @@ it('maps each engine to its client binary name', function () {
 
 it('reports no client binary for an unknown engine', function () {
     expect(dbQueryReflect('isClientBinaryAvailable', 'unknown-engine'))->toBeFalse();
+});
+
+it('refuses an unsupported engine on the framework connection', function () {
+    $output = new Symfony\Component\Console\Output\BufferedOutput();
+    $status = dbQueryReflect('executeViaAdapter', $output, 'SELECT 1', 'postgres', false);
+
+    expect($status)->toBe(Symfony\Component\Console\Command\Command::FAILURE)
+        ->and($output->fetch())->toContain('Unsupported database engine: postgres');
 });

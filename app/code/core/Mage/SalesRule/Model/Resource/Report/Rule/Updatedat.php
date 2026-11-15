@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_SalesRule_Model_Resource_Report_Rule_Updatedat extends Mage_SalesRule_Model_Resource_Report_Rule_Createdat
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('salesrule/coupon_aggregated_updated', 'id');
     }

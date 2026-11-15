@@ -106,9 +106,9 @@ it('updates the low stock date of the stock items', function () {
 });
 
 it('saves an empty date field as no date', function () {
-    $user = Mage::getModel('admin/user')->load(1)->setData('rp_token_created_at', '')->save();
+    Mage::getModel('admin/user')->load(1)->setData('rp_token_created_at', '')->save();
 
-    expect($user->getId())->not->toBeNull();
+    expect(Mage::getModel('admin/user')->load(1)->getData('rp_token_created_at'))->toBeNull();
 });
 
 it('saves an empty blog category position as 0', function () {

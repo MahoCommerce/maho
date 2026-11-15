@@ -395,12 +395,7 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
         }
 
         if ($attributeCode === 'is_in_stock') {
-            $stockItem = $product->getStockItem();
-            if (!$stockItem) {
-                $stockItem = Mage::getModel('cataloginventory/stock_item');
-                $stockItem->loadByProduct($product->getId());
-            }
-            return $stockItem->getIsInStock() ? '1' : '0';
+            return Mage::helper('cataloginventory')->isInStock($product) ? '1' : '0';
         }
 
         return $product->getData($attributeCode);

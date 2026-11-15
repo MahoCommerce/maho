@@ -11,6 +11,11 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_Rating>
     </modules>
     <global>
+        <services>
+            <rating>
+                <class>Mage_Rating_Service</class>
+            </rating>
+        </services>
         <models>
             <rating>
                 <class>Mage_Rating_Model</class>

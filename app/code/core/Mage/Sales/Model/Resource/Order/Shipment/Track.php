@@ -19,7 +19,7 @@ class Mage_Sales_Model_Resource_Order_Shipment_Track extends Mage_Sales_Model_Re
     protected $_eventPrefix    = 'sales_order_shipment_track_resource';
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('sales/shipment_track', 'entity_id');
     }

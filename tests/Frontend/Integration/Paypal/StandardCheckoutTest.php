@@ -25,15 +25,12 @@ it('has correct capability flags', function () {
     expect($method->canUseCheckout())->toBeTrue();
 });
 
-it('has correct form and info block types', function () {
+it('has form and info block types that resolve to the PayPal blocks', function () {
     $method = Mage::getModel('paypal/method_standardCheckout');
     expect($method->getFormBlockType())->toBe('paypal/checkout_standard_form');
     expect($method->getInfoBlockType())->toBe('paypal/payment_info');
-});
-
-it('resolves paypal/config alias to Maho_Paypal_Model_Config', function () {
-    $config = Mage::getModel('paypal/config');
-    expect($config)->toBeInstanceOf(Maho_Paypal_Model_Config::class);
+    expect(Mage::app()->getLayout()->createBlock($method->getInfoBlockType()))
+        ->toBeInstanceOf(Maho_Paypal_Block_Payment_Info::class);
 });
 
 it('provides JS SDK URL for correct environment', function () {

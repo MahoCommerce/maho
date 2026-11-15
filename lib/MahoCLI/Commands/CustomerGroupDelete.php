@@ -11,7 +11,7 @@ namespace MahoCLI\Commands;
 
 use Mage;
 use Mage_Core_Exception;
-use Mage_Customer_Model_Resource_Group;
+use Mage_Customer_Service_Group;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Interact;
@@ -39,25 +39,16 @@ class CustomerGroupDelete extends BaseMahoCommand
     ): int {
         $this->initMaho();
 
-        // A lookup in PHP: PostgreSQL refuses a query with an ID that is out of range for the column.
-        $groupIds = array_keys(Mage::getResourceModel('customer/group_collection')->toOptionHash());
-        $group = Mage::getModel('customer/group');
-        if (in_array($groupId, $groupIds, true)) {
-            $group->load($groupId);
-        }
-        if ($group->getId() === null) {
-            $io->writeln("<error>Customer group not found with ID: $groupId</error>");
-            return Command::FAILURE;
-        }
-        $code = $group->getCode();
-        /** @var Mage_Customer_Model_Resource_Group $resource */
-        $resource = Mage::getResourceSingleton('customer/group');
+        /** @var Mage_Customer_Service_Group $service */
+        $service = Mage::getService('customer/group');
         try {
-            $resource->validateDelete($group);
+            $group = $service->getById($groupId);
+            $service->validateDelete($group);
         } catch (Mage_Core_Exception $e) {
             $io->writeln('<error>' . $e->getMessage() . '</error>');
             return Command::FAILURE;
         }
+        $code = $group->getCode();
 
         $customers = Mage::getResourceModel('customer/customer_collection')
             ->addAttributeToFilter('group_id', $groupId)
@@ -70,7 +61,7 @@ class CustomerGroupDelete extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        $rows = $resource->getReferencingRows($groupId);
+        $rows = $group->getResource()->getReferencingRows($groupId);
         if ($rows) {
             $io->writeln("Deleting customer group $code also changes these rows, by the ON DELETE rule of their foreign key:");
             new Table($io)->setHeaders(['table', 'column', 'on_delete', 'rows'])->setRows($rows)->render();
@@ -84,7 +75,7 @@ class CustomerGroupDelete extends BaseMahoCommand
         }
 
         try {
-            $group->delete();
+            $service->delete($group);
         } catch (Mage_Core_Exception $e) {
             $io->writeln('<error>' . $e->getMessage() . '</error>');
             return Command::FAILURE;

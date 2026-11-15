@@ -93,8 +93,7 @@ describe('Sale Category Integration', function () {
 
         // Verify that at least some products in the Sale category have special prices
         // This is a reasonable expectation for a "Sale" category
-        if ($totalProducts > 0) {
-            expect($productsWithSpecialPrice)->toBeGreaterThan(0);
-        }
+        expect($totalProducts)->toBeGreaterThan(0)
+            ->and($productsWithSpecialPrice)->toBeGreaterThan(0);
     });
 });

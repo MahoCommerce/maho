@@ -14,6 +14,11 @@ SPDX-License-Identifier: AFL-3.0
         <docs>
             <user>docs/user</user>
         </docs>
+        <services>
+            <cataloginventory>
+                <class>Mage_CatalogInventory_Service</class>
+            </cataloginventory>
+        </services>
         <models>
             <cataloginventory>
                 <class>Mage_CatalogInventory_Model</class>

@@ -16,65 +16,75 @@ interface IoInterface
     /**
      * Open a connection
      */
-    public function open(array $args = []);
+    public function open(array $args = []): bool;
 
     /**
      * Close a connection
      */
-    public function close();
+    public function close(): void;
 
     /**
      * Create a directory
+     *
+     * @return string|bool The FTP adapter returns the name of the new directory
      */
-    public function mkdir($dir, $mode = 0777, $recursive = true);
+    public function mkdir(string $dir, int $mode = 0777, bool $recursive = true): string|bool;
 
     /**
      * Delete a directory
      */
-    public function rmdir($dir, $recursive = false);
+    public function rmdir(string $dir, bool $recursive = false): bool;
 
     /**
      * Get current working directory
+     *
+     * @return string|false|null null before open()
      */
-    public function pwd();
+    public function pwd(): string|false|null;
 
     /**
      * Change current working directory
      */
-    public function cd($dir);
+    public function cd(string $dir): bool;
 
     /**
      * Read a file
+     *
+     * @param string|resource|null $dest A file name or a stream to write to, or null to return the content
      */
-    public function read($filename, $dest = null);
+    public function read(string $filename, mixed $dest = null): string|bool;
 
     /**
      * Write a file
+     *
+     * @param string|resource $src A file name, the content, or a stream
      */
-    public function write($filename, $src, $mode = null);
+    public function write(string $filename, mixed $src, ?int $mode = null): int|bool;
 
     /**
      * Delete a file
      */
-    public function rm($filename);
+    public function rm(string $filename): bool;
 
     /**
      * Rename or move a directory or a file
      */
-    public function mv($src, $dest);
+    public function mv(string $src, string $dest): bool;
 
     /**
-     * Chamge mode of a directory or a file
+     * Change mode of a directory or a file
+     *
+     * @return int|bool The FTP and SFTP adapters return the new mode
      */
-    public function chmod($filename, $mode);
+    public function chmod(string $filename, int $mode): int|bool;
 
     /**
      * Get list of cwd subdirectories and files
      */
-    public function ls($grep = null);
+    public function ls(?string $grep = null): array;
 
     /**
      * Retrieve directory separator in context of io resource
      */
-    public function dirsep();
+    public function dirsep(): string;
 }

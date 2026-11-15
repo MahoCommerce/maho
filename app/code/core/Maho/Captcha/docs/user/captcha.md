@@ -46,6 +46,14 @@ Out of the box, the captcha guards the most-abused forms in a typical store:
 - Wishlist sharing
 - EU revocation form
 
+**API**
+
+For a headless storefront, the API asks the captcha where the storefront form asks it. `GET /contact/config` gives the frontend the challenge URL.
+
+- Contact form (`POST /contact`)
+- Newsletter subscription (`POST /newsletter/subscribe` and the GraphQL `subscribeNewsletter` mutation)
+- Product reviews (`POST /products/{productId}/reviews` and the GraphQL `submitReview` mutation)
+
 **Admin**
 
 - Admin login
@@ -73,6 +81,7 @@ The **CSS Selectors** field controls exactly which storefront forms get the capt
 .contacts-index-index #contactForm
 .customer-account-login #form-validate-register
 .customer-account-login #form-validate-forgot
+.customer-account-confirmation #form-validate
 #newsletter-validate-detail
 .catalog-product-view #review-form
 .review-product-list #review-form

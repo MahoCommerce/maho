@@ -438,7 +438,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      *                                    'src_name'=>'filename',
      *                                    'dst_name'=>'filename2'])
      */
-    public function addFileQueue($queueOptions)
+    public function addFileQueue($queueOptions): void
     {
         $this->_fileQueue[] = $queueOptions;
     }
@@ -600,7 +600,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      *
      * @param Mage_Catalog_Model_Product $product
      */
-    protected function _removeNotApplicableAttributes($product = null)
+    protected function _removeNotApplicableAttributes($product = null): void
     {
         $product    = $this->getProduct($product);
         $eavConfig  = Mage::getSingleton('eav/config');
@@ -628,6 +628,57 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
         $this->_removeNotApplicableAttributes($product);
         $this->getProduct($product)->canAffectOptions(true);
         return $this;
+    }
+
+    /**
+     * Check that each product of $productIds exists, has one of the types $allowedTypes and has no required custom
+     * option, so that it can be a child of the product. With $attributeSetId, the child must be in this attribute
+     * set. Each problem is an error of $field.
+     *
+     * @param array<int> $productIds
+     * @param list<string> $allowedTypes
+     * @throws Mage_Core_Exception_Input
+     */
+    protected function _validateChildProducts(array $productIds, array $allowedTypes, string $field, ?int $attributeSetId = null): void
+    {
+        if ($productIds === []) {
+            return;
+        }
+        $children = [];
+        foreach (Mage::getResourceModel('catalog/product_collection')->addIdFilter($productIds) as $child) {
+            $children[(int) $child->getId()] = $child;
+        }
+        $helper = Mage::helper('catalog');
+        $errors = new Mage_Core_Exception_Input();
+        foreach ($productIds as $productId) {
+            $child = $children[$productId] ?? null;
+            if ($child === null) {
+                $errors->addError($field, $helper->__('Product %s does not exist.', $productId));
+            } elseif (!in_array((string) $child->getTypeId(), $allowedTypes, true)) {
+                $errors->addError($field, $helper->__(
+                    'Product %s is a %s product. Allowed types: %s',
+                    $productId,
+                    (string) $child->getTypeId(),
+                    implode(', ', $allowedTypes),
+                ));
+            } elseif ((int) $child->getData('required_options') !== 0) {
+                // The storefront collections of the children leave out a product with a required option
+                $errors->addError($field, $helper->__('Product %s has a required custom option.', $productId));
+            } elseif ($attributeSetId !== null && (int) $child->getAttributeSetId() !== $attributeSetId) {
+                $errors->addError($field, $helper->__('Product %s is not in the attribute set of the product.', $productId));
+            }
+        }
+        $errors->throwIfErrors();
+    }
+
+    /**
+     * Return true when $product can have custom options.
+     *
+     * @param Mage_Catalog_Model_Product|null $product
+     */
+    public function allowsCustomOptions($product = null): bool
+    {
+        return true;
     }
 
     /**

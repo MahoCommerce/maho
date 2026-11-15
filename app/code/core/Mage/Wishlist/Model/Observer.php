@@ -73,7 +73,7 @@ class Mage_Wishlist_Model_Observer extends Mage_Core_Model_Abstract
      * @param \Maho\Event\Observer $observer
      */
     #[Maho\Config\Observer('checkout_cart_add_product_complete')]
-    public function processAddToCart($observer)
+    public function processAddToCart($observer): void
     {
         /** @var Mage_Core_Controller_Request_Http $request */
         $request = $observer->getEvent()->getRequest();

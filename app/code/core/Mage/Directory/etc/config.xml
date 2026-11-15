@@ -35,6 +35,11 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Mage_Directory_Block</class>
             </directory>
         </blocks>
+        <services>
+            <directory>
+                <class>Mage_Directory_Service</class>
+            </directory>
+        </services>
         <models>
             <directory>
                 <class>Mage_Directory_Model</class>

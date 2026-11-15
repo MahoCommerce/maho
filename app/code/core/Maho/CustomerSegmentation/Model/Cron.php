@@ -32,7 +32,8 @@ class Maho_CustomerSegmentation_Model_Cron
                     sprintf('Refreshing segment: %s (ID: %d)', $segment->getName(), $segment->getId()),
                 );
 
-                Mage::getService('customersegmentation/segment')->refresh($segment);
+                Mage::getService('customersegmentation/segment')
+                    ->refresh($segment, Maho_CustomerSegmentation_Service_Segment::REFRESH_WAIT_SECONDS);
 
                 $executionTime = microtime(true) - $startTime;
                 $memoryUsed = memory_get_usage() - $startMemory;

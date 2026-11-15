@@ -18,11 +18,8 @@ class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Retrieve the class name of the payment method's model
-     *
-     * @param $code
-     * @return string|null
      */
-    public function getMethodModelClassName($code)
+    public function getMethodModelClassName(?string $code): ?string
     {
         $key = self::XML_PATH_PAYMENT_METHODS . '/' . $code . '/model';
         return Mage::getStoreConfig($key);

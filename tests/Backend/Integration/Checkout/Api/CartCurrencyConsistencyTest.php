@@ -92,8 +92,7 @@ describe('Cart API quote-currency consistency (issue #1238)', function (): void 
         // A large enough cart that the full balance applies.
         $quote = createPricedQuote($this->product, 10);
 
-        $service = \Mage::getService('checkout/cart');
-        $service->applyGiftcard($quote, $giftcard->getCode());
+        \Mage::getService('giftcard/giftcard')->applyToCart($quote, $giftcard->getCode());
 
         // The stored snapshot is base currency: the total collector owns the format.
         $storedCodes = Mage::helper('core')->jsonDecode($quote->getGiftcardCodes(), true);

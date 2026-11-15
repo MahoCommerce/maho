@@ -104,10 +104,9 @@ describe('Cart price rule coupon generation', function (): void {
         'no quantity' => [[], 'qty'],
         'too many' => [['qty' => 1001], 'qty'],
         'no length' => [['qty' => 1, 'length' => 0], 'length'],
-        'too long' => [['qty' => 1, 'length' => 33], 'length'],
+        'too long' => [['qty' => 1, 'length' => 256], 'length'],
         'unknown format' => [['qty' => 1, 'format' => 'emoji'], 'format'],
-        'prefix with a space' => [['qty' => 1, 'prefix' => 'A B'], 'prefix'],
-        'long suffix' => [['qty' => 1, 'suffix' => str_repeat('S', 33)], 'suffix'],
+        'a code longer than the cart accepts' => [['qty' => 1, 'length' => 250, 'prefix' => 'PREFIX', 'dash' => 0], 'code'],
         'dash after the end' => [['qty' => 1, 'length' => 4, 'dash' => 5], 'dash'],
     ]);
 

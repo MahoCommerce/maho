@@ -51,7 +51,7 @@ class Mage_Bundle_Model_Resource_Bundle extends Mage_CatalogIndex_Model_Resource
      *
      * @param int $productId
      */
-    public function dropAllQuoteChildItems($productId)
+    public function dropAllQuoteChildItems($productId): void
     {
         $quoteItemIds = $this->_getReadAdapter()->fetchCol(
             $this->_getReadAdapter()->select()
@@ -74,7 +74,7 @@ class Mage_Bundle_Model_Resource_Bundle extends Mage_CatalogIndex_Model_Resource
      * @param int $productId
      * @param array $ids
      */
-    public function dropAllUnneededSelections($productId, $ids)
+    public function dropAllUnneededSelections($productId, $ids): void
     {
         $where = [
             'parent_product_id = ?' => $productId,

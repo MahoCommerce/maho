@@ -457,6 +457,9 @@ class formElementDependenceController {
     static MODE_OR  = 'OR';
     static MODE_XOR = 'XOR';
 
+    /** The wanted value that matches a field that holds any value that is not empty */
+    static ANY_VALUE = '__any__';
+
     /**
      * @param {Object.<string, Object>} elementsMap - key/value pairs of target fields and their conditions to be visible
      * @param {Object} [config] - config options, see Mage_Adminhtml_Block_Widget_Form_Element_Dependence::addConfigOptions()
@@ -465,12 +468,23 @@ class formElementDependenceController {
      * @param {Object.<string, string>} [config.field_values]
      * @param {number} [config.levels_up]
      * @param {boolean} [config.can_edit_price]
+     * @param {string[]} [config.keep_disabled] - ids of fields that a condition never enables
+     * @param {Object.<string, Object>} [config.required] - target fields and the conditions that make them required
      */
     constructor(elementsMap, config = {}) {
         this.config = config;
+        // A field that uses the default value is disabled only until the admin unchecks its Use Default box
+        this.config.keep_disabled = config.keep_disabled?.filter((id) => {
+            const inheritCheckboxEl = document.getElementById(id + '_inherit') ?? document.getElementById(id + '_default');
+            return !(inheritCheckboxEl?.checked && !inheritCheckboxEl.disabled);
+        });
         for (let [targetField, condition] of Object.entries(elementsMap)) {
             this.trackChange(null, targetField, condition);
             this.bindEventListeners(condition, [targetField, condition]);
+        }
+        for (const [targetField, condition] of Object.entries(config.required ?? {})) {
+            this.trackRequired(targetField, condition);
+            this.bindEventListeners(condition, [targetField, condition], (event, ...args) => this.trackRequired(...args));
         }
     }
 
@@ -495,22 +509,23 @@ class formElementDependenceController {
      *
      * @param {Object} condition
      * @param {Array<any>} eventArgs
+     * @param {Function} [handler] - called with the event and eventArgs, trackChange() by default
      */
-    bindEventListeners(condition, eventArgs = []) {
+    bindEventListeners(condition, eventArgs = [], handler = (event, ...args) => this.trackChange(event, ...args)) {
         for (let [dependentField, subcondition] of Object.entries(condition)) {
             if (this.isLogicalOperator(subcondition?.operator)) {
-                this.bindEventListeners(subcondition.condition, eventArgs);
+                this.bindEventListeners(subcondition.condition, eventArgs, handler);
             } else {
                 const dependentEl = document.getElementById(this.mapFieldId(dependentField));
                 if (dependentEl) {
                     if (this.config.on_event !== false) {
                         dependentEl.addEventListener(this.config.on_event ?? 'change', (event) => {
-                            this.trackChange(event, ...eventArgs);
+                            handler(event, ...eventArgs);
                         });
                     }
                     dependentEl.addEventListener('update', (event) => {
                         if (event instanceof formElementDependenceEvent) {
-                            this.trackChange(event, ...eventArgs);
+                            handler(event, ...eventArgs);
                         }
                     });
                 }
@@ -625,7 +640,9 @@ class formElementDependenceController {
                         dependentValues = Array.isArray(fallbackValues) ? fallbackValues : [fallbackValues];
                     }
                 }
-                result = dependentValues.some((val) => refValues.includes(val));
+                result = dependentValues.some((val) => refValues.includes(val))
+                    || (refValues.includes(formElementDependenceController.ANY_VALUE)
+                        && dependentValues.some((val) => typeof val === 'string' && val.trim() !== ''));
             }
             results.push(result)
         }
@@ -658,18 +675,53 @@ class formElementDependenceController {
         // Find all child form elements, except hidden fields because they may have custom logic
         rowEl.querySelectorAll('input:not([type=hidden]), textarea, select').forEach((el) => {
             // If Use Default is checked, don't toggle the main form element, only toggle the inherit box itself
-            const inheritCheckboxEl = document.getElementById(el.id + '_inherit');
-            if (inheritCheckboxEl && inheritCheckboxEl.checked) {
+            const inheritCheckboxEl = document.getElementById(el.id + '_inherit') ?? document.getElementById(el.id + '_default');
+            if (inheritCheckboxEl && inheritCheckboxEl !== el && inheritCheckboxEl.checked) {
                 return;
             }
             // Do not enable if can_edit_price option is set to true
             if (shouldShowUp && this.config.can_edit_price != undefined && !this.config.can_edit_price) {
                 return;
             }
+            // A field that the page disabled for another reason, such as a missing permission, stays disabled
+            if (shouldShowUp && this.config.keep_disabled?.includes(el.id)) {
+                return;
+            }
             el.disabled = !shouldShowUp;
         });
 
         this.toggleElem(rowEl, !shouldShowUp);
+    }
+
+    /**
+     * Mark a field as required while its condition is met: the required-entry class on the field, and the star
+     * on its label.
+     *
+     * @param {string} field - field name alias or ID of the target element
+     * @param {Object} condition - key/value pairs of field names and wanted values, or subconditions
+     */
+    trackRequired(field, condition) {
+        const el = document.getElementById(this.mapFieldId(field));
+        if (!el) {
+            return;
+        }
+        const required = this.evalCondition(condition);
+        // The validator no longer checks the field, so it would keep the message of an earlier check.
+        // reset() finds that message through the required-entry class, so it runs first.
+        if (!required && typeof Validation !== 'undefined') {
+            Validation.reset(el);
+        }
+        el.classList.toggle('required-entry', required);
+        const label = document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
+        const star = label?.querySelector('span.required');
+        if (required && label && !star) {
+            const mark = document.createElement('span');
+            mark.className = 'required';
+            mark.textContent = '*';
+            label.append(' ', mark);
+        } else if (!required) {
+            star?.remove();
+        }
     }
 }
 

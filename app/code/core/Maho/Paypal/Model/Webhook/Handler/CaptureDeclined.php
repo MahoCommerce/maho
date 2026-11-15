@@ -22,13 +22,10 @@ class Maho_Paypal_Model_Webhook_Handler_CaptureDeclined extends Maho_Paypal_Mode
             return;
         }
 
+        $this->_cancelOrder($order);
+
         $reason = $resource['status_details']['reason'] ?? 'DECLINED';
         $order->addStatusHistoryComment("PayPal capture declined ({$reason}): {$captureId}");
-
-        if ($order->canCancel()) {
-            $order->cancel();
-        }
-
         $order->save();
 
         $this->_log("CaptureDeclined: processed for order {$order->getIncrementId()}");

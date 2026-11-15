@@ -110,7 +110,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
     /**
      * Rule condition SQL builder setter
      */
-    public function setRuleResourceHelper(Mage_Rule_Model_Resource_Rule_Condition_SqlBuilder $ruleHelper)
+    public function setRuleResourceHelper(Mage_Rule_Model_Resource_Rule_Condition_SqlBuilder $ruleHelper): void
     {
         $this->_ruleResourceHelper = $ruleHelper;
     }
@@ -149,7 +149,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
     /**
      * Add special attributes
      */
-    protected function _addSpecialAttributes(array &$attributes)
+    protected function _addSpecialAttributes(array &$attributes): void
     {
         $attributes['attribute_set_id'] = Mage::helper('catalog')->__('Attribute Set');
         $attributes['category_ids'] = Mage::helper('catalog')->__('Category');

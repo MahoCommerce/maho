@@ -22,7 +22,7 @@ Go to **System > Configuration > Catalog > Configurable Swatches**.
 |---------|--------------|
 | Enabled | Turns the feature on |
 | Product Attributes to Show as Swatches in Product Detail | The attributes drawn as swatches on the product page, in the layered navigation filters and in the "shopping by" tag, for example `color` and `size` |
-| Product Attribute to Use for Swatches in Product Listing | The single attribute used in category and search results |
+| Product Attributes to Use for Swatches in Product Listing | The attributes that can give the swatches in category and search results, for example `color`, `scent` and `volume`. A product shows one row of swatches, see [Swatches in listings](#swatches-in-listings) |
 | Dynamic Price Change for Swatches in Product Listing | When a customer picks a swatch in a listing, the price shown adds the option price of the selected value, if the value has one |
 | Swatch Dimensions on Product Detail Page | Inner size of the swatches on the product page, in pixels |
 | Swatch Dimensions in Product Listing | Inner size of the swatches in listings |
@@ -30,7 +30,7 @@ Go to **System > Configuration > Catalog > Configurable Swatches**.
 
 Two things are easy to miss:
 
-- The feature is off when **Product Attribute to Use for Swatches in Product Listing** is empty,
+- The feature is off when **Product Attributes to Use for Swatches in Product Listing** is empty,
   even if Enabled is set to Yes. The product page stops showing swatches too.
 - An attribute is drawn with swatches only if it is listed in one of the two attribute settings.
   Making the attribute filterable is not enough on its own.
@@ -136,7 +136,7 @@ safe choice for a texture.
 | Place | Which attributes | Which appearance |
 |-------|------------------|------------------|
 | Product page | every attribute enabled for the product page | color, catalog image, product image |
-| Category and search results | the single listing attribute, shown when the product has at least two values | color, catalog image, product image |
+| Category and search results | one listing attribute for each product, shown when the product has at least two values | color, catalog image, product image |
 | Layered navigation filters | the filterable attributes enabled as swatches | color or catalog image |
 | "Shopping by" tag of an active filter | the same attributes | color or catalog image |
 
@@ -144,6 +144,23 @@ safe choice for a texture.
     A product image is a product page and listing feature. Both the filter list and the
     "shopping by" tag use only the color or the catalog image, so a value that has to look the
     same in a filter needs one of those two.
+
+### Swatches in listings
+
+A product in a category or in search results shows one row of swatches. The row uses one of the
+listing attributes, and the store picks it for each product:
+
+1. Only the listing attributes that the product is configurable by count. A product that uses none
+   of them shows no swatches.
+2. The store takes the first of these attributes on the **Associated Products** tab of the
+   product that has two values or more. Drag the attributes on that tab to change the order.
+3. If no attribute has two values, the store takes the first one with a value. The row stays
+   hidden, because a row needs two values.
+
+So a catalog with T-shirts configurable by `color` and perfumes configurable by `scent` lists both
+attributes: the T-shirts show color swatches, and the perfumes show scent swatches. Do not list an
+attribute such as `size` when its options have no color and no image. If you list it, a product
+that uses `size` before `color` on its Associated Products tab shows text swatches for the sizes.
 
 ## What happens when a customer picks a swatch
 
@@ -160,8 +177,9 @@ safe choice for a texture.
 |---------|---------------|
 | Swatches show as text | The value has no color, no catalog image and no product image |
 | There is no field to upload a swatch image | The attribute form has none. Upload a catalog image in **CMS > Media Library**, or add a product image with the option name as its label on the configurable product. Every product has the **Images** tab with an upload, a child variant and a product that is not saved yet too, and a role that can edit products can upload images. So the product type and the role are not the reason for a missing upload. The store uses only the images of the configurable product for swatches |
-| No swatch and no dropdown | Configurable Swatches is disabled, or the listing attribute is empty |
-| No color picker in the attribute | The attribute is not listed in **Product Attributes to Show as Swatches in Product Detail** |
+| No swatch and no dropdown | Configurable Swatches is disabled, or **Product Attributes to Use for Swatches in Product Listing** is empty |
+| No color picker in the attribute | The attribute is not listed in **Product Attributes to Show as Swatches in Product Detail** or in **Product Attributes to Use for Swatches in Product Listing** |
+| A product shows the swatches of the wrong attribute in a listing | The product uses two listing attributes. Move the attribute that you want first on the Associated Products tab of the product, or remove the other one from the listing setting |
 | A catalog image is ignored | The file name (lower case, hyphens, exact name) or the extension. On most servers file names are case sensitive, so `Blue-Light.webp` does not match `blue-light.webp` |
 | A product image does not appear | A catalog image with that name exists and wins, or the image is on a child variant instead of the configurable product |
 | Text in one store view, image in another | The value has no variant visible in that store view, for example out of stock and hidden, so the translated name cannot be connected to the file |

@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * Give a CMS page write to the CMS page service.
+ *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Cms
@@ -13,136 +15,71 @@ namespace Mage\Cms\Api;
 use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\Security\ApiUser;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class CmsPageProcessor extends CrudProcessor
 {
-    private const VALID_META_ROBOTS = [
-        'INDEX,FOLLOW',
-        'NOINDEX,FOLLOW',
-        'INDEX,NOFOLLOW',
-        'NOINDEX,NOFOLLOW',
-    ];
+    #[\Override]
+    protected function newModel(): \Mage_Cms_Model_Page
+    {
+        return $this->service()->newPage();
+    }
+
+    #[\Override]
+    protected function loadModel(int $id): \Mage_Cms_Model_Page
+    {
+        return $this->service()->getById($id);
+    }
 
     #[\Override]
     protected function beforeSave(object $model, CrudResource $data, ApiUser $user): void
     {
-        // Validate only what the request actually sent, never what is already stored:
-        // a legacy or imported value outside the allowed set would otherwise make the
-        // page permanently un-updatable through the API.
         if ($data instanceof CmsPage) {
-            if ($data->customThemeFrom !== null) {
-                $model->setData('custom_theme_from', $this->normalizeDateInput($data->customThemeFrom, 'customThemeFrom'));
-            }
-            if ($data->customThemeTo !== null) {
-                $model->setData('custom_theme_to', $this->normalizeDateInput($data->customThemeTo, 'customThemeTo'));
+            foreach (['customThemeFrom' => 'custom_theme_from', 'customThemeTo' => 'custom_theme_to'] as $property => $field) {
+                if ($data->{$property} !== null) {
+                    $model->setData($field, $this->normalizeDateInput($data->{$property}, $field));
+                }
             }
             if ($data->metaRobots !== null) {
-                $model->setData('meta_robots', $this->normalizeMetaRobots($data->metaRobots));
-            }
-            if ($data->pageLayout !== null) {
-                $model->setData('root_template', $this->normalizePageLayout($data->pageLayout));
-            }
-            if ($data->layoutUpdateXml !== null) {
-                $model->setData('layout_update_xml', $this->validateLayoutUpdate($data->layoutUpdateXml, 'layoutUpdateXml'));
-            }
-            if ($data->customLayoutUpdateXml !== null) {
-                $model->setData('custom_layout_update_xml', $this->validateLayoutUpdate($data->customLayoutUpdateXml, 'customLayoutUpdateXml'));
+                $model->setData('meta_robots', strtoupper(str_replace(' ', '', $data->metaRobots)));
             }
         }
+    }
 
-        // On create, apply defaults for fields omitted from the request. They are nullable on
-        // the DTO so that an omitted field on a partial update is a no-op (no silent reset);
-        // create still needs sane defaults: enabled page assigned to all store views.
-        if (!$model->getId()) {
-            // A page needs a URL identifier; reject a create that omits it with a
-            // 4xx rather than persisting a page with an empty identifier.
-            if (trim((string) $model->getData('identifier')) === '') {
-                throw new UnprocessableEntityHttpException('Identifier is required.');
-            }
-            if ($model->getData('is_active') === null) {
-                $model->setData('is_active', 1);
-            }
-            if ($model->getData('stores') === null) {
-                $model->setData('stores', [0]);
-            }
-            if ($model->getData('root_template') === null) {
-                $model->setData('root_template', \Mage::getSingleton('page/source_layout')->getDefaultValue());
-            }
+    #[\Override]
+    protected function saveModel(\Mage_Core_Model_Abstract $model): void
+    {
+        /** @var \Mage_Cms_Model_Page $model */
+        try {
+            $this->service()->save($model);
+        } catch (\Mage_Core_Exception_Input $e) {
+            throw $e->withFieldNames(['root_template' => 'pageLayout']);
         }
+    }
 
-        // Content sanitization lives in Mage_Cms_Model_Resource_Page::_beforeSave(), so it covers
-        // every save path. Filtering here as well would run over unresolved template directives
-        // and mangle them ({{media url="..."}} becomes a broken %7B%7B… URL).
+    #[\Override]
+    protected function deleteModel(\Mage_Core_Model_Abstract $model): void
+    {
+        /** @var \Mage_Cms_Model_Page $model */
+        $this->service()->delete($model);
     }
 
     /**
-     * Empty string clears the value (returns null).
+     * An empty string clears the date.
+     *
+     * @throws \Mage_Core_Exception_Input
      */
     private function normalizeDateInput(string $value, string $field): ?string
     {
         try {
             return \Mage::app()->getLocale()->formatDateForDb($value, withTime: false);
         } catch (\Exception) {
-            throw new UnprocessableEntityHttpException("Invalid date for {$field}; use Y-m-d format.");
+            throw new \Mage_Core_Exception_Input()->addError($field, \Mage::helper('cms')->__('Invalid date, use the Y-m-d format.'));
         }
     }
 
-    /**
-     * Layout updates are executed when the storefront renders the page, so the API
-     * must apply the same validator the admin form does (blocked templates,
-     * disallowed blocks, helper attributes) instead of storing arbitrary XML.
-     */
-    private function validateLayoutUpdate(string $xml, string $field): ?string
+    private function service(): \Mage_Cms_Service_Page
     {
-        if (trim($xml) === '') {
-            return null;
-        }
-
-        /** @var \Mage_Adminhtml_Model_LayoutUpdate_Validator $validator */
-        $validator = \Mage::getModel('adminhtml/layoutUpdate_validator');
-        try {
-            $isValid = $validator->isValid($xml);
-        } catch (\Throwable) {
-            $isValid = false;
-        }
-
-        if (!$isValid) {
-            $messages = implode(' ', $validator->getMessages());
-            throw new UnprocessableEntityHttpException(trim("{$field} is not a valid layout update. " . $messages));
-        }
-
-        return $xml;
-    }
-
-    /**
-     * The layout codes come from the theme configuration, so an unknown code would render
-     * nothing; refuse it and name the codes the store knows.
-     */
-    private function normalizePageLayout(string $value): ?string
-    {
-        if ($value === '') {
-            return null;
-        }
-        $codes = array_map(strval(...), array_keys(\Mage::getSingleton('page/source_layout')->getOptions()));
-        if (!in_array($value, $codes, true)) {
-            throw new UnprocessableEntityHttpException('pageLayout must be one of: ' . implode(', ', $codes));
-        }
-
-        return $value;
-    }
-
-    private function normalizeMetaRobots(string $value): ?string
-    {
-        if ($value === '') {
-            return null;
-        }
-
-        $normalized = strtoupper(str_replace(' ', '', $value));
-        if (!in_array($normalized, self::VALID_META_ROBOTS, true)) {
-            throw new UnprocessableEntityHttpException('metaRobots must be one of: ' . implode(', ', self::VALID_META_ROBOTS));
-        }
-
-        return $normalized;
+        /** @var \Mage_Cms_Service_Page */
+        return \Mage::getService('cms/page');
     }
 }

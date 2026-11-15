@@ -26,23 +26,6 @@ describe('Giftcard Model Constants', function () {
     });
 });
 
-describe('Giftcard Model Instantiation', function () {
-    test('can be instantiated via Mage factory', function () {
-        $giftcard = Mage::getModel('giftcard/giftcard');
-        expect($giftcard)->toBeInstanceOf(Maho_Giftcard_Model_Giftcard::class);
-    });
-
-    test('resource model is properly configured', function () {
-        $giftcard = Mage::getModel('giftcard/giftcard');
-        expect($giftcard->getResource())->toBeInstanceOf(Maho_Giftcard_Model_Resource_Giftcard::class);
-    });
-
-    test('collection can be instantiated', function () {
-        $collection = Mage::getResourceModel('giftcard/giftcard_collection');
-        expect($collection)->toBeInstanceOf(Maho_Giftcard_Model_Resource_Giftcard_Collection::class);
-    });
-});
-
 describe('Giftcard isValid() Logic', function () {
     beforeEach(function () {
         $this->giftcard = Mage::getModel('giftcard/giftcard');
@@ -121,14 +104,5 @@ describe('Giftcard Balance Getter', function () {
         $giftcard->setData('balance', '99.99');
         expect($giftcard->getBalance())->toBeFloat();
         expect($giftcard->getBalance())->toBe(99.99);
-    });
-});
-
-describe('Giftcard History Collection', function () {
-    test('returns history collection instance', function () {
-        $giftcard = Mage::getModel('giftcard/giftcard');
-        $giftcard->setId(1);
-        $collection = $giftcard->getHistoryCollection();
-        expect($collection)->toBeInstanceOf(Maho_Giftcard_Model_Resource_History_Collection::class);
     });
 });

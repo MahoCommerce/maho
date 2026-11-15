@@ -749,11 +749,21 @@ var ProductMediaManager = {
     swapImage: function(target) {
         const gallery = document.querySelector('.product-image-gallery');
         const current = gallery?.querySelector('.gallery-image.visible');
-        if (!gallery || target === current) return;
+        if (!gallery) return;
+
+        // Cancel a swatch image that is still loading, so it cannot replace this image
+        if (window.ConfigurableMediaImages) ConfigurableMediaImages.swapGeneration++;
+
+        if (target === current) {
+            gallery.classList.remove('loading');
+            return;
+        }
 
         target.removeAttribute('loading');
 
+        const generation = window.ConfigurableMediaImages?.swapGeneration;
         const doSwap = () => {
+            if (generation !== window.ConfigurableMediaImages?.swapGeneration) return;
             gallery.classList.remove('loading');
             if (current) current.classList.remove('visible');
             target.classList.add('gallery-image', 'visible');

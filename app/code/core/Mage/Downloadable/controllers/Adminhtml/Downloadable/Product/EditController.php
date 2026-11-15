@@ -35,7 +35,7 @@ class Mage_Downloadable_Adminhtml_Downloadable_Product_EditController extends Ma
      * @param string $resource
      * @param string $resourceType
      */
-    protected function _processDownload($resource, $resourceType)
+    protected function _processDownload($resource, $resourceType): void
     {
         /** @var Mage_Downloadable_Helper_Download $helper */
         $helper = Mage::helper('downloadable/download');

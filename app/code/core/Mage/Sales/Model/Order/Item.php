@@ -34,7 +34,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
     #[\Override]
     protected $_eventObject = 'item';
 
-    protected static $_statuses = null;
+    protected static ?array $_statuses = null;
 
     /**
      * Order instance
@@ -43,8 +43,8 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      */
     protected $_order       = null;
 
-    protected $_parentItem  = null;
-    protected $_children    = [];
+    protected ?Mage_Sales_Model_Order_Item $_parentItem = null;
+    protected array $_children = [];
 
     /**
      * Init resource model
@@ -107,10 +107,8 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
 
     /**
      * Get parent item
-     *
-     * @return $this|null
      */
-    public function getParentItem()
+    public function getParentItem(): ?Mage_Sales_Model_Order_Item
     {
         return $this->_parentItem;
     }
@@ -496,7 +494,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      *
      * @param Mage_Sales_Model_Order_Item $item
      */
-    public function addChildItem($item)
+    public function addChildItem($item): void
     {
         if ($item instanceof Mage_Sales_Model_Order_Item) {
             $this->_children[] = $item;

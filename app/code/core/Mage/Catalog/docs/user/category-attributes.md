@@ -70,6 +70,35 @@ out, the page asks first, and names the number of categories that have a value.
 You cannot delete the default set. When you delete another set, its categories move to the default
 set.
 
+## Show a field only when another field has a value
+
+A condition shows a field only when other fields of the same form have some values. For example, a
+field **Brand Logo** can show only when the field **Is Brand** is **Yes**.
+
+1. Open the attribute in **System > Attributes > Categories**.
+2. Go to the **When the Field Shows** section.
+3. Click **Add**, then select the field that decides and the values that show the field. Hold the
+   Ctrl or Cmd key to select more than one value.
+4. For more than one row, select in **Show the field when** if each row, at least one row, no row
+   or exactly one row must match.
+5. Click **Save**.
+
+A condition can read a field with a list of values, such as a **Dropdown**, a **Yes/No** field, or a
+standard field such as **Display Mode**. It can also read a **Text Field**, a **Text Area** or a
+**Date**, with the value **Any Value**: the condition then asks only whether the field has a value.
+A field that a condition reads cannot have a condition of its own, and you cannot delete it while a
+condition reads it.
+
+When the condition hides a field, the edit page does not show it, and the field is not required. The
+field keeps its value, so the value comes back when the condition shows the field again. The table
+of values on the storefront does not show a hidden field. The API applies the same rule. A field on
+another tab reads the saved value of the field that decides, not the value that you just changed.
+Save the category to update it.
+
+The section **When the Field Is Required** works in the same way, and makes an optional field
+required only when the other fields have some values. It can read a field that has a condition of
+its own.
+
 ## Show the attribute on the category page
 
 Set **Visible on Frontend** to **Yes** in the **Frontend Properties** of the
@@ -88,7 +117,8 @@ the order, drag the attribute in the set.
 
 The table shows HTML only when **Allow HTML Tags on Frontend** or **Enable WYSIWYG** is **Yes**.
 It does not show Image attributes. To show an image, such as a brand logo, a developer adds it to
-the category template of the theme.
+the category template of the theme with `Mage::helper('eav')->getImageSet($category, 'brand_logo')`.
+This call gives no image when the condition of the attribute hides the field.
 
 ## Translate the name of a group
 

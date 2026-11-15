@@ -76,17 +76,12 @@ class Mage_Adminhtml_Block_Sales_Order_Status_Grid extends Mage_Adminhtml_Block_
         return parent::_prepareColumns();
     }
 
-    public function decorateLabel($value, $row, $column, $isExport): string
+    public function decorateLabel(string $value, \Maho\DataObject $row, Mage_Adminhtml_Block_Widget_Grid_Column $column, bool $isExport): string
     {
         return "<span class='order-status-color-marker' style='background:{$row['color']}'></span> {$value}";
     }
 
-    /**
-     * Decorate status column values
-     *
-     * @return string
-     */
-    public function decorateState($value, $row, $column, $isExport)
+    public function decorateState(string $value, \Maho\DataObject $row, Mage_Adminhtml_Block_Widget_Grid_Column $column, bool $isExport): string
     {
         if ($value) {
             $cell = $value . ' [' . Mage::getSingleton('sales/order_config')->getStateLabel($value) . ']';
@@ -96,7 +91,7 @@ class Mage_Adminhtml_Block_Sales_Order_Status_Grid extends Mage_Adminhtml_Block_
         return $cell;
     }
 
-    public function decorateAction($value, $row, $column, $isExport)
+    public function decorateAction(string $value, \Maho\DataObject $row, Mage_Adminhtml_Block_Widget_Grid_Column $column, bool $isExport): string
     {
         $cell = '';
         $state = $row->getState();

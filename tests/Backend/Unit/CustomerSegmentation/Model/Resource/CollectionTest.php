@@ -25,37 +25,32 @@ describe('Customer Segment Collection', function () {
         }
     });
 
-    test('can add customer count to select - segmentation specific functionality', function () {
-        createTestSegments();
+    test('adds the number of members of each segment to the select', function () {
+        $customerIds = [];
+        $uniqueId = uniqid('count_', true);
+        for ($i = 0; $i < 2; $i++) {
+            $customer = Mage::getModel('customer/customer')
+                ->setEmail("count.customer.{$uniqueId}.{$i}@test.com")
+                ->setFirstname('Count')
+                ->setLastname('Customer')
+                ->setWebsiteId(1)
+                ->setGroupId(1);
+            $customer->save();
+            $customerIds[] = (int) $customer->getId();
+        }
+
+        $segment = Mage::getModel('customersegmentation/segment')
+            ->setName('Customer Count ' . $uniqueId)
+            ->setWebsiteIds([1]);
+        $segment->save();
+        Mage::getResourceModel('customersegmentation/segment')->updateCustomerMembership($segment, $customerIds);
 
         $this->collection->addCustomerCountToSelect();
+        $this->collection->getSelect()->where('main_table.segment_id = ?', (int) $segment->getId());
         $this->collection->load();
 
-        foreach ($this->collection as $segment) {
-            // Should have customer count field after joining
-            expect($segment->hasData('customer_count'))->toBe(true);
-        }
-    });
-
-    test('can filter segments needing refresh - segmentation specific functionality', function () {
-        createTestSegments();
-
-        // Add filter for segments that need refresh (pending status or old refresh date)
-        $this->collection->addFieldToFilter(
-            ['refresh_status', 'last_refresh_at'],
-            [
-                ['eq' => 'pending'],
-                ['lt' => date('Y-m-d H:i:s', strtotime('-1 day'))],
-            ],
-        );
-        $this->collection->load();
-
-        foreach ($this->collection as $segment) {
-            $needsRefresh = ($segment->getRefreshStatus() === 'pending')
-                           || ($segment->getLastRefreshAt()
-                            && strtotime($segment->getLastRefreshAt()) < strtotime('-1 day'));
-            expect($needsRefresh)->toBe(true);
-        }
+        expect($this->collection->count())->toBe(1)
+            ->and((int) $this->collection->getFirstItem()->getData('customer_count'))->toBe(2);
     });
 
     // Helper method to create test segments

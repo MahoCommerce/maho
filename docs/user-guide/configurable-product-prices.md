@@ -86,8 +86,8 @@ is enabled.
 
 When the setting is **Yes**, a customer who clicks a swatch in a category page or in search
 results sees the price change in that listing. The new price is the price of the configurable
-product plus the option price of the clicked value. The store uses only the attribute in
-**Product Attribute to Use for Swatches in Product Listing**.
+product plus the option price of the clicked value. The store uses only the attribute that gives
+the swatches of that product, one of **Product Attributes to Use for Swatches in Product Listing**.
 
 This setting does not read the prices of the child products either. If no value of the listing
 attribute has an option price, the price does not change when a customer clicks a swatch. See

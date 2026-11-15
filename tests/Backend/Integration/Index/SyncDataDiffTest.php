@@ -14,7 +14,7 @@ function syncDataResource(): Mage_Index_Model_Resource_Abstract
 {
     $resource = new class extends Mage_Index_Model_Resource_Abstract {
         #[\Override]
-        protected function _construct()
+        protected function _construct(): void
         {
             $this->_init('catalog/product_index_price', 'entity_id');
         }

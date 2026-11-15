@@ -123,8 +123,8 @@ return [
         'childProductIds', 'extensions', 'id', 'superAttributes',
     ],
     'ContactForm' => [
-        'captchaProvider', 'captchaSiteKey', 'enabled', 'extensions', 'honeypotField', 'id', 'message',
-        'success',
+        'captchaChallengeUrl', 'captchaProvider', 'captchaSiteKey', 'enabled', 'extensions', 'honeypotField', 'id',
+        'message', 'success',
     ],
     'Country' => [
         'availableRegions', 'extensions', 'id', 'iso2Code', 'iso3Code', 'name',
@@ -149,8 +149,8 @@ return [
         'code', 'exchangeRate', 'extensions', 'symbol',
     ],
     'CustomAttribute' => [
-        'attributeSets', 'code', 'defaultValue', 'entityType', 'extensions', 'id', 'input', 'isRequired',
-        'isUnique', 'label', 'options', 'usedInForms',
+        'attributeSets', 'code', 'defaultValue', 'dependsOn', 'entityType', 'extensions', 'id', 'input',
+        'isRequired', 'isUnique', 'label', 'options', 'requiredWhen', 'usedInForms',
     ],
     'Customer' => [
         'addresses', 'createdAt', 'createdIn', 'customAttributes', 'defaultBillingAddress', 'defaultShippingAddress',
@@ -242,7 +242,7 @@ return [
     ],
     'Order' => [
         'accessToken', 'accountToken', 'appliedRuleIds', 'baseCurrencyCode', 'billingAddress',
-        'changeAmount', 'couponCode', 'couponRuleName', 'createdAt', 'currency',
+        'couponCode', 'couponRuleName', 'createdAt', 'currency',
         'customerCustomAttributeLabels', 'customerCustomAttributes', 'customerDob', 'customerEmail', 'customerFirstname', 'customerGender', 'customerGroupId', 'customerId',
         'customerIsGuest', 'customerLastname', 'customerMiddlename', 'customerNote', 'customerPrefix',
         'customerSuffix', 'customerTaxvat', 'discountDescription', 'emailSent', 'extCustomerId',
@@ -267,6 +267,9 @@ return [
         'specialPrice', 'specialToDate', 'status', 'stockItem', 'stockQty', 'stockStatus', 'taxClassId',
         'thumbnailLabel', 'thumbnailUrl', 'tierPrices', 'type', 'updatedAt', 'upsellProducts', 'urlKey',
         'urlPath', 'variants', 'visibility', 'websiteIds', 'weight', 'weightType',
+    ],
+    'ProductAlert' => [
+        'addedAt', 'extensions', 'id', 'price', 'productId', 'type',
     ],
     'ProductAttribute' => [
         'applyTo', 'attributeCode', 'backendType', 'defaultValue', 'extensions', 'frontendClass',

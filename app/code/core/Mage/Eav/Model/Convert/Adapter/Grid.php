@@ -10,7 +10,7 @@
 
 class Mage_Eav_Model_Convert_Adapter_Grid extends Mage_Dataflow_Model_Convert_Adapter_Abstract
 {
-    protected $_entity;
+    protected ?\Mage_Eav_Model_Entity_Interface $_entity = null;
 
     /**
      * @var string
@@ -34,11 +34,8 @@ class Mage_Eav_Model_Convert_Adapter_Grid extends Mage_Dataflow_Model_Convert_Ad
         return $this->_entity;
     }
 
-    /**
-     * @return $this
-     */
     #[\Override]
-    public function load()
+    public function load(): static
     {
         if (!$this->getEntity()) {
             return $this;
@@ -59,11 +56,8 @@ class Mage_Eav_Model_Convert_Adapter_Grid extends Mage_Dataflow_Model_Convert_Ad
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     #[\Override]
-    public function save()
+    public function save(): static
     {
         if (!$this->getEntity()) {
             return $this;

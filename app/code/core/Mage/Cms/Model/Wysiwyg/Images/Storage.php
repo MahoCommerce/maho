@@ -251,7 +251,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
      *
      * @param string $path Target dir
      */
-    public function deleteDirectory($path)
+    public function deleteDirectory($path): void
     {
         $root = $this->getHelper()->getStorageRootPath();
         if (trim(str_replace('\\', '/', (string) $path), '/') === $root) {
@@ -307,12 +307,13 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
      *
      * @param string $targetPath Target directory
      * @param string $type Type of storage, e.g. image, media etc.
+     * @param string $fileId The name of the upload field
      * @return array
      * @throws Mage_Core_Exception
      */
-    public function uploadFile($targetPath, $type = null)
+    public function uploadFile($targetPath, $type = null, string $fileId = 'image')
     {
-        $uploader = Mage::getModel('core/file_uploader', 'image');
+        $uploader = Mage::getModel('core/file_uploader', $fileId);
         if ($allowed = $this->getAllowedExtensions($type)) {
             $uploader->setAllowedExtensions($allowed);
         }

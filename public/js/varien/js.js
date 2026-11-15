@@ -60,7 +60,8 @@ async function mahoFetch(url, options) {
         url.searchParams.set('isAjax', true);
 
         const response = await fetch(url, fetchOptions);
-        const result = response.headers.get('Content-Type') === 'application/json'
+        const mediaType = (response.headers.get('Content-Type') ?? '').split(';', 1)[0].trim().toLowerCase();
+        const result = mediaType === 'application/json'
               ? await response.json()
               : await response.text();
 
@@ -572,10 +573,8 @@ Varien.DateElement = class {
                 this.day.value = day.toString().padStart(2, '0');
                 this.month.value = month.toString().padStart(2, '0');
 
-                this.full.value = this.format
-                    .replace(/%[mb]/i, this.month.value)
-                    .replace(/%[de]/i, this.day.value)
-                    .replace(/%y/i, this.year.value);
+                // The server reads YYYY-MM-DD in every locale
+                this.full.value = `${this.year.value.padStart(4, '0')}-${this.month.value}-${this.day.value}`;
 
                 const testFull = `${this.month.value}/${this.day.value}/${this.year.value}`;
                 const test = new Date(testFull);

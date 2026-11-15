@@ -62,11 +62,14 @@ class ContactForm extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Whether the contact form is enabled')]
     public bool $enabled = false;
 
-    #[ApiProperty(description: 'CAPTCHA provider name (none, turnstile, recaptcha_v3)')]
+    #[ApiProperty(description: 'CAPTCHA provider that the store uses: none, altcha, or the name that a CAPTCHA module gives')]
     public ?string $captchaProvider = null;
 
-    #[ApiProperty(description: 'CAPTCHA site key for client-side widget')]
+    #[ApiProperty(description: 'Public key for the CAPTCHA widget, when the provider has one')]
     public ?string $captchaSiteKey = null;
+
+    #[ApiProperty(description: 'URL of the challenge for the CAPTCHA widget, when the provider has one (Altcha)')]
+    public ?string $captchaChallengeUrl = null;
 
     #[ApiProperty(description: 'Honeypot field name if enabled, null otherwise')]
     public ?string $honeypotField = null;

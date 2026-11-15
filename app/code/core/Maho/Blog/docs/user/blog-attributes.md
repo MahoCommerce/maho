@@ -50,6 +50,34 @@ Do not take an attribute out of a set by mistake. Every night, the store deletes
 attribute that is not in the set of its post or category. When a save of the set page takes an
 attribute out, the page asks first, and names the number of posts or categories that have a value.
 
+## Show a field only when another field has a value
+
+A condition shows a field only when other fields of the same form have some values. For example, a
+field **Event Date** can show only when the field **Post Type** is **Event**.
+
+1. Open the attribute in **System > Attributes > Blog Posts** or **Blog Categories**.
+2. Go to the **When the Field Shows** section.
+3. Click **Add**, then select the field that decides and the values that show the field. Hold the
+   Ctrl or Cmd key to select more than one value.
+4. For more than one row, select in **Show the field when** if each row, at least one row, no row
+   or exactly one row must match.
+5. Click **Save**.
+
+A condition can read a field with a list of values, such as a **Dropdown**, a **Yes/No** field, or
+the **Status**. It can also read a **Text Field**, a **Text Area** or a **Date**, with the value
+**Any Value**: the condition then asks only whether the field has a value. A field that a condition
+reads cannot have a condition of its own, and you cannot delete it while a condition reads it.
+
+When the condition hides a field, the edit page does not show it, and the field is not required. The
+field keeps its value, so the value comes back when the condition shows the field again. The table
+of values on the storefront does not show a hidden field. The API applies the same rule. A field on
+another tab reads the saved value of the field that decides, not the value that you just changed.
+Save the post to update it.
+
+The section **When the Field Is Required** works in the same way, and makes an optional field
+required only when the other fields have some values. It can read a field that has a condition of
+its own.
+
 ## Show the attribute on the storefront
 
 Set **Visible on Frontend** to **Yes** in the **Frontend Properties** of the attribute. The post
@@ -81,6 +109,22 @@ storefront. You can give the table a different title in each language.
 3. In the row of each store view, enter the name in the language of that store view. If you leave a
    row empty, the store view shows the **Admin** name.
 4. Click **Save** in the window, then click **Save** on the set page.
+
+## The URL key of a post
+
+The **URL Key** of a post is the last part of its address. The admin form, the import and the API
+use the same rules:
+
+- The URL key has only lowercase letters, digits and dashes, for example `summer-sale-2026`. It
+  does not start or end with a dash, and it has no two dashes in sequence. A save with another
+  URL key shows "The URL key ... must have only lowercase letters, digits and dashes." The API
+  answers 422.
+- Two posts that share a store view cannot have the same URL key. A post in **All Store Views**
+  shares each store view. A save shows "Another post of the same store view has the URL key ...".
+  The API answers 409.
+- When you leave the URL key empty, the store makes it from the title.
+- A post that was saved before these rules keeps its URL key. The store checks the URL key again
+  only when you change it.
 
 ## Import
 

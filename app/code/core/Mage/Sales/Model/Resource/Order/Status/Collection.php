@@ -43,7 +43,7 @@ class Mage_Sales_Model_Resource_Order_Status_Collection extends Mage_Core_Model_
     /**
      * Join order states table
      */
-    public function joinStates()
+    public function joinStates(): static
     {
         if (!$this->getFlag('states_joined')) {
             $this->_idFieldName = 'status_state';

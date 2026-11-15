@@ -540,7 +540,7 @@ class Mage_Catalog_Model_Resource_Category_Tree extends \Maho\Data\Tree\Dbp
      *
      * @param array $data
      */
-    protected function _updateAnchorProductCount(&$data)
+    protected function _updateAnchorProductCount(&$data): void
     {
         foreach ($data as $key => $row) {
             if ((int) $row['is_anchor'] === 0) {

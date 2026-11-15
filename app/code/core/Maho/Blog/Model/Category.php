@@ -31,6 +31,16 @@ class Maho_Blog_Model_Category extends Mage_Core_Model_Abstract
         $this->_init('blog/category');
     }
 
+    /**
+     * Tell whether a visitor of the store view $storeId can read the category: it is active, and it is in
+     * that store view or in all store views.
+     */
+    public function isVisibleInStore(int $storeId): bool
+    {
+        return $this->getIsActive()
+            && array_intersect([Mage_Core_Model_App::ADMIN_STORE_ID, $storeId], array_map(intval(...), $this->getStores())) !== [];
+    }
+
     public function getStores(): array
     {
         if (!$this->hasStores()) {

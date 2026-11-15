@@ -804,7 +804,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * Directory structure initializing
      * @throws Mage_Core_Exception
      */
-    protected function _initFilesystem()
+    protected function _initFilesystem(): void
     {
         $mount = Mage::getStorage('custom_options');
 

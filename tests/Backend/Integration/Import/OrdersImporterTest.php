@@ -19,12 +19,13 @@ const ORDERS_HEADER = ['reference', 'store_code', 'hours_ago', 'status', 'email'
 
 /**
  * @param list<list<string>> $rows
+ * @param list<string> $extraColumns columns after the columns of ORDERS_HEADER
  */
-function ordersCsv(array $rows): string
+function ordersCsv(array $rows, array $extraColumns = []): string
 {
     $path = tempnam(sys_get_temp_dir(), 'orders') . '.csv';
     $handle = fopen($path, 'w');
-    foreach ([ORDERS_HEADER, ...$rows] as $row) {
+    foreach ([[...ORDERS_HEADER, ...$extraColumns], ...$rows] as $row) {
         fputcsv($handle, $row, escape: '\\');
     }
     fclose($handle);
@@ -34,8 +35,14 @@ function ordersCsv(array $rows): string
 /**
  * @return list<string>
  */
-function ordersRow(string $reference, string $status, int $hoursAgo, string $email, string $items): array
-{
+function ordersRow(
+    string $reference,
+    string $status,
+    int $hoursAgo,
+    #[\SensitiveParameter]
+    string $email,
+    string $items,
+): array {
     $store = Mage::app()->getStore(1)->getCode();
     return [$reference, $store, (string) $hoursAgo, $status, $email, 'Imp', 'Buyer',
         '1 Import Street', 'Los Angeles', 'California', '90028', 'US', '555-0100', $items];
@@ -50,6 +57,29 @@ function importedOrder(string $reference): Mage_Sales_Model_Order
 function stockQty(int $productId): float
 {
     return (float) Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId)->getQty();
+}
+
+/**
+ * Give the product one unit in stock, with its own manage stock setting. Return the old values for addData().
+ *
+ * @return array<string, mixed>
+ */
+function stockOfOneUnit(int $productId): array
+{
+    $item = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId);
+    $was = ['qty' => $item->getQty(), 'is_in_stock' => $item->getIsInStock(), 'manage_stock' => $item->getManageStock(),
+        'use_config_manage_stock' => $item->getUseConfigManageStock()];
+    $item->setUseConfigManageStock(false)->setManageStock(true)->setQty(1)->setIsInStock(true)->save();
+    return $was;
+}
+
+function priceIndexRows(int $productId): int
+{
+    $read = Mage::getSingleton('core/resource')->getConnection('core_read');
+    return (int) $read->fetchOne($read->select()
+        ->from(Mage::getSingleton('core/resource')->getTableName('catalog/product_index_price'), [new Maho\Db\Expr('COUNT(*)')])
+        ->where('entity_id = ?', $productId)
+        ->where('website_id = ?', (int) Mage::app()->getStore(1)->getWebsiteId()));
 }
 
 function ordersCleanup(): void
@@ -82,7 +112,7 @@ it('places an order for each status, dates it back and skips it on rerun', funct
         ordersRow('IMP-ORD-5', 'processing', 50, 'imp.orders@example.com', $item),
     ]);
 
-    $result = (new Orders())->import($path, [Orders::OPTION_SKIP_STATISTICS => true]);
+    $result = new Orders()->import($path, [Orders::OPTION_SKIP_STATISTICS => true]);
     expect($result->created)->toBe(5);
 
     $complete = importedOrder('IMP-ORD-1');
@@ -106,10 +136,53 @@ it('places an order for each status, dates it back and skips it on rerun', funct
 
     expect(stockQty((int) $product->getId()))->toBe($stock);
 
-    $again = (new Orders())->import($path, [Orders::OPTION_SKIP_STATISTICS => true]);
+    $again = new Orders()->import($path, [Orders::OPTION_SKIP_STATISTICS => true]);
     expect($again->created)->toBe(0);
     expect(Mage::getResourceModel('sales/order_collection')->addFieldToFilter('ext_order_id', ['like' => 'IMP-ORD-%'])->getSize())->toBe(5);
     unlink($path);
+});
+
+it('puts back the stock, the stock status and the price index of a product whose last unit an order takes', function (): void {
+    $product = loadSimplePricedProduct();
+    $productId = (int) $product->getId();
+    $was = stockOfOneUnit($productId);
+    $path = ordersCsv([ordersRow('IMP-ORD-LAST', 'pending', 1, 'imp.guest@example.org', $product->getSku() . ':1')]);
+
+    try {
+        expect(new Orders()->import($path, [Orders::OPTION_SKIP_STATISTICS => true])->created)->toBe(1);
+
+        $item = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId);
+        $status = Mage::getResourceSingleton('cataloginventory/stock_status')->getProductStatus([$productId], 1);
+        expect((float) $item->getQty())->toBe(1.0)
+            ->and((bool) $item->getIsInStock())->toBeTrue()
+            ->and($item->getLowStockDate())->toBeNull()
+            ->and((int) $item->getStockStatusChangedAutomatically())->toBe(0)
+            ->and((int) $status[$productId])->toBe(Mage_CatalogInventory_Model_Stock_Status::STATUS_IN_STOCK)
+            ->and(priceIndexRows($productId))->toBeGreaterThan(0);
+    } finally {
+        Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId)->addData($was)->save();
+        unlink($path);
+    }
+});
+
+it('puts back the price index of a product whose last unit an order takes, when a later row fails', function (): void {
+    $product = loadSimplePricedProduct();
+    $productId = (int) $product->getId();
+    $was = stockOfOneUnit($productId);
+    $item = $product->getSku() . ':1';
+    $path = ordersCsv([
+        [...ordersRow('IMP-ORD-PARTIAL-1', 'pending', 1, 'imp.guest@example.org', $item), ''],
+        [...ordersRow('IMP-ORD-PARTIAL-2', 'pending', 1, 'imp.guest@example.org', $item), 'NO-SUCH-COUPON'],
+    ], ['coupon_code']);
+
+    try {
+        expect(fn() => new Orders()->import($path, [Orders::OPTION_SKIP_STATISTICS => true]))
+            ->toThrow(RowException::class, "Coupon code 'NO-SUCH-COUPON' is not valid");
+        expect(priceIndexRows($productId))->toBeGreaterThan(0);
+    } finally {
+        Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId)->addData($was)->save();
+        unlink($path);
+    }
 });
 
 it('orders the variant of a configurable through its parent', function (): void {
@@ -133,7 +206,7 @@ it('orders the variant of a configurable through its parent', function (): void 
     }
     $path = ordersCsv([ordersRow('IMP-ORD-6', 'processing', 1, 'imp.guest@example.org', $variant->getSku() . ':2')]);
 
-    expect((new Orders())->import($path, [Orders::OPTION_SKIP_STATISTICS => true])->created)->toBe(1);
+    expect(new Orders()->import($path, [Orders::OPTION_SKIP_STATISTICS => true])->created)->toBe(1);
 
     $items = importedOrder('IMP-ORD-6')->getAllItems();
     $types = array_map(fn($item) => $item->getProductType(), $items);
@@ -171,4 +244,88 @@ it('rejects an unknown sku, a bad item, a bad status and a missing region before
     ]);
     expect(fn() => $importer->validate($path))->toThrow(RowException::class, "line 3: reference 'IMP-ORD-7' is also on line 2");
     expect(Mage::getResourceModel('sales/order_collection')->addFieldToFilter('ext_order_id', ['like' => 'IMP-ORD-%'])->getSize())->toBe(0);
+});
+
+it('reports a row with a coupon code that does not apply as failed, and places no order for it', function (): void {
+    $item = loadSimplePricedProduct()->getSku() . ':1';
+    $path = ordersCsv([[...ordersRow('IMP-ORD-8', 'processing', 1, 'imp.guest@example.org', $item), 'NO-SUCH-COUPON']], ['coupon_code']);
+
+    expect(fn() => new Orders()->import($path, [Orders::OPTION_SKIP_STATISTICS => true]))
+        ->toThrow(RowException::class, "Coupon code 'NO-SUCH-COUPON' is not valid");
+    expect(Mage::getResourceModel('sales/order_collection')->addFieldToFilter('ext_order_id', 'IMP-ORD-8')->getSize())->toBe(0);
+    unlink($path);
+});
+
+it('reports a row with a disabled product as failed, and places no order for it', function (): void {
+    $product = Mage::getModel('catalog/product')->setStoreId(0)
+        ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+        ->setAttributeSetId(Mage::getModel('catalog/product')->getDefaultAttributeSetId())
+        ->setSku('pest-import-order-' . uniqid())->setName('Pest import order product')->setPrice(10.0)->setWeight(1)
+        ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_DISABLED)
+        ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
+        ->setTaxClassId(0)->setWebsiteIds([1])
+        ->setStockData(['use_config_manage_stock' => 0, 'manage_stock' => 0, 'is_in_stock' => 1]);
+    $product->save();
+    $path = ordersCsv([ordersRow('IMP-ORD-9', 'processing', 1, 'imp.guest@example.org', $product->getSku() . ':1')]);
+
+    try {
+        expect(fn() => new Orders()->import($path, [Orders::OPTION_SKIP_STATISTICS => true]))
+            ->toThrow(RowException::class, "Product '{$product->getSku()}' is not available");
+        expect(Mage::getResourceModel('sales/order_collection')->addFieldToFilter('ext_order_id', 'IMP-ORD-9')->getSize())->toBe(0);
+    } finally {
+        $product->delete();
+        unlink($path);
+    }
+});
+
+it('moves an order to its status through the order services, with no email to the customer', function (): void {
+    $calls = new ArrayObject();
+    $orders = new class ($calls) extends Mage_Sales_Service_Order {
+        public function __construct(private ArrayObject $calls) {}
+
+        #[\Override]
+        public function cancel(Mage_Sales_Model_Order $order, ?string $reason = null): Mage_Sales_Model_Order
+        {
+            $this->calls[] = 'cancel';
+            return parent::cancel($order, $reason);
+        }
+    };
+    $documents = new class ($calls) extends Mage_Sales_Service_Order_Document {
+        public function __construct(private ArrayObject $calls) {}
+
+        #[\Override]
+        public function invoice(
+            Mage_Sales_Model_Order $order,
+            array $qtys = [],
+            ?string $captureCase = null,
+            ?string $comment = null,
+            bool $notifyCustomer = false,
+            bool $visibleOnFront = false,
+            ?bool $sendEmail = null,
+            bool $ship = false,
+            array $tracks = [],
+        ): Mage_Sales_Model_Order_Invoice {
+            $this->calls[] = 'invoice:' . $captureCase . ':' . var_export($sendEmail, true);
+            return parent::invoice($order, $qtys, $captureCase, $comment, $notifyCustomer, $visibleOnFront, $sendEmail, $ship, $tracks);
+        }
+    };
+    Mage::unregister('_service/sales/order');
+    Mage::register('_service/sales/order', $orders);
+    Mage::unregister('_service/sales/order_document');
+    Mage::register('_service/sales/order_document', $documents);
+    $item = loadSimplePricedProduct()->getSku() . ':1';
+    $path = ordersCsv([
+        ordersRow('IMP-ORD-10', 'canceled', 5, 'imp.guest@example.org', $item),
+        ordersRow('IMP-ORD-11', 'processing', 5, 'imp.guest@example.org', $item),
+    ]);
+
+    try {
+        new Orders()->import($path, [Orders::OPTION_SKIP_STATISTICS => true]);
+    } finally {
+        Mage::unregister('_service/sales/order');
+        Mage::unregister('_service/sales/order_document');
+        unlink($path);
+    }
+
+    expect($calls->getArrayCopy())->toBe(['cancel', 'invoice:offline:false']);
 });

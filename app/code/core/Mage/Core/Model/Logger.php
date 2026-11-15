@@ -29,7 +29,7 @@ class Mage_Core_Model_Logger
      * @param string $file
      * @param bool $forceLog
      */
-    public function log($message, $level = null, $file = '', $forceLog = false)
+    public function log($message, $level = null, $file = '', $forceLog = false): void
     {
         // Check if XML log configuration exists - if so, bypass backend settings
         if (self::isLogConfigManagedByXml()) {
@@ -98,7 +98,7 @@ class Mage_Core_Model_Logger
     /**
      * Log exception wrapper
      */
-    public function logException(Throwable $e)
+    public function logException(Throwable $e): void
     {
         Mage::logException($e);
     }

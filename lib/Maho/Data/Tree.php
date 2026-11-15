@@ -81,14 +81,14 @@ class Tree
      * @param Node $parentNode
      * @param Node $prevNode
      */
-    public function moveNodeTo($node, $parentNode, $prevNode = null) {}
+    public function moveNodeTo($node, $parentNode, $prevNode = null): void {}
 
     /**
      * @param Node $node
      * @param Node $parentNode
      * @param Node $prevNode
      */
-    public function copyNodeTo($node, $parentNode, $prevNode = null) {}
+    public function copyNodeTo($node, $parentNode, $prevNode = null): void {}
 
     /**
      * @param Node $node
@@ -108,12 +108,12 @@ class Tree
      * @param Node $parentNode
      * @param Node $prevNode
      */
-    public function createNode($parentNode, $prevNode = null) {}
+    public function createNode($parentNode, $prevNode = null): void {}
 
     /**
      * @param Node $node
      */
-    public function getChild($node) {}
+    public function getChild($node): void {}
 
     /**
      * @param Node $node

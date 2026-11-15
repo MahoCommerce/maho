@@ -85,7 +85,7 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
      * @param string|array|\Maho\DataObject $tab
      * @param   string $afterTabId
      */
-    public function addTabAfter($tabId, $tab, $afterTabId)
+    public function addTabAfter($tabId, $tab, $afterTabId): void
     {
         $this->addTab($tabId, $tab);
         $this->_afterTabIds[$tabId] = $afterTabId;
@@ -392,7 +392,7 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
      * @param string $tabOneId
      * @param string $tabTwoId
      */
-    public function bindShadowTabs($tabOneId, $tabTwoId)
+    public function bindShadowTabs($tabOneId, $tabTwoId): void
     {
         $tabs = [];
         $args = func_get_args();

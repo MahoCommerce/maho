@@ -11,220 +11,47 @@ uses(Tests\MahoBackendTestCase::class);
 
 describe('Customer Address Integration Tests', function () {
     beforeEach(function () {
-        createCustomerAddressTestData();
+        $this->customers = createCustomerAddressTestData();
     });
 
     describe('Basic Address Attribute Filtering', function () {
-        test('filters customers by first name in address', function () {
-            $segment = createCustomerAddressTestSegment('Address Firstname', [
+        test('matches the customers by a field of one of their addresses', function (string $attribute, string $operator, string $value, string $member, Closure $matches) {
+            $segment = createCustomerAddressTestSegment('Address ' . $attribute, [
                 'type' => 'customersegmentation/segment_condition_customer_address',
-                'attribute' => 'firstname',
-                'operator' => '==',
-                'value' => 'John',
+                'attribute' => $attribute,
+                'operator' => $operator,
+                'value' => $value,
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
+            expect($matchedCustomers)->toContain($this->customers[$member]);
 
             foreach ($matchedCustomers as $customerId) {
-                $addresses = getCustomerAddresses((int) $customerId);
                 $hasMatchingAddress = false;
-                foreach ($addresses as $address) {
-                    if ($address->getFirstname() === 'John') {
+                foreach (getCustomerAddresses((int) $customerId) as $address) {
+                    if ($matches($address)) {
                         $hasMatchingAddress = true;
                         break;
                     }
                 }
-                expect($hasMatchingAddress)->toBe(true);
+                expect($hasMatchingAddress)->toBe(true, "Customer {$customerId} has no address with {$attribute} {$operator} {$value}");
             }
-        });
-
-        test('filters customers by last name in address', function () {
-            $segment = createCustomerAddressTestSegment('Address Lastname', [
-                'type' => 'customersegmentation/segment_condition_customer_address',
-                'attribute' => 'lastname',
-                'operator' => '==',
-                'value' => 'Smith',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $addresses = getCustomerAddresses((int) $customerId);
-                $hasMatchingAddress = false;
-                foreach ($addresses as $address) {
-                    if ($address->getLastname() === 'Smith') {
-                        $hasMatchingAddress = true;
-                        break;
-                    }
-                }
-                expect($hasMatchingAddress)->toBe(true);
-            }
-        });
-
-        test('filters customers by company in address', function () {
-            $segment = createCustomerAddressTestSegment('Address Company', [
-                'type' => 'customersegmentation/segment_condition_customer_address',
-                'attribute' => 'company',
-                'operator' => '{}',
-                'value' => 'Acme',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $addresses = getCustomerAddresses((int) $customerId);
-                $hasMatchingAddress = false;
-                foreach ($addresses as $address) {
-                    if (str_contains($address->getCompany() ?? '', 'Acme')) {
-                        $hasMatchingAddress = true;
-                        break;
-                    }
-                }
-                expect($hasMatchingAddress)->toBe(true);
-            }
-        });
-
-        test('filters customers by street address', function () {
-            $segment = createCustomerAddressTestSegment('Address Street', [
-                'type' => 'customersegmentation/segment_condition_customer_address',
-                'attribute' => 'street',
-                'operator' => '{}',
-                'value' => 'Main St',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $addresses = getCustomerAddresses((int) $customerId);
-                $hasMatchingAddress = false;
-                foreach ($addresses as $address) {
-                    if (str_contains($address->getStreetFull() ?? '', 'Main St')) {
-                        $hasMatchingAddress = true;
-                        break;
-                    }
-                }
-                expect($hasMatchingAddress)->toBe(true);
-            }
-        });
-
-        test('filters customers by city in address', function () {
-            $segment = createCustomerAddressTestSegment('Address City', [
-                'type' => 'customersegmentation/segment_condition_customer_address',
-                'attribute' => 'city',
-                'operator' => '==',
-                'value' => 'New York',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $addresses = getCustomerAddresses((int) $customerId);
-                $hasMatchingAddress = false;
-                foreach ($addresses as $address) {
-                    if ($address->getCity() === 'New York') {
-                        $hasMatchingAddress = true;
-                        break;
-                    }
-                }
-                expect($hasMatchingAddress)->toBe(true);
-            }
-        });
-
-        test('filters customers by postcode in address', function () {
-            $segment = createCustomerAddressTestSegment('Address Postcode', [
-                'type' => 'customersegmentation/segment_condition_customer_address',
-                'attribute' => 'postcode',
-                'operator' => '{}',
-                'value' => '10001',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $addresses = getCustomerAddresses((int) $customerId);
-                $hasMatchingAddress = false;
-                foreach ($addresses as $address) {
-                    if (str_contains($address->getPostcode() ?? '', '10001')) {
-                        $hasMatchingAddress = true;
-                        break;
-                    }
-                }
-                expect($hasMatchingAddress)->toBe(true);
-            }
-        });
-
-        test('filters customers by telephone in address', function () {
-            $segment = createCustomerAddressTestSegment('Address Telephone', [
-                'type' => 'customersegmentation/segment_condition_customer_address',
-                'attribute' => 'telephone',
-                'operator' => '{}',
-                'value' => '555-0123',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $addresses = getCustomerAddresses((int) $customerId);
-                $hasMatchingAddress = false;
-                foreach ($addresses as $address) {
-                    if (str_contains($address->getTelephone() ?? '', '555-0123')) {
-                        $hasMatchingAddress = true;
-                        break;
-                    }
-                }
-                expect($hasMatchingAddress)->toBe(true);
-            }
-        });
-
-        test('filters customers by country_id in address', function () {
-            $segment = createCustomerAddressTestSegment('Address Country', [
-                'type' => 'customersegmentation/segment_condition_customer_address',
-                'attribute' => 'country_id',
-                'operator' => '==',
-                'value' => 'US',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $addresses = getCustomerAddresses((int) $customerId);
-                $hasMatchingAddress = false;
-                foreach ($addresses as $address) {
-                    if ($address->getCountryId() === 'US') {
-                        $hasMatchingAddress = true;
-                        break;
-                    }
-                }
-                expect($hasMatchingAddress)->toBe(true);
-            }
-        });
+        })->with([
+            'first name' => ['firstname', '==', 'John', 'Single', fn($a) => $a->getFirstname() === 'John'],
+            'last name' => ['lastname', '==', 'Smith', 'Single', fn($a) => $a->getLastname() === 'Smith'],
+            'company' => ['company', '{}', 'Acme', 'Single', fn($a) => str_contains($a->getCompany() ?? '', 'Acme')],
+            'street' => ['street', '{}', 'Main St', 'Single', fn($a) => str_contains($a->getStreetFull() ?? '', 'Main St')],
+            'city' => ['city', '==', 'New York', 'Single', fn($a) => $a->getCity() === 'New York'],
+            'postcode' => ['postcode', '{}', '10001', 'Single', fn($a) => str_contains($a->getPostcode() ?? '', '10001')],
+            'telephone' => ['telephone', '{}', '555-0123', 'Single', fn($a) => str_contains($a->getTelephone() ?? '', '555-0123')],
+            'US country' => ['country_id', '==', 'US', 'Single', fn($a) => $a->getCountryId() === 'US'],
+            'Canadian country' => ['country_id', '==', 'CA', 'Canadian', fn($a) => $a->getCountryId() === 'CA'],
+            'region text' => ['region', '==', 'Free Region Name', 'Single', fn($a) => $a->getRegion() === 'Free Region Name'],
+            'UK region text' => ['region', '==', 'London', 'British', fn($a) => $a->getRegion() === 'London'],
+        ]);
     });
 
     describe('Complex Region Logic Testing', function () {
-        test('matches customers by region text field', function () {
-            $segment = createCustomerAddressTestSegment('Region Text', [
-                'type' => 'customersegmentation/segment_condition_customer_address',
-                'attribute' => 'region',
-                'operator' => '==',
-                'value' => 'Free Region Name',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $addresses = getCustomerAddresses((int) $customerId);
-                $hasMatchingAddress = false;
-                foreach ($addresses as $address) {
-                    if ($address->getRegion() === 'Free Region Name') {
-                        $hasMatchingAddress = true;
-                        break;
-                    }
-                }
-                expect($hasMatchingAddress)->toBe(true);
-            }
-        });
-
         test('matches customers by directory region name lookup', function () {
             // First get a valid region ID and name from the directory
             $regionCollection = Mage::getResourceModel('directory/region_collection')
@@ -290,50 +117,17 @@ describe('Customer Address Integration Tests', function () {
 
     describe('Multiple Addresses per Customer', function () {
         test('matches customers with multiple addresses when one matches', function () {
-            // First, verify that test data was created with Los Angeles address
-            $addressCollection = Mage::getResourceModel('customer/address_collection')
-                ->addAttributeToSelect('*')
-                ->addAttributeToFilter('city', 'Los Angeles');
-
-            // If no Los Angeles addresses exist, let's just test with any existing city
-            if ($addressCollection->getSize() == 0) {
-                // Find any address and use its city for the test
-                $anyAddressCollection = Mage::getResourceModel('customer/address_collection')
-                    ->addAttributeToSelect('*')
-                    ->setPageSize(1);
-
-                $anyAddress = $anyAddressCollection->getFirstItem();
-                if (!$anyAddress->getId()) {
-                    expect(true)->toBe(true); // No addresses at all - skip test
-                    return;
-                }
-
-                $testCity = $anyAddress->getCity();
-            } else {
-                $testCity = 'Los Angeles';
-            }
-
             $segment = createCustomerAddressTestSegment('Multi Address Match', [
                 'type' => 'customersegmentation/segment_condition_customer_address',
                 'attribute' => 'city',
                 'operator' => '==',
-                'value' => $testCity,
+                'value' => 'Los Angeles',
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
 
-            // At least the segment logic is working if we get matched customers
-            expect(count($matchedCustomers))->toBeGreaterThanOrEqual(0);
-
-            // If we have matches, do a basic verification that makes sense
-            if (count($matchedCustomers) > 0) {
-                foreach ($matchedCustomers as $customerId) {
-                    $addresses = getCustomerAddresses((int) $customerId);
-                    // At minimum, matched customers should have addresses
-                    expect(count($addresses))->toBeGreaterThan(0);
-                }
-            }
+            expect($matchedCustomers)->toContain($this->customers['Multiple'])
+                ->and($matchedCustomers)->not->toContain($this->customers['Single']);
         });
 
         test('does not match customers when none of their addresses match', function () {
@@ -347,54 +141,6 @@ describe('Customer Address Integration Tests', function () {
             $matchedCustomers = $segment->getMatchingCustomerIds();
             expect($matchedCustomers)->toBeArray();
             expect(count($matchedCustomers))->toBe(0);
-        });
-    });
-
-    describe('International Addresses', function () {
-        test('filters customers by Canadian addresses', function () {
-            $segment = createCustomerAddressTestSegment('Canadian Customers', [
-                'type' => 'customersegmentation/segment_condition_customer_address',
-                'attribute' => 'country_id',
-                'operator' => '==',
-                'value' => 'CA',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $addresses = getCustomerAddresses((int) $customerId);
-                $hasCanadianAddress = false;
-                foreach ($addresses as $address) {
-                    if ($address->getCountryId() === 'CA') {
-                        $hasCanadianAddress = true;
-                        break;
-                    }
-                }
-                expect($hasCanadianAddress)->toBe(true);
-            }
-        });
-
-        test('filters customers by UK addresses with region text', function () {
-            $segment = createCustomerAddressTestSegment('UK Customers', [
-                'type' => 'customersegmentation/segment_condition_customer_address',
-                'attribute' => 'region',
-                'operator' => '==',
-                'value' => 'London',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $addresses = getCustomerAddresses((int) $customerId);
-                $hasLondonAddress = false;
-                foreach ($addresses as $address) {
-                    if ($address->getRegion() === 'London') {
-                        $hasLondonAddress = true;
-                        break;
-                    }
-                }
-                expect($hasLondonAddress)->toBe(true);
-            }
         });
     });
 
@@ -438,7 +184,7 @@ describe('Customer Address Integration Tests', function () {
             }
         });
 
-        test('handles null values in address fields', function () {
+        test('matches nobody when a field must not contain an empty value', function () {
             $segment = createCustomerAddressTestSegment('Has Telephone', [
                 'type' => 'customersegmentation/segment_condition_customer_address',
                 'attribute' => 'telephone',
@@ -446,9 +192,7 @@ describe('Customer Address Integration Tests', function () {
                 'value' => null,
             ]);
 
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-            // Should handle null values without errors
-            expect($matchedCustomers)->toBeArray();
+            expect($segment->getMatchingCustomerIds())->toBe([]);
         });
 
         test('handles pattern matching with special characters', function () {
@@ -460,7 +204,9 @@ describe('Customer Address Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
+
+            expect($matchedCustomers)->toContain($this->customers['Special'])
+                ->and($matchedCustomers)->not->toContain($this->customers['Single']);
         });
     });
 
@@ -581,7 +327,10 @@ describe('Customer Address Integration Tests', function () {
 });
 
 // Helper functions for test data creation and management
-function createCustomerAddressTestData(): void
+/**
+ * @return array<string, int> customer IDs keyed by their last name
+ */
+function createCustomerAddressTestData(): array
 {
     $uniqueId = uniqid('addr_', true);
 
@@ -772,6 +521,7 @@ function createCustomerAddressTestData(): void
         ];
     }
 
+    $ids = [];
     foreach ($customers as $customerData) {
         $customer = Mage::getModel('customer/customer');
         $customer->setFirstname($customerData['customer']['firstname']);
@@ -780,7 +530,7 @@ function createCustomerAddressTestData(): void
         $customer->setGroupId(1);
         $customer->setWebsiteId(1);
         $customer->save();
-
+        $ids[$customerData['customer']['lastname']] = (int) $customer->getId();
 
         // Create addresses
         foreach ($customerData['addresses'] as $addressData) {
@@ -814,6 +564,8 @@ function createCustomerAddressTestData(): void
             $address->save();
         }
     }
+
+    return $ids;
 }
 
 function createCustomerAddressTestSegment(string $name, array $conditions): Maho_CustomerSegmentation_Model_Segment
@@ -839,7 +591,6 @@ function createCustomerAddressTestSegment(string $name, array $conditions): Maho
     $segment->setRefreshStatus('pending');
     $segment->setPriority(10);
     $segment->save();
-
 
     return $segment;
 }

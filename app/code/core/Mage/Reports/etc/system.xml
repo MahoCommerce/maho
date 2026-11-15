@@ -131,6 +131,52 @@ SPDX-License-Identifier: AFL-3.0
                         </viewed_expr>
                     </fields>
                 </crontab>
+                <not_found translate="label">
+                    <label>404 Errors</label>
+                    <sort_order>4</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <enabled translate="label comment">
+                            <label>Record 404 Errors</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>Count each storefront address that answers 404 in Reports > 404 Errors.</comment>
+                        </enabled>
+                        <log_rate_limit translate="label comment">
+                            <label>Pages Recorded per Hour per Visitor</label>
+                            <validate>validate-digits</validate>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>Above this number, the 404 page still shows, but the report does not count it. This stops a scanner from filling the report. Enter "0" for no limit.</comment>
+                            <depends><enabled>1</enabled></depends>
+                        </log_rate_limit>
+                        <days_to_keep translate="label comment">
+                            <label>Delete Addresses Not Seen For (days)</label>
+                            <validate>validate-digits</validate>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>Enter "0" to keep them.</comment>
+                        </days_to_keep>
+                        <max_rows translate="label comment">
+                            <label>Maximum Addresses</label>
+                            <validate>validate-digits</validate>
+                            <sort_order>4</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>Every hour, the store deletes the addresses seen least recently above this number. Enter "0" for no limit.</comment>
+                        </max_rows>
+                    </fields>
+                </not_found>
             </groups>
         </reports>
         <system>
@@ -138,8 +184,8 @@ SPDX-License-Identifier: AFL-3.0
                 <rate_limit>
                     <fields>
                         <reports_refresh translate="label comment" module="reports">
-                            <label>Report statistics refresh (API)</label>
-                            <comment>Per API caller. Default 10 per minute. 0 to disable.</comment>
+                            <label>Report statistics refresh</label>
+                            <comment>Per admin user or API caller. Default 10 per minute. 0 to disable.</comment>
                             <sort_order>320</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>

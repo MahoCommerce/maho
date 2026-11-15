@@ -50,7 +50,7 @@ class Template
     /**
      * Sets template variables that's can be called through {var ...} statement
      */
-    public function setVariables(array $variables)
+    public function setVariables(array $variables): static
     {
         foreach ($variables as $name => $value) {
             $this->_templateVars[$name] = $value;
@@ -64,7 +64,7 @@ class Template
      *
      * @param callable $callback it must return string
      */
-    public function setTemplateProcessor(callable $callback)
+    public function setTemplateProcessor(callable $callback): static
     {
         $this->_templateProcessor = $callback;
         return $this;
@@ -85,7 +85,7 @@ class Template
      *
      * @param callable $callback it must return string
      */
-    public function setIncludeProcessor(callable $callback)
+    public function setIncludeProcessor(callable $callback): static
     {
         $this->_includeProcessor = $callback;
         return $this;
@@ -203,7 +203,7 @@ class Template
         return $replacedValue;
     }
 
-    public function dependDirective($construction)
+    public function dependDirective(array $construction): string
     {
         if (count($this->_templateVars) == 0) {
             // If template preprocessing
@@ -216,7 +216,7 @@ class Template
         return $construction[2];
     }
 
-    public function ifDirective($construction)
+    public function ifDirective(array $construction): string
     {
         if (count($this->_templateVars) == 0) {
             return $construction[0];

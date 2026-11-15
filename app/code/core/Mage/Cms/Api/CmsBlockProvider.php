@@ -31,39 +31,19 @@ final class CmsBlockProvider extends CrudProvider
     protected ?string $backendResource = 'cms-blocks';
 
     /**
-     * Disabled blocks must not be readable through the public GET /cms-blocks/{id}
-     * route. The base provider only store-scopes; enforce is_active here so the
-     * numeric-id path matches the identifier and collection paths. Backend
-     * readers bypass both checks so drafts and foreign-store blocks stay readable.
+     * A guest or a customer reads an enabled block of the store view. A backend reader reads any block of its store views.
      */
     #[\Override]
     protected function provideItem(int|string $id): ?CmsBlock
     {
-        $block = \Mage::getModel('cms/block')->load($id);
-        if (!$block->getId()) {
+        $backend = $this->isBackendReader();
+        try {
+            $block = \Mage::getService('cms/block')->getById((int) $id, $backend ? null : StoreContext::getStoreId());
+        } catch (\Mage_Core_Exception_NoSuchEntity) {
             return null;
         }
-
-        if ($this->isBackendReader()) {
-            $resource = $block->getResource();
-            if (method_exists($resource, 'lookupStoreIds')) {
-                $this->assertReadableStores($resource->lookupStoreIds($block->getId()), 'block');
-            }
-
-            /** @var CmsBlock */
-            return $this->toDto($block);
-        }
-
-        if (!$block->getIsActive()) {
-            return null;
-        }
-
-        $resource = $block->getResource();
-        if (method_exists($resource, 'lookupStoreIds')) {
-            $storeIds = $resource->lookupStoreIds($block->getId());
-            if (!StoreContext::isAvailableForStore($storeIds, StoreContext::getStoreId())) {
-                return null;
-            }
+        if ($backend) {
+            $this->assertReadableStores($block->getResource()->lookupStoreIds($block->getId()), 'block');
         }
 
         /** @var CmsBlock */

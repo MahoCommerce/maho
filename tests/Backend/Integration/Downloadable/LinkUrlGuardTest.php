@@ -24,6 +24,7 @@ describe('Downloadable link URL guard', function (): void {
 
     it('refuses to save a link or a sample with a URL that is not valid', function (): void {
         $link = Mage::getModel('downloadable/link')
+            ->setTitle('Pest link')
             ->setLinkType(Mage_Downloadable_Helper_Download::LINK_TYPE_URL)
             ->setLinkUrl('https://files.example:99999/a.pdf');
         expect(fn() => $link->save())->toThrow(Mage_Core_Exception::class, 'is not valid');
@@ -34,6 +35,7 @@ describe('Downloadable link URL guard', function (): void {
         expect(fn() => $sample->save())->toThrow(Mage_Core_Exception::class, 'is not valid');
 
         $linkWithSample = Mage::getModel('downloadable/link')
+            ->setTitle('Pest link')
             ->setLinkType(Mage_Downloadable_Helper_Download::LINK_TYPE_FILE)
             ->setSampleType(Mage_Downloadable_Helper_Download::LINK_TYPE_URL)
             ->setSampleUrl('ftp://files.example/a.pdf');

@@ -69,15 +69,13 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
     {
         $this->_title($this->__('CMS'))->_title($this->__('Static Blocks'));
 
-        // 1. Get ID and create model
         $id = $this->getRequest()->getParam('block_id');
-        $model = Mage::getModel('cms/block');
-
-        // 2. Initial checking
+        $model = $this->blockService()->newBlock();
         if ($id) {
-            $model->load($id);
-            if (!$model->getId()) {
-                Mage::getSingleton('adminhtml/session')->addError(Mage::helper('cms')->__('This block no longer exists.'));
+            try {
+                $model = $this->blockService()->getById((int) $id);
+            } catch (Mage_Core_Exception_NoSuchEntity $e) {
+                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
                 $this->_redirect('*/*/');
                 return;
             }
@@ -100,85 +98,72 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
             ->renderLayout();
     }
 
-    /**
-     * Save action
-     */
     #[Maho\Config\Route('/admin/cms_block/save')]
     public function saveAction(): void
     {
-        // check if data sent
-        if ($data = $this->getRequest()->getPost()) {
-            $id = $this->getRequest()->getParam('block_id');
-            $model = Mage::getModel('cms/block')->load($id);
-            if (!$model->getId() && $id) {
-                Mage::getSingleton('adminhtml/session')->addError(Mage::helper('cms')->__('This block no longer exists.'));
-                $this->_redirect('*/*/');
-                return;
-            }
-
-            // init model and set data
-
-            $model->setData($data);
-
-            // try to save it
-            try {
-                // save the data
-                $model->save();
-                // display success message
-                Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('cms')->__('The block has been saved.'));
-                // clear previously saved data from session
-                Mage::getSingleton('adminhtml/session')->setFormData(false);
-
-                // check if 'Save and Continue'
-                if ($this->getRequest()->getParam('back')) {
-                    $this->_redirect('*/*/edit', ['block_id' => $model->getId()]);
-                    return;
-                }
-                // go to grid
-                $this->_redirect('*/*/');
-                return;
-            } catch (Exception $e) {
-                // display error message
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                // save data in session
-                Mage::getSingleton('adminhtml/session')->setFormData($data);
-                // redirect to edit form
-                $this->_redirect('*/*/edit', ['block_id' => $this->getRequest()->getParam('block_id')]);
-                return;
-            }
+        $data = $this->getRequest()->getPost();
+        if (!$data) {
+            $this->_redirect('*/*/');
+            return;
         }
-        $this->_redirect('*/*/');
+
+        $session = Mage::getSingleton('adminhtml/session');
+        $id = (int) $this->getRequest()->getParam('block_id');
+        try {
+            $model = $id ? $this->blockService()->getById($id) : Mage::getModel('cms/block');
+        } catch (Mage_Core_Exception_NoSuchEntity $e) {
+            $session->addError($e->getMessage());
+            $this->_redirect('*/*/');
+            return;
+        }
+
+        try {
+            $this->blockService()->save($model->setData($data));
+            $session->addSuccess(Mage::helper('cms')->__('The block has been saved.'));
+            $session->setFormData(false);
+            if ($this->getRequest()->getParam('back')) {
+                $this->_redirect('*/*/edit', ['block_id' => $model->getId()]);
+                return;
+            }
+            $this->_redirect('*/*/');
+            return;
+        } catch (Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $session->addError($error['message']);
+            }
+        } catch (Exception $e) {
+            $session->addError($e->getMessage());
+        }
+        $session->setFormData($data);
+        $this->_redirect('*/*/edit', ['block_id' => $id ?: null]);
     }
 
-    /**
-     * Delete action
-     */
     #[Maho\Config\Route('/admin/cms_block/delete')]
     public function deleteAction(): void
     {
-        // check if we know what should be deleted
-        if ($id = $this->getRequest()->getParam('block_id')) {
-            try {
-                // init model and delete
-                $model = Mage::getModel('cms/block');
-                $model->load($id);
-                $model->delete();
-                // display success message
-                Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('cms')->__('The block has been deleted.'));
-                // go to grid
-                $this->_redirect('*/*/');
-                return;
-            } catch (Exception $e) {
-                // display error message
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                // go back to edit form
-                $this->_redirect('*/*/edit', ['block_id' => $id]);
-                return;
-            }
+        $session = Mage::getSingleton('adminhtml/session');
+        $id = (int) $this->getRequest()->getParam('block_id');
+        if (!$id) {
+            $session->addError(Mage::helper('cms')->__('Unable to find a block to delete.'));
+            $this->_redirect('*/*/');
+            return;
         }
-        // display error message
-        Mage::getSingleton('adminhtml/session')->addError(Mage::helper('cms')->__('Unable to find a block to delete.'));
-        // go to grid
-        $this->_redirect('*/*/');
+
+        try {
+            $this->blockService()->delete($this->blockService()->getById($id));
+            $session->addSuccess(Mage::helper('cms')->__('The block has been deleted.'));
+            $this->_redirect('*/*/');
+        } catch (Mage_Core_Exception_NoSuchEntity $e) {
+            $session->addError($e->getMessage());
+            $this->_redirect('*/*/');
+        } catch (Exception $e) {
+            $session->addError($e->getMessage());
+            $this->_redirect('*/*/edit', ['block_id' => $id]);
+        }
+    }
+
+    protected function blockService(): Mage_Cms_Service_Block
+    {
+        return Mage::getService('cms/block');
     }
 }

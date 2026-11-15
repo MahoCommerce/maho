@@ -148,9 +148,9 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      */
     protected $_creditmemos;
 
-    protected $_relatedObjects  = [];
-    protected $_orderCurrency   = null;
-    protected $_baseCurrency    = null;
+    protected array $_relatedObjects  = [];
+    protected ?Mage_Directory_Model_Currency $_orderCurrency = null;
+    protected ?Mage_Directory_Model_Currency $_baseCurrency = null;
 
     /**
      * Array of action flags for canUnhold, canEdit, etc.
@@ -2054,7 +2054,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     /**
      * Check order state before saving
      */
-    protected function _checkState()
+    protected function _checkState(): static
     {
         if (!$this->getId()) {
             return $this;
@@ -2220,7 +2220,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      */
     public function prepareInvoice($qtys = [])
     {
-        return Mage::getModel('sales/service_order', $this)->prepareInvoice($qtys);
+        return Mage::getService('sales/order_document')->buildInvoice($this, (array) $qtys);
     }
 
     /**
@@ -2231,7 +2231,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      */
     public function prepareShipment($qtys = [])
     {
-        return Mage::getModel('sales/service_order', $this)->prepareShipment($qtys);
+        return Mage::getService('sales/order_document')->buildShipment($this, (array) $qtys);
     }
 
     /**

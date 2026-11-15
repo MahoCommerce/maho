@@ -162,6 +162,50 @@ it('installs the fixture package end to end and reruns without duplicates', func
     expect(Mage::getResourceModel('catalogsearch/query_collection')->addFieldToFilter('query_text', 'fixture chair')->count())->toBe(1);
 });
 
+it('reindexes and flushes the cache through the services', function (): void {
+    $index = new class extends Mage_Index_Service_Process {
+        public int $queues = 0;
+        public int $reindexes = 0;
+
+        #[\Override]
+        public function getQueue(?array $processIds = null): array
+        {
+            $this->queues++;
+            return [];
+        }
+
+        #[\Override]
+        public function reindexAll(array $queue, ?callable $onStart = null, ?callable $onEnd = null): void
+        {
+            $this->reindexes++;
+        }
+    };
+    $cache = new class extends Mage_Core_Service_Cache {
+        public int $flushes = 0;
+
+        #[\Override]
+        public function flush(): void
+        {
+            $this->flushes++;
+        }
+    };
+    Mage::unregister('_service/index/process');
+    Mage::register('_service/index/process', $index);
+    Mage::unregister('_service/core/cache');
+    Mage::register('_service/core/cache', $cache);
+
+    try {
+        (new Installer())->install(Package::fromPath(fixturePackDir()), null, true);
+    } finally {
+        Mage::unregister('_service/index/process');
+        Mage::unregister('_service/core/cache');
+    }
+
+    expect($index->queues)->toBe(1)
+        ->and($index->reindexes)->toBe(1)
+        ->and($cache->flushes)->toBe(1);
+});
+
 it('refuses a folder without packs and an unknown pack name', function (): void {
     expect(fn() => Package::fromPath(sys_get_temp_dir()))->toThrow(\Maho\Exception::class, 'no packs/ folder');
     $package = Package::fromPath(fixturePackDir());

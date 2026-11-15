@@ -148,18 +148,33 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
             $previousMethod = $shippingAddr->getShippingMethod();
             $shippingAddr->addData($billingData);
             $shippingAddr->setSameAsBilling();
-            $shippingAddr->setCollectShippingRates()->collectShippingRates();
-
-            $rates = $shippingAddr->getAllShippingRates();
-            $availableCodes = array_map(fn($r) => $r->getCode(), $rates);
-
-            if ($previousMethod && in_array($previousMethod, $availableCodes)) {
-                $shippingAddr->setShippingMethod($previousMethod);
-            } elseif (count($rates) > 0) {
-                $shippingAddr->setShippingMethod($rates[0]->getCode());
+            if (!$this->selectShippingRate($quote, $previousMethod)) {
+                $shippingAddr->save();
             }
-            $shippingAddr->save();
         }
+    }
+
+    /**
+     * Collect the shipping rates of $quote, and select the method $preferred when it has a rate, else the first rate.
+     * Return false when the shipping address has no rate.
+     */
+    public function selectShippingRate(Mage_Sales_Model_Quote $quote, ?string $preferred): bool
+    {
+        $address = $quote->getShippingAddress();
+        $address->setCollectShippingRates(true)->collectShippingRates();
+        $codes = [];
+        foreach ($address->getAllShippingRates() as $rate) {
+            if (!$rate->getErrorMessage()) {
+                $codes[] = $rate->getCode();
+            }
+        }
+        $code = in_array($preferred, $codes, true) ? $preferred : ($codes[0] ?? null);
+        if ($code === null) {
+            return false;
+        }
+
+        Mage::getService('checkout/cart')->selectShippingMethod($quote, $code);
+        return true;
     }
 
     public function placeOrderFromPaypalResult(
@@ -273,7 +288,7 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
      * Prepare and validate the quote before any payment is captured.
      *
      * Imports the PayPal address (assigning a shipping method) when needed,
-     * recollects totals, then runs the same validation order placement will
+     * selects the payment method, then runs the same validation order placement will
      * run. Throws here, before the irreversible capture, when the quote is not
      * placeable (e.g. missing shipping method), so no money moves for an order
      * that cannot be created.
@@ -283,8 +298,6 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
         array $paypalResult,
         string $methodCode,
     ): void {
-        $quote->getPayment()->setMethod($methodCode);
-
         if (!$quote->getBillingAddress()->getFirstname()) {
             $this->importPaypalAddress($paypalResult, $quote);
         }
@@ -294,9 +307,15 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
             $quote->setData('checkout_method', Mage_Checkout_Model_Type_Onepage::METHOD_CUSTOMER);
         }
 
-        $quote->collectTotals();
+        if (($paypalResult['status'] ?? '') === 'COMPLETED') {
+            // The buyer has paid, so a check of the method that fails now leaves a payment without an order
+            $quote->getPayment()->setMethod($methodCode);
+            $quote->collectTotals();
+        } else {
+            Mage::getService('checkout/cart')->selectPaymentMethod($quote, ['method' => $methodCode]);
+        }
 
-        Mage::getModel('sales/service_quote', $quote)->validate();
+        Mage::getService('sales/order')->validateQuote($quote, Mage_Checkout_Model_Actor::Customer);
     }
 
     public function saveVaultToken(array $paypalResult, Mage_Sales_Model_Quote $quote): void

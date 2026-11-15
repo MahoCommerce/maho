@@ -41,75 +41,54 @@ class Migrate extends BaseMahoCommand
 
         $output->writeln('<info>Applying pending updates...</info>');
 
-        // Replicate the exact logic from CacheController::flushSystemAction()
-        Mage::app()->getCache()->banUse('config');
-        Mage::getConfig()->reinit();
-        Mage::getConfig()->getCacheSaveLock(30, true);
-
         try {
-            Mage::app()->cleanCache();
-            $output->writeln('✓ Cleaned cache');
-
-            /** @var \Maho\Db\Adapter\AdapterInterface $adapter */
-            $adapter = Mage::getSingleton('core/resource')->getConnection('core_setup');
-            [$target, $contributors] = Collector::collect();
-            if ($contributors === []) {
-                $output->writeln('✓ Applied declarative schema (no modules declare sql/schema.php)');
-            } else {
-                $sql = Applier::plan($adapter->getConnection(), $target, Collector::tablePrefix());
-                if ($sql === []) {
-                    $output->writeln(sprintf(
-                        '✓ Applied declarative schema (%d module(s), already up to date)',
-                        count($contributors),
-                    ));
-                } else {
-                    $this->warnDestructive($output, $sql);
-                    $this->warnCharsetConversions($output, $sql);
-                    $this->warnDroppedKeys($output, $sql);
-                    Applier::execute($adapter, $sql);
-                    $output->writeln(sprintf(
-                        '✓ Applied declarative schema (%d module(s), %d statement(s) executed)',
-                        count($contributors),
-                        count($sql),
-                    ));
-                }
-            }
-
-            Status::markApplied($adapter);
-
-            // Enumerated before applying: the per-phase counts below let the CI
-            // idempotency check assert a second run applies zero scripts, not
-            // just zero declarative statements.
-            $pendingScripts = ['schema' => 0, 'data' => 0];
-            foreach (Mage_Core_Model_Resource_Setup::getAllPendingUpdates() as $updates) {
-                foreach ($updates as $update) {
-                    $pendingScripts[$update['type']]++;
-                }
-            }
-
-            Mage_Core_Model_Resource_Setup::applyAllUpdates();
-            $output->writeln(sprintf('✓ Applied legacy schema/data updates (%d script(s))', $pendingScripts['schema']));
-
-            Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
-            $output->writeln(sprintf('✓ Applied data updates (%d script(s))', $pendingScripts['data']));
-
-            // unbanUse must precede saveCache(): saveCache() is a no-op while
-            // config cache use is banned. The finally covers the error path.
-            Mage::app()->getCache()->unbanUse('config');
-            Mage::getConfig()->saveCache();
-            $output->writeln('✓ Saved cache configuration');
+            $scripts = Mage::getService('core/cache')->flushSystem(function () use ($output): void {
+                $output->writeln('✓ Cleaned cache');
+                $this->applyDeclarativeSchema($output);
+            });
         } catch (\Exception $e) {
             $output->writeln('<error>' . $e->getMessage() . '</error>');
             return Command::FAILURE;
-        } finally {
-            Mage::app()->getCache()->unbanUse('config');
-            Mage::getConfig()->releaseCacheSaveLock();
         }
-
-        Mage::dispatchEvent('adminhtml_cache_flush_system');
+        $output->writeln(sprintf('✓ Applied legacy schema/data updates (%d script(s))', $scripts['schema']));
+        $output->writeln(sprintf('✓ Applied data updates (%d script(s))', $scripts['data']));
+        $output->writeln('✓ Saved cache configuration');
 
         $output->writeln('<info>All updates applied successfully!</info>');
         return Command::SUCCESS;
+    }
+
+    /**
+     * Apply the sql/schema.php of every module, and print what changed.
+     */
+    private function applyDeclarativeSchema(OutputInterface $output): void
+    {
+        /** @var \Maho\Db\Adapter\AdapterInterface $adapter */
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_setup');
+        [$target, $contributors] = Collector::collect();
+        if ($contributors === []) {
+            $output->writeln('✓ Applied declarative schema (no modules declare sql/schema.php)');
+        } else {
+            $sql = Applier::plan($adapter->getConnection(), $target, Collector::tablePrefix());
+            if ($sql === []) {
+                $output->writeln(sprintf(
+                    '✓ Applied declarative schema (%d module(s), already up to date)',
+                    count($contributors),
+                ));
+            } else {
+                $this->warnDestructive($output, $sql);
+                $this->warnCharsetConversions($output, $sql);
+                $this->warnDroppedKeys($output, $sql);
+                Applier::execute($adapter, $sql);
+                $output->writeln(sprintf(
+                    '✓ Applied declarative schema (%d module(s), %d statement(s) executed)',
+                    count($contributors),
+                    count($sql),
+                ));
+            }
+        }
+
+        Status::markApplied($adapter);
     }
 
     /**

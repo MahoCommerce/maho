@@ -35,23 +35,23 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
      */
     protected $_productTypes;
 
-    protected $_inventoryFields = [];
+    protected array $_inventoryFields = [];
 
-    protected $_imageFields = [];
+    protected array $_imageFields = [];
 
-    protected $_systemFields = [];
-    protected $_internalFields = [];
-    protected $_externalFields = [];
+    protected array $_systemFields = [];
+    protected array $_internalFields = [];
+    protected array $_externalFields = [];
 
-    protected $_inventoryItems = [];
+    protected array $_inventoryItems = [];
 
-    protected $_productModel;
+    protected ?Mage_Catalog_Model_Product $_productModel = null;
 
-    protected $_setInstances = [];
+    protected array $_setInstances = [];
 
-    protected $_store;
-    protected $_storeId;
-    protected $_attributes = [];
+    protected ?Mage_Core_Model_Store $_store = null;
+    protected ?int $_storeId = null;
+    protected array $_attributes = [];
 
     public function __construct()
     {
@@ -129,18 +129,9 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
         return false;
     }
 
-    /**
-     * Retrieve product model cache
-     *
-     * @return Mage_Catalog_Model_Product|object
-     */
-    public function getProductModel()
+    public function getProductModel(): Mage_Catalog_Model_Product
     {
-        if (is_null($this->_productModel)) {
-            $productModel = Mage::getModel('catalog/product');
-            $this->_productModel = Mage::objects()->save($productModel);
-        }
-        return Mage::objects()->load($this->_productModel);
+        return $this->_productModel ??= Mage::getModel('catalog/product');
     }
 
     /**
@@ -217,7 +208,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
 
     #[\Override]
     #[\Deprecated(message: 'not used anymore')]
-    public function parse()
+    public function parse(): static
     {
         $data            = $this->getData();
         $entityTypeId    = Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Product::ENTITY)->getId();
@@ -344,7 +335,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
     /**
      * @param array $items
      */
-    public function setInventoryItems($items)
+    public function setInventoryItems($items): void
     {
         $this->_inventoryItems = $items;
     }
@@ -359,11 +350,9 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
 
     /**
      * Unparse (prepare data) loaded products
-     *
-     * @return $this
      */
     #[\Override]
-    public function unparse()
+    public function unparse(): static
     {
         $entityIds = $this->getData();
 

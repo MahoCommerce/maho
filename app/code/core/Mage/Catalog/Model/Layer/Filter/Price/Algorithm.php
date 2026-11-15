@@ -282,7 +282,7 @@ class Mage_Catalog_Model_Layer_Filter_Price_Algorithm
      * @param array $oldRoundPrices
      * @param array $newRoundPrices
      */
-    protected function _mergeRoundPrices(&$oldRoundPrices, &$newRoundPrices)
+    protected function _mergeRoundPrices(&$oldRoundPrices, &$newRoundPrices): void
     {
         foreach ($newRoundPrices as $roundingFactor => $roundPriceValues) {
             if (array_key_exists($roundingFactor, $oldRoundPrices)) {

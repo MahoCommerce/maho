@@ -24,8 +24,9 @@ class CacheFlush extends BaseMahoCommand
     {
         $this->initMaho();
 
-        Mage::app()->getCache()->flush();
-        Mage::dispatchEvent('adminhtml_cache_flush_all');
+        /** @var \Mage_Core_Service_Cache $service */
+        $service = Mage::getService('core/cache');
+        $service->flush();
 
         $output->writeln('Caches flushed successfully!');
         return Command::SUCCESS;

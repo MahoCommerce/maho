@@ -137,9 +137,8 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             // popup/approve round-trip), so validate the quote here, before the money
             // moves, just as the standard flow validates before its capture.
             if ($vaultPaypalTokenId) {
-                $quote->getPayment()->setMethod($methodCode);
-                $quote->collectTotals();
-                Mage::getModel('sales/service_quote', $quote)->validate();
+                Mage::getService('checkout/cart')->selectPaymentMethod($quote, ['method' => $methodCode]);
+                Mage::getService('sales/order')->validateQuote($quote, Mage_Checkout_Model_Actor::Customer);
             }
 
             /** @var Maho_Paypal_Model_Api_Client $client */
@@ -372,25 +371,11 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                 $shippingAddr->setPostcode($shippingAddress['postal_code'] ?? '');
             }
 
-            $shippingAddr->setCollectShippingRates()->collectShippingRates();
-            $rates = $shippingAddr->getAllShippingRates();
-
-            if (count($rates) === 0) {
+            if (!Mage::helper('paypal')->selectShippingRate($quote, $selectedOption['id'] ?? null)) {
                 $this->getResponse()->setHttpResponseCode(422);
                 return;
             }
-
-            // If buyer selected a specific option, use it; otherwise select the first
-            $selectedCode = $selectedOption['id'] ?? null;
-            $validCodes = array_map(fn($r) => $r->getCode(), $rates);
-            if ($selectedCode && in_array($selectedCode, $validCodes)) {
-                $shippingAddr->setShippingMethod($selectedCode);
-            } else {
-                $shippingAddr->setShippingMethod($rates[0]->getCode());
-            }
-
-            $quote->collectTotals();
-            $quote->save();
+            $rates = $shippingAddr->getAllShippingRates();
 
             // Build response in PayPal's expected format
             $currency = $quote->getBaseCurrencyCode();

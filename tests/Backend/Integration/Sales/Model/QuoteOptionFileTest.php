@@ -265,13 +265,14 @@ it('keeps every file while the Sales data upgrade has not run', function (): voi
     $this->files[] = $path;
     $quote->delete();
     $resource = Mage::getResourceSingleton('core/resource');
+    $dataVersion = (string) $resource->getDataVersion('sales_setup');
     $resource->setDataVersion('sales_setup', '2.0.1');
 
     try {
         expect(quoteFileSweep())->toBe(0)
             ->and($this->mount->fileExists($path))->toBeTrue();
     } finally {
-        $resource->setDataVersion('sales_setup', '2.0.2');
+        $resource->setDataVersion('sales_setup', $dataVersion);
     }
 });
 

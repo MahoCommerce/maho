@@ -73,8 +73,8 @@ describe('Product Links, CRUD Lifecycle', function (): void {
         ], $token);
         expect($add['status'])->toBeIn([200, 201]);
 
-        // Read back
-        $read = apiGet("/api/rest/v2/products/{$mainProductId}/links/related");
+        // Read back as the integration: a guest sees only the links that the storefront lists
+        $read = apiGet("/api/rest/v2/products/{$mainProductId}/links/related", $token);
         expect($read['status'])->toBe(200);
         $items = getItems($read);
         $linkedIds = array_column($items, 'linkedProductId');
@@ -87,7 +87,7 @@ describe('Product Links, CRUD Lifecycle', function (): void {
         expect($replace['status'])->toBe(200);
 
         // Verify replacement
-        $readAfter = apiGet("/api/rest/v2/products/{$mainProductId}/links/related");
+        $readAfter = apiGet("/api/rest/v2/products/{$mainProductId}/links/related", $token);
         $afterItems = getItems($readAfter);
         $afterIds = array_column($afterItems, 'linkedProductId');
         expect($afterIds)->toContain($p2Id);
@@ -98,7 +98,7 @@ describe('Product Links, CRUD Lifecycle', function (): void {
         expect($delete['status'])->toBeIn([200, 204]);
 
         // Verify empty
-        $readEmpty = apiGet("/api/rest/v2/products/{$mainProductId}/links/related");
+        $readEmpty = apiGet("/api/rest/v2/products/{$mainProductId}/links/related", $token);
         $emptyItems = getItems($readEmpty);
         $emptyIds = array_column($emptyItems, 'linkedProductId');
         expect($emptyIds)->not->toContain($p2Id);

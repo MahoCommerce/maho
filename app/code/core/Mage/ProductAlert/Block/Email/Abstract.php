@@ -71,7 +71,7 @@ abstract class Mage_ProductAlert_Block_Email_Abstract extends Mage_Core_Block_Te
     /**
      * Reset product collection
      */
-    public function reset()
+    public function reset(): void
     {
         $this->_products = [];
     }
@@ -79,7 +79,7 @@ abstract class Mage_ProductAlert_Block_Email_Abstract extends Mage_Core_Block_Te
     /**
      * Add product to collection
      */
-    public function addProduct(Mage_Catalog_Model_Product $product)
+    public function addProduct(Mage_Catalog_Model_Product $product): void
     {
         $this->_products[$product->getId()] = $product;
     }

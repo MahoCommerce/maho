@@ -109,7 +109,7 @@ class Mage_Tag_IndexController extends Mage_Core_Controller_Front_Action
      *
      * @param array $counter
      */
-    protected function _fillMessageBox($counter)
+    protected function _fillMessageBox($counter): void
     {
         $session = Mage::getSingleton('catalog/session');
 

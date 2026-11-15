@@ -443,6 +443,7 @@ class Shipping {
             shippingRegionUpdater.update();
             document.getElementById('shipping:region_id').value = document.getElementById('billing:region_id').value;
             document.getElementById('shipping:region').value = document.getElementById('billing:region').value;
+            FieldDependenceController.refresh(formElement);
         } else {
             shippingSelect.value = billingSelect.value;
         }

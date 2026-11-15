@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Admin_Page
 {
-    protected $_url;
+    protected ?Mage_Adminhtml_Model_Url $_url = null;
 
     public function toOptionArray(): array
     {
@@ -22,7 +22,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Admin_Page
         return $options;
     }
 
-    protected function _createOptions(&$optionArray, $menuNode)
+    protected function _createOptions(array &$optionArray, array $menuNode): void
     {
         $nonEscapableNbspChar = html_entity_decode('&#160;', ENT_NOQUOTES, 'UTF-8');
 
@@ -51,13 +51,13 @@ class Mage_Adminhtml_Model_System_Config_Source_Admin_Page
         }
     }
 
-    protected function _getUrlModel()
+    protected function _getUrlModel(): Mage_Adminhtml_Model_Url
     {
         $this->_url ??= Mage::getModel('adminhtml/url');
         return $this->_url;
     }
 
-    protected function _buildMenuArray(?\Maho\Simplexml\Element $parent = null, $path = '', $level = 0)
+    protected function _buildMenuArray(?\Maho\Simplexml\Element $parent = null, string $path = '', int $level = 0): array
     {
         $parent ??= Mage::getSingleton('admin/config')->getAdminhtmlConfig()->getNode('menu');
 
@@ -102,12 +102,12 @@ class Mage_Adminhtml_Model_System_Config_Source_Admin_Page
         return $parentArr;
     }
 
-    protected function _sortMenu($a, $b)
+    protected function _sortMenu(array $a, array $b): int
     {
         return $a['sort_order'] <=> $b['sort_order'];
     }
 
-    protected function _checkDepends(\Maho\Simplexml\Element $depends)
+    protected function _checkDepends(\Maho\Simplexml\Element $depends): bool
     {
         if ($depends->module) {
             $modulesConfig = Mage::getConfig()->getNode('modules');
@@ -121,7 +121,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Admin_Page
         return true;
     }
 
-    protected function _getHelperValue(\Maho\Simplexml\Element $child)
+    protected function _getHelperValue(\Maho\Simplexml\Element $child): string
     {
         $helperName         = 'adminhtml';
         $titleNodeName      = 'title';

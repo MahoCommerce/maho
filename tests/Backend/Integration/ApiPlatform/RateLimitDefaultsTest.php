@@ -24,7 +24,6 @@ it('ships non-zero rate-limit defaults for every throttled API key', function (s
     'auth_token_ip',
     'customer_login',
     'customer_register',
-    'forgot_password',
     'reset_password',
     'newsletter_subscribe',
     'newsletter_unsubscribe',
@@ -35,4 +34,6 @@ it('ships non-zero rate-limit defaults for every throttled API key', function (s
     'guest_order_lookup',
     'shipping_tracking',
     'downloadable_link',
+    'confirmation_link',
+    'wishlist_share',
 ]);

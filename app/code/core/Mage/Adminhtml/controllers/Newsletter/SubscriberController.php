@@ -78,8 +78,7 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
         } else {
             try {
                 foreach ($subscribersIds as $subscriberId) {
-                    $subscriber = Mage::getModel('newsletter/subscriber')->load($subscriberId);
-                    $subscriber->unsubscribe();
+                    $this->subscriberService()->unsubscribe((int) $subscriberId);
                 }
                 Mage::getSingleton('adminhtml/session')->addSuccess(
                     Mage::helper('adminhtml')->__('Total of %d record(s) were updated', count($subscribersIds)),
@@ -100,9 +99,9 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
             Mage::getSingleton('adminhtml/session')->addError(Mage::helper('newsletter')->__('Please select subscriber(s)'));
         } else {
             try {
+                $service = $this->subscriberService();
                 foreach ($subscribersIds as $subscriberId) {
-                    $subscriber = Mage::getModel('newsletter/subscriber')->load($subscriberId);
-                    $subscriber->delete();
+                    $service->delete($service->getById((int) $subscriberId));
                 }
                 Mage::getSingleton('adminhtml/session')->addSuccess(
                     Mage::helper('adminhtml')->__('Total of %d record(s) were deleted', count($subscribersIds)),
@@ -113,5 +112,10 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
         }
 
         $this->_redirect('*/*/index');
+    }
+
+    protected function subscriberService(): Mage_Newsletter_Service_Subscriber
+    {
+        return Mage::getService('newsletter/subscriber');
     }
 }

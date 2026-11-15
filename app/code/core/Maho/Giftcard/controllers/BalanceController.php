@@ -46,53 +46,29 @@ class Maho_Giftcard_BalanceController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * "Not found", "expired", "disabled" and "wrong website" all return the
-     * same opaque error so live codes cannot be enumerated. Rate-limited per
-     * customer; only failed lookups count against the limit.
+     * The service gives one error for an unknown, expired, disabled or foreign card, so that live codes cannot be found.
      */
     #[Maho\Config\Route('/giftcard/balance/check', methods: ['POST'])]
     public function checkAction(): void
     {
         $session = Mage::getSingleton('giftcard/session');
         $session->setLastGiftcardLookup(null);
-        $flash = Mage::getSingleton('customer/session');
 
-        $customerId = (string) Mage::getSingleton('customer/session')->getCustomerId();
-        $limiter = Mage::helper('core')->rateLimiterBy('giftcard_balance_check', $customerId, 10, 3600);
-        if ($limiter->tooManyAttempts()) {
-            $flash->addError(Mage::helper('giftcard')->__('Too many recent lookup attempts. Please wait a while before trying again.'));
-            $this->_redirect('*/*/');
-            return;
+        try {
+            $card = Mage::getService('giftcard/giftcard')->checkBalance(
+                (string) $this->getRequest()->getPost('giftcard_code', ''),
+                (int) Mage::app()->getStore()->getWebsiteId(),
+                (int) Mage::getSingleton('customer/session')->getCustomerId(),
+            );
+            $session->setLastGiftcardLookup([
+                'code'          => $card->getCode(),
+                'balance'       => (float) $card->getBalance(),
+                'currency_code' => (string) $card->getCurrencyCode(),
+                'expires_at'    => $card->getExpiresAt(),
+            ]);
+        } catch (Mage_Core_Exception $e) {
+            Mage::getSingleton('customer/session')->addError($e->getMessage());
         }
-
-        $code = trim((string) $this->getRequest()->getPost('giftcard_code', ''));
-        if ($code === '') {
-            $flash->addError(Mage::helper('giftcard')->__('Please enter a gift card code.'));
-            $this->_redirect('*/*/');
-            return;
-        }
-
-        /** @var Maho_Giftcard_Model_Giftcard $card */
-        $card = Mage::getModel('giftcard/giftcard');
-        /** @var Maho_Giftcard_Model_Resource_Giftcard $resource */
-        $resource = $card->getResource();
-        $resource->loadByCode($card, $code);
-
-        $websiteId = (int) Mage::app()->getStore()->getWebsiteId();
-
-        if (!$card->getId() || !$card->isValidForWebsite($websiteId)) {
-            $limiter->hit();
-            $flash->addError(Mage::helper('giftcard')->__('We could not find an active gift card for that code on this store.'));
-            $this->_redirect('*/*/');
-            return;
-        }
-
-        $session->setLastGiftcardLookup([
-            'code'          => $card->getCode(),
-            'balance'       => (float) $card->getBalance(),
-            'currency_code' => (string) $card->getCurrencyCode(),
-            'expires_at'    => $card->getExpiresAt(),
-        ]);
 
         $this->_redirect('*/*/');
     }

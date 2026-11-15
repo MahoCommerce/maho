@@ -43,4 +43,16 @@ SPDX-License-Identifier: AFL-3.0
             </shippingbridge>
         </carriers>
     </default>
+
+    <adminhtml>
+        <translate>
+            <modules>
+                <Maho_ShippingBridge>
+                    <files>
+                        <default>Maho_ShippingBridge.csv</default>
+                    </files>
+                </Maho_ShippingBridge>
+            </modules>
+        </translate>
+    </adminhtml>
 </config>

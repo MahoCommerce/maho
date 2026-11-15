@@ -13,11 +13,8 @@ class Mage_CatalogSearch_Model_Resource_Fulltext_Engine extends Mage_Core_Model_
     /** Shadow table a staged rebuild writes to. Null means write in place. */
     protected ?string $_indexTable = null;
 
-    /**
-     * Init resource model
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalogsearch/fulltext', 'product_id');
     }
@@ -155,7 +152,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext_Engine extends Mage_Core_Model_
     /**
      * Stub method for compatibility with other search engines
      */
-    public function getResourceName()
+    public function getResourceName(): ?string
     {
         return null;
     }

@@ -11,6 +11,22 @@ declare(strict_types=1);
 class Maho_Ai_Model_Observer
 {
     /**
+     * Tell the admin the result of each model list refresh that the save of the AI section started.
+     */
+    #[Maho\Config\Observer('admin_system_config_changed_section_ai', area: 'adminhtml', id: 'ai_model_refresh_messages')]
+    public function addModelRefreshMessages(\Maho\Event\Observer $observer): void
+    {
+        $session = Mage::getSingleton('adminhtml/session');
+        foreach (Mage::getSingleton('ai/platform_modelFetcher')->takeRefreshResults() as $provider => $count) {
+            if ($count === null) {
+                $session->addWarning(Mage::helper('ai')->__('AI: could not refresh models for %s. See exception.log.', $provider));
+            } else {
+                $session->addSuccess(Mage::helper('ai')->__('AI: refreshed %d models for %s.', $count, $provider));
+            }
+        }
+    }
+
+    /**
      * Auto-queue an embedding task when a product is saved.
      */
     #[Maho\Config\Observer('catalog_product_save_after', id: 'ai_product_embed')]

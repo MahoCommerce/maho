@@ -32,8 +32,6 @@ Navigate to **System → Configuration → Customers → Customer Configuration 
 |---------|-------------|---------|
 | **Enable Magic Link** | Enable/disable the feature per website | Disabled |
 | **Token Expiration** | How long login links remain valid (minutes) | 10 |
-| **Rate Limit (Email)** | Maximum requests per email per hour | 3 |
-| **Rate Limit (IP)** | Maximum requests per IP address per hour | 10 |
 | **Email Template** | Template used for magic link emails | `customer_magic_link_email_template` |
 | **Email Identity** | Sender identity for magic link emails | General Contact |
 | **Registration Password Requirement** | Authentication mode (see below) | No Password |
@@ -126,13 +124,12 @@ The Magic Link implementation follows industry best practices:
 
 ### Rate Limiting
 
-Two independent rate limits protect against abuse:
+Two independent rate limits protect against abuse. Set them in **System > Configuration > Advanced > System > Rate limit**:
 
-1. **Email-based limiting** (default: 3 requests/hour)
+1. **Magic link request (per email)** (default: 3 requests/hour)
     - Prevents spam to specific email addresses
-    - Configurable per your security needs
 
-2. **IP-based limiting** (default: 10 requests/hour)
+2. **Magic link request (per IP)** (default: 10 requests/hour)
     - Prevents automated attacks from single sources
     - Higher limit allows legitimate users on shared networks
 
@@ -151,6 +148,13 @@ Magic link tokens are:
 !!! warning "Token Storage"
     Like password reset tokens, magic link tokens are stored unhashed because they must be sent via email. This is the same security model used by password reset functionality and is industry standard for email-based authentication.
 
+## API
+
+A headless storefront uses the same magic link. `POST /customers/magic-link` sends the email, with the same
+rate limits and the same answer for each address. The storefront reads the `token` value of the link and sends it
+to `POST /auth/token` with the grant type `magic_link`. A customer who uses two-factor authentication sends
+the code in the same request. See [Authentication](../api/v2/authentication.md).
+
 ## Email Template
 
 The magic link email uses the template: **customer_magic_link_email_template**
@@ -166,4 +170,3 @@ You can customize this template in the admin panel under:
 
     - `customer_entity.rp_token` - stores the magic link token
     - `customer_entity.rp_token_created_at` - token creation timestamp, used for expiration
-    - `customer_flowpassword` - tracks requests for rate limiting

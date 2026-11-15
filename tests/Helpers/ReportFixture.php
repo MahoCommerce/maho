@@ -239,9 +239,7 @@ final class ReportFixture
      */
     public static function refundOrder(\Mage_Sales_Model_Order $order): \Mage_Sales_Model_Order
     {
-        /** @var \Mage_Sales_Model_Service_Order $service */
-        $service = \Mage::getModel('sales/service_order', $order);
-        $creditmemo = $service->prepareCreditmemo();
+        $creditmemo = \Mage::getService('sales/order_document')->buildCreditmemo($order);
         $creditmemo->setOfflineRequested(true);
         $creditmemo->register();
         \Mage::getModel('core/resource_transaction')->addObject($creditmemo)->addObject($creditmemo->getOrder())->save();

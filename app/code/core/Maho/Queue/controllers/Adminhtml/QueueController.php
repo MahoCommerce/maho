@@ -104,7 +104,7 @@ class Maho_Queue_Adminhtml_QueueController extends Mage_Adminhtml_Controller_Act
         if (QueueManager::discardStoredMessage($id)) {
             Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('queue')->__('Message discarded.'));
         } else {
-            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('queue')->__('Message not found.'));
+            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('queue')->__('The message was not discarded: it does not exist, or a worker runs it now.'));
         }
         $this->refreshAbandonedNotice();
         $this->_redirect('*/*/');
@@ -137,14 +137,19 @@ class Maho_Queue_Adminhtml_QueueController extends Mage_Adminhtml_Controller_Act
     public function massDiscardAction(): void
     {
         $discarded = 0;
+        $skipped = 0;
         foreach ($this->getMessageIds() as $id) {
             if (QueueManager::discardStoredMessage($id)) {
                 $discarded++;
+            } else {
+                $skipped++;
             }
         }
-        Mage::getSingleton('adminhtml/session')->addSuccess(
-            Mage::helper('queue')->__('%s message(s) discarded.', $discarded),
-        );
+        $session = Mage::getSingleton('adminhtml/session');
+        $session->addSuccess(Mage::helper('queue')->__('%s message(s) discarded.', $discarded));
+        if ($skipped > 0) {
+            $session->addNotice(Mage::helper('queue')->__('%s message(s) were skipped: a worker runs them now.', $skipped));
+        }
         $this->refreshAbandonedNotice();
         $this->_redirect('*/*/');
     }

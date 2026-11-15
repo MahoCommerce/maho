@@ -75,7 +75,7 @@ class Mage_Rss_Block_Order_New extends Mage_Core_Block_Template
     /**
      * @param array $args
      */
-    public function addNewOrderXmlCallback($args)
+    public function addNewOrderXmlCallback($args): void
     {
         $rssObj = $args['rssObj'];
         $order = $args['order'];

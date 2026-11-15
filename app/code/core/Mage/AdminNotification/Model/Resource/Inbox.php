@@ -10,11 +10,8 @@
 
 class Mage_AdminNotification_Model_Resource_Inbox extends Mage_Core_Model_Resource_Db_Abstract
 {
-    /**
-     * AdminNotification Resource initialization
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('adminnotification/inbox', 'notification_id');
     }
@@ -93,7 +90,7 @@ class Mage_AdminNotification_Model_Resource_Inbox extends Mage_Core_Model_Resour
     /**
      * Save notifications (if not exists)
      */
-    public function parse(Mage_AdminNotification_Model_Inbox $object, array $data)
+    public function parse(Mage_AdminNotification_Model_Inbox $object, array $data): void
     {
         $adapter = $this->_getWriteAdapter();
         foreach ($data as $item) {

@@ -10,7 +10,7 @@
 
 class Mage_Catalog_Block_Product_View_Attributes extends Mage_Core_Block_Template
 {
-    protected $_product = null;
+    protected ?Mage_Catalog_Model_Product $_product = null;
 
     /**
      * @return mixed|null

@@ -1,0 +1,108 @@
+name: Refresh Test Shards
+
+# The Pest shards are balanced by the test timings in tests/.pest/shards.json. A new test has
+# no timing and goes to the shards in turn, so the balance drifts as tests are added. Once a
+# week, this workflow runs all tests and records new timings. When every test passed, it
+# commits the timings to main. When a test failed, it opens a pull request, so that the failure
+# gets a fix. The file only splits the tests between the shards, so it cannot make a test pass
+# or fail.
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    uses: ./.github/workflows/pest.yml
+    with:
+      update_shards: true
+    secrets: inherit
+
+  commit:
+    name: Commit the timings
+    needs: tests
+    # A run started on another branch must not commit: the rebase would push the commits of
+    # that branch to main.
+    if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    # The keys of the CI app are secrets of this environment, which allows only main
+    environment: maho-ci
+    steps:
+      # Only admins and the CI app may push to main, so the push uses the token of the app.
+      # The app has write access to contents and pull requests only. A pull request that the
+      # app opens also starts CI, unlike one that GITHUB_TOKEN opens.
+      - name: Get a token of the CI app
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ secrets.MAHO_CI_APP_CLIENT_ID }}
+          private-key: ${{ secrets.MAHO_CI_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      # Pest writes the timings only when every test of the refresh job passed, so the artifact
+      # can be missing in a failed week.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        id: timings
+        continue-on-error: true
+        with:
+          name: shards-json
+          path: tests/.pest
+
+      - name: Commit the timings, or open a pull request for the failed tests
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          if [ "$TESTS_RESULT" = success ]; then
+            git commit -am "$TITLE"
+            # main can move during the test run, which takes more than an hour
+            for _ in 1 2 3; do
+              if git pull --rebase origin main && git push origin HEAD:main; then
+                exit 0
+              fi
+              sleep 10
+            done
+            exit 1
+          fi
+          # A failed test gets a pull request, so that a maintainer sees it and fixes it there.
+          # CI runs on the pull request, because the app opens it. An open pull request of an
+          # earlier week can hold fixes, so it stays as it is.
+          OPEN=$(gh pr list --head "$BRANCH" --state open --json url --jq '.[].url')
+          if [ -n "$OPEN" ]; then
+            echo "::warning::Tests failed, and the pull request of an earlier week is still open: $OPEN"
+            exit 0
+          fi
+          if [ "$TIMINGS" = success ] && ! git diff --quiet; then
+            git commit -am "$TITLE"
+            CHANGE="It also updates \`tests/.pest/shards.json\` with the test timings of that run."
+          else
+            # No timings, so an empty commit gives the pull request its branch
+            git commit --allow-empty -m "Started a fix for the tests that failed in the weekly run"
+            CHANGE="The refresh job failed too, so this pull request has no new test timings yet."
+          fi
+          git push --force origin "HEAD:refs/heads/$BRANCH"
+          gh pr create --base main --head "$BRANCH" \
+            --title "Fixed the tests that failed in the weekly run of all tests" \
+            --body "$(printf '%s\n' \
+              '## What it does' \
+              '' \
+              "The weekly run of all tests had failing tests: $RUN_URL" \
+              '' \
+              "$CHANGE Fix the failing tests on this branch, then merge." \
+              '' \
+              '## Release notes' \
+              '' \
+              'Nothing to note.')"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          TESTS_RESULT: ${{ needs.tests.result }}
+          TIMINGS: ${{ steps.timings.outcome }}
+          BRANCH: refresh-test-shards
+          TITLE: Refreshed the test timings that balance the CI shards
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

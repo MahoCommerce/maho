@@ -11,7 +11,7 @@
 class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Source extends Mage_Catalog_Model_Resource_Product_Indexer_Eav_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalog/product_index_eav', 'entity_id');
     }
@@ -46,13 +46,9 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Source extends Mage_Catalo
 
     /**
      * Prepare data index for indexable attributes
-     *
-     * @param array $entityIds      the entity ids limitation
-     * @param int $attributeId      the attribute id limitation
-     * @return $this
      */
     #[\Override]
-    protected function _prepareIndex($entityIds = null, $attributeId = null)
+    protected function _prepareIndex(?array $entityIds = null, ?int $attributeId = null): static
     {
         $this->_prepareSelectIndex($entityIds, $attributeId);
         $this->_prepareMultiselectIndex($entityIds, $attributeId);

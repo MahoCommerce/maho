@@ -18,7 +18,7 @@
 class Mage_Dataflow_Model_Convert_Validator_Dryrun extends Mage_Dataflow_Model_Convert_Validator_Abstract
 {
     #[\Override]
-    public function validate()
+    public function validate(): static
     {
         if ($this->getVar('dry_run') || $this->getProfile()->getDryRun()) {
             $this->addException(Mage::helper('dataflow')->__('Dry run set, stopping execution.'), Mage_Dataflow_Model_Convert_Exception::FATAL);

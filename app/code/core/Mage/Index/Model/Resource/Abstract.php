@@ -289,7 +289,7 @@ abstract class Mage_Index_Model_Resource_Abstract extends Mage_Core_Model_Resour
     /**
      * Clean up temporary index table
      */
-    public function clearTemporaryIndexTable()
+    public function clearTemporaryIndexTable(): void
     {
         $adapter = $this->_getWriteAdapter();
         // TRUNCATE commits on MySQL, and costs more than a DELETE of the few rows of a partial reindex

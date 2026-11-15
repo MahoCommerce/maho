@@ -32,7 +32,7 @@ function placeOrderWithGiftcard(Maho_Giftcard_Model_Giftcard $giftcard, Mage_Cat
         ->setShippingMethod('flatrate_flatrate');
     $quote->getPayment()->importData(['method' => 'checkmo']);
 
-    Mage::getService('checkout/cart')->applyGiftcard($quote, $giftcard->getCode());
+    Mage::getService('giftcard/giftcard')->applyToCart($quote, $giftcard->getCode());
 
     return (new Mage_Sales_Model_Service_Quote($quote))->submitOrder();
 }

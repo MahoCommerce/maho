@@ -11,82 +11,33 @@ uses(Tests\MahoBackendTestCase::class);
 
 describe('Newsletter Customer Conditions', function () {
     beforeEach(function () {
-        createNewsletterTestData();
+        $this->customers = createNewsletterTestData();
     });
 
     describe('subscriber_status condition', function () {
-        test('can find subscribed customers', function () {
-            $segment = createNewsletterTestSegment('Subscribed Customers', [
+        test('matches the customers by their subscriber status', function (int $status, string $member) {
+            $segment = createNewsletterTestSegment('Subscriber status ' . $status, [
                 'type' => 'customersegmentation/segment_condition_customer_newsletter',
                 'attribute' => 'subscriber_status',
                 'operator' => '==',
-                'value' => (string) Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED,
+                'value' => (string) $status,
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
-            expect(count($matchedCustomers))->toBeGreaterThan(0);
+            expect($matchedCustomers)->toContain($this->customers[$member])
+                ->and($matchedCustomers)->not->toContain($this->customers['No Newsletter']);
 
             foreach ($matchedCustomers as $customerId) {
                 $subscriber = getNewsletterSubscriberForCustomer($customerId);
                 expect($subscriber)->not()->toBeNull();
-                expect((int) $subscriber->getSubscriberStatus())->toBe(Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED);
+                expect((int) $subscriber->getSubscriberStatus())->toBe($status);
             }
-        });
-
-        test('can find unsubscribed customers', function () {
-            $segment = createNewsletterTestSegment('Unsubscribed Customers', [
-                'type' => 'customersegmentation/segment_condition_customer_newsletter',
-                'attribute' => 'subscriber_status',
-                'operator' => '==',
-                'value' => (string) Mage_Newsletter_Model_Subscriber::STATUS_UNSUBSCRIBED,
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
-
-            foreach ($matchedCustomers as $customerId) {
-                $subscriber = getNewsletterSubscriberForCustomer($customerId);
-                expect($subscriber)->not()->toBeNull();
-                expect((int) $subscriber->getSubscriberStatus())->toBe(Mage_Newsletter_Model_Subscriber::STATUS_UNSUBSCRIBED);
-            }
-        });
-
-        test('can find not active customers', function () {
-            $segment = createNewsletterTestSegment('Not Active Customers', [
-                'type' => 'customersegmentation/segment_condition_customer_newsletter',
-                'attribute' => 'subscriber_status',
-                'operator' => '==',
-                'value' => (string) Mage_Newsletter_Model_Subscriber::STATUS_NOT_ACTIVE,
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
-
-            foreach ($matchedCustomers as $customerId) {
-                $subscriber = getNewsletterSubscriberForCustomer($customerId);
-                expect($subscriber)->not()->toBeNull();
-                expect((int) $subscriber->getSubscriberStatus())->toBe(Mage_Newsletter_Model_Subscriber::STATUS_NOT_ACTIVE);
-            }
-        });
-
-        test('can find unconfirmed customers', function () {
-            $segment = createNewsletterTestSegment('Unconfirmed Customers', [
-                'type' => 'customersegmentation/segment_condition_customer_newsletter',
-                'attribute' => 'subscriber_status',
-                'operator' => '==',
-                'value' => (string) Mage_Newsletter_Model_Subscriber::STATUS_UNCONFIRMED,
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
-
-            foreach ($matchedCustomers as $customerId) {
-                $subscriber = getNewsletterSubscriberForCustomer($customerId);
-                expect($subscriber)->not()->toBeNull();
-                expect((int) $subscriber->getSubscriberStatus())->toBe(Mage_Newsletter_Model_Subscriber::STATUS_UNCONFIRMED);
-            }
-        });
+        })->with([
+            'subscribed' => [Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED, 'Recent Subscriber'],
+            'unsubscribed' => [Mage_Newsletter_Model_Subscriber::STATUS_UNSUBSCRIBED, 'Old Unsubscriber'],
+            'not active' => [Mage_Newsletter_Model_Subscriber::STATUS_NOT_ACTIVE, 'Not Active'],
+            'unconfirmed' => [Mage_Newsletter_Model_Subscriber::STATUS_UNCONFIRMED, 'Unconfirmed User'],
+        ]);
 
         test('can use not equal operator', function () {
             $segment = createNewsletterTestSegment('Not Subscribed Customers', [
@@ -105,103 +56,37 @@ describe('Newsletter Customer Conditions', function () {
                 expect((int) $subscriber->getSubscriberStatus())->not()->toBe(Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED);
             }
         });
-
-        test('excludes customers without newsletter records', function () {
-            $segment = createNewsletterTestSegment('Any Newsletter Status', [
-                'type' => 'customersegmentation/segment_condition_customer_newsletter',
-                'attribute' => 'subscriber_status',
-                'operator' => '==',
-                'value' => (string) Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED,
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            // All matched customers should have newsletter records
-            foreach ($matchedCustomers as $customerId) {
-                $resource = Mage::getSingleton('core/resource');
-                $adapter = $resource->getConnection('core_read');
-                $subscriberTable = $resource->getTableName('newsletter/subscriber');
-
-                $select = $adapter->select()
-                    ->from($subscriberTable, ['subscriber_id'])
-                    ->where('customer_id = ?', $customerId);
-
-                $subscriberRecord = $adapter->fetchRow($select);
-                expect($subscriberRecord)->not()->toBeFalse();
-                expect($subscriberRecord['subscriber_id'])->not()->toBeNull();
-            }
-        });
     });
 
     describe('change_status_at condition', function () {
-        test('can find customers who changed status within date range', function () {
-            $segment = createNewsletterTestSegment('Recent Status Change', [
+        test('matches the customers by the date of their last status change', function (string $operator, string $date, ?string $member, Closure $passes) {
+            $segment = createNewsletterTestSegment('Status change ' . $operator . ' ' . $date, [
                 'type' => 'customersegmentation/segment_condition_customer_newsletter',
                 'attribute' => 'change_status_at',
-                'operator' => '>=',
-                'value' => date('Y-m-d', strtotime('-30 days')),
+                'operator' => $operator,
+                'value' => $date,
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
+            if ($member !== null) {
+                expect($matchedCustomers)->toContain($this->customers[$member]);
+            }
 
             foreach ($matchedCustomers as $customerId) {
                 $subscriber = getNewsletterSubscriberForCustomer($customerId);
                 expect($subscriber)->not()->toBeNull();
-                expect($subscriber->getChangeStatusAt())->not()->toBeNull();
-
-                $changeDate = strtotime($subscriber->getChangeStatusAt());
-                $oneYearAgo = strtotime('-1 year'); // Allow more flexibility for sample data
-                expect($changeDate)->toBeGreaterThanOrEqual($oneYearAgo);
+                $changedAt = (string) $subscriber->getChangeStatusAt();
+                expect($changedAt)->not->toBe('')
+                    ->and($passes($changedAt))->toBeTrue("Customer {$customerId} changed status at {$changedAt}");
             }
-        });
-
-        test('can find customers who changed status before specific date', function () {
-            $cutoffDate = date('Y-m-d', strtotime('-60 days'));
-
-            $segment = createNewsletterTestSegment('Old Status Change', [
-                'type' => 'customersegmentation/segment_condition_customer_newsletter',
-                'attribute' => 'change_status_at',
-                'operator' => '<',
-                'value' => $cutoffDate,
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
-
-            foreach ($matchedCustomers as $customerId) {
-                $subscriber = getNewsletterSubscriberForCustomer($customerId);
-                expect($subscriber)->not()->toBeNull();
-                expect($subscriber->getChangeStatusAt())->not()->toBeNull();
-
-                $changeDate = strtotime($subscriber->getChangeStatusAt());
-                $cutoffTimestamp = strtotime($cutoffDate);
-                expect($changeDate)->toBeLessThan($cutoffTimestamp);
-            }
-        });
-
-        test('can find customers who changed status on exact date', function () {
-            $exactDate = date('Y-m-d', strtotime('-15 days'));
-
-            $segment = createNewsletterTestSegment('Exact Date Status Change', [
-                'type' => 'customersegmentation/segment_condition_customer_newsletter',
-                'attribute' => 'change_status_at',
-                'operator' => '==',
-                'value' => $exactDate,
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
-
-            foreach ($matchedCustomers as $customerId) {
-                $subscriber = getNewsletterSubscriberForCustomer($customerId);
-                expect($subscriber)->not()->toBeNull();
-                expect($subscriber->getChangeStatusAt())->not()->toBeNull();
-
-                $changeDate = date('Y-m-d', strtotime($subscriber->getChangeStatusAt()));
-                expect($changeDate)->toBe($exactDate);
-            }
-        });
+        })->with([
+            'in the last 30 days' => ['>=', date('Y-m-d', strtotime('-30 days')), 'Recent Subscriber', fn(string $at) => strtotime($at) >= strtotime(date('Y-m-d', strtotime('-30 days')))],
+            'before 60 days ago' => ['<', date('Y-m-d', strtotime('-60 days')), 'Old Unsubscriber', fn(string $at) => strtotime($at) < strtotime(date('Y-m-d', strtotime('-60 days')))],
+            'on an exact date' => ['==', date('Y-m-d', strtotime('-15 days')), null, fn(string $at) => date('Y-m-d', strtotime($at)) === date('Y-m-d', strtotime('-15 days'))],
+            'in the last 7 days' => ['>=', date('Y-m-d', strtotime('-7 days')), 'Recent Change', fn(string $at) => strtotime($at) >= strtotime(date('Y-m-d', strtotime('-7 days')))],
+            'in the last year' => ['>=', date('Y-m-d', strtotime('-365 days')), 'Recent Subscriber', fn(string $at) => strtotime($at) >= strtotime(date('Y-m-d', strtotime('-365 days')))],
+            'before a future date' => ['<=', date('Y-m-d', strtotime('+30 days')), 'Recent Subscriber', fn(string $at) => strtotime($at) <= strtotime(date('Y-m-d', strtotime('+30 days')))],
+        ]);
 
         test('handles date range queries correctly', function () {
             $startDate = date('Y-m-d', strtotime('-45 days'));
@@ -247,30 +132,6 @@ describe('Newsletter Customer Conditions', function () {
     });
 
     describe('newsletter status transitions', function () {
-        test('can track status changes over time', function () {
-            $segment = createNewsletterTestSegment('Recently Changed Status', [
-                'type' => 'customersegmentation/segment_condition_customer_newsletter',
-                'attribute' => 'change_status_at',
-                'operator' => '>=',
-                'value' => date('Y-m-d', strtotime('-7 days')),
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
-
-            // Verify that all matched customers have recent status changes
-            foreach ($matchedCustomers as $customerId) {
-                $subscriber = getNewsletterSubscriberForCustomer($customerId);
-                expect($subscriber)->not()->toBeNull();
-
-                $changeStatusAt = $subscriber->getChangeStatusAt();
-                expect($changeStatusAt)->not()->toBeNull();
-
-                $daysDiff = (int) ((time() - strtotime($changeStatusAt)) / 86400);
-                expect($daysDiff)->toBeLessThanOrEqual(7);
-            }
-        });
-
         test('can combine status and date conditions', function () {
             $segment = createNewsletterTestSegment('Recently Subscribed', [
                 'type' => 'customersegmentation/segment_condition_combine',
@@ -308,24 +169,6 @@ describe('Newsletter Customer Conditions', function () {
     });
 
     describe('edge cases and error handling', function () {
-        test('handles customers with null change_status_at dates', function () {
-            $segment = createNewsletterTestSegment('Has Change Date', [
-                'type' => 'customersegmentation/segment_condition_customer_newsletter',
-                'attribute' => 'change_status_at',
-                'operator' => '>=',
-                'value' => date('Y-m-d', strtotime('-365 days')),
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $subscriber = getNewsletterSubscriberForCustomer($customerId);
-                expect($subscriber)->not()->toBeNull();
-                expect($subscriber->getChangeStatusAt())->not()->toBeNull();
-                expect($subscriber->getChangeStatusAt())->not()->toBe('0000-00-00 00:00:00');
-            }
-        });
-
         test('correctly handles multiple newsletter subscriptions per customer', function () {
             // Note: In theory, a customer should only have one subscriber record
             // but we test for robustness
@@ -368,34 +211,13 @@ describe('Newsletter Customer Conditions', function () {
             expect($matchedCustomers)->toBeArray();
             expect(count($matchedCustomers))->toBe(0);
         });
-
-        test('handles future dates in change_status_at', function () {
-            $futureDate = date('Y-m-d', strtotime('+30 days'));
-
-            $segment = createNewsletterTestSegment('Future Status Change', [
-                'type' => 'customersegmentation/segment_condition_customer_newsletter',
-                'attribute' => 'change_status_at',
-                'operator' => '<=',
-                'value' => $futureDate,
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            // All customers with valid change dates should be included
-            foreach ($matchedCustomers as $customerId) {
-                $subscriber = getNewsletterSubscriberForCustomer($customerId);
-                expect($subscriber)->not()->toBeNull();
-                expect($subscriber->getChangeStatusAt())->not()->toBeNull();
-
-                $changeDate = strtotime($subscriber->getChangeStatusAt());
-                $futureTimestamp = strtotime($futureDate . ' 23:59:59');
-                expect($changeDate)->toBeLessThanOrEqual($futureTimestamp);
-            }
-        });
     });
 
     // Helper functions
-    function createNewsletterTestData(): void
+    /**
+     * @return array<string, int> customer IDs keyed by "firstname lastname"
+     */
+    function createNewsletterTestData(): array
     {
         $uniqueId = uniqid('newsletter_', true);
         $baseTime = time();
@@ -483,6 +305,7 @@ describe('Newsletter Customer Conditions', function () {
             ],
         ];
 
+        $ids = [];
         foreach ($customers as $customerData) {
             // Create customer
             $customer = Mage::getModel('customer/customer');
@@ -492,7 +315,7 @@ describe('Newsletter Customer Conditions', function () {
             $customer->setGroupId($customerData['group_id']);
             $customer->setWebsiteId($customerData['website_id']);
             $customer->save();
-
+            $ids[$customerData['firstname'] . ' ' . $customerData['lastname']] = (int) $customer->getId();
 
             // Create newsletter subscription if specified
             if ($customerData['subscriber_status'] !== null) {
@@ -506,6 +329,8 @@ describe('Newsletter Customer Conditions', function () {
 
             }
         }
+
+        return $ids;
     }
 
     function createNewsletterTestSegment(string $name, array $conditions): Maho_CustomerSegmentation_Model_Segment
@@ -531,7 +356,6 @@ describe('Newsletter Customer Conditions', function () {
         $segment->setRefreshStatus('pending');
         $segment->setPriority(10);
         $segment->save();
-
 
         return $segment;
     }

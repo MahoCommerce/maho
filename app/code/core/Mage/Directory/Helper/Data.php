@@ -183,10 +183,18 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
             }
             $regions[$region->getCountryId()][$region->getRegionId()] = [
                 'code' => $region->getCode(),
-                'name' => $this->__($region->getName()),
+                'name' => $this->getRegionName($region),
             ];
         }
         return $regions;
+    }
+
+    /**
+     * The name of $region in the locale of the store. The address forms and the API show this name.
+     */
+    public function getRegionName(Mage_Directory_Model_Region $region): string
+    {
+        return $this->__((string) $region->getName());
     }
 
     /**

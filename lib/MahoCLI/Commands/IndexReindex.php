@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Mage;
+use Mage_Core_Exception;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -28,17 +29,18 @@ class IndexReindex extends BaseMahoCommand
     ): int {
         $this->initMaho();
 
-        $index = Mage::getModel('index/indexer')->getProcessByCode($indexCode);
-        if (!$index) {
-            $output->writeln('<error>Index not found</error>');
+        /** @var \Mage_Index_Service_Process $service */
+        $service = Mage::getService('index/process');
+        try {
+            $process = $service->getByCode($indexCode);
+            $output->write("Reindexing {$process->getIndexerCode()}... ");
+            $startTime = microtime(true);
+            $service->reindex($process);
+        } catch (Mage_Core_Exception $e) {
+            $output->writeln("<error>{$e->getMessage()}</error>");
             return Command::FAILURE;
         }
-
-        $output->write("Reindexing {$index->getIndexerCode()}... ");
-        $startTime = microtime(true);
-        $index->reindexEverything();
-        $duration = round(microtime(true) - $startTime, 2);
-        $output->writeln(sprintf('<info>done!</info> (%.2fs)', $duration));
+        $output->writeln(sprintf('<info>done!</info> (%.2fs)', microtime(true) - $startTime));
 
         return Command::SUCCESS;
     }

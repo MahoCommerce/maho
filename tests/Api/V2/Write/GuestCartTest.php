@@ -314,9 +314,14 @@ describe('DELETE /api/rest/v2/guest-carts/{id}/items/{itemId} (Remove Item)', fu
 
 describe('PUT /api/rest/v2/guest-carts/{id}/coupon (Apply Coupon)', function (): void {
 
-    it('returns 400 for invalid coupon', function (): void {
+    it('returns 422 for an unknown coupon', function (): void {
         $createResponse = createGuestCart();
         $cartId = $createResponse['json']['maskedId'];
+        $addResponse = apiPost("/api/rest/v2/guest-carts/{$cartId}/items", [
+            'sku' => fixtures('write_test_sku'),
+            'qty' => 1,
+        ]);
+        expect($addResponse['status'])->toBe(200);
 
         $response = apiPut("/api/rest/v2/guest-carts/{$cartId}/coupon", [
             'code' => 'INVALID-COUPON-CODE-12345',
@@ -324,6 +329,18 @@ describe('PUT /api/rest/v2/guest-carts/{id}/coupon (Apply Coupon)', function ():
 
         expect($response['status'])->toBe(422);
         expect($response['json']['message'])->toContain('is not valid');
+    });
+
+    it('returns 409 for a coupon on an empty cart, as the cart page refuses it', function (): void {
+        $createResponse = createGuestCart();
+        $cartId = $createResponse['json']['maskedId'];
+
+        $response = apiPut("/api/rest/v2/guest-carts/{$cartId}/coupon", [
+            'code' => 'INVALID-COUPON-CODE-12345',
+        ]);
+
+        expect($response['status'])->toBe(409);
+        expect($response['json']['message'])->toBe('Your shopping cart is empty.');
     });
 
     it('returns 422 when coupon code is missing', function (): void {

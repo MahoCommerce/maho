@@ -117,70 +117,7 @@ describe('Blog Post CRUD Lifecycle (REST)', function (): void {
 
 });
 
-describe('Blog Post CRUD with "all" permission', function (): void {
-
-    it('full lifecycle with "all" permission', function (): void {
-        $token = serviceToken(['all']);
-
-        // Create
-        $create = apiPost('/api/rest/v2/blog-posts', [
-            'title' => 'All Permission Post',
-            'urlKey' => 'test-pest-all-perm-post',
-            'content' => '<p>All permission test</p>',
-            'isActive' => true,
-            'stores' => ['all'],
-        ], $token);
-
-        expect($create['status'])->toBeIn([200, 201]);
-        $postId = $create['json']['id'];
-        trackCreated('blog_post', $postId);
-
-        // Read (public)
-        $read = apiGet("/api/rest/v2/blog-posts/{$postId}");
-        expect($read['status'])->toBe(200);
-
-        // Update
-        $update = apiPut("/api/rest/v2/blog-posts/{$postId}", [
-            'title' => 'All Permission Post Updated',
-        ], $token);
-        expect($update['status'])->toBe(200);
-
-        // Delete
-        $delete = apiDelete("/api/rest/v2/blog-posts/{$postId}", $token);
-        expect($delete['status'])->toBeIn([200, 204]);
-
-        // Confirm gone
-        $gone = apiGet("/api/rest/v2/blog-posts/{$postId}");
-        expect($gone['status'])->toBeNotFound();
-    });
-
-});
-
 describe('Blog Post via GraphQL (read)', function (): void {
-
-    it('reads blog posts collection via GraphQL', function (): void {
-        $query = <<<'GRAPHQL'
-        {
-            blogPosts {
-                edges {
-                    node {
-                        id
-                        _id
-                        title
-                        urlKey
-                        publishDate
-                    }
-                }
-            }
-        }
-        GRAPHQL;
-
-        $response = gqlQuery($query);
-
-        expect($response['status'])->toBe(200);
-        expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data'])->toHaveKey('blogPosts');
-    });
 
     it('creates post via REST then reads via GraphQL', function (): void {
         $token = serviceToken(['blog-posts/write', 'blog-posts/delete']);

@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -56,7 +57,7 @@ abstract class Mage_Dataflow_Model_Batch_Abstract extends Mage_Core_Model_Abstra
         return $this->getResource()->getIdCollection($this);
     }
 
-    public function deleteCollection($batchId = null)
+    public function deleteCollection(?int $batchId = null): Mage_Dataflow_Model_Resource_Batch_Abstract
     {
         if (!is_null($batchId)) {
             $this->setBatchId($batchId);

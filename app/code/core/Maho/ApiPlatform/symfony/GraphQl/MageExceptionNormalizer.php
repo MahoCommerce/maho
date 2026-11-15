@@ -19,8 +19,9 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 /**
  * A service throws a Mage_Core_Exception for a client fault. GraphQL shows "Internal server error" for an
- * exception that is not an HTTP exception or a RuntimeException, so this normalizer gives the message and the
- * status that REST gives (see ApiExceptionListener).
+ * exception that is not an HTTP exception, so this normalizer gives what REST gives (see ApiExceptionListener).
+ * The `extensions` of the error hold the `status`, the `error` name, the `details` of a Mage_Core_Exception_Input
+ * and the `retryAfter` seconds of a Mage_Core_Exception_TooManyRequests, which REST sends in the Retry-After header.
  */
 final class MageExceptionNormalizer implements NormalizerInterface
 {
@@ -36,6 +37,13 @@ final class MageExceptionNormalizer implements NormalizerInterface
         $error = FormattedError::createFromException($data);
         $error['message'] = $exception->getMessage();
         $error['extensions']['status'] = ApiExceptionListener::mageExceptionStatus($exception);
+        $error['extensions']['error'] = ApiExceptionListener::mageExceptionError($exception);
+        if ($exception instanceof \Mage_Core_Exception_Input) {
+            $error['extensions']['details'] = ApiExceptionListener::mageExceptionDetails($exception);
+        }
+        if ($exception instanceof \Mage_Core_Exception_TooManyRequests && $exception->getRetryAfter() !== null) {
+            $error['extensions']['retryAfter'] = $exception->getRetryAfter();
+        }
 
         return $error;
     }

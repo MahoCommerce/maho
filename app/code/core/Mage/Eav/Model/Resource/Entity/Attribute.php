@@ -18,7 +18,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
     protected static $_entityAttributes     = [];
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('eav/attribute', 'attribute_id');
     }
@@ -122,6 +122,25 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
         ]);
 
         return $this;
+    }
+
+    /**
+     * Refuse to delete a system attribute. The stored row decides, so a change of the flag in memory does not count.
+     *
+     * @throws Mage_Core_Exception_Conflict
+     */
+    #[\Override]
+    protected function _beforeDelete(Mage_Core_Model_Abstract $object)
+    {
+        $isUserDefined = $this->_getReadAdapter()->fetchOne(
+            $this->_getReadAdapter()->select()
+                ->from($this->getMainTable(), ['is_user_defined'])
+                ->where('attribute_id = ?', (int) $object->getId()),
+        );
+        if ($isUserDefined !== false && !(int) $isUserDefined) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('eav')->__('A system attribute cannot be deleted.'));
+        }
+        return parent::_beforeDelete($object);
     }
 
     /**

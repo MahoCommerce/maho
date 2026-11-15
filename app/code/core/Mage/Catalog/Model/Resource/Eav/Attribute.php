@@ -23,6 +23,8 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
     public const MODULE_NAME                           = 'Mage_Catalog';
     public const ENTITY                                = 'catalog_eav_attribute';
 
+    public const XML_PATH_ALLOWED_HTML_TAGS = 'system/catalog/frontend/allowed_html_tags_list';
+
     /**
      * @var string
      */
@@ -50,19 +52,22 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
     /**
      * Processing object before save data
      *
-     * @throws Mage_Core_Exception
+     * @throws Mage_Core_Exception_Conflict when the scope changes on an attribute of configurable products
      * @return Mage_Core_Model_Abstract
      */
     #[\Override]
     protected function _beforeSave()
     {
         $this->setData('modulePrefix', self::MODULE_NAME);
+        if (Mage::getModel('catalog/product')->isReservedAttribute($this)) {
+            throw new Mage_Core_Exception(Mage::helper('catalog')->__('The attribute code \'%s\' is reserved by system. Please try another attribute code', $this->getAttributeCode()));
+        }
         if (isset($this->_origData['is_global'])) {
             $this->_data['is_global'] ??= self::SCOPE_GLOBAL;
             if (($this->_data['is_global'] != $this->_origData['is_global'])
                 && $this->_getResource()->isUsedBySuperProducts($this)
             ) {
-                Mage::throwException(Mage::helper('catalog')->__('Scope must not be changed, because the attribute is used in configurable products.'));
+                throw new Mage_Core_Exception_Conflict(Mage::helper('catalog')->__('Scope must not be changed, because the attribute is used in configurable products.'));
             }
         }
         if ($this->getFrontendInput() == 'price') {
@@ -96,7 +101,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
     protected function _beforeDelete()
     {
         if ($this->_getResource()->isUsedBySuperProducts($this)) {
-            Mage::throwException(Mage::helper('catalog')->__('This attribute is used in configurable products.'));
+            throw new Mage_Core_Exception_Conflict(Mage::helper('catalog')->__('This attribute is used in configurable products.'));
         }
         Mage::getSingleton('index/indexer')->logEvent(
             $this,
@@ -189,22 +194,102 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
             title: $helper->__('Category Attributes'),
             setsTitle: $helper->__('Category Attribute Sets'),
             mainTab: 'adminhtml/catalog_category_attribute_edit_tab_main',
-            allowedTags: explode(',', (string) Mage::getStoreConfig('system/catalog/frontend/allowed_html_tags_list')),
+            allowedTags: $this->getAllowedOptionTags(),
             addToDefaultSet: true,
         );
     }
 
+    /**
+     * A category adds the image type. A product takes the types of general/validator_data/input_types, with the
+     * models of Mage_Catalog_Helper_Product::getAttributeInputTypes().
+     */
     #[\Override]
     protected function _getInputTypes(): array
     {
         $types = parent::_getInputTypes();
-        if ($this->getEntityType()->getEntityTypeCode() === Mage_Catalog_Model_Category::ENTITY) {
+        $helper = Mage::helper('catalog');
+        $entityType = $this->getEntityType()->getEntityTypeCode();
+        if ($entityType === Mage_Catalog_Model_Category::ENTITY) {
             $types['image'] = [
-                'label' => Mage::helper('catalog')->__('Image'),
+                'label' => $helper->__('Image'),
                 'backend_model' => 'catalog/category_attribute_backend_image',
             ];
         }
-        return $types;
+        if ($entityType !== Mage_Catalog_Model_Product::ENTITY) {
+            return $types;
+        }
+
+        $labels = ['price' => $helper->__('Price'), 'media_image' => $helper->__('Media Image'), 'file' => $helper->__('File')];
+        /** @var Mage_Catalog_Helper_Product $productHelper */
+        $productHelper = Mage::helper('catalog/product');
+        $productTypes = [];
+        foreach (array_keys((array) Mage::helper('eav')->getInputTypesValidatorData()) as $code) {
+            $code = (string) $code;
+            $type = $types[$code] ?? ['label' => $labels[$code] ?? ucwords(str_replace('_', ' ', $code))];
+            foreach ((array) $productHelper->getAttributeInputTypes($code) as $key => $model) {
+                if (in_array($key, ['backend_model', 'source_model', 'frontend_model'], true) && is_string($model)) {
+                    $type[$key] ??= $model;
+                }
+            }
+            $productTypes[$code] = $type;
+        }
+        return $productTypes;
+    }
+
+    /**
+     * Add the rules of a catalog attribute: a code that the product model does not reserve, a known scope and layered
+     * navigation value, a position of 0 or more, and the known product types in apply_to.
+     */
+    #[\Override]
+    public function getValidationErrors(): Mage_Core_Exception_Input
+    {
+        $errors = parent::getValidationErrors();
+        $helper = Mage::helper('catalog');
+
+        /** @var Mage_Catalog_Model_Product $product */
+        $product = Mage::getModel('catalog/product');
+        if ($product->isReservedAttribute($this)) {
+            $errors->addError('attribute_code', $helper->__('The attribute code \'%s\' is reserved by system. Please try another attribute code', $this->getAttributeCode()));
+        }
+
+        $choices = [
+            'is_global' => [[self::SCOPE_STORE, self::SCOPE_GLOBAL, self::SCOPE_WEBSITE], $helper->__('The scope must be 0 (store view), 1 (global) or 2 (website).')],
+            'is_filterable' => [[0, 1, 2], $helper->__('The layered navigation value must be 0 (no), 1 (filterable with results) or 2 (filterable with no results).')],
+        ];
+        foreach ($choices as $field => [$allowed, $message]) {
+            $value = $this->getData($field);
+            if ($value !== null && $this->isValueChanged($field) && !in_array((string) (is_bool($value) ? (int) $value : $value), array_map(strval(...), $allowed), true)) {
+                $errors->addError($field, $message);
+            }
+        }
+
+        $position = $this->getData('position');
+        if ($position !== null && $position !== '' && $this->isValueChanged('position')
+            && (!is_scalar($position) || filter_var($position, FILTER_VALIDATE_INT) === false || (int) $position < 0)
+        ) {
+            $errors->addError('position', $helper->__('The position must be an integer of 0 or more.'));
+        }
+
+        if ($this->getEntityTypeId() && $this->getEntityType()->getEntityTypeCode() === Mage_Catalog_Model_Product::ENTITY
+            && $this->isValueChanged('apply_to')
+        ) {
+            $productTypes = array_keys(Mage_Catalog_Model_Product_Type::getTypes());
+            $applyTo = array_filter(array_map(strval(...), $this->getApplyTo()), static fn(string $type): bool => $type !== '');
+            if (array_diff($applyTo, $productTypes) !== []) {
+                $errors->addError('apply_to', $helper->__('Apply To must contain only these product types: %s', implode(', ', $productTypes)));
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Return the tags of the Allowed HTML Tags setting of the catalog.
+     */
+    #[\Override]
+    public function getAllowedOptionTags(): array
+    {
+        return array_values(array_filter(explode(',', (string) Mage::getStoreConfig(self::XML_PATH_ALLOWED_HTML_TAGS))));
     }
 
     /**
@@ -263,12 +348,14 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
     }
 
     /**
-     * Get default attribute source model
+     * Return the option table source, or the Yes/No source for a Yes/No attribute.
      */
     #[\Override]
     public function getDefaultSourceModel(): string
     {
-        return 'eav/entity_attribute_source_table';
+        return $this->getFrontendInput() === 'boolean'
+            ? 'eav/entity_attribute_source_boolean'
+            : 'eav/entity_attribute_source_table';
     }
 
     /**

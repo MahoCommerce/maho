@@ -12,11 +12,11 @@ class Mage_Catalog_Model_Config extends Mage_Eav_Model_Config
 {
     public const XML_PATH_LIST_DEFAULT_SORT_BY     = 'catalog/frontend/default_sort_by';
 
-    protected $_attributeSetsById;
-    protected $_attributeSetsByName;
+    protected ?array $_attributeSetsById = null;
+    protected ?array $_attributeSetsByName = null;
 
-    protected $_attributeGroupsById;
-    protected $_attributeGroupsByName;
+    protected ?array $_attributeGroupsById = null;
+    protected ?array $_attributeGroupsByName = null;
 
     /**
      * @var array
@@ -53,7 +53,7 @@ class Mage_Catalog_Model_Config extends Mage_Eav_Model_Config
 
     public const XML_PATH_PRODUCT_COLLECTION_ATTRIBUTES = 'frontend/product/collection/attributes';
 
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalog/config');
     }

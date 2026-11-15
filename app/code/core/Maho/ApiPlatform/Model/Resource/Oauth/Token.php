@@ -35,6 +35,18 @@ class Maho_ApiPlatform_Model_Resource_Oauth_Token extends Mage_Core_Model_Resour
     }
 
     /**
+     * Set used_at on the row only when it is still empty. True when this call set it.
+     */
+    public function markUsed(int $entityId, int $usedAt): bool
+    {
+        return $this->_getWriteAdapter()->update(
+            $this->getMainTable(),
+            ['used_at' => $usedAt],
+            ['entity_id = ?' => $entityId, 'used_at IS NULL'],
+        ) === 1;
+    }
+
+    /**
      * The consent row and everything issued under it, in one statement.
      */
     public function revokeGrant(int $grantId): void

@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * Give a gift card write of REST or GraphQL to the gift card service.
+ *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Maho_Giftcard
@@ -11,288 +13,111 @@ declare(strict_types=1);
 namespace Maho\Giftcard\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Maho\ApiPlatform\CrudResource;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
-final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
+final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
 {
-    private const MAX_BALANCE = 10000;
-
-    private const STATUSES = [
-        \Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE,
-        \Maho_Giftcard_Model_Giftcard::STATUS_USED,
-        \Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED,
-        \Maho_Giftcard_Model_Giftcard::STATUS_DISABLED,
-    ];
-
     #[\Override]
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): GiftCard
     {
-        return match ($operation->getName()) {
-            'create' => $this->createGiftcardFromGraphQl($context),
-            'adjustBalance' => $this->adjustBalance($context),
-            default => parent::process($data, $operation, $uriVariables, $context),
+        $user = $this->requireUser();
+        $input = RequestInput::of($context['args']['input'] ?? []);
+
+        return match (true) {
+            $operation->getName() === 'create' => $this->create($user, $input, null),
+            $operation->getName() === 'adjustBalance' => $this->adjustBalance($user, $input),
+            $operation->getName() === 'giftcard_send_email' => $this->sendEmail($user, (int) $uriVariables['id']),
+            $operation->getName() === 'sendEmail' => $this->sendEmail($user, $input->int('giftCardId') ?? 0),
+            isset($uriVariables['id']) => $this->update($user, (int) $uriVariables['id'], $data),
+            default => $this->create($user, $input, $data),
         };
     }
 
-    #[\Override]
-    protected function afterSave(object $model, CrudResource $data): void
-    {
-        $this->sendEmailToRecipient($model);
-    }
-
     /**
-     * Default omitted websiteIds to the current website, then enforce the
-     * token's website scope on the resolved set.
+     * Create a card from the GraphQL $input or from the REST $data. A card with no websites gets the website of the request.
      */
-    #[\Override]
-    protected function beforeSave(object $model, CrudResource $data, ApiUser $user): void
+    private function create(ApiUser $user, RequestInput $input, ?GiftCard $data): GiftCard
     {
-        if (!$model->getId() && $model->getData('website_ids') === null) {
-            $model->setWebsiteIds([(int) StoreContext::getStore()->getWebsiteId()]);
-        } elseif (is_array($model->getData('website_ids'))) {
-            // Route through the setter so duplicates and non-positive ids never reach the junction
-            $model->setWebsiteIds($model->getData('website_ids'));
-        }
-        if ($model->getId() && $this->allowedWebsiteIds($user) !== null) {
-            // Without checking the stored set, a restricted token could claim a foreign card
-            $this->assertAllWebsitesAllowed(
-                $model->getResource()->getWebsiteIds((int) $model->getId()),
-                $user,
-                'gift card',
-            );
-        }
-        $this->assertAllWebsitesAllowed($model->getWebsiteIds(), $user, 'gift card');
-    }
-
-    /** Balance bounds and duplicate-code check for the REST CRUD create/update path. */
-    #[\Override]
-    protected function validate(CrudResource $data, object $model, bool $isNew): void
-    {
-        // validate() runs BEFORE the DTO is applied to the model, so read the
-        // incoming values from the DTO. The create field is initialBalance.
-        if (!$data instanceof GiftCard) {
-            return;
-        }
-        $balance = $data->initialBalance ?: (float) ($data->balance ?? 0.0);
-        $this->assertValidGiftcard(
-            $balance,
-            ($data->code !== null && $data->code !== '') ? $data->code : null,
-            $model->getId() ? (int) $model->getId() : null,
-        );
-        // balance is written independently of initialBalance, so it needs its own
-        // bounds check or a create could smuggle a balance past the limit above.
-        if ($data->balance !== null) {
-            $this->assertBalanceBounds((float) $data->balance);
-        }
-        $this->assertValidStatus($data->status);
-        // Pre-1.1.0 clients sent a scalar websiteId
-        if ($data->websiteId !== null && $data->websiteIds === null) {
-            $data->websiteIds = [(int) $data->websiteId];
-        }
-        if ($data->websiteIds !== null) {
-            $data->websiteIds = $this->resolveWebsiteIds($data->websiteIds);
-        }
-    }
-
-    /**
-     * Shared by the REST and GraphQL create paths: reject an explicitly empty
-     * set (400 here; the resource model's rejection would surface as a 500),
-     * default an omitted set to the current website, and validate each id.
-     *
-     * @param int[]|null $websiteIds
-     * @return int[]
-     */
-    private function resolveWebsiteIds(?array $websiteIds): array
-    {
-        if ($websiteIds === []) {
-            throw new UnprocessableEntityHttpException('A gift card must be associated with at least one website');
-        }
-        if ($websiteIds === null) {
-            return [(int) StoreContext::getStore()->getWebsiteId()];
-        }
-        $websiteIds = array_map(intval(...), $websiteIds);
-        foreach ($websiteIds as $websiteId) {
-            $this->assertKnownWebsite($websiteId);
-        }
-        return $websiteIds;
-    }
-
-    private function assertKnownWebsite(int $websiteId): void
-    {
-        // id 0 loads the admin website, which no storefront can redeem on
-        if ($websiteId <= 0) {
-            throw new UnprocessableEntityHttpException("Unknown website id {$websiteId}");
-        }
-        try {
-            \Mage::app()->getWebsite($websiteId);
-        } catch (\Throwable) {
-            throw new UnprocessableEntityHttpException("Unknown website id {$websiteId}");
-        }
-    }
-
-    private function assertValidStatus(?string $status): void
-    {
-        if ($status !== null && !in_array($status, self::STATUSES, true)) {
-            throw new UnprocessableEntityHttpException('Invalid gift card status; allowed: ' . implode(', ', self::STATUSES));
-        }
-    }
-
-    /**
-     * Handles exactly the two admin actions: a status change and a balance
-     * adjustment (via adjustBalance(), which writes a history row).
-     */
-    #[\Override]
-    protected function processUpdate(int $id, mixed $data, ApiUser $user): mixed
-    {
-        if (!$data instanceof GiftCard) {
-            return parent::processUpdate($id, $data, $user);
-        }
-
-        /** @var \Maho_Giftcard_Model_Giftcard $model */
-        $model = $this->loadOrFail($this->modelAlias, $id, 'Gift card not found');
-        $this->assertAllWebsitesAllowed($model->getWebsiteIds(), $user, 'gift card');
-        $oldData = $model->getData();
-
-        $this->assertValidStatus($data->status);
-
-        // Only status and balance are updatable, but a read-modify-write PUT
-        // echoes the stored set back, so reject only an actual change
-        if ($data->websiteIds !== null
-            && \Maho_Giftcard_Model_Giftcard::canonicalizeWebsiteIds($data->websiteIds) !== $model->getWebsiteIds()
-        ) {
-            throw new UnprocessableEntityHttpException('websiteIds cannot be changed through update');
-        }
-
-        if ($data->balance !== null) {
-            $newBalance = (float) $data->balance;
-            $this->assertBalanceBounds($newBalance);
-            if ($newBalance !== (float) $model->getBalance()) {
-                $model->adjustBalance($newBalance, $data->comment ?? 'API balance adjustment');
-            }
-        }
-
-        // Explicit status wins over the status adjustBalance() derives from the amount.
-        if ($data->status !== null && $data->status !== $model->getStatus()) {
-            $model->setStatus($data->status);
-            $this->safeSave($model, "update {$this->entityLabel}");
-        }
-
-        $this->logApiActivity($this->entityType, 'update', $oldData, $model);
-
-        // Not buildResponse(): the afterSave() hook there sends the recipient
-        // email, which a status/balance update must never trigger early.
-        $reloaded = \Mage::getModel($this->modelAlias)->load($model->getId());
-        return GiftCard::fromModel($reloaded->getId() ? $reloaded : $model);
-    }
-
-    /** Bounds every writable balance must satisfy, on create and on adjustment alike. */
-    private function assertBalanceBounds(float $balance): void
-    {
-        if ($balance < 0) {
-            throw new UnprocessableEntityHttpException('Gift card balance cannot be negative');
-        }
-        if ($balance > self::MAX_BALANCE) {
-            throw new UnprocessableEntityHttpException('Gift card balance cannot exceed ' . self::MAX_BALANCE);
-        }
-    }
-
-    /**
-     * Reject a non-positive or over-limit balance, and a custom code that
-     * collides with an existing card. Shared by the REST and GraphQL paths.
-     */
-    private function assertValidGiftcard(float $balance, ?string $code, ?int $excludeId): void
-    {
-        if ($balance <= 0) {
-            throw new UnprocessableEntityHttpException('Gift card balance must be greater than zero');
-        }
-        if ($balance > self::MAX_BALANCE) {
-            throw new UnprocessableEntityHttpException('Gift card balance cannot exceed ' . self::MAX_BALANCE);
-        }
-        if ($code !== null && $code !== '') {
-            $existing = \Mage::getModel('giftcard/giftcard')->loadByCode($code);
-            if ($existing->getId() && (int) $existing->getId() !== $excludeId) {
-                throw new ConflictHttpException("Gift card code '{$code}' already exists");
-            }
-        }
-    }
-
-    private function createGiftcardFromGraphQl(array $context): GiftCard
-    {
-        $args = $context['args']['input'] ?? [];
-
-        $this->assertValidGiftcard(
-            (float) ($args['initialBalance'] ?? 0),
-            $args['code'] ?? null,
-            null,
-        );
-
-        // Same defaulting, empty-set rejection, and token scoping as the REST create path
-        $websiteIds = $this->resolveWebsiteIds(
-            isset($args['websiteIds']) ? (array) $args['websiteIds'] : null,
-        );
-        $this->assertAllWebsitesAllowed($websiteIds, $this->requireUser(), 'gift card');
-
+        /** @var \Maho_Giftcard_Model_Giftcard $giftcard */
         $giftcard = \Mage::getModel('giftcard/giftcard');
-        $giftcard->setData([
-            'balance' => (float) ($args['initialBalance'] ?? 0),
-            'initial_balance' => (float) ($args['initialBalance'] ?? 0),
-            'code' => $args['code'] ?? null,
-            'recipient_name' => $args['recipientName'] ?? null,
-            'recipient_email' => $args['recipientEmail'] ?? null,
-            'sender_name' => $args['senderName'] ?? null,
-            'sender_email' => $args['senderEmail'] ?? null,
-            'message' => $args['message'] ?? null,
-            'expires_at' => $args['expiresAt'] ?? null,
-        ]);
-        $giftcard->setWebsiteIds($websiteIds);
-        $giftcard->save();
-        $this->sendEmailToRecipient($giftcard);
+        if ($data !== null) {
+            $data->applyToModel($giftcard);
+            // Clients before 1.1.0 send one websiteId
+            $websiteIds = $data->websiteIds ?? ($data->websiteId !== null ? [$data->websiteId] : null);
+        } else {
+            $initialBalance = $input->float('initialBalance') ?? 0.0;
+            $giftcard->addData([
+                'balance' => $initialBalance,
+                'initial_balance' => $initialBalance,
+                'code' => $input->string('code'),
+                'recipient_name' => $input->string('recipientName'),
+                'recipient_email' => $input->string('recipientEmail'),
+                'sender_name' => $input->string('senderName'),
+                'sender_email' => $input->string('senderEmail'),
+                'message' => $input->string('message'),
+                'expires_at' => $input->string('expiresAt'),
+            ]);
+            $websiteIds = $input->intList('websiteIds');
+        }
+        $giftcard->setWebsiteIds($websiteIds ?? [(int) StoreContext::getStore()->getWebsiteId()]);
+        $this->assertAllWebsitesAllowed($giftcard->getWebsiteIds(), $user, 'gift card');
 
-        return GiftCard::fromModel($giftcard);
+        /** @var \Maho_Giftcard_Service_Giftcard $service */
+        $service = \Mage::getService('giftcard/giftcard');
+        $service->save($giftcard);
+        $this->logApiActivity('gift_card', 'create', null, $giftcard);
+
+        return GiftCard::fromModel($service->getById((int) $giftcard->getId()));
     }
 
     /**
-     * Mirrors the explicit-send pattern used by the purchase flow (Observer)
-     * and admin "Send email" button (PrintController). The save-lifecycle hook
-     * approach causes recursion via the helper's $giftcard->save() call.
+     * A PUT changes only the status and the balance. A read-modify-write PUT sends the stored websites back, so only a change is refused.
      */
-    private function sendEmailToRecipient(\Maho_Giftcard_Model_Giftcard $giftcard): void
+    private function update(ApiUser $user, int $id, GiftCard $data): GiftCard
     {
-        if (!$giftcard->getRecipientEmail() || $giftcard->getEmailSentAt()) {
-            return;
+        /** @var \Maho_Giftcard_Service_Giftcard $service */
+        $service = \Mage::getService('giftcard/giftcard');
+        $giftcard = $service->getById($id);
+        $this->assertAllWebsitesAllowed($giftcard->getWebsiteIds(), $user, 'gift card');
+        $oldData = $giftcard->getData();
+
+        if ($data->websiteIds !== null
+            && \Maho_Giftcard_Model_Giftcard::canonicalizeWebsiteIds($data->websiteIds) !== $giftcard->getWebsiteIds()
+        ) {
+            throw new \Mage_Core_Exception_Input()->addError('website_ids', \Mage::helper('giftcard')->__('websiteIds cannot be changed through update'));
         }
-        try {
-            \Mage::helper('giftcard')->sendGiftcardEmail($giftcard);
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-        }
+
+        $service->update($giftcard, $data->balance, $data->status, $data->comment ?? 'API balance adjustment');
+        $this->logApiActivity('gift_card', 'update', $oldData, $giftcard);
+
+        return GiftCard::fromModel($service->getById($id));
     }
 
-    private function adjustBalance(array $context): GiftCard
+    private function sendEmail(ApiUser $user, int $id): GiftCard
     {
-        $args = $context['args']['input'] ?? [];
+        /** @var \Maho_Giftcard_Service_Giftcard $service */
+        $service = \Mage::getService('giftcard/giftcard');
+        $giftcard = $service->getById($id);
+        $this->assertAllWebsitesAllowed($giftcard->getWebsiteIds(), $user, 'gift card');
+        $service->sendEmail($giftcard);
 
-        $code = trim((string) ($args['code'] ?? ''));
-        $newBalance = (float) ($args['newBalance'] ?? 0);
+        return GiftCard::fromModel($service->getById($id));
+    }
 
+    private function adjustBalance(ApiUser $user, RequestInput $input): GiftCard
+    {
+        $code = trim($input->string('code') ?? '');
         if ($code === '') {
-            throw new UnprocessableEntityHttpException('Gift card code is required');
+            throw new \Mage_Core_Exception_Input()->addError('code', \Mage::helper('giftcard')->__('Gift card code is required'));
         }
 
-        $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($code);
-        if (!$giftcard->getId()) {
-            throw new NotFoundHttpException('Gift card not found');
-        }
-
-        $this->assertAllWebsitesAllowed($giftcard->getWebsiteIds(), $this->requireUser(), 'gift card');
-
-        $this->assertBalanceBounds($newBalance);
-        $giftcard->adjustBalance($newBalance, $args['comment'] ?? null);
+        /** @var \Maho_Giftcard_Service_Giftcard $service */
+        $service = \Mage::getService('giftcard/giftcard');
+        $giftcard = $service->getByCode($code);
+        $this->assertAllWebsitesAllowed($giftcard->getWebsiteIds(), $user, 'gift card');
+        $service->update($giftcard, $input->float('newBalance') ?? 0.0, null, $input->string('comment'));
 
         return GiftCard::fromModel($giftcard);
     }

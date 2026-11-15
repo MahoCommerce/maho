@@ -18,7 +18,7 @@ class Mage_Core_Model_Cookie
 
     public const DEFAULT_COOKIE_LIFETIME   = 60 * 60 * 24 * 365;
 
-    protected $_lifetime;
+    protected ?int $_lifetime = null;
 
     /**
      * Store object

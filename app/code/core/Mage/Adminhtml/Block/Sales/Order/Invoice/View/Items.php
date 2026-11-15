@@ -21,10 +21,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_View_Items extends Mage_Adminhtml
         return $this->getInvoice()->getOrder();
     }
 
-    /**
-     * Retrieve order url
-     */
-    public function getOrderUrl()
+    public function getOrderUrl(): string
     {
         return $this->getUrl('*/sales_order/view', ['order_id' => $this->getInvoice()->getOrderId()]);
     }

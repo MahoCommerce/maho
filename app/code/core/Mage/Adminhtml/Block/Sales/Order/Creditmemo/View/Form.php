@@ -54,7 +54,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_View_Form extends Mage_Adminht
         return Mage::registry('current_creditmemo');
     }
 
-    public function getOrderUrl()
+    public function getOrderUrl(): string
     {
         return $this->getUrl('*/sales_order/view', ['order_id' => $this->getCreditmemo()->getOrderId()]);
     }

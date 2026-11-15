@@ -33,7 +33,8 @@ describe('CMS page layout through the API', function (): void {
             'pageLayout' => '1column',
         ], $token);
 
-        expect($create['status'])->toBe(422);
+        expect($create['status'])->toBe(422)
+            ->and(array_column($create['json']['details']['errors'] ?? [], 'field'))->toBe(['pageLayout']);
         expect(json_encode($create['json']))->toContain('one_column');
     });
 

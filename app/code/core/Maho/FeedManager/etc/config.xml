@@ -67,6 +67,12 @@ SPDX-License-Identifier: OSL-3.0
             </feedmanager>
         </blocks>
 
+        <services>
+            <feedmanager>
+                <class>Maho_FeedManager_Service</class>
+            </feedmanager>
+        </services>
+
         <helpers>
             <feedmanager>
                 <class>Maho_FeedManager_Helper</class>

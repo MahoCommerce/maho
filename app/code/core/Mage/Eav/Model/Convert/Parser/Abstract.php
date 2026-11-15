@@ -11,8 +11,8 @@
 abstract class Mage_Eav_Model_Convert_Parser_Abstract extends Mage_Dataflow_Model_Convert_Parser_Abstract
 {
     protected $_storesById;
-    protected $_attributeSetsById;
-    protected $_attributeSetsByName;
+    protected ?array $_attributeSetsById = null;
+    protected ?array $_attributeSetsByName = null;
 
     /**
      * @param array $stores

@@ -10,42 +10,40 @@
 
 class Mage_Adminhtml_Tax_ClassController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * save class action
-     */
     #[Maho\Config\Route('/admin/tax_class/save')]
     public function saveAction(): void
     {
-        if ($postData = $this->getRequest()->getPost()) {
-            $model = Mage::getModel('tax/class')->setData($postData);
-
-            try {
-                $model->save();
-                $classType  = $model->getClassType();
-                $classUrl   = '*/tax_class_' . strtolower($classType);
-
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('tax')->__('The tax class has been saved.'),
-                );
-                $this->_redirect($classUrl);
-
-                return;
-            } catch (Mage_Core_Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                Mage::getSingleton('adminhtml/session')->setClassData($postData);
-                $this->_redirectReferer();
-            } catch (Exception) {
-                Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('tax')->__('An error occurred while saving this tax class.'),
-                );
-                Mage::getSingleton('adminhtml/session')->setClassData($postData);
-                $this->_redirectReferer();
-            }
-
-            $this->_redirectReferer();
+        $postData = $this->getRequest()->getPost();
+        if (!$postData) {
+            $this->_redirect('*/tax_class');
             return;
         }
-        $this->getResponse()->setRedirect($this->getUrl('*/tax_class'));
+
+        $session = Mage::getSingleton('adminhtml/session');
+        $service = $this->classService();
+        try {
+            $classId = (int) $this->getRequest()->getPost('class_id');
+            $class = $classId ? $service->getById($classId) : Mage::getModel('tax/class');
+            $class->setClassName((string) $this->getRequest()->getPost('class_name'));
+            if ($this->getRequest()->getPost('class_type') !== null) {
+                $class->setClassType((string) $this->getRequest()->getPost('class_type'));
+            }
+            $service->save($class);
+            $session->addSuccess(Mage::helper('tax')->__('The tax class has been saved.'));
+            $this->_redirect('*/tax_class_' . strtolower((string) $class->getClassType()));
+            return;
+        } catch (Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $session->addError($error['message']);
+            }
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $session->addError(Mage::helper('tax')->__('An error occurred while saving this tax class.'));
+        }
+        $session->setClassData($postData);
+        $this->_redirectReferer();
     }
 
     /**
@@ -119,5 +117,10 @@ class Mage_Adminhtml_Tax_ClassController extends Mage_Adminhtml_Controller_Actio
     {
         $class = Mage::getModel('tax/class')->load($classId);
         return $class->getId() ? (string) $class->getClassType() : null;
+    }
+
+    protected function classService(): Mage_Tax_Service_Class
+    {
+        return Mage::getService('tax/class');
     }
 }

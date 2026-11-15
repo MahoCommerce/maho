@@ -87,7 +87,7 @@ class Mage_Rss_IndexController extends Mage_Rss_Controller_Abstract
     /**
      * Show wishlist rss
      */
-    protected function _showWishlistRss()
+    protected function _showWishlistRss(): void
     {
         $this->getResponse()->setHeader('Content-type', 'text/xml; charset=UTF-8');
         $this->loadLayout(false);

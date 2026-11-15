@@ -188,7 +188,7 @@ class Mage_Log_Model_Resource_Visitor_Collection extends Mage_Core_Model_Resourc
      *
      * @param array|int $storeIds
      */
-    public function addVisitorStoreFilter($storeIds)
+    public function addVisitorStoreFilter($storeIds): void
     {
         $this->getSelect()->where('visitor_table.store_id IN (?)', $storeIds);
     }

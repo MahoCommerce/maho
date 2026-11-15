@@ -80,7 +80,26 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
             $this->_validateWebsiteIds($object, $ids);
         }
 
+        $code = (string) $object->getData('code');
+        if ($code !== '' && (!$object->getId() || $object->dataHasChangedFor('code')) && $this->_isCodeUsed($code, (int) $object->getId())) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('giftcard')->__("Gift card code '%s' already exists", $code));
+        }
+
         return parent::_beforeSave($object);
+    }
+
+    /**
+     * Return whether a card other than $exceptId has $code. Codes do not differ by case only, because loadByCode() ignores the case.
+     */
+    protected function _isCodeUsed(string $code, int $exceptId): bool
+    {
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from($this->getMainTable(), ['giftcard_id'])
+            ->where((string) $adapter->getCaseInsensitiveEqualsSql('code', '?'), $code)
+            ->where('giftcard_id != ?', $exceptId)
+            ->limit(1);
+        return (bool) $adapter->fetchOne($select);
     }
 
     /**
@@ -94,6 +113,19 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
                 Mage::helper('giftcard')->__('A gift card must be associated with at least one website.'),
             );
         }
+
+        // Read all the IDs: a WHERE with an ID out of the column range makes PostgreSQL fail the query and the transaction
+        $adapter = $this->_getReadAdapter();
+        $known = array_map(intval(...), $adapter->fetchCol(
+            $adapter->select()->from($this->getTable('core/website'), ['website_id'])->where('website_id > 0'),
+        ));
+        $errors = new Mage_Core_Exception_Input();
+        foreach ($ids as $websiteId) {
+            if (!in_array((int) $websiteId, $known, true)) {
+                $errors->addError('website_ids', Mage::helper('giftcard')->__('Unknown website ID: %s.', $websiteId));
+            }
+        }
+        $errors->throwIfErrors();
 
         // The balance is denominated in one currency, so all websites must share it
         $currencies = [];

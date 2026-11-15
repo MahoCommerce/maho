@@ -13,11 +13,8 @@
  */
 class Mage_Oauth_Model_Resource_Token extends Mage_Core_Model_Resource_Db_Abstract
 {
-    /**
-     * Initialize resource model
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('oauth/token', 'entity_id');
     }

@@ -43,7 +43,7 @@ class Maho_Captcha_Model_Observer
         return $request->isAjax() || $request->getHeader('Sec-Fetch-Dest') === 'empty';
     }
 
-    #[Maho\Config\Observer('api_verify_captcha', area: 'api')]
+    #[Maho\Config\Observer('api_verify_captcha')]
     public function verifyApi(\Maho\Event\Observer $observer): void
     {
         $helper = Mage::helper('captcha');

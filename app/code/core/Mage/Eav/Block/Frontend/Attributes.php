@@ -30,8 +30,9 @@ class Mage_Eav_Block_Frontend_Attributes extends Mage_Core_Block_Template
     }
 
     /**
-     * Return the label, the value and the code of each visible attribute that has a value.
-     * A Text Area value is a text: it shows under the table, because a long value does not fit in a cell.
+     * Return the label, the value and the code of each visible attribute that has a value and that its condition
+     * does not hide. A Text Area value is a text: it shows under the table, because a long value does not fit in a
+     * cell.
      *
      * @return list<array{label: string, value: string, code: string, text: bool}>
      */
@@ -43,17 +44,22 @@ class Mage_Eav_Block_Frontend_Attributes extends Mage_Core_Block_Template
         }
 
         $visible = [];
+        $fields = [];
         foreach ($entity->getAttributes() as $code => $attribute) {
             /** @var Mage_Eav_Model_Entity_Attribute $attribute */
             // An image value is a file name, not text to show
             if ($attribute->getIsVisibleOnFront() && $attribute->getFrontendInput() !== 'image') {
                 $visible[$code] = $attribute;
+                $fields = [...$fields, ...\Maho\Data\Form\Condition::fields($attribute->getDependsOn() ?? [])];
             }
         }
-        $this->loadMissingValues($entity, array_keys($visible));
+        $this->loadMissingValues($entity, array_values(array_unique([...array_keys($visible), ...$fields])));
 
         $rows = [];
         foreach ($visible as $code => $attribute) {
+            if (Mage::helper('eav')->isHidden($entity, $attribute)) {
+                continue;
+            }
             // A Yes/No frontend shows "No" for null, so an empty raw value skips the row
             $raw = $entity->getData($code);
             if ($raw === null || $raw === '' || $raw === false) {

@@ -42,12 +42,6 @@ class Mage_Adminhtml_Eav_AttributeController extends Mage_Adminhtml_Controller_E
     }
 
     #[\Override]
-    protected function getAllowedTags(): array
-    {
-        return $this->getPageSettings()->allowedTags;
-    }
-
-    #[\Override]
     #[Maho\Config\Route('/admin/eav_attribute/index')]
     public function indexAction(): void
     {

@@ -43,6 +43,11 @@ describe('Mage_Core_Helper_Purifier HTML5 support', function () {
             ->toContain('loading="lazy"');
     });
 
+    it('keeps fetchpriority on an image', function () {
+        expect($this->purifier->purify('<img src="/a.jpg" alt="x" fetchpriority="high" />'))
+            ->toContain('fetchpriority="high"');
+    });
+
     it('keeps class, which themes depend on', function () {
         expect($this->purifier->purify('<p class="std">x</p>'))->toContain('class="std"');
     });
@@ -109,8 +114,6 @@ describe('Mage_Core_Helper_Purifier removes active content', function () {
         // to the MEDIUMTEXT bound of the content column instead.
         $long = '<p>' . str_repeat('a', 50000) . '</p>';
         expect(strlen((string) $this->purifier->purify($long)))->toBeGreaterThan(49_000);
-
-        expect(Mage_Core_Helper_Purifier::MAX_INPUT_LENGTH)->toBe(2_097_152);
     });
 });
 

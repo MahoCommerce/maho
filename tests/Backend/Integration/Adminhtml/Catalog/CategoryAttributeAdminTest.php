@@ -207,7 +207,7 @@ it('does not update a product attribute through the category page', function () 
     ]);
 
     $reloaded = Mage::getModel('catalog/resource_eav_attribute')->load($name->getId());
-    expect(categoryAttributeAdminMessages()['errors'])->toBe(['This attribute cannot be updated.'])
+    expect(categoryAttributeAdminMessages()['errors'])->toBe(['This attribute no longer exists.'])
         ->and($reloaded->getFrontendLabel())->toBe($name->getFrontendLabel());
 });
 
@@ -217,7 +217,7 @@ it('deletes a user-defined category attribute and refuses a system one', functio
     categoryAttributeAdminRun(Mage_Adminhtml_Eav_AttributeController::class, 'eav_attribute', 'delete', [
         'attribute_id' => $system->getId(),
     ]);
-    expect(categoryAttributeAdminMessages()['errors'])->toBe(['This attribute cannot be deleted.']);
+    expect(categoryAttributeAdminMessages()['errors'])->toBe(['A system attribute cannot be deleted.']);
 
     $attribute = Mage::getModel('catalog/resource_eav_attribute')->setData([
         'entity_type_id' => categoryAttributeAdminTypeId(),
@@ -283,11 +283,15 @@ it('moves the categories of a deleted set to the default set', function () {
 it('refuses to delete the default category set or a product set', function () {
     $productSetId = (int) Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Product::ENTITY)->getDefaultAttributeSetId();
 
-    foreach ([categoryAttributeAdminDefaultSetId(), $productSetId] as $setId) {
+    $cases = [
+        categoryAttributeAdminDefaultSetId() => 'The default attribute set cannot be deleted.',
+        $productSetId => 'Attribute set not found',
+    ];
+    foreach ($cases as $setId => $message) {
         categoryAttributeAdminRun(Mage_Adminhtml_Eav_SetController::class, 'eav_set', 'delete', [
             'id' => $setId,
         ]);
-        expect(categoryAttributeAdminMessages()['errors'])->toBe(['This attribute set cannot be deleted.'])
+        expect(categoryAttributeAdminMessages()['errors'])->toBe([$message])
             ->and(Mage::getModel('eav/entity_attribute_set')->load($setId)->getId())->not->toBeNull();
     }
 });

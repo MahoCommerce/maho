@@ -53,13 +53,10 @@ class WeeeTest_MockHelper extends Mage_Weee_Helper_Data
     }
 
     #[\Override]
-    public function setStore($store): self
-    {
-        return $this;
-    }
+    public function setStore(Mage_Core_Model_Store $store): void {}
 
     #[\Override]
-    public function setApplied($item, $value): self
+    public function setApplied(Maho\DataObject $item, array $value): static
     {
         $item->setWeeeTaxApplied(serialize($value));
         return $this;
@@ -111,12 +108,7 @@ function setWeeeAddressItems(Mage_Sales_Model_Quote_Address $address, array $ite
     $address->setData('cached_items_all', $items);
 }
 
-describe('Weee Total Collector Instantiation', function () {
-    test('total collector can be instantiated', function () {
-        $total = Mage::getModel('weee/total_quote_weee');
-        expect($total)->toBeInstanceOf(Mage_Weee_Model_Total_Quote_Weee::class);
-    });
-
+describe('Weee Total Collector', function () {
     test('has correct code', function () {
         $total = Mage::getModel('weee/total_quote_weee');
         expect($total->getCode())->toBe('weee');
@@ -133,16 +125,15 @@ describe('Weee _processTotalAmount is always called', function () {
         $this->mockHelper->enabled = true;
     });
 
-    test('processTotalAmount adds to subtotal when includeInSubtotal is true and has WEEE value', function () {
-        // Setup: includeInSubtotal = true, WEEE amount = 10.00
+    test('processTotalAmount adds the WEEE row value to the subtotal when includeInSubtotal is true', function (float $amount, int $qty, float $expected) {
         $this->mockHelper->includeInSubtotal = true;
         $this->mockHelper->weeeAttributes = [
-            createWeeeAttribute(10.00),
+            createWeeeAttribute($amount),
         ];
 
         $address = $this->quote->getShippingAddress();
 
-        $item = createWeeeQuoteItem(['total_qty' => 2]);
+        $item = createWeeeQuoteItem(['total_qty' => $qty]);
         setWeeeAddressItems($address, [$item]);
 
         $total = Mage::getModel('weee/total_quote_weee');
@@ -150,65 +141,12 @@ describe('Weee _processTotalAmount is always called', function () {
         $total->setStore(Mage::app()->getStore());
         $total->collect($address);
 
-        // WEEE row value = 10.00 * 2 qty = 20.00
-        // Subtotal total amount should be increased by 20.00
-        expect((float) $address->getTotalAmount('subtotal'))->toBe(20.00);
-        expect((float) $address->getBaseTotalAmount('subtotal'))->toBe(20.00);
-    });
-
-    test('processTotalAmount adds to extra tax when includeInSubtotal is false and has WEEE value', function () {
-        // Setup: includeInSubtotal = false, WEEE amount = 10.00
-        $this->mockHelper->includeInSubtotal = false;
-        $this->mockHelper->weeeAttributes = [
-            createWeeeAttribute(10.00),
-        ];
-
-        $address = $this->quote->getShippingAddress();
-        $address->setExtraTaxAmount(0);
-        $address->setBaseExtraTaxAmount(0);
-
-        $item = createWeeeQuoteItem(['total_qty' => 2]);
-        setWeeeAddressItems($address, [$item]);
-
-        $total = Mage::getModel('weee/total_quote_weee');
-        $total->setHelper($this->mockHelper);
-        $total->setStore(Mage::app()->getStore());
-        $total->collect($address);
-
-        // WEEE row value = 10.00 * 2 qty = 20.00
-        // Extra tax amount should be increased by 20.00
-        // Subtotal total amount should remain 0
-        expect((float) $address->getTotalAmount('subtotal'))->toBe(0.0);
-        expect((float) $address->getExtraTaxAmount())->toBe(20.00);
-        expect((float) $address->getBaseExtraTaxAmount())->toBe(20.00);
-    });
-
-    test('subtotal is correctly updated even when WEEE has row value - regression test for short-circuit bug', function () {
-        // This is the specific regression test for the bug fix
-        // The bug was: when hasRowValue was true, _processTotalAmount was skipped due to short-circuit evaluation
-        // This meant the subtotal was NOT updated when includeInSubtotal was true
-
-        $this->mockHelper->includeInSubtotal = true;
-        $this->mockHelper->weeeAttributes = [
-            createWeeeAttribute(15.00), // Non-zero value to trigger hasRowValue = true
-        ];
-
-        $address = $this->quote->getShippingAddress();
-
-        $item = createWeeeQuoteItem(['total_qty' => 3]);
-        setWeeeAddressItems($address, [$item]);
-
-        $total = Mage::getModel('weee/total_quote_weee');
-        $total->setHelper($this->mockHelper);
-        $total->setStore(Mage::app()->getStore());
-        $total->collect($address);
-
-        // WEEE row value = 15.00 * 3 qty = 45.00
-        // With the bug: subtotal total amount would be 0 (processTotalAmount skipped)
-        // With the fix: subtotal total amount should be 45.00
-        expect((float) $address->getTotalAmount('subtotal'))->toBe(45.00);
-        expect((float) $address->getBaseTotalAmount('subtotal'))->toBe(45.00);
-    });
+        expect((float) $address->getTotalAmount('subtotal'))->toBe($expected);
+        expect((float) $address->getBaseTotalAmount('subtotal'))->toBe($expected);
+    })->with([
+        '10.00 x 2' => [10.00, 2, 20.00],
+        '15.00 x 3' => [15.00, 3, 45.00],
+    ]);
 
     test('extra tax amount is correctly updated even when WEEE has row value - regression test', function () {
         // Same regression test but for the extra tax amount path

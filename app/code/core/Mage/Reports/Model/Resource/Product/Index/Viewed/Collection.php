@@ -14,11 +14,9 @@ class Mage_Reports_Model_Resource_Product_Index_Viewed_Collection extends Mage_R
 {
     /**
      * Retrieve Product Index table name
-     *
-     * @return string
      */
     #[\Override]
-    protected function _getTableName()
+    protected function _getTableName(): string
     {
         return $this->getTable('reports/viewed_product_index');
     }

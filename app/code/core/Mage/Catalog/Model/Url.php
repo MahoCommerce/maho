@@ -90,17 +90,13 @@ class Mage_Catalog_Model_Url
 
     /**
      * Singleton of category resource model to check default url_key
-     *
-     * @var Mage_Catalog_Model_Category
      */
-    protected static $_categoryResourceSingleton;
+    protected static ?Mage_Catalog_Model_Resource_Category $_categoryResourceSingleton = null;
 
     /**
      * Singleton of product resource model to check default url_key
-     *
-     * @var Mage_Catalog_Model_Category
      */
-    protected static $_productResourceSingleton;
+    protected static ?Mage_Catalog_Model_Resource_Product $_productResourceSingleton = null;
 
     /**
      * Array of categories id without default url_key before reindex
@@ -124,7 +120,7 @@ class Mage_Catalog_Model_Url
      *
      * @param \Maho\DataObject|Mage_Catalog_Model_Category $category
      */
-    protected function _addCategoryUrlPath($category)
+    protected function _addCategoryUrlPath($category): void
     {
         if (!($category instanceof \Maho\DataObject) || $category->getUrlPath()) {
             return;

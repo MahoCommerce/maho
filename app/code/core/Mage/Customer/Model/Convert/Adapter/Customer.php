@@ -12,90 +12,58 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
 {
     public const MULTI_DELIMITER = ' , ';
 
-    /**
-     * Customer model
-     *
-     * @var Mage_Customer_Model_Customer|string|null
-     */
-    protected $_customerModel;
+    protected ?Mage_Customer_Model_Customer $_customerModel = null;
 
-    protected $_stores;
-    protected $_attributes = [];
-    protected $_customerGroups;
+    protected ?array $_stores = null;
+    protected array $_attributes = [];
+    protected ?array $_customerGroups = null;
 
-    protected $_billingAddressModel;
-    protected $_shippingAddressModel;
+    protected ?Mage_Customer_Model_Address $_billingAddressModel = null;
+    protected ?Mage_Customer_Model_Address $_shippingAddressModel = null;
 
-    protected $_requiredFields = [];
+    protected array $_requiredFields = [];
 
-    protected $_ignoreFields = [];
+    protected array $_ignoreFields = [];
 
-    protected $_billingFields = [];
+    protected array $_billingFields = [];
 
-    protected $_billingMappedFields = [];
+    protected array $_billingMappedFields = [];
 
-    protected $_billingStreetFields = [];
+    protected array $_billingStreetFields = [];
 
-    protected $_billingRequiredFields = [];
+    protected array $_billingRequiredFields = [];
 
-    protected $_shippingFields = [];
+    protected array $_shippingFields = [];
 
-    protected $_shippingMappedFields = [];
+    protected array $_shippingMappedFields = [];
 
-    protected $_shippingStreetFields = [];
+    protected array $_shippingStreetFields = [];
 
-    protected $_shippingRequiredFields = [];
+    protected array $_shippingRequiredFields = [];
 
-    protected $_addressFields = [];
+    protected array $_addressFields = [];
 
-    protected $_regions;
-    protected $_websites;
+    protected ?array $_regions = null;
+    protected ?array $_websites = null;
 
     protected $_customer = null;
     protected $_address = null;
 
-    protected $_customerId = '';
+    protected string $_customerId = '';
 
-    /**
-     * Retrieve customer model cache
-     *
-     * @return Mage_Customer_Model_Customer|object
-     */
-    public function getCustomerModel()
+    public function getCustomerModel(): Mage_Customer_Model_Customer
     {
-        if (is_null($this->_customerModel)) {
-            $object = Mage::getModel('customer/customer');
-            $this->_customerModel = Mage::objects()->save($object);
-        }
-        return Mage::objects()->load($this->_customerModel);
+        return $this->_customerModel ??= Mage::getModel('customer/customer');
     }
 
-    /**
-     * Retrieve customer address model cache
-     *
-     * @return Mage_Customer_Model_Address|object
-     */
-    public function getBillingAddressModel()
+    public function getBillingAddressModel(): Mage_Customer_Model_Address
     {
-        if (is_null($this->_billingAddressModel)) {
-            $object = Mage::getModel('customer/address');
-            $this->_billingAddressModel = Mage::objects()->save($object);
-        }
-        return Mage::objects()->load($this->_billingAddressModel);
+        return $this->_billingAddressModel ??= Mage::getModel('customer/address');
     }
 
-    /**
-     * Retrieve customer address model cache
-     *
-     * @return Mage_Customer_Model_Address|object
-     */
-    public function getShippingAddressModel()
+    public function getShippingAddressModel(): Mage_Customer_Model_Address
     {
-        if (is_null($this->_shippingAddressModel)) {
-            $object = Mage::getModel('customer/address');
-            $this->_shippingAddressModel = Mage::objects()->save($object);
-        }
-        return Mage::objects()->load($this->_shippingAddressModel);
+        return $this->_shippingAddressModel ??= Mage::getModel('customer/address');
     }
 
     /**
@@ -240,12 +208,11 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
     }
 
     /**
-     * @return Mage_Eav_Model_Convert_Adapter_Entity
      * @throws Mage_Core_Model_Store_Exception
      * @throws \Maho\Convert\Exception
      */
     #[\Override]
-    public function load()
+    public function load(): static
     {
         $addressType = $this->getVar('filter/adressType'); //error in key filter addressType
         if ($addressType == 'both') {
@@ -308,7 +275,7 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
     /**
      * Not use :(
      */
-    public function parse()
+    public function parse(): void
     {
         $batchModel = Mage::getSingleton('dataflow/batch');
         /** @var Mage_Dataflow_Model_Batch $batchModel */
@@ -328,7 +295,7 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
      * @throws Mage_Core_Exception
      * @throws \Maho\Exception
      */
-    public function setCustomer(Mage_Customer_Model_Customer $customer)
+    public function setCustomer(Mage_Customer_Model_Customer $customer): void
     {
         $id = Mage::objects()->save($customer);
         Mage::register('Object_Cache_Customer', $id);
@@ -343,11 +310,10 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
     }
 
     /**
-     * @return $this
      * @throws Mage_Core_Exception
      */
     #[\Override]
-    public function save()
+    public function save(): static
     {
         $stores = [];
         foreach (Mage::getConfig()->getNode('stores')->children() as $storeNode) {

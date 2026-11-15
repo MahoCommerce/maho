@@ -164,6 +164,20 @@ it('uses the address set of the group of the quote for a quote address', functio
         ->and(customerSetTestFormCodes('customer_address_edit', $guestAddress))->toContain('city');
 });
 
+it('keeps the order of the address forms when a set is made from the default set', function () {
+    $resource = Mage::getSingleton('core/resource');
+    $adapter = $resource->getConnection('core_read');
+    $formOrders = fn(): array => array_map(intval(...), $adapter->fetchPairs($adapter->select()
+        ->from(['ea' => $resource->getTableName('eav/attribute')], ['attribute_code'])
+        ->join(['cea' => $resource->getTableName('customer/eav_attribute')], 'cea.attribute_id = ea.attribute_id', ['sort_order'])
+        ->where('ea.entity_type_id = ?', (int) Mage::getSingleton('eav/config')->getEntityType('customer_address')->getId())));
+    $before = $formOrders();
+
+    $this->sets[] = customerSetTestCreateSet('customer_address', 'Pest Order ' . $this->suffix);
+
+    expect($formOrders())->toBe($before);
+});
+
 it('puts a new attribute that names no set into the default set, which every group without a set uses', function () {
     $code = 'pest_default_' . $this->suffix;
     $attribute = $this->attributes[] = customerSetTestCreateAttribute('customer', $code, null, ['customer_account_edit']);
@@ -394,4 +408,41 @@ it('names the customer groups of a set on its edit page, and keeps the values wh
         ->and($helper->getSetNote($defaultSet))->not->toContain('Pest Note Group ' . $this->suffix)
         ->and($helper->getSetNote($set))->toContain('The fields of the first group, General, join the other fields of the form with no title.')
         ->and($helper->getSetDeleteQuestion($set))->toContain('The values of the customers stay');
+});
+
+it('puts a field whose sort order is lower than every standard field at the top of the form', function () {
+    $top = $this->attributes[] = customerSetTestCreateAttribute('customer_address', 'pest_top_' . $this->suffix, null, ['customer_address_edit']);
+    $top->setSortOrder(1)->save();
+    $bottom = $this->attributes[] = customerSetTestCreateAttribute('customer_address', 'pest_bottom_' . $this->suffix, null, ['customer_address_edit']);
+    $bottom->setSortOrder(500)->save();
+    Mage::getSingleton('eav/config')->clear();
+
+    $codes = function (?string $placement): array {
+        $block = Mage::app()->getLayout()->createBlock('customer/form_attributes')
+            ->setCustomerForm('customer_address_edit', Mage::getModel('customer/address'))
+            ->setPlacement($placement);
+        return array_map(fn($attribute) => $attribute->getAttributeCode(), $block->getAttributes());
+    };
+
+    expect($codes(Mage_Customer_Block_Form_Attributes::PLACEMENT_TOP))->toContain($top->getAttributeCode())
+        ->not->toContain($bottom->getAttributeCode())
+        ->and($codes(Mage_Customer_Block_Form_Attributes::PLACEMENT_BOTTOM))->toContain($bottom->getAttributeCode())
+        ->not->toContain($top->getAttributeCode())
+        ->and($codes(null))->toContain($top->getAttributeCode(), $bottom->getAttributeCode());
+});
+
+it('starts the condition controller only in the block at the bottom of the form', function () {
+    $type = $this->attributes[] = customerSetTestCreateAttribute('customer_address', 'pest_type_' . $this->suffix, null, ['customer_address_edit']);
+    $type->setSortOrder(1)->save();
+    $note = $this->attributes[] = customerSetTestCreateAttribute('customer_address', 'pest_note_' . $this->suffix, null, ['customer_address_edit']);
+    $note->setDependsOn([$type->getAttributeCode() => ['__any__']])->save();
+    Mage::getSingleton('eav/config')->clear();
+
+    $json = fn(string $placement) => Mage::app()->getLayout()->createBlock('customer/form_attributes')
+        ->setCustomerForm('customer_address_edit', Mage::getModel('customer/address'))
+        ->setPlacement($placement)
+        ->getDependenceJson();
+
+    expect($json(Mage_Customer_Block_Form_Attributes::PLACEMENT_TOP))->toBeNull()
+        ->and($json(Mage_Customer_Block_Form_Attributes::PLACEMENT_BOTTOM))->toContain($note->getAttributeCode());
 });

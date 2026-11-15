@@ -33,26 +33,16 @@ describe('RouteCollectionBuilder::getAdminFrontName()', function () {
     beforeEach(fn() => resetAdminFrontNameCache());
     afterEach(fn() => resetAdminFrontNameCache());
 
-    it('returns the default admin base_path when use_custom_path is off', function () {
-        Mage::getConfig()->setNode(AdminhtmlHelper::XML_PATH_USE_CUSTOM_ADMIN_PATH, '0');
-        Mage::getConfig()->setNode(AdminhtmlHelper::XML_PATH_CUSTOM_ADMIN_PATH, '');
+    it('returns the admin front name from the custom path settings', function (string $useCustomPath, string $customPath, string $expected) {
+        Mage::getConfig()->setNode(AdminhtmlHelper::XML_PATH_USE_CUSTOM_ADMIN_PATH, $useCustomPath);
+        Mage::getConfig()->setNode(AdminhtmlHelper::XML_PATH_CUSTOM_ADMIN_PATH, $customPath);
 
-        expect(RouteCollectionBuilder::getAdminFrontName())->toBe('admin');
-    });
-
-    it('returns the custom path when use_custom_path is enabled and custom_path is set', function () {
-        Mage::getConfig()->setNode(AdminhtmlHelper::XML_PATH_USE_CUSTOM_ADMIN_PATH, '1');
-        Mage::getConfig()->setNode(AdminhtmlHelper::XML_PATH_CUSTOM_ADMIN_PATH, 'backoffice');
-
-        expect(RouteCollectionBuilder::getAdminFrontName())->toBe('backoffice');
-    });
-
-    it('falls back to default when use_custom_path is enabled but custom_path is empty', function () {
-        Mage::getConfig()->setNode(AdminhtmlHelper::XML_PATH_USE_CUSTOM_ADMIN_PATH, '1');
-        Mage::getConfig()->setNode(AdminhtmlHelper::XML_PATH_CUSTOM_ADMIN_PATH, '');
-
-        expect(RouteCollectionBuilder::getAdminFrontName())->toBe('admin');
-    });
+        expect(RouteCollectionBuilder::getAdminFrontName())->toBe($expected);
+    })->with([
+        'custom path off' => ['0', '', 'admin'],
+        'custom path on and set' => ['1', 'backoffice', 'backoffice'],
+        'custom path on but empty' => ['1', '', 'admin'],
+    ]);
 });
 
 describe('RouteCollectionBuilder::normalizeFrontName()', function () {

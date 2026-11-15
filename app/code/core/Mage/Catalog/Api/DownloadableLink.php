@@ -88,7 +88,7 @@ class DownloadableLink extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Link type (url or file)', extraProperties: [EnumSource::KEY => ['url', 'file']])]
     public string $linkType = 'url';
 
-    #[ApiProperty(description: 'Link URL (when linkType = url)')]
+    #[ApiProperty(description: 'Link URL (when linkType = url). Null for a caller without backend access to the products')]
     public ?string $linkUrl = null;
 
     #[ApiProperty(description: 'Sample URL')]

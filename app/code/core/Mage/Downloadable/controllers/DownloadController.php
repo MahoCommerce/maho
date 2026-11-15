@@ -37,7 +37,7 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
      * @param string $resourceType
      * @throws Exception
      */
-    protected function _processDownload($resource, $resourceType)
+    protected function _processDownload($resource, $resourceType): void
     {
         $helper = Mage::helper('downloadable/download');
         $helper->setResource($resource, $resourceType);
@@ -80,7 +80,7 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
      * Download sample action
      */
     #[Maho\Config\Route('/downloadable/download/sample/{sample_id}', name: 'downloadable.download.sample', methods: ['GET'], requirements: ['sample_id' => '\d+'])]
-    public function sampleAction()
+    public function sampleAction(): static
     {
         $sampleId = $this->getRequest()->getParam('sample_id', 0);
         $sample = Mage::getModel('downloadable/sample')->load($sampleId);
@@ -115,7 +115,7 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
      * Download link's sample action
      */
     #[Maho\Config\Route('/downloadable/download/linkSample/{link_id}', name: 'downloadable.download.linksample', methods: ['GET'], requirements: ['link_id' => '\d+'])]
-    public function linkSampleAction()
+    public function linkSampleAction(): static
     {
         $linkId = $this->getRequest()->getParam('link_id', 0);
         $link = Mage::getModel('downloadable/link')->load($linkId);

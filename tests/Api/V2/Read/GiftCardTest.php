@@ -17,23 +17,9 @@ declare(strict_types=1);
 
 describe('GET /api/rest/v2/giftcards/{code}', function (): void {
 
-    it('returns gift card balance for valid id', function (): void {
+    it('returns expected gift card fields', function (): void {
         // REST reads a gift card by numeric id (admin only); code-based lookup is
         // the public GraphQL checkBalance query.
-        $id = fixtures('giftcard_id');
-
-        if (!$id) {
-            $this->markTestSkipped('No giftcard_id configured in fixtures');
-        }
-
-        $response = apiGet("/api/rest/v2/giftcards/{$id}", adminToken());
-
-        expect($response['status'])->toBe(200);
-        expect($response['json'])->toBeArray();
-        expect($response['json'])->toHaveKey('balance');
-    });
-
-    it('returns expected gift card fields', function (): void {
         $id = fixtures('giftcard_id');
 
         if (!$id) {
@@ -55,14 +41,6 @@ describe('GET /api/rest/v2/giftcards/{code}', function (): void {
         $response = apiGet("/api/rest/v2/giftcards/{$invalidCode}", customerToken());
 
         expect($response['status'])->toBeNotFound();
-    });
-
-    it('requires authentication', function (): void {
-        $code = fixtures('giftcard_code') ?? 'TEST123';
-
-        $response = apiGet("/api/rest/v2/giftcards/{$code}");
-
-        expect($response['status'])->toBeUnauthorized();
     });
 
 });

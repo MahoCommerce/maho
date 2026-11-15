@@ -47,7 +47,7 @@ $_helper = $this->helper('catalog/output');
                                             <?= $this->__('Add to Cart') ?>
                                         </button>
                                     </p>
-                                <?php elseif ($_product->getStockItem() && $_product->getStockItem()->getIsInStock()): ?>
+                                <?php elseif ($_product->isSaleable()): ?>
                                     <p class="action"><a title="<?= $this->quoteEscape($this->__('View Details')) ?>" class="button" href="<?= $_product->getProductUrl() ?>"><?= $this->__('View Details') ?></a></p>
                                 <?php else: ?>
                                     <p class="action availability out-of-stock"><span><?= $this->__('Out of stock') ?></span></p>

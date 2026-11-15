@@ -131,7 +131,7 @@ describe('Guest order lookup rate limit', function () {
         guest_lookup_spend_budget();
 
         expect(guest_lookup_attempt($this->post))->toBeFalse();
-        expect(guest_lookup_last_error())->toContain('Too Soon');
+        expect(guest_lookup_last_error())->toContain('Too many requests');
     });
 
     it('counts every failed form lookup against the budget', function () {
@@ -141,7 +141,7 @@ describe('Guest order lookup rate limit', function () {
         }
 
         expect(guest_lookup_attempt($this->post))->toBeFalse();
-        expect(guest_lookup_last_error())->toContain('Too Soon');
+        expect(guest_lookup_last_error())->toContain('Too many requests');
     });
 
     it('does not load an order while the client is throttled', function () {
@@ -157,7 +157,7 @@ describe('Guest order lookup rate limit', function () {
         ];
 
         expect(guest_lookup_attempt($post))->toBeFalse();
-        expect(guest_lookup_last_error())->toContain('Too Soon');
+        expect(guest_lookup_last_error())->toContain('Too many requests');
         expect(Mage::registry('current_order'))->toBeNull();
     });
 
@@ -185,7 +185,7 @@ describe('Guest order lookup rate limit', function () {
         }
 
         expect(guest_lookup_cookie_attempt($cookie))->toBeFalse();
-        expect(guest_lookup_last_error())->toContain('Too Soon');
+        expect(guest_lookup_last_error())->toContain('Too many requests');
     });
 
     it('does not check a cookie protect code while the client is throttled', function () {
@@ -195,7 +195,23 @@ describe('Guest order lookup rate limit', function () {
         $cookie = base64_encode($this->order->getProtectCode() . ':' . $this->order->getIncrementId());
 
         expect(guest_lookup_cookie_attempt($cookie))->toBeFalse();
-        expect(guest_lookup_last_error())->toContain('Too Soon');
+        expect(guest_lookup_last_error())->toContain('Too many requests');
         expect(Mage::registry('current_order'))->toBeNull();
+    });
+
+    it('counts a failed token read of the API against the same budget, and not a successful one', function () {
+        $this->order = guest_lookup_order();
+        $this->order->setData('guest_access_token', 'pest-guest-token')->save();
+        $service = Mage::getService('sales/order');
+
+        for ($i = 0; $i <= GUEST_LOOKUP_BUDGET; $i++) {
+            expect($service->getForGuest($this->order->getIncrementId(), 'pest-guest-token')?->getId())->toBe($this->order->getId());
+        }
+        for ($i = 0; $i < GUEST_LOOKUP_BUDGET; $i++) {
+            expect($service->getForGuest($this->order->getIncrementId(), 'wrong-token'))->toBeNull();
+        }
+
+        expect(guest_lookup_attempt($this->post))->toBeFalse();
+        expect(guest_lookup_last_error())->toContain('Too many requests');
     });
 });

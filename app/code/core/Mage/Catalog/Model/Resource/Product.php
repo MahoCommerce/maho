@@ -92,6 +92,29 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
     }
 
     /**
+     * Return the IDs of $productIds that are in none of the websites $websiteIds.
+     *
+     * @param array<int|string> $productIds
+     * @param array<int|string> $websiteIds
+     * @return list<int>
+     */
+    public function getIdsNotInWebsites(array $productIds, array $websiteIds): array
+    {
+        if ($productIds === []) {
+            return [];
+        }
+        $websiteIds = array_map(intval(...), $websiteIds);
+        $productWebsites = $this->getWebsiteIdsByProductIds($productIds);
+        $outside = [];
+        foreach ($productIds as $productId) {
+            if (array_intersect(array_map(intval(...), $productWebsites[$productId] ?? []), $websiteIds) === []) {
+                $outside[] = (int) $productId;
+            }
+        }
+        return $outside;
+    }
+
+    /**
      * Retrieve product category identifiers
      *
      * @param Mage_Catalog_Model_Product|\Maho\DataObject $product
@@ -360,6 +383,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
 
         $select = $adapter->select();
         $condition = [];
+        $websiteId = null;
 
         $indexTable = $this->getTable('catalog/product_enabled_index');
         if (is_null($store) && is_null($product)) {
@@ -368,7 +392,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
             );
         } elseif (is_null($product) || is_array($product)) {
             $storeId    = $store->getId();
-            $websiteId  = $store->getWebsiteId();
+            $websiteId  = (int) $store->getWebsiteId();
 
             if (is_array($product) && !empty($product)) {
                 $condition[] = $adapter->quoteInto('product_id IN (?)', $product);
@@ -381,15 +405,6 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
                 new Maho\Db\Expr((string) $storeId),
                 $adapter->getCheckSql('t_v.value_id > 0', 't_v.value', 't_v_default.value'),
             ];
-
-            $select->joinInner(
-                ['w' => $this->getTable('catalog/product_website')],
-                $adapter->quoteInto(
-                    'w.product_id = t_v_default.entity_id AND w.website_id = ?',
-                    $websiteId,
-                ),
-                [],
-            );
         } elseif ($store === null) {
             foreach ($product->getStoreIds() as $storeId) {
                 $store = Mage::app()->getStore($storeId);
@@ -417,6 +432,15 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
         $adapter->delete($indexTable, $condition);
 
         $select->from(['t_v_default' => $visibilityTable], $selectFields);
+
+        // A join that comes before from() loses its condition, so the website join comes here
+        if ($websiteId !== null) {
+            $select->joinInner(
+                ['w' => $this->getTable('catalog/product_website')],
+                $adapter->quoteInto('w.product_id = t_v_default.entity_id AND w.website_id = ?', $websiteId),
+                [],
+            );
+        }
 
         $visibilityTableJoinCond = [
             't_v.entity_id = t_v_default.entity_id',

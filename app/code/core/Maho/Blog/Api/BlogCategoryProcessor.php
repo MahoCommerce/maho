@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Blog category write processor: validation, tree integrity and subtree delete.
+ * Give a blog category write to the blog category service.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -12,65 +12,44 @@ declare(strict_types=1);
 
 namespace Maho\Blog\Api;
 
-use Maho\ApiPlatform\CrudProcessor;
-use Maho\ApiPlatform\CrudResource;
-use Maho\ApiPlatform\Security\ApiUser;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use ApiPlatform\Metadata\DeleteOperationInterface;
+use ApiPlatform\Metadata\Operation;
 
-final class BlogCategoryProcessor extends CrudProcessor
+final class BlogCategoryProcessor extends \Maho\ApiPlatform\Processor
 {
     #[\Override]
-    protected function validate(CrudResource $data, object $model, bool $isNew): void
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?BlogCategory
     {
-        if (!$data instanceof BlogCategory) {
-            return;
+        $user = $this->requireUser();
+        /** @var \Maho_Blog_Service_Category $service */
+        $service = \Mage::getService('blog/category');
+        $category = isset($uriVariables['id']) ? $service->getById((int) $uriVariables['id']) : $service->newCategory();
+        $oldData = $category->getId() ? $category->getData() : null;
+        if ($oldData !== null) {
+            $this->validateEntityStoreAccess($category->getStores(), $user, 'BlogCategory');
         }
 
-        if ($data->name !== null && trim($data->name) === '') {
-            throw new UnprocessableEntityHttpException('Blog category name cannot be empty');
-        }
-        if ($isNew && $data->name === null) {
-            throw new UnprocessableEntityHttpException('Blog category name is required');
-        }
-
-        if ($data->parentId !== null && $data->parentId !== \Maho_Blog_Model_Category::ROOT_PARENT_ID) {
-            $parent = \Mage::getModel('blog/category')->load($data->parentId);
-            if (!$parent->getId()) {
-                throw new UnprocessableEntityHttpException("Unknown parent blog category id {$data->parentId}");
+        if ($operation instanceof DeleteOperationInterface) {
+            // The subtree goes with the category, so a token that is limited to some store views needs each descendant
+            foreach (\Mage::getResourceSingleton('blog/category')->getDescendantIds((int) $category->getId()) as $descendantId) {
+                $this->validateEntityStoreAccess($service->getById($descendantId)->getStores(), $user, 'BlogCategory');
             }
-            if ($model->getId() && (
-                (int) $data->parentId === (int) $model->getId()
-                || in_array((int) $model->getId(), $parent->getPathIds(), true)
-            )) {
-                throw new UnprocessableEntityHttpException('A blog category cannot be moved under itself or its descendants');
-            }
-        }
-    }
-
-    /** Mirrors the admin delete flow: the whole subtree goes with the category. */
-    #[\Override]
-    protected function processDelete(int $id, ApiUser $user): null
-    {
-        $model = $this->loadOrFail($this->modelAlias, $id, 'Blog category not found');
-        $this->authorizeEntity($model, $user);
-
-        /** @var \Maho_Blog_Model_Resource_Category $resource */
-        $resource = \Mage::getResourceSingleton('blog/category');
-
-        // The subtree goes with the category, so every descendant must be in the
-        // caller's store scope too: a store-scoped token must not take out a child
-        // category that belongs to a store it was never granted.
-        foreach ($resource->getDescendantIds((int) $model->getId()) as $descendantId) {
-            $descendant = \Mage::getModel('blog/category')->load($descendantId);
-            if ($descendant->getId()) {
-                $this->authorizeEntity($descendant, $user);
-            }
+            $service->delete($category);
+            $this->logApiActivity('blog_category', 'delete', $oldData, null);
+            return null;
         }
 
-        $oldData = $model->getData();
-        $resource->deleteDescendants((int) $model->getId());
-        $this->safeDelete($model, "delete {$this->entityLabel}");
-        $this->logApiActivity($this->entityType, 'delete', $oldData, null);
-        return null;
+        /** @var BlogCategory $data */
+        $sent = $oldData === null ? null : array_map(strval(...), array_keys($this->parseRequestBody($context['request'] ?? null)));
+        $data->applyToModel($category, $sent);
+        if ($data->stores !== null && ($sent === null || in_array('stores', $sent, true))) {
+            $category->setData('stores', $this->resolveStoreIds($data->stores, $user));
+        }
+        $this->validateEntityStoreAccess($category->getStores(), $user, 'BlogCategory');
+
+        $service->save($category);
+        $this->logApiActivity('blog_category', $oldData === null ? 'create' : 'update', $oldData, $category);
+
+        return BlogCategory::fromModel($service->getById((int) $category->getId()));
     }
 }

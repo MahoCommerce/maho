@@ -63,7 +63,7 @@ class Mage_ConfigurableSwatches_Model_Observer extends Mage_Core_Model_Abstract
      * Observes: catalog_product_load_after
      */
     #[Maho\Config\Observer('catalog_product_load_after', area: 'frontend')]
-    public function productLoadAfter(\Maho\Event\Observer $observer)
+    public function productLoadAfter(\Maho\Event\Observer $observer): void
     {
         if (!Mage::helper('configurableswatches')->isEnabled()) { // functionality disabled
             return; // exit without loading swatch functionality
@@ -90,7 +90,7 @@ class Mage_ConfigurableSwatches_Model_Observer extends Mage_Core_Model_Abstract
      * Observes: catalog_product_attribute_backend_media_load_gallery_before
      */
     #[Maho\Config\Observer('catalog_product_attribute_backend_media_load_gallery_before', area: 'frontend')]
-    public function loadChildProductImagesOnMediaLoad(\Maho\Event\Observer $observer)
+    public function loadChildProductImagesOnMediaLoad(\Maho\Event\Observer $observer): void
     {
         if (!Mage::helper('configurableswatches')->isEnabled()) { // functionality disabled
             return; // exit without loading swatch functionality
@@ -130,7 +130,7 @@ class Mage_ConfigurableSwatches_Model_Observer extends Mage_Core_Model_Abstract
      * Observes: controller_action_layout_generate_blocks_after
      */
     #[Maho\Config\Observer('controller_action_layout_generate_blocks_after', area: 'frontend')]
-    public function convertLayerBlock(\Maho\Event\Observer $observer)
+    public function convertLayerBlock(\Maho\Event\Observer $observer): void
     {
         $front = Mage::app()->getRequest()->getRouteName();
         $controller = Mage::app()->getRequest()->getControllerName();

@@ -37,12 +37,12 @@ class Mage_Adminhtml_Block_Sales_Order_Comments_View extends Mage_Adminhtml_Bloc
         return parent::_prepareLayout();
     }
 
-    public function getSubmitUrl()
+    public function getSubmitUrl(): string
     {
         return $this->getUrl('*/*/addComment', ['id' => $this->getEntity()->getId()]);
     }
 
-    public function canSendCommentEmail()
+    public function canSendCommentEmail(): bool
     {
         return match ($this->getParentType()) {
             'invoice' => Mage::helper('sales')->canSendInvoiceCommentEmail(

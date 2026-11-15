@@ -183,6 +183,19 @@ describe('GraphQL Customer Addresses Query', function (): void {
     });
 
     it('returns addresses with expected field types', function (): void {
+        $create = apiPost('/api/rest/v2/customers/me/addresses', [
+            'firstname' => 'Graph',
+            'lastname' => 'Address',
+            'street' => ['1 Graph Street'],
+            'city' => 'Melbourne',
+            'postcode' => '3000',
+            'countryId' => 'AU',
+            'telephone' => '0400000000',
+            'region' => 'Victoria',
+        ], customerToken());
+        expect($create['status'])->toBeIn([200, 201]);
+        $addressId = (int) $create['json']['id'];
+
         $query = <<<'GRAPHQL'
         {
             myAddresses {
@@ -202,19 +215,22 @@ describe('GraphQL Customer Addresses Query', function (): void {
         }
         GRAPHQL;
 
-        $response = gqlQuery($query, [], customerToken());
+        try {
+            $response = gqlQuery($query, [], customerToken());
+        } finally {
+            apiDelete("/api/rest/v2/customers/me/addresses/{$addressId}", customerToken());
+        }
 
         expect($response['status'])->toBe(200);
 
         $edges = $response['json']['data']['myAddresses']['edges'] ?? [];
-        if (!empty($edges)) {
-            $address = $edges[0]['node'];
-            expect($address['firstname'])->toBeString();
-            expect($address['lastname'])->toBeString();
-            expect($address['countryId'])->toBeString();
-            expect($address['isDefaultBilling'])->toBeBool();
-            expect($address['isDefaultShipping'])->toBeBool();
-        }
+        expect($edges)->not->toBeEmpty();
+        $address = $edges[0]['node'];
+        expect($address['firstname'])->toBeString();
+        expect($address['lastname'])->toBeString();
+        expect($address['countryId'])->toBeString();
+        expect($address['isDefaultBilling'])->toBeBool();
+        expect($address['isDefaultShipping'])->toBeBool();
     });
 
 });

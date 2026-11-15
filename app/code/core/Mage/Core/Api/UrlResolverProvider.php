@@ -38,15 +38,8 @@ final class UrlResolverProvider extends \Maho\ApiPlatform\Provider
             $path = $context['filters']['path'] ?? '';
         }
 
-        // Clean the path
         $path = trim($path, '/');
-
-        // Empty path = homepage
-        if (empty($path)) {
-            $path = 'home';
-        }
-
-        $result = $this->resolveUrl($path);
+        $result = $path === '' ? $this->resolveHomePage() : $this->resolveUrl($path);
 
         // For GetCollection, return as array (empty if not found)
         if ($operation instanceof \ApiPlatform\Metadata\CollectionOperationInterface) {
@@ -93,23 +86,9 @@ final class UrlResolverProvider extends \Maho\ApiPlatform\Provider
             }
         }
 
-        // Check for CMS page by identifier directly
-        $cmsPage = \Mage::getModel('cms/page');
-        $pageId = $cmsPage->checkIdentifier($path, $storeId);
-
-        // Also try with .html suffix (common in Maho/Magento)
-        if (!$pageId) {
-            $pageId = $cmsPage->checkIdentifier($path . '.html', $storeId);
-        }
-
-        if ($pageId) {
-            $cmsPage->load($pageId);
-            if ($cmsPage->getIsActive() && !\Mage::helper('cms/page')->isNoRoutePage($cmsPage)) {
-                $result->type = 'cms_page';
-                $result->id = (int) $cmsPage->getId();
-                $result->identifier = $cmsPage->getIdentifier();
-                return $result;
-            }
+        $cmsResult = $this->resolveCmsPage($path, $storeId);
+        if ($cmsResult) {
+            return $cmsResult;
         }
 
         // Check for category by URL key
@@ -144,6 +123,37 @@ final class UrlResolverProvider extends \Maho\ApiPlatform\Provider
         return $result;
     }
 
+    /**
+     * Resolve the CMS page that the store shows at its root URL.
+     */
+    private function resolveHomePage(): UrlResolveResult
+    {
+        $storeId = StoreContext::getStoreId();
+        $identifier = \Mage::helper('cms/page')->getConfigPageIdentifier(\Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE, $storeId);
+        return ($identifier !== '' ? $this->resolveCmsPage($identifier, $storeId) : null) ?? new UrlResolveResult();
+    }
+
+    private function resolveCmsPage(string $identifier, int $storeId): ?UrlResolveResult
+    {
+        $cmsPage = \Mage::getModel('cms/page');
+        $pageId = $cmsPage->checkIdentifier($identifier, $storeId)
+            ?: $cmsPage->checkIdentifier($identifier . '.html', $storeId);
+        if (!$pageId) {
+            return null;
+        }
+
+        $cmsPage->load($pageId);
+        if (!$cmsPage->getIsActive() || \Mage::helper('cms/page')->isNoRoutePage($cmsPage)) {
+            return null;
+        }
+
+        $result = new UrlResolveResult();
+        $result->type = 'cms_page';
+        $result->id = (int) $cmsPage->getId();
+        $result->identifier = $cmsPage->getIdentifier();
+        return $result;
+    }
+
     private function processRewrite(\Mage_Core_Model_Url_Rewrite $rewrite, UrlResolveResult $result): UrlResolveResult
     {
         $targetPath = $rewrite->getTargetPath();
@@ -169,6 +179,10 @@ final class UrlResolverProvider extends \Maho\ApiPlatform\Provider
 
             // Check if this is a simple product with a configurable parent
             $productId = $this->resolveParentProductId($productId);
+            if (!$this->isProductVisible($productId)) {
+                $result->type = 'not_found';
+                return $result;
+            }
 
             $result->type = 'product';
             $result->id = $productId;
@@ -177,6 +191,12 @@ final class UrlResolverProvider extends \Maho\ApiPlatform\Provider
         }
 
         if (preg_match('#^catalog/category/view/id/(\d+)#', $targetPath, $matches)) {
+            try {
+                self::categoryService()->getVisibleById((int) $matches[1], StoreContext::getStoreId());
+            } catch (\Mage_Core_Exception_NoSuchEntity) {
+                $result->type = 'not_found';
+                return $result;
+            }
             $result->type = 'category';
             $result->id = (int) $matches[1];
             $result->identifier = $identifier;
@@ -217,13 +237,17 @@ final class UrlResolverProvider extends \Maho\ApiPlatform\Provider
     {
         $collection = \Mage::getModel('catalog/category')->getCollection();
         $collection->setStoreId($storeId);
+        $collection->addAttributeToSelect(['url_key', 'is_active']);
         $collection->addAttributeToFilter('url_key', $urlKey);
         $collection->addAttributeToFilter('is_active', 1);
-        $collection->setPageSize(1);
 
-        $category = $collection->getFirstItem();
-
-        return $category->getId() ? $category : null;
+        // A URL key can repeat in the trees of other stores
+        foreach ($collection as $category) {
+            if (self::categoryService()->isVisibleInStore($category, $storeId)) {
+                return $category;
+            }
+        }
+        return null;
     }
 
     private function findProductByUrlKey(string $urlKey, int $storeId): ?\Mage_Catalog_Model_Product
@@ -244,13 +268,28 @@ final class UrlResolverProvider extends \Maho\ApiPlatform\Provider
         // If this is a simple product, check if it has a parent (configurable, grouped, or bundle)
         // and return the parent instead (for proper display)
         if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
-            $parent = $this->findParentProduct($product->getId());
-            if ($parent) {
-                return $parent;
-            }
+            $product = $this->findParentProduct($product->getId()) ?? $product;
         }
 
-        return $product;
+        return $this->isProductVisible((int) $product->getId()) ? $product : null;
+    }
+
+    private function isProductVisible(int $productId): bool
+    {
+        /** @var \Mage_Catalog_Service_Product $service */
+        $service = \Mage::getService('catalog/product');
+        try {
+            $service->getVisibleById($productId, StoreContext::getStoreId());
+        } catch (\Mage_Core_Exception_NoSuchEntity) {
+            return false;
+        }
+        return true;
+    }
+
+    private static function categoryService(): \Mage_Catalog_Service_Category
+    {
+        /** @var \Mage_Catalog_Service_Category */
+        return \Mage::getService('catalog/category');
     }
 
     /**

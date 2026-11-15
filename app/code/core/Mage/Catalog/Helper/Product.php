@@ -33,7 +33,7 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
      */
     protected $_productUrlSuffix = [];
 
-    protected $_statuses;
+    protected ?array $_statuses = null;
 
     protected $_priceBlock;
 
@@ -162,6 +162,15 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
         }
 
         return $product->isVisibleInCatalog() && $product->isVisibleInSiteVisibility();
+    }
+
+    /**
+     * Return whether the storefront of the store $storeId shows $product: canShow(), and the product is in the website.
+     */
+    public function isVisibleInStore(Mage_Catalog_Model_Product $product, int $storeId): bool
+    {
+        return $this->canShow($product)
+            && in_array((int) Mage::app()->getStore($storeId)->getWebsiteId(), array_map(intval(...), $product->getWebsiteIds()), true);
     }
 
     /**
@@ -300,10 +309,7 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
             'product' => $product,
         ]);
 
-        if (!$this->canShow($product)) {
-            return false;
-        }
-        if (!in_array(Mage::app()->getStore()->getWebsiteId(), $product->getWebsiteIds())) {
+        if (!$this->isVisibleInStore($product, (int) Mage::app()->getStore()->getId())) {
             return false;
         }
 

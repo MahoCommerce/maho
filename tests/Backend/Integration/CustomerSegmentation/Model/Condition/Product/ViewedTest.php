@@ -18,15 +18,6 @@ describe('Product Viewed Condition Integration Tests', function () {
         setupTestData();
     });
 
-    test('can create new condition instance', function () {
-        expect($this->condition)->toBeInstanceOf(Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed::class);
-        expect($this->condition->getType())->toBe('customersegmentation/segment_condition_product_viewed');
-    });
-
-    test('extends abstract condition correctly', function () {
-        expect($this->condition)->toBeInstanceOf(Maho_CustomerSegmentation_Model_Segment_Condition_Abstract::class);
-    });
-
     test('has correct new child select options', function () {
         $options = $this->condition->getNewChildSelectOptions();
 
@@ -127,6 +118,10 @@ describe('Product Viewed Condition Integration Tests', function () {
             expect($sql)->toContain('catalog_product_entity_varchar');
             expect($sql)->toMatch('/pv\.value I?LIKE/');
             expect($sql)->toContain('%Test Product%');
+
+            $nameAttributeId = (int) Mage::getResourceModel('eav/entity_attribute')->getIdByCode('catalog_product', 'name');
+            expect($nameAttributeId)->toBeGreaterThan(0)
+                ->and($sql)->toContain('pv.attribute_id = ' . $nameAttributeId);
         });
 
         test('generates correct SQL for product_sku condition with product table join', function () {
@@ -241,34 +236,6 @@ describe('Product Viewed Condition Integration Tests', function () {
         });
     });
 
-    test('table name methods return correct table names', function () {
-        $condition = new Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed();
-
-        // Use reflection to test protected methods
-        $reflection = new ReflectionClass($condition);
-
-        $getReportViewedTable = $reflection->getMethod('getReportViewedTable');
-        $getReportViewedTable->setAccessible(true);
-        expect($getReportViewedTable->invoke($condition))->toContain('report_viewed_product_index');
-
-        $getProductTable = $reflection->getMethod('getProductTable');
-        $getProductTable->setAccessible(true);
-        expect($getProductTable->invoke($condition))->toContain('catalog_product_entity');
-
-        $getProductVarcharTable = $reflection->getMethod('getProductVarcharTable');
-        $getProductVarcharTable->setAccessible(true);
-        expect($getProductVarcharTable->invoke($condition))->toContain('catalog_product_entity_varchar');
-
-        $getCatalogCategoryProductTable = $reflection->getMethod('getCatalogCategoryProductTable');
-        $getCatalogCategoryProductTable->setAccessible(true);
-        expect($getCatalogCategoryProductTable->invoke($condition))->toContain('catalog_category_product');
-
-        $getNameAttributeId = $reflection->getMethod('getNameAttributeId');
-        $getNameAttributeId->setAccessible(true);
-        $nameAttrId = $getNameAttributeId->invoke($condition);
-        expect($nameAttrId)->toBeGreaterThan(0);
-    });
-
     test('attribute name and string representation work correctly', function () {
         $this->condition->setAttribute('product_name');
 
@@ -282,7 +249,6 @@ describe('Product Viewed Condition Integration Tests', function () {
         expect($stringRepresentation)->toContain('Viewed');
         expect($stringRepresentation)->toContain('Product Name');
     });
-
 });
 
 // Helper methods for test data setup

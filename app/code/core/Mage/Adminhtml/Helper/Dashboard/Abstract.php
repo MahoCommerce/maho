@@ -1,11 +1,14 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
  */
+
+declare(strict_types=1);
 
 abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper_Data
 {
@@ -23,7 +26,7 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
      */
     protected $_params = [];
 
-    public function getCollection()
+    public function getCollection(): \Maho\Data\Collection|array
     {
         if (is_null($this->_collection)) {
             $this->_initCollection();
@@ -31,7 +34,7 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
         return $this->_collection;
     }
 
-    abstract protected function _initCollection();
+    abstract protected function _initCollection(): void;
 
     /**
      * Returns collection items
@@ -43,12 +46,12 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
         return is_array($this->getCollection()) ? $this->getCollection() : $this->getCollection()->getItems();
     }
 
-    public function getCount()
+    public function getCount(): int
     {
         return count($this->getItems());
     }
 
-    public function getColumn($index)
+    public function getColumn(string $index): array
     {
         $result = [];
         foreach ($this->getItems() as $item) {
@@ -67,12 +70,12 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
         return $result;
     }
 
-    public function setParam($name, $value)
+    public function setParam(string $name, mixed $value): void
     {
         $this->_params[$name] = $value;
     }
 
-    public function setParams(array $params)
+    public function setParams(array $params): void
     {
         $this->_params = $params;
     }
@@ -82,7 +85,7 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
         return $this->_params[$name] ?? null;
     }
 
-    public function getParams()
+    public function getParams(): array
     {
         return $this->_params;
     }

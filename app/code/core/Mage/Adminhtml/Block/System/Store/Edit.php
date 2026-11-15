@@ -69,24 +69,10 @@ class Mage_Adminhtml_Block_System_Store_Edit extends Mage_Adminhtml_Block_Widget
     }
 
     /**
-     * Create URL depending on backups
-     *
-     * @param string $storeType
-     * @param bool $backupAvailable
-     * @return string
+     * Return the URL that deletes the $storeType (website, group or store) of the page.
      */
-    public function _getDeleteUrl($storeType, $backupAvailable = false)
+    public function _getDeleteUrl(string $storeType): string
     {
-        $storeType = uc_words($storeType);
-        if ($backupAvailable) {
-            $deleteUrl   = $this->getUrl('*/*/delete' . $storeType, ['item_id' => Mage::registry('store_data')->getId()]);
-        } else {
-            $deleteUrl   = $this->getUrl(
-                '*/*/delete' . $storeType . 'Post',
-                ['item_id' => Mage::registry('store_data')->getId()],
-            );
-        }
-
-        return $deleteUrl;
+        return $this->getUrl('*/*/delete' . ucfirst($storeType) . 'Post', ['item_id' => Mage::registry('store_data')->getId()]);
     }
 }

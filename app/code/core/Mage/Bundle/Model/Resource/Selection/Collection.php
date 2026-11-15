@@ -17,11 +17,8 @@ class Mage_Bundle_Model_Resource_Selection_Collection extends Mage_Catalog_Model
      */
     protected $_selectionTable;
 
-    /**
-     * Initialize collection
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         parent::_construct();
         $this->setRowIdFieldName('selection_id');

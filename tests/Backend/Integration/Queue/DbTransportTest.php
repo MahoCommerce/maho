@@ -415,3 +415,17 @@ it('counts pending messages and finds stored ones', function () {
 
     expect([...$transport->all()])->toHaveCount(2);
 });
+
+it('discards a processing row only when its claim is abandoned', function () {
+    QueueManager::dispatch(makeEmailMessage());
+    expect([...QueueManager::dbTransport()->get()])->toHaveCount(1);
+    $id = (int) fetchQueueRows()[0]['message_id'];
+
+    // A live worker runs the handler: deleting the row would not stop the job.
+    expect(QueueManager::discardStoredMessage($id))->toBeFalse();
+    expect(fetchQueueRows())->toHaveCount(1);
+
+    queueAdapter()->update(QueueManager::tableName(), ['claimed_at' => agoUtc(7200)], ['message_id = ?' => $id]);
+    expect(QueueManager::discardStoredMessage($id))->toBeTrue();
+    expect(fetchQueueRows())->toHaveCount(0);
+});

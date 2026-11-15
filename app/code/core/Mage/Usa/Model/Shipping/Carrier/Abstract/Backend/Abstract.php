@@ -28,12 +28,12 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract_Backend_Abstract extends
     /**
      * Set source model to get allowed values
      */
-    abstract protected function _setSourceModelData();
+    abstract protected function _setSourceModelData(): void;
 
     /**
      * Set field name to display in error block
      */
-    abstract protected function _setNameErrorField();
+    abstract protected function _setNameErrorField(): void;
 
     /**
      * Mage_Usa_Model_Shipping_Carrier_Ups_Backend_Abstract constructor.

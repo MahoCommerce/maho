@@ -148,6 +148,11 @@ SPDX-License-Identifier: AFL-3.0
                 </control_size>
             </tokens>
         </design>
+        <services>
+            <core>
+                <class>Mage_Core_Service</class>
+            </core>
+        </services>
         <models>
             <core>
                 <class>Mage_Core_Model</class>
@@ -221,11 +226,21 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Mage_Core_Block</class>
             </core>
         </blocks>
+        <services>
+            <core>
+                <class>Mage_Core_Service</class>
+            </core>
+        </services>
         <helpers>
             <core>
                 <encryption_model>Mage_Core_Model_Encryption</encryption_model>
             </core>
         </helpers>
+        <services>
+            <core>
+                <class>Mage_Core_Service</class>
+            </core>
+        </services>
         <template>
             <email>
                 <design_email_header translate="label" module="core">

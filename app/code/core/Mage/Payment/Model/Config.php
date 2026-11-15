@@ -15,7 +15,7 @@
  */
 class Mage_Payment_Model_Config
 {
-    protected static $_methods;
+    protected static array $_methods = [];
 
     /**
      * Retrieve active system payments

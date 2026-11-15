@@ -40,36 +40,10 @@ class Maho_Revocation_IndexController extends Mage_Core_Controller_Front_Action
     {
         // Captured before any gate so the legal receipt reflects the actual submit moment.
         $receivedAt = microtime(true);
-
-        if (!Mage::helper('revocation')->isEnabled()) {
-            $this->_forward('noRoute');
-            return;
-        }
-
         $session = Mage::getSingleton('core/session');
         $request = $this->getRequest();
 
         if (!$request->isPost()) {
-            $this->_redirectUrl(Mage::getUrl('revocation/index/index'));
-            return;
-        }
-
-        // Honeypot: hidden field humans never see. Bots that fill it get the normal
-        // success page so they cannot detect the trap. No row, no email.
-        if (Mage::getStoreConfigFlag(Maho_Revocation_Helper_Data::XML_PATH_HONEYPOT_ENABLED)
-            && Mage::helper('core')->isHoneypotTriggered($request->getPost())) {
-            $this->_fakeSuccess($receivedAt);
-            return;
-        }
-
-        if ($this->_isSubmittedTooFast($receivedAt)) {
-            $this->_fakeSuccess($receivedAt);
-            return;
-        }
-
-        $ip = (string) Mage::helper('core/http')->getRemoteAddr();
-        if (Mage::helper('revocation')->isIpRateLimited()) {
-            $session->addError($this->__('Your request could not be processed right now. Please try again later or contact us directly.'));
             $this->_redirectUrl(Mage::getUrl('revocation/index/index'));
             return;
         }
@@ -79,11 +53,13 @@ class Maho_Revocation_IndexController extends Mage_Core_Controller_Front_Action
             'email' => $request->getParam('email'),
             'order_reference' => $request->getParam('order_reference'),
             'reason' => $request->getParam('reason'),
-            'ip' => $ip,
+            'ip' => (string) Mage::helper('core/http')->getRemoteAddr(),
             'user_agent' => $request->getHeader('User-Agent'),
             'locale' => Mage::app()->getLocale()->getLocaleCode(),
             'store_id' => (int) Mage::app()->getStore()->getId(),
             'received_at_microtime' => $receivedAt,
+            'form_fields' => $request->getPost(),
+            'render_token' => $request->getParam('frt'),
         ]);
 
         $customerSession = Mage::getSingleton('customer/session');
@@ -94,10 +70,19 @@ class Maho_Revocation_IndexController extends Mage_Core_Controller_Front_Action
 
         try {
             $revocationRequest = Mage::getService('revocation/request')->submit($input);
+        } catch (Mage_Core_Exception_NoSuchEntity) {
+            $this->_forward('noRoute');
+            return;
         } catch (Mage_Core_Exception $e) {
             $session->addError($e->getMessage());
             $session->setRevocationFormData($request->getPost());
             $this->_redirectUrl(Mage::getUrl('revocation/index/index'));
+            return;
+        }
+
+        // A bot that fills the honeypot or posts too fast gets the normal success page. No row, no email.
+        if ($revocationRequest === null) {
+            $this->_fakeSuccess($receivedAt);
             return;
         }
 
@@ -147,26 +132,6 @@ class Maho_Revocation_IndexController extends Mage_Core_Controller_Front_Action
         if ($order->getId() && (int) $order->getCustomerId() === (int) $customerSession->getCustomerId()) {
             Mage::register('revocation_prefill_order', $order);
         }
-    }
-
-    /**
-     * Submit-time check: the form embeds an encrypted render timestamp; anything
-     * faster than the configured minimum is bot traffic. Missing or unreadable
-     * tokens count as too fast.
-     */
-    protected function _isSubmittedTooFast(float $receivedAt): bool
-    {
-        $minSeconds = (int) Mage::getStoreConfig(Maho_Revocation_Helper_Data::XML_PATH_MIN_SUBMIT_SECONDS);
-        if ($minSeconds <= 0) {
-            return false;
-        }
-
-        $renderedAt = (string) Mage::helper('core')->decrypt((string) $this->getRequest()->getParam('frt'));
-        if (!ctype_digit($renderedAt)) {
-            return true;
-        }
-
-        return ($receivedAt - (float) $renderedAt) < $minSeconds;
     }
 
     /**

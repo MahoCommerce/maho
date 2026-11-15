@@ -28,7 +28,7 @@ abstract class Mage_Core_Model_Resource_Abstract
      */
     protected static $_commitCallbacks = [];
 
-    abstract protected function _construct();
+    abstract protected function _construct(): void;
 
     /**
      * Retrieve connection for read data

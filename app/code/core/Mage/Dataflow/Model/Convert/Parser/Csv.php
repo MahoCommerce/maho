@@ -10,16 +10,15 @@
 
 class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert_Parser_Abstract
 {
-    protected $_fields;
+    protected ?array $_fields = null;
 
-    protected $_mapfields = [];
+    protected array $_mapfields = [];
 
     /**
-     * @return $this
      * @throws Throwable
      */
     #[\Override]
-    public function parse()
+    public function parse(): static
     {
         // fixed for multibyte characters
         setlocale(LC_ALL, Mage::app()->getLocale()->getLocaleCode() . '.UTF-8');
@@ -75,16 +74,17 @@ class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert
             $fieldNames = $this->getVar('map');
         } else {
             $fieldNames = [];
-            foreach ($batchIoAdapter->read(true, $fDel, $fEnc) as $v) {
+            foreach ($batchIoAdapter->readCsv($fDel, $fEnc) as $v) {
                 $fieldNames[$v] = $v;
             }
         }
 
         $countRows = 0;
-        while (($csvData = $batchIoAdapter->read(true, $fDel, $fEnc)) !== false) {
+        while (($csvData = $batchIoAdapter->readCsv($fDel, $fEnc)) !== false) {
             if (count($csvData) == 1 && $csvData[0] === null) {
                 continue;
             }
+            $csvData = Mage::helper('core')->unEscapeCSVData($csvData);
 
             $itemData = [];
             $countRows++;
@@ -114,7 +114,7 @@ class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert
         return $this;
     }
 
-    public function parseRow($i, $line)
+    public function parseRow(int $i, array $line): array|false|null
     {
         if (count($line) === 1) {
             return false;
@@ -123,7 +123,7 @@ class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert
         if ($i == 0) {
             if ($this->getVar('fieldnames')) {
                 $this->_fields = $line;
-                return;
+                return null;
             }
             foreach ($line as $j => $f) {
                 $this->_fields[$j] = $this->_mapfields[$j];
@@ -140,11 +140,9 @@ class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert
 
     /**
      * Read data collection and write to temporary file
-     *
-     * @return $this
      */
     #[\Override]
-    public function unparse()
+    public function unparse(): static
     {
         $batchExport = $this->getBatchExportModel()
             ->setBatchId($this->getBatchModel()->getId());

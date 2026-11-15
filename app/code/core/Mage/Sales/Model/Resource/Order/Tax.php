@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_Sales_Model_Resource_Order_Tax extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('sales/order_tax', 'tax_id');
     }

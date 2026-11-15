@@ -17,7 +17,7 @@ declare(strict_types=1);
  */
 class Mage_Checkout_Block_Cart extends Mage_Checkout_Block_Cart_Abstract
 {
-    public function chooseTemplate()
+    public function chooseTemplate(): void
     {
         $itemsCount = $this->getItemsCount() ?: $this->getQuote()->getItemsCount();
         if ($itemsCount) {

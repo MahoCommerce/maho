@@ -8,20 +8,22 @@
  * @package Mage_Adminhtml
  */
 
-class Mage_Adminhtml_Model_System_Config_Source_Customer_Forgotpassword
-{
-    public const FORGOTPASS_FLOW_DISABLED  = 0;
-    public const FORGOTPASS_FLOW_IP_EMAIL  = 1;
-    public const FORGOTPASS_FLOW_IP        = 2;
-    public const FORGOTPASS_FLOW_EMAIL     = 3;
+declare(strict_types=1);
 
-    public function toOptionArray(): array
-    {
-        return [
-            ['value' => self::FORGOTPASS_FLOW_DISABLED, 'label' => Mage::helper('adminhtml')->__('Disabled')],
-            ['value' => self::FORGOTPASS_FLOW_IP_EMAIL, 'label' => Mage::helper('adminhtml')->__('By IP and Email')],
-            ['value' => self::FORGOTPASS_FLOW_IP,       'label' => Mage::helper('adminhtml')->__('By IP')],
-            ['value' => self::FORGOTPASS_FLOW_EMAIL,    'label' => Mage::helper('adminhtml')->__('By Email')],
-        ];
-    }
+/**
+ * @deprecated since 27.1, use Mage_Customer_Model_Config_Forgotpassword
+ */
+class Mage_Adminhtml_Model_System_Config_Source_Customer_Forgotpassword extends Mage_Customer_Model_Config_Forgotpassword
+{
+    #[\Deprecated('Use Mage_Customer_Model_Config_Forgotpassword::FLOW_DISABLED.', since: '27.1')]
+    public const FORGOTPASS_FLOW_DISABLED = self::FLOW_DISABLED;
+
+    #[\Deprecated('Use Mage_Customer_Model_Config_Forgotpassword::FLOW_IP_EMAIL.', since: '27.1')]
+    public const FORGOTPASS_FLOW_IP_EMAIL = self::FLOW_IP_EMAIL;
+
+    #[\Deprecated('Use Mage_Customer_Model_Config_Forgotpassword::FLOW_IP.', since: '27.1')]
+    public const FORGOTPASS_FLOW_IP = self::FLOW_IP;
+
+    #[\Deprecated('Use Mage_Customer_Model_Config_Forgotpassword::FLOW_EMAIL.', since: '27.1')]
+    public const FORGOTPASS_FLOW_EMAIL = self::FLOW_EMAIL;
 }

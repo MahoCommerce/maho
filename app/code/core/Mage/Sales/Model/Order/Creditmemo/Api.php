@@ -104,9 +104,7 @@ class Mage_Sales_Model_Order_Creditmemo_Api extends Mage_Sales_Model_Api_Resourc
         }
         $creditmemoData = $this->_prepareCreateData($creditmemoData);
 
-        /** @var Mage_Sales_Model_Service_Order $service */
-        $service = Mage::getModel('sales/service_order', $order);
-        $creditmemo = $service->prepareCreditmemo($creditmemoData);
+        $creditmemo = Mage::getService('sales/order')->buildCreditmemo($order, $creditmemoData);
 
         $creditmemo->setPaymentRefundDisallowed(true)->register();
         // add comment to creditmemo

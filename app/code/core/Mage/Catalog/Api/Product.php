@@ -190,7 +190,7 @@ class Product extends CrudResource
     public ?string $visibility = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Stock status: in_stock or out_of_stock. Stock is global: the same in every store view and website', writable: false, extraProperties: [EnumSource::KEY => ['in_stock', 'out_of_stock'], 'computed' => true])]
+    #[ApiProperty(description: 'Stock status in the website of the store, as the storefront shows it: in_stock or out_of_stock. A configurable, grouped or bundle product with no child in stock is out_of_stock, and so is a disabled product', writable: false, extraProperties: [EnumSource::KEY => ['in_stock', 'out_of_stock'], 'computed' => true])]
     public string $stockStatus = 'in_stock';
 
     #[Groups(['product:read'])]

@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -38,7 +39,7 @@ abstract class Mage_Dataflow_Model_Convert_Adapter_Abstract extends Mage_Dataflo
         return $this;
     }
 
-    public function getNumber($value)
+    public function getNumber(string $value): float
     {
         if (!($separator = $this->getBatchParams('decimal_separator'))) {
             $separator = '.';

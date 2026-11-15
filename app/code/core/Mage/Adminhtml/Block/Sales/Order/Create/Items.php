@@ -65,7 +65,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Items extends Mage_Adminhtml_Block
      *
      * @param array $args
      */
-    public function addButton($args)
+    public function addButton($args): void
     {
         $this->_buttons[] = $args;
     }

@@ -101,7 +101,7 @@ describe('POST /api/rest/v2/customers (extended fields)', function (): void {
 
         $read = apiGet('/api/rest/v2/customers/' . (int) $response['json']['id'], adminToken());
         expect($read['json']['groupId'])->toBe(1)
-            ->and($read['json']['taxvat'])->toBeNull();
+            ->and($read['json']['taxvat'] ?? null)->toBeNull();
     });
 
     it('rejects a non-existent groupId', function (): void {
@@ -264,10 +264,23 @@ describe('Customer service errors', function (): void {
         [, $secondEmail] = createTestCustomer();
         $firstId = (int) $first['json']['id'];
 
-        $response = apiPut('/api/rest/v2/customers/me', ['email' => $secondEmail], customerToken($firstId));
+        $response = apiPut('/api/rest/v2/customers/me', ['email' => $secondEmail, 'currentPassword' => 'PestWrite1234!'], customerToken($firstId));
 
         expect($response['status'])->toBe(409);
         expect($response['json']['message'])->toBe('This email is already in use.');
+    });
+
+    it('returns 422 when a customer changes their email without the current password', function (): void {
+        [$create, $email] = createTestCustomer();
+        $id = (int) $create['json']['id'];
+
+        $response = apiPut('/api/rest/v2/customers/me', ['email' => 'new-' . $email], customerToken($id));
+
+        expect($response['status'])->toBe(422);
+        expect($response['json']['details']['errors'])->toBe([
+            ['field' => 'currentPassword', 'message' => 'Enter your current password to change your email.'],
+        ]);
+        expect(apiGet("/api/rest/v2/customers/{$id}", adminToken())['json']['email'])->toBe($email);
     });
 
     it('returns 422 for a wrong current password', function (): void {

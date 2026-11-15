@@ -224,7 +224,11 @@ class Maho_FeedManager_Model_Platform_Idealo extends Maho_FeedManager_Model_Plat
         'fulfillmentType' => ['source_type' => 'static', 'source_value' => 'Parcel_Service'],
         'checkoutLimitPerPeriod' => ['source_type' => 'static', 'source_value' => '5'],
         'checkout' => ['source_type' => 'static', 'source_value' => 'true'],
-        'formerPrice' => ['source_type' => 'static', 'source_value' => ''],
+        'formerPrice' => [
+            'source_type' => 'combined',
+            'source_value' => '["{{regular_price}}","{{final_price}}"]',
+            'transformers' => 'current_price:part=original_price,currency=none',
+        ],
         'deposit' => ['source_type' => 'static', 'source_value' => ''],
         'maxOrderProcessingTime' => ['source_type' => 'static', 'source_value' => ''],
         'freeReturnDays' => ['source_type' => 'static', 'source_value' => ''],

@@ -160,7 +160,6 @@ const TransformerModal = {
                 self.renderDropdown();
             },
             onClose: function() {
-                self.hideDropdown();
                 self.dialog = null;
             }
         });

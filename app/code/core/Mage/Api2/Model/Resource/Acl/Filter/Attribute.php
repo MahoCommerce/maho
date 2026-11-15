@@ -19,7 +19,7 @@ class Mage_Api2_Model_Resource_Acl_Filter_Attribute extends Mage_Core_Model_Reso
     public const FILTER_RESOURCE_ALL = 'all';
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('api2/acl_attribute', 'entity_id');
     }

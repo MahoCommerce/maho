@@ -26,6 +26,7 @@ trait Mage_Adminhtml_Block_Cms_Page_Edit_AttributeFieldsTrait
         if (!$attributes) {
             return;
         }
+        $this->setData('attribute_dependence_values', $page->getData());
         $this->_setFieldset($attributes, $fieldset);
         $disabled = !Mage::getSingleton('admin/session')->isAllowed('cms/page/save');
         foreach ($attributes as $attribute) {

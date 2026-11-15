@@ -15,39 +15,16 @@ namespace Mage\Core\Api;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\TraversablePaginator;
-use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\ApiUser;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * @phpstan-type FieldInfo array{
- *     path: string,
- *     section: string,
- *     group: string,
- *     field: string,
- *     label: string,
- *     groupLabel: string,
- *     sectionLabel: string,
- *     comment: string,
- *     frontendType: ?string,
- *     backendModel: ?string,
- *     sourceModel: ?string,
- *     showInDefault: bool,
- *     showInWebsite: bool,
- *     showInStore: bool,
- * }
+ * @phpstan-import-type FieldInfo from \Mage_Core_Service_Config
  * @phpstan-type ScopeInfo array{scope: string, scopeId: int, scopeCode: ?string}
  */
 final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
 {
-    private const SENSITIVE_NAME_PATTERN = '/key|secret|password|token|salt/i';
-    private const SENSITIVE_FRONTEND_TYPES = ['obscure', 'password'];
     private const MAX_OPTIONS = 50;
-
-    /** @var array<string, FieldInfo>|null */
-    private ?array $fields = null;
 
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object
@@ -64,11 +41,7 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
             return $this->provideSettings($filters, $scope, $user, $context);
         }
 
-        $path = (string) ($uriVariables['path'] ?? $filters['path'] ?? '');
-        $field = $this->field($path);
-        if ($field === null) {
-            throw new NotFoundHttpException("Configuration setting '$path' not found");
-        }
+        $field = $this->service()->getField((string) ($uriVariables['path'] ?? $filters['path'] ?? ''));
         $this->assertSectionAllowed($field, $user);
 
         return $this->toSettingDto($field, $scope, $this->ownPaths($scope), withOptions: true);
@@ -97,8 +70,8 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
         $search = isset($filters['search']) ? trim((string) $filters['search']) : '';
 
         $matching = [];
-        foreach ($this->fields() as $field) {
-            if (!$this->isShownAtScope($field, $scope['scope'])) {
+        foreach ($this->service()->getFields() as $field) {
+            if (!$this->service()->isShownAtScope($field, $scope['scope'])) {
                 continue;
             }
             if ($pathPrefix !== '' && !str_starts_with($field['path'], $pathPrefix)) {
@@ -111,7 +84,7 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
             ) {
                 continue;
             }
-            if (!$this->isSectionAllowed($field['section'], $user)) {
+            if ($this->service()->getDeniedSection($field, $this->aclCheck($user)) !== null) {
                 continue;
             }
             $matching[] = $field;
@@ -148,7 +121,7 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
         $dto->sectionLabel = $field['sectionLabel'];
         $dto->comment = $field['comment'] !== '' ? $field['comment'] : null;
         $dto->frontendType = $field['frontendType'];
-        $dto->isSensitive = $this->isSensitive($field);
+        $dto->isSensitive = $this->service()->isSensitive($field);
         $dto->inherited = $scope['scope'] !== ConfigSetting::SCOPE_DEFAULT && !isset($ownPaths[$field['path']]);
         $dto->value = $dto->isSensitive ? null : $this->valueAtScope($field['path'], $scope);
         $dto->options = $withOptions ? $this->options($field) : null;
@@ -212,7 +185,7 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
         }
 
         if ($scopeCode === null || $scopeCode === '') {
-            throw self::scopeError("scopeCode is required for scope '$scope'", 'scopeCode', 'NotBlank', $inBody);
+            throw self::scopeError("scopeCode is required for scope '$scope'", 'scopeCode', $inBody);
         }
 
         if ($scope === ConfigSetting::SCOPE_WEBSITES) {
@@ -222,7 +195,7 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
                 $website = null;
             }
             if (!$website || !$website->getId()) {
-                throw self::scopeError("Website '$scopeCode' not found", 'scopeCode', 'Invalid', $inBody);
+                throw self::scopeError("Website '$scopeCode' not found", 'scopeCode', $inBody);
             }
             return ['scope' => $scope, 'scopeId' => (int) $website->getId(), 'scopeCode' => $website->getCode()];
         }
@@ -234,17 +207,17 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
                 $store = null;
             }
             if (!$store || !$store->getId()) {
-                throw self::scopeError("Store view '$scopeCode' not found", 'scopeCode', 'Invalid', $inBody);
+                throw self::scopeError("Store view '$scopeCode' not found", 'scopeCode', $inBody);
             }
             return ['scope' => $scope, 'scopeId' => (int) $store->getId(), 'scopeCode' => $store->getCode()];
         }
 
-        throw self::scopeError('scope must be default, websites or stores', 'scope', 'Choice', $inBody);
+        throw self::scopeError('scope must be default, websites or stores', 'scope', $inBody);
     }
 
-    public static function scopeError(string $message, string $field, string $constraint, bool $inBody): \Exception
+    private static function scopeError(string $message, string $field, bool $inBody): \Exception
     {
-        return $inBody ? new ValidationException($message, $field, $constraint) : new BadRequestHttpException($message);
+        return $inBody ? new \Mage_Core_Exception_Input()->addError($field, $message) : new BadRequestHttpException($message);
     }
 
     /**
@@ -254,42 +227,9 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
      */
     private function assertScopeReadable(array $scope, ApiUser $user): void
     {
-        if ($scope['scope'] === ConfigSetting::SCOPE_STORES && !$user->canAccessStore($scope['scopeId'])) {
-            throw new AccessDeniedHttpException('Token is not authorized for the requested store.');
+        if ($scope['scope'] === ConfigSetting::SCOPE_STORES) {
+            $this->assertRequestedStoreAllowed($scope['scopeId'], $user);
         }
-    }
-
-    /**
-     * @param FieldInfo $field
-     */
-    public function isShownAtScope(array $field, string $scope): bool
-    {
-        return match ($scope) {
-            ConfigSetting::SCOPE_WEBSITES => $field['showInWebsite'],
-            ConfigSetting::SCOPE_STORES => $field['showInStore'],
-            default => $field['showInDefault'],
-        };
-    }
-
-    /**
-     * @param FieldInfo $field
-     */
-    public function isSensitive(array $field): bool
-    {
-        if (in_array($field['frontendType'], self::SENSITIVE_FRONTEND_TYPES, true)) {
-            return true;
-        }
-        if (preg_match(self::SENSITIVE_NAME_PATTERN, $field['field']) === 1) {
-            return true;
-        }
-        if ($field['backendModel'] !== null) {
-            $class = \Mage::getConfig()->getModelClassName($field['backendModel']);
-            if (is_a($class, \Mage_Adminhtml_Model_System_Config_Backend_Encrypted::class, true)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -297,101 +237,41 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
      */
     public function isSectionAllowed(string $section, ApiUser $user): bool
     {
-        if (!$user->isAdmin()) {
-            return true;
-        }
-
-        try {
-            return (bool) \Mage::getSingleton('admin/session')->isAllowed('admin/system/config/' . $section);
-        } catch (\Exception) {
-            return false;
-        }
+        return $this->service()->isSectionAllowed($section, $this->aclCheck($user));
     }
 
     /**
+     * A field that stores its value in another section needs access to the two sections, as in the admin.
+     *
      * @param FieldInfo $field
+     * @throws \Mage_Core_Exception_Forbidden
      */
     public function assertSectionAllowed(array $field, ApiUser $user): void
     {
-        if (!$this->isSectionAllowed($field['section'], $user)) {
-            throw new AccessDeniedHttpException(
-                sprintf('Your admin role does not grant access to the configuration section "%s".', $field['section']),
-            );
-        }
+        $this->service()->assertFieldAllowed($field, $this->aclCheck($user));
     }
 
     /**
-     * @return FieldInfo|null
+     * @return \Closure(string): bool whether the role of $user allows an ACL resource
      */
-    public function field(string $path): ?array
+    private function aclCheck(ApiUser $user): \Closure
     {
-        return $this->fields()[trim($path, '/')] ?? null;
+        return static function (string $resource) use ($user): bool {
+            if (!$user->isAdmin()) {
+                return true;
+            }
+            try {
+                return (bool) \Mage::getSingleton('admin/session')->isAllowed($resource);
+            } catch (\Exception) {
+                return false;
+            }
+        };
     }
 
-    /**
-     * Every labelled field of system.xml, keyed by its configuration path.
-     *
-     * @return array<string, FieldInfo>
-     */
-    public function fields(): array
+    public function service(): \Mage_Core_Service_Config
     {
-        if ($this->fields !== null) {
-            return $this->fields;
-        }
-
-        $this->fields = [];
-        $sections = \Mage::getSingleton('adminhtml/config')->getSections();
-        foreach ($sections->children() as $sectionCode => $section) {
-            if (!isset($section->groups)) {
-                continue;
-            }
-            $sectionLabel = $this->label($section);
-            foreach ($section->groups->children() as $groupCode => $group) {
-                $this->collectGroup((string) $sectionCode, $sectionLabel, (string) $groupCode, $group);
-            }
-        }
-
-        return $this->fields;
-    }
-
-    private function collectGroup(string $section, string $sectionLabel, string $group, \Maho\Simplexml\Element $groupNode): void
-    {
-        if (!isset($groupNode->fields)) {
-            return;
-        }
-        $groupLabel = $this->label($groupNode);
-        foreach ($groupNode->fields->children() as $fieldCode => $fieldNode) {
-            // A nested group sits among the fields of its parent with type="group"
-            if ((string) $fieldNode->attributes()->type === 'group') {
-                $this->collectGroup($section, $sectionLabel, (string) $fieldCode, $fieldNode);
-                continue;
-            }
-            if (!isset($fieldNode->label)) {
-                continue;
-            }
-
-            $configPath = isset($fieldNode->config_path) ? trim((string) $fieldNode->config_path, '/') : '';
-            $path = $configPath !== '' && str_contains($configPath, '/')
-                ? $configPath
-                : $section . '/' . $group . '/' . $fieldCode;
-
-            $this->fields[$path] = [
-                'path' => $path,
-                'section' => $section,
-                'group' => $group,
-                'field' => (string) $fieldCode,
-                'label' => $this->label($fieldNode),
-                'groupLabel' => $groupLabel,
-                'sectionLabel' => $sectionLabel,
-                'comment' => isset($fieldNode->comment) ? trim(html_entity_decode(strip_tags((string) $fieldNode->comment))) : '',
-                'frontendType' => isset($fieldNode->frontend_type) ? (string) $fieldNode->frontend_type : 'text',
-                'backendModel' => isset($fieldNode->backend_model) ? (string) $fieldNode->backend_model : null,
-                'sourceModel' => isset($fieldNode->source_model) ? (string) $fieldNode->source_model : null,
-                'showInDefault' => (bool) (int) $fieldNode->show_in_default,
-                'showInWebsite' => (bool) (int) $fieldNode->show_in_website,
-                'showInStore' => (bool) (int) $fieldNode->show_in_store,
-            ];
-        }
+        /** @var \Mage_Core_Service_Config */
+        return \Mage::getService('core/config');
     }
 
     /**
@@ -464,10 +344,5 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
                 $options[] = ['value' => (string) $option['value'], 'label' => (string) ($option['label'] ?? $option['value'])];
             }
         }
-    }
-
-    private function label(\Maho\Simplexml\Element $node): string
-    {
-        return isset($node->label) ? trim((string) $node->label) : '';
     }
 }

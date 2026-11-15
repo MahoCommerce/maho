@@ -41,20 +41,15 @@ abstract class Io implements IoInterface
 
     /**
      * Open a connection
-     *
-     * @return bool
      */
     #[\Override]
-    public function open(array $args = [])
+    public function open(array $args = []): bool
     {
         return false;
     }
 
-    /**
-     * @return string
-     */
     #[\Override]
-    public function dirsep()
+    public function dirsep(): string
     {
         return '/';
     }

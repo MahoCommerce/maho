@@ -22,6 +22,8 @@ use Symfony\Component\Console\Helper\Table;
 )]
 class TranslationsMissing extends BaseMahoCommand
 {
+    use TranslationScanTrait;
+
     public function __invoke(
         #[Argument(description: 'Specify which language pack to check in app/locale, default is en_US')]
         string $lang = 'en_US',
@@ -38,6 +40,11 @@ class TranslationsMissing extends BaseMahoCommand
             if (count($missing)) {
                 echo "$file\n    " . implode("\n    ", $missing) . "\n\n";
             }
+        }
+
+        if ($this->scanIncomplete) {
+            fwrite(STDERR, "ERROR: Translation scan incomplete; review the warnings above.\n");
+            return Command::FAILURE;
         }
 
         return Command::SUCCESS;
@@ -64,12 +71,7 @@ class TranslationsMissing extends BaseMahoCommand
         }
 
         if (count($files) === 0) {
-            $files = array_merge(
-                // Grep for all files that might call the __ function
-                explode("\n", (string) shell_exec("grep -Frl --exclude-dir='.git' --include=*.php --include=*.phtml '__' .")),
-                // Grep for all XML files that might use the translate attribute
-                explode("\n", (string) shell_exec("grep -Frl --exclude-dir='.git' --include=*.xml 'translate=' .")),
-            );
+            $files = $this->searchSourceFiles();
         }
 
         return array_filter(array_map(trim(...), $files));
@@ -106,6 +108,7 @@ class TranslationsMissing extends BaseMahoCommand
      */
     protected function getUsedStrings(): array
     {
+        $this->scanIncomplete = false;
         $map = [];
         $files = $this->getFiles();
         foreach ($files as $file) {
@@ -119,6 +122,7 @@ class TranslationsMissing extends BaseMahoCommand
 
             if ($contents === false) {
                 echo "ERROR: File not found $file\n";
+                $this->scanIncomplete = true;
                 continue;
             }
 
@@ -137,7 +141,10 @@ class TranslationsMissing extends BaseMahoCommand
                     $matches = array_merge($matches, str_replace("\'", "'", $_matches[1]));
                 }
             } elseif ($ext === 'xml') {
-                $xml = new \SimpleXMLElement($contents);
+                $xml = $this->parseSourceXml($contents, $file);
+                if ($xml === null) {
+                    continue;
+                }
                 // Get all nodes with translate="" attribute
                 $nodes = $xml->xpath('//*[@translate]');
                 foreach ($nodes as $node) {

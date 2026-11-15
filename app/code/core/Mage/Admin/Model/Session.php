@@ -79,7 +79,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * Logout user if was logged not from admin
      */
-    protected function logoutIndirect()
+    protected function logoutIndirect(): void
     {
         $user = $this->getUser();
         if ($user) {
@@ -292,7 +292,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
      * @param string $username
      * @param string $message
      */
-    protected function _loginFailed($e, $request, #[\SensitiveParameter] $username, $message)
+    protected function _loginFailed($e, $request, #[\SensitiveParameter] $username, $message): void
     {
         try {
             Mage::dispatchEvent('admin_session_user_login_failed', [

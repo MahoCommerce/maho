@@ -7,8 +7,11 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Table as DbalTable;
+use Doctrine\DBAL\Types\Types;
 use Maho\Db\Adapter\AdapterInterface;
 use Maho\Db\Ddl\Table;
+use Maho\Db\Schema;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -198,6 +201,27 @@ describe('DDL Operations - Table Introspection', function () {
         expect($describe['id']['NULLABLE'])->toBeFalse();
         expect($describe['email']['NULLABLE'])->toBeFalse();
         expect($describe['age']['NULLABLE'])->toBeTrue();
+    });
+
+    it('reports the plain type names of date and time columns', function () {
+        // Built through DBAL like a schema.php table: on SQLite, newTable() stores dates as TEXT.
+        $connection = $this->adapter->getConnection();
+        $table = DbalTable::editor()
+            ->setUnquotedName($this->testTableName)
+            ->addColumn(Schema::column('id', Types::INTEGER))
+            ->addColumn(Schema::column('col_date', Types::DATE_IMMUTABLE, notNull: false))
+            ->addColumn(Schema::column('col_time', Types::TIME_IMMUTABLE, notNull: false))
+            ->addColumn(Schema::column('col_datetime', Types::DATETIME_IMMUTABLE, notNull: false))
+            ->create();
+        foreach ($connection->getDatabasePlatform()->getCreateTableSQL($table) as $sql) {
+            $connection->executeStatement($sql);
+        }
+
+        $describe = $this->adapter->describeTable($this->testTableName);
+
+        expect($describe['col_date']['DATA_TYPE'])->toBe('date');
+        expect($describe['col_time']['DATA_TYPE'])->toBe('time');
+        expect($describe['col_datetime']['DATA_TYPE'])->toBe('datetime');
     });
 
     it('checks if column exists in table', function () {

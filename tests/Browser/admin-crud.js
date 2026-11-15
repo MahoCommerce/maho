@@ -22,7 +22,9 @@
   const ajax = u => send(u, {headers: {'X-Requested-With': 'XMLHttpRequest'}}).then(r => r.text());
   const messages = t => {
     const d = parse(t);
-    const read = sel => [...d.querySelectorAll(sel)].map(e => e.innerText.trim()).filter(Boolean);
+    // A page can hold a hidden message that its script shows later, such as the warning of the configurable product
+    const read = sel => [...d.querySelectorAll(sel)].filter(e => !e.closest('[style*="display: none"], [style*="display:none"]'))
+      .map(e => e.innerText.trim()).filter(Boolean);
     return {ok: read('.success-msg li, li.success-msg'), err: read('.error-msg li, li.error-msg')};
   };
   const outcome = t => { const m = messages(t); return (m.ok[0] || '-') + (m.err.length ? ' ERR: ' + m.err.join(' | ') : ''); };
@@ -218,6 +220,17 @@
     try {
       let doc = f.contentDocument, html = doc.documentElement.outerHTML, m = html.match(C.FATAL);
       if (m) return stop('new', 'FATAL ' + snip(html, m));
+      // A new configurable product asks for its super attributes first: pick one, as the Continue button does
+      const superAttribute = doc.querySelector('input.attribute-checkbox');
+      if (superAttribute) {
+        const next = (html.match(/setSuperSettings\('([^']+)'/) || [])[1];
+        if (!next) return stop('new', 'no continue url on the super attributes step');
+        const attributes = btoa(superAttribute.value).replace(/\//g, '%2F').replace(/=/g, '%3D');
+        f.remove();
+        f = await frame(next.replace(/\{\{attributes\}\}|%7B%7Battributes%7D%7D/i, attributes));
+        doc = f.contentDocument; html = doc.documentElement.outerHTML; m = html.match(C.FATAL);
+        if (m) return stop('new', 'FATAL ' + snip(html, m));
+      }
       let form = findForm(doc);
       if (!form) return stop('new', 'no form at ' + short(f.contentWindow.location.href));
       C.fill(form, tag, entity);

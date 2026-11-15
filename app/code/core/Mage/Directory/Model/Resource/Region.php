@@ -17,11 +17,8 @@ class Mage_Directory_Model_Resource_Region extends Mage_Core_Model_Resource_Db_A
      */
     protected $_regionNameTable;
 
-    /**
-     * Define main and locale region name tables
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('directory/country_region', 'region_id');
         $this->_regionNameTable = $this->getTable('directory/country_region_name');

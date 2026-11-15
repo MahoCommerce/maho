@@ -16,59 +16,21 @@ class Mage_Adminhtml_System_Config_TestEmailController extends Mage_Adminhtml_Co
      */
     public const ADMIN_RESOURCE = 'system/config/system';
 
-    /**
-     * Send test email action
-     */
     #[Maho\Config\Route('/admin/system_config_testemail/send')]
     public function sendAction(): void
     {
-        $recipient = $this->getRequest()->getParam('recipient');
-
-        if (!Mage::helper('core')->isValidEmail($recipient)) {
-            $this->getResponse()->setBodyJson([
-                'success' => false,
-                'message' => Mage::helper('adminhtml')->__('Invalid email address.'),
-            ]);
-            return;
-        }
-
-        $dsn = Mage::helper('core')->getMailerDsn();
-        if (empty($dsn) || $dsn === 'null://null') {
-            $this->getResponse()->setBodyJson([
-                'success' => false,
-                'message' => Mage::helper('adminhtml')->__('Email transport is disabled. Please configure an email transport in Mail Sending Settings.'),
-            ]);
-            return;
-        }
-
+        $recipient = (string) $this->getRequest()->getParam('recipient');
         try {
-            $emailTemplate = Mage::getModel('core/email_template');
-            $emailTemplate
-                ->setSenderName(Mage::getStoreConfig('trans_email/ident_general/name'))
-                ->setSenderEmail(Mage::getStoreConfig('trans_email/ident_general/email'))
-                ->setTemplateType(\Mage_Core_Model_Template::TYPE_TEXT)
-                ->setTemplateText(Mage::helper('adminhtml')->__('This is a test email from Maho admin.'))
-                ->setTemplateSubject(Mage::helper('adminhtml')->__('Maho Test Email'));
-
-            $result = $emailTemplate->send($recipient, 'Test recipient');
-
-            if ($result) {
-                $this->getResponse()->setBodyJson([
-                    'success' => true,
-                    'message' => Mage::helper('adminhtml')->__('Test email sent successfully to %s.', $recipient),
-                ]);
-            } else {
-                $this->getResponse()->setBodyJson([
-                    'success' => false,
-                    'message' => Mage::helper('adminhtml')->__('Failed to send test email. Please check your email configuration and error logs.'),
-                ]);
-            }
-        } catch (Exception $e) {
+            /** @var Mage_Core_Service_Email_Template $service */
+            $service = Mage::getService('core/email_template');
+            $service->sendTest($recipient);
+            $result = ['success' => true, 'message' => $this->__('Test email sent successfully to %s.', $recipient)];
+        } catch (Mage_Core_Exception $e) {
+            $result = ['success' => false, 'message' => $e->getMessage()];
+        } catch (Throwable $e) {
             Mage::logException($e);
-            $this->getResponse()->setBodyJson([
-                'success' => false,
-                'message' => Mage::helper('adminhtml')->__('An error occurred: %s', $e->getMessage()),
-            ]);
+            $result = ['success' => false, 'message' => $this->__('An error occurred: %s', $e->getMessage())];
         }
+        $this->getResponse()->setBodyJson($result);
     }
 }

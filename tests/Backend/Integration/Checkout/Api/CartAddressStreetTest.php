@@ -65,7 +65,7 @@ describe('cart API street lines', function (): void {
 
         try {
             $service = \Mage::getService('checkout/cart');
-            $service->setShippingAddress($quote, $service->mapAddressInput(cartApiAddressInput()));
+            $service->setShippingAddress($quote, \Mage\Checkout\Api\CartRequest::mapAddress(cartApiAddressInput()));
 
             expect(cartApiQuoteStreet((int) $quote->getId(), 'shipping'))->toBe("1 Test Street\nApt 7");
 
@@ -83,7 +83,7 @@ describe('cart API street lines', function (): void {
 
         try {
             $service = \Mage::getService('checkout/cart');
-            $service->setBillingAddress($quote, $service->mapAddressInput(cartApiAddressInput()));
+            $service->setBillingAddress($quote, \Mage\Checkout\Api\CartRequest::mapAddress(cartApiAddressInput()));
 
             expect(cartApiQuoteStreet((int) $quote->getId(), 'billing'))->toBe("1 Test Street\nApt 7");
 
@@ -101,7 +101,7 @@ describe('cart API street lines', function (): void {
 
         try {
             $service = \Mage::getService('checkout/cart');
-            $service->setShippingAddress($quote, $service->mapAddressInput(cartApiAddressInput()));
+            $service->setShippingAddress($quote, \Mage\Checkout\Api\CartRequest::mapAddress(cartApiAddressInput()));
             $service->setBillingAddress($quote, [], true);
 
             expect(cartApiQuoteStreet((int) $quote->getId(), 'billing'))->toBe("1 Test Street\nApt 7");
@@ -120,7 +120,7 @@ describe('cart API street lines', function (): void {
             $quote = createPlaceableQuote($product, 1);
 
             $service = \Mage::getService('checkout/cart');
-            $service->setShippingAddress($quote, $service->mapAddressInput(cartApiAddressInput()));
+            $service->setShippingAddress($quote, \Mage\Checkout\Api\CartRequest::mapAddress(cartApiAddressInput()));
             $service->setBillingAddress($quote, [], true);
 
             // Place-order is its own request, so it reads the address back from

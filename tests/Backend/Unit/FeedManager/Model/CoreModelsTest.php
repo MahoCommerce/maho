@@ -14,11 +14,6 @@ describe('Feed Model', function () {
         $this->feed = Mage::getModel('feedmanager/feed');
     });
 
-    test('can create new feed instance', function () {
-        expect($this->feed)->toBeInstanceOf(Maho_FeedManager_Model_Feed::class);
-        expect($this->feed->getId())->toBeNull();
-    });
-
     test('has configurable mode constants', function () {
         expect(Maho_FeedManager_Model_Feed::CONFIGURABLE_MODE_SIMPLE_ONLY)->toBe('simple_only');
         expect(Maho_FeedManager_Model_Feed::CONFIGURABLE_MODE_CHILDREN_ONLY)->toBe('children_only');
@@ -88,16 +83,6 @@ describe('Feed Model', function () {
         $loaded->delete();
     });
 
-    test('getConditions returns Combine instance', function () {
-        $conditions = $this->feed->getConditions();
-        expect($conditions)->toBeInstanceOf(Maho_FeedManager_Model_Rule_Condition_Combine::class);
-    });
-
-    test('getForm returns Form instance', function () {
-        $form = $this->feed->getForm();
-        expect($form)->toBeInstanceOf(Maho\Data\Form::class);
-    });
-
     test('getOutputFilePath returns path with correct extension', function () {
         $this->feed->setFilename('my-feed');
         $this->feed->setFileFormat('xml');
@@ -114,14 +99,38 @@ describe('Feed Model', function () {
         expect($url)->toEndWith('my-feed.csv');
     });
 
-    test('getAttributeMappings returns a collection instance', function () {
-        $mappings = $this->feed->getAttributeMappings();
-        expect($mappings)->toBeInstanceOf(Maho_FeedManager_Model_Resource_AttributeMapping_Collection::class);
-    });
+    test('getLogs returns only the logs of the feed, newest first', function () {
+        $createFeed = fn(string $name): Maho_FeedManager_Model_Feed => Mage::getModel('feedmanager/feed')
+            ->setName($name)
+            ->setPlatform('google')
+            ->setStoreId(1)
+            ->setIsEnabled(1)
+            ->setFilename('logs-test-' . uniqid())
+            ->setFileFormat('xml')
+            ->save();
+        $createLog = fn(Maho_FeedManager_Model_Feed $feed, string $startedAt): Maho_FeedManager_Model_Log => Mage::getModel('feedmanager/log')
+            ->setFeedId((int) $feed->getId())
+            ->setStatus(Maho_FeedManager_Model_Log::STATUS_COMPLETED)
+            ->setStartedAt($startedAt)
+            ->save();
 
-    test('getLogs returns a collection instance', function () {
-        $logs = $this->feed->getLogs();
-        expect($logs)->toBeInstanceOf(Maho_FeedManager_Model_Resource_Log_Collection::class);
+        $feed = $createFeed('Logs Test Feed');
+        $otherFeed = $createFeed('Logs Test Other Feed');
+        $older = $createLog($feed, '2026-01-01 10:00:00');
+        $newer = $createLog($feed, '2026-01-02 10:00:00');
+        $other = $createLog($otherFeed, '2026-01-03 10:00:00');
+
+        try {
+            $ids = array_map(fn(Maho_FeedManager_Model_Log $log): int => (int) $log->getId(), array_values($feed->getLogs()->getItems()));
+
+            expect($ids)->toBe([(int) $newer->getId(), (int) $older->getId()]);
+        } finally {
+            foreach ([$older, $newer, $other] as $log) {
+                $log->delete();
+            }
+            $feed->delete();
+            $otherFeed->delete();
+        }
     });
 
     test('beforeSave strips feed format extensions from filename', function () {
@@ -142,11 +151,6 @@ describe('Feed Model', function () {
 describe('Log Model', function () {
     beforeEach(function () {
         $this->log = Mage::getModel('feedmanager/log');
-    });
-
-    test('can create new log instance', function () {
-        expect($this->log)->toBeInstanceOf(Maho_FeedManager_Model_Log::class);
-        expect($this->log->getId())->toBeNull();
     });
 
     test('has status constants', function () {
@@ -200,11 +204,6 @@ describe('Destination Model', function () {
         $this->destination = Mage::getModel('feedmanager/destination');
     });
 
-    test('can create new destination instance', function () {
-        expect($this->destination)->toBeInstanceOf(Maho_FeedManager_Model_Destination::class);
-        expect($this->destination->getId())->toBeNull();
-    });
-
     test('has type constants', function () {
         expect(Maho_FeedManager_Model_Destination::TYPE_SFTP)->toBe('sftp');
         expect(Maho_FeedManager_Model_Destination::TYPE_FTP)->toBe('ftp');
@@ -242,11 +241,6 @@ describe('DynamicRule Model', function () {
         $this->rule = Mage::getModel('feedmanager/dynamicRule');
     });
 
-    test('can create new dynamic rule instance', function () {
-        expect($this->rule)->toBeInstanceOf(Maho_FeedManager_Model_DynamicRule::class);
-        expect($this->rule->getId())->toBeNull();
-    });
-
     test('has output type constants', function () {
         expect(Maho_FeedManager_Model_DynamicRule::OUTPUT_TYPE_STATIC)->toBe('static');
         expect(Maho_FeedManager_Model_DynamicRule::OUTPUT_TYPE_ATTRIBUTE)->toBe('attribute');
@@ -261,10 +255,5 @@ describe('DynamicRule Model', function () {
         expect($this->rule->getName())->toBe('Test Rule');
         expect($this->rule->getCode())->toBe('test_rule');
         expect((int) $this->rule->getIsEnabled())->toBe(1);
-    });
-
-    test('getForm returns Form instance', function () {
-        $form = $this->rule->getForm();
-        expect($form)->toBeInstanceOf(Maho\Data\Form::class);
     });
 });

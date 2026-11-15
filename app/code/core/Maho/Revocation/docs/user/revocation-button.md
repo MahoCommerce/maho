@@ -106,7 +106,7 @@ All settings live under **System → Configuration → Sales → Revocation Butt
 | **Enabled** | Master switch. Does not by itself display the button, you must place the widget. | Store View | No |
 | **Button Label** | Text for the storefront button. Leave empty for the translated default ("Revoke contract" / "Vertrag widerrufen"). | Store View | (empty) |
 | **Merchant Notification Email** | Where merchant notifications are sent. Leave empty to use the General Contact email. | Store View | (empty) |
-| **Cooling-Off Period (Days)** | Gates the my-account shortcut only, never the public form. The statutory period is 14 days. | Store View | 14 |
+| **Cooling-Off Period (Days)** | Shows the my-account shortcut only during the period. It never refuses a declaration, on the public form or the API. The statutory period is 14 days. | Store View | 14 |
 
 The cooling-off window is measured from the latest shipment date when available, falling back to the order date. Setting it to `0` always shows the my-account link. It never restricts the public `/revocation` form, which must remain open.
 
@@ -125,14 +125,19 @@ The merchant notification sets the customer's address as **Reply-To** so you can
 
 ### Abuse Protection
 
-This form must stay frictionless, so only **invisible** background measures are used. Manual CAPTCHAs and email verification links are legally inadmissible for the revocation form.
+This form must stay frictionless, so only **invisible** background measures are used. Manual CAPTCHAs and email verification links are legally inadmissible for the revocation form. When the invisible CAPTCHA of the store is on (**System → Configuration → Advanced → Admin → Captcha**), it also checks this form and the API, with no step for the consumer.
 
 | Setting | Description | Default |
 |---------|-------------|---------|
 | **Minimum Submit Time (Seconds)** | Submissions faster than this after the page renders are silently dropped as bots. `0` disables. | 3 |
-| **Submissions per IP per Hour** | Hard limit per IP; over-limit submissions are refused. `0` disables. | 5 |
-| **Receipt Emails per Recipient per Day** | Over this, the request is still recorded but the **customer receipt email** is suppressed (resendable in admin). Defeats email-bombing of third parties. `0` disables. | 1 |
-| **Merchant Notifications per Store per Hour** | Throttles merchant notification emails. `0` disables. | 100 |
+
+The rate limits of the form are in **System > Configuration > Advanced > System > Rate limit**, with the limits of the other public forms:
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| **Revocation form** | Hard limit per IP; over-limit submissions are refused. `0` disables. | 5 per hour |
+| **Revocation receipt email** | Over this, the request is still recorded but the **customer receipt email** is suppressed (resendable in admin). Defeats email-bombing of third parties. `0` disables. | 1 per day |
+| **Revocation merchant notification** | Throttles merchant notification emails, per store view. `0` disables. | 100 per hour |
 
 !!! tip "Do not over-tighten these"
     These gates exist to stop bots and abuse, not real customers. Setting them too strictly can block legitimate declarations, which defeats the legal purpose of the button. The defaults are conservative on purpose.
@@ -141,7 +146,7 @@ This form must stay frictionless, so only **invisible** background measures are 
 
 - **Honeypot**: a hidden field humans never see. Bots that fill it get the *normal success page* so they receive no signal that a trap exists. No row is written, no email is sent.
 - **Submit timing**: the form embeds an encrypted render timestamp; a submit faster than the minimum is treated as a bot and silently dropped (also shown the normal success page). Under full page cache a stale token only ever inflates the measured time, so the gate "degrades open" and never blocks a real user.
-- **IP rate limit**: over-limit submissions are refused with a soft error asking the customer to retry later or contact you directly.
+- **IP rate limit**: over-limit submissions are refused with a soft error asking the customer to retry later or contact you directly. The form and the API count the submissions of one IP together.
 - **Recipient rate limit**: protects a victimized third party from email-bombing. The declaration is still recorded and the merchant is still notified; only the courtesy email to that address is withheld, and an admin can resend it.
 
 Rate limits are rolling-window counters kept on the cache backend. They are a soft throttle for abuse mitigation, not a hard atomic guarantee.
@@ -164,15 +169,15 @@ Next to the **Search** button, the **All** and **Email Suppressed** buttons sele
 <figcaption>The revocation queue under Sales > Revocation Requests</figcaption>
 </figure>
 
-!!! note "Mass actions mark requests only"
-    Bulk Accept/Reject updates the request rows but does **not** change the matched orders. Order-level actions (status note, refund) are applied one at a time from the detail view, where you can see the matched order.
+!!! note "Mass actions add the same order note"
+    Bulk Accept/Reject records the decision on each request and adds the same audit comment to each matched order as the **Accept** and **Reject** buttons of the detail view. It does not change the status or the state of an order. You issue each refund from the detail view, where you can see the matched order.
 
 ### The detail view
 
 From a single request you can:
 
 - **Save an internal note**, without touching the order or the request's status.
-- **Accept or Reject** the revocation. This records the decision on the request and adds an audit comment to the matched order's history; it does **not** change the order's status, state, or issue any refund. After you accept, if the order can still be credit-memoed, the view shows a link to **create a credit memo** through Maho's standard refund flow.
+- **Accept or Reject** the revocation. This records the decision on the request and adds an audit comment to the matched order's history; it does **not** change the order's status, state, or issue any refund. After you accept, if the order can still be credit-memoed, the view shows a link to **create a credit memo** through Maho's standard refund flow. A decision that you set through the API adds the same comment. A second accept or reject with the same status adds no new comment.
 - **Link an order** manually after triage when the automatic match did not resolve (by entering the order increment ID).
 - **Resend the receipt email**, which also clears a rate-limit suppression and records the resend in the note log.
 
@@ -198,7 +203,7 @@ Every submission is written to the `revocation_request` table. Key fields:
 | `customer_name`, `email`, `reason` | The declaration content (reason is optional). |
 | `verified` | 1 only for authenticated my-account submissions. |
 | `ip`, `user_agent`, `locale` | Context captured for the audit record. |
-| `processed_status`, `processed_at`, `admin_note` | The merchant's triage decisions and notes. |
+| `processed_status`, `processed_at`, `admin_note` | The merchant's triage decisions and notes. `processed_at` is the time of the last change of the status. |
 | `suppressed_at`, `suppressed_reason` | Set when a receipt email was withheld (e.g. rate limit). |
 
 Declaration fields are never edited after insert, the row is the legal receipt.

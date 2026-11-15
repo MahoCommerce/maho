@@ -70,6 +70,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             args: [
                 'email' => ['type' => 'String'],
                 'storeId' => ['type' => 'Int', 'description' => 'Store view to subscribe on (defaults to the ambient store)'],
+                'captchaToken' => ['type' => 'String', 'description' => 'CAPTCHA token from the client-side widget, when the store uses a CAPTCHA'],
             ],
             description: 'Subscribe to newsletter',
         ),
@@ -98,6 +99,9 @@ class NewsletterSubscription extends CrudResource
 
     /** Writable on subscribe only; defaults to the ambient store */
     public ?int $storeId = null;
+
+    #[ApiProperty(description: 'CAPTCHA token from the client-side widget, when the store uses a CAPTCHA', readable: false, extraProperties: ['computed' => true])]
+    public ?string $captchaToken = null;
 
     #[ApiProperty(writable: false)]
     public ?string $changeStatusAt = null;

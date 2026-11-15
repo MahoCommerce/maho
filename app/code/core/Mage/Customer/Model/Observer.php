@@ -119,7 +119,7 @@ class Mage_Customer_Model_Observer
      * @param \Maho\Event\Observer $observer
      */
     #[Maho\Config\Observer('controller_action_layout_load_before', area: 'frontend')]
-    public function beforeLoadLayout($observer)
+    public function beforeLoadLayout($observer): void
     {
         $loggedIn = Mage::getSingleton('customer/session')->isLoggedIn();
 
@@ -133,7 +133,7 @@ class Mage_Customer_Model_Observer
      * @param \Maho\Event\Observer $observer
      */
     #[Maho\Config\Observer('customer_address_save_before')]
-    public function beforeAddressSave($observer)
+    public function beforeAddressSave($observer): void
     {
         if (Mage::registry(self::VIV_CURRENTLY_SAVED_ADDRESS)) {
             Mage::unregister(self::VIV_CURRENTLY_SAVED_ADDRESS);
@@ -163,7 +163,7 @@ class Mage_Customer_Model_Observer
      * @param \Maho\Event\Observer $observer
      */
     #[Maho\Config\Observer('customer_address_save_after')]
-    public function afterAddressSave($observer)
+    public function afterAddressSave($observer): void
     {
         /** @var Mage_Customer_Model_Address $customerAddress */
         $customerAddress = $observer->getCustomerAddress();
@@ -234,7 +234,7 @@ class Mage_Customer_Model_Observer
      * @param \Maho\Event\Observer $observer
      */
     #[Maho\Config\Observer('sales_model_service_quote_submit_after', area: 'frontend')]
-    public function quoteSubmitAfter($observer)
+    public function quoteSubmitAfter($observer): void
     {
         /** @var Mage_Customer_Model_Customer $customer */
         $customer = $observer->getQuote()->getCustomer();
@@ -254,15 +254,16 @@ class Mage_Customer_Model_Observer
     }
 
     /**
-     * Clear customer flow password table
+     * Delete the requests for a password reset email that are too old to count in the forgot password limit.
      */
     #[Maho\Config\CronJob('customer_flowpassword', schedule: '0 0 1 * *')]
-    public function deleteCustomerFlowPassword()
+    public function deleteCustomerFlowPassword(): void
     {
-        $resource   = Mage::getSingleton('core/resource');
-        $connection = $resource->getConnection('write');
-        $condition  = ['requested_date < ?' => Mage::app()->getLocale()->formatDateForDb('-1 day')];
-        $connection->delete($resource->getTableName('customer_flowpassword'), $condition);
+        $resource = Mage::getSingleton('core/resource');
+        $resource->getConnection('core_write')->delete(
+            $resource->getTableName('customer/flowpassword'),
+            ['requested_date < ?' => Mage::app()->getLocale()->formatDateForDb('-1 day')],
+        );
     }
 
     /**
@@ -271,7 +272,7 @@ class Mage_Customer_Model_Observer
      * @param \Maho\Event\Observer $observer
      */
     #[Maho\Config\Observer('customer_customer_authenticated')]
-    public function actionUpgradeCustomerPassword($observer)
+    public function actionUpgradeCustomerPassword($observer): void
     {
         $password = $observer->getEvent()->getPassword();
         $model = $observer->getEvent()->getModel();
@@ -288,7 +289,7 @@ class Mage_Customer_Model_Observer
      * Set the customer's or guest's session time based on config
      */
     #[Maho\Config\Observer('session_before_renew_cookie')]
-    public function setCookieLifetime(\Maho\Event\Observer $observer)
+    public function setCookieLifetime(\Maho\Event\Observer $observer): void
     {
         if ($observer->getSessionName() === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
             /** @var Mage_Customer_Model_Session $session */

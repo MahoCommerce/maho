@@ -24,8 +24,9 @@ class CacheMinifyFlush extends BaseMahoCommand
     {
         $this->initMaho();
 
-        $minifyHelper = Mage::helper('core/minify');
-        $minifyHelper->clearCache();
+        /** @var \Mage_Core_Service_Cache $service */
+        $service = Mage::getService('core/cache');
+        $service->flushMinified();
 
         $output->writeln('Minified CSS/JS cache flushed successfully!');
         return Command::SUCCESS;

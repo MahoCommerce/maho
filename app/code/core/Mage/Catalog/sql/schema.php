@@ -33,8 +33,8 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('sku', Types::STRING, length: 64, notNull: false))
             ->addColumn(Schema::column('has_options', Types::SMALLINT, default: 0))
             ->addColumn(Schema::column('required_options', Types::SMALLINT, unsigned: true, default: 0))
-            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
-            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_IMMUTABLE, notNull: false))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_IMMUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('entity_type_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('attribute_set_id'))
@@ -66,7 +66,7 @@ return function (SchemaEditor $schema): void {
     // entity_type_id is SMALLINT for datetime/decimal/gallery but INTEGER for int/text/varchar (a historical inconsistency, preserved).
     $productValueTables = [
         'catalog_product_entity_datetime' => [
-            'value' => Schema::column('value', Types::DATETIME_MUTABLE, notNull: false),
+            'value' => Schema::column('value', Types::DATETIME_IMMUTABLE, notNull: false),
             'entityTypeIdType' => Types::SMALLINT,
             'hasValueIndex' => false,
             'comment' => 'Catalog Product Datetime Attribute Backend Table',
@@ -206,8 +206,8 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('entity_type_id', Types::SMALLINT, unsigned: true, default: 0))
             ->addColumn(Schema::column('attribute_set_id', Types::SMALLINT, unsigned: true, default: 0))
             ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true, default: 0))
-            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
-            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_IMMUTABLE, notNull: false))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_IMMUTABLE, notNull: false))
             ->addColumn(Schema::column('path', Types::STRING, length: 255))
             ->addColumn(Schema::column('position', Types::INTEGER))
             ->addColumn(Schema::column('level', Types::INTEGER, default: 0))
@@ -222,7 +222,7 @@ return function (SchemaEditor $schema): void {
     // Category value tables (datetime/decimal/int/text/varchar).
     $categoryValueTables = [
         'catalog_category_entity_datetime' => [
-            'value' => Schema::column('value', Types::DATETIME_MUTABLE, notNull: false),
+            'value' => Schema::column('value', Types::DATETIME_IMMUTABLE, notNull: false),
             'comment' => 'Catalog Category Datetime Attribute Backend Table',
         ],
         'catalog_category_entity_decimal' => [
@@ -1519,7 +1519,7 @@ return function (SchemaEditor $schema): void {
         Table::editor()
             ->setUnquotedName('catalog_product_index_website')
             ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
-            ->addColumn(Schema::column('website_date', Types::DATE_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('website_date', Types::DATE_IMMUTABLE, notNull: false))
             ->addColumn(Schema::column('rate', Types::SMALLFLOAT, notNull: false, default: 1.0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('website_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('website_date'))
@@ -1803,8 +1803,8 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('conditions_serialized', Types::TEXT, length: 2097152, notNull: false))
             ->addColumn(Schema::column('parent_resolution', Types::STRING, length: 20, default: 'none'))
             ->addColumn(Schema::column('is_active', Types::SMALLINT, unsigned: true, default: 1))
-            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
-            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('category_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('is_active'))

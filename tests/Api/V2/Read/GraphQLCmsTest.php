@@ -79,9 +79,8 @@ describe('GraphQL CMS Pages', function (): void {
         expect($response['json'])->toHaveKey('data');
 
         $edges = $response['json']['data']['cmsPages']['edges'] ?? [];
-        if (!empty($edges)) {
-            expect($edges[0]['node']['identifier'])->toBe('home');
-        }
+        expect($edges)->not->toBeEmpty();
+        expect($edges[0]['node']['identifier'])->toBe('home');
     });
 
     it('returns single CMS page by IRI', function (): void {
@@ -153,8 +152,8 @@ describe('GraphQL Blog Posts', function (): void {
         $response = gqlQuery($query, [], customerToken());
 
         expect($response['status'])->toBe(200);
-        expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data'])->toHaveKey('blogPosts');
+        expect($response['json'])->not->toHaveKey('errors');
+        expect($response['json']['data']['blogPosts']['edges'] ?? [])->not->toBeEmpty();
     });
 
     /**

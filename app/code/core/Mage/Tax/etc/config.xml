@@ -14,6 +14,11 @@ SPDX-License-Identifier: AFL-3.0
         <docs>
             <user>docs/user</user>
         </docs>
+        <services>
+            <tax>
+                <class>Mage_Tax_Service</class>
+            </tax>
+        </services>
         <models>
             <tax>
                 <class>Mage_Tax_Model</class>

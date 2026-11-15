@@ -10,14 +10,14 @@
 
 abstract class Mage_CatalogIndex_Model_Indexer_Abstract extends Mage_Core_Model_Abstract implements Mage_CatalogIndex_Model_Indexer_Interface
 {
-    protected $_processChildren = true;
-    protected $_processChildrenForConfigurable = true;
-    protected $_runOnce = false;
+    protected bool $_processChildren = true;
+    protected bool $_processChildrenForConfigurable = true;
+    protected bool $_runOnce = false;
 
     /**
      * @param int|string $forceId
      */
-    public function processAfterSave(Mage_Catalog_Model_Product $object, $forceId = null)
+    public function processAfterSave(Mage_Catalog_Model_Product $object, $forceId = null): void
     {
         $associated = [];
         switch ($object->getTypeId()) {
@@ -85,7 +85,7 @@ abstract class Mage_CatalogIndex_Model_Indexer_Abstract extends Mage_Core_Model_
      * @param int $storeId
      * @param int $productId
      */
-    public function saveIndex($data, $storeId, $productId)
+    public function saveIndex($data, $storeId, $productId): void
     {
         $this->_getResource()->saveIndex($data, $storeId, $productId);
     }
@@ -94,7 +94,7 @@ abstract class Mage_CatalogIndex_Model_Indexer_Abstract extends Mage_Core_Model_
      * @param int $storeId
      * @param int $productId
      */
-    public function saveIndices(array $data, $storeId, $productId)
+    public function saveIndices(array $data, $storeId, $productId): void
     {
         $this->_getResource()->saveIndices($data, $storeId, $productId);
     }
@@ -153,7 +153,7 @@ abstract class Mage_CatalogIndex_Model_Indexer_Abstract extends Mage_Core_Model_
      * @param int $productId
      * @param int $storeId
      */
-    public function cleanup($productId, $storeId = null)
+    public function cleanup($productId, $storeId = null): void
     {
         $this->_getResource()->cleanup($productId, $storeId);
     }

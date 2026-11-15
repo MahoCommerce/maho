@@ -11,6 +11,11 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_Bundle>
     </modules>
     <global>
+        <services>
+            <bundle>
+                <class>Mage_Bundle_Service</class>
+            </bundle>
+        </services>
         <models>
             <bundle>
                 <class>Mage_Bundle_Model</class>

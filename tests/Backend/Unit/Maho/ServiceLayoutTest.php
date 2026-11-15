@@ -12,7 +12,8 @@ use Tests\MahoBackendTestCase;
 /**
  * Tripwire for the service layout of #1348. A service lives in the Service/ folder of its module, its
  * module declares the class group under <global><services>, and code gets it with Mage::getService(),
- * never with new, so that a <rewrite> reaches every caller.
+ * never with new, so that a <rewrite> reaches every caller. Mage::getService() keeps one instance for
+ * each alias, so a service holds no state: a property keeps a value from one call to the next.
  */
 
 uses(MahoBackendTestCase::class);
@@ -80,13 +81,44 @@ it('never creates a service with new', function () {
     expect($offenders)->toBe([]);
 });
 
+it('gives a service no parent class, no constructor and no property', function () {
+    $offenders = [];
+    foreach (coreFiles('#^(Mage|Maho)/[A-Za-z]+/Service/.+\.php$#') as $path) {
+        $class = new ReflectionClass(str_replace('/', '_', substr($path, 0, -4)));
+        $faults = array_keys(array_filter([
+            'a parent class' => $class->getParentClass() !== false,
+            'a constructor' => $class->getConstructor() !== null,
+            'a property' => $class->getProperties() !== [],
+        ]));
+        if ($faults !== []) {
+            $offenders[] = $class->getName() . ' has ' . implode(', ', $faults);
+        }
+    }
+
+    expect($offenders)->toBe([]);
+});
+
 it('resolves each moved service through its alias', function (string $alias, string $class) {
     expect(Mage::getService($alias))->toBeInstanceOf($class);
-})->with([
-    ['checkout/cart', Mage_Checkout_Service_Cart::class],
-    ['customer/customer', Mage_Customer_Service_Customer::class],
-    ['sales/order', Mage_Sales_Service_Order::class],
-    ['revocation/request', Maho_Revocation_Service_Request::class],
-    ['sociallogin/identity', Maho_SocialLogin_Service_Identity::class],
-    ['customersegmentation/segment', Maho_CustomerSegmentation_Service_Segment::class],
-]);
+})->with(function (): Generator {
+    // Mage is not booted while Pest builds the dataset, so the config.xml files are read directly.
+    $root = dirname(__DIR__, 4) . '/app/code/core/';
+    foreach (glob($root . '*/*/etc/config.xml') ?: [] as $configFile) {
+        foreach (simplexml_load_file($configFile)->xpath('/config/global/services/*') ?: [] as $group) {
+            $prefix = (string) $group->class;
+            $dir = $root . str_replace('_', '/', $prefix);
+            if (!is_dir($dir)) {
+                continue;
+            }
+            $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS));
+            foreach ($iterator as $file) {
+                if (!str_ends_with($file->getFilename(), '.php')) {
+                    continue;
+                }
+                $parts = explode('/', substr($file->getPathname(), strlen($dir) + 1, -4));
+                $alias = $group->getName() . '/' . implode('_', array_map(lcfirst(...), $parts));
+                yield $alias => [$alias, $prefix . '_' . implode('_', $parts)];
+            }
+        }
+    }
+});

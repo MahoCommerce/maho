@@ -419,7 +419,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
      *
      * @param string $model
      */
-    public function setResourceModel($model)
+    public function setResourceModel($model): void
     {
         $this->_resourceModel = $model;
     }

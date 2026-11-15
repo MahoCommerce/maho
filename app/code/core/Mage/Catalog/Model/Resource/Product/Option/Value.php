@@ -11,7 +11,7 @@
 class Mage_Catalog_Model_Resource_Product_Option_Value extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalog/product_option_type_value', 'option_type_id');
     }
@@ -34,7 +34,7 @@ class Mage_Catalog_Model_Resource_Product_Option_Value extends Mage_Core_Model_R
     /**
      * Save option value price data
      */
-    protected function _saveValuePrices(Mage_Core_Model_Abstract $object)
+    protected function _saveValuePrices(Mage_Core_Model_Abstract $object): void
     {
         $priceTable = $this->getTable('catalog/product_option_type_price');
 
@@ -124,7 +124,7 @@ class Mage_Catalog_Model_Resource_Product_Option_Value extends Mage_Core_Model_R
     /**
      * Save option value title data
      */
-    protected function _saveValueTitles(Mage_Core_Model_Abstract $object)
+    protected function _saveValueTitles(Mage_Core_Model_Abstract $object): void
     {
         $titleTable = $this->getTable('catalog/product_option_type_title');
 
@@ -222,7 +222,7 @@ class Mage_Catalog_Model_Resource_Product_Option_Value extends Mage_Core_Model_R
      *
      * @param int $optionTypeId
      */
-    public function deleteValues($optionTypeId)
+    public function deleteValues($optionTypeId): void
     {
         $condition = [
             'option_type_id = ?' => $optionTypeId,

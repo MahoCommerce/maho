@@ -88,6 +88,7 @@ use Maho\ApiPlatform\Metadata\ListFilter;
                 'adjustmentNegative' => ['type' => 'Float'],
                 'shippingAmount' => ['type' => 'Float'],
                 'offlineRefund' => ['type' => 'Boolean'],
+                'invoiceId' => ['type' => 'Int'],
             ],
             security: "is_granted('ROLE_ADMIN') or is_granted('credit-memos/create')",
         ),
@@ -106,7 +107,7 @@ class CreditMemo extends CrudResource
     #[ApiProperty(writable: false)]
     public ?int $orderId = null;
 
-    #[ApiProperty(writable: false)]
+    #[ApiProperty(description: 'The invoice that the credit memo refunds. On create: an invoice of the order. An online refund needs it')]
     public ?int $invoiceId = null;
 
     #[ApiProperty(writable: false)]

@@ -27,8 +27,8 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
             ->addColumn(Schema::column('price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
             ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true, default: 0))
-            ->addColumn(Schema::column('add_date', Types::DATETIME_MUTABLE, notNull: false))
-            ->addColumn(Schema::column('last_send_date', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('add_date', Types::DATETIME_IMMUTABLE, notNull: false))
+            ->addColumn(Schema::column('last_send_date', Types::DATETIME_IMMUTABLE, notNull: false))
             ->addColumn(Schema::column('send_count', Types::SMALLINT, unsigned: true, default: 0))
             ->addColumn(Schema::column('status', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(
@@ -77,8 +77,8 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, default: 0))
             ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
             ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true, default: 0))
-            ->addColumn(Schema::column('add_date', Types::DATETIME_MUTABLE, notNull: false))
-            ->addColumn(Schema::column('send_date', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('add_date', Types::DATETIME_IMMUTABLE, notNull: false))
+            ->addColumn(Schema::column('send_date', Types::DATETIME_IMMUTABLE, notNull: false))
             ->addColumn(Schema::column('send_count', Types::SMALLINT, unsigned: true, default: 0))
             ->addColumn(Schema::column('status', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(

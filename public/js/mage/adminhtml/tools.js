@@ -608,10 +608,10 @@ function debounce(func, delay) {
 
 /**
  * Remove the scripts, the event handlers and the unsafe URLs from the HTML in str. Return HTML.
- * The save keeps `target` on a link, so the filter keeps it too.
+ * The save keeps `target` on a link and `fetchpriority` on an image, so the filter keeps them too.
  */
 function xssFilter(str, config = {}) {
-    return DOMPurify.sanitize(str, { ADD_ATTR: ['target'], ...config });
+    return DOMPurify.sanitize(str, { ADD_ATTR: ['target', 'fetchpriority'], ...config });
 }
 
 async function validateHtmlContent(textareaId, url) {

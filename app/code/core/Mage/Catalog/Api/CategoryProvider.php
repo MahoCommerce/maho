@@ -17,7 +17,6 @@ use ApiPlatform\Metadata\Put;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\CustomAttributes;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Category State Provider - Fetches category data for API Platform.
@@ -64,9 +63,9 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
      */
     private function getItem(int $id, bool $checkVisibility = true): ?Category
     {
-        $mahoCategory = \Mage::getModel('catalog/category')->load($id);
-
-        if (!$mahoCategory->getId()) {
+        try {
+            $mahoCategory = $this->service()->getById($id, StoreContext::getStoreId());
+        } catch (\Mage_Core_Exception_NoSuchEntity) {
             return null;
         }
 
@@ -119,25 +118,16 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Whether a category is active (or the caller is a backend reader) and lives
-     * under the current store's root category tree. Mirrors the scoping the
-     * collection path applies so single lookups (by id / url key) cannot leak
-     * disabled or cross-store categories.
+     * Whether the caller may read a category: a guest or a customer reads what the storefront of the current store
+     * shows. A backend caller also reads inactive categories, in the trees that scope=all gives it, as the admin
+     * category tree shows them.
      */
     private function isAccessibleCategory(\Mage_Catalog_Model_Category $category): bool
     {
-        if (!$category->getId() || (!$category->getIsActive() && !$this->backendCategoriesAccess())) {
-            return false;
+        if (!$this->backendCategoriesAccess()) {
+            return $this->service()->isVisibleInStore($category, StoreContext::getStoreId());
         }
-
-        // A backend caller reads the trees that scope=all gives it, as the admin category
-        // tree shows them; a guest or a customer reads the tree of the current store only.
-        $rootIds = $this->backendCategoriesAccess() ? $this->readableRootIds() : [(int) StoreContext::getRootCategoryId()];
-
-        // The store root and every descendant carry the root id in their path
-        // ("1/<root>/..."). Anchoring with slashes prevents substring matches.
-        $pathIds = array_map(intval(...), explode('/', (string) $category->getPath()));
-        return array_intersect($rootIds, $pathIds) !== [];
+        return $category->getId() && $this->service()->isInTrees($category, $this->readableRootIds());
     }
 
     /**
@@ -174,7 +164,8 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
             return false;
         }
         if (!$this->backendCategoriesAccess()) {
-            throw new AccessDeniedHttpException('scope=all requires a backend token');
+            $this->requireUser();
+            throw new \Mage_Core_Exception_Forbidden('scope=all requires a backend token');
         }
 
         return true;
@@ -188,19 +179,16 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
      */
     private function readableRootIds(): array
     {
-        $allowed = $this->requireUser()->getAllowedStoreIds();
-        if ($allowed === null) {
-            return [\Mage_Catalog_Model_Category::TREE_ROOT_ID];
-        }
-        $rootIds = [];
-        foreach (\Mage::app()->getStores() as $store) {
-            if (in_array((int) $store->getId(), $allowed, true)) {
-                $rootIds[] = (int) $store->getRootCategoryId();
-            }
-        }
+        $rootIds = $this->service()->getRootIds($this->requireUser()->getAllowedStoreIds()) ?? [\Mage_Catalog_Model_Category::TREE_ROOT_ID];
 
         // A token without a store view reads no tree: -1 matches no path.
         return $rootIds === [] ? [-1] : $rootIds;
+    }
+
+    private function service(): \Mage_Catalog_Service_Category
+    {
+        /** @var \Mage_Catalog_Service_Category */
+        return \Mage::getService('catalog/category');
     }
 
     /**

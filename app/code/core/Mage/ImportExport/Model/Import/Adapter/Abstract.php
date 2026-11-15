@@ -89,7 +89,7 @@ abstract class Mage_ImportExport_Model_Import_Adapter_Abstract implements Seekab
     /**
      * `__destruct()` calls this method. A subclass closes its file here.
      */
-    public function destruct() {}
+    public function destruct(): void {}
 
     /**
      * Method called as last step of object instance creation. Can be overridden in child classes.

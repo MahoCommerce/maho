@@ -25,7 +25,7 @@ class Mage_Admin_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstra
     protected $_ruleTable;
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('admin/role', 'role_id');
 

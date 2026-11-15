@@ -167,10 +167,9 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
             $this->_redirect('checkout/cart');
             return;
         }
-        if (!$quote->validateMinimumAmount()) {
-            $error = Mage::getStoreConfig('sales/minimum_order/error_message') ?: Mage::helper('checkout')->__('Subtotal must exceed minimum order amount');
-
-            Mage::getSingleton('checkout/session')->addError($error);
+        $minimumAmountError = Mage::getService('sales/order')->getMinimumAmountError($quote);
+        if ($minimumAmountError !== null) {
+            Mage::getSingleton('checkout/session')->addError($minimumAmountError);
             $this->_redirect('checkout/cart');
             return;
         }
@@ -435,29 +434,28 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         if ($customerAddress) {
             $billingAddress->importCustomerAddress($customerAddress)->setSaveInAddressBook(false);
         } else {
-            $billingAddress->addData($data);
+            /** @var Mage_Customer_Model_Form $addressForm */
+            $addressForm = Mage::getModel('customer/form');
+            $addressForm->setFormCode('customer_address_edit')
+                ->setEntityType('customer_address')
+                ->setEntity($billingAddress);
+            $addressForm->restoreData($addressForm->extractData($addressForm->prepareRequest($data)));
+        }
+        // The address form has no email. A payment such as PayPal places the order of a guest from this cart
+        // with no billing step, so the cart keeps the email here. The order service checks it.
+        if (!$quote->getCustomerId() && is_string($data['email'] ?? null)) {
+            $billingAddress->setEmail(mb_substr(trim($data['email']), 0, 255));
         }
         $billingAddress->implodeStreetAddress();
 
         // `billing[use_for_shipping]` lives outside the hidden form and is always posted.
-        $useForShipping = $data['use_for_shipping'] ?? 1;
-        if ($useForShipping && !$quote->isVirtual()) {
-            $shippingAddress = $quote->getShippingAddress();
-            if ($customerAddress) {
-                $shippingAddress->importCustomerAddress($customerAddress)->setSaveInAddressBook(false);
-            } else {
-                $shippingData = $data;
-                unset($shippingData['address_id']);
-                $shippingAddress->addData($shippingData);
-            }
-            $shippingAddress->setSameAsBilling()
-                ->implodeStreetAddress()
-                ->setCollectShippingRates(true);
+        /** @var Mage_Checkout_Service_Cart $cartService */
+        $cartService = Mage::getService('checkout/cart');
+        if (($data['use_for_shipping'] ?? 1) && !$quote->isVirtual()) {
+            $cartService->useBillingForShipping($quote);
+        } else {
+            $cartService->collectAndSave($quote);
         }
-
-        // collectTotals() runs all total collectors including shipping,
-        // which properly calculates item qty before collecting rates
-        $quote->collectTotals()->save();
 
         $result = [
             'success' => true,
@@ -517,8 +515,8 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
                         'request' => $this->getRequest(),
                         'quote'   => $this->getOnepage()->getQuote()],
                 );
-                $this->getOnepage()->getQuote()->collectTotals();
-                $this->_prepareDataJSON($result);
+                // An observer of this event of the checkout form can change the cart, so the service collects and saves it again
+                Mage::getService('checkout/cart')->collectAndSave($this->getOnepage()->getQuote());
 
                 $result['goto_section'] = 'payment';
                 $result['update_section'] = [
@@ -526,7 +524,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
                     'html' => $this->_getPaymentMethodsHtml(),
                 ];
             }
-            $this->getOnepage()->getQuote()->collectTotals()->save();
             $this->_prepareDataJSON($result);
         }
     }
@@ -609,7 +606,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         foreach ($this->_getOrder()->getAllItems() as $item) {
             $items[$item->getId()] = $item->getQtyOrdered();
         }
-        $invoice = Mage::getModel('sales/service_order', $this->_getOrder())->prepareInvoice($items);
+        $invoice = Mage::getService('sales/order_document')->buildInvoice($this->_getOrder(), $items);
         $invoice->setEmailSent()->register();
 
         Mage::register('current_invoice', $invoice);
@@ -631,27 +628,12 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
 
         try {
             try {
-                $requiredAgreements = Mage::helper('checkout')->getRequiredAgreementIds();
-                if ($requiredAgreements) {
-                    $postedAgreements = array_keys($this->getRequest()->getPost('agreement', []));
-                    $diff = array_diff($requiredAgreements, $postedAgreements);
-                    if ($diff) {
-                        $result['success'] = false;
-                        $result['error'] = true;
-                        $result['error_messages'] = $this->__('Please agree to all the terms and conditions before placing the order.');
-                        $this->_prepareDataJSON($result);
-                        return;
-                    }
-                }
-
                 $data = $this->getRequest()->getPost('payment', []);
                 if ($data) {
-                    // A client must not choose its own checks mask
-                    unset($data['checks']);
-                    $this->getOnepage()->getQuote()->getPayment()->importData($data);
+                    Mage::getService('checkout/cart')->selectPaymentMethod($this->getOnepage()->getQuote(), $data);
                 }
 
-                $this->getOnepage()->saveOrder();
+                $this->getOnepage()->saveOrder(array_keys((array) $this->getRequest()->getPost('agreement', [])));
 
                 $redirectUrl = $this->getOnepage()->getCheckout()->getRedirectUrl();
                 $result['success'] = true;
@@ -667,8 +649,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
                     'html' => $this->_getPaymentMethodsHtml(),
                 ];
             } catch (Mage_Core_Exception $e) {
-                Mage::logException($e);
-                Mage::helper('checkout')->sendPaymentFailedEmail($this->getOnepage()->getQuote(), $e->getMessage());
                 $result['success'] = false;
                 $result['error'] = true;
                 $result['error_messages'] = $e->getMessage();
@@ -691,7 +671,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
                 }
             } catch (Exception $e) {
                 Mage::logException($e);
-                Mage::helper('checkout')->sendPaymentFailedEmail($this->getOnepage()->getQuote(), $e->getMessage());
                 $result['success']  = false;
                 $result['error']    = true;
                 $result['error_messages'] = $this->__('There was an error processing your order. Please contact us or try again later.');

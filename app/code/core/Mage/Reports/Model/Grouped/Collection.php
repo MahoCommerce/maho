@@ -20,7 +20,7 @@ class Mage_Reports_Model_Grouped_Collection extends \Maho\Data\Collection //Mage
     /**
      * Collection resource
      *
-     * @var Mage_Core_Model_Resource_Db_Collection_Abstract
+     * @var \Maho\Data\Collection\Db|null
      */
     protected $_resourceCollection  = null;
 

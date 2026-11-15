@@ -12,6 +12,8 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
 {
     public const ICONV_CHARSET = 'UTF-8';
 
+    public const MAX_SEARCH_WORDS = 10;
+
     #[\Override]
     protected $_moduleName = 'Mage_Core';
 
@@ -254,6 +256,18 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
         }
 
         return $result;
+    }
+
+    /**
+     * Split $search at white space and return its first $limit words.
+     * Each word of a search adds a LIKE condition, so a search uses only its first words.
+     *
+     * @return list<string>
+     */
+    public function splitSearchWords(?string $search, int $limit = self::MAX_SEARCH_WORDS): array
+    {
+        $words = preg_split('/\s+/', trim((string) $search), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        return array_slice($words, 0, $limit);
     }
 
     /**

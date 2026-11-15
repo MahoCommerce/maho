@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_Reports_Model_Resource_Tag_Customer_Collection extends Mage_Tag_Model_Resource_Customer_Collection
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         parent::_construct();
         $this->_useAnalyticFunction = true;

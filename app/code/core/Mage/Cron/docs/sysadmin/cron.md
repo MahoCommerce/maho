@@ -133,7 +133,6 @@ these two commands:
 | catalog_product_index_price_reindex_all      | catalog/observer::reindexProductPrices                    | 0 2 * * *    |
 | core_clean_cache                             | core/observer::cleanCache                                 | 30 2 * * *   |
 | currency_rates_update                        | directory/observer::scheduledUpdateCurrencyRates          |              |
-| customer_flowpassword                        | customer/observer::deleteCustomerFlowPassword             | 0 0 1 * *    |
 | index_clean_events                           | index/observer::cleanOutdatedEvents                       | 30 */4 * * * |
 | log_clean                                    | log/cron::logClean                                        |              |
 | newsletter_send_all                          | newsletter/observer::scheduledSend                        | */5 * * * *  |
@@ -178,10 +177,20 @@ This can be done passing the `job_code` you want to execute to `./maho cron:run`
 newsletter_send_all executed successfully
 ```
 
-!!! note
-    If there's a record in the `cron_schedule` table for the specified `job_code` with status
-    of `pending`, that record will be "burnt" otherwise no record will be created but the job
-    will be executed anyway.
+The **Run Now** action of **System > Tools > Cron Jobs** does the same. Each run adds a record to the
+`cron_schedule` table, with the status `running`, then `success` or `error`. A `pending` record of the
+job stays, and runs at its time.
+
+When a job fails, the `messages` column of its record holds the message of the error. This is the
+same for a run of the scheduler, of the admin and of the CLI. The stack trace is in
+`var/log/exception.log`.
+
+A job holds a lock while it runs, so two runs of one job never overlap. When a run starts from the
+admin, the CLI or the scheduler while another run of the same job is in progress, the admin and the CLI
+show "The cron job ... is already running.", and the scheduler leaves the `pending` record for its next
+pass. The lock ends with the process that holds it, also when the process crashes. `./maho cron:unlock`
+resets the `running` records that a crashed process left, and never resets the record of a job that
+holds its lock.
 
 ## Migrating from XML
 

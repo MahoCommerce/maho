@@ -407,7 +407,11 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'source_value' => 'is_in_stock',
             'transformers' => 'conditional:operator=eq,compare_value=1,true_value=in_stock,false_value=out_of_stock',
         ],
-        'price' => ['source_type' => 'attribute', 'source_value' => 'price'],
+        'price' => [
+            'source_type' => 'combined',
+            'source_value' => '["{{regular_price}}","{{final_price}}"]',
+            'transformers' => 'current_price:part=price',
+        ],
         'brand' => [
             'source_type' => 'attribute',
             'source_value' => 'manufacturer',
@@ -443,13 +447,15 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
         'adult' => ['source_type' => 'static', 'source_value' => ''],
 
         // Pricing
-        'sale_price' => ['source_type' => 'attribute', 'source_value' => 'special_price'],
-        // Rolling now / +90 days range. Swap source to special_to_date if
-        // the catalog has real per-product sale-end dates.
+        'sale_price' => [
+            'source_type' => 'combined',
+            'source_value' => '["{{regular_price}}","{{final_price}}"]',
+            'transformers' => 'current_price:part=sale_price',
+        ],
+        // Export the current native price. Regenerate the feed when prices change.
         'sale_price_effective_date' => [
             'source_type' => 'static',
             'source_value' => '',
-            'transformers' => 'relative_date_range',
         ],
         'cost_of_goods_sold' => ['source_type' => 'attribute', 'source_value' => 'cost'],
         'expiration_date' => ['source_type' => 'static', 'source_value' => ''],

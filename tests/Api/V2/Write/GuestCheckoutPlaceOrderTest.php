@@ -290,3 +290,41 @@ it('takes the Checkout Registration fields of a guest in customerCustomAttribute
         Mage::app()->cleanCache();
     }
 });
+
+it('takes the customer fields of a guest in guestCustomer, and refuses a guest order without a required one', function (): void {
+    $attribute = Mage::getModel('customer/attribute')
+        ->load(Mage::getSingleton('eav/config')->getAttribute('customer', 'dob')->getId());
+    $before = [
+        'is_required' => $attribute->getData('is_required'),
+        'is_visible' => $attribute->getData('is_visible'),
+        'used_in_forms' => $attribute->getUsedInForms(),
+    ];
+    $setAttribute = function (array $data) use ($attribute): void {
+        $attribute->addData($data)->save();
+        Mage::app()->cleanCache();
+        Mage::getSingleton('eav/config')->clear();
+    };
+    $setAttribute([
+        'is_required' => 1,
+        'is_visible' => 1,
+        'used_in_forms' => array_values(array_unique([...$before['used_in_forms'], 'checkout_register'])),
+    ]);
+    guestPlaceSetGuestCheckout('1');
+
+    try {
+        [$maskedId] = guestPlaceCart($this->sku);
+        $missing = apiPost("/api/rest/v2/guest-carts/{$maskedId}/place-order", guestPlaceBody());
+        $list = apiPost("/api/rest/v2/guest-carts/{$maskedId}/place-order", guestPlaceBody() + ['guestCustomer' => ['dob' => ['1990-05-17']]]);
+        $placed = apiPost("/api/rest/v2/guest-carts/{$maskedId}/place-order", guestPlaceBody() + ['guestCustomer' => ['dob' => '1990-05-17']]);
+        expect($placed['status'])->toBeIn([200, 201]);
+        $order = Mage::getModel('sales/order')->loadByIncrementId((string) $placed['json']['incrementId']);
+        $this->orderIds[] = (int) $order->getId();
+
+        expect($missing['status'])->toBe(422)
+            ->and(array_column($missing['json']['details']['errors'] ?? [], 'field'))->toContain('customerDob')
+            ->and($list['status'])->toBe(400)
+            ->and((string) $order->getData('customer_dob'))->toStartWith('1990-05-17');
+    } finally {
+        $setAttribute($before);
+    }
+});

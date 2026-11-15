@@ -12,11 +12,8 @@ declare(strict_types=1);
 
 class Mage_Sales_Model_Resource_Quote_Address extends Mage_Sales_Model_Resource_Abstract
 {
-    /**
-     * Main table and field initialization
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('sales/quote_address', 'address_id');
     }

@@ -21,7 +21,7 @@ declare(strict_types=1);
  */
 class Mage_Directory_Model_Country extends Mage_Core_Model_Abstract
 {
-    public static $_format = [];
+    public static array $_format = [];
 
     #[\Override]
     protected function _construct()

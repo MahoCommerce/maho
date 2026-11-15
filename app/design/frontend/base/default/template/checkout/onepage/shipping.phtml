@@ -25,6 +25,9 @@
                 <p class="required"><?= $this->__('* Required Fields') ?></p>
                 <input type="hidden" name="shipping[address_id]" value="<?= $this->getAddress()->getId() ?>" id="shipping:address_id">
                 <ul>
+                    <?= $this->getLayout()->createBlock('customer/form_attributes')
+                        ->setCustomerForm('customer_address_edit', $this->getAddress())
+                        ->setNameFormat('shipping[%s]')->setIdPrefix('shipping:')->setPlacement(Mage_Customer_Block_Form_Attributes::PLACEMENT_TOP)->toHtml() ?>
                     <li class="fields"><?= $this->getLayout()->createBlock('customer/widget_name')->setObject($this->getAddress())->setFieldIdFormat('shipping:%s')->setFieldNameFormat('shipping[%s]')->setFieldParams('onchange="shipping.setSameAsBilling(false)"')->toHtml() ?></li>
                     <li class="fields">
                         <div class="fields">
@@ -102,7 +105,7 @@
                     </li>
                 <?= $this->getLayout()->createBlock('customer/form_attributes')
                     ->setCustomerForm('customer_address_edit', $this->getAddress())
-                    ->setNameFormat('shipping[%s]')->setIdPrefix('shipping:')->toHtml() ?>
+                    ->setNameFormat('shipping[%s]')->setIdPrefix('shipping:')->setPlacement(Mage_Customer_Block_Form_Attributes::PLACEMENT_BOTTOM)->toHtml() ?>
                 <?php if ($this->isCustomerLoggedIn() && $this->customerHasAddresses()): ?>
                     <li class="control">
                         <input type="checkbox" name="shipping[save_in_address_book]" value="1" title="<?= $this->quoteEscape($this->__('Save in address book')) ?>" id="shipping:save_in_address_book" onchange="shipping.setSameAsBilling(false);"<?php if ($this->getAddress()->getSaveInAddressBook()): ?> checked="checked"<?php endif ?> class="checkbox"><label for="shipping:save_in_address_book"><?= $this->__('Save in address book') ?></label></li>

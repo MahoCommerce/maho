@@ -61,10 +61,10 @@ class Maho_FeedManager_Model_Platform_Trovaprezzi extends Maho_FeedManager_Model
             'required' => true,
             'description' => 'Main product image URL',
         ],
-        'OriginalPrice' => [
-            'label' => 'Original Price',
+        'Price' => [
+            'label' => 'Price',
             'required' => true,
-            'description' => 'Product price (numeric, no currency)',
+            'description' => 'Price that the store charges now (numeric, no currency)',
         ],
         'ShippingCost' => [
             'label' => 'Shipping Cost',
@@ -95,10 +95,10 @@ class Maho_FeedManager_Model_Platform_Trovaprezzi extends Maho_FeedManager_Model
             'required' => false,
             'description' => 'Manufacturer Part Number (MPN)',
         ],
-        'Price' => [
-            'label' => 'Sale Price',
+        'OriginalPrice' => [
+            'label' => 'Original Price',
             'required' => false,
-            'description' => 'Discounted/sale price if different from OriginalPrice',
+            'description' => 'Regular price during a sale (numeric, no currency)',
         ],
         'Weight' => [
             'label' => 'Weight',
@@ -147,8 +147,16 @@ class Maho_FeedManager_Model_Platform_Trovaprezzi extends Maho_FeedManager_Model
         'Description' => ['source_type' => 'attribute', 'source_value' => 'description'],
         'Link' => ['source_type' => 'attribute', 'source_value' => 'url', 'use_parent' => 'always'],
         'Image' => ['source_type' => 'attribute', 'source_value' => 'image', 'use_parent' => 'if_empty'],
-        'OriginalPrice' => ['source_type' => 'attribute', 'source_value' => 'price'],
-        'Price' => ['source_type' => 'attribute', 'source_value' => 'special_price'],
+        'OriginalPrice' => [
+            'source_type' => 'combined',
+            'source_value' => '["{{regular_price}}","{{final_price}}"]',
+            'transformers' => 'current_price:part=original_price,currency=none',
+        ],
+        'Price' => [
+            'source_type' => 'combined',
+            'source_value' => '["{{regular_price}}","{{final_price}}"]',
+            'transformers' => 'current_price:part=current,currency=none',
+        ],
         'ShippingCost' => ['source_type' => 'static', 'source_value' => '0'],
         'EanCode' => ['source_type' => 'attribute', 'source_value' => 'gtin'],
         'PartNumber' => ['source_type' => 'attribute', 'source_value' => 'mpn'],

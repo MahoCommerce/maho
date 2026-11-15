@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_Reports_Model_Resource_Event_Type extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('reports/event_type', 'event_type_id');
     }

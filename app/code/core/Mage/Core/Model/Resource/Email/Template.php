@@ -11,7 +11,7 @@
 class Mage_Core_Model_Resource_Email_Template extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('core/email_template', 'template_id');
     }
@@ -73,7 +73,7 @@ class Mage_Core_Model_Resource_Email_Template extends Mage_Core_Model_Resource_D
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         if ($object->isObjectNew()) {
-            $object->setCreatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
+            $object->setAddedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         }
         $object->setModifiedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         $object->setTemplateType((int) $object->getTemplateType());

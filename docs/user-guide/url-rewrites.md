@@ -104,8 +104,15 @@ the store fills in the paths for you.
 The store creates the rewrites of products and categories with the type **System**. The redirects
 for old URL keys have the type **Custom**.
 
+A product or a category can have many custom rewrites in a store view. For example, add one
+**Permanent (301)** redirect for each old URL of a category.
+
 A custom rewrite takes its request path. If a product later needs the same URL, the product gets a
 URL with a number (see [Why a URL is not the one you chose](#why-a-url-is-not-the-one-you-chose)).
+
+A request path must be unique in its store view. The store refuses a rewrite whose request path
+another rewrite of the store view already has. The REST API (`/url-rewrites`) checks the same
+rules, and it cannot change or delete a **System** rewrite.
 
 ## URL keys per store view
 
@@ -154,6 +161,7 @@ With 0, it keeps them forever.
 
 ## Related
 
+- [404 Errors Report](404-errors.md) for the addresses that answer 404, and a redirect for each one.
 - [SEO](seo.md) for canonical tags and the other search engine settings.
 - [Scope](scope.md) for store view values and **Use Default Value**.
 - [CMS Pages and Blocks in Store Views](cms-store-views.md) for a CMS page that has the same path as

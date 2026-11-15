@@ -20,7 +20,7 @@ abstract class AbstractTokenizer
     /**
      * String for tokenize
      */
-    protected $_string;
+    protected string $_string = '';
 
     /**
      * Move current index to next char.
@@ -69,7 +69,7 @@ abstract class AbstractTokenizer
     /**
      * Set string for tokenize
      */
-    public function setString($value): void
+    public function setString(string $value): void
     {
         $this->_string = $value;
         $this->reset();
@@ -94,5 +94,5 @@ abstract class AbstractTokenizer
         return trim($char) != $char;
     }
 
-    abstract public function tokenize();
+    abstract public function tokenize(): array;
 }

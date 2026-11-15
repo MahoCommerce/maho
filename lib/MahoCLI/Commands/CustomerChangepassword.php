@@ -39,18 +39,14 @@ class CustomerChangepassword extends BaseMahoCommand
         string $password,
         #[Option(description: 'The code of the website, when customers of more websites have the email')]
         ?string $website = null,
+        #[Option(description: 'Email the customer that the password changed')]
+        bool $notify = false,
     ): int {
         $this->initMaho();
 
         $email = trim($email);
         if (!strlen($email)) {
             $io->writeln('<error>Email cannot be empty</error>');
-            return Command::INVALID;
-        }
-
-        $password = trim($password);
-        if (!strlen($password)) {
-            $io->writeln('<error>New password cannot be empty</error>');
             return Command::INVALID;
         }
 
@@ -65,8 +61,17 @@ class CustomerChangepassword extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        $customer->setPassword($password);
-        $customer->save();
+        try {
+            // The search loads a few attributes only, and a save writes only the attributes that the model loaded
+            /** @var \Mage_Customer_Service_Customer $service */
+            $service = Mage::getService('customer/customer');
+            $service->setPassword($service->getById((int) $customer->getId()), trim($password), $notify);
+        } catch (\Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $io->writeln("<error>{$error['message']}</error>");
+            }
+            return Command::INVALID;
+        }
         $io->writeln("<info>Password changed for customer $email.</info>");
         return Command::SUCCESS;
     }

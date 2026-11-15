@@ -10,8 +10,8 @@
 
 class Mage_Adminhtml_Block_Catalog_Product_Created extends Mage_Adminhtml_Block_Widget
 {
-    protected $_configurableProduct;
-    protected $_product;
+    protected ?Mage_Catalog_Model_Product $_configurableProduct = null;
+    protected ?Mage_Catalog_Model_Product $_product = null;
 
     public function __construct()
     {
@@ -33,12 +33,12 @@ class Mage_Adminhtml_Block_Catalog_Product_Created extends Mage_Adminhtml_Block_
         return $this;
     }
 
-    public function getCloseButtonHtml()
+    public function getCloseButtonHtml(): string
     {
         return $this->getChildHtml('close_button');
     }
 
-    public function getProductId()
+    public function getProductId(): int
     {
         return (int) $this->getRequest()->getParam('id');
     }
@@ -74,7 +74,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Created extends Mage_Adminhtml_Block_
         return Mage::helper('core')->jsonEncode($result);
     }
 
-    public function getAttributes()
+    public function getAttributes(): array
     {
         if ($this->getConfigurableProduct()->getId()) {
             /** @var Mage_Catalog_Model_Product_Type_Configurable $productType */

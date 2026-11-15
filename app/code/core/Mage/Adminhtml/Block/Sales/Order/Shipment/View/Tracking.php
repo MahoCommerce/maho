@@ -61,12 +61,7 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_View_Tracking extends Mage_Admin
         return $this->getChildHtml('save_button');
     }
 
-    /**
-     * Retrieve remove url
-     *
-     * @return string
-     */
-    public function getRemoveUrl($track)
+    public function getRemoveUrl(Mage_Sales_Model_Order_Shipment_Track $track): string
     {
         return $this->getUrl('*/*/removeTrack/', [
             'shipment_id' => $this->getShipment()->getId(),
@@ -74,12 +69,7 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_View_Tracking extends Mage_Admin
         ]);
     }
 
-    /**
-     * Retrieve remove url
-     *
-     * @return string
-     */
-    public function getTrackInfoUrl($track)
+    public function getTrackInfoUrl(Mage_Sales_Model_Order_Shipment_Track $track): string
     {
         return $this->getUrl('*/*/viewTrack/', [
             'shipment_id' => $this->getShipment()->getId(),

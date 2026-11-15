@@ -42,12 +42,6 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
         return [$this->__('Catalog'), $this->__('Attributes'), $this->__('Manage Attribute Sets')];
     }
 
-    /**
-     * The products of a set are deleted with it, through a foreign key.
-     */
-    #[\Override]
-    protected function beforeSetDelete(Mage_Eav_Model_Entity_Attribute_Set $attributeSet): void {}
-
     #[\Override]
     #[Maho\Config\Route('/admin/catalog_product_set/index')]
     public function indexAction(): void

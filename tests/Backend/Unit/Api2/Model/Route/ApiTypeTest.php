@@ -13,71 +13,24 @@ use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
 describe('Mage_Api2_Model_Route_ApiType', function () {
     describe('Basic API Type Routing', function () {
-        it('matches api_type from path', function () {
+        it('reads the api_type from the path', function (string $path, string $apiType) {
             $route = new Mage_Api2_Model_Route_ApiType([
                 Mage_Api2_Model_Route_Abstract::PARAM_ROUTE => 'api/:api_type',
                 Mage_Api2_Model_Route_Abstract::PARAM_DEFAULTS => [],
                 Mage_Api2_Model_Route_Abstract::PARAM_REQS => [],
             ]);
 
-            // Create a mock Request object
-            $symfonyRequest = SymfonyRequest::create('/api/rest');
-            $request = new Mage_Api2_Model_Request($symfonyRequest);
-
-            $result = $route->match($request);
-            expect($result)->toBeArray();
-            expect($result['api_type'])->toBe('rest');
-        });
-
-        it('matches different api types', function () {
-            $route = new Mage_Api2_Model_Route_ApiType([
-                Mage_Api2_Model_Route_Abstract::PARAM_ROUTE => 'api/:api_type',
-                Mage_Api2_Model_Route_Abstract::PARAM_DEFAULTS => [],
-                Mage_Api2_Model_Route_Abstract::PARAM_REQS => [],
-            ]);
-
-            $symfonyRequest = SymfonyRequest::create('/api/soap');
-            $request = new Mage_Api2_Model_Request($symfonyRequest);
-
-            $result = $route->match($request);
-            expect($result)->toBeArray();
-            expect($result['api_type'])->toBe('soap');
-        });
-
-        it('fails on invalid api type', function () {
-            $route = new Mage_Api2_Model_Route_ApiType([
-                Mage_Api2_Model_Route_Abstract::PARAM_ROUTE => 'api/:api_type',
-                Mage_Api2_Model_Route_Abstract::PARAM_DEFAULTS => [],
-                Mage_Api2_Model_Route_Abstract::PARAM_REQS => [],
-            ]);
-
-            $symfonyRequest = SymfonyRequest::create('/api/invalid_type');
-            $request = new Mage_Api2_Model_Request($symfonyRequest);
-
-            // Should still match the path, but validation happens elsewhere
-            $result = $route->match($request);
-            expect($result)->toBeArray();
-            expect($result['api_type'])->toBe('invalid_type');
-        });
+            $result = $route->match(new Mage_Api2_Model_Request(SymfonyRequest::create($path)));
+            expect($result)->toBeArray()
+                ->and($result['api_type'])->toBe($apiType);
+        })->with([
+            'rest' => ['/api/rest', 'rest'],
+            'soap' => ['/api/soap', 'soap'],
+            'a type that the route does not validate' => ['/api/invalid_type', 'invalid_type'],
+        ]);
     });
 
     describe('Query Parameter Fallback', function () {
-        it('uses type query parameter as fallback', function () {
-            $route = new Mage_Api2_Model_Route_ApiType([
-                Mage_Api2_Model_Route_Abstract::PARAM_ROUTE => 'api/:api_type',
-                Mage_Api2_Model_Route_Abstract::PARAM_DEFAULTS => [],
-                Mage_Api2_Model_Route_Abstract::PARAM_REQS => [],
-            ]);
-
-            // Path doesn't match, but query param exists
-            $symfonyRequest = SymfonyRequest::create('/some/path?type=rest');
-            $request = new Mage_Api2_Model_Request($symfonyRequest);
-
-            $result = $route->match($request);
-            expect($result)->toBeArray();
-            expect($result['api_type'])->toBe('rest');
-        });
-
         it('prefers path over query parameter', function () {
             $route = new Mage_Api2_Model_Route_ApiType([
                 Mage_Api2_Model_Route_Abstract::PARAM_ROUTE => 'api/:api_type',
@@ -124,26 +77,6 @@ describe('Mage_Api2_Model_Route_ApiType', function () {
     });
 
     describe('Route Chaining with ApiType', function () {
-        it('chains with resource route', function () {
-            $apiTypeRoute = new Mage_Api2_Model_Route_ApiType([
-                Mage_Api2_Model_Route_Abstract::PARAM_ROUTE => 'api/:api_type',
-                Mage_Api2_Model_Route_Abstract::PARAM_DEFAULTS => [],
-                Mage_Api2_Model_Route_Abstract::PARAM_REQS => [],
-            ]);
-
-            $resourceRoute = new Mage_Api2_Model_Route_Base('products/:id');
-
-            $chain = $apiTypeRoute->chain($resourceRoute);
-
-            $symfonyRequest = SymfonyRequest::create('/api/rest/products/123');
-            $request = new Mage_Api2_Model_Request($symfonyRequest);
-
-            $result = $chain->match($request);
-            expect($result)->toBeArray();
-            expect($result['api_type'])->toBe('rest');
-            expect($result['id'])->toBe('123');
-        });
-
         it('chains with string route pattern', function () {
             $apiTypeRoute = new Mage_Api2_Model_Route_ApiType([
                 Mage_Api2_Model_Route_Abstract::PARAM_ROUTE => 'api/:api_type',
@@ -298,29 +231,6 @@ describe('Mage_Api2_Model_Route_ApiType', function () {
             expect($result['module'])->toBe('api');
             expect($result['controller'])->toBe('index');
             expect($result['action'])->toBe('view');
-        });
-
-        it('handles subresources', function () {
-            $apiRoute = new Mage_Api2_Model_Route_ApiType([
-                Mage_Api2_Model_Route_Abstract::PARAM_ROUTE => 'api/:api_type',
-                Mage_Api2_Model_Route_Abstract::PARAM_DEFAULTS => [],
-                Mage_Api2_Model_Route_Abstract::PARAM_REQS => [],
-            ]);
-
-            $subresourceRoute = new Mage_Api2_Model_Route_Base(
-                'customers/:customer_id/addresses/:address_id',
-            );
-
-            $chain = $apiRoute->chain($subresourceRoute);
-
-            $symfonyRequest = SymfonyRequest::create('/api/rest/customers/100/addresses/5');
-            $request = new Mage_Api2_Model_Request($symfonyRequest);
-
-            $result = $chain->match($request);
-            expect($result)->toBeArray();
-            expect($result['api_type'])->toBe('rest');
-            expect($result['customer_id'])->toBe('100');
-            expect($result['address_id'])->toBe('5');
         });
     });
 });

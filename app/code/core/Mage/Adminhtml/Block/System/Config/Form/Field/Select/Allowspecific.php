@@ -32,7 +32,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Select_Allowspecific extends
         return parent::getHtml();
     }
 
-    protected function _getSpecificCountryElementId()
+    protected function _getSpecificCountryElementId(): string
     {
         return substr($this->getId(), 0, strrpos($this->getId(), 'allowspecific')) . 'specificcountry';
     }

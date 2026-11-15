@@ -323,11 +323,12 @@ describe('a styles.css that changes after the cache has the manifest', function 
     });
 
     it('keeps the copy when a copy of the same styles.css changes its time only', function (): void {
-        touch($this->styles, time() + 60);
+        $mtime = time() + 60;
+        touch($this->styles, $mtime);
 
         expect(skinDirContentBundle($this->skinDir)->getUrl($this->styles))->toBe($this->copyUrl);
         $cached = Mage::helper('core')->jsonDecode((string) Mage::app()->loadCache(Mage_Core_Model_Design_Content_Bundle::CACHE_ID));
-        expect($cached['test/theme']['stat'])->toStartWith((time() + 60) . '-');
+        expect($cached['test/theme']['stat'])->toStartWith($mtime . '-');
     });
 
     it('links the new styles.css when a copy keeps the modification time and the size of the old one', function (): void {

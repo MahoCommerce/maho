@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sales orders placed through the quote service, keyed by reference, dated back from now by hours_ago.
+ * Sales orders placed through the cart service and the order service, keyed by reference, dated back from now by hours_ago.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -18,6 +18,9 @@ use Maho\Import\CsvFile;
 use Maho\Import\Reporter;
 use Maho\Import\Result;
 
+/**
+ * @phpstan-type StockColumns array{qty: float, is_in_stock: int, low_stock_date: ?string, stock_status_changed_auto: int}
+ */
 class Orders extends AbstractImporter
 {
     /** Skip the refresh of the report statistics, for a caller that refreshes them once after several files. */
@@ -96,26 +99,35 @@ class Orders extends AbstractImporter
             }
         }
         $stock = $this->stockOf(array_values($productIds));
+        $backInStock = [];
         $now = time();
         $done = 0;
-        foreach ($rows as $line => $row) {
-            $reporter->progress(++$done, count($rows), 'orders');
-            if ($this->exists($row['reference'], (int) $row['store_id'])) {
-                continue;
+        try {
+            foreach ($rows as $line => $row) {
+                $reporter->progress(++$done, count($rows), 'orders');
+                if ($this->exists($row['reference'], (int) $row['store_id'])) {
+                    continue;
+                }
+                try {
+                    $order = Mage::app()->withStore((int) $row['store_id'], fn() => $this->place($row));
+                    $this->applyStatus($order, $row['status']);
+                } catch (\Mage_Core_Exception $e) {
+                    $this->fail($file, $line, $e->getMessage());
+                } finally {
+                    // Every order puts the stock back, so the next orders of a popular product still find it.
+                    $backInStock += $this->restoreStock($stock, $row['lines']);
+                }
+                // A few minutes from the reference, so the orders of one hour do not share a time.
+                $seconds = (int) $row['hours_ago'] * 3600 + crc32($row['reference']) % 3600;
+                $this->moveDates((int) $order->getId(), gmdate('Y-m-d H:i:s', $now - $seconds));
+                $result->created++;
             }
-            try {
-                $order = Mage::app()->withStore((int) $row['store_id'], fn() => $this->place($row));
-                $this->applyStatus($order, $row['status']);
-            } catch (\Mage_Core_Exception $e) {
-                $this->fail($file, $line, $e->getMessage());
-            } finally {
-                // Every order puts the stock back, so the next orders of a popular product still find it.
-                $this->restoreStock($stock, $row['lines']);
+        } finally {
+            if ($backInStock !== []) {
+                // An order that takes the last unit removes the product from the price, filter and search indexes
+                $products = new \Maho\DataObject(['product_ids' => array_values($backInStock), 'attributes_data' => ['force_reindex_required' => 1]]);
+                Mage::getSingleton('index/indexer')->processEntityAction($products, \Mage_Catalog_Model_Product::ENTITY, \Mage_Index_Model_Event::TYPE_MASS_ACTION);
             }
-            // A few minutes from the reference, so the orders of one hour do not share a time.
-            $seconds = (int) $row['hours_ago'] * 3600 + crc32($row['reference']) % 3600;
-            $this->moveDates((int) $order->getId(), gmdate('Y-m-d H:i:s', $now - $seconds));
-            $result->created++;
         }
         if ($result->created > 0 && !($options[self::OPTION_SKIP_STATISTICS] ?? false)) {
             Mage::getModel('reports/statistics')->refreshLifetime(self::STATISTICS);
@@ -129,7 +141,7 @@ class Orders extends AbstractImporter
     private function place(array $row): \Mage_Sales_Model_Order
     {
         $storeId = (int) $row['store_id'];
-        $quote = Mage::getModel('sales/quote')->setStoreId($storeId)->setIsActive(false);
+        $quote = Mage::getModel('sales/quote')->setStoreId($storeId)->setIsActive(true);
         $customer = Mage::getModel('customer/customer')
             ->setWebsiteId((int) Mage::app()->getStore($storeId)->getWebsiteId())
             ->loadByEmail($row['email']);
@@ -142,8 +154,28 @@ class Orders extends AbstractImporter
                 ->setCustomerFirstname($row['firstname'])
                 ->setCustomerLastname($row['lastname']);
         }
+        try {
+            return $this->submit($quote, $storeId, $row);
+        } catch (\Throwable $e) {
+            // A quote without an order must not become the cart of its customer
+            if ($quote->getId()) {
+                $quote->setIsActive(false)->save();
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * Fill $quote through the cart service, as staff, and place its order through the order service.
+     *
+     * @param array<string, mixed> $row
+     */
+    private function submit(\Mage_Sales_Model_Quote $quote, int $storeId, array $row): \Mage_Sales_Model_Order
+    {
+        /** @var \Mage_Checkout_Service_Cart $cart */
+        $cart = Mage::getService('checkout/cart');
         foreach ($row['lines'] as $orderLine) {
-            $this->addLine($quote, $storeId, $orderLine);
+            $this->addLine($cart, $quote, $storeId, $orderLine);
         }
         $address = [
             'firstname' => $row['firstname'],
@@ -162,19 +194,17 @@ class Orders extends AbstractImporter
             ->setCollectShippingRates(true)
             ->setShippingMethod($row['shipping_method']);
         $quote->getPayment()->importData(['method' => $row['payment_method']]);
+        $cart->collectAndSave($quote);
         if (($row['coupon_code'] ?? '') !== '') {
-            $quote->setCouponCode($row['coupon_code']);
+            $cart->applyCoupon($quote, $row['coupon_code'], \Mage_Checkout_Model_Actor::Staff);
         }
-        $quote->collectTotals()->save();
 
-        $service = new \Mage_Sales_Model_Service_Quote($quote);
-        $service->setOrderData(['ext_order_id' => $row['reference']]);
-        $service->submitAll();
-        $order = $service->getOrder();
-        if (!$order instanceof \Mage_Sales_Model_Order || !$order->getId()) {
-            throw new \Mage_Core_Exception('the quote service placed no order');
-        }
-        return $order;
+        return Mage::getService('sales/order')->submit(
+            $quote,
+            \Mage_Checkout_Model_Actor::Staff,
+            orderData: ['ext_order_id' => $row['reference']],
+            sendConfirmation: false,
+        );
     }
 
     /**
@@ -182,7 +212,7 @@ class Orders extends AbstractImporter
      *
      * @param array{product_id: int, parent_id: int|null, qty: int} $orderLine
      */
-    private function addLine(\Mage_Sales_Model_Quote $quote, int $storeId, array $orderLine): void
+    private function addLine(\Mage_Checkout_Service_Cart $cart, \Mage_Sales_Model_Quote $quote, int $storeId, array $orderLine): void
     {
         $request = ['qty' => $orderLine['qty']];
         $productId = $orderLine['product_id'];
@@ -198,37 +228,33 @@ class Orders extends AbstractImporter
             $productId = $orderLine['parent_id'];
         }
         $product = Mage::getModel('catalog/product')->setStoreId($storeId)->load($productId);
-        $item = $quote->addProduct($product, new \Maho\DataObject($request));
-        if (is_string($item)) {
-            throw new \Mage_Core_Exception("sku '{$product->getSku()}': $item");
-        }
+        $cart->addProduct($quote, $product, new \Maho\DataObject($request), \Mage_Checkout_Model_Actor::Staff, save: false);
     }
 
+    /**
+     * Move $order to $status through the order service, with no email to the customer. The service refuses a step
+     * that the state of the order does not allow.
+     *
+     * @throws \Mage_Core_Exception
+     */
     private function applyStatus(\Mage_Sales_Model_Order $order, string $status): void
     {
         if ($status === 'pending') {
             return;
         }
         if ($status === 'canceled') {
-            $order->cancel()->save();
+            Mage::getService('sales/order')->cancel($order);
             return;
         }
-        $invoice = Mage::getModel('sales/service_order', $order)->prepareInvoice();
-        $invoice->setRequestedCaptureCase(\Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE)->register();
-        $order->setIsInProcess(true);
-        Mage::getModel('core/resource_transaction')->addObject($invoice)->addObject($order)->save();
+        /** @var \Mage_Sales_Service_Order_Document $documents */
+        $documents = Mage::getService('sales/order_document');
+        $documents->invoice($order, captureCase: \Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE, sendEmail: false);
+        // An order of virtual products only has nothing to ship
         if ($status === 'complete' && $order->canShip()) {
-            $shipment = $order->prepareShipment();
-            $shipment->register();
-            // The order must carry a change of its own, or its save skips the shipped items too.
-            $order->setIsInProcess(true);
-            Mage::getModel('core/resource_transaction')->addObject($shipment)->addObject($order)->save();
+            $documents->ship($order, sendEmail: false);
         }
         if ($status === 'closed') {
-            $creditmemo = Mage::getModel('sales/service_order', $order)->prepareCreditmemo();
-            $creditmemo->setOfflineRequested(true)->register();
-            $order->setIsInProcess(true);
-            Mage::getModel('core/resource_transaction')->addObject($creditmemo)->addObject($order)->save();
+            $documents->refund($order, [], offlineRefund: true, sendEmail: false);
         }
     }
 
@@ -260,7 +286,7 @@ class Orders extends AbstractImporter
 
     /**
      * @param list<int> $productIds
-     * @return array<int, array{qty: float, is_in_stock: bool}>
+     * @return array<int, StockColumns>
      */
     private function stockOf(array $productIds): array
     {
@@ -271,22 +297,29 @@ class Orders extends AbstractImporter
         $read = $resource->getConnection('core_read');
         $stock = [];
         $select = $read->select()
-            ->from($resource->getTableName('cataloginventory/stock_item'), ['product_id', 'qty', 'is_in_stock'])
+            ->from($resource->getTableName('cataloginventory/stock_item'), ['product_id', 'qty', 'is_in_stock', 'low_stock_date', 'stock_status_changed_auto'])
             ->where('product_id IN (?)', $productIds);
         foreach ($read->fetchAll($select) as $item) {
-            $stock[(int) $item['product_id']] = ['qty' => (float) $item['qty'], 'is_in_stock' => (bool) $item['is_in_stock']];
+            $stock[(int) $item['product_id']] = [
+                'qty' => (float) $item['qty'],
+                'is_in_stock' => (int) $item['is_in_stock'],
+                'low_stock_date' => $item['low_stock_date'],
+                'stock_status_changed_auto' => (int) $item['stock_status_changed_auto'],
+            ];
         }
         return $stock;
     }
 
     /**
      * Puts the stock of the products of an order back as it was before the import: placing an order
-     * takes stock, and cancelling one gives it back.
+     * takes stock, and cancelling one gives it back. A save of the stock item would reindex each product
+     * and clean its cache, so the update writes the stock columns back and reindexes the stock status only.
      *
-     * @param array<int, array{qty: float, is_in_stock: bool}> $stock
+     * @param array<int, StockColumns> $stock
      * @param list<array{product_id: int, parent_id: int|null, qty: int}> $lines
+     * @return array<int, int> the products that the order took out of stock and that are in stock again, by ID
      */
-    private function restoreStock(array $stock, array $lines): void
+    private function restoreStock(array $stock, array $lines): array
     {
         $productIds = [];
         foreach ($lines as $orderLine) {
@@ -295,17 +328,25 @@ class Orders extends AbstractImporter
                 $productIds[] = $orderLine['parent_id'];
             }
         }
-        foreach (array_unique($productIds) as $productId) {
-            if (!isset($stock[$productId])) {
+        $restored = [];
+        $backInStock = [];
+        $resource = Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        foreach ($this->stockOf(array_values(array_unique($productIds))) as $productId => $current) {
+            $was = $stock[$productId] ?? null;
+            if ($was === null || $current === $was) {
                 continue;
             }
-            $was = $stock[$productId];
-            $item = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId);
-            if ((float) $item->getQty() === $was['qty'] && (bool) $item->getIsInStock() === $was['is_in_stock']) {
-                continue;
+            $write->update($resource->getTableName('cataloginventory/stock_item'), $was, ['product_id = ?' => $productId]);
+            $restored[$productId] = $productId;
+            if ($current['is_in_stock'] !== $was['is_in_stock']) {
+                $backInStock[$productId] = $productId;
             }
-            $item->setQty($was['qty'])->setIsInStock($was['is_in_stock'])->save();
         }
+        if ($restored !== []) {
+            Mage::getResourceSingleton('cataloginventory/indexer_stock')->reindexProducts(array_values($restored));
+        }
+        return $backInStock;
     }
 
     private function regionId(CsvFile $file, int $line, string $countryId, string $region): ?int

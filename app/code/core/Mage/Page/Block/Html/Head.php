@@ -395,7 +395,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
      * @param string $itemName
      * @param array $itemThe
      */
-    protected function _separateOtherHtmlHeadElements(&$lines, $itemType, $itemParams, $itemName, $itemThe)
+    protected function _separateOtherHtmlHeadElements(&$lines, $itemType, $itemParams, $itemName, $itemThe): void
     {
         $params = $itemParams ? ' ' . $itemParams : '';
         $href   = $itemName;
@@ -602,7 +602,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
                 $currentIdPath = Mage::getModel('core/url_rewrite')
                     ->setStoreId($currentStoreId)
                     ->loadByRequestPath($currentUrl)
-                    ->getIdPath();
+                    ->getIdPathForOtherStores();
 
                 /** @var Mage_Core_Model_Store $store */
                 foreach ($activeStores as $store) {
@@ -661,7 +661,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
      * @param string|bool $before
      * @param string $type
      */
-    protected function _sortItems($referenceName, $before, $type)
+    protected function _sortItems($referenceName, $before, $type): void
     {
         // Convert string values ("true"/"false") to bool
         $before = filter_var($before, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);

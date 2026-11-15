@@ -37,7 +37,7 @@ class Mage_CatalogSearch_Block_Advanced_Result extends Mage_Core_Block_Template
         return parent::_prepareLayout();
     }
 
-    public function setListOrders()
+    public function setListOrders(): void
     {
         $category = Mage::getSingleton('catalog/layer')
             ->getCurrentCategory();
@@ -53,7 +53,7 @@ class Mage_CatalogSearch_Block_Advanced_Result extends Mage_Core_Block_Template
             ->setSortBy('relevance');
     }
 
-    public function setListModes()
+    public function setListModes(): void
     {
         $this->getChild('search_result_list')
             ->setModes([
@@ -61,7 +61,7 @@ class Mage_CatalogSearch_Block_Advanced_Result extends Mage_Core_Block_Template
                 'list' => Mage::helper('catalogsearch')->__('List')]);
     }
 
-    public function setListCollection()
+    public function setListCollection(): void
     {
         $this->getChild('search_result_list')
            ->setCollection($this->_getProductCollection());

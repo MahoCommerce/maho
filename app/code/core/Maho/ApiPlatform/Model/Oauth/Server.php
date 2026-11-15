@@ -184,8 +184,8 @@ class Maho_ApiPlatform_Model_Oauth_Server
             return null;
         }
 
-        if ($consume) {
-            $pending->markUsed();
+        if ($consume && !$pending->markUsed()) {
+            return null;
         }
 
         try {
@@ -266,7 +266,12 @@ class Maho_ApiPlatform_Model_Oauth_Server
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_GRANT, 'The grant was revoked');
         }
 
-        $code->markUsed();
+        // Another request with the same code can pass the checks above at the same time.
+        if (!$code->markUsed()) {
+            $code->revokeGrant();
+            throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_GRANT, 'Authorization code already used');
+        }
+
         $client->recordUsage();
 
         return $this->issueTokenSet($code, $consentId);
@@ -312,7 +317,12 @@ class Maho_ApiPlatform_Model_Oauth_Server
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_GRANT, 'The grant was revoked');
         }
 
-        $refresh->markUsed();
+        // Another request with the same token can pass the checks above at the same time.
+        if (!$refresh->markUsed()) {
+            $refresh->revokeGrant();
+            throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_GRANT, 'Refresh token already used');
+        }
+
         $client->recordUsage();
 
         return $this->issueTokenSet($refresh, $consentId);
@@ -547,15 +557,13 @@ class Maho_ApiPlatform_Model_Oauth_Server
     /**
      * Query strings and JSON bodies can carry an array where a string belongs
      * (`?state[]=x`), and casting one to string raises a warning that developer
-     * mode turns into an exception. Anything not a scalar is simply absent.
+     * mode turns into an exception. Anything but a string or a number is simply absent.
      *
      * @param array<string, mixed> $params
      */
     protected function stringParam(array $params, string $key): string
     {
-        $value = $params[$key] ?? null;
-
-        return is_scalar($value) ? (string) $value : '';
+        return \Maho\ApiPlatform\Http\RequestInput::toString($params[$key] ?? null) ?? '';
     }
 
     protected function fail(string $error, string $description, bool $redirectable = true, int $httpStatus = 400): Maho_ApiPlatform_Model_Oauth_Exception

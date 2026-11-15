@@ -46,7 +46,7 @@ class Mage_Payment_Model_Observer
      * Sets current instructions for bank transfer account
      */
     #[Maho\Config\Observer('sales_order_payment_save_before')]
-    public function beforeOrderPaymentSave(\Maho\Event\Observer $observer)
+    public function beforeOrderPaymentSave(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Sales_Model_Order_Payment $payment */
         $payment = $observer->getEvent()->getPayment();
@@ -66,7 +66,7 @@ class Mage_Payment_Model_Observer
      * @throws Mage_Core_Exception
      */
     #[Maho\Config\Observer('sales_order_status_unassign_before')]
-    public function beforeSalesOrderStatusUnassign($observer)
+    public function beforeSalesOrderStatusUnassign($observer): void
     {
         $state = $observer->getEvent()->getState();
         if ($state == Mage_Sales_Model_Order::STATE_NEW) {

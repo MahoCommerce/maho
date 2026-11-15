@@ -9,14 +9,6 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Invoice Total Collector Instantiation', function () {
-    test('total collector can be instantiated', function () {
-        $total = Mage::getModel('giftcard/total_invoice');
-        expect($total)->toBeInstanceOf(Maho_Giftcard_Model_Total_Invoice::class);
-        expect($total)->toBeInstanceOf(Mage_Sales_Model_Order_Invoice_Total_Abstract::class);
-    });
-});
-
 describe('Invoice Total Collection', function () {
     beforeEach(function () {
         // Create a mock order with gift card amounts

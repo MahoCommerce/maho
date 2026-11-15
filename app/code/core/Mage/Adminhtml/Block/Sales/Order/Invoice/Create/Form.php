@@ -65,12 +65,12 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Form extends Mage_Adminhtm
         return parent::_prepareLayout();
     }
 
-    public function getSaveUrl()
+    public function getSaveUrl(): string
     {
         return $this->getUrl('*/*/save', ['order_id' => $this->getInvoice()->getOrderId()]);
     }
 
-    public function canCreateShipment()
+    public function canCreateShipment(): bool
     {
         foreach ($this->getInvoice()->getAllItems() as $item) {
             if ($item->getOrderItem()->getQtyToShip()) {
@@ -80,7 +80,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Form extends Mage_Adminhtm
         return false;
     }
 
-    public function hasInvoiceShipmentTypeMismatch()
+    public function hasInvoiceShipmentTypeMismatch(): bool
     {
         foreach ($this->getInvoice()->getAllItems() as $item) {
             if ($item->getOrderItem()->isChildrenCalculated() && !$item->getOrderItem()->isShipSeparately()) {
@@ -90,7 +90,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Form extends Mage_Adminhtm
         return false;
     }
 
-    public function canShipPartiallyItem()
+    public function canShipPartiallyItem(): bool
     {
         $value = $this->getOrder()->getCanShipPartiallyItem();
         if (!is_null($value) && !$value) {

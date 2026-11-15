@@ -64,7 +64,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      */
     protected $_encryptor = null;
 
-    protected $_allowedFormats = [
+    protected array $_allowedFormats = [
         Mage_Core_Model_Locale::FORMAT_TYPE_FULL,
         Mage_Core_Model_Locale::FORMAT_TYPE_LONG,
         Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM,
@@ -883,7 +883,7 @@ XML;
                 $value = (string) $value;
 
                 $firstLetter = substr($value, 0, 1);
-                if ($firstLetter && in_array($firstLetter, ['=', '+', '-'])) {
+                if ($firstLetter && in_array($firstLetter, ['=', '+', '-', '@'])) {
                     $data[$key] = ' ' . $value;
                 }
             }
@@ -903,7 +903,7 @@ XML;
             foreach ($data as $key => $value) {
                 $value = (string) $value;
 
-                if (preg_match("/^ [=\-+]/", $value)) {
+                if (preg_match("/^ [=\-+@]/", $value)) {
                     $data[$key] = ltrim($value);
                 }
             }
@@ -1069,6 +1069,34 @@ XML;
             return $value !== [];
         }
         return trim((string) $value) !== '';
+    }
+
+    /**
+     * Ask the CAPTCHA module of the store to check the token in $fields. $fields is what the client sent: the form
+     * POST or the body of the API request. A service calls this for every transport, and the CAPTCHA module finds
+     * its own field. Without a CAPTCHA module, each request passes.
+     *
+     * @param array<array-key, mixed> $fields
+     * @return string|null the error message, or null when the CAPTCHA module accepts the request
+     */
+    public function getCaptchaError(array $fields): ?string
+    {
+        $result = new \Maho\DataObject(['verified' => true, 'error' => '']);
+        Mage::dispatchEvent('api_verify_captcha', ['result' => $result, 'data' => $fields]);
+
+        return $result->getVerified() ? null : ((string) $result->getError() ?: $this->__('Incorrect CAPTCHA.'));
+    }
+
+    /**
+     * @param array<array-key, mixed> $fields see getCaptchaError()
+     * @throws Mage_Core_Exception_Input with an error on captcha_token when the CAPTCHA module refuses the token
+     */
+    public function assertCaptcha(array $fields): void
+    {
+        $error = $this->getCaptchaError($fields);
+        if ($error !== null) {
+            throw new Mage_Core_Exception_Input()->addError('captcha_token', $error);
+        }
     }
 
     /**

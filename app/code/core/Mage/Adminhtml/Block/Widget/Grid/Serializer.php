@@ -35,7 +35,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Serializer extends Mage_Core_Block_Templa
      *
      * @param array|string $names
      */
-    public function addColumnInputName($names)
+    public function addColumnInputName($names): void
     {
         if (is_array($names)) {
             foreach ($names as $name) {
@@ -90,7 +90,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Serializer extends Mage_Core_Block_Templa
      * @param string $hiddenInputName hidden input name where serialized data will be store
      * @param string $reloadParamName name of request parameter that will be used to save set data while reload grid
      */
-    public function initSerializerBlock($grid, $callback, $hiddenInputName, $reloadParamName = 'entityCollection')
+    public function initSerializerBlock($grid, $callback, $hiddenInputName, $reloadParamName = 'entityCollection'): void
     {
         if (is_string($grid)) {
             $grid = $this->getLayout()->getBlock($grid);

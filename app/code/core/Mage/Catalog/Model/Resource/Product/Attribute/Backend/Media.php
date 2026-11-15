@@ -13,12 +13,12 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media extends Mage_C
     public const GALLERY_TABLE       = 'catalog/product_attribute_media_gallery';
     public const GALLERY_VALUE_TABLE = 'catalog/product_attribute_media_gallery_value';
 
-    protected $_eventPrefix = 'catalog_product_attribute_backend_media';
+    protected string $_eventPrefix = 'catalog_product_attribute_backend_media';
 
     private ?int $_attributeId = null;
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init(self::GALLERY_TABLE, 'value_id');
     }

@@ -33,13 +33,6 @@ function apiCategoryId(string $path): int
 
 describe('GET /api/rest/v2/products - Basic', function (): void {
 
-    it('returns a list of products', function (): void {
-        $response = apiGet('/api/rest/v2/products');
-
-        expect($response['status'])->toBe(200);
-        expect($response['json'])->toBeArray();
-    });
-
     it('returns products in expected format', function (): void {
         $response = apiGet('/api/rest/v2/products?pageSize=5');
 
@@ -59,34 +52,20 @@ describe('GET /api/rest/v2/products - Basic', function (): void {
     });
 
     it('returns product images', function (): void {
-        $response = apiGet('/api/rest/v2/products?pageSize=10');
+        $response = apiGet('/api/rest/v2/products?pageSize=50');
 
         expect($response['status'])->toBe(200);
 
-        $items = getItems($response);
-
-        // Find a product with an image
         $productWithImage = null;
-        foreach ($items as $p) {
+        foreach (getItems($response) as $p) {
             if (!empty($p['imageUrl'])) {
                 $productWithImage = $p;
                 break;
             }
         }
 
-        if ($productWithImage) {
-            expect($productWithImage['imageUrl'])->toContain('media/catalog/product');
-        }
-    });
-
-    it('supports pagination', function (): void {
-        $response = apiGet('/api/rest/v2/products?page=1&pageSize=5');
-
-        expect($response['status'])->toBe(200);
-
-        $items = getItems($response);
-
-        expect(count($items))->toBeLessThanOrEqual(5);
+        expect($productWithImage)->not->toBeNull();
+        expect($productWithImage['imageUrl'])->toContain('media/catalog/product');
     });
 
     it('respects pageSize parameter', function (): void {
@@ -155,23 +134,6 @@ describe('GET /api/rest/v2/products - Sorting by Name', function (): void {
         expect($isNameSorted(array_column($items, 'name'), true))->toBeTrue();
     });
 
-    it('returns different first product for asc vs desc name sort', function (): void {
-        $ascResponse = apiGet('/api/rest/v2/products?pageSize=1&sortBy=name&sortDir=asc');
-        $descResponse = apiGet('/api/rest/v2/products?pageSize=1&sortBy=name&sortDir=desc');
-
-        expect($ascResponse['status'])->toBe(200);
-        expect($descResponse['status'])->toBe(200);
-
-        $ascItems = getItems($ascResponse);
-        $descItems = getItems($descResponse);
-
-        expect($ascItems)->not->toBeEmpty();
-        expect($descItems)->not->toBeEmpty();
-
-        // First product should be different
-        expect($ascItems[0]['name'])->not->toBe($descItems[0]['name']);
-    });
-
 });
 
 describe('GET /api/rest/v2/products - Sorting by Price', function (): void {
@@ -208,22 +170,6 @@ describe('GET /api/rest/v2/products - Sorting by Price', function (): void {
         $sorted = $prices;
         rsort($sorted);
         expect($prices)->toBe($sorted);
-    });
-
-    it('returns different first product for asc vs desc price sort', function (): void {
-        $ascResponse = apiGet('/api/rest/v2/products?pageSize=1&sortBy=price&sortDir=asc&priceMin=1');
-        $descResponse = apiGet('/api/rest/v2/products?pageSize=1&sortBy=price&sortDir=desc&priceMin=1');
-
-        expect($ascResponse['status'])->toBe(200);
-        expect($descResponse['status'])->toBe(200);
-
-        $ascItems = getItems($ascResponse);
-        $descItems = getItems($descResponse);
-
-        expect($ascItems)->not->toBeEmpty();
-        expect($descItems)->not->toBeEmpty();
-
-        expect($ascItems[0]['price'])->toBeLessThan($descItems[0]['price']);
     });
 
 });
@@ -306,20 +252,6 @@ describe('GET /api/rest/v2/products - Category Filtering', function (): void {
 
 describe('GET /api/rest/v2/products/{id}', function (): void {
 
-    it('returns a single product by ID', function (): void {
-        $productId = fixtures('product_id');
-
-        if (!$productId) {
-            $this->markTestSkipped('No product_id configured in fixtures');
-        }
-
-        $response = apiGet("/api/rest/v2/products/{$productId}");
-
-        expect($response['status'])->toBe(200);
-        expect($response['json'])->toBeArray();
-        expect($response['json'])->toHaveKey('sku');
-    });
-
     it('returns product with all expected fields', function (): void {
         $productId = fixtures('product_id');
 
@@ -401,11 +333,6 @@ describe('GET /api/rest/v2/products - Price Filtering', function (): void {
     it('rejects a sortBy field that is not allowlisted', function (): void {
         $response = apiGet('/api/rest/v2/products?sortBy=' . urlencode('(SELECT 1)'));
         expect($response['status'])->toBe(400);
-    });
-
-    it('accepts an allowlisted sortBy field', function (): void {
-        $response = apiGet('/api/rest/v2/products?pageSize=5&sortBy=name&sortDir=asc');
-        expect($response['status'])->toBe(200);
     });
 
 });

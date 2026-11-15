@@ -11,6 +11,7 @@
 class Mage_Contacts_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_ENABLED   = 'contacts/contacts/enabled';
+    public const XML_PATH_API_ENABLED = 'contacts/api/enabled';
 
     #[\Override]
     protected $_moduleName = 'Mage_Contacts';
@@ -21,6 +22,14 @@ class Mage_Contacts_Helper_Data extends Mage_Core_Helper_Abstract
     public function isEnabled()
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_ENABLED);
+    }
+
+    /**
+     * Return whether the store $storeId accepts a contact message on the API.
+     */
+    public function isApiEnabled(?int $storeId = null): bool
+    {
+        return Mage::getStoreConfigFlag(self::XML_PATH_API_ENABLED, $storeId);
     }
 
     /**

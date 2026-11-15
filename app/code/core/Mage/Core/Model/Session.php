@@ -55,7 +55,7 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * Creates new Form key
      */
-    public function renewFormKey()
+    public function renewFormKey(): void
     {
         $this->setData('_form_key', Mage::helper('core')->getRandomString(16));
     }

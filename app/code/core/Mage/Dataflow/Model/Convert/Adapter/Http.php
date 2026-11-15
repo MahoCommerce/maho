@@ -11,7 +11,7 @@
 class Mage_Dataflow_Model_Convert_Adapter_Http extends Mage_Dataflow_Model_Convert_Adapter_Abstract
 {
     #[\Override]
-    public function load()
+    public function load(): static
     {
         if (!$_FILES) {
             echo '<form method="POST" enctype="multipart/form-data">';
@@ -26,7 +26,7 @@ class Mage_Dataflow_Model_Convert_Adapter_Http extends Mage_Dataflow_Model_Conve
     }
 
     #[\Override]
-    public function save()
+    public function save(): static
     {
         if ($this->getVars()) {
             foreach ($this->getVars() as $key => $value) {
@@ -37,7 +37,7 @@ class Mage_Dataflow_Model_Convert_Adapter_Http extends Mage_Dataflow_Model_Conve
         return $this;
     }
 
-    public function loadFile()
+    public function loadFile(): static
     {
         if (!$_FILES) {
             echo '<form method="POST" enctype="multipart/form-data">';

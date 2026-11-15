@@ -34,6 +34,15 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      */
     public const APPLY_LOCK_WAIT_SECONDS = 3600;
 
+    /** Each child node is the code of an action that a rule accepts. A module adds a node for its action. */
+    public const XML_PATH_SIMPLE_ACTIONS = 'global/catalogrule/rule/simple_actions';
+
+    /** The core actions of a catalog price rule. getSimpleActions() returns the list that a store accepts. */
+    public const SIMPLE_ACTIONS = ['by_percent', 'by_fixed', 'to_percent', 'to_fixed'];
+
+    /** The actions whose amount is a percentage */
+    public const PERCENT_ACTIONS = ['by_percent', 'to_percent'];
+
     /**
      * Prefix of model events names
      *
@@ -129,6 +138,56 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     }
 
     /**
+     * @throws Mage_Core_Exception_Input with one error for each problem of the rule
+     */
+    #[\Override]
+    protected function _beforeSave()
+    {
+        $this->validateRecord()->throwIfErrors();
+        return parent::_beforeSave();
+    }
+
+    /**
+     * Add an error to $errors for each problem of the rule, and return $errors.
+     */
+    public function validateRecord(Mage_Core_Exception_Input $errors = new Mage_Core_Exception_Input()): Mage_Core_Exception_Input
+    {
+        $helper = Mage::helper('catalogrule');
+        $this->_validateScope($errors);
+        $actions = $this->getSimpleActions();
+        foreach (['simple_action' => 'discount_amount', 'sub_simple_action' => 'sub_discount_amount'] as $actionField => $amountField) {
+            $action = $this->getData($actionField);
+            if ($action === null || $action === '') {
+                $action = $actionField === 'simple_action' ? 'by_percent' : null;
+            }
+            $amount = (float) $this->getData($amountField);
+            if ($action !== null && !in_array($action, $actions, true)) {
+                $this->_addRecordError($errors, $actionField, $helper->__('The action must be one of: %s.', implode(', ', $actions)));
+            }
+            if ($amount < 0) {
+                $this->_addRecordError($errors, $amountField, $helper->__('The discount amount must be 0 or more.'));
+            } elseif ($amount > 100 && in_array($action, self::PERCENT_ACTIONS, true)) {
+                $this->_addRecordError($errors, $amountField, $helper->__('The discount amount must not be more than 100 for %s.', implode(' and ', self::PERCENT_ACTIONS)), [$actionField]);
+            }
+        }
+        if ((int) $this->getSortOrder() < 0) {
+            $this->_addRecordError($errors, 'sort_order', $helper->__('%s must be 0 or more.', $helper->__('Priority')));
+        }
+        return $errors;
+    }
+
+    /**
+     * Return the codes of the actions that a rule accepts: the child nodes of global/catalogrule/rule/simple_actions.
+     *
+     * @return list<string>
+     */
+    public function getSimpleActions(): array
+    {
+        $node = Mage::getConfig()->getNode(self::XML_PATH_SIMPLE_ACTIONS);
+        return $node ? array_map(strval(...), array_keys($node->asArray())) : self::SIMPLE_ACTIONS;
+    }
+
+    /**
      * Getter for rule conditions collection
      *
      * @return Mage_CatalogRule_Model_Rule_Condition_Combine
@@ -178,7 +237,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @param string $now
      */
-    public function setNow($now)
+    public function setNow($now): void
     {
         $this->_now = $now;
     }
@@ -221,7 +280,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @param array $args
      */
-    public function callbackValidateProduct($args)
+    public function callbackValidateProduct($args): void
     {
         $product = clone $args['product'];
         $product->setData($args['row']);
@@ -256,7 +315,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      * @param int|Mage_Catalog_Model_Product $product
      * @param array|null $websiteIds
      */
-    public function applyToProduct($product, $websiteIds = null)
+    public function applyToProduct($product, $websiteIds = null): void
     {
         if (is_numeric($product)) {
             /** @var Mage_Catalog_Model_Product $product */
@@ -274,7 +333,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @throws Exception
      */
-    public function applyAll()
+    public function applyAll(): void
     {
         // The queue, the cron job and the REST API can start a run at the same time, so a run waits for the other one
         $lock = Mage::getSingleton('core/lock');
@@ -415,7 +474,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @param  int|array $productIds
      */
-    public function setProductsFilter($productIds)
+    public function setProductsFilter($productIds): void
     {
         $this->_productsFilter = $productIds;
     }

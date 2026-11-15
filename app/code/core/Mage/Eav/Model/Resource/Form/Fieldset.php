@@ -11,7 +11,7 @@
 class Mage_Eav_Model_Resource_Form_Fieldset extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('eav/form_fieldset', 'fieldset_id');
         $this->addUniqueField([

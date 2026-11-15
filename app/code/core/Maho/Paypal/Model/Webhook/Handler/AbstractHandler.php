@@ -85,6 +85,19 @@ abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
         return null;
     }
 
+    /**
+     * Cancel $order through the order service, which holds the order lock. An order that cannot be canceled, such as
+     * an order that an admin invoiced, stays as it is.
+     */
+    protected function _cancelOrder(Mage_Sales_Model_Order $order): void
+    {
+        try {
+            Mage::getService('sales/order')->cancel($order);
+        } catch (Mage_Core_Exception_Conflict $e) {
+            $this->_log("Order {$order->getIncrementId()} not canceled: {$e->getMessage()}");
+        }
+    }
+
     protected function _findQuoteByPaypalOrderId(string $paypalOrderId): ?Mage_Sales_Model_Quote
     {
         if (!$paypalOrderId || !preg_match('/^[A-Z0-9]+$/', $paypalOrderId)) {

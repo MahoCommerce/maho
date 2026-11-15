@@ -9,25 +9,10 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class)->group('backend', 'paypal');
 
-it('config model is instantiable via alias', function () {
-    $config = Mage::getModel('paypal/config');
-    expect($config)->toBeInstanceOf(Maho_Paypal_Model_Config::class);
-});
-
 it('config model defines new method constants', function () {
     expect(Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT)->toBe('paypal_standard_checkout');
     expect(Maho_Paypal_Model_Config::METHOD_ADVANCED_CHECKOUT)->toBe('paypal_advanced_checkout');
     expect(Maho_Paypal_Model_Config::METHOD_VAULT)->toBe('paypal_vault');
-});
-
-it('can instantiate observer', function () {
-    $observer = Mage::getModel('paypal/observer');
-    expect($observer)->toBeInstanceOf(Maho_Paypal_Model_Observer::class);
-});
-
-it('can instantiate payment info block', function () {
-    $block = Mage::app()->getLayout()->createBlock('paypal/payment_info');
-    expect($block)->toBeInstanceOf(Maho_Paypal_Block_Payment_Info::class);
 });
 
 it('can instantiate shortcut button block', function () {

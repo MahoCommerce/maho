@@ -60,7 +60,7 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
     protected $_stock;
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('cataloginventory/stock', 'stock_id');
     }
@@ -198,7 +198,7 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
     /**
      * Load some inventory configuration settings
      */
-    protected function _initConfig()
+    protected function _initConfig(): void
     {
         if (!$this->_isConfig) {
             $configMap = [
@@ -221,7 +221,7 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
     /**
      * Set items out of stock basing on their quantities and config settings
      */
-    public function updateSetOutOfStock()
+    public function updateSetOutOfStock(): void
     {
         $this->_initConfig();
         $adapter = $this->_getWriteAdapter();
@@ -255,7 +255,7 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
     /**
      * Set items in stock basing on their quantities and config settings
      */
-    public function updateSetInStock()
+    public function updateSetInStock(): void
     {
         $this->_initConfig();
         $adapter = $this->_getWriteAdapter();
@@ -286,7 +286,7 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
     /**
      * Update items low stock date basing on their quantities and config settings
      */
-    public function updateLowStockDate()
+    public function updateLowStockDate(): void
     {
         $this->_initConfig();
 

@@ -44,18 +44,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_View_Items extends Mage_Adminh
         ];
     }
 
-    /**
-     * Retrieve creditmemo model instance
-     *
-     * @return Mage_Sales_Model_Order_Creditmemo
-     */
-    #[\Override]
-    public function getCreditmemo()
-    {
-        return Mage::registry('current_creditmemo');
-    }
-
-    public function getOrderUrl()
+    public function getOrderUrl(): string
     {
         return $this->getUrl('*/sales_order/view', ['order_id' => $this->getCreditmemo()->getOrderId()]);
     }

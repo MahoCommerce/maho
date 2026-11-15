@@ -10,6 +10,8 @@
 
 declare(strict_types=1);
 
+use Maho\Job\StepState;
+
 class Mage_Index_Model_Runner
 {
     /**
@@ -98,50 +100,32 @@ class Mage_Index_Model_Runner
     /**
      * Reindex every process in the queue, writing per-index state to the progress record.
      *
-     * A failing index is recorded and the batch carries on: with a dozen indexes queued, aborting
-     * the lot because one threw is the worse outcome.
+     * The process service skips an index that is working now and keeps going after a failing one.
      */
     public function run(array $processes, Mage_Index_Model_Progress $progress): void
     {
         /** @var Mage_Core_Model_Lock $lock */
         $lock = Mage::getSingleton('core/lock');
+        $lockName = fn(Mage_Index_Model_Process $process): string => self::lockName((string) $progress->getToken(), (string) $process->getIndexerCode());
 
-        foreach ($processes as $process) {
-            $code = $process->getIndexerCode();
-
-            if ($process->isLocked()) {
-                // reindexEverything() resolves dependencies through the same indexer singleton, so
-                // without this flag a later step in this queue would rebuild the index we just
-                // declined to touch, outside any step and unreported
-                $process->setData('runed_reindexall', true);
-                $progress->skipStep($code, Mage::helper('index')->__('Already running, skipped.'));
-                continue;
-            }
-
-            $lockName = self::lockName((string) $progress->getToken(), $code);
-            $lock->acquire($lockName);
-
-            $progress->startStep($code);
-            $startTime = microtime(true);
-
-            try {
-                $process->reindexEverything();
-                $progress->finishStep($code, microtime(true) - $startTime);
-            } catch (Mage_Core_Exception $e) {
-                $progress->failStep($code, $e->getMessage(), microtime(true) - $startTime);
-            } catch (Throwable $e) {
-                // Only Mage_Core_Exception messages are written to be read by a human; anything
-                // else can carry SQL, table names or paths, so it stays in exception.log
-                Mage::logException($e);
-                $progress->failStep(
-                    $code,
-                    Mage::helper('index')->__('There was a problem with reindexing process.'),
-                    microtime(true) - $startTime,
-                );
-            } finally {
-                $lock->release($lockName);
-            }
-        }
+        /** @var Mage_Index_Service_Process $service */
+        $service = Mage::getService('index/process');
+        $service->reindexQueue(
+            $processes,
+            function (Mage_Index_Model_Process $process) use ($lock, $lockName, $progress): void {
+                $lock->acquire($lockName($process));
+                $progress->startStep((string) $process->getIndexerCode());
+            },
+            function (Mage_Index_Model_Process $process, array $result) use ($lock, $lockName, $progress): void {
+                $lock->release($lockName($process));
+                $code = (string) $process->getIndexerCode();
+                match ($result['state']) {
+                    StepState::Success => $progress->finishStep($code, $result['duration']),
+                    StepState::Skipped => $progress->skipStep($code, (string) $result['message']),
+                    default => $progress->failStep($code, (string) $result['message'], $result['duration']),
+                };
+            },
+        );
 
         $progress->finish();
     }
