@@ -61,7 +61,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
         $tierPrice = true,
         $products = null,
         $store = null,
-    ) {
+    ): void {
         $suffix = '';
         $priceSuffix = '';
         $tables = ['eav' => 'catalogindex/eav', 'price' => 'catalogindex/price'];

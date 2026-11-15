@@ -181,7 +181,7 @@ class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer
     /**
      * Register data required by catalog product processes in event object
      */
-    protected function _registerCatalogProductEvent(Mage_Index_Model_Event $event)
+    protected function _registerCatalogProductEvent(Mage_Index_Model_Event $event): void
     {
         switch ($event->getType()) {
             case Mage_Index_Model_Event::TYPE_SAVE:
@@ -204,7 +204,7 @@ class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer
     /**
      * Register data required by cataloginventory stock item processes in event object
      */
-    protected function _registerCatalogInventoryStockItemEvent(Mage_Index_Model_Event $event)
+    protected function _registerCatalogInventoryStockItemEvent(Mage_Index_Model_Event $event): void
     {
         switch ($event->getType()) {
             case Mage_Index_Model_Event::TYPE_SAVE:

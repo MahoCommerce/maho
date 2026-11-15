@@ -378,7 +378,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
         }
     }
 
-    protected function _reloadQuote()
+    protected function _reloadQuote(): static
     {
         $id = $this->_getQuote()->getId();
         $this->_getQuote()->load($id);

@@ -13,7 +13,7 @@ class Mage_ConfigurableSwatches_Model_Resource_Catalog_Product_Type_Configurable
     /**
      * Filter by parent product set
      */
-    public function addProductSetFilter(array $productIds)
+    public function addProductSetFilter(array $productIds): void
     {
         $this->getSelect()->where('link_table.parent_id in (?)', $productIds);
     }

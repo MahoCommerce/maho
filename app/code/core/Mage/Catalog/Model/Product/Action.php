@@ -211,7 +211,7 @@ class Mage_Catalog_Model_Product_Action extends Mage_Core_Model_Abstract
      * @param array $websiteIds
      * @param string $type
      */
-    public function updateWebsites($productIds, $websiteIds, $type)
+    public function updateWebsites($productIds, $websiteIds, $type): void
     {
         Mage::dispatchEvent('catalog_product_website_update_before', [
             'website_ids'   => $websiteIds,

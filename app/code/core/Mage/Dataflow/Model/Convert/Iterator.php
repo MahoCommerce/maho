@@ -22,7 +22,7 @@ class Mage_Dataflow_Model_Session_Adapter_Iterator extends Mage_Dataflow_Model_C
         return $this;
     }
 
-    public function walk()
+    public function walk(): void
     {
         $sessionId = Mage::registry('current_dataflow_session_id');
         $import = Mage::getResourceModel('dataflow/import');

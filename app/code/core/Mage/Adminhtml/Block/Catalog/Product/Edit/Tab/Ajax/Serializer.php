@@ -41,7 +41,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Ajax_Serializer extends Mage
      * @param string $getProductFunction
      * @param string $inputName
      */
-    public function initSerializerBlock($blockName, $getProductFunction, $inputName)
+    public function initSerializerBlock($blockName, $getProductFunction, $inputName): void
     {
         if ($block = $this->getLayout()->getBlock($blockName)) {
             $this->setGridBlock($block)

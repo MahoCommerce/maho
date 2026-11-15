@@ -139,7 +139,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
         return Mage::helper('directory')->getAnyRate((string) $from, (string) $to);
     }
 
-    public function prepareRates($displayCurrency)
+    public function prepareRates($displayCurrency): void
     {
         $storeCurrency = $this->getColumn()->getCurrencyCode();
 

@@ -141,7 +141,7 @@ class Mage_Bundle_Model_Resource_Selection extends Mage_Core_Model_Resource_Db_A
      *
      * @param Mage_Bundle_Model_Selection $item
      */
-    public function saveSelectionPrice($item)
+    public function saveSelectionPrice($item): void
     {
         $write = $this->_getWriteAdapter();
         if ($item->getDefaultPriceScope()) {

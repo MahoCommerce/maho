@@ -39,7 +39,7 @@ class Mage_ConfigurableSwatches_Helper_Productlist extends Mage_Core_Helper_Abst
      *
      * @param string $blockName
      */
-    public function convertLayerBlock($blockName)
+    public function convertLayerBlock($blockName): void
     {
         if (Mage::helper('configurableswatches')->isEnabled()
             && ($block = Mage::app()->getLayout()->getBlock($blockName))

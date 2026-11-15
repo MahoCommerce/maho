@@ -22,7 +22,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Admin_Page
         return $options;
     }
 
-    protected function _createOptions(&$optionArray, $menuNode)
+    protected function _createOptions(&$optionArray, $menuNode): void
     {
         $nonEscapableNbspChar = html_entity_decode('&#160;', ENT_NOQUOTES, 'UTF-8');
 

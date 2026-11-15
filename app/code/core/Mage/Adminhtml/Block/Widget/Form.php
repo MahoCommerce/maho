@@ -217,7 +217,7 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
      * @param \Maho\Data\Form\Element\Fieldset $fieldset
      * @param array $exclude attributes that should be skipped
      */
-    protected function _setFieldset($attributes, $fieldset, $exclude = [])
+    protected function _setFieldset($attributes, $fieldset, $exclude = []): void
     {
         $this->_addElementTypes($fieldset);
         foreach ($attributes as $attribute) {
@@ -274,7 +274,7 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
     /**
      * Add new element type
      */
-    protected function _addElementTypes(\Maho\Data\Form\AbstractForm $baseElement)
+    protected function _addElementTypes(\Maho\Data\Form\AbstractForm $baseElement): void
     {
         $types = $this->_getAdditionalElementTypes();
         foreach ($types as $code => $className) {

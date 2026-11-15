@@ -26,7 +26,7 @@ class Mage_ConfigurableSwatches_Helper_List_Price extends Mage_Core_Helper_Abstr
      *
      * @param int $storeId
      */
-    public function attachConfigurableProductChildrenPricesMapping(array $products, $storeId = null)
+    public function attachConfigurableProductChildrenPricesMapping(array $products, $storeId = null): void
     {
         foreach ($products as $product) {
             /** @var Mage_Catalog_Model_Product $product */

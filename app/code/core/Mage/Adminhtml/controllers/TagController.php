@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
 {
-    protected function _initAction()
+    protected function _initAction(): static
     {
         $this->loadLayout()
             ->_setActiveMenu('catalog/tag')

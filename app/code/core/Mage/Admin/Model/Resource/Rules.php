@@ -19,7 +19,7 @@ class Mage_Admin_Model_Resource_Rules extends Mage_Core_Model_Resource_Db_Abstra
     /**
      * Save ACL resources
      */
-    public function saveRel(Mage_Admin_Model_Rules $rule)
+    public function saveRel(Mage_Admin_Model_Rules $rule): void
     {
         $adapter = $this->_getWriteAdapter();
         try {

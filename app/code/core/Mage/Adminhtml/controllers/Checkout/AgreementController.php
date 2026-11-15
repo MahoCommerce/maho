@@ -17,7 +17,7 @@ class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Control
     public const ADMIN_RESOURCE = 'sales/checkoutagreement';
 
     #[Maho\Config\Route('/admin/checkout_agreement/index')]
-    public function indexAction()
+    public function indexAction(): static
     {
         $this->_title($this->__('Sales'))->_title($this->__('Terms and Conditions'));
 

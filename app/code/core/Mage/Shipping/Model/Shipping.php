@@ -59,7 +59,7 @@ class Mage_Shipping_Model_Shipping
      *
      * @param array $data
      */
-    public function setOrigData($data)
+    public function setOrigData($data): void
     {
         $this->_orig = $data;
     }

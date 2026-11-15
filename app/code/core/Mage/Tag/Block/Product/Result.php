@@ -34,7 +34,7 @@ class Mage_Tag_Block_Product_Result extends Mage_Catalog_Block_Product_Abstract
         return parent::_prepareLayout();
     }
 
-    public function setListOrders()
+    public function setListOrders(): void
     {
         $this->getChild('search_result_list')
             ->setAvailableOrders([
@@ -42,7 +42,7 @@ class Mage_Tag_Block_Product_Result extends Mage_Catalog_Block_Product_Abstract
                 'price' => Mage::helper('tag')->__('Price')]);
     }
 
-    public function setListModes()
+    public function setListModes(): void
     {
         $this->getChild('search_result_list')
             ->setModes([
@@ -53,7 +53,7 @@ class Mage_Tag_Block_Product_Result extends Mage_Catalog_Block_Product_Abstract
     /**
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function setListCollection()
+    public function setListCollection(): void
     {
         $this->getChild('search_result_list')
            ->setCollection($this->_getProductCollection());

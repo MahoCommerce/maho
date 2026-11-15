@@ -30,7 +30,7 @@ class Mage_Adminhtml_Block_Dashboard_Bar extends Mage_Adminhtml_Block_Dashboard_
         return $this->_totals;
     }
 
-    public function addTotal($label, $value, $isQuantity = false)
+    public function addTotal($label, $value, $isQuantity = false): static
     {
         if (!$isQuantity) {
             $value = $this->format($value);
@@ -69,7 +69,7 @@ class Mage_Adminhtml_Block_Dashboard_Bar extends Mage_Adminhtml_Block_Dashboard_
      *
      * @param Mage_Directory_Model_Currency $currency
      */
-    public function setCurrency($currency)
+    public function setCurrency($currency): void
     {
         $this->_currency = $currency;
     }

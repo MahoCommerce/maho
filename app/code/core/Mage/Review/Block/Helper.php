@@ -75,7 +75,7 @@ class Mage_Review_Block_Helper extends Mage_Core_Block_Template
      * @param string $type
      * @param string $template
      */
-    public function addTemplate($type, $template)
+    public function addTemplate($type, $template): void
     {
         $this->_availableTemplates[$type] = $template;
     }

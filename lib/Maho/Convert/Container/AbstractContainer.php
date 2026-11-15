@@ -34,7 +34,7 @@ abstract class AbstractContainer implements ContainerInterface
         return $this->_vars;
     }
 
-    public function setVar($key, $value = null)
+    public function setVar($key, $value = null): static
     {
         if (is_array($key) && is_null($value)) {
             $this->_vars = $key;
@@ -145,7 +145,7 @@ abstract class AbstractContainer implements ContainerInterface
         return $this->_position;
     }
 
-    public function setPosition($position)
+    public function setPosition($position): static
     {
         $this->_position = $position;
         return $this;

@@ -23,7 +23,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
      * @param int $storeId
      * @param bool $onlyListAttributes
      */
-    public function attachProductChildrenAttributeMapping(array $parentProducts, $storeId, $onlyListAttributes = false)
+    public function attachProductChildrenAttributeMapping(array $parentProducts, $storeId, $onlyListAttributes = false): void
     {
         $listAttributeIds = Mage::helper('configurableswatches/productlist')->getSwatchAttributeIds();
         $swatchAttributeIds = $listAttributeIds;
@@ -285,7 +285,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
     /**
      * Groups media gallery images by local images and child images
      */
-    public function groupMediaGalleryImages(Mage_Catalog_Model_Product $product)
+    public function groupMediaGalleryImages(Mage_Catalog_Model_Product $product): void
     {
         $mediaGallery = $product->getMediaGallery();
 
@@ -316,7 +316,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
      *
      * @param int $storeId
      */
-    public function attachGallerySetToCollection(array $products, $storeId)
+    public function attachGallerySetToCollection(array $products, $storeId): void
     {
         $productIds = [];
         /** @var Mage_Catalog_Model_Product $product */
@@ -397,7 +397,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
      *
      * @param int $storeId
      */
-    public function attachChildrenProducts(array $products, $storeId)
+    public function attachChildrenProducts(array $products, $storeId): void
     {
         $productIds = [];
         /** @var Mage_Catalog_Model_Product $product */

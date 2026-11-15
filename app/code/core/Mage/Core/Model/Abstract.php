@@ -90,7 +90,7 @@ abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
      *
      * @param string $resourceModel
      */
-    protected function _init($resourceModel)
+    protected function _init($resourceModel): void
     {
         $this->_setResourceModel($resourceModel);
     }
@@ -148,7 +148,7 @@ abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
      * @param string $resourceName
      * @param string|null $resourceCollectionName
      */
-    protected function _setResourceModel($resourceName, $resourceCollectionName = null)
+    protected function _setResourceModel($resourceName, $resourceCollectionName = null): void
     {
         $this->_resourceName = $resourceName;
         $resourceCollectionName ??= $resourceName . '_collection';
@@ -538,7 +538,7 @@ abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
      *
      * @throws Mage_Core_Exception
      */
-    protected function _protectFromNonAdmin()
+    protected function _protectFromNonAdmin(): void
     {
         if (Mage::registry('isSecureArea')) {
             return;

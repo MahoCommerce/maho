@@ -308,7 +308,7 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
     /**
      * Not use :(
      */
-    public function parse()
+    public function parse(): void
     {
         $batchModel = Mage::getSingleton('dataflow/batch');
         /** @var Mage_Dataflow_Model_Batch $batchModel */
@@ -328,7 +328,7 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
      * @throws Mage_Core_Exception
      * @throws \Maho\Exception
      */
-    public function setCustomer(Mage_Customer_Model_Customer $customer)
+    public function setCustomer(Mage_Customer_Model_Customer $customer): void
     {
         $id = Mage::objects()->save($customer);
         Mage::register('Object_Cache_Customer', $id);

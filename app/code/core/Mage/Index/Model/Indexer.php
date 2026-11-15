@@ -299,7 +299,7 @@ class Mage_Index_Model_Indexer
      * @param string $method
      * @param array $args
      */
-    protected function _runAll($method, $args)
+    protected function _runAll($method, $args): void
     {
         $checkLocks = $method != 'register';
         $processed = [];

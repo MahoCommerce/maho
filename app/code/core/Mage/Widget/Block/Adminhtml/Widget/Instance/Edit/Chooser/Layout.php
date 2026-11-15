@@ -137,7 +137,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Layout extends Ma
      *
      * @param SimpleXMLElement $layoutHandles
      */
-    protected function _collectLayoutHandles($layoutHandles)
+    protected function _collectLayoutHandles($layoutHandles): void
     {
         if ($layoutHandlesArr = $layoutHandles->xpath('/*/*/label/..')) {
             /** @var \Maho\Simplexml\Element $node */

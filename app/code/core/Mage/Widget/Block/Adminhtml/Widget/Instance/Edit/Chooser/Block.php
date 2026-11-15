@@ -178,7 +178,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Block extends Mag
     /**
      * Merging layout handles and create xml of merged layout handles
      */
-    protected function _collectLayoutHandles()
+    protected function _collectLayoutHandles(): void
     {
         foreach ($this->getLayoutHandle() as $handle) {
             $this->_mergeLayoutHandles($handle);
@@ -192,7 +192,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Block extends Mag
      *
      * @param string $handle
      */
-    public function _mergeLayoutHandles($handle)
+    public function _mergeLayoutHandles($handle): void
     {
         foreach ($this->_layoutHandlesXml->{$handle} as $updateXml) {
             foreach ($updateXml->children() as $child) {
@@ -207,7 +207,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Block extends Mag
     /**
      * Filter and collect blocks into array
      */
-    protected function _collectBlocks()
+    protected function _collectBlocks(): void
     {
         if ($blocks = $this->_layoutHandleUpdatesXml->xpath('//block/label/..')) {
             /** @var Mage_Core_Model_Layout_Element $block */

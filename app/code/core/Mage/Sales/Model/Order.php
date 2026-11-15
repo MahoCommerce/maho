@@ -2054,7 +2054,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     /**
      * Check order state before saving
      */
-    protected function _checkState()
+    protected function _checkState(): static
     {
         if (!$this->getId()) {
             return $this;

@@ -286,7 +286,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
     /**
      *  Init stores
      */
-    protected function _initStores()
+    protected function _initStores(): void
     {
         if (is_null($this->_stores)) {
             $this->_stores = Mage::app()->getStores(true, true);
@@ -338,7 +338,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
         return false;
     }
 
-    public function parse()
+    public function parse(): void
     {
         $batchModel = Mage::getSingleton('dataflow/batch');
         /** @var Mage_Dataflow_Model_Batch $batchModel */
@@ -419,7 +419,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
      * @throws Mage_Core_Exception
      * @throws \Maho\Exception
      */
-    public function setProduct(Mage_Catalog_Model_Product $object)
+    public function setProduct(Mage_Catalog_Model_Product $object): void
     {
         $id = Mage::objects()->save($object);
         //$this->_product = $object;
@@ -438,7 +438,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
      * @throws Mage_Core_Exception
      * @throws \Maho\Exception
      */
-    public function setStockItem(Mage_CatalogInventory_Model_Stock_Item $object)
+    public function setStockItem(Mage_CatalogInventory_Model_Stock_Item $object): void
     {
         $id = Mage::objects()->save($object);
         Mage::register('Object_Cache_StockItem', $id);
@@ -870,7 +870,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
      * Process after import data
      * Init indexing process after catalog product import
      */
-    public function finish()
+    public function finish(): void
     {
         /**
          * Back compatibility event

@@ -351,7 +351,7 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
     /**
      * Unsubscribes loaded subscription
      */
-    public function unsubscribe()
+    public function unsubscribe(): static
     {
         if ($this->hasCheckCode() && $this->getCode() != $this->getCheckCode()) {
             Mage::throwException(Mage::helper('newsletter')->__('Invalid subscription confirmation code.'));

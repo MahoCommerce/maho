@@ -30,7 +30,7 @@ class Mage_Adminhtml_Model_Observer
     }
 
     #[Maho\Config\Observer('controller_action_layout_generate_blocks_before', area: 'adminhtml')]
-    public function displayBootupWarnings($observer)
+    public function displayBootupWarnings($observer): void
     {
         $bootupWarnings = Mage::registry('bootup_warnings') ?? [];
         foreach ($bootupWarnings as $message) {
@@ -39,7 +39,7 @@ class Mage_Adminhtml_Model_Observer
     }
 
     #[Maho\Config\Observer('core_locale_set_locale', area: 'adminhtml')]
-    public function bindLocale($observer)
+    public function bindLocale($observer): static
     {
         if ($locale = $observer->getEvent()->getLocale()) {
             if ($choosedLocale = Mage::getSingleton('adminhtml/session')->getLocale()) {
@@ -50,7 +50,7 @@ class Mage_Adminhtml_Model_Observer
     }
 
     #[Maho\Config\Observer('adminhtml_controller_action_predispatch_start', id: 'store')]
-    public function bindStore()
+    public function bindStore(): static
     {
         Mage::app()->setCurrentStore('admin');
         return $this;

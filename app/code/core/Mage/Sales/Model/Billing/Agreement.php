@@ -261,7 +261,7 @@ class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_Agre
     /**
      * Save related orders
      */
-    protected function _saveOrderRelations()
+    protected function _saveOrderRelations(): void
     {
         foreach ($this->_relatedOrders as $order) {
             $orderId = $order instanceof Mage_Sales_Model_Order ? $order->getId() : (int) $order;

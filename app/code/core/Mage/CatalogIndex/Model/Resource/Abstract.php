@@ -22,7 +22,7 @@ class Mage_CatalogIndex_Model_Resource_Abstract extends Mage_Core_Model_Resource
      *
      * @param int $storeId
      */
-    public function setStoreId($storeId)
+    public function setStoreId($storeId): void
     {
         $this->_storeId = $storeId;
     }

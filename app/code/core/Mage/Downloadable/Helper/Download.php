@@ -321,7 +321,7 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
         return Mage::app()->getFrontController()->getResponse();
     }
 
-    public function output()
+    public function output(): void
     {
         $handle = $this->_getHandle();
         if ($this->_linkType == self::LINK_TYPE_FILE) {

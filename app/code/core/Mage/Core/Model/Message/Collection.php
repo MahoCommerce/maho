@@ -109,7 +109,7 @@ class Mage_Core_Model_Message_Collection
     /**
      * @param string $identifier
      */
-    public function deleteMessageByIdentifier($identifier)
+    public function deleteMessageByIdentifier($identifier): void
     {
         foreach ($this->_messages as $type => $messages) {
             foreach ($messages as $id => $message) {

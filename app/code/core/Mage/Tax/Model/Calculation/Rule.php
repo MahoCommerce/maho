@@ -153,7 +153,7 @@ class Mage_Tax_Model_Calculation_Rule extends Mage_Core_Model_Abstract
     /**
      * Saves the Calculation Data
      */
-    public function saveCalculationData()
+    public function saveCalculationData(): void
     {
         $ctc = $this->getData('tax_customer_class');
         $ptc = $this->getData('tax_product_class');

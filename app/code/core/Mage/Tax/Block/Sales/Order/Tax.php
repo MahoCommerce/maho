@@ -249,7 +249,7 @@ class Mage_Tax_Block_Sales_Order_Tax extends Mage_Core_Block_Template
         return $this;
     }
 
-    protected function _initDiscount() {}
+    protected function _initDiscount(): void {}
 
     /**
      * @return $this

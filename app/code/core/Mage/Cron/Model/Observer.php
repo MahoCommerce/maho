@@ -74,7 +74,7 @@ class Mage_Cron_Model_Observer
      * @param \Maho\Event\Observer $observer
      */
     #[Maho\Config\Observer('default', area: 'crontab', id: 'cron_observer')]
-    public function dispatch($observer)
+    public function dispatch($observer): void
     {
         $schedules = $this->getPendingSchedules();
         $jobsRoot = Mage::getConfig()->getNode('crontab/jobs');
@@ -125,7 +125,7 @@ class Mage_Cron_Model_Observer
      * @param \Maho\Event\Observer $observer
      */
     #[Maho\Config\Observer('always', area: 'crontab', id: 'cron_observer')]
-    public function dispatchAlways($observer)
+    public function dispatchAlways($observer): void
     {
         $jobsRoot = Mage::getConfig()->getNode('crontab/jobs');
         if ($jobsRoot instanceof \Maho\Simplexml\Element) {

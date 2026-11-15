@@ -292,7 +292,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
      *
      * @param Mage_Core_Model_Abstract|Mage_Review_Model_Review $object
      */
-    public function aggregate($object)
+    public function aggregate($object): void
     {
         $readAdapter  = $this->_getReadAdapter();
         $writeAdapter = $this->_getWriteAdapter();
@@ -402,7 +402,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
      * @param int $reviewId
      * @param int $entityPkValue
      */
-    public function reAggregateReview($reviewId, $entityPkValue)
+    public function reAggregateReview($reviewId, $entityPkValue): void
     {
         $this->_aggregateRatings($this->_loadVotedRatingIds($reviewId), $entityPkValue);
     }

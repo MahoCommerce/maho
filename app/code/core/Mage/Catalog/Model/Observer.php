@@ -125,7 +125,7 @@ class Mage_Catalog_Model_Observer
      * Checking whether the using static urls in WYSIWYG allowed event
      */
     #[Maho\Config\Observer('cms_wysiwyg_images_static_urls_allowed', area: 'adminhtml')]
-    public function catalogCheckIsUsingStaticUrlsAllowed(\Maho\Event\Observer $observer)
+    public function catalogCheckIsUsingStaticUrlsAllowed(\Maho\Event\Observer $observer): void
     {
         $storeId = $observer->getEvent()->getData('store_id');
         $result  = $observer->getEvent()->getData('result');
@@ -136,7 +136,7 @@ class Mage_Catalog_Model_Observer
      * Cron job method for product prices to reindex
      */
     #[Maho\Config\CronJob('catalog_product_index_price_reindex_all', schedule: '0 2 * * *')]
-    public function reindexProductPrices(Mage_Cron_Model_Schedule $schedule)
+    public function reindexProductPrices(Mage_Cron_Model_Schedule $schedule): void
     {
         $indexProcess = Mage::getSingleton('index/indexer')->getProcessByCode('catalog_product_price');
         if ($indexProcess) {
@@ -177,7 +177,7 @@ class Mage_Catalog_Model_Observer
      * Adds catalog categories to top menu
      */
     #[Maho\Config\Observer('page_block_html_topmenu_gethtml_before')]
-    public function addCatalogToTopmenuItems(\Maho\Event\Observer $observer)
+    public function addCatalogToTopmenuItems(\Maho\Event\Observer $observer): void
     {
         $block = $observer->getEvent()->getBlock();
         $block->addCacheTag(Mage_Catalog_Model_Category::CACHE_TAG);
@@ -196,7 +196,7 @@ class Mage_Catalog_Model_Observer
      * @param Mage_Page_Block_Html_Topmenu $menuBlock
      * @param bool $addTags
      */
-    protected function _addCategoriesToMenu($categories, $parentCategoryNode, $menuBlock, $addTags = false)
+    protected function _addCategoriesToMenu($categories, $parentCategoryNode, $menuBlock, $addTags = false): void
     {
         $categoryModel = Mage::getModel('catalog/category');
         foreach ($categories as $category) {

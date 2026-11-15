@@ -26,7 +26,7 @@ class Exception extends MahoException
 
     protected $_position;
 
-    public function setContainer($container)
+    public function setContainer($container): static
     {
         $this->_container = $container;
         return $this;
@@ -42,7 +42,7 @@ class Exception extends MahoException
         return $this->_level;
     }
 
-    public function setLevel($level)
+    public function setLevel($level): static
     {
         $this->_level = $level;
         return $this;
@@ -53,7 +53,7 @@ class Exception extends MahoException
         return $this->_position;
     }
 
-    public function setPosition($position)
+    public function setPosition($position): static
     {
         $this->_position = $position;
         return $this;

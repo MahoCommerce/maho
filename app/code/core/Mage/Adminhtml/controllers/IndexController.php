@@ -16,7 +16,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
      * @param string $tplName
      * @param array $data parameters required by template
      */
-    protected function _outTemplate($tplName, $data = [])
+    protected function _outTemplate($tplName, $data = []): void
     {
         $this->_initLayoutMessages('adminhtml/session');
         $block = $this->getLayout()->createBlock('adminhtml/template')->setTemplate("$tplName.phtml");
@@ -376,7 +376,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
      * @param string $resetPasswordLinkToken
      * @throws Mage_Core_Exception
      */
-    protected function _validateResetPasswordLinkToken($userId, $resetPasswordLinkToken)
+    protected function _validateResetPasswordLinkToken($userId, $resetPasswordLinkToken): void
     {
         $limiter = Mage::helper('core')->rateLimiter(
             'admin_reset_token',

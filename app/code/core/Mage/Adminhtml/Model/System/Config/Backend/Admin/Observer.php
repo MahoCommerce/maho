@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2025 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -15,7 +16,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Admin_Observer
      * @param \Maho\Event\Observer $observer
      */
     #[Maho\Config\Observer('admin_system_config_changed_section_admin', area: 'adminhtml')]
-    public function afterCustomUrlChanged($observer)
+    public function afterCustomUrlChanged($observer): void
     {
         if (is_null(Mage::registry('custom_admin_path_redirect'))) {
             return;

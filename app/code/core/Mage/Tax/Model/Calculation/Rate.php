@@ -169,7 +169,7 @@ class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
      *
      * @param array | null $titles
      */
-    public function saveTitles($titles = null)
+    public function saveTitles($titles = null): void
     {
         $titles ??= $this->getTitle();
 

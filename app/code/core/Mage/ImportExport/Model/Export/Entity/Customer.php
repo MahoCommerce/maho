@@ -106,7 +106,7 @@ class Mage_ImportExport_Model_Export_Entity_Customer extends Mage_ImportExport_M
     /**
      * Prepare data for export and write its to temporary file through writer.
      */
-    protected function _prepareExport()
+    protected function _prepareExport(): void
     {
         $collection = $this->_prepareEntityCollection(Mage::getResourceModel('customer/customer_collection'));
         $validAttrCodes = $this->_getExportAttrCodes();

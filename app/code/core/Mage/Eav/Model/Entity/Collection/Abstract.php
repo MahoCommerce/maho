@@ -894,7 +894,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      *
      * @todo make batch save directly from collection
      */
-    public function save()
+    public function save(): static
     {
         foreach ($this->getItems() as $item) {
             $item->save();
@@ -907,7 +907,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      *
      * @todo make batch delete directly from collection
      */
-    public function delete()
+    public function delete(): static
     {
         foreach ($this->getItems() as $k => $item) {
             $this->getEntity()->delete($item);

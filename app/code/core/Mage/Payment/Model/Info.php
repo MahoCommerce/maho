@@ -166,7 +166,7 @@ class Mage_Payment_Model_Info extends Mage_Core_Model_Abstract
     /**
      * Make sure _additionalInformation is an array
      */
-    protected function _initAdditionalInformation()
+    protected function _initAdditionalInformation(): void
     {
         if ($this->_additionalInformation === -1) {
             $this->_additionalInformation = $this->_getData('additional_information');

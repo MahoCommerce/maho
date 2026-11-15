@@ -175,7 +175,7 @@ abstract class Mage_Dataflow_Model_Convert_Action_Abstract implements Mage_Dataf
         }
     }
 
-    public function importXml(\Maho\Simplexml\Element $actionNode)
+    public function importXml(\Maho\Simplexml\Element $actionNode): static
     {
         foreach ($actionNode->attributes() as $key => $value) {
             $this->setParam($key, (string) $value);
@@ -235,7 +235,7 @@ abstract class Mage_Dataflow_Model_Convert_Action_Abstract implements Mage_Dataf
         return $this;
     }
 
-    public function runActions(array $args = [])
+    public function runActions(array $args = []): static
     {
         if (empty($this->_actions)) {
             return $this;

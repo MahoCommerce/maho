@@ -113,7 +113,7 @@ class Mage_Customer_Block_Widget_Dob extends Mage_Customer_Block_Widget_Abstract
      * @param string $code
      * @param string $html
      */
-    public function setDateInput($code, $html)
+    public function setDateInput($code, $html): void
     {
         $this->_dateInputs[$code] = $html;
     }

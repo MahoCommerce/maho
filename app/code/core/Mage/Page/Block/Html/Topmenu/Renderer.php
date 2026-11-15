@@ -44,7 +44,7 @@ class Mage_Page_Block_Html_Topmenu_Renderer extends Mage_Page_Block_Html_Topmenu
     /**
      * Add cache tags
      */
-    protected function _addCacheTags()
+    protected function _addCacheTags(): void
     {
         $parentBlock = $this->getParentBlock();
         if ($parentBlock) {

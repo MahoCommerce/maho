@@ -172,7 +172,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
     /**
      * Process category index after category save
      */
-    public function catalogCategorySave(Mage_Index_Model_Event $event)
+    public function catalogCategorySave(Mage_Index_Model_Event $event): void
     {
         $data = $event->getNewData();
 

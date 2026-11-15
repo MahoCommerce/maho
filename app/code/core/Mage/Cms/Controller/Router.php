@@ -16,7 +16,7 @@ class Mage_Cms_Controller_Router extends Mage_Core_Controller_Varien_Router_Abst
      * @param \Maho\Event\Observer $observer
      */
     #[Maho\Config\Observer('controller_front_init_routers')]
-    public function initControllerRouters($observer)
+    public function initControllerRouters($observer): void
     {
         /** @var Mage_Core_Controller_Varien_Front $front */
         $front = $observer->getEvent()->getFront();

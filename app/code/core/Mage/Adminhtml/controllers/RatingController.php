@@ -110,7 +110,7 @@ class Mage_Adminhtml_RatingController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/');
     }
 
-    protected function _initEnityId()
+    protected function _initEnityId(): void
     {
         $this->_title($this->__('Catalog'))
              ->_title($this->__('Reviews and Ratings'))

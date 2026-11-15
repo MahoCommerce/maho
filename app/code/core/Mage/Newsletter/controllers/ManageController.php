@@ -45,7 +45,7 @@ class Mage_Newsletter_ManageController extends Mage_Core_Controller_Front_Action
     }
 
     #[Maho\Config\Route('/newsletter/manage/save', name: 'newsletter.manage.save', methods: ['POST'])]
-    public function saveAction()
+    public function saveAction(): void
     {
         $session = Mage::getSingleton('customer/session');
         $customerId = (int) $session->getCustomerId();

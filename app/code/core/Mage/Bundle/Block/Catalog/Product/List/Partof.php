@@ -102,7 +102,7 @@ class Mage_Bundle_Block_Catalog_Product_List_Partof extends Mage_Catalog_Block_P
         return $this->_columnCount;
     }
 
-    public function resetItemsIterator()
+    public function resetItemsIterator(): void
     {
         $this->getItems();
         reset($this->_items);

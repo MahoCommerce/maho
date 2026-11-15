@@ -95,7 +95,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
      * @param Mage_Catalog_Model_Product $product
      * @param array|null $preValues
      */
-    public function indexProductImages($product, $preValues = null)
+    public function indexProductImages($product, $preValues = null): void
     {
         if ($product->getTypeId() != Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
             return; // we only index images on configurable products
@@ -479,7 +479,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
     /**
      * Cleans out the swatch image cache dir
      */
-    public function clearSwatchesCache()
+    public function clearSwatchesCache(): void
     {
         Mage::getStorage('media')->deleteDirectory(self::SWATCH_CACHE_DIR);
         Mage::app()->cleanCache([self::CACHE_TAG]);

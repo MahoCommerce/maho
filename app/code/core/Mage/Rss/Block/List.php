@@ -70,7 +70,7 @@ class Mage_Rss_Block_List extends Mage_Core_Block_Template
         return $this;
     }
 
-    public function resetRssFeed()
+    public function resetRssFeed(): void
     {
         $this->_rssFeeds = [];
     }
@@ -122,7 +122,7 @@ class Mage_Rss_Block_List extends Mage_Core_Block_Template
     /**
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function newProductRssFeed()
+    public function newProductRssFeed(): void
     {
         $path = self::XML_PATH_RSS_METHODS . '/catalog/new';
         if (Mage::getStoreConfigFlag($path)) {
@@ -133,7 +133,7 @@ class Mage_Rss_Block_List extends Mage_Core_Block_Template
     /**
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function specialProductRssFeed()
+    public function specialProductRssFeed(): void
     {
         $path = self::XML_PATH_RSS_METHODS . '/catalog/special';
         if (Mage::getStoreConfigFlag($path)) {
@@ -144,7 +144,7 @@ class Mage_Rss_Block_List extends Mage_Core_Block_Template
     /**
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function salesRuleProductRssFeed()
+    public function salesRuleProductRssFeed(): void
     {
         $path = self::XML_PATH_RSS_METHODS . '/catalog/salesrule';
         if (Mage::getStoreConfigFlag($path)) {
@@ -156,7 +156,7 @@ class Mage_Rss_Block_List extends Mage_Core_Block_Template
      * @throws Mage_Core_Exception
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function categoriesRssFeed()
+    public function categoriesRssFeed(): void
     {
         $path = self::XML_PATH_RSS_METHODS . '/catalog/category';
         if (Mage::getStoreConfigFlag($path)) {

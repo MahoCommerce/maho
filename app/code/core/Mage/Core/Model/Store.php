@@ -360,7 +360,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Set website model
      */
-    public function setWebsite(Mage_Core_Model_Website $website)
+    public function setWebsite(Mage_Core_Model_Website $website): void
     {
         $this->_website = $website;
     }
@@ -982,7 +982,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      *
      * @param Mage_Core_Model_Store_Group $group
      */
-    public function setGroup($group)
+    public function setGroup($group): void
     {
         $this->_group = $group;
     }

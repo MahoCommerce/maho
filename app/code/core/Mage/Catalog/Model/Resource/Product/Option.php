@@ -164,7 +164,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
      *
      * @throws Doctrine\DBAL\Exception
      */
-    protected function _saveValueTitles(Mage_Core_Model_Abstract $object)
+    protected function _saveValueTitles(Mage_Core_Model_Abstract $object): void
     {
         $readAdapter  = $this->_getReadAdapter();
         $writeAdapter = $this->_getWriteAdapter();

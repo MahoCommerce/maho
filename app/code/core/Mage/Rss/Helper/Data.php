@@ -37,7 +37,7 @@ class Mage_Rss_Helper_Data extends Mage_Core_Helper_Abstract
      *
      * @param string $path
      */
-    public function authAdmin($path)
+    public function authAdmin($path): void
     {
         if (!$this->_rssSession->isAdminLoggedIn() || !$this->_adminSession->isLoggedIn()) {
             [$username, $password] = $this->authValidate();
@@ -76,7 +76,7 @@ class Mage_Rss_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Send authenticate failed headers
      */
-    public function authFailed()
+    public function authFailed(): void
     {
         Mage::helper('core/http')->authFailed();
     }

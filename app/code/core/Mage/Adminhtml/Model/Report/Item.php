@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -12,7 +13,7 @@ class Mage_Adminhtml_Model_Report_Item extends \Maho\DataObject
     protected $_isEmpty  = false;
     protected $_children = [];
 
-    public function setIsEmpty($flag = true)
+    public function setIsEmpty($flag = true): static
     {
         $this->_isEmpty = $flag;
         return $this;
@@ -23,14 +24,14 @@ class Mage_Adminhtml_Model_Report_Item extends \Maho\DataObject
         return $this->_isEmpty;
     }
 
-    public function hasIsEmpty() {}
+    public function hasIsEmpty(): void {}
 
     public function getChildren()
     {
         return $this->_children;
     }
 
-    public function setChildren($children)
+    public function setChildren($children): static
     {
         $this->_children = $children;
         return $this;
@@ -41,7 +42,7 @@ class Mage_Adminhtml_Model_Report_Item extends \Maho\DataObject
         return count($this->_children) > 0;
     }
 
-    public function addChild($child)
+    public function addChild($child): static
     {
         $this->_children[] = $child;
         return $this;

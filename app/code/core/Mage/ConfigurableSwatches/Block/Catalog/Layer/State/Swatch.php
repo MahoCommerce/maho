@@ -45,7 +45,7 @@ class Mage_ConfigurableSwatches_Block_Catalog_Layer_State_Swatch extends Mage_Co
      *
      * @param Mage_Catalog_Model_Layer_Filter_Item $filter
      */
-    protected function _init($filter)
+    protected function _init($filter): void
     {
         if (!$this->_initDone) {
             $dimHelper = Mage::helper('configurableswatches/swatchdimensions');

@@ -47,7 +47,7 @@ class Mage_Adminhtml_Block_Widget extends Mage_Adminhtml_Block_Template
         return $this->getUrl('*/*/*', $params);
     }
 
-    protected function _addBreadcrumb($label, $title = null, $link = null)
+    protected function _addBreadcrumb($label, $title = null, $link = null): void
     {
         /** @var Mage_Adminhtml_Block_Widget_Breadcrumbs $block */
         $block = $this->getLayout()->getBlock('breadcrumbs');

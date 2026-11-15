@@ -16,7 +16,7 @@ class Mage_Adminhtml_Permissions_UserController extends Mage_Adminhtml_Controlle
      */
     public const ADMIN_RESOURCE = 'system/acl/users';
 
-    protected function _initAction()
+    protected function _initAction(): static
     {
         $this->loadLayout()
             ->_setActiveMenu('system/acl/users')
@@ -86,7 +86,7 @@ class Mage_Adminhtml_Permissions_UserController extends Mage_Adminhtml_Controlle
     }
 
     #[Maho\Config\Route('/admin/permissions_user/save')]
-    public function saveAction()
+    public function saveAction(): void
     {
         $data = $this->getRequest()->getPost();
         if (!$data) {

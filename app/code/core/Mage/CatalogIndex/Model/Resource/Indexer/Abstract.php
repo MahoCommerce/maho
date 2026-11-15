@@ -43,7 +43,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer_Abstract extends Mage_Core_Model_
      * @param int $storeId
      * @param int $productId
      */
-    public function saveIndices(array $data, $storeId, $productId)
+    public function saveIndices(array $data, $storeId, $productId): void
     {
         $this->_executeReplace($data, $storeId, $productId);
     }

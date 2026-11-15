@@ -90,7 +90,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
     /**
      * Uploader clean on shutdown
      */
-    public function destruct()
+    public function destruct(): void
     {
         if ($this->_saveBeforeDestruct) {
             $this->save();

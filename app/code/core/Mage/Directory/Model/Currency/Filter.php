@@ -40,7 +40,7 @@ class Mage_Directory_Model_Currency_Filter
      *
      * @param double $rate
      */
-    public function setRate($rate)
+    public function setRate($rate): void
     {
         $this->_rate = $rate;
     }

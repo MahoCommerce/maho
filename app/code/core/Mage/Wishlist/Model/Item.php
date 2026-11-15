@@ -614,7 +614,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
      * Sets custom option download url
      * @param string $url
      */
-    public function setCustomDownloadUrl($url)
+    public function setCustomDownloadUrl($url): void
     {
         $this->_customOptionDownloadUrl = $url;
     }

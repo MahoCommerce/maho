@@ -143,7 +143,7 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
     /**
      * Register data required by catalog product delete process
      */
-    protected function _registerCatalogProductDeleteEvent(Mage_Index_Model_Event $event)
+    protected function _registerCatalogProductDeleteEvent(Mage_Index_Model_Event $event): void
     {
         /** @var Mage_Catalog_Model_Product $product */
         $product = $event->getDataObject();
@@ -157,7 +157,7 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
     /**
      * Register data required by catalog product save process
      */
-    protected function _registerCatalogProductSaveEvent(Mage_Index_Model_Event $event)
+    protected function _registerCatalogProductSaveEvent(Mage_Index_Model_Event $event): void
     {
         /** @var Mage_Catalog_Model_Product $product */
         $product      = $event->getDataObject();
@@ -177,7 +177,7 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
         }
     }
 
-    protected function _registerCatalogProductMassActionEvent(Mage_Index_Model_Event $event)
+    protected function _registerCatalogProductMassActionEvent(Mage_Index_Model_Event $event): void
     {
         $actionObject = $event->getDataObject();
         $attributes   = $this->_getDependentAttributes();

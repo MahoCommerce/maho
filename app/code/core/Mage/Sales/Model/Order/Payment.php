@@ -1239,7 +1239,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
      *
      * @param array $data
      */
-    protected function _updateTotals($data)
+    protected function _updateTotals($data): void
     {
         foreach ($data as $key => $amount) {
             if ($amount !== null) {
@@ -1412,7 +1412,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
      * @param string $type
      * @param Mage_Sales_Model_Order_Payment_Transaction|false $transactionBasedOn
      */
-    protected function _generateTransactionId($type, $transactionBasedOn = false)
+    protected function _generateTransactionId($type, $transactionBasedOn = false): void
     {
         if (!$this->getParentTransactionId() && !$this->getTransactionId() && $transactionBasedOn) {
             $this->setParentTransactionId($transactionBasedOn->getTxnId());
@@ -1473,7 +1473,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
      * Generate billing agreement object if there is billing agreement data
      * Adds it to order as related object
      */
-    protected function _createBillingAgreement()
+    protected function _createBillingAgreement(): void
     {
         if ($this->getBillingAgreementData()) {
             $order = $this->getOrder();
@@ -1496,7 +1496,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
      * @param string $key
      * @param string $value
      */
-    public function setTransactionAdditionalInfo($key, $value)
+    public function setTransactionAdditionalInfo($key, $value): void
     {
         if (is_array($key)) {
             $this->_transactionAdditionalInfo = $key;

@@ -378,7 +378,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         return $this;
     }
 
-    protected function _initBillingAddressFromOrder(Mage_Sales_Model_Order $order)
+    protected function _initBillingAddressFromOrder(Mage_Sales_Model_Order $order): void
     {
         $this->getQuote()->getBillingAddress()->setCustomerAddressId(null);
         Mage::helper('core')->copyFieldset(
@@ -389,7 +389,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         );
     }
 
-    protected function _initShippingAddressFromOrder(Mage_Sales_Model_Order $order)
+    protected function _initShippingAddressFromOrder(Mage_Sales_Model_Order $order): void
     {
         $orderShippingAddress = $order->getShippingAddress();
         $quoteShippingAddress = $this->getQuote()->getShippingAddress()
@@ -1219,7 +1219,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         return $this;
     }
 
-    public function setShippingAsBilling($flag)
+    public function setShippingAsBilling($flag): static
     {
         /** @var Mage_Checkout_Service_Cart $cartService */
         $cartService = Mage::getService('checkout/cart');
@@ -1271,14 +1271,14 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         return $this;
     }
 
-    public function setShippingMethod($method)
+    public function setShippingMethod($method): static
     {
         $this->getShippingAddress()->setShippingMethod($method);
         $this->setRecollect(true);
         return $this;
     }
 
-    public function resetShippingMethod()
+    public function resetShippingMethod(): static
     {
         $this->getShippingAddress()->setShippingMethod(null);
         $this->getShippingAddress()->removeAllShippingRates();
@@ -1288,19 +1288,19 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
     /**
      * Collect shipping data for quote shipping address
      */
-    public function collectShippingRates()
+    public function collectShippingRates(): static
     {
         $this->getQuote()->getShippingAddress()->setCollectShippingRates();
         $this->collectRates();
         return $this;
     }
 
-    public function collectRates()
+    public function collectRates(): void
     {
         $this->getQuote()->collectTotals();
     }
 
-    public function setPaymentMethod($method)
+    public function setPaymentMethod($method): static
     {
         $this->getQuote()->getPayment()->setMethod($method);
         return $this;
@@ -1311,14 +1311,14 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
      *
      * @throws Mage_Core_Exception when the method is not available for the quote, or refuses the data
      */
-    public function setPaymentData($data)
+    public function setPaymentData($data): static
     {
         $data['method'] ??= $this->getQuote()->getPayment()->getMethod();
         Mage::getService('checkout/cart')->selectPaymentMethod($this->getQuote(), $data, Mage_Checkout_Model_Actor::Staff);
         return $this;
     }
 
-    public function applyCoupon($code)
+    public function applyCoupon($code): static
     {
         $code = trim((string) $code);
         if ($code === '') {
@@ -1336,7 +1336,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         return $this;
     }
 
-    public function setAccountData($accountData)
+    public function setAccountData($accountData): static
     {
         $customer   = $this->getQuote()->getCustomer();
         $form       = $this->_getCustomerForm();
@@ -1524,7 +1524,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
     /**
      * Prepare item options
      */
-    protected function _prepareQuoteItems()
+    protected function _prepareQuoteItems(): static
     {
         foreach ($this->getQuote()->getAllItems() as $item) {
             $options = [];

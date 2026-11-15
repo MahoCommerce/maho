@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -40,7 +41,7 @@ abstract class Mage_Core_Model_Resource_Type_Abstract
      *
      * @param String $name
      */
-    public function setName($name)
+    public function setName($name): void
     {
         $this->_name = $name;
     }

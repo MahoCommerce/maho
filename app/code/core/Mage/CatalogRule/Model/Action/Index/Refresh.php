@@ -59,7 +59,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     /**
      * Set connection
      */
-    protected function _setConnection(Maho\Db\Adapter\AdapterInterface $connection)
+    protected function _setConnection(Maho\Db\Adapter\AdapterInterface $connection): void
     {
         $this->_connection = $connection;
     }
@@ -67,7 +67,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     /**
      * Set factory
      */
-    protected function _setFactory(Mage_Core_Model_Factory $factory)
+    protected function _setFactory(Mage_Core_Model_Factory $factory): void
     {
         $this->_factory = $factory;
     }
@@ -75,7 +75,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     /**
      * Set resource
      */
-    protected function _setResource(Mage_Core_Model_Resource_Db_Abstract $resource)
+    protected function _setResource(Mage_Core_Model_Resource_Db_Abstract $resource): void
     {
         $this->_resource = $resource;
     }
@@ -83,7 +83,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     /**
      * Run reindex
      */
-    public function execute()
+    public function execute(): void
     {
         $this->_app->dispatchEvent('catalogrule_before_apply', ['resource' => $this->_resource]);
 
@@ -112,7 +112,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     /**
      * Create temporary table
      */
-    protected function _createTemporaryTable()
+    protected function _createTemporaryTable(): void
     {
         $this->_connection->dropTemporaryTable($this->_getTemporaryTable());
         $table = $this->_connection->newTable($this->_getTemporaryTable())
@@ -501,7 +501,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
      *
      * @param int $timestamp
      */
-    protected function _reindex(Mage_Core_Model_Website $website, $timestamp)
+    protected function _reindex(Mage_Core_Model_Website $website, $timestamp): void
     {
         // No rate, no price to discount: the website is not selling, so it keeps no rule prices either
         if ($this->_websitePriceRate($website) === null) {
@@ -563,7 +563,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     /**
      * Prepare affected product
      */
-    protected function _prepareAffectedProduct()
+    protected function _prepareAffectedProduct(): void
     {
         $modelCondition = $this->_factory->getModel('catalog/product_condition');
 

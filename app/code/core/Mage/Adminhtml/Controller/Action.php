@@ -121,13 +121,13 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
         return $this;
     }
 
-    protected function _addLeft(Mage_Core_Block_Abstract $block)
+    protected function _addLeft(Mage_Core_Block_Abstract $block): static
     {
         $this->getLayout()->getBlock('left')->append($block);
         return $this;
     }
 
-    protected function _addJs(Mage_Core_Block_Abstract $block)
+    protected function _addJs(Mage_Core_Block_Abstract $block): static
     {
         $this->getLayout()->getBlock('js')->append($block);
         return $this;

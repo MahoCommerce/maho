@@ -436,7 +436,7 @@ class Mage_Checkout_Model_Type_Onepage
      * Mage_Sales_Service_Order::validateQuote() checks the quote when the order is placed. A subclass can add a check
      * of the one page checkout here.
      */
-    public function validate() {}
+    public function validate(): void {}
 
     /**
      * Prepare quote for guest checkout order submit
@@ -457,7 +457,7 @@ class Mage_Checkout_Model_Type_Onepage
      * Prepare quote for customer registration and customer order submit. Mage_Sales_Service_Order::submit() adds the
      * addresses to the address book.
      */
-    protected function _prepareNewCustomerQuote()
+    protected function _prepareNewCustomerQuote(): void
     {
         $quote = $this->getQuote();
         $customer = $quote->getCustomer();
@@ -473,7 +473,7 @@ class Mage_Checkout_Model_Type_Onepage
      * Prepare quote for customer order submit. Mage_Sales_Service_Order::submit() adds the addresses to the address
      * book.
      */
-    protected function _prepareCustomerQuote()
+    protected function _prepareCustomerQuote(): void
     {
         $quote = $this->getQuote();
         $customer = $this->getCustomerSession()->getCustomer();

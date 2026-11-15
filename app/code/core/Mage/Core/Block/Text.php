@@ -35,7 +35,7 @@ class Mage_Core_Block_Text extends Mage_Core_Block_Abstract
      * @param string $text
      * @param bool $before
      */
-    public function addText($text, $before = false)
+    public function addText($text, $before = false): void
     {
         if ($before) {
             $this->setText($text . $this->getText());

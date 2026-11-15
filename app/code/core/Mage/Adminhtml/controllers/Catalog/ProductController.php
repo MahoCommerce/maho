@@ -147,7 +147,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     /**
      * Output specified blocks as a text list
      */
-    protected function _outputBlocks()
+    protected function _outputBlocks(): void
     {
         $blocks = func_get_args();
         $output = $this->getLayout()->createBlock('adminhtml/text_list');
@@ -676,7 +676,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      *
      * @param array $stockData
      */
-    protected function _filterStockData(&$stockData)
+    protected function _filterStockData(&$stockData): void
     {
         if (is_null($stockData)) {
             return;

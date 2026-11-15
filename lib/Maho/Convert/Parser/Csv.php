@@ -55,7 +55,7 @@ class Csv extends AbstractParser
     }
 
     // experimental code
-    public function parseTest()
+    public function parseTest(): static
     {
         $fDel = $this->getVar('delimiter', ',');
         $fEnc = $this->getVar('enclose', '"');

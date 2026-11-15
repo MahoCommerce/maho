@@ -70,7 +70,7 @@ class Mage_Rss_Block_Catalog_Tag extends Mage_Rss_Block_Catalog_Abstract
      *
      * @param array $args
      */
-    public function addTaggedItemXml($args)
+    public function addTaggedItemXml($args): void
     {
         $product = $args['product'];
 

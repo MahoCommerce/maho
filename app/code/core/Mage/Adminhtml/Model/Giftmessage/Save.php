@@ -284,7 +284,7 @@ class Mage_Adminhtml_Model_Giftmessage_Save extends \Maho\DataObject
         return $this;
     }
 
-    public function importAllowQuoteItemsFromItems($items)
+    public function importAllowQuoteItemsFromItems($items): static
     {
         $allowedItems = $this->getAllowQuoteItems();
         $deleteAllowedItems = [];

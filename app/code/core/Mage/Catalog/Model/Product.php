@@ -1630,7 +1630,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      * @param mixed  $value New attribute value
      * @param int    $store Store ID
      */
-    public function addAttributeUpdate($code, $value, $store)
+    public function addAttributeUpdate($code, $value, $store): void
     {
         $oldValue = $this->getData($code);
         $oldStore = $this->getStoreId();
@@ -1857,7 +1857,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @param array $options Array of options
      */
-    public function setCustomOptions(array $options)
+    public function setCustomOptions(array $options): void
     {
         $this->_customOptions = $options;
     }
