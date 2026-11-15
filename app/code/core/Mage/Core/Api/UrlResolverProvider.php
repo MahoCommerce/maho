@@ -38,15 +38,8 @@ final class UrlResolverProvider extends \Maho\ApiPlatform\Provider
             $path = $context['filters']['path'] ?? '';
         }
 
-        // Clean the path
         $path = trim($path, '/');
-
-        // Empty path = homepage
-        if (empty($path)) {
-            $path = 'home';
-        }
-
-        $result = $this->resolveUrl($path);
+        $result = $path === '' ? $this->resolveHomePage() : $this->resolveUrl($path);
 
         // For GetCollection, return as array (empty if not found)
         if ($operation instanceof \ApiPlatform\Metadata\CollectionOperationInterface) {
@@ -93,23 +86,9 @@ final class UrlResolverProvider extends \Maho\ApiPlatform\Provider
             }
         }
 
-        // Check for CMS page by identifier directly
-        $cmsPage = \Mage::getModel('cms/page');
-        $pageId = $cmsPage->checkIdentifier($path, $storeId);
-
-        // Also try with .html suffix (common in Maho/Magento)
-        if (!$pageId) {
-            $pageId = $cmsPage->checkIdentifier($path . '.html', $storeId);
-        }
-
-        if ($pageId) {
-            $cmsPage->load($pageId);
-            if ($cmsPage->getIsActive() && !\Mage::helper('cms/page')->isNoRoutePage($cmsPage)) {
-                $result->type = 'cms_page';
-                $result->id = (int) $cmsPage->getId();
-                $result->identifier = $cmsPage->getIdentifier();
-                return $result;
-            }
+        $cmsResult = $this->resolveCmsPage($path, $storeId);
+        if ($cmsResult) {
+            return $cmsResult;
         }
 
         // Check for category by URL key
@@ -141,6 +120,37 @@ final class UrlResolverProvider extends \Maho\ApiPlatform\Provider
 
         // Not found
         $result->type = 'not_found';
+        return $result;
+    }
+
+    /**
+     * Resolve the CMS page that the store shows at its root URL.
+     */
+    private function resolveHomePage(): UrlResolveResult
+    {
+        $storeId = StoreContext::getStoreId();
+        $identifier = \Mage::helper('cms/page')->getConfigPageIdentifier(\Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE, $storeId);
+        return ($identifier !== '' ? $this->resolveCmsPage($identifier, $storeId) : null) ?? new UrlResolveResult();
+    }
+
+    private function resolveCmsPage(string $identifier, int $storeId): ?UrlResolveResult
+    {
+        $cmsPage = \Mage::getModel('cms/page');
+        $pageId = $cmsPage->checkIdentifier($identifier, $storeId)
+            ?: $cmsPage->checkIdentifier($identifier . '.html', $storeId);
+        if (!$pageId) {
+            return null;
+        }
+
+        $cmsPage->load($pageId);
+        if (!$cmsPage->getIsActive() || \Mage::helper('cms/page')->isNoRoutePage($cmsPage)) {
+            return null;
+        }
+
+        $result = new UrlResolveResult();
+        $result->type = 'cms_page';
+        $result->id = (int) $cmsPage->getId();
+        $result->identifier = $cmsPage->getIdentifier();
         return $result;
     }
 

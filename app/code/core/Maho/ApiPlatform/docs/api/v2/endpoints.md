@@ -845,4 +845,6 @@ The API and the product page use the same rules. `POST` gives a 404 when the sto
 |--------|----------|------|-------------|
 | GET | `/url-resolver?path=/some-page` | None | Resolve URL to entity |
 
+An empty path or `/` resolves to the CMS page that **Default Pages > CMS Home Page** names for the store, as the storefront does at its root URL.
+
 A product or a category that the storefront does not show resolves to `not_found`: a disabled product, a product that is not visible or not in the website of the store, an inactive category and a category outside the tree of the store.

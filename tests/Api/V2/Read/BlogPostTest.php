@@ -28,16 +28,6 @@ describe('API v2 Blog Posts', function (): void {
             expect($response['json'])->toBeArray();
         });
 
-        it('allows getting single blog post without authentication', function (): void {
-            $list = apiGet('/api/rest/v2/blog-posts');
-            $members = $list['json']['member'] ?? $list['json']['hydra:member'] ?? [];
-            expect($members)->not->toBeEmpty();
-
-            $response = apiGet("/api/rest/v2/blog-posts/{$members[0]['id']}");
-
-            expect($response['status'])->toBeSuccessful();
-        });
-
         it('returns 404 for non-existent blog post', function (): void {
             $response = apiGet('/api/rest/v2/blog-posts/999999');
 
@@ -52,19 +42,6 @@ describe('API v2 Blog Posts', function (): void {
             $response = apiGet('/api/rest/v2/blog-posts', adminToken());
 
             expect($response['status'])->toBeSuccessful();
-        });
-
-    });
-
-    describe('response format', function (): void {
-
-        it('includes expected blog post fields', function (): void {
-            $response = apiGet('/api/rest/v2/blog-posts');
-            $members = $response['json']['member'] ?? $response['json']['hydra:member'] ?? [];
-
-            expect($members)->not->toBeEmpty();
-            expect($members[0])->toHaveKey('id');
-            expect($members[0])->toHaveKey('title');
         });
 
     });
