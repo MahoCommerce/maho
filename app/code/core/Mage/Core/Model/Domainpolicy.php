@@ -128,11 +128,8 @@ class Mage_Core_Model_Domainpolicy
 
     /**
      * Return string representation for policy code
-     *
-     * @param string $policyCode
-     * @return string|null
      */
-    protected function _getDomainPolicyByCode($policyCode)
+    protected function _getDomainPolicyByCode(int $policyCode): ?string
     {
         $policy = match ($policyCode) {
             self::FRAME_POLICY_ALLOW => null,

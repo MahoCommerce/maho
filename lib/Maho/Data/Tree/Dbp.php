@@ -57,9 +57,9 @@ class Dbp extends Tree
      * @var string
      */
     protected $_idField;
-    protected $_pathField;
-    protected $_orderField;
-    protected $_levelField;
+    protected ?string $_pathField = null;
+    protected ?string $_orderField = null;
+    protected ?string $_levelField = null;
 
     /**
      * Db tree constructor

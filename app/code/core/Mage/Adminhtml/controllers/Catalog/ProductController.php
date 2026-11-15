@@ -569,7 +569,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      * Initialize product before saving
      * @throws Mage_Core_Exception|Exception
      */
-    protected function _initProductSave()
+    protected function _initProductSave(): Mage_Catalog_Model_Product
     {
         $product     = $this->_initProduct();
         $productData = $this->getRequest()->getPost('product');

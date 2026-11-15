@@ -30,10 +30,11 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     }
 
     #[Maho\Config\Route('/admin/cms_wysiwyg_images/index')]
-    public function indexAction()
+    public function indexAction(): void
     {
         if ($this->getRequest()->isAjax()) {
-            return $this->_forward('popup');
+            $this->_forward('popup');
+            return;
         }
 
         $storeId = (int) $this->getRequest()->getParam('store');

@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Maho\Convert;
 
+use Maho\Convert\Container\ContainerInterface;
 use Maho\Exception as MahoException;
 
 class Exception extends MahoException
@@ -20,19 +21,19 @@ class Exception extends MahoException
     public const ERROR = 'ERROR';
     public const FATAL = 'FATAL';
 
-    protected $_container;
+    protected ?ContainerInterface $_container = null;
 
     protected $_level;
 
     protected $_position;
 
-    public function setContainer($container): static
+    public function setContainer(?ContainerInterface $container): static
     {
         $this->_container = $container;
         return $this;
     }
 
-    public function getContainer()
+    public function getContainer(): ?ContainerInterface
     {
         return $this->_container;
     }

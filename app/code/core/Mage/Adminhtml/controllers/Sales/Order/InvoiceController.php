@@ -13,20 +13,18 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Get requested items qty's from request
      */
-    protected function _getItemQtys()
+    protected function _getItemQtys(): array
     {
         $data = $this->getRequest()->getParam('invoice');
-        $qtys = $data['items'] ?? [];
-        return $qtys;
+        return (array) ($data['items'] ?? []);
     }
 
     /**
      * Initialize invoice model instance
      *
-     * @return Mage_Sales_Model_Order_Invoice|false
      * @throws Mage_Core_Exception
      */
-    protected function _initInvoice($update = false)
+    protected function _initInvoice(bool $update = false): Mage_Sales_Model_Order_Invoice|false
     {
         $this->_title($this->__('Sales'))->_title($this->__('Invoices'));
 

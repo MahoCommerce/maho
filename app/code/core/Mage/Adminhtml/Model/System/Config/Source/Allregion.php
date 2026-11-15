@@ -10,10 +10,10 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Allregion
 {
-    protected $_countries;
+    protected ?array $_countries = null;
     protected ?array $_options = null;
 
-    public function toOptionArray($isMultiselect = false)
+    public function toOptionArray(bool $isMultiselect = false): array
     {
         if (!$this->_options) {
             $countriesArray = Mage::getResourceModel('directory/country_collection')->load()
@@ -47,7 +47,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Allregion
         return $options;
     }
 
-    public function sortRegionCountries($a, $b)
+    public function sortRegionCountries(string $a, string $b): int
     {
         return strcmp($this->_countries[$a], $this->_countries[$b]);
     }

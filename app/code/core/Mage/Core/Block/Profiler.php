@@ -63,7 +63,7 @@ class Mage_Core_Block_Profiler extends Mage_Core_Block_Abstract
         }
 
         if ($sqlProfiler) {
-            $out .= print_r($sqlProfiler, 1);
+            $out .= print_r($sqlProfiler, true);
         }
 
         $out .= '</div>';

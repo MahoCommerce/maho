@@ -122,7 +122,7 @@ class Fieldset extends AbstractElement
     public function setSortElementsByAttribute($key, $direction = SORT_ASC)
     {
         $this->_sortChildrenByKey = $key;
-        $this->_sortDirection = $direction;
+        $this->_sortChildrenDirection = $direction;
         return $this;
     }
 

@@ -56,12 +56,12 @@ it('copies the VAT number and the result of its check to the shipping address', 
 it('does not save the cart again when the admin order create reloads with the same billing address', function () {
     $create = Mage::getModel('adminhtml/sales_order_create')->setQuote($this->quote);
 
-    $create->setShippingAsBilling(1);
+    $create->setShippingAsBilling(true);
     $afterCopy = $this->saves->count;
-    $create->setShippingAsBilling(1);
+    $create->setShippingAsBilling(true);
     $afterReload = $this->saves->count;
     $this->quote->getBillingAddress()->setCity('Pasadena');
-    $create->setShippingAsBilling(1);
+    $create->setShippingAsBilling(true);
 
     expect($afterCopy)->toBe(1)
         ->and($afterReload)->toBe(1)

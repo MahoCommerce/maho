@@ -44,7 +44,7 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
     /**
      * Process object which currently working with event
      */
-    protected $_process = null;
+    protected ?Mage_Index_Model_Process $_process = null;
 
     /**
      * Initialize resource

@@ -259,10 +259,8 @@ class Cache
 
     /**
      * Cleanup objects by tags
-     *
-     * @param array|string $tags
      */
-    public function deleteByTags($tags)
+    public function deleteByTags(array|string $tags): bool
     {
         if (is_string($tags)) {
             $tags = [$tags];
@@ -302,7 +300,7 @@ class Cache
         return false;
     }
 
-    public function findByIds($ids)
+    public function findByIds(array $ids): array
     {
         $objects = [];
         foreach ($this->_objects as $idx => $obj) {
@@ -313,7 +311,7 @@ class Cache
         return $objects;
     }
 
-    public function findByHash($hash)
+    public function findByHash(string $hash): ?object
     {
         return isset($this->_hashes[$hash]) ? $this->_objects[$this->_hashes[$hash]] : null;
     }
@@ -343,10 +341,8 @@ class Cache
 
     /**
      * Find by class name for objects of subclasses too
-     *
-     * @param string $class
      */
-    public function findByClass($class)
+    public function findByClass(string $class): array
     {
         $objects = [];
         foreach ($this->_objects as $idx => $object) {
@@ -357,7 +353,7 @@ class Cache
         return $objects;
     }
 
-    public function debug($idx, $object = null): void
+    public function debug(string $idx, ?object $object = null): void
     {
         $bt = debug_backtrace();
         $debug = [];

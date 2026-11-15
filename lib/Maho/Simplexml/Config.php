@@ -484,11 +484,8 @@ class Config
      * Create node by $path and set its value.
      *
      * @param string $path separated by slashes
-     * @param string $value
-     * @param boolean $overwrite
-     * @return $this
      */
-    public function setNode($path, $value, $overwrite = true)
+    public function setNode(string $path, mixed $value, bool $overwrite = true): static
     {
         $this->_xml->setNode($path, $value, $overwrite);
         return $this;

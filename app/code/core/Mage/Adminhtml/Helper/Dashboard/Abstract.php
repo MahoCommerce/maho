@@ -8,6 +8,8 @@
  * @package Mage_Adminhtml
  */
 
+declare(strict_types=1);
+
 abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper_Data
 {
     /**
@@ -24,7 +26,7 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
      */
     protected $_params = [];
 
-    public function getCollection()
+    public function getCollection(): \Maho\Data\Collection|array
     {
         if (is_null($this->_collection)) {
             $this->_initCollection();
@@ -32,7 +34,7 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
         return $this->_collection;
     }
 
-    abstract protected function _initCollection();
+    abstract protected function _initCollection(): void;
 
     /**
      * Returns collection items
@@ -44,12 +46,12 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
         return is_array($this->getCollection()) ? $this->getCollection() : $this->getCollection()->getItems();
     }
 
-    public function getCount()
+    public function getCount(): int
     {
         return count($this->getItems());
     }
 
-    public function getColumn($index)
+    public function getColumn(string $index): array
     {
         $result = [];
         foreach ($this->getItems() as $item) {
@@ -68,7 +70,7 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
         return $result;
     }
 
-    public function setParam($name, $value): void
+    public function setParam(string $name, mixed $value): void
     {
         $this->_params[$name] = $value;
     }
@@ -83,7 +85,7 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
         return $this->_params[$name] ?? null;
     }
 
-    public function getParams()
+    public function getParams(): array
     {
         return $this->_params;
     }

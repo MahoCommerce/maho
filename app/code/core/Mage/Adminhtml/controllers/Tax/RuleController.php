@@ -92,12 +92,13 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/tax_rule/save')]
-    public function saveAction()
+    public function saveAction(): void
     {
         $request = $this->getRequest();
         $postData = $request->getPost();
         if (!$postData) {
-            return $this->getResponse()->setRedirect($this->getUrl('*/tax_rule'));
+            $this->getResponse()->setRedirect($this->getUrl('*/tax_rule'));
+            return;
         }
 
         /** @var Mage_Adminhtml_Model_Session $session */
@@ -116,10 +117,12 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
             $session->addSuccess($this->__('The tax rule has been saved.'));
 
             if ($request->getParam('back')) {
-                return $this->_redirect('*/*/edit', ['rule' => $rule->getId()]);
+                $this->_redirect('*/*/edit', ['rule' => $rule->getId()]);
+                return;
             }
 
-            return $this->_redirect('*/*/');
+            $this->_redirect('*/*/');
+            return;
         } catch (Mage_Core_Exception_Input $e) {
             foreach ($e->getErrors() as $error) {
                 $session->addError($error['message']);

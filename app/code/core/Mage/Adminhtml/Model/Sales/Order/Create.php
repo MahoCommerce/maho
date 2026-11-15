@@ -321,7 +321,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
 
         $quote = $this->getQuote();
         if (!$quote->isVirtual() && $this->getShippingAddress()->getSameAsBilling()) {
-            $this->setShippingAsBilling(1);
+            $this->setShippingAsBilling(true);
         }
 
         $this->setShippingMethod($order->getShippingMethod());
@@ -406,11 +406,9 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
     /**
      * Add the product of $orderItem to the quote, with the options of the order item.
      *
-     * @param int $qty
-     * @return Mage_Sales_Model_Quote_Item|$this
      * @throws Mage_Core_Exception when the cart refuses the product
      */
-    public function initFromOrderItem(Mage_Sales_Model_Order_Item $orderItem, $qty = null)
+    public function initFromOrderItem(Mage_Sales_Model_Order_Item $orderItem, ?float $qty = null): Mage_Sales_Model_Quote_Item|static
     {
         if (!$orderItem->getId()) {
             return $this;
@@ -479,9 +477,8 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
      * Retrieve customer wishlist model object
      *
      * @params bool $cacheReload pass cached wishlist object and get new one
-     * @return Mage_Wishlist_Model_Wishlist
      */
-    public function getCustomerWishlist($cacheReload = false)
+    public function getCustomerWishlist(bool $cacheReload = false): Mage_Wishlist_Model_Wishlist|false
     {
         if (!is_null($this->_wishlist) && !$cacheReload) {
             return $this->_wishlist;
@@ -545,7 +542,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         return $this->_compareList;
     }
 
-    public function getCustomerGroupId()
+    public function getCustomerGroupId(): ?int
     {
         $groupId = $this->getQuote()->getCustomerGroupId();
         if (!$groupId) {
@@ -1117,7 +1114,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         return $newInfoOptions;
     }
 
-    protected function _parseCustomPrice($price)
+    protected function _parseCustomPrice(mixed $price): float
     {
         $price = Mage::app()->getLocale()->getNumber($price);
         $price = $price > 0 ? $price : 0;
@@ -1219,7 +1216,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         return $this;
     }
 
-    public function setShippingAsBilling($flag): static
+    public function setShippingAsBilling(bool $flag): static
     {
         /** @var Mage_Checkout_Service_Cart $cartService */
         $cartService = Mage::getService('checkout/cart');
@@ -1271,7 +1268,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         return $this;
     }
 
-    public function setShippingMethod($method): static
+    public function setShippingMethod(?string $method): static
     {
         $this->getShippingAddress()->setShippingMethod($method);
         $this->setRecollect(true);
@@ -1300,7 +1297,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         $this->getQuote()->collectTotals();
     }
 
-    public function setPaymentMethod($method): static
+    public function setPaymentMethod(?string $method): static
     {
         $this->getQuote()->getPayment()->setMethod($method);
         return $this;
@@ -1311,14 +1308,14 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
      *
      * @throws Mage_Core_Exception when the method is not available for the quote, or refuses the data
      */
-    public function setPaymentData($data): static
+    public function setPaymentData(array $data): static
     {
         $data['method'] ??= $this->getQuote()->getPayment()->getMethod();
         Mage::getService('checkout/cart')->selectPaymentMethod($this->getQuote(), $data, Mage_Checkout_Model_Actor::Staff);
         return $this;
     }
 
-    public function applyCoupon($code): static
+    public function applyCoupon(?string $code): static
     {
         $code = trim((string) $code);
         if ($code === '') {
@@ -1336,7 +1333,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         return $this;
     }
 
-    public function setAccountData($accountData): static
+    public function setAccountData(array $accountData): static
     {
         $customer   = $this->getQuote()->getCustomer();
         $form       = $this->_getCustomerForm();

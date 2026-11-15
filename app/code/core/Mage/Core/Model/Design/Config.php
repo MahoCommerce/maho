@@ -10,7 +10,7 @@
 
 class Mage_Core_Model_Design_Config extends \Maho\Simplexml\Config
 {
-    protected $_designRoot;
+    protected ?string $_designRoot = null;
 
     /**
      * Assemble themes inheritance config

@@ -17,7 +17,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Image extends Mage_Adminhtml_Mo
     }
 
     #[\Override]
-    protected function addValidators(Mage_Core_Model_File_Uploader $uploader)
+    protected function addValidators(Mage_Core_Model_File_Uploader $uploader): void
     {
         parent::addValidators($uploader);
 

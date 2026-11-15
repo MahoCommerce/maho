@@ -13,6 +13,9 @@ use ArrayAccess;
 use JsonSerializable;
 use ReflectionClass;
 
+/**
+ * @implements ArrayAccess<string, mixed>
+ */
 class DataObject implements ArrayAccess, JsonSerializable
 {
     /**
@@ -24,9 +27,8 @@ class DataObject implements ArrayAccess, JsonSerializable
 
     /**
      * Data changes flag (true after setData|unsetData call)
-     * @var bool $_hasDataChange
      */
-    protected $_hasDataChanges = false;
+    protected bool $_hasDataChanges = false;
 
     /**
      * Name of object id field
@@ -59,7 +61,7 @@ class DataObject implements ArrayAccess, JsonSerializable
     /**
      * Map of fields to sync to other fields upon changing their data
      */
-    protected $_syncFieldsMap = [];
+    protected array $_syncFieldsMap = [];
 
     /**
      * @var array

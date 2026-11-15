@@ -15,11 +15,9 @@ class Variable extends AbstractTokenizer
 {
     /**
      * Tokenize string and return getted variable stack path
-     *
-     * @return array
      */
     #[\Override]
-    public function tokenize()
+    public function tokenize(): array
     {
         $actions = [];
         $parameterName = '';

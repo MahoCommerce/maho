@@ -84,7 +84,7 @@ class Mage_Adminhtml_Controller_Sales_Creditmemo extends Mage_Adminhtml_Controll
         }
     }
 
-    public function pdfcreditmemosAction()
+    public function pdfcreditmemosAction(): void
     {
         $creditmemosIds = $this->getRequest()->getPost('creditmemo_ids');
         if (!empty($creditmemosIds)) {
@@ -94,8 +94,9 @@ class Mage_Adminhtml_Controller_Sales_Creditmemo extends Mage_Adminhtml_Controll
                 ->load();
             $pdf = Mage::getModel('sales/order_pdf_creditmemo')->getPdf($invoices);
 
-            return $this->_prepareDownloadResponse('creditmemo' . Mage::app()->getLocale()->utcToStore()->format('Y-m-d_H-i-s')
+            $this->_prepareDownloadResponse('creditmemo' . Mage::app()->getLocale()->utcToStore()->format('Y-m-d_H-i-s')
                 . '.pdf', $pdf, 'application/pdf');
+            return;
         }
         $this->_redirect('*/*/');
     }

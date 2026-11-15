@@ -15,8 +15,8 @@ class Mage_Core_Controller_Varien_Exception extends Exception
     public const RESULT_FORWARD  = '_forward';
     public const RESULT_REDIRECT = '_redirect';
 
-    protected $_resultCallback       = null;
-    protected $_resultCallbackParams = [];
+    protected ?string $_resultCallback = null;
+    protected array $_resultCallbackParams = [];
     protected string $_defaultActionName    = 'noroute';
     protected array $_flags                = [];
 
