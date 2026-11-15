@@ -137,24 +137,19 @@ class Ftp extends \Maho\Io
      * Create a directory
      *
      * @todo implement $mode and $recursive
-     * @param string $dir
-     * @param int $mode
-     * @param boolean $recursive
      * @return string|false The name of the new directory
      */
     #[\Override]
-    public function mkdir($dir, $mode = 0777, $recursive = true): string|false
+    public function mkdir(string $dir, int $mode = 0777, bool $recursive = true): string|false
     {
         return @ftp_mkdir($this->_conn, $dir);
     }
 
     /**
      * Delete a directory
-     *
-     * @param string $dir
      */
     #[\Override]
-    public function rmdir($dir, bool $recursive = false): bool
+    public function rmdir(string $dir, bool $recursive = false): bool
     {
         return @ftp_rmdir($this->_conn, $dir);
     }
@@ -170,11 +165,9 @@ class Ftp extends \Maho\Io
 
     /**
      * Change current working directory
-     *
-     * @param string $dir
      */
     #[\Override]
-    public function cd($dir): bool
+    public function cd(string $dir): bool
     {
         return @ftp_chdir($this->_conn, $dir);
     }
@@ -182,11 +175,10 @@ class Ftp extends \Maho\Io
     /**
      * Read a file to result, file or stream
      *
-     * @param string $filename
      * @param string|resource|null $dest destination file name, stream, or if null will return file contents
      */
     #[\Override]
-    public function read($filename, $dest = null): string|bool
+    public function read(string $filename, mixed $dest = null): string|bool
     {
         if (is_string($dest)) {
             $result = ftp_get($this->_conn, $dest, $filename, $this->_config['file_mode']);
@@ -216,11 +208,10 @@ class Ftp extends \Maho\Io
     /**
      * Write a file from string, file or stream
      *
-     * @param string $filename
      * @param string|resource $src filename, string data or source stream
      */
     #[\Override]
-    public function write($filename, $src, ?int $mode = null): bool
+    public function write(string $filename, mixed $src, ?int $mode = null): bool
     {
         if (is_string($src) && is_readable($src)) {
             return @ftp_put($this->_conn, $filename, $src, $this->_config['file_mode']);
@@ -244,23 +235,18 @@ class Ftp extends \Maho\Io
 
     /**
      * Delete a file
-     *
-     * @param string $filename
      */
     #[\Override]
-    public function rm($filename): bool
+    public function rm(string $filename): bool
     {
         return @ftp_delete($this->_conn, $filename);
     }
 
     /**
      * Rename or move a directory or a file
-     *
-     * @param string $src
-     * @param string $dest
      */
     #[\Override]
-    public function mv($src, $dest): bool
+    public function mv(string $src, string $dest): bool
     {
         return @ftp_rename($this->_conn, $src, $dest);
     }
@@ -268,12 +254,10 @@ class Ftp extends \Maho\Io
     /**
      * Change mode of a directory or a file
      *
-     * @param string $filename
-     * @param int $mode
      * @return int|false The new mode
      */
     #[\Override]
-    public function chmod($filename, $mode): int|false
+    public function chmod(string $filename, int $mode): int|false
     {
         return @ftp_chmod($this->_conn, $mode, $filename);
     }

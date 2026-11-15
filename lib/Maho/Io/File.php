@@ -105,12 +105,8 @@ class File extends \Maho\Io
     /**
      * Open file in stream mode
      * For set folder for file use open method
-     *
-     * @param string $fileName
-     * @param string $mode
-     * @return bool
      */
-    public function streamOpen($fileName, $mode = 'w+', int $chmod = 0666)
+    public function streamOpen(string $fileName, string $mode = 'w+', int $chmod = 0666): bool
     {
         $writeableMode = preg_match('#^[wax]#i', $mode);
         if ($writeableMode && !is_writeable($this->_cwd)) {
@@ -192,10 +188,8 @@ class File extends \Maho\Io
 
     /**
      * Gets line from file pointer and parse for CSV fields
-     *
-     * @return array|false|null
      */
-    public function streamReadCsv(string $delimiter = ',', string $enclosure = '"')
+    public function streamReadCsv(string $delimiter = ',', string $enclosure = '"'): array|false
     {
         if (!$this->_streamHandler) {
             return false;
@@ -325,13 +319,9 @@ class File extends \Maho\Io
 
     /**
      * Create a directory
-     *
-     * @param string $dir
-     * @param int $mode
-     * @param bool $recursive
      */
     #[\Override]
-    public function mkdir($dir, $mode = 0777, $recursive = true): bool
+    public function mkdir(string $dir, int $mode = 0777, bool $recursive = true): bool
     {
         if ($this->_cwd) {
             chdir($this->_cwd);
@@ -349,11 +339,9 @@ class File extends \Maho\Io
 
     /**
      * Delete a directory
-     *
-     * @param string $dir
      */
     #[\Override]
-    public function rmdir($dir, bool $recursive = false): bool
+    public function rmdir(string $dir, bool $recursive = false): bool
     {
         if ($this->_cwd) {
             @chdir($this->_cwd);
@@ -404,11 +392,10 @@ class File extends \Maho\Io
     /**
      * Change current working directory
      *
-     * @param string $dir
      * @throws \Exception
      */
     #[\Override]
-    public function cd($dir): bool
+    public function cd(string $dir): bool
     {
         if (is_dir($dir)) {
             @chdir($this->_iwd);
@@ -424,11 +411,10 @@ class File extends \Maho\Io
      * If $dest is null the output will be returned.
      * Otherwise it will be saved to the file or stream and operation result is returned.
      *
-     * @param string $filename
      * @param string|resource $dest
      */
     #[\Override]
-    public function read($filename, $dest = null): string|bool
+    public function read(string $filename, mixed $dest = null): string|bool
     {
         if (!is_null($dest)) {
             chdir($this->_cwd);
@@ -447,14 +433,12 @@ class File extends \Maho\Io
     /**
      * Write a file from string, file or stream
      *
-     * @param string $filename
      * @param string|resource $src
-     * @param int $mode
      *
      * @throws \Exception
      */
     #[\Override]
-    public function write($filename, $src, $mode = null): int|bool
+    public function write(string $filename, mixed $src, ?int $mode = null): int|bool
     {
         $this->_assertInsideCwd($filename);
 
@@ -655,11 +639,9 @@ class File extends \Maho\Io
 
     /**
      * Delete a file
-     *
-     * @param string $filename
      */
     #[\Override]
-    public function rm($filename): bool
+    public function rm(string $filename): bool
     {
         $this->_assertInsideCwd($filename);
         if ($this->_cwd) {
@@ -674,12 +656,9 @@ class File extends \Maho\Io
 
     /**
      * Rename or move a directory or a file
-     *
-     * @param string $src
-     * @param string $dest
      */
     #[\Override]
-    public function mv($src, $dest): bool
+    public function mv(string $src, string $dest): bool
     {
         $this->_assertInsideCwd($dest);
         if ($this->_cwd) {
@@ -714,12 +693,9 @@ class File extends \Maho\Io
 
     /**
      * Change mode of a directory or a file
-     *
-     * @param string $filename
-     * @param int $mode
      */
     #[\Override]
-    public function chmod($filename, $mode): bool
+    public function chmod(string $filename, int $mode): bool
     {
         if ($this->_cwd) {
             chdir($this->_cwd);
