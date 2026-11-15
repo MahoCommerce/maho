@@ -10,7 +10,7 @@
 
 class Mage_Page_Block_Switch extends Mage_Core_Block_Template
 {
-    protected $_storeInUrl;
+    protected ?bool $_storeInUrl = null;
 
     /**
      * @return int

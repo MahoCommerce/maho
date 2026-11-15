@@ -29,7 +29,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
         $this->setVarNameFilter('product_filter');
     }
 
-    protected function _getStore()
+    protected function _getStore(): Mage_Core_Model_Store
     {
         $storeId = (int) $this->getRequest()->getParam('store', 0);
         return Mage::app()->getStore($storeId);

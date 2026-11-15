@@ -75,7 +75,7 @@ class Mage_Admin_Model_Rules extends Mage_Core_Model_Abstract
     /**
      * Check if the current rule is denied
      */
-    public function isDenied()
+    public function isDenied(): bool
     {
         return $this->getPermission() == self::RULE_PERMISSION_DENIED;
     }

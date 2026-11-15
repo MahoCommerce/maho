@@ -7,18 +7,6 @@ parameters:
 			path: app/Mage.php
 
 		-
-			rawMessage: 'Method Mage_Admin_Model_Acl_Assert_Ip::_isCleanIP() should return bool|null but return statement is missing.'
-			identifier: return.missing
-			count: 1
-			path: app/code/core/Mage/Admin/Model/Acl/Assert/Ip.php
-
-		-
-			rawMessage: 'Method Mage_Admin_Model_Acl_Assert_Time::_isCleanTime() should return bool|null but return statement is missing.'
-			identifier: return.missing
-			count: 1
-			path: app/code/core/Mage/Admin/Model/Acl/Assert/Time.php
-
-		-
 			rawMessage: 'Cannot call method getClassName() on SimpleXMLElement|false.'
 			identifier: method.nonObject
 			count: 1
@@ -49,46 +37,10 @@ parameters:
 			path: app/code/core/Mage/Admin/Model/Rules.php
 
 		-
-			rawMessage: 'Method Mage_Admin_Model_Rules::isDenied() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Admin/Model/Rules.php
-
-		-
 			rawMessage: 'Method Mage_Admin_Model_User::setPasskeyData() has parameter $data with no type specified.'
 			identifier: missingType.parameter
 			count: 1
 			path: app/code/core/Mage/Admin/Model/User.php
-
-		-
-			rawMessage: 'Method Mage_AdminNotification_Model_Resource_Inbox::parse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/AdminNotification/Model/Resource/Inbox.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Cache_Grid::decorateStatus() has parameter $column with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Cache/Grid.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Cache_Grid::decorateStatus() has parameter $isExport with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Cache/Grid.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Cache_Grid::decorateStatus() has parameter $row with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Cache/Grid.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Cache_Grid::decorateStatus() has parameter $value with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Cache/Grid.php
 
 		-
 			rawMessage: 'Parameter #1 $collection of method Mage_Adminhtml_Block_Widget_Grid::setCollection() expects Maho\Data\Collection\Db, Maho\Data\Collection given.'
@@ -97,70 +49,10 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Cache/Grid.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Block_Cache_Grid::$_invalidatedTypes has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Cache/Grid.php
-
-		-
 			rawMessage: 'Cannot call method addAttributeToSelect() on Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
 			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Category/Widget/Chooser.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Catalog_Category_Widget_Chooser::$_selectedCategories has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Category/Widget/Chooser.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main_Formgroup::_getSetId() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Attribute/Set/Main/Formgroup.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Catalog_Product_Composite_Configure::$_product has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Composite/Configure.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Created::getAttributes() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Created.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Created::getCloseButtonHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Created.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Created::getProductId() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Created.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Catalog_Product_Created::$_configurableProduct has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Created.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Catalog_Product_Created::$_product has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Created.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit::getIsGrouped() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit::getProductId() has no return type specified.'
@@ -173,36 +65,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Action_Attribute_Tab_Websites::getGroupCollection() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Action/Attribute/Tab/Websites.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Action_Attribute_Tab_Websites::getStoreCollection() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Action/Attribute/Tab/Websites.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Action_Attribute_Tab_Websites::getWebsiteCollection() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Action/Attribute/Tab/Websites.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Ajax_Serializer::getProductsJSON() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Ajax/Serializer.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Inventory::getBackordersOption() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Inventory.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Inventory::getConfigFieldValue() has no return type specified.'
@@ -229,12 +91,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Inventory.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Inventory::getFieldSuffix() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Inventory.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Inventory::getFieldValue() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -247,49 +103,7 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Inventory.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Inventory::isConfigurable() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Inventory.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Inventory::isNew() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Inventory.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options::getAddButtonHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options::getOptionsBoxHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option::getAddButtonId() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options/Option.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option::getDeleteButtonHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options/Option.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option::getItemCount() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options/Option.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option::getOptionValues() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options/Option.php
@@ -325,130 +139,16 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options/Option.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option::setItemCount() has parameter $itemCount with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options/Option.php
-
-		-
-			rawMessage: 'Parameter #1 $id of method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option::getCheckboxScopeHtml() expects string, int|null given.'
-			identifier: argument.type
-			count: 4
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options/Option.php
-
-		-
-			rawMessage: 'Parameter #4 $selectId of method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option::getCheckboxScopeHtml() expects string, int|null given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options/Option.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option::$_itemCount has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options/Option.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option::$_product has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options/Option.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option::$_productInstance has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options/Option.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Type_Select::getAddButtonHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options/Type/Select.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Type_Select::getDeleteButtonHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options/Type/Select.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Settings::getContinueUrl() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Settings.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid::_getSelectedProducts() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Super/Config/Grid.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid::getOptions() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Super/Config/Grid.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid::getOptions() has parameter $attribute with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Super/Config/Grid.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid_Renderer_Checkbox::getAttributesJson() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Super/Config/Grid/Renderer/Checkbox.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs::setAttributeTabBlock() has parameter $attributeTabBlock with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tabs.php
-
-		-
 			rawMessage: Property Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs::$_attributeTabBlock has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tabs.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Frontend_Product_Watermark::_getFooterHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Frontend/Product/Watermark.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Frontend_Product_Watermark::_getFooterHtml() has parameter $element with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Frontend/Product/Watermark.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Frontend_Product_Watermark::_getHeaderHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Frontend/Product/Watermark.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Frontend_Product_Watermark::_getHeaderHtml() has parameter $element with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Frontend/Product/Watermark.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Grid::_getStore() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Grid.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Price::_getTaxObservingCode() has parameter $attribute with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Helper/Form/Price.php
 
 		-
 			rawMessage: 'Parameter #1 $entityId of method Mage_Catalog_Model_Resource_Abstract::getAttributeRawValue() expects int, string given.'
@@ -481,48 +181,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter::getStatusChangedDate() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/Newsletter.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid_Renderer_Action::_actionsToHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/Newsletter/Grid/Renderer/Action.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid_Renderer_Action::_getEscapedValue() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/Newsletter/Grid/Renderer/Action.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid_Renderer_Action::_getEscapedValue() has parameter $value with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/Newsletter/Grid/Renderer/Action.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid_Renderer_Status::getStatus() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/Newsletter/Grid/Renderer/Status.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid_Renderer_Status::getStatus() has parameter $status with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/Newsletter/Grid/Renderer/Status.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid_Renderer_Status::$_statuses has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/Newsletter/Grid/Renderer/Status.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Customer_Edit_Tab_View::getCreatedInStore() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -535,20 +193,8 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Customer_Edit_Tab_View::getStoreId() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Customer_Edit_Tab_View::getStoreLastLoginDateTimezone() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Customer_Edit_Tab_View::$_customerLog has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View.php
 
@@ -559,46 +205,10 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Orders.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales::getRows() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Sales.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales::getTotals() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Sales.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales::getWebsiteCount() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Sales.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales::getWebsiteCount() has parameter $websiteId with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Sales.php
-
-		-
 			rawMessage: 'Property Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales::$_collection (Mage_Sales_Model_Resource_Sale_Collection) does not accept Maho\Data\Collection\Db.'
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Sales.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales::$_websiteCounts has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Sales.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Customer_Online::getFilterFormHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Online.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Dashboard::getSwitchUrl() has no return type specified.'
@@ -691,30 +301,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Dashboard/Orders/Grid.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Denied::hasAvailaleResources() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Denied.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Newsletter_Problem::getDeleteButtonHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Newsletter/Problem.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Newsletter_Problem::getShowButtons() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Newsletter/Problem.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Newsletter_Problem::getUnsubscribeButtonHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Newsletter/Problem.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Newsletter_Subscriber::getShowQueueAdd() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -725,24 +311,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Notification/Window.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Page_Header::getHomeLink() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Page/Header.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Page_Header::getLogoutLink() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Page/Header.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Page_Header::getUser() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Page/Header.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Permissions_Buttons::getBackButtonHtml() has no return type specified.'
@@ -827,12 +395,6 @@ parameters:
 			identifier: argument.type
 			count: 3
 			path: app/code/core/Mage/Adminhtml/Block/Promo/Quote/Edit/Tab/Main.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Rating_Edit_Tab_Form::_getWarningHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Rating/Edit/Tab/Form.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Rating_Edit_Tab_Form::_setRatingCodes() has parameter $ratingCodes with no type specified.'
@@ -1089,30 +651,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Review_Rating_Detailed::getRating() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Review/Rating/Detailed.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Review_Rating_Detailed::isSelected() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Review/Rating/Detailed.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Review_Rating_Detailed::isSelected() has parameter $option with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Review/Rating/Detailed.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Review_Rating_Detailed::isSelected() has parameter $rating with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Review/Rating/Detailed.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Review_Rating_Detailed::$_voteCollection has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Review/Rating/Detailed.php
 
@@ -1873,12 +1411,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Transactions/Detail/Grid.php
 
 		-
-			rawMessage: 'Property Mage_Adminhtml_Block_Store_Switcher_Form_Renderer_Fieldset::$_element (Maho\Data\Form\Element\Fieldset) does not accept Maho\Data\Form\Element\AbstractElement.'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Store/Switcher/Form/Renderer/Fieldset.php
-
-		-
 			rawMessage: 'Parameter #2 $onclick of method Mage_Adminhtml_Block_Widget::getButtonHtml() expects string, null given.'
 			identifier: argument.type
 			count: 4
@@ -1893,12 +1425,6 @@ parameters:
 		-
 			rawMessage: 'Cannot call method initForm() on Mage_Core_Block_Abstract|false.'
 			identifier: method.nonObject
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Edit.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_System_Config_Edit::$_section has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/System/Config/Edit.php
 
@@ -1951,130 +1477,10 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Field/Array/Abstract.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Config_Form_Field_Select_Allowspecific::_getSpecificCountryElementId() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Field/Select/Allowspecific.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput::_getDummyElement() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Modules/DisableOutput.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput::_getFieldHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Modules/DisableOutput.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput::_getFieldHtml() has parameter $fieldset with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Modules/DisableOutput.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput::_getFieldHtml() has parameter $moduleName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Modules/DisableOutput.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput::_getFieldRenderer() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Modules/DisableOutput.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput::_getValues() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Modules/DisableOutput.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput::$_fieldRenderer has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Modules/DisableOutput.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput::$_values has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Modules/DisableOutput.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Config_Form_Fieldset_Order_Statuses::_getDummyElement() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Order/Statuses.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Config_Form_Fieldset_Order_Statuses::_getFieldHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Order/Statuses.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Config_Form_Fieldset_Order_Statuses::_getFieldHtml() has parameter $fieldset with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Order/Statuses.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Config_Form_Fieldset_Order_Statuses::_getFieldHtml() has parameter $id with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Order/Statuses.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Config_Form_Fieldset_Order_Statuses::_getFieldHtml() has parameter $status with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Order/Statuses.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Config_Form_Fieldset_Order_Statuses::_getFieldRenderer() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Order/Statuses.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_System_Config_Form_Fieldset_Order_Statuses::$_fieldRenderer has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Order/Statuses.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_System_Config_Form_Fieldset_Order_Statuses::$_values has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset/Order/Statuses.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_System_Convert_Gui_Edit::getProfileId() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/System/Convert/Gui/Edit.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Convert_Gui_Edit_Tab_Upload::getDataMaxSize() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Convert/Gui/Edit/Tab/Upload.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Convert_Gui_Edit_Tab_Upload::getPostMaxSize() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Convert/Gui/Edit/Tab/Upload.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Convert_Gui_Edit_Tab_Upload::getUploadMaxSize() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Convert/Gui/Edit/Tab/Upload.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_System_Convert_Gui_Edit_Tab_Wizard::getChecked() has no return type specified.'
@@ -2089,46 +1495,10 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/System/Convert/Gui/Edit/Tab/Wizard.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Block_System_Convert_Gui_Edit_Tab_Wizard::$_addMapButtonHtml has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Convert/Gui/Edit/Tab/Wizard.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_System_Convert_Gui_Edit_Tab_Wizard::$_attributes has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Convert/Gui/Edit/Tab/Wizard.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_System_Convert_Gui_Edit_Tab_Wizard::$_removeMapButtonHtml has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Convert/Gui/Edit/Tab/Wizard.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_System_Convert_Gui_Edit_Tab_Wizard::$_shortDateFormat has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Convert/Gui/Edit/Tab/Wizard.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_System_Convert_Gui_Edit_Tab_Wizard::$_storeModel has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Convert/Gui/Edit/Tab/Wizard.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_System_Convert_Profile_Edit::getProfileId() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/System/Convert/Profile/Edit.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Convert_Profile_Edit_Tab_Run::getImportedFiles() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Convert/Profile/Edit/Tab/Run.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_System_Convert_Profile_Edit_Tab_Run::getParseType() has no return type specified.'
@@ -2143,54 +1513,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/System/Convert/Profile/Edit/Tab/Run.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Convert_Profile_Edit_Tab_Run::getRunButtonHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Convert/Profile/Edit/Tab/Run.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Currency::getHeader() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Currency.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Currency::getImportButtonHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Currency.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Currency::getImportFormAction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Currency.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Currency::getRatesMatrixHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Currency.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Currency::getResetButtonHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Currency.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Currency::getSaveButtonHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Currency.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Currency::getServicesHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Currency.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_System_Currency_Rate_Matrix::_prepareRates() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -2203,82 +1525,16 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/System/Currency/Rate/Matrix.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Currency_Rate_Matrix::getRatesFormAction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Currency/Rate/Matrix.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_System_Design_Edit::getDesignChangeId() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/System/Design/Edit.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Email_Template_Edit::getCurrentLocale() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Email/Template/Edit.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Email_Template_Edit::getLocaleOptions() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Email/Template/Edit.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Email_Template_Edit::getTemplateOptions() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Email/Template/Edit.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Email_Template_Grid_Renderer_Action::_actionsToHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Email/Template/Grid/Renderer/Action.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Email_Template_Grid_Renderer_Action::_getEscapedValue() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Email/Template/Grid/Renderer/Action.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_System_Email_Template_Grid_Renderer_Action::_getEscapedValue() has parameter $value with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Email/Template/Grid/Renderer/Action.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Tag_Assigned_Grid::$_currentTagModel has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Tag/Assigned/Grid.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Tag_Model_Resource_Tag_Collection::addAttributeToFilter().'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Tag/Grid/All.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Tag_Pending::getCreateButtonHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Tag/Pending.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Tag_Pending::getGridHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Tag/Pending.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Tag_Pending::getHeaderHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Tag/Pending.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Tax_Class::setClassType() has no return type specified.'
@@ -2303,30 +1559,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Tax/Rate/Title.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Tax_Rate_Title::getTitles() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Tax/Rate/Title.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Widget::_addBreadcrumb() has parameter $label with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Widget::_addBreadcrumb() has parameter $link with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Widget::_addBreadcrumb() has parameter $title with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Widget_Accordion::addItem() has parameter $config with no type specified.'
@@ -4927,18 +4159,6 @@ parameters:
 			path: app/code/core/Mage/Cms/Model/Resource/Page/Collection.php
 
 		-
-			rawMessage: 'Method Mage_Cms_IndexController::indexAction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Cms/controllers/IndexController.php
-
-		-
-			rawMessage: 'Method Mage_Cms_PageController::viewAction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Cms/controllers/PageController.php
-
-		-
 			rawMessage: Property Mage_ConfigurableSwatches_Helper_Data::$_configAttributeIds has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -6223,18 +5443,6 @@ parameters:
 			path: app/code/core/Mage/Page/Block/Html.php
 
 		-
-			rawMessage: Property Mage_Page_Block_Html::$_urls has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Page/Block/Html.php
-
-		-
-			rawMessage: Property Mage_Page_Block_Html_Pager::$_availableLimit has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Page/Block/Html/Pager.php
-
-		-
 			rawMessage: Property Mage_Page_Block_Html_Pager::$_collection has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -6247,34 +5455,10 @@ parameters:
 			path: app/code/core/Mage/Page/Block/Html/Pager.php
 
 		-
-			rawMessage: Property Mage_Page_Block_Html_Pager::$_limitVarName has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Page/Block/Html/Pager.php
-
-		-
-			rawMessage: Property Mage_Page_Block_Html_Pager::$_pageVarName has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Page/Block/Html/Pager.php
-
-		-
 			rawMessage: Property Mage_Page_Block_Html_Pager::$_showPerPage has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Page/Block/Html/Pager.php
-
-		-
-			rawMessage: Property Mage_Page_Block_Html_Topmenu_Renderer::$_templateFile has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Page/Block/Html/Topmenu/Renderer.php
-
-		-
-			rawMessage: Property Mage_Page_Block_Switch::$_storeInUrl has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Page/Block/Switch.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Payment_Model_Method_Abstract::isPartialAuthorization().'
@@ -7501,46 +6685,10 @@ parameters:
 			path: app/code/core/Mage/Weee/Model/Total/Quote/Weee.php
 
 		-
-			rawMessage: Property Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Block::$_allowedBlocks has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Widget/Block/Adminhtml/Widget/Instance/Edit/Chooser/Block.php
-
-		-
-			rawMessage: Property Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Block::$_blocks has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Widget/Block/Adminhtml/Widget/Instance/Edit/Chooser/Block.php
-
-		-
-			rawMessage: Property Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Block::$_layoutHandle has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Widget/Block/Adminhtml/Widget/Instance/Edit/Chooser/Block.php
-
-		-
-			rawMessage: Property Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Block::$_layoutHandlesXml has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Widget/Block/Adminhtml/Widget/Instance/Edit/Chooser/Block.php
-
-		-
-			rawMessage: Property Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Layout::$_layoutHandles has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Widget/Block/Adminhtml/Widget/Instance/Edit/Chooser/Layout.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Core_Block_Abstract::prepareElementHtml().'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Widget/Block/Adminhtml/Widget/Options.php
-
-		-
-			rawMessage: Property Mage_Widget_Model_Widget_Instance::$_specificEntitiesLayoutHandles has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Widget/Model/Widget/Instance.php
 
 		-
 			rawMessage: 'Method Mage_Wishlist_Block_Customer_Wishlist_Item_Column::_beforeChildToHtml() has no return type specified.'

@@ -10,10 +10,10 @@
 
 class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_Adminhtml_Block_Widget
 {
-    protected $_product;
-    protected $_productInstance;
+    protected ?Mage_Catalog_Model_Product $_product = null;
+    protected ?Mage_Catalog_Model_Product $_productInstance = null;
     protected ?array $_values = null;
-    protected $_itemCount = 1;
+    protected int $_itemCount = 1;
 
     public function __construct()
     {
@@ -23,12 +23,12 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
         $this->setCanEditPrice(true);
     }
 
-    public function getItemCount()
+    public function getItemCount(): int
     {
         return $this->_itemCount;
     }
 
-    public function setItemCount($itemCount): static
+    public function setItemCount(?int $itemCount): static
     {
         $this->_itemCount = max($this->_itemCount, $itemCount);
         return $this;
@@ -122,7 +122,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
                 ->getChild('add_button')->getId();
     }
 
-    public function getDeleteButtonHtml()
+    public function getDeleteButtonHtml(): string
     {
         return $this->getChildHtml('delete_button');
     }
@@ -184,7 +184,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
             . $this->getChildHtml('date_option_type');
     }
 
-    public function getOptionValues()
+    public function getOptionValues(): array
     {
         $optionsArr = array_reverse($this->getProduct()->getOptions(), true);
 
@@ -284,16 +284,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
         return $this->_values;
     }
 
-    /**
-     * Retrieve html of scope checkbox
-     *
-     * @param string $id
-     * @param string $name
-     * @param bool $checked
-     * @param string $selectId
-     * @return string
-     */
-    public function getCheckboxScopeHtml($id, $name, $checked = true, $selectId = '-1')
+    public function getCheckboxScopeHtml(?int $id, string $name, bool $checked = true, ?int $selectId = -1): string
     {
         $checkedHtml = '';
         if ($checked) {
@@ -301,7 +292,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
         }
         $selectNameHtml = '';
         $selectIdHtml = '';
-        if ($selectId != '-1') {
+        if ($selectId != -1) {
             $selectNameHtml = '[values][' . $selectId . ']';
             $selectIdHtml = 'select_' . $selectId . '_';
         }

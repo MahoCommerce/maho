@@ -28,12 +28,8 @@ class Mage_Admin_Model_Acl_Assert_Time implements Mage_Admin_Model_Acl_Assert_In
         return $this->_isCleanTime(time());
     }
 
-    /**
-     * @param int $time
-     * @return bool|null
-     */
-    protected function _isCleanTime($time)
+    protected function _isCleanTime(int $time): ?bool
     {
-        // ...
+        return null;
     }
 }

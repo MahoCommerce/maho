@@ -21,7 +21,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Ajax_Serializer extends Mage
         return $this;
     }
 
-    public function getProductsJSON()
+    public function getProductsJSON(): string
     {
         $result = [];
         if ($this->getProducts()) {

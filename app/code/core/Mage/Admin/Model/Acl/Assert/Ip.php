@@ -26,12 +26,8 @@ class Mage_Admin_Model_Acl_Assert_Ip implements Mage_Admin_Model_Acl_Assert_Inte
         return $this->_isCleanIP(Mage::helper('core/http')->getRemoteAddr());
     }
 
-    /**
-     * @param string|false $ip
-     * @return bool|null
-     */
-    protected function _isCleanIP($ip)
+    protected function _isCleanIP(string|false $ip): ?bool
     {
-        // ...
+        return null;
     }
 }

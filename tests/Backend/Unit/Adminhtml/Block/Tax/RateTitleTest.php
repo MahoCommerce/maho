@@ -12,7 +12,7 @@ uses(Tests\MahoBackendTestCase::class);
 class TaxRateTitleStub extends Mage_Adminhtml_Block_Tax_Rate_Title
 {
     #[\Override]
-    public function getTitles()
+    public function getTitles(): array
     {
         return [0 => 'VAT" autofocus onfocus="alert(1)'];
     }

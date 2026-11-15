@@ -17,7 +17,7 @@
  */
 class Mage_Adminhtml_Block_Tag_Assigned_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
-    protected $_currentTagModel;
+    protected ?Mage_Tag_Model_Tag $_currentTagModel = null;
 
     /**
      * Set grid params
