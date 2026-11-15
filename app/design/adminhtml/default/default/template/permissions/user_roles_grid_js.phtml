@@ -14,7 +14,7 @@
 <?php if ($myBlock instanceof Mage_Adminhtml_Block_Permissions_User_Edit_Tab_Roles && $myBlock->getJsObjectName()): ?>
     const radioBoxes = new Map();
     let warning = false;
-    const userRoles = new Map(Object.entries(<?= $myBlock->getSelectedRolesJson() ?>));
+    const userRoles = new Map(Object.entries(<?= $myBlock->getSelectedRolesAsJson() ?>));
     if (userRoles.size > 0) warning = true;
     const userRolesInput = document.getElementById('user_user_roles');
     if (userRolesInput) {

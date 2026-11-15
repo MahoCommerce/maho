@@ -143,7 +143,7 @@ class Mage_Adminhtml_Block_Permissions_Role_Grid_User extends Mage_Adminhtml_Blo
     /**
      * Role user IDs as a JSON object with the IDs as keys, for the grid script
      */
-    public function getUsersJson(): string
+    public function getUsersAsJson(): string
     {
         return Mage::helper('core')->jsonEncode((object) array_fill_keys($this->_getUsers(), 0));
     }

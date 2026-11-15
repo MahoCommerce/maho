@@ -103,7 +103,7 @@ class Mage_Adminhtml_Block_Permissions_User_Edit_Tab_Roles extends Mage_Adminhtm
     /**
      * Selected role IDs as a JSON object with the IDs as keys, for the grid script
      */
-    public function getSelectedRolesJson(): string
+    public function getSelectedRolesAsJson(): string
     {
         return Mage::helper('core')->jsonEncode((object) array_fill_keys($this->_getSelectedRoles(), 0));
     }
