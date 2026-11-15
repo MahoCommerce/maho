@@ -16,12 +16,12 @@ use Maho\Convert\Profile\AbstractProfile;
 
 abstract class AbstractContainer implements ContainerInterface
 {
-    protected $_vars;
+    protected ?array $_vars = null;
     protected ?\Maho\Convert\Profile\AbstractProfile $_profile = null;
-    protected $_data;
-    protected $_position;
+    protected mixed $_data = null;
+    protected mixed $_position = null;
 
-    public function getVar($key, $default = null)
+    public function getVar(string $key, mixed $default = null): mixed
     {
         if (!isset($this->_vars[$key])) {
             return $default;
@@ -29,12 +29,13 @@ abstract class AbstractContainer implements ContainerInterface
         return $this->_vars[$key];
     }
 
-    public function getVars()
+    public function getVars(): ?array
     {
         return $this->_vars;
     }
 
-    public function setVar($key, $value = null): static
+    #[\Override]
+    public function setVar(array|string $key, mixed $value = null): static
     {
         if (is_array($key) && is_null($value)) {
             $this->_vars = $key;
@@ -51,7 +52,7 @@ abstract class AbstractContainer implements ContainerInterface
         return $this;
     }
 
-    public function getProfile()
+    public function getProfile(): ?AbstractProfile
     {
         return $this->_profile;
     }
@@ -82,7 +83,7 @@ abstract class AbstractContainer implements ContainerInterface
         return $this;
     }
 
-    public function validateDataString($data = null)
+    public function validateDataString(mixed $data = null): bool
     {
         $data ??= $this->getData();
         if (!is_string($data)) {
@@ -91,7 +92,7 @@ abstract class AbstractContainer implements ContainerInterface
         return true;
     }
 
-    public function validateDataArray($data = null)
+    public function validateDataArray(mixed $data = null): bool
     {
         $data ??= $this->getData();
         if (!is_array($data)) {
@@ -100,7 +101,7 @@ abstract class AbstractContainer implements ContainerInterface
         return true;
     }
 
-    public function validateDataGrid($data = null)
+    public function validateDataGrid(mixed $data = null): bool
     {
         $data ??= $this->getData();
         if (!is_array($data) || !is_array(current($data))) {
@@ -112,7 +113,7 @@ abstract class AbstractContainer implements ContainerInterface
         return true;
     }
 
-    public function getGridFields($grid)
+    public function getGridFields(array $grid): array
     {
         $fields = [];
         foreach ($grid as $row) {
@@ -140,12 +141,12 @@ abstract class AbstractContainer implements ContainerInterface
         return $e;
     }
 
-    public function getPosition()
+    public function getPosition(): mixed
     {
         return $this->_position;
     }
 
-    public function setPosition($position): static
+    public function setPosition(mixed $position): static
     {
         $this->_position = $position;
         return $this;

@@ -28,42 +28,32 @@ abstract class Mage_Dataflow_Model_Convert_Action_Abstract implements Mage_Dataf
 
     /**
      * Reference to profile this action belongs to
-     *
-     * @var Mage_Dataflow_Model_Convert_Profile_Abstract
      */
-    protected $_profile;
+    protected ?Mage_Dataflow_Model_Convert_Profile_Interface $_profile = null;
 
     protected array $_actions = [];
 
     /**
      * Action's container
-     *
-     * @var Mage_Dataflow_Model_Convert_Container_Abstract
      */
-    protected $_container;
+    protected ?Mage_Dataflow_Model_Convert_Container_Interface $_container = null;
 
     protected string $_actionDefaultClass = 'Mage_Dataflow_Model_Convert_Action';
 
     /**
      * Get action parameter
-     *
-     * @param string $key
-     * @param mixed $default
-     * @return mixed
      */
-    public function getParam($key, $default = null)
+    #[\Override]
+    public function getParam(string $key, mixed $default = null): mixed
     {
         return $this->_params[$key] ?? $default;
     }
 
     /**
-     * Set action parameter
-     *
-     * @param string $key
-     * @param mixed $value
-     * @return Mage_Dataflow_Model_Convert_Action_Abstract
+     * Set action parameter, or all parameters when $key is an array
      */
-    public function setParam($key, $value = null)
+    #[\Override]
+    public function setParam(array|string $key, mixed $value = null): static
     {
         if (is_array($key) && is_null($value)) {
             $this->_params = $key;
@@ -97,27 +87,23 @@ abstract class Mage_Dataflow_Model_Convert_Action_Abstract implements Mage_Dataf
 
     /**
      * Get profile instance the action belongs to
-     *
-     * @return Mage_Dataflow_Model_Convert_Profile_Abstract
      */
-    public function getProfile()
+    public function getProfile(): ?Mage_Dataflow_Model_Convert_Profile_Interface
     {
         return $this->_profile;
     }
 
     /**
      * Set profile instance the action belongs to
-     *
-     * @param Mage_Dataflow_Model_Convert_Profile_Abstract $profile
-     * @return Mage_Dataflow_Model_Convert_Action_Abstract
      */
-    public function setProfile(Mage_Dataflow_Model_Convert_Profile_Interface $profile)
+    #[\Override]
+    public function setProfile(Mage_Dataflow_Model_Convert_Profile_Interface $profile): static
     {
         $this->_profile = $profile;
         return $this;
     }
 
-    public function addAction(?Mage_Dataflow_Model_Convert_Action_Interface $action = null)
+    public function addAction(?Mage_Dataflow_Model_Convert_Action_Interface $action = null): Mage_Dataflow_Model_Convert_Action_Interface
     {
         $action ??= new $this->_actionDefaultClass();
         $this->_actions[] = $action;
@@ -127,10 +113,9 @@ abstract class Mage_Dataflow_Model_Convert_Action_Abstract implements Mage_Dataf
 
     /**
      * Set action's container
-     *
-     * @return Mage_Dataflow_Model_Convert_Action_Abstract
      */
-    public function setContainer(Mage_Dataflow_Model_Convert_Container_Interface $container)
+    #[\Override]
+    public function setContainer(Mage_Dataflow_Model_Convert_Container_Interface $container): static
     {
         $this->_container = $container;
         $this->_container->setProfile($this->getProfile());
@@ -140,11 +125,9 @@ abstract class Mage_Dataflow_Model_Convert_Action_Abstract implements Mage_Dataf
 
     /**
      * Get action's container
-     *
-     * @param string $name
-     * @return Mage_Dataflow_Model_Convert_Container_Abstract
      */
-    public function getContainer($name = null)
+    #[\Override]
+    public function getContainer(string|int|null $name = null): Mage_Dataflow_Model_Convert_Container_Interface
     {
         if (!is_null($name)) {
             return $this->getProfile()->getContainer($name);
@@ -175,6 +158,7 @@ abstract class Mage_Dataflow_Model_Convert_Action_Abstract implements Mage_Dataf
         }
     }
 
+    #[\Override]
     public function importXml(\Maho\Simplexml\Element $actionNode): static
     {
         foreach ($actionNode->attributes() as $key => $value) {

@@ -12,30 +12,26 @@ namespace Maho\Convert\Container;
 class Collection
 {
     protected array $_items = [];
-    protected $_defaultClass = \Maho\Convert\Container\Generic::class;
+    /** @var class-string<ContainerInterface> */
+    protected string $_defaultClass = \Maho\Convert\Container\Generic::class;
 
-    public function setDefaultClass($className): static
+    public function setDefaultClass(string $className): static
     {
         $this->_defaultClass = $className;
         return $this;
     }
 
-    public function addItem($name, ContainerInterface $item)
+    public function addItem(string|int|null $name, ContainerInterface $item): ContainerInterface
     {
-        if (is_null($name)) {
-            if ($item->getName()) {
-                $name = $item->getName();
-            } else {
-                $name = count($this->_items);
-            }
-        }
+        // No core container has a name, but an extension container can have one
+        $name ??= method_exists($item, 'getName') && $item->getName() ? $item->getName() : count($this->_items);
 
         $this->_items[$name] = $item;
 
         return $item;
     }
 
-    public function getItem($name)
+    public function getItem(string|int $name): ContainerInterface
     {
         if (!isset($this->_items[$name])) {
             $this->addItem($name, new $this->_defaultClass());
@@ -43,7 +39,7 @@ class Collection
         return $this->_items[$name];
     }
 
-    public function hasItem($name)
+    public function hasItem(string|int $name): bool
     {
         return isset($this->_items[$name]);
     }

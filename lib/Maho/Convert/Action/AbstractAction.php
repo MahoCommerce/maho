@@ -26,26 +26,19 @@ abstract class AbstractAction implements ActionInterface
 
     /**
      * Reference to profile this action belongs to
-     *
-     * @var AbstractProfile
      */
-    protected $_profile;
+    protected ?AbstractProfile $_profile = null;
 
     /**
      * Action's container
-     *
-     * @var ContainerInterface
      */
-    protected $_container;
+    protected ?ContainerInterface $_container = null;
 
     /**
      * Get action parameter
-     *
-     * @param string $key
-     * @param mixed $default
-     * @return mixed
      */
-    public function getParam($key, $default = null)
+    #[\Override]
+    public function getParam(string $key, mixed $default = null): mixed
     {
         if (!isset($this->_params[$key])) {
             return $default;
@@ -54,13 +47,10 @@ abstract class AbstractAction implements ActionInterface
     }
 
     /**
-     * Set action parameter
-     *
-     * @param string $key
-     * @param mixed $value
-     * @return AbstractAction
+     * Set action parameter, or all parameters when $key is an array
      */
-    public function setParam($key, $value = null)
+    #[\Override]
+    public function setParam(array|string $key, mixed $value = null): static
     {
         if (is_array($key) && is_null($value)) {
             $this->_params = $key;
@@ -94,20 +84,17 @@ abstract class AbstractAction implements ActionInterface
 
     /**
      * Get profile instance the action belongs to
-     *
-     * @return AbstractProfile
      */
-    public function getProfile()
+    public function getProfile(): ?AbstractProfile
     {
         return $this->_profile;
     }
 
     /**
      * Set profile instance the action belongs to
-     *
-     * @return AbstractAction
      */
-    public function setProfile(AbstractProfile $profile)
+    #[\Override]
+    public function setProfile(AbstractProfile $profile): static
     {
         $this->_profile = $profile;
         return $this;
@@ -115,10 +102,9 @@ abstract class AbstractAction implements ActionInterface
 
     /**
      * Set action's container
-     *
-     * @return AbstractAction
      */
-    public function setContainer(ContainerInterface $container)
+    #[\Override]
+    public function setContainer(ContainerInterface $container): static
     {
         $this->_container = $container;
         $this->_container->setProfile($this->getProfile());
@@ -127,11 +113,9 @@ abstract class AbstractAction implements ActionInterface
 
     /**
      * Get action's container
-     *
-     * @param string $name
-     * @return ContainerInterface
      */
-    public function getContainer($name = null)
+    #[\Override]
+    public function getContainer(string|int|null $name = null): ContainerInterface
     {
         if (!is_null($name)) {
             return $this->getProfile()->getContainer($name);

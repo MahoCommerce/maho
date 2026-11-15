@@ -23,12 +23,8 @@ class Mage_Core_Model_Convert extends Mage_Dataflow_Model_Convert_Profile_Collec
         }
     }
 
-    /**
-     * @param string $type
-     * @return mixed|string
-     */
     #[\Override]
-    public function getClassNameByType($type)
+    public function getClassNameByType(string $type): string
     {
         if (str_contains($type, '/')) {
             return Mage::getConfig()->getModelClassName($type);
