@@ -214,7 +214,7 @@ final class Mage
      * @param string $appRoot
      * @throws Mage_Core_Exception
      */
-    public static function setRoot($appRoot = '')
+    public static function setRoot($appRoot = ''): void
     {
         if (self::$_appRoot) {
             return ;

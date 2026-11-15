@@ -32,7 +32,7 @@ abstract class AbstractProfile
         return $action;
     }
 
-    public function setContainers(Collection $containers)
+    public function setContainers(Collection $containers): static
     {
         $this->_containers = $containers;
         return $this;
@@ -69,7 +69,7 @@ abstract class AbstractProfile
         return $this->_dryRun;
     }
 
-    public function setDryRun($flag)
+    public function setDryRun($flag): static
     {
         $this->_dryRun = $flag;
         return $this;

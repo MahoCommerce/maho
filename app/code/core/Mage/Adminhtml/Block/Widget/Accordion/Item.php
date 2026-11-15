@@ -12,7 +12,7 @@ class Mage_Adminhtml_Block_Widget_Accordion_Item extends Mage_Adminhtml_Block_Wi
 {
     protected $_accordion;
 
-    public function setAccordion($accordion)
+    public function setAccordion($accordion): static
     {
         $this->_accordion = $accordion;
         return $this;

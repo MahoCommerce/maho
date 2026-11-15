@@ -235,7 +235,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
      *
      * @param bool $visible
      */
-    public function setStoreSwitcherVisibility($visible = true)
+    public function setStoreSwitcherVisibility($visible = true): void
     {
         $this->_storeSwitcherVisibility = $visible;
     }
@@ -265,7 +265,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
      *
      * @param bool $visible
      */
-    public function setDateFilterVisibility($visible = true)
+    public function setDateFilterVisibility($visible = true): void
     {
         $this->_dateFilterVisibility = $visible;
     }
@@ -285,7 +285,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
      *
      * @param bool $visible
      */
-    public function setExportVisibility($visible = true)
+    public function setExportVisibility($visible = true): void
     {
         $this->_exportVisibility = $visible;
     }
@@ -305,7 +305,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
      *
      * @param bool $visible
      */
-    public function setSubtotalVisibility($visible = true)
+    public function setSubtotalVisibility($visible = true): void
     {
         $this->_subtotalVisibility = $visible;
     }
@@ -338,7 +338,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
         return $this->getChildHtml('refresh_button');
     }
 
-    public function setFilter($name, $value)
+    public function setFilter($name, $value): void
     {
         if ($name) {
             $this->_filters[$name] = $value;
@@ -351,7 +351,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
                 ? htmlspecialchars($this->getRequest()->getParam($name)) : '');
     }
 
-    public function setSubReportSize($size)
+    public function setSubReportSize($size): void
     {
         $this->_subReportSize = $size;
     }

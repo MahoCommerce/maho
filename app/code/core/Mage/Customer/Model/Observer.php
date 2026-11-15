@@ -289,7 +289,7 @@ class Mage_Customer_Model_Observer
      * Set the customer's or guest's session time based on config
      */
     #[Maho\Config\Observer('session_before_renew_cookie')]
-    public function setCookieLifetime(\Maho\Event\Observer $observer)
+    public function setCookieLifetime(\Maho\Event\Observer $observer): void
     {
         if ($observer->getSessionName() === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
             /** @var Mage_Customer_Model_Session $session */

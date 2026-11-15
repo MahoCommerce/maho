@@ -1575,7 +1575,7 @@ class Mage_Core_Model_App
     /**
      * @param bool $value
      */
-    public function setUpdateMode($value)
+    public function setUpdateMode($value): void
     {
         $this->_updateMode = $value;
     }

@@ -71,7 +71,7 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
      *
      * @param  Mage_Core_Controller_Front_Action $controller
      */
-    public function getBreadcrumbs($controller)
+    public function getBreadcrumbs($controller): void
     {
         /** @var Mage_Page_Block_Html_Breadcrumbs $breadcrumbs */
         $breadcrumbs = $controller->getLayout()->getBlock('breadcrumbs');

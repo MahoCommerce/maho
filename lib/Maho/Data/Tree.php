@@ -113,7 +113,7 @@ class Tree
     /**
      * @param Node $node
      */
-    public function getChild($node) {}
+    public function getChild($node): void {}
 
     /**
      * @param Node $node

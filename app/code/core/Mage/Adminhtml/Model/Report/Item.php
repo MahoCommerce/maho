@@ -13,7 +13,7 @@ class Mage_Adminhtml_Model_Report_Item extends \Maho\DataObject
     protected $_isEmpty  = false;
     protected $_children = [];
 
-    public function setIsEmpty($flag = true)
+    public function setIsEmpty($flag = true): static
     {
         $this->_isEmpty = $flag;
         return $this;
@@ -31,7 +31,7 @@ class Mage_Adminhtml_Model_Report_Item extends \Maho\DataObject
         return $this->_children;
     }
 
-    public function setChildren($children)
+    public function setChildren($children): static
     {
         $this->_children = $children;
         return $this;

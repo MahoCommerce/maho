@@ -12,6 +12,8 @@ namespace Maho\Rector;
 use PhpParser\Node;
 use PhpParser\Node\Expr\ArrowFunction;
 use PhpParser\Node\Expr\Closure;
+use PhpParser\Node\Expr\MethodCall;
+use PhpParser\Node\Expr\NullsafeMethodCall;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\Throw_;
 use PhpParser\Node\Expr\Variable;
@@ -23,6 +25,7 @@ use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Expression;
 use PhpParser\Node\Stmt\Function_;
 use PhpParser\Node\Stmt\Return_;
+use PhpParser\NodeFinder;
 use PHPStan\Reflection\ClassReflection;
 use Rector\PHPStan\ScopeFetcher;
 use Rector\Rector\AbstractRector;
@@ -37,8 +40,8 @@ use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
  * the parents of a method, but not its children, and they skip protected methods and abstract
  * classes. This rule finds the children through MethodOverrideIndex, so it can type those too.
  * It skips deprecated classes and methods, because PHPStan does not report errors in them. It
- * skips a public getter or setter in a file without strict types, because a typed accessor
- * needs a strict file.
+ * skips a public getter or setter that calls getData() or setData() in a file without strict
+ * types, because a typed accessor needs a strict file.
  *
  *  - void: the body returns no value and does not yield. A body that only throws stays as it is,
  *    because it is a placeholder that a subclass of another package can replace with a value.
@@ -167,8 +170,9 @@ CODE_SAMPLE,
     }
 
     /**
-     * A typed accessor holds its type only in a file with strict types, as
-     * TypedAccessorStrictTypesTest checks. The typed accessor work (#1283) types these methods.
+     * A public getter or setter that calls getData() or setData() is a typed accessor when it has
+     * a return type. TypedAccessorStrictTypesTest requires strict types in its file, so the rule
+     * leaves it to the typed accessor work (#1283) when the file has none.
      */
     private function isAccessorInWeakFile(ClassMethod $classMethod): bool
     {
@@ -176,7 +180,18 @@ CODE_SAMPLE,
             return false;
         }
 
-        return !str_contains($this->getFile()->getFileContent(), 'declare(strict_types=1)');
+        if (str_contains($this->getFile()->getFileContent(), 'declare(strict_types=1)')) {
+            return false;
+        }
+
+        $dataCall = new NodeFinder()->findFirst(
+            $classMethod->stmts ?? [],
+            fn(Node $node): bool => ($node instanceof MethodCall || $node instanceof NullsafeMethodCall)
+                && $node->name instanceof Identifier
+                && in_array($node->name->toString(), ['getData', 'setData'], true),
+        );
+
+        return $dataCall instanceof Node;
     }
 
     private function hasReturnTag(ClassMethod $classMethod): bool

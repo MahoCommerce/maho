@@ -69,7 +69,7 @@ class Mage_Adminhtml_Block_Dashboard_Bar extends Mage_Adminhtml_Block_Dashboard_
      *
      * @param Mage_Directory_Model_Currency $currency
      */
-    public function setCurrency($currency)
+    public function setCurrency($currency): void
     {
         $this->_currency = $currency;
     }
