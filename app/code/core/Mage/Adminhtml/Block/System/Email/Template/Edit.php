@@ -275,17 +275,17 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit extends Mage_Adminhtml_Blo
         return Mage::registry('current_email_template');
     }
 
-    public function getLocaleOptions()
+    public function getLocaleOptions(): array
     {
         return Mage::app()->getLocale()->getOptionLocales();
     }
 
-    public function getTemplateOptions()
+    public function getTemplateOptions(): array
     {
         return Mage_Core_Model_Email_Template::getDefaultTemplatesAsOptionsArray();
     }
 
-    public function getCurrentLocale()
+    public function getCurrentLocale(): string
     {
         return Mage::app()->getLocale()->getLocaleCode();
     }

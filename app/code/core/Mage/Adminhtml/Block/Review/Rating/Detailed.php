@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Review_Rating_Detailed extends Mage_Adminhtml_Block_Template
 {
-    protected $_voteCollection = false;
+    protected Mage_Rating_Model_Resource_Rating_Option_Vote_Collection|false $_voteCollection = false;
     public function __construct()
     {
         parent::__construct();
@@ -80,7 +80,7 @@ class Mage_Adminhtml_Block_Review_Rating_Detailed extends Mage_Adminhtml_Block_T
         return $this;
     }
 
-    public function isSelected($option, $rating)
+    public function isSelected(\Maho\DataObject $option, \Maho\DataObject $rating): bool
     {
         if ($this->getIsIndependentMode()) {
             $ratings = $this->getRequest()->getParam('ratings');

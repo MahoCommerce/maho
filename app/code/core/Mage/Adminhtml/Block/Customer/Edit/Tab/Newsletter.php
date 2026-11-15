@@ -73,7 +73,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter extends Mage_Adminhtml_B
         return $this;
     }
 
-    public function getStatusChangedDate()
+    public function getStatusChangedDate(): ?string
     {
         $subscriber = Mage::registry('subscriber');
         if ($subscriber->getChangeStatusAt()) {

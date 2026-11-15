@@ -15,7 +15,7 @@ declare(strict_types=1);
  */
 class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Layout extends Mage_Adminhtml_Block_Widget
 {
-    protected $_layoutHandles = [];
+    protected array $_layoutHandles = [];
 
     /**
      * layout handles wildcar patterns

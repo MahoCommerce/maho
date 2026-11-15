@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Block_Catalog_Product_Composite_Configure extends Mage_Adminhtml_Block_Widget
 {
-    protected $_product;
+    protected ?Mage_Catalog_Model_Product $_product = null;
 
     /**
      * Set template
