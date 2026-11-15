@@ -12,7 +12,7 @@
 <script>
 <?php $myBlock = $this->getLayout()->getBlock('roleUsersGrid'); ?>
 <?php if ($myBlock instanceof Mage_Adminhtml_Block_Permissions_Role_Grid_User && $myBlock->getJsObjectName()): ?>
-    const checkBoxes = new Map(Object.entries(<?= $myBlock->_getUsers(true) ?>));
+    const checkBoxes = new Map(Object.entries(<?= $myBlock->getUsersJson() ?>));
     let warning = false;
     if (checkBoxes.size > 0) {
         warning = true;

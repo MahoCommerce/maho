@@ -85,28 +85,26 @@ class Mage_Adminhtml_Block_Permissions_User_Edit_Tab_Roles extends Mage_Adminhtm
         return $this->getUrl('*/*/rolesGrid', ['user_id' => Mage::registry('permissions_user')->getUserId()]);
     }
 
-    public function _getSelectedRoles(bool $json = false): string|array
+    public function _getSelectedRoles(): array
     {
         if ($this->getRequest()->getParam('user_roles') != '') {
-            return $this->getRequest()->getParam('user_roles');
+            return (array) $this->getRequest()->getParam('user_roles');
         }
         /** @var Mage_Admin_Model_User $user */
         $user = Mage::registry('permissions_user');
         //checking if we have this data and we
         //don't need load it through resource model
         if ($user->hasData('roles')) {
-            $uRoles = $user->getData('roles');
-        } else {
-            $uRoles = $user->getRoles();
+            return (array) $user->getData('roles');
         }
+        return $user->getRoles();
+    }
 
-        if ($json) {
-            $jsonRoles = [];
-            foreach ($uRoles as $urid) {
-                $jsonRoles[$urid] = 0;
-            }
-            return Mage::helper('core')->jsonEncode((object) $jsonRoles);
-        }
-        return $uRoles;
+    /**
+     * Selected role IDs as a JSON object with the IDs as keys, for the grid script
+     */
+    public function getSelectedRolesJson(): string
+    {
+        return Mage::helper('core')->jsonEncode((object) array_fill_keys($this->_getSelectedRoles(), 0));
     }
 }

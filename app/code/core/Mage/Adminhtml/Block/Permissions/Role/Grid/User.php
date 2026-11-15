@@ -131,26 +131,20 @@ class Mage_Adminhtml_Block_Permissions_Role_Grid_User extends Mage_Adminhtml_Blo
         return $this->getUrl('*/*/editrolegrid', ['rid' => $roleId]);
     }
 
-    public function _getUsers(bool $json = false): string|array
+    public function _getUsers(): array
     {
         if ($this->getRequest()->getParam('in_role_user') != '') {
-            return $this->getRequest()->getParam('in_role_user');
+            return (array) $this->getRequest()->getParam('in_role_user');
         }
         $roleId = ($this->getRequest()->getParam('rid') > 0) ? $this->getRequest()->getParam('rid') : Mage::registry('RID');
-        $users  = Mage::getModel('admin/roles')->setId($roleId)->getRoleUsers();
-        if (count($users)) {
-            if ($json) {
-                $jsonUsers = [];
-                foreach ($users as $usrid) {
-                    $jsonUsers[$usrid] = 0;
-                }
-                return Mage::helper('core')->jsonEncode((object) $jsonUsers);
-            }
-            return array_values($users);
-        }
-        if ($json) {
-            return '{}';
-        }
-        return [];
+        return array_values(Mage::getModel('admin/roles')->setId($roleId)->getRoleUsers());
+    }
+
+    /**
+     * Role user IDs as a JSON object with the IDs as keys, for the grid script
+     */
+    public function getUsersJson(): string
+    {
+        return Mage::helper('core')->jsonEncode((object) array_fill_keys($this->_getUsers(), 0));
     }
 }
