@@ -21,12 +21,6 @@ describe('API v2 Stores', function (): void {
 
     describe('public access (no auth)', function (): void {
 
-        it('allows listing stores without authentication', function (): void {
-            $response = apiGet('/api/rest/v2/stores');
-
-            expect($response['status'])->toBeSuccessful();
-        });
-
         it('returns stores collection', function (): void {
             $response = apiGet('/api/rest/v2/stores');
 
@@ -35,22 +29,10 @@ describe('API v2 Stores', function (): void {
         });
 
         it('allows getting single store without authentication', function (): void {
-            $list = apiGet('/api/rest/v2/stores');
-            $members = $list['json']['member'] ?? $list['json']['hydra:member'] ?? [];
+            $response = apiGet('/api/rest/v2/stores/1');
 
-            if (!empty($members) && isset($members[0]['id'])) {
-                $storeId = $members[0]['id'];
-                $response = apiGet("/api/rest/v2/stores/{$storeId}");
-
-                expect($response['status'])->toBeSuccessful();
-            } elseif (isset($list['json'][0]['id'])) {
-                $storeId = $list['json'][0]['id'];
-                $response = apiGet("/api/rest/v2/stores/{$storeId}");
-
-                expect($response['status'])->toBeSuccessful();
-            } else {
-                $this->markTestSkipped('No stores returned to fetch individually');
-            }
+            expect($response['status'])->toBe(200);
+            expect($response['json']['id'] ?? null)->toBe(1);
         });
 
         it('returns 404 for non-existent store', function (): void {
@@ -61,39 +43,14 @@ describe('API v2 Stores', function (): void {
 
     });
 
-    describe('with authentication', function (): void {
-
-        it('allows listing stores with valid token', function (): void {
-            $response = apiGet('/api/rest/v2/stores', customerToken());
-
-            expect($response['status'])->toBeSuccessful();
-        });
-
-        it('allows listing stores with admin token', function (): void {
-            $response = apiGet('/api/rest/v2/stores', adminToken());
-
-            expect($response['status'])->toBeSuccessful();
-        });
-
-    });
-
     describe('response format', function (): void {
 
         it('includes expected store fields', function (): void {
             $response = apiGet('/api/rest/v2/stores');
-            $stores = $response['json']['member'] ?? $response['json']['hydra:member'] ?? $response['json'] ?? [];
+            $stores = $response['json']['member'] ?? $response['json']['hydra:member'] ?? [];
 
-            if (!empty($stores) && isset($stores[0])) {
-                $store = $stores[0];
-
-                expect($store)->toHaveKey('id');
-                // A store view exposes both a code and a name; assert the pair
-                // directly. (The `->or->` higher-order form misreports here even
-                // when both keys are present.)
-                expect(array_key_exists('code', $store) || array_key_exists('name', $store))->toBeTrue();
-            } else {
-                $this->markTestSkipped('No stores in response to verify fields');
-            }
+            expect($stores)->not->toBeEmpty();
+            expect($stores[0])->toHaveKeys(['id', 'code', 'name']);
         });
 
     });

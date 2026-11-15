@@ -10,40 +10,49 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 describe('Feed Collection', function () {
-    test('returns correct collection class', function () {
-        $collection = Mage::getResourceModel('feedmanager/feed_collection');
-        expect($collection)->toBeInstanceOf(Maho_FeedManager_Model_Resource_Feed_Collection::class);
+    beforeEach(function () {
+        $this->createFeed = fn(string $name, string $platform, int $enabled, int $storeId): Maho_FeedManager_Model_Feed => Mage::getModel('feedmanager/feed')
+            ->setName($name)
+            ->setPlatform($platform)
+            ->setStoreId($storeId)
+            ->setIsEnabled($enabled)
+            ->setFilename('collection-test-' . uniqid())
+            ->setFileFormat('xml')
+            ->save();
+
+        $this->enabledFeed = ($this->createFeed)('Collection Enabled Feed', 'google', 1, 1);
+        $this->disabledFeed = ($this->createFeed)('Collection Disabled Feed', 'facebook', 0, 0);
+        $this->testCollection = fn(): Maho_FeedManager_Model_Resource_Feed_Collection => Mage::getResourceModel('feedmanager/feed_collection')
+            ->addFieldToFilter('feed_id', ['in' => [(int) $this->enabledFeed->getId(), (int) $this->disabledFeed->getId()]]);
+        $this->ids = fn(Maho_FeedManager_Model_Resource_Feed_Collection $collection): array => array_map(intval(...), $collection->getAllIds());
     });
 
-    test('can apply enabled filter', function () {
-        $collection = Mage::getResourceModel('feedmanager/feed_collection');
-        $result = $collection->addEnabledFilter();
-        expect($result)->toBeInstanceOf(Maho_FeedManager_Model_Resource_Feed_Collection::class);
+    afterEach(function () {
+        $this->enabledFeed->delete();
+        $this->disabledFeed->delete();
     });
 
-    test('can apply platform filter', function () {
-        $collection = Mage::getResourceModel('feedmanager/feed_collection');
-        $result = $collection->addPlatformFilter('google');
-        expect($result)->toBeInstanceOf(Maho_FeedManager_Model_Resource_Feed_Collection::class);
+    test('the enabled filter keeps only the enabled feeds', function () {
+        expect(($this->ids)(($this->testCollection)()->addEnabledFilter()))
+            ->toBe([(int) $this->enabledFeed->getId()]);
     });
 
-    test('can apply store filter', function () {
-        $collection = Mage::getResourceModel('feedmanager/feed_collection');
-        $result = $collection->addStoreFilter(1);
-        expect($result)->toBeInstanceOf(Maho_FeedManager_Model_Resource_Feed_Collection::class);
+    test('the platform filter keeps only the feeds of the platform', function () {
+        expect(($this->ids)(($this->testCollection)()->addPlatformFilter('facebook')))
+            ->toBe([(int) $this->disabledFeed->getId()]);
     });
 
-    test('can convert to option array', function () {
-        $collection = Mage::getResourceModel('feedmanager/feed_collection');
-        $options = $collection->toOptionArray();
-        expect($options)->toBeArray();
+    test('the store filter keeps only the feeds of the store', function () {
+        expect(($this->ids)(($this->testCollection)()->addStoreFilter(1)))
+            ->toBe([(int) $this->enabledFeed->getId()]);
     });
-});
 
-describe('Log Collection', function () {
-    test('returns correct collection class', function () {
-        $collection = Mage::getResourceModel('feedmanager/log_collection');
-        expect($collection)->toBeInstanceOf(Maho_FeedManager_Model_Resource_Log_Collection::class);
+    test('the option array gives the feed name for each feed ID', function () {
+        $labels = array_column(($this->testCollection)()->toOptionArray(), 'label', 'value');
+
+        expect($labels)->toHaveCount(2)
+            ->and($labels[(int) $this->enabledFeed->getId()])->toBe('Collection Enabled Feed')
+            ->and($labels[(int) $this->disabledFeed->getId()])->toBe('Collection Disabled Feed');
     });
 });
 
@@ -58,19 +67,5 @@ describe('DynamicRule Collection', function () {
     test('returns correct collection class', function () {
         $collection = Mage::getResourceModel('feedmanager/dynamicRule_collection');
         expect($collection)->toBeInstanceOf(Maho_FeedManager_Model_Resource_DynamicRule_Collection::class);
-    });
-});
-
-describe('AttributeMapping Collection', function () {
-    test('returns correct collection class', function () {
-        $collection = Mage::getResourceModel('feedmanager/attributeMapping_collection');
-        expect($collection)->toBeInstanceOf(Maho_FeedManager_Model_Resource_AttributeMapping_Collection::class);
-    });
-});
-
-describe('CategoryMapping Collection', function () {
-    test('returns correct collection class', function () {
-        $collection = Mage::getResourceModel('feedmanager/categoryMapping_collection');
-        expect($collection)->toBeInstanceOf(Maho_FeedManager_Model_Resource_CategoryMapping_Collection::class);
     });
 });

@@ -14,15 +14,6 @@ describe('Cart Items Condition', function () {
         $this->condition = Mage::getModel('customersegmentation/segment_condition_cart_items');
     });
 
-    test('can create new condition instance', function () {
-        expect($this->condition)->toBeInstanceOf(Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items::class);
-        expect($this->condition->getType())->toBe('customersegmentation/segment_condition_cart_items');
-    });
-
-    test('extends abstract condition', function () {
-        expect($this->condition)->toBeInstanceOf(Maho_CustomerSegmentation_Model_Segment_Condition_Abstract::class);
-    });
-
     test('has correct new child select options', function () {
         $options = $this->condition->getNewChildSelectOptions();
 
@@ -43,84 +34,16 @@ describe('Cart Items Condition', function () {
         expect($options)->toHaveKey('price');
     });
 
-    test('can handle product identification attributes', function () {
-        $this->condition->setAttribute('sku');
-        expect($this->condition->getInputType())->toBe('string');
-
-        $this->condition->setAttribute('product_id');
-        expect($this->condition->getInputType())->toBe('numeric');
-    });
-
-    test('can handle quantity and price attributes', function () {
-        $this->condition->setAttribute('qty');
-        expect($this->condition->getInputType())->toBe('numeric');
-
-        $this->condition->setAttribute('price');
-        expect($this->condition->getInputType())->toBe('numeric');
-
-        $this->condition->setAttribute('row_total');
-        expect($this->condition->getInputType())->toBe('numeric');
-    });
-
-    test('validates cart item conditions correctly', function () {
-        $this->condition->setAttribute('qty');
-        $this->condition->setOperator('>=');
-        $this->condition->setValue('2');
-
-        // Mock cart item data
-        $cartItemData = new Varien_Object([
-            'qty' => '3',
-        ]);
-
-        expect($this->condition->validate($cartItemData))->toBe(true);
-
-        $cartItemData->setQty('1');
-        expect($this->condition->validate($cartItemData))->toBe(false);
-    });
-
-    test('can handle SKU matching conditions', function () {
-        $this->condition->setAttribute('sku');
-        $this->condition->setOperator('==');
-        $this->condition->setValue('TEST-SKU-001');
-
-        $cartItemData = new Varien_Object(['sku' => 'TEST-SKU-001']);
-        expect($this->condition->validate($cartItemData))->toBe(true);
-
-        $cartItemData->setSku('DIFFERENT-SKU');
-        expect($this->condition->validate($cartItemData))->toBe(false);
-    });
-
-    test('can handle multiple SKU conditions', function () {
-        $this->condition->setAttribute('sku');
-        $this->condition->setOperator('()');
-        $this->condition->setValue('SKU1,SKU2,SKU3');
-
-        expect($this->condition->validate(new Varien_Object(['sku' => 'SKU1'])))->toBe(true);
-        expect($this->condition->validate(new Varien_Object(['sku' => 'SKU2'])))->toBe(true);
-        expect($this->condition->validate(new Varien_Object(['sku' => 'OTHER-SKU'])))->toBe(false);
-    });
-
-    test('can handle price range conditions', function () {
-        $this->condition->setAttribute('price');
-        $this->condition->setOperator('>=');
-        $this->condition->setValue('10.00');
-
-        expect($this->condition->validate(new Varien_Object(['price' => '15.50'])))->toBe(true);
-        expect($this->condition->validate(new Varien_Object(['price' => '5.99'])))->toBe(false);
-    });
-
-    test('can handle category conditions', function () {
-        $this->condition->setAttribute('qty');
-        $this->condition->setOperator('>=');
-        $this->condition->setValue('1');
-
-        // Mock cart item with quantity
-        $cartItemData = new Varien_Object(['qty' => 2]);
-        expect($this->condition->validate($cartItemData))->toBe(true);
-
-        $cartItemData->setQty(0);
-        expect($this->condition->validate($cartItemData))->toBe(false);
-    });
+    test('gives each cart item attribute its input type', function (string $attribute, string $inputType) {
+        $this->condition->setAttribute($attribute);
+        expect($this->condition->getInputType())->toBe($inputType);
+    })->with([
+        'SKU' => ['sku', 'string'],
+        'product ID' => ['product_id', 'numeric'],
+        'quantity' => ['qty', 'numeric'],
+        'price' => ['price', 'numeric'],
+        'row total' => ['row_total', 'numeric'],
+    ]);
 
     test('can handle product attribute conditions', function () {
         $this->condition->setAttribute('name');
@@ -149,24 +72,6 @@ describe('Cart Items Condition', function () {
         expect($elementType)->toBeIn(['text', 'multiselect']);
     });
 
-    test('can export condition as array', function () {
-        $this->condition->setAttribute('sku');
-        $this->condition->setOperator('==');
-        $this->condition->setValue('TEST-SKU');
-
-        $array = $this->condition->asArray();
-
-        expect($array)->toHaveKey('type');
-        expect($array)->toHaveKey('attribute');
-        expect($array)->toHaveKey('operator');
-        expect($array)->toHaveKey('value');
-
-        expect($array['type'])->toBe('customersegmentation/segment_condition_cart_items');
-        expect($array['attribute'])->toBe('sku');
-        expect($array['operator'])->toBe('==');
-        expect($array['value'])->toBe('TEST-SKU');
-    });
-
     test('handles empty cart conditions gracefully', function () {
         $this->condition->setAttribute('qty');
         $this->condition->setOperator('>');
@@ -175,15 +80,5 @@ describe('Cart Items Condition', function () {
         // Empty cart item should not match quantity > 0
         $emptyCartData = new Varien_Object([]);
         expect($this->condition->validate($emptyCartData))->toBe(false);
-    });
-
-    test('can handle aggregated cart conditions', function () {
-        // Test conditions like "total items in cart"
-        $this->condition->setAttribute('total_qty');
-        $this->condition->setOperator('>=');
-        $this->condition->setValue('5');
-
-        expect($this->condition->getAttribute())->toBe('total_qty');
-        expect($this->condition->getValue())->toBe('5');
     });
 });

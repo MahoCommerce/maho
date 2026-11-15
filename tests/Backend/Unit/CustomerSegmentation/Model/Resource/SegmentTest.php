@@ -14,27 +14,24 @@ describe('Customer Segment Resource Model', function () {
         $this->resource = Mage::getResourceModel('customersegmentation/segment');
     });
 
-    test('can get matched customers for segment - core segmentation functionality', function () {
-        // Create a test segment
+    test('matches an active customer of the website of a segment without conditions', function () {
+        $customer = Mage::getModel('customer/customer')
+            ->setEmail('match.' . uniqid('unit_', true) . '@test.com')
+            ->setFirstname('Match')
+            ->setLastname('Customer')
+            ->setWebsiteId(1)
+            ->setGroupId(1);
+        $customer->save();
+
         $segment = Mage::getModel('customersegmentation/segment');
         $segment->setName('Customer Match Test');
         $segment->setIsActive();
         $segment->setWebsiteIds([1]);
         $this->resource->save($segment);
 
-        // Test the core segmentation functionality
         $matchedCustomers = $this->resource->getMatchingCustomerIds($segment);
 
-        expect($matchedCustomers)->toBeArray();
-
-        // Verify the segmentation works - should return valid array (empty or with IDs)
-        expect(count($matchedCustomers) >= 0)->toBe(true);
-
-        // If customers are matched, verify they are valid customer IDs
-        foreach ($matchedCustomers as $customerId) {
-            expect(is_numeric($customerId))->toBe(true);
-            expect($customerId > 0)->toBe(true);
-        }
+        expect($matchedCustomers)->toContain((int) $customer->getId());
     });
 
     test('can manage customer segment relationships - core segmentation functionality', function () {

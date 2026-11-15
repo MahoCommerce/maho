@@ -40,26 +40,17 @@ describe('admin directive preview filter', function () {
             ->toBe(Mage_Cms_Model_Adminhtml_Template_Filter::MEDIA_PREFIX . 'wysiwyg/logo.png');
     });
 
-    it('refuses a directive the preview does not serve', function () {
-        expect(fn() => $this->filter->filter('{{config path="web/unsecure/base_url"}}'))
+    it('refuses anything that is not exactly one media directive', function (string $content) {
+        expect(fn() => $this->filter->filter($content))
             ->toThrow(Mage_Core_Exception::class, 'Invalid directive.');
-        expect(fn() => $this->filter->filter('{{block type="core/template" template="x.phtml"}}'))
-            ->toThrow(Mage_Core_Exception::class, 'Invalid directive.');
-    });
-
-    it('refuses more than one directive or text around it', function () {
-        expect(fn() => $this->filter->filter('{{media url="a.png"}}{{media url="b.png"}}'))
-            ->toThrow(Mage_Core_Exception::class, 'Invalid directive.');
-        expect(fn() => $this->filter->filter('x{{media url="a.png"}}'))
-            ->toThrow(Mage_Core_Exception::class, 'Invalid directive.');
-    });
-
-    it('refuses plain text and an empty string', function () {
-        expect(fn() => $this->filter->filter(''))
-            ->toThrow(Mage_Core_Exception::class, 'Invalid directive.');
-        expect(fn() => $this->filter->filter('/etc/passwd'))
-            ->toThrow(Mage_Core_Exception::class, 'Invalid directive.');
-    });
+    })->with([
+        'a config directive' => ['{{config path="web/unsecure/base_url"}}'],
+        'a block directive' => ['{{block type="core/template" template="x.phtml"}}'],
+        'two media directives' => ['{{media url="a.png"}}{{media url="b.png"}}'],
+        'text before a media directive' => ['x{{media url="a.png"}}'],
+        'an empty string' => [''],
+        'plain text' => ['/etc/passwd'],
+    ]);
 
     it('lets a traversal inside a media directive reach the caller', function () {
         expect(fn() => $this->filter->filter('{{media url="../../app/etc/local.xml"}}'))

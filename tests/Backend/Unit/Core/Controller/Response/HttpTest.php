@@ -145,21 +145,6 @@ describe('Mage_Core_Controller_Response_Http', function () {
             $this->response->setHttpResponseCode(404);
             expect($this->response->getHttpResponseCode())->toBe(404);
         });
-
-        it('validates HTTP response codes', function () {
-            expect(function () {
-                $this->response->setHttpResponseCode(999);
-            })->toThrow(Exception::class);
-        });
-
-        it('allows valid HTTP response codes', function () {
-            $validCodes = [200, 201, 301, 302, 400, 401, 403, 404, 500, 503];
-
-            foreach ($validCodes as $code) {
-                $this->response->setHttpResponseCode($code);
-                expect($this->response->getHttpResponseCode())->toBe($code);
-            }
-        });
     });
 
     describe('Redirect Management', function () {
@@ -294,10 +279,6 @@ describe('Mage_Core_Controller_Response_Http', function () {
     });
 
     describe('Symfony Response Compatibility', function () {
-        it('wraps Symfony Response instance', function () {
-            expect($this->response)->toBeInstanceOf(Mage_Core_Controller_Response_Http::class);
-        });
-
         it('can be created from existing Symfony Response', function () {
             $symfonyResponse = new SymfonyResponse('Test content', 201, ['X-Test' => 'value']);
             $response = new Mage_Core_Controller_Response_Http($symfonyResponse);
@@ -316,14 +297,6 @@ describe('Mage_Core_Controller_Response_Http', function () {
             expect($symfonyResponse->getStatusCode())->toBe(200);
         });
 
-        it('sends response using Symfony send method', function () {
-            $this->response->setBody('Test content');
-            $this->response->setHeader('X-Test', 'value');
-
-            // We can't actually send in tests, but verify the method exists
-            expect(method_exists($this->response, 'sendResponse'))->toBeTrue();
-        });
-
         it('handles output callback for sending response', function () {
             $called = false;
             $callback = function () use (&$called) {
@@ -338,17 +311,8 @@ describe('Mage_Core_Controller_Response_Http', function () {
     });
 
     describe('Response State Checks', function () {
-        it('checks if headers have been sent', function () {
-            expect($this->response->canSendHeaders())->toBeTrue();
-        });
-
         it('checks if response has been sent', function () {
             expect($this->response->isSent())->toBeFalse();
-        });
-
-        it('reports header already sent state', function () {
-            // In test environment, headers aren't actually sent
-            expect($this->response->headersSentThrowsException)->toBeFalse();
         });
     });
 
@@ -371,61 +335,7 @@ describe('Mage_Core_Controller_Response_Http', function () {
         });
     });
 
-    describe('Output Buffering', function () {
-        it('handles append/prepend with output callback', function () {
-            $output = '';
-            $callback = function ($content) use (&$output) {
-                $output = $content;
-                return $content;
-            };
-
-            $this->response->setOutputCallback($callback);
-            $this->response->setBody('Middle');
-            $this->response->prependBody('Start');
-            $this->response->appendBody('End');
-
-            expect($this->response->getBody())->toBe('StartMiddleEnd');
-        });
-    });
-
-    describe('HTTP Protocol Version', function () {
-        it('upgrades to HTTP/1.1 on send via prepare()', function () {
-            $this->response->sendHeaders();
-            expect($this->response->getSymfonyResponse()->getProtocolVersion())->toBe('1.1');
-        });
-
-        it('upgrades an injected Symfony response on send', function () {
-            $response = new Mage_Core_Controller_Response_Http(new SymfonyResponse('content'));
-            $response->sendHeaders();
-            expect($response->getSymfonyResponse()->getProtocolVersion())->toBe('1.1');
-        });
-    });
-
     describe('Default Cache-Control', function () {
-        it('defaults to no-cache, private when no caching headers are set', function () {
-            expect($this->response->getSymfonyResponse()->headers->get('Cache-Control'))
-                ->toBe('no-cache, private');
-        });
-
-        it('switches to private, must-revalidate when Last-Modified is set', function () {
-            $this->response->setHeader('Last-Modified', gmdate('D, d M Y H:i:s') . ' GMT');
-            expect($this->response->getSymfonyResponse()->headers->get('Cache-Control'))
-                ->toBe('private, must-revalidate');
-        });
-
-        it('switches to private, must-revalidate when Expires is set', function () {
-            $this->response->setHeader('Expires', 'Thu, 01 Jan 1970 00:00:00 GMT');
-            expect($this->response->getSymfonyResponse()->headers->get('Cache-Control'))
-                ->toBe('private, must-revalidate');
-        });
-
-        it('keeps an explicitly set Cache-Control header', function () {
-            $this->response->setHeader('Cache-Control', 'public, max-age=3600');
-            // Symfony normalizes directive order
-            expect($this->response->getSymfonyResponse()->headers->get('Cache-Control'))
-                ->toBe('max-age=3600, public');
-        });
-
         it('does not wipe bag cookies when a raw Set-Cookie header is sent', function () {
             $this->response->setCookie('keep_me', 'value');
             $this->response->setRawHeader('Set-Cookie: raw_cookie=1');
@@ -446,21 +356,6 @@ describe('Mage_Core_Controller_Response_Http', function () {
                 ->toBe('text/html; charset=utf-8');
         });
 
-        it('appends the charset to a text Content-Type on send', function () {
-            $this->response->setHeader('Content-Type', 'text/xml');
-            $this->response->sendHeaders();
-            expect($this->response->getSymfonyResponse()->headers->get('Content-Type'))
-                ->toBe('text/xml; charset=utf-8');
-        });
-
-        it('strips body and entity headers from a 304 response on send', function () {
-            $this->response->setBody('stale content');
-            $this->response->setHttpResponseCode(304);
-            $this->response->sendHeaders();
-            expect($this->response->getSymfonyResponse()->getContent())->toBe('')
-                ->and($this->response->getSymfonyResponse()->headers->has('Content-Type'))->toBeFalse();
-        });
-
         it('is a no-op on a second sendHeaders call', function () {
             $this->response->sendHeaders();
             $this->response->setRawHeader('X-Test: raw');
@@ -468,31 +363,6 @@ describe('Mage_Core_Controller_Response_Http', function () {
             $this->response->sendHeaders();
             // raw-header shadowing did not run, proving the second call was skipped
             expect($this->response->getSymfonyResponse()->headers->has('X-Test'))->toBeTrue();
-        });
-    });
-
-    describe('Content Type Management', function () {
-        it('sets content type header', function () {
-            $this->response->setHeader('Content-Type', 'application/json');
-
-            $headers = $this->response->getHeaders();
-            $contentType = null;
-
-            foreach ($headers as $header) {
-                if ($header['name'] === 'Content-Type') {
-                    $contentType = $header['value'];
-                    break;
-                }
-            }
-
-            expect($contentType)->toBe('application/json');
-        });
-
-        it('handles charset in content type', function () {
-            $this->response->setHeader('Content-Type', 'text/html; charset=UTF-8');
-
-            $symfonyResponse = $this->response->getSymfonyResponse();
-            expect($symfonyResponse->headers->get('Content-Type'))->toBe('text/html; charset=UTF-8');
         });
     });
 

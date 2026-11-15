@@ -58,7 +58,12 @@ it('accepts one scalar value for each placeholder of a range condition', functio
         ->where('config_id >= ?', 1)
         ->where('config_id <= ?', 5);
 
-    expect($this->adapter->fetchCol($select))->toBeArray();
+    $ids = array_map('intval', $this->adapter->fetchCol($select));
+
+    expect($ids)->not->toBeEmpty();
+    foreach ($ids as $id) {
+        expect($id)->toBeGreaterThanOrEqual(1)->toBeLessThanOrEqual(5);
+    }
 });
 
 it('keeps the same scalar in every placeholder', function () {

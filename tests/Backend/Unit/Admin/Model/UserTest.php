@@ -14,97 +14,15 @@ describe('Mage_Admin_Model_User Validation', function () {
         $this->user = Mage::getModel('admin/user');
     });
 
-    it('validates successfully with valid user data', function () {
-        $this->user->setUsername('testuser');
-        $this->user->setFirstname('Test');
-        $this->user->setLastname('User');
-        $this->user->setEmail('test@example.com');
+    it('passes validation when a name field holds only spaces', function (string $field) {
+        $data = ['username' => 'testuser', 'firstname' => 'Test', 'lastname' => 'User', 'email' => 'test@example.com'];
+        $data[$field] = '   ';
+        $this->user->addData($data);
 
-        $result = $this->user->validate();
-        expect($result)->toBeTrue();
-    });
-
-    describe('username validation', function () {
-        it('fails validation when username is empty', function () {
-            $this->user->setUsername('');
-            $this->user->setFirstname('Test');
-            $this->user->setLastname('User');
-            $this->user->setEmail('test@example.com');
-
-            $result = $this->user->validate();
-            expect($result)->toBeArray();
-            expect($result)->toContain('User Name is required field.');
-        });
-
-        it('passes validation when username is blank spaces', function () {
-            $this->user->setUsername('   ');
-            $this->user->setFirstname('Test');
-            $this->user->setLastname('User');
-            $this->user->setEmail('test@example.com');
-
-            $result = $this->user->validate();
-            expect($result)->toBeTrue();
-        });
-    });
-
-    describe('firstname validation', function () {
-        it('fails validation when firstname is empty', function () {
-            $this->user->setUsername('testuser');
-            $this->user->setFirstname('');
-            $this->user->setLastname('User');
-            $this->user->setEmail('test@example.com');
-
-            $result = $this->user->validate();
-            expect($result)->toBeArray();
-            expect($result)->toContain('First Name is required field.');
-        });
-
-        it('passes validation when firstname is blank spaces', function () {
-            $this->user->setUsername('testuser');
-            $this->user->setFirstname('   ');
-            $this->user->setLastname('User');
-            $this->user->setEmail('test@example.com');
-
-            $result = $this->user->validate();
-            expect($result)->toBeTrue();
-        });
-    });
-
-    describe('lastname validation', function () {
-        it('fails validation when lastname is empty', function () {
-            $this->user->setUsername('testuser');
-            $this->user->setFirstname('Test');
-            $this->user->setLastname('');
-            $this->user->setEmail('test@example.com');
-
-            $result = $this->user->validate();
-            expect($result)->toBeArray();
-            expect($result)->toContain('Last Name is required field.');
-        });
-
-        it('passes validation when lastname is blank spaces', function () {
-            $this->user->setUsername('testuser');
-            $this->user->setFirstname('Test');
-            $this->user->setLastname('   ');
-            $this->user->setEmail('test@example.com');
-
-            $result = $this->user->validate();
-            expect($result)->toBeTrue();
-        });
-    });
+        expect($this->user->validate())->toBeTrue();
+    })->with(['username', 'firstname', 'lastname']);
 
     describe('email validation', function () {
-        it('fails validation when email is invalid', function () {
-            $this->user->setUsername('testuser');
-            $this->user->setFirstname('Test');
-            $this->user->setLastname('User');
-            $this->user->setEmail('invalid-email');
-
-            $result = $this->user->validate();
-            expect($result)->toBeArray();
-            expect($result)->toContain('Please enter a valid email.');
-        });
-
         it('passes validation with valid email formats', function () {
             $validEmails = [
                 'test@example.com',

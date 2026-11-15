@@ -21,12 +21,6 @@ describe('API v2 Blog Posts', function (): void {
 
     describe('public access (no auth)', function (): void {
 
-        it('allows listing blog posts without authentication', function (): void {
-            $response = apiGet('/api/rest/v2/blog-posts');
-
-            expect($response['status'])->toBeSuccessful();
-        });
-
         it('returns blog posts collection', function (): void {
             $response = apiGet('/api/rest/v2/blog-posts');
 
@@ -37,15 +31,11 @@ describe('API v2 Blog Posts', function (): void {
         it('allows getting single blog post without authentication', function (): void {
             $list = apiGet('/api/rest/v2/blog-posts');
             $members = $list['json']['member'] ?? $list['json']['hydra:member'] ?? [];
+            expect($members)->not->toBeEmpty();
 
-            if (!empty($members) && isset($members[0]['id'])) {
-                $postId = $members[0]['id'];
-                $response = apiGet("/api/rest/v2/blog-posts/{$postId}");
+            $response = apiGet("/api/rest/v2/blog-posts/{$members[0]['id']}");
 
-                expect($response['status'])->toBeSuccessful();
-            } else {
-                $this->markTestSkipped('No blog posts available to fetch individually');
-            }
+            expect($response['status'])->toBeSuccessful();
         });
 
         it('returns 404 for non-existent blog post', function (): void {
@@ -57,12 +47,6 @@ describe('API v2 Blog Posts', function (): void {
     });
 
     describe('with authentication', function (): void {
-
-        it('allows listing blog posts with valid token', function (): void {
-            $response = apiGet('/api/rest/v2/blog-posts', customerToken());
-
-            expect($response['status'])->toBeSuccessful();
-        });
 
         it('allows listing blog posts with admin token', function (): void {
             $response = apiGet('/api/rest/v2/blog-posts', adminToken());
@@ -78,14 +62,9 @@ describe('API v2 Blog Posts', function (): void {
             $response = apiGet('/api/rest/v2/blog-posts');
             $members = $response['json']['member'] ?? $response['json']['hydra:member'] ?? [];
 
-            if (!empty($members) && isset($members[0])) {
-                $post = $members[0];
-
-                expect($post)->toHaveKey('id');
-                expect($post)->toHaveKey('title');
-            } else {
-                $this->markTestSkipped('No blog posts in response to verify fields');
-            }
+            expect($members)->not->toBeEmpty();
+            expect($members[0])->toHaveKey('id');
+            expect($members[0])->toHaveKey('title');
         });
 
     });

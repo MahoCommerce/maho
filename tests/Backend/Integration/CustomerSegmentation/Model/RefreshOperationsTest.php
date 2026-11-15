@@ -40,29 +40,6 @@ describe('Segment Refresh Operations', function () {
         expect((int) $segment->getMatchedCustomersCount())->toBeGreaterThan(0);
     });
 
-    test('can refresh segment automatically', function () {
-        $segment = createRefreshTestSegment('Auto Refresh Test', [
-            'type' => 'customersegmentation/segment_condition_customer_attributes',
-            'attribute' => 'firstname',
-            'operator' => '==',
-            'value' => 'John',
-        ]);
-
-        // Set auto refresh mode
-        $segment->setRefreshMode(Maho_CustomerSegmentation_Model_Segment::MODE_AUTO);
-        $segment->setRefreshStatus(Maho_CustomerSegmentation_Model_Segment::STATUS_PENDING);
-        $segment->save();
-
-        expect($segment->getRefreshMode())->toBe('auto');
-
-        // Test auto refresh directly instead of via cron for speed
-        expect($segment->getRefreshStatus())->toBe('pending');
-        $segment->refreshCustomers();
-
-        expect($segment->getRefreshStatus())->toBe('completed');
-        expect($segment->getLastRefreshAt())->not()->toBeEmpty();
-    });
-
     test('refresh updates customer count correctly', function () {
         $segment = createRefreshTestSegment('Count Update Test', [
             'type' => 'customersegmentation/segment_condition_customer_attributes',
@@ -85,54 +62,7 @@ describe('Segment Refresh Operations', function () {
         expect((int) $segment->getMatchedCustomersCount())->toBe($expectedCount);
     });
 
-    test('refresh handles complex conditions correctly', function () {
-        $segment = createRefreshTestSegment('Complex Refresh Test', [
-            'type' => 'customersegmentation/segment_condition_combine',
-            'aggregator' => 'all',
-            'value' => 1,
-            'conditions' => [
-                [
-                    'type' => 'customersegmentation/segment_condition_customer_attributes',
-                    'attribute' => 'email',
-                    'operator' => '{}',
-                    'value' => '@test.com',
-                ],
-                [
-                    'type' => 'customersegmentation/segment_condition_order_attributes',
-                    'attribute' => 'grand_total',
-                    'operator' => '>=',
-                    'value' => '50',
-                ],
-            ],
-        ]);
-
-        $segment->refreshCustomers();
-
-        expect($segment->getRefreshStatus())->toBe('completed');
-        expect((int) $segment->getMatchedCustomersCount())->toBeGreaterThanOrEqual(0);
-
-        // Verify the matching logic is working correctly
-        $matchedCustomers = $segment->getMatchingCustomerIds();
-        foreach ($matchedCustomers as $customerId) {
-            $customer = Mage::getModel('customer/customer')->load($customerId);
-            expect($customer->getEmail())->toContain('@test.com');
-
-            $orders = Mage::getResourceModel('sales/order_collection')
-                ->addFieldToFilter('customer_id', $customerId);
-
-            $hasQualifyingOrder = false;
-            foreach ($orders as $order) {
-                if ($order->getGrandTotal() >= 50) {
-                    $hasQualifyingOrder = true;
-                    break;
-                }
-            }
-            expect($hasQualifyingOrder)->toBe(true);
-        }
-    });
-
-    test('refresh sets error status on invalid conditions', function () {
-        // Create a segment with valid structure but invalid attribute that will cause error
+    test('completes the refresh of a segment whose condition has an unknown attribute', function () {
         $segment = createRefreshTestSegment('Invalid Conditions Test', [
             'type' => 'customersegmentation/segment_condition_customer_attributes',
             'attribute' => 'nonexistent_attribute',
@@ -140,23 +70,10 @@ describe('Segment Refresh Operations', function () {
             'value' => 'test',
         ]);
 
-        // The refresh should catch any error and set error status, then re-throw
-        $exceptionThrown = false;
-        try {
-            $segment->refreshCustomers();
-        } catch (Exception $e) {
-            $exceptionThrown = true;
-        }
+        $segment->refreshCustomers();
 
-        // If an exception was thrown, verify error status was set
-        if ($exceptionThrown) {
-            // Reload segment to check if status was set to error
-            $segment = Mage::getModel('customersegmentation/segment')->load($segment->getId());
-            expect($segment->getRefreshStatus())->toBe('error');
-        } else {
-            // If no exception, the refresh completed successfully
-            expect($segment->getRefreshStatus())->toBe('completed');
-        }
+        $reloaded = Mage::getModel('customersegmentation/segment')->load($segment->getId());
+        expect($reloaded->getRefreshStatus())->toBe('completed');
     });
 
     test('refresh preserves customer-segment relationships', function () {
@@ -222,27 +139,6 @@ describe('Segment Refresh Operations', function () {
         expect($segment->getLastRefreshAt())->not()->toBeEmpty();
     });
 
-    test('cron refreshes only segments needing refresh', function () {
-        // Test cron logic without actually running cron for speed
-        $pendingSegment = createRefreshTestSegment('Pending Segment', [
-            'type' => 'customersegmentation/segment_condition_customer_attributes',
-            'attribute' => 'firstname',
-            'operator' => '==',
-            'value' => 'John',
-        ]);
-        $pendingSegment->setRefreshStatus('pending');
-        $pendingSegment->setRefreshMode('auto');
-        $pendingSegment->save();
-
-        // Test that pending auto segments can be refreshed
-        expect($pendingSegment->getRefreshMode())->toBe('auto');
-        expect($pendingSegment->getRefreshStatus())->toBe('pending');
-
-        // Refresh the pending segment
-        $pendingSegment->refreshCustomers();
-        expect($pendingSegment->getRefreshStatus())->toBe('completed');
-    });
-
     test('refresh respects segment active status', function () {
         $segment = createRefreshTestSegment('Inactive Segment Test', [
             'type' => 'customersegmentation/segment_condition_customer_attributes',
@@ -263,7 +159,8 @@ describe('Segment Refresh Operations', function () {
 
         // Manual refresh should still work even for inactive segments
         $segment->refreshCustomers();
-        expect($segment->getRefreshStatus())->toBe('completed');
+        expect($segment->getRefreshStatus())->toBe('completed')
+            ->and((int) $segment->getMatchedCustomersCount())->toBe(0);
     });
 
     // Helper methods

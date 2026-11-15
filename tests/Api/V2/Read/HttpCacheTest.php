@@ -55,20 +55,15 @@ describe('HTTP cache headers', function (): void {
         expect(apiHeader($response, 'ETag'))->not->toBeNull();
     });
 
-    it('keys public cache on X-Store-Code via Vary', function (): void {
+    it('keys public cache on X-Store-Code and X-Currency-Code via Vary', function (): void {
         $response = apiGet('/api/rest/v2/store-config');
 
         $vary = apiHeader($response, 'Vary');
         expect($vary)->not->toBeNull();
         expect($vary)->toContain('X-Store-Code');
-    });
-
-    it('keys public cache on X-Currency-Code via Vary', function (): void {
-        $response = apiGet('/api/rest/v2/store-config');
-
         // The header selects the display currency, so a shared cache that
         // ignores it would serve one caller's currency to another.
-        expect(apiHeader($response, 'Vary'))->toContain('X-Currency-Code');
+        expect($vary)->toContain('X-Currency-Code');
     });
 
     it('marks unauthenticated requests to non-public paths as no-store', function (): void {
@@ -77,15 +72,10 @@ describe('HTTP cache headers', function (): void {
         // into the "unauthenticated, non-public" tier.
         $response = apiGet('/api/rest/v2/products');
 
-        if ($response['status'] === 200) {
-            $cacheControl = apiHeader($response, 'Cache-Control');
-            expect($cacheControl)->not->toBeNull();
-            expect($cacheControl)->toContain('no-store');
-        } else {
-            // Endpoint may legitimately require auth in some configurations;
-            // skip the cache-tier assertion in that case.
-            expect($response['status'])->toBeGreaterThanOrEqual(200);
-        }
+        expect($response['status'])->toBe(200);
+        $cacheControl = apiHeader($response, 'Cache-Control');
+        expect($cacheControl)->not->toBeNull();
+        expect($cacheControl)->toContain('no-store');
     });
 
 });

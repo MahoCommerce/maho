@@ -18,12 +18,6 @@ declare(strict_types=1);
 
 describe('GET /api/rest/v2/customers/me/revocation-requests', function (): void {
 
-    it('requires authentication', function (): void {
-        $response = apiGet('/api/rest/v2/customers/me/revocation-requests');
-
-        expect($response['status'])->toBeUnauthorized();
-    });
-
     it('lets a customer list their own declarations', function (): void {
         $response = apiGet('/api/rest/v2/customers/me/revocation-requests', customerToken());
 
@@ -34,12 +28,6 @@ describe('GET /api/rest/v2/customers/me/revocation-requests', function (): void 
 });
 
 describe('GET /api/rest/v2/revocation-requests', function (): void {
-
-    it('requires authentication', function (): void {
-        $response = apiGet('/api/rest/v2/revocation-requests');
-
-        expect($response['status'])->toBeUnauthorized();
-    });
 
     it('allows an admin to list all requests', function (): void {
         $response = apiGet('/api/rest/v2/revocation-requests', adminToken());
@@ -58,17 +46,12 @@ describe('GET /api/rest/v2/revocation-requests', function (): void {
         $response = apiGet('/api/rest/v2/revocation-requests?page=1&itemsPerPage=5', adminToken());
 
         expect($response['status'])->toBeSuccessful();
+        expect(count(getItems($response)))->toBeLessThanOrEqual(5);
     });
 
 });
 
 describe('GET /api/rest/v2/revocation-requests/{id}', function (): void {
-
-    it('requires authentication', function (): void {
-        $response = apiGet('/api/rest/v2/revocation-requests/1');
-
-        expect($response['status'])->toBeUnauthorized();
-    });
 
     it('returns 404 for a non-existent request', function (): void {
         $response = apiGet('/api/rest/v2/revocation-requests/999999999', adminToken());

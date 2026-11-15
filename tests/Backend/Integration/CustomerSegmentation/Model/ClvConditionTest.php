@@ -11,64 +11,33 @@ uses(Tests\MahoBackendTestCase::class);
 
 describe('CLV Condition Tests - Profit and Refunds Focus', function () {
     beforeEach(function () {
-        createClvConditionTestData();
+        $this->customers = createClvConditionTestData();
     });
 
     describe('Lifetime Profit Calculations', function () {
-        test('calculates profit correctly for customers with sales only (no refunds)', function () {
-            $segment = createClvConditionTestSegment('Sales Only Profit', [
+        test('matches the customers whose paid minus refunded amount passes the condition', function (string $operator, string $value, string $member) {
+            $segment = createClvConditionTestSegment('Profit ' . $operator . ' ' . $value, [
                 'type' => 'customersegmentation/segment_condition_customer_clv',
                 'attribute' => 'lifetime_profit',
-                'operator' => '>=',
-                'value' => '200',
+                'operator' => $operator,
+                'value' => $value,
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
+            expect($matchedCustomers)->toContain($this->customers[$member]);
 
             foreach ($matchedCustomers as $customerId) {
-                $totalPaid = calculateCustomerLifetimePaid($customerId);
-                $totalRefunds = calculateCustomerLifetimeRefunds($customerId);
-                $expectedProfit = $totalPaid - $totalRefunds;
-
-                expect($expectedProfit)->toBeGreaterThanOrEqual(200.0);
+                $profit = calculateCustomerLifetimePaid($customerId) - calculateCustomerLifetimeRefunds($customerId);
+                $operator === '>'
+                    ? expect($profit)->toBeGreaterThan((float) $value)
+                    : expect($profit)->toBeGreaterThanOrEqual((float) $value);
             }
-        });
-
-        test('calculates profit correctly for customers with sales and refunds', function () {
-            $segment = createClvConditionTestSegment('Sales with Refunds Profit', [
-                'type' => 'customersegmentation/segment_condition_customer_clv',
-                'attribute' => 'lifetime_profit',
-                'operator' => '>=',
-                'value' => '100',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
-
-            foreach ($matchedCustomers as $customerId) {
-                $totalPaid = calculateCustomerLifetimePaid($customerId);
-                $totalRefunds = calculateCustomerLifetimeRefunds($customerId);
-                $expectedProfit = $totalPaid - $totalRefunds;
-
-                expect($expectedProfit)->toBeGreaterThanOrEqual(100.0);
-
-                // Verify this customer has both sales and refunds
-                $orders = Mage::getResourceModel('sales/order_collection')
-                    ->addFieldToFilter('customer_id', $customerId);
-
-                $creditmemoCount = 0;
-                foreach ($orders as $order) {
-                    $creditmemoCount += Mage::getResourceModel('sales/order_creditmemo_collection')
-                        ->addFieldToFilter('order_id', $order->getId())
-                        ->getSize();
-                }
-
-                if ($creditmemoCount > 0) {
-                    expect($totalRefunds)->toBeGreaterThan(0.0);
-                }
-            }
-        });
+        })->with([
+            'at least 200' => ['>=', '200', 'High Profit'],
+            'at least 100 with refunds' => ['>=', '100', 'Medium Profit'],
+            'more than 0' => ['>', '0', 'High Profit'],
+            'at least 99.99' => ['>=', '99.99', 'Medium Profit'],
+        ]);
 
         test('handles customers with zero profit (sales equal refunds)', function () {
             $segment = createClvConditionTestSegment('Zero Profit', [
@@ -112,35 +81,28 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
     });
 
     describe('Lifetime Refunds Calculations', function () {
-        test('calculates refunds correctly for customers with credit memos', function () {
-            $segment = createClvConditionTestSegment('Has Refunds', [
+        test('matches the customers whose refunded credit memos pass the condition', function (string $operator, string $value, string $member) {
+            $segment = createClvConditionTestSegment('Refunds ' . $operator . ' ' . $value, [
                 'type' => 'customersegmentation/segment_condition_customer_clv',
                 'attribute' => 'lifetime_refunds',
-                'operator' => '>',
-                'value' => '0',
+                'operator' => $operator,
+                'value' => $value,
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
+            expect($matchedCustomers)->toContain($this->customers[$member]);
 
             foreach ($matchedCustomers as $customerId) {
-                $expectedRefunds = calculateCustomerLifetimeRefunds($customerId);
-                expect($expectedRefunds)->toBeGreaterThan(0.0);
-
-                // Verify this customer actually has credit memos
-                $orders = Mage::getResourceModel('sales/order_collection')
-                    ->addFieldToFilter('customer_id', $customerId);
-
-                $creditmemoCount = 0;
-                foreach ($orders as $order) {
-                    $creditmemoCount += Mage::getResourceModel('sales/order_creditmemo_collection')
-                        ->addFieldToFilter('order_id', $order->getId())
-                        ->getSize();
-                }
-
-                expect($creditmemoCount)->toBeGreaterThan(0);
+                $refunds = calculateCustomerLifetimeRefunds($customerId);
+                $operator === '>'
+                    ? expect($refunds)->toBeGreaterThan((float) $value)
+                    : expect($refunds)->toBeGreaterThanOrEqual((float) $value);
             }
-        });
+        })->with([
+            'more than 0' => ['>', '0', 'Medium Profit'],
+            'at least 25' => ['>=', '25', 'Big Spender'],
+            'at least 50 across orders' => ['>=', '50', 'Multi Refunds'],
+        ]);
 
         test('returns zero refunds for customers with no credit memos', function () {
             $segment = createClvConditionTestSegment('No Refunds', [
@@ -169,75 +131,6 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
                 }
 
                 expect($creditmemoCount)->toBe(0);
-            }
-        });
-
-        test('calculates correct refund amounts for partial refunds', function () {
-            $segment = createClvConditionTestSegment('Partial Refunds', [
-                'type' => 'customersegmentation/segment_condition_customer_clv',
-                'attribute' => 'lifetime_refunds',
-                'operator' => '>=',
-                'value' => '25',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
-
-            foreach ($matchedCustomers as $customerId) {
-                $refunds = calculateCustomerLifetimeRefunds($customerId);
-                expect($refunds)->toBeGreaterThanOrEqual(25.0);
-
-                // Verify refund calculation matches sum of credit memo grand totals
-                $orders = Mage::getResourceModel('sales/order_collection')
-                    ->addFieldToFilter('customer_id', $customerId);
-
-                $expectedRefunds = 0.0;
-                foreach ($orders as $order) {
-                    $creditmemos = Mage::getResourceModel('sales/order_creditmemo_collection')
-                        ->addFieldToFilter('order_id', $order->getId());
-
-                    foreach ($creditmemos as $creditmemo) {
-                        $expectedRefunds += (float) $creditmemo->getGrandTotal();
-                    }
-                }
-
-                expect(abs($refunds - $expectedRefunds))->toBeLessThan(0.01);
-            }
-        });
-
-        test('handles customers with multiple refunds across different orders', function () {
-            $segment = createClvConditionTestSegment('Multiple Refunds', [
-                'type' => 'customersegmentation/segment_condition_customer_clv',
-                'attribute' => 'lifetime_refunds',
-                'operator' => '>=',
-                'value' => '50',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $refunds = calculateCustomerLifetimeRefunds($customerId);
-                expect($refunds)->toBeGreaterThanOrEqual(50.0);
-
-                // Check that customer has refunds from different orders
-                $orders = Mage::getResourceModel('sales/order_collection')
-                    ->addFieldToFilter('customer_id', $customerId);
-
-                $ordersWithRefunds = [];
-                foreach ($orders as $order) {
-                    $creditmemoCount = Mage::getResourceModel('sales/order_creditmemo_collection')
-                        ->addFieldToFilter('order_id', $order->getId())
-                        ->getSize();
-                    if ($creditmemoCount > 0) {
-                        $ordersWithRefunds[] = $order->getId();
-                    }
-                }
-
-                $uniqueOrders = array_unique($ordersWithRefunds);
-                // Some customers should have refunds across multiple orders
-                if (count($uniqueOrders) > 1) {
-                    expect(count($uniqueOrders))->toBeGreaterThan(1);
-                }
             }
         });
     });
@@ -288,75 +181,6 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
         });
     });
 
-    describe('Edge Cases and Error Handling', function () {
-        test('handles customers with no orders for profit calculations', function () {
-            $segment = createClvConditionTestSegment('Zero Profit No Orders', [
-                'type' => 'customersegmentation/segment_condition_customer_clv',
-                'attribute' => 'lifetime_profit',
-                'operator' => '==',
-                'value' => '0',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
-
-            $customersWithNoOrders = 0;
-            foreach ($matchedCustomers as $customerId) {
-                $orderCount = Mage::getResourceModel('sales/order_collection')
-                    ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('state', ['nin' => ['canceled']])
-                    ->getSize();
-
-                if ($orderCount === 0) {
-                    $customersWithNoOrders++;
-                    $profit = calculateCustomerLifetimePaid($customerId) - calculateCustomerLifetimeRefunds($customerId);
-                    expect($profit)->toBe(0.0);
-                }
-            }
-
-            // Either we tested some customers with no orders, or none matched (both are valid)
-            expect($customersWithNoOrders)->toBeInt();
-            expect($customersWithNoOrders >= 0)->toBe(true);
-        });
-
-        test('handles customers with orders but no refunds', function () {
-            $segment = createClvConditionTestSegment('Sales No Refunds', [
-                'type' => 'customersegmentation/segment_condition_customer_clv',
-                'attribute' => 'lifetime_profit',
-                'operator' => '>',
-                'value' => '0',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $refunds = calculateCustomerLifetimeRefunds($customerId);
-                $paid = calculateCustomerLifetimePaid($customerId);
-
-                if ($refunds === 0.0) {
-                    expect($paid)->toBeGreaterThan(0.0);
-                }
-            }
-        });
-
-        test('handles floating point precision in profit calculations', function () {
-            $segment = createClvConditionTestSegment('Precision Test', [
-                'type' => 'customersegmentation/segment_condition_customer_clv',
-                'attribute' => 'lifetime_profit',
-                'operator' => '>=',
-                'value' => '99.99',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $paid = calculateCustomerLifetimePaid($customerId);
-                $refunds = calculateCustomerLifetimeRefunds($customerId);
-                expect($paid - $refunds)->toBeGreaterThanOrEqual(99.99);
-            }
-        });
-    });
-
     describe('Existing CLV Attributes Regression Tests', function () {
         test('lifetime_sales still works correctly', function () {
             $segment = createClvConditionTestSegment('Sales Regression', [
@@ -404,29 +228,29 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
+            expect($matchedCustomers)->toContain($this->customers['High Profit']);
 
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('status', ['nin' => ['canceled', 'closed']]);
+                    ->addFieldToFilter('state', ['nin' => ['canceled', 'closed']]);
 
-                if ($orders->getSize() > 0) {
-                    $totalSales = 0.0;
-                    $orderCount = 0;
-                    foreach ($orders as $order) {
-                        $totalSales += (float) $order->getGrandTotal();
-                        $orderCount++;
-                    }
+                expect($orders->getSize())->toBeGreaterThan(0);
 
-                    $aov = $totalSales / $orderCount;
-                    expect($aov)->toBeGreaterThanOrEqual(75.0);
+                $totalSales = 0.0;
+                foreach ($orders as $order) {
+                    $totalSales += (float) $order->getBaseGrandTotal();
                 }
+                expect($totalSales / $orders->getSize())->toBeGreaterThanOrEqual(75.0);
             }
         });
     });
 
     // Helper functions for test data creation and calculations
-    function createClvConditionTestData(): void
+    /**
+     * @return array<string, int> customer IDs keyed by "firstname lastname"
+     */
+    function createClvConditionTestData(): array
     {
         $uniqueId = uniqid('clv_test_', true);
 
@@ -535,6 +359,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
             ],
         ];
 
+        $ids = [];
         foreach ($customers as $customerData) {
             $customer = Mage::getModel('customer/customer');
             $customer->setFirstname($customerData['firstname']);
@@ -543,7 +368,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
             $customer->setGroupId($customerData['group_id']);
             $customer->setWebsiteId($customerData['website_id']);
             $customer->save();
-
+            $ids[$customerData['firstname'] . ' ' . $customerData['lastname']] = (int) $customer->getId();
 
             // Create orders and credit memos
             foreach ($customerData['orders'] as $orderData) {
@@ -585,6 +410,8 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
                 }
             }
         }
+
+        return $ids;
     }
 
     function calculateCustomerLifetimeSales(int|string $customerId): float
@@ -665,7 +492,6 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
         $segment->setRefreshStatus('pending');
         $segment->setPriority(10);
         $segment->save();
-
 
         return $segment;
     }

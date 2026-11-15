@@ -80,15 +80,19 @@ it('puts dependencies before the index that needs them', function () {
     $queue = Mage::getModel('index/runner')->buildQueue();
 
     $seen = [];
+    $checked = 0;
     foreach ($queue as $process) {
         foreach ($process->getDepends() as $code) {
             $dependency = Mage::getSingleton('index/indexer')->getProcessByCode($code);
             if ($dependency && $dependency->getIndexer()->isVisible()) {
                 expect($seen)->toContain($code);
+                $checked++;
             }
         }
         $seen[] = $process->getIndexerCode();
     }
+
+    expect($checked)->toBeGreaterThan(0);
 });
 
 it('de-duplicates repeated ids', function () {

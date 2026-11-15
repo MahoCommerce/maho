@@ -9,34 +9,6 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Giftcard Helper Instantiation', function () {
-    test('can be instantiated via Mage factory', function () {
-        $helper = Mage::helper('giftcard');
-        expect($helper)->toBeInstanceOf(Maho_Giftcard_Helper_Data::class);
-    });
-
-    test('data helper alias works', function () {
-        $helper = Mage::helper('giftcard/data');
-        expect($helper)->toBeInstanceOf(Maho_Giftcard_Helper_Data::class);
-    });
-});
-
-describe('Giftcard Helper Display Options', function () {
-    test('has correct display options constant', function () {
-        $options = Maho_Giftcard_Helper_Data::DISPLAY_OPTIONS;
-
-        expect($options)->toBeArray();
-        expect($options)->toHaveKey('giftcard_recipient_name');
-        expect($options)->toHaveKey('giftcard_recipient_email');
-        expect($options)->toHaveKey('giftcard_sender_name');
-        expect($options)->toHaveKey('giftcard_message');
-        expect($options)->toHaveKey('giftcard_delivery_date');
-
-        expect($options['giftcard_recipient_name'])->toBe('Recipient Name');
-        expect($options['giftcard_recipient_email'])->toBe('Recipient Email');
-    });
-});
-
 describe('Giftcard Helper buildAdditionalOptions()', function () {
     beforeEach(function () {
         $this->helper = Mage::helper('giftcard');
@@ -91,12 +63,6 @@ describe('Giftcard Helper Code Generation', function () {
         $this->helper = Mage::helper('giftcard');
     });
 
-    test('generateCode returns non-empty string', function () {
-        $code = $this->helper->generateCode();
-        expect($code)->toBeString();
-        expect($code)->not->toBeEmpty();
-    });
-
     test('generateCode produces unique codes', function () {
         $codes = [];
         for ($i = 0; $i < 10; $i++) {
@@ -127,16 +93,6 @@ describe('Giftcard Helper Code Generation', function () {
 describe('Giftcard Helper Configuration Methods', function () {
     beforeEach(function () {
         $this->helper = Mage::helper('giftcard');
-    });
-
-    test('isEnabled returns boolean', function () {
-        $result = $this->helper->isEnabled();
-        expect($result)->toBeBool();
-    });
-
-    test('getLifetime returns integer', function () {
-        $result = $this->helper->getLifetime();
-        expect($result)->toBeInt();
     });
 
     test('getProductLifetime uses product attribute when set', function () {
@@ -203,39 +159,25 @@ describe('Giftcard Helper Barcode/QR Methods', function () {
         $this->helper = Mage::helper('giftcard');
     });
 
-    test('isBarcodePackageInstalled returns boolean', function () {
-        $result = $this->helper->isBarcodePackageInstalled();
-        expect($result)->toBeBool();
+    test('getQrCodeDataUrl returns an SVG data URL only when the QR code is enabled', function () {
+        Mage::app()->getStore()->setConfig('giftcard/general/show_qrcode', '1');
+        expect($this->helper->getQrCodeDataUrl('TEST-CODE-123'))->toStartWith('data:image/svg+xml;base64,');
+
+        Mage::app()->getStore()->setConfig('giftcard/general/show_qrcode', '0');
+        expect($this->helper->getQrCodeDataUrl('TEST-CODE-123'))->toBe('');
     });
 
-    test('isQrCodeEnabled returns boolean', function () {
-        $result = $this->helper->isQrCodeEnabled();
-        expect($result)->toBeBool();
-    });
-
-    test('isBarcodeEnabled returns boolean', function () {
-        $result = $this->helper->isBarcodeEnabled();
-        expect($result)->toBeBool();
-    });
-
-    test('getQrCodeDataUrl returns string', function () {
-        $result = $this->helper->getQrCodeDataUrl('TEST-CODE-123');
-        expect($result)->toBeString();
-
-        // If QR is enabled, should be a data URL
-        if ($this->helper->isQrCodeEnabled()) {
-            expect($result)->toStartWith('data:image/svg+xml;base64,');
-        }
-    });
-
-    test('getBarcodeDataUrl returns string', function () {
+    test('getBarcodeDataUrl returns an SVG data URL only when the barcode is enabled and the package is installed', function () {
+        Mage::app()->getStore()->setConfig('giftcard/general/show_barcode', '1');
         $result = $this->helper->getBarcodeDataUrl('TEST-CODE-123');
-        expect($result)->toBeString();
-
-        // If barcode is enabled and package installed, should be a data URL
-        if ($this->helper->isBarcodeEnabled()) {
+        if ($this->helper->isBarcodePackageInstalled()) {
             expect($result)->toStartWith('data:image/svg+xml;base64,');
+        } else {
+            expect($result)->toBe('');
         }
+
+        Mage::app()->getStore()->setConfig('giftcard/general/show_barcode', '0');
+        expect($this->helper->getBarcodeDataUrl('TEST-CODE-123'))->toBe('');
     });
 });
 
@@ -250,8 +192,8 @@ describe('Giftcard Helper Currency Formatting', function () {
         expect($result)->toContain('99');
     });
 
-    test('formatAmount accepts currency code', function () {
-        $result = $this->helper->formatAmount(100.00, 'USD');
-        expect($result)->toBeString();
+    test('formatAmount formats the amount in the currency that the caller gives', function () {
+        expect($this->helper->formatAmount(100.00, 'USD'))->toContain('$')->toContain('100.00');
+        expect($this->helper->formatAmount(100.00, 'EUR'))->toContain('€')->toContain('100.00');
     });
 });

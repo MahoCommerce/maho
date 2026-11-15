@@ -24,11 +24,6 @@ describe('Customer Segment Model', function () {
         expect(Maho_CustomerSegmentation_Model_Segment::MODE_MANUAL)->toBe('manual');
     });
 
-    test('can get conditions combine model - segmentation specific functionality', function () {
-        $conditionsModel = $this->segment->getConditions();
-        expect($conditionsModel)->toBeInstanceOf(Maho_CustomerSegmentation_Model_Segment_Condition_Combine::class);
-    });
-
     test('gets the column defaults of the table when a direct save leaves them out', function () {
         $segment = Mage::getModel('customersegmentation/segment')
             ->setName('Pest table defaults ' . uniqid())
@@ -46,12 +41,6 @@ describe('Customer Segment Model', function () {
         } finally {
             $segment->delete();
         }
-    });
-
-    test('can handle empty conditions gracefully - segmentation specific functionality', function () {
-        $this->segment->setConditionsSerialized('');
-        $conditions = $this->segment->getConditions();
-        expect($conditions)->toBeInstanceOf(Maho_CustomerSegmentation_Model_Segment_Condition_Combine::class);
     });
 
     test('reads the website and customer group IDs from the column text and from the array of a load', function () {

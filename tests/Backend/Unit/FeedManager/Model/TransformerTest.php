@@ -33,11 +33,6 @@ describe('Transformer Factory', function () {
             ->and($available)->toHaveCount(18);
     });
 
-    test('getTransformer returns correct instance', function () {
-        $transformer = Maho_FeedManager_Model_Transformer::getTransformer('strip_tags');
-        expect($transformer)->toBeInstanceOf(Maho_FeedManager_Model_Transformer_StripTags::class);
-    });
-
     test('getTransformer returns null for nonexistent transformer', function () {
         $transformer = Maho_FeedManager_Model_Transformer::getTransformer('nonexistent');
         expect($transformer)->toBeNull();
@@ -69,11 +64,6 @@ describe('Transformer Factory', function () {
             ->and($categories['Numbers & Prices'])->toHaveKey('current_price')
             ->and($categories)->toHaveKey('Dates & URLs')
             ->and($categories)->toHaveKey('Advanced');
-    });
-
-    test('apply transforms a value correctly', function () {
-        $result = Maho_FeedManager_Model_Transformer::apply('hello world', 'uppercase');
-        expect($result)->toBe('HELLO WORLD');
     });
 
     test('apply returns original value for nonexistent transformer', function () {
@@ -141,14 +131,11 @@ describe('TransformerInterface compliance', function () {
             expect($transformer->getDescription())->toBeString()->not->toBeEmpty();
         });
 
-        test("{$code} returns array from getOptionDefinitions", function () use ($code) {
+        test("{$code} validateOptions names each missing required option", function () use ($code) {
             $transformer = Maho_FeedManager_Model_Transformer::getTransformer($code);
-            expect($transformer->getOptionDefinitions())->toBeArray();
-        });
-
-        test("{$code} returns array from validateOptions", function () use ($code) {
-            $transformer = Maho_FeedManager_Model_Transformer::getTransformer($code);
-            expect($transformer->validateOptions([]))->toBeArray();
+            $required = array_filter($transformer->getOptionDefinitions(), fn(array $definition): bool => !empty($definition['required']));
+            $missing = array_map(fn(array $definition): string => "Missing required option: {$definition['label']}", array_values($required));
+            expect(array_slice($transformer->validateOptions([]), 0, count($missing)))->toBe($missing);
         });
     }
 });
@@ -185,11 +172,6 @@ describe('StripTags Transformer', function () {
     test('normalizes whitespace', function () {
         $result = Maho_FeedManager_Model_Transformer::apply("<p>Hello\n\n  world</p>", 'strip_tags');
         expect($result)->toBe('Hello world');
-    });
-
-    test('returns non-string values unchanged', function () {
-        expect(Maho_FeedManager_Model_Transformer::apply(42, 'strip_tags'))->toBe(42);
-        expect(Maho_FeedManager_Model_Transformer::apply(null, 'strip_tags'))->toBeNull();
     });
 });
 
@@ -246,10 +228,6 @@ describe('Truncate Transformer', function () {
             ['max_length' => '10'],
         );
         expect($result)->toBe('');
-    });
-
-    test('returns non-string values unchanged', function () {
-        expect(Maho_FeedManager_Model_Transformer::apply(42, 'truncate', ['max_length' => '1']))->toBe(42);
     });
 });
 
@@ -370,10 +348,6 @@ describe('Replace Transformer', function () {
     test('returns value unchanged when search is empty', function () {
         $result = Maho_FeedManager_Model_Transformer::apply('Hello', 'replace', ['search' => '']);
         expect($result)->toBe('Hello');
-    });
-
-    test('returns non-string values unchanged', function () {
-        expect(Maho_FeedManager_Model_Transformer::apply(42, 'replace', ['search' => '4']))->toBe(42);
     });
 
     test('validates invalid regex pattern', function () {
@@ -515,7 +489,7 @@ describe('FormatDate Transformer', function () {
             'output_format' => 'Y-m-d H:i:s',
             'timezone' => 'Australia/Sydney',
         ]);
-        expect($result)->not->toBe('2025-06-15 00:00:00');
+        expect($result)->toBe('2025-06-15 10:00:00');
     });
 });
 
@@ -538,10 +512,6 @@ describe('UrlEncode Transformer', function () {
         );
         expect($result)->toContain('https://example.com');
         expect($result)->toContain('path%20with%20spaces');
-    });
-
-    test('returns non-string values unchanged', function () {
-        expect(Maho_FeedManager_Model_Transformer::apply(42, 'url_encode'))->toBe(42);
     });
 });
 
@@ -589,133 +559,23 @@ describe('CombineFields Transformer', function () {
 });
 
 describe('Conditional Transformer', function () {
-    test('returns true_value when condition matches (eq)', function () {
-        $result = Maho_FeedManager_Model_Transformer::apply('1', 'conditional', [
-            'operator' => 'eq',
-            'compare_value' => '1',
-            'true_value' => 'in stock',
-            'false_value' => 'out of stock',
-        ]);
-        expect($result)->toBe('in stock');
-    });
-
-    test('returns false_value when condition does not match (eq)', function () {
-        $result = Maho_FeedManager_Model_Transformer::apply('0', 'conditional', [
-            'operator' => 'eq',
-            'compare_value' => '1',
-            'true_value' => 'in stock',
-            'false_value' => 'out of stock',
-        ]);
-        expect($result)->toBe('out of stock');
-    });
-
-    test('supports neq operator', function () {
-        $result = Maho_FeedManager_Model_Transformer::apply('active', 'conditional', [
-            'operator' => 'neq',
-            'compare_value' => 'disabled',
-            'true_value' => 'yes',
-            'false_value' => 'no',
-        ]);
-        expect($result)->toBe('yes');
-    });
-
-    test('supports gt operator', function () {
-        $result = Maho_FeedManager_Model_Transformer::apply('10', 'conditional', [
-            'operator' => 'gt',
-            'compare_value' => '5',
-            'true_value' => 'high',
-            'false_value' => 'low',
-        ]);
-        expect($result)->toBe('high');
-    });
-
-    test('supports gte operator', function () {
-        $result = Maho_FeedManager_Model_Transformer::apply('5', 'conditional', [
-            'operator' => 'gte',
-            'compare_value' => '5',
-            'true_value' => 'yes',
-            'false_value' => 'no',
-        ]);
-        expect($result)->toBe('yes');
-    });
-
-    test('supports lt operator', function () {
-        $result = Maho_FeedManager_Model_Transformer::apply('3', 'conditional', [
-            'operator' => 'lt',
-            'compare_value' => '5',
-            'true_value' => 'low',
-            'false_value' => 'high',
-        ]);
-        expect($result)->toBe('low');
-    });
-
-    test('supports lte operator', function () {
-        $result = Maho_FeedManager_Model_Transformer::apply('5', 'conditional', [
-            'operator' => 'lte',
-            'compare_value' => '5',
-            'true_value' => 'yes',
-            'false_value' => 'no',
-        ]);
-        expect($result)->toBe('yes');
-    });
-
-    test('supports empty operator', function () {
-        $result = Maho_FeedManager_Model_Transformer::apply('', 'conditional', [
-            'operator' => 'empty',
-            'true_value' => 'missing',
-            'false_value' => '{{value}}',
-        ]);
-        expect($result)->toBe('missing');
-    });
-
-    test('supports not_empty operator', function () {
-        $result = Maho_FeedManager_Model_Transformer::apply('hello', 'conditional', [
-            'operator' => 'not_empty',
-            'true_value' => '{{value}}',
-            'false_value' => 'missing',
-        ]);
-        expect($result)->toBe('hello');
-    });
-
-    test('supports contains operator', function () {
-        $result = Maho_FeedManager_Model_Transformer::apply('Hello World', 'conditional', [
-            'operator' => 'contains',
-            'compare_value' => 'World',
-            'true_value' => 'found',
-            'false_value' => 'not found',
-        ]);
-        expect($result)->toBe('found');
-    });
-
-    test('supports not_contains operator', function () {
-        $result = Maho_FeedManager_Model_Transformer::apply('Hello World', 'conditional', [
-            'operator' => 'not_contains',
-            'compare_value' => 'Foo',
-            'true_value' => 'absent',
-            'false_value' => 'present',
-        ]);
-        expect($result)->toBe('absent');
-    });
-
-    test('supports in operator', function () {
-        $result = Maho_FeedManager_Model_Transformer::apply('red', 'conditional', [
-            'operator' => 'in',
-            'compare_value' => 'red, green, blue',
-            'true_value' => 'primary',
-            'false_value' => 'other',
-        ]);
-        expect($result)->toBe('primary');
-    });
-
-    test('supports not_in operator', function () {
-        $result = Maho_FeedManager_Model_Transformer::apply('yellow', 'conditional', [
-            'operator' => 'not_in',
-            'compare_value' => 'red, green, blue',
-            'true_value' => 'other',
-            'false_value' => 'primary',
-        ]);
-        expect($result)->toBe('other');
-    });
+    test('applies the operator', function (mixed $value, array $options, string $expected) {
+        expect(Maho_FeedManager_Model_Transformer::apply($value, 'conditional', $options))->toBe($expected);
+    })->with([
+        'eq matches' => ['1', ['operator' => 'eq', 'compare_value' => '1', 'true_value' => 'in stock', 'false_value' => 'out of stock'], 'in stock'],
+        'eq does not match' => ['0', ['operator' => 'eq', 'compare_value' => '1', 'true_value' => 'in stock', 'false_value' => 'out of stock'], 'out of stock'],
+        'neq' => ['active', ['operator' => 'neq', 'compare_value' => 'disabled', 'true_value' => 'yes', 'false_value' => 'no'], 'yes'],
+        'gt' => ['10', ['operator' => 'gt', 'compare_value' => '5', 'true_value' => 'high', 'false_value' => 'low'], 'high'],
+        'gte' => ['5', ['operator' => 'gte', 'compare_value' => '5', 'true_value' => 'yes', 'false_value' => 'no'], 'yes'],
+        'lt' => ['3', ['operator' => 'lt', 'compare_value' => '5', 'true_value' => 'low', 'false_value' => 'high'], 'low'],
+        'lte' => ['5', ['operator' => 'lte', 'compare_value' => '5', 'true_value' => 'yes', 'false_value' => 'no'], 'yes'],
+        'empty' => ['', ['operator' => 'empty', 'true_value' => 'missing', 'false_value' => '{{value}}'], 'missing'],
+        'not_empty' => ['hello', ['operator' => 'not_empty', 'true_value' => '{{value}}', 'false_value' => 'missing'], 'hello'],
+        'contains' => ['Hello World', ['operator' => 'contains', 'compare_value' => 'World', 'true_value' => 'found', 'false_value' => 'not found'], 'found'],
+        'not_contains' => ['Hello World', ['operator' => 'not_contains', 'compare_value' => 'Foo', 'true_value' => 'absent', 'false_value' => 'present'], 'absent'],
+        'in' => ['red', ['operator' => 'in', 'compare_value' => 'red, green, blue', 'true_value' => 'primary', 'false_value' => 'other'], 'primary'],
+        'not_in' => ['yellow', ['operator' => 'not_in', 'compare_value' => 'red, green, blue', 'true_value' => 'other', 'false_value' => 'primary'], 'other'],
+    ]);
 
     test('replaces {{value}} placeholder in output', function () {
         $result = Maho_FeedManager_Model_Transformer::apply('Hello', 'conditional', [
@@ -855,10 +715,6 @@ describe('Uppercase Transformer', function () {
         $result = Maho_FeedManager_Model_Transformer::apply('café', 'uppercase');
         expect($result)->toBe('CAFÉ');
     });
-
-    test('returns non-string values unchanged', function () {
-        expect(Maho_FeedManager_Model_Transformer::apply(42, 'uppercase'))->toBe(42);
-    });
 });
 
 describe('Lowercase Transformer', function () {
@@ -875,10 +731,6 @@ describe('Lowercase Transformer', function () {
     test('handles multibyte characters', function () {
         $result = Maho_FeedManager_Model_Transformer::apply('CAFÉ', 'lowercase');
         expect($result)->toBe('café');
-    });
-
-    test('returns non-string values unchanged', function () {
-        expect(Maho_FeedManager_Model_Transformer::apply(42, 'lowercase'))->toBe(42);
     });
 });
 
@@ -902,8 +754,19 @@ describe('Capitalise Transformer', function () {
         $result = Maho_FeedManager_Model_Transformer::apply('', 'capitalise', ['mode' => 'first']);
         expect($result)->toBe('');
     });
+});
 
-    test('returns non-string values unchanged', function () {
-        expect(Maho_FeedManager_Model_Transformer::apply(42, 'capitalise'))->toBe(42);
-    });
+describe('Text transformers', function () {
+    test('return a non-string value unchanged', function (string $transformer, array $options, mixed $value) {
+        expect(Maho_FeedManager_Model_Transformer::apply($value, $transformer, $options))->toBe($value);
+    })->with([
+        'strip_tags integer' => ['strip_tags', [], 42],
+        'strip_tags null' => ['strip_tags', [], null],
+        'truncate' => ['truncate', ['max_length' => '1'], 42],
+        'replace' => ['replace', ['search' => '4'], 42],
+        'url_encode' => ['url_encode', [], 42],
+        'uppercase' => ['uppercase', [], 42],
+        'lowercase' => ['lowercase', [], 42],
+        'capitalise' => ['capitalise', [], 42],
+    ]);
 });

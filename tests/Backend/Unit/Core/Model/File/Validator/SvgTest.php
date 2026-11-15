@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 use Maho\Security\SvgAllowlist;
 use Maho\Security\SvgDocumentSanitizer;
-use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -36,14 +35,6 @@ function sanitizeUpload(string $svg): ?string
 }
 
 describe('Mage_Core_Model_File_Validator_Svg', function () {
-    // Every upload reaches the validator through the model factory, and that factory hands each
-    // model its arguments array. A constructor that takes the sanitizer alone raised a TypeError
-    // before any file was read.
-    it('is built by the model factory, which is how every upload reaches it', function () {
-        expect(Mage::getModel('core/file_validator_svg'))
-            ->toBeInstanceOf(Mage_Core_Model_File_Validator_Svg::class);
-    });
-
     // The validator used a blocklist, which let through every name it did not list. Each test
     // below fails against that version.
     it('refuses a file that declares an entity, which read a local file into the saved SVG', function () {
@@ -177,15 +168,6 @@ describe('Mage_Core_Model_File_Validator_Svg', function () {
 describe('Maho\Security\SvgDocumentSanitizer', function () {
     // The XML half of the policy answers the interface that the HTML half answers, so a reader
     // sees two instances of one idea, and a test reaches it without a file on disk.
-    it('answers the interface that the content sanitizer answers', function () {
-        expect(new SvgDocumentSanitizer())->toBeInstanceOf(HtmlSanitizerInterface::class);
-
-        // Mage_Core_Helper_Purifier takes that interface, so either half fits the same seam.
-        $seam = (new ReflectionMethod(Mage_Core_Helper_Purifier::class, '__construct'))->getParameters()[0];
-
-        expect((string) $seam->getType())->toContain(HtmlSanitizerInterface::class);
-    });
-
     it('removes the same markup that the content sanitizer removes', function () {
         $svg = '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script>'
             . '<path d="M0 0" fill="url(https://evil.test/x)" onclick="alert(1)"/></svg>';

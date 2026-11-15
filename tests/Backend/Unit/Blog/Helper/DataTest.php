@@ -15,16 +15,6 @@ describe('Blog Helper Data', function () {
         // Enable database transactions to isolate test data changes
     });
 
-    test('helper instance is correct type', function () {
-        expect($this->helper)->toBeInstanceOf(Maho_Blog_Helper_Data::class);
-    });
-
-    test('helper has correct module configuration', function () {
-        // Test that the helper is properly configured
-        expect($this->helper->isModuleEnabled())->toBeBool();
-        expect($this->helper->isModuleOutputEnabled())->toBeBool();
-    });
-
     test('isEnabled checks module status', function () {
         // This should return true in test environment
         expect($this->helper->isEnabled())->toBeTrue();
@@ -54,120 +44,6 @@ describe('Blog Helper Data', function () {
         'add' => [Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::ADD_TRAILING_SLASH, '/news/'],
         'remove' => [Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::REMOVE_TRAILING_SLASH, '/news'],
     ]);
-
-    test('shouldShowInNavigation works with different scenarios', function () {
-        $currentStore = Mage::app()->getStore();
-
-        // Test that adding a visible post makes navigation true
-        $activePost = Mage::getModel('blog/post');
-        $activePost->setTitle('Unit Test Active Post - ' . uniqid());
-        $activePost->setContent('Test content');
-        $activePost->setIsActive(true);
-        $activePost->setPublishDate('2025-01-01'); // Past date
-        $activePost->setStores([$currentStore->getId()]);
-        $activePost->save();
-
-        // Now navigation should definitely be visible (we added a visible post)
-        expect($this->helper->shouldShowInNavigation())->toBeTrue();
-
-        // Create invisible posts - should NOT change the true state
-        $inactivePost = Mage::getModel('blog/post');
-        $inactivePost->setTitle('Unit Test Inactive Post - ' . uniqid());
-        $inactivePost->setContent('Test content');
-        $inactivePost->setIsActive(false); // Inactive
-        $inactivePost->setPublishDate('2025-01-01');
-        $inactivePost->setStores([$currentStore->getId()]);
-        $inactivePost->save();
-
-        $futurePost = Mage::getModel('blog/post');
-        $futurePost->setTitle('Unit Test Future Post - ' . uniqid());
-        $futurePost->setContent('Test content');
-        $futurePost->setIsActive(true);
-        $futurePost->setPublishDate('2025-12-31'); // Future date
-        $futurePost->setStores([$currentStore->getId()]);
-        $futurePost->save();
-
-        // Should still be true (visible post still exists)
-        expect($this->helper->shouldShowInNavigation())->toBeTrue();
-
-        // Test post with no publish date - should be visible
-        $noDatePost = Mage::getModel('blog/post');
-        $noDatePost->setTitle('Unit Test No Date Post - ' . uniqid());
-        $noDatePost->setContent('Test content');
-        $noDatePost->setIsActive(true);
-        $noDatePost->setPublishDate(null); // No date = visible
-        $noDatePost->setStores([$currentStore->getId()]);
-        $noDatePost->save();
-
-        // Should still be true (multiple visible posts exist)
-        expect($this->helper->shouldShowInNavigation())->toBeTrue();
-
-        // Clean up - transactions will rollback all changes
-        $activePost->delete();
-        $inactivePost->delete();
-        $futurePost->delete();
-        $noDatePost->delete();
-    });
-
-    test('hasVisiblePosts correctly identifies visible posts', function () {
-        $currentStore = Mage::app()->getStore();
-
-        // Test by creating posts with different visibility conditions
-        // Focus on positive assertions - we add visible posts and verify they're detected
-
-        // 1. Active post with past publish date - VISIBLE
-        $visiblePost = Mage::getModel('blog/post');
-        $visiblePost->setTitle('Unit Test Visible Post - ' . uniqid());
-        $visiblePost->setContent('Test content');
-        $visiblePost->setIsActive(true);
-        $visiblePost->setPublishDate('2025-01-01');
-        $visiblePost->setStores([$currentStore->getId()]);
-        $visiblePost->save();
-
-        expect($this->helper->hasVisiblePosts())->toBeTrue();
-
-        // 2. Inactive post - should NOT change the true state
-        $inactivePost = Mage::getModel('blog/post');
-        $inactivePost->setTitle('Unit Test Inactive Post - ' . uniqid());
-        $inactivePost->setContent('Test content');
-        $inactivePost->setIsActive(false);
-        $inactivePost->setPublishDate('2025-01-01');
-        $inactivePost->setStores([$currentStore->getId()]);
-        $inactivePost->save();
-
-        // Should still be true (visible post exists)
-        expect($this->helper->hasVisiblePosts())->toBeTrue();
-
-        // 3. Future post - should NOT change the true state
-        $futurePost = Mage::getModel('blog/post');
-        $futurePost->setTitle('Unit Test Future Post - ' . uniqid());
-        $futurePost->setContent('Test content');
-        $futurePost->setIsActive(true);
-        $futurePost->setPublishDate('2025-12-31');
-        $futurePost->setStores([$currentStore->getId()]);
-        $futurePost->save();
-
-        // Should still be true (visible post still exists)
-        expect($this->helper->hasVisiblePosts())->toBeTrue();
-
-        // 4. Post with no publish date - VISIBLE (should maintain true state)
-        $noDatePost = Mage::getModel('blog/post');
-        $noDatePost->setTitle('Unit Test No Date Post - ' . uniqid());
-        $noDatePost->setContent('Test content');
-        $noDatePost->setIsActive(true);
-        $noDatePost->setPublishDate(null);
-        $noDatePost->setStores([$currentStore->getId()]);
-        $noDatePost->save();
-
-        // Should still be true (multiple visible posts exist)
-        expect($this->helper->hasVisiblePosts())->toBeTrue();
-
-        // Clean up - transactions will rollback all changes
-        $visiblePost->delete();
-        $inactivePost->delete();
-        $futurePost->delete();
-        $noDatePost->delete();
-    });
 
     test('navigation respects store isolation - collection filtering works correctly', function () {
         $currentStore = Mage::app()->getStore();
@@ -217,6 +93,21 @@ describe('Blog Helper Data', function () {
         expect($this->helper->hasVisiblePosts())->toBeTrue();
         expect($this->helper->shouldShowInNavigation())->toBeTrue();
 
+        // A post that is published later does not count as visible
+        $futurePost = Mage::getModel('blog/post');
+        $futurePost->setTitle('Future Store Post');
+        $futurePost->setContent('This future post should not affect navigation');
+        $futurePost->setIsActive(true);
+        $futurePost->setPublishDate(Mage::app()->getLocale()->utcToStore()->modify('+1 year')->format(Mage_Core_Model_Locale::DATE_FORMAT));
+        $futurePost->setStores([$currentStoreId]);
+        $futurePost->save();
+
+        $futureCollection = Mage::getResourceModel('blog/post_collection')
+            ->addStoreFilter($currentStore)
+            ->addPublishedFilter()
+            ->addFieldToFilter('entity_id', $futurePost->getId());
+        expect($futureCollection->getSize())->toBe(0);
+
         // Remove the active post
         $currentStorePost->delete();
 
@@ -226,5 +117,19 @@ describe('Blog Helper Data', function () {
 
         // Clean up
         $inactivePost->delete();
+        $futurePost->delete();
+    });
+
+    test('hasVisiblePosts is false when no post is active', function () {
+        $write = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $write->beginTransaction();
+        try {
+            $write->update(Mage::getResourceSingleton('blog/post')->getEntityTable(), ['is_active' => 0]);
+
+            expect($this->helper->hasVisiblePosts())->toBeFalse();
+            expect($this->helper->shouldShowInNavigation())->toBeFalse();
+        } finally {
+            $write->rollBack();
+        }
     });
 });

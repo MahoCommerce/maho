@@ -87,9 +87,9 @@ describe('Parameter Binding and SQL Injection Protection', function () {
             [$scopes],
         );
 
-        expect($result)->toBeArray();
         $returnedScopes = array_column($result, 'scope');
-        expect($returnedScopes)->toBeArray();
+        expect($returnedScopes)->toContain('default')
+            ->and(array_diff($returnedScopes, $scopes))->toBe([]);
     });
 
     it('handles NULL values correctly', function () {

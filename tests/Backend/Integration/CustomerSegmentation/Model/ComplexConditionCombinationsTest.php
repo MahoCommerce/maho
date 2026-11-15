@@ -11,8 +11,8 @@ uses(Tests\MahoBackendTestCase::class);
 
 describe('Complex Condition Combinations', function () {
     beforeEach(function () {
-        createComplexTestOrders(createComplexTestCustomers());
-        createComplexTestCarts();
+        $this->customers = createComplexTestCustomers();
+        createComplexTestOrders($this->customers);
     });
 
     test('can handle deeply nested conditions', function () {
@@ -118,9 +118,16 @@ describe('Complex Condition Combinations', function () {
             ],
         ]);
 
+        [$john, $jane] = $this->customers;
+        $quote = Mage::getModel('sales/quote')->setStoreId(1);
+        $quote->setCustomerId((int) $john->getId())->setCustomerGroupId(1)->setIsActive();
+        $quote->addProduct(loadSimplePricedProduct(), 1);
+        $quote->save();
+
         $matchedCustomers = $segment->getMatchingCustomerIds();
 
-        expect($matchedCustomers)->toBeArray();
+        expect($matchedCustomers)->toContain((int) $john->getId())
+            ->and($matchedCustomers)->not->toContain((int) $jane->getId());
 
         foreach ($matchedCustomers as $customerId) {
             $customer = Mage::getModel('customer/customer')->load($customerId);
@@ -133,11 +140,6 @@ describe('Complex Condition Combinations', function () {
                 ->addFieldToFilter('customer_id', $customerId)
                 ->addFieldToFilter('status', 'pending');
             expect($orders->getSize())->toBeGreaterThan(0);
-
-            // Verify has cart items
-            $cart = Mage::getModel('checkout/cart');
-            $cart->setCustomer($customer);
-            // Note: In real implementation, this would check active cart items
         }
     });
 
@@ -239,12 +241,11 @@ describe('Complex Condition Combinations', function () {
             ],
         ]);
 
+        [$john, $jane, $bob, $alice] = $this->customers;
         $matchedCustomers = $segment->getMatchingCustomerIds();
 
-        expect($matchedCustomers)->toBeArray();
-
-        // This tests the structure rather than actual time calculations
-        // since we'd need more complex time-based test data
+        expect($matchedCustomers)->toContain((int) $jane->getId(), (int) $bob->getId(), (int) $alice->getId())
+            ->and($matchedCustomers)->not->toContain((int) $john->getId());
     });
 
     test('can handle customer lifetime value conditions', function () {
@@ -316,6 +317,31 @@ describe('Complex Condition Combinations', function () {
     });
 
     test('can handle product-based conditions with customer criteria', function () {
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_write');
+        $categoryProduct = $adapter->fetchRow(
+            $adapter->select()
+                ->from($resource->getTableName('catalog/category_product'), ['category_id', 'product_id'])
+                ->order(['category_id', 'product_id'])
+                ->limit(1),
+        );
+        if (!$categoryProduct) {
+            $this->markTestSkipped('No product is assigned to a category');
+        }
+
+        [$john, , $bob] = $this->customers;
+        $adapter->insertOnDuplicate(
+            $resource->getTableName('reports/viewed_product_index'),
+            [
+                'visitor_id' => null,
+                'customer_id' => (int) $john->getId(),
+                'product_id' => (int) $categoryProduct['product_id'],
+                'store_id' => 1,
+                'added_at' => Mage::app()->getLocale()->formatDateForDb('now'),
+            ],
+            ['added_at'],
+        );
+
         $segment = createComplexTestSegment('Product-Customer Complex', [
             'type' => 'customersegmentation/segment_condition_combine',
             'aggregator' => 'all',
@@ -325,7 +351,7 @@ describe('Complex Condition Combinations', function () {
                     'type' => 'customersegmentation/segment_condition_product_viewed',
                     'attribute' => 'category_id',
                     'operator' => '()',
-                    'value' => '1,2,3',
+                    'value' => (string) $categoryProduct['category_id'],
                 ],
                 [
                     'type' => 'customersegmentation/segment_condition_combine',
@@ -351,9 +377,8 @@ describe('Complex Condition Combinations', function () {
 
         $matchedCustomers = $segment->getMatchingCustomerIds();
 
-        expect($matchedCustomers)->toBeArray();
-
-        // Tests structure validation for product-based conditions
+        expect($matchedCustomers)->toContain((int) $john->getId())
+            ->and($matchedCustomers)->not->toContain((int) $bob->getId());
     });
 
     test('handles invalid nested structures gracefully', function () {
@@ -377,9 +402,20 @@ describe('Complex Condition Combinations', function () {
             ],
         ]);
 
-        // Should handle invalid conditions gracefully
-        $matchedCustomers = $segment->getMatchingCustomerIds();
-        expect($matchedCustomers)->toBeArray();
+        $emailOnly = createComplexTestSegment('Email Only Test', [
+            'type' => 'customersegmentation/segment_condition_customer_attributes',
+            'attribute' => 'email',
+            'operator' => '{}',
+            'value' => '@test.com',
+        ]);
+
+        $matched = $segment->getMatchingCustomerIds();
+        $expected = $emailOnly->getMatchingCustomerIds();
+        sort($matched);
+        sort($expected);
+
+        expect($matched)->toContain((int) $this->customers[0]->getId())
+            ->and($matched)->toBe($expected);
     });
 
     test('can export and import complex nested conditions', function () {
@@ -513,12 +549,6 @@ describe('Complex Condition Combinations', function () {
             $order->setStatus($orderData[$index]['status']);
             $order->save();
         }
-    }
-
-    function createComplexTestCarts(): void
-    {
-        // Create basic cart data for testing
-        // In practice, this would create quote records with items
     }
 
     function createComplexTestSegment(string $name, array $conditions): Maho_CustomerSegmentation_Model_Segment

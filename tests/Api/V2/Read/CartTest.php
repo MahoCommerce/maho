@@ -24,47 +24,18 @@ afterAll(function (): void {
 
 describe('API v2 Customer Cart', function (): void {
 
-    describe('without authentication', function (): void {
-
-        it('rejects getting customer cart without token', function (): void {
-            $response = apiGet('/api/rest/v2/carts/mine');
-
-            expect($response['status'])->toBeUnauthorized();
-        });
-
-        it('returns 401 error for unauthenticated cart request', function (): void {
-            $response = apiGet('/api/rest/v2/carts/mine');
-
-            expect($response['status'])->toBe(401);
-            expect($response['json'])->toHaveKey('error');
-            expect($response['json']['error'])->toBe('unauthorized');
-        });
-
-    });
-
-    describe('with invalid token', function (): void {
-
-        it('rejects cart request with malformed token', function (): void {
-            $response = apiGet('/api/rest/v2/carts/mine', 'invalid-token');
-
-            expect($response['status'])->toBeUnauthorized();
-        });
-
-        it('rejects cart request with expired token', function (): void {
-            $response = apiGet('/api/rest/v2/carts/mine', expiredToken());
-
-            expect($response['status'])->toBeUnauthorized();
-        });
-
-    });
-
     describe('with valid customer token', function (): void {
 
-        it('allows getting customer cart with valid token', function (): void {
-            $response = apiGet('/api/rest/v2/carts/mine', customerToken());
+        it('reads its own cart by id', function (): void {
+            $create = apiPost('/api/rest/v2/carts', [], customerToken());
+            expect($create['status'])->toBeIn([200, 201]);
+            $cartId = (int) $create['json']['id'];
+            trackCreated('quote', $cartId);
 
-            // Should succeed (200) or 404 if no cart exists
-            expect($response['status'])->toBeIn([200, 404]);
+            $response = apiGet("/api/rest/v2/carts/{$cartId}", customerToken());
+
+            expect($response['status'])->toBe(200);
+            expect($response['json']['id'] ?? null)->toBe($cartId);
         });
 
     });

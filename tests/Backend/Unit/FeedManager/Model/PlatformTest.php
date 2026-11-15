@@ -25,12 +25,6 @@ describe('Platform Factory', function () {
             ->and($platforms)->toHaveCount(9);
     });
 
-    test('getAdapter returns correct instance for each platform', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('google');
-        expect($adapter)->toBeInstanceOf(Maho_FeedManager_Model_Platform_AdapterInterface::class)
-            ->and($adapter)->toBeInstanceOf(Maho_FeedManager_Model_Platform_Google::class);
-    });
-
     test('getAdapter returns null for nonexistent platform', function () {
         $adapter = Maho_FeedManager_Model_Platform::getAdapter('nonexistent');
         expect($adapter)->toBeNull();
@@ -79,11 +73,6 @@ describe('AdapterInterface compliance', function () {
     ];
 
     foreach ($platformCodes as $code) {
-        test("{$code} implements AdapterInterface", function () use ($code) {
-            $adapter = Maho_FeedManager_Model_Platform::getAdapter($code);
-            expect($adapter)->toBeInstanceOf(Maho_FeedManager_Model_Platform_AdapterInterface::class);
-        });
-
         test("{$code} getCode returns correct code", function () use ($code) {
             $adapter = Maho_FeedManager_Model_Platform::getAdapter($code);
             expect($adapter->getCode())->toBe($code);
@@ -108,16 +97,6 @@ describe('AdapterInterface compliance', function () {
             expect($adapter->getDefaultFormat())->toBeIn($adapter->getSupportedFormats());
         });
 
-        test("{$code} getRequiredAttributes returns array", function () use ($code) {
-            $adapter = Maho_FeedManager_Model_Platform::getAdapter($code);
-            expect($adapter->getRequiredAttributes())->toBeArray();
-        });
-
-        test("{$code} getOptionalAttributes returns array", function () use ($code) {
-            $adapter = Maho_FeedManager_Model_Platform::getAdapter($code);
-            expect($adapter->getOptionalAttributes())->toBeArray();
-        });
-
         test("{$code} getAllAttributes includes all required attributes", function () use ($code) {
             $adapter = Maho_FeedManager_Model_Platform::getAdapter($code);
             $all = $adapter->getAllAttributes();
@@ -138,41 +117,18 @@ describe('AdapterInterface compliance', function () {
             }
         });
 
-        test("{$code} getRootElement returns string", function () use ($code) {
-            $adapter = Maho_FeedManager_Model_Platform::getAdapter($code);
-            expect($adapter->getRootElement())->toBeString();
-        });
-
-        test("{$code} getItemElement returns string", function () use ($code) {
-            $adapter = Maho_FeedManager_Model_Platform::getAdapter($code);
-            expect($adapter->getItemElement())->toBeString();
-        });
-
-        test("{$code} getNamespaces returns array", function () use ($code) {
-            $adapter = Maho_FeedManager_Model_Platform::getAdapter($code);
-            expect($adapter->getNamespaces())->toBeArray();
-        });
-
-        test("{$code} getDefaultMappings returns array", function () use ($code) {
-            $adapter = Maho_FeedManager_Model_Platform::getAdapter($code);
-            expect($adapter->getDefaultMappings())->toBeArray();
-        });
-
-        test("{$code} transformProductData returns array", function () use ($code) {
+        test("{$code} transformProductData keeps a plain title", function () use ($code) {
             $adapter = Maho_FeedManager_Model_Platform::getAdapter($code);
             $result = $adapter->transformProductData(['title' => 'Test Product']);
-            expect($result)->toBeArray();
+            expect($result['title'] ?? null)->toBe('Test Product');
         });
 
-        test("{$code} validateProductData returns array", function () use ($code) {
+        test("{$code} validateProductData names each missing required attribute", function () use ($code) {
             $adapter = Maho_FeedManager_Model_Platform::getAdapter($code);
-            $result = $adapter->validateProductData([]);
-            expect($result)->toBeArray();
-        });
-
-        test("{$code} supportsCategoryMapping returns bool", function () use ($code) {
-            $adapter = Maho_FeedManager_Model_Platform::getAdapter($code);
-            expect($adapter->supportsCategoryMapping())->toBeBool();
+            $required = array_keys(array_filter($adapter->getRequiredAttributes(), fn(array $config): bool => !empty($config['required'])));
+            $missing = array_map(fn(string $attribute): string => "Missing required attribute: {$attribute}", $required);
+            $errors = $adapter->validateProductData([]);
+            expect(array_slice($errors, 0, count($missing)))->toBe($missing);
         });
     }
 });
@@ -192,31 +148,11 @@ describe('Google Platform', function () {
             ->and($required)->toHaveKey('google_product_category');
     });
 
-    test('supported formats include xml', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('google');
-        expect($adapter->getSupportedFormats())->toContain('xml');
-    });
-
-    test('root element is feed', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('google');
-        expect($adapter->getRootElement())->toBe('feed');
-    });
-
-    test('item element is entry', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('google');
-        expect($adapter->getItemElement())->toBe('entry');
-    });
-
     test('has Atom and Google namespaces', function () {
         $adapter = Maho_FeedManager_Model_Platform::getAdapter('google');
         $ns = $adapter->getNamespaces();
         expect($ns)->toHaveKey('xmlns')
             ->and($ns)->toHaveKey('xmlns:g');
-    });
-
-    test('supports category mapping', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('google');
-        expect($adapter->supportsCategoryMapping())->toBeTrue();
     });
 
     test('validates missing required attributes', function () {
@@ -243,58 +179,10 @@ describe('Google Platform', function () {
 });
 
 describe('Facebook Platform', function () {
-    test('supports xml and csv formats', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('facebook');
-        $formats = $adapter->getSupportedFormats();
-        expect($formats)->toContain('xml')
-            ->and($formats)->toContain('csv');
-    });
-
     test('required attributes include condition', function () {
         $adapter = Maho_FeedManager_Model_Platform::getAdapter('facebook');
         $required = $adapter->getRequiredAttributes();
         expect($required)->toHaveKey('condition');
-    });
-
-    test('item element is item', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('facebook');
-        expect($adapter->getItemElement())->toBe('item');
-    });
-});
-
-describe('Bing Platform', function () {
-    test('supports xml and csv formats', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('bing');
-        $formats = $adapter->getSupportedFormats();
-        expect($formats)->toContain('xml')
-            ->and($formats)->toContain('csv');
-    });
-
-    test('uses entry as item element', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('bing');
-        expect($adapter->getItemElement())->toBe('entry');
-    });
-
-    test('supports category mapping', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('bing');
-        expect($adapter->supportsCategoryMapping())->toBeTrue();
-    });
-});
-
-describe('Pinterest Platform', function () {
-    test('uses rss as root element', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('pinterest');
-        expect($adapter->getRootElement())->toBe('rss');
-    });
-
-    test('uses item as item element', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('pinterest');
-        expect($adapter->getItemElement())->toBe('item');
-    });
-
-    test('supports category mapping', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('pinterest');
-        expect($adapter->supportsCategoryMapping())->toBeTrue();
     });
 });
 
@@ -313,11 +201,6 @@ describe('Idealo Platform', function () {
             ->and($required)->toHaveKey('eans')
             ->and($required)->toHaveKey('delivery');
     });
-
-    test('does not support category mapping', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('idealo');
-        expect($adapter->supportsCategoryMapping())->toBeFalse();
-    });
 });
 
 describe('Trovaprezzi Platform', function () {
@@ -327,33 +210,15 @@ describe('Trovaprezzi Platform', function () {
         expect($formats)->toBe(['xml']);
     });
 
-    test('uses Products and Offer for XML elements', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('trovaprezzi');
-        expect($adapter->getRootElement())->toBe('Products')
-            ->and($adapter->getItemElement())->toBe('Offer');
-    });
-
     test('required attributes include EanCode and Stock', function () {
         $adapter = Maho_FeedManager_Model_Platform::getAdapter('trovaprezzi');
         $required = $adapter->getRequiredAttributes();
         expect($required)->toHaveKey('EanCode')
             ->and($required)->toHaveKey('Stock');
     });
-
-    test('does not support category mapping', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('trovaprezzi');
-        expect($adapter->supportsCategoryMapping())->toBeFalse();
-    });
 });
 
 describe('OpenAI Platform', function () {
-    test('supports jsonl and csv formats', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('openai');
-        $formats = $adapter->getSupportedFormats();
-        expect($formats)->toContain('jsonl')
-            ->and($formats)->toContain('csv');
-    });
-
     test('default format is jsonl', function () {
         $adapter = Maho_FeedManager_Model_Platform::getAdapter('openai');
         expect($adapter->getDefaultFormat())->toBe('jsonl');
@@ -367,56 +232,18 @@ describe('OpenAI Platform', function () {
             ->and($required)->toHaveKey('return_window')
             ->and($required)->toHaveKey('group_id');
     });
-
-    test('does not support category mapping', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('openai');
-        expect($adapter->supportsCategoryMapping())->toBeFalse();
-    });
-
-    test('has no namespaces', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('openai');
-        expect($adapter->getNamespaces())->toBeEmpty();
-    });
 });
 
 describe('Custom Platform', function () {
-    test('supports xml, csv, and json formats', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('custom');
-        $formats = $adapter->getSupportedFormats();
-        expect($formats)->toContain('xml')
-            ->and($formats)->toContain('csv')
-            ->and($formats)->toContain('json');
-    });
-
     test('has no required attributes', function () {
         $adapter = Maho_FeedManager_Model_Platform::getAdapter('custom');
         expect($adapter->getRequiredAttributes())->toBeEmpty();
-    });
-
-    test('does not support category mapping', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('custom');
-        expect($adapter->supportsCategoryMapping())->toBeFalse();
-    });
-
-    test('has no namespaces', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('custom');
-        expect($adapter->getNamespaces())->toBeEmpty();
     });
 
     test('validates product data with no errors', function () {
         $adapter = Maho_FeedManager_Model_Platform::getAdapter('custom');
         $errors = $adapter->validateProductData([]);
         expect($errors)->toBeEmpty();
-    });
-
-    test('uses products as root element', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('custom');
-        expect($adapter->getRootElement())->toBe('products');
-    });
-
-    test('uses product as item element', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('custom');
-        expect($adapter->getItemElement())->toBe('product');
     });
 });
 
@@ -427,18 +254,6 @@ describe('Google Local Inventory Platform', function () {
         expect($required)->toHaveKey('id')
             ->and($required)->toHaveKey('store_code')
             ->and($required)->toHaveKey('availability');
-    });
-
-    test('supports xml and csv formats', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('google_local_inventory');
-        $formats = $adapter->getSupportedFormats();
-        expect($formats)->toContain('xml')
-            ->and($formats)->toContain('csv');
-    });
-
-    test('does not support category mapping', function () {
-        $adapter = Maho_FeedManager_Model_Platform::getAdapter('google_local_inventory');
-        expect($adapter->supportsCategoryMapping())->toBeFalse();
     });
 
     test('namespaces every attribute, id included', function () {
@@ -488,8 +303,53 @@ describe('Default XML structure', function () {
 
     test('platforms without namespaces keep plain tags', function () {
         $adapter = Maho_FeedManager_Model_Platform::getAdapter('custom');
-        foreach ($adapter->getDefaultXmlStructure() as $row) {
+        $structure = $adapter->getDefaultXmlStructure();
+        expect($structure)->not->toBeEmpty();
+        foreach ($structure as $row) {
             expect($row['tag'])->not->toStartWith('g:');
         }
     });
+});
+
+describe('Platform properties', function () {
+    test('category mapping support', function (string $code, bool $expected) {
+        expect(Maho_FeedManager_Model_Platform::getAdapter($code)->supportsCategoryMapping())->toBe($expected);
+    })->with([
+        'google' => ['google', true],
+        'facebook' => ['facebook', true],
+        'bing' => ['bing', true],
+        'pinterest' => ['pinterest', true],
+        'idealo' => ['idealo', false],
+        'trovaprezzi' => ['trovaprezzi', false],
+        'openai' => ['openai', false],
+        'custom' => ['custom', false],
+        'google_local_inventory' => ['google_local_inventory', false],
+    ]);
+
+    test('supported formats', function (string $code, array $formats) {
+        expect(Maho_FeedManager_Model_Platform::getAdapter($code)->getSupportedFormats())->toContain(...$formats);
+    })->with([
+        'facebook' => ['facebook', ['xml', 'csv']],
+        'bing' => ['bing', ['xml', 'csv']],
+        'openai' => ['openai', ['jsonl', 'csv']],
+        'custom' => ['custom', ['xml', 'csv', 'json']],
+        'google_local_inventory' => ['google_local_inventory', ['xml', 'csv']],
+    ]);
+
+    test('root and item elements', function (string $code, string $root, string $item) {
+        $adapter = Maho_FeedManager_Model_Platform::getAdapter($code);
+        expect($adapter->getRootElement())->toBe($root)
+            ->and($adapter->getItemElement())->toBe($item);
+    })->with([
+        'google' => ['google', 'feed', 'entry'],
+        'facebook' => ['facebook', 'feed', 'item'],
+        'bing' => ['bing', 'feed', 'entry'],
+        'pinterest' => ['pinterest', 'rss', 'item'],
+        'trovaprezzi' => ['trovaprezzi', 'Products', 'Offer'],
+        'custom' => ['custom', 'products', 'product'],
+    ]);
+
+    test('no namespaces', function (string $code) {
+        expect(Maho_FeedManager_Model_Platform::getAdapter($code)->getNamespaces())->toBeEmpty();
+    })->with(['openai', 'custom']);
 });
