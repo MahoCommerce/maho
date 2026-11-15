@@ -132,20 +132,20 @@ SPDX-License-Identifier: AFL-3.0
                     </fields>
                 </crontab>
                 <not_found translate="label">
-                    <label>Not Found Report</label>
+                    <label>404 Errors</label>
                     <sort_order>4</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
                     <fields>
                         <enabled translate="label comment">
-                            <label>Record Pages Not Found</label>
+                            <label>Record 404 Errors</label>
                             <frontend_type>boolean</frontend_type>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment>Count each storefront address that answers 404 in Reports > Not Found.</comment>
+                            <comment>Count each storefront address that answers 404 in Reports > 404 Errors.</comment>
                         </enabled>
                         <log_rate_limit translate="label comment">
                             <label>Pages Recorded per Hour per Visitor</label>

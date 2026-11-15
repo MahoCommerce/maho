@@ -79,7 +79,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
         if ($requestPath !== '' && !$rewrite->getId()
             && !Mage::registry('current_product')->getId() && !Mage::registry('current_category')->getId()
         ) {
-            // Reports > Not Found opens a new rewrite that redirects a path that answered 404
+            // Reports > 404 Errors opens a new rewrite that redirects a path that answered 404
             $rewrite->setRequestPath($requestPath)
                 ->setIdPath($requestPath)
                 ->setOptions('RP')

@@ -32,7 +32,7 @@ function notFoundObserverSend(string $path, int $status): void
     Mage::dispatchEvent('controller_front_send_response_before', ['front' => Mage::app()->getFrontController()]);
 }
 
-describe('Not Found report observer', function () {
+describe('404 Errors report observer', function () {
     beforeEach(function () {
         Mage::app()->setCurrentStore(Mage::app()->getDefaultStoreView());
         $this->store = Mage::app()->getStore();

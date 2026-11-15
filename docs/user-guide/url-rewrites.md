@@ -161,7 +161,7 @@ With 0, it keeps them forever.
 
 ## Related
 
-- [Not Found Report](not-found-report.md) for the addresses that answer 404, and a redirect for each one.
+- [404 Errors Report](404-errors.md) for the addresses that answer 404, and a redirect for each one.
 - [SEO](seo.md) for canonical tags and the other search engine settings.
 - [Scope](scope.md) for store view values and **Use Default Value**.
 - [CMS Pages and Blocks in Store Views](cms-store-views.md) for a CMS page that has the same path as

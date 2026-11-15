@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * Issue #1832: the Not Found report keeps one row for each storefront path that answered 404.
+ * Issue #1832: the 404 Errors report keeps one row for each storefront path that answered 404.
  */
 function notFoundRecord(string $uri, int $status = 404, array $server = []): bool
 {
@@ -34,7 +34,7 @@ function notFoundRow(string $path, int $storeId): ?array
     return $row ?: null;
 }
 
-describe('Not Found report', function () {
+describe('404 Errors report', function () {
     beforeEach(function () {
         Mage::app()->setCurrentStore(Mage::app()->getDefaultStoreView());
         $this->store = Mage::app()->getStore();
@@ -211,7 +211,7 @@ describe('Not Found report', function () {
     });
 });
 
-describe('Not Found report with a URL rewrite that does not redirect', function () {
+describe('404 Errors report with a URL rewrite that does not redirect', function () {
     beforeEach(function () {
         $this->storeId = (int) Mage::app()->getDefaultStoreView()->getId();
         $this->path = 'missing-page-' . uniqid();
@@ -291,7 +291,7 @@ describe('Not Found report with a URL rewrite that does not redirect', function 
     });
 });
 
-describe('Not Found report with a rewrite of store 0', function () {
+describe('404 Errors report with a rewrite of store 0', function () {
     it('shows the target of a rewrite of store 0 when the store view has none', function () {
         Mage::app()->setCurrentStore(Mage::app()->getDefaultStoreView());
         $storeId = (int) Mage::app()->getStore()->getId();
@@ -327,7 +327,7 @@ describe('Not Found report with a rewrite of store 0', function () {
     });
 });
 
-describe('Not Found report grid renderers', function () {
+describe('404 Errors report grid renderers', function () {
     it('shows a referer as escaped text, and as a link only for http and https', function () {
         $render = fn(string $referer) => Mage::app()->getLayout()
             ->createBlock('adminhtml/report_notfound_grid_renderer_referer')

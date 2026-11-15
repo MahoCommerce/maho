@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Reports > Not Found: the storefront paths that answered 404.
+ * Reports > 404 Errors: the storefront paths that answered 404.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -17,12 +17,12 @@ class Mage_Adminhtml_Report_NotfoundController extends Mage_Adminhtml_Controller
     #[Maho\Config\Route('/admin/report_notfound/index')]
     public function indexAction(): void
     {
-        $this->_title($this->__('Reports'))->_title($this->__('Not Found'));
+        $this->_title($this->__('Reports'))->_title($this->__('404 Errors'));
 
         $this->loadLayout()
             ->_setActiveMenu('report/notfound')
             ->_addBreadcrumb(Mage::helper('reports')->__('Reports'), Mage::helper('reports')->__('Reports'))
-            ->_addBreadcrumb(Mage::helper('reports')->__('Not Found'), Mage::helper('reports')->__('Not Found'))
+            ->_addBreadcrumb(Mage::helper('reports')->__('404 Errors'), Mage::helper('reports')->__('404 Errors'))
             ->_addContent($this->getLayout()->createBlock('adminhtml/report_notfound'))
             ->renderLayout();
     }

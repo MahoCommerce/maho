@@ -27,7 +27,7 @@ class Mage_Reports_Model_Observer
     }
 
     /**
-     * Count a storefront 404 in the Not Found report. Every 404 of a storefront page passes here once, also after
+     * Count a storefront 404 in the 404 Errors report. Every 404 of a storefront page passes here once, also after
      * a forward to the no-route page.
      */
     #[Maho\Config\Observer('controller_front_send_response_before', area: 'frontend')]

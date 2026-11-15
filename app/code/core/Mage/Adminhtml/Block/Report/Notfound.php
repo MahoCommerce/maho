@@ -13,7 +13,7 @@ class Mage_Adminhtml_Block_Report_Notfound extends Mage_Adminhtml_Block_Widget_G
     public function __construct()
     {
         $this->_controller = 'report_notfound';
-        $this->_headerText = Mage::helper('reports')->__('Not Found');
+        $this->_headerText = Mage::helper('reports')->__('404 Errors');
         parent::__construct();
         $this->_removeButton('add');
     }

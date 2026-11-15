@@ -1,11 +1,11 @@
 ---
-description: The Not Found report lists the storefront addresses that answered "404 Not Found", with the number of hits, the dates and the last referer, and opens a redirect for each one.
+description: The 404 Errors report lists the storefront addresses that answered "404 Not Found", with the number of hits, the dates and the last referer, and opens a redirect for each one.
 admin_pages: [report_notfound]
 ---
 
-# Not Found Report
+# 404 Errors Report
 
-The **Reports > Not Found** report lists each storefront address that answered "404 Not Found".
+The **Reports > 404 Errors** report lists each storefront address that answered "404 Not Found".
 Use it to find broken links and the pages that send visitors to them. Then redirect each address
 to a page that exists.
 
@@ -57,11 +57,11 @@ that answers 404 again gets a new row.
 
 ## Settings
 
-The settings are in **System > Configuration > General > Reports > Not Found Report**.
+The settings are in **System > Configuration > General > Reports > 404 Errors**.
 
 | Setting | What it does |
 |---------|--------------|
-| Record Pages Not Found | Turns the report on or off. With No, the store records no new rows |
+| Record 404 Errors | Turns the report on or off. With No, the store records no new rows |
 | Pages Recorded per Hour per Visitor | Above this number, a visitor still gets the 404 page, but the report does not count it. This stops a scanner from filling the report. 0 means no limit |
 | Delete Addresses Not Seen For (days) | Every hour, the store deletes the addresses that did not answer 404 in this number of days. 0 keeps them |
 | Maximum Addresses | Every hour, the store keeps only this number of addresses, the ones seen last. 0 means no limit |

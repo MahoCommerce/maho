@@ -104,7 +104,7 @@ SPDX-License-Identifier: AFL-3.0
                     <action>adminhtml/report/search</action>
                 </search>
                 <notfound translate="title" module="reports">
-                    <title>Not Found</title>
+                    <title>404 Errors</title>
                     <sort_order>61</sort_order>
                     <action>adminhtml/report_notfound</action>
                 </notfound>
@@ -221,7 +221,7 @@ SPDX-License-Identifier: AFL-3.0
                                 <title>Search Terms</title>
                             </search>
                             <notfound translate="title">
-                                <title>Not Found</title>
+                                <title>404 Errors</title>
                             </notfound>
                             <statistics translate="title">
                                 <title>Statistics</title>
