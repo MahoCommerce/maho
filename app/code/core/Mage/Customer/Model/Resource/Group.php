@@ -11,7 +11,7 @@
 class Mage_Customer_Model_Resource_Group extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('customer/customer_group', 'customer_group_id');
     }

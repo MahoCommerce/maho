@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_Reports_Model_Resource_Product_Index_Compared extends Mage_Reports_Model_Resource_Product_Index_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('reports/compared_product_index', 'index_id');
     }

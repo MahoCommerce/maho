@@ -12,11 +12,8 @@ class Mage_Admin_Model_Resource_Acl extends Mage_Core_Model_Resource_Db_Abstract
 {
     public const ACL_ALL_RULES = 'all';
 
-    /**
-     * Initialize resource
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('admin/role', 'role_id');
     }

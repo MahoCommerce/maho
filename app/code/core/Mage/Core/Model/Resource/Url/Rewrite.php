@@ -18,7 +18,7 @@ class Mage_Core_Model_Resource_Url_Rewrite extends Mage_Core_Model_Resource_Db_A
     protected $_tagTable;
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('core/url_rewrite', 'url_rewrite_id');
         $this->_tagTable = $this->getTable('url_rewrite_tag');

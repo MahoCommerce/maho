@@ -11,7 +11,7 @@
 class Mage_Reports_Model_Resource_Tag_Product_Collection extends Mage_Tag_Model_Resource_Product_Collection
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         parent::_construct();
         /**

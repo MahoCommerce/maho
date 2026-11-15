@@ -41,7 +41,7 @@ class Mage_Sales_Model_Resource_Order_Creditmemo extends Mage_Sales_Model_Resour
     protected $_entityTypeForIncrementId     = 'creditmemo';
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('sales/creditmemo', 'entity_id');
     }

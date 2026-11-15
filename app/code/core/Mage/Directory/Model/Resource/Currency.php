@@ -30,11 +30,8 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
      */
     protected static ?array $_rateCache = null;
 
-    /**
-     * Define main and currency rate tables
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('directory/currency', 'currency_code');
         $this->_currencyRateTable   = $this->getTable('directory/currency_rate');

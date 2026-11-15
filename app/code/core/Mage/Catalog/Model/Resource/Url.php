@@ -45,11 +45,8 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      */
     protected $_rootChildrenIds             = [];
 
-    /**
-     * Load core Url rewrite model
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('core/url_rewrite', 'url_rewrite_id');
     }

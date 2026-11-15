@@ -18,7 +18,7 @@ class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_A
     public const LINK_INSERT_CHUNK = 1000;
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('newsletter/queue', 'queue_id');
     }

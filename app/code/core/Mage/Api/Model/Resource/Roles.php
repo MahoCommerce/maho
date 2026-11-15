@@ -28,7 +28,7 @@ class Mage_Api_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstract
     protected $_ruleTable;
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('api/role', 'role_id');
 

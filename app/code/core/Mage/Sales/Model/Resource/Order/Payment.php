@@ -27,7 +27,7 @@ class Mage_Sales_Model_Resource_Order_Payment extends Mage_Sales_Model_Resource_
     protected $_eventPrefix          = 'sales_order_payment_resource';
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('sales/order_payment', 'entity_id');
     }

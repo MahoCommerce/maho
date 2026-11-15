@@ -16,7 +16,7 @@ class Mage_Directory_Model_Resource_Country extends Mage_Core_Model_Resource_Db_
     protected string $_countryNameTable;
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('directory/country', 'country_id');
         $this->_countryNameTable = $this->getTable('directory/country_name');

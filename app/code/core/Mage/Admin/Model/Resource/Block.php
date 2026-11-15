@@ -23,7 +23,7 @@ class Mage_Admin_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstra
     protected $disallowedBlockNames = ['install/complete'];
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('admin/permission_block', 'block_id');
     }

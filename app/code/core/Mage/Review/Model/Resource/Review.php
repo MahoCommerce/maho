@@ -59,11 +59,8 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
      */
     private $_deleteCache   = [];
 
-    /**
-     * Define main table. Define other tables name
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('review/review', 'review_id');
         $this->_reviewTable         = $this->getTable('review/review');

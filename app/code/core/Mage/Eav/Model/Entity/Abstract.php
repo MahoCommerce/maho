@@ -166,7 +166,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     }
 
     #[\Override]
-    protected function _construct() {}
+    protected function _construct(): void {}
 
     /**
      * Retrieve connection for read data

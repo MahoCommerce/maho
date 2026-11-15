@@ -20,11 +20,8 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction extends Mage_Sales_Mod
         'additional_information' => [null, []],
     ];
 
-    /**
-     * Initialize main table and the primary key field name
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('sales/payment_transaction', 'transaction_id');
     }

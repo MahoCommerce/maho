@@ -24,11 +24,8 @@ class Mage_CatalogIndex_Model_Resource_Aggregation extends Mage_Core_Model_Resou
      */
     protected $_toTagTable;
 
-    /**
-     * Initialize resource tables
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalogindex/aggregation', 'aggregation_id');
         $this->_tagTable    = $this->getTable('catalogindex/aggregation_tag');
