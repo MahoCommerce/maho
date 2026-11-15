@@ -23,15 +23,23 @@ uses(Tests\MahoBackendTestCase::class);
 
 /**
  * A file holds a real typed accessor when it declares a get or set method with
- * a return type whose body reads or writes model data.
+ * a return type whose body reads or writes model data, and whose signature has a
+ * scalar type. Only a scalar is coerced in a weak file: mixed, an object type and
+ * static keep their value, so strict types change nothing for them.
  */
 function holdsTypedAccessor(string $code): bool
 {
-    if (!preg_match_all('/public function (?:get|set)[A-Z]\w*\([^)]*\)\s*:\s*[^{;]+\{(.{0,400})/s', $code, $matches)) {
+    // The lookahead lets the windows overlap, so a short method does not hide the next one
+    $pattern = '/public function (?:get|set)[A-Z]\w*\(([^)]*)\)\s*:\s*([^{;]+)\{(?=(.{0,400}))/s';
+    if (!preg_match_all($pattern, $code, $matches, PREG_SET_ORDER)) {
         return false;
     }
 
-    foreach ($matches[1] as $body) {
+    foreach ($matches as [, $parameters, $returnType, $body]) {
+        if (preg_match('/\b(?:int|float|string|bool)\b/', $parameters . ' ' . $returnType) !== 1) {
+            continue;
+        }
+
         // The window can run past a short method, so it stops at the next method declaration
         $body = preg_split('/(?:public|protected|private)\s+(?:static\s+)?function\s/', $body)[0];
         if (str_contains($body, '->getData(') || str_contains($body, '->setData(')) {
@@ -41,6 +49,16 @@ function holdsTypedAccessor(string $code): bool
 
     return false;
 }
+
+it('flags only an accessor with a scalar type, also right after a short method', function () {
+    $scalar = '<?php class A { public function setFlag(): static { return $this; }'
+        . ' public function setCustomerId(?int $id): static { return $this->setData("customer_id", $id); } }';
+    $mixed = '<?php class A { public function setData(mixed $data): static { $this->getProfile()->setData($data); return $this; }'
+        . ' public function getData(): mixed { return $this->getProfile()->getData(); } }';
+
+    expect(holdsTypedAccessor($scalar))->toBeTrue()
+        ->and(holdsTypedAccessor($mixed))->toBeFalse();
+});
 
 /**
  * @return list<string>

@@ -12,30 +12,33 @@ class Mage_Dataflow_Model_Convert_Container_Collection
 {
     protected array $_items = [];
 
-    protected $_defaultClass = 'Mage_Dataflow_Model_Convert_Container_Generic';
+    /** @var class-string<Mage_Dataflow_Model_Convert_Container_Interface> */
+    protected string $_defaultClass = 'Mage_Dataflow_Model_Convert_Container_Generic';
 
-    public function setDefaultClass($className): static
+    public function setDefaultClass(string $className): static
     {
         $this->_defaultClass = $className;
         return $this;
     }
 
-    public function addItem($name, Mage_Dataflow_Model_Convert_Container_Interface $item)
+    public function addItem(string|int|null $name, Mage_Dataflow_Model_Convert_Container_Interface $item): Mage_Dataflow_Model_Convert_Container_Interface
     {
-        if (is_null($name)) {
-            if ($item->getName()) {
-                $name = $item->getName();
-            } else {
-                $name = count($this->_items);
-            }
+        // No core container has a name, but an extension container can have one
+        if ($name === null && method_exists($item, 'getName') && $item->getName()) {
+            $name = $item->getName();
         }
 
-        $this->_items[$name] = $item;
+        // A nameless container takes the next free index, so it never replaces another one
+        if ($name === null) {
+            $this->_items[] = $item;
+        } else {
+            $this->_items[$name] = $item;
+        }
 
         return $item;
     }
 
-    public function getItem($name)
+    public function getItem(string|int $name): Mage_Dataflow_Model_Convert_Container_Interface
     {
         if (!isset($this->_items[$name])) {
             $this->addItem($name, new $this->_defaultClass());
@@ -43,7 +46,7 @@ class Mage_Dataflow_Model_Convert_Container_Collection
         return $this->_items[$name];
     }
 
-    public function hasItem($name)
+    public function hasItem(string|int $name): bool
     {
         return isset($this->_items[$name]);
     }
