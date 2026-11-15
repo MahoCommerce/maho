@@ -36,7 +36,7 @@ class Mage_Adminhtml_Block_Permissions_Edituser extends Mage_Adminhtml_Block_Wid
         return parent::_beforeToHtml();
     }
 
-    public function getUser()
+    public function getUser(): mixed
     {
         return Mage::registry('user_data');
     }

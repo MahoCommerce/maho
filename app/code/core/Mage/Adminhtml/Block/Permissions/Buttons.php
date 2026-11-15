@@ -62,30 +62,30 @@ class Mage_Adminhtml_Block_Permissions_Buttons extends Mage_Adminhtml_Block_Temp
         return parent::_prepareLayout();
     }
 
-    public function getBackButtonHtml()
+    public function getBackButtonHtml(): string
     {
         return $this->getChildHtml('backButton');
     }
 
-    public function getResetButtonHtml()
+    public function getResetButtonHtml(): string
     {
         return $this->getChildHtml('resetButton');
     }
 
-    public function getSaveButtonHtml()
+    public function getSaveButtonHtml(): string
     {
         return $this->getChildHtml('saveButton');
     }
 
-    public function getDeleteButtonHtml()
+    public function getDeleteButtonHtml(): string
     {
         if ((int) $this->getRequest()->getParam('rid') == 0) {
-            return;
+            return '';
         }
         return $this->getChildHtml('deleteButton');
     }
 
-    public function getUser()
+    public function getUser(): mixed
     {
         return Mage::registry('user_data');
     }

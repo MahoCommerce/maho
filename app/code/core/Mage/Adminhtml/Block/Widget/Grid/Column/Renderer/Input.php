@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Input extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
-    protected $_values;
+    protected mixed $_values = null;
 
     /**
      * Renders grid column

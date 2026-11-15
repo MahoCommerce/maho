@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Sales_Order_Create_Totals extends Mage_Adminhtml_Block_Sales_Order_Create_Abstract
 {
-    protected $_totalRenderers;
+    protected mixed $_totalRenderers = null;
     protected string $_defaultRenderer = 'adminhtml/sales_order_create_totals_default';
 
     public function __construct()
@@ -19,7 +19,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Totals extends Mage_Adminhtml_Bloc
         $this->setId('sales_order_create_totals');
     }
 
-    public function getTotals()
+    public function getTotals(): array
     {
         return $this->getQuote()->getTotals();
     }
@@ -40,7 +40,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Totals extends Mage_Adminhtml_Bloc
         return 'head-money';
     }
 
-    protected function _getTotalRenderer($code)
+    protected function _getTotalRenderer(string $code): Mage_Core_Block_Abstract
     {
         $blockName = $code . '_total_renderer';
         $block = $this->getLayout()->getBlock($blockName);
@@ -60,7 +60,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Totals extends Mage_Adminhtml_Bloc
         return $block;
     }
 
-    public function renderTotal($total, $area = null, $colspan = 1)
+    public function renderTotal(\Maho\DataObject $total, ?string $area = null, int $colspan = 1): string
     {
         return $this->_getTotalRenderer($total->getCode())
             ->setTotal($total)
@@ -69,7 +69,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Totals extends Mage_Adminhtml_Bloc
             ->toHtml();
     }
 
-    public function renderTotals($area = null, $colspan = 1)
+    public function renderTotals(?string $area = null, int $colspan = 1): string
     {
         $html = '';
         foreach ($this->getTotals() as $total) {

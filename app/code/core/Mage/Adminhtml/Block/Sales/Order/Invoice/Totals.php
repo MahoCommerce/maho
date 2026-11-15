@@ -10,9 +10,9 @@
 
 class Mage_Adminhtml_Block_Sales_Order_Invoice_Totals extends Mage_Adminhtml_Block_Sales_Totals
 {
-    protected $_invoice = null;
+    protected ?Mage_Sales_Model_Order_Invoice $_invoice = null;
 
-    public function getInvoice()
+    public function getInvoice(): ?Mage_Sales_Model_Order_Invoice
     {
         if ($this->_invoice === null) {
             if ($this->hasData('invoice')) {

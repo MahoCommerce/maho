@@ -11,7 +11,7 @@
 class Mage_Adminhtml_Block_Dashboard_Bar extends Mage_Adminhtml_Block_Dashboard_Abstract
 {
     protected array $_totals = [];
-    protected $_currentCurrencyCode = null;
+    protected ?Mage_Directory_Model_Currency $_currentCurrencyCode = null;
 
     /**
      * @var Mage_Directory_Model_Currency
@@ -25,7 +25,7 @@ class Mage_Adminhtml_Block_Dashboard_Bar extends Mage_Adminhtml_Block_Dashboard_
         $this->setTemplate('dashboard/bar.phtml');
     }
 
-    protected function getTotals()
+    protected function getTotals(): array
     {
         return $this->_totals;
     }

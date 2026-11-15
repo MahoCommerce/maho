@@ -10,14 +10,14 @@
 
 abstract class Mage_Adminhtml_Block_Dashboard_Abstract extends Mage_Adminhtml_Block_Widget
 {
-    protected $_dataHelperName = null;
+    protected ?string $_dataHelperName = null;
 
-    public function getCollection()
+    public function getCollection(): mixed
     {
         return $this->getDataHelper()->getCollection();
     }
 
-    public function getCount()
+    public function getCount(): int|bool
     {
         return $this->getDataHelper()->getCount();
     }
@@ -27,21 +27,18 @@ abstract class Mage_Adminhtml_Block_Dashboard_Abstract extends Mage_Adminhtml_Bl
         return $this->helper($this->getDataHelperName());
     }
 
-    public function getDataHelperName()
+    public function getDataHelperName(): ?string
     {
         return $this->_dataHelperName;
     }
 
-    public function setDataHelperName($dataHelperName): static
+    public function setDataHelperName(string $dataHelperName): static
     {
         $this->_dataHelperName = $dataHelperName;
         return $this;
     }
 
-    protected function _prepareData()
-    {
-        return $this;
-    }
+    protected function _prepareData(): void {}
 
     #[\Override]
     protected function _prepareLayout()

@@ -131,7 +131,7 @@ class Mage_Adminhtml_Block_Permissions_Role_Grid_User extends Mage_Adminhtml_Blo
         return $this->getUrl('*/*/editrolegrid', ['rid' => $roleId]);
     }
 
-    public function _getUsers($json = false)
+    public function _getUsers(bool $json = false): string|array
     {
         if ($this->getRequest()->getParam('in_role_user') != '') {
             return $this->getRequest()->getParam('in_role_user');

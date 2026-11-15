@@ -11,8 +11,8 @@
 
 abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends Mage_Adminhtml_Block_Abstract implements Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Interface
 {
-    protected $_defaultWidth;
-    protected $_column;
+    protected ?int $_defaultWidth = null;
+    protected mixed $_column = null;
 
     /**
      * @param Mage_Adminhtml_Block_Widget_Grid_Column $column

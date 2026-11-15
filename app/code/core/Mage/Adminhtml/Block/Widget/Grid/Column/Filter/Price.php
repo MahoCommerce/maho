@@ -10,8 +10,8 @@
 
 class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
 {
-    protected $_currencyList = null;
-    protected $_currencyModel = null;
+    protected ?array $_currencyList = null;
+    protected ?Mage_Directory_Model_Currency $_currencyModel = null;
 
     #[\Override]
     public function getHtml()
@@ -41,7 +41,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
         return $html;
     }
 
-    public function getDisplayCurrencySelect()
+    public function getDisplayCurrencySelect(): mixed
     {
         if (!is_null($this->getColumn()->getData('display_currency_select'))) {
             return $this->getColumn()->getData('display_currency_select');
@@ -49,7 +49,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
         return true;
     }
 
-    public function getCurrencyAffect()
+    public function getCurrencyAffect(): mixed
     {
         if (!is_null($this->getColumn()->getData('currency_affect'))) {
             return $this->getColumn()->getData('currency_affect');
@@ -57,14 +57,14 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
         return true;
     }
 
-    protected function _getCurrencyModel()
+    protected function _getCurrencyModel(): Mage_Directory_Model_Currency
     {
         $this->_currencyModel ??= Mage::getModel('directory/currency');
 
         return $this->_currencyModel;
     }
 
-    protected function _getCurrencySelectHtml(?string $label = null)
+    protected function _getCurrencySelectHtml(?string $label = null): string
     {
         $value = $this->getEscapedValue('currency');
         if (!$value) {
@@ -83,7 +83,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
         return $html;
     }
 
-    protected function _getCurrencyList()
+    protected function _getCurrencyList(): array
     {
         $this->_currencyList ??= $this->_getCurrencyModel()->getConfigAllowCurrencies();
         return $this->_currencyList;

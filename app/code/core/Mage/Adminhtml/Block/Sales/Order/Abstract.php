@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -29,7 +30,7 @@ class Mage_Adminhtml_Block_Sales_Order_Abstract extends Mage_Adminhtml_Block_Wid
         Mage::throwException(Mage::helper('sales')->__('Cannot get order instance'));
     }
 
-    public function getPriceDataObject()
+    public function getPriceDataObject(): mixed
     {
         $obj = $this->getData('price_data_object');
         if (is_null($obj)) {
