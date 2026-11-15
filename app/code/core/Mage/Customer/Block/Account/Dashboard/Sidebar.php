@@ -10,14 +10,14 @@
 
 class Mage_Customer_Block_Account_Dashboard_Sidebar extends Mage_Core_Block_Template
 {
-    protected $_cartItemsCount;
+    protected ?int $_cartItemsCount = null;
 
     /**
      * @var Mage_Wishlist_Model_Wishlist
      */
     protected $_wishlist;
 
-    protected $_compareItems;
+    protected ?Mage_Catalog_Model_Resource_Product_Compare_Item_Collection $_compareItems = null;
 
     /**
      * @return string

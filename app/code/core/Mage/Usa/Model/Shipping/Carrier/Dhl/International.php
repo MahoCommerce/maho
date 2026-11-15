@@ -241,7 +241,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         return $this->_result;
     }
 
-    protected function _addParams($requestObject)
+    protected function _addParams(\Maho\DataObject $requestObject): \Maho\DataObject
     {
         $request = $this->_request;
         foreach ($this->_requestVariables as $code => $objectCode) {

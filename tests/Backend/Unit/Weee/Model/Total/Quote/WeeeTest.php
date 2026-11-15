@@ -53,13 +53,10 @@ class WeeeTest_MockHelper extends Mage_Weee_Helper_Data
     }
 
     #[\Override]
-    public function setStore($store): self
-    {
-        return $this;
-    }
+    public function setStore(Mage_Core_Model_Store $store): void {}
 
     #[\Override]
-    public function setApplied($item, $value): self
+    public function setApplied(Maho\DataObject $item, array $value): static
     {
         $item->setWeeeTaxApplied(serialize($value));
         return $this;

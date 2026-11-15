@@ -17,7 +17,7 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
     #[\Override]
     protected $_moduleName = 'Mage_Checkout';
 
-    protected $_agreements = null;
+    protected ?array $_agreements = null;
 
     /**
      * Retrieve checkout session model

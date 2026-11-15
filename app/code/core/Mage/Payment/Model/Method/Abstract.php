@@ -750,10 +750,8 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
 
     /**
      * Log debug data to file
-     *
-     * @param mixed $debugData
      */
-    protected function _debug($debugData)
+    protected function _debug(mixed $debugData): void
     {
         if ($this->getDebugFlag()) {
             Mage::getModel('core/log_adapter', 'payment_' . $this->getCode() . '.log')

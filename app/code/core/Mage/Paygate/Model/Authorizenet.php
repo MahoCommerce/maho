@@ -102,7 +102,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     #[\Override]
     protected $_canUseCheckout          = true;
     #[\Override]
-    protected $_canSaveCc               = false;
+    protected bool $_canSaveCc = false;
     #[\Override]
     protected $_canFetchTransactionInfo = true;
 

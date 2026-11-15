@@ -157,10 +157,8 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Customer groups collection
-     *
-     * @var Mage_Customer_Model_Entity_Group_Collection|null
      */
-    protected $_groups;
+    protected ?Mage_Customer_Model_Resource_Group_Collection $_groups = null;
 
     private ?int $currentGroupId = null;
 

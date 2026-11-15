@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Customer_Block_Account_Dashboard extends Mage_Core_Block_Template
 {
-    protected $_subscription = null;
+    protected ?Mage_Newsletter_Model_Subscriber $_subscription = null;
 
     /**
      * @return Mage_Customer_Model_Customer

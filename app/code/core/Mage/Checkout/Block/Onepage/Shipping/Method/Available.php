@@ -10,8 +10,8 @@
 
 class Mage_Checkout_Block_Onepage_Shipping_Method_Available extends Mage_Checkout_Block_Onepage_Abstract
 {
-    protected $_rates;
-    protected $_address;
+    protected ?array $_rates = null;
+    protected ?Mage_Sales_Model_Quote_Address $_address = null;
 
     /**
      * @return array

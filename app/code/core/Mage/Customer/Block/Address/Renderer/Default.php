@@ -28,13 +28,8 @@ class Mage_Customer_Block_Address_Renderer_Default extends Mage_Core_Block_Abstr
         return $this->_type;
     }
 
-    /**
-     * Retrieve format type object
-     *
-     * @return $this
-     */
     #[\Override]
-    public function setType(\Maho\DataObject $type)
+    public function setType(\Maho\DataObject $type): static
     {
         $this->_type = $type;
         return $this;

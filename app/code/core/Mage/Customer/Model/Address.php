@@ -23,7 +23,7 @@ declare(strict_types=1);
  */
 class Mage_Customer_Model_Address extends Mage_Customer_Model_Address_Abstract
 {
-    protected $_customer;
+    protected ?Mage_Customer_Model_Customer $_customer = null;
 
     #[\Override]
     protected function _construct()

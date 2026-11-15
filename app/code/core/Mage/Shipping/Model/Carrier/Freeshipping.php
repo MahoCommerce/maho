@@ -65,11 +65,9 @@ class Mage_Shipping_Model_Carrier_Freeshipping extends Mage_Shipping_Model_Carri
 
     /**
      * Allows free shipping when all product items have free shipping (promotions etc.)
-     *
-     * @param Mage_Shipping_Model_Rate_Request $request
      */
     #[\Override]
-    protected function _updateFreeMethodQuote($request)
+    protected function _updateFreeMethodQuote(Mage_Shipping_Model_Rate_Request $request): void
     {
         $freeShipping = false;
         $items = $request->getAllItems();

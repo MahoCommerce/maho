@@ -17,19 +17,19 @@ class Mage_Dataflow_Model_Convert_Exception extends \Maho\Exception
     public const ERROR = 'ERROR';
     public const FATAL = 'FATAL';
 
-    protected $_container;
+    protected ?Mage_Dataflow_Model_Convert_Container_Interface $_container = null;
 
     protected $_level;
 
     protected $_position;
 
-    public function setContainer($container): static
+    public function setContainer(?Mage_Dataflow_Model_Convert_Container_Interface $container): static
     {
         $this->_container = $container;
         return $this;
     }
 
-    public function getContainer()
+    public function getContainer(): ?Mage_Dataflow_Model_Convert_Container_Interface
     {
         return $this->_container;
     }

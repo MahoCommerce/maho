@@ -15,7 +15,7 @@ interface Mage_Customer_Block_Address_Renderer_Interface
     /**
      * Set format type object
      */
-    public function setType(\Maho\DataObject $type);
+    public function setType(\Maho\DataObject $type): static;
 
     /**
      * Retrieve format type object

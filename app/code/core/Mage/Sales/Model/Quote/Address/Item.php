@@ -25,7 +25,7 @@ class Mage_Sales_Model_Quote_Address_Item extends Mage_Sales_Model_Quote_Item_Ab
      * @var Mage_Sales_Model_Quote_Address
      */
     protected $_address;
-    protected $_quote;
+    protected ?Mage_Sales_Model_Quote $_quote = null;
 
     #[\Override]
     protected function _construct()
