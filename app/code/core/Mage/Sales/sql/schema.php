@@ -405,6 +405,7 @@ return function (SchemaEditor $schema): void {
             ->addIndex(Index::editor()->setUnquotedColumnNames('order_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('product_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('product_id', 'created_at'))
             ->addForeignKeyConstraint(
                 ForeignKeyConstraint::editor()
                     ->setUnquotedReferencingColumnNames('order_id')
@@ -1149,6 +1150,7 @@ return function (SchemaEditor $schema): void {
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('customer_id', 'store_id', 'is_active'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('updated_at'))
             ->addForeignKeyConstraint(
                 ForeignKeyConstraint::editor()
                     ->setUnquotedReferencingColumnNames('store_id')

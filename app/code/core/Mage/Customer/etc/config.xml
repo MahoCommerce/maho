@@ -173,6 +173,13 @@ SPDX-License-Identifier: AFL-3.0
         </fieldsets>
     </admin>
     <global>
+        <reports>
+            <datasets>
+                <customers>
+                    <class>customer/report_dataset_customers</class>
+                </customers>
+            </datasets>
+        </reports>
         <docs>
             <user>docs/user</user>
         </docs>

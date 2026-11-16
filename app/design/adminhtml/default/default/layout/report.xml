@@ -6,6 +6,14 @@ SPDX-License-Identifier: AFL-3.0
 -->
 
 <layout>
+    <adminhtml_report_explorer_index>
+        <reference name="head">
+            <action method="addJs"><name>mage/adminhtml/report-explorer.js</name></action>
+        </reference>
+        <reference name="content">
+            <block type="adminhtml/report_explorer" name="report.explorer" />
+        </reference>
+    </adminhtml_report_explorer_index>
     <adminhtml_report_statistics_index>
         <reference name="content">
             <block type="adminhtml/report_refresh_statistics" template="report/refresh/statistics.phtml" name="sales.report.refreshstatistics" />

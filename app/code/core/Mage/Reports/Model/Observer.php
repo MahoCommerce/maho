@@ -49,4 +49,11 @@ class Mage_Reports_Model_Observer
             Mage::getStoreConfigAsInt(Mage_Reports_Model_NotFound::XML_PATH_MAX_ROWS),
         );
     }
+
+    /** A save of the reports settings clears the Explorer results, because a setting changes what a report counts. */
+    #[Maho\Config\Observer('admin_system_config_changed_section_reports')]
+    public function cleanExplorerCache(): void
+    {
+        Mage::app()->cleanCache([Mage_Reports_Model_Explorer_Runner::CACHE_TAG]);
+    }
 }

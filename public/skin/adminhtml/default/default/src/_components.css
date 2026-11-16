@@ -647,6 +647,59 @@
         margin-bottom: var(--maho-space-2);
     }
 
+    /* Reports > Explorer: the presets beside the report on a wide screen, and the total tiles in rows */
+    .report-explorer-layout {
+        display: grid;
+        gap: var(--maho-space-4);
+        align-items: start;
+
+        @media (width >= 64rem) {
+            grid-template-columns: 15rem minmax(0, 1fr);
+
+            & > .report-explorer-sidebar {
+                position: sticky;
+                top: var(--maho-space-4);
+                max-height: calc(100vh - 2 * var(--maho-space-4));
+                overflow-y: auto;
+            }
+        }
+    }
+
+    .report-explorer-totals {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+        gap: var(--maho-space-3);
+    }
+
+    .report-explorer-layout[hidden],
+    .report-explorer-dashboard[hidden] {
+        display: none;
+    }
+
+    .report-explorer-dashboard {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+        gap: var(--maho-space-4);
+    }
+
+    .report-explorer-driver {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        column-gap: var(--maho-space-2);
+        row-gap: 2px;
+    }
+
+    .report-explorer-driver > :last-child {
+        grid-column: span 2;
+    }
+
+    .report-explorer-explain {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+        gap: var(--maho-space-4);
+    }
+
     /* Product websites: one card for each website, with its stores and their store views */
     .product-websites {
         display: grid;

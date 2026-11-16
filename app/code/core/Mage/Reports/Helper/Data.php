@@ -115,4 +115,21 @@ class Mage_Reports_Helper_Data extends Mage_Core_Helper_Abstract
             $collection->addItem($item);
         }
     }
+
+    /**
+     * The shape of a saved report for the Explorer page.
+     *
+     * @return array{id: int, name: string, shared: bool, mine: bool, request: array<string, mixed>, updatedAt: ?string}
+     */
+    public function savedReportToArray(Mage_Reports_Model_SavedReport $report, ?int $adminUserId): array
+    {
+        return [
+            'id' => (int) $report->getId(),
+            'name' => (string) $report->getName(),
+            'shared' => (bool) $report->getIsShared(),
+            'mine' => $adminUserId !== null && $report->getAdminUserId() === $adminUserId,
+            'request' => $report->getRequestData(),
+            'updatedAt' => $report->getUpdatedAt(),
+        ];
+    }
 }
