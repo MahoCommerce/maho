@@ -28,25 +28,13 @@ const CRUD_KNOWN_ENDS = [
 ];
 
 beforeEach(function () {
-    createCrudAdmin();
+    createBrowserAdmin(CRUD_ADMIN_USER, CRUD_ADMIN_PASSWORD);
 });
 
 afterEach(function () {
-    deleteCrudAdmin();
+    deleteBrowserAdmin(CRUD_ADMIN_USER);
     deleteCrudSalesFixtures();
 });
-
-function deleteCrudAdmin(): void
-{
-    deleteBrowserAdmin(CRUD_ADMIN_USER);
-}
-
-function createCrudAdmin(): void
-{
-    deleteCrudAdmin();
-
-    createBrowserAdmin(CRUD_ADMIN_USER, CRUD_ADMIN_PASSWORD);
-}
 
 function deleteCrudSalesFixtures(): void
 {

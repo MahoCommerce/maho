@@ -28,25 +28,12 @@ const QUERY_URLS_ADMIN_PASSWORD = 'Password123!';
 const QUERY_URLS_QUERY = 'pest_query=PestQueryStringUrls';
 
 beforeEach(function () {
-    createQueryUrlsAdmin();
+    createBrowserAdmin(QUERY_URLS_ADMIN_USER, QUERY_URLS_ADMIN_PASSWORD);
 });
 
 afterEach(function () {
-    deleteQueryUrlsAdmin();
-});
-
-function deleteQueryUrlsAdmin(): void
-{
     deleteBrowserAdmin(QUERY_URLS_ADMIN_USER);
-}
-
-/** A fresh admin with the full-access role, so the password is known and ACL never gets in the way. */
-function createQueryUrlsAdmin(): void
-{
-    deleteQueryUrlsAdmin();
-
-    createBrowserAdmin(QUERY_URLS_ADMIN_USER, QUERY_URLS_ADMIN_PASSWORD);
-}
+});
 
 /** Log in and open an admin page, waiting for one of its elements. */
 function visitAdminPage(string $path, string $selector): object

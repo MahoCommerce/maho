@@ -23,25 +23,12 @@ const REPORT_STATUS_ADMIN_USER = 'report-status-admin';
 const REPORT_STATUS_ADMIN_PASSWORD = 'Password123!';
 
 beforeEach(function () {
-    createReportStatusAdmin();
+    createBrowserAdmin(REPORT_STATUS_ADMIN_USER, REPORT_STATUS_ADMIN_PASSWORD);
 });
 
 afterEach(function () {
-    deleteReportStatusAdmin();
-});
-
-function deleteReportStatusAdmin(): void
-{
     deleteBrowserAdmin(REPORT_STATUS_ADMIN_USER);
-}
-
-/** A fresh admin with the full-access role, so the password is known and ACL never gets in the way. */
-function createReportStatusAdmin(): void
-{
-    deleteReportStatusAdmin();
-
-    createBrowserAdmin(REPORT_STATUS_ADMIN_USER, REPORT_STATUS_ADMIN_PASSWORD);
-}
+});
 
 /** Decode the filter the report was run with out of the url the report landed on. */
 function decodeReportFilter(string $url): array

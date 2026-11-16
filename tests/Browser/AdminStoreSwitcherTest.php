@@ -28,25 +28,12 @@ const STORE_SWITCHER_ADMIN_PASSWORD = 'Password123!';
 const STORE_SWITCHER_QUERY = 'form_key=PestStoreSwitcherFormKey';
 
 beforeEach(function () {
-    createStoreSwitcherAdmin();
+    createBrowserAdmin(STORE_SWITCHER_ADMIN_USER, STORE_SWITCHER_ADMIN_PASSWORD);
 });
 
 afterEach(function () {
-    deleteStoreSwitcherAdmin();
-});
-
-function deleteStoreSwitcherAdmin(): void
-{
     deleteBrowserAdmin(STORE_SWITCHER_ADMIN_USER);
-}
-
-/** A fresh admin with the full-access role, so the password is known and ACL never gets in the way. */
-function createStoreSwitcherAdmin(): void
-{
-    deleteStoreSwitcherAdmin();
-
-    createBrowserAdmin(STORE_SWITCHER_ADMIN_USER, STORE_SWITCHER_ADMIN_PASSWORD);
-}
+});
 
 /** The first switchable store view. */
 function storeSwitcherStoreId(): int

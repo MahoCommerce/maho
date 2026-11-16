@@ -15,27 +15,14 @@ const REINDEX_ADMIN_USER = 'reindex-dialog-admin';
 const REINDEX_ADMIN_PASSWORD = 'Password123!';
 
 beforeEach(function () {
-    createReindexAdmin();
+    createBrowserAdmin(REINDEX_ADMIN_USER, REINDEX_ADMIN_PASSWORD);
 });
 
 // Per test rather than once at the end: afterAll runs after the base tearDown has called
 // Mage::reset(), so there is no app left to clean up through
 afterEach(function () {
-    deleteReindexAdmin();
-});
-
-function deleteReindexAdmin(): void
-{
     deleteBrowserAdmin(REINDEX_ADMIN_USER);
-}
-
-/** A fresh admin with the full-access role, so the password is known and ACL never gets in the way. */
-function createReindexAdmin(): void
-{
-    deleteReindexAdmin();
-
-    createBrowserAdmin(REINDEX_ADMIN_USER, REINDEX_ADMIN_PASSWORD);
-}
+});
 
 function loginToIndexManagement(): object
 {

@@ -45,25 +45,12 @@ const WYSIWYG_LOSS_DEFAULT_SPANS = '<table style="min-width: 50px;"><colgroup><c
     . '<td colspan="1" rowspan="1" style="vertical-align: middle;"><p><strong>Short ingredient lists</strong><br>Ten or fewer, on the front</p></td></tr></tbody></table>';
 
 beforeEach(function () {
-    createWysiwygLossAdmin();
+    createBrowserAdmin(WYSIWYG_LOSS_ADMIN_USER, WYSIWYG_LOSS_ADMIN_PASSWORD);
 });
 
 afterEach(function () {
-    deleteWysiwygLossAdmin();
-});
-
-function deleteWysiwygLossAdmin(): void
-{
     deleteBrowserAdmin(WYSIWYG_LOSS_ADMIN_USER);
-}
-
-/** Create an admin with the full-access role. The password is known and the ACL allows all. */
-function createWysiwygLossAdmin(): void
-{
-    deleteWysiwygLossAdmin();
-
-    createBrowserAdmin(WYSIWYG_LOSS_ADMIN_USER, WYSIWYG_LOSS_ADMIN_PASSWORD);
-}
+});
 
 function createWysiwygLossProduct(): Mage_Catalog_Model_Product
 {

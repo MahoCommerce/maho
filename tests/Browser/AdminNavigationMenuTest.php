@@ -15,24 +15,12 @@ const NAV_MENU_ADMIN_USER = 'nav-menu-admin';
 const NAV_MENU_ADMIN_PASSWORD = 'Password123!';
 
 beforeEach(function () {
-    createNavMenuAdmin();
+    createBrowserAdmin(NAV_MENU_ADMIN_USER, NAV_MENU_ADMIN_PASSWORD);
 });
 
 afterEach(function () {
-    deleteNavMenuAdmin();
-});
-
-function deleteNavMenuAdmin(): void
-{
     deleteBrowserAdmin(NAV_MENU_ADMIN_USER);
-}
-
-function createNavMenuAdmin(): void
-{
-    deleteNavMenuAdmin();
-
-    createBrowserAdmin(NAV_MENU_ADMIN_USER, NAV_MENU_ADMIN_PASSWORD);
-}
+});
 
 it('hides a closed submenu, and opens it on hover and on keyboard focus but not after a click', function () {
     $pw = adminLoginAndVisit(NAV_MENU_ADMIN_USER, NAV_MENU_ADMIN_PASSWORD, '/admin/dashboard', '.nav-bar:visible')->page();

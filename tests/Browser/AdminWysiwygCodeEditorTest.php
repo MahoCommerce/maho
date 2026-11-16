@@ -35,7 +35,6 @@ const CODE_EDITOR_TYPE = <<<'JS'
     JS;
 
 beforeEach(function () {
-    deleteCodeEditorAdmin();
     createBrowserAdmin(CODE_EDITOR_ADMIN_USER, CODE_EDITOR_ADMIN_PASSWORD);
 
     $this->block = Mage::getModel('cms/block')
@@ -48,14 +47,9 @@ beforeEach(function () {
 });
 
 afterEach(function () {
-    deleteCodeEditorAdmin();
+    deleteBrowserAdmin(CODE_EDITOR_ADMIN_USER);
     $this->block->delete();
 });
-
-function deleteCodeEditorAdmin(): void
-{
-    deleteBrowserAdmin(CODE_EDITOR_ADMIN_USER);
-}
 
 /** Open the block, switch to the plain HTML view, and put the cursor after `card`. */
 function openCodeEditor(object $test): object

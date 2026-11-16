@@ -21,19 +21,12 @@ const RULE_LABEL_ADMIN_PASSWORD = 'PestRuleLabel2026!';
 const RULE_LABEL_MARKUP = '<img src=x onerror="window.__ruleXss=1">';
 
 beforeEach(function () {
-    deleteRuleLabelAdmin();
-
     createBrowserAdmin(RULE_LABEL_ADMIN_USERNAME, RULE_LABEL_ADMIN_PASSWORD);
 });
 
 afterEach(function () {
-    deleteRuleLabelAdmin();
-});
-
-function deleteRuleLabelAdmin(): void
-{
     deleteBrowserAdmin(RULE_LABEL_ADMIN_USERNAME);
-}
+});
 
 /** Build a condition container from $innerHtml, call hideParamInputField() on it, and return the text of its label. */
 function ruleLabelText(object $page, string $innerHtml, string $prepare): string

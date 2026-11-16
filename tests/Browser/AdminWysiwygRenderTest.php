@@ -20,7 +20,6 @@ const WYSIWYG_RENDER_ADMIN_USER = 'wysiwyg-render-admin';
 const WYSIWYG_RENDER_ADMIN_PASSWORD = 'Password123!';
 
 beforeEach(function () {
-    deleteWysiwygRenderAdmin();
     createBrowserAdmin(WYSIWYG_RENDER_ADMIN_USER, WYSIWYG_RENDER_ADMIN_PASSWORD);
 
     $this->inner = Mage::getModel('cms/block')
@@ -40,15 +39,10 @@ beforeEach(function () {
 });
 
 afterEach(function () {
-    deleteWysiwygRenderAdmin();
+    deleteBrowserAdmin(WYSIWYG_RENDER_ADMIN_USER);
     $this->holder->delete();
     $this->inner->delete();
 });
-
-function deleteWysiwygRenderAdmin(): void
-{
-    deleteBrowserAdmin(WYSIWYG_RENDER_ADMIN_USER);
-}
 
 it('shows a block as the storefront shows it and an icon as its SVG, and saves the directives', function () {
     $page = adminLoginAndVisit(

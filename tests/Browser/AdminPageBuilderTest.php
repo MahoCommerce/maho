@@ -21,7 +21,6 @@ const PAGE_BUILDER_ADMIN_USER = 'page-builder-admin';
 const PAGE_BUILDER_ADMIN_PASSWORD = 'Password123!';
 
 beforeEach(function () {
-    deletePageBuilderAdmin();
     createBrowserAdmin(PAGE_BUILDER_ADMIN_USER, PAGE_BUILDER_ADMIN_PASSWORD);
 
     $this->block = Mage::getModel('cms/block')
@@ -34,14 +33,9 @@ beforeEach(function () {
 });
 
 afterEach(function () {
-    deletePageBuilderAdmin();
+    deleteBrowserAdmin(PAGE_BUILDER_ADMIN_USER);
     $this->block->delete();
 });
-
-function deletePageBuilderAdmin(): void
-{
-    deleteBrowserAdmin(PAGE_BUILDER_ADMIN_USER);
-}
 
 /** Poll $script in the page until it returns 1. */
 function pageBuilderWaitFor(object $page, string $script, string $what, int $seconds = 15): void
