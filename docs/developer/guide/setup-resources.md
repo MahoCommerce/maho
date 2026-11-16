@@ -145,6 +145,8 @@ public function endSetup()
 
 You can look into `\Maho\Db\Adapter\Pdo\Mysql` in `lib/Maho/Db/Adapter/Pdo/Mysql.php` to see the connection-level setup these run for MySQL.
 
+`startSetup()` turns the foreign keys off on every engine, so a delete between the two calls does not cascade. `removeAttribute()` deletes the values, the options and the other rows of the attribute itself. For any other delete whose rows must cascade, do not call `startSetup()`.
+
 Then the call to `run`:
 
 ```php

@@ -8,6 +8,8 @@
  * @package Mage_Eav
  */
 
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
+
 class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
 {
     /**
@@ -39,6 +41,11 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
      * @var string
      */
     protected $_defaultAttributeSetName  = 'Default';
+
+    /**
+     * @var array<string, list<array{table: string, column: string, refColumn: string, onDelete: ReferentialAction}>>|null
+     */
+    private static ?array $cascadingKeys = null;
 
     /**
      * Clean cache
@@ -1009,6 +1016,10 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
     /**
      * Remove Attribute
      *
+     * The values, the options and every other row that refers to the attribute are deleted here, not by the
+     * foreign keys. A script that calls startSetup() turns the foreign keys off, and then the database
+     * deletes none of them.
+     *
      * @param mixed $entityTypeId
      * @param mixed $code
      * @return $this
@@ -1018,12 +1029,114 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
         $mainTable  = $this->getTable('eav/attribute');
         $attribute  = $this->getAttribute($entityTypeId, $code);
         if ($attribute) {
+            $this->deleteReferringRows($mainTable, 'attribute_id', [(int) $attribute['attribute_id']]);
             $this->deleteTableRow('eav/attribute', 'attribute_id', $attribute['attribute_id']);
             if (isset($this->_setupCache[$mainTable][$attribute['entity_type_id']][$attribute['attribute_code']])) {
                 unset($this->_setupCache[$mainTable][$attribute['entity_type_id']][$attribute['attribute_code']]);
             }
         }
         return $this;
+    }
+
+    /**
+     * Delete the rows that refer to an attribute that no longer exists, with the rows that refer to them.
+     *
+     * Such rows stay when an attribute was removed while the foreign keys were off.
+     */
+    public function purgeOrphanedAttributeRows(): void
+    {
+        $adapter = $this->getConnection();
+        $keys = self::getCascadingKeys();
+        $attributeTable = $this->getTable('eav/attribute');
+        $queue = [$attributeTable];
+        $queued = [$attributeTable => true];
+        while ($queue !== []) {
+            $table = array_shift($queue);
+            foreach ($keys[$table] ?? [] as $key) {
+                if (!$adapter->isTableExists($key['table'])) {
+                    continue;
+                }
+                $existing = $adapter->select()
+                    ->from($table, [$key['refColumn']])
+                    ->where($adapter->quoteIdentifier($key['refColumn']) . ' IS NOT NULL');
+                $where = [$adapter->quoteIdentifier($key['column']) . ' NOT IN ?' => $existing];
+                if ($key['onDelete'] === ReferentialAction::SET_NULL) {
+                    $adapter->update($key['table'], [$key['column'] => null], $where);
+                } else {
+                    $adapter->delete($key['table'], $where);
+                }
+                if (!isset($queued[$key['table']])) {
+                    $queued[$key['table']] = true;
+                    $queue[] = $key['table'];
+                }
+            }
+        }
+    }
+
+    /**
+     * Delete or clear the rows that refer to the rows of $table whose $column is in $values, as the foreign keys
+     * do when they are on. Delete the rows that refer to those rows first.
+     *
+     * @param list<int|string> $values
+     */
+    protected function deleteReferringRows(string $table, string $column, array $values): void
+    {
+        $adapter = $this->getConnection();
+        foreach (self::getCascadingKeys()[$table] ?? [] as $key) {
+            if (!$adapter->isTableExists($key['table'])) {
+                continue;
+            }
+            $refValues = $key['refColumn'] === $column ? $values : $adapter->fetchCol(
+                $adapter->select()
+                    ->from($table, [$key['refColumn']])
+                    ->where($adapter->quoteIdentifier($column) . ' IN (?)', $values),
+            );
+            if ($refValues === []) {
+                continue;
+            }
+            $where = [$adapter->quoteIdentifier($key['column']) . ' IN (?)' => $refValues];
+            if ($key['onDelete'] === ReferentialAction::SET_NULL) {
+                $adapter->update($key['table'], [$key['column'] => null], $where);
+                continue;
+            }
+            $this->deleteReferringRows($key['table'], $key['column'], $refValues);
+            $adapter->delete($key['table'], $where);
+        }
+    }
+
+    /**
+     * Return the declared one-column foreign keys that delete or clear a row when the row it refers to goes,
+     * keyed by the table they refer to.
+     *
+     * @return array<string, list<array{table: string, column: string, refColumn: string, onDelete: ReferentialAction}>>
+     */
+    private static function getCascadingKeys(): array
+    {
+        if (self::$cascadingKeys !== null) {
+            return self::$cascadingKeys;
+        }
+        self::$cascadingKeys = [];
+        [$schema] = \Maho\Db\Schema\Collector::collect();
+        foreach ($schema->getTables() as $table) {
+            foreach ($table->getForeignKeys() as $foreignKey) {
+                $onDelete = $foreignKey->getOnDeleteAction();
+                $columns = $foreignKey->getReferencingColumnNames();
+                $refColumns = $foreignKey->getReferencedColumnNames();
+                if (!in_array($onDelete, [ReferentialAction::CASCADE, ReferentialAction::SET_NULL], true)
+                    || count($columns) !== 1
+                    || count($refColumns) !== 1
+                ) {
+                    continue;
+                }
+                self::$cascadingKeys[$foreignKey->getReferencedTableName()->getUnqualifiedName()->getValue()][] = [
+                    'table' => $table->getObjectName()->getUnqualifiedName()->getValue(),
+                    'column' => $columns[0]->getIdentifier()->getValue(),
+                    'refColumn' => $refColumns[0]->getIdentifier()->getValue(),
+                    'onDelete' => $onDelete,
+                ];
+            }
+        }
+        return self::$cascadingKeys;
     }
 
     /**
