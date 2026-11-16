@@ -255,7 +255,7 @@ it('keeps a category value that a form field lists in use_default without the ch
     expect($service->getById($id, 1)->getName())->toBe('Pest Store Name');
 });
 
-it('updates the stock data of a product in a store view with the legacy API and no name', function () {
+it('updates the stock data of a product in a store view with the legacy API, with the name on the default value', function () {
     $id = useDefaultProduct(storeName: false);
 
     $result = Mage::getModel('catalog/product_api')->update($id, ['stock_data' => ['qty' => 3, 'is_in_stock' => 1]], 1);
