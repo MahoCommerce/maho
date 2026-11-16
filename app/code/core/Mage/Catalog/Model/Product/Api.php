@@ -253,31 +253,20 @@ class Mage_Catalog_Model_Product_Api extends Mage_Catalog_Model_Api_Resource
         }
 
         foreach ($product->getTypeInstance(true)->getEditableAttributes($product) as $attribute) {
-            //Unset data if object attribute has no value in current store
-            if (Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID !== (int) $product->getStoreId()
-                && !$product->getExistsStoreValueFlag($attribute->getAttributeCode())
+            $code = $attribute->getAttributeCode();
+            $value = $this->_isAllowedAttribute($attribute)
+                ? $productData[$code]
+                    ?? $productData['additional_attributes']['single_data'][$code]
+                    ?? $productData['additional_attributes']['multi_data'][$code]
+                    ?? null
+                : null;
+            if ($value !== null) {
+                $product->setData($code, $value);
+            } elseif (Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID !== (int) $product->getStoreId()
+                && !$product->getExistsStoreValueFlag($code)
                 && !$attribute->isScopeGlobal()
             ) {
-                $product->setData($attribute->getAttributeCode(), false);
-            }
-
-            if ($this->_isAllowedAttribute($attribute)) {
-                if (isset($productData[$attribute->getAttributeCode()])) {
-                    $product->setData(
-                        $attribute->getAttributeCode(),
-                        $productData[$attribute->getAttributeCode()],
-                    );
-                } elseif (isset($productData['additional_attributes']['single_data'][$attribute->getAttributeCode()])) {
-                    $product->setData(
-                        $attribute->getAttributeCode(),
-                        $productData['additional_attributes']['single_data'][$attribute->getAttributeCode()],
-                    );
-                } elseif (isset($productData['additional_attributes']['multi_data'][$attribute->getAttributeCode()])) {
-                    $product->setData(
-                        $attribute->getAttributeCode(),
-                        $productData['additional_attributes']['multi_data'][$attribute->getAttributeCode()],
-                    );
-                }
+                $product->useDefaultValue($code);
             }
         }
 
