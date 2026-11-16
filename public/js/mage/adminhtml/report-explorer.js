@@ -48,13 +48,20 @@ class MahoReportExplorer {
             this.root.textContent = '';
             return;
         }
+        if (config.mode === 'dashboard') {
+            this.root.innerHTML = '<div class="flex flex-col gap-2" data-role="messages"></div><div class="report-explorer-dashboard" data-role="dashboard"></div>';
+            this.parts = Object.fromEntries([...this.root.querySelectorAll('[data-role]')].map((el) => [el.dataset.role, el]));
+            this.renderDashboard();
+            this.watchColorScheme();
+            return;
+        }
         this.state = this.initialState();
         this.view = this.initialView();
         this.savedId ??= this.view.savedId ?? null;
         this.presetChart ??= this.view.presetChart ?? null;
         this.renderSkeleton();
         this.renderControls();
-        this.show();
+        this.run();
         this.watchColorScheme();
         document.addEventListener('click', (event) => {
             if (this.popover && !this.popover.contains(event.target)) {
@@ -160,7 +167,7 @@ class MahoReportExplorer {
     }
 
     initialView() {
-        const view = { tab: this.dashboard.length && !this.config.state && !this.config.preset && !this.config.savedId ? 'dashboard' : 'explore', chartMetric: null, chartType: 'auto', panel: null, drill: [], valueLabels: {} };
+        const view = { chartMetric: null, chartType: 'auto', panel: null, drill: [], valueLabels: {} };
         const encoded = new URL(window.location.href).searchParams.get('view');
         if (encoded) {
             try {
@@ -217,9 +224,9 @@ class MahoReportExplorer {
         this.savedId = savedId;
         this.presetChart = chart;
         this.state = structuredClone(state);
-        this.view = { ...this.view, tab: 'explore', chartMetric: null, chartType: 'auto', panel: null, drill: [] };
+        this.view = { ...this.view, chartMetric: null, chartType: 'auto', panel: null, drill: [] };
         this.renderControls();
-        this.show();
+        this.run();
     }
 
     setView(changes) {
@@ -238,7 +245,6 @@ class MahoReportExplorer {
 
     renderSkeleton() {
         this.root.innerHTML = `
-            <div role="tablist" class="d-tabs d-tabs-box mb-4 w-fit" data-role="tabs"></div>
             <section class="report-explorer-layout min-w-0" data-role="explore">
                 <div class="d-card d-card-border bg-base-100"><div class="d-card-body gap-3 p-4" data-role="controls"></div></div>
                 <nav class="d-breadcrumbs text-sm py-0" data-role="breadcrumb" aria-label="${this.escape(this.t('drillSteps'))}"></nav>
@@ -258,43 +264,11 @@ class MahoReportExplorer {
                         <div class="flex items-center justify-end gap-2 p-3" data-role="pager"></div>
                     </div>
                 </div>
-            </section>
-            <div class="report-explorer-dashboard" data-role="dashboard" hidden></div>`;
+            </section>`;
         this.parts = Object.fromEntries([...this.root.querySelectorAll('[data-role]')].map((el) => [el.dataset.role, el]));
     }
 
-    renderTabs() {
-        const tabs = this.parts.tabs;
-        tabs.textContent = '';
-        for (const [code, label] of [['explore', this.t('explore')], ['dashboard', `${this.t('dashboard')} (${this.dashboard.length})`]]) {
-            const tab = this.button(label, `d-tab ${this.view.tab === code ? 'd-tab-active' : ''}`, () => {
-                this.setView({ tab: code });
-                this.show();
-            });
-            tab.setAttribute('role', 'tab');
-            tab.setAttribute('aria-selected', String(this.view.tab === code));
-            tabs.append(tab);
-        }
-    }
-
-    /** Show the tab of the view: the dashboard, or the explorer with the report of the state. */
-    show() {
-        this.renderTabs();
-        const dashboard = this.view.tab === 'dashboard';
-        this.parts.explore.hidden = dashboard;
-        this.parts.dashboard.hidden = !dashboard;
-        if (dashboard) {
-            this.updateUrl();
-            this.renderDashboard();
-        } else {
-            this.run();
-        }
-    }
-
-    /**
-     * The Report menu: the ready-made reports by group, then the saved reports. A report that matches none of them
-     * shows as a custom report. A saved report that the controls changed keeps its name, marked as changed.
-     */
+    /** The Report menu: the ready-made reports by group, then the saved reports. */
     reportSelect() {
         const current = this.saved.find((report) => report.id === this.savedId);
         const preset = current ? null : this.allPresets().find((p) => this.isPreset(p));
@@ -360,10 +334,7 @@ class MahoReportExplorer {
         return normal(a) === normal(b);
     }
 
-    /**
-     * The request for another dataset: the period, the comparison, the store views, the scope and the date keep their
-     * value, and so do the metrics, the groupings, the filters and the sort that the dataset also has.
-     */
+    /** The request for another dataset. It keeps each value of the current request that the dataset also has. */
     carryState(dataset) {
         const next = this.defaultState(dataset);
         const old = this.state;
@@ -1266,7 +1237,7 @@ class MahoReportExplorer {
     }
 
     watchColorScheme() {
-        const redraw = () => (this.view.tab === 'dashboard' ? this.renderDashboard() : this.renderChart(this.runToken));
+        const redraw = () => (this.config.mode === 'dashboard' ? this.renderDashboard() : this.renderChart(this.runToken));
         new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-scheme'] });
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', redraw);
     }
@@ -1872,10 +1843,10 @@ class MahoReportExplorer {
         }
         this.saved = result.saved;
         this.dashboard = result.dashboard;
-        this.renderControls();
-        this.renderTabs();
-        if (this.view.tab === 'dashboard') {
+        if (this.config.mode === 'dashboard') {
             this.renderDashboard();
+        } else {
+            this.renderControls();
         }
     }
 
@@ -1885,16 +1856,14 @@ class MahoReportExplorer {
         const holder = this.parts.dashboard;
         holder.textContent = '';
         const reports = this.dashboard.map((id) => this.saved.find((report) => report.id === id)).filter(Boolean);
-        if (reports.length === 0) {
-            holder.append(this.element('p', 'd-alert', this.t('noDashboard')));
-            return;
-        }
+        this.root.closest('[data-role=pinned-reports]')?.toggleAttribute('hidden', reports.length === 0);
         await this.loadChartJs().catch(() => null);
         await Promise.all(reports.map(async (report) => {
             const card = this.element('article', 'd-card d-card-border bg-base-100');
             const body = this.element('div', 'd-card-body p-4 gap-2');
             const header = this.element('div', 'flex items-center gap-2');
-            const title = this.action(report.name, 'd-link d-link-hover font-semibold me-auto', () => this.open(report.request, { savedId: report.id }));
+            const title = this.element('a', 'd-link d-link-hover font-semibold me-auto', report.name);
+            title.href = `${this.config.urls.index}?saved=${report.id}`;
             const unpin = this.button('★', 'd-btn d-btn-ghost d-btn-xs', () => this.togglePin(report, false));
             unpin.setAttribute('aria-label', `${this.t('unpin')}: ${report.name}`);
             header.append(title, unpin);
@@ -2023,7 +1992,6 @@ class MahoReportExplorer {
                 this.dashboard = this.dashboard.filter((id) => id !== report.id);
                 this.savedId = null;
                 this.renderControls();
-                this.renderTabs();
                 return true;
             },
         });

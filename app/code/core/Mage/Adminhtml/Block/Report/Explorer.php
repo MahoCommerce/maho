@@ -32,18 +32,19 @@ class Mage_Adminhtml_Block_Report_Explorer extends Mage_Adminhtml_Block_Template
 
         return [
             'urls' => [
-                'data' => $this->getUrl('*/*/data'),
-                'export' => $this->getUrl('*/*/export'),
-                'savedSave' => $this->getUrl('*/*/savedSave'),
-                'savedDelete' => $this->getUrl('*/*/savedDelete'),
-                'records' => $this->getUrl('*/*/records'),
-                'explain' => $this->getUrl('*/*/explain'),
-                'pin' => $this->getUrl('*/*/pin'),
-                'annotationSave' => $this->getUrl('*/*/annotationSave'),
-                'annotationDelete' => $this->getUrl('*/*/annotationDelete'),
-                'targets' => $this->getUrl('*/*/targets'),
-                'targetSave' => $this->getUrl('*/*/targetSave'),
-                'targetDelete' => $this->getUrl('*/*/targetDelete'),
+                'index' => $this->getUrl('*/report_explorer/index'),
+                'data' => $this->getUrl('*/report_explorer/data'),
+                'export' => $this->getUrl('*/report_explorer/export'),
+                'savedSave' => $this->getUrl('*/report_explorer/savedSave'),
+                'savedDelete' => $this->getUrl('*/report_explorer/savedDelete'),
+                'records' => $this->getUrl('*/report_explorer/records'),
+                'explain' => $this->getUrl('*/report_explorer/explain'),
+                'pin' => $this->getUrl('*/report_explorer/pin'),
+                'annotationSave' => $this->getUrl('*/report_explorer/annotationSave'),
+                'annotationDelete' => $this->getUrl('*/report_explorer/annotationDelete'),
+                'targets' => $this->getUrl('*/report_explorer/targets'),
+                'targetSave' => $this->getUrl('*/report_explorer/targetSave'),
+                'targetDelete' => $this->getUrl('*/report_explorer/targetDelete'),
                 'chart' => Mage::getBaseUrl('js') . 'chart.min.js',
             ],
             'datasets' => Mage::getService('reports/explorer')->datasets($access),
@@ -147,8 +148,6 @@ class Mage_Adminhtml_Block_Report_Explorer extends Mage_Adminhtml_Block_Template
             'no' => $helper->__('No'),
             'listHint' => $helper->__('Separate the values with commas.'),
             'mine' => $helper->__('Mine'),
-            'explore' => $helper->__('Explore'),
-            'dashboard' => $helper->__('Dashboard'),
             'drillSteps' => $helper->__('Drill steps'),
             'allData' => $helper->__('All data'),
             'onlyThis' => $helper->__('Only this value'),
@@ -183,7 +182,6 @@ class Mage_Adminhtml_Block_Report_Explorer extends Mage_Adminhtml_Block_Template
             'table' => $helper->__('Table'),
             'pin' => $helper->__('Show on my dashboard'),
             'unpin' => $helper->__('Remove from my dashboard'),
-            'noDashboard' => $helper->__('Your dashboard is empty. Save a report, then click its star to show it here.'),
         ];
     }
 }

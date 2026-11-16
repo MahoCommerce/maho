@@ -1,6 +1,6 @@
 ---
-description: The Reports > Explorer page runs ready-made reports and reports that you build, on live order, cart, customer and stock data, with a chart, a comparison with an earlier period, the records behind a number, an explanation of a change, notes, monthly targets, a dashboard, CSV export and saved reports.
-admin_pages: [report_explorer]
+description: The Reports > Explorer page runs ready-made reports and reports that you build, on live order, cart, customer and stock data, with a chart, a comparison with an earlier period, the records behind a number, an explanation of a change, notes, monthly targets, saved reports pinned to the admin dashboard, and CSV export.
+admin_pages: [report_explorer, dashboard]
 ---
 
 # Report Explorer
@@ -102,8 +102,8 @@ change. An average, such as **Average order value**, has no share. Click a value
 
 A note marks a day on the chart, for example the day of a newsletter. Click **Add a note** on a
 chart over time, or click a day on the chart and select **Add a note**. Then enter the day and the
-text. The note shows as a dotted line on the chart, in the tooltip of its day, and as a label under
-the chart, for every administrator. Only the author deletes a note.
+text. The note shows as a dotted line on the chart with its text above the dot, in the tooltip of
+its day, and as a label under the chart, for every administrator. Only the author deletes a note.
 
 The chart also shows the first day of each active cart price rule, as **Promotion starts**.
 
@@ -122,14 +122,15 @@ divided by the days of the month. A target set while one store view is selected 
 store view. Otherwise, the target applies to the report of all the store views.
 Only a metric that adds up, such as **Net sales** or **Units**, can have a target.
 
-## Dashboard
+## Pinned reports on the dashboard
 
-Open a saved report and click its star, next to **Save**, to put it on your dashboard. The **Dashboard** tab shows each
-report of your dashboard as a card, with the total of its first metric, its change and a small
-chart. Click the name of a card to open the report.
+Open a saved report and click its star, next to **Save**. The report then shows under **Pinned
+reports** at the top of the admin **Dashboard**, as a card with the total of its first metric, its
+change and a small chart. Click the name of a card to open the report in the Explorer. Click the
+star of a card to remove it from the dashboard.
 
-Each administrator has a dashboard of their own. A shared report that its owner stops sharing
-leaves the dashboard. When your dashboard has a report, the page opens on the dashboard.
+Each administrator pins reports for their own dashboard. A shared report that its owner stops
+sharing leaves the dashboard.
 
 ## Orders that count
 
