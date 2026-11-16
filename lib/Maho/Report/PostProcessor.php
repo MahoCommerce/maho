@@ -74,7 +74,7 @@ final class PostProcessor
                 $order = ($a['values'][$key] ?? null) <=> ($b['values'][$key] ?? null);
                 return $plan->request->sortDescending ? -$order : $order;
             });
-        } elseif ($fill && $plan->request->sortKey === $period->dimension->code && $plan->request->sortDescending) {
+        } elseif ($fill && ($plan->request->sortKey === null ? $period->granularity?->isCyclic() !== true : $plan->request->sortDescending)) {
             $result = array_reverse($result);
         }
 

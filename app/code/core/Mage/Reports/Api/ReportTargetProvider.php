@@ -22,23 +22,25 @@ use Maho\ApiPlatform\Security\AdminAcl;
 
 final class ReportTargetProvider extends \Maho\ApiPlatform\Provider
 {
+    use ExplorerAccessTrait;
+
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): TraversablePaginator|\Mage_Reports_Model_Target
     {
         AdminAcl::checkPath(ReportTarget::ADMIN_RESOURCE);
-        $this->requireUser();
+        $access = $this->explorerAccess($this->requireUser());
         $service = \Mage::getService('reports/target');
         if ($operation instanceof CollectionOperationInterface) {
             $input = RequestInput::of(ReportProviderBase::requestFilters($context));
             $dataset = $input->string('dataset') ?? throw ValidationException::requiredField('dataset');
-            $targets = array_map($this->readable(...), $service->listFor($dataset, $input->string('metric')));
+            $targets = array_map($this->readable(...), $service->listFor($dataset, $access, $input->string('metric')));
             ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, $this->defaultPageSize, $this->maxPageSize);
             return new TraversablePaginator(new \ArrayIterator(array_slice($targets, ($page - 1) * $pageSize, $pageSize)), $page, $pageSize, count($targets));
         }
         if ($operation instanceof Post && !isset($uriVariables['id'])) {
             return $service->newTarget();
         }
-        return $this->readable($service->getById((int) ($uriVariables['id'] ?? 0)));
+        return $this->readable($service->getById((int) ($uriVariables['id'] ?? 0), $access));
     }
 
     /** The table holds the first day of the month, and the API shows the month. */

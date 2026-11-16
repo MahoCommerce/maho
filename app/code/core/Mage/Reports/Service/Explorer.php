@@ -163,7 +163,7 @@ class Mage_Reports_Service_Explorer
                 'to' => $period['to'],
                 'compare' => 'none',
                 'limit' => Mage_Reports_Model_Explorer_Runner::maxRows(),
-            ]), $access)['rows'];
+            ]), $access, false)['rows'];
             $values = [];
             foreach (['current' => $total['period'], 'earlier' => $total['comparePeriod']] as $side => $period) {
                 foreach ($read($period) as $row) {
@@ -221,13 +221,23 @@ class Mage_Reports_Service_Explorer
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('reports')->__('The report "%s" does not exist.', $code));
         }
         [$dataset, $preset] = $found;
+        return $this->requestWith(array_merge(['dataset' => $dataset->code], $preset->request), $overrides);
+    }
+
+    /**
+     * The request of $data, with the keys of $overrides replaced. An empty override keeps the value of $data.
+     *
+     * @param array<string, mixed> $data
+     * @param array<string, mixed> $overrides
+     */
+    public function requestWith(array $data, array $overrides): Request
+    {
         $overrides = array_filter($overrides, static fn(mixed $value): bool => $value !== null && $value !== '' && $value !== []);
-        $request = $preset->request;
-        // A period of its own replaces the period of the preset, named or not
+        // A period of its own replaces the period of the request, named or not
         if (isset($overrides['range']) || isset($overrides['from']) || isset($overrides['to'])) {
-            unset($request['range'], $request['from'], $request['to']);
+            unset($data['range'], $data['from'], $data['to']);
         }
-        return Request::fromArray(array_merge(['dataset' => $dataset->code], $request, $overrides));
+        return Request::fromArray(array_merge($data, $overrides));
     }
 
     /**

@@ -62,7 +62,8 @@ primary database. A replica that lags shows the newest orders later.
 
 Maho adds two indexes for the Explorer:
 
-- `sales_flat_order_item (product_id, created_at)`: the dead stock and never sold reports.
+- `sales_flat_order_item (product_id, created_at)`: the dead stock and never sold reports. It
+  replaces the index on `product_id` alone, because a query on `product_id` uses the new index.
 - `sales_flat_quote (updated_at)`: the cart reports.
 
 `./maho migrate` creates them. On a large store, the index creation can take some minutes.
@@ -70,7 +71,7 @@ Maho adds two indexes for the Explorer:
 ## Limits
 
 - A period with hourly steps can have at most 31 days. A period with daily steps can have at most
-  400 days.
+  400 days. A period by week, month or year can have at most 36,600 days (about 100 years).
 - The page and the API show at most **Rows per Page** rows at once.
 - An export with more rows than **Rows per Page** runs in the queue `reports`, as an export file
   in `var/reports/export`. A daily job deletes the files after 7 days. The storage mount
@@ -82,6 +83,9 @@ The results go to the cache type **Report Explorer Results**. A report on a past
 **Cache Lifetime of a Past Period** (24 hours by default). A report that includes today, and each
 cart and stock report, stays for **Cache Lifetime of a Current Period** (5 minutes by default). A
 save of **System > Configuration > Reports** clears the type.
+
+A new installation enables the cache type. An upgraded store does not: enable **Report Explorer
+Results** in **System > Cache Management**, or every report reads the database again.
 
 To see the SQL and the time of each statement of a report, run:
 

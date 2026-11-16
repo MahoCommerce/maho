@@ -199,6 +199,24 @@ describe('the access of the caller', function () {
             ->and(array_column($orders['presets'], 'code'))->not->toContain('customer_value_by_email')
             ->and(fn() => explorerRun(['dataset' => 'sales_orders', 'metrics' => ['orders'], 'dimensions' => ['customer_email']], $access))
             ->toThrow(Mage_Core_Exception_Input::class);
+
+        try {
+            explorerRun([
+                'dataset' => 'sales_orders',
+                'metrics' => ['orders'],
+                'filters' => [['field' => 'customer_email', 'operator' => 'eq', 'value' => 'a@example.com']],
+            ], $access);
+            $this->fail('The request filtered on personal data without the permission.');
+        } catch (Mage_Core_Exception_Input $e) {
+            expect(array_column($e->getErrors(), 'field'))->toContain('filters');
+        }
+    });
+
+    it('gives a caller with a store limit its own stores when the request names none', function () {
+        $access = new Mage_Reports_Model_Explorer_Access(null, true, [2]);
+        $result = explorerRun(['dataset' => 'sales_orders', 'metrics' => ['orders'], 'storeIds' => null], $access);
+
+        expect($result['request']['storeIds'])->toBe([2]);
     });
 
     it('refuses a store that the caller may not read', function () {
@@ -217,6 +235,24 @@ describe('the access of the caller', function () {
             $this->fail('The request with unknown codes passed.');
         } catch (Mage_Core_Exception_Input $e) {
             expect(array_column($e->getErrors(), 'field'))->toContain('metrics', 'dimensions', 'sort');
+        }
+    });
+
+    it('refuses an unknown date field with a field error, also with a period grouping', function () {
+        try {
+            explorerRun(['dataset' => 'sales_orders', 'metrics' => ['orders'], 'dimensions' => ['period:day'], 'dateField' => 'nowhere']);
+            $this->fail('The request with an unknown date field passed.');
+        } catch (Mage_Core_Exception_Input $e) {
+            expect(array_column($e->getErrors(), 'field'))->toContain('dateField');
+        }
+    });
+
+    it('refuses a period by month of more than 100 years', function () {
+        try {
+            explorerRun(['dataset' => 'sales_orders', 'metrics' => ['orders'], 'dimensions' => ['period:month'], 'from' => '0001-01-01', 'to' => '9999-12-31']);
+            $this->fail('The request of ten thousand years passed.');
+        } catch (Mage_Core_Exception_Input $e) {
+            expect(array_column($e->getErrors(), 'field'))->toContain('dimensions');
         }
     });
 

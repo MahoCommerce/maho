@@ -34,21 +34,14 @@ class Mage_Adminhtml_Report_ExplorerController extends Mage_Adminhtml_Controller
     #[Maho\Config\Route('/admin/report_explorer/data', methods: ['POST'])]
     public function dataAction(): void
     {
-        try {
-            $result = Mage::getService('reports/explorer')->run($this->readRequest(), $this->access());
-            $this->getResponse()->setBodyJson($result);
-        } catch (Mage_Core_Exception_Input $e) {
-            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage(), 'errors' => $e->getErrors()]);
-        } catch (Mage_Core_Exception $e) {
-            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
-        }
+        $this->respond(fn(): array => Mage::getService('reports/explorer')->run($this->readRequest(), $this->access()));
     }
 
     #[Maho\Config\Route('/admin/report_explorer/records', methods: ['POST'])]
     public function recordsAction(): void
     {
-        $params = $this->getRequest();
-        try {
+        $this->respond(function (): array {
+            $params = $this->getRequest();
             $result = Mage::getService('reports/explorer')->records(
                 $this->readRequest(),
                 $this->access(),
@@ -62,29 +55,18 @@ class Mage_Adminhtml_Report_ExplorerController extends Mage_Adminhtml_Controller
                 }
             }
             unset($result['route'], $result['routeParam']);
-            $this->getResponse()->setBodyJson($result);
-        } catch (Mage_Core_Exception_Input $e) {
-            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage(), 'errors' => $e->getErrors()]);
-        } catch (Mage_Core_Exception $e) {
-            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
-        }
+            return $result;
+        });
     }
 
     #[Maho\Config\Route('/admin/report_explorer/explain', methods: ['POST'])]
     public function explainAction(): void
     {
-        try {
-            $result = Mage::getService('reports/explorer')->explain(
-                $this->readRequest(),
-                $this->access(),
-                (string) $this->getRequest()->getParam('metric'),
-            );
-            $this->getResponse()->setBodyJson($result);
-        } catch (Mage_Core_Exception_Input $e) {
-            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage(), 'errors' => $e->getErrors()]);
-        } catch (Mage_Core_Exception $e) {
-            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
-        }
+        $this->respond(fn(): array => Mage::getService('reports/explorer')->explain(
+            $this->readRequest(),
+            $this->access(),
+            (string) $this->getRequest()->getParam('metric'),
+        ));
     }
 
     #[Maho\Config\Route('/admin/report_explorer/export', methods: ['POST'])]
@@ -125,37 +107,29 @@ class Mage_Adminhtml_Report_ExplorerController extends Mage_Adminhtml_Controller
     #[Maho\Config\Route('/admin/report_explorer/savedSave', methods: ['POST'])]
     public function savedSaveAction(): void
     {
-        $service = Mage::getService('reports/savedReport');
-        $adminUserId = (int) Mage::helper('adminnotification')->getCurrentAdminUserId();
-        try {
+        $this->respond(function (int $adminUserId): array {
+            $service = Mage::getService('reports/savedReport');
             $id = (int) $this->getRequest()->getParam('id');
             $report = $id > 0 ? $service->getById($id, $adminUserId) : $service->newReport();
             $report->setName((string) $this->getRequest()->getParam('name'))
                 ->setIsShared((bool) $this->getRequest()->getParam('shared'))
                 ->setRequestData($this->readRequest()->toArray());
             $service->save($report, $adminUserId, $this->access());
-            $this->getResponse()->setBodyJson([
+            return [
                 'report' => Mage::helper('reports')->savedReportToArray($report, $adminUserId),
-                'saved' => $this->savedReports(),
-            ]);
-        } catch (Mage_Core_Exception_Input $e) {
-            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage(), 'errors' => $e->getErrors()]);
-        } catch (Mage_Core_Exception $e) {
-            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
-        }
+                'saved' => Mage::helper('reports')->savedReportsFor($adminUserId, $this->access()),
+            ];
+        });
     }
 
     #[Maho\Config\Route('/admin/report_explorer/savedDelete', methods: ['POST'])]
     public function savedDeleteAction(): void
     {
-        $service = Mage::getService('reports/savedReport');
-        $adminUserId = (int) Mage::helper('adminnotification')->getCurrentAdminUserId();
-        try {
+        $this->respond(function (int $adminUserId): array {
+            $service = Mage::getService('reports/savedReport');
             $service->delete($service->getById((int) $this->getRequest()->getParam('id'), $adminUserId), $adminUserId);
-            $this->getResponse()->setBodyJson(['saved' => $this->savedReports()]);
-        } catch (Mage_Core_Exception $e) {
-            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
-        }
+            return ['saved' => Mage::helper('reports')->savedReportsFor($adminUserId, $this->access())];
+        });
     }
 
     #[Maho\Config\Route('/admin/report_explorer/pin', methods: ['POST'])]
@@ -169,7 +143,7 @@ class Mage_Adminhtml_Report_ExplorerController extends Mage_Adminhtml_Controller
             } else {
                 $service->unpin($report, $adminUserId);
             }
-            return ['saved' => $this->savedReports(), 'dashboard' => $service->pinnedIds($adminUserId)];
+            return ['saved' => Mage::helper('reports')->savedReportsFor($adminUserId, $this->access()), 'dashboard' => $service->pinnedIds($adminUserId)];
         });
     }
 
@@ -202,7 +176,7 @@ class Mage_Adminhtml_Report_ExplorerController extends Mage_Adminhtml_Controller
     {
         $this->respond(function (): array {
             $targets = [];
-            foreach (Mage::getService('reports/target')->listFor((string) $this->getRequest()->getParam('dataset'), (string) $this->getRequest()->getParam('metric')) as $target) {
+            foreach (Mage::getService('reports/target')->listFor((string) $this->getRequest()->getParam('dataset'), $this->access(), (string) $this->getRequest()->getParam('metric')) as $target) {
                 $targets[] = ['id' => (int) $target->getId(), 'month' => substr((string) $target->getMonth(), 0, 7), 'storeId' => $target->getStoreId(), 'value' => $target->getValue()];
             }
             return ['targets' => $targets];
@@ -232,7 +206,7 @@ class Mage_Adminhtml_Report_ExplorerController extends Mage_Adminhtml_Controller
     {
         $this->respond(function (): array {
             $service = Mage::getService('reports/target');
-            $service->delete($service->getById((int) $this->getRequest()->getParam('id')));
+            $service->delete($service->getById((int) $this->getRequest()->getParam('id'), $this->access()));
             return [];
         });
     }
@@ -302,16 +276,5 @@ class Mage_Adminhtml_Report_ExplorerController extends Mage_Adminhtml_Controller
     private function access(): Mage_Reports_Model_Explorer_Access
     {
         return Mage_Reports_Model_Explorer_Access::forAdmin(Mage::getSingleton('admin/session'));
-    }
-
-    /** @return list<array<string, mixed>> */
-    private function savedReports(): array
-    {
-        $adminUserId = (int) Mage::helper('adminnotification')->getCurrentAdminUserId();
-        $reports = [];
-        foreach (Mage::getService('reports/savedReport')->listFor($adminUserId, $this->access()) as $report) {
-            $reports[] = Mage::helper('reports')->savedReportToArray($report, $adminUserId);
-        }
-        return $reports;
     }
 }

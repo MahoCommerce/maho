@@ -33,8 +33,10 @@ class Mage_Downloadable_Model_Report_Dataset_Downloads implements DatasetProvide
         $helper = Mage::helper('downloadable');
         $resource = Mage::getSingleton('core/resource');
 
-        $dataset = new Dataset(self::CODE, $helper->__('Downloads'), 'products', 'report/products/downloads', $resource->getTableName('downloadable/link_purchased_item'), 'main', null, true);
+        $dataset = new Dataset(self::CODE, $helper->__('Downloads'), 'products', 'report/products/downloads', $resource->getTableName('downloadable/link_purchased_item'), 'main', 'store_id', true);
+        $dataset->addJoin(new Join('order_item', $resource->getTableName('sales/order_item'), 'order_item.item_id = main.order_item_id'));
         foreach ([
+            new Field('store_id', Mage::helper('sales')->__('Store view'), FieldType::Id, 'order_item.store_id', ['order_item'], labels: 'store'),
             new Field('product_id', $helper->__('Product'), FieldType::Id, 'main.product_id', labels: 'product'),
             new Field('link_title', $helper->__('Link'), FieldType::String, 'main.link_title'),
             new Field('status', $helper->__('Status'), FieldType::String, 'main.status'),

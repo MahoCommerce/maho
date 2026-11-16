@@ -14,8 +14,6 @@ use Maho\Report\Request;
 
 class Mage_Reports_Service_SavedReport
 {
-    public const NAME_MAX_LENGTH = 255;
-
     public function newReport(): Mage_Reports_Model_SavedReport
     {
         return Mage::getModel('reports/savedReport')->setIsShared(false);
@@ -71,20 +69,11 @@ class Mage_Reports_Service_SavedReport
             $report->setAdminUserId($adminUserId);
         }
 
-        $errors = new Mage_Core_Exception_Input($helper->__('The saved report is not valid.'));
-        $name = trim((string) $report->getName());
-        if ($name === '') {
-            $errors->addError('name', $helper->__('The name is required.'));
-        } elseif (mb_strlen($name) > self::NAME_MAX_LENGTH) {
-            $errors->addError('name', $helper->__('The name has at most %d characters.', self::NAME_MAX_LENGTH));
-        }
-        $data = $report->getRequestData();
-        if ($data === []) {
-            $errors->addError('definition', $helper->__('The report definition is required.'));
-        }
-        $errors->throwIfErrors();
+        new Mage_Core_Exception_Input($helper->__('The saved report is not valid.'))
+            ->addValidationResult($report->validate(), 'name')
+            ->throwIfErrors();
 
-        $request = Request::fromArray($data);
+        $request = Request::fromArray($report->getRequestData());
         $registry = Mage::getSingleton('reports/explorer_registry');
         Mage::getSingleton('reports/explorer_validator')->validate(
             $request,
@@ -93,7 +82,7 @@ class Mage_Reports_Service_SavedReport
             Mage_Reports_Model_Explorer_Runner::maxRows(),
         );
 
-        $report->setName($name)
+        $report->setName(trim((string) $report->getName()))
             ->setRequestData($request->with(['offset' => 0])->toArray())
             ->setIsShared((bool) $report->getIsShared())
             ->save();

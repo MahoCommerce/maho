@@ -72,4 +72,29 @@ class Mage_Reports_Model_Target extends Mage_Core_Model_Abstract
     {
         return $this->setData('value', $value);
     }
+
+    /** The first day of the month of the target, or null when the month is not a real YYYY-MM month. */
+    public function getMonthStart(): ?DateTimeImmutable
+    {
+        $month = (string) $this->getMonth();
+        $start = DateTimeImmutable::createFromFormat('!Y-m-d', substr($month, 0, 7) . '-01');
+        if ($start === false || !preg_match('/^\d{4}-\d{2}(-\d{2})?$/', $month) || $start->format('Y-m') !== substr($month, 0, 7)) {
+            return null;
+        }
+        return $start;
+    }
+
+    /** @return array<string, string>|true */
+    public function validate(): array|true
+    {
+        $helper = Mage::helper('reports');
+        $errors = [];
+        if ($this->getMonthStart() === null) {
+            $errors['month'] = $helper->__('The month must be YYYY-MM.');
+        }
+        if ($this->getValue() === null || !is_finite($this->getValue())) {
+            $errors['value'] = $helper->__('The target value is required.');
+        }
+        return $errors === [] ? true : $errors;
+    }
 }

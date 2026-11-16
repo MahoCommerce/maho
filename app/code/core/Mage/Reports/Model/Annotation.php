@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 class Mage_Reports_Model_Annotation extends Mage_Core_Model_Abstract
 {
+    public const TITLE_MAX_LENGTH = 255;
+
     #[\Override]
     protected function _construct(): void
     {
@@ -49,5 +51,23 @@ class Mage_Reports_Model_Annotation extends Mage_Core_Model_Abstract
     public function setTitle(?string $value): static
     {
         return $this->setData('title', $value);
+    }
+
+    /** @return array<string, string>|true */
+    public function validate(): array|true
+    {
+        $helper = Mage::helper('reports');
+        $errors = [];
+        $title = trim((string) $this->getTitle());
+        if ($title === '') {
+            $errors['title'] = $helper->__('The text of the note is required.');
+        } elseif (mb_strlen($title) > self::TITLE_MAX_LENGTH) {
+            $errors['title'] = $helper->__('The text of the note has at most %d characters.', self::TITLE_MAX_LENGTH);
+        }
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d', (string) $this->getAnnotationDate());
+        if ($date === false || $date->format('Y-m-d') !== $this->getAnnotationDate()) {
+            $errors['date'] = $helper->__('The date must be a day as YYYY-MM-DD.');
+        }
+        return $errors === [] ? true : $errors;
     }
 }

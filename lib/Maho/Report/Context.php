@@ -23,6 +23,7 @@ final class Context
      * @param string|null $utcTo the end of the queried range, as a UTC "Y-m-d H:i:s"
      * @param array<string, mixed> $settings values from the configuration, such as the days of dead stock
      * @param string|null $dateField the code of the date field of the request, for a derived join that filters on it
+     * @param list<int>|null $storeIds the store views of the request, for a derived join that reads data of a store
      */
     public function __construct(
         public readonly AdapterInterface $adapter,
@@ -34,6 +35,7 @@ final class Context
         public readonly ?string $utcTo = null,
         public readonly array $settings = [],
         public readonly ?string $dateField = null,
+        public readonly ?array $storeIds = null,
     ) {}
 
     public function localTime(string $column): string
@@ -43,7 +45,7 @@ final class Context
 
     public function withRange(?string $utcFrom, ?string $utcTo): self
     {
-        return new self($this->adapter, $this->localTime, $this->now, $this->timezone, $this->firstDayOfWeek, $utcFrom, $utcTo, $this->settings, $this->dateField);
+        return new self($this->adapter, $this->localTime, $this->now, $this->timezone, $this->firstDayOfWeek, $utcFrom, $utcTo, $this->settings, $this->dateField, $this->storeIds);
     }
 
     public function setting(string $key, mixed $default = null): mixed

@@ -20,6 +20,7 @@ final class Join
      * @param string|\Closure(Context): Select $table a table name, or a closure that builds a derived table
      * @param string|\Closure(Context): string $condition the ON condition
      * @param list<string> $requires the aliases of the joins that the condition reads
+     * @param bool $manyRows the join has many rows for one row of the dataset, such as the categories of a product
      */
     public function __construct(
         public readonly string $alias,
@@ -27,6 +28,7 @@ final class Join
         private readonly string|\Closure $condition,
         public readonly JoinType $type = JoinType::Left,
         public readonly array $requires = [],
+        public readonly bool $manyRows = false,
     ) {}
 
     public function table(Context $context): string|Select

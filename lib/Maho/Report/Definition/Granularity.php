@@ -33,6 +33,7 @@ enum Granularity: string
         return match ($this) {
             self::Hour => 31,
             self::Day => 400,
+            self::Week, self::Month, self::Year => 36600,
             default => null,
         };
     }

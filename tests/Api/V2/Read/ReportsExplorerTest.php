@@ -115,13 +115,10 @@ describe('Report explorer API', function (): void {
 
     it('keeps a token with a store restriction in its stores', function (): void {
         $token = serviceToken(['reports/read'], [1]);
-        $otherStores = array_values(array_diff(array_keys(Mage::app()->getStores()), [1]));
+        $other = explorerApiUrl(['dataset' => 'sales_orders', 'metrics' => 'orders', 'storeIds' => '999']);
 
-        expect(apiGet(explorerApiUrl(['dataset' => 'sales_orders', 'metrics' => 'orders']), $token)['status'])->toBe(200);
-        if ($otherStores !== []) {
-            $url = explorerApiUrl(['dataset' => 'sales_orders', 'metrics' => 'orders', 'storeIds' => (string) $otherStores[0]]);
-            expect(apiGet($url, $token)['status'])->toBe(422);
-        }
+        expect(apiGet(explorerApiUrl(['dataset' => 'sales_orders', 'metrics' => 'orders']), $token)['status'])->toBe(200)
+            ->and(apiGet($other, $token)['status'])->toBe(422);
     });
 
     it('applies the admin ACL of the explorer and of each dataset', function (): void {
@@ -131,6 +128,13 @@ describe('Report explorer API', function (): void {
         expect(apiGet(explorerApiUrl(['dataset' => 'sales_orders', 'metrics' => 'orders']), $salesOnly)['status'])->toBe(403)
             ->and(apiGet(explorerApiUrl(['dataset' => 'sales_orders', 'metrics' => 'orders']), $explorer)['status'])->toBe(200)
             ->and(apiGet(explorerApiUrl(['dataset' => 'sales_items', 'metrics' => 'units']), $explorer)['status'])->toBe(422);
+
+        $records = explorerApiUrl(['dataset' => 'sales_orders', 'scope' => 'not_canceled'], EXPLORER_API_RECORDS);
+        $personal = explorerApiUrl(['dataset' => 'sales_orders', 'metrics' => 'orders', 'dimensions' => 'customer_email']);
+        expect(apiGet($records, $explorer)['status'])->toBe(422)
+            ->and(apiGet($personal, $explorer)['status'])->toBe(422)
+            ->and(apiGet($records, adminToken())['status'])->toBe(200)
+            ->and(apiGet($personal, adminToken())['status'])->toBe(200);
 
         $codes = array_column(apiGet(EXPLORER_API_DATASETS, $explorer)['json'], 'code');
         expect($codes)->toContain('sales_orders')->not->toContain('sales_items');

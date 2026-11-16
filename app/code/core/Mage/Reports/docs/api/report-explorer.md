@@ -62,7 +62,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 | `from`, `to` | Local days, `YYYY-MM-DD`, in place of `range` |
 | `compare` | `previous_period` or `previous_year` |
 | `storeIds` | Comma-separated store view IDs |
-| `sort` | A metric or grouping code of the request, with `-` before it for descending |
+| `sort` | A metric or grouping code of the request, with `-` before it for descending. Without it, a report that groups by the date only lists the newest date first |
 | `limit`, `offset` | The rows of the page. `limit` is 100 by default, and at most **Rows per Page** |
 
 The QUERY body takes the same keys, with lists as JSON arrays and filters as objects:
@@ -129,6 +129,7 @@ report counts, newest first. It ignores `metrics` and `dimensions`.
   "columns": [{"key": "increment_id", "label": "Order #", "format": "text"}, {"key": "sales_total", "label": "Sales total", "format": "money"}],
   "rows": [{"id": 4211, "values": {"increment_id": "100004211", "sales_total": 129.9}, "labels": {}}],
   "totalRows": 18,
+  "limit": 50,
   "route": "adminhtml/sales_order/view",
   "routeParam": "order_id"
 }

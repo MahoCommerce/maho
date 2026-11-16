@@ -108,6 +108,13 @@ describe('the explanation of a change', function () {
             ->and(array_column($result['dimensions'][0]['drivers'], 'value'))->toBe(['pending', 'processing'])
             ->and(array_column($result['dimensions'][0]['drivers'], 'share'))->toBe([75.0, 25.0]);
     });
+
+    it('refuses to explain a dataset that has no period', function () {
+        $request = Request::fromArray(['dataset' => 'catalog_stock', 'metrics' => ['qty_on_hand']]);
+
+        expect(fn() => Mage::getService('reports/explorer')->explain($request, Mage_Reports_Model_Explorer_Access::full(), 'qty_on_hand'))
+            ->toThrow(Mage_Core_Exception_Input::class);
+    });
 });
 
 describe('the dashboard, the notes and the targets', function () {
@@ -144,8 +151,13 @@ describe('the dashboard, the notes and the targets', function () {
         $note = $service->save($service->newAnnotation()->setAnnotationDate(EXPLORER_FEATURES_DAY_ONE)->setTitle('  Newsletter sent  '), (int) $this->owner->getId());
 
         try {
-            expect(fn() => $service->delete($note, (int) $this->other->getId()))->toThrow(Mage_Core_Exception_Forbidden::class)
-                ->and(fn() => $service->save($service->newAnnotation()->setAnnotationDate('2004-02-30')->setTitle(''), (int) $this->owner->getId()))
+            $other = (int) $this->other->getId();
+            expect(fn() => $service->delete($note, $other))->toThrow(Mage_Core_Exception_Forbidden::class)
+                ->and(fn() => $service->save($service->getById((int) $note->getId())->setTitle('Changed'), $other))
+                ->toThrow(Mage_Core_Exception_Forbidden::class)
+                ->and(fn() => $service->save($service->newAnnotation()->setAnnotationDate(EXPLORER_FEATURES_DAY_ONE)->setTitle('   '), $other))
+                ->toThrow(Mage_Core_Exception_Input::class)
+                ->and(fn() => $service->save($service->newAnnotation()->setAnnotationDate('2004-02-30')->setTitle('A note'), (int) $this->owner->getId()))
                 ->toThrow(Mage_Core_Exception_Input::class);
 
             $result = Mage::getService('reports/explorer')->run(
@@ -170,7 +182,7 @@ describe('the dashboard, the notes and the targets', function () {
         $kept = $service->save($target('units', 31.0), $access);
 
         try {
-            expect($service->listFor('sales_orders', 'units'))->toHaveCount(1);
+            expect($service->listFor('sales_orders', $access, 'units'))->toHaveCount(1);
             $result = Mage::getService('reports/explorer')->run(
                 Request::fromArray(['dataset' => 'sales_orders', 'metrics' => ['units', 'aov'], 'dimensions' => ['period:day'], 'scope' => 'all', 'from' => EXPLORER_FEATURES_DAY_ONE, 'to' => EXPLORER_FEATURES_DAY_TWO]),
                 $access,
@@ -182,6 +194,45 @@ describe('the dashboard, the notes and the targets', function () {
                 $access,
             );
             expect($filtered['targets'])->toBe([]);
+        } finally {
+            $service->delete($kept);
+        }
+    });
+
+    it('applies the target of one store view only to a report on that store view', function () {
+        $service = Mage::getService('reports/target');
+        $access = Mage_Reports_Model_Explorer_Access::full();
+        $kept = $service->save($service->newTarget()->setDataset('sales_orders')->setMetric('units')->setMonth('2004-05')->setValue(31.0)->setStoreId(1), $access);
+        $run = static fn(?array $storeIds): array => Mage::getService('reports/explorer')->run(
+            Request::fromArray(['dataset' => 'sales_orders', 'metrics' => ['units'], 'dimensions' => ['period:day'], 'scope' => 'all', 'from' => EXPLORER_FEATURES_DAY_ONE, 'to' => EXPLORER_FEATURES_DAY_TWO] + ($storeIds === null ? [] : ['storeIds' => $storeIds])),
+            $access,
+        )['targets'];
+
+        try {
+            expect($run([1]))->toBe(['units' => ['buckets' => [EXPLORER_FEATURES_DAY_ONE => 1.0, EXPLORER_FEATURES_DAY_TWO => 1.0], 'total' => 2.0]])
+                ->and($run(null))->toBe([])
+                ->and($run([1, 2]))->toBe([]);
+        } finally {
+            $service->delete($kept);
+        }
+    });
+
+    it('refuses a month that does not exist, and hides the targets of a dataset or a store that the caller may not read', function () {
+        $service = Mage::getService('reports/target');
+        $full = Mage_Reports_Model_Explorer_Access::full();
+        foreach (['2026-13', '2026-00'] as $month) {
+            expect(fn() => $service->save($service->newTarget()->setDataset('sales_orders')->setMetric('units')->setMonth($month)->setValue(1.0), $full))
+                ->toThrow(Mage_Core_Exception_Input::class);
+        }
+        $kept = $service->save($service->newTarget()->setDataset('sales_orders')->setMetric('units')->setMonth('2004-05')->setValue(31.0)->setStoreId(1), $full);
+        $id = (int) $kept->getId();
+
+        try {
+            foreach ([new Mage_Reports_Model_Explorer_Access(['carts'], true), new Mage_Reports_Model_Explorer_Access(null, true, [2])] as $access) {
+                expect($service->listFor('sales_orders', $access, 'units'))->toBe([])
+                    ->and(fn() => $service->getById($id, $access))->toThrow(Mage_Core_Exception_NoSuchEntity::class);
+            }
+            expect(array_map(static fn($t): int => (int) $t->getId(), $service->listFor('sales_orders', $full, 'units')))->toBe([$id]);
         } finally {
             $service->delete($kept);
         }

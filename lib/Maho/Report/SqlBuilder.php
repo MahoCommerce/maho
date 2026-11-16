@@ -15,8 +15,10 @@ use Maho\Db\Expr;
 use Maho\Db\Select;
 use Maho\Report\Definition\Aggregate;
 use Maho\Report\Definition\Dataset;
+use Maho\Report\Definition\Field;
 use Maho\Report\Definition\FieldType;
 use Maho\Report\Definition\Granularity;
+use Maho\Report\Definition\Join;
 use Maho\Report\Definition\JoinType;
 use Maho\Report\Definition\Metric;
 
@@ -183,7 +185,8 @@ final class SqlBuilder
         $adapter = $context->adapter;
         $select = $adapter->select()->from([$dataset->alias => $dataset->table], []);
 
-        foreach ($this->joinOrder($plan, $withDimensions, $extraFields) as $alias) {
+        $joined = $this->joinOrder($plan, $withDimensions, $extraFields);
+        foreach ($joined as $alias) {
             $join = $dataset->getJoin($alias);
             $name = [$alias => $join->table($context)];
             if ($join->type === JoinType::Inner) {
@@ -218,7 +221,7 @@ final class SqlBuilder
         }
 
         foreach ($plan->request->filters as $filter) {
-            $this->addFilter($select, $plan, $context, $filter);
+            $this->addFilter($select, $plan, $context, $filter, $joined);
         }
 
         return $select;
@@ -231,11 +234,42 @@ final class SqlBuilder
         }
     }
 
-    private function addFilter(Select $select, Plan $plan, Context $context, RequestFilter $filter): void
+    /** @param list<string> $joined the aliases that the query joins already, such as the join of a grouping */
+    private function addFilter(Select $select, Plan $plan, Context $context, RequestFilter $filter, array $joined): void
     {
         $field = $plan->dataset->getField($filter->field);
-        $sql = $field->sql($context);
-        $value = $filter->value;
+        $join = $this->manyRowsJoin($plan, $field);
+        if ($join === null || in_array($join->alias, $joined, true)) {
+            $this->addCondition($select, $field, $field->sql($context), $filter->operator, $filter->value);
+            return;
+        }
+        // A join of the filter would count a row once for each of its joined rows, so the filter tests them in a subquery
+        $positive = match ($filter->operator) {
+            Operator::Neq => Operator::Eq,
+            Operator::Nin => Operator::In,
+            Operator::Empty => Operator::NotEmpty,
+            default => null,
+        };
+        $exists = $context->adapter->select()
+            ->from([$join->alias => $join->table($context)], [new Expr('1')])
+            ->where($join->condition($context));
+        $this->addCondition($exists, $field, $field->sql($context), $positive ?? $filter->operator, $filter->value);
+        $select->where(($positive === null ? '' : 'NOT ') . "EXISTS ({$exists})");
+    }
+
+    private function manyRowsJoin(Plan $plan, Field $field): ?Join
+    {
+        foreach ($field->joins as $alias) {
+            $join = $plan->dataset->getJoin($alias);
+            if ($join->manyRows) {
+                return $join;
+            }
+        }
+        return null;
+    }
+
+    private function addCondition(Select $select, Field $field, string $sql, Operator $operator, mixed $value): void
+    {
         $cast = static fn(mixed $v): mixed => match ($field->type) {
             FieldType::Boolean => (int) (bool) $v,
             FieldType::Integer, FieldType::Id => is_numeric($v) ? (int) $v : $v,
@@ -244,7 +278,7 @@ final class SqlBuilder
         };
         $isText = $field->type === FieldType::String;
 
-        match ($filter->operator) {
+        match ($operator) {
             Operator::Eq => $select->where("{$sql} = ?", $cast($value)),
             Operator::Neq => $select->where("({$sql} IS NULL OR {$sql} <> ?)", $cast($value)),
             Operator::In => $select->where("{$sql} IN (?)", array_map($cast, (array) $value)),
@@ -255,7 +289,7 @@ final class SqlBuilder
             Operator::Lte => $select->where("{$sql} <= ?", $cast($value)),
             Operator::Contains => $select->where(
                 "LOWER({$sql}) LIKE ? ESCAPE '!'",
-                '%' . addcslashes(mb_strtolower((string) $value), '!%_') . '%',
+                '%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], mb_strtolower((string) $value)) . '%',
             ),
             Operator::Empty => $select->where($isText ? "({$sql} IS NULL OR {$sql} = '')" : "{$sql} IS NULL"),
             Operator::NotEmpty => $select->where($isText ? "({$sql} IS NOT NULL AND {$sql} <> '')" : "{$sql} IS NOT NULL"),
@@ -294,7 +328,9 @@ final class SqlBuilder
             }
         }
         foreach ($plan->request->filters as $filter) {
-            $fields[$filter->field] = true;
+            if ($this->manyRowsJoin($plan, $dataset->getField($filter->field)) === null) {
+                $fields[$filter->field] = true;
+            }
         }
         if ($plan->dateField !== null) {
             $fields[$plan->dateField->code] = true;

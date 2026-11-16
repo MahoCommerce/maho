@@ -25,11 +25,6 @@ class Mage_Adminhtml_Block_Report_Explorer extends Mage_Adminhtml_Block_Template
         $access = Mage_Reports_Model_Explorer_Access::forAdmin(Mage::getSingleton('admin/session'));
         $adminUserId = Mage::helper('adminnotification')->getCurrentAdminUserId();
 
-        $saved = [];
-        foreach (Mage::getService('reports/savedReport')->listFor($adminUserId, $access) as $report) {
-            $saved[] = Mage::helper('reports')->savedReportToArray($report, $adminUserId);
-        }
-
         $stores = [];
         foreach (Mage::app()->getStores() as $store) {
             $stores[] = ['id' => (int) $store->getId(), 'label' => $store->getWebsite()->getName() . ' / ' . $store->getName()];
@@ -52,7 +47,7 @@ class Mage_Adminhtml_Block_Report_Explorer extends Mage_Adminhtml_Block_Template
                 'chart' => Mage::getBaseUrl('js') . 'chart.min.js',
             ],
             'datasets' => Mage::getService('reports/explorer')->datasets($access),
-            'saved' => $saved,
+            'saved' => Mage::helper('reports')->savedReportsFor($adminUserId, $access),
             'dashboard' => Mage::getService('reports/savedReport')->pinnedIds((int) $adminUserId),
             'adminUserId' => (int) $adminUserId,
             'stores' => $stores,

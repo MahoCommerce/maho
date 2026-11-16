@@ -404,7 +404,6 @@ return function (SchemaEditor $schema): void {
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('item_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('order_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
-            ->addIndex(Index::editor()->setUnquotedColumnNames('product_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('product_id', 'created_at'))
             ->addForeignKeyConstraint(
                 ForeignKeyConstraint::editor()

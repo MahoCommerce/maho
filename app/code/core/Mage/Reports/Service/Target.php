@@ -17,11 +17,16 @@ class Mage_Reports_Service_Target
         return Mage::getModel('reports/target')->setStoreId(0);
     }
 
-    /** @throws Mage_Core_Exception_NoSuchEntity */
-    public function getById(int $id): Mage_Reports_Model_Target
+    /**
+     * A target of a dataset and a store view that the caller may read.
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity
+     */
+    public function getById(int $id, Mage_Reports_Model_Explorer_Access $access): Mage_Reports_Model_Target
     {
         $target = Mage::getModel('reports/target')->load($id);
-        if ($target->getId() === null) {
+        $dataset = Mage::getSingleton('reports/explorer_registry')->getDataset((string) $target->getDataset());
+        if ($target->getId() === null || $dataset === null || !$access->allowsDataset($dataset) || !$this->allowsStore((int) $target->getStoreId(), $access)) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('reports')->__('The target with ID %s does not exist.', $id));
         }
         return $target;
@@ -46,18 +51,13 @@ class Mage_Reports_Service_Target
         } elseif (!$dataset->isAdditive($metric)) {
             $errors->addError('metric', $helper->__('A target needs a metric that adds up over the days, such as a sum or a count.'));
         }
-        $month = DateTimeImmutable::createFromFormat('!Y-m-d', substr((string) $target->getMonth(), 0, 7) . '-01');
-        if ($month === false || !preg_match('/^\d{4}-\d{2}(-\d{2})?$/', (string) $target->getMonth())) {
-            $errors->addError('month', $helper->__('The month must be YYYY-MM.'));
-        }
+        $errors->addValidationResult($target->validate(), 'month');
         $storeId = (int) $target->getStoreId();
-        if ($storeId !== 0 && (!array_key_exists($storeId, Mage::app()->getStores()) || ($access->storeIds !== null && !in_array($storeId, $access->storeIds, true)))) {
+        if (($storeId !== 0 && !array_key_exists($storeId, Mage::app()->getStores())) || !$this->allowsStore($storeId, $access)) {
             $errors->addError('storeId', $helper->__('The store view with ID %d does not exist.', $storeId));
         }
-        if ($target->getValue() === null || !is_finite($target->getValue())) {
-            $errors->addError('value', $helper->__('The target value is required.'));
-        }
         $errors->throwIfErrors();
+        $month = $target->getMonthStart() ?? throw new LogicException('validate() accepted a target with no month.');
 
         $existing = Mage::getResourceModel('reports/target_collection')
             ->addFieldToFilter('dataset', $target->getDataset())
@@ -98,18 +98,31 @@ class Mage_Reports_Service_Target
     }
 
     /**
-     * Every target of a dataset, newest month first.
+     * Every target of a dataset that the caller may read, newest month first.
      *
      * @return list<Mage_Reports_Model_Target>
      */
-    public function listFor(string $dataset, ?string $metric = null): array
+    public function listFor(string $dataset, Mage_Reports_Model_Explorer_Access $access, ?string $metric = null): array
     {
+        $definition = Mage::getSingleton('reports/explorer_registry')->getDataset($dataset);
+        if ($definition === null || !$access->allowsDataset($definition)) {
+            return [];
+        }
         $collection = Mage::getResourceModel('reports/target_collection')
             ->addFieldToFilter('dataset', $dataset)
             ->setOrder('month', 'DESC');
         if ($metric !== null) {
             $collection->addFieldToFilter('metric', $metric);
         }
-        return array_values(array_filter($collection->getItems(), static fn($item): bool => $item instanceof Mage_Reports_Model_Target));
+        return array_values(array_filter(
+            $collection->getItems(),
+            fn($item): bool => $item instanceof Mage_Reports_Model_Target && $this->allowsStore((int) $item->getStoreId(), $access),
+        ));
+    }
+
+    /** Store 0 holds the targets of every store view, and every caller reads it. */
+    private function allowsStore(int $storeId, Mage_Reports_Model_Explorer_Access $access): bool
+    {
+        return $storeId === 0 || $access->storeIds === null || in_array($storeId, $access->storeIds, true);
     }
 }

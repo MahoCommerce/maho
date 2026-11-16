@@ -38,6 +38,7 @@ class MahoReportExplorer {
         this.chart = null;
         this.charts = [];
         this.runToken = 0;
+        this.chartToken = 0;
         this.money = new Intl.NumberFormat(config.locale, { style: 'currency', currency: config.currency });
         this.number = new Intl.NumberFormat(config.locale, { maximumFractionDigits: 2 });
         this.dateFormat = new Intl.DateTimeFormat(config.locale, { dateStyle: 'medium', timeStyle: 'short', timeZone: config.timezone });
@@ -49,6 +50,8 @@ class MahoReportExplorer {
         }
         this.state = this.initialState();
         this.view = this.initialView();
+        this.savedId ??= this.view.savedId ?? null;
+        this.presetChart ??= this.view.presetChart ?? null;
         this.renderSkeleton();
         this.renderControls();
         this.show();
@@ -128,8 +131,6 @@ class MahoReportExplorer {
     runRequest(request) {
         return this.post(this.config.urls.data, { request: JSON.stringify(request) });
     }
-
-    // State and view
 
     initialState() {
         if (this.config.state) {
@@ -229,13 +230,11 @@ class MahoReportExplorer {
     updateUrl() {
         const url = new URL(window.location.href);
         url.searchParams.set('state', this.encode(JSON.stringify(this.state)));
-        url.searchParams.set('view', this.encode(JSON.stringify(this.view)));
+        url.searchParams.set('view', this.encode(JSON.stringify({ ...this.view, savedId: this.savedId, presetChart: this.presetChart })));
         url.searchParams.delete('preset');
         url.searchParams.delete('saved');
         window.history.replaceState(null, '', url);
     }
-
-    // Layout
 
     renderSkeleton() {
         this.root.innerHTML = `
@@ -371,8 +370,6 @@ class MahoReportExplorer {
         return this.savedId === null && this.view.drill.length === 0 && JSON.stringify(preset.request) === JSON.stringify(this.state);
     }
 
-    // Controls
-
     renderControls() {
         this.renderSidebar();
         const dataset = this.dataset();
@@ -388,7 +385,7 @@ class MahoReportExplorer {
             const ranges = MahoReportExplorer.RANGES.map((code) => [code, this.t(code)]).concat([['custom', this.t('custom')]]);
             row.append(this.selectField(this.t('period'), ranges, range, (value) => {
                 if (value === 'custom') {
-                    const today = new Date().toISOString().slice(0, 10);
+                    const today = this.today();
                     this.setPeriod({ range: undefined, from: this.state.from ?? today, to: this.state.to ?? today });
                 } else {
                     this.setPeriod({ range: value, from: undefined, to: undefined });
@@ -721,8 +718,6 @@ class MahoReportExplorer {
         }
     }
 
-    // Drill
-
     renderBreadcrumb() {
         const nav = this.parts.breadcrumb;
         nav.textContent = '';
@@ -756,11 +751,27 @@ class MahoReportExplorer {
         this.setState(changes, { keepDrill: true });
     }
 
-    /** The first and the last local day of a bucket of the period, or null for a cycle such as the hour of the day. */
+    /** The date of today in the time zone of the store, as YYYY-MM-DD. */
+    today() {
+        return new Intl.DateTimeFormat('en-CA', { timeZone: this.config.timezone }).format(new Date());
+    }
+
+    /** A copy of the rows in the order of the period, oldest first. A cycle keeps the order of the server, which starts the week on its first day. */
+    byPeriod(rows, column) {
+        if (MahoReportExplorer.CYCLES.includes(column.granularity)) {
+            return rows;
+        }
+        return [...rows].sort((a, b) => {
+            const x = a.dimensions[column.key];
+            const y = b.dimensions[column.key];
+            return typeof x === 'number' ? x - y : (x < y ? -1 : (x > y ? 1 : 0));
+        });
+    }
+
+    /** The first and the last local day of a bucket of the period, or null for an hour or a cycle such as the hour of the day. */
     bucketRange(granularity, key) {
         const day = (date) => date.toISOString().slice(0, 10);
         switch (granularity) {
-            case 'hour':
             case 'day':
                 return [String(key).slice(0, 10), String(key).slice(0, 10)];
             case 'month': {
@@ -790,6 +801,9 @@ class MahoReportExplorer {
         const changes = {};
         const labels = [];
         for (const column of this.dimensionColumns()) {
+            if (!(column.key in row.dimensions)) {
+                continue;
+            }
             const value = row.dimensions[column.key];
             const label = row.labels?.[column.key] ?? String(value ?? '');
             if (column.granularity) {
@@ -797,7 +811,12 @@ class MahoReportExplorer {
                 if (!range) {
                     continue;
                 }
-                Object.assign(changes, { range: undefined, from: range[0], to: range[1] });
+                const period = this.result?.period;
+                Object.assign(changes, {
+                    range: undefined,
+                    from: period?.from && period.from > range[0] ? period.from : range[0],
+                    to: period?.to && period.to < range[1] ? period.to : range[1],
+                });
                 const finer = MahoReportExplorer.FINER[column.granularity];
                 const allowed = dataset.dimensions.find((d) => d.code === column.key)?.granularities ?? [];
                 dimensions = dimensions.map((entry) => (entry.split(':')[0] === column.key
@@ -885,8 +904,6 @@ class MahoReportExplorer {
         this.popover = null;
     }
 
-    // Run
-
     async run() {
         const token = ++this.runToken;
         this.updateUrl();
@@ -934,8 +951,6 @@ class MahoReportExplorer {
             this.parts.messages.append(alert);
         }
     }
-
-    // Results
 
     metricColumns(result = this.result) {
         return result.columns.filter((column) => column.kind === 'metric');
@@ -990,7 +1005,7 @@ class MahoReportExplorer {
         if (dimensions.length !== 1 || !dimensions[0].granularity || MahoReportExplorer.CYCLES.includes(dimensions[0].granularity)) {
             return null;
         }
-        return this.result.rows.map((row) => row.values[key] ?? 0);
+        return this.byPeriod(this.result.rows, dimensions[0]).map((row) => row.values[key] ?? 0);
     }
 
     sparkline(values) {
@@ -1173,8 +1188,6 @@ class MahoReportExplorer {
         pager.append(previous, next);
     }
 
-    // Chart
-
     async loadChartJs() {
         if (window.Chart) {
             return;
@@ -1283,7 +1296,7 @@ class MahoReportExplorer {
         const first = dimensions[0];
         const request = { ...this.state, metrics: [metric], sort: undefined, offset: undefined };
         if (dimensions.length === 1 && first.granularity) {
-            return { kind: 'single', rows: this.result.rows, compare: Boolean(this.result.comparePeriod) };
+            return { kind: 'single', rows: this.byPeriod(this.result.rows, first), compare: Boolean(this.result.comparePeriod) };
         }
         if (dimensions.length === 1) {
             const result = await this.runRequest({ ...request, sort: { key: metric, direction: 'desc' }, limit: MahoReportExplorer.CHART_TOP });
@@ -1298,7 +1311,8 @@ class MahoReportExplorer {
         if (top.error) {
             return null;
         }
-        const seriesValues = top.rows.map((row) => row.dimensions[second.key]);
+        const topRows = top.rows.slice(0, MahoReportExplorer.SERIES_TOP);
+        const seriesValues = topRows.map((row) => row.dimensions[second.key]);
         const axisRequest = { ...request, compare: undefined, dimensions: [this.state.dimensions[0]] };
         if (!first.granularity) {
             Object.assign(axisRequest, { sort: { key: metric, direction: 'desc' }, limit: MahoReportExplorer.CHART_TOP });
@@ -1319,7 +1333,8 @@ class MahoReportExplorer {
         if (grid.error) {
             return null;
         }
-        return { kind: 'series', axis: axis.rows, series: top.rows, grid: grid.rows, first: first.key, second: second.key };
+        const axisRows = first.granularity ? this.byPeriod(axis.rows, first) : axis.rows;
+        return { kind: 'series', axis: axisRows, series: topRows, grid: grid.rows, first: first.key, second: second.key };
     }
 
     async renderChart(token) {
@@ -1327,6 +1342,7 @@ class MahoReportExplorer {
         if (!this.result) {
             return;
         }
+        const own = ++this.chartToken;
         const shape = this.chartShape();
         this.renderChartHeader(shape);
         this.renderNotes();
@@ -1346,7 +1362,7 @@ class MahoReportExplorer {
             console.error(error);
             return;
         }
-        if (token !== this.runToken || !data) {
+        if (token !== this.runToken || own !== this.chartToken || !data) {
             return;
         }
         if (this.chart) {
@@ -1438,8 +1454,10 @@ class MahoReportExplorer {
                     legend: { display: !compact && datasets.length > 1, labels: { color: text, usePointStyle: true } },
                     tooltip: { enabled: !compact, callbacks: { label: (context) => `${context.dataset.label}: ${this.format(metric, horizontal ? context.parsed.x : context.parsed.y)}` } },
                 },
-                onClick: compact ? undefined : (event, elements) => {
-                    const element = elements[0];
+                onClick: compact ? undefined : (event, elements, chart) => {
+                    const element = data.kind === 'series'
+                        ? chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, true)[0]
+                        : elements[0];
                     if (!element) {
                         return;
                     }
@@ -1594,9 +1612,9 @@ class MahoReportExplorer {
         body.append(scroller);
         const pager = this.element('div', 'flex items-center justify-end gap-2');
         pager.append(this.element('span', 'text-sm opacity-80', this.t('rowsOf', offset + 1, offset + result.rows.length, result.totalRows)));
-        const previous = this.button(this.t('previous'), 'd-btn d-btn-sm', () => this.openRecords(request, label, Math.max(0, offset - result.rows.length), sort));
+        const previous = this.button(this.t('previous'), 'd-btn d-btn-sm', () => this.openRecords(request, label, Math.max(0, offset - result.limit), sort));
         previous.disabled = offset === 0;
-        const next = this.button(this.t('next'), 'd-btn d-btn-sm', () => this.openRecords(request, label, offset + result.rows.length, sort));
+        const next = this.button(this.t('next'), 'd-btn d-btn-sm', () => this.openRecords(request, label, offset + result.limit, sort));
         next.disabled = offset + result.rows.length >= result.totalRows;
         pager.append(previous, next);
         body.append(pager);
@@ -1647,7 +1665,7 @@ class MahoReportExplorer {
                 const button = this.action('', 'report-explorer-driver w-full no-underline text-base-content rounded px-1 py-0.5 hover:bg-base-200', () => {
                     const filter = driver.value === '' ? { field: dimension.field, operator: 'empty', value: null } : { field: dimension.field, operator: 'eq', value: driver.value };
                     this.rememberLabel(dimension.field, driver.value, driver.label);
-                    this.drillTo(`${dimension.label}: ${driver.label}`, { filters: [...(this.state.filters ?? []), filter] });
+                    this.drillTo(`${dimension.label}: ${driver.label}`, { filters: [...(request.filters ?? []), filter], range: request.range, from: request.from, to: request.to });
                 });
                 button.title = driver.share === null ? this.t('onlyThis') : `${this.t('shareOfChange', this.number.format(driver.share))} · ${this.t('onlyThis')}`;
                 button.append(this.element('span', 'truncate text-sm', driver.label));
@@ -1667,10 +1685,8 @@ class MahoReportExplorer {
         body.append(this.element('p', 'text-xs opacity-70', this.t('explainHint')));
     }
 
-    // Notes and targets
-
     openNoteDialog() {
-        const today = new Date().toISOString().slice(0, 10);
+        const today = this.today();
         const content = `
             <form class="flex flex-col gap-3" onsubmit="return false">
                 <label class="flex flex-col gap-1">
@@ -1710,12 +1726,13 @@ class MahoReportExplorer {
             this.showErrors(list.message);
             return;
         }
-        const rows = list.targets.filter((target) => target.storeId === 0)
+        const storeId = this.state.storeIds?.length === 1 ? Number(this.state.storeIds[0]) : 0;
+        const rows = list.targets.filter((target) => target.storeId === storeId)
             .map((target) => `<li class="flex items-center gap-2"><span class="w-24">${this.escape(target.month)}</span>`
                 + `<span class="flex-1 text-end">${this.escape(this.format(metric, target.value))}</span>`
                 + `<button type="button" class="d-btn d-btn-ghost d-btn-xs" data-delete="${target.id}" aria-label="${this.escape(`${this.t('delete')} ${target.month}`)}">×</button></li>`)
             .join('');
-        const month = new Date().toISOString().slice(0, 7);
+        const month = this.today().slice(0, 7);
         const content = `
             <form class="flex flex-col gap-3" onsubmit="return false">
                 <p class="text-sm">${this.escape(this.t('targetsHint'))}</p>
@@ -1751,7 +1768,7 @@ class MahoReportExplorer {
                     metric: metric.key,
                     month: dialog.querySelector('[name=month]').value,
                     value: dialog.querySelector('[name=value]').value,
-                    store_id: '0',
+                    store_id: String(storeId),
                 });
                 if (result.error) {
                     const error = dialog.querySelector('[data-role=dialog-error]');
@@ -1764,8 +1781,6 @@ class MahoReportExplorer {
             },
         });
     }
-
-    // Dashboard
 
     async togglePin(report, pinned) {
         const result = await this.post(this.config.urls.pin, { id: String(report.id), pinned: pinned ? '1' : '' });
@@ -1822,20 +1837,19 @@ class MahoReportExplorer {
                 kpi.append(badge);
             }
             body.append(kpi);
-            const dimension = result.columns.find((column) => column.kind === 'dimension');
+            const dimensions = result.columns.filter((column) => column.kind === 'dimension');
+            const dimension = dimensions.length === 1 ? dimensions[0] : null;
             if (dimension && window.Chart && result.rows.length > 0) {
                 const box = this.element('div', 'relative h-36');
                 const canvas = this.element('canvas');
                 box.append(canvas);
                 body.append(box);
                 const overTime = dimension.granularity && !MahoReportExplorer.CYCLES.includes(dimension.granularity);
-                const rows = overTime ? result.rows : [...result.rows].sort((a, b) => (b.values[metric.key] ?? 0) - (a.values[metric.key] ?? 0)).slice(0, 5);
+                const rows = overTime ? this.byPeriod(result.rows, dimension) : [...result.rows].sort((a, b) => (b.values[metric.key] ?? 0) - (a.values[metric.key] ?? 0)).slice(0, 5);
                 this.charts.push(this.drawChart(canvas, overTime ? 'line' : (dimension.granularity ? 'bar' : 'hbar'), { kind: 'single', rows, compare: false }, metric, result, { compact: true }));
             }
         }));
     }
-
-    // Export and saved reports
 
     export() {
         const form = this.element('form');

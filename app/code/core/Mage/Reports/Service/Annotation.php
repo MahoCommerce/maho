@@ -12,8 +12,6 @@ declare(strict_types=1);
 
 class Mage_Reports_Service_Annotation
 {
-    public const TITLE_MAX_LENGTH = 255;
-
     public function newAnnotation(): Mage_Reports_Model_Annotation
     {
         return Mage::getModel('reports/annotation');
@@ -44,19 +42,10 @@ class Mage_Reports_Service_Annotation
         } else {
             $this->assertOwner($annotation, $adminUserId);
         }
-        $errors = new Mage_Core_Exception_Input($helper->__('The note is not valid.'));
-        $title = trim((string) $annotation->getTitle());
-        if ($title === '') {
-            $errors->addError('title', $helper->__('The text of the note is required.'));
-        } elseif (mb_strlen($title) > self::TITLE_MAX_LENGTH) {
-            $errors->addError('title', $helper->__('The text of the note has at most %d characters.', self::TITLE_MAX_LENGTH));
-        }
-        $date = DateTimeImmutable::createFromFormat('!Y-m-d', (string) $annotation->getAnnotationDate());
-        if ($date === false || $date->format('Y-m-d') !== $annotation->getAnnotationDate()) {
-            $errors->addError('date', $helper->__('The date must be a day as YYYY-MM-DD.'));
-        }
-        $errors->throwIfErrors();
-        $annotation->setTitle($title)->save();
+        new Mage_Core_Exception_Input($helper->__('The note is not valid.'))
+            ->addValidationResult($annotation->validate(), 'title')
+            ->throwIfErrors();
+        $annotation->setTitle(trim((string) $annotation->getTitle()))->save();
         return $annotation;
     }
 

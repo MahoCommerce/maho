@@ -28,23 +28,24 @@ class Mage_Reports_Model_Explorer_Runner
     public const EXPORT_PAGE_SIZE = 5000;
 
     /**
-     * Run a request and return the result envelope.
+     * Run a request and return the result envelope. Without $withTotals, the envelope has no totals and its total
+     * number of rows is not counted, for a caller that reads only the rows.
      *
      * @return array<string, mixed>
      * @throws Mage_Core_Exception_Input
      */
-    public function run(Request $request, Mage_Reports_Model_Explorer_Access $access): array
+    public function run(Request $request, Mage_Reports_Model_Explorer_Access $access, bool $withTotals = true): array
     {
-        return Mage::app()->withStore(Mage_Core_Model_App::ADMIN_STORE_ID, function () use ($request, $access): array {
+        return Mage::app()->withStore(Mage_Core_Model_App::ADMIN_STORE_ID, function () use ($request, $access, $withTotals): array {
             [$plan, $context] = $this->prepare($request, $access, self::maxRows());
 
-            $cacheKey = $this->cacheKey($plan, $access);
+            $cacheKey = $this->cacheKey($plan, $access, $withTotals);
             $useCache = Mage::app()->useCache(self::CACHE_TYPE);
             if ($useCache && ($cached = Mage::app()->loadCache($cacheKey)) !== false) {
                 return ['cached' => true] + Mage::helper('core')->jsonDecode($cached);
             }
 
-            $result = $this->execute($plan, $context);
+            $result = $this->execute($plan, $context, $withTotals);
             if ($useCache) {
                 Mage::app()->saveCache(
                     Mage::helper('core')->jsonEncode($result),
@@ -142,6 +143,7 @@ class Mage_Reports_Model_Explorer_Runner
                 'columns' => $columns,
                 'rows' => $rows,
                 'totalRows' => $total,
+                'limit' => $limit,
                 'route' => $records->route,
                 'routeParam' => $records->routeParam,
                 'period' => $local === null ? null : ['from' => $local[0], 'to' => $local[1], 'timezone' => $plan->timezone],
@@ -161,10 +163,14 @@ class Mage_Reports_Model_Explorer_Runner
         return Mage::app()->withStore(Mage_Core_Model_App::ADMIN_STORE_ID, function () use ($request, $access, $maxRows, $onRow): int {
             $count = 0;
             $offset = 0;
+            $compareRows = null;
             do {
                 $page = $request->with(['limit' => min(self::EXPORT_PAGE_SIZE, $maxRows - $count), 'offset' => $offset]);
                 [$plan, $context] = $this->prepare($page, $access, max($maxRows, self::EXPORT_PAGE_SIZE));
-                $result = $this->execute($plan, $context);
+                if ($plan->hasComparison()) {
+                    $compareRows ??= $context->adapter->fetchAll(new SqlBuilder()->rows($plan, $context, true));
+                }
+                $result = $this->execute($plan, $context, false, $compareRows);
                 foreach ($result['rows'] as $row) {
                     $onRow($row, $result);
                     $count++;
@@ -255,13 +261,15 @@ class Mage_Reports_Model_Explorer_Runner
         foreach (['dead_stock_days', 'abandoned_after_hours', 'recent_cart_hours'] as $key) {
             $settings[$key] = max(1, (int) Mage::getStoreConfig(self::XML_PATH . $key));
         }
-        $settings['report_attributes'] = array_values(array_filter(explode(',', (string) Mage::getStoreConfig(self::XML_PATH . 'report_attributes'))));
 
-        return new Context($adapter, $localTime, $now, $plan->timezone, $plan->firstDayOfWeek, null, null, $settings, $plan->dateField?->code);
+        return new Context($adapter, $localTime, $now, $plan->timezone, $plan->firstDayOfWeek, null, null, $settings, $plan->dateField?->code, $plan->request->storeIds);
     }
 
-    /** @return array<string, mixed> */
-    private function execute(Plan $plan, Context $context): array
+    /**
+     * @param list<array<string, mixed>>|null $compareRows the rows of the earlier period, when the caller read them already
+     * @return array<string, mixed>
+     */
+    private function execute(Plan $plan, Context $context, bool $withTotals = true, ?array $compareRows = null): array
     {
         $adapter = $context->adapter;
         $builder = new SqlBuilder();
@@ -273,15 +281,19 @@ class Mage_Reports_Model_Explorer_Runner
         if ($hasMore) {
             array_pop($rows);
         }
-        $totalRows = $hasMore || $offset > 0
-            ? (int) $adapter->fetchOne($builder->count($plan, $context))
-            : count($rows);
-        $totals = $adapter->fetchRow($builder->totals($plan, $context)) ?: [];
+        if (!$withTotals) {
+            $totalRows = $offset + count($rows) + ($hasMore ? 1 : 0);
+        } elseif ($hasMore || $offset > 0) {
+            $totalRows = (int) $adapter->fetchOne($builder->count($plan, $context));
+        } else {
+            $totalRows = count($rows);
+        }
+        $totals = $withTotals ? ($adapter->fetchRow($builder->totals($plan, $context)) ?: []) : [];
 
-        $compareRows = $compareTotals = null;
+        $compareTotals = null;
         if ($plan->hasComparison()) {
-            $compareRows = $adapter->fetchAll($builder->rows($plan, $context, true));
-            $compareTotals = $adapter->fetchRow($builder->totals($plan, $context, true)) ?: [];
+            $compareRows ??= $adapter->fetchAll($builder->rows($plan, $context, true));
+            $compareTotals = $withTotals ? ($adapter->fetchRow($builder->totals($plan, $context, true)) ?: []) : [];
         }
 
         $result = new PostProcessor()->process($plan, $rows, $totals, $totalRows, $compareRows, $compareTotals);
@@ -306,7 +318,7 @@ class Mage_Reports_Model_Explorer_Runner
             'request' => $plan->request->toArray(),
             'columns' => $this->columns($plan),
             'rows' => $result['rows'],
-            'totals' => $result['totals'],
+            'totals' => $withTotals ? $result['totals'] : null,
             'totalRows' => $result['totalRows'],
             'warnings' => $warnings,
             'period' => $local === null ? null : ['from' => $local[0], 'to' => $local[1], 'timezone' => $plan->timezone],
@@ -374,9 +386,10 @@ class Mage_Reports_Model_Explorer_Runner
         return $rows;
     }
 
-    private function cacheKey(Plan $plan, Mage_Reports_Model_Explorer_Access $access): string
+    private function cacheKey(Plan $plan, Mage_Reports_Model_Explorer_Access $access, bool $withTotals): string
     {
         return 'REPORT_EXPLORER_' . hash('sha256', Mage::helper('core')->jsonEncode([
+            $withTotals,
             $plan->request->toArray(),
             $plan->localBounds(),
             $plan->localBounds(true),

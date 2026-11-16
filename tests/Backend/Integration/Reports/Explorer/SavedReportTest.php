@@ -64,6 +64,17 @@ it('shows a shared report to the other administrators, who cannot change or dele
         ->and(fn() => $this->service->delete($seen, $other))->toThrow(Mage_Core_Exception_Forbidden::class);
 });
 
+it('hides a shared report on a dataset that the administrator may not read', function () {
+    $report = savedReportFor((int) $this->owner->getId(), true);
+    $ids = fn(Mage_Reports_Model_Explorer_Access $access): array => array_map(
+        static fn($r): int => (int) $r->getId(),
+        $this->service->listFor((int) $this->other->getId(), $access),
+    );
+
+    expect($ids(new Mage_Reports_Model_Explorer_Access(['sales_items'], true)))->not->toContain((int) $report->getId())
+        ->and($ids($this->access))->toContain((int) $report->getId());
+});
+
 it('refuses a report without a name or with an unknown metric', function () {
     $owner = (int) $this->owner->getId();
     $noName = $this->service->newReport()->setName(' ')->setRequestData(['dataset' => 'sales_orders', 'metrics' => ['orders']]);

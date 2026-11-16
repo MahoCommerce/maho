@@ -76,8 +76,8 @@ class Mage_Reports_Model_Explorer_Validator
             $dimension = $dataset->getDimension($requested->code);
             if ($dimension->isPeriod()) {
                 $periodGranularity = $requested->granularity ?? Granularity::Day;
-                $dateField = $dataset->getField($request->dateField ?? $dataset->getDateFields()[0]);
-                if ($dateField->localDate && in_array($periodGranularity, [Granularity::Hour, Granularity::HourOfDay], true)) {
+                $dateField = $request->dateField ?? $dataset->getDateFields()[0];
+                if ($dataset->hasField($dateField) && $dataset->getField($dateField)->localDate && in_array($periodGranularity, [Granularity::Hour, Granularity::HourOfDay], true)) {
                     $errors->addError('dimensions', $helper->__('This dataset has one row per day, so it has no hours.'));
                 }
                 continue;

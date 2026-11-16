@@ -43,6 +43,16 @@ it('gives no share when the values do not add up to the total, and keeps the top
         ->and(array_column($drivers, 'share'))->toBe([null, null, null]);
 });
 
+it('gives no share when the changes cancel out to a total change of zero', function () {
+    $drivers = Explainer::drivers([
+        'a' => ['label' => 'A', 'current' => 3.0, 'earlier' => 1.0],
+        'b' => ['label' => 'B', 'current' => 1.0, 'earlier' => 3.0],
+    ], 0.0, true);
+
+    expect(array_column($drivers, 'value'))->toBe(['a', 'b'])
+        ->and(array_column($drivers, 'share'))->toBe([null, null]);
+});
+
 it('knows which formulas only add and subtract', function () {
     expect(Formula::parse('gross_sales - discount - returns')->isLinear())->toBeTrue()
         ->and(Formula::parse('-a + b')->isLinear())->toBeTrue()

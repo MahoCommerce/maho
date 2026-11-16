@@ -25,7 +25,6 @@ trait ReportCommandTrait
      */
     private function reportRequest(?string $preset, ?int $savedId, ?string $json, array $overrides): Request
     {
-        $overrides = array_filter($overrides, static fn(mixed $value): bool => $value !== null && $value !== '');
         $sources = array_filter([$preset, $savedId, $json], static fn(mixed $value): bool => $value !== null && $value !== '');
         if (count($sources) !== 1) {
             throw new \Mage_Core_Exception('Give exactly one of --preset, --saved and --request.');
@@ -37,7 +36,11 @@ trait ReportCommandTrait
         }
 
         if ($savedId !== null) {
-            $data = Mage::getService('reports/savedReport')->getById($savedId, null)->getRequestData();
+            $report = Mage::getModel('reports/savedReport')->load($savedId);
+            if ($report->getId() === null) {
+                throw new \Mage_Core_Exception_NoSuchEntity("The saved report with ID {$savedId} does not exist.");
+            }
+            $data = $report->getRequestData();
         } else {
             try {
                 $data = Mage::helper('core')->jsonDecode((string) $json);
@@ -48,10 +51,7 @@ trait ReportCommandTrait
                 throw new \Mage_Core_Exception('The --request option must be a JSON object.');
             }
         }
-        if (isset($overrides['range']) || isset($overrides['from']) || isset($overrides['to'])) {
-            unset($data['range'], $data['from'], $data['to']);
-        }
-        return Request::fromArray(array_merge($data, $overrides));
+        return $service->requestWith($data, $overrides);
     }
 
     private function writeReportError(OutputInterface $output, \Mage_Core_Exception $e): void

@@ -48,13 +48,13 @@ class Mage_Sales_Model_Report_Dataset_Items implements DatasetProvider
             $itemTable,
             "child.parent_item_id = main.item_id AND main.product_type = 'configurable'",
         ));
-        $dataset->addJoin(new Join('category', $resource->getTableName('catalog/category_product'), 'category.product_id = main.product_id'));
+        $dataset->addJoin(new Join('category', $resource->getTableName('catalog/category_product'), 'category.product_id = main.product_id', manyRows: true));
         Mage_Sales_Model_Report_Dataset_Orders::addScopes($dataset, $adapter, 'ord', ['ord']);
 
         $rate = $adapter->getIfNullSql('ord.base_to_global_rate', 0);
         $ifNull = static fn(string $sql): string => (string) $adapter->getIfNullSql($sql, 0);
         $units = '(main.qty_ordered - ' . $ifNull('main.qty_canceled') . ')';
-        $uncanceledShare = "CASE WHEN main.qty_ordered > 0 THEN {$units} / main.qty_ordered ELSE 0 END";
+        $uncanceledShare = "CASE WHEN main.qty_ordered > 0 THEN {$units} * 1.0 / main.qty_ordered ELSE 0 END";
         $unitCost = 'COALESCE(child.base_cost, main.base_cost)';
 
         $types = [];

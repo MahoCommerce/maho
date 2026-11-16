@@ -60,15 +60,21 @@ class Mage_CatalogInventory_Model_Report_Dataset_Stock implements DatasetProvide
         }
         $dataset->addJoin(new Join(
             'sold',
-            static fn(Context $context): \Maho\Db\Select => $adapter->select()
-                ->from(['sold_item' => $itemTable], [
-                    'product_id' => 'sold_item.product_id',
-                    'qty' => new Maho\Db\Expr('SUM(sold_item.qty_ordered - ' . $adapter->getIfNullSql('sold_item.qty_canceled', 0) . ')'),
-                ])
-                ->joinInner(['sold_order' => $orderTable], 'sold_order.entity_id = sold_item.order_id', [])
-                ->where('sold_item.created_at >= ?', $context->utcAgo(self::SALES_DAYS, 'days'))
-                ->where("sold_order.state <> {$canceled}")
-                ->group('sold_item.product_id'),
+            static function (Context $context) use ($adapter, $itemTable, $orderTable, $canceled): \Maho\Db\Select {
+                $select = $adapter->select()
+                    ->from(['sold_item' => $itemTable], [
+                        'product_id' => 'sold_item.product_id',
+                        'qty' => new Maho\Db\Expr('SUM(sold_item.qty_ordered - ' . $adapter->getIfNullSql('sold_item.qty_canceled', 0) . ')'),
+                    ])
+                    ->joinInner(['sold_order' => $orderTable], 'sold_order.entity_id = sold_item.order_id', [])
+                    ->where('sold_item.created_at >= ?', $context->utcAgo(self::SALES_DAYS, 'days'))
+                    ->where("sold_order.state <> {$canceled}")
+                    ->group('sold_item.product_id');
+                if ($context->storeIds !== null) {
+                    $select->where('sold_order.store_id IN (?)', $context->storeIds === [] ? [-1] : $context->storeIds);
+                }
+                return $select;
+            },
             'sold.product_id = main.product_id',
         ));
 

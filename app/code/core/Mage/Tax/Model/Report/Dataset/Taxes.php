@@ -51,7 +51,7 @@ class Mage_Tax_Model_Report_Dataset_Taxes implements DatasetProvider
                 'tax',
                 $helper->__('Tax'),
                 FieldType::Money,
-                $adapter->getIfNullSql('main.base_amount', 0) . ' * ' . $adapter->getIfNullSql('ord.base_to_global_rate', 0),
+                $adapter->getIfNullSql('main.base_real_amount', (string) $adapter->getIfNullSql('main.base_amount', 0)) . ' * ' . $adapter->getIfNullSql('ord.base_to_global_rate', 0),
                 ['ord'],
             ),
         ] as $field) {

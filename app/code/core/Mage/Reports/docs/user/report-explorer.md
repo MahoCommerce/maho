@@ -41,7 +41,8 @@ The days of a period are days in the time zone of the default configuration (**S
 Configuration > General > Locale Options > Timezone**). The week starts on the day that
 **First Day of Week** sets. Amounts are in the global currency.
 
-Click a column title to sort the rows by that column. A change shows in green when it is good and
+A report that groups by the date only lists the newest date first. Click a column title to sort the
+rows by that column. A change shows in green when it is good and
 in red when it is bad. For a metric such as **Returns**, a lower number is good.
 
 ## Read the chart
@@ -110,8 +111,9 @@ A target is a number for one month, for example net sales of 30,000 in June.
 
 A report that groups by the date only, with no filter, shows the target as a green dotted line
 and as a percent on the card of the metric. For a day or a week, the target is the monthly target
-divided by the days of the month. A target applies to all the store views. Only a metric that adds
-up, such as **Net sales** or **Units**, can have a target.
+divided by the days of the month. A target set while one store view is selected applies to that
+store view. Otherwise, the target applies to the report of all the store views.
+Only a metric that adds up, such as **Net sales** or **Units**, can have a target.
 
 ## Dashboard
 

@@ -49,3 +49,46 @@ it('writes the export file of the queue to the private mount and sends a notice 
         $notice->delete();
     }
 });
+
+it('keeps every field of an access through the array of the queue', function () {
+    $access = new Mage_Reports_Model_Explorer_Access(['sales_orders'], false, [2], ['sales_orders']);
+    $copy = Mage_Reports_Model_Explorer_Access::fromArray(json_decode(json_encode($access->toArray()), true));
+
+    expect($copy)->toEqual($access)
+        ->and($copy->toArray())->toBe($access->toArray());
+});
+
+it('queues an export above the page limit and streams it when no administrator is given', function () {
+    // The runner reads the limit in the admin scope, and export() in the current store
+    $stores = [Mage::app()->getStore(), Mage::app()->getStore(Mage_Core_Model_App::ADMIN_STORE_ID)];
+    $path = Mage_Reports_Model_Explorer_Runner::XML_PATH . 'max_rows';
+    $original = $stores[1]->getConfig($path);
+    foreach ($stores as $store) {
+        $store->setConfig($path, '1');
+    }
+    \Maho\Queue\QueueManager::reset();
+    clearQueueTable();
+    $request = Maho\Report\Request::fromArray(['dataset' => 'sales_orders', 'metrics' => ['orders'], 'dimensions' => ['period:day'], 'range' => 'last_30_days', 'limit' => 1]);
+    $service = Mage::getService('reports/explorer');
+    $access = Mage_Reports_Model_Explorer_Access::full();
+
+    try {
+        expect($service->export($request, $access, 1))->toBe(['queued' => true]);
+        $rows = fetchQueueRows();
+        expect($rows)->toHaveCount(1)
+            ->and($rows[0]['queue'])->toBe(Mage_Reports_Model_Queue_ExplorerExport::QUEUE_NAME)
+            ->and($rows[0]['message_class'])->toBe(Mage_Reports_Model_Queue_ExplorerExport::class);
+
+        clearQueueTable();
+        $result = $service->export($request, $access, null);
+        expect($result['queued'])->toBeFalse()
+            ->and(fetchQueueRows())->toBe([]);
+        fclose($result['stream']);
+    } finally {
+        foreach ($stores as $store) {
+            $store->setConfig($path, $original);
+        }
+        clearQueueTable();
+        \Maho\Queue\QueueManager::reset();
+    }
+});

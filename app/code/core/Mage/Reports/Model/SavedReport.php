@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 class Mage_Reports_Model_SavedReport extends Mage_Core_Model_Abstract
 {
+    public const NAME_MAX_LENGTH = 255;
+
     #[\Override]
     protected function _construct(): void
     {
@@ -100,5 +102,22 @@ class Mage_Reports_Model_SavedReport extends Mage_Core_Model_Abstract
     public function setIsPinned(?bool $value = true): static
     {
         return $this->setData('is_pinned', $value);
+    }
+
+    /** @return array<string, string>|true */
+    public function validate(): array|true
+    {
+        $helper = Mage::helper('reports');
+        $errors = [];
+        $name = trim((string) $this->getName());
+        if ($name === '') {
+            $errors['name'] = $helper->__('The name is required.');
+        } elseif (mb_strlen($name) > self::NAME_MAX_LENGTH) {
+            $errors['name'] = $helper->__('The name has at most %d characters.', self::NAME_MAX_LENGTH);
+        }
+        if ($this->getRequestData() === []) {
+            $errors['definition'] = $helper->__('The report definition is required.');
+        }
+        return $errors === [] ? true : $errors;
     }
 }
