@@ -121,6 +121,17 @@ it('saves a new store view value after a save on the default value', function ()
     expect($product->getName())->toBe('Pest Default Name');
 });
 
+it('puts the inherited value back into a value that the caller changed before useDefaultValue()', function () {
+    $id = useDefaultProduct(storeName: false);
+    /** @var Mage_Catalog_Service_Product $service */
+    $service = Mage::getService('catalog/product');
+
+    $product = $service->getById($id, 1);
+    $product->setName('Pest Submitted Name')->useDefaultValue('name');
+
+    expect($product->getName())->toBe('Pest Default Name');
+});
+
 it('puts the default value into a store view value that the same model saved', function () {
     $id = useDefaultProduct(storeName: false);
     /** @var Mage_Catalog_Service_Product $service */

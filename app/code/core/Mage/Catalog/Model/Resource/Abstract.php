@@ -269,14 +269,12 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     }
 
     /**
-     * Record the default value of $code for useDefaultValue(), before a save changes the store value flag. Without
-     * the flag, the store view inherited the loaded value. With the flag, the load found no default value.
+     * Record the default value of $code for useDefaultValue(), before a save changes the store value flag: the
+     * original data keeps the old store view value after the save.
      */
     protected function _recordDefaultValue(Mage_Catalog_Model_Abstract $object, string $code): void
     {
-        if ($object->getAttributeDefaultValue($code) === false) {
-            $object->setAttributeDefaultValue($code, $object->getExistsStoreValueFlag($code) ? null : $object->getOrigData($code));
-        }
+        $object->setAttributeDefaultValue($code, $object->getInheritedValue($code));
     }
 
     /**

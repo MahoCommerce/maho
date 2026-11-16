@@ -289,6 +289,19 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Return the value that the store view inherits for $attributeCode: the recorded default value, else the loaded
+     * value when the store view had no value of its own, else null.
+     */
+    public function getInheritedValue(string $attributeCode): mixed
+    {
+        $default = $this->getAttributeDefaultValue($attributeCode);
+        if ($default !== false) {
+            return $default;
+        }
+        return $this->getExistsStoreValueFlag($attributeCode) ? null : $this->getOrigData($attributeCode);
+    }
+
+    /**
      * Make the store view use the default value of the attribute $attributeCode. The data gets the default value
      * now, and the next save deletes the store view value. A locked attribute or a read-only model does not change,
      * as with setData().
@@ -298,10 +311,7 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
         if ($this->hasLockedAttributes() ? $this->isLockedAttribute($attributeCode) : $this->isReadonly()) {
             return $this;
         }
-        if ($this->getExistsStoreValueFlag($attributeCode)) {
-            $default = $this->getAttributeDefaultValue($attributeCode);
-            $this->setData($attributeCode, $default === false ? null : $default);
-        }
+        $this->setData($attributeCode, $this->getInheritedValue($attributeCode));
         $codes = $this->getUseDefault() ?? [];
         if (!in_array($attributeCode, $codes, true)) {
             $codes[] = $attributeCode;
