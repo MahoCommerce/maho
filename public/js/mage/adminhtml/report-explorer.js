@@ -1456,7 +1456,7 @@ class MahoReportExplorer {
                 },
                 onClick: compact ? undefined : (event, elements, chart) => {
                     const element = data.kind === 'series'
-                        ? chart.getElementsAtEventForMode(event, 'nearest', { intersect: false }, true)[0]
+                        ? chart.getElementsAtEventForMode(event, 'nearest', { intersect: type !== 'line' }, true)[0]
                         : elements[0];
                     if (!element) {
                         return;

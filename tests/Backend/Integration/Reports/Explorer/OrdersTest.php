@@ -366,6 +366,24 @@ describe('the order items, the taxes, the downloads and the stock', function () 
         expect($run([2]))->toBe(0.0)->and($run([1]))->toBe(2.0);
     });
 
+    it('reads the sold flags of the stock only in the store views of the caller', function () {
+        $product = ReportFixture::createProduct('explorer-sold-flags');
+        ReportFixture::placeOrder($product, 1);
+        $count = static fn(array $stores, ?string $flag): float => (float) (Mage::getService('reports/explorer')->run(Request::fromArray([
+            'dataset' => 'catalog_stock', 'metrics' => ['products'],
+            'filters' => array_merge(
+                [['field' => 'product_id', 'operator' => 'eq', 'value' => (int) $product->getId()]],
+                $flag === null ? [] : [['field' => $flag, 'operator' => 'eq', 'value' => 1]],
+            ),
+        ]), new Mage_Reports_Model_Explorer_Access(null, true, $stores))['totals']['values']['products'] ?? 0);
+
+        expect($count([2], null))->toBe(1.0)
+            ->and($count([2], 'ever_sold'))->toBe(0.0)
+            ->and($count([2], 'sold_recently'))->toBe(0.0)
+            ->and($count([1], 'ever_sold'))->toBe(1.0)
+            ->and($count([1], 'sold_recently'))->toBe(1.0);
+    });
+
     it('lists the newest day first when the request has no sort', function () {
         $days = static fn(array $extra): array => array_column(array_column(
             explorerRun(['dataset' => 'sales_orders', 'metrics' => ['orders'], 'dimensions' => ['period:day']] + $extra)['rows'],

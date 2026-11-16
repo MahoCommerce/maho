@@ -61,7 +61,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 | `range` | `today`, `yesterday`, `last_7_days`, `last_30_days` (default), `last_90_days`, `this_month`, `last_month`, `this_year`, `last_year`, `last_12_months` |
 | `from`, `to` | Local days, `YYYY-MM-DD`, in place of `range` |
 | `compare` | `previous_period` or `previous_year` |
-| `storeIds` | Comma-separated store view IDs |
+| `storeIds` | Comma-separated store view IDs. For `catalog_stock`, they limit the sales, the dead stock and the products never sold, and the quantity counts for all the store views |
 | `sort` | A metric or grouping code of the request, with `-` before it for descending. Without it, a report with only a date grouping shows the newest date first |
 | `limit`, `offset` | The rows of the page. `limit` is 100 by default, and at most **Rows per Page** |
 

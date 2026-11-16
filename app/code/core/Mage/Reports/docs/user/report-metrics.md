@@ -91,6 +91,8 @@ keeps a quantity (simple, virtual and downloadable products, for example).
   last **Dead Stock After (days)**.
 - **Products never sold**: the product is in no order.
 
+The stock data has no store view selector: the quantity and the sales count for all the store views.
+
 ## Carts
 
 Each row is one cart with items. The date is the last activity of the cart.
