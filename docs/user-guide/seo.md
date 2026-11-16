@@ -170,9 +170,11 @@ store:
 3. Then the deepest category wins. For example, **Men > Shirts > Casual** wins over **Men**.
 4. If two categories are at the same depth, the category with the lower ID wins.
 
-To keep a sale or a promotion category out of the breadcrumbs, set **Include in Navigation Menu**
-to **No** on it, or on a category above it. This works for each product that is also in a category
-of the menu.
+To keep a sale or a promotion category out of the primary category, set
+**Include in Navigation Menu** to **No** on it, or on a category above it. This works for each
+product that is also in a category of the menu. A visitor who opens the product from the sale
+category still gets it in the breadcrumbs, because the category of the URL and the last category
+come first.
 
 ## Multi-store hreflang
 
