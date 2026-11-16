@@ -52,6 +52,13 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         $this->_categoryProductTable = $this->getTable('catalog/category_product');
     }
 
+    /** A database migrated from Magento 1 can lack the attribute rows of these table columns, and a save then skips them. */
+    #[\Override]
+    protected function _getDefaultAttributes()
+    {
+        return [...parent::_getDefaultAttributes(), 'path', 'position', 'level', 'children_count'];
+    }
+
     /**
      * Set store Id
      *
