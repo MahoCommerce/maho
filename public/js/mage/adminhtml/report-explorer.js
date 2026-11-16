@@ -1484,7 +1484,8 @@ class MahoReportExplorer {
         const horizontal = shape === 'hbar';
         const valueAxis = { ticks: { color: text, callback: (value) => this.format(metric, value) }, grid: { color: grid }, beginAtZero: true };
         const categoryAxis = { ticks: { color: text, autoSkip: true, maxRotation: 0, maxTicksLimit: compact ? 4 : undefined }, grid: { display: false } };
-        const notes = compact ? [] : (result.annotations ?? []);
+        const notes = compact || horizontal ? [] : (result.annotations ?? []);
+        const legend = !compact && datasets.length > 1;
         const firstKey = result.columns.find((c) => c.kind === 'dimension')?.key;
         const self = this;
         return new Chart(canvas, {
@@ -1493,11 +1494,13 @@ class MahoReportExplorer {
             options: {
                 maintainAspectRatio: false,
                 animation: false,
+                // A free row above the plot for the text of the notes
+                layout: { padding: { top: notes.length && !legend ? 18 : 0 } },
                 indexAxis: horizontal ? 'y' : 'x',
                 interaction: { mode: horizontal ? 'nearest' : 'index', intersect: horizontal },
                 scales: horizontal ? { x: valueAxis, y: categoryAxis } : { x: categoryAxis, y: valueAxis },
                 plugins: {
-                    legend: { display: !compact && datasets.length > 1, labels: { color: text, usePointStyle: true } },
+                    legend: { display: legend, labels: { color: text, usePointStyle: true } },
                     tooltip: {
                         enabled: !compact,
                         callbacks: {
@@ -1526,8 +1529,17 @@ class MahoReportExplorer {
             },
             plugins: [{
                 id: 'reportNotes',
+                beforeInit(chart) {
+                    if (notes.length && legend) {
+                        const fit = chart.legend.fit;
+                        chart.legend.fit = function () {
+                            fit.call(this);
+                            this.height += 18;
+                        };
+                    }
+                },
                 afterDatasetsDraw(chart) {
-                    if (!notes.length || horizontal) {
+                    if (!notes.length) {
                         return;
                     }
                     const { ctx, chartArea } = chart;
@@ -1540,13 +1552,12 @@ class MahoReportExplorer {
                         }
                     }
                     const xs = [...marks.keys()].sort((a, b) => a - b);
-                    const top = chartArea.top + 4;
                     ctx.save();
                     ctx.strokeStyle = self.color('--color-warning', 0.9);
                     ctx.fillStyle = self.color('--color-warning');
                     ctx.font = `600 11px ${getComputedStyle(canvas).fontFamily}`;
                     ctx.textBaseline = 'middle';
-                    let used = chartArea.left;
+                    ctx.textAlign = 'left';
                     xs.forEach((x, i) => {
                         ctx.setLineDash([3, 3]);
                         ctx.beginPath();
@@ -1554,26 +1565,20 @@ class MahoReportExplorer {
                         ctx.lineTo(x, chartArea.bottom);
                         ctx.stroke();
                         ctx.beginPath();
-                        ctx.arc(x, top, 4, 0, Math.PI * 2);
+                        ctx.arc(x, chartArea.top, 4, 0, Math.PI * 2);
                         ctx.fill();
-                        // The text goes to the right of the dot when it fits there, otherwise to the wider side, shortened
+                        // Centered above the dot, inside half the space to each neighbor note, shortened when it does not fit
+                        const from = i > 0 ? (xs[i - 1] + x) / 2 + 3 : chartArea.left;
+                        const to = i < xs.length - 1 ? (x + xs[i + 1]) / 2 - 3 : chartArea.right;
                         let text = marks.get(x).join(', ');
-                        const right = (xs[i + 1] ?? chartArea.right) - x - 12;
-                        const left = x - used - 12;
-                        const toRight = ctx.measureText(text).width <= right || right >= left;
-                        const width = toRight ? right : left;
-                        used = x + 4;
-                        if (width < 24) {
-                            return;
-                        }
-                        while (text.length > 1 && ctx.measureText(text).width > width) {
+                        while (text.length > 1 && ctx.measureText(text).width > to - from) {
                             text = `${text.slice(0, -2)}…`;
                         }
-                        ctx.textAlign = toRight ? 'left' : 'right';
-                        ctx.fillText(text, toRight ? x + 8 : x - 8, top);
-                        if (toRight) {
-                            used = x + 8 + ctx.measureText(text).width;
+                        const width = ctx.measureText(text).width;
+                        if (width > to - from) {
+                            return;
                         }
+                        ctx.fillText(text, Math.min(Math.max(x - width / 2, from), to - width), chartArea.top - 12);
                     });
                     ctx.restore();
                 },
