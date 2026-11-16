@@ -5000,10 +5000,6 @@ table.actions td {
     padding-top: var(--maho-space-3)
 }
 
-.grid-widget .massaction td:first-child {
-    vertical-align: bottom
-}
-
 .grid-widget .grid {
     padding-bottom: 0
 }
