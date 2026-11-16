@@ -239,29 +239,26 @@ class MahoReportExplorer {
     renderSkeleton() {
         this.root.innerHTML = `
             <div role="tablist" class="d-tabs d-tabs-box mb-4 w-fit" data-role="tabs"></div>
-            <div class="report-explorer-layout" data-role="explore">
-                <aside class="report-explorer-sidebar flex flex-col gap-4" data-role="sidebar"></aside>
-                <section class="flex flex-col gap-4 min-w-0">
-                    <div class="d-card d-card-border bg-base-100"><div class="d-card-body gap-3 p-4" data-role="controls"></div></div>
-                    <nav class="d-breadcrumbs text-sm py-0" data-role="breadcrumb" aria-label="${this.escape(this.t('drillSteps'))}"></nav>
-                    <div class="flex flex-col gap-2" data-role="messages"></div>
-                    <div class="report-explorer-totals" data-role="totals"></div>
-                    <div class="d-card d-card-border bg-base-100" data-role="chart-card">
-                        <div class="d-card-body p-4 gap-3">
-                            <div class="flex flex-wrap items-center gap-2" data-role="chart-header"></div>
-                            <div class="relative h-72" data-role="chart-box"><canvas data-role="chart"></canvas></div>
-                            <div class="flex flex-wrap gap-2" data-role="notes"></div>
-                        </div>
+            <section class="report-explorer-layout min-w-0" data-role="explore">
+                <div class="d-card d-card-border bg-base-100"><div class="d-card-body gap-3 p-4" data-role="controls"></div></div>
+                <nav class="d-breadcrumbs text-sm py-0" data-role="breadcrumb" aria-label="${this.escape(this.t('drillSteps'))}"></nav>
+                <div class="flex flex-col gap-2" data-role="messages"></div>
+                <div class="report-explorer-totals" data-role="totals"></div>
+                <div class="d-card d-card-border bg-base-100" data-role="chart-card">
+                    <div class="d-card-body p-4 gap-3">
+                        <div class="flex flex-wrap items-center gap-2" data-role="chart-header"></div>
+                        <div class="relative h-72" data-role="chart-box"><canvas data-role="chart"></canvas></div>
+                        <div class="flex flex-wrap gap-2" data-role="notes"></div>
                     </div>
-                    <div data-role="panel"></div>
-                    <div class="d-card d-card-border bg-base-100" data-role="table-card">
-                        <div class="d-card-body p-0 gap-0">
-                            <div class="overflow-x-auto" data-role="table"></div>
-                            <div class="flex items-center justify-end gap-2 p-3" data-role="pager"></div>
-                        </div>
+                </div>
+                <div data-role="panel"></div>
+                <div class="d-card d-card-border bg-base-100" data-role="table-card">
+                    <div class="d-card-body p-0 gap-0">
+                        <div class="overflow-x-auto" data-role="table"></div>
+                        <div class="flex items-center justify-end gap-2 p-3" data-role="pager"></div>
                     </div>
-                </section>
-            </div>
+                </div>
+            </section>
             <div class="report-explorer-dashboard" data-role="dashboard" hidden></div>`;
         this.parts = Object.fromEntries([...this.root.querySelectorAll('[data-role]')].map((el) => [el.dataset.role, el]));
     }
@@ -294,91 +291,131 @@ class MahoReportExplorer {
         }
     }
 
-    renderSidebar() {
-        const sidebar = this.parts.sidebar;
-        sidebar.textContent = '';
-
+    /**
+     * The Report menu: the ready-made reports by group, then the saved reports. A report that matches none of them
+     * shows as a custom report. A saved report that the controls changed keeps its name, marked as changed.
+     */
+    reportSelect() {
+        const current = this.saved.find((report) => report.id === this.savedId);
+        const preset = current ? null : this.allPresets().find((p) => this.isPreset(p));
+        const value = current ? `saved:${current.id}` : preset ? `preset:${preset.code}` : '';
+        const wrapper = this.element('label', 'flex flex-col gap-1 text-sm');
+        wrapper.append(this.element('span', 'font-semibold', this.t('report')));
+        const select = this.element('select', 'd-select d-select-sm');
+        const option = (optionValue, label) => {
+            const element = this.element('option', '', label);
+            element.value = optionValue;
+            element.selected = optionValue === value;
+            return element;
+        };
+        if (!value) {
+            select.append(option('', this.t('customReport')));
+        }
         const groups = new Map();
-        for (const preset of this.allPresets()) {
-            if (!groups.has(preset.group)) {
-                groups.set(preset.group, []);
+        for (const entry of this.allPresets()) {
+            if (!groups.has(entry.group)) {
+                groups.set(entry.group, this.element('optgroup'));
+                groups.get(entry.group).label = entry.group;
             }
-            groups.get(preset.group).push(preset);
+            const element = option(`preset:${entry.code}`, entry.label);
+            if (entry.description) {
+                element.title = entry.description;
+            }
+            groups.get(entry.group).append(element);
         }
-        const nav = this.element('nav', 'd-card d-card-border bg-base-100');
-        nav.setAttribute('aria-label', this.t('reports'));
-        const menu = this.element('ul', 'd-menu d-menu-sm w-full');
-        for (const [group, presets] of groups) {
-            const item = this.element('li');
-            item.append(this.element('h2', 'd-menu-title', group));
-            const list = this.element('ul');
-            for (const preset of presets) {
-                const link = this.element('a', this.isPreset(preset) ? 'd-menu-active' : '', preset.label);
-                link.href = '#';
-                if (preset.description) {
-                    link.title = preset.description;
+        select.append(...groups.values());
+        if (this.saved.length) {
+            const group = this.element('optgroup');
+            group.label = this.t('saved');
+            for (const report of this.saved) {
+                let label = report.shared ? `${report.name} (${this.t('shared')})` : report.name;
+                if (report === current && !this.sameRequest(report.request, this.state)) {
+                    label = this.t('changedReport', label);
                 }
-                link.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    this.open(preset.request, { chart: preset.chart });
-                });
-                const li = this.element('li');
-                li.append(link);
-                list.append(li);
+                group.append(option(`saved:${report.id}`, label));
             }
-            item.append(list);
-            menu.append(item);
+            select.append(group);
         }
-        nav.append(menu);
-        sidebar.append(nav);
-
-        const savedCard = this.element('div', 'd-card d-card-border bg-base-100');
-        const savedMenu = this.element('ul', 'd-menu d-menu-sm w-full');
-        const title = this.element('li');
-        title.append(this.element('h2', 'd-menu-title', this.t('saved')));
-        savedMenu.append(title);
-        if (this.saved.length === 0) {
-            savedMenu.append(this.element('li', 'px-4 py-2 text-sm opacity-70', this.t('noSaved')));
-        }
-        for (const report of this.saved) {
-            const li = this.element('li');
-            const row = this.element('div', `flex items-center gap-1 p-0 ${report.id === this.savedId ? 'd-menu-active' : ''}`);
-            const link = this.element('a', 'flex-1 min-w-0 flex items-center gap-1 px-3 py-1');
-            link.href = '#';
-            link.append(this.element('span', 'truncate', report.name));
-            if (report.shared) {
-                link.append(this.element('span', 'd-badge d-badge-sm d-badge-ghost', this.t('shared')));
-            }
-            link.addEventListener('click', (event) => {
-                event.preventDefault();
+        select.addEventListener('change', () => {
+            const [kind, code] = select.value.split(':');
+            const report = kind === 'saved' ? this.saved.find((r) => String(r.id) === code) : null;
+            const entry = kind === 'preset' ? this.allPresets().find((p) => p.code === code) : null;
+            if (report) {
                 this.open(report.request, { savedId: report.id });
-            });
-            const pinned = this.dashboard.includes(report.id);
-            const pin = this.button(pinned ? '★' : '☆', 'd-btn d-btn-ghost d-btn-xs', () => this.togglePin(report, !pinned));
-            pin.setAttribute('aria-label', `${pinned ? this.t('unpin') : this.t('pin')}: ${report.name}`);
-            pin.setAttribute('aria-pressed', String(pinned));
-            pin.title = pinned ? this.t('unpin') : this.t('pin');
-            row.append(link, pin);
-            li.append(row);
-            savedMenu.append(li);
-        }
-        savedCard.append(savedMenu);
-        sidebar.append(savedCard);
+            } else if (entry) {
+                this.open(entry.request, { chart: entry.chart });
+            }
+        });
+        wrapper.append(select);
+        return wrapper;
     }
 
     isPreset(preset) {
-        return this.savedId === null && this.view.drill.length === 0 && JSON.stringify(preset.request) === JSON.stringify(this.state);
+        return this.savedId === null && this.view.drill.length === 0 && this.sameRequest(preset.request, this.state);
+    }
+
+    /** Compare two requests without the page and the order of the metrics, which a saved report can change. */
+    sameRequest(a, b) {
+        const normal = (request) => JSON.stringify({ ...request, offset: undefined, metrics: [...(request.metrics ?? [])].sort() });
+        return normal(a) === normal(b);
+    }
+
+    /**
+     * The request for another dataset: the period, the comparison, the store views, the scope and the date keep their
+     * value, and so do the metrics, the groupings, the filters and the sort that the dataset also has.
+     */
+    carryState(dataset) {
+        const next = this.defaultState(dataset);
+        const old = this.state;
+        const metrics = (old.metrics ?? []).filter((code) => dataset.metrics.some((m) => m.code === code));
+        const dimensions = (old.dimensions ?? []).filter((entry) => {
+            const [code, granularity] = entry.split(':');
+            const dimension = dataset.dimensions.find((d) => d.code === code);
+            return dimension && (!granularity || dimension.granularities?.includes(granularity));
+        });
+        const filters = (old.filters ?? []).filter((filter) => {
+            const field = dataset.fields.find((f) => f.code === filter.field);
+            return field && this.operatorsFor(field).includes(filter.operator);
+        });
+        if (metrics.length) {
+            next.metrics = metrics;
+        }
+        if (dimensions.length) {
+            next.dimensions = dimensions;
+        }
+        if (filters.length) {
+            next.filters = filters;
+        }
+        if (old.sort && (next.metrics.includes(old.sort.key) || (next.dimensions ?? []).some((entry) => entry.split(':')[0] === old.sort.key))) {
+            next.sort = old.sort;
+        }
+        if (dataset.dated) {
+            Object.assign(next, { range: old.range, from: old.from, to: old.to, compare: old.compare });
+            if (!next.range && !(next.from && next.to)) {
+                next.range = 'last_30_days';
+            }
+            if (dataset.dateFields.some((f) => f.code === old.dateField)) {
+                next.dateField = old.dateField;
+            }
+        }
+        if (dataset.hasStores && old.storeIds) {
+            next.storeIds = old.storeIds;
+        }
+        if (dataset.scopes.some((scope) => scope.code === old.scope)) {
+            next.scope = old.scope;
+        }
+        return next;
     }
 
     renderControls() {
-        this.renderSidebar();
         const dataset = this.dataset();
         const controls = this.parts.controls;
         controls.textContent = '';
 
         const row = this.element('div', 'flex flex-wrap items-end gap-3');
+        row.append(this.reportSelect());
         row.append(this.selectField(this.t('dataset'), [...this.datasets.values()].map((d) => [d.code, d.label]), this.state.dataset,
-            (value) => this.open(this.defaultState(this.datasets.get(value)))));
+            (value) => this.open(this.carryState(this.datasets.get(value)))));
 
         if (dataset.dated) {
             const range = this.state.range ?? (this.state.from ? 'custom' : 'last_30_days');
@@ -417,6 +454,14 @@ class MahoReportExplorer {
         actions.append(this.button(this.t('export'), 'd-btn d-btn-sm', () => this.export()));
         actions.append(this.button(this.t('save'), 'd-btn d-btn-sm d-btn-primary', () => this.openSaveDialog()));
         const current = this.saved.find((report) => report.id === this.savedId);
+        if (current) {
+            const pinned = this.dashboard.includes(current.id);
+            const pin = this.button(pinned ? '★' : '☆', 'd-btn d-btn-sm d-btn-ghost', () => this.togglePin(current, !pinned));
+            pin.setAttribute('aria-label', pinned ? this.t('unpin') : this.t('pin'));
+            pin.setAttribute('aria-pressed', String(pinned));
+            pin.title = pinned ? this.t('unpin') : this.t('pin');
+            actions.append(pin);
+        }
         if (current?.mine) {
             const deleteButton = this.button(this.t('delete'), 'd-btn d-btn-sm d-btn-ghost text-error', () => this.deleteSaved(current));
             deleteButton.setAttribute('aria-label', this.t('deleteReport'));
@@ -521,12 +566,6 @@ class MahoReportExplorer {
         }
         details.append(list);
         row.append(details);
-        for (const code of this.state.metrics ?? []) {
-            const metric = dataset.metrics.find((m) => m.code === code);
-            if (metric) {
-                row.append(this.element('span', 'd-badge d-badge-outline', metric.label));
-            }
-        }
         return row;
     }
 
@@ -889,6 +928,13 @@ class MahoReportExplorer {
         }
         if (dataset.dated && this.chartMetric()) {
             item(this.t('explainChange'), () => this.openExplain({ ...this.state, ...changes, dimensions: [] }, label));
+        }
+        const period = this.dimensionColumns()[0];
+        const day = dataset.dated && period?.granularity && !MahoReportExplorer.CYCLES.includes(period.granularity)
+            ? this.bucketRange(period.granularity, row.dimensions[period.key])?.[0]
+            : null;
+        if (day) {
+            item(this.t('addNote'), () => this.openNoteDialog(day));
         }
 
         document.body.append(menu);
@@ -1452,7 +1498,13 @@ class MahoReportExplorer {
                 scales: horizontal ? { x: valueAxis, y: categoryAxis } : { x: categoryAxis, y: valueAxis },
                 plugins: {
                     legend: { display: !compact && datasets.length > 1, labels: { color: text, usePointStyle: true } },
-                    tooltip: { enabled: !compact, callbacks: { label: (context) => `${context.dataset.label}: ${this.format(metric, horizontal ? context.parsed.x : context.parsed.y)}` } },
+                    tooltip: {
+                        enabled: !compact,
+                        callbacks: {
+                            label: (context) => `${context.dataset.label}: ${this.format(metric, horizontal ? context.parsed.x : context.parsed.y)}`,
+                            footer: (items) => notes.filter((note) => String(note.key) === String(rows[items[0]?.dataIndex]?.dimensions[firstKey])).map((note) => note.title),
+                        },
+                    },
                 },
                 onClick: compact ? undefined : (event, elements, chart) => {
                     const element = data.kind === 'series'
@@ -1685,13 +1737,13 @@ class MahoReportExplorer {
         body.append(this.element('p', 'text-xs opacity-70', this.t('explainHint')));
     }
 
-    openNoteDialog() {
+    openNoteDialog(day = null) {
         const today = this.today();
         const content = `
             <form class="flex flex-col gap-3" onsubmit="return false">
                 <label class="flex flex-col gap-1">
                     <span class="font-semibold">${this.escape(this.t('date'))}</span>
-                    <input class="d-input w-full" type="date" name="date" required value="${this.escape(this.state.to ?? today)}">
+                    <input class="d-input w-full" type="date" name="date" required value="${this.escape(day ?? this.state.to ?? today)}">
                 </label>
                 <label class="flex flex-col gap-1">
                     <span class="font-semibold">${this.escape(this.t('note'))}</span>
@@ -1790,7 +1842,7 @@ class MahoReportExplorer {
         }
         this.saved = result.saved;
         this.dashboard = result.dashboard;
-        this.renderSidebar();
+        this.renderControls();
         this.renderTabs();
         if (this.view.tab === 'dashboard') {
             this.renderDashboard();

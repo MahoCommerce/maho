@@ -16,9 +16,12 @@ different.
 ## Run a ready-made report
 
 1. Go to **Reports > Explorer**.
-2. In the list on the left, click a report, for example **Sales overview** or **Sales by payment
+2. In the **Report** menu, select a report, for example **Sales overview** or **Sales by payment
    method**.
 3. Change the controls above the report. Each change runs the report again.
+
+When you change a control, the **Report** menu shows **Custom report**. A saved report that you
+change shows "(changed)" after its name.
 
 The address of the page holds the report. Copy the address to send the same report to another
 administrator.
@@ -27,7 +30,8 @@ administrator.
 
 | Control | What it does |
 |---------|--------------|
-| Data | The data of the report: orders, order items, invoices, credit memos, taxes, customers, carts, cart items, stock, product views, search terms, reviews, tags or downloads |
+| Report | A ready-made report or a saved report. It sets all the other controls |
+| Data | The data of the report: orders, order items, invoices, credit memos, taxes, customers, carts, cart items, stock, product views, search terms, reviews, tags or downloads. A change keeps the period, the store view and the metrics, groupings and filters that the new data also has |
 | Period | The days of the report, for example **Last 30 days**. **Custom** shows a **From** and a **To** day |
 | Compare with | **The period before** has the same number of days and ends the day before the period. **The year before** has the same days one year earlier |
 | Date | The date that puts an order in the period: the order date, or the date of its last change |
@@ -76,6 +80,8 @@ Click the first cell of a row, or a point or a bar of the chart. A menu opens:
   with a link to each one.
 - **Explain the change** shows which values caused the change of the row against the earlier
   period.
+- **Add a note** adds a note on the first day of the row. It shows for a day, a week, a month or a
+  year.
 
 The steps show above the report. Click a step to go back to it.
 
@@ -95,8 +101,9 @@ change. An average, such as **Average order value**, has no share. Click a value
 ## Notes
 
 A note marks a day on the chart, for example the day of a newsletter. Click **Add a note** on a
-chart over time, then enter the day and the text. The note shows as a dotted line on the chart and
-as a label under it, for every administrator. Only the author deletes a note.
+chart over time, or click a day on the chart and select **Add a note**. Then enter the day and the
+text. The note shows as a dotted line on the chart, in the tooltip of its day, and as a label under
+the chart, for every administrator. Only the author deletes a note.
 
 The chart also shows the first day of each active cart price rule, as **Promotion starts**.
 
@@ -117,7 +124,7 @@ Only a metric that adds up, such as **Net sales** or **Units**, can have a targe
 
 ## Dashboard
 
-Click the star of a saved report to put it on your dashboard. The **Dashboard** tab shows each
+Open a saved report and click its star, next to **Save**, to put it on your dashboard. The **Dashboard** tab shows each
 report of your dashboard as a card, with the total of its first metric, its change and a small
 chart. Click the name of a card to open the report.
 
@@ -144,7 +151,7 @@ The order reports have an **Orders** control with three values:
 5. To show the report on your dashboard, select **Show on my dashboard**.
 6. Click **Save**.
 
-The report shows under **Saved reports**. Only its owner changes or deletes a saved report. A
+The report shows under **Saved reports** in the **Report** menu. Only its owner changes or deletes a saved report. A
 saved report keeps its period as a named period, so **Last 30 days** always shows the last 30
 days.
 

@@ -68,9 +68,10 @@ class Mage_Adminhtml_Block_Report_Explorer extends Mage_Adminhtml_Block_Template
     {
         $helper = Mage::helper('reports');
         return [
-            'reports' => $helper->__('Reports'),
+            'report' => $helper->__('Report'),
+            'customReport' => $helper->__('Custom report'),
+            'changedReport' => $helper->__('%s (changed)'),
             'saved' => $helper->__('Saved reports'),
-            'noSaved' => $helper->__('No saved report yet.'),
             'shared' => $helper->__('Shared'),
             'dataset' => $helper->__('Data'),
             'period' => $helper->__('Period'),
