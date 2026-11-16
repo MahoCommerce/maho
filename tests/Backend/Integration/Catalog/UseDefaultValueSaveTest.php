@@ -172,6 +172,24 @@ it('puts null into a value with no default value after a save of the same model 
     expect($product->getMetaTitle())->toBeNull();
 });
 
+it('puts the default value into a product that a store view save created', function () {
+    /** @var Mage_Catalog_Service_Product $service */
+    $service = Mage::getService('catalog/product');
+    $product = $service->newProduct();
+    $product->setStoreId(1)
+        ->setSku(USE_DEFAULT_SKU)
+        ->setName('Pest Default Name')
+        ->setPrice(10)
+        ->setWeight(1)
+        ->setWebsiteIds([1])
+        ->setUrlKey('pest-use-default-' . uniqid())
+        ->setStockData(['qty' => 5, 'is_in_stock' => 1]);
+    $service->save($product);
+    $service->useDefault($product, ['name']);
+
+    expect($product->getName())->toBe('Pest Default Name');
+});
+
 it('puts the default value into a product of a store view collection', function () {
     $id = useDefaultProduct();
 

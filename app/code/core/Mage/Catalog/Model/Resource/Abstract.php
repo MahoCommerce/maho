@@ -304,15 +304,19 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
             $row = $this->_getReadAdapter()->fetchOne($select);
 
             if (!$row) {
+                $defaultValue = $this->_prepareValueForSave($value, $attribute);
                 $data  = new \Maho\DataObject([
                     'entity_type_id'    => $attribute->getEntityTypeId(),
                     'attribute_id'      => $attribute->getAttributeId(),
                     'store_id'          => $this->getDefaultStoreId(),
                     'entity_id'         => $object->getEntityId(),
-                    'value'             => $this->_prepareValueForSave($value, $attribute),
+                    'value'             => $defaultValue,
                 ]);
                 $bind  = $this->_prepareDataForTable($data, $table);
                 $this->_getWriteAdapter()->insertOnDuplicate($table, $bind, ['value']);
+                if ($object instanceof Mage_Catalog_Model_Abstract) {
+                    $object->setAttributeDefaultValue($attribute->getAttributeCode(), $defaultValue);
+                }
             }
         }
 
