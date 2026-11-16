@@ -314,6 +314,17 @@
         @apply d-select-sm;
     }
 
+    /* The buttons and selects of a grid header take the small size of the pager beside them */
+    .grid-widget :is(table.actions, .massaction) {
+        & button {
+            @apply d-btn-sm;
+        }
+
+        & select {
+            @apply d-select-sm;
+        }
+    }
+
     /* Filter columns are narrow, so the controls keep the md height with less padding */
     .grid tr.filter {
         & th {
