@@ -1532,24 +1532,49 @@ class MahoReportExplorer {
                     }
                     const { ctx, chartArea } = chart;
                     const meta = chart.getDatasetMeta(0);
+                    const marks = new Map();
+                    for (const note of notes) {
+                        const point = meta.data[rows.findIndex((row) => String(row.dimensions[firstKey]) === String(note.key))];
+                        if (point) {
+                            marks.set(point.x, [...(marks.get(point.x) ?? []), note.title]);
+                        }
+                    }
+                    const xs = [...marks.keys()].sort((a, b) => a - b);
+                    const top = chartArea.top + 4;
                     ctx.save();
                     ctx.strokeStyle = self.color('--color-warning', 0.9);
                     ctx.fillStyle = self.color('--color-warning');
-                    ctx.setLineDash([3, 3]);
-                    for (const note of notes) {
-                        const index = rows.findIndex((row) => String(row.dimensions[firstKey]) === String(note.key));
-                        const point = meta.data[index];
-                        if (!point) {
-                            continue;
-                        }
+                    ctx.font = `600 11px ${getComputedStyle(canvas).fontFamily}`;
+                    ctx.textBaseline = 'middle';
+                    let used = chartArea.left;
+                    xs.forEach((x, i) => {
+                        ctx.setLineDash([3, 3]);
                         ctx.beginPath();
-                        ctx.moveTo(point.x, chartArea.top);
-                        ctx.lineTo(point.x, chartArea.bottom);
+                        ctx.moveTo(x, chartArea.top);
+                        ctx.lineTo(x, chartArea.bottom);
                         ctx.stroke();
                         ctx.beginPath();
-                        ctx.arc(point.x, chartArea.top + 4, 4, 0, Math.PI * 2);
+                        ctx.arc(x, top, 4, 0, Math.PI * 2);
                         ctx.fill();
-                    }
+                        // The text goes to the right of the dot when it fits there, otherwise to the wider side, shortened
+                        let text = marks.get(x).join(', ');
+                        const right = (xs[i + 1] ?? chartArea.right) - x - 12;
+                        const left = x - used - 12;
+                        const toRight = ctx.measureText(text).width <= right || right >= left;
+                        const width = toRight ? right : left;
+                        used = x + 4;
+                        if (width < 24) {
+                            return;
+                        }
+                        while (text.length > 1 && ctx.measureText(text).width > width) {
+                            text = `${text.slice(0, -2)}…`;
+                        }
+                        ctx.textAlign = toRight ? 'left' : 'right';
+                        ctx.fillText(text, toRight ? x + 8 : x - 8, top);
+                        if (toRight) {
+                            used = x + 8 + ctx.measureText(text).width;
+                        }
+                    });
                     ctx.restore();
                 },
             }],
