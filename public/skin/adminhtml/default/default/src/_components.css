@@ -671,17 +671,6 @@
         gap: var(--maho-space-3);
     }
 
-    .report-explorer-layout[hidden],
-    .report-explorer-dashboard[hidden] {
-        display: none;
-    }
-
-    .report-explorer-dashboard {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
-        gap: var(--maho-space-4);
-    }
-
     .report-explorer-driver {
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
@@ -1155,5 +1144,11 @@
     :root[data-scheme="dark"] #scheme-toggle .scheme-dark,
     :root[data-scheme="light"] #scheme-toggle .scheme-light {
         display: block;
+    }
+
+    /* base.css draws every link in a box head as a large light title, which the config sections keep */
+    .entry-edit .entry-edit-head a.report-explorer-title {
+        font: inherit !important;
+        color: inherit !important;
     }
 }

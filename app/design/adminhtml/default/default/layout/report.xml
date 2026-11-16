@@ -18,7 +18,7 @@ SPDX-License-Identifier: AFL-3.0
         <reference name="head">
             <action method="addJs"><name>mage/adminhtml/report-explorer.js</name></action>
         </reference>
-        <reference name="dashboard.widgets.top">
+        <reference name="dashboard.widgets.stats">
             <block type="adminhtml/report_explorer_pinned" name="report.explorer.pinned" />
         </reference>
     </adminhtml_dashboard_index>

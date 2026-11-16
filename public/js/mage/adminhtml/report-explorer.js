@@ -49,7 +49,7 @@ class MahoReportExplorer {
             return;
         }
         if (config.mode === 'dashboard') {
-            this.root.innerHTML = '<div class="flex flex-col gap-2" data-role="messages"></div><div class="report-explorer-dashboard" data-role="dashboard"></div>';
+            this.root.innerHTML = '<div class="contents" data-role="messages"></div><div class="contents" data-role="dashboard"></div>';
             this.parts = Object.fromEntries([...this.root.querySelectorAll('[data-role]')].map((el) => [el.dataset.role, el]));
             this.renderDashboard();
             this.watchColorScheme();
@@ -1854,19 +1854,21 @@ class MahoReportExplorer {
         const holder = this.parts.dashboard;
         holder.textContent = '';
         const reports = this.dashboard.map((id) => this.saved.find((report) => report.id === id)).filter(Boolean);
-        this.root.closest('[data-role=pinned-reports]')?.toggleAttribute('hidden', reports.length === 0);
         await this.loadChartJs().catch(() => null);
         await Promise.all(reports.map(async (report) => {
-            const card = this.element('article', 'd-card d-card-border bg-base-100');
-            const body = this.element('div', 'd-card-body p-4 gap-2');
-            const header = this.element('div', 'flex items-center gap-2');
-            const title = this.element('a', 'd-link d-link-hover font-semibold me-auto', report.name);
+            // A box of the admin dashboard, as Visitors and Sales Overview are
+            const card = this.element('div', 'entry-edit');
+            const header = this.element('div', 'entry-edit-head flex items-baseline gap-2');
+            const heading = this.element('h4', 'me-auto');
+            const title = this.element('a', 'report-explorer-title hover:underline', report.name);
             title.href = `${this.config.urls.index}?saved=${report.id}`;
+            heading.append(title);
             const unpin = this.button('★', 'd-btn d-btn-ghost d-btn-xs', () => this.togglePin(report, false));
             unpin.setAttribute('aria-label', `${this.t('unpin')}: ${report.name}`);
-            header.append(title, unpin);
-            body.append(header);
-            card.append(body);
+            unpin.title = this.t('unpin');
+            header.append(heading, unpin);
+            const body = this.element('fieldset', 'flex flex-col gap-2 pt-1');
+            card.append(header, body);
             holder.append(card);
 
             const result = await this.runRequest(report.request);

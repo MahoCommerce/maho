@@ -99,7 +99,6 @@ mahoOnReady(() => loadChartJs().then(() => initDashboardCharts(document)));
 </div>
 <div class="dashboard-container">
     <?= $this->getChildHtml('store_switcher') ?>
-    <?= $this->getChildHtml('widgets_top') ?>
     <div class="dashboard-grid">
         <div class="dashboard-col-left">
             <?php if ($this->getChild('visitorStats')): ?>

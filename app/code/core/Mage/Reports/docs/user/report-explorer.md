@@ -124,10 +124,10 @@ Only a metric that adds up, such as **Net sales** or **Units**, can have a targe
 
 ## Pinned reports on the dashboard
 
-Open a saved report and click its star, next to **Save**. The report then shows under **Pinned
-reports** at the top of the admin **Dashboard**, as a card with the total of its first metric, its
-change and a small chart. Click the name of a card to open the report in the Explorer. Click the
-star of a card to remove it from the dashboard.
+Open a saved report and click its star, next to **Save**. The report then shows as a box in the
+left column of the admin **Dashboard**, after **Sales Overview**. The box shows the total of the
+first metric, its change and a small chart. Click the name of the box to open the report in the
+Explorer. Click the star of the box to remove it from the dashboard.
 
 Each administrator pins reports for their own dashboard. A shared report that its owner stops
 sharing leaves the dashboard.
