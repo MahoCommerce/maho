@@ -1,3 +1,10 @@
+## Supported Versions
+
+Only the latest release gets security fixes. To get a fix, update to the latest release on the
+[releases page](https://github.com/MahoCommerce/maho/releases).
+
+If you need more support, consider [becoming a sponsor](https://mahocommerce.com/sponsors/).
+
 ## Reporting Security Issues
 
 If you believe you have found a security vulnerability in Maho, please report it through coordinated disclosure.
@@ -44,3 +51,13 @@ gh release verify-asset 26.11.0 maho-26.11.0.zip --repo MahoCommerce/maho
 ```
 
 Composer installs the source archive that GitHub generates for the tag, not this package.
+
+## Limitation of Liability
+
+Maho is available under the [OSL 3.0](https://opensource.org/licenses/OSL-3.0) and
+[AFL 3.0](https://opensource.org/licenses/AFL-3.0) licenses. Section 8 of both licenses says
+that you use this source code at your own risk:
+
+> 8. Limitation of Liability. Under no circumstances and under no legal theory, whether in tort (including negligence), contract, or otherwise, shall the Licensor be liable to anyone for any indirect, special, incidental, or consequential damages of any character arising as a result of this License or the use of the Original Work including, without limitation, damages for loss of goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages or losses. This limitation of liability shall not apply to the extent applicable law prohibits such limitation.
+
+For the full text, see `LICENSE.txt` and `LICENSE_AFL.txt`.
