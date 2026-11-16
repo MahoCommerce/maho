@@ -306,6 +306,14 @@
         outline-offset: calc(var(--border) * -1);
     }
 
+    .pager input.page {
+        @apply d-input-sm;
+    }
+
+    .pager select {
+        @apply d-select-sm;
+    }
+
     /* Filter columns are narrow, so the controls keep the md height with less padding */
     .grid tr.filter {
         & th {
