@@ -8,8 +8,7 @@
 
 declare(strict_types=1);
 
-use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
-use Tests\Helpers\AdminRoleFixture;
+use Tests\Helpers\AdminApiParity;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -36,28 +35,7 @@ function quickCreateUseDefaultProduct(string $sku, string $name, string $typeId)
     return $product;
 }
 
-function quickCreateUseDefaultPost(array $params): void
-{
-    $request = new Mage_Core_Controller_Request_Http(
-        SymfonyRequest::create('/index.php/admin/catalog_product/quickCreate', 'POST', $params),
-    );
-    $request->setRouteName('adminhtml')
-        ->setControllerName('catalog_product')
-        ->setActionName('quickCreate')
-        ->setDispatched(true);
-    Mage::app()->setRequest($request);
-
-    $controller = new Mage_Adminhtml_Catalog_ProductController($request, new Mage_Core_Controller_Response_Http());
-
-    try {
-        $controller->quickCreateAction();
-    } catch (Throwable) {
-        // The save runs before the response is built. The assertions check the saved data.
-    }
-}
-
 beforeEach(function () {
-    $this->user = AdminRoleFixture::login(['admin/catalog', 'admin/catalog/products']);
     $this->products = [];
 });
 
@@ -67,14 +45,13 @@ afterEach(function () {
         Mage::getModel('catalog/product')->load($product->getId())->delete();
     }
     Mage::unregister('isSecureArea');
-    AdminRoleFixture::delete($this->user);
 });
 
 it('does not let a form field delete a value of a stored product', function () {
     $this->products[] = $configurable = quickCreateUseDefaultProduct('quick-create-configurable', 'Pest Configurable', Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
     $this->products[] = $stored = quickCreateUseDefaultProduct('quick-create-stored', 'Pest Default Name', Mage_Catalog_Model_Product_Type::TYPE_SIMPLE);
 
-    quickCreateUseDefaultPost([
+    AdminApiParity::admin(Mage_Adminhtml_Catalog_ProductController::class, 'quickCreate', [
         'product' => $configurable->getId(),
         'simple_product' => [
             'entity_id' => $stored->getId(),
