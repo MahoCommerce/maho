@@ -17,8 +17,8 @@ uses(MahoBrowserTestCase::class)->group('browser');
  *
  * One day has 10 units in a processing order and 1 unit in a pending order, so the processing bar is tall and the
  * pending bar beside it is short. The test clicks inside the tall bar near its base, at a point that is nearer to
- * the center of the short bar. Chart.js picks the bar by the distance to its center unless the click must be inside
- * the bar, so only the right option opens the menu of the processing bar.
+ * the center of the short bar. With `intersect: false`, Chart.js picks the bar with the nearest center, which is the
+ * short bar. With `intersect: true`, it picks only a bar that holds the click, which is the tall bar.
  */
 
 const EXPLORER_CLICK_ADMIN_USER = 'explorer-click-admin';
@@ -35,14 +35,14 @@ const EXPLORER_CLICK_BAR = <<<'JS'
         for (let day = 0; day < sets[0].bars.length; day++) {
             for (const tall of sets) {
                 for (const short of sets) {
-                    const a = tall.bars[day].getProps(['x', 'y', 'base'], true);
-                    const b = short.bars[day].getProps(['x', 'y', 'base'], true);
-                    if (tall === short || !(b.base - b.y > 0) || !(a.base - a.y >= 4 * (b.base - b.y))) {
+                    const tallBar = tall.bars[day].getProps(['x', 'y', 'base'], true);
+                    const shortBar = short.bars[day].getProps(['x', 'y', 'base'], true);
+                    if (tall === short || !(shortBar.base - shortBar.y > 0) || !(tallBar.base - tallBar.y >= 4 * (shortBar.base - shortBar.y))) {
                         continue;
                     }
-                    const x = a.x;
-                    const y = a.base - 2;
-                    if (!(Math.hypot(b.x - x, (b.y + b.base) / 2 - y) < (a.base - a.y) / 2 - 2)) {
+                    const x = tallBar.x;
+                    const y = tallBar.base - 2;
+                    if (!(Math.hypot(shortBar.x - x, (shortBar.y + shortBar.base) / 2 - y) < (tallBar.base - tallBar.y) / 2 - 2)) {
                         continue;
                     }
                     canvas.dispatchEvent(new MouseEvent('click', { clientX: rect.left + x, clientY: rect.top + y, bubbles: true }));
@@ -61,29 +61,15 @@ const EXPLORER_CLICK_LINE = <<<'JS'
         const chart = Chart.getChart(canvas);
         const rect = canvas.getBoundingClientRect();
         const points = chart.getDatasetMeta(0).data;
-        const p = points[1].getProps(['x', 'y'], true);
-        const q = points[2].getProps(['x', 'y'], true);
-        canvas.dispatchEvent(new MouseEvent('click', { clientX: rect.left + (p.x + q.x) / 2, clientY: rect.top + (p.y + q.y) / 2 + 3, bubbles: true }));
+        const second = points[1].getProps(['x', 'y'], true);
+        const third = points[2].getProps(['x', 'y'], true);
+        canvas.dispatchEvent(new MouseEvent('click', { clientX: rect.left + (second.x + third.x) / 2, clientY: rect.top + (second.y + third.y) / 2 + 3, bubbles: true }));
         return true;
     })()
     JS;
 
 beforeEach(function () {
-    deleteExplorerClickAdmin();
-    $user = Mage::getModel('admin/user')
-        ->setUsername(EXPLORER_CLICK_ADMIN_USER)
-        ->setFirstname('Explorer')
-        ->setLastname('Click')
-        ->setEmail('explorer-click@example.test')
-        ->setPassword(EXPLORER_CLICK_ADMIN_PASSWORD)
-        ->setIsActive()
-        ->save();
-    $roleId = Mage::getModel('admin/role')->getCollection()
-        ->addFieldToFilter('role_type', Mage_Admin_Model_Acl::ROLE_TYPE_GROUP)
-        ->setPageSize(1)
-        ->getFirstItem()
-        ->getId();
-    Mage::getModel('admin/user')->load($user->getId())->setRoleIds([$roleId])->saveRelations();
+    createBrowserAdmin(EXPLORER_CLICK_ADMIN_USER, EXPLORER_CLICK_ADMIN_PASSWORD);
 
     ReportFixture::snapshot();
     $product = ReportFixture::createProduct('explorer_click', 10.0);
@@ -99,24 +85,16 @@ afterEach(function () {
         ReportFixture::restore();
     } finally {
         Mage::unregister('isSecureArea');
-        deleteExplorerClickAdmin();
+        deleteBrowserAdmin(EXPLORER_CLICK_ADMIN_USER);
     }
 });
-
-function deleteExplorerClickAdmin(): void
-{
-    $user = Mage::getModel('admin/user')->loadByUsername(EXPLORER_CLICK_ADMIN_USER);
-    if ($user->getId()) {
-        $user->delete();
-    }
-}
 
 /** Open Reports > Explorer on the units of the fixture product by day and by order status, as a chart of $chartType. */
 function openExplorerClickChart(int $productId, string $chartType): object
 {
     $encode = static fn(array $data): string => rtrim(strtr(base64_encode(json_encode($data, JSON_THROW_ON_ERROR)), '+/', '-_'), '=');
     $state = [
-        'dataset' => 'sales_orders',
+        'dataset' => 'sales_items',
         'metrics' => ['units'],
         'dimensions' => ['period:day', 'status'],
         'scope' => 'all',
