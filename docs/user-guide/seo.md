@@ -154,9 +154,14 @@ Search engines do not keep the last category, so they always get the primary cat
 breadcrumbs.
 
 When the product has no **Meta Title**, the page title shows the names of the categories from the
-URL or from the last category. The primary category does not change the page title or the URL of
-the product. Maho selects the primary category from the categories of the
-product in the category tree of the store:
+URL or from the last category. The primary category does not change the page title, the meta
+robots, the meta keywords or the URL of the product. It is the current category of the page for
+everything else: the navigation menu highlights it, the page gets its `category-*` body classes,
+Google Analytics and the Meta pixel get its name, and its custom design applies when
+**Apply To Products** is **Yes**.
+
+Maho selects the primary category from the categories of the product in the category tree of the
+store:
 
 1. Maho skips a category when it, or a category above it, is not active.
 2. A category that the navigation menu shows wins over a category that the menu does not show.

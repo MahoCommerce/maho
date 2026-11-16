@@ -279,8 +279,8 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
      * Inits product to be used for product controller actions and layouts
      * $params can have following data:
      *   'category_id' - id of category to check and append to product as current.
-     *     If empty or not valid, the last visited category is used, then the primary category of the product.
-     *     FALSE gives no category.
+     *     If empty, the store uses the last visited category, then the primary category of the product.
+     *     If not valid, the store uses the primary category. FALSE gives no category.
      *
      * @param int $productId
      * @param Mage_Core_Controller_Front_Action $controller

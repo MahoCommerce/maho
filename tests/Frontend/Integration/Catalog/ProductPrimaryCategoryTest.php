@@ -37,6 +37,22 @@ function primaryCategoryCreate(string $key, Mage_Catalog_Model_Category|string $
     return $category;
 }
 
+function primaryCategoryStoreValue(Mage_Catalog_Model_Category $category, string $code, int $value): void
+{
+    // In single store mode, the save writes the default value and deletes the store value
+    $app = Mage::app();
+    $property = new ReflectionProperty(Mage_Core_Model_App::class, '_isSingleStore');
+    $before = $property->getValue($app);
+    $property->setValue($app, false);
+    try {
+        $category->setStoreId((int) $app->getDefaultStoreView()->getId())->setData($code, $value);
+        $category->getResource()->saveAttribute($category, $code);
+    } finally {
+        $property->setValue($app, $before);
+        $category->setStoreId(0);
+    }
+}
+
 /**
  * @param list<Mage_Catalog_Model_Category> $categories
  */
@@ -141,6 +157,20 @@ describe('primary category', function (): void {
     it('gives no category when the product has no category in the store', function (): void {
         expect(primaryCategoryOf(primaryCategoryProduct([])))->toBeNull()
             ->and(primaryCategoryOf(primaryCategoryProduct([$this->archive, $this->otherDeep])))->toBeNull();
+    });
+
+    it('lets a store value of is_active replace the default value', function (): void {
+        primaryCategoryStoreValue($this->winter, 'is_active', 0);
+        primaryCategoryStoreValue($this->archive, 'is_active', 1);
+
+        expect(primaryCategoryOf(primaryCategoryProduct([$this->clothing, $this->winter])))->toBe((int) $this->clothing->getId())
+            ->and(primaryCategoryOf(primaryCategoryProduct([$this->archive])))->toBe((int) $this->archive->getId());
+    });
+
+    it('lets a store value of include_in_menu replace the default value', function (): void {
+        primaryCategoryStoreValue($this->sale, 'include_in_menu', 1);
+
+        expect(primaryCategoryOf(primaryCategoryProduct([$this->clothing, $this->lastPieces])))->toBe((int) $this->lastPieces->getId());
     });
 });
 
