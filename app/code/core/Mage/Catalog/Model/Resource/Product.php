@@ -558,6 +558,90 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
     }
 
     /**
+     * Get the category of $product that the store shows when the request names no category.
+     *
+     * The candidates are the categories of the product below the root category of the store. A candidate
+     * with an inactive category in its path is skipped. A candidate whose whole path is in the navigation
+     * menu wins over the others. Then the deepest candidate wins, then the lowest ID.
+     */
+    public function getPrimaryCategoryId(Mage_Catalog_Model_Product $product, int $storeId): ?int
+    {
+        $adapter = $this->_getReadAdapter();
+        $rootPath = Mage_Catalog_Model_Category::TREE_ROOT_ID . '/' . (int) Mage::app()->getStore($storeId)->getRootCategoryId();
+        $paths = $adapter->fetchPairs(
+            $adapter->select()
+                ->from(['cp' => $this->_productCategoryTable], ['category_id'])
+                ->join(['ce' => $this->getTable('catalog/category')], 'ce.entity_id = cp.category_id', ['path'])
+                ->where('cp.product_id = ?', (int) $product->getId())
+                ->where('ce.path LIKE ?', $rootPath . '/%'),
+        );
+        if ($paths === []) {
+            return null;
+        }
+
+        $pathIds = [];
+        foreach ($paths as $categoryId => $path) {
+            $pathIds[(int) $categoryId] = array_map(intval(...), array_slice(explode('/', (string) $path), 2));
+        }
+        $flags = $this->_getCategoryMenuFlags(array_values(array_unique(array_merge(...array_values($pathIds)))), $storeId);
+
+        $candidates = [];
+        foreach ($pathIds as $categoryId => $ids) {
+            $isActive = true;
+            $inMenu = true;
+            foreach ($ids as $id) {
+                $isActive = $isActive && ($flags[$id]['is_active'] ?? false);
+                $inMenu = $inMenu && ($flags[$id]['include_in_menu'] ?? false);
+            }
+            if ($isActive) {
+                $candidates[] = [$inMenu ? 0 : 1, -count($ids), $categoryId];
+            }
+        }
+        if ($candidates === []) {
+            return null;
+        }
+        sort($candidates);
+
+        return $candidates[0][2];
+    }
+
+    /**
+     * Get the is_active and include_in_menu values of each category in $categoryIds for $storeId
+     *
+     * A store value replaces the default value. A missing value is false, as in the navigation menu.
+     *
+     * @param list<int> $categoryIds
+     * @return array<int, array{is_active?: bool, include_in_menu?: bool}>
+     */
+    protected function _getCategoryMenuFlags(array $categoryIds, int $storeId): array
+    {
+        $eavConfig = Mage::getSingleton('eav/config');
+        $codes = [];
+        $table = '';
+        foreach (['is_active', 'include_in_menu'] as $code) {
+            $attribute = $eavConfig->getAttribute(Mage_Catalog_Model_Category::ENTITY, $code);
+            $codes[(int) $attribute->getId()] = $code;
+            $table = $attribute->getBackendTable();
+        }
+
+        $adapter = $this->_getReadAdapter();
+        $rows = $adapter->fetchAll(
+            $adapter->select()
+                ->from($table, ['entity_id', 'attribute_id', 'value'])
+                ->where('entity_id IN (?)', $categoryIds)
+                ->where('attribute_id IN (?)', array_keys($codes))
+                ->where('store_id IN (?)', array_unique([Mage_Core_Model_App::ADMIN_STORE_ID, $storeId]))
+                ->order('store_id ASC'),
+        );
+
+        $flags = [];
+        foreach ($rows as $row) {
+            $flags[(int) $row['entity_id']][$codes[(int) $row['attribute_id']]] = (int) $row['value'] === 1;
+        }
+        return $flags;
+    }
+
+    /**
      * Duplicate product store values
      *
      * @param int $oldId
