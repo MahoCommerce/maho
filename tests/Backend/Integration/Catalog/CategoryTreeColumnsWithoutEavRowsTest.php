@@ -9,32 +9,35 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-test('a new category saves its tree columns when a migrated database lacks their EAV rows', function () {
+test('a new category saves its tree columns when a migrated database lacks their static EAV rows', function (string $change) {
     $treeColumns = ['path', 'position', 'level', 'children_count'];
     $resetEavState = function (): void {
         Mage::getSingleton('eav/config')->clear();
         Mage::unregister('_resource_singleton/catalog/category');
     };
-    $transaction = Mage::getResourceModel('catalog/category');
+    $categoryResource = Mage::getResourceModel('catalog/category');
     $write = Mage::getSingleton('core/resource')->getConnection('catalog_write');
+    $eavAttributeTable = Mage::getSingleton('core/resource')->getTableName('eav/attribute');
     $entityTypeId = (int) Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Category::ENTITY)->getId();
-    $countTreeRows = fn(): int => (int) $write->fetchOne(
+    $treeRows = ['entity_type_id = ?' => $entityTypeId, 'attribute_code IN (?)' => $treeColumns];
+    $countStaticTreeRows = fn(): int => (int) $write->fetchOne(
         $write->select()
-            ->from(Mage::getSingleton('core/resource')->getTableName('eav/attribute'), ['count' => new Maho\Db\Expr('COUNT(*)')])
+            ->from($eavAttributeTable, ['count' => new Maho\Db\Expr('COUNT(*)')])
             ->where('entity_type_id = ?', $entityTypeId)
-            ->where('attribute_code IN (?)', $treeColumns),
+            ->where('attribute_code IN (?)', $treeColumns)
+            ->where('backend_type = ?', 'static'),
     );
     $rootId = (int) Mage::app()->getDefaultStoreView()->getRootCategoryId();
     $rootPath = (string) Mage::getModel('catalog/category')->load($rootId)->getPath();
-    $treeRowsBefore = $countTreeRows();
+    $staticTreeRowsBefore = $countStaticTreeRows();
 
     // Roll back through a resource model: it also drops the commit callbacks that the save queues.
-    $transaction->beginTransaction();
+    $categoryResource->beginTransaction();
     try {
-        $write->delete(Mage::getSingleton('core/resource')->getTableName('eav/attribute'), [
-            'entity_type_id = ?' => $entityTypeId,
-            'attribute_code IN (?)' => $treeColumns,
-        ]);
+        match ($change) {
+            'delete' => $write->delete($eavAttributeTable, $treeRows),
+            'not static' => $write->update($eavAttributeTable, ['backend_type' => 'int'], $treeRows),
+        };
         $resetEavState();
 
         $category = Mage::getModel('catalog/category');
@@ -51,12 +54,12 @@ test('a new category saves its tree columns when a migrated database lacks their
                 ->where('entity_id = ?', $category->getId()),
         );
     } finally {
-        $transaction->rollBack();
+        $categoryResource->rollBack();
         $resetEavState();
     }
 
-    expect($countTreeRows())->toBe($treeRowsBefore);
+    expect($countStaticTreeRows())->toBe($staticTreeRowsBefore);
     expect($row['path'])->toBe($rootPath . '/' . $category->getId());
     expect((int) $row['level'])->toBe(count(explode('/', $rootPath)));
     expect((int) $row['children_count'])->toBe(0);
-});
+})->with(['delete', 'not static']);
