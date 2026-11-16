@@ -20,6 +20,7 @@ class MahoReportExplorer {
         number: ['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'in', 'nin', 'empty', 'not_empty'],
     };
     static MAX_DIMENSIONS = 3;
+    static CARDS = 5;
     static CYCLES = ['hour_of_day', 'day_of_week'];
     static CHART_TOP = 15;
     static SERIES_TOP = 5;
@@ -1050,7 +1051,10 @@ class MahoReportExplorer {
     renderTotals() {
         const totals = this.parts.totals;
         totals.textContent = '';
-        for (const column of this.metricColumns()) {
+        const columns = this.metricColumns();
+        const folded = !this.view.allCards && columns.length > MahoReportExplorer.CARDS + 1;
+        const shown = folded ? columns.filter((column, index) => index < MahoReportExplorer.CARDS || column.key === this.view.chartMetric) : columns;
+        for (const column of shown) {
             const selected = column.key === this.view.chartMetric;
             const pick = () => {
                 this.setView({ chartMetric: column.key });
@@ -1086,6 +1090,14 @@ class MahoReportExplorer {
             }
             tile.append(body);
             totals.append(tile);
+        }
+        if (columns.length > MahoReportExplorer.CARDS + 1) {
+            const more = this.button(folded ? this.t('moreMetrics', columns.length - shown.length) : this.t('fewerMetrics'), 'd-card border-2 border-dashed border-base-300 bg-transparent min-h-24 font-semibold hover:border-primary', () => {
+                this.setView({ allCards: !this.view.allCards });
+                this.renderTotals();
+            });
+            more.setAttribute('aria-expanded', String(!folded));
+            totals.append(more);
         }
     }
 
@@ -1128,7 +1140,15 @@ class MahoReportExplorer {
             body.append(tr);
         }
         for (const row of this.result.rows) {
-            const tr = this.element('tr', 'd-hover');
+            const tr = this.element('tr', dimensions.length ? 'd-hover cursor-pointer' : 'd-hover');
+            if (dimensions.length) {
+                tr.addEventListener('click', (event) => {
+                    if (!event.target.closest('a, button, input, select')) {
+                        event.stopPropagation();
+                        this.openDrillMenu(row, { x: event.clientX, y: event.clientY });
+                    }
+                });
+            }
             dimensions.forEach((column, index) => {
                 const td = this.element('td', 'whitespace-nowrap');
                 const text = row.labels[column.key] ?? row.dimensions[column.key] ?? '';
@@ -1720,9 +1740,10 @@ class MahoReportExplorer {
                 });
                 button.title = driver.share === null ? this.t('onlyThis') : `${this.t('shareOfChange', this.number.format(driver.share))} · ${this.t('onlyThis')}`;
                 button.append(this.element('span', 'truncate text-sm', driver.label));
-                const percent = driver.percent === null ? this.t('newValue') : `${driver.percent > 0 ? '+' : ''}${this.number.format(driver.percent)} %`;
+                // No percent on a small earlier value, where it tells less than the change itself
+                const percent = !driver.earlier ? ` (${this.t('newValue')})` : driver.percent === null ? '' : ` (${driver.percent > 0 ? '+' : ''}${this.number.format(driver.percent)} %)`;
                 button.append(this.element('span', `text-xs whitespace-nowrap ${better ? 'text-success' : 'text-error'}`,
-                    `${driver.change > 0 ? '+' : ''}${this.format(column, driver.change)} (${percent})`));
+                    `${driver.change > 0 ? '+' : ''}${this.format(column, driver.change)}${percent}`));
                 const bar = this.element('span', `block h-1.5 rounded ${better ? 'bg-success' : 'bg-error'}`);
                 bar.style.width = `${Math.max(2, Math.abs(driver.change) / max * 100)}%`;
                 button.append(bar);

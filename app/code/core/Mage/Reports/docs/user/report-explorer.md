@@ -52,7 +52,8 @@ in red when it is bad. For a metric such as **Returns**, a lower number is good.
 ## Read the chart
 
 Each metric has a card above the chart, with its total, the total of the earlier period and a
-small line of its values over the period. Click a card to show that metric in the chart.
+small line of its values over the period. Click a card to show that metric in the chart. A report
+with more than six metrics shows five cards. Click **Show more** for the other cards.
 
 The chart shows one metric. Its type follows the first grouping:
 
@@ -70,7 +71,7 @@ two months, weeks up to six months, then months.
 
 ## Look inside a number
 
-Click the first cell of a row, or a point or a bar of the chart. A menu opens:
+Click a row of the table, or a point or a bar of the chart. A menu opens:
 
 - **Only this value** keeps only this row. For a value such as a payment method, it adds a filter.
   For a day, a week or a month, it changes the period to that day, week or month, with a smaller
@@ -94,7 +95,11 @@ Click **Explain the change** on the chart. The page compares the metric of the c
 earlier period, or with the period before when the report has no comparison. For each grouping,
 it lists the values with the biggest change, for example the payment methods or the countries.
 
-Each value shows its change and its change in percent. When the metric adds up over the values,
+Each value shows its change and its change in percent. A value that was small in the earlier
+period, under 5% of the earlier total of its grouping, shows no percent, because a change from 1 to 9
+is +800% and tells less than the change itself. When two groupings split the records in the same
+way, such as **Customer group** and **Customer type** when only guests and one group order, the
+page shows only the first one. When the metric adds up over the values,
 such as **Net sales** or **Orders**, the tooltip of a value also shows its share of the total
 change. An average, such as **Average order value**, has no share. Click a value to keep only it.
 

@@ -289,7 +289,7 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
 
         foreach ([
             new Preset('sales_overview', $helper->__('Sales overview'), $sales, [
-                'metrics' => ['orders', 'units', 'gross_sales', 'discount', 'returns', 'net_sales', 'tax', 'shipping', 'sales_total', 'aov'],
+                'metrics' => ['orders', 'net_sales', 'sales_total', 'aov', 'units', 'gross_sales', 'discount', 'returns', 'tax', 'shipping'],
                 'dimensions' => ['period:day'],
                 'range' => 'last_30_days',
                 'compare' => 'previous_period',

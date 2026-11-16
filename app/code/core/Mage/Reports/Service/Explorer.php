@@ -178,6 +178,11 @@ class Mage_Reports_Service_Explorer
             }
             $additive = $metricIsAdditive && !$dimension->nonAdditive;
             $drivers = Explainer::drivers($values, $totalChange, $additive, $top);
+            // Two groupings that split the records the same way, such as a customer group and a customer type, show once
+            $numbers = static fn(array $list): array => array_map(static fn(array $driver): array => [$driver['change'], $driver['current']], $list);
+            if (in_array($numbers($drivers), array_map(static fn(array $shown): array => $numbers($shown['drivers']), $explained), true)) {
+                continue;
+            }
             if ($drivers !== []) {
                 $explained[] = ['code' => $dimension->code, 'label' => $dimension->label, 'field' => $dimension->field, 'additive' => $additive, 'drivers' => $drivers];
             }

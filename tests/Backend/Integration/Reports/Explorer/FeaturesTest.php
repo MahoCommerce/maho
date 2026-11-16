@@ -109,6 +109,23 @@ describe('the explanation of a change', function () {
             ->and(array_column($result['dimensions'][0]['drivers'], 'share'))->toBe([75.0, 25.0]);
     });
 
+    it('shows a grouping once when another grouping splits the orders the same way', function () {
+        $product = ReportFixture::createProduct('explorer_explain_twins', 10.0);
+        ReportFixture::placeOrder($product, 2, '2004-05-20 12:00:00');
+        ReportFixture::placeOrder($product, 1, '2004-05-20 13:00:00', customer: ReportFixture::createCustomer('explorer_twins'));
+        ReportFixture::placeOrder($product, 1, '2004-05-21 12:00:00');
+
+        $result = Mage::getService('reports/explorer')->explain(
+            explorerFeatureRequest('2004-05-21', ['compare' => 'previous_period']),
+            Mage_Reports_Model_Explorer_Access::full(),
+            'units',
+            ['customer_group_id', 'customer_type'],
+        );
+
+        expect(array_column($result['dimensions'], 'code'))->toBe(['customer_group_id'])
+            ->and(array_column($result['dimensions'][0]['drivers'], 'change'))->toBe([-1.0, -1.0]);
+    });
+
     it('refuses to explain a dataset that has no period', function () {
         $request = Request::fromArray(['dataset' => 'catalog_stock', 'metrics' => ['qty_on_hand']]);
 

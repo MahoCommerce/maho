@@ -53,6 +53,19 @@ it('gives no share when the changes cancel out to a total change of zero', funct
         ->and(array_column($drivers, 'share'))->toBe([null, null]);
 });
 
+it('gives no percent to a value whose earlier amount is under 5% of the earlier amounts of the dimension', function () {
+    $drivers = Explainer::drivers([
+        'complete' => ['label' => 'Complete', 'current' => 15.0, 'earlier' => 32.0],
+        'processing' => ['label' => 'Processing', 'current' => 9.0, 'earlier' => 1.0],
+        'canceled' => ['label' => 'Canceled', 'current' => 1.0, 'earlier' => 2.0],
+        'closed' => ['label' => 'Closed', 'current' => 2.0, 'earlier' => 1.0],
+    ], -9.0, true);
+
+    expect(array_column($drivers, 'value'))->toBe(['complete', 'processing', 'canceled', 'closed'])
+        ->and(array_column($drivers, 'percent'))->toBe([-53.13, null, -50.0, null])
+        ->and(array_column($drivers, 'change'))->toBe([-17.0, 8.0, -1.0, 1.0]);
+});
+
 it('knows which formulas only add and subtract', function () {
     expect(Formula::parse('gross_sales - discount - returns')->isLinear())->toBeTrue()
         ->and(Formula::parse('-a + b')->isLinear())->toBeTrue()

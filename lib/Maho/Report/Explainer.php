@@ -18,6 +18,8 @@ final class Explainer
      *
      * The share is the part of the total change that a value caused, as a percent. It is null when the values do not
      * add up to the total: a ratio or a distinct count, or a dimension where a record has several values.
+     * The percent is null when the earlier value is under 5% of the earlier values of the dimension, because a
+     * change from 1 to 9 is +800% and tells less than the change itself.
      *
      * @param array<string, array{label: string, current: ?float, earlier: ?float}> $values the values of the dimension, by key
      * @param float|null $totalChange the change of the metric over the whole report
@@ -26,6 +28,7 @@ final class Explainer
      */
     public static function drivers(array $values, ?float $totalChange, bool $additive, int $top = 5): array
     {
+        $smallBase = 0.05 * array_sum(array_map(static fn(array $value): float => abs($value['earlier'] ?? 0.0), $values));
         $drivers = [];
         foreach ($values as $key => $value) {
             $current = $value['current'];
@@ -40,7 +43,7 @@ final class Explainer
                 'current' => $current,
                 'earlier' => $earlier,
                 'change' => round($change, 4),
-                'percent' => $earlier === null || abs($earlier) < 0.00005 ? null : round($change / abs($earlier) * 100, 2),
+                'percent' => $earlier === null || abs($earlier) < max(0.00005, $smallBase) ? null : round($change / abs($earlier) * 100, 2),
                 'share' => $additive && $totalChange !== null && abs($totalChange) >= 0.00005 ? round($change / $totalChange * 100, 2) : null,
             ];
         }
