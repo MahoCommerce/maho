@@ -133,6 +133,19 @@ it('puts the default value into a store view value that the same model saved', f
     expect($product->getName())->toBe('Pest Default Name');
 });
 
+it('puts the default value into a product of a store view collection', function () {
+    $id = useDefaultProduct();
+
+    $product = Mage::getResourceModel('catalog/product_collection')
+        ->setStoreId(1)
+        ->addAttributeToSelect('name')
+        ->addIdFilter($id)
+        ->getFirstItem();
+    $product->useDefaultValue('name');
+
+    expect($product->getName())->toBe('Pest Default Name');
+});
+
 it('keeps a value that a form field lists in use_default without the check', function () {
     $id = useDefaultProduct();
     /** @var Mage_Catalog_Service_Product $service */
