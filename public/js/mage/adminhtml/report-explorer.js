@@ -271,8 +271,9 @@ class MahoReportExplorer {
     /** The Report menu: the ready-made reports by group, then the saved reports. */
     reportSelect() {
         const current = this.saved.find((report) => report.id === this.savedId);
+        const changed = current && !this.sameRequest(current.request, this.state);
         const preset = current ? null : this.allPresets().find((p) => this.isPreset(p));
-        const value = current ? `saved:${current.id}` : preset ? `preset:${preset.code}` : '';
+        const value = current && !changed ? `saved:${current.id}` : preset ? `preset:${preset.code}` : '';
         const wrapper = this.element('label', 'flex flex-col gap-1 text-sm');
         wrapper.append(this.element('span', 'font-semibold', this.t('report')));
         const select = this.element('select', 'd-select d-select-sm');
@@ -283,7 +284,7 @@ class MahoReportExplorer {
             return element;
         };
         if (!value) {
-            select.append(option('', this.t('customReport')));
+            select.append(option('', changed ? this.t('changedReport', current.name) : this.t('customReport')));
         }
         const groups = new Map();
         for (const entry of this.allPresets()) {
@@ -302,11 +303,7 @@ class MahoReportExplorer {
             const group = this.element('optgroup');
             group.label = this.t('saved');
             for (const report of this.saved) {
-                let label = report.shared ? `${report.name} (${this.t('shared')})` : report.name;
-                if (report === current && !this.sameRequest(report.request, this.state)) {
-                    label = this.t('changedReport', label);
-                }
-                group.append(option(`saved:${report.id}`, label));
+                group.append(option(`saved:${report.id}`, report.shared ? `${report.name} (${this.t('shared')})` : report.name));
             }
             select.append(group);
         }
@@ -328,9 +325,11 @@ class MahoReportExplorer {
         return this.savedId === null && this.view.drill.length === 0 && this.sameRequest(preset.request, this.state);
     }
 
-    /** Compare two requests without the page and the order of the metrics, which a saved report can change. */
+    /** Compare two requests without the page, the order of the keys and of the metrics, and the empty values. */
     sameRequest(a, b) {
-        const normal = (request) => JSON.stringify({ ...request, offset: undefined, metrics: [...(request.metrics ?? [])].sort() });
+        const normal = (request) => JSON.stringify(Object.entries({ ...request, offset: undefined, metrics: [...(request.metrics ?? [])].sort() })
+            .filter(([, value]) => value !== undefined && value !== null && !(Array.isArray(value) && value.length === 0))
+            .sort(([x], [y]) => x.localeCompare(y)));
         return normal(a) === normal(b);
     }
 
@@ -364,6 +363,9 @@ class MahoReportExplorer {
             Object.assign(next, { range: old.range, from: old.from, to: old.to, compare: old.compare });
             if (!next.range && !(next.from && next.to)) {
                 next.range = 'last_30_days';
+            }
+            if (!dimensions.length && next.dimensions) {
+                next.dimensions = [`period:${this.stepFor(this.periodDays(next), dataset)}`];
             }
             if (dataset.dateFields.some((f) => f.code === old.dateField)) {
                 next.dateField = old.dateField;
@@ -473,8 +475,8 @@ class MahoReportExplorer {
         return MahoReportExplorer.RANGE_DAYS[state.range ?? 'last_30_days'] ?? 30;
     }
 
-    stepFor(days) {
-        const period = this.dataset().dimensions.find((d) => d.granularities);
+    stepFor(days, dataset = this.dataset()) {
+        const period = dataset.dimensions.find((d) => d.granularities);
         const allowed = period?.granularities ?? ['day'];
         const wanted = days <= 2 ? 'hour' : days <= 62 ? 'day' : days <= 183 ? 'week' : 'month';
         return allowed.includes(wanted) ? wanted : 'day';
@@ -900,12 +902,8 @@ class MahoReportExplorer {
         if (dataset.dated && this.chartMetric()) {
             item(this.t('explainChange'), () => this.openExplain({ ...this.state, ...changes, dimensions: [] }, label));
         }
-        const period = this.dimensionColumns()[0];
-        const day = dataset.dated && period?.granularity && !MahoReportExplorer.CYCLES.includes(period.granularity)
-            ? this.bucketRange(period.granularity, row.dimensions[period.key])?.[0]
-            : null;
-        if (day) {
-            item(this.t('addNote'), () => this.openNoteDialog(day));
+        if (dataset.dated && changes.from) {
+            item(this.t('addNote'), () => this.openNoteDialog(changes.from));
         }
 
         document.body.append(menu);
