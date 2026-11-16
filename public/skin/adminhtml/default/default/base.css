@@ -4995,6 +4995,11 @@ table.actions td {
     vertical-align: middle
 }
 
+/* A grid with no pager row above the mass action bar: Reports > Refresh Statistics */
+.grid-widget > div:first-child > .massaction {
+    padding-top: var(--maho-space-3)
+}
+
 .grid-widget .massaction td:first-child {
     vertical-align: bottom
 }
