@@ -275,6 +275,15 @@ describe('product page head', function (): void {
         expect($layout->getBlock('head')->getKeywords())->not->toBe('Pcat Product');
     });
 
+    it('keeps the meta keywords of the category of the URL', function (): void {
+        primaryCategoryInit($this->product, (int) $this->winter->getId());
+        $layout = Mage::app()->getLayout();
+        $layout->createBlock('page/html_head', 'head');
+        $layout->createBlock('catalog/product_view');
+
+        expect($layout->getBlock('head')->getKeywords())->toBe('Pcat Product');
+    });
+
     it('leaves the primary category out of the title', function (): void {
         primaryCategoryInit($this->product);
 
