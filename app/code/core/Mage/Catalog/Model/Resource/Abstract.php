@@ -263,12 +263,19 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     protected function _markStoreValueOwn(\Maho\DataObject $object, Mage_Eav_Model_Entity_Attribute_Abstract $attribute, int $storeId): void
     {
         if ($object instanceof Mage_Catalog_Model_Abstract && $storeId != $this->getDefaultStoreId()) {
-            $code = $attribute->getAttributeCode();
-            // The store view inherited the loaded value, so it is the default value that useDefaultValue() reads
-            if (!$object->getExistsStoreValueFlag($code) && $object->getAttributeDefaultValue($code) === false) {
-                $object->setAttributeDefaultValue($code, $object->getOrigData($code));
-            }
-            $object->setExistsStoreValueFlag($code);
+            $this->_recordDefaultValue($object, $attribute->getAttributeCode());
+            $object->setExistsStoreValueFlag($attribute->getAttributeCode());
+        }
+    }
+
+    /**
+     * Record the default value of $code for useDefaultValue(), before a save changes the store value flag. Without
+     * the flag, the store view inherited the loaded value. With the flag, the load found no default value.
+     */
+    protected function _recordDefaultValue(Mage_Catalog_Model_Abstract $object, string $code): void
+    {
+        if ($object->getAttributeDefaultValue($code) === false) {
+            $object->setAttributeDefaultValue($code, $object->getExistsStoreValueFlag($code) ? null : $object->getOrigData($code));
         }
     }
 
@@ -410,6 +417,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
                 continue;
             }
             if ($object instanceof Mage_Catalog_Model_Abstract) {
+                $this->_recordDefaultValue($object, $attribute->getAttributeCode());
                 $object->unsExistsStoreValueFlag($attribute->getAttributeCode());
             }
         }

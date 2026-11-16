@@ -133,6 +133,21 @@ it('puts the default value into a store view value that the same model saved', f
     expect($product->getName())->toBe('Pest Default Name');
 });
 
+it('puts null into a value with no default value after a save of the same model deleted it', function () {
+    $id = useDefaultProduct(storeName: false);
+    /** @var Mage_Catalog_Service_Product $service */
+    $service = Mage::getService('catalog/product');
+    $service->save($service->getById($id, 1)->setData('meta_title', 'Pest Store Title'));
+
+    $product = $service->getById($id, 1);
+    $service->useDefault($product, ['meta_title']);
+    $service->save($product);
+    $service->save($product->setData('meta_title', 'Pest New Store Title'));
+    $service->useDefault($product, ['meta_title']);
+
+    expect($product->getMetaTitle())->toBeNull();
+});
+
 it('puts the default value into a product of a store view collection', function () {
     $id = useDefaultProduct();
 
@@ -217,4 +232,25 @@ it('saves a category in a store view with the name on the default value', functi
 
     expect($category->getName())->toBe('Pest Default Name')
         ->and($service->getById($id, 1)->getName())->toBe('Pest Default Name');
+});
+
+it('keeps a category value that a form field lists in use_default without the check', function () {
+    /** @var Mage_Catalog_Service_Category $service */
+    $service = Mage::getService('catalog/category');
+    $category = $service->newCategory((int) Mage::app()->getStore(1)->getRootCategoryId());
+    $category->setName('Pest Default Name')
+        ->setUrlKey('pest-use-default-' . uniqid())
+        ->setIsActive(1)
+        ->setIsAnchor(1)
+        ->setIncludeInMenu(1);
+    $id = (int) $service->save($category)->getId();
+
+    $service->save($service->getById($id, 1)->setName('Pest Store Name'));
+
+    $category = $service->getById($id, 1);
+    $category->addData(['use_default' => ['name']]);
+    $service->useDefault($category, []);
+    $service->save($category);
+
+    expect($service->getById($id, 1)->getName())->toBe('Pest Store Name');
 });
