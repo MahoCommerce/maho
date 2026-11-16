@@ -961,6 +961,8 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
         }
 
         $product->addData($this->getRequest()->getParam('simple_product', []));
+        // Empties the "Use Default Value" list that a form field can fill
+        $this->_getService()->useDefault($product, []);
         $product->setWebsiteIds($configurableProduct->getWebsiteIds());
 
         $autogenerateOptions = [];
