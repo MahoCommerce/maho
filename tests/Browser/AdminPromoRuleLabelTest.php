@@ -23,22 +23,7 @@ const RULE_LABEL_MARKUP = '<img src=x onerror="window.__ruleXss=1">';
 beforeEach(function () {
     deleteRuleLabelAdmin();
 
-    $user = Mage::getModel('admin/user')
-        ->setUsername(RULE_LABEL_ADMIN_USERNAME)
-        ->setFirstname('Rule')
-        ->setLastname('Label')
-        ->setEmail('rule-label@example.test')
-        ->setPassword(RULE_LABEL_ADMIN_PASSWORD)
-        ->setIsActive()
-        ->save();
-
-    $roleId = Mage::getModel('admin/role')->getCollection()
-        ->addFieldToFilter('role_type', Mage_Admin_Model_Acl::ROLE_TYPE_GROUP)
-        ->setPageSize(1)
-        ->getFirstItem()
-        ->getId();
-
-    Mage::getModel('admin/user')->load($user->getId())->setRoleIds([$roleId])->saveRelations();
+    createBrowserAdmin(RULE_LABEL_ADMIN_USERNAME, RULE_LABEL_ADMIN_PASSWORD);
 });
 
 afterEach(function () {
@@ -47,10 +32,7 @@ afterEach(function () {
 
 function deleteRuleLabelAdmin(): void
 {
-    $user = Mage::getModel('admin/user')->loadByUsername(RULE_LABEL_ADMIN_USERNAME);
-    if ($user->getId()) {
-        $user->delete();
-    }
+    deleteBrowserAdmin(RULE_LABEL_ADMIN_USERNAME);
 }
 
 /** Build a condition container from $innerHtml, call hideParamInputField() on it, and return the text of its label. */

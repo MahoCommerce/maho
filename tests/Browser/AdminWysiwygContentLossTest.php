@@ -54,10 +54,7 @@ afterEach(function () {
 
 function deleteWysiwygLossAdmin(): void
 {
-    $user = Mage::getModel('admin/user')->loadByUsername(WYSIWYG_LOSS_ADMIN_USER);
-    if ($user->getId()) {
-        $user->delete();
-    }
+    deleteBrowserAdmin(WYSIWYG_LOSS_ADMIN_USER);
 }
 
 /** Create an admin with the full-access role. The password is known and the ACL allows all. */
@@ -65,22 +62,7 @@ function createWysiwygLossAdmin(): void
 {
     deleteWysiwygLossAdmin();
 
-    $user = Mage::getModel('admin/user')
-        ->setUsername(WYSIWYG_LOSS_ADMIN_USER)
-        ->setFirstname('Wysiwyg')
-        ->setLastname('Loss')
-        ->setEmail('wysiwyg-loss@example.test')
-        ->setPassword(WYSIWYG_LOSS_ADMIN_PASSWORD)
-        ->setIsActive()
-        ->save();
-
-    $roleId = Mage::getModel('admin/role')->getCollection()
-        ->addFieldToFilter('role_type', Mage_Admin_Model_Acl::ROLE_TYPE_GROUP)
-        ->setPageSize(1)
-        ->getFirstItem()
-        ->getId();
-
-    Mage::getModel('admin/user')->load($user->getId())->setRoleIds([$roleId])->saveRelations();
+    createBrowserAdmin(WYSIWYG_LOSS_ADMIN_USER, WYSIWYG_LOSS_ADMIN_PASSWORD);
 }
 
 function createWysiwygLossProduct(): Mage_Catalog_Model_Product

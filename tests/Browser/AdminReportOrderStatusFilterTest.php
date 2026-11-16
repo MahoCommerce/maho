@@ -32,10 +32,7 @@ afterEach(function () {
 
 function deleteReportStatusAdmin(): void
 {
-    $user = Mage::getModel('admin/user')->loadByUsername(REPORT_STATUS_ADMIN_USER);
-    if ($user->getId()) {
-        $user->delete();
-    }
+    deleteBrowserAdmin(REPORT_STATUS_ADMIN_USER);
 }
 
 /** A fresh admin with the full-access role, so the password is known and ACL never gets in the way. */
@@ -43,22 +40,7 @@ function createReportStatusAdmin(): void
 {
     deleteReportStatusAdmin();
 
-    $user = Mage::getModel('admin/user')
-        ->setUsername(REPORT_STATUS_ADMIN_USER)
-        ->setFirstname('Report')
-        ->setLastname('Status')
-        ->setEmail('report-status@example.test')
-        ->setPassword(REPORT_STATUS_ADMIN_PASSWORD)
-        ->setIsActive()
-        ->save();
-
-    $roleId = Mage::getModel('admin/role')->getCollection()
-        ->addFieldToFilter('role_type', Mage_Admin_Model_Acl::ROLE_TYPE_GROUP)
-        ->setPageSize(1)
-        ->getFirstItem()
-        ->getId();
-
-    Mage::getModel('admin/user')->load($user->getId())->setRoleIds([$roleId])->saveRelations();
+    createBrowserAdmin(REPORT_STATUS_ADMIN_USER, REPORT_STATUS_ADMIN_PASSWORD);
 }
 
 /** Decode the filter the report was run with out of the url the report landed on. */

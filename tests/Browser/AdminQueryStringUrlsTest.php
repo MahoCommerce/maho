@@ -37,10 +37,7 @@ afterEach(function () {
 
 function deleteQueryUrlsAdmin(): void
 {
-    $user = Mage::getModel('admin/user')->loadByUsername(QUERY_URLS_ADMIN_USER);
-    if ($user->getId()) {
-        $user->delete();
-    }
+    deleteBrowserAdmin(QUERY_URLS_ADMIN_USER);
 }
 
 /** A fresh admin with the full-access role, so the password is known and ACL never gets in the way. */
@@ -48,22 +45,7 @@ function createQueryUrlsAdmin(): void
 {
     deleteQueryUrlsAdmin();
 
-    $user = Mage::getModel('admin/user')
-        ->setUsername(QUERY_URLS_ADMIN_USER)
-        ->setFirstname('Query')
-        ->setLastname('Urls')
-        ->setEmail('query-urls@example.test')
-        ->setPassword(QUERY_URLS_ADMIN_PASSWORD)
-        ->setIsActive()
-        ->save();
-
-    $roleId = Mage::getModel('admin/role')->getCollection()
-        ->addFieldToFilter('role_type', Mage_Admin_Model_Acl::ROLE_TYPE_GROUP)
-        ->setPageSize(1)
-        ->getFirstItem()
-        ->getId();
-
-    Mage::getModel('admin/user')->load($user->getId())->setRoleIds([$roleId])->saveRelations();
+    createBrowserAdmin(QUERY_URLS_ADMIN_USER, QUERY_URLS_ADMIN_PASSWORD);
 }
 
 /** Log in and open an admin page, waiting for one of its elements. */

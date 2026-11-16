@@ -26,10 +26,7 @@ afterEach(function () {
 
 function deleteReindexAdmin(): void
 {
-    $user = Mage::getModel('admin/user')->loadByUsername(REINDEX_ADMIN_USER);
-    if ($user->getId()) {
-        $user->delete();
-    }
+    deleteBrowserAdmin(REINDEX_ADMIN_USER);
 }
 
 /** A fresh admin with the full-access role, so the password is known and ACL never gets in the way. */
@@ -37,22 +34,7 @@ function createReindexAdmin(): void
 {
     deleteReindexAdmin();
 
-    $user = Mage::getModel('admin/user')
-        ->setUsername(REINDEX_ADMIN_USER)
-        ->setFirstname('Reindex')
-        ->setLastname('Dialog')
-        ->setEmail('reindex-dialog@example.test')
-        ->setPassword(REINDEX_ADMIN_PASSWORD)
-        ->setIsActive()
-        ->save();
-
-    $roleId = Mage::getModel('admin/role')->getCollection()
-        ->addFieldToFilter('role_type', Mage_Admin_Model_Acl::ROLE_TYPE_GROUP)
-        ->setPageSize(1)
-        ->getFirstItem()
-        ->getId();
-
-    Mage::getModel('admin/user')->load($user->getId())->setRoleIds([$roleId])->saveRelations();
+    createBrowserAdmin(REINDEX_ADMIN_USER, REINDEX_ADMIN_PASSWORD);
 }
 
 function loginToIndexManagement(): object

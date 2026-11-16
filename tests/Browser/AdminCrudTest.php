@@ -38,32 +38,14 @@ afterEach(function () {
 
 function deleteCrudAdmin(): void
 {
-    $user = Mage::getModel('admin/user')->loadByUsername(CRUD_ADMIN_USER);
-    if ($user->getId()) {
-        $user->delete();
-    }
+    deleteBrowserAdmin(CRUD_ADMIN_USER);
 }
 
 function createCrudAdmin(): void
 {
     deleteCrudAdmin();
 
-    $user = Mage::getModel('admin/user')
-        ->setUsername(CRUD_ADMIN_USER)
-        ->setFirstname('Admin')
-        ->setLastname('Crud')
-        ->setEmail('admin-crud@example.test')
-        ->setPassword(CRUD_ADMIN_PASSWORD)
-        ->setIsActive()
-        ->save();
-
-    $roleId = Mage::getModel('admin/role')->getCollection()
-        ->addFieldToFilter('role_type', Mage_Admin_Model_Acl::ROLE_TYPE_GROUP)
-        ->setPageSize(1)
-        ->getFirstItem()
-        ->getId();
-
-    Mage::getModel('admin/user')->load($user->getId())->setRoleIds([$roleId])->saveRelations();
+    createBrowserAdmin(CRUD_ADMIN_USER, CRUD_ADMIN_PASSWORD);
 }
 
 function deleteCrudSalesFixtures(): void
