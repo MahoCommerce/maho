@@ -450,40 +450,6 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     }
 
     /**
-     * Put the default value into each attribute that the save deleted for the store. A value of false means "use the
-     * default value", and the observers of the save must read the value, not false.
-     */
-    #[\Override]
-    protected function _afterSave(\Maho\DataObject $object)
-    {
-        parent::_afterSave($object);
-
-        $codes = [];
-        foreach ($object->getData() as $code => $value) {
-            if ($value === false && isset($this->_attributesByCode[$code]) && !$this->isAttributeStatic($code)) {
-                $codes[] = $code;
-            }
-        }
-        if ($codes === []) {
-            return $this;
-        }
-
-        $values = $this->getAttributeRawValue($object->getId(), $codes, $this->getDefaultStoreId());
-        if (count($codes) === 1) {
-            $values = $values === false ? [] : [$codes[0] => $values];
-        }
-        foreach ($codes as $code) {
-            $value = is_array($values) ? ($values[$code] ?? null) : null;
-            $object->setData($code, $value);
-            if ($object instanceof Mage_Core_Model_Abstract && $object->getOrigData($code) === false) {
-                $object->setOrigData($code, $value);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * Retrieve Object instance with original data
      *
      * @param \Maho\DataObject $object

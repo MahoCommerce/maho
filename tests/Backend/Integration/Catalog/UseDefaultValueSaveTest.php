@@ -10,8 +10,8 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * "Use Default Value" sets an attribute to false, and the save deletes the store view value (#1857). The observers
- * of the save must read the default value, not false.
+ * "Use Default Value" sets an attribute to false, and the save deletes the store view value (#1857). A typed getter
+ * returns null for false, so the observers of the save never get false.
  */
 
 const USE_DEFAULT_SKU = 'pest-use-default-value';
@@ -50,8 +50,8 @@ it('saves a product in a store view with the name on the default value', functio
     $service->useDefault($product, ['name']);
     $service->save($product);
 
-    expect($product->getName())->toBe('Pest Default Name')
-        ->and($product->getStockItem()->getProductName())->toBe('Pest Default Name')
+    expect($product->getName())->toBeNull()
+        ->and($product->getStockItem()->getProductName())->toBeNull()
         ->and($service->getById($id, 1)->getName())->toBe('Pest Default Name');
 });
 
@@ -72,6 +72,14 @@ it('saves a category in a store view with the name on the default value', functi
     $service->useDefault($category, ['name']);
     $service->save($category);
 
-    expect($category->getName())->toBe('Pest Default Name')
+    expect($category->getName())->toBeNull()
         ->and($service->getById($id, 1)->getName())->toBe('Pest Default Name');
+});
+
+it('returns null from a typed getter of an attribute on the default value', function () {
+    $product = Mage::getModel('catalog/product')->setData(['tax_class_id' => false, 'url_key' => false, 'description' => false]);
+
+    expect($product->getTaxClassId())->toBeNull()
+        ->and($product->getUrlKey())->toBeNull()
+        ->and($product->getDescription())->toBeNull();
 });

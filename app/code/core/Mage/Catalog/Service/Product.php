@@ -517,7 +517,8 @@ class Mage_Catalog_Service_Product
             $errors->addError('sku', $helper->__('SKU is required'));
         }
         // In a store view, false means that the store view uses the default name
-        if ($product->getName() !== false && trim((string) $product->getName()) === '') {
+        $name = $product->getData('name');
+        if ($name !== false && trim((string) $name) === '') {
             $errors->addError('name', $helper->__('Name is required'));
         }
         $product->validateRecord($errors)->throwIfErrors();
