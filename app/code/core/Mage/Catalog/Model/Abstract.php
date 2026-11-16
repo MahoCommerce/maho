@@ -41,13 +41,6 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
     protected $_storeValuesFlags = [];
 
     /**
-     * Codes of the attributes whose store view value the next save deletes
-     *
-     * @var array<string, true>
-     */
-    protected array $_useDefaultValues = [];
-
-    /**
      * Locked attributes
      *
      * @var array
@@ -309,21 +302,35 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
             $default = $this->getAttributeDefaultValue($attributeCode);
             $this->setData($attributeCode, $default === false ? null : $default);
         }
-        $this->_useDefaultValues[$attributeCode] = true;
-        return $this;
+        $codes = $this->getUseDefault() ?? [];
+        if (!in_array($attributeCode, $codes, true)) {
+            $codes[] = $attributeCode;
+        }
+        return $this->setUseDefault($codes);
     }
 
     public function usesDefaultValue(string $attributeCode): bool
     {
-        return isset($this->_useDefaultValues[$attributeCode]);
+        return in_array($attributeCode, $this->getUseDefault() ?? [], true);
     }
 
     /**
-     * @return list<string>
+     * Codes of the attributes whose store view value the next save deletes
+     *
+     * @return list<string>|null
      */
-    public function getUseDefaultValueCodes(): array
+    public function getUseDefault(): ?array
     {
-        return array_keys($this->_useDefaultValues);
+        $value = $this->getData('use_default');
+        return is_array($value) ? array_values(array_map(strval(...), $value)) : null;
+    }
+
+    /**
+     * @param list<string>|null $value
+     */
+    public function setUseDefault(?array $value): static
+    {
+        return $this->setData('use_default', $value);
     }
 
     /**
@@ -344,7 +351,7 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
     protected function _afterSave()
     {
         parent::_afterSave();
-        $this->_useDefaultValues = [];
+        $this->unsetData('use_default');
         return $this;
     }
 

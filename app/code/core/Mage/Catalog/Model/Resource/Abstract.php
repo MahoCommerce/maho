@@ -460,28 +460,13 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     }
 
     /**
-     * Collect the save data. An attribute on the default value takes the path of false, which deletes the store
-     * view value, and then gets its value back.
+     * The save deletes the store view value of an attribute on the default value. It keeps every other value, an
+     * empty one included.
      */
     #[\Override]
-    protected function _collectSaveData($newObject)
+    protected function _isAttributeValueDeleted(\Maho\DataObject $object, Mage_Eav_Model_Entity_Attribute_Abstract $attribute, mixed $value): bool
     {
-        if (!$newObject instanceof Mage_Catalog_Model_Abstract) {
-            return parent::_collectSaveData($newObject);
-        }
-
-        $values = [];
-        foreach ($newObject->getUseDefaultValueCodes() as $code) {
-            $values[$code] = $newObject->getData($code);
-            $newObject->setData($code, false);
-        }
-        try {
-            return parent::_collectSaveData($newObject);
-        } finally {
-            foreach ($values as $code => $value) {
-                $newObject->setData($code, $value);
-            }
-        }
+        return $this->isUseDefaultValue($object, (string) $attribute->getAttributeCode());
     }
 
     /**

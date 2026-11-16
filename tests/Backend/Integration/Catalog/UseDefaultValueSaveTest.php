@@ -109,9 +109,27 @@ it('saves a new store view value after a save on the default value', function ()
     $product = $service->getById($id, 1);
     $service->useDefault($product, ['name']);
     $service->save($product);
+
+    expect($product->getUseDefault())->toBeNull();
+
     $service->save($product->setName('Pest New Store Name'));
 
     expect($service->getById($id, 1)->getName())->toBe('Pest New Store Name');
+});
+
+it('deletes a store view value that is equal to the default value', function () {
+    $id = useDefaultProduct(storeName: false);
+    /** @var Mage_Catalog_Service_Product $service */
+    $service = Mage::getService('catalog/product');
+    $service->save($service->getById($id, 1)->setName('Pest Default Name'));
+
+    expect(useDefaultStoreNameRows($id))->toBe(1);
+
+    $product = $service->getById($id, 1);
+    $service->useDefault($product, ['name']);
+    $service->save($product);
+
+    expect(useDefaultStoreNameRows($id))->toBe(0);
 });
 
 it('still deletes the store view value of an attribute set to false', function () {
