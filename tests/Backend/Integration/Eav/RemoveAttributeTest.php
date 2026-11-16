@@ -83,16 +83,3 @@ it('deletes the values and the options of an attribute that a script removes wit
     expect(removeAttributeRowCounts($this->setup, $this->attributeId, $this->optionIds))
         ->toBe(['values' => 0, 'options' => 0, 'optionValues' => 0, 'setRows' => 0]);
 });
-
-it('deletes the rows that an attribute deleted with the foreign keys off left behind', function () {
-    $this->setup->startSetup();
-    $this->setup->getConnection()->delete($this->setup->getTable('eav/attribute'), ['attribute_id = ?' => $this->attributeId]);
-    $this->setup->endSetup();
-
-    expect(removeAttributeRowCounts($this->setup, $this->attributeId, $this->optionIds)['values'])->toBe(1);
-
-    $this->setup->purgeOrphanedAttributeRows();
-
-    expect(removeAttributeRowCounts($this->setup, $this->attributeId, $this->optionIds))
-        ->toBe(['values' => 0, 'options' => 0, 'optionValues' => 0, 'setRows' => 0]);
-});

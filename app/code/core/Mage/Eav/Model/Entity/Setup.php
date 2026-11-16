@@ -1039,41 +1039,6 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
     }
 
     /**
-     * Delete the rows that refer to an attribute that no longer exists, with the rows that refer to them.
-     *
-     * Such rows stay when an attribute was removed while the foreign keys were off.
-     */
-    public function purgeOrphanedAttributeRows(): void
-    {
-        $adapter = $this->getConnection();
-        $keys = self::getCascadingKeys();
-        $attributeTable = $this->getTable('eav/attribute');
-        $queue = [$attributeTable];
-        $queued = [$attributeTable => true];
-        while ($queue !== []) {
-            $table = array_shift($queue);
-            foreach ($keys[$table] ?? [] as $key) {
-                if (!$adapter->isTableExists($key['table'])) {
-                    continue;
-                }
-                $existing = $adapter->select()
-                    ->from($table, [$key['refColumn']])
-                    ->where($adapter->quoteIdentifier($key['refColumn']) . ' IS NOT NULL');
-                $where = [$adapter->quoteIdentifier($key['column']) . ' NOT IN ?' => $existing];
-                if ($key['onDelete'] === ReferentialAction::SET_NULL) {
-                    $adapter->update($key['table'], [$key['column'] => null], $where);
-                } else {
-                    $adapter->delete($key['table'], $where);
-                }
-                if (!isset($queued[$key['table']])) {
-                    $queued[$key['table']] = true;
-                    $queue[] = $key['table'];
-                }
-            }
-        }
-    }
-
-    /**
      * Delete or clear the rows that refer to the rows of $table whose $column is in $values, as the foreign keys
      * do when they are on. Delete the rows that refer to those rows first.
      *
