@@ -1,6 +1,6 @@
 ---
 description: The Reports > Explorer page runs ready-made reports and reports that you build, on live order, cart, customer and stock data, with a chart, a comparison with an earlier period, the records behind a number, an explanation of a change, notes, monthly targets, saved reports pinned to the admin dashboard, and CSV export.
-admin_pages: [report_explorer, dashboard]
+admin_pages: [report_explorer]
 ---
 
 # Report Explorer
