@@ -132,6 +132,8 @@ class Mage_Catalog_Service_Category
      */
     public function useDefault(Category $category, array $codes): void
     {
+        // A form field can also fill use_default, so the list keeps only the codes that pass the check
+        $category->setUseDefault(null);
         foreach (Mage::helper('catalog')->getStoreScopeAttributes(Category::ENTITY, $codes, (int) $category->getStoreId()) as $attribute) {
             $category->useDefaultValue($attribute->getAttributeCode());
         }

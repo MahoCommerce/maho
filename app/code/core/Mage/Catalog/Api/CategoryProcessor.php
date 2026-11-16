@@ -210,8 +210,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Map the response from a new load in the same store scope, as a GET does: the save changes several values,
-     * and useDefault leaves the EAV false value in the model.
+     * Map the response from a new load in the same store scope, as a GET does: the save changes several values.
      */
     private function refreshDto(Mage_Catalog_Model_Category $category): Category
     {

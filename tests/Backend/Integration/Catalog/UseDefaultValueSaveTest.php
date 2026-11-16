@@ -115,6 +115,36 @@ it('saves a new store view value after a save on the default value', function ()
     $service->save($product->setName('Pest New Store Name'));
 
     expect($service->getById($id, 1)->getName())->toBe('Pest New Store Name');
+
+    $service->useDefault($product, ['name']);
+
+    expect($product->getName())->toBe('Pest Default Name');
+});
+
+it('puts the default value into a store view value that the same model saved', function () {
+    $id = useDefaultProduct(storeName: false);
+    /** @var Mage_Catalog_Service_Product $service */
+    $service = Mage::getService('catalog/product');
+
+    $product = $service->getById($id, 1);
+    $service->save($product->setName('Pest Store Name'));
+    $service->useDefault($product, ['name']);
+
+    expect($product->getName())->toBe('Pest Default Name');
+});
+
+it('keeps a value that a form field lists in use_default without the check', function () {
+    $id = useDefaultProduct();
+    /** @var Mage_Catalog_Service_Product $service */
+    $service = Mage::getService('catalog/product');
+
+    $product = $service->getById($id, 1);
+    $product->addData(['use_default' => ['price', 'name']]);
+    $service->useDefault($product, []);
+    $service->save($product);
+
+    expect((float) $service->getById($id, 0)->getPrice())->toBe(10.0)
+        ->and(useDefaultStoreNameRows($id))->toBe(1);
 });
 
 it('deletes a store view value that is equal to the default value', function () {

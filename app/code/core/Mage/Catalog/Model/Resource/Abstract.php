@@ -263,7 +263,12 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     protected function _markStoreValueOwn(\Maho\DataObject $object, Mage_Eav_Model_Entity_Attribute_Abstract $attribute, int $storeId): void
     {
         if ($object instanceof Mage_Catalog_Model_Abstract && $storeId != $this->getDefaultStoreId()) {
-            $object->setExistsStoreValueFlag($attribute->getAttributeCode());
+            $code = $attribute->getAttributeCode();
+            // The store view inherited the loaded value, so it is the default value that useDefaultValue() reads
+            if (!$object->getExistsStoreValueFlag($code) && $object->getAttributeDefaultValue($code) === false) {
+                $object->setAttributeDefaultValue($code, $object->getOrigData($code));
+            }
+            $object->setExistsStoreValueFlag($code);
         }
     }
 
@@ -490,10 +495,8 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     /**
      * Validate attribute values, excusing store-scope attributes set to use the default value.
      *
-     * In catalog a `false` value is the "use default scope value" sentinel, and it is the only value
-     * treated as empty (see _isAttributeValueEmpty), so it is the only value a required attribute is
-     * ever flagged for. In a non-default store the default scope is assumed to hold a valid value
-     * (not verified here), so such an attribute is not a missing required value.
+     * In a store view, a required attribute on the default value is not missing: the default scope holds its
+     * value (not verified here).
      *
      * @param Mage_Catalog_Model_Abstract $object
      * @return array|true
@@ -516,18 +519,6 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     }
 
     /**
-     * Check is attribute value empty
-     *
-     * @param mixed $value
-     * @return bool
-     */
-    #[\Override]
-    protected function _isAttributeValueEmpty(Mage_Eav_Model_Entity_Attribute_Abstract $attribute, $value)
-    {
-        return $value === false;
-    }
-
-    /**
      * Return if attribute exists in original data array.
      * Checks also attribute's store scope:
      * We should insert on duplicate key update values if we unchecked 'STORE VIEW' checkbox in store view.
@@ -544,7 +535,6 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
         $result = parent::_canUpdateAttribute($attribute, $value, $origData);
         if ($result
             && ($attribute->isScopeStore() || $attribute->isScopeWebsite())
-            && !$this->_isAttributeValueEmpty($attribute, $value)
             && $value == $origData[$attribute->getAttributeCode()]
             && isset($origData['store_id']) && $origData['store_id'] != $this->getDefaultStoreId()
         ) {

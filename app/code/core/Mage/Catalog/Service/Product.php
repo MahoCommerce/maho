@@ -216,6 +216,8 @@ class Mage_Catalog_Service_Product
      */
     public function useDefault(Product $product, array $codes): void
     {
+        // A form field can also fill use_default, so the list keeps only the codes that pass the check
+        $product->setUseDefault(null);
         foreach (Mage::helper('catalog')->getStoreScopeAttributes(Product::ENTITY, $codes, (int) $product->getStoreId()) as $attribute) {
             $product->useDefaultValue($attribute->getAttributeCode());
         }
