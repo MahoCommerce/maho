@@ -248,9 +248,31 @@ describe('product page URL', function (): void {
     });
 });
 
-describe('product page title', function (): void {
+describe('product page head', function (): void {
     beforeEach(function (): void {
         $this->product = primaryCategoryProduct([$this->winter]);
+        $this->winter->setMetaRobots('NOINDEX,FOLLOW')->save();
+    });
+
+    it('leaves the robots of the primary category out of the page', function (): void {
+        primaryCategoryInit($this->product);
+
+        expect(Mage::app()->getLayout()->createBlock('page/html_head')->getRobots())->not->toBe('NOINDEX,FOLLOW');
+    });
+
+    it('keeps the robots of the category of the URL', function (): void {
+        primaryCategoryInit($this->product, (int) $this->winter->getId());
+
+        expect(Mage::app()->getLayout()->createBlock('page/html_head')->getRobots())->toBe('NOINDEX,FOLLOW');
+    });
+
+    it('leaves the primary category out of the meta keywords', function (): void {
+        primaryCategoryInit($this->product);
+        $layout = Mage::app()->getLayout();
+        $layout->createBlock('page/html_head', 'head');
+        $layout->createBlock('catalog/product_view');
+
+        expect($layout->getBlock('head')->getKeywords())->not->toBe('Pcat Product');
     });
 
     it('leaves the primary category out of the title', function (): void {

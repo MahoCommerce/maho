@@ -566,8 +566,8 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
                 }
             }
 
-            // Check for category page
-            if ($category = Mage::registry('current_category')) {
+            // Check for category page. The primary category of a product page does not set the robots.
+            if (($category = Mage::registry('current_category')) && $product?->getUsesPrimaryCategory() !== true) {
                 $robots = $category->getMetaRobots();
                 if ($robots) {
                     $this->_data['robots'] = $robots;
