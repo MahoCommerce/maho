@@ -1555,10 +1555,10 @@ it('loads tool sections on demand and keeps them for the conversation', function
             new TextResult('Here are the orders.'),
         );
 
-        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'What came in today?', 'context' => ['route' => 'dashboard/index']]);
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'What came in today?', 'context' => ['route' => 'notification/index']]);
 
         expect($result['status'])->toBe(200);
-        // The dashboard loads no section and the message names none: only the local tools are offered at first.
+        // The inbox loads no section and the message names none: only the local tools are offered at first.
         expect(AiChatScript::$offeredTools[0])->toBe(['enable_tools', 'remember', 'forget', 'attachment_read', 'admin_open_page', 'admin_fill_form', 'admin_page_action', 'run_in_background', 'docs_read']);
         $results = aiChatEvents($result['events'], 'tool_result');
         expect($results[0]['ok'])->toBeFalse();
@@ -1574,7 +1574,7 @@ it('loads tool sections on demand and keeps them for the conversation', function
 
         // The next turn of the same conversation starts with the sales section loaded.
         AiChatScript::reset(new TextResult('Still here.'));
-        aiChatRequest('/api/admin/ai/chat', ['conversation_id' => (int) $done[0]['conversation_id'], 'message' => 'Thanks', 'context' => ['route' => 'dashboard/index']]);
+        aiChatRequest('/api/admin/ai/chat', ['conversation_id' => (int) $done[0]['conversation_id'], 'message' => 'Thanks', 'context' => ['route' => 'notification/index']]);
         expect(AiChatScript::$offeredTools[0])->toContain('sales_orders_list');
     } finally {
         aiChatDeleteConversations((int) $admin->getId());
