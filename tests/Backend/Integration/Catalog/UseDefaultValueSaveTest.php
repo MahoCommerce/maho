@@ -10,8 +10,8 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * "Use Default Value" sets an attribute to false, and the save deletes the store view value (#1857). The observers
- * of the save must read the default value, not false.
+ * "Use Default Value" puts the default value into the model and deletes the store view value at the save (#1857).
+ * The model never holds false, so the observers of the save read the default value.
  */
 
 const USE_DEFAULT_SKU = 'pest-use-default-value';
@@ -27,7 +27,12 @@ afterEach(function () {
     Mage::unregister('isSecureArea');
 });
 
-it('saves a product in a store view with the name on the default value', function () {
+/**
+ * Save a product named "Pest Default Name", with the name "Pest Store Name" in the store view 1 when $storeName is
+ * true. Return its ID.
+ */
+function useDefaultProduct(bool $storeName = true): int
+{
     /** @var Mage_Catalog_Service_Product $service */
     $service = Mage::getService('catalog/product');
     $product = $service->newProduct();
@@ -42,17 +47,94 @@ it('saves a product in a store view with the name on the default value', functio
         ->setUrlKey('pest-use-default-' . uniqid())
         ->setStockData(['qty' => 5, 'is_in_stock' => 1]);
     $id = (int) $service->save($product)->getId();
+    if ($storeName) {
+        $service->save($service->getById($id, 1)->setName('Pest Store Name'));
+    }
+    return $id;
+}
 
-    $service->save($service->getById($id, 1)->setName('Pest Store Name'));
+/**
+ * Count the rows of the name of the product $id in the store view 1.
+ */
+function useDefaultStoreNameRows(int $id): int
+{
+    $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'name');
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+    return (int) $adapter->fetchOne(
+        $adapter->select()
+            ->from($attribute->getBackend()->getTable(), 'COUNT(*)')
+            ->where('entity_id = ?', $id)
+            ->where('attribute_id = ?', (int) $attribute->getId())
+            ->where('store_id = ?', 1),
+    );
+}
+
+it('saves a product in a store view with the name on the default value', function () {
+    $id = useDefaultProduct();
+    /** @var Mage_Catalog_Service_Product $service */
+    $service = Mage::getService('catalog/product');
 
     $product = $service->getById($id, 1);
     $product->setStockData(['qty' => 5, 'is_in_stock' => 1]);
     $service->useDefault($product, ['name']);
+
+    expect($product->getName())->toBe('Pest Default Name');
+
     $service->save($product);
 
     expect($product->getName())->toBe('Pest Default Name')
         ->and($product->getStockItem()->getProductName())->toBe('Pest Default Name')
+        ->and(useDefaultStoreNameRows($id))->toBe(0)
         ->and($service->getById($id, 1)->getName())->toBe('Pest Default Name');
+});
+
+it('writes no store view value for a name that already uses the default value', function () {
+    $id = useDefaultProduct(storeName: false);
+    /** @var Mage_Catalog_Service_Product $service */
+    $service = Mage::getService('catalog/product');
+
+    $product = $service->getById($id, 1);
+    $service->useDefault($product, ['name']);
+    $service->save($product->setWeight(2));
+
+    expect(useDefaultStoreNameRows($id))->toBe(0)
+        ->and($product->getName())->toBe('Pest Default Name');
+});
+
+it('saves a new store view value after a save on the default value', function () {
+    $id = useDefaultProduct();
+    /** @var Mage_Catalog_Service_Product $service */
+    $service = Mage::getService('catalog/product');
+
+    $product = $service->getById($id, 1);
+    $service->useDefault($product, ['name']);
+    $service->save($product);
+    $service->save($product->setName('Pest New Store Name'));
+
+    expect($service->getById($id, 1)->getName())->toBe('Pest New Store Name');
+});
+
+it('still deletes the store view value of an attribute set to false', function () {
+    $id = useDefaultProduct();
+    /** @var Mage_Catalog_Service_Product $service */
+    $service = Mage::getService('catalog/product');
+
+    $service->save($service->getById($id, 1)->setData('name', false));
+
+    expect(useDefaultStoreNameRows($id))->toBe(0)
+        ->and($service->getById($id, 1)->getName())->toBe('Pest Default Name');
+});
+
+it('does not use the default value for a locked attribute', function () {
+    $id = useDefaultProduct();
+    /** @var Mage_Catalog_Service_Product $service */
+    $service = Mage::getService('catalog/product');
+
+    $product = $service->getById($id, 1);
+    $product->lockAttribute('name')->useDefaultValue('name');
+
+    expect($product->usesDefaultValue('name'))->toBeFalse()
+        ->and($product->getName())->toBe('Pest Store Name');
 });
 
 it('saves a category in a store view with the name on the default value', function () {

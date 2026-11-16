@@ -74,8 +74,7 @@ final class CategoryImageProcessor extends Processor
      */
     private function saveCategory(\Mage_Catalog_Service_Category $service, \Mage_Catalog_Model_Category $category, array $oldData): void
     {
-        $inherited = StoreScopeWrite::keepInheritedValues($category, $oldData, ['image' => true]);
+        StoreScopeWrite::keepInheritedValues($category, $oldData, ['image' => true]);
         $service->save($category);
-        StoreScopeWrite::restoreInheritedValues($category, $oldData, $inherited);
     }
 }

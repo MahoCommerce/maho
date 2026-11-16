@@ -41,6 +41,13 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
     protected $_storeValuesFlags = [];
 
     /**
+     * Codes of the attributes whose store view value the next save deletes
+     *
+     * @var array<string, true>
+     */
+    protected array $_useDefaultValues = [];
+
+    /**
      * Locked attributes
      *
      * @var array
@@ -289,6 +296,37 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Make the store view use the default value of the attribute $attributeCode. The data gets the default value
+     * now, and the next save deletes the store view value. A locked attribute or a read-only model does not change,
+     * as with setData().
+     */
+    public function useDefaultValue(string $attributeCode): static
+    {
+        if ($this->hasLockedAttributes() ? $this->isLockedAttribute($attributeCode) : $this->isReadonly()) {
+            return $this;
+        }
+        if ($this->getExistsStoreValueFlag($attributeCode)) {
+            $default = $this->getAttributeDefaultValue($attributeCode);
+            $this->setData($attributeCode, $default === false ? null : $default);
+        }
+        $this->_useDefaultValues[$attributeCode] = true;
+        return $this;
+    }
+
+    public function usesDefaultValue(string $attributeCode): bool
+    {
+        return isset($this->_useDefaultValues[$attributeCode]);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getUseDefaultValueCodes(): array
+    {
+        return array_keys($this->_useDefaultValues);
+    }
+
+    /**
      * Before save unlock attributes
      */
     #[\Override]
@@ -297,6 +335,17 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
         $this->unlockAttributes();
         $this->_sanitizeWysiwygAttributes();
         return parent::_beforeSave();
+    }
+
+    /**
+     * The save deleted the store view values, so a later save must not delete them again
+     */
+    #[\Override]
+    protected function _afterSave()
+    {
+        parent::_afterSave();
+        $this->_useDefaultValues = [];
+        return $this;
     }
 
     /**

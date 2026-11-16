@@ -67,7 +67,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
             && ($method == 'beforeSave' || $method == 'afterSave')
         ) {
             $attributeCode = $instance->getAttribute()->getAttributeCode();
-            if (isset($args[0]) && $args[0] instanceof \Maho\DataObject && $args[0]->getData($attributeCode) === false) {
+            if (isset($args[0]) && $args[0] instanceof \Maho\DataObject && $this->isUseDefaultValue($args[0], $attributeCode)) {
                 return false;
             }
         }
@@ -450,37 +450,38 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     }
 
     /**
-     * Put the default value into each attribute that the save deleted for the store. A value of false means "use the
-     * default value", and the observers of the save must read the value, not false.
+     * Check if the store view of $object uses the default value of the attribute $code. Code that predates
+     * Mage_Catalog_Model_Abstract::useDefaultValue() sets the value to false for this.
+     */
+    protected function isUseDefaultValue(\Maho\DataObject $object, string $code): bool
+    {
+        return $object->getData($code) === false
+            || ($object instanceof Mage_Catalog_Model_Abstract && $object->usesDefaultValue($code));
+    }
+
+    /**
+     * Collect the save data. An attribute on the default value takes the path of false, which deletes the store
+     * view value, and then gets its value back.
      */
     #[\Override]
-    protected function _afterSave(\Maho\DataObject $object)
+    protected function _collectSaveData($newObject)
     {
-        parent::_afterSave($object);
+        if (!$newObject instanceof Mage_Catalog_Model_Abstract) {
+            return parent::_collectSaveData($newObject);
+        }
 
-        $codes = [];
-        foreach ($object->getData() as $code => $value) {
-            if ($value === false && isset($this->_attributesByCode[$code]) && !$this->isAttributeStatic($code)) {
-                $codes[] = $code;
+        $values = [];
+        foreach ($newObject->getUseDefaultValueCodes() as $code) {
+            $values[$code] = $newObject->getData($code);
+            $newObject->setData($code, false);
+        }
+        try {
+            return parent::_collectSaveData($newObject);
+        } finally {
+            foreach ($values as $code => $value) {
+                $newObject->setData($code, $value);
             }
         }
-        if ($codes === []) {
-            return $this;
-        }
-
-        $values = $this->getAttributeRawValue($object->getId(), $codes, $this->getDefaultStoreId());
-        if (count($codes) === 1) {
-            $values = $values === false ? [] : [$codes[0] => $values];
-        }
-        foreach ($codes as $code) {
-            $value = is_array($values) ? ($values[$code] ?? null) : null;
-            $object->setData($code, $value);
-            if ($object instanceof Mage_Core_Model_Abstract && $object->getOrigData($code) === false) {
-                $object->setOrigData($code, $value);
-            }
-        }
-
-        return $this;
     }
 
     /**
@@ -521,7 +522,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
         }
 
         foreach (array_keys($result) as $code) {
-            if ($object->getData($code) === false) {
+            if ($this->isUseDefaultValue($object, (string) $code)) {
                 unset($result[$code]);
             }
         }

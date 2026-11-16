@@ -16,10 +16,9 @@ namespace Mage\Catalog\Api;
  * A catalog model loaded for a store view holds the default value of each attribute
  * that the store view inherits. A model save at that store writes every loaded value
  * that is not empty as a store value, so a write of one field would also store all
- * the inherited values. Before the save, this class sets each inherited attribute
- * that the request does not write to `false`. The catalog EAV resource reads `false`
- * as "use the default value", as for the "Use Default Value" checkboxes of the admin
- * forms, and writes no store value for it.
+ * the inherited values. Before the save, this class marks each inherited attribute
+ * that the request does not write with useDefaultValue(), as the "Use Default Value"
+ * checkboxes of the admin forms do, so the save writes no store value for it.
  */
 final class StoreScopeWrite
 {
@@ -50,22 +49,20 @@ final class StoreScopeWrite
      * Mark the inherited attributes that the request does not write as "use the
      * default value". An attribute is left as it is when it has a value in the store
      * view (the admin shows it with "Use Default Value" cleared), when the request
-     * names it, or when its value changed after the load. Returns the codes that it
-     * changed, for restoreInheritedValues() after the save.
+     * names it, or when its value changed after the load.
      *
      * @param array<string, mixed> $loadedData the model data after the load
      * @param array<string, true> $requestedCodes
-     * @return list<string>
      */
-    public static function keepInheritedValues(\Mage_Catalog_Model_Abstract $model, array $loadedData, array $requestedCodes): array
+    public static function keepInheritedValues(\Mage_Catalog_Model_Abstract $model, array $loadedData, array $requestedCodes): void
     {
         $storeId = (int) $model->getStoreId();
         if ($storeId === \Mage_Core_Model_App::ADMIN_STORE_ID) {
-            return [];
+            return;
         }
         $resource = $model->getResource();
         if (!$resource instanceof \Mage_Catalog_Model_Resource_Abstract) {
-            return [];
+            return;
         }
 
         /** @var array<string, \Mage_Catalog_Model_Resource_Eav_Attribute> $candidates */
@@ -99,22 +96,16 @@ final class StoreScopeWrite
             static fn(\Mage_Catalog_Model_Resource_Eav_Attribute $attribute): bool => $attribute->isScopeWebsite(),
         ));
 
-        $inherited = [];
         foreach (array_keys($candidates) as $code) {
             if (array_key_exists($code, $websiteValues)) {
-                // `false` on a website attribute deletes the rows of all the store
-                // views of the website. Another store view of the website has a
+                // "Use the default value" on a website attribute deletes the rows of all
+                // the store views of the website. Another store view of the website has a
                 // value, so the save writes that website value instead.
                 $model->setData($code, $websiteValues[$code]);
                 continue;
             }
-            $model->setData($code, false);
-            // Keeps the URL indexer from rebuilding the rewrites of an unchanged url_key
-            $model->setOrigData($code, false);
-            $inherited[] = $code;
+            $model->useDefaultValue($code);
         }
-
-        return $inherited;
     }
 
     /**
@@ -160,19 +151,5 @@ final class StoreScopeWrite
         }
 
         return $values;
-    }
-
-    /**
-     * Put the loaded values back after the save, so that the model, and the activity
-     * log that reads it, show the values that the store view inherits.
-     *
-     * @param array<string, mixed> $loadedData
-     * @param list<string> $codes the return value of keepInheritedValues()
-     */
-    public static function restoreInheritedValues(\Mage_Catalog_Model_Abstract $model, array $loadedData, array $codes): void
-    {
-        foreach ($codes as $code) {
-            $model->setData($code, $loadedData[$code] ?? null);
-        }
     }
 }
