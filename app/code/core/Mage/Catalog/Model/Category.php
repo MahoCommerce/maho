@@ -841,10 +841,14 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
         return $this->_getData('request_path');
     }
 
-    public function getName(): ?string
+    /**
+     * Retrieve Name data wrapper
+     *
+     * @return string
+     */
+    public function getName()
     {
-        $value = $this->getAttributeData('name');
-        return $value === null ? null : (string) $value;
+        return $this->_getData('name');
     }
 
     #[\Override]
@@ -1133,7 +1137,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
 
     public function getCustomUseParentSettings(): ?int
     {
-        $value = $this->getAttributeData('custom_use_parent_settings');
+        $value = $this->getData('custom_use_parent_settings');
         return $value === null ? null : (int) $value;
     }
 
@@ -1144,7 +1148,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
 
     public function getDisplayMode(): ?string
     {
-        $value = $this->getAttributeData('display_mode');
+        $value = $this->getData('display_mode');
         return $value === null ? null : (string) $value;
     }
 
@@ -1155,7 +1159,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
 
     public function getImage(): ?string
     {
-        $value = $this->getAttributeData('image');
+        $value = $this->getData('image');
         return $value === null ? null : (string) $value;
     }
 
@@ -1181,7 +1185,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
 
     public function getIsActive(): ?int
     {
-        $value = $this->getAttributeData('is_active');
+        $value = $this->getData('is_active');
         return $value === null ? null : (int) $value;
     }
 
@@ -1216,7 +1220,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
 
     public function getLandingPage(): ?int
     {
-        $value = $this->getAttributeData('landing_page');
+        $value = $this->getData('landing_page');
         return $value === null ? null : (int) $value;
     }
 
@@ -1227,19 +1231,19 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
 
     public function getMetaDescription(): ?string
     {
-        $value = $this->getAttributeData('meta_description');
+        $value = $this->getData('meta_description');
         return $value === null ? null : (string) $value;
     }
 
     public function getMetaKeywords(): ?string
     {
-        $value = $this->getAttributeData('meta_keywords');
+        $value = $this->getData('meta_keywords');
         return $value === null ? null : (string) $value;
     }
 
     public function getMetaTitle(): ?string
     {
-        $value = $this->getAttributeData('meta_title');
+        $value = $this->getData('meta_title');
         return $value === null ? null : (string) $value;
     }
 
@@ -1304,7 +1308,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
 
     public function getUrlKey(): ?string
     {
-        $value = $this->getAttributeData('url_key');
+        $value = $this->getData('url_key');
         return $value === null ? null : (string) $value;
     }
 

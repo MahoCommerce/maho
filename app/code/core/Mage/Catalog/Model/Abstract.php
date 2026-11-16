@@ -289,16 +289,6 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Return the data of the attribute $code for a typed getter. "Use Default Value" sets the data to false, which
-     * is not a value, so return null for it.
-     */
-    protected function getAttributeData(string $code): mixed
-    {
-        $value = $this->getData($code);
-        return $value === false ? null : $value;
-    }
-
-    /**
      * Before save unlock attributes
      */
     #[\Override]

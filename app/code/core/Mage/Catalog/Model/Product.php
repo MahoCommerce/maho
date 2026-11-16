@@ -290,10 +290,14 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         return Mage::app()->isSingleStoreMode() ? [(int) Mage::app()->getStore(true)->getWebsiteId()] : null;
     }
 
-    public function getName(): ?string
+    /**
+     * Get product name
+     *
+     * @return string|null
+     */
+    public function getName()
     {
-        $value = $this->getAttributeData('name');
-        return $value === null ? null : (string) $value;
+        return $this->_getData('name');
     }
 
     /**
@@ -903,7 +907,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     public function getSpecialPrice(): ?float
     {
         if (!$this->getPriceModel()->isSpecialPriceFixed()) {
-            $value = $this->getAttributeData('special_price');
+            $value = $this->_getData('special_price');
             return $value !== null ? (float) $value : null;
         }
 
@@ -2453,13 +2457,13 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
     public function getCost(): ?float
     {
-        $value = $this->getAttributeData('cost');
+        $value = $this->getData('cost');
         return $value === null ? null : (float) $value;
     }
 
     public function getCustomLayoutUpdate(): ?string
     {
-        $value = $this->getAttributeData('custom_layout_update');
+        $value = $this->getData('custom_layout_update');
         return $value === null ? null : (string) $value;
     }
 
@@ -2507,7 +2511,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
     public function getDescription(): ?string
     {
-        $value = $this->getAttributeData('description');
+        $value = $this->getData('description');
         return $value === null ? null : (string) $value;
     }
 
@@ -2598,7 +2602,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
     public function getImage(): ?string
     {
-        $value = $this->getAttributeData('image');
+        $value = $this->getData('image');
         return $value === null ? null : (string) $value;
     }
 
@@ -2764,31 +2768,31 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
     public function getMetaDescription(): ?string
     {
-        $value = $this->getAttributeData('meta_description');
+        $value = $this->getData('meta_description');
         return $value === null ? null : (string) $value;
     }
 
     public function getMetaKeyword(): ?string
     {
-        $value = $this->getAttributeData('meta_keyword');
+        $value = $this->getData('meta_keyword');
         return $value === null ? null : (string) $value;
     }
 
     public function getMetaTitle(): ?string
     {
-        $value = $this->getAttributeData('meta_title');
+        $value = $this->getData('meta_title');
         return $value === null ? null : (string) $value;
     }
 
     public function getMsrpEnabled(): ?int
     {
-        $value = $this->getAttributeData('msrp_enabled');
+        $value = $this->getData('msrp_enabled');
         return $value === null ? null : (int) $value;
     }
 
     public function getMsrpDisplayActualPriceType(): ?string
     {
-        $value = $this->getAttributeData('msrp_display_actual_price_type');
+        $value = $this->getData('msrp_display_actual_price_type');
         return $value === null ? null : (string) $value;
     }
 
@@ -2837,7 +2841,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
     public function getPageLayout(): ?string
     {
-        $value = $this->getAttributeData('page_layout');
+        $value = $this->getData('page_layout');
         return $value === null ? null : (string) $value;
     }
 
@@ -3018,7 +3022,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
     public function getSamplesTitle(): ?string
     {
-        $value = $this->getAttributeData('samples_title');
+        $value = $this->getData('samples_title');
         return $value === null ? null : (string) $value;
     }
 
@@ -3060,7 +3064,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
     public function getShortDescription(): ?string
     {
-        $value = $this->getAttributeData('short_description');
+        $value = $this->getData('short_description');
         return $value === null ? null : (string) $value;
     }
 
@@ -3094,7 +3098,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     #[\Deprecated(message: 'a product has one image, use getData(\'image_label\')', since: '26.11')]
     public function getSmallImageLabel(): ?string
     {
-        $value = $this->getAttributeData('image_label');
+        $value = $this->getData('image_label');
         return $value === null ? null : (string) $value;
     }
 
@@ -3140,7 +3144,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
     public function getTaxClassId(): ?int
     {
-        $value = $this->getAttributeData('tax_class_id');
+        $value = $this->getData('tax_class_id');
         return $value === null ? null : (int) $value;
     }
 
@@ -3153,7 +3157,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     #[\Deprecated(message: 'a product has one image, use getData(\'image_label\')', since: '26.11')]
     public function getThumbnailLabel(): ?string
     {
-        $value = $this->getAttributeData('image_label');
+        $value = $this->getData('image_label');
         return $value === null ? null : (string) $value;
     }
 
@@ -3233,7 +3237,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
     public function getUrlKey(): ?string
     {
-        $value = $this->getAttributeData('url_key');
+        $value = $this->getData('url_key');
         return $value === null ? null : (string) $value;
     }
 
@@ -3249,7 +3253,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
     public function getVisibility(): ?int
     {
-        $value = $this->getAttributeData('visibility');
+        $value = $this->getData('visibility');
         return $value === null ? null : (int) $value;
     }
 
