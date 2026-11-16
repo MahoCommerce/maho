@@ -141,6 +141,34 @@ through `/index.php/...`, answers with a **301 redirect** to the same page witho
 The storefront therefore keeps one canonical entry point on every web server, and you need no
 rewrite rule of your own. See [Web Server Configuration](../hosting/web-server.md).
 
+## Breadcrumbs on product pages <span class="version-badge">v27.1+</span>
+
+The breadcrumbs of a product page show one category of the product. The structured data of the
+page uses the same breadcrumbs. Maho picks the category in this order:
+
+1. The category in the URL, when the store uses the category path in product URLs.
+2. The category that the visitor opened last, when the product is in it.
+3. The primary category of the product.
+
+Search engines do not keep the last category, so they always get the primary category and the same
+breadcrumbs.
+
+When the product has no **Meta Title**, the page title shows the names of the categories from the
+URL or from the last category. The primary category does not change the page title or the URL of
+the product. Maho selects the primary category from the categories of the
+product in the category tree of the store:
+
+1. Maho skips a category when it, or a category above it, is not active.
+2. A category that the navigation menu shows wins over a category that the menu does not show.
+   The menu shows a category when **Include in Navigation Menu** is **Yes** for it and for each
+   category above it.
+3. Then the deepest category wins. For example, **Men > Shirts > Casual** wins over **Men**.
+4. If two categories are at the same depth, the category with the lower ID wins.
+
+To keep a sale or a promotion category out of the breadcrumbs, set **Include in Navigation Menu**
+to **No** on it, or on a category above it. This works for each product that is also in a category
+of the menu.
+
 ## Multi-store hreflang
 
 When a website has more than one active store view, Maho automatically emits

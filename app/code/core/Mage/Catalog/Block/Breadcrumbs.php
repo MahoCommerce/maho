@@ -36,10 +36,13 @@ class Mage_Catalog_Block_Breadcrumbs extends Mage_Core_Block_Template
 
             $title = [];
             $path  = Mage::helper('catalog')->getBreadcrumbPath();
+            $categoriesInTitle = Mage::helper('catalog')->getProduct()?->getUsesPrimaryCategory() !== true;
 
             foreach ($path as $name => $breadcrumb) {
                 $breadcrumbsBlock->addCrumb($name, $breadcrumb);
-                $title[] = $breadcrumb['label'];
+                if ($categoriesInTitle || !str_starts_with((string) $name, 'category')) {
+                    $title[] = $breadcrumb['label'];
+                }
             }
 
             if ($headBlock = $this->getLayout()->getBlock('head')) {
