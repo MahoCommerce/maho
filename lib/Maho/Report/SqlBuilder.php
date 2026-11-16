@@ -239,22 +239,22 @@ final class SqlBuilder
     {
         $field = $plan->dataset->getField($filter->field);
         $join = $this->manyRowsJoin($plan, $field);
-        if ($join === null || in_array($join->alias, $joined, true)) {
-            $this->addCondition($select, $field, $field->sql($context), $filter->operator, $filter->value);
-            return;
-        }
-        // A join of the filter would count a row once for each of its joined rows, so the filter tests them in a subquery
         $positive = match ($filter->operator) {
             Operator::Neq => Operator::Eq,
             Operator::Nin => Operator::In,
             Operator::Empty => Operator::NotEmpty,
             default => null,
         };
+        // A positive filter keeps the joined row of a grouping; a negative one drops the line from every query
+        if ($join === null || ($positive === null && in_array($join->alias, $joined, true))) {
+            $this->addCondition($select, $field, $field->sql($context), $filter->operator, $filter->value);
+            return;
+        }
         $exists = $context->adapter->select()
             ->from([$join->alias => $join->table($context)], [new Expr('1')])
             ->where($join->condition($context));
         $this->addCondition($exists, $field, $field->sql($context), $positive ?? $filter->operator, $filter->value);
-        $select->where(($positive === null ? '' : 'NOT ') . "EXISTS ({$exists})");
+        $select->where(($positive === null ? '' : 'NOT ') . "EXISTS ({$exists})", null, Select::TYPE_CONDITION);
     }
 
     private function manyRowsJoin(Plan $plan, Field $field): ?Join

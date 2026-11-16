@@ -41,7 +41,7 @@ The days of a period are days in the time zone of the default configuration (**S
 Configuration > General > Locale Options > Timezone**). The week starts on the day that
 **First Day of Week** sets. Amounts are in the global currency.
 
-A report that groups by the date only lists the newest date first. Click a column title to sort the
+A report with only a date grouping shows the newest date first. Click a column title to sort the
 rows by that column. A change shows in green when it is good and
 in red when it is bad. For a metric such as **Returns**, a lower number is good.
 

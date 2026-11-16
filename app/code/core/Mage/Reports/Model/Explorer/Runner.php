@@ -28,8 +28,8 @@ class Mage_Reports_Model_Explorer_Runner
     public const EXPORT_PAGE_SIZE = 5000;
 
     /**
-     * Run a request and return the result envelope. Without $withTotals, the envelope has no totals and its total
-     * number of rows is not counted, for a caller that reads only the rows.
+     * Run a request and return the result envelope. Without $withTotals, the result has no totals, and the runner
+     * does not count the rows. A caller that reads only the rows uses it.
      *
      * @return array<string, mixed>
      * @throws Mage_Core_Exception_Input

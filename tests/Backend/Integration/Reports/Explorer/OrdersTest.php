@@ -262,3 +262,129 @@ describe('the access of the caller', function () {
             ->toThrow(Mage_Core_Exception_Input::class);
     });
 });
+
+describe('the order items, the taxes, the downloads and the stock', function () {
+    it('counts an order line once when its product is in two categories', function () {
+        $pid = (int) explorerOrders()['orders'][1]->getAllItems()[0]->getProductId();
+        $categories = [Mage_Catalog_Model_Category::TREE_ROOT_ID, (int) Mage::app()->getStore(1)->getRootCategoryId()];
+        $table = ReportFixture::table('catalog/category_product');
+        foreach ($categories as $id) {
+            ReportFixture::adapter()->insert($table, ['category_id' => $id, 'product_id' => $pid, 'position' => 0]);
+        }
+        $run = static fn(array $filter, array $extra = []): array => explorerRun([
+            'dataset' => 'sales_items', 'scope' => 'all', 'metrics' => ['lines'],
+            'filters' => [['field' => 'product_id', 'operator' => 'eq', 'value' => $pid], ['field' => 'category_id'] + $filter],
+        ] + $extra);
+
+        try {
+            expect($run(['operator' => 'in', 'value' => $categories])['totals']['values']['lines'])->toBe(4.0)
+                ->and($run(['operator' => 'neq', 'value' => 999999999])['totals']['values']['lines'])->toBe(4.0)
+                ->and($run(['operator' => 'neq', 'value' => $categories[0]])['totals']['values']['lines'])->toBe(0.0);
+            $grouped = $run(['operator' => 'in', 'value' => [$categories[0]]], ['dimensions' => ['category_id']]);
+            expect(array_column(array_column($grouped['rows'], 'dimensions'), 'category_id'))->toEqual([$categories[0]])
+                ->and($grouped['rows'][0]['values']['lines'])->toBe(4.0);
+            $excluded = $run(['operator' => 'neq', 'value' => $categories[0]], ['dimensions' => ['category_id']]);
+            expect($excluded['rows'])->toBe([]);
+        } finally {
+            ReportFixture::adapter()->delete($table, ['product_id = ?' => $pid]);
+        }
+    });
+
+    it('counts the tax of a group of two rates once, in the explorer and in the classic report', function () {
+        $order = explorerOrders()['orders'][1];
+        $adapter = ReportFixture::adapter();
+        $codes = ['explorer_a' => 2.0, 'explorer_b' => 1.0];
+        foreach ($codes as $code => $real) {
+            $adapter->insert(ReportFixture::table('sales/order_tax'), ['order_id' => $order->getId(), 'code' => $code, 'title' => $code,
+                'percent' => 10, 'amount' => 3, 'base_amount' => 3, 'base_real_amount' => $real, 'priority' => 0, 'position' => 0, 'process' => 0]);
+        }
+        $expected = 3.0 * (float) $order->getBaseToGlobalRate();
+
+        try {
+            $result = explorerRun(['dataset' => 'sales_taxes', 'scope' => 'all', 'metrics' => ['tax'],
+                'filters' => [['field' => 'code', 'operator' => 'in', 'value' => array_keys($codes)]]]);
+            ReportFixture::aggregate(['tax'], EXPLORER_DAY_ONE, EXPLORER_DAY_ONE);
+            $classic = (float) $adapter->fetchOne($adapter->select()
+                ->from(ReportFixture::table('tax/tax_order_aggregated_created'), [new Maho\Db\Expr('SUM(tax_base_amount_sum)')])
+                ->where('period = ?', EXPLORER_DAY_ONE)->where('store_id = ?', 1)->where('code IN (?)', array_keys($codes)));
+            expect($result['totals']['values']['tax'])->toEqualWithDelta($expected, 0.0001)
+                ->and($classic)->toEqualWithDelta($expected, 0.0001);
+        } finally {
+            $adapter->delete(ReportFixture::table('sales/order_tax'), ['order_id = ?' => $order->getId(), 'code IN (?)' => array_keys($codes)]);
+        }
+    });
+
+    it('gives the gross sales of a partly canceled line on every database', function () {
+        $product = ReportFixture::createProduct('explorer-partial', 10.0);
+        $order = ReportFixture::placeOrder($product, 3, '2004-03-12 12:00:00');
+        ReportFixture::adapter()->update(ReportFixture::table('sales/order_item'), ['qty_canceled' => 1], ['order_id = ?' => $order->getId()]);
+        $result = explorerRun(['dataset' => 'sales_items', 'scope' => 'all', 'metrics' => ['gross_sales'], 'from' => '2004-03-12', 'to' => '2004-03-12',
+            'filters' => [['field' => 'product_id', 'operator' => 'eq', 'value' => (int) $product->getId()]]]);
+
+        expect($result['totals']['values']['gross_sales'])->toEqualWithDelta(20.0 * (float) $order->getBaseToGlobalRate(), 0.0001);
+    });
+
+    it('finds an underscore and a percent sign as plain text', function () {
+        $product = ReportFixture::createProduct('like_100%');
+        ReportFixture::placeOrder($product, 1, '2004-03-13 12:00:00');
+        $lines = static fn(string $text): float => (float) (explorerRun(['dataset' => 'sales_items', 'scope' => 'all', 'metrics' => ['lines'],
+            'from' => '2004-03-13', 'to' => '2004-03-13',
+            'filters' => [['field' => 'sku', 'operator' => 'contains', 'value' => $text]]])['totals']['values']['lines'] ?? 0);
+
+        expect($lines('like_100%'))->toBe(1.0)
+            ->and($lines('lik__100'))->toBe(0.0);
+    });
+
+    it('limits the downloads to the store views of the caller', function () {
+        $order = explorerOrders()['orders'][1];
+        $item = $order->getAllItems()[0];
+        $adapter = ReportFixture::adapter();
+        $adapter->insert(ReportFixture::table('downloadable/link_purchased'), ['order_id' => $order->getId(), 'order_item_id' => $item->getId(), 'customer_id' => null]);
+        $purchasedId = (int) $adapter->lastInsertId(ReportFixture::table('downloadable/link_purchased'));
+        $adapter->insert(ReportFixture::table('downloadable/link_purchased_item'), ['purchased_id' => $purchasedId,
+            'order_item_id' => $item->getId(), 'product_id' => $item->getProductId(), 'number_of_downloads_bought' => 3]);
+        $run = static fn(array $stores): float => (float) (Mage::getService('reports/explorer')->run(Request::fromArray([
+            'dataset' => 'downloads', 'metrics' => ['purchases'],
+            'filters' => [['field' => 'product_id', 'operator' => 'eq', 'value' => (int) $item->getProductId()]],
+        ]), new Mage_Reports_Model_Explorer_Access(null, true, $stores))['totals']['values']['purchases'] ?? 0);
+
+        try {
+            expect($run([2]))->toBe(0.0)->and($run([1]))->toBe(3.0);
+        } finally {
+            $adapter->delete(ReportFixture::table('downloadable/link_purchased'), ['purchased_id = ?' => $purchasedId]);
+        }
+    });
+
+    it('counts the units sold in 30 days only in the store views of the caller', function () {
+        $product = ReportFixture::createProduct('explorer-stock');
+        ReportFixture::placeOrder($product, 2);
+        $run = static fn(array $stores): float => (float) (Mage::getService('reports/explorer')->run(Request::fromArray([
+            'dataset' => 'catalog_stock', 'metrics' => ['units_sold_30d'],
+            'filters' => [['field' => 'product_id', 'operator' => 'eq', 'value' => (int) $product->getId()]],
+        ]), new Mage_Reports_Model_Explorer_Access(null, true, $stores))['totals']['values']['units_sold_30d'] ?? 0);
+
+        expect($run([2]))->toBe(0.0)->and($run([1]))->toBe(2.0);
+    });
+
+    it('lists the newest day first when the request has no sort', function () {
+        $days = static fn(array $extra): array => array_column(array_column(
+            explorerRun(['dataset' => 'sales_orders', 'metrics' => ['orders'], 'dimensions' => ['period:day']] + $extra)['rows'],
+            'dimensions',
+        ), 'period');
+
+        expect($days([]))->toBe([EXPLORER_DAY_TWO, EXPLORER_DAY_ONE])
+            ->and($days(['sort' => 'period']))->toBe([EXPLORER_DAY_ONE, EXPLORER_DAY_TWO]);
+    });
+
+    it('writes the earlier period in an export with a comparison', function () {
+        $handle = fopen('php://memory', 'w+');
+        Mage::getModel('reports/explorer_csv')->write($handle, Request::fromArray(['dataset' => 'sales_orders', 'scope' => 'not_canceled',
+            'metrics' => ['orders'], 'dimensions' => ['period:day'], 'from' => EXPLORER_DAY_TWO, 'to' => EXPLORER_DAY_TWO,
+            'compare' => 'previous_period', 'storeIds' => [1]]), Mage_Reports_Model_Explorer_Access::full(), 100);
+        rewind($handle);
+        $lines = array_map(static fn(string $line): array => str_getcsv($line, escape: ''), explode("\n", trim((string) stream_get_contents($handle))));
+        fclose($handle);
+
+        expect(array_slice($lines[1], 1, 2))->toBe(['1', '2']);
+    });
+});

@@ -58,23 +58,22 @@ class Mage_CatalogInventory_Model_Report_Dataset_Stock implements DatasetProvide
                 ));
             }
         }
+        // The sales of the store views of the request, so that a caller limited to some store views reads only their sales
+        $inStores = static fn(Context $context, string $item): string => $context->storeIds === null
+            ? '1 = 1'
+            : "{$item}.store_id IN (" . implode(', ', array_map(intval(...), $context->storeIds ?: [-1])) . ')';
         $dataset->addJoin(new Join(
             'sold',
-            static function (Context $context) use ($adapter, $itemTable, $orderTable, $canceled): \Maho\Db\Select {
-                $select = $adapter->select()
-                    ->from(['sold_item' => $itemTable], [
-                        'product_id' => 'sold_item.product_id',
-                        'qty' => new Maho\Db\Expr('SUM(sold_item.qty_ordered - ' . $adapter->getIfNullSql('sold_item.qty_canceled', 0) . ')'),
-                    ])
-                    ->joinInner(['sold_order' => $orderTable], 'sold_order.entity_id = sold_item.order_id', [])
-                    ->where('sold_item.created_at >= ?', $context->utcAgo(self::SALES_DAYS, 'days'))
-                    ->where("sold_order.state <> {$canceled}")
-                    ->group('sold_item.product_id');
-                if ($context->storeIds !== null) {
-                    $select->where('sold_order.store_id IN (?)', $context->storeIds === [] ? [-1] : $context->storeIds);
-                }
-                return $select;
-            },
+            static fn(Context $context): \Maho\Db\Select => $adapter->select()
+                ->from(['sold_item' => $itemTable], [
+                    'product_id' => 'sold_item.product_id',
+                    'qty' => new Maho\Db\Expr('SUM(sold_item.qty_ordered - ' . $adapter->getIfNullSql('sold_item.qty_canceled', 0) . ')'),
+                ])
+                ->joinInner(['sold_order' => $orderTable], 'sold_order.entity_id = sold_item.order_id', [])
+                ->where('sold_item.created_at >= ?', $context->utcAgo(self::SALES_DAYS, 'days'))
+                ->where("sold_order.state <> {$canceled}")
+                ->where($inStores($context, 'sold_item'))
+                ->group('sold_item.product_id'),
             'sold.product_id = main.product_id',
         ));
 
@@ -83,9 +82,9 @@ class Mage_CatalogInventory_Model_Report_Dataset_Stock implements DatasetProvide
         $managed = "(CASE WHEN main.use_config_manage_stock = 1 THEN {$manage} ELSE main.manage_stock END) = 1";
         $notifyQty = "CASE WHEN main.use_config_notify_stock_qty = 1 THEN {$notify} ELSE main.notify_stock_qty END";
         $qty = (string) $adapter->getIfNullSql('main.qty', 0);
-        $soldSince = static fn(string $since): string => 'EXISTS (SELECT 1 FROM ' . $adapter->quoteIdentifier($itemTable) . ' recent_item'
+        $soldSince = static fn(Context $context, string $since): string => 'EXISTS (SELECT 1 FROM ' . $adapter->quoteIdentifier($itemTable) . ' recent_item'
             . ' INNER JOIN ' . $adapter->quoteIdentifier($orderTable) . ' recent_order ON recent_order.entity_id = recent_item.order_id'
-            . " WHERE recent_item.product_id = main.product_id AND recent_item.created_at >= {$since} AND recent_order.state <> {$canceled})";
+            . " WHERE recent_item.product_id = main.product_id AND recent_item.created_at >= {$since} AND recent_order.state <> {$canceled} AND {$inStores($context, 'recent_item')})";
 
         $types = [];
         foreach (Mage::getSingleton('catalog/product_type')->getOptionArray() as $value => $label) {
@@ -106,14 +105,15 @@ class Mage_CatalogInventory_Model_Report_Dataset_Stock implements DatasetProvide
                 'sold_recently',
                 $helper->__('Sold in the dead stock days'),
                 FieldType::Boolean,
-                static fn(Context $context): string => 'CASE WHEN ' . $soldSince($context->quote($context->utcAgo((int) $context->setting('dead_stock_days', 90), 'days')))
+                static fn(Context $context): string => 'CASE WHEN ' . $soldSince($context, $context->quote($context->utcAgo((int) $context->setting('dead_stock_days', 90), 'days')))
                     . ' THEN 1 ELSE 0 END',
             ),
             new Field(
                 'ever_sold',
                 $helper->__('Ever sold'),
                 FieldType::Boolean,
-                'CASE WHEN EXISTS (SELECT 1 FROM ' . $adapter->quoteIdentifier($itemTable) . ' any_item WHERE any_item.product_id = main.product_id) THEN 1 ELSE 0 END',
+                static fn(Context $context): string => 'CASE WHEN EXISTS (SELECT 1 FROM ' . $adapter->quoteIdentifier($itemTable)
+                    . " any_item WHERE any_item.product_id = main.product_id AND {$inStores($context, 'any_item')}) THEN 1 ELSE 0 END",
             ),
         ] as $field) {
             $dataset->addField($field);
