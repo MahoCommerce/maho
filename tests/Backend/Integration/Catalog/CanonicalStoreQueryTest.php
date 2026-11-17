@@ -33,21 +33,9 @@ function catalogCanonicalHrefs(string $blockType, array $data = []): array
 
 describe('catalog canonical tag store parameter', function () {
     beforeEach(function () {
-        Mage::app()->setCurrentStore(Mage::app()->getDefaultStoreView());
-        $this->store = Mage::app()->getStore();
-        $this->createdModels = [];
-        $this->createStoreView = function (string $layout): Mage_Core_Model_Store {
-            Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);
-            $code = ($this->createdModels[] = Mage::getModel('core/store')
-                ->setCode('canonical_' . substr(uniqid(), -8))
-                ->setWebsiteId((int) $this->store->getWebsiteId())
-                ->setGroupId((int) $this->store->getGroupId())
-                ->setName('Canonical store view')
-                ->setIsActive()
-                ->save())->getCode();
-            Mage::app()->reinitStores();
-
-            $other = Mage::app()->getStore($code);
+        // The sample data puts default-fr on the base URL of the default store view
+        $this->useSiblingStoreView = function (string $layout): Mage_Core_Model_Store {
+            $other = Mage::app()->getStore('default-fr');
             foreach ([$other->getWebsite()->getDefaultStore(), $other] as $store) {
                 $store->setConfig(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL, '0');
             }
@@ -65,16 +53,10 @@ describe('catalog canonical tag store parameter', function () {
 
     afterEach(function () {
         Mage::unregister('product');
-        Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);
-        Mage::register('isSecureArea', true, true);
-        foreach (array_reverse($this->createdModels) as $model) {
-            $model->delete();
-        }
-        Mage::unregister('isSecureArea');
     });
 
     it('adds the store parameter to the category canonical only on a shared base URL', function (string $layout) {
-        $other = ($this->createStoreView)($layout);
+        $other = ($this->useSiblingStoreView)($layout);
         $query = $layout === 'same base URL' ? '?___store=' . $other->getCode() : '';
         $url = Mage::getBaseUrl() . 'canonical-category.html';
         $category = Mage::getModel('catalog/category')->setData('url', $url);
@@ -83,13 +65,14 @@ describe('catalog canonical tag store parameter', function () {
     })->with(['same base URL', 'own base URL']);
 
     it('adds the store parameter to the product canonical only on a shared base URL', function (string $layout) {
-        $other = ($this->createStoreView)($layout);
+        $other = ($this->useSiblingStoreView)($layout);
         $query = $layout === 'same base URL' ? '?___store=' . $other->getCode() : '';
+        $url = Mage::getBaseUrl() . 'canonical-product.html';
         Mage::register('product', Mage::getModel('catalog/product')
             ->setStoreId((int) $other->getId())
             ->setData('request_path', 'canonical-product.html')
             ->setData('description', 'Description'));
 
-        expect(catalogCanonicalHrefs('catalog/product_view'))->toBe([Mage::getBaseUrl() . 'canonical-product.html' . $query]);
+        expect(catalogCanonicalHrefs('catalog/product_view'))->toBe([$url . $query]);
     })->with(['same base URL', 'own base URL']);
 });
