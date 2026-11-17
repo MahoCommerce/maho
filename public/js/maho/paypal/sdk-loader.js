@@ -8,7 +8,10 @@ class MahoPaypalSdk {
 
     static async init(sdkUrl, clientTokenUrl) {
         if (this._initPromise) return this._initPromise;
-        this._initPromise = this._doInit(sdkUrl, clientTokenUrl);
+        this._initPromise = this._doInit(sdkUrl, clientTokenUrl).catch((err) => {
+            this._initPromise = null;
+            throw err;
+        });
         return this._initPromise;
     }
 
