@@ -146,5 +146,6 @@ describe('Mage_Core_Model_Url::getUrl() for a store that is not the current stor
         expect(Mage::getModel('core/url')->setStore($store)->getUrl(''))->toBe('https://folder-home.example/shop/');
         // Before the install finishes, the base URL has no scheme
         expect(Mage::helper('core/url')->keepBasePathSlash('//folder-home.example/shop/', $store))->toBe('//folder-home.example/shop/');
+        expect(Mage::helper('core/url')->keepBasePathSlash('//folder-home.example/shop', $store))->toBe('//folder-home.example/shop/');
     });
 });

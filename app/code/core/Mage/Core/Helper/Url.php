@@ -102,7 +102,7 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
     public function buildUrl(array $parts): string
     {
         return
-            (isset($parts['scheme']) ? $parts['scheme'] . '://' : '')
+            (isset($parts['scheme']) ? $parts['scheme'] . '://' : (isset($parts['host']) ? '//' : ''))
             . ($parts['user'] ?? '')
             . (isset($parts['pass']) ? ':' . $parts['pass'] : '')
             . ((isset($parts['user']) || isset($parts['pass'])) ? '@' : '')
