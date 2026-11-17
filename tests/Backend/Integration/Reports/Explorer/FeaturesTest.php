@@ -106,7 +106,7 @@ describe('the totals', function () {
             ->and($totals)->toMatchArray(['units' => 5.0, 'orders' => 2.0])
             ->and($totals['aov'])->toEqualWithDelta($totals['sales_total'] / 2, 0.0001)
             ->and($statements($request->with(['metrics' => ['units', 'unique_customers']])))->toBe(['rows', 'totals'])
-            ->and($statements($request->with(['limit' => 1])))->toBe(['rows', 'totals'])
+            ->and($statements($request->with(['limit' => 1])))->toBe(['rows', 'count', 'totals'])
             ->and($runner->run($request->with(['limit' => 1]), $access)['totals']['values']['units'])->toBe(5.0);
     });
 });

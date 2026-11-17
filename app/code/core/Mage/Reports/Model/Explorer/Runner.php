@@ -208,6 +208,9 @@ class Mage_Reports_Model_Explorer_Runner
             $offset = $plan->request->offset;
             $parts = $builder->totalParts($plan);
             $rows = $run('rows', $builder->rows($plan, $context, false, $limit + 1, $offset));
+            if (count($rows) > $limit || $offset > 0) {
+                $run('count', $builder->count($plan, $context));
+            }
             if ($parts === null || count($rows) > $limit || $offset > 0) {
                 $run('totals', $builder->totals($plan, $context));
             }
