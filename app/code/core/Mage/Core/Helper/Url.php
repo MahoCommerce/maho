@@ -303,22 +303,27 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
 
     /**
      * Return the query that a canonical URL of $store needs to show $store, or an empty array.
-     * A store view that shares the base URL of the default store view of its website needs ___store.
+     * A store view that shares the base URL of the default store view of its website or of its
+     * store group needs ___store, because a URL without it shows that default store view.
      *
      * @return array<string, string>
      */
     public function getCanonicalStoreQuery(Mage_Core_Model_Store|int|null $store = null): array
     {
         $store = Mage::app()->getStore($store);
-        $default = $store->getWebsite() ? $store->getWebsite()->getDefaultStore() : null;
-        if (!$default
-            || (int) $default->getId() === (int) $store->getId()
-            || $default->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK) !== $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK)
-        ) {
-            return [];
+        $baseUrl = Mage::getModel('core/url')->setStore($store)->getBaseUrl();
+        $website = $store->getWebsite();
+        $group = $store->getGroup();
+        foreach ([$website ? $website->getDefaultStore() : null, $group ? $group->getDefaultStore() : null] as $default) {
+            if ($default
+                && (int) $default->getId() !== (int) $store->getId()
+                && Mage::getModel('core/url')->setStore($default)->getBaseUrl() === $baseUrl
+            ) {
+                return ['___store' => $store->getCode()];
+            }
         }
 
-        return ['___store' => $store->getCode()];
+        return [];
     }
 
     /**

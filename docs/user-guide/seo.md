@@ -69,17 +69,23 @@ ranking signals onto it.
     get clean category canonicals out of the box. If you are upgrading and deliberately kept it off,
     review this setting after the update.
 
-CMS pages always get a canonical tag, with no setting. The tag holds the URL of the page without
-the query string, so a link with tracking parameters such as `?utm_source=` counts for the page
-itself. The tag follows the **Trailing Slash Behavior** setting. The CMS Home Page points to the
-base URL of the store, because its own identifier redirects there.
+### CMS pages <span class="version-badge">v27.1+</span>
 
-A store view that shares the base URL of the default store view of its website shows at the same
-path with `?___store=<code>`. Its canonical keeps that parameter, so that it does not point to the
-default store view.
+CMS pages always get a canonical tag, with no setting. The tag holds the URL of the page without
+the query string. Search engines then give a link with tracking parameters, such as
+`?utm_source=`, to the URL of the page. The tag follows the **Trailing Slash Behavior** setting
+(System > Configuration > General > Web > Url Options). The CMS Home Page points to the base URL
+of the store, because its own identifier redirects there.
 
 The **CMS No Route Page** gets no canonical tag, and neither does a page whose meta robots
 contains `noindex`.
+
+### Store views on one domain <span class="version-badge">v27.1+</span>
+
+A store view can share the base URL of the default store view of its website, or of its store
+group. Its pages then show at the same path with `?___store=<code>`. The canonical tags of its CMS
+pages keep that parameter, so that they do not point to the default store view. The canonical tags
+of its categories and products keep it too, when the settings above turn them on.
 
 ## Layered navigation crawl controls <span class="version-badge">v26.7+</span>
 
