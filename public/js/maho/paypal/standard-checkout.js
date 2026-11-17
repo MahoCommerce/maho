@@ -206,8 +206,10 @@ class MahoPaypalStandardCheckout {
             errorDiv.className = 'paypal-standard-errors validation-advice';
             this.formDiv.appendChild(errorDiv);
         }
-        // SDK messages ("unable to open popup") are developer text, never shopper text.
-        errorDiv.textContent = err instanceof MahoPaypalCheckoutError && err.message
+        // SDK messages ("unable to open popup") and HTTP status codes are developer text, never shopper text.
+        const isShopperText = err instanceof MahoPaypalCheckoutError
+            || (err instanceof MahoError && err.originalMessage !== 'Server returned status %s');
+        errorDiv.textContent = isShopperText && err.message
             ? err.message
             : 'We could not complete your PayPal payment. Please try again, or choose another payment method.';
         errorDiv.style.display = '';
