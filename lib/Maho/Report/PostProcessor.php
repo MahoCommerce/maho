@@ -114,16 +114,19 @@ final class PostProcessor
         foreach (array_keys($parts) as $code) {
             $sums[$code] = array_sum(array_map(static fn(array $row): float => (float) ($row['m_' . $code] ?? 0), $rows));
         }
-        $value = static function (Metric $metric) use (&$value, $sums, $plan): ?float {
-            return $metric->formula === null
-                ? $sums[$metric->code]
-                : Formula::parse($metric->formula)->evaluate(static fn(string $code): ?float => $value($plan->dataset->getMetric($code)));
-        };
         $totals = [];
         foreach ($plan->metrics as $metric) {
-            $totals['m_' . $metric->code] = $value($metric);
+            $totals['m_' . $metric->code] = $this->totalFromSums($plan->dataset, $metric, $sums);
         }
         return $totals;
+    }
+
+    /** @param array<string, float> $sums the sum of each part over the rows */
+    private function totalFromSums(Dataset $dataset, Metric $metric, array $sums): ?float
+    {
+        return $metric->formula === null
+            ? $sums[$metric->code]
+            : Formula::parse($metric->formula)->evaluate(fn(string $code): ?float => $this->totalFromSums($dataset, $dataset->getMetric($code), $sums));
     }
 
     /**
