@@ -123,16 +123,8 @@ class Mage_Core_Model_Controller_Front_Observer
 
         // A leading "//" or "/\" makes the browser read the Location as another origin.
         $path = '/' . ltrim(preg_replace('#/{2,}#', '/', $path), '/\\');
-        $path = Mage::helper('core/url')->addOrRemoveTrailingSlash($path);
-
-        // The base path keeps its trailing slash: "/shop" resolves outside the base URL and 404s.
-        $basePath = rtrim((string) parse_url(Mage::getBaseUrl(
-            Mage_Core_Model_Store::URL_TYPE_WEB,
-            Mage::app()->isCurrentlySecure(),
-        ), PHP_URL_PATH), '/');
-        if ($basePath !== '' && rtrim($path, '/') === $basePath) {
-            $path = $basePath . '/';
-        }
+        $urlHelper = Mage::helper('core/url');
+        $path = $urlHelper->keepBasePathSlash($urlHelper->addOrRemoveTrailingSlash($path));
 
         $canonicalUri = $path . $query;
         if ($canonicalUri !== $requestUri) {
