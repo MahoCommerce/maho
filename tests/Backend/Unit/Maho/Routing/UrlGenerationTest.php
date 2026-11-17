@@ -133,7 +133,7 @@ describe('Mage_Core_Model_Url::getUrl() for a store that is not the current stor
         expect($url)->toEndWith('/checkout/cart');
     });
 
-    it('keeps the trailing slash on the home URL of a store in a folder when the setting removes it', function () {
+    it('keeps the trailing slash on the home URL of a store in a folder', function () {
         $store = Mage::app()->getDefaultStoreView();
         foreach (['web/unsecure/base_url', 'web/secure/base_url', 'web/unsecure/base_link_url', 'web/secure/base_link_url'] as $path) {
             $store->setConfig($path, 'https://folder-home.example/shop/');
@@ -144,5 +144,7 @@ describe('Mage_Core_Model_Url::getUrl() for a store that is not the current stor
         Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);
 
         expect(Mage::getModel('core/url')->setStore($store)->getUrl(''))->toBe('https://folder-home.example/shop/');
+        // Before the install finishes, the base URL has no scheme
+        expect(Mage::helper('core/url')->keepBasePathSlash('//folder-home.example/shop/', $store))->toBe('//folder-home.example/shop/');
     });
 });
