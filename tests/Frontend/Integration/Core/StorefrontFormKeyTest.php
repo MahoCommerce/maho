@@ -192,13 +192,19 @@ it('lists no stale public action', function () {
     }
 });
 
-function sfkGetController(string $action, string $method = 'GET'): Mage_Checkout_CartController
-{
-    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/checkout/cart/' . $action . '/id/5', $method));
-    $request->setModuleName('checkout')->setControllerName('cart')->setActionName($action)->setDispatched(true);
+function sfkGetController(
+    string $action,
+    string $method = 'GET',
+    string $module = 'checkout',
+    string $controllerName = 'cart',
+    string $class = Mage_Checkout_CartController::class,
+): Mage_Core_Controller_Front_Action {
+    $path = '/' . $module . '/' . $controllerName . '/' . $action . '/id/5';
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create($path, $method));
+    $request->setModuleName($module)->setControllerName($controllerName)->setActionName($action)->setDispatched(true);
     Mage::app()->setRequest($request);
 
-    return new Mage_Checkout_CartController($request, new Mage_Core_Controller_Response_Http());
+    return new $class($request, new Mage_Core_Controller_Response_Http());
 }
 
 it('asks no form key of a GET to an action whose route accepts GET', function () {
@@ -206,10 +212,7 @@ it('asks no form key of a GET to an action whose route accepts GET', function ()
 });
 
 it('asks no form key of a GET for the PayPal client token', function () {
-    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/paypal/checkout/clientToken', 'GET'));
-    $request->setModuleName('paypal')->setControllerName('checkout')->setActionName('clientToken')->setDispatched(true);
-    Mage::app()->setRequest($request);
-    $controller = new Maho_Paypal_CheckoutController($request, new Mage_Core_Controller_Response_Http());
+    $controller = sfkGetController('clientToken', 'GET', 'paypal', 'checkout', Maho_Paypal_CheckoutController::class);
 
     expect(sfkIsFormKeyRequired($controller))->toBeFalse();
 });

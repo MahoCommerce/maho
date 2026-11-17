@@ -12,7 +12,7 @@ use Tests\MahoBrowserTestCase;
 
 uses(MahoBrowserTestCase::class)->group('browser');
 
-it('loads the PayPal SDK on a second call after the first call failed', function (): void {
+it('loads the PayPal SDK with GET on a second call after the first call failed', function (): void {
     $page = visit(MahoServer::baseUrl() . '/');
     $page->script(<<<'JS'
         new Promise((resolve, reject) => {
@@ -29,15 +29,19 @@ it('loads the PayPal SDK on a second call after the first call failed', function
         (async () => {
             window.paypal = {createInstance: async () => 'instance'};
             let calls = 0;
-            window.mahoFetch = async () => ++calls === 1 ? {success: false} : {success: true, client_token: 't'};
+            const methods = [];
+            window.mahoFetch = async (url, options) => {
+                methods.push(options?.method ?? 'GET');
+                return ++calls === 1 ? {success: false} : {success: true, client_token: 't'};
+            };
             let first = null;
             try { await MahoPaypalSdk.init('unused', '/paypal/checkout/clientToken'); } catch (e) { first = e.message; }
             let second;
             try { second = await MahoPaypalSdk.init('unused', '/paypal/checkout/clientToken'); } catch (e) { second = e.message; }
-            return {first, second, calls};
+            return {first, second, calls, methods};
         })()
         JS);
 
-    expect($result)->toBe(['first' => 'Failed to get client token', 'second' => 'instance', 'calls' => 2]);
+    expect($result)->toBe(['first' => 'Failed to get client token', 'second' => 'instance', 'calls' => 2, 'methods' => ['GET', 'GET']]);
     $page->assertNoJavaScriptErrors();
 });
