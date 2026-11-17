@@ -537,7 +537,9 @@ comments in `.github/workflows/pest.yml` explain the CI shards and how to refres
   POST only.
   A POST form renders `getBlockHtml('formkey')`; `js.js` adds the key only as a fallback.
   Put an action in `$_publicActions` only when a third party must reach it with its own
-  credential (a payment webhook, an OAuth endpoint, an unsubscribe link)
+  credential (a payment webhook, an OAuth endpoint, an unsubscribe link). A POST-only action that
+  changes no state can also go there, when a page that the browser restores calls it with the
+  form key of an ended session (`paypal/checkout/clientToken`)
 - Admin CSRF is automatic too: POST validates the form key, and for a logged-in admin GET
   validates the per-action secret key every admin url carries. An action that runs before login
   (see `Mage_Admin_Model_Observer::actionPreDispatchAdmin()`) gets the POST check as well, so it

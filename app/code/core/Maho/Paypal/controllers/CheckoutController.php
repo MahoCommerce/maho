@@ -12,11 +12,13 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 {
     /**
      * PayPal calls shippingCallback from its own servers, so it carries no form key.
+     * clientToken changes no state, and a page that the browser restores after the session
+     * ended still sends the form key of that old session.
      *
      * @var string[]
      */
     #[\Override]
-    protected $_publicActions = ['shippingCallback'];
+    protected $_publicActions = ['shippingCallback', 'clientToken'];
 
     /**
      * Parse JSON request body params into the request object.
