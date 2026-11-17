@@ -87,7 +87,11 @@ it('knows which metrics add up over the groups', function () {
     $dataset->addMetric(Metric::formula('mixed', 'Mixed', 'sales - customers'));
 
     $additive = array_filter(['orders', 'sales', 'customers', 'largest', 'net', 'average', 'mixed'], $dataset->isAdditive(...));
-    expect(array_values($additive))->toBe(['orders', 'sales', 'net']);
+    expect(array_values($additive))->toBe(['orders', 'sales', 'net'])
+        ->and(array_keys($dataset->additiveParts('average') ?? []))->toBe(['sales', 'orders'])
+        ->and(array_keys($dataset->additiveParts('net') ?? []))->toBe(['sales', 'orders'])
+        ->and($dataset->additiveParts('mixed'))->toBeNull()
+        ->and($dataset->additiveParts('largest'))->toBeNull();
 });
 
 it('spreads a monthly target over the days and adds the days of each bucket', function () {

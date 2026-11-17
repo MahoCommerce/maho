@@ -129,6 +129,29 @@ final class Dataset
         return in_array($metric->aggregate, [Aggregate::Sum, Aggregate::Count], true);
     }
 
+    /**
+     * The sums and counts that give the value of a metric over several groups: the metric itself, or the metrics of
+     * its formula. Null when one of them is a distinct count, an average, a minimum or a maximum.
+     *
+     * @return array<string, Metric>|null
+     */
+    public function additiveParts(string $code): ?array
+    {
+        $metric = $this->getMetric($code);
+        if ($metric->formula === null) {
+            return in_array($metric->aggregate, [Aggregate::Sum, Aggregate::Count], true) ? [$code => $metric] : null;
+        }
+        $parts = [];
+        foreach (\Maho\Report\Formula::parse($metric->formula)->references() as $reference) {
+            $referenceParts = $this->additiveParts($reference);
+            if ($referenceParts === null) {
+                return null;
+            }
+            $parts += $referenceParts;
+        }
+        return $parts;
+    }
+
     public function setRecords(?Records $records): static
     {
         $this->records = $records;

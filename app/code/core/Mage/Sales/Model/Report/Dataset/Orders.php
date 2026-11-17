@@ -11,7 +11,6 @@
 declare(strict_types=1);
 
 use Maho\Db\Adapter\AdapterInterface;
-use Maho\Report\Context;
 use Maho\Report\DatasetProvider;
 use Maho\Report\Definition\Aggregate;
 use Maho\Report\Definition\ChartType;
@@ -66,27 +65,12 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
             $resource->getTableName('sales/order_address'),
             "shipping.parent_id = main.entity_id AND shipping.address_type = 'shipping'",
         ));
-        $dataset->addJoin(new Join(
-            'items',
-            static function (Context $context) use ($adapter, $itemTable, $orderTable): \Maho\Db\Select {
-                $dateColumn = $context->dateField === 'updated_at' ? 'item_order.updated_at' : 'item_order.created_at';
-                $select = $adapter->select()
-                    ->from(['item' => $itemTable], [
-                        'order_id' => 'item.order_id',
-                        'qty' => new Maho\Db\Expr('SUM(item.qty_ordered - ' . $adapter->getIfNullSql('item.qty_canceled', 0) . ')'),
-                        'qty_invoiced' => new Maho\Db\Expr('SUM(item.qty_invoiced)'),
-                    ])
-                    ->joinInner(['item_order' => $orderTable], 'item_order.entity_id = item.order_id', [])
-                    ->where('item.parent_item_id IS NULL')
-                    ->group('item.order_id');
-                if ($context->utcFrom !== null && $context->utcTo !== null) {
-                    $select->where("{$dateColumn} >= ?", $context->utcFrom)->where("{$dateColumn} <= ?", $context->utcTo);
-                }
-                return $select;
-            },
-            'items.order_id = main.entity_id',
-        ));
-
+        // A subquery for each order reads the items through their order_id index, which is faster than a join of all the items of the period
+        $itemSum = static fn(string $quantity): string => (string) $adapter->getIfNullSql(
+            '(SELECT SUM(' . $quantity . ') FROM ' . $adapter->quoteIdentifier($itemTable) . ' item'
+            . ' WHERE item.order_id = main.entity_id AND item.parent_item_id IS NULL)',
+            0,
+        );
         $rate = $adapter->getIfNullSql('main.base_to_global_rate', 0);
         $amount = static fn(string $sql): string => "({$sql}) * {$rate}";
         $col = static fn(string $column): string => (string) $adapter->getIfNullSql("main.{$column}", 0);
@@ -147,8 +131,8 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
                 labels: 'country',
             ),
             new Field('billing_postcode', $helper->__('Billing postcode'), FieldType::String, 'UPPER(TRIM(billing.postcode))', ['billing'], personal: true),
-            new Field('units', $helper->__('Units'), FieldType::Decimal, (string) $adapter->getIfNullSql('items.qty', 0), ['items']),
-            new Field('units_invoiced', $helper->__('Units invoiced'), FieldType::Decimal, (string) $adapter->getIfNullSql('items.qty_invoiced', 0), ['items']),
+            new Field('units', $helper->__('Units'), FieldType::Decimal, $itemSum('item.qty_ordered - ' . $adapter->getIfNullSql('item.qty_canceled', 0))),
+            new Field('units_invoiced', $helper->__('Units invoiced'), FieldType::Decimal, $itemSum('item.qty_invoiced')),
             new Field('sales_total', $helper->__('Sales total'), FieldType::Money, $amount($col('base_grand_total') . ' - ' . $col('base_total_canceled'))),
             new Field('revenue', $helper->__('Revenue'), FieldType::Money, $amount(sprintf(
                 '%s - %s - %s - (%s - %s - %s)',

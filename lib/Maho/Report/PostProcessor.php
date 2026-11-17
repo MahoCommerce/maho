@@ -101,6 +101,32 @@ final class PostProcessor
     }
 
     /**
+     * The totals of the plan from all its rows, in the shape of {@see SqlBuilder::totals()}: the sum of each part, and
+     * each formula calculated from those sums.
+     *
+     * @param array<string, Metric> $parts the result of {@see SqlBuilder::totalParts()}
+     * @param list<array<string, mixed>> $rows every row of {@see SqlBuilder::rows()}
+     * @return array<string, float|null>
+     */
+    public function totalsFromRows(Plan $plan, array $parts, array $rows): array
+    {
+        $sums = [];
+        foreach (array_keys($parts) as $code) {
+            $sums[$code] = array_sum(array_map(static fn(array $row): float => (float) ($row['m_' . $code] ?? 0), $rows));
+        }
+        $value = static function (Metric $metric) use (&$value, $sums, $plan): ?float {
+            return $metric->formula === null
+                ? $sums[$metric->code]
+                : Formula::parse($metric->formula)->evaluate(static fn(string $code): ?float => $value($plan->dataset->getMetric($code)));
+        };
+        $totals = [];
+        foreach ($plan->metrics as $metric) {
+            $totals['m_' . $metric->code] = $value($metric);
+        }
+        return $totals;
+    }
+
+    /**
      * @param list<array<string, mixed>> $rows
      * @param array<string|int, string|int>|null $periodMap a compare bucket key => the current bucket key at the same position
      * @return array<string, array{dimensions: array<string, string|int|null>, values: array<string, float|string|null>}>

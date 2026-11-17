@@ -38,6 +38,12 @@ final class SqlBuilder
             $groups[] = $dimension->alias;
         }
         $this->addMetrics($select, $plan, $context);
+        $metricCodes = array_map(static fn(Metric $metric): string => $metric->code, $plan->metrics);
+        foreach ($this->totalParts($plan) ?? [] as $code => $part) {
+            if (!in_array($code, $metricCodes, true)) {
+                $select->columns(['m_' . $code => new Expr($this->metricSql($plan->dataset, $part, $context))]);
+            }
+        }
         if ($groups !== []) {
             $select->group($groups);
         }
@@ -76,6 +82,36 @@ final class SqlBuilder
         $select = $this->base($plan, $context, $compare, false);
         $this->addMetrics($select, $plan, $context);
         return $select;
+    }
+
+    /**
+     * The sums and counts whose columns in the rows give the totals of the plan, or null when the totals need their own
+     * query: a metric is a distinct count or an average, or a grouping repeats a record or leaves one out.
+     *
+     * @return array<string, Metric>|null
+     */
+    public function totalParts(Plan $plan): ?array
+    {
+        foreach ($plan->dimensions as $dimension) {
+            if ($dimension->dimension->nonAdditive) {
+                return null;
+            }
+        }
+        foreach (array_diff($this->joinOrder($plan, true), $this->joinOrder($plan, false)) as $alias) {
+            $join = $plan->dataset->getJoin($alias);
+            if ($join->type !== JoinType::Left || $join->manyRows) {
+                return null;
+            }
+        }
+        $parts = [];
+        foreach ($plan->metrics as $metric) {
+            $metricParts = $plan->dataset->additiveParts($metric->code);
+            if ($metricParts === null) {
+                return null;
+            }
+            $parts += $metricParts;
+        }
+        return $parts;
     }
 
     /** The number of grouped rows of the period. */

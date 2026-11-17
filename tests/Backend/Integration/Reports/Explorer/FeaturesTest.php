@@ -94,6 +94,23 @@ describe('the records behind a report', function () {
     });
 });
 
+describe('the totals', function () {
+    it('adds up the rows for the totals, and queries the totals when a metric does not add up or the limit cuts the rows', function () {
+        $runner = Mage::getSingleton('reports/explorer_runner');
+        $access = Mage_Reports_Model_Explorer_Access::full();
+        $request = explorerFeatureRequest(EXPLORER_FEATURES_DAY_ONE, ['metrics' => ['units', 'orders', 'sales_total', 'aov'], 'dimensions' => ['status']]);
+        $statements = static fn(Request $request): array => array_column($runner->explain($request, $access), 'label');
+        $totals = $runner->run($request, $access)['totals']['values'];
+
+        expect($statements($request))->toBe(['rows'])
+            ->and($totals)->toMatchArray(['units' => 5.0, 'orders' => 2.0])
+            ->and($totals['aov'])->toEqualWithDelta($totals['sales_total'] / 2, 0.0001)
+            ->and($statements($request->with(['metrics' => ['units', 'unique_customers']])))->toBe(['rows', 'totals'])
+            ->and($statements($request->with(['limit' => 1])))->toBe(['rows', 'totals'])
+            ->and($runner->run($request->with(['limit' => 1]), $access)['totals']['values']['units'])->toBe(5.0);
+    });
+});
+
 describe('the explanation of a change', function () {
     it('ranks the order statuses by how much of the drop of units they caused', function () {
         $result = Mage::getService('reports/explorer')->explain(

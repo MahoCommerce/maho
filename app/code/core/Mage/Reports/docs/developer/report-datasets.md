@@ -136,7 +136,9 @@ Run `composer dump-autoload` after you add the observer attribute.
 ## Check the SQL
 
 `./maho report:explain` prints the SQL of each statement of a report, with its time and its row
-count. `./maho report:run` prints the report as a table, CSV or JSON:
+count. `./maho report:run` prints the report as a table, CSV or JSON. A report whose metrics are
+sums, counts or formulas over them has no totals statement: the runner adds up the rows, when the
+rows hold every group and no grouping repeats a record or leaves one out.
 
 ```bash
 ./maho report:explain --preset=sales_by_payment_method --range=last_12_months

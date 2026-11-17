@@ -77,6 +77,20 @@ Maho adds two indexes for the Explorer:
   in `var/reports/export`. A daily job deletes the files after 7 days. The storage mount
   `reports_exports` can point at shared storage (see [Shared storage](storage.md)).
 
+## Speed on a large store
+
+These are the times of a test store on MySQL with 1.2 million orders over two years (about 1,700
+orders a day), with no cache:
+
+| Report | Last 30 days | Last 12 months |
+|--------|--------------|----------------|
+| Sales overview | 1.2 s | 14 s |
+| Product performance | 8 s | 36 s |
+| Explain the change on Sales overview | 6 s | 61 s |
+
+A report reads every record of its period, so the time grows with the number of orders in the
+period. On a store of this size, keep the cache on, and use a read replica for long periods.
+
 ## Cache
 
 The results go to the cache type **Report Explorer Results**. A report on a past period stays for

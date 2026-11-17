@@ -192,16 +192,8 @@ class Mage_Reports_Model_Explorer_Runner
         return Mage::app()->withStore(Mage_Core_Model_App::ADMIN_STORE_ID, function () use ($request, $access): array {
             [$plan, $context] = $this->prepare($request, $access, self::maxRows());
             $builder = new SqlBuilder();
-            $statements = [
-                'rows' => $builder->rows($plan, $context, false, $plan->request->limit, $plan->request->offset),
-                'totals' => $builder->totals($plan, $context),
-            ];
-            if ($plan->hasComparison()) {
-                $statements['compare rows'] = $builder->rows($plan, $context, true);
-                $statements['compare totals'] = $builder->totals($plan, $context, true);
-            }
             $explained = [];
-            foreach ($statements as $label => $select) {
+            $run = static function (string $label, \Maho\Db\Select $select) use ($context, &$explained): array {
                 $start = hrtime(true);
                 $rows = $context->adapter->fetchAll($select);
                 $explained[] = [
@@ -210,6 +202,20 @@ class Mage_Reports_Model_Explorer_Runner
                     'milliseconds' => round((hrtime(true) - $start) / 1e6, 1),
                     'rows' => count($rows),
                 ];
+                return $rows;
+            };
+            $limit = $plan->request->limit;
+            $offset = $plan->request->offset;
+            $parts = $builder->totalParts($plan);
+            $rows = $run('rows', $builder->rows($plan, $context, false, $limit + 1, $offset));
+            if ($parts === null || count($rows) > $limit || $offset > 0) {
+                $run('totals', $builder->totals($plan, $context));
+            }
+            if ($plan->hasComparison()) {
+                $run('compare rows', $builder->rows($plan, $context, true));
+                if ($parts === null) {
+                    $run('compare totals', $builder->totals($plan, $context, true));
+                }
             }
             return $explained;
         });
@@ -288,15 +294,26 @@ class Mage_Reports_Model_Explorer_Runner
         } else {
             $totalRows = count($rows);
         }
-        $totals = $withTotals ? ($adapter->fetchRow($builder->totals($plan, $context)) ?: []) : [];
+        $postProcessor = new PostProcessor();
+        // When the rows hold every group, their sums give the totals, and the query of the totals does not run
+        $parts = $builder->totalParts($plan);
+        $totals = match (true) {
+            !$withTotals => [],
+            $parts !== null && !$hasMore && $offset === 0 => $postProcessor->totalsFromRows($plan, $parts, $rows),
+            default => $adapter->fetchRow($builder->totals($plan, $context)) ?: [],
+        };
 
         $compareTotals = null;
         if ($plan->hasComparison()) {
             $compareRows ??= $adapter->fetchAll($builder->rows($plan, $context, true));
-            $compareTotals = $withTotals ? ($adapter->fetchRow($builder->totals($plan, $context, true)) ?: []) : [];
+            $compareTotals = match (true) {
+                !$withTotals => [],
+                $parts !== null => $postProcessor->totalsFromRows($plan, $parts, $compareRows),
+                default => $adapter->fetchRow($builder->totals($plan, $context, true)) ?: [],
+            };
         }
 
-        $result = new PostProcessor()->process($plan, $rows, $totals, $totalRows, $compareRows, $compareTotals);
+        $result = $postProcessor->process($plan, $rows, $totals, $totalRows, $compareRows, $compareTotals);
         $result['rows'] = $this->addLabels($plan, $result['rows']);
 
         $helper = Mage::helper('reports');
