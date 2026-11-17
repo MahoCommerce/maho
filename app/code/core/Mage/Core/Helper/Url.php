@@ -297,7 +297,7 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
             return $url;
         }
         $parts = parse_url($url) ?: ['path' => $url];
-        if (rtrim($parts['path'] ?? '', '/') !== $basePath) {
+        if (($parts['path'] ?? '') !== $basePath) {
             return $url;
         }
         $parts['path'] = $basePath . '/';
