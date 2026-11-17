@@ -284,6 +284,24 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Put the trailing slash back when the path of $url is the path of the web base URL of $store.
+     * Without the slash, "/shop" is outside the base URL "/shop/" and gives a 404.
+     */
+    public function keepBasePathSlash(string $url, int|Mage_Core_Model_Store|null $store = null, ?bool $secure = null): string
+    {
+        $basePath = rtrim((string) parse_url(
+            Mage::app()->getStore($store)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB, $secure),
+            PHP_URL_PATH,
+        ), '/');
+        $parts = parse_url($url) ?: ['path' => $url];
+        if ($basePath === '' || rtrim($parts['path'] ?? '', '/') !== $basePath) {
+            return $url;
+        }
+        $parts['path'] = $basePath . '/';
+        return $this->buildUrl($parts);
+    }
+
+    /**
      * Return the query that a canonical URL of $store needs to show $store, or an empty array.
      * A store view that shares the base URL of the default store view of its website needs ___store.
      *
