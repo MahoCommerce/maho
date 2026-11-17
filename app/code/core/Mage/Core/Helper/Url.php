@@ -293,8 +293,11 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
             Mage::app()->getStore($store)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB, $secure),
             PHP_URL_PATH,
         ), '/');
+        if ($basePath === '') {
+            return $url;
+        }
         $parts = parse_url($url) ?: ['path' => $url];
-        if ($basePath === '' || rtrim($parts['path'] ?? '', '/') !== $basePath) {
+        if (rtrim($parts['path'] ?? '', '/') !== $basePath) {
             return $url;
         }
         $parts['path'] = $basePath . '/';

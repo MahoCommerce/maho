@@ -136,7 +136,7 @@ class Mage_Cms_Block_Page extends Mage_Core_Block_Abstract
         $urlHelper = Mage::helper('core/url');
         $params = ['_query' => $urlHelper->getCanonicalStoreQuery()];
         if ($helper->isHomePage($page)) {
-            return $urlHelper->keepBasePathSlash(Mage::getUrl('', $params));
+            return Mage::getUrl('', $params);
         }
 
         return Mage::getUrl(null, ['_direct' => $identifier] + $params);
