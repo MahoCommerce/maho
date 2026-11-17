@@ -33,7 +33,7 @@ function catalogCanonicalHrefs(string $blockType, array $data = []): array
 
 describe('catalog canonical tag store parameter', function () {
     beforeEach(function () {
-        // The sample data puts default-fr on the base URL of the default store view
+        // In the sample data, default-fr has the same base URL as the default store view
         $this->useSiblingStoreView = function (string $layout): Mage_Core_Model_Store {
             $other = Mage::app()->getStore('default-fr');
             foreach ([$other->getWebsite()->getDefaultStore(), $other] as $store) {
