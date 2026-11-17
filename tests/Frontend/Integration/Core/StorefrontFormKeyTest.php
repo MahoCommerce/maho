@@ -24,6 +24,7 @@ const STOREFRONT_PUBLIC_ACTIONS = [
     'Maho_ApiPlatform_IndexController::soap',
     'Maho_ApiPlatform_IndexController::v2Soap',
     'Maho_ApiPlatform_IndexController::xmlrpc',
+    'Maho_Paypal_CheckoutController::clientToken',
     'Maho_Paypal_CheckoutController::shippingCallback',
     'Maho_Paypal_WebhookController::index',
     'Mage_Newsletter_SubscriberController::unsubscribe',
@@ -192,29 +193,17 @@ it('lists no stale public action', function () {
     }
 });
 
-function sfkGetController(
-    string $action,
-    string $method = 'GET',
-    string $module = 'checkout',
-    string $controllerName = 'cart',
-    string $class = Mage_Checkout_CartController::class,
-): Mage_Core_Controller_Front_Action {
-    $path = '/' . $module . '/' . $controllerName . '/' . $action . '/id/5';
-    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create($path, $method));
-    $request->setModuleName($module)->setControllerName($controllerName)->setActionName($action)->setDispatched(true);
+function sfkGetController(string $action, string $method = 'GET'): Mage_Checkout_CartController
+{
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/checkout/cart/' . $action . '/id/5', $method));
+    $request->setModuleName('checkout')->setControllerName('cart')->setActionName($action)->setDispatched(true);
     Mage::app()->setRequest($request);
 
-    return new $class($request, new Mage_Core_Controller_Response_Http());
+    return new Mage_Checkout_CartController($request, new Mage_Core_Controller_Response_Http());
 }
 
 it('asks no form key of a GET to an action whose route accepts GET', function () {
     expect(sfkIsFormKeyRequired(sfkGetController('index')))->toBeFalse();
-});
-
-it('asks no form key of a GET for the PayPal client token', function () {
-    $controller = sfkGetController('clientToken', 'GET', 'paypal', 'checkout', Maho_Paypal_CheckoutController::class);
-
-    expect(sfkIsFormKeyRequired($controller))->toBeFalse();
 });
 
 it('asks the form key of a GET that reaches a POST-only action through extra path parts', function () {
