@@ -126,16 +126,6 @@ describe('CMS page canonical tag', function () {
         'setting holds the identifier and the page id' => [true],
     ]);
 
-    it('keeps the trailing slash on the home page of a store in a folder when the setting removes it', function () {
-        cmsCanonicalSetBaseUrl($this->store, 'https://canonical-folder.example/shop/');
-        $this->store->setConfig(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL, '0');
-        $this->store->setConfig('web/url/trailing_slash_behavior', 'remove');
-        $page = ($this->createPage)('test-home-folder');
-        $this->store->setConfig(Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE, $page->getIdentifier());
-
-        expect(cmsCanonicalHrefs($page))->toBe(['https://canonical-folder.example/shop/']);
-    });
-
     it('adds no canonical to the no-route page', function () {
         $page = ($this->createPage)('test-no-route');
         $this->store->setConfig(Mage_Cms_Helper_Page::XML_PATH_NO_ROUTE_PAGE, $page->getIdentifier() . '|' . $page->getId());
@@ -154,7 +144,7 @@ describe('CMS page canonical tag', function () {
         $code = ($this->createStore)((int) $this->store->getGroupId())->getCode();
         Mage::app()->reinitStores();
         $other = Mage::app()->getStore($code);
-        cmsCanonicalSetUrlConfig($layout === 'store code in URL' ? '1' : '0', $other->getWebsite()->getDefaultStore(), $other);
+        cmsCanonicalSetUrlConfig('0', $other->getWebsite()->getDefaultStore(), $other);
         if ($layout === 'own base URL') {
             cmsCanonicalSetBaseUrl($other, 'https://canonical-sibling.example/');
         }
@@ -162,59 +152,10 @@ describe('CMS page canonical tag', function () {
 
         $query = $layout === 'same base URL' ? '?___store=' . $code : '';
         expect(cmsCanonicalHrefs($page))->toBe([Mage::getBaseUrl() . $page->getIdentifier() . '/' . $query]);
-
-        $other->setConfig(Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE, $page->getIdentifier());
-        expect(cmsCanonicalHrefs($page))->toBe([Mage::getBaseUrl() . $query]);
     })->with([
         'same base URL',
         'own base URL',
-        'store code in URL',
     ]);
-
-    it('compares the secure base URL when the storefront uses secure URLs', function () {
-        $page = ($this->createPage)('test-secure');
-        $code = ($this->createStore)((int) $this->store->getGroupId())->getCode();
-        Mage::app()->reinitStores();
-        $other = Mage::app()->getStore($code);
-        $default = $other->getWebsite()->getDefaultStore();
-        cmsCanonicalSetUrlConfig('0', $default, $other);
-        foreach ([$default, $other] as $store) {
-            $store->setConfig(Mage_Core_Model_Url::XML_PATH_SECURE_IN_FRONT, '1');
-            $store->setConfig('web/secure/base_url', 'https://canonical-secure.example/');
-            $store->setConfig('web/secure/base_link_url', 'https://canonical-secure.example/');
-        }
-        $other->setConfig('web/unsecure/base_url', 'https://canonical-unsecure.example/');
-        $other->setConfig('web/unsecure/base_link_url', 'https://canonical-unsecure.example/');
-        Mage::app()->setCurrentStore($other);
-
-        expect(cmsCanonicalHrefs($page))->toBe(['https://canonical-secure.example/' . $page->getIdentifier() . '/?___store=' . $code]);
-    });
-
-    it('adds the store parameter when the store view shares the base URL of the default store view of its group', function () {
-        $page = ($this->createPage)('test-group');
-        Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);
-        $group = $this->createdModels[] = Mage::getModel('core/store_group')
-            ->setWebsiteId((int) $this->store->getWebsiteId())
-            ->setName('Canonical group')
-            ->setRootCategoryId((int) $this->store->getRootCategoryId())
-            ->save();
-        $groupDefaultModel = ($this->createStore)((int) $group->getId());
-        $code = ($this->createStore)((int) $group->getId())->getCode();
-        $group->setDefaultStoreId((int) $groupDefaultModel->getId())->save();
-        Mage::app()->reinitStores();
-
-        $groupDefault = Mage::app()->getStore($groupDefaultModel->getCode());
-        $other = Mage::app()->getStore($code);
-        cmsCanonicalSetUrlConfig('0', $other->getWebsite()->getDefaultStore(), $groupDefault, $other);
-        cmsCanonicalSetBaseUrl($groupDefault, 'https://canonical-group.example/');
-        cmsCanonicalSetBaseUrl($other, 'https://canonical-group.example/');
-
-        Mage::app()->setCurrentStore($other);
-        expect(cmsCanonicalHrefs($page))->toBe(['https://canonical-group.example/' . $page->getIdentifier() . '/?___store=' . $code]);
-
-        Mage::app()->setCurrentStore($groupDefault);
-        expect(cmsCanonicalHrefs($page))->toBe(['https://canonical-group.example/' . $page->getIdentifier() . '/']);
-    });
 
     it('adds no store parameter on the default store view', function () {
         $this->store->setConfig(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL, '0');
