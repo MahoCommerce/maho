@@ -89,6 +89,9 @@ class Mage_Cms_Block_Page extends Mage_Core_Block_Abstract
             $head->setTitle($page->getTitle());
             $head->setKeywords($page->getMetaKeywords());
             $head->setDescription($page->getMetaDescription());
+            if ($canonicalUrl = $this->getCanonicalUrl()) {
+                $head->addLinkRel('canonical', $canonicalUrl);
+            }
         }
 
         return parent::_prepareLayout();
@@ -110,6 +113,33 @@ class Mage_Cms_Block_Page extends Mage_Core_Block_Abstract
         $html = $processor->filter($this->getPage()->getContent());
         $html = $this->getMessagesBlock()->toHtml() . $html;
         return $html;
+    }
+
+    /**
+     * Return the URL of the page for <link rel="canonical">, or null when the page gets no canonical.
+     * The home page is the base URL, which its own identifier redirects to.
+     */
+    public function getCanonicalUrl(): ?string
+    {
+        $page = $this->getPage();
+        $identifier = (string) $page->getIdentifier();
+        /** @var Mage_Cms_Helper_Page $helper */
+        $helper = Mage::helper('cms/page');
+        if ($identifier === ''
+            || $helper->isNoRoutePage($page)
+            || stripos((string) $page->getMetaRobots(), 'noindex') !== false
+        ) {
+            return null;
+        }
+
+        /** @var Mage_Core_Helper_Url $urlHelper */
+        $urlHelper = Mage::helper('core/url');
+        $params = ['_query' => $urlHelper->getCanonicalStoreQuery()];
+        if ($helper->isHomePage($page)) {
+            return Mage::getUrl('', $params);
+        }
+
+        return Mage::getUrl(null, ['_direct' => $identifier] + $params);
     }
 
     public function getPageId(): ?int

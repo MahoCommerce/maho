@@ -69,6 +69,18 @@ ranking signals onto it.
     get clean category canonicals out of the box. If you are upgrading and deliberately kept it off,
     review this setting after the update.
 
+CMS pages always get a canonical tag, with no setting. The tag holds the URL of the page without
+the query string, so a link with tracking parameters such as `?utm_source=` counts for the page
+itself. The tag follows the **Trailing Slash Behavior** setting. The CMS Home Page points to the
+base URL of the store, because its own identifier redirects there.
+
+A store view that shares the base URL of the default store view of its website shows at the same
+path with `?___store=<code>`. Its canonical keeps that parameter, so that it does not point to the
+default store view.
+
+The **CMS No Route Page** gets no canonical tag, and neither does a page whose meta robots
+contains `noindex`.
+
 ## Layered navigation crawl controls <span class="version-badge">v26.7+</span>
 
 Category pages with layered navigation are a classic SEO trap. A single category can generate a
