@@ -318,6 +318,26 @@ describe('Store override flags (storeOverrides)', function (): void {
         expect(productStoreValueCodes($productId, scopeTestStoreId()))->toBe([]);
     });
 
+    it('saves stock data in a store view that inherits the name', function (): void {
+        $productId = (int) $GLOBALS['_scope_test_product_id'];
+        $token = serviceToken(['products/write', 'products/read']);
+
+        $revert = apiPut('/api/rest/v2/products/' . $productId . '?store=' . SCOPE_STORE_CODE, [
+            'useDefault' => ['name'],
+        ], $token);
+        expect($revert['status'])->toBe(200);
+
+        $update = apiPut('/api/rest/v2/products/' . $productId . '?store=' . SCOPE_STORE_CODE, [
+            'stockQty' => 7,
+        ], $token);
+        expect($update['status'])->toBe(200);
+        expect($update['json']['name'])->toBe('Scope Test Global Name');
+        expect(productStoreValueCodes($productId, scopeTestStoreId()))->toBe([]);
+
+        $read = apiGet('/api/rest/v2/products/' . $productId, $token);
+        expect((float) $read['json']['stockQty'])->toBe(7.0);
+    });
+
     it('keeps a plain update on the global scope', function (): void {
         $productId = (int) $GLOBALS['_scope_test_product_id'];
         $token = serviceToken(['products/write', 'products/read']);

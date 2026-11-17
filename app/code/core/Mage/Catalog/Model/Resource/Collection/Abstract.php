@@ -194,6 +194,10 @@ class Mage_Catalog_Model_Resource_Collection_Abstract extends Mage_Eav_Model_Ent
 
         foreach ($this->_itemsById[$valueInfo[$this->getEntity()->getEntityIdField()]] as $object) {
             $object->setExistsStoreValueFlag($attributeCode);
+            // Record the default value for useDefaultValue(), as a load of the model does
+            if (($valueInfo['default_value'] ?? null) !== null) {
+                $object->setAttributeDefaultValue($attributeCode, $valueInfo['default_value']);
+            }
         }
 
         return $this;

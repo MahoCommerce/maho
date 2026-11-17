@@ -132,8 +132,10 @@ class Mage_Catalog_Service_Category
      */
     public function useDefault(Category $category, array $codes): void
     {
+        // A form field can also fill use_default, so the list keeps only the codes that pass the check
+        $category->setUseDefault(null);
         foreach (Mage::helper('catalog')->getStoreScopeAttributes(Category::ENTITY, $codes, (int) $category->getStoreId()) as $attribute) {
-            $category->setData($attribute->getAttributeCode(), false);
+            $category->useDefaultValue($attribute->getAttributeCode());
         }
     }
 
@@ -248,8 +250,8 @@ class Mage_Catalog_Service_Category
         try {
             foreach ($category->getAttributes() as $code => $attribute) {
                 $value = $category->getData($code);
-                // In a store view, false means that the store view uses the default value
-                if (!$isAdminScope && $value === false) {
+                // A store view on the default value has no value of its own
+                if (!$isAdminScope && ($value === false || $category->usesDefaultValue((string) $code))) {
                     continue;
                 }
                 $field = $attribute->getIsUserDefined() ? $customAttributePrefix . $code : (string) $code;

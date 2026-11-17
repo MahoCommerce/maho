@@ -296,21 +296,14 @@ class Mage_Catalog_Model_Api2_Product_Rest_Admin_V1 extends Mage_Catalog_Model_A
         }
         /** @var Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
         foreach ($product->getTypeInstance(true)->getEditableAttributes($product) as $attribute) {
-            //Unset data if object attribute has no value in current store
-            if (Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID !== (int) $product->getStoreId()
-                && !$product->getExistsStoreValueFlag($attribute->getAttributeCode())
+            $code = (string) $attribute->getAttributeCode();
+            if ($this->_isAllowedAttribute($attribute) && array_key_exists($code, $productData)) {
+                $product->setData($code, $productData[$code]);
+            } elseif (Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID !== (int) $product->getStoreId()
+                && !$product->getExistsStoreValueFlag($code)
                 && !$attribute->isScopeGlobal()
             ) {
-                $product->setData($attribute->getAttributeCode(), false);
-            }
-
-            if ($this->_isAllowedAttribute($attribute)) {
-                if (array_key_exists((string) $attribute->getAttributeCode(), $productData)) {
-                    $product->setData(
-                        $attribute->getAttributeCode(),
-                        $productData[$attribute->getAttributeCode()],
-                    );
-                }
+                $product->useDefaultValue($code);
             }
         }
     }

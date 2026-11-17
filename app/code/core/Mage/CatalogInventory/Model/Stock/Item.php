@@ -762,7 +762,6 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         $this->setProductId($product->getId())
             ->setProductName($product->getName())
             ->setStoreId($product->getStoreId())
-            ->setProductName($product->getName())
             ->setProductTypeId($product->getTypeId())
             ->setProductStatusChanged($product->dataHasChangedFor('status'))
             ->setProductChangedWebsites($product->getIsChangedWebsites());
