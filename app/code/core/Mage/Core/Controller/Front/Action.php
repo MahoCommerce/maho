@@ -25,7 +25,9 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
      * Actions of this controller that run without a form key check.
      *
      * Put an action here only when a third party must reach it: a payment webhook, an OAuth
-     * endpoint, an unsubscribe link. Every other action that changes state keeps the check.
+     * endpoint, an unsubscribe link. A POST-only action that changes no state can also go here,
+     * when a page that the browser restores calls it with the form key of an ended session.
+     * Every other action that changes state keeps the check.
      *
      * @var string[]
      */

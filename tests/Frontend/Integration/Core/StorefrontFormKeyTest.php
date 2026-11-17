@@ -24,6 +24,7 @@ const STOREFRONT_PUBLIC_ACTIONS = [
     'Maho_ApiPlatform_IndexController::soap',
     'Maho_ApiPlatform_IndexController::v2Soap',
     'Maho_ApiPlatform_IndexController::xmlrpc',
+    'Maho_Paypal_CheckoutController::clientToken',
     'Maho_Paypal_CheckoutController::shippingCallback',
     'Maho_Paypal_WebhookController::index',
     'Mage_Newsletter_SubscriberController::unsubscribe',
