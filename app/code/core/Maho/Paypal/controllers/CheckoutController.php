@@ -12,13 +12,11 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 {
     /**
      * PayPal calls shippingCallback from its own servers, so it carries no form key.
-     * clientToken changes no state, and a page that the browser restores after the session
-     * ended still sends the form key of that old session.
      *
      * @var string[]
      */
     #[\Override]
-    protected $_publicActions = ['shippingCallback', 'clientToken'];
+    protected $_publicActions = ['shippingCallback'];
 
     /**
      * Parse JSON request body params into the request object.
@@ -45,7 +43,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         return $this;
     }
 
-    #[Maho\Config\Route('/paypal/checkout/clientToken', methods: ['POST'])]
+    #[Maho\Config\Route('/paypal/checkout/clientToken', methods: ['GET', 'POST'])]
     public function clientTokenAction(): void
     {
         $result = ['success' => false];
@@ -66,6 +64,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         }
 
         $this->getResponse()->setHeader('Content-Type', 'application/json');
+        $this->getResponse()->setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate', true);
         $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
     }
 

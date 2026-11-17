@@ -24,7 +24,6 @@ const STOREFRONT_PUBLIC_ACTIONS = [
     'Maho_ApiPlatform_IndexController::soap',
     'Maho_ApiPlatform_IndexController::v2Soap',
     'Maho_ApiPlatform_IndexController::xmlrpc',
-    'Maho_Paypal_CheckoutController::clientToken',
     'Maho_Paypal_CheckoutController::shippingCallback',
     'Maho_Paypal_WebhookController::index',
     'Mage_Newsletter_SubscriberController::unsubscribe',
@@ -204,6 +203,15 @@ function sfkGetController(string $action, string $method = 'GET'): Mage_Checkout
 
 it('asks no form key of a GET to an action whose route accepts GET', function () {
     expect(sfkIsFormKeyRequired(sfkGetController('index')))->toBeFalse();
+});
+
+it('asks no form key of a GET for the PayPal client token', function () {
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/paypal/checkout/clientToken', 'GET'));
+    $request->setModuleName('paypal')->setControllerName('checkout')->setActionName('clientToken')->setDispatched(true);
+    Mage::app()->setRequest($request);
+    $controller = new Maho_Paypal_CheckoutController($request, new Mage_Core_Controller_Response_Http());
+
+    expect(sfkIsFormKeyRequired($controller))->toBeFalse();
 });
 
 it('asks the form key of a GET that reaches a POST-only action through extra path parts', function () {
