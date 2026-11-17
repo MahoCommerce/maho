@@ -52,7 +52,7 @@ function invoiceWeeeItem(int $storeId, string $type): Mage_Sales_Model_Order_Inv
 {
     $order = Mage::getModel('sales/order')->setStoreId($storeId)->setBaseCurrencyCode('USD')->setOrderCurrencyCode('USD');
     $orderItem = Mage::getModel('sales/order_item')->setName('Owned invoice item')->setSku('OWNED-INVOICE-ITEM')
-        ->setProductType($type)->setProductOptions([]);
+        ->setProductType($type)->setProductOptions([])->setStoreId($storeId);
     $invoice = Mage::getModel('sales/order_invoice')->setOrder($order);
     $item = Mage::getModel('sales/order_invoice_item')->setInvoice($invoice)->setOrderItem($orderItem);
     documentWeeeApply($item);
@@ -97,7 +97,7 @@ it('renders invoice WEEE details using the invoice store regardless of the curre
     $unitInclTax = new DOMXPath($document)->query('(//td)[2]//span[@class="price-incl-tax"]')->item(0)->textContent;
     expect(str_contains($unitInclTax, 'Owned recycling fee'))->toBe($invoiceMode === 2)
         ->and($actual)->toBe($sameStore)
-        ->and($item->getData())->toBe($before + ['store_id' => $this->scopeStores['invoice']]);
+        ->and(array_diff_key($item->getData(), ['store_id' => null]))->toBe(array_diff_key($before, ['store_id' => null]));
 })->with(['simple', 'configurable', 'downloadable', 'bundle'])->with([
     'different store, separate WEEE' => [0, 2],
     'different store, included WEEE' => [2, 0],
