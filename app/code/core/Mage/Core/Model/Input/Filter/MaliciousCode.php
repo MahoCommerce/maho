@@ -441,8 +441,9 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
         if ($removeWrapper) {
             // Strip the wrapper tags libxml adds, plus the XML PI we injected
             // above (libxml may emit it with or without a trailing question
-            // mark depending on version; [^>]* matches both forms).
-            $html = preg_replace('/<(?:!DOCTYPE|\?xml\b|\/?(?:html|body))[^>]*>\s*/i', '', $html);
+            // mark depending on version; [^>]* matches both forms). libxml 2.14
+            // and newer emits it as the comment <!--?xml ...-->.
+            $html = preg_replace('/<(?:!DOCTYPE|!--\?xml\b|\?xml\b|\/?(?:html|body))[^>]*>\s*/i', '', $html);
         }
 
         libxml_use_internal_errors($libXmlErrorsState);
