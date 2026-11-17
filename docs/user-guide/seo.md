@@ -87,6 +87,9 @@ group. Its pages then show at the same path with `?___store=<code>`. The canonic
 pages keep that parameter, so that they do not point to the default store view. The canonical tags
 of its categories and products keep it too, when the settings above turn them on.
 
+The default robots.txt rules block `?___store=`, so search engines do not fetch these pages until
+the store view gets its own base URL or you remove that rule. See [robots.txt](../hosting/robotstxt.md).
+
 ## Layered navigation crawl controls <span class="version-badge">v26.7+</span>
 
 Category pages with layered navigation are a classic SEO trap. A single category can generate a

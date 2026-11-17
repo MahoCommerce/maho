@@ -75,10 +75,10 @@ describe('CMS page canonical tag', function () {
         $this->store->setConfig('web/url/trailing_slash_behavior', 'add');
         $this->pages = [];
         $this->createPage = (fn(string $prefix, ?string $robots = null): Mage_Cms_Model_Page => $this->pages[] = cmsCanonicalCreatePage($prefix . '-' . uniqid(), $robots));
-        $this->storeModels = [];
+        $this->createdModels = [];
         $this->createStore = function (int $groupId): Mage_Core_Model_Store {
             Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);
-            return $this->storeModels[] = Mage::getModel('core/store')
+            return $this->createdModels[] = Mage::getModel('core/store')
                 ->setCode('canonical_' . substr(uniqid(), -8))
                 ->setWebsiteId((int) $this->store->getWebsiteId())
                 ->setGroupId($groupId)
@@ -94,7 +94,7 @@ describe('CMS page canonical tag', function () {
         }
         Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);
         Mage::register('isSecureArea', true, true);
-        foreach (array_reverse($this->storeModels) as $model) {
+        foreach (array_reverse($this->createdModels) as $model) {
             $model->delete();
         }
         Mage::unregister('isSecureArea');
@@ -193,7 +193,7 @@ describe('CMS page canonical tag', function () {
     it('adds the store parameter when the store view shares the base URL of the default store view of its group', function () {
         $page = ($this->createPage)('test-group');
         Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);
-        $group = $this->storeModels[] = Mage::getModel('core/store_group')
+        $group = $this->createdModels[] = Mage::getModel('core/store_group')
             ->setWebsiteId((int) $this->store->getWebsiteId())
             ->setName('Canonical group')
             ->setRootCategoryId((int) $this->store->getRootCategoryId())

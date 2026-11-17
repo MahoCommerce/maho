@@ -303,8 +303,7 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
 
     /**
      * Return the query that a canonical URL of $store needs to show $store, or an empty array.
-     * A store view that shares the base URL of the default store view of its website or of its
-     * store group needs ___store, because a URL without it shows that default store view.
+     * A store view with the base URL of the default store view of its website or group needs ___store.
      *
      * @return array<string, string>
      */
