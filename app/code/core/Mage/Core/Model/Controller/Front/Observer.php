@@ -127,9 +127,44 @@ class Mage_Core_Model_Controller_Front_Observer
         $path = $urlHelper->keepBasePathSlash($urlHelper->addOrRemoveTrailingSlash($path));
 
         $canonicalUri = $path . $query;
-        if ($canonicalUri !== $requestUri) {
+        // rewriteDb() sends the client to the target of a redirect rewrite in one step.
+        if ($canonicalUri !== $requestUri && !$this->hasRedirectRewrite($request)) {
             $response->setRedirect($canonicalUri, 301);
         }
+    }
+
+    private function hasRedirectRewrite(Mage_Core_Controller_Request_Http $request): bool
+    {
+        if (Mage::app()->getStore()->isAdmin() || $request->isStraight()) {
+            return false;
+        }
+        $rewrite = $this->loadRewrite($this->getRequestPathCandidates($request));
+        return $rewrite->getId() && ($rewrite->hasOption('R') || $rewrite->hasOption('RP'));
+    }
+
+    /**
+     * Load the URL rewrite of the current store that matches the first of $requestCases.
+     *
+     * @param list<string> $requestCases
+     */
+    private function loadRewrite(array $requestCases): Mage_Core_Model_Url_Rewrite
+    {
+        /** @var Mage_Core_Model_Url_Rewrite $rewrite */
+        $rewrite = Mage::getModel('core/url_rewrite');
+        $rewrite->setStoreId(Mage::app()->getStore()->getId());
+        $rewrite->loadByRequestPath($requestCases);
+        return $rewrite;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function getRequestPathCandidates(Mage_Core_Controller_Request_Http $request): array
+    {
+        return Mage::helper('core/url')->getRequestPathCandidates(
+            $request->getPathInfo(),
+            Mage::helper('core/url')->getRewriteQueryString($request),
+        );
     }
 
     /**
@@ -167,15 +202,8 @@ class Mage_Core_Model_Controller_Front_Observer
 
         \Maho\Profiler::start('mage::dispatch::db_url_rewrite');
 
-        /** @var Mage_Core_Model_Url_Rewrite $rewrite */
-        $rewrite = Mage::getModel('core/url_rewrite');
-        $rewrite->setStoreId(Mage::app()->getStore()->getId());
-
-        $requestCases = Mage::helper('core/url')->getRequestPathCandidates(
-            $request->getPathInfo(),
-            Mage::helper('core/url')->getRewriteQueryString($request),
-        );
-        $rewrite->loadByRequestPath($requestCases);
+        $requestCases = $this->getRequestPathCandidates($request);
+        $rewrite = $this->loadRewrite($requestCases);
 
         $fromStore = $request->getQuery('___from_store');
         if (!$rewrite->getId() && $fromStore) {

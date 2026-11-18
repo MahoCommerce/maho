@@ -63,7 +63,7 @@ function canonicalUriResetConfig(): void
     Mage::app()->reinitStores();
 }
 
-function canonicalUriDispatch(string $uri, string $script = '/index.php', string $method = 'GET', array $postData = []): Mage_Core_Controller_Response_Http
+function canonicalUriDispatch(string $uri, string $script = '/index.php', string $method = 'GET', array $postData = [], bool $straight = true): Mage_Core_Controller_Response_Http
 {
     // `SymfonyRequest::create()` validates the URI, so it cannot express what a web server hands over.
     $server = [
@@ -79,7 +79,7 @@ function canonicalUriDispatch(string $uri, string $script = '/index.php', string
 
     $request = new Mage_Core_Controller_Request_Http($symfonyRequest);
     // The URL-rewrite lookup runs after this step and would redirect on its own.
-    $request->isStraight(true);
+    $request->isStraight($straight);
 
     $response = new Mage_Core_Controller_Response_Http();
 
@@ -202,5 +202,61 @@ describe('Front observer canonical URI', function () {
         $response = canonicalUriDispatch('/index.php', '/index.php', 'POST', ['form_key' => 'x']);
 
         expect($response->isRedirect())->toBeFalse();
+    });
+});
+
+function canonicalUriInsertRewrite(string $requestPath, string $targetPath, string $options = ''): int
+{
+    $write = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $write->insert(Mage::getSingleton('core/resource')->getTableName('core/url_rewrite'), [
+        'store_id' => (int) Mage::app()->getStore()->getId(),
+        'id_path' => 'pest_canonical_' . uniqid(),
+        'request_path' => $requestPath,
+        'target_path' => $targetPath,
+        'is_system' => 0,
+        'options' => $options,
+    ]);
+    return (int) $write->lastInsertId();
+}
+
+describe('Front observer canonical URI with a URL rewrite', function () {
+    beforeEach(function () {
+        canonicalUriConfig('add');
+        $this->rewriteIds = [];
+    });
+
+    afterEach(function () {
+        $write = Mage::getSingleton('core/resource')->getConnection('core_write');
+        foreach ($this->rewriteIds as $id) {
+            $write->delete(Mage::getSingleton('core/resource')->getTableName('core/url_rewrite'), ['url_rewrite_id = ?' => $id]);
+        }
+        canonicalUriResetConfig();
+    });
+
+    it('redirects to the target of a permanent rewrite in one step when the trailing slash is missing', function () {
+        $this->rewriteIds[] = canonicalUriInsertRewrite('pest-old-brand/', 'pest-new-brand/', 'RP');
+
+        $response = canonicalUriDispatch('/pest-old-brand', straight: false);
+
+        expect($response->getHttpResponseCode())->toBe(301);
+        expect(canonicalUriLocation($response))->toBe('/pest-new-brand/');
+    });
+
+    it('redirects to the target of a temporary rewrite in one step when the trailing slash is missing', function () {
+        $this->rewriteIds[] = canonicalUriInsertRewrite('pest-old-sale/', 'pest-new-sale/', 'R');
+
+        $response = canonicalUriDispatch('/pest-old-sale', straight: false);
+
+        expect($response->getHttpResponseCode())->toBe(302);
+        expect(canonicalUriLocation($response))->toBe('/pest-new-sale/');
+    });
+
+    it('still adds the trailing slash to a rewrite that does not redirect', function () {
+        $this->rewriteIds[] = canonicalUriInsertRewrite('pest-alias/', 'catalog/category/view/id/3');
+
+        $response = canonicalUriDispatch('/pest-alias', straight: false);
+
+        expect($response->getHttpResponseCode())->toBe(301);
+        expect(canonicalUriLocation($response))->toBe('/pest-alias/');
     });
 });
