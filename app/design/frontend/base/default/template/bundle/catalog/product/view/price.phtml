@@ -30,6 +30,23 @@ if (!$canApplyMAP && $_product->getCanShowPrice() !== false && !$this->getWithou
     $_priceModel = $_product->getPriceModel();
     $_finalPrice = $_priceModel->getRoundedPriceWithTax($_product, $_finalPrice);
     $_finalPriceInclTax = $_priceModel->getRoundedPriceWithTax($_product, $_finalPriceInclTax, true);
+
+    // Add the FPT as product_options.js does for a saleable bundle
+    $_weeeHelper = Mage::helper('weee');
+    $_weeeAmount = $_weeeHelper->getAmountForDisplay($_product);
+    if ($_weeeAmount && !$_weeeHelper->typeOfDisplay($_product, 3)) {
+        $_weeeAmountInclTax = $_weeeHelper->isTaxable()
+            ? $_weeeHelper->getAmountInclTaxes($_weeeHelper->getProductWeeeAttributesForRenderer($_product, null, null, null, true))
+            : $_weeeAmount;
+        $_weeeAmount = $_store->convertPrice($_weeeAmount);
+        $_weeeAmountInclTax = $_store->convertPrice($_weeeAmountInclTax);
+        $_finalPriceInclTax += $_weeeAmountInclTax;
+        if ($this->helper('tax')->displayPriceIncludingTax()) {
+            $_finalPrice += $_weeeAmountInclTax;
+        } elseif ($_weeeHelper->typeOfDisplay($_product, [0, 1, 4])) {
+            $_finalPrice += $_weeeAmount;
+        }
+    }
 }
 ?>
 <?php if ($_product->getCanShowPrice() !== false): ?>

@@ -29,10 +29,13 @@ it('shows the tax amounts in the configured price of an unavailable fixed bundle
         $store->setConfig($path, $value);
     }
 
+    $feeCode = 'bundle_fee_' . bin2hex(random_bytes(4));
     $transactionStarted = false;
     try {
         $resource->beginTransaction();
         $transactionStarted = true;
+        Tests\Helpers\WeeeDiscountFixture::createFeeAttribute($feeCode);
+        Mage::unregister('_singleton/weee/tax');
         $guestClassId = (int) Mage::getModel('customer/group')
             ->getTaxClassId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
         expect(Mage::getSingleton('tax/calculation')->getCustomer())->toBeFalse()
@@ -74,6 +77,7 @@ it('shows the tax amounts in the configured price of an unavailable fixed bundle
             'price' => 100, 'price_type' => Mage_Bundle_Model_Product_Price::PRICE_TYPE_FIXED,
             'tax_class_id' => (int) $taxClass->getId(), 'sku_type' => 0, 'weight_type' => 0,
             'shipment_type' => 0, 'price_view' => 0, 'can_save_bundle_selections' => true,
+            $feeCode => [['website_id' => (int) $store->getWebsiteId(), 'country' => 'AT', 'state' => '*', 'price' => 5.0]],
             'stock_data' => ['use_config_manage_stock' => 0, 'manage_stock' => 1, 'is_in_stock' => 0, 'qty' => 0],
             'bundle_options_data' => [[
                 'title' => 'Selection', 'default_title' => 'Selection', 'type' => 'select',
@@ -105,7 +109,12 @@ it('shows the tax amounts in the configured price of an unavailable fixed bundle
             $priceBlock = $layout->createBlock('bundle/catalog_product_price')
                 ->setTemplate('bundle/catalog/product/view/price.phtml')->setProduct($product);
             $parent->setChild('bundle_prices', $priceBlock);
-            $html = $parent->getChildHtml('bundle_prices', false);
+            Mage::register('current_product', $product);
+            try {
+                $html = $parent->getChildHtml('bundle_prices', false);
+            } finally {
+                Mage::unregister('current_product');
+            }
             $dom = new DOMDocument();
             $previous = libxml_use_internal_errors(true);
             try {
@@ -134,6 +143,25 @@ it('shows the tax amounts in the configured price of an unavailable fixed bundle
             ->and($capture('AT', false, Mage_Tax_Model_Config::DISPLAY_TYPE_INCLUDING_TAX))->toBe(['display' => $format(120.0)])
             ->and($capture('AT', true, Mage_Tax_Model_Config::DISPLAY_TYPE_EXCLUDING_TAX))->toBe(['display' => $format(83.33)]);
 
+        $captureWithFpt = static function (int $fptDisplay, int $displayType, bool $fptTaxed = false) use ($store, $capture): array {
+            $store->setConfig('tax/weee/enable', '1');
+            $store->setConfig('tax/weee/display', (string) $fptDisplay);
+            $store->setConfig('tax/weee/apply_vat', $fptTaxed ? (string) Mage_Weee_Helper_Data::TAXED : '0');
+            try {
+                return $capture('AT', false, $displayType);
+            } finally {
+                $store->setConfig('tax/weee/enable', '0');
+            }
+        };
+        expect($captureWithFpt(Mage_Weee_Model_Tax::DISPLAY_INCL, $both))->toBe(['excluding' => $format(105.0), 'including' => $format(125.0)])
+            ->and($captureWithFpt(Mage_Weee_Model_Tax::DISPLAY_INCL_DESCR, $both))->toBe(['excluding' => $format(105.0), 'including' => $format(125.0)])
+            ->and($captureWithFpt(Mage_Weee_Model_Tax::DISPLAY_EXCL_DESCR_INCL, $both))->toBe(['excluding' => $format(100.0), 'including' => $format(125.0)])
+            ->and($captureWithFpt(Mage_Weee_Model_Tax::DISPLAY_EXCL, $both))->toBe(['excluding' => $format(100.0), 'including' => $format(120.0)])
+            ->and($captureWithFpt(Mage_Weee_Model_Tax::DISPLAY_INCL, $both, fptTaxed: true))->toBe(['excluding' => $format(105.0), 'including' => $format(126.0)])
+            ->and($captureWithFpt(Mage_Weee_Model_Tax::DISPLAY_EXCL_DESCR_INCL, Mage_Tax_Model_Config::DISPLAY_TYPE_INCLUDING_TAX))->toBe(['display' => $format(125.0)])
+            ->and($captureWithFpt(Mage_Weee_Model_Tax::DISPLAY_EXCL_DESCR_INCL, Mage_Tax_Model_Config::DISPLAY_TYPE_EXCLUDING_TAX))->toBe(['display' => $format(100.0)])
+            ->and($captureWithFpt(Mage_Weee_Model_Tax::DISPLAY_INCL, Mage_Tax_Model_Config::DISPLAY_TYPE_EXCLUDING_TAX))->toBe(['display' => $format(105.0)]);
+
         // Reload before each native attribute update; the creation object is never saved twice.
         $updatePrice = static function (float $price) use ($resource, $bundleId): void {
             $updated = Mage::getModel('catalog/product')->setStoreId(0)->load($bundleId);
@@ -155,6 +183,8 @@ it('shows the tax amounts in the configured price of an unavailable fixed bundle
         if ($transactionStarted) {
             $resource->rollBack();
         }
+        Tests\Helpers\WeeeDiscountFixture::cleanup(['products' => [], 'categories' => [], 'rules' => [], 'attribute' => $feeCode]);
+        Mage::unregister('_singleton/weee/tax');
         resetCurrencyState();
     }
 });
