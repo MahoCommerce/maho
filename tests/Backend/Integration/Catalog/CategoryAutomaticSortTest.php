@@ -66,6 +66,15 @@ it('offers the three automatic sorts next to position', function () {
     expect(array_keys($options))->toContain('position', 'newest', 'bestsellers', 'most_viewed');
 });
 
+it('offers Most Viewed only when the store records the views of products', function () {
+    $store = Mage::app()->getStore($this->storeId);
+    $store->setConfig('catalog/recently_products/enabled_recently_viewed', '0');
+    expect(array_keys(Mage::getSingleton('catalog/config')->getAutomaticSortOptions()))->not->toContain('most_viewed');
+
+    $store->setConfig('catalog/recently_products/enabled_recently_viewed', '1');
+    expect(array_keys(Mage::getSingleton('catalog/config')->getAutomaticSortOptions()))->toContain('most_viewed');
+});
+
 it('sorts by the date of creation for Newest', function () {
     [$a, $b, $c] = $this->ids;
 
@@ -76,7 +85,7 @@ it('sorts by the date of creation for Newest', function () {
 it('sorts by the units sold of the store for Bestsellers, and a product with no row goes last in both directions', function () {
     [$a, $b, $c] = $this->ids;
     $this->db->insertMultiple($this->tables['sales'], [
-        ['product_id' => $a, 'store_id' => $this->storeId, 'qty_ordered' => 3, 'revenue' => 30],
+        ['product_id' => $a, 'store_id' => $this->storeId, 'qty_ordered' => 3, 'revenue' => 300],
         ['product_id' => $b, 'store_id' => $this->storeId, 'qty_ordered' => 9, 'revenue' => 90],
         // The score of all stores must not count in a store view
         ['product_id' => $c, 'store_id' => 0, 'qty_ordered' => 100, 'revenue' => 1000],

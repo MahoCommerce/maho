@@ -239,6 +239,7 @@ class CategoryMerchandiser {
     }
 
     writePins() {
+        this.pinnedEl.disabled = false;
         this.pinnedEl.value = [...this.pinned.keys()].join(',');
     }
 
@@ -563,6 +564,8 @@ class CategoryMerchandiser {
             await this.refresh();
             return;
         }
+        this.requestId++;
+        this.isLoading = false;
         this.view = this.order.slice(0, Math.max(this.view.length, 1));
         try {
             await this.ensureTiles(this.view);

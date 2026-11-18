@@ -379,7 +379,7 @@ class Mage_Catalog_Model_Config extends Mage_Eav_Model_Config
 
     /**
      * Retrieve the sorts that the store computes, with the code as key and the label as value.
-     * The Most Viewed sort needs the Mage_Reports module.
+     * The Most Viewed sort needs the Mage_Reports module, and the store must record the views of products.
      *
      * @return array<string, string>
      */
@@ -390,7 +390,7 @@ class Mage_Catalog_Model_Config extends Mage_Eav_Model_Config
             self::SORT_NEWEST => $helper->__('Newest'),
             self::SORT_BESTSELLERS => $helper->__('Bestsellers'),
         ];
-        if ($helper->isModuleEnabled('Mage_Reports')) {
+        if ($helper->isModuleEnabled('Mage_Reports') && Mage::helper('reports')->isRecentlyViewedEnabled()) {
             $options[self::SORT_MOST_VIEWED] = $helper->__('Most Viewed');
         }
         return $options;

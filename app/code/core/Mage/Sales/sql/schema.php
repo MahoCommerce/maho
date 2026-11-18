@@ -1764,7 +1764,7 @@ return function (SchemaEditor $schema): void {
             ->setUnquotedName('sales_bestsellers_aggregated_rolling')
             ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true))
             ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true))
-            ->addColumn(Schema::column('qty_ordered', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('qty_ordered', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
             ->addColumn(Schema::column('revenue', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()->setUnquotedColumnNames('product_id', 'store_id')->create(),

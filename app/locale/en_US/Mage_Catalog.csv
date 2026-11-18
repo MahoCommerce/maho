@@ -777,7 +777,7 @@
 "The attribute set does not have the attribute '%s' that the configurable product %s uses.","The attribute set does not have the attribute '%s' that the configurable product %s uses."
 "The attribute set has been saved.","The attribute set has been saved."
 "The base directory to upload file is not specified.","The base directory to upload file is not specified."
-"The Bestsellers and Most Viewed sorts, and the sales on the category product tiles, count the orders and the views of this number of days before the last refresh of the statistics.","The Bestsellers and Most Viewed sorts, and the sales on the category product tiles, count the orders and the views of this number of days before the last refresh of the statistics."
+"The Bestsellers and Most Viewed sorts, and the sales on the category product tiles, count the units ordered and the views of this number of days before the last refresh of the statistics.","The Bestsellers and Most Viewed sorts, and the sales on the category product tiles, count the units ordered and the views of this number of days before the last refresh of the statistics."
 "The category has been deleted.","The category has been deleted."
 "The category has been saved.","The category has been saved."
 "The comparison list was cleared.","The comparison list was cleared."

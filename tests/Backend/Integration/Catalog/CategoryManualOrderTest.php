@@ -105,6 +105,19 @@ it('puts a product that enters the category at the top when the category says to
     expect(manualOrderList($category))->toBe([$c, $a, $b]);
 });
 
+it('puts a product that enters the category before a product at position 0 when the category says top', function () {
+    [$a, $b, $c] = manualOrderProducts(3);
+    $category = manualOrderCategory('top');
+    manualOrderSave($category, [$a => 0, $b => 1]);
+
+    manualOrderSave($category, [$a => 0, $b => 1, $c => 0]);
+
+    $rows = manualOrderRows($category);
+    expect(manualOrderList($category))->toBe([$c, $a, $b])
+        ->and($rows[$c]['position'])->toBeLessThan(0)
+        ->and($rows[$a]['position'])->toBe(0);
+});
+
 it('puts a product that enters the category at the bottom when the category says bottom', function () {
     [$a, $b, $c] = manualOrderProducts(3);
     $category = manualOrderCategory('bottom');

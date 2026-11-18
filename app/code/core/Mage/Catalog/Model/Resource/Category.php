@@ -470,8 +470,9 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         $others = array_keys($others);
 
         $arranged = [];
+        $next = 0;
         for ($slot = 1; $slot <= $count; $slot++) {
-            $arranged[$slots[$slot] ?? array_shift($others)] = $slot;
+            $arranged[$slots[$slot] ?? $others[$next++]] = $slot;
         }
         return $arranged;
     }

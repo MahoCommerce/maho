@@ -34,8 +34,9 @@ When the category sorts by **Best Value** (the position order), you can change t
   **Unpin**.
 - Use the search field to filter the tiles by name or SKU, or tick **Out of stock only**. While a
   filter is on, you cannot drag the tiles, but the actions for the selected tiles still work.
-- A dashed line between the tiles shows where each page of the storefront ends. The line uses the
-  number of products per page of the store.
+- A dashed line between the tiles marks the end of each page, counted by position. The line uses the
+  number of products per page of the store. A product that the storefront hides, or an out of stock
+  product that the storefront shows last, can move the real page end.
 - The tiles load 100 at a time when you scroll. **Move to position** reaches a slot that the page
   did not load yet.
 - Use **Add a product by name or SKU** to add a product, and **Remove** on a tile to remove it.
@@ -87,7 +88,7 @@ The sort lists of the category and of the storefront offer three more sort order
 |------------|--------------------|
 | Newest | The date when the product was created. The newest product comes first |
 | Bestsellers | The units that the product sold in the last days. The highest number comes first |
-| Most Viewed | The views of the product page in the last days. The highest number comes first. It needs the Reports module |
+| Most Viewed | The views of the product page in the last days. The highest number comes first. It needs the Reports module and the setting **Enable Recently Viewed Products**, because the store records the views only then |
 
 A product with no sales, or no views, in the period comes last, in both directions. The shopper can
 reverse the direction with the arrow next to **Sort By**.
@@ -172,7 +173,7 @@ Search results do not use the positions of a category. They sort by **Relevance*
 | The products show in the reverse order | The direction is descending: someone clicked the arrow next to **Sort By**, and the store remembers it for that session | Click the arrow again, or open the page in a private window |
 | One store view shows another order | That store view has its own value of the sort settings of the category | Select the store view and check **Use Config Settings** and the value |
 | The products of a subcategory are always at the end | The category is an anchor category, and those products are not in the category itself | Assign the products to the category and give them a position |
-| The tiles are read-only | The category sorts by something else than Best Value | Set **Default Product Listing Sort By** to Best Value, and save the category |
+| The tiles are read-only | The category sorts by something else than Best Value | Add Best Value to **Available Product Listing Sort By** when it is missing, set **Default Product Listing Sort By** to Best Value, and save the category |
 | Bestsellers or Most Viewed shows no order | The statistics have no rows yet, or are old | Refresh the statistics in **Reports > Statistics > Refresh Statistics** |
 | The new positions do not show | The **Category Products** index is in **Manual Update** mode, or needs a reindex | Reindex in **System > Index Management** |
 | Products with the same position change places | Products with equal positions are sorted by product ID | Give each product its own position |

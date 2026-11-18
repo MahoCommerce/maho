@@ -135,7 +135,7 @@ function merchandiserTilesAnswer(int $categoryId, int $storeId, array $post): ar
     $response = new Mage_Core_Controller_Response_Http();
     Mage::unregister('category');
     Mage::unregister('current_category');
-    (new Mage_Adminhtml_Catalog_CategoryController($request, $response))->tilesAction();
+    new Mage_Adminhtml_Catalog_CategoryController($request, $response)->tilesAction();
     Mage::unregister('category');
     Mage::unregister('current_category');
 
@@ -209,3 +209,12 @@ it('reads the page size of the storefront in the mode that it opens', function (
     'grid first' => ['grid-list', 12],
     'list first' => ['list-grid', 10],
 ]);
+
+it('uses the first allowed page size when the default page size is not allowed', function () {
+    $store = Mage::app()->getStore($this->storeId);
+    $store->setConfig('catalog/frontend/list_mode', 'grid');
+    $store->setConfig('catalog/frontend/grid_per_page', '24');
+    $store->setConfig('catalog/frontend/grid_per_page_values', '12,36');
+
+    expect($this->merchandiser->getPerPage(merchandiserCategory($this->storeId, $this->rootId)))->toBe(12);
+});

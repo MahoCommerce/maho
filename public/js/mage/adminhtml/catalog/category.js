@@ -193,7 +193,7 @@ class CategoryEditForm {
      * @returns {boolean} true when the page can go on
      */
     confirmDiscardProductOrder() {
-        return !this.merchandiser?.isDirty || confirm(this.merchandiser.labels.confirmLeave);
+        return this.discardConfirmed || !this.merchandiser?.isDirty || confirm(this.merchandiser.labels.confirmLeave);
     }
 
     renderTree(config) {
@@ -301,6 +301,9 @@ class CategoryEditForm {
             alert(Translator.translate('Please select a parent category before adding a new one.'));
             return;
         }
+        if (!this.confirmDiscardProductOrder()) {
+            return;
+        }
         if (parent.id === 1) {
             this.tree.deselectAll();
         }
@@ -399,6 +402,7 @@ class CategoryEditForm {
 
         const storeId = parseInt(event.target.value) || 0;
         const category = this.getSelectedCategory();
+        this.discardConfirmed = true;
 
         if (!this.config.useAjax) {
             return setLocation(
@@ -420,6 +424,8 @@ class CategoryEditForm {
 
         } catch (error) {
             setMessagesDiv(error.message, 'error');
+        } finally {
+            this.discardConfirmed = false;
         }
     }
 

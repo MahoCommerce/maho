@@ -101,7 +101,7 @@ SPDX-License-Identifier: AFL-3.0
                         </default_sort_by>
                         <sort_days translate="label comment">
                             <label>Days Counted by Bestsellers and Most Viewed</label>
-                            <comment>The Bestsellers and Most Viewed sorts, and the sales on the category product tiles, count the orders and the views of this number of days before the last refresh of the statistics.</comment>
+                            <comment>The Bestsellers and Most Viewed sorts, and the sales on the category product tiles, count the units ordered and the views of this number of days before the last refresh of the statistics.</comment>
                             <frontend_type>text</frontend_type>
                             <validate>validate-digits validate-greater-than-zero</validate>
                             <sort_order>6</sort_order>

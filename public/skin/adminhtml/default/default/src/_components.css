@@ -1209,7 +1209,6 @@
     }
 
     .merchandiser-select {
-        position: absolute;
         inset-block-start: var(--maho-space-3);
         inset-inline-start: var(--maho-space-3);
         z-index: 1;
@@ -1282,8 +1281,12 @@
     }
 }
 
-/* The d-btn rules sit in the utilities layer, so the pressed button of the view switch and the pinned icon are here */
+/* The d-btn rules sit in the utilities layer, so the pressed button of the view switch, the pinned icon and the position of the checkbox are here */
 @layer utilities {
+    .merchandiser-select {
+        position: absolute;
+    }
+
     .merchandiser-pin[aria-pressed="true"] {
         color: var(--maho-accent-strong);
     }

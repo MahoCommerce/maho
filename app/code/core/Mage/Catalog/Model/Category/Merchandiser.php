@@ -46,10 +46,11 @@ class Mage_Catalog_Model_Category_Merchandiser
     public function getPerPage(Mage_Catalog_Model_Category $category): int
     {
         $storeId = $category->getStoreId();
-        $path = str_starts_with((string) Mage::getStoreConfig('catalog/frontend/list_mode', $storeId), 'list')
-            ? 'catalog/frontend/list_per_page'
-            : 'catalog/frontend/grid_per_page';
-        return max(1, Mage::getStoreConfigAsInt($path, $storeId));
+        $mode = str_starts_with((string) Mage::getStoreConfig('catalog/frontend/list_mode', $storeId), 'list') ? 'list' : 'grid';
+        $default = max(1, Mage::getStoreConfigAsInt("catalog/frontend/{$mode}_per_page", $storeId));
+        $allowed = array_filter(array_map(intval(...), explode(',', (string) Mage::getStoreConfig("catalog/frontend/{$mode}_per_page_values", $storeId))));
+
+        return $allowed === [] || in_array($default, $allowed, true) ? $default : (int) reset($allowed);
     }
 
     /**
