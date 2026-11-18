@@ -105,7 +105,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @var string
      */
-    protected $_entityTablePrefix;
+    protected ?string $_entityTablePrefix = null;
 
     /**
      * Partial load flag
@@ -166,7 +166,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     }
 
     #[\Override]
-    protected function _construct() {}
+    protected function _construct(): void {}
 
     /**
      * Retrieve connection for read data
@@ -1186,19 +1186,21 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
             /**
              * Check comparability for attribute value
              */
-            if ($this->_canUpdateAttribute($attribute, $v, $origData)) {
-                if ($this->_isAttributeValueEmpty($attribute, $v)) {
+            if ($this->_isAttributeValueDeleted($newObject, $attribute, $v)) {
+                if (array_key_exists($k, $origData)) {
                     $delete[$attribute->getBackend()->getTable()][] = [
                         'attribute_id'  => $attrId,
                         'value_id'      => $attribute->getBackend()->getEntityValueId($newObject),
                     ];
-                } elseif ($v !== $origData[$k]) {
+                }
+            } elseif ($this->_canUpdateAttribute($attribute, $v, $origData)) {
+                if ($v !== $origData[$k]) {
                     $update[$attrId] = [
                         'value_id' => $attribute->getBackend()->getEntityValueId($newObject),
                         'value'    => $v,
                     ];
                 }
-            } elseif (!$this->_isAttributeValueEmpty($attribute, $v)) {
+            } else {
                 $insert[$attrId] = $v;
             }
         }
@@ -1708,5 +1710,13 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     protected function _isAttributeValueEmpty(Mage_Eav_Model_Entity_Attribute_Abstract $attribute, $value)
     {
         return $attribute->isValueEmpty($value);
+    }
+
+    /**
+     * Check if the save deletes the value of $attribute for $object. The save deletes an empty value.
+     */
+    protected function _isAttributeValueDeleted(\Maho\DataObject $object, Mage_Eav_Model_Entity_Attribute_Abstract $attribute, mixed $value): bool
+    {
+        return $this->_isAttributeValueEmpty($attribute, $value);
     }
 }

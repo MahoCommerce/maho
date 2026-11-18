@@ -762,6 +762,7 @@
 "The category has been deleted.","The category has been deleted."
 "The category has been saved.","The category has been saved."
 "The comparison list was cleared.","The comparison list was cleared."
+"The configurable product already has other super attributes, which cannot be changed.","The configurable product already has other super attributes, which cannot be changed."
 "The file claims to be an image but does not contain valid image data.","The file claims to be an image but does not contain valid image data."
 "The file content type ""%s"" is not allowed for security reasons.","The file content type ""%s"" is not allowed for security reasons."
 "The file was only partially uploaded. Please try again.","The file was only partially uploaded. Please try again."

@@ -24,13 +24,13 @@ class Mage_Adminhtml_Block_Sales_Order_View_History extends Mage_Adminhtml_Block
         return parent::_prepareLayout();
     }
 
-    public function getStatuses()
+    public function getStatuses(): array
     {
         $state = $this->getOrder()->getState();
         return $this->getOrder()->getConfig()->getStateStatuses($state);
     }
 
-    public function canSendCommentEmail()
+    public function canSendCommentEmail(): bool
     {
         return Mage::helper('sales')->canSendOrderCommentEmail($this->getOrder()->getStore()->getId());
     }
@@ -45,13 +45,13 @@ class Mage_Adminhtml_Block_Sales_Order_View_History extends Mage_Adminhtml_Block
         return Mage::registry('sales_order');
     }
 
-    public function canAddComment()
+    public function canAddComment(): bool
     {
         return Mage::getSingleton('admin/session')->isAllowed('sales/order/actions/comment')
                && $this->getOrder()->canComment();
     }
 
-    public function getSubmitUrl()
+    public function getSubmitUrl(): string
     {
         return $this->getUrl('*/*/addComment', ['order_id' => $this->getOrder()->getId()]);
     }

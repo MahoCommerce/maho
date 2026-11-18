@@ -31,11 +31,8 @@ class Mage_Catalog_Model_Resource_Product_Compare_Item_Collection extends Mage_C
      */
     protected $_comparableAttributes;
 
-    /**
-     * Initialize resources
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalog/product_compare_item', 'catalog/product');
         $this->_initTables();

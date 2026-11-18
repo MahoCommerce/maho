@@ -100,7 +100,7 @@ class UrlRewrite extends CrudResource
     #[ApiProperty(description: 'Store view id the rewrite applies to')]
     public ?int $storeId = null;
 
-    #[ApiProperty(description: 'Internal key of the rewrite, unique per store view. Generated as "product/{id}", "product/{id}/{categoryId}" or "category/{id}" when productId or categoryId is given.')]
+    #[ApiProperty(description: 'Internal key of the rewrite. A system rewrite has "product/{id}", "product/{id}/{categoryId}" or "category/{id}". A custom rewrite with productId or categoryId gets a generated unique key, so a product or a category can have many custom rewrites.')]
     public ?string $idPath = null;
 
     #[ApiProperty(description: 'Path the shopper requests, relative to the store base URL and without a leading slash. Stored lower-case.')]

@@ -10,10 +10,10 @@
 
 class Mage_Bundle_Block_Catalog_Product_List_Partof extends Mage_Catalog_Block_Product_Abstract
 {
-    protected $_columnCount = 4;
-    protected $_items;
-    protected $_itemCollection;
-    protected $_product = null;
+    protected int $_columnCount = 4;
+    protected ?array $_items = null;
+    protected ?Mage_Catalog_Model_Resource_Product_Collection $_itemCollection = null;
+    protected ?Mage_Catalog_Model_Product $_product = null;
 
     /**
      * @return $this
@@ -102,7 +102,7 @@ class Mage_Bundle_Block_Catalog_Product_List_Partof extends Mage_Catalog_Block_P
         return $this->_columnCount;
     }
 
-    public function resetItemsIterator()
+    public function resetItemsIterator(): void
     {
         $this->getItems();
         reset($this->_items);

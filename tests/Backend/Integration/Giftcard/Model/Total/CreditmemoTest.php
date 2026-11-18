@@ -9,13 +9,36 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Creditmemo Total Collector Instantiation', function () {
-    test('total collector can be instantiated', function () {
-        $total = Mage::getModel('giftcard/total_creditmemo');
-        expect($total)->toBeInstanceOf(Maho_Giftcard_Model_Total_Creditmemo::class);
-        expect($total)->toBeInstanceOf(Mage_Sales_Model_Order_Creditmemo_Total_Abstract::class);
-    });
-});
+/**
+ * Return an order that gift cards paid in full, with the credit memos $previous already refunded.
+ *
+ * @param list<Mage_Sales_Model_Order_Creditmemo> $previous
+ */
+function giftcardCreditmemoOrderWith(array $previous): Mage_Sales_Model_Order
+{
+    $order = new class extends Mage_Sales_Model_Order {
+        /** @var list<Mage_Sales_Model_Order_Creditmemo> */
+        public array $previous = [];
+
+        #[\Override]
+        public function getCreditmemosCollection()
+        {
+            return $this->previous;
+        }
+    };
+    $order->previous = $previous;
+    $order->setGiftcardAmount(100.00);
+    $order->setBaseGiftcardAmount(100.00);
+    $order->setGrandTotal(0.00);
+
+    return $order;
+}
+
+function giftcardCreditmemoRefunded(int $id, float $amount): Mage_Sales_Model_Order_Creditmemo
+{
+    return Mage::getModel('sales/order_creditmemo')->setId($id)
+        ->setBaseGiftcardAmount(-$amount)->setGiftcardAmount(-$amount);
+}
 
 describe('Creditmemo Total - Order Fully Paid by Gift Card', function () {
     beforeEach(function () {
@@ -85,6 +108,7 @@ describe('Creditmemo Total - Partial Gift Card Payment', function () {
         $this->order->setGiftcardAmount(50.00);
         $this->order->setBaseGiftcardAmount(50.00);
         $this->order->setGrandTotal(50.00); // Remaining after gift card
+        $this->order->setBaseGrandTotal(50.00);
         $this->order->setBaseSubtotal(80.00);
         $this->order->setBaseShippingAmount(10.00);
         $this->order->setBaseTaxAmount(10.00);
@@ -102,10 +126,9 @@ describe('Creditmemo Total - Partial Gift Card Payment', function () {
         $total = Mage::getModel('giftcard/total_creditmemo');
         $total->collect($creditmemo);
 
-        // Should refund ~50% of gift card (25.00)
-        $giftcardRefund = abs((float) $creditmemo->getBaseGiftcardAmount());
-        expect($giftcardRefund)->toBeGreaterThan(0);
-        expect($giftcardRefund)->toBeLessThanOrEqual(50.00);
+        // Half of the order total is refunded, so half of the gift card
+        expect((float) $creditmemo->getBaseGiftcardAmount())->toBe(-25.00);
+        expect((float) $creditmemo->getGiftcardAmount())->toBe(-25.00);
     });
 
     test('reduces creditmemo grand total by gift card refund', function () {
@@ -148,96 +171,37 @@ describe('Creditmemo Total - No Gift Card on Order', function () {
         expect($creditmemo->getBaseGiftcardAmount())->toBeNull();
         expect((float) $creditmemo->getGrandTotal())->toBe(50.00);
     });
-
-    test('handles null gift card amount', function () {
-        $order = Mage::getModel('sales/order');
-        // Gift card amount not set (null)
-        $order->setGrandTotal(100.00);
-
-        $creditmemo = Mage::getModel('sales/order_creditmemo');
-        $creditmemo->setOrder($order);
-        $creditmemo->setGrandTotal(100.00);
-        $creditmemo->setBaseGrandTotal(100.00);
-
-        $total = Mage::getModel('giftcard/total_creditmemo');
-        $result = $total->collect($creditmemo);
-
-        expect($result)->toBeInstanceOf(Maho_Giftcard_Model_Total_Creditmemo::class);
-    });
 });
 
 describe('Creditmemo Total - Multiple Credit Memos', function () {
-    test('tracks gift card refunded in previous credit memos', function () {
-        $order = Mage::getModel('sales/order');
-        $order->setGiftcardAmount(100.00);
-        $order->setBaseGiftcardAmount(100.00);
-        $order->setGrandTotal(0.00);
-        $order->setBaseSubtotal(80.00);
-        $order->setBaseShippingAmount(10.00);
-        $order->setBaseTaxAmount(10.00);
+    test('refunds only the gift card amount that previous credit memos did not refund', function () {
+        $order = giftcardCreditmemoOrderWith([giftcardCreditmemoRefunded(1, 50.00)]);
 
-        // First credit memo already processed
-        $previousCreditmemo = Mage::getModel('sales/order_creditmemo');
-        $previousCreditmemo->setId(1);
-        $previousCreditmemo->setBaseGiftcardAmount(-50.00);
-        $previousCreditmemo->setGiftcardAmount(-50.00);
-
-        $creditmemoCollection = new Maho\Data\Collection();
-        $creditmemoCollection->addItem($previousCreditmemo);
-        $order->setData('creditmemos_collection', $creditmemoCollection);
-
-        // New credit memo
         $creditmemo = Mage::getModel('sales/order_creditmemo');
         $creditmemo->setId(2);
         $creditmemo->setOrder($order);
-        $creditmemo->setGrandTotal(50.00);
-        $creditmemo->setBaseGrandTotal(50.00);
-        $creditmemo->setBaseSubtotal(40.00);
-        $creditmemo->setBaseShippingAmount(5.00);
-        $creditmemo->setBaseTaxAmount(5.00);
+        $creditmemo->setGrandTotal(80.00);
+        $creditmemo->setBaseGrandTotal(80.00);
 
-        $total = Mage::getModel('giftcard/total_creditmemo');
-        $total->collect($creditmemo);
+        Mage::getModel('giftcard/total_creditmemo')->collect($creditmemo);
 
-        // Should consider remaining gift card (100 - 50 = 50 remaining)
-        $giftcardRefund = abs((float) $creditmemo->getBaseGiftcardAmount());
-        expect($giftcardRefund)->toBeLessThanOrEqual(50.00);
+        expect((float) $creditmemo->getBaseGiftcardAmount())->toBe(-50.00)
+            ->and((float) $creditmemo->getBaseGrandTotal())->toBe(30.00);
     });
 
-    test('does not refund more than remaining gift card amount', function () {
-        $order = Mage::getModel('sales/order');
-        $order->setGiftcardAmount(100.00);
-        $order->setBaseGiftcardAmount(100.00);
-        $order->setGrandTotal(0.00);
-        $order->setBaseSubtotal(100.00);
-        $order->setBaseShippingAmount(0);
-        $order->setBaseTaxAmount(0);
+    test('refunds nothing to the gift card when previous credit memos refunded all of it', function () {
+        $order = giftcardCreditmemoOrderWith([giftcardCreditmemoRefunded(1, 100.00)]);
 
-        // First credit memo refunded all gift card
-        $previousCreditmemo = Mage::getModel('sales/order_creditmemo');
-        $previousCreditmemo->setId(1);
-        $previousCreditmemo->setBaseGiftcardAmount(-100.00);
-        $previousCreditmemo->setGiftcardAmount(-100.00);
-
-        $creditmemoCollection = new Maho\Data\Collection();
-        $creditmemoCollection->addItem($previousCreditmemo);
-        $order->setData('creditmemos_collection', $creditmemoCollection);
-
-        // Second credit memo
         $creditmemo = Mage::getModel('sales/order_creditmemo');
         $creditmemo->setId(2);
         $creditmemo->setOrder($order);
         $creditmemo->setGrandTotal(50.00);
         $creditmemo->setBaseGrandTotal(50.00);
-        $creditmemo->setBaseSubtotal(50.00);
-        $creditmemo->setBaseShippingAmount(0);
-        $creditmemo->setBaseTaxAmount(0);
 
-        $total = Mage::getModel('giftcard/total_creditmemo');
-        $result = $total->collect($creditmemo);
+        Mage::getModel('giftcard/total_creditmemo')->collect($creditmemo);
 
-        // Should return early, no more gift card to refund
-        expect($result)->toBeInstanceOf(Maho_Giftcard_Model_Total_Creditmemo::class);
+        expect($creditmemo->getBaseGiftcardAmount())->toBeNull()
+            ->and((float) $creditmemo->getBaseGrandTotal())->toBe(50.00);
     });
 });
 

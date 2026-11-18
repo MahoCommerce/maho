@@ -133,7 +133,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
      * @param \Maho\Simplexml\Element $section
      * @param \Maho\Data\Form\Element\Fieldset|null $parentElement
      */
-    protected function _initGroup($form, $group, $section, $parentElement = null)
+    protected function _initGroup($form, $group, $section, $parentElement = null): void
     {
         /** @var Mage_Adminhtml_Block_System_Config_Form_Fieldset $fieldsetRenderer */
         $fieldsetRenderer = $group->frontend_model
@@ -478,7 +478,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
      * @param \Maho\Data\Form\Element\AbstractElement $field
      * @param \Maho\Simplexml\Element $xmlElement
      */
-    protected function _prepareFieldOriginalData($field, $xmlElement)
+    protected function _prepareFieldOriginalData($field, $xmlElement): void
     {
         $originalData = [];
         foreach ($xmlElement as $key => $value) {

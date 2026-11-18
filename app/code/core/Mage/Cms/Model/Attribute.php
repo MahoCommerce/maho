@@ -40,6 +40,26 @@ class Mage_Cms_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
         );
     }
 
+    /**
+     * A condition can also read the status and the layout of the page, which are columns of cms_page.
+     */
+    #[\Override]
+    public function getDependencySources(): array
+    {
+        $helper = Mage::helper('cms');
+        $layouts = [];
+        foreach (Mage::getSingleton('page/source_layout')->toOptionArray() as $option) {
+            $layouts[] = ['value' => (string) $option['value'], 'label' => (string) $option['label']];
+        }
+        return [
+            'is_active' => ['label' => $helper->__('Status'), 'options' => [
+                ['value' => '1', 'label' => $helper->__('Enabled')],
+                ['value' => '0', 'label' => $helper->__('Disabled')],
+            ]],
+            'root_template' => ['label' => $helper->__('Layout'), 'options' => $layouts],
+        ] + parent::getDependencySources();
+    }
+
     #[\Override]
     public function getSetNote(Mage_Eav_Model_Entity_Attribute_Set $set): ?string
     {

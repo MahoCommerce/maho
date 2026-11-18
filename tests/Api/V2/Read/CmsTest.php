@@ -21,12 +21,6 @@ describe('API v2 CMS Pages', function (): void {
 
     describe('public access (no auth)', function (): void {
 
-        it('allows listing CMS pages without authentication', function (): void {
-            $response = apiGet('/api/rest/v2/cms-pages');
-
-            expect($response['status'])->toBeSuccessful();
-        });
-
         it('returns CMS pages collection', function (): void {
             $response = apiGet('/api/rest/v2/cms-pages');
 
@@ -37,15 +31,11 @@ describe('API v2 CMS Pages', function (): void {
         it('allows getting single CMS page without authentication', function (): void {
             $list = apiGet('/api/rest/v2/cms-pages');
             $members = $list['json']['member'] ?? $list['json']['hydra:member'] ?? [];
+            expect($members)->not->toBeEmpty();
 
-            if (!empty($members) && isset($members[0]['id'])) {
-                $pageId = $members[0]['id'];
-                $response = apiGet("/api/rest/v2/cms-pages/{$pageId}");
+            $response = apiGet("/api/rest/v2/cms-pages/{$members[0]['id']}");
 
-                expect($response['status'])->toBeSuccessful();
-            } else {
-                $this->markTestSkipped('No CMS pages available to fetch individually');
-            }
+            expect($response['status'])->toBeSuccessful();
         });
 
         it('returns 404 for non-existent CMS page', function (): void {
@@ -56,27 +46,11 @@ describe('API v2 CMS Pages', function (): void {
 
     });
 
-    describe('with authentication', function (): void {
-
-        it('allows listing CMS pages with valid token', function (): void {
-            $response = apiGet('/api/rest/v2/cms-pages', customerToken());
-
-            expect($response['status'])->toBeSuccessful();
-        });
-
-    });
-
 });
 
 describe('API v2 CMS Blocks', function (): void {
 
     describe('public access (no auth)', function (): void {
-
-        it('allows listing CMS blocks without authentication', function (): void {
-            $response = apiGet('/api/rest/v2/cms-blocks');
-
-            expect($response['status'])->toBeSuccessful();
-        });
 
         it('returns CMS blocks collection', function (): void {
             $response = apiGet('/api/rest/v2/cms-blocks');
@@ -88,15 +62,11 @@ describe('API v2 CMS Blocks', function (): void {
         it('allows getting single CMS block without authentication', function (): void {
             $list = apiGet('/api/rest/v2/cms-blocks');
             $members = $list['json']['member'] ?? $list['json']['hydra:member'] ?? [];
+            expect($members)->not->toBeEmpty();
 
-            if (!empty($members) && isset($members[0]['id'])) {
-                $blockId = $members[0]['id'];
-                $response = apiGet("/api/rest/v2/cms-blocks/{$blockId}");
+            $response = apiGet("/api/rest/v2/cms-blocks/{$members[0]['id']}");
 
-                expect($response['status'])->toBeSuccessful();
-            } else {
-                $this->markTestSkipped('No CMS blocks available to fetch individually');
-            }
+            expect($response['status'])->toBeSuccessful();
         });
 
         it('returns 404 for non-existent CMS block', function (): void {
@@ -111,33 +81,30 @@ describe('API v2 CMS Blocks', function (): void {
 
 describe('API v2 URL Resolver', function (): void {
 
-    describe('public access (no auth)', function (): void {
+    it('resolves the home page without authentication', function (): void {
+        $response = apiGet('/api/rest/v2/url-resolver?path=/');
 
-        it('allows resolving URLs without authentication', function (): void {
-            $response = apiGet('/api/rest/v2/url-resolver?url=/');
-
-            // Should work even if URL not found (returns result or 404)
-            expect($response['status'])->toBeIn([200, 404]);
-        });
-
-        it('resolves product URLs', function (): void {
-            // Try to resolve a common URL pattern
-            $response = apiGet('/api/rest/v2/url-resolver?url=/about-us');
-
-            // May or may not exist, but shouldn't require auth
-            expect($response['status'])->toBeIn([200, 404]);
-        });
-
+        expect($response['status'])->toBe(200);
+        $items = getItems($response);
+        expect($items)->not->toBeEmpty();
+        expect($items[0]['type'] ?? null)->toBe('cms_page');
+        expect($items[0]['identifier'] ?? null)->toBe('home');
     });
 
-    describe('with authentication', function (): void {
+    it('resolves a product URL key', function (): void {
+        $sku = fixtures('configurable_sku');
+        if (!$sku) {
+            $this->markTestSkipped('No configurable_sku configured in fixtures');
+        }
+        $product = \Mage::getModel('catalog/product')->loadByAttribute('sku', $sku);
 
-        it('allows resolving URLs with valid token', function (): void {
-            $response = apiGet('/api/rest/v2/url-resolver?url=/', customerToken());
+        $response = apiGet('/api/rest/v2/url-resolver?path=' . urlencode((string) $product->getUrlKey()));
 
-            expect($response['status'])->toBeIn([200, 404]);
-        });
-
+        expect($response['status'])->toBe(200);
+        $items = getItems($response);
+        expect($items)->not->toBeEmpty();
+        expect($items[0]['type'] ?? null)->toBe('product');
+        expect($items[0]['id'] ?? null)->toBe((int) $product->getId());
     });
 
 });

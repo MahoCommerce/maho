@@ -102,7 +102,7 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
     public function buildUrl(array $parts): string
     {
         return
-            (isset($parts['scheme']) ? $parts['scheme'] . '://' : '')
+            (isset($parts['scheme']) ? $parts['scheme'] . '://' : (isset($parts['host']) ? '//' : ''))
             . ($parts['user'] ?? '')
             . (isset($parts['pass']) ? ':' . $parts['pass'] : '')
             . ((isset($parts['user']) || isset($parts['pass'])) ? '@' : '')
@@ -281,6 +281,51 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
             return $this->addTrailingSlash($url);
         }
         return $url;
+    }
+
+    /**
+     * Put the trailing slash back when the path of $url is the path of the web base URL of $store.
+     * Without the slash, "/shop" is outside the base URL "/shop/" and gives a 404.
+     */
+    public function keepBasePathSlash(string $url, int|Mage_Core_Model_Store|null $store = null, ?bool $secure = null): string
+    {
+        $basePath = rtrim((string) parse_url(
+            Mage::app()->getStore($store)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB, $secure),
+            PHP_URL_PATH,
+        ), '/');
+        if ($basePath === '') {
+            return $url;
+        }
+        $parts = parse_url($url) ?: ['path' => $url];
+        if (($parts['path'] ?? '') !== $basePath) {
+            return $url;
+        }
+        $parts['path'] = $basePath . '/';
+        return $this->buildUrl($parts);
+    }
+
+    /**
+     * Return the query that a canonical URL of $store needs to show $store, or an empty array.
+     * A store view with the base URL of the default store view of its website or group needs ___store.
+     *
+     * @return array<string, string>
+     */
+    public function getCanonicalStoreQuery(Mage_Core_Model_Store|int|null $store = null): array
+    {
+        $store = Mage::app()->getStore($store);
+        $baseUrl = Mage::getModel('core/url')->setStore($store)->getBaseUrl();
+        $website = $store->getWebsite();
+        $group = $store->getGroup();
+        foreach ([$website ? $website->getDefaultStore() : null, $group ? $group->getDefaultStore() : null] as $default) {
+            if ($default
+                && (int) $default->getId() !== (int) $store->getId()
+                && Mage::getModel('core/url')->setStore($default)->getBaseUrl() === $baseUrl
+            ) {
+                return ['___store' => $store->getCode()];
+            }
+        }
+
+        return [];
     }
 
     /**

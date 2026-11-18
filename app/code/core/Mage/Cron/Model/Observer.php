@@ -26,7 +26,7 @@ class Mage_Cron_Model_Observer
 
     public const REGEX_RUN_MODEL = '#^([a-z0-9_]+/[a-z0-9_]+)::([a-z0-9_]+)$#i';
 
-    protected $_pendingSchedules;
+    protected ?Mage_Cron_Model_Resource_Schedule_Collection $_pendingSchedules = null;
 
     /**
      * Check if cron is running and warn admin users if not
@@ -74,7 +74,7 @@ class Mage_Cron_Model_Observer
      * @param \Maho\Event\Observer $observer
      */
     #[Maho\Config\Observer('default', area: 'crontab', id: 'cron_observer')]
-    public function dispatch($observer)
+    public function dispatch($observer): void
     {
         $schedules = $this->getPendingSchedules();
         $jobsRoot = Mage::getConfig()->getNode('crontab/jobs');
@@ -125,7 +125,7 @@ class Mage_Cron_Model_Observer
      * @param \Maho\Event\Observer $observer
      */
     #[Maho\Config\Observer('always', area: 'crontab', id: 'cron_observer')]
-    public function dispatchAlways($observer)
+    public function dispatchAlways($observer): void
     {
         $jobsRoot = Mage::getConfig()->getNode('crontab/jobs');
         if ($jobsRoot instanceof \Maho\Simplexml\Element) {

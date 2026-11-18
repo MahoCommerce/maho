@@ -267,7 +267,7 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    public function _parseGuiData()
+    public function _parseGuiData(): static
     {
         $nl = "\r\n";
         $import = $this->getDirection() === 'import';

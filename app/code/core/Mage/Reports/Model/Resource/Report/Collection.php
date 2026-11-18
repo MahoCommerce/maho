@@ -59,7 +59,7 @@ class Mage_Reports_Model_Resource_Report_Collection
      */
     protected $_storeIds;
 
-    protected function _construct() {}
+    protected function _construct(): void {}
 
     /**
      * Set period

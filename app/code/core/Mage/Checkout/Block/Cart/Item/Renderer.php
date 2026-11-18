@@ -23,8 +23,8 @@ class Mage_Checkout_Block_Cart_Item_Renderer extends Mage_Core_Block_Template
     /** @var Mage_Checkout_Model_Session */
     protected $_checkoutSession;
     protected $_item;
-    protected $_productUrl = null;
-    protected $_productThumbnail = null;
+    protected ?string $_productUrl = null;
+    protected ?Mage_Catalog_Helper_Image $_productThumbnail = null;
 
     /**
      * Whether qty will be converted to number
@@ -71,11 +71,7 @@ class Mage_Checkout_Block_Cart_Item_Renderer extends Mage_Core_Block_Template
         return $this->getItem()->getProduct();
     }
 
-    /**
-     * @param Mage_Catalog_Helper_Image $productThumbnail
-     * @return $this
-     */
-    public function overrideProductThumbnail($productThumbnail)
+    public function overrideProductThumbnail(?Mage_Catalog_Helper_Image $productThumbnail): static
     {
         $this->_productThumbnail = $productThumbnail;
         return $this;
@@ -97,11 +93,7 @@ class Mage_Checkout_Block_Cart_Item_Renderer extends Mage_Core_Block_Template
         return $helper->init($this->getProduct(), 'image');
     }
 
-    /**
-     * @param string $productUrl
-     * @return $this
-     */
-    public function overrideProductUrl($productUrl)
+    public function overrideProductUrl(?string $productUrl): static
     {
         $this->_productUrl = $productUrl;
         return $this;

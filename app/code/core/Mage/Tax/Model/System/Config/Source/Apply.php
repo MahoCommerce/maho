@@ -10,7 +10,7 @@
 
 class Mage_Tax_Model_System_Config_Source_Apply
 {
-    protected $_options;
+    protected array $_options = [];
 
     public function __construct()
     {

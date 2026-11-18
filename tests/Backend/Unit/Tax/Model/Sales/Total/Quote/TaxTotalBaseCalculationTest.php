@@ -24,7 +24,7 @@ it('saves the base currency tax as the base amount of an applied tax', function 
         }
 
         #[\Override]
-        protected function _totalBaseProcessItemTax($item, $taxRateRequest, &$taxGroups, &$itemTaxGroups, $catalogPriceInclTax)
+        protected function _totalBaseProcessItemTax(Mage_Sales_Model_Quote_Item_Abstract $item, Maho\DataObject $taxRateRequest, array &$taxGroups, array &$itemTaxGroups, bool $catalogPriceInclTax): void
         {
             $taxGroups[10] = [
                 'applied_rates' => [['id' => 'US-CA', 'percent' => 10, 'rates' => []]],

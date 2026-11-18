@@ -20,11 +20,8 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction extends Mage_Sales_Mod
         'additional_information' => [null, []],
     ];
 
-    /**
-     * Initialize main table and the primary key field name
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('sales/payment_transaction', 'transaction_id');
     }
@@ -57,7 +54,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction extends Mage_Sales_Mod
      * Update transactions in database using provided transaction as parent for them
      * have to repeat the business logic to avoid accidental injection of wrong transactions
      */
-    public function injectAsParent(Mage_Sales_Model_Order_Payment_Transaction $transaction)
+    public function injectAsParent(Mage_Sales_Model_Order_Payment_Transaction $transaction): void
     {
         $txnId = $transaction->getTxnId();
         if ($txnId && Mage_Sales_Model_Order_Payment_Transaction::TYPE_PAYMENT === $transaction->getTxnType()
@@ -103,7 +100,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction extends Mage_Sales_Mod
         $orderId,
         $paymentId,
         $txnId,
-    ) {
+    ): void {
         $select = $this->_getLoadByUniqueKeySelect($orderId, $paymentId, $txnId);
         $data   = $this->_getWriteAdapter()->fetchRow($select);
         $transaction->setData($data);

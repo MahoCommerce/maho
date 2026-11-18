@@ -147,7 +147,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     /**
      * Output specified blocks as a text list
      */
-    protected function _outputBlocks()
+    protected function _outputBlocks(): void
     {
         $blocks = func_get_args();
         $output = $this->getLayout()->createBlock('adminhtml/text_list');
@@ -569,7 +569,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      * Initialize product before saving
      * @throws Mage_Core_Exception|Exception
      */
-    protected function _initProductSave()
+    protected function _initProductSave(): Mage_Catalog_Model_Product
     {
         $product     = $this->_initProduct();
         $productData = $this->getRequest()->getPost('product');
@@ -676,7 +676,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      *
      * @param array $stockData
      */
-    protected function _filterStockData(&$stockData)
+    protected function _filterStockData(&$stockData): void
     {
         if (is_null($stockData)) {
             return;
@@ -961,6 +961,8 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
         }
 
         $product->addData($this->getRequest()->getParam('simple_product', []));
+        // Empties the "Use Default Value" list that a form field can fill
+        $this->_getService()->useDefault($product, []);
         $product->setWebsiteIds($configurableProduct->getWebsiteIds());
 
         $autogenerateOptions = [];

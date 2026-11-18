@@ -23,7 +23,7 @@ class Mage_Adminhtml_Block_Report_Sales_Sales extends Mage_Adminhtml_Block_Widge
         ]);
     }
 
-    public function getFilterUrl()
+    public function getFilterUrl(): string
     {
         $this->getRequest()->setParam('filter', null);
         return $this->getUrl('*/*/sales', ['_current' => true]);

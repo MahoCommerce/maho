@@ -60,7 +60,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     protected $_eventPrefix      = 'catalog_product';
     #[\Override]
     protected $_eventObject      = 'product';
-    protected $_canAffectOptions = false;
+    protected bool $_canAffectOptions = false;
 
     /**
      * Product type instance
@@ -72,7 +72,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      * Product type instance as singleton
      */
-    protected $_typeInstanceSingleton   = null;
+    protected ?Mage_Catalog_Model_Product_Type_Abstract $_typeInstanceSingleton = null;
 
     /**
      * Product link instance
@@ -98,11 +98,11 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     protected static $_url;
     protected static $_urlRewrite;
 
-    protected $_errors = [];
+    protected array $_errors = [];
 
-    protected $_optionInstance;
+    protected ?Mage_Catalog_Model_Product_Option $_optionInstance = null;
 
-    protected $_options = [];
+    protected array $_options = [];
 
     /**
      * Flag for available duplicate function
@@ -1630,7 +1630,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      * @param mixed  $value New attribute value
      * @param int    $store Store ID
      */
-    public function addAttributeUpdate($code, $value, $store)
+    public function addAttributeUpdate($code, $value, $store): void
     {
         $oldValue = $this->getData($code);
         $oldStore = $this->getStoreId();
@@ -1857,7 +1857,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @param array $options Array of options
      */
-    public function setCustomOptions(array $options)
+    public function setCustomOptions(array $options): void
     {
         $this->_customOptions = $options;
     }
@@ -1905,6 +1905,28 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     public function canBeShowInCategory($categoryId)
     {
         return $this->_getResource()->canBeShowInCategory($this, $categoryId);
+    }
+
+    /**
+     * Get the category that the store shows for this product when the request names no category.
+     */
+    public function getPrimaryCategoryId(): ?int
+    {
+        return $this->_getResource()->getPrimaryCategoryId($this, (int) $this->getStoreId());
+    }
+
+    /**
+     * Tell if the current category of the product page is the primary category, not a category of the request.
+     */
+    public function getUsesPrimaryCategory(): ?bool
+    {
+        $value = $this->getData('uses_primary_category');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setUsesPrimaryCategory(?bool $value = true): static
+    {
+        return $this->setData('uses_primary_category', $value);
     }
 
     /**
@@ -2700,6 +2722,17 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     public function setLinksPurchasedSeparately(?int $value): static
     {
         return $this->setData('links_purchased_separately', $value);
+    }
+
+    public function getListSwatchAttrId(): ?int
+    {
+        $value = $this->getData('list_swatch_attr_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setListSwatchAttrId(?int $value): static
+    {
+        return $this->setData('list_swatch_attr_id', $value);
     }
 
     public function getListSwatchAttrValues(): ?array

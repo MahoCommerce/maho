@@ -38,11 +38,8 @@ class Mage_Newsletter_Model_Resource_Subscriber extends Mage_Core_Model_Resource
      */
     protected $_messagesScope          = 'newsletter/session';
 
-    /**
-     * Get tablename from config
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('newsletter/subscriber', 'subscriber_id');
         $this->_subscriberLinkTable = $this->getTable('newsletter/queue_link');
@@ -55,7 +52,7 @@ class Mage_Newsletter_Model_Resource_Subscriber extends Mage_Core_Model_Resource
      *
      * @param string $scope
      */
-    public function setMessagesScope($scope)
+    public function setMessagesScope($scope): void
     {
         $this->_messagesScope = $scope;
     }

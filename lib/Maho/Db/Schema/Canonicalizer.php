@@ -290,7 +290,7 @@ final class Canonicalizer
                 continue;
             }
             $liveColumn = $live->getColumn($name);
-            $sameType = $liveColumn->getTypeName() === $targetColumn->getTypeName();
+            $sameType = self::sameTypeName($liveColumn->getTypeName(), $targetColumn->getTypeName());
 
             // Only reconcile the default when the types already match. When the
             // type itself changes (e.g. boolean to smallint), the default changes
@@ -336,6 +336,23 @@ final class Canonicalizer
                 },
             );
         }
+    }
+
+    /**
+     * Tell whether $live and $target name the same column type.
+     *
+     * DBAL introspects a date or time column as the immutable type. A schema.php
+     * that declares the mutable type produces the same DDL, so the two are equal.
+     * The mutable names are literals because DBAL deprecates their constants.
+     */
+    private static function sameTypeName(string $live, string $target): bool
+    {
+        $immutable = static fn(string $name): string => match ($name) {
+            'date', 'time', 'datetime', 'datetimetz' => $name . '_immutable',
+            default => $name,
+        };
+
+        return $immutable($live) === $immutable($target);
     }
 
     /**

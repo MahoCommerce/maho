@@ -63,7 +63,7 @@ function canonicalUriResetConfig(): void
     Mage::app()->reinitStores();
 }
 
-function canonicalUriDispatch(string $uri, string $script = '/index.php', string $method = 'GET', array $postData = []): Mage_Core_Controller_Response_Http
+function canonicalUriDispatch(string $uri, string $script = '/index.php', string $method = 'GET', array $postData = [], bool $straight = true): Mage_Core_Controller_Response_Http
 {
     // `SymfonyRequest::create()` validates the URI, so it cannot express what a web server hands over.
     $server = [
@@ -79,7 +79,7 @@ function canonicalUriDispatch(string $uri, string $script = '/index.php', string
 
     $request = new Mage_Core_Controller_Request_Http($symfonyRequest);
     // The URL-rewrite lookup runs after this step and would redirect on its own.
-    $request->isStraight(true);
+    $request->isStraight($straight);
 
     $response = new Mage_Core_Controller_Response_Http();
 
@@ -203,4 +203,46 @@ describe('Front observer canonical URI', function () {
 
         expect($response->isRedirect())->toBeFalse();
     });
+});
+
+describe('Front observer canonical URI with a URL rewrite', function () {
+    beforeEach(fn() => canonicalUriConfig('add'));
+
+    afterEach(function () {
+        Mage::getSingleton('core/resource')->getConnection('core_write')
+            ->delete(Mage::getSingleton('core/resource')->getTableName('core/url_rewrite'), ['id_path LIKE ?' => 'pest_canonical_%']);
+        unset($_GET['___from_store']);
+        canonicalUriResetConfig();
+    });
+
+    it('adds the slash when ___from_store is an array and no rewrite matches', function () {
+        $_GET['___from_store'] = ['default'];
+
+        $response = canonicalUriDispatch('/pest-no-rewrite', straight: false);
+
+        expect($response->getHttpResponseCode())->toBe(301)
+            ->and(canonicalUriLocation($response))->toBe('/pest-no-rewrite/');
+    });
+
+    it('goes to the target of a redirect rewrite with one redirect, or adds the slash to any other rewrite', function (string $options, string $target, string $uri, int $code, string $location) {
+        Mage::getSingleton('core/resource')->getConnection('core_write')->insert(Mage::getSingleton('core/resource')->getTableName('core/url_rewrite'), [
+            'store_id' => (int) Mage::app()->getStore()->getId(),
+            'id_path' => 'pest_canonical_' . uniqid(),
+            'request_path' => 'pest-old-brand/',
+            'target_path' => $target,
+            'is_system' => 0,
+            'options' => $options,
+        ]);
+
+        $response = canonicalUriDispatch($uri, straight: false);
+
+        expect($response->getHttpResponseCode())->toBe($code)
+            ->and(canonicalUriLocation($response))->toBe($location);
+    })->with([
+        'permanent redirect' => ['RP', 'pest-new-brand/', '/pest-old-brand', 301, '/pest-new-brand/'],
+        'temporary redirect' => ['R', 'pest-new-brand/', '/pest-old-brand', 302, '/pest-new-brand/'],
+        'external target' => ['', 'https://example.com/new-brand/', '/pest-old-brand', 302, 'https://example.com/new-brand/'],
+        'no redirect' => ['', 'catalog/category/view/id/3', '/pest-old-brand', 301, '/pest-old-brand/'],
+        'script name in the path' => ['RP', 'pest-new-brand/', '/index.php/pest-old-brand', 301, '/pest-old-brand/'],
+    ]);
 });

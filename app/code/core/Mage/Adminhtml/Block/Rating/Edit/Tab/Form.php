@@ -78,7 +78,7 @@ class Mage_Adminhtml_Block_Rating_Edit_Tab_Form extends Mage_Adminhtml_Block_Wid
         return parent::_prepareForm();
     }
 
-    protected function _setRatingCodes($ratingCodes)
+    protected function _setRatingCodes($ratingCodes): void
     {
         foreach ($ratingCodes as $store => $value) {
             if ($element = $this->getForm()->getElement('rating_code_' . $store)) {
@@ -93,7 +93,7 @@ class Mage_Adminhtml_Block_Rating_Edit_Tab_Form extends Mage_Adminhtml_Block_Wid
         return $this->_getWarningHtml() . parent::_toHtml();
     }
 
-    protected function _getWarningHtml()
+    protected function _getWarningHtml(): string
     {
         return '<div>
 <ul class="messages">

@@ -93,7 +93,7 @@ class Select extends AbstractElement
         return $html;
     }
 
-    protected function _prepareOptions()
+    protected function _prepareOptions(): void
     {
         $values = $this->getValues();
         if (empty($values)) {

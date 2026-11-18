@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Tax_Rate_Title extends Mage_Core_Block_Template
 {
-    protected $_titles;
+    protected ?array $_titles = null;
 
     #[\Override]
     protected function _construct()
@@ -18,7 +18,7 @@ class Mage_Adminhtml_Block_Tax_Rate_Title extends Mage_Core_Block_Template
         $this->setTemplate('tax/rate/title.phtml');
     }
 
-    public function getTitles()
+    public function getTitles(): array
     {
         if (is_null($this->_titles)) {
             $this->_titles = [];

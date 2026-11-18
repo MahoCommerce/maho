@@ -13,11 +13,8 @@
  */
 class Mage_Api_Model_Resource_Acl extends Mage_Core_Model_Resource_Db_Abstract
 {
-    /**
-     * Initialize resource connections
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('api/role', 'role_id');
     }

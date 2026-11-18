@@ -25,10 +25,9 @@ it('keeps the merchant credentials out of the debug data of a transaction detail
         }
 
         #[\Override]
-        protected function _debug(mixed $debugData): static
+        protected function _debug(mixed $debugData): void
         {
             $this->debugData = $debugData;
-            return $this;
         }
 
         public function requestTransactionDetails(string $transactionId): void

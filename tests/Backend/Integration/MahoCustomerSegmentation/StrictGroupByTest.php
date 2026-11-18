@@ -29,15 +29,10 @@ uses(Tests\MahoBackendTestCase::class);
  * freshly created adapter opened after Mage::setIsDeveloperMode(true), which
  * applies ONLY_FULL_GROUP_BY in _initConnection(). PostgreSQL enforces strict
  * GROUP BY natively, so the live adapter is sufficient there. SQLite has no
- * strict GROUP BY mode and is skipped (MariaDB's ONLY_FULL_GROUP_BY is exempted
+ * strict GROUP BY mode: the matching tests run there on the live adapter, and the
+ * test of the SQL text is skipped (MariaDB's ONLY_FULL_GROUP_BY is exempted
  * by the adapter itself, so the queries simply run unrestricted there).
  */
-beforeEach(function () {
-    $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
-    if ($adapter instanceof Sqlite) {
-        $this->markTestSkipped('SQLite has no strict GROUP BY mode; test is MySQL/PostgreSQL only.');
-    }
-});
 
 // ---------------------------------------------------------------------------
 // Helper functions
@@ -193,6 +188,10 @@ function segTimebasedCleanFixture(array $fixture): void
 // ---------------------------------------------------------------------------
 
 it('never references the SELECT-list alias "days" in HAVING for any fixed attribute', function () {
+    if (Mage::getSingleton('core/resource')->getConnection('core_read') instanceof Sqlite) {
+        $this->markTestSkipped('SQLite has no strict GROUP BY mode; test is MySQL/PostgreSQL only.');
+    }
+
     $attributes = [
         'days_since_last_login',
         'days_since_last_order',

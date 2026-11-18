@@ -10,13 +10,8 @@
 
 class Mage_Bundle_Model_Product_Attribute_Source_Price_View extends Mage_Eav_Model_Entity_Attribute_Source_Abstract
 {
-    /**
-     * Get all options
-     *
-     * @return array
-     */
     #[\Override]
-    public function getAllOptions()
+    public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array
     {
         $this->_options ??= [
             [

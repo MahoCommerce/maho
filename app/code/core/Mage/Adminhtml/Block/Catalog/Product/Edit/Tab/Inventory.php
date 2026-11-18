@@ -18,7 +18,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Inventory extends Mage_Admin
         $this->setTemplate('catalog/product/tab/inventory.phtml');
     }
 
-    public function getBackordersOption()
+    public function getBackordersOption(): array
     {
         if ($this->isModuleEnabled('Mage_CatalogInventory', 'catalog')) {
             return Mage::getSingleton('cataloginventory/source_backorders')->toOptionArray();
@@ -61,7 +61,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Inventory extends Mage_Admin
         return $this->getProduct()->getStockItem();
     }
 
-    public function isConfigurable()
+    public function isConfigurable(): bool
     {
         return $this->getProduct()->isConfigurable();
     }
@@ -108,7 +108,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Inventory extends Mage_Admin
         return $this->getProduct()->getInventoryReadonly();
     }
 
-    public function isNew()
+    public function isNew(): bool
     {
         if ($this->getProduct()->getId()) {
             return false;
@@ -116,7 +116,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Inventory extends Mage_Admin
         return true;
     }
 
-    public function getFieldSuffix()
+    public function getFieldSuffix(): string
     {
         return 'product';
     }

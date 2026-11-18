@@ -104,10 +104,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
         $this->_initSelect();
     }
 
-    /**
-     * Initialize collection
-     */
-    protected function _construct() {}
+    protected function _construct(): void {}
 
     /**
      * Retrieve table name
@@ -897,7 +894,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      *
      * @todo make batch save directly from collection
      */
-    public function save()
+    public function save(): static
     {
         foreach ($this->getItems() as $item) {
             $item->save();
@@ -910,7 +907,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      *
      * @todo make batch delete directly from collection
      */
-    public function delete()
+    public function delete(): static
     {
         foreach ($this->getItems() as $k => $item) {
             $this->getEntity()->delete($item);
@@ -1432,7 +1429,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      *
      * return array
      */
-    public function getLoadedIds()
+    public function getLoadedIds(): array
     {
         return array_keys($this->_items);
     }

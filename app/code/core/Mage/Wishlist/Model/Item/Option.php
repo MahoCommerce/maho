@@ -19,8 +19,8 @@ declare(strict_types=1);
  */
 class Mage_Wishlist_Model_Item_Option extends Mage_Core_Model_Abstract implements Mage_Catalog_Model_Product_Configuration_Item_Option_Interface
 {
-    protected $_item;
-    protected $_product;
+    protected ?Mage_Wishlist_Model_Item $_item = null;
+    protected ?Mage_Catalog_Model_Product $_product = null;
 
     #[\Override]
     protected function _construct()

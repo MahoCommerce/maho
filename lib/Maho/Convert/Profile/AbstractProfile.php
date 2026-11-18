@@ -16,15 +16,17 @@ use Maho\Convert\Exception;
 
 abstract class AbstractProfile
 {
-    protected $_actions;
-    protected $_containers;
-    protected $_exceptions = [];
-    protected $_dryRun;
+    protected array $_actions = [];
+    protected ?object $_containers = null;
+    protected array $_exceptions = [];
+    protected ?bool $_dryRun = null;
 
-    protected $_actionDefaultClass = \Maho\Convert\Action::class;
-    protected $_containerCollectionDefaultClass = \Maho\Convert\Container\Collection::class;
+    /** @var class-string<ActionInterface> */
+    protected string $_actionDefaultClass = \Maho\Convert\Action::class;
+    /** @var class-string<Collection> */
+    protected string $_containerCollectionDefaultClass = \Maho\Convert\Container\Collection::class;
 
-    public function addAction(?ActionInterface $action = null)
+    public function addAction(?ActionInterface $action = null): ActionInterface
     {
         $action ??= new $this->_actionDefaultClass();
         $this->_actions[] = $action;
@@ -32,13 +34,13 @@ abstract class AbstractProfile
         return $action;
     }
 
-    public function setContainers(Collection $containers)
+    public function setContainers(Collection $containers): static
     {
         $this->_containers = $containers;
         return $this;
     }
 
-    public function getContainers()
+    public function getContainers(): Collection
     {
         if (!$this->_containers) {
             $this->_containers = new $this->_containerCollectionDefaultClass();
@@ -46,48 +48,48 @@ abstract class AbstractProfile
         return $this->_containers;
     }
 
-    public function getContainer($name = null)
+    public function getContainer(string|int|null $name = null): ContainerInterface
     {
         $name ??= '_default';
         return $this->getContainers()->getItem($name);
     }
 
-    public function addContainer($name, ContainerInterface $container)
+    public function addContainer(string|int|null $name, ContainerInterface $container): ContainerInterface
     {
         $container = $this->getContainers()->addItem($name, $container);
         $container->setProfile($this);
         return $container;
     }
 
-    public function getExceptions()
+    public function getExceptions(): array
     {
         return $this->_exceptions;
     }
 
-    public function getDryRun()
+    public function getDryRun(): ?bool
     {
         return $this->_dryRun;
     }
 
-    public function setDryRun($flag)
+    public function setDryRun(bool $flag): static
     {
         $this->_dryRun = $flag;
         return $this;
     }
 
-    public function addException(Exception $e)
+    public function addException(Exception $e): static
     {
         $this->_exceptions[] = $e;
         return $this;
     }
 
-    public function run()
+    public function run(): ?static
     {
         if (!$this->_actions) {
             $e = new Exception('Could not find any actions for this profile');
             $e->setLevel(Exception::FATAL);
             $this->addException($e);
-            return;
+            return null;
         }
 
         foreach ($this->_actions as $action) {

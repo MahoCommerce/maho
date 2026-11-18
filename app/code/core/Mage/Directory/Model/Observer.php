@@ -22,7 +22,7 @@ class Mage_Directory_Model_Observer
      * @throws Mage_Core_Exception
      */
     #[Maho\Config\CronJob('currency_rates_update', configPath: 'crontab/jobs/currency_rates_update/schedule/cron_expr')]
-    public function scheduledUpdateCurrencyRates()
+    public function scheduledUpdateCurrencyRates(): void
     {
         if (!Mage::getStoreConfig(self::IMPORT_ENABLE) || !Mage::getStoreConfig(self::CRON_STRING_PATH)) {
             return;

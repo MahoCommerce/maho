@@ -30,7 +30,7 @@ describe('Blog Post Collection', function () {
         $post2->setTitle('Active Future Post');
         $post2->setContent('Content for active future post');
         $post2->setIsActive(true);
-        $post2->setPublishDate('2025-12-31');
+        $post2->setPublishDate(Mage::app()->getLocale()->utcToStore()->modify('+1 year')->format(Mage_Core_Model_Locale::DATE_FORMAT));
         $post2->save();
         $this->testPosts[] = $post2;
 
@@ -60,16 +60,6 @@ describe('Blog Post Collection', function () {
         }
     });
 
-    test('can create collection instance', function () {
-        expect($this->collection)->toBeInstanceOf(Maho_Blog_Model_Resource_Post_Collection::class);
-    });
-
-    test('can load all posts', function () {
-        $this->collection->load();
-
-        expect($this->collection->getSize())->toBeGreaterThanOrEqual(4);
-    });
-
     test('can filter by active status using static attribute', function () {
         $activeCollection = Mage::getResourceModel('blog/post_collection')
             ->addFieldToFilter('is_active', 1);
@@ -89,17 +79,6 @@ describe('Blog Post Collection', function () {
 
         $post = $titleCollection->getFirstItem();
         expect($post->getTitle())->toBe('Active Past Post');
-    });
-
-    test('can filter by publish date', function () {
-        $today = Mage::app()->getLocale()->todayUtc();
-        $pastCollection = Mage::getResourceModel('blog/post_collection');
-        $pastCollection->getSelect()->where('publish_date IS NULL OR publish_date <= ?', $today);
-
-        foreach ($pastCollection as $post) {
-            $publishDate = $post->getPublishDate();
-            expect($publishDate === null || $publishDate <= $today)->toBeTrue();
-        }
     });
 
     test('addPublishedFilter keeps active posts published today or earlier', function () {
@@ -129,15 +108,6 @@ describe('Blog Post Collection', function () {
 
         $post = $collection->getFirstItem();
         expect($post->getTitle())->toBe('Active Past Post');
-    });
-
-    test('can add store filter', function () {
-        $storeId = Mage::app()->getStore()->getId();
-        $this->collection->addStoreFilter($storeId);
-
-        // Should not throw exception and should load data
-        $this->collection->load();
-        expect($this->collection)->toBeInstanceOf(Maho_Blog_Model_Resource_Post_Collection::class);
     });
 
     test('can order by static attributes', function () {
@@ -175,7 +145,6 @@ describe('Blog Post Collection', function () {
             ->addAttributeToFilter('title', 'Test')
             ->addAttributeToFilter('is_active', 1);
 
-        $collection->load();
-        expect($collection)->toBeInstanceOf(Maho_Blog_Model_Resource_Post_Collection::class);
+        expect($collection->getSize())->toBe(0);
     });
 });

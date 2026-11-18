@@ -124,14 +124,8 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
         return $result;
     }
 
-    /**
-     * Register data required by process in event object
-     * Check if category ids was changed
-     *
-     * @return Mage_Catalog_Model_Category_Indexer_Product
-     */
     #[\Override]
-    protected function _registerEvent(Mage_Index_Model_Event $event)
+    protected function _registerEvent(Mage_Index_Model_Event $event): void
     {
         $event->addNewData(self::EVENT_MATCH_RESULT_KEY, true);
         $entity = $event->getEntity();
@@ -154,13 +148,12 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
                 $process->changeStatus(Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX);
                 break;
         }
-        return $this;
     }
 
     /**
      * Register event data during product save process
      */
-    protected function _registerProductEvent(Mage_Index_Model_Event $event)
+    protected function _registerProductEvent(Mage_Index_Model_Event $event): void
     {
         $eventType = $event->getType();
         if ($eventType == Mage_Index_Model_Event::TYPE_SAVE) {
@@ -205,7 +198,7 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
     /**
      * Register event data during category save process
      */
-    protected function _registerCategoryEvent(Mage_Index_Model_Event $event)
+    protected function _registerCategoryEvent(Mage_Index_Model_Event $event): void
     {
         $category = $event->getDataObject();
         /**
@@ -222,11 +215,8 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
         }
     }
 
-    /**
-     * Process event data and save to index
-     */
     #[\Override]
-    protected function _processEvent(Mage_Index_Model_Event $event)
+    protected function _processEvent(Mage_Index_Model_Event $event): void
     {
         $data = $event->getNewData();
         if (!empty($data['catalog_category_product_reindex_all'])) {

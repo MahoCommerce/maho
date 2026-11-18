@@ -61,11 +61,8 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
         parent::__construct();
     }
 
-    /**
-     * Initialize main table and table id field
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalogrule/rule', 'rule_id');
     }
@@ -116,7 +113,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      *
      * @param int $ruleId
      */
-    public function cleanProductData($ruleId, array $productIds = [])
+    public function cleanProductData($ruleId, array $productIds = []): void
     {
         /** @var Maho\Db\Adapter\AdapterInterface $write */
         $write = $this->_getWriteAdapter();
@@ -144,7 +141,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
     /**
      * Inserts rule data into catalogrule/rule_product table
      */
-    public function insertRuleData(Mage_CatalogRule_Model_Rule $rule, array $websiteIds, array $productIds = [])
+    public function insertRuleData(Mage_CatalogRule_Model_Rule $rule, array $websiteIds, array $productIds = []): void
     {
         /** @var Maho\Db\Adapter\AdapterInterface $write */
         $write = $this->_getWriteAdapter();
@@ -446,7 +443,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      *
      * @param int|Mage_Catalog_Model_Product $product
      */
-    protected function _reindexCatalogRule($product = null)
+    protected function _reindexCatalogRule($product = null): void
     {
         $indexerCode = 'catalogrule/action_index_refresh';
         $value = null;

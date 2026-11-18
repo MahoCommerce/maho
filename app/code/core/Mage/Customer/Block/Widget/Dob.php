@@ -113,36 +113,34 @@ class Mage_Customer_Block_Widget_Dob extends Mage_Customer_Block_Widget_Abstract
      * @param string $code
      * @param string $html
      */
-    public function setDateInput($code, $html)
+    public function setDateInput($code, $html): void
     {
         $this->_dateInputs[$code] = $html;
     }
 
     /**
-     * Sort date inputs by dateformat order of current locale
+     * Return the day, month and year inputs in the order of the short date format of the locale, which is an ICU
+     * pattern such as M/d/yy or dd.MM.y.
      *
      * @return string
      */
     public function getSortedDateInputs()
     {
-        $strtr = [
-            '%b' => '%1$s',
-            '%B' => '%1$s',
-            '%m' => '%1$s',
-            '%d' => '%2$s',
-            '%e' => '%2$s',
-            '%Y' => '%3$s',
-            '%y' => '%3$s',
-        ];
+        $format = (string) $this->getDateFormat();
+        $positions = [];
+        foreach (['m' => '/[ML]/', 'd' => '/d/', 'y' => '/[yY]/'] as $code => $pattern) {
+            $positions[$code] = preg_match($pattern, $format, $match, PREG_OFFSET_CAPTURE) ? $match[0][1] : PHP_INT_MAX;
+        }
+        asort($positions);
+        return implode('', array_map(fn(string $code) => $this->_dateInputs[$code], array_keys($positions)));
+    }
 
-        $dateFormat = preg_replace('/[^\%\w]/', '\\1', $this->getDateFormat());
-
-        return sprintf(
-            strtr($dateFormat, $strtr),
-            $this->_dateInputs['m'],
-            $this->_dateInputs['d'],
-            $this->_dateInputs['y'],
-        );
+    /**
+     * Return the date as YYYY-MM-DD, the value that the form sends when the customer does not change the date.
+     */
+    public function getIsoDate(): string
+    {
+        return $this->hasTime() ? $this->getTime()->format(Mage_Core_Model_Locale::DATE_FORMAT) : '';
     }
 
     public function getTime(): ?DateTime

@@ -55,10 +55,8 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
 
     /**
      * Quote addresses collection
-     *
-     * @var Mage_Sales_Model_Resource_Order_Address_Collection|null
      */
-    protected $_addresses = null;
+    protected ?Mage_Sales_Model_Resource_Quote_Address_Collection $_addresses = null;
 
     /**
      * Quote items collection
@@ -456,10 +454,8 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
 
     /**
      * Retrieve quote address collection
-     *
-     * @return Mage_Sales_Model_Resource_Order_Address_Collection
      */
-    public function getAddressesCollection()
+    public function getAddressesCollection(): Mage_Sales_Model_Resource_Quote_Address_Collection
     {
         if (is_null($this->_addresses)) {
             $this->_addresses = Mage::getModel('sales/quote_address')->getCollection()

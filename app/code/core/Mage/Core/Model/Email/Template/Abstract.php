@@ -18,7 +18,7 @@ abstract class Mage_Core_Model_Email_Template_Abstract extends Mage_Core_Model_T
     public const XML_PATH_DESIGN_EMAIL_LOGO_HEIGHT     = 'design/email/logo_height';
     public const XML_PATH_CSS_NON_INLINE_FILES         = 'design/email/css_non_inline';
 
-    protected $_cssFileCache = [];
+    protected array $_cssFileCache = [];
 
     /**
      * Get template code for template directive

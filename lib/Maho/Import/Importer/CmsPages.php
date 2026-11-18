@@ -63,8 +63,18 @@ class CmsPages extends AbstractCmsImporter
             foreach ($attributes as $code => $attribute) {
                 if (($row[$code] ?? '') !== '') {
                     $row['custom'][$code] = $this->customValue($file, $line, $attribute, $row[$code]);
-                } elseif ($row['page_id'] === null && $attribute->getIsRequired() && (string) $attribute->getDefaultValue() === '') {
-                    $this->fail($file, $line, "$code is required for a new page");
+                }
+            }
+            if ($row['page_id'] === null) {
+                // The save checks the attributes of a new page with the same call, so a row fails here and not in the write
+                $page = Mage::getService('cms/page')->newPage()->setIsActive((bool) $row['is_active'])
+                    ->addData(array_filter(array_intersect_key($row, array_flip(self::TEXT_COLUMNS)), fn($value) => $value !== ''))
+                    ->addData($row['custom']);
+                try {
+                    Mage::getResourceSingleton('cms/page')->prepareCustomAttributes($page);
+                } catch (\Mage_Core_Exception_Input $e) {
+                    $error = $e->getErrors()[0];
+                    $this->fail($file, $line, "{$error['field']}: {$error['message']}");
                 }
             }
             $rows[$line] = $row;

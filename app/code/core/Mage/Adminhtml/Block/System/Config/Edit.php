@@ -12,7 +12,7 @@ class Mage_Adminhtml_Block_System_Config_Edit extends Mage_Adminhtml_Block_Widge
 {
     public const DEFAULT_SECTION_BLOCK = 'adminhtml/system_config_form';
 
-    protected $_section;
+    protected ?\Maho\Simplexml\Element $_section = null;
 
     /**
      * Mage_Adminhtml_Block_System_Config_Edit constructor.

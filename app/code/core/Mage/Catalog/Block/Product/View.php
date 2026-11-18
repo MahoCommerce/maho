@@ -48,7 +48,7 @@ class Mage_Catalog_Block_Product_View extends Mage_Catalog_Block_Product_Abstrac
             $currentCategory = Mage::registry('current_category');
             if ($keyword) {
                 $headBlock->setKeywords($keyword);
-            } elseif ($currentCategory) {
+            } elseif ($currentCategory && !$product->getUsesPrimaryCategory()) {
                 $headBlock->setKeywords($product->getName());
             }
             $description = $product->getMetaDescription();
@@ -61,7 +61,9 @@ class Mage_Catalog_Block_Product_View extends Mage_Catalog_Block_Product_Abstrac
             /** @var Mage_Catalog_Helper_Product $helper */
             $helper = $this->helper('catalog/product');
             if ($helper->canUseCanonicalTag()) {
-                $params = ['_ignore_category' => true];
+                /** @var Mage_Core_Helper_Url $urlHelper */
+                $urlHelper = $this->helper('core/url');
+                $params = ['_ignore_category' => true, '_query' => $urlHelper->getCanonicalStoreQuery()];
                 $headBlock->addLinkRel('canonical', $product->getUrlModel()->getUrl($product, $params));
             }
         }

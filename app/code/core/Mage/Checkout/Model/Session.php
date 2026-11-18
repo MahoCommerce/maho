@@ -193,7 +193,7 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * @param int|null $quoteId
      */
-    public function setQuoteId($quoteId)
+    public function setQuoteId($quoteId): void
     {
         $this->setData($this->_getQuoteIdKey(), $quoteId);
     }
@@ -403,7 +403,7 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * Clear misc checkout parameters
      */
-    public function clearHelperData()
+    public function clearHelperData(): void
     {
         $this->setLastBillingAgreementId(null)
             ->setRedirectUrl(null)

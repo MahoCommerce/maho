@@ -16,10 +16,9 @@ class Mage_Usa_Model_Shipping_Carrier_UpsAuth extends Mage_Usa_Model_Shipping_Ca
     public const CACHE_KEY_PREFIX = 'ups_api_token_';
 
     /**
-     * @return string
      * @throws Exception
      */
-    public function getAccessToken(string $clientId, string $clientSecret, string $clientUrl)
+    public function getAccessToken(string $clientId, string $clientSecret, string $clientUrl): string
     {
         $cacheKey = self::CACHE_KEY_PREFIX;
         $cache = Mage::app()->getCache();
@@ -38,9 +37,9 @@ class Mage_Usa_Model_Shipping_Carrier_UpsAuth extends Mage_Usa_Model_Shipping_Ca
         ]);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $clientUrl);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $authPayload);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
@@ -48,7 +47,7 @@ class Mage_Usa_Model_Shipping_Carrier_UpsAuth extends Mage_Usa_Model_Shipping_Ca
         $responseData = curl_exec($ch);
         if ($responseData === false) {
             $code = curl_errno($ch);
-            $description = curl_strerror($ch);
+            $description = curl_strerror($code);
             $message = curl_error($ch);
             Mage::throwException("cURL Error: ($code) $description - \"$message\"");
         }

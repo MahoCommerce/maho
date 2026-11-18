@@ -10,12 +10,8 @@
 
 class Mage_Reports_Model_Resource_Event extends Mage_Core_Model_Resource_Db_Abstract
 {
-    /**
-     * Initialize main table and identifier field.
-     * Set main entity table name and primary key field name.
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('reports/event', 'event_id');
     }

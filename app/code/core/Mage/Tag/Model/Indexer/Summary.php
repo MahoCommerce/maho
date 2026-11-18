@@ -76,11 +76,8 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
         ];
     }
 
-    /**
-     * Register data required by process in event object
-     */
     #[\Override]
-    protected function _registerEvent(Mage_Index_Model_Event $event)
+    protected function _registerEvent(Mage_Index_Model_Event $event): void
     {
         if ($event->getEntity() == Mage_Catalog_Model_Product::ENTITY) {
             $this->_registerCatalogProduct($event);
@@ -94,7 +91,7 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
     /**
      * Register data required by catalog product save process
      */
-    protected function _registerCatalogProductSaveEvent(Mage_Index_Model_Event $event)
+    protected function _registerCatalogProductSaveEvent(Mage_Index_Model_Event $event): void
     {
         /** @var Mage_Catalog_Model_Product $product */
         $product = $event->getDataObject();
@@ -112,7 +109,7 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
     /**
      * Register data required by catalog product delete process
      */
-    protected function _registerCatalogProductDeleteEvent(Mage_Index_Model_Event $event)
+    protected function _registerCatalogProductDeleteEvent(Mage_Index_Model_Event $event): void
     {
         $tagIds = Mage::getModel('tag/tag_relation')
             ->setProductId($event->getEntityPk())
@@ -125,7 +122,7 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
     /**
      * Register data required by catalog product massaction process
      */
-    protected function _registerCatalogProductMassActionEvent(Mage_Index_Model_Event $event)
+    protected function _registerCatalogProductMassActionEvent(Mage_Index_Model_Event $event): void
     {
         $actionObject = $event->getDataObject();
         $attributes   = $this->_getProductAttributesDependOn();
@@ -158,7 +155,7 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
         }
     }
 
-    protected function _registerCatalogProduct(Mage_Index_Model_Event $event)
+    protected function _registerCatalogProduct(Mage_Index_Model_Event $event): void
     {
         switch ($event->getType()) {
             case Mage_Index_Model_Event::TYPE_SAVE:
@@ -175,25 +172,22 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
         }
     }
 
-    protected function _registerTag(Mage_Index_Model_Event $event)
+    protected function _registerTag(Mage_Index_Model_Event $event): void
     {
         if ($event->getType() == Mage_Index_Model_Event::TYPE_SAVE) {
             $event->addNewData('tag_reindex_tag_id', $event->getEntityPk());
         }
     }
 
-    protected function _registerTagRelation(Mage_Index_Model_Event $event)
+    protected function _registerTagRelation(Mage_Index_Model_Event $event): void
     {
         if ($event->getType() == Mage_Index_Model_Event::TYPE_SAVE) {
             $event->addNewData('tag_reindex_tag_id', $event->getDataObject()->getTagId());
         }
     }
 
-    /**
-     * Process event
-     */
     #[\Override]
-    protected function _processEvent(Mage_Index_Model_Event $event)
+    protected function _processEvent(Mage_Index_Model_Event $event): void
     {
         $this->callEventHandler($event);
     }

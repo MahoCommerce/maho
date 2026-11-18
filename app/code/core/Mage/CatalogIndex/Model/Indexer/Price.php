@@ -20,9 +20,9 @@ declare(strict_types=1);
  */
 class Mage_CatalogIndex_Model_Indexer_Price extends Mage_CatalogIndex_Model_Indexer_Abstract
 {
-    protected $_customerGroups = [];
+    protected iterable $_customerGroups = [];
     #[\Override]
-    protected $_processChildrenForConfigurable = false;
+    protected bool $_processChildrenForConfigurable = false;
 
     #[\Override]
     protected function _construct()

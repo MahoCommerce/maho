@@ -125,6 +125,7 @@ class Mage_Adminhtml_Block_Customer_Attribute_Edit_Tab_Main extends Mage_Eav_Blo
         if ($this->hasWebsiteFields($attribute)) {
             $notes[] = $helper->__('The Websites section can change it for one website.');
         }
+        $notes[] = $helper->__('A field that its condition hides is never required.');
         return [
             'name' => 'default_mode',
             'label' => $helper->__('Default'),

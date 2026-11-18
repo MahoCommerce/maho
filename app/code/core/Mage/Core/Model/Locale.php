@@ -95,7 +95,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      */
     protected $_emulatedLocales = [];
 
-    protected static $_currencyCache = [];
+    protected static array $_currencyCache = [];
     /** @var NumberFormatter[] */
     protected static $_numberFormatterCache = [];
 

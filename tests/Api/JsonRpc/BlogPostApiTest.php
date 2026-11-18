@@ -17,30 +17,7 @@ describe('Blog Post JSON-RPC API', function () {
         $this->setupBlogApiUser();
     });
 
-    describe('Configuration', function () {
-        it('can detect API base URL automatically', function () {
-            $detectedUrl = $this->getDetectedApiUrl();
-
-            expect($detectedUrl)->toBeString();
-            expect($detectedUrl)->toContain('api.php');
-            expect($detectedUrl)->toMatch('/^https?:\/\//'); // Should be a valid URL
-
-            // The URL should match what's configured in the system
-            if (!isset($_ENV['API_BASE_URL'])) {
-                // If no override, should contain the configured base URL
-                $baseUrl = Mage::app()->getStore()->getBaseUrl();
-                $domain = parse_url($baseUrl, PHP_URL_HOST);
-                expect($detectedUrl)->toContain($domain);
-            }
-        });
-    });
-
     describe('Authentication', function () {
-        it('can authenticate with valid credentials', function () {
-            $sessionId = $this->getAuthenticatedSessionId();
-            expect($sessionId)->toBeString()->not->toBeEmpty();
-        });
-
         it('fails authentication with invalid credentials', function () {
             $client = new Tests\Api\Client\JsonRpcClient($this->apiConfig['base_url']);
 
@@ -71,12 +48,8 @@ describe('Blog Post JSON-RPC API', function () {
             $this->assertSuccessfulResponse($response);
             $result = $response->getResult();
 
-            expect($result)->toBeArray();
-
-            if (!empty($result)) {
-                // The list is a plain array of posts; assert the first one's shape.
-                expect($result[0])->toHaveKeys(['post_id', 'title', 'url_key', 'is_active']);
-            }
+            expect($result)->toBeArray()->not->toBeEmpty();
+            expect($result[0])->toHaveKeys(['post_id', 'title', 'url_key', 'is_active']);
         });
 
         it('can create a blog post', function () {
@@ -222,7 +195,7 @@ describe('Blog Post JSON-RPC API', function () {
             $this->assertErrorResponse($response);
         });
 
-        it('validates publish_date format', function () {
+        it('replaces an invalid publish_date with the date of today in the store', function () {
             $postData = [
                 'title' => 'Test Date Validation',
                 'content' => 'Testing date validation',
@@ -233,15 +206,15 @@ describe('Blog Post JSON-RPC API', function () {
             ];
 
             $response = $this->authenticatedCall('blog_post.create', [$postData]);
-            // Should either succeed (with date corrected) or fail with validation error
 
-            if ($response->isSuccess()) {
-                $postId = $response->getResult();
-                expect($postId)->toBeInt()->toBeGreaterThan(0);
-                $this->testPostIds[] = $postId;
-            } else {
-                $this->assertErrorResponse($response);
-            }
+            $this->assertSuccessfulResponse($response);
+            $postId = $response->getResult();
+            expect($postId)->toBeInt()->toBeGreaterThan(0);
+            $this->testPostIds[] = $postId;
+
+            $info = $this->authenticatedCall('blog_post.info', [$postId])->getResult();
+            $today = Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT);
+            expect((string) $info['publish_date'])->toStartWith($today);
         });
     });
 
@@ -271,22 +244,31 @@ describe('Blog Post JSON-RPC API', function () {
                 'stores' => [1],
             ];
 
-            $activeResponse = $this->authenticatedCall('blog_post.create', [$activePostData]);
-            $this->testPostIds[] = $activeResponse->getResult();
+            $activeId = $this->authenticatedCall('blog_post.create', [$activePostData])->getResult();
+            $this->testPostIds[] = $activeId;
 
-            // Filter by active status
-            $filters = ['is_active' => 1];
-            $response = $this->authenticatedCall('blog_post.list', [$filters]);
+            $inactiveId = $this->authenticatedCall('blog_post.create', [[
+                'title' => 'Inactive Test Post',
+                'content' => 'This is an inactive post',
+                'url_key' => 'inactive-test-post-' . time(),
+                'is_active' => 0,
+                'publish_date' => date('Y-m-d'),
+                'stores' => [1],
+            ]])->getResult();
+            $this->testPostIds[] = $inactiveId;
+
+            $response = $this->authenticatedCall('blog_post.list', [['is_active' => 1]]);
 
             $this->assertSuccessfulResponse($response);
             $posts = $response->getResult();
 
             expect($posts)->toBeArray();
-
-            // Verify all returned posts are active
             foreach ($posts as $post) {
                 expect($post['is_active'])->toBe(1);
             }
+            $ids = array_map('intval', array_column($posts, 'post_id'));
+            expect($ids)->toContain($activeId);
+            expect($ids)->not->toContain($inactiveId);
         });
     });
 

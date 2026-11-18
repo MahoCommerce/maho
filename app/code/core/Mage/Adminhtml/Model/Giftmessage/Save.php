@@ -17,7 +17,7 @@ declare(strict_types=1);
  */
 class Mage_Adminhtml_Model_Giftmessage_Save extends \Maho\DataObject
 {
-    protected $_saved = false;
+    protected bool $_saved = false;
 
     /**
      * Save all seted giftmessages
@@ -284,7 +284,7 @@ class Mage_Adminhtml_Model_Giftmessage_Save extends \Maho\DataObject
         return $this;
     }
 
-    public function importAllowQuoteItemsFromItems($items)
+    public function importAllowQuoteItemsFromItems(array $items): static
     {
         $allowedItems = $this->getAllowQuoteItems();
         $deleteAllowedItems = [];

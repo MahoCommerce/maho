@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_Tax_Model_Resource_Report_Tax_Updatedat extends Mage_Tax_Model_Resource_Report_Tax_Createdat
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('tax/tax_order_aggregated_updated', 'id');
     }

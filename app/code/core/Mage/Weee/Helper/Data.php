@@ -170,6 +170,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function typeOfDisplay($product, $compareTo = null, $zone = null, $store = null)
     {
+        $store ??= $this->getStoreIdOfItem($product);
         if (!$this->isEnabled($store)) {
             return false;
         }
@@ -202,6 +203,23 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
             return in_array($type, $compareTo);
         }
         return $type == $compareTo;
+    }
+
+    /**
+     * Return the store of a product, a quote item or a sales item. An invoice item and a credit
+     * memo item have no store, so they return the store of their order item.
+     */
+    protected function getStoreIdOfItem(mixed $item): ?int
+    {
+        if (!$item instanceof Maho\DataObject) {
+            return null;
+        }
+        $storeId = $item->getStoreId();
+        if ($storeId === null && ($item instanceof Mage_Sales_Model_Order_Invoice_Item || $item instanceof Mage_Sales_Model_Order_Creditmemo_Item)) {
+            $orderItem = $item->getOrderItem();
+            $storeId = $orderItem instanceof Mage_Sales_Model_Order_Item ? $orderItem->getStoreId() : null;
+        }
+        return $storeId === null ? null : (int) $storeId;
     }
 
     /**
@@ -259,12 +277,8 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Sets applied weee taxes
-     *
-     * @param Mage_Sales_Model_Quote_Item_Abstract $item
-     * @param array                                $value
-     * @return $this
      */
-    public function setApplied($item, $value)
+    public function setApplied(\Maho\DataObject $item, array $value): static
     {
         $item->setWeeeTaxApplied(Mage::helper('core')->jsonEncode($value));
         return $this;
@@ -454,10 +468,8 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Set the store for the current quote
-     *
-     * @param Mage_Core_Model_Store $store
      */
-    public function setStore($store)
+    public function setStore(Mage_Core_Model_Store $store): void
     {
         $this->_store = $store;
     }
@@ -505,13 +517,8 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Set a value to a specific property searching FPT by title for the Item
-     *
-     * @param Mage_Core_Model_Abstract $item
-     * @param string $title
-     * @param string $property
-     * @param string $value
      */
-    public function setWeeeTaxesAppliedProperty($item, $title, $property, $value)
+    public function setWeeeTaxesAppliedProperty(\Maho\DataObject $item, ?string $title, string $property, mixed $value): void
     {
         $weeeTaxAppliedAmounts = $this->getApplied($item);
         foreach ($weeeTaxAppliedAmounts as &$weeeTaxAppliedAmount) {

@@ -251,7 +251,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
      *
      * @param string $path Target dir
      */
-    public function deleteDirectory($path)
+    public function deleteDirectory($path): void
     {
         $root = $this->getHelper()->getStorageRootPath();
         if (trim(str_replace('\\', '/', (string) $path), '/') === $root) {

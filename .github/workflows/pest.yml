@@ -356,7 +356,7 @@ jobs:
             Tests/Browser/Screenshots/
             tests/Browser/Screenshots/
             var/log/
-            var/workers/*/var/log/
+            ${{ runner.temp }}/pest-workers/*/var/log/
             var/workers/worker-*.log
           if-no-files-found: ignore
           retention-days: 7
@@ -559,7 +559,7 @@ jobs:
             Tests/Browser/Screenshots/
             tests/Browser/Screenshots/
             var/log/
-            var/workers/*/var/log/
+            ${{ runner.temp }}/pest-workers/*/var/log/
             var/workers/worker-*.log
           if-no-files-found: ignore
           retention-days: 7

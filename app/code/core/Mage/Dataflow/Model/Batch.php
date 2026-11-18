@@ -39,19 +39,9 @@ class Mage_Dataflow_Model_Batch extends Mage_Core_Model_Abstract
      */
     protected $_ioAdapter;
 
-    /**
-     * Dataflow batch export model
-     *
-     * @var Mage_Dataflow_Model_Batch_Export|null
-     */
-    protected $_batchExport;
+    protected ?Mage_Dataflow_Model_Batch_Export $_batchExport = null;
 
-    /**
-     * Dataflow batch import model
-     *
-     * @var Mage_Dataflow_Model_Batch_Import|null
-     */
-    protected $_batchImport;
+    protected ?Mage_Dataflow_Model_Batch_Import $_batchImport = null;
 
     /**
      * Init model
@@ -77,7 +67,7 @@ class Mage_Dataflow_Model_Batch extends Mage_Core_Model_Abstract
      *
      * @param array $row
      */
-    public function parseFieldList($row)
+    public function parseFieldList($row): void
     {
         foreach (array_keys($row) as $fieldName) {
             if (!in_array($fieldName, $this->_fieldList)) {
@@ -117,40 +107,28 @@ class Mage_Dataflow_Model_Batch extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    /**
-     * Retrieve Batch export model
-     *
-     * @return Mage_Dataflow_Model_Batch_Export
-     */
-    public function getBatchExportModel()
+    public function getBatchExportModel(): Mage_Dataflow_Model_Batch_Export
     {
-        if (is_null($this->_batchExport)) {
-            $object = Mage::getModel('dataflow/batch_export');
-            $object->setBatchId($this->getId());
-            $this->_batchExport = \Maho\DataObject\Cache::singleton()->save($object);
+        if ($this->_batchExport === null) {
+            $this->_batchExport = Mage::getModel('dataflow/batch_export');
+            $this->_batchExport->setBatchId($this->getId());
         }
-        return \Maho\DataObject\Cache::singleton()->load($this->_batchExport);
+        return $this->_batchExport;
     }
 
-    /**
-     * Retrieve Batch import model
-     *
-     * @return Mage_Dataflow_Model_Batch_Import
-     */
-    public function getBatchImportModel()
+    public function getBatchImportModel(): Mage_Dataflow_Model_Batch_Import
     {
-        if (is_null($this->_batchImport)) {
-            $object = Mage::getModel('dataflow/batch_import');
-            $object->setBatchId($this->getId());
-            $this->_batchImport = \Maho\DataObject\Cache::singleton()->save($object);
+        if ($this->_batchImport === null) {
+            $this->_batchImport = Mage::getModel('dataflow/batch_import');
+            $this->_batchImport->setBatchId($this->getId());
         }
-        return \Maho\DataObject\Cache::singleton()->load($this->_batchImport);
+        return $this->_batchImport;
     }
 
     /**
      * Run finish actions for Adapter
      */
-    public function beforeFinish()
+    public function beforeFinish(): void
     {
         if ($this->getAdapter()) {
             $adapter = Mage::getModel($this->getAdapter());

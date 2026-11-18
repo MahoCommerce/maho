@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Store
 {
-    protected $_options;
+    protected ?array $_options = null;
 
     public function toOptionArray(): array
     {

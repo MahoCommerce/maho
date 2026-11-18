@@ -39,15 +39,15 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     public const XML_PATH_SENDING_RETURN_PATH_EMAIL    = 'system/smtp/return_path_email';
 
     protected $_templateFilter;
-    protected $_preprocessFlag = false;
-    protected $_bccEmails = [];
+    protected bool $_preprocessFlag = false;
+    protected array $_bccEmails = [];
     protected ?string $_replyToEmail = null;
     protected ?string $_returnPathEmail = null;
 
     /** @var Mage_Core_Model_Email_Attachment[] */
     protected array $_attachments = [];
 
-    protected static $_defaultTemplates;
+    protected static ?array $_defaultTemplates = null;
 
     #[\Override]
     protected function _construct()

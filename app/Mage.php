@@ -135,7 +135,7 @@ final class Mage
      * collector happens to run, so a process that resets repeatedly (the test
      * suite, once per test) piles up connections until the server refuses more.
      */
-    public static function reset()
+    public static function reset(): void
     {
         $resource = self::$_registry['_singleton/core/resource'] ?? null;
         if ($resource instanceof Mage_Core_Model_Resource) {
@@ -171,7 +171,7 @@ final class Mage
      * @param bool $graceful
      * @throws Mage_Core_Exception
      */
-    public static function register($key, $value, $graceful = false)
+    public static function register($key, $value, $graceful = false): void
     {
         if (isset(self::$_registry[$key])) {
             if ($graceful) {
@@ -187,7 +187,7 @@ final class Mage
      *
      * @param string $key
      */
-    public static function unregister($key)
+    public static function unregister($key): void
     {
         if (isset(self::$_registry[$key])) {
             if (is_object(self::$_registry[$key]) && (method_exists(self::$_registry[$key], '__destruct'))) {
@@ -214,7 +214,7 @@ final class Mage
      * @param string $appRoot
      * @throws Mage_Core_Exception
      */
-    public static function setRoot($appRoot = '')
+    public static function setRoot($appRoot = ''): void
     {
         if (self::$_appRoot) {
             return ;
@@ -664,7 +664,7 @@ final class Mage
         throw new Mage_Core_Exception($message);
     }
 
-    public static function addBootupWarning(string $message)
+    public static function addBootupWarning(string $message): void
     {
         self::$_registry['bootup_warnings'] ??= [];
         self::$_registry['bootup_warnings'][] = $message;
@@ -701,7 +701,7 @@ final class Mage
      * @param array $options
      * @param string|array $modules
      */
-    public static function init($code = '', $type = 'store', $options = [], $modules = [])
+    public static function init($code = '', $type = 'store', $options = [], $modules = []): void
     {
         try {
             self::setRoot();
@@ -731,7 +731,7 @@ final class Mage
      * @param string $type
      * @param string|array $options
      */
-    public static function run($code = '', $type = 'store', $options = [])
+    public static function run($code = '', $type = 'store', $options = []): void
     {
         try {
             \Maho\Profiler::start('mage');
@@ -782,7 +782,7 @@ final class Mage
      *
      * @param array $options
      */
-    protected static function _setIsInstalled($options = [])
+    protected static function _setIsInstalled($options = []): void
     {
         if (isset($options['is_installed'])) {
             self::$_isInstalled = (bool) $options['is_installed'];
@@ -794,7 +794,7 @@ final class Mage
      *
      * @param array $options
      */
-    protected static function _setConfigModel($options = [])
+    protected static function _setConfigModel($options = []): void
     {
         if (isset($options['config_model']) && class_exists($options['config_model'])) {
             $alternativeConfigModelName = $options['config_model'];
@@ -862,7 +862,7 @@ final class Mage
      * @param string|null $file
      * @param bool $forceLog
      */
-    public static function log($message, $level = null, $file = '', $forceLog = false)
+    public static function log($message, $level = null, $file = '', $forceLog = false): void
     {
         if (!self::getConfig()) {
             return;
@@ -881,7 +881,7 @@ final class Mage
     /**
      * Write exception to log
      */
-    public static function logException(Throwable $e)
+    public static function logException(Throwable $e): void
     {
         if (!self::getConfig()) {
             return;

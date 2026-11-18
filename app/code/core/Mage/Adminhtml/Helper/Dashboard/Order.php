@@ -14,12 +14,12 @@ class Mage_Adminhtml_Helper_Dashboard_Order extends Mage_Adminhtml_Helper_Dashbo
     protected $_moduleName = 'Mage_Adminhtml';
 
     #[\Override]
-    protected function _initCollection()
+    protected function _initCollection(): void
     {
         $isFilter = $this->getParam('store') || $this->getParam('website') || $this->getParam('group');
 
         $this->_collection = Mage::getResourceSingleton('reports/order_collection')
-            ->prepareSummary($this->getParam('period'), 0, 0, $isFilter);
+            ->prepareSummary($this->getParam('period'), 0, 0, (int) $isFilter);
 
         if ($this->getParam('store')) {
             $this->_collection->addFieldToFilter('store_id', $this->getParam('store'));

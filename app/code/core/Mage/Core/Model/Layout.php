@@ -52,7 +52,7 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
      */
     protected $_directOutput = false;
 
-    protected $invalidActions
+    protected array $invalidActions
         = [
             // explicitly not using class constant here Mage_Page_Block_Html_Topmenu_Renderer::class
             // if the class does not exists it breaks.
@@ -172,7 +172,7 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
      *
      * @param Mage_Core_Model_Layout_Element|\Maho\Simplexml\Element|null $parent
      */
-    public function generateBlocks($parent = null)
+    public function generateBlocks($parent = null): void
     {
         if (empty($parent)) {
             $parent = $this->getNode();
@@ -347,7 +347,7 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
      * @param \Maho\Simplexml\Element $node
      * @param array $args
      **/
-    protected function _translateLayoutNode($node, &$args)
+    protected function _translateLayoutNode($node, &$args): void
     {
         if (isset($node['translate'])) {
             // Translate value by core module if module attribute was not set

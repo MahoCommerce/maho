@@ -13,7 +13,7 @@ class Mage_Rating_Model_Resource_Rating extends Mage_Core_Model_Resource_Db_Abst
     public const RATING_STATUS_APPROVED = 'Approved';
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('rating/rating', 'rating_id');
     }

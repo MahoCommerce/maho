@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_System_Email_Template_Grid_Renderer_Type extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
-    protected static $_types = [
+    protected static array $_types = [
         Mage_Core_Model_Template::TYPE_HTML => 'HTML',
         Mage_Core_Model_Template::TYPE_TEXT => 'Text',
     ];

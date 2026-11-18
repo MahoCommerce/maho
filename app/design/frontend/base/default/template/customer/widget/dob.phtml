@@ -8,64 +8,18 @@
  */
 
 /**
-USAGE:
-
-Simple:
-
-<?= $this->getLayout()->createBlock('customer/widget_dob')
-   ->setDate($this->getCustomer()->getDob())
-   ->toHtml() ?>
-
-For checkout/onepage/billing.phtml:
-
-<?= $this->getLayout()->createBlock('customer/widget_dob')
-   ->setDate($this->getCustomer()->getDob())
-   ->setFieldIdFormat('billing:%s')
-   ->setFieldNameFormat('billing[%s]')
-   ->toHtml() ?>
-
-NOTE: Regarding styles - if we leave it this way, we'll move it to boxes.css
-      Alternatively we could calculate widths automatically using block input parameters.
+ * Usage, for example in checkout/onepage/billing.phtml:
+ *
+ * <?= $this->getLayout()->createBlock('customer/widget_dob')
+ *    ->setDate($this->getCustomer()->getDob())
+ *    ->setFieldIdFormat('billing:%s')
+ *    ->setFieldNameFormat('billing[%s]')
+ *    ->toHtml() ?>
  */
 
-/**
- * @see Mage_Customer_Block_Widget_Dob
- * @var Mage_Customer_Block_Widget_Dob $this
- */
+/** @var Mage_Customer_Block_Widget_Dob $this */
 ?>
-<label for="<?= $this->getFieldId('month') ?>"<?= $this->isRequired() ? ' class="required"' : '' ?>><?= $this->__('Date of Birth') ?></label>
-<div class="input-box customer-dob">
-<?php
-    $this->setDateInput('d',
-        '<div class="dob-day">
-             <input type="text" id="' . $this->getFieldId('day') . '" name="' . $this->getFieldName('day') . '" value="' . $this->getDay() . '" title="' . $this->__('Day') . '" class="input-text validate-custom" ' . $this->getFieldParams() . '>
-             <label for="' . $this->getFieldId('day') . '">' . $this->__('DD') . '</label>
-         </div>',
-    );
-
-    $this->setDateInput(
-        'm',
-        '<div class="dob-month">
-             <input type="text" id="' . $this->getFieldId('month') . '" name="' . $this->getFieldName('month') . '" value="' . $this->getMonth() . '" title="' . $this->__('Month') . '" class="input-text validate-custom" ' . $this->getFieldParams() . '>
-             <label for="' . $this->getFieldId('month') . '">' . $this->__('MM') . '</label>
-         </div>',
-    );
-
-    $this->setDateInput(
-        'y',
-        '<div class="dob-year">
-             <input type="text" id="' . $this->getFieldId('year') . '" name="' . $this->getFieldName('year') . '" value="' . $this->getYear() . '" title="' . $this->__('Year') . '" class="input-text validate-custom" ' . $this->getFieldParams() . '>
-             <label for="' . $this->getFieldId('year') . '">' . $this->__('YYYY') . '</label>
-         </div>',
-    );
-?>
-    <?= $this->getSortedDateInputs() ?>
-    <div class="dob-full" style="display:none;">
-        <input type="hidden" id="<?= $this->getFieldId('dob') ?>" name="<?= $this->getFieldName('dob') ?>">
-    </div>
-
-    <div class="validation-advice" style="display:none;"></div>
+<label for="<?= $this->getFieldId('dob') ?>"<?= $this->isRequired() ? ' class="required"' : '' ?>><?= $this->__('Date of Birth') ?></label>
+<div class="input-box">
+    <input type="date" id="<?= $this->getFieldId('dob') ?>" name="<?= $this->getFieldName('dob') ?>" value="<?= $this->escapeHtml($this->getIsoDate()) ?>" min="1900-01-01" max="<?= Mage_Core_Model_Locale::todayUtc() ?>" title="<?= $this->quoteEscape($this->__('Date of Birth')) ?>" class="input-text<?= $this->isRequired() ? ' required-entry' : '' ?>"<?= $this->isRequired() ? ' aria-required="true"' : '' ?> <?= $this->getFieldParams() ?>>
 </div>
-<script>
-    var customer_dob = new Varien.DOB('.customer-dob', <?= $this->isRequired() ? 'true' : 'false' ?>, '<?= $this->getDateFormat() ?>');
-</script>

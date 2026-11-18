@@ -33,7 +33,7 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
      */
     protected $_productUrlSuffix = [];
 
-    protected $_statuses;
+    protected ?array $_statuses = null;
 
     protected $_priceBlock;
 
@@ -279,7 +279,8 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
      * Inits product to be used for product controller actions and layouts
      * $params can have following data:
      *   'category_id' - id of category to check and append to product as current.
-     *     If empty (except FALSE) - will be guessed (e.g. from last visited) to load as current.
+     *     If empty, the store uses the last visited category, then the primary category of the product.
+     *     If not valid, the store uses the primary category. FALSE gives no category.
      *
      * @param int $productId
      * @param Mage_Core_Controller_Front_Action $controller
@@ -315,13 +316,20 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
 
         // Load product current category
         $categoryId = $params->getCategoryId();
-        if (!$categoryId && ($categoryId !== false)) {
+        $useCategory = $categoryId !== false;
+        if (!$categoryId && $useCategory) {
             $lastId = Mage::getSingleton('catalog/session')->getLastVisitedCategoryId();
             if ($product->canBeShowInCategory($lastId)) {
                 $categoryId = $lastId;
             }
         } elseif (!$product->canBeShowInCategory($categoryId)) {
             $categoryId = null;
+        }
+        if (!$categoryId && $useCategory) {
+            $categoryId = $product->getPrimaryCategoryId();
+            // The request named no category, so the URL and the page title of the product get no category
+            $product->setDoNotUseCategoryId(true);
+            $product->setUsesPrimaryCategory($categoryId !== null);
         }
 
         if ($categoryId) {

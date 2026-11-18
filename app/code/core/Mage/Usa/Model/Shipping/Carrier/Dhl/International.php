@@ -221,7 +221,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      *
      * @param string $freeMethod
      */
-    protected function _setFreeMethodRequest($freeMethod)
+    protected function _setFreeMethodRequest($freeMethod): void
     {
         $rawRequest = $this->_rawRequest;
 
@@ -241,7 +241,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         return $this->_result;
     }
 
-    protected function _addParams($requestObject)
+    protected function _addParams(\Maho\DataObject $requestObject): \Maho\DataObject
     {
         $request = $this->_request;
         foreach ($this->_requestVariables as $code => $objectCode) {
@@ -641,7 +641,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Make pieces
      */
-    protected function _makePieces(SimpleXMLElement $nodeBkgDetails)
+    protected function _makePieces(SimpleXMLElement $nodeBkgDetails): void
     {
         $divideOrderWeight = (string) $this->getConfigData('divide_order_weight');
         $nodePieces = $nodeBkgDetails->addChild('Pieces', '', '');
@@ -745,7 +745,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      *
      * @param SimpleXMLElement $nodePiece
      */
-    protected function _addDimension($nodePiece)
+    protected function _addDimension($nodePiece): void
     {
         $sizeChecker = (string) $this->getConfigData('size');
 
@@ -832,7 +832,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         ]);
 
         $response = $client->request('POST', (string) $this->getConfigData('gateway_url'), [
-            'body' => mb_convert_encoding($request, 'UTF-8', 'ISO-8859-1'),
+            'body' => $request,
         ]);
         return $response->getContent();
     }
@@ -1176,7 +1176,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Map request to shipment
      */
-    protected function _mapRequestToShipment(\Maho\DataObject $request)
+    protected function _mapRequestToShipment(\Maho\DataObject $request): void
     {
         $request->setOrigCountryId($request->getShipperAddressCountryCode());
         $this->_rawRequest = $request;
@@ -1288,7 +1288,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
 
         $companyName = $rawRequest->getRecipientContactCompanyName() ?: $rawRequest->getRecipientContactPersonName();
 
-        $nodeConsignee->addChild('CompanyName', substr($companyName, 0, 35));
+        $nodeConsignee->addChild('CompanyName', mb_substr((string) $companyName, 0, 35));
 
         $address = $rawRequest->getRecipientAddressStreet1() . ' ' . $rawRequest->getRecipientAddressStreet2();
         $address = Mage::helper('core/string')->str_split($address, 35, false, true);
@@ -1309,8 +1309,8 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
             (string) $this->getCountryParams($rawRequest->getRecipientAddressCountryCode())->name,
         );
         $nodeContact = $nodeConsignee->addChild('Contact');
-        $nodeContact->addChild('PersonName', substr($rawRequest->getRecipientContactPersonName(), 0, 34));
-        $nodeContact->addChild('PhoneNumber', substr($rawRequest->getRecipientContactPhoneNumber(), 0, 24));
+        $nodeContact->addChild('PersonName', mb_substr((string) $rawRequest->getRecipientContactPersonName(), 0, 34));
+        $nodeContact->addChild('PhoneNumber', mb_substr((string) $rawRequest->getRecipientContactPhoneNumber(), 0, 24));
 
         /* Commodity
          * The CommodityCode element contains commodity code for shipment contents. Its
@@ -1371,13 +1371,12 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
             (string) $this->getCountryParams($rawRequest->getShipperAddressCountryCode())->name,
         );
         $nodeContact = $nodeShipper->addChild('Contact', '', '');
-        $nodeContact->addChild('PersonName', substr($rawRequest->getShipperContactPersonName(), 0, 34));
-        $nodeContact->addChild('PhoneNumber', substr($rawRequest->getShipperContactPhoneNumber(), 0, 24));
+        $nodeContact->addChild('PersonName', mb_substr((string) $rawRequest->getShipperContactPersonName(), 0, 34));
+        $nodeContact->addChild('PhoneNumber', mb_substr((string) $rawRequest->getShipperContactPhoneNumber(), 0, 24));
 
         $xml->addChild('LabelImageFormat', 'PDF', '');
 
         $request = $xml->asXML();
-        $request = mb_convert_encoding($request, 'UTF-8', 'ISO-8859-1');
 
         $responseBody = $this->_getCachedQuotes($request);
         if ($responseBody === null) {
@@ -1413,7 +1412,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      * @param Mage_Shipping_Model_Rate_Request|\Maho\DataObject $rawRequest
      * @param string $originRegion
      */
-    protected function _shipmentDetails($xml, $rawRequest, $originRegion = '')
+    protected function _shipmentDetails($xml, $rawRequest, $originRegion = ''): void
     {
         $nodeShipmentDetails = $xml->addChild('ShipmentDetails', '', '');
         $nodeShipmentDetails->addChild('NumberOfPieces', (string) count($rawRequest->getPackages()));
@@ -1463,7 +1462,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
             foreach ($package['items'] as $item) {
                 $content[] = $item['name'];
             }
-            $nodePiece->addChild('PieceContents', substr(implode(',', $content), 0, 34));
+            $nodePiece->addChild('PieceContents', mb_substr(implode(',', $content), 0, 34));
         }
 
         if (!$originRegion) {
@@ -1578,7 +1577,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         //$xml->addChild('PiecesEnabled', 'ALL_CHECK_POINTS');
 
         $request = $xml->asXML();
-        $request = mb_convert_encoding($request, 'UTF-8', 'ISO-8859-1');
 
         $responseBody = $this->_getCachedQuotes($request);
         if ($responseBody === null) {
@@ -1613,7 +1611,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      * @param array $trackings
      * @param string $response
      */
-    protected function _parseXmlTrackingResponse($trackings, $response)
+    protected function _parseXmlTrackingResponse($trackings, $response): void
     {
         $errorTitle = Mage::helper('usa')->__('Unable to retrieve tracking');
         $resultArr = [];

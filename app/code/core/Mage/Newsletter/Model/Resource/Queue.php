@@ -18,7 +18,7 @@ class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_A
     public const LINK_INSERT_CHUNK = 1000;
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('newsletter/queue', 'queue_id');
     }
@@ -26,7 +26,7 @@ class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_A
     /**
      * Add subscribers to queue
      */
-    public function addSubscribersToQueue(Mage_Newsletter_Model_Queue $queue, array $subscriberIds)
+    public function addSubscribersToQueue(Mage_Newsletter_Model_Queue $queue, array $subscriberIds): void
     {
         if (count($subscriberIds) == 0) {
             Mage::throwException(Mage::helper('newsletter')->__('No subscribers selected.'));

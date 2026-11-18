@@ -13,11 +13,10 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Initialize shipment items QTY
      */
-    protected function _getItemQtys()
+    protected function _getItemQtys(): array
     {
         $data = $this->getRequest()->getParam('shipment');
-        $qtys = $data['items'] ?? [];
-        return $qtys;
+        return (array) ($data['items'] ?? []);
     }
 
     /**
@@ -370,7 +369,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      * Print label for one specific shipment
      */
     #[Maho\Config\Route('/admin/sales_order_shipment/printLabel')]
-    public function printLabelAction()
+    public function printLabelAction(): void
     {
         try {
             $shipment = $this->_initShipment();
@@ -379,30 +378,33 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
                 // Check if content is ZIP file (multiple labels)
                 if (str_starts_with($labelContent, 'PK')) {
                     // ZIP file signature detected - return as ZIP
-                    return $this->_prepareDownloadResponse(
+                    $this->_prepareDownloadResponse(
                         'ShippingLabels(' . $shipment->getIncrementId() . ').zip',
                         $labelContent,
                         'application/zip',
                     );
+                    return;
                 }
                 if (stripos($labelContent, '%PDF-') !== false) {
                     // Single PDF file
-                    return $this->_prepareDownloadResponse(
+                    $this->_prepareDownloadResponse(
                         'ShippingLabel(' . $shipment->getIncrementId() . ').pdf',
                         $labelContent,
                         'application/pdf',
                     );
+                    return;
                 }
                 // Image content - convert to PDF
                 $pdfContent = $this->createPdfFromImageString($labelContent, $shipment->getIncrementId());
                 if (!$pdfContent) {
                     $this->_getSession()->addError(Mage::helper('sales')->__('File extension not known or unsupported type in the following shipment: %s', $shipment->getIncrementId()));
                 } else {
-                    return $this->_prepareDownloadResponse(
+                    $this->_prepareDownloadResponse(
                         'ShippingLabel(' . $shipment->getIncrementId() . ').pdf',
                         $pdfContent,
                         'application/pdf',
                     );
+                    return;
                 }
             }
         } catch (Mage_Core_Exception $e) {

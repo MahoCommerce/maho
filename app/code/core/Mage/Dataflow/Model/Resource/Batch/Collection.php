@@ -24,7 +24,7 @@ class Mage_Dataflow_Model_Resource_Batch_Collection extends Mage_Core_Model_Reso
     /**
      * Add expire filter (for abandoned batches)
      */
-    public function addExpireFilter()
+    public function addExpireFilter(): void
     {
         $lifetime = Mage_Dataflow_Model_Batch::LIFETIME;
         $expire   = Mage::app()->getLocale()->formatDateForDb(time() - $lifetime);

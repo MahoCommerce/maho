@@ -64,7 +64,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      */
     protected $_encryptor = null;
 
-    protected $_allowedFormats = [
+    protected array $_allowedFormats = [
         Mage_Core_Model_Locale::FORMAT_TYPE_FULL,
         Mage_Core_Model_Locale::FORMAT_TYPE_LONG,
         Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM,
@@ -883,7 +883,7 @@ XML;
                 $value = (string) $value;
 
                 $firstLetter = substr($value, 0, 1);
-                if ($firstLetter && in_array($firstLetter, ['=', '+', '-'])) {
+                if ($firstLetter && in_array($firstLetter, ['=', '+', '-', '@'])) {
                     $data[$key] = ' ' . $value;
                 }
             }
@@ -903,7 +903,7 @@ XML;
             foreach ($data as $key => $value) {
                 $value = (string) $value;
 
-                if (preg_match("/^ [=\-+]/", $value)) {
+                if (preg_match("/^ [=\-+@]/", $value)) {
                     $data[$key] = ltrim($value);
                 }
             }

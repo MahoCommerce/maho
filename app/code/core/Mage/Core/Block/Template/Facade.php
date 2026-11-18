@@ -1,11 +1,14 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Core
  */
+
+declare(strict_types=1);
 
 /**
  * Block that can get data from layout or from registry.
@@ -22,18 +25,15 @@ class Mage_Core_Block_Template_Facade extends Mage_Core_Block_Template
      * @param string $key
      * @param string $value
      */
-    public function setDataByKey($key, $value)
+    public function setDataByKey($key, $value): void
     {
         $this->_data[$key] = $value;
     }
 
     /**
      * Also set data, but take the value from registry by registry key
-     *
-     * @param string $key
-     * @param string $registryKey
      */
-    public function setDataByKeyFromRegistry($key, $registryKey)
+    public function setDataByKeyFromRegistry(string $key, string $registryKey): void
     {
         $registryItem = Mage::registry($registryKey);
         if (empty($registryItem)) {

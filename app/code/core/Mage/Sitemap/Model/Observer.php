@@ -85,7 +85,7 @@ class Mage_Sitemap_Model_Observer
      * @param Mage_Cron_Model_Schedule $schedule
      */
     #[Maho\Config\CronJob('sitemap_generate', configPath: 'crontab/jobs/sitemap_generate/schedule/cron_expr')]
-    public function scheduledGenerateSitemaps($schedule)
+    public function scheduledGenerateSitemaps($schedule): void
     {
         $errors = [];
 

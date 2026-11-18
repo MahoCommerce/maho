@@ -11,12 +11,12 @@ namespace Maho\Filter;
 
 class Sprintf
 {
-    protected $_format = null;
-    protected $_decimals = null;
-    protected $_decPoint = null;
-    protected $_thousandsSep = null;
+    protected string $_format;
+    protected ?int $_decimals = null;
+    protected string $_decPoint;
+    protected string $_thousandsSep;
 
-    public function __construct($format, $decimals = null, $decPoint = '.', $thousandsSep = ',')
+    public function __construct(string $format, ?int $decimals = null, string $decPoint = '.', string $thousandsSep = ',')
     {
         $this->_format = $format;
         $this->_decimals = $decimals;

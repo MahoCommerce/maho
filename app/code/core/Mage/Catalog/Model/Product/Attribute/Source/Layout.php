@@ -10,11 +10,8 @@
 
 class Mage_Catalog_Model_Product_Attribute_Source_Layout extends Mage_Eav_Model_Entity_Attribute_Source_Abstract
 {
-    /**
-     * @return array
-     */
     #[\Override]
-    public function getAllOptions()
+    public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array
     {
         if (!$this->_options) {
             $this->_options = Mage::getSingleton('page/source_layout')->toOptionArray();

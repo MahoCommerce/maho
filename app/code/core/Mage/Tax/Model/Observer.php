@@ -14,7 +14,7 @@ class Mage_Tax_Model_Observer
      * Put quote address tax information into order
      */
     #[Maho\Config\Observer('sales_convert_quote_address_to_order')]
-    public function salesEventConvertQuoteAddressToOrder(\Maho\Event\Observer $observer)
+    public function salesEventConvertQuoteAddressToOrder(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Sales_Model_Quote_Address $address */
         $address = $observer->getEvent()->getAddress();
@@ -35,7 +35,7 @@ class Mage_Tax_Model_Observer
      * Save order tax information
      */
     #[Maho\Config\Observer('sales_order_save_after')]
-    public function salesEventOrderAfterSave(\Maho\Event\Observer $observer)
+    public function salesEventOrderAfterSave(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Sales_Model_Order $order */
         $order = $observer->getEvent()->getOrder();

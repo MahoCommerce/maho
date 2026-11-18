@@ -87,7 +87,7 @@ class Mage_Review_Model_Review extends Mage_Core_Model_Abstract
      * @param Mage_Catalog_Model_Product $product
      * @param int $storeId
      */
-    public function getEntitySummary($product, $storeId = 0)
+    public function getEntitySummary($product, $storeId = 0): void
     {
         $product->setRatingSummary($product->getReviewSummary($storeId));
     }

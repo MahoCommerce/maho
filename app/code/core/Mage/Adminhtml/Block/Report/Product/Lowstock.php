@@ -31,7 +31,7 @@ class Mage_Adminhtml_Block_Report_Product_Lowstock extends Mage_Adminhtml_Block_
         return parent::_prepareLayout();
     }
 
-    public function getStoreSwitcherHtml()
+    public function getStoreSwitcherHtml(): string
     {
         return Mage::app()->isSingleStoreMode() ? '' : $this->getChildHtml('store_switcher');
     }

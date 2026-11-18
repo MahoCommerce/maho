@@ -123,21 +123,22 @@ class Mage_Core_Model_Controller_Front_Observer
 
         // A leading "//" or "/\" makes the browser read the Location as another origin.
         $path = '/' . ltrim(preg_replace('#/{2,}#', '/', $path), '/\\');
-        $path = Mage::helper('core/url')->addOrRemoveTrailingSlash($path);
-
-        // The base path keeps its trailing slash: "/shop" resolves outside the base URL and 404s.
-        $basePath = rtrim((string) parse_url(Mage::getBaseUrl(
-            Mage_Core_Model_Store::URL_TYPE_WEB,
-            Mage::app()->isCurrentlySecure(),
-        ), PHP_URL_PATH), '/');
-        if ($basePath !== '' && rtrim($path, '/') === $basePath) {
-            $path = $basePath . '/';
-        }
+        $onlyTrailingSlashDiffers = $path . $query === $requestUri;
+        $urlHelper = Mage::helper('core/url');
+        $path = $urlHelper->keepBasePathSlash($urlHelper->addOrRemoveTrailingSlash($path));
 
         $canonicalUri = $path . $query;
-        if ($canonicalUri !== $requestUri) {
-            $response->setRedirect($canonicalUri, 301);
+        if ($canonicalUri === $requestUri) {
+            return;
         }
+        // When a rewrite of this path redirects, the client goes to its target with one redirect, not two.
+        if ($onlyTrailingSlashDiffers) {
+            $this->rewriteDb($request, $response);
+            if ($response->isRedirect()) {
+                return;
+            }
+        }
+        $response->setRedirect($canonicalUri, 301);
     }
 
     /**
@@ -186,7 +187,7 @@ class Mage_Core_Model_Controller_Front_Observer
         $rewrite->loadByRequestPath($requestCases);
 
         $fromStore = $request->getQuery('___from_store');
-        if (!$rewrite->getId() && $fromStore) {
+        if (!$rewrite->getId() && is_string($fromStore) && $fromStore) {
             $this->handleCrossStoreRedirect($rewrite, $response, $fromStore, $requestCases);
             \Maho\Profiler::stop('mage::dispatch::db_url_rewrite');
             return;
@@ -221,7 +222,7 @@ class Mage_Core_Model_Controller_Front_Observer
         }
 
         $currentStore = Mage::app()->getStore();
-        $rewrite->setStoreId($currentStore->getId())->loadByIdPath($rewrite->getIdPath());
+        $rewrite->setStoreId($currentStore->getId())->loadByIdPath($rewrite->getIdPathForOtherStores());
 
         $this->setStoreCodeCookie($currentStore->getCode());
         $response->setRedirect($currentStore->getBaseUrl() . $rewrite->getRequestPath(), 301);

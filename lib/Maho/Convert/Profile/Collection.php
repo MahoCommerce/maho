@@ -16,17 +16,20 @@ use Maho\Simplexml\Element;
 
 class Collection
 {
-    protected $_xml;
-    protected $_containers;
-    protected $_profiles = [];
+    protected ?\SimpleXMLElement $_xml = null;
+    protected ?object $_containers = null;
+    protected array $_profiles = [];
 
-    protected $_simplexmlDefaultClass = \Maho\Simplexml\Element::class;
-    protected $_profileDefaultClass = \Maho\Convert\Profile::class;
-    protected $_profileCollectionDefaultClass = \Maho\Convert\Profile\Collection::class;
-    protected $_containerDefaultClass = \Maho\Convert\Container\Generic::class;
-    protected $_containerCollectionDefaultClass = \Maho\Convert\Container\Collection::class;
+    protected string $_simplexmlDefaultClass = \Maho\Simplexml\Element::class;
+    /** @var class-string<AbstractProfile> */
+    protected string $_profileDefaultClass = \Maho\Convert\Profile::class;
+    protected string $_profileCollectionDefaultClass = \Maho\Convert\Profile\Collection::class;
+    /** @var class-string<ContainerInterface> */
+    protected string $_containerDefaultClass = \Maho\Convert\Container\Generic::class;
+    /** @var class-string<\Maho\Convert\Container\Collection> */
+    protected string $_containerCollectionDefaultClass = \Maho\Convert\Container\Collection::class;
 
-    public function getContainers()
+    public function getContainers(): \Maho\Convert\Container\Collection
     {
         if (!$this->_containers) {
             $this->_containers = new $this->_containerCollectionDefaultClass();
@@ -35,49 +38,49 @@ class Collection
         return $this->_containers;
     }
 
-    public function getContainer($name)
+    public function getContainer(string|int $name): ContainerInterface
     {
         return $this->getContainers()->getItem($name);
     }
 
-    public function addContainer($name, ContainerInterface $container)
+    public function addContainer(string|int|null $name, ContainerInterface $container): ContainerInterface
     {
         $container = $this->getContainers()->addItem($name, $container);
         return $container;
     }
 
-    public function getProfiles()
+    public function getProfiles(): array
     {
         return $this->_profiles;
     }
 
-    public function getProfile($name)
+    public function getProfile(string $name): ?AbstractProfile
     {
         if (!isset($this->_profiles[$name])) {
             $this->importProfileXml($name);
         }
-        return $this->_profiles[$name];
+        return $this->_profiles[$name] ?? null;
     }
 
-    public function addProfile($name, ?AbstractProfile $profile = null)
+    public function addProfile(string $name, ?AbstractProfile $profile = null): AbstractProfile
     {
         $profile ??= new $this->_profileDefaultClass();
         $this->_profiles[$name] = $profile;
         return $profile;
     }
 
-    public function run($profile)
+    public function run(string $profile): static
     {
         $this->getProfile($profile)->run();
         return $this;
     }
 
-    public function getClassNameByType($type)
+    public function getClassNameByType(string $type): string
     {
         return $type;
     }
 
-    public function importXml($xml)
+    public function importXml(string|SimpleXMLElement $xml): static
     {
         if (is_string($xml)) {
             $xml = simplexml_load_string($xml, $this->_simplexmlDefaultClass);
@@ -101,7 +104,7 @@ class Collection
         return $this;
     }
 
-    public function importProfileXml($name)
+    public function importProfileXml(string $name): static
     {
         if (!$this->_xml) {
             return $this;

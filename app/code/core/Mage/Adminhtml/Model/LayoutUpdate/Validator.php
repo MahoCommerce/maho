@@ -91,7 +91,7 @@ class Mage_Adminhtml_Model_LayoutUpdate_Validator
     /**
      * Initialize the validator instance with populated template messages
      */
-    protected function _initValidator()
+    protected function _initValidator(): void
     {
         $this->_validator = Mage::getModel('core/layout_validator');
         $this->_disallowedBlock = $this->_validator->getDisallowedBlocks();
@@ -147,7 +147,7 @@ class Mage_Adminhtml_Model_LayoutUpdate_Validator
      * Validate template path for preventing access to the directory above
      * If template path value has "../" @throws Exception
      */
-    protected function _validateTemplatePath(array $templatePaths)
+    protected function _validateTemplatePath(array $templatePaths): void
     {
         $this->_validator->validateTemplatePath($templatePaths);
     }

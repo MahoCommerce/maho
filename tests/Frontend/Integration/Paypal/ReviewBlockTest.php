@@ -33,10 +33,6 @@ function setCheckoutMethod(string $method): void
     Mage::getSingleton('checkout/session')->getQuote()->getPayment()->setMethod($method);
 }
 
-it('resolves paypal/checkout_standard_review to the Review block', function () {
-    expect(paypalReviewBlock())->toBeInstanceOf(Maho_Paypal_Block_Checkout_Standard_Review::class);
-});
-
 it('is inactive in onestep checkout even when PayPal Standard is selected', function () {
     Mage::app()->getStore()->setConfig('checkout/options/onestep_checkout_enabled', '1');
     setCheckoutMethod('paypal_standard_checkout');

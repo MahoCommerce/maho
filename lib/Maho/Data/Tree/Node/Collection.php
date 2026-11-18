@@ -28,11 +28,7 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
      */
     private $_container;
 
-    /**
-     * Node_Collection constructor.
-     * @param $container
-     */
-    public function __construct($container)
+    public function __construct(Tree|Node $container)
     {
         $this->_nodes = [];
         $this->_container = $container;

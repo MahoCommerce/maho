@@ -59,8 +59,8 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('increment_id', Types::STRING, length: 50, notNull: false))
             ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true, default: 0))
             ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
-            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
-            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
             ->addColumn(Schema::column('is_active', Types::SMALLINT, unsigned: true, default: 1))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('entity_type_id'))
@@ -92,7 +92,7 @@ return function (SchemaEditor $schema): void {
     // shape, with only the `value` column type differing per backend.
     $valueTables = [
         'eav_entity_datetime' => [
-            'value' => Schema::column('value', Types::DATETIME_MUTABLE, notNull: false),
+            'value' => Schema::column('value', Types::DATETIME_IMMUTABLE, notNull: false),
             'hasValueIndex' => true,
         ],
         'eav_entity_decimal' => [
@@ -188,6 +188,8 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('default_value', Types::TEXT, length: 65535, notNull: false))
             ->addColumn(Schema::column('is_unique', Types::SMALLINT, unsigned: true, default: 0))
             ->addColumn(Schema::column('note', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('depends_on', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('required_when', Types::TEXT, length: 65535, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('attribute_id')->create())
             ->addIndex(
                 Index::editor()

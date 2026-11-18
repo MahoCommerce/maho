@@ -14,10 +14,8 @@ class Mage_Adminhtml_Block_Store_Switcher_Form_Renderer_Fieldset extends Mage_Ad
 {
     /**
      * Form element which re-rendering
-     *
-     * @var \Maho\Data\Form\Element\Fieldset
      */
-    protected $_element;
+    protected ?\Maho\Data\Form\Element\AbstractElement $_element = null;
 
     #[\Override]
     protected function _construct()
@@ -25,12 +23,7 @@ class Mage_Adminhtml_Block_Store_Switcher_Form_Renderer_Fieldset extends Mage_Ad
         $this->setTemplate('store/switcher/form/renderer/fieldset.phtml');
     }
 
-    /**
-     * Retrieve an element
-     *
-     * @return \Maho\Data\Form\Element\Fieldset
-     */
-    public function getElement()
+    public function getElement(): ?\Maho\Data\Form\Element\AbstractElement
     {
         return $this->_element;
     }

@@ -55,7 +55,10 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
             if ($robots = $this->getForcedRobots()) {
                 $headBlock->setRobots($robots);
             } elseif ($this->shouldUseCanonicalTag()) {
-                $headBlock->addLinkRel('canonical', $category->getUrl());
+                /** @var Mage_Core_Helper_Url $urlHelper */
+                $urlHelper = $this->helper('core/url');
+                $storeQuery = $urlHelper->getCanonicalStoreQuery();
+                $headBlock->addLinkRel('canonical', $storeQuery ? $urlHelper->addRequestParam($category->getUrl(), $storeQuery) : $category->getUrl());
             }
 
             // Add rss feed in head block

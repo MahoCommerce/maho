@@ -14,17 +14,7 @@ describe('Product Wishlist Condition Integration Tests', function () {
         $this->condition = Mage::getModel('customersegmentation/segment_condition_product_wishlist');
         $this->adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
 
-        // Set up test data with actual customers and wishlist items
-        setupWishlistTestData();
-    });
-
-    test('can create new condition instance', function () {
-        expect($this->condition)->toBeInstanceOf(Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist::class);
-        expect($this->condition->getType())->toBe('customersegmentation/segment_condition_product_wishlist');
-    });
-
-    test('extends abstract condition correctly', function () {
-        expect($this->condition)->toBeInstanceOf(Maho_CustomerSegmentation_Model_Segment_Condition_Abstract::class);
+        $this->fixture = setupWishlistTestData();
     });
 
     test('has correct new child select options', function () {
@@ -146,6 +136,10 @@ describe('Product Wishlist Condition Integration Tests', function () {
             expect($sql)->toContain('catalog_product_entity_varchar');
             expect($sql)->toMatch('/pv\.value I?LIKE/');
             expect($sql)->toContain('%Test Product%');
+
+            $nameAttributeId = (int) Mage::getResourceModel('eav/entity_attribute')->getIdByCode('catalog_product', 'name');
+            expect($nameAttributeId)->toBeGreaterThan(0)
+                ->and($sql)->toContain('pv.attribute_id = ' . $nameAttributeId);
         });
 
         test('generates correct SQL for product_sku condition with product table join', function () {
@@ -178,23 +172,6 @@ describe('Product Wishlist Condition Integration Tests', function () {
             expect($sql)->toContain('ccp.category_id');
         });
 
-        test('generates correct SQL for wishlist_items_count aggregation condition', function () {
-            $this->condition->setAttribute('wishlist_items_count');
-            $this->condition->setOperator('>=');
-            $this->condition->setValue('5');
-
-            $sql = $this->condition->getConditionsSql($this->adapter);
-
-            expect($sql)->toBeString();
-            expect($sql)->toContain('e.entity_id IN');
-            expect($sql)->toContain('wishlist_item');
-            expect($sql)->toContain('wishlist');
-            expect($sql)->toContain('COUNT(*)');
-            expect($sql)->toContain('GROUP BY');
-            expect($sql)->toContain('HAVING');
-            expect($sql)->toContain('COUNT(*)');
-        });
-
         test('generates correct SQL for added_at condition', function () {
             $this->condition->setAttribute('added_at');
             $this->condition->setOperator('>=');
@@ -207,39 +184,6 @@ describe('Product Wishlist Condition Integration Tests', function () {
             expect($sql)->toContain('wishlist_item');
             expect($sql)->toContain('wishlist');
             expect($sql)->toContain('wi.added_at');
-        });
-
-        test('generates correct SQL for days_since_added condition with utcDate preserved', function () {
-            $this->condition->setAttribute('days_since_added');
-            $this->condition->setOperator('<=');
-            $this->condition->setValue('30');
-
-            $sql = $this->condition->getConditionsSql($this->adapter);
-
-            expect($sql)->toBeString();
-            expect($sql)->toContain('e.entity_id IN');
-            expect($sql)->toContain('wishlist_item');
-            expect($sql)->toContain('wishlist');
-            expect($sql)->toContain('MAX(wi.added_at)');
-            // Check for MySQL (DATEDIFF), PostgreSQL (DATE() or ::date), or SQLite (JULIANDAY) syntax
-            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(|JULIANDAY/');
-            expect($sql)->toMatch('/202[5-9]-/'); // Verify date is properly formatted
-            expect($sql)->toContain('GROUP BY');
-            expect($sql)->toContain('HAVING');
-        });
-
-        test('generates correct SQL for wishlist_shared condition', function () {
-            $this->condition->setAttribute('wishlist_shared');
-            $this->condition->setOperator('==');
-            $this->condition->setValue('1');
-
-            $sql = $this->condition->getConditionsSql($this->adapter);
-
-            expect($sql)->toBeString();
-            expect($sql)->toContain('e.entity_id IN');
-            expect($sql)->toContain('wishlist');
-            expect($sql)->toContain('w.shared');
-            expect($sql)->toContain('w.customer_id IS NOT NULL');
         });
     });
 
@@ -300,38 +244,6 @@ describe('Product Wishlist Condition Integration Tests', function () {
         });
     });
 
-    test('table name methods return correct table names', function () {
-        $condition = new Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist();
-
-        // Use reflection to test protected methods
-        $reflection = new ReflectionClass($condition);
-
-        $getWishlistTable = $reflection->getMethod('getWishlistTable');
-        $getWishlistTable->setAccessible(true);
-        expect($getWishlistTable->invoke($condition))->toContain('wishlist');
-
-        $getWishlistItemTable = $reflection->getMethod('getWishlistItemTable');
-        $getWishlistItemTable->setAccessible(true);
-        expect($getWishlistItemTable->invoke($condition))->toContain('wishlist_item');
-
-        $getProductTable = $reflection->getMethod('getProductTable');
-        $getProductTable->setAccessible(true);
-        expect($getProductTable->invoke($condition))->toContain('catalog_product_entity');
-
-        $getProductVarcharTable = $reflection->getMethod('getProductVarcharTable');
-        $getProductVarcharTable->setAccessible(true);
-        expect($getProductVarcharTable->invoke($condition))->toContain('catalog_product_entity_varchar');
-
-        $getCatalogCategoryProductTable = $reflection->getMethod('getCatalogCategoryProductTable');
-        $getCatalogCategoryProductTable->setAccessible(true);
-        expect($getCatalogCategoryProductTable->invoke($condition))->toContain('catalog_category_product');
-
-        $getNameAttributeId = $reflection->getMethod('getNameAttributeId');
-        $getNameAttributeId->setAccessible(true);
-        $nameAttrId = $getNameAttributeId->invoke($condition);
-        expect($nameAttrId)->toBeGreaterThan(0);
-    });
-
     test('attribute name and string representation work correctly', function () {
         $this->condition->setAttribute('product_name');
 
@@ -347,66 +259,79 @@ describe('Product Wishlist Condition Integration Tests', function () {
     });
 
     describe('Wishlist-specific functionality', function () {
-        test('handles wishlist shared status correctly', function () {
-            // Test Yes (shared)
+        test('builds the SQL of the wishlist_shared condition', function (string $value) {
             $this->condition->setAttribute('wishlist_shared');
             $this->condition->setOperator('==');
-            $this->condition->setValue('1');
+            $this->condition->setValue($value);
 
             $sql = $this->condition->getConditionsSql($this->adapter);
-            // SQLite may not quote integer values
-            expect($sql)->toMatch('/w\.shared = .?1.?/');
 
-            // Test No (not shared)
-            $this->condition->setValue('0');
-            $sql = $this->condition->getConditionsSql($this->adapter);
-            expect($sql)->toMatch('/w\.shared = .?0.?/');
-        });
+            expect($sql)->toContain('e.entity_id IN')
+                ->and($sql)->toContain('wishlist')
+                ->and($sql)->toContain('w.customer_id IS NOT NULL')
+                // SQLite may not quote integer values
+                ->and($sql)->toMatch('/w\.shared = .?' . $value . '.?/');
+        })->with([
+            'shared' => ['1'],
+            'not shared' => ['0'],
+        ]);
 
-        test('handles wishlist items count aggregation', function () {
+        test('builds the SQL of the wishlist_items_count aggregation', function (string $value) {
             $this->condition->setAttribute('wishlist_items_count');
             $this->condition->setOperator('>=');
-            $this->condition->setValue('10');
+            $this->condition->setValue($value);
 
             $sql = $this->condition->getConditionsSql($this->adapter);
 
-            expect($sql)->toContain('COUNT(*)');
-            expect($sql)->toContain('GROUP BY');
-            expect($sql)->toContain('HAVING');
-            // SQLite may not quote integer values
-            expect($sql)->toMatch('/COUNT\(\*\) >= .?10.?/');
-        });
+            expect($sql)->toContain('e.entity_id IN')
+                ->and($sql)->toContain('wishlist_item')
+                ->and($sql)->toContain('GROUP BY')
+                ->and($sql)->toContain('HAVING')
+                // SQLite may not quote integer values
+                ->and($sql)->toMatch('/COUNT\(\*\) >= .?' . $value . '.?/');
+        })->with([
+            '5 items' => ['5'],
+            '10 items' => ['10'],
+        ]);
 
-        test('handles date-based wishlist conditions', function () {
+        test('builds the SQL of the days_since_added condition', function (string $operator, string $value) {
             $this->condition->setAttribute('days_since_added');
-            $this->condition->setOperator('<');
-            $this->condition->setValue('7'); // Added in last 7 days
+            $this->condition->setOperator($operator);
+            $this->condition->setValue($value);
 
             $sql = $this->condition->getConditionsSql($this->adapter);
 
-            // Check for MySQL (DATEDIFF), PostgreSQL (DATE() or ::date), or SQLite (JULIANDAY) syntax
-            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(|JULIANDAY/');
-            expect($sql)->toContain('MAX(wi.added_at)');
-            // SQLite may not quote integer values
-            expect($sql)->toMatch('/< .?7.?/');
-        });
+            expect($sql)->toContain('e.entity_id IN')
+                ->and($sql)->toContain('wishlist_item')
+                ->and($sql)->toContain('MAX(wi.added_at)')
+                // MySQL uses DATEDIFF, PostgreSQL DATE() or ::date, SQLite JULIANDAY
+                ->and($sql)->toMatch('/DATEDIFF|::date|DATE\\(|JULIANDAY/')
+                ->and($sql)->toMatch('/202[5-9]-/')
+                ->and($sql)->toContain('GROUP BY')
+                ->and($sql)->toContain('HAVING')
+                // SQLite may not quote integer values
+                ->and($sql)->toMatch('/' . $operator . ' .?' . $value . '.?/');
+        })->with([
+            'at most 30 days' => ['<=', '30'],
+            'less than 7 days' => ['<', '7'],
+        ]);
     });
 
     describe('Business Logic Validation - Wishlist Item Counts', function () {
-        test('finds customers with high wishlist item counts', function () {
-            $segment = createWishlistTestSegment('High Item Count Wishlists', [
+        test('matches the customers by the number of items in their wishlists', function (string $operator, string $value, string $member) {
+            $segment = createWishlistTestSegment('Wishlist count ' . $operator . ' ' . $value, [
                 'type' => 'customersegmentation/segment_condition_product_wishlist',
                 'attribute' => 'wishlist_items_count',
-                'operator' => '>=',
-                'value' => '5',
+                'operator' => $operator,
+                'value' => $value,
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
+            expect($matchedCustomers)->toContain($this->fixture['customers'][$member])
+                ->and($matchedCustomers)->not->toContain($this->fixture['customers']['No Wishlist']);
 
-            // Validate each matched customer actually has high item count
             foreach ($matchedCustomers as $customerId) {
-                $itemCount = Mage::getSingleton('core/resource')->getConnection('core_read')
+                $itemCount = (int) Mage::getSingleton('core/resource')->getConnection('core_read')
                     ->select()
                     ->from(['wi' => Mage::getSingleton('core/resource')->getTableName('wishlist/item')], ['COUNT(*)'])
                     ->join(['w' => Mage::getSingleton('core/resource')->getTableName('wishlist/wishlist')], 'wi.wishlist_id = w.wishlist_id', [])
@@ -414,169 +339,70 @@ describe('Product Wishlist Condition Integration Tests', function () {
                     ->query()
                     ->fetchColumn();
 
-                expect((int) $itemCount)->toBeGreaterThanOrEqual(5, "Customer {$customerId} should have >= 5 wishlist items, but has {$itemCount}");
+                $passes = match ($operator) {
+                    '>=' => $itemCount >= (int) $value,
+                    '>' => $itemCount > (int) $value,
+                    '==' => $itemCount === (int) $value,
+                    '<' => $itemCount < (int) $value,
+                };
+                expect($passes)->toBeTrue("Customer {$customerId} has {$itemCount} wishlist items");
             }
-        });
-
-        test('finds customers with exact wishlist item count', function () {
-            $segment = createWishlistTestSegment('Exact Item Count', [
-                'type' => 'customersegmentation/segment_condition_product_wishlist',
-                'attribute' => 'wishlist_items_count',
-                'operator' => '==',
-                'value' => '3',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $itemCount = Mage::getSingleton('core/resource')->getConnection('core_read')
-                    ->select()
-                    ->from(['wi' => Mage::getSingleton('core/resource')->getTableName('wishlist/item')], ['COUNT(*)'])
-                    ->join(['w' => Mage::getSingleton('core/resource')->getTableName('wishlist/wishlist')], 'wi.wishlist_id = w.wishlist_id', [])
-                    ->where('w.customer_id = ?', $customerId)
-                    ->query()
-                    ->fetchColumn();
-
-                expect((int) $itemCount)->toBe(3, "Customer {$customerId} should have exactly 3 wishlist items, but has {$itemCount}");
-            }
-        });
-
-        test('excludes customers with low wishlist item counts', function () {
-            $segment = createWishlistTestSegment('Low Item Count', [
-                'type' => 'customersegmentation/segment_condition_product_wishlist',
-                'attribute' => 'wishlist_items_count',
-                'operator' => '<',
-                'value' => '2',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $itemCount = Mage::getSingleton('core/resource')->getConnection('core_read')
-                    ->select()
-                    ->from(['wi' => Mage::getSingleton('core/resource')->getTableName('wishlist/item')], ['COUNT(*)'])
-                    ->join(['w' => Mage::getSingleton('core/resource')->getTableName('wishlist/wishlist')], 'wi.wishlist_id = w.wishlist_id', [])
-                    ->where('w.customer_id = ?', $customerId)
-                    ->query()
-                    ->fetchColumn();
-
-                expect((int) $itemCount)->toBeLessThan(2, "Customer {$customerId} should have < 2 wishlist items, but has {$itemCount}");
-            }
-        });
+        })->with([
+            'at least 5' => ['>=', '5', 'Wishlist Enthusiast'],
+            'exactly 3' => ['==', '3', 'Private Shopper'],
+            'less than 2' => ['<', '2', 'Single Item'],
+            'more than 0' => ['>', '0', 'Recent Wisher'],
+            'exactly 1' => ['==', '1', 'Single Item'],
+            'at least 1' => ['>=', '1', 'Recent Wisher'],
+        ]);
     });
 
     describe('Business Logic Validation - Wishlist Sharing', function () {
-        test('finds customers with shared wishlists', function () {
-            $segment = createWishlistTestSegment('Shared Wishlists', [
+        test('matches the customers by the sharing of their wishlist', function (string $operator, string $value, string $member) {
+            $segment = createWishlistTestSegment('Wishlist shared ' . $operator . ' ' . $value, [
                 'type' => 'customersegmentation/segment_condition_product_wishlist',
                 'attribute' => 'wishlist_shared',
-                'operator' => '==',
-                'value' => '1',
+                'operator' => $operator,
+                'value' => $value,
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
+            expect($matchedCustomers)->toContain($this->fixture['customers'][$member]);
 
             foreach ($matchedCustomers as $customerId) {
-                $hasSharedWishlist = Mage::getSingleton('core/resource')->getConnection('core_read')
+                $sharedCount = (int) Mage::getSingleton('core/resource')->getConnection('core_read')
                     ->select()
                     ->from(Mage::getSingleton('core/resource')->getTableName('wishlist/wishlist'), ['COUNT(*)'])
                     ->where('customer_id = ?', $customerId)
-                    ->where('shared = ?', 1)
+                    ->where('shared = ?', $operator === '==' ? (int) $value : 1)
                     ->query()
                     ->fetchColumn();
 
-                expect((int) $hasSharedWishlist)->toBeGreaterThan(0, "Customer {$customerId} should have at least one shared wishlist");
+                $operator === '=='
+                    ? expect($sharedCount)->toBeGreaterThan(0, "Customer {$customerId} has no wishlist with shared = {$value}")
+                    : expect($sharedCount)->toBe(0, "Customer {$customerId} should not have any shared wishlists");
             }
-        });
-
-        test('finds customers with private wishlists', function () {
-            $segment = createWishlistTestSegment('Private Wishlists', [
-                'type' => 'customersegmentation/segment_condition_product_wishlist',
-                'attribute' => 'wishlist_shared',
-                'operator' => '==',
-                'value' => '0',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $hasPrivateWishlist = Mage::getSingleton('core/resource')->getConnection('core_read')
-                    ->select()
-                    ->from(Mage::getSingleton('core/resource')->getTableName('wishlist/wishlist'), ['COUNT(*)'])
-                    ->where('customer_id = ?', $customerId)
-                    ->where('shared = ?', 0)
-                    ->query()
-                    ->fetchColumn();
-
-                expect((int) $hasPrivateWishlist)->toBeGreaterThan(0, "Customer {$customerId} should have at least one private wishlist");
-            }
-        });
-
-        test('excludes customers without shared wishlists', function () {
-            $segment = createWishlistTestSegment('No Shared Wishlists', [
-                'type' => 'customersegmentation/segment_condition_product_wishlist',
-                'attribute' => 'wishlist_shared',
-                'operator' => '!=',
-                'value' => '1',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                // Customer should either have no wishlists or only private ones
-                $sharedWishlistCount = Mage::getSingleton('core/resource')->getConnection('core_read')
-                    ->select()
-                    ->from(Mage::getSingleton('core/resource')->getTableName('wishlist/wishlist'), ['COUNT(*)'])
-                    ->where('customer_id = ?', $customerId)
-                    ->where('shared = ?', 1)
-                    ->query()
-                    ->fetchColumn();
-
-                expect((int) $sharedWishlistCount)->toBe(0, "Customer {$customerId} should not have any shared wishlists");
-            }
-        });
+        })->with([
+            'shared' => ['==', '1', 'Wishlist Enthusiast'],
+            'private' => ['==', '0', 'Private Shopper'],
+            'not shared' => ['!=', '1', 'Private Shopper'],
+        ]);
     });
 
     describe('Business Logic Validation - Date and Time Calculations', function () {
-        test('finds customers with recent wishlist additions', function () {
-            $segment = createWishlistTestSegment('Recent Wishlist Additions', [
+        test('matches the customers by the days since their last wishlist addition', function (string $operator, string $value, string $member) {
+            $segment = createWishlistTestSegment('Wishlist added ' . $operator . ' ' . $value, [
                 'type' => 'customersegmentation/segment_condition_product_wishlist',
                 'attribute' => 'days_since_added',
-                'operator' => '<=',
-                'value' => '7', // Last 7 days
+                'operator' => $operator,
+                'value' => $value,
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
+            expect($matchedCustomers)->toContain($this->fixture['customers'][$member]);
 
-            foreach ($matchedCustomers as $customerId) {
-                // Get the most recent addition for this customer
-                $lastAddedDate = Mage::getSingleton('core/resource')->getConnection('core_read')
-                    ->select()
-                    ->from(['wi' => Mage::getSingleton('core/resource')->getTableName('wishlist/item')], ['MAX(wi.added_at)'])
-                    ->join(['w' => Mage::getSingleton('core/resource')->getTableName('wishlist/wishlist')], 'wi.wishlist_id = w.wishlist_id', [])
-                    ->where('w.customer_id = ?', $customerId)
-                    ->query()
-                    ->fetchColumn();
-
-                if ($lastAddedDate) {
-                    $currentDate = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
-                    $daysSinceLastAdded = (int) ((strtotime($currentDate) - strtotime($lastAddedDate)) / 86400);
-
-                    expect($daysSinceLastAdded)->toBeLessThanOrEqual(7, "Customer {$customerId} should have added to wishlist within 7 days, but it was {$daysSinceLastAdded} days ago");
-                }
-            }
-        });
-
-        test('finds customers with old wishlist additions', function () {
-            $segment = createWishlistTestSegment('Old Wishlist Additions', [
-                'type' => 'customersegmentation/segment_condition_product_wishlist',
-                'attribute' => 'days_since_added',
-                'operator' => '>=',
-                'value' => '30', // More than 30 days ago
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
+            // The segment counts calendar days in UTC, like DATEDIFF
+            $today = new DateTimeImmutable('today', new DateTimeZone('UTC'));
             foreach ($matchedCustomers as $customerId) {
                 $lastAddedDate = Mage::getSingleton('core/resource')->getConnection('core_read')
                     ->select()
@@ -585,15 +411,16 @@ describe('Product Wishlist Condition Integration Tests', function () {
                     ->where('w.customer_id = ?', $customerId)
                     ->query()
                     ->fetchColumn();
+                expect($lastAddedDate)->not->toBeEmpty();
 
-                if ($lastAddedDate) {
-                    $currentDate = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
-                    $daysSinceLastAdded = (int) ((strtotime($currentDate) - strtotime($lastAddedDate)) / 86400);
-
-                    expect($daysSinceLastAdded)->toBeGreaterThanOrEqual(30, "Customer {$customerId} should have last added to wishlist >= 30 days ago, but it was {$daysSinceLastAdded} days ago");
-                }
+                $days = $today->diff(new DateTimeImmutable(substr((string) $lastAddedDate, 0, 10), new DateTimeZone('UTC')))->days;
+                expect($operator === '<=' ? $days <= (int) $value : $days >= (int) $value)
+                    ->toBeTrue("Customer {$customerId} last added to the wishlist {$days} days ago");
             }
-        });
+        })->with([
+            'within 7 days' => ['<=', '7', 'Recent Wisher'],
+            '30 days or more' => ['>=', '30', 'Old Wisher'],
+        ]);
 
         test('finds customers who added products to wishlist on specific date', function () {
             $testDate = date('Y-m-d', strtotime('-5 days'));
@@ -678,74 +505,59 @@ describe('Product Wishlist Condition Integration Tests', function () {
         });
 
         test('finds customers who added specific product ID to wishlist', function () {
-            // Get first available product from our test data
-            $productId = Mage::getModel('catalog/product')->getCollection()
-                ->addAttributeToFilter('sku', ['like' => '%wishlist%'])
-                ->setPageSize(1)
-                ->getFirstItem()
-                ->getId();
+            $productId = $this->fixture['laptop'];
+            $segment = createWishlistTestSegment('Product ID Wishlisters', [
+                'type' => 'customersegmentation/segment_condition_product_wishlist',
+                'attribute' => 'product_id',
+                'operator' => '==',
+                'value' => (string) $productId,
+            ]);
 
-            if ($productId) {
-                $segment = createWishlistTestSegment('Product ID Wishlisters', [
-                    'type' => 'customersegmentation/segment_condition_product_wishlist',
-                    'attribute' => 'product_id',
-                    'operator' => '==',
-                    'value' => (string) $productId,
-                ]);
+            $matchedCustomers = $segment->getMatchingCustomerIds();
+            expect($matchedCustomers)->toContain($this->fixture['customers']['Single Item'])
+                ->and($matchedCustomers)->not->toContain($this->fixture['customers']['Recent Wisher']);
 
-                $matchedCustomers = $segment->getMatchingCustomerIds();
+            foreach ($matchedCustomers as $customerId) {
+                $hasProductInWishlist = Mage::getSingleton('core/resource')->getConnection('core_read')
+                    ->select()
+                    ->from(['wi' => Mage::getSingleton('core/resource')->getTableName('wishlist/item')], ['COUNT(*)'])
+                    ->join(['w' => Mage::getSingleton('core/resource')->getTableName('wishlist/wishlist')], 'wi.wishlist_id = w.wishlist_id', [])
+                    ->where('w.customer_id = ?', $customerId)
+                    ->where('wi.product_id = ?', $productId)
+                    ->query()
+                    ->fetchColumn();
 
-                foreach ($matchedCustomers as $customerId) {
-                    $hasProductInWishlist = Mage::getSingleton('core/resource')->getConnection('core_read')
-                        ->select()
-                        ->from(['wi' => Mage::getSingleton('core/resource')->getTableName('wishlist/item')], ['COUNT(*)'])
-                        ->join(['w' => Mage::getSingleton('core/resource')->getTableName('wishlist/wishlist')], 'wi.wishlist_id = w.wishlist_id', [])
-                        ->where('w.customer_id = ?', $customerId)
-                        ->where('wi.product_id = ?', $productId)
-                        ->query()
-                        ->fetchColumn();
-
-                    expect((int) $hasProductInWishlist)->toBeGreaterThan(0, "Customer {$customerId} should have product ID {$productId} in wishlist");
-                }
+                expect((int) $hasProductInWishlist)->toBeGreaterThan(0, "Customer {$customerId} should have product ID {$productId} in wishlist");
             }
         });
     });
 
     describe('Business Logic Validation - Category Filtering', function () {
         test('finds customers who added products from specific category to wishlist', function () {
-            // Get a test category from our setup
-            $category = Mage::getResourceModel('catalog/category_collection')
-                ->addAttributeToSelect('name')
-                ->addAttributeToFilter('name', ['like' => '%Wishlist Electronics%'])
-                ->addAttributeToFilter('is_active', 1)
-                ->setPageSize(1)
-                ->getFirstItem();
+            $categoryId = $this->fixture['electronics'];
+            $segment = createWishlistTestSegment('Category Specific Wishlisters', [
+                'type' => 'customersegmentation/segment_condition_product_wishlist',
+                'attribute' => 'category_id',
+                'operator' => '==',
+                'value' => (string) $categoryId,
+            ]);
 
-            if ($category && $category->getId()) {
-                $categoryId = $category->getId();
+            $matchedCustomers = $segment->getMatchingCustomerIds();
+            expect($matchedCustomers)->toContain($this->fixture['customers']['Electronics Lover'])
+                ->and($matchedCustomers)->not->toContain($this->fixture['customers']['Old Wisher']);
 
-                $segment = createWishlistTestSegment('Category Specific Wishlisters', [
-                    'type' => 'customersegmentation/segment_condition_product_wishlist',
-                    'attribute' => 'category_id',
-                    'operator' => '==',
-                    'value' => (string) $categoryId,
-                ]);
+            foreach ($matchedCustomers as $customerId) {
+                $hasCategoryProducts = Mage::getSingleton('core/resource')->getConnection('core_read')
+                    ->select()
+                    ->from(['wi' => Mage::getSingleton('core/resource')->getTableName('wishlist/item')], ['COUNT(*)'])
+                    ->join(['w' => Mage::getSingleton('core/resource')->getTableName('wishlist/wishlist')], 'wi.wishlist_id = w.wishlist_id', [])
+                    ->join(['ccp' => Mage::getSingleton('core/resource')->getTableName('catalog/category_product')], 'wi.product_id = ccp.product_id', [])
+                    ->where('w.customer_id = ?', $customerId)
+                    ->where('ccp.category_id = ?', $categoryId)
+                    ->query()
+                    ->fetchColumn();
 
-                $matchedCustomers = $segment->getMatchingCustomerIds();
-
-                foreach ($matchedCustomers as $customerId) {
-                    $hasCategoryProducts = Mage::getSingleton('core/resource')->getConnection('core_read')
-                        ->select()
-                        ->from(['wi' => Mage::getSingleton('core/resource')->getTableName('wishlist/item')], ['COUNT(*)'])
-                        ->join(['w' => Mage::getSingleton('core/resource')->getTableName('wishlist/wishlist')], 'wi.wishlist_id = w.wishlist_id', [])
-                        ->join(['ccp' => Mage::getSingleton('core/resource')->getTableName('catalog/category_product')], 'wi.product_id = ccp.product_id', [])
-                        ->where('w.customer_id = ?', $customerId)
-                        ->where('ccp.category_id = ?', $categoryId)
-                        ->query()
-                        ->fetchColumn();
-
-                    expect((int) $hasCategoryProducts)->toBeGreaterThan(0, "Customer {$customerId} should have products from category {$categoryId} in wishlist");
-                }
+                expect((int) $hasCategoryProducts)->toBeGreaterThan(0, "Customer {$customerId} should have products from category {$categoryId} in wishlist");
             }
         });
 
@@ -908,104 +720,34 @@ describe('Product Wishlist Condition Integration Tests', function () {
     });
 
     describe('Edge Cases and Data Integrity', function () {
-        test('handles customers with no wishlist gracefully', function () {
-            $segment = createWishlistTestSegment('Has Wishlist', [
-                'type' => 'customersegmentation/segment_condition_product_wishlist',
-                'attribute' => 'wishlist_items_count',
-                'operator' => '>',
-                'value' => '0',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            // All matched customers should have at least one wishlist item
-            foreach ($matchedCustomers as $customerId) {
-                $itemCount = Mage::getSingleton('core/resource')->getConnection('core_read')
-                    ->select()
-                    ->from(['wi' => Mage::getSingleton('core/resource')->getTableName('wishlist/item')], ['COUNT(*)'])
-                    ->join(['w' => Mage::getSingleton('core/resource')->getTableName('wishlist/wishlist')], 'wi.wishlist_id = w.wishlist_id', [])
-                    ->where('w.customer_id = ?', $customerId)
-                    ->query()
-                    ->fetchColumn();
-
-                expect((int) $itemCount)->toBeGreaterThan(0, "Customer {$customerId} should have at least one wishlist item");
-            }
-        });
-
-        test('handles wishlist item count boundaries correctly', function () {
-            $segment = createWishlistTestSegment('Exact Wishlist Count', [
-                'type' => 'customersegmentation/segment_condition_product_wishlist',
-                'attribute' => 'wishlist_items_count',
-                'operator' => '==',
-                'value' => '1',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $itemCount = Mage::getSingleton('core/resource')->getConnection('core_read')
-                    ->select()
-                    ->from(['wi' => Mage::getSingleton('core/resource')->getTableName('wishlist/item')], ['COUNT(*)'])
-                    ->join(['w' => Mage::getSingleton('core/resource')->getTableName('wishlist/wishlist')], 'wi.wishlist_id = w.wishlist_id', [])
-                    ->where('w.customer_id = ?', $customerId)
-                    ->query()
-                    ->fetchColumn();
-
-                expect((int) $itemCount)->toBe(1, "Customer {$customerId} should have exactly 1 wishlist item, but has {$itemCount}");
-            }
-        });
-
-        test('handles date boundary conditions for wishlist', function () {
-            $exactDate = date('Y-m-d', strtotime('-10 days'));
+        test('matches no fixture customer for a date without wishlist additions', function () {
             $segment = createWishlistTestSegment('Exact Date Wishlist Additions', [
                 'type' => 'customersegmentation/segment_condition_product_wishlist',
                 'attribute' => 'added_at',
                 'operator' => '==',
-                'value' => $exactDate,
-            ]);
-
-            // Should not crash with exact date matches
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
-        });
-
-        test('handles multiple wishlists per customer', function () {
-            // Some customers might have multiple wishlists in edge cases
-            $segment = createWishlistTestSegment('Multiple Wishlists', [
-                'type' => 'customersegmentation/segment_condition_product_wishlist',
-                'attribute' => 'wishlist_items_count',
-                'operator' => '>=',
-                'value' => '1',
+                'value' => date('Y-m-d', strtotime('-20 days')),
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
 
-            // Verify the query handles multiple wishlists correctly by aggregating
-            foreach ($matchedCustomers as $customerId) {
-                $totalItems = Mage::getSingleton('core/resource')->getConnection('core_read')
-                    ->select()
-                    ->from(['wi' => Mage::getSingleton('core/resource')->getTableName('wishlist/item')], ['COUNT(*)'])
-                    ->join(['w' => Mage::getSingleton('core/resource')->getTableName('wishlist/wishlist')], 'wi.wishlist_id = w.wishlist_id', [])
-                    ->where('w.customer_id = ?', $customerId)
-                    ->query()
-                    ->fetchColumn();
-
-                expect((int) $totalItems)->toBeGreaterThanOrEqual(1, "Customer {$customerId} should have >= 1 total wishlist items across all wishlists");
+            foreach ($this->fixture['customers'] as $name => $customerId) {
+                expect($matchedCustomers)->not->toContain($customerId, "{$name} added nothing 20 days ago");
             }
         });
     });
-
 });
 
-// Built once per run: nothing mutates the fixture, and every assertion below checks
-// each matched customer on its own rather than counting rows.
-function setupWishlistTestData(): void
+/**
+ * Build the fixture once per run: nothing mutates it.
+ *
+ * @return array{customers: array<string, int>, laptop: int, electronics: int}
+ */
+function setupWishlistTestData(): array
 {
-    static $built = false;
-    if ($built) {
-        return;
+    static $fixture = null;
+    if ($fixture !== null) {
+        return $fixture;
     }
-    $built = true;
 
     $uniqueId = uniqid('wishlist_', true);
 
@@ -1111,6 +853,11 @@ function setupWishlistTestData(): void
         ],
     ];
 
+    $fixture = [
+        'customers' => [],
+        'laptop' => (int) $laptop->getId(),
+        'electronics' => (int) $electronicsCategory->getId(),
+    ];
     foreach ($customers as $customerData) {
         // Create customer
         $customer = Mage::getModel('customer/customer');
@@ -1120,6 +867,7 @@ function setupWishlistTestData(): void
         $customer->setGroupId(1);
         $customer->setWebsiteId(1);
         $customer->save();
+        $fixture['customers'][$customerData['firstname'] . ' ' . $customerData['lastname']] = (int) $customer->getId();
 
         // Create wishlist only if needed (some customers have no wishlist)
         if (!isset($customerData['create_wishlist']) || $customerData['create_wishlist'] !== false) {
@@ -1144,6 +892,8 @@ function setupWishlistTestData(): void
             }
         }
     }
+
+    return $fixture;
 }
 
 function createWishlistTestCategory(string $name, string $urlKey): Mage_Catalog_Model_Category

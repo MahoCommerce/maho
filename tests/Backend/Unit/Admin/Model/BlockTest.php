@@ -37,15 +37,10 @@ describe('Mage_Admin_Model_Block Validation', function () {
         });
 
         it('fails validation for disallowed block names', function () {
-            // Test with a disallowed block name - first let's get the disallowed names
-            $disallowedNames = Mage::helper('admin/block')->getDisallowedBlockNames();
+            expect(Mage::helper('admin/block')->getDisallowedBlockNames())->toContain('install/complete');
 
-            if (!empty($disallowedNames)) {
-                $this->block->setBlockName($disallowedNames[0]);
-                $result = $this->block->validate();
-                expect($result)->toBeArray();
-                expect($result)->toContain('Block Name is disallowed.');
-            }
+            $this->block->setBlockName('install/complete');
+            expect($this->block->validate())->toContain('Block Name is disallowed.');
         });
 
         it('fails validation for incorrect block name format', function () {

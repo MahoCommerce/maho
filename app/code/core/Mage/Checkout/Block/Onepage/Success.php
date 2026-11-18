@@ -51,7 +51,7 @@ class Mage_Checkout_Block_Onepage_Success extends Mage_Core_Block_Template
     /**
      * Get last order ID from session, fetch it and check whether it can be viewed, printed etc
      */
-    protected function _prepareLastOrder()
+    protected function _prepareLastOrder(): void
     {
         $orderId = Mage::getSingleton('checkout/session')->getLastOrderId();
         if ($orderId) {
@@ -77,7 +77,7 @@ class Mage_Checkout_Block_Onepage_Success extends Mage_Core_Block_Template
     /**
      * Prepare billing agreement data from an identifier in the session
      */
-    protected function _prepareLastBillingAgreement()
+    protected function _prepareLastBillingAgreement(): void
     {
         $agreementId = Mage::getSingleton('checkout/session')->getLastBillingAgreementId();
         $customerId = Mage::getSingleton('customer/session')->getCustomerId();

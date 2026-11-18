@@ -10,11 +10,8 @@
 
 class Mage_Catalog_Model_Resource_Product_Action extends Mage_Catalog_Model_Resource_Abstract
 {
-    /**
-     * Initialize connection
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $resource = Mage::getSingleton('core/resource');
         $this->setType(Mage_Catalog_Model_Product::ENTITY)

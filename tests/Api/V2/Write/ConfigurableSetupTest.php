@@ -128,3 +128,221 @@ describe('Configurable Setup, Child Management', function (): void {
     });
 
 });
+
+/**
+ * A select attribute with two options, in the default attribute set unless $inSet is false, usable to configure products unless $configurable is false
+ */
+function configurableSetupCreateAttribute(bool $inSet = true, bool $configurable = true): Mage_Catalog_Model_Resource_Eav_Attribute
+{
+    $productType = Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Product::ENTITY);
+    $setId = (int) $productType->getDefaultAttributeSetId();
+    $data = [
+        'entity_type_id' => (int) $productType->getId(),
+        'attribute_code' => 'pest_cfg_setup_' . substr(uniqid(), -8),
+        'frontend_input' => 'select',
+        'backend_type' => 'int',
+        'frontend_label' => ['Pest configurable setup'],
+        'is_global' => Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL,
+        'is_configurable' => (int) $configurable,
+        'is_user_defined' => 1,
+        'option' => ['value' => ['first' => ['First'], 'second' => ['Second']]],
+    ];
+    if ($inSet) {
+        $data['attribute_set_id'] = $setId;
+        $data['attribute_group_id'] = (int) Mage::getModel('eav/entity_attribute_set')->getDefaultGroupId($setId);
+    }
+    $attribute = Mage::getModel('catalog/resource_eav_attribute');
+    $attribute->addData($data)->save();
+    Mage::getSingleton('eav/config')->clear();
+
+    return $attribute;
+}
+
+/**
+ * @param array<string, mixed> $data
+ */
+function configurableSetupCreateProduct(string $type, array $data = []): int
+{
+    $sku = "pest-cfg-setup-{$type}-" . uniqid();
+    $product = Mage::getModel('catalog/product')->setStoreId(0)
+        ->setTypeId($type)
+        ->setAttributeSetId((int) Mage::getModel('catalog/product')->getDefaultAttributeSetId())
+        ->setSku($sku)->setName("Pest configurable setup {$type}")->setUrlKey($sku)->setWeight(1)
+        ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+        ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
+        ->setPrice(10)->setTaxClassId(0)->setWebsiteIds([1])
+        ->setStockData(['use_config_manage_stock' => 0, 'manage_stock' => 0])
+        ->addData($data);
+    $product->save();
+    trackCreated('product', (int) $product->getId());
+
+    return (int) $product->getId();
+}
+
+function configurableSetupSuperAttributeRows(int $productId): int
+{
+    $resource = Mage::getSingleton('core/resource');
+
+    return (int) $resource->getConnection('core_read')->fetchOne(
+        'SELECT COUNT(*) FROM ' . $resource->getTableName('catalog/product_super_attribute') . ' WHERE product_id = ?',
+        [$productId],
+    );
+}
+
+describe('Configurable Setup, Setup', function (): void {
+
+    beforeEach(function (): void {
+        Mage::app();
+        $this->attribute = configurableSetupCreateAttribute();
+        $this->code = (string) $this->attribute->getAttributeCode();
+        $this->childIds = [];
+        foreach ($this->attribute->getSource()->getAllOptions(false) as $option) {
+            if ($option['value'] !== '') {
+                $this->childIds[] = configurableSetupCreateProduct(
+                    Mage_Catalog_Model_Product_Type::TYPE_SIMPLE,
+                    [$this->code => (int) $option['value']],
+                );
+            }
+        }
+        $this->configurableId = configurableSetupCreateProduct(Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
+        $this->token = serviceToken(['products/write', 'products/read']);
+        $this->otherAttribute = null;
+        $this->emptySet = null;
+    });
+
+    afterEach(function (): void {
+        cleanupTestData();
+        foreach ([$this->attribute, $this->otherAttribute] as $attribute) {
+            if ($attribute) {
+                Mage::getModel('catalog/resource_eav_attribute')->load((int) $attribute->getId())->delete();
+            }
+        }
+        if ($this->emptySet) {
+            $this->emptySet->delete();
+        }
+        Mage::getSingleton('eav/config')->clear();
+    });
+
+    it('sets the super attributes and the children in one request', function (): void {
+        $response = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
+            'superAttributes' => [$this->code],
+            'childProductIds' => $this->childIds,
+        ], $this->token);
+
+        expect($response['status'])->toBe(200);
+        expect($response['json']['superAttributes'])->toBe([$this->code]);
+        expect($response['json']['childProductIds'])->toEqualCanonicalizing($this->childIds);
+        expect(configurableSetupSuperAttributeRows($this->configurableId))->toBe(1);
+    });
+
+    it('rejects a super attribute outside the attribute set of the product', function (): void {
+        $this->otherAttribute = configurableSetupCreateAttribute(false);
+
+        $response = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
+            'superAttributes' => [(string) $this->otherAttribute->getAttributeCode()],
+        ], $this->token);
+
+        expect($response['status'])->toBe(422);
+        expect(configurableSetupSuperAttributeRows($this->configurableId))->toBe(0);
+    });
+
+    it('rejects other super attributes than the saved ones, and accepts the same ones again', function (): void {
+        $first = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
+            'superAttributes' => [$this->code],
+            'childProductIds' => [$this->childIds[0]],
+        ], $this->token);
+        expect($first['status'])->toBe(200);
+
+        $this->otherAttribute = configurableSetupCreateAttribute();
+        $other = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
+            'superAttributes' => [(string) $this->otherAttribute->getAttributeCode()],
+            'childProductIds' => $this->childIds,
+        ], $this->token);
+        expect($other['status'])->toBe(409);
+
+        $same = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
+            'superAttributes' => [$this->code],
+            'childProductIds' => $this->childIds,
+        ], $this->token);
+        expect($same['status'])->toBe(200);
+        expect($same['json']['superAttributes'])->toBe([$this->code]);
+        expect($same['json']['childProductIds'])->toEqualCanonicalizing($this->childIds);
+    });
+
+    it('rejects a super attribute that cannot configure products', function (): void {
+        $this->otherAttribute = configurableSetupCreateAttribute(true, false);
+
+        $response = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
+            'superAttributes' => [(string) $this->otherAttribute->getAttributeCode()],
+        ], $this->token);
+
+        expect($response['status'])->toBe(422);
+        expect(configurableSetupSuperAttributeRows($this->configurableId))->toBe(0);
+    });
+
+    it('assigns children when the saved super attribute can no longer configure products', function (): void {
+        $first = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
+            'superAttributes' => [$this->code],
+            'childProductIds' => [$this->childIds[0]],
+        ], $this->token);
+        expect($first['status'])->toBe(200);
+
+        Mage::getModel('catalog/resource_eav_attribute')->load((int) $this->attribute->getId())->setIsConfigurable(0)->save();
+        Mage::getSingleton('eav/config')->clear();
+
+        $second = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
+            'superAttributes' => [$this->code],
+            'childProductIds' => $this->childIds,
+        ], $this->token);
+        expect($second['status'])->toBe(200);
+        expect($second['json']['childProductIds'])->toEqualCanonicalizing($this->childIds);
+    });
+
+    it('rejects other super attributes when a saved one is not in the attribute set of the product', function (): void {
+        $first = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
+            'superAttributes' => [$this->code],
+            'childProductIds' => [$this->childIds[0]],
+        ], $this->token);
+        expect($first['status'])->toBe(200);
+
+        $this->otherAttribute = configurableSetupCreateAttribute();
+        $this->emptySet = Mage::getModel('eav/entity_attribute_set')
+            ->setEntityTypeId((int) $this->attribute->getEntityTypeId())
+            ->setAttributeSetName('pest_cfg_setup_' . bin2hex(random_bytes(8)))
+            ->save();
+        $resource = Mage::getSingleton('core/resource');
+        $resource->getConnection('core_write')->update(
+            $resource->getTableName('catalog/product'),
+            ['attribute_set_id' => (int) $this->emptySet->getId()],
+            ['entity_id = ?' => $this->configurableId],
+        );
+
+        $second = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
+            'superAttributes' => [(string) $this->otherAttribute->getAttributeCode()],
+        ], $this->token);
+
+        expect($second['status'])->toBe(409);
+        expect(configurableSetupSuperAttributeRows($this->configurableId))->toBe(1);
+    });
+
+    it('rejects super attributes that are not a list of codes', function (string $key, mixed $value): void {
+        $response = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [$key => $value], $this->token);
+
+        expect($response['status'])->toBe(400);
+        expect(configurableSetupSuperAttributeRows($this->configurableId))->toBe(0);
+    })->with([
+        'a super attribute that is not a code' => ['superAttributes', [['color']]],
+        'super attributes that are not a list' => ['super_attributes', 'color'],
+    ]);
+
+    it('saves no super attribute when the children cannot be assigned', function (): void {
+        $response = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
+            'superAttributes' => [$this->code],
+            'childProductIds' => [999999999],
+        ], $this->token);
+
+        expect($response['status'])->toBe(422);
+        expect(configurableSetupSuperAttributeRows($this->configurableId))->toBe(0);
+    });
+
+});

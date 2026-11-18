@@ -28,7 +28,7 @@ abstract class Mage_Reports_Model_Resource_Product_Index_Collection_Abstract ext
     /**
      * Retrieve Product Index table name
      */
-    abstract protected function _getTableName();
+    abstract protected function _getTableName(): string;
 
     /**
      * Join index table

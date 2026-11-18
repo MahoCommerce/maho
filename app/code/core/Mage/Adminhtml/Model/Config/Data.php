@@ -343,7 +343,7 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
     /**
      * Validate isset required parametrs
      */
-    protected function _validate()
+    protected function _validate(): void
     {
         if (is_null($this->getSection())) {
             $this->setSection('');
@@ -359,7 +359,7 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
     /**
      * Get scope name and scopeId
      */
-    protected function _getScope()
+    protected function _getScope(): void
     {
         if ($this->getStore()) {
             $scope   = self::SCOPE_STORES;
@@ -481,7 +481,7 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
                         $cloneModel = Mage::getModel((string) $groupConfig->clone_model);
                     } else {
                         Mage::throwException(
-                            $this->__('Config form fieldset clone model required to be able to clone fields'),
+                            Mage::helper('adminhtml')->__('Config form fieldset clone model required to be able to clone fields'),
                         );
                     }
                     foreach ($cloneModel->getPrefixes() as $prefix) {

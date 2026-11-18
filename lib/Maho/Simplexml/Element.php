@@ -245,7 +245,7 @@ class Element extends SimpleXMLElement
         $out = '';
         foreach ($this->children() as $child) {
             /** @var Element $child */
-            $out .= $child->asNiceXml($level);
+            $out .= $child->asNiceXml('', $level);
         }
         return $out;
     }
@@ -380,7 +380,7 @@ class Element extends SimpleXMLElement
         return $this;
     }
 
-    public function setNode($path, $value, $overwrite = true)
+    public function setNode(string $path, mixed $value, bool $overwrite = true): static
     {
         $arr1 = explode('/', $path);
         $arr = [];

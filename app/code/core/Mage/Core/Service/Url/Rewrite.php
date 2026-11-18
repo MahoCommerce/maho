@@ -36,7 +36,9 @@ class Mage_Core_Service_Url_Rewrite
      * Save $rewrite. The transport puts its input into the rewrite through the typed setters first. A new rewrite is
      * custom. Check the store view, the request path, the redirect type, the product and the category. A rewrite
      * without a product or a category needs an ID path and a target path. The request path is stored in lower case.
-     * A rewrite with a product or a category gets the ID path and the target path of that product or category.
+     * A rewrite with a product or a category gets the target path of that product or category. A system rewrite
+     * gets the ID path of its product or category. A custom rewrite keeps its ID path, or it gets a new unique ID
+     * path. So a product or a category can have many custom rewrites in a store view.
      * The resource model checks the uniqueness of the request path and the ID path. A system rewrite keeps its
      * store view. The catalog URL indexer writes a system rewrite again when it reindexes its product or
      * category, so a change to a system rewrite lasts until then.
@@ -134,16 +136,18 @@ class Mage_Core_Service_Url_Rewrite
     ): void {
         $catalogUrl = Mage::getSingleton('catalog/url');
         $idPath = $catalogUrl->generatePath('id', $product, $category);
-        $rewrite->setIdPath($idPath);
+        $rewrite->setIdPath(
+            $rewrite->getIsSystem() ? $idPath : ((string) $rewrite->getOrigData('id_path') ?: $catalogUrl->generateUniqueIdPath()),
+        );
 
         if (in_array($rewrite->getOptions(), ['R', 'RP'], true)) {
-            $target = Mage::getResourceModel('catalog/url')->getRewriteByIdPath($idPath, (int) $rewrite->getStoreId());
-            if (!$target) {
+            $target = $this->newRewrite()->setStoreId((int) $rewrite->getStoreId())->loadByIdPath($idPath);
+            if (!$target->getId()) {
                 throw new Mage_Core_Exception_Input()->addError('product_id', Mage::helper('core')->__(
                     'The product or category has no URL in the chosen store view, so there is no page to redirect to. Check the store view, the product and the category.',
                 ));
             }
-            if ($target->getId() && (int) $target->getId() !== (int) $rewrite->getId()) {
+            if ((int) $target->getId() !== (int) $rewrite->getId()) {
                 $rewrite->setTargetPath($target->getRequestPath());
                 return;
             }

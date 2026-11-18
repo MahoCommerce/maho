@@ -141,42 +141,6 @@ class Maho_Giftcard_Model_Observer
     }
 
     /**
-     * Save gift card product attributes
-     *
-     * @return void
-     */
-    #[Maho\Config\Observer('catalog_product_save_before', id: 'giftcard_product_save')]
-    public function catalogProductSaveBefore(Maho\Event\Observer $observer)
-    {
-        /** @var Mage_Catalog_Model_Product $product */
-        $product = $observer->getEvent()->getProduct();
-
-        // Only process gift card products
-        if ($product->getTypeId() !== 'giftcard') {
-            return;
-        }
-
-        // Get the product data from request
-        $data = $product->getData();
-
-        // Save gift card specific attributes
-        $attributes = [
-            'giftcard_type',
-            'giftcard_amounts',
-            'giftcard_min_amount',
-            'giftcard_max_amount',
-            'giftcard_allow_message',
-            'giftcard_lifetime',
-        ];
-
-        foreach ($attributes as $attribute) {
-            if (isset($data[$attribute])) {
-                $product->setData($attribute, $data[$attribute]);
-            }
-        }
-    }
-
-    /**
      * Set custom price on quote item for gift cards
      *
      * @return void

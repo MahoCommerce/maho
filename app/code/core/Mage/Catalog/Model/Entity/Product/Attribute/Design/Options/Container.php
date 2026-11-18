@@ -8,10 +8,12 @@
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 class Mage_Catalog_Model_Entity_Product_Attribute_Design_Options_Container extends Mage_Eav_Model_Entity_Attribute_Source_Config
 {
     #[\Override]
-    protected $_configNodePath;
+    protected ?string $_configNodePath = null;
 
     public function __construct()
     {

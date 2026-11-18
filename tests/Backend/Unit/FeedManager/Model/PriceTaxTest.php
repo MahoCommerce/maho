@@ -67,47 +67,23 @@ function taxProduct(float $price = 20.00, ?int $taxClassId = 2): Mage_Catalog_Mo
 }
 
 describe('Feed tax mode', function () {
-    it('adds tax when the store stores prices without tax and the feed asks for tax', function () {
-        Mage::app()->getStore(1)->setConfig('tax/calculation/price_includes_tax', 0);
-
-        $adjuster = new Maho_FeedManager_Model_Price_TaxAdjuster(taxFeed('incl'));
-
-        expect($adjuster->adjust(taxProduct(), 20.00))->toBe(24.40);
-    });
-
-    it('adds tax to the price rounded to cents, as the cart does', function () {
-        Mage::app()->getStore(1)->setConfig('tax/calculation/price_includes_tax', 0);
-
-        $adjuster = new Maho_FeedManager_Model_Price_TaxAdjuster(taxFeed('incl'));
-
-        expect($adjuster->adjust(taxProduct(), 11.4754))->toBe(14.01);
-    });
-
-    it('leaves the price alone when the feed asks for the mode the store already stores', function () {
-        Mage::app()->getStore(1)->setConfig('tax/calculation/price_includes_tax', 0);
-
-        $adjuster = new Maho_FeedManager_Model_Price_TaxAdjuster(taxFeed('excl'));
-
-        expect($adjuster->adjust(taxProduct(), 20.00))->toBe(20.00);
-    });
-
-    it('removes tax when the store stores prices with tax and the feed asks for none', function () {
+    it('adjusts the price to the tax mode of the feed', function (int $priceIncludesTax, ?int $crossBorderTrade, string $taxMode, float $price, float $expected) {
         $store = Mage::app()->getStore(1);
-        $store->setConfig('tax/calculation/price_includes_tax', 1);
-        $store->setConfig('tax/calculation/cross_border_trade_enabled', 1);
+        $store->setConfig('tax/calculation/price_includes_tax', $priceIncludesTax);
+        if ($crossBorderTrade !== null) {
+            $store->setConfig('tax/calculation/cross_border_trade_enabled', $crossBorderTrade);
+        }
 
-        $adjuster = new Maho_FeedManager_Model_Price_TaxAdjuster(taxFeed('excl'));
+        $adjuster = new Maho_FeedManager_Model_Price_TaxAdjuster(taxFeed($taxMode));
 
-        expect($adjuster->adjust(taxProduct(), 24.40))->toBe(20.00);
-    });
-
-    it('keeps a tax inclusive price when the feed asks for tax', function () {
-        Mage::app()->getStore(1)->setConfig('tax/calculation/price_includes_tax', 1);
-
-        $adjuster = new Maho_FeedManager_Model_Price_TaxAdjuster(taxFeed('incl'));
-
-        expect($adjuster->adjust(taxProduct(), 24.40))->toBe(24.40);
-    });
+        expect($adjuster->adjust(taxProduct(), $price))->toBe($expected);
+    })->with([
+        'adds tax when the store stores prices without tax and the feed asks for tax' => [0, null, 'incl', 20.00, 24.40],
+        'adds tax to the price rounded to cents, as the cart does' => [0, null, 'incl', 11.4754, 14.01],
+        'leaves the price alone when the feed asks for the mode the store already stores' => [0, null, 'excl', 20.00, 20.00],
+        'removes tax when the store stores prices with tax and the feed asks for none' => [1, 1, 'excl', 24.40, 20.00],
+        'keeps a tax inclusive price when the feed asks for tax' => [1, null, 'incl', 24.40, 24.40],
+    ]);
 
     it('treats a missing tax mode as "include tax"', function () {
         Mage::app()->getStore(1)->setConfig('tax/calculation/price_includes_tax', 0);

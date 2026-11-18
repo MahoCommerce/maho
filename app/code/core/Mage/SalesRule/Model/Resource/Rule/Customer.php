@@ -11,7 +11,7 @@
 class Mage_SalesRule_Model_Resource_Rule_Customer extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('salesrule/rule_customer', 'rule_customer_id');
     }

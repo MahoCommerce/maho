@@ -2888,6 +2888,13 @@ class Sqlite extends AbstractPdoAdapter
                     $value = $this->formatDate($value, false);
                 }
                 break;
+            case 'datetime':
+                if ($column['NULLABLE'] && ($value === false || $value === '' || $value === null)) {
+                    $value = null;
+                } else {
+                    $value = $this->formatDate($value, true);
+                }
+                break;
             case 'timestamp':
             case 'text':
                 if ($column['NULLABLE'] && ($value === false || $value === '' || $value === null)) {

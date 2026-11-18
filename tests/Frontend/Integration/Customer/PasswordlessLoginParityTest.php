@@ -257,7 +257,12 @@ describe('account confirmation', function () {
         $webState = [$session->isLoggedIn(), $session->getTwofaPendingCustomerId()];
         $again = passwordlessParityWeb('GET', 'confirm', ['id' => $customer->getId(), 'key' => 'web-key']);
         $isLoggedInAfterSecondLink = $session->isLoggedIn();
-        $code = passwordlessParityWeb('POST', 'twofaChallengePost', ['twofa_verification_code' => \OTPHP\TOTP::createFromSecret($secret)->now()]);
+        $totp = \OTPHP\TOTP::createFromSecret($secret);
+        // The code must stay valid until the request checks it, so it must not come from the end of a period
+        if ($totp->expiresIn() < 5) {
+            sleep($totp->expiresIn() + 1);
+        }
+        $code = passwordlessParityWeb('POST', 'twofaChallengePost', ['twofa_verification_code' => $totp->now()]);
 
         expect($web['errors'])->toBe([])
             ->and($webState)->toBe([false, (int) $customer->getId()])

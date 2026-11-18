@@ -65,7 +65,7 @@ class Mage_SalesRule_Model_Resource_Coupon_Collection extends Mage_Core_Model_Re
      * @param Mage_Core_Model_Resource_Db_Collection_Abstract $collection
      * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
      */
-    public function addIsUsedFilterCallback($collection, $column)
+    public function addIsUsedFilterCallback($collection, $column): void
     {
         $filterValue = $column->getFilter()->getCondition();
 

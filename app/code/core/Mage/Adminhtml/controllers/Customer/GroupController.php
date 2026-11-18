@@ -16,7 +16,7 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
      */
     public const ADMIN_RESOURCE = 'customer/group';
 
-    protected function _initGroup()
+    protected function _initGroup(): void
     {
         $this->_title($this->__('Customers'))->_title($this->__('Customer Groups'));
 

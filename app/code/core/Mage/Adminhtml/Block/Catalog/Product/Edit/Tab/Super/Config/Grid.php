@@ -144,7 +144,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid extends Ma
         return $this;
     }
 
-    protected function _getSelectedProducts()
+    protected function _getSelectedProducts(): array
     {
         $products = $this->getRequest()->getPost('products');
         if (!is_array($products)) {
@@ -297,7 +297,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid extends Ma
         return implode(',', $attributesIds);
     }
 
-    public function getOptions($attribute)
+    public function getOptions(\Maho\DataObject $attribute): array
     {
         $result = [];
         foreach ($attribute->getProductAttribute()->getSource()->getAllOptions() as $option) {

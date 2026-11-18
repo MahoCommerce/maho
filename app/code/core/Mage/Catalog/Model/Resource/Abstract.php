@@ -67,7 +67,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
             && ($method == 'beforeSave' || $method == 'afterSave')
         ) {
             $attributeCode = $instance->getAttribute()->getAttributeCode();
-            if (isset($args[0]) && $args[0] instanceof \Maho\DataObject && $args[0]->getData($attributeCode) === false) {
+            if (isset($args[0]) && $args[0] instanceof \Maho\DataObject && $this->isUseDefaultValue($args[0], $attributeCode)) {
                 return false;
             }
         }
@@ -263,8 +263,18 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     protected function _markStoreValueOwn(\Maho\DataObject $object, Mage_Eav_Model_Entity_Attribute_Abstract $attribute, int $storeId): void
     {
         if ($object instanceof Mage_Catalog_Model_Abstract && $storeId != $this->getDefaultStoreId()) {
+            $this->_recordDefaultValue($object, $attribute->getAttributeCode());
             $object->setExistsStoreValueFlag($attribute->getAttributeCode());
         }
+    }
+
+    /**
+     * Record the default value of $code for useDefaultValue(), before a save changes the store value flag: the
+     * original data keeps the old store view value after the save.
+     */
+    protected function _recordDefaultValue(Mage_Catalog_Model_Abstract $object, string $code): void
+    {
+        $object->setAttributeDefaultValue($code, $object->getInheritedValue($code));
     }
 
     /**
@@ -294,15 +304,19 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
             $row = $this->_getReadAdapter()->fetchOne($select);
 
             if (!$row) {
+                $defaultValue = $this->_prepareValueForSave($value, $attribute);
                 $data  = new \Maho\DataObject([
                     'entity_type_id'    => $attribute->getEntityTypeId(),
                     'attribute_id'      => $attribute->getAttributeId(),
                     'store_id'          => $this->getDefaultStoreId(),
                     'entity_id'         => $object->getEntityId(),
-                    'value'             => $this->_prepareValueForSave($value, $attribute),
+                    'value'             => $defaultValue,
                 ]);
                 $bind  = $this->_prepareDataForTable($data, $table);
                 $this->_getWriteAdapter()->insertOnDuplicate($table, $bind, ['value']);
+                if ($object instanceof Mage_Catalog_Model_Abstract) {
+                    $object->setAttributeDefaultValue($attribute->getAttributeCode(), $defaultValue);
+                }
             }
         }
 
@@ -405,6 +419,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
                 continue;
             }
             if ($object instanceof Mage_Catalog_Model_Abstract) {
+                $this->_recordDefaultValue($object, $attribute->getAttributeCode());
                 $object->unsExistsStoreValueFlag($attribute->getAttributeCode());
             }
         }
@@ -450,6 +465,26 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     }
 
     /**
+     * Check if the store view of $object uses the default value of the attribute $code. Code that predates
+     * Mage_Catalog_Model_Abstract::useDefaultValue() sets the value to false for this.
+     */
+    protected function isUseDefaultValue(\Maho\DataObject $object, string $code): bool
+    {
+        return $object->getData($code) === false
+            || ($object instanceof Mage_Catalog_Model_Abstract && $object->usesDefaultValue($code));
+    }
+
+    /**
+     * The save deletes the store view value of an attribute on the default value. It keeps every other value, an
+     * empty one included.
+     */
+    #[\Override]
+    protected function _isAttributeValueDeleted(\Maho\DataObject $object, Mage_Eav_Model_Entity_Attribute_Abstract $attribute, mixed $value): bool
+    {
+        return $this->isUseDefaultValue($object, (string) $attribute->getAttributeCode());
+    }
+
+    /**
      * Retrieve Object instance with original data
      *
      * @param \Maho\DataObject $object
@@ -470,10 +505,8 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     /**
      * Validate attribute values, excusing store-scope attributes set to use the default value.
      *
-     * In catalog a `false` value is the "use default scope value" sentinel, and it is the only value
-     * treated as empty (see _isAttributeValueEmpty), so it is the only value a required attribute is
-     * ever flagged for. In a non-default store the default scope is assumed to hold a valid value
-     * (not verified here), so such an attribute is not a missing required value.
+     * In a store view, a required attribute on the default value is not missing: the default scope holds its
+     * value (not verified here).
      *
      * @param Mage_Catalog_Model_Abstract $object
      * @return array|true
@@ -487,24 +520,12 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
         }
 
         foreach (array_keys($result) as $code) {
-            if ($object->getData($code) === false) {
+            if ($this->isUseDefaultValue($object, (string) $code)) {
                 unset($result[$code]);
             }
         }
 
         return $result === [] ? true : $result;
-    }
-
-    /**
-     * Check is attribute value empty
-     *
-     * @param mixed $value
-     * @return bool
-     */
-    #[\Override]
-    protected function _isAttributeValueEmpty(Mage_Eav_Model_Entity_Attribute_Abstract $attribute, $value)
-    {
-        return $value === false;
     }
 
     /**
@@ -524,7 +545,6 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
         $result = parent::_canUpdateAttribute($attribute, $value, $origData);
         if ($result
             && ($attribute->isScopeStore() || $attribute->isScopeWebsite())
-            && !$this->_isAttributeValueEmpty($attribute, $value)
             && $value == $origData[$attribute->getAttributeCode()]
             && isset($origData['store_id']) && $origData['store_id'] != $this->getDefaultStoreId()
         ) {

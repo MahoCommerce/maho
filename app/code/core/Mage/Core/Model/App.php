@@ -699,7 +699,7 @@ class Mage_Core_Model_App
         return $this;
     }
 
-    public function reinitStores()
+    public function reinitStores(): void
     {
         $this->_initStores();
     }
@@ -707,7 +707,7 @@ class Mage_Core_Model_App
     /**
      * Init store, group and website collections
      */
-    protected function _initStores()
+    protected function _initStores(): void
     {
         $this->_stores   = [];
         $this->_groups   = [];
@@ -1310,7 +1310,7 @@ class Mage_Core_Model_App
     /**
      * Deletes all session files
      */
-    public function cleanAllSessions()
+    public function cleanAllSessions(): static
     {
         if (session_module_name() == 'files') {
             $dir = session_save_path();
@@ -1575,7 +1575,7 @@ class Mage_Core_Model_App
     /**
      * @param bool $value
      */
-    public function setUpdateMode($value)
+    public function setUpdateMode($value): void
     {
         $this->_updateMode = $value;
     }
@@ -1668,7 +1668,7 @@ class Mage_Core_Model_App
      *
      * @param null|bool|int|string|Mage_Core_Model_Website $id
      */
-    public function clearWebsiteCache($id = null)
+    public function clearWebsiteCache($id = null): void
     {
         if (is_null($id)) {
             $id = $this->getStore()->getWebsiteId();

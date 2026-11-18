@@ -17,15 +17,8 @@ class Mage_Eav_Model_Entity_Attribute_Source_Table extends Mage_Eav_Model_Entity
      */
     protected $_optionsDefault = [];
 
-    /**
-     * Retrieve Full Option values array
-     *
-     * @param bool $withEmpty       Add empty option to array
-     * @param bool $defaultValues
-     * @return array
-     */
     #[\Override]
-    public function getAllOptions($withEmpty = true, $defaultValues = false)
+    public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array
     {
         $storeId = $this->getAttribute()->getStoreId();
         $storeId ??= 0;

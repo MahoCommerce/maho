@@ -205,9 +205,6 @@ describe('Import/Export in the queue', function () {
             ->setFirstname('Qie')
             ->setLastname('Export')
             ->save();
-        $pattern = sys_get_temp_dir() . '/importexport_*';
-        $before = glob($pattern) ?: [];
-
         try {
             $export = Mage::getModel('importexport/export')->setData([
                 'entity' => 'customer',
@@ -217,13 +214,15 @@ describe('Import/Export in the queue', function () {
             $fileName = $export->exportToStorage();
             $content = $export->getStorage()->read($fileName);
             $export->getStorage()->delete($fileName);
-            $after = glob($pattern) ?: [];
+            // Other test workers export at the same time, so check only the file of this export
+            $tempFile = (fn() => $this->_getWriter()->getDestination())->call($export);
         } finally {
             $customer->delete();
         }
 
         expect($content)->toContain($customer->getEmail())
-            ->and(array_values(array_diff($after, $before)))->toBe([]);
+            ->and($tempFile)->toStartWith(realpath(sys_get_temp_dir()) . '/importexport_')
+            ->and(file_exists($tempFile))->toBeFalse();
     });
 
     test('a finished export writes the file to the mount and sends a link to it', function () {

@@ -110,7 +110,7 @@ class Mage_Adminhtml_Controller_Sales_Invoice extends Mage_Adminhtml_Controller_
         }
     }
 
-    public function pdfinvoicesAction()
+    public function pdfinvoicesAction(): void
     {
         $invoicesIds = $this->getRequest()->getPost('invoice_ids');
         if (!empty($invoicesIds)) {
@@ -120,8 +120,9 @@ class Mage_Adminhtml_Controller_Sales_Invoice extends Mage_Adminhtml_Controller_
                 ->load();
             $pdf = Mage::getModel('sales/order_pdf_invoice')->getPdf($invoices);
 
-            return $this->_prepareDownloadResponse('invoice' . Mage::app()->getLocale()->utcToStore()->format('Y-m-d_H-i-s')
+            $this->_prepareDownloadResponse('invoice' . Mage::app()->getLocale()->utcToStore()->format('Y-m-d_H-i-s')
                 . '.pdf', $pdf, 'application/pdf');
+            return;
         }
         $this->_redirect('*/*/');
     }

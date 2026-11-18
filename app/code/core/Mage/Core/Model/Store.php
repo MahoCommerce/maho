@@ -172,10 +172,8 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
 
     /**
      * Session entity
-     *
-     * @var Mage_Core_Model_Session_Abstract
      */
-    protected $_session;
+    protected ?Mage_Core_Model_Session $_session = null;
 
     /**
      * Flag that shows that backend URLs are secure
@@ -227,10 +225,8 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
 
     /**
      * Retrieve store session object
-     *
-     * @return Mage_Core_Model_Session
      */
-    protected function _getSession()
+    protected function _getSession(): Mage_Core_Model_Session
     {
         if (!$this->_session) {
             $this->_session = Mage::getModel('core/session');
@@ -360,7 +356,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Set website model
      */
-    public function setWebsite(Mage_Core_Model_Website $website)
+    public function setWebsite(Mage_Core_Model_Website $website): void
     {
         $this->_website = $website;
     }
@@ -982,7 +978,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      *
      * @param Mage_Core_Model_Store_Group $group
      */
-    public function setGroup($group)
+    public function setGroup($group): void
     {
         $this->_group = $group;
     }

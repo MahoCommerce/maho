@@ -32,9 +32,9 @@ class Form extends AbstractForm
      */
     protected $_elementsIndex;
 
-    protected static $_defaultElementRenderer;
-    protected static $_defaultFieldsetRenderer;
-    protected static $_defaultFieldsetElementRenderer;
+    protected static ?\Maho\Data\Form\Element\Renderer\RendererInterface $_defaultElementRenderer = null;
+    protected static ?\Maho\Data\Form\Element\Renderer\RendererInterface $_defaultFieldsetRenderer = null;
+    protected static ?\Maho\Data\Form\Element\Renderer\RendererInterface $_defaultFieldsetElementRenderer = null;
 
     public function __construct($attributes = [])
     {
@@ -112,6 +112,14 @@ class Form extends AbstractForm
     protected function _elementIdExists(?string $elementId): bool
     {
         return isset($this->_elementsIndex[(string) $elementId]);
+    }
+
+    /**
+     * Return every element of the form, the elements of the fieldsets included.
+     */
+    public function getAllElements(): ElementCollection
+    {
+        return $this->_allElements;
     }
 
     public function addElementToCollection(Form\Element\AbstractElement $element): self

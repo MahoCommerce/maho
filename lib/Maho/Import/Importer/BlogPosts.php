@@ -72,12 +72,6 @@ class BlogPosts extends AbstractCmsImporter
             $setCodes = null;
             foreach ($this->customAttributes() as $code => $attribute) {
                 if (($row[$code] ?? '') === '') {
-                    // A new post needs each required attribute of its set, unless the attribute has a default value
-                    if ($row['post_id'] === null && $attribute->getIsRequired() && (string) $attribute->getDefaultValue() === ''
-                        && in_array($code, $setCodes ??= $this->setAttributeCodes($row['attribute_set_id'] ?? $this->postSetId(null)), true)
-                    ) {
-                        $this->fail($file, $line, "$code is required for a new post");
-                    }
                     continue;
                 }
                 // The nightly eav_clean_orphaned_records cron deletes a value whose attribute is not in the set
@@ -86,6 +80,23 @@ class BlogPosts extends AbstractCmsImporter
                     $this->fail($file, $line, "$code is not in the attribute set of the post");
                 }
                 $row['custom'][$code] = $this->customValue($file, $line, $attribute, $row[$code]);
+            }
+            // A condition reads the option IDs of the file, and the status as the save writes it, 0 or 1
+            $post = new \Maho\DataObject(['is_active' => (int) $row['is_active']] + $row['custom']);
+            // The save gives an attribute that the file leaves out its default value, and a condition reads that value
+            foreach ($this->customAttributes() as $code => $attribute) {
+                if (!isset($row['custom'][$code])) {
+                    $attribute->getBackend()->beforeSave($post);
+                }
+            }
+            foreach ($this->customAttributes() as $code => $attribute) {
+                // A new post needs each required attribute of its set, unless the attribute has a default value
+                if ($row['post_id'] === null && !isset($row['custom'][$code]) && Mage::helper('eav')->isRequired($post, $attribute)
+                    && (string) $attribute->getDefaultValue() === ''
+                    && in_array($code, $setCodes ??= $this->setAttributeCodes($row['attribute_set_id'] ?? $this->postSetId(null)), true)
+                ) {
+                    $this->fail($file, $line, "$code is required for a new post");
+                }
             }
             $rows[$line] = $row;
         }

@@ -23,12 +23,12 @@ class Mage_Adminhtml_Model_Sales_Order_Random
      * @var Mage_Sales_Model_Order
      */
     protected $_order;
-    protected $_store;
-    protected $_customer;
-    protected $_productCollection;
+    protected ?Mage_Core_Model_Store $_store = null;
+    protected ?Mage_Customer_Model_Customer $_customer = null;
+    protected ?Mage_Catalog_Model_Resource_Product_Collection $_productCollection = null;
 
-    protected static $_storeCollection;
-    protected static $_customerCollection;
+    protected static ?Mage_Core_Model_Resource_Store_Collection $_storeCollection = null;
+    protected static ?Mage_Customer_Model_Resource_Customer_Collection $_customerCollection = null;
 
     public function __construct()
     {
@@ -36,7 +36,7 @@ class Mage_Adminhtml_Model_Sales_Order_Random
         $this->_order = Mage::getModel('sales/order');
     }
 
-    protected function _getStores()
+    protected function _getStores(): array
     {
         if (!self::$_storeCollection) {
             self::$_storeCollection = Mage::getResourceModel('core/store_collection')
@@ -45,7 +45,7 @@ class Mage_Adminhtml_Model_Sales_Order_Random
         return self::$_storeCollection->getItems();
     }
 
-    protected function _getCustomers()
+    protected function _getCustomers(): array
     {
         if (!self::$_customerCollection) {
             self::$_customerCollection = Mage::getResourceModel('customer/customer_collection')
@@ -56,7 +56,7 @@ class Mage_Adminhtml_Model_Sales_Order_Random
         return self::$_customerCollection->getItems();
     }
 
-    protected function _getProducts()
+    protected function _getProducts(): array
     {
         if (!$this->_productCollection) {
             $this->_productCollection = Mage::getResourceModel('catalog/product_collection');
@@ -88,14 +88,14 @@ class Mage_Adminhtml_Model_Sales_Order_Random
         return $this->_customer;
     }
 
-    protected function _getRandomProduct()
+    protected function _getRandomProduct(): Mage_Catalog_Model_Product|false
     {
         $items = $this->_getProducts();
         $randKey = array_rand($items);
         return $items[$randKey] ?? false;
     }
 
-    protected function _getStore()
+    protected function _getStore(): Mage_Core_Model_Store
     {
         if (!$this->_store) {
             $items = $this->_getStores();
@@ -105,7 +105,7 @@ class Mage_Adminhtml_Model_Sales_Order_Random
         return $this->_store;
     }
 
-    public function render()
+    public function render(): static
     {
         $customer = $this->_getCustomer();
         $this->_quote->setStore($this->_getStore())
@@ -131,13 +131,13 @@ class Mage_Adminhtml_Model_Sales_Order_Random
         return $this;
     }
 
-    protected function _getRandomDate()
+    protected function _getRandomDate(): string
     {
         $timestamp = mktime(random_int(0, 23), random_int(0, 59), 0, random_int(1, 11), random_int(1, 28), random_int(2006, 2007));
         return date(Mage_Core_Model_Locale::DATETIME_FORMAT, $timestamp);
     }
 
-    public function save()
+    public function save(): static
     {
         $this->_order->setStoreId($this->_getStore()->getId());
         $this->_order->createFromQuoteAddress($this->_quote->getShippingAddress());

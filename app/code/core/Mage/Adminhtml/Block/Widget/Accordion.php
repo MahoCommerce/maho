@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -9,19 +10,19 @@
 
 class Mage_Adminhtml_Block_Widget_Accordion extends Mage_Adminhtml_Block_Widget
 {
-    protected $_items = [];
+    protected array $_items = [];
     public function __construct()
     {
         parent::__construct();
         $this->setTemplate('widget/accordion.phtml');
     }
 
-    public function getItems()
+    public function getItems(): array
     {
         return $this->_items;
     }
 
-    public function addItem($itemId, $config)
+    public function addItem(string $itemId, array $config): static
     {
         $this->_items[$itemId] = $this->getLayout()->createBlock('adminhtml/widget_accordion_item')
             ->setData($config)

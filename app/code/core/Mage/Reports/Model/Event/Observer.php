@@ -10,7 +10,7 @@
 
 class Mage_Reports_Model_Event_Observer
 {
-    protected $_enabledReports = true;
+    protected bool $_enabledReports = true;
 
     /**
      * Object initialization

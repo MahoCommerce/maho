@@ -21,12 +21,6 @@ describe('API v2 Countries', function (): void {
 
     describe('public access (no auth)', function (): void {
 
-        it('allows listing countries without authentication', function (): void {
-            $response = apiGet('/api/rest/v2/countries');
-
-            expect($response['status'])->toBeSuccessful();
-        });
-
         it('returns countries collection', function (): void {
             $response = apiGet('/api/rest/v2/countries');
 
@@ -35,19 +29,9 @@ describe('API v2 Countries', function (): void {
         });
 
         it('allows getting single country without authentication', function (): void {
-            $list = apiGet('/api/rest/v2/countries');
-            $members = $list['json']['member'] ?? $list['json']['hydra:member'] ?? [];
+            $response = apiGet('/api/rest/v2/countries/AU');
 
-            if (!empty($members) && isset($members[0]['id'])) {
-                $countryId = $members[0]['id'];
-                $response = apiGet("/api/rest/v2/countries/{$countryId}");
-
-                expect($response['status'])->toBeSuccessful();
-            } else {
-                // Try common country code
-                $response = apiGet('/api/rest/v2/countries/AU');
-                expect($response['status'])->toBeIn([200, 404]);
-            }
+            expect($response['status'])->toBe(200);
         });
 
         it('returns 404 for non-existent country', function (): void {
@@ -58,30 +42,15 @@ describe('API v2 Countries', function (): void {
 
     });
 
-    describe('with authentication', function (): void {
-
-        it('allows listing countries with valid token', function (): void {
-            $response = apiGet('/api/rest/v2/countries', customerToken());
-
-            expect($response['status'])->toBeSuccessful();
-        });
-
-    });
-
     describe('response format', function (): void {
 
         it('includes expected country fields', function (): void {
             $response = apiGet('/api/rest/v2/countries');
-            $countries = $response['json']['member'] ?? $response['json']['hydra:member'] ?? $response['json'] ?? [];
+            $countries = $response['json']['member'] ?? $response['json']['hydra:member'] ?? [];
 
-            if (!empty($countries) && isset($countries[0])) {
-                $country = $countries[0];
-
-                expect($country)->toHaveKey('id');
-                expect($country)->toHaveKey('name');
-            } else {
-                $this->markTestSkipped('No countries in response to verify fields');
-            }
+            expect($countries)->not->toBeEmpty();
+            expect($countries[0])->toHaveKey('id');
+            expect($countries[0])->toHaveKey('name');
         });
 
     });

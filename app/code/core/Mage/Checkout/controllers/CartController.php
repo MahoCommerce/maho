@@ -463,7 +463,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Update customer's shopping cart
      */
-    protected function _updateShoppingCart()
+    protected function _updateShoppingCart(): void
     {
         try {
             $cartData = $this->getRequest()->getParam('cart');
@@ -493,7 +493,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Empty customer's shopping cart
      */
-    protected function _emptyShoppingCart()
+    protected function _emptyShoppingCart(): void
     {
         try {
             $this->_getCart()->truncate()->save();

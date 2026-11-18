@@ -25,4 +25,6 @@ interface ContainerInterface
     public function addException(string $error, string|int|null $level = null): Exception;
 
     public function setVars(array $vars): self;
+
+    public function setVar(array|string $key, mixed $value = null): static;
 }

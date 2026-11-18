@@ -36,7 +36,7 @@ return function (SchemaEditor $schema): void {
         Table::editor()
             ->setUnquotedName('report_event')
             ->addColumn(Schema::column('event_id', Types::BIGINT, unsigned: true, autoincrement: true))
-            ->addColumn(Schema::column('logged_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('logged_at', Types::DATETIME_IMMUTABLE, notNull: false))
             ->addColumn(Schema::column('event_type_id', Types::SMALLINT, unsigned: true, default: 0))
             ->addColumn(Schema::column('object_id', Types::INTEGER, unsigned: true, default: 0))
             ->addColumn(Schema::column('subject_id', Types::INTEGER, unsigned: true, default: 0))
@@ -78,7 +78,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, notNull: false))
             ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true))
             ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
-            ->addColumn(Schema::column('added_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('added_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('index_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('visitor_id', 'product_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('customer_id', 'product_id'))
@@ -124,7 +124,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, notNull: false))
             ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true))
             ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
-            ->addColumn(Schema::column('added_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('added_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('index_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('visitor_id', 'product_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('customer_id', 'product_id'))
@@ -173,7 +173,7 @@ return function (SchemaEditor $schema): void {
             Table::editor()
                 ->setUnquotedName($tableName)
                 ->addColumn(Schema::column('id', Types::INTEGER, unsigned: true, autoincrement: true))
-                ->addColumn(Schema::column('period', Types::DATE_MUTABLE, notNull: false))
+                ->addColumn(Schema::column('period', Types::DATE_IMMUTABLE, notNull: false))
                 ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
                 ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, notNull: false))
                 ->addColumn(Schema::column('product_name', Types::STRING, length: 255, notNull: false))
@@ -211,4 +211,32 @@ return function (SchemaEditor $schema): void {
                 ->create(),
         );
     }
+
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('report_not_found')
+            ->addColumn(Schema::column('not_found_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('request_path', Types::STRING, length: 255))
+            ->addColumn(Schema::column('hits', Types::INTEGER, unsigned: true, default: 1))
+            ->addColumn(Schema::column('referer', Types::TEXT, notNull: false))
+            ->addColumn(Schema::column('first_seen_at', Types::DATETIME_IMMUTABLE))
+            ->addColumn(Schema::column('last_seen_at', Types::DATETIME_IMMUTABLE))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('not_found_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('request_path', 'store_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('last_seen_at'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('hits'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Storefront Paths That Answered 404')
+            ->create(),
+    );
 };

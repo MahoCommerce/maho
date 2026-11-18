@@ -18,13 +18,13 @@ class Mage_Catalog_Block_Product_List_Upsell extends Mage_Catalog_Block_Product_
     #[\Override]
     protected $_mapRenderer = 'msrp_noform';
 
-    protected $_columnCount = 4;
+    protected int $_columnCount = 4;
 
-    protected $_items;
+    protected ?array $_items = null;
 
-    protected $_itemCollection;
+    protected ?Mage_Catalog_Model_Resource_Product_Link_Product_Collection $_itemCollection = null;
 
-    protected $_itemLimits = [];
+    protected array $_itemLimits = [];
 
     /**
      * @return $this
@@ -126,7 +126,7 @@ class Mage_Catalog_Block_Product_List_Upsell extends Mage_Catalog_Block_Product_
         return $this->_columnCount;
     }
 
-    public function resetItemsIterator()
+    public function resetItemsIterator(): void
     {
         $this->getItems();
         reset($this->_items);

@@ -26,7 +26,7 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock extends Mage_Catalog_Mo
     protected $_defaultIndexer   = 'cataloginventory/indexer_stock_default';
 
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('cataloginventory/stock_status', 'product_id');
     }

@@ -17,10 +17,10 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
      */
     protected $_store;
 
-    protected $_filter = [];
-    protected $_joinFilter = [];
+    protected array $_filter = [];
+    protected array $_joinFilter = [];
     protected $_joinAttr = [];
-    protected $_attrToDb;
+    protected ?array $_attrToDb = null;
     protected $_joinField = [];
 
     /**
@@ -197,7 +197,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
      * @param array $joinAttr
      * @throws Exception
      */
-    public function setJoinAttr($joinAttr)
+    public function setJoinAttr($joinAttr): void
     {
         if (is_array($joinAttr)) {
             $joinArrAttr = [];
@@ -229,7 +229,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
      *         ]
      *     NOTE: Optional key must be have NULL at least
      */
-    public function setJoinField($joinField)
+    public function setJoinField($joinField): void
     {
         if (is_array($joinField)) {
             $this->_joinField[] = $joinField;
@@ -237,11 +237,10 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
     }
 
     /**
-     * @return $this
      * @throws \Maho\Convert\Exception
      */
     #[\Override]
-    public function load()
+    public function load(): static
     {
         if (!($entityType = $this->getVar('entity_type'))
             || !(Mage::getResourceSingleton($entityType) instanceof Mage_Eav_Model_Entity_Interface)
@@ -319,11 +318,10 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
     }
 
     /**
-     * @return $this
      * @throws \Maho\Convert\Exception
      */
     #[\Override]
-    public function save()
+    public function save(): static
     {
         $collection = $this->getData();
         if ($collection instanceof Mage_Eav_Model_Entity_Collection_Abstract) {

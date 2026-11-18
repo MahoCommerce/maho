@@ -766,7 +766,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      *
      * @param string $groupName
      */
-    public function addToChildGroup($groupName, Mage_Core_Block_Abstract $child)
+    public function addToChildGroup($groupName, Mage_Core_Block_Abstract $child): void
     {
         $this->_childGroups[$groupName] ??= [];
         if (!in_array($child->getBlockAlias(), $this->_childGroups[$groupName])) {
@@ -1283,7 +1283,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      *
      * @see Mage_Core_Helper_Data::jsonEncode()
      */
-    public function jsonEncode($valueToEncode): string
+    public function jsonEncode(mixed $valueToEncode): string
     {
         return Mage::helper('core')->jsonEncode($valueToEncode);
     }

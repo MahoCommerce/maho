@@ -12,7 +12,7 @@ class Mage_Reports_Model_Resource_Quote_Collection extends Mage_Sales_Model_Reso
 {
     public const SELECT_COUNT_SQL_TYPE_CART = 1;
 
-    protected $_selectCountSqlType = 0;
+    protected int $_selectCountSqlType = 0;
 
     /**
      * Join fields

@@ -94,10 +94,24 @@ it('reconciles a numeric default spelled differently when the types match', func
 
 it('reconciles a CURRENT_TIMESTAMP string default against the expression object', function () {
     $live = canonTable('t')
-        ->addColumn(canonColumn('created_at', Types::DATETIME_MUTABLE)->setDefaultValue('CURRENT_TIMESTAMP')->create())
+        ->addColumn(canonColumn('created_at', Types::DATETIME_IMMUTABLE)->setDefaultValue('CURRENT_TIMESTAMP')->create())
         ->create();
     $target = canonTable('t')
-        ->addColumn(canonColumn('created_at', Types::DATETIME_MUTABLE)->setDefaultValue(new CurrentTimestamp())->create())
+        ->addColumn(canonColumn('created_at', Types::DATETIME_IMMUTABLE)->setDefaultValue(new CurrentTimestamp())->create())
+        ->create();
+
+    [$live] = Canonicalizer::reconcile($live, $target, []);
+
+    expect($live->getColumn('created_at')->getDefault())->toBeInstanceOf(CurrentTimestamp::class);
+});
+
+it('reconciles a CURRENT_TIMESTAMP default when the target declares the mutable datetime type', function () {
+    // DBAL introspects the live column as datetime_immutable. The literal 'datetime' avoids the deprecated constant.
+    $live = canonTable('t')
+        ->addColumn(canonColumn('created_at', Types::DATETIME_IMMUTABLE)->setDefaultValue('CURRENT_TIMESTAMP')->create())
+        ->create();
+    $target = canonTable('t')
+        ->addColumn(canonColumn('created_at', 'datetime')->setDefaultValue(new CurrentTimestamp())->create())
         ->create();
 
     [$live] = Canonicalizer::reconcile($live, $target, []);

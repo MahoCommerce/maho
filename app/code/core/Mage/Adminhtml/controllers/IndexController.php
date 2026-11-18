@@ -16,7 +16,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
      * @param string $tplName
      * @param array $data parameters required by template
      */
-    protected function _outTemplate($tplName, $data = [])
+    protected function _outTemplate($tplName, $data = []): void
     {
         $this->_initLayoutMessages('adminhtml/session');
         $block = $this->getLayout()->createBlock('adminhtml/template')->setTemplate("$tplName.phtml");
@@ -181,7 +181,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Retrieve response for deniedJsonAction()
      */
-    protected function _getDeniedJson()
+    protected function _getDeniedJson(): string
     {
         return Mage::helper('core')->jsonEncode([
             'ajaxExpired' => 1,
@@ -201,7 +201,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Retrieve response for deniedIframeAction()
      */
-    protected function _getDeniedIframe()
+    protected function _getDeniedIframe(): string
     {
         return '<script>parent.window.location = \''
             . $this->getUrl('*/index/login') . '\';</script>';
@@ -376,7 +376,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
      * @param string $resetPasswordLinkToken
      * @throws Mage_Core_Exception
      */
-    protected function _validateResetPasswordLinkToken($userId, $resetPasswordLinkToken)
+    protected function _validateResetPasswordLinkToken($userId, $resetPasswordLinkToken): void
     {
         $limiter = Mage::helper('core')->rateLimiter(
             'admin_reset_token',

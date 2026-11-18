@@ -341,10 +341,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
         return $this->getConfigData('sort_order');
     }
 
-    /**
-     * @param Mage_Shipping_Model_Rate_Request $request
-     */
-    protected function _updateFreeMethodQuote($request)
+    protected function _updateFreeMethodQuote(Mage_Shipping_Model_Rate_Request $request): void
     {
         if ($request->getFreeMethodWeight() == $request->getPackageWeight() || !$request->hasFreeMethodWeight()) {
             return;
@@ -542,10 +539,8 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
 
     /**
      * Log debug data to file
-     *
-     * @param mixed $debugData
      */
-    protected function _debug($debugData)
+    protected function _debug(mixed $debugData): void
     {
         if ($this->getDebugFlag()) {
             Mage::getModel('core/log_adapter', 'shipping_' . $this->getCarrierCode() . '.log')
@@ -569,7 +564,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
      *
      * @param mixed $debugData
      */
-    public function debugData($debugData)
+    public function debugData($debugData): void
     {
         $this->_debug($debugData);
     }

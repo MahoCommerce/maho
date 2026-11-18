@@ -24,11 +24,8 @@ class Mage_Sales_Model_Resource_Order_Status extends Mage_Core_Model_Resource_Db
      */
     protected $_stateTable;
 
-    /**
-     * Internal constructor
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('sales/order_status', 'status');
         $this->_isPkAutoIncrement = false;

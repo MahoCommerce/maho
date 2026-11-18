@@ -50,7 +50,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
      */
     public const HISTORY_ENTITY_NAME = 'invoice';
 
-    protected static $_states;
+    protected static ?array $_states = null;
 
     /**
      * @var Mage_Sales_Model_Resource_Order_Invoice_Item_Collection|Mage_Sales_Model_Order_Invoice_Item[]|null
@@ -74,7 +74,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
      */
     protected $_rounders = [];
 
-    protected $_saveBeforeDestruct = false;
+    protected bool $_saveBeforeDestruct = false;
 
     #[\Override]
     protected $_eventPrefix = 'sales_order_invoice';
@@ -90,7 +90,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
     /**
      * Uploader clean on shutdown
      */
-    public function destruct()
+    public function destruct(): void
     {
         if ($this->_saveBeforeDestruct) {
             $this->save();

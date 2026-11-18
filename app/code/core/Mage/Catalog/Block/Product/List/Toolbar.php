@@ -173,7 +173,7 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
     /**
      * Disable list state params memorizing
      */
-    public function disableParamsMemorizing()
+    public function disableParamsMemorizing(): static
     {
         $this->_paramsMemorizeAllowed = false;
         return $this;

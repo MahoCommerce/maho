@@ -372,7 +372,7 @@ abstract class Mage_Core_Controller_Varien_Action
     /**
      * @param string $action
      */
-    public function dispatch($action)
+    public function dispatch($action): void
     {
         try {
             $actionMethodName = $this->getActionMethodName($action);
@@ -875,7 +875,7 @@ abstract class Mage_Core_Controller_Varien_Action
      * @see self::loadLayout()
      * @see self::renderLayout()
      */
-    protected function _renderTitles()
+    protected function _renderTitles(): void
     {
         if ($this->_isLayoutLoaded && $this->_titles) {
             $titleBlock = $this->getLayout()->getBlock('head');

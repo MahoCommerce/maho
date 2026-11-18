@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_SalesRule_Model_Resource_Rule_Product extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('salesrule/rule_product', 'product_rule_id');
     }

@@ -495,10 +495,8 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
 
     /**
      * Set free method request
-     *
-     * @param  $freeMethod
      */
-    protected function _setFreeMethodRequest($freeMethod)
+    protected function _setFreeMethodRequest(string $freeMethod): void
     {
         $r = $this->_rawRequest;
         $weight = $this->getTotalNumOfBoxes($r->getFreeMethodWeight());

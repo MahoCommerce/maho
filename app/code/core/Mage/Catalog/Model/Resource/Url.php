@@ -45,11 +45,8 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      */
     protected $_rootChildrenIds             = [];
 
-    /**
-     * Load core Url rewrite model
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('core/url_rewrite', 'url_rewrite_id');
     }
@@ -1369,7 +1366,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      * @param string $requestPath
      * @param int $storeId
      */
-    public function deleteRewrite($requestPath, $storeId)
+    public function deleteRewrite($requestPath, $storeId): void
     {
         $this->deleteRewriteRecord($requestPath, $storeId);
     }
@@ -1408,7 +1405,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      * @param int $storeId
      * @param bool $rp whether check rewrite option to be "Redirect = Permanent"
      */
-    public function deleteRewriteRecord($requestPath, $storeId, $rp = false)
+    public function deleteRewriteRecord($requestPath, $storeId, $rp = false): void
     {
         $conditions =  [
             'store_id = ?' => $storeId,

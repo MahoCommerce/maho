@@ -16,17 +16,17 @@ class Mage_Adminhtml_Block_Page_Header extends Mage_Adminhtml_Block_Template
         $this->setTemplate('page/header.phtml');
     }
 
-    public function getHomeLink()
+    public function getHomeLink(): string
     {
         return $this->getUrl('adminhtml');
     }
 
-    public function getUser()
+    public function getUser(): ?Mage_Admin_Model_User
     {
         return Mage::getSingleton('admin/session')->getUser();
     }
 
-    public function getLogoutLink()
+    public function getLogoutLink(): string
     {
         return $this->getUrl('adminhtml/index/logout');
     }

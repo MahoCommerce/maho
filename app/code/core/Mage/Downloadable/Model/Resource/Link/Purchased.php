@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_Downloadable_Model_Resource_Link_Purchased extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('downloadable/link_purchased', 'purchased_id');
     }

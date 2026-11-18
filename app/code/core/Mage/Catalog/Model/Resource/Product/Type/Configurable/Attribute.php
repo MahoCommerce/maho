@@ -24,11 +24,8 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute extends Ma
      */
     protected $_priceTable;
 
-    /**
-     * Inititalize connection and define tables
-     */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalog/product_super_attribute', 'product_super_attribute_id');
         $this->_labelTable = $this->getTable('catalog/product_super_attribute_label');

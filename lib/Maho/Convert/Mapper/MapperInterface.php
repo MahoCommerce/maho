@@ -13,5 +13,5 @@ namespace Maho\Convert\Mapper;
 
 interface MapperInterface
 {
-    public function map();
+    public function map(): static;
 }

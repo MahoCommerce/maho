@@ -72,13 +72,13 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
      * Preview Newsletter queue template
      */
     #[Maho\Config\Route('/admin/newsletter_queue/preview')]
-    public function previewAction()
+    public function previewAction(): void
     {
         $this->loadLayout();
         $data = $this->getRequest()->getParams();
         if (empty($data) || !isset($data['id'])) {
             $this->_forward('noRoute');
-            return $this;
+            return;
         }
 
         // set default value for selected store

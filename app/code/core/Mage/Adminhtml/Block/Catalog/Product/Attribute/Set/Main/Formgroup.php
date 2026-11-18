@@ -57,7 +57,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main_Formgroup extends 
         return $this;
     }
 
-    protected function _getSetId()
+    protected function _getSetId(): ?int
     {
         return ((int) $this->getRequest()->getParam('id') > 0)
                     ? (int) $this->getRequest()->getParam('id')

@@ -29,7 +29,7 @@ class Mage_Eav_Model_Config
         'is_unique',
     ];
 
-    protected $_storeInitialized = [];
+    protected array $_storeInitialized = [];
 
     /**
      * @var Mage_Eav_Model_Entity_Type[]|null
@@ -117,7 +117,7 @@ class Mage_Eav_Model_Config
     /**
      * @throws Mage_Core_Model_Store_Exception
      */
-    protected function _storeId()
+    protected function _storeId(): ?int
     {
         if (isset($this->_currentStoreId) && $this->_currentStoreId !== false) {
             return $this->_currentStoreId;
@@ -128,7 +128,7 @@ class Mage_Eav_Model_Config
     /**
      * @throws Exception
      */
-    protected function _initializeStore($storeId = null)
+    protected function _initializeStore(?int $storeId = null): void
     {
         if ($storeId === null) {
             $storeId = $this->_storeId();
@@ -304,7 +304,7 @@ class Mage_Eav_Model_Config
         return true;
     }
 
-    protected function _saveToCache($storeId)
+    protected function _saveToCache(?int $storeId): void
     {
         $cacheData = [
             '_entityTypes' => [],

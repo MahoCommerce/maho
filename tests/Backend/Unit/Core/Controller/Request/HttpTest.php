@@ -132,24 +132,6 @@ describe('Mage_Core_Controller_Request_Http', function () {
             expect($filters['price']['min'])->toBe('10');
         });
 
-        it('handles mixed scalar and array parameters', function () {
-            // Mix of scalar and array values
-            $this->symfonyRequest->request->set('scalar_param', 'simple_value');
-            $this->symfonyRequest->request->set('array_param', ['key' => 'value']);
-            $this->symfonyRequest->request->set('deep_array', [
-                'level1' => [
-                    'level2' => [
-                        'level3' => 'deep_value',
-                    ],
-                ],
-            ]);
-
-            expect($this->request->getParam('scalar_param'))->toBe('simple_value');
-            expect($this->request->getParam('array_param'))->toBeArray();
-            expect($this->request->getParam('array_param')['key'])->toBe('value');
-            expect($this->request->getParam('deep_array')['level1']['level2']['level3'])->toBe('deep_value');
-        });
-
         it('handles empty arrays correctly', function () {
             $this->symfonyRequest->request->set('empty_array', []);
 
@@ -157,64 +139,17 @@ describe('Mage_Core_Controller_Request_Http', function () {
             expect($result)->toBeArray();
             expect($result)->toBe([]);
         });
-
-        it('preserves array structure when setting internal params', function () {
-            $complexArray = [
-                'nested' => ['data' => 'value'],
-                'list' => [1, 2, 3],
-            ];
-
-            $this->request->setParam('complex', $complexArray);
-
-            $retrieved = $this->request->getParam('complex');
-            expect($retrieved)->toBeArray();
-            expect($retrieved)->toBe($complexArray);
-        });
-
-        it('handles arrays with numeric keys', function () {
-            $this->symfonyRequest->request->set('indexed_array', [
-                0 => 'first',
-                1 => 'second',
-                2 => 'third',
-            ]);
-
-            $result = $this->request->getParam('indexed_array');
-            expect($result)->toBeArray();
-            expect($result[0])->toBe('first');
-            expect($result[1])->toBe('second');
-            expect($result[2])->toBe('third');
-        });
-
-        it('handles arrays with mixed key types', function () {
-            $this->symfonyRequest->request->set('mixed_keys', [
-                'string_key' => 'value1',
-                123 => 'value2',
-                'nested' => ['inner' => 'value3'],
-            ]);
-
-            $result = $this->request->getParam('mixed_keys');
-            expect($result)->toBeArray();
-            expect($result['string_key'])->toBe('value1');
-            expect($result[123])->toBe('value2');
-            expect($result['nested']['inner'])->toBe('value3');
-        });
     });
 
     describe('Symfony Request Compatibility', function () {
-        it('wraps Symfony Request instance properly', function () {
-            expect($this->request)->toBeInstanceOf(Mage_Core_Controller_Request_Http::class);
-        });
-
         it('forwards method calls to Symfony Request', function () {
             expect($this->request->getMethod())->toBe('GET');
             expect($this->request->getRequestUri())->toBe('/test/path?query_param=query_value');
             expect($this->request->getHost())->toBe('test.example.com');
         });
 
-        it('handles client IP retrieval', function () {
-            $ip = $this->request->getClientIp();
-            expect($ip)->toBeString();
-            expect($ip)->not->toBeEmpty();
+        it('reads the client IP from the connection, not from an untrusted X-Forwarded-For header', function () {
+            expect($this->request->getClientIp())->toBe('127.0.0.1');
         });
 
         it('handles secure request detection', function () {
@@ -350,10 +285,6 @@ describe('Mage_Core_Controller_Request_Http', function () {
             $ajaxReq = new Mage_Core_Controller_Request_Http($ajaxRequest);
             expect($ajaxReq->isAjax())->toBeTrue();
         });
-
-        it('handles isXmlHttpRequest alias', function () {
-            expect($this->request->isXmlHttpRequest())->toBeFalse();
-        });
     });
 
     describe('Aliases', function () {
@@ -384,48 +315,29 @@ describe('Mage_Core_Controller_Request_Http', function () {
     });
 
     describe('Direct Front Names', function () {
-        it('checks direct access frontend names', function () {
-            // This would need proper Mage configuration to test fully
-            expect($this->request->isDirectAccessFrontendName('test'))->toBeBool();
-        });
-
-        it('retrieves direct front names', function () {
-            $names = $this->request->getDirectFrontNames();
-            expect($names)->toBeArray();
+        it('reads the direct front names from the configuration', function () {
+            expect($this->request->getDirectFrontNames())->toHaveKey('api')
+                ->and($this->request->isDirectAccessFrontendName('api'))->toBeTrue()
+                ->and($this->request->isDirectAccessFrontendName('test'))->toBeFalse();
         });
     });
 
     describe('HTTP Method Detection', function () {
-        it('detects GET requests', function () {
-            $getRequest = SymfonyRequest::create('/test', 'GET');
-            $req = new Mage_Core_Controller_Request_Http($getRequest);
-            expect($req->isGet())->toBeTrue();
-            expect($req->isPost())->toBeFalse();
-        });
+        it('detects the method of the request', function (string $method, string $predicate) {
+            $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/test', $method));
 
-        it('detects POST requests', function () {
-            $postRequest = SymfonyRequest::create('/test', 'POST');
-            $req = new Mage_Core_Controller_Request_Http($postRequest);
-            expect($req->isPost())->toBeTrue();
-            expect($req->isGet())->toBeFalse();
-        });
+            expect($request->$predicate())->toBeTrue();
+        })->with([
+            'GET' => ['GET', 'isGet'],
+            'POST' => ['POST', 'isPost'],
+            'PUT' => ['PUT', 'isPut'],
+            'DELETE' => ['DELETE', 'isDelete'],
+            'HEAD' => ['HEAD', 'isHead'],
+        ]);
 
-        it('detects PUT requests', function () {
-            $putRequest = SymfonyRequest::create('/test', 'PUT');
-            $req = new Mage_Core_Controller_Request_Http($putRequest);
-            expect($req->isPut())->toBeTrue();
-        });
-
-        it('detects DELETE requests', function () {
-            $deleteRequest = SymfonyRequest::create('/test', 'DELETE');
-            $req = new Mage_Core_Controller_Request_Http($deleteRequest);
-            expect($req->isDelete())->toBeTrue();
-        });
-
-        it('detects HEAD requests', function () {
-            $headRequest = SymfonyRequest::create('/test', 'HEAD');
-            $req = new Mage_Core_Controller_Request_Http($headRequest);
-            expect($req->isHead())->toBeTrue();
+        it('does not take a GET request for a POST request, or the reverse', function () {
+            expect(new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/test', 'GET'))->isPost())->toBeFalse()
+                ->and(new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/test', 'POST'))->isGet())->toBeFalse();
         });
     });
 

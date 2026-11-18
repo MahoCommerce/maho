@@ -30,15 +30,15 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('url_key', Types::STRING, length: 255))
             ->addColumn(Schema::column('title', Types::STRING, length: 255))
             ->addColumn(Schema::column('is_active', Types::SMALLINT, unsigned: true, default: 1))
-            ->addColumn(Schema::column('publish_date', Types::DATE_MUTABLE))
+            ->addColumn(Schema::column('publish_date', Types::DATE_IMMUTABLE))
             ->addColumn(Schema::column('content', Types::TEXT, length: 2097152, notNull: false))
             ->addColumn(Schema::column('short_content', Types::TEXT, length: 65535, notNull: false))
             ->addColumn(Schema::column('meta_description', Types::TEXT, length: 65535, notNull: false))
             ->addColumn(Schema::column('meta_keywords', Types::TEXT, length: 65535, notNull: false))
             ->addColumn(Schema::column('meta_title', Types::STRING, length: 255, notNull: false))
             ->addColumn(Schema::column('meta_robots', Types::STRING, length: 50, notNull: false))
-            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
-            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('entity_type_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('url_key'))
@@ -67,7 +67,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('attribute_id', Types::SMALLINT, unsigned: true, default: 0))
             ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
             ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, default: 0))
-            ->addColumn(Schema::column('value', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('value', Types::DATETIME_IMMUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
             ->addIndex(
                 Index::editor()
@@ -328,8 +328,8 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('meta_keywords', Types::TEXT, length: 65535, notNull: false))
             ->addColumn(Schema::column('meta_description', Types::TEXT, length: 65535, notNull: false))
             ->addColumn(Schema::column('meta_robots', Types::STRING, length: 50, notNull: false))
-            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
-            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('entity_type_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('parent_id'))
@@ -472,7 +472,7 @@ return function (SchemaEditor $schema): void {
 
     $decimal = fn() => Schema::column('value', Types::DECIMAL, precision: 12, scale: 4, notNull: false);
     $valueTable('blog_post_entity', 'decimal', 'Blog Post Decimal', $decimal());
-    $valueTable('blog_category_entity', 'datetime', 'Blog Category Datetime', Schema::column('value', Types::DATETIME_MUTABLE, notNull: false));
+    $valueTable('blog_category_entity', 'datetime', 'Blog Category Datetime', Schema::column('value', Types::DATETIME_IMMUTABLE, notNull: false));
     $valueTable('blog_category_entity', 'decimal', 'Blog Category Decimal', $decimal());
     $valueTable('blog_category_entity', 'int', 'Blog Category Integer', Schema::column('value', Types::INTEGER, notNull: false));
     $valueTable('blog_category_entity', 'text', 'Blog Category Text', Schema::column('value', Types::TEXT, length: 65535, notNull: false));

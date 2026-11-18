@@ -137,7 +137,7 @@ class Mage_Core_Model_Design_Fallback
      * @param string $theme
      * @throws Mage_Core_Exception
      */
-    protected function _checkVisited($area, $package, $theme)
+    protected function _checkVisited($area, $package, $theme): void
     {
         $path = $area . '/' . $package . '/' . $theme;
         if (in_array($path, $this->_visited)) {

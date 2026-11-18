@@ -27,7 +27,7 @@ abstract class Mage_Sales_Model_Quote_Address_Total_Abstract
      * @var bool
      */
     protected $_canAddAmountToAddress = true;
-    protected $_canSetAddressAmount   = true;
+    protected bool $_canSetAddressAmount   = true;
 
     /**
      * Key for item row total getting

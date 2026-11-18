@@ -82,8 +82,5 @@ abstract class Mage_Sales_Model_Payment_Method_Billing_AgreementAbstract extends
         return $result;
     }
 
-    /**
-     * @param Mage_Sales_Model_Quote $quote
-     */
-    abstract protected function _isAvailable($quote);
+    abstract protected function _isAvailable(?Mage_Sales_Model_Quote $quote): bool;
 }

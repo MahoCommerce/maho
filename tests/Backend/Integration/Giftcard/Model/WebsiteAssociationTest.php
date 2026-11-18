@@ -130,22 +130,6 @@ describe('Giftcard Website Associations (junction)', function () {
         }
     });
 
-    test('re-saving an unchanged website set does not rewrite the junction', function () {
-        $card = createActiveCard();
-        $card->setWebsiteIds([1]);
-        $card->save();
-
-        try {
-            $card->setWebsiteIds([1]);
-            $card->save();
-
-            $reloaded = Mage::getModel('giftcard/giftcard')->load($card->getId());
-            expect($reloaded->getWebsiteIds())->toBe([1]);
-        } finally {
-            $card->delete();
-        }
-    });
-
     test('websites with different base currencies cannot be associated to one card', function () {
         $website = Mage::getModel('core/website');
         $website->setCode('gc_currency_test_' . uniqid());

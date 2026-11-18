@@ -69,6 +69,27 @@ ranking signals onto it.
     get clean category canonicals out of the box. If you are upgrading and deliberately kept it off,
     review this setting after the update.
 
+### CMS pages <span class="version-badge">v27.1+</span>
+
+CMS pages always get a canonical tag, with no setting. The tag holds the URL of the page without
+the query string. Search engines then give a link with tracking parameters, such as
+`?utm_source=`, to the URL of the page. The tag follows the **Trailing Slash Behavior** setting
+(System > Configuration > General > Web > Url Options). The CMS Home Page points to the base URL
+of the store, because its own identifier redirects there.
+
+The **CMS No Route Page** gets no canonical tag, and neither does a page whose meta robots
+contains `noindex`.
+
+### Store views on one domain <span class="version-badge">v27.1+</span>
+
+A store view can share the base URL of the default store view of its website, or of its store
+group. Its pages then show at the same path with `?___store=<code>`. The canonical tags of its CMS
+pages keep that parameter, so that they do not point to the default store view. The canonical tags
+of its categories and products keep it too, when the settings above turn them on.
+
+The default robots.txt rules block `?___store=`, so search engines do not fetch these pages until
+the store view gets its own base URL or you remove that rule. See [robots.txt](../hosting/robotstxt.md).
+
 ## Layered navigation crawl controls <span class="version-badge">v26.7+</span>
 
 Category pages with layered navigation are a classic SEO trap. A single category can generate a
@@ -140,6 +161,41 @@ Maho also normalizes the request URL itself. A request for `/index.php`, or for 
 through `/index.php/...`, answers with a **301 redirect** to the same page without that segment.
 The storefront therefore keeps one canonical entry point on every web server, and you need no
 rewrite rule of your own. See [Web Server Configuration](../hosting/web-server.md).
+
+## Breadcrumbs on product pages <span class="version-badge">v27.1+</span>
+
+The breadcrumbs of a product page show one category of the product. The structured data of the
+page uses the same breadcrumbs. Maho picks the category in this order:
+
+1. The category in the URL, when the store uses the category path in product URLs.
+2. The category that the visitor opened last, when the product is in it.
+3. The primary category of the product.
+
+Search engines do not keep the last category, so they always get the primary category and the same
+breadcrumbs.
+
+When the product has no **Meta Title**, the page title shows the names of the categories from the
+URL or from the last category. The primary category does not change the page title, the meta
+robots, the meta keywords or the URL of the product. It is the current category of the page for
+everything else: the navigation menu highlights it, the page gets its `category-*` body classes,
+Google Analytics and the Meta pixel get its name, and its custom design applies when
+**Apply To Products** is **Yes**.
+
+Maho selects the primary category from the categories of the product in the category tree of the
+store:
+
+1. Maho skips a category when it, or a category above it, is not active.
+2. A category that the navigation menu shows wins over a category that the menu does not show.
+   The menu shows a category when **Include in Navigation Menu** is **Yes** for it and for each
+   category above it.
+3. Then the deepest category wins. For example, **Men > Shirts > Casual** wins over **Men**.
+4. If two categories are at the same depth, the category with the lower ID wins.
+
+To keep a sale or a promotion category out of the primary category, set
+**Include in Navigation Menu** to **No** on it, or on a category above it. This works for each
+product that is also in a category of the menu. A visitor who opens the product from the sale
+category still gets it in the breadcrumbs, because the category of the URL and the last category
+come first.
 
 ## Multi-store hreflang
 

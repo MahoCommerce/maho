@@ -10,11 +10,11 @@
 
 class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploader
 {
-    protected $_tmpDir  = '';
+    protected string $_tmpDir  = '';
     private string $_destStoragePath = '';
     private bool $_validated = false;
     private bool $_trustedMedia = false;
-    protected $_allowedMimeTypes = [
+    protected array $_allowedMimeTypes = [
         'webp' => 'image/webp',
         'avif' => 'image/avif',
         'jpg' => 'image/jpeg',
@@ -48,7 +48,7 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
     /**
      * Initiate uploader default settings
      */
-    public function init()
+    public function init(): void
     {
         $this->setAllowRenameFiles(true);
         $this->setAllowCreateFolders(true);
@@ -140,7 +140,7 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
      *
      * @param string $filePath
      */
-    protected function _setUploadFile($filePath)
+    protected function _setUploadFile($filePath): void
     {
         if (!is_readable($filePath)) {
             Mage::throwException("File '{$filePath}' was not found or has read restriction.");

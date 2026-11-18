@@ -11,7 +11,7 @@
 class Mage_Log_Model_Resource_Aggregation extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('log/summary_table', 'log_summary_id');
     }
@@ -78,7 +78,7 @@ class Mage_Log_Model_Resource_Aggregation extends Mage_Core_Model_Resource_Db_Ab
      * @param array $data
      * @param string $id
      */
-    public function saveLog($data, $id = null)
+    public function saveLog($data, $id = null): void
     {
         $adapter = $this->_getWriteAdapter();
         if (is_null($id)) {
@@ -94,7 +94,7 @@ class Mage_Log_Model_Resource_Aggregation extends Mage_Core_Model_Resource_Db_Ab
      *
      * @param string $date
      */
-    public function removeEmpty($date)
+    public function removeEmpty($date): void
     {
         $adapter    = $this->_getWriteAdapter();
         $condition  = [

@@ -87,6 +87,32 @@ class Mage_Core_Model_Url_Rewrite extends Mage_Core_Model_Abstract implements Ma
     }
 
     /**
+     * Return the ID path of the system rewrite of the same product or category. The store switch and the hreflang
+     * links use it to find the page in another store view. A custom rewrite has an ID path of its own, which no
+     * other store view has.
+     */
+    public function getIdPathForOtherStores(): ?string
+    {
+        $productId = $this->getProductId();
+        $categoryId = $this->getCategoryId();
+        if ($this->getIsSystem() || ($productId === null && $categoryId === null)) {
+            return $this->getIdPath();
+        }
+        if ($productId === null) {
+            return 'category/' . $categoryId;
+        }
+        if ($categoryId === null) {
+            return 'product/' . $productId;
+        }
+        // The catalog decides if the category is part of the ID path of a product.
+        return Mage::getSingleton('catalog/url')->generatePath(
+            'id',
+            new Maho\DataObject(['id' => $productId]),
+            Mage::getModel('catalog/category')->load($categoryId),
+        );
+    }
+
+    /**
      * @param string|array $tags
      * @return $this
      */

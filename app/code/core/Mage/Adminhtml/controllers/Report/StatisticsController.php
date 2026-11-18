@@ -28,7 +28,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
     protected $_adminSession = null;
 
     #[Maho\Config\Route('/admin/report_statistics/_init')]
-    public function _initAction()
+    public function _initAction(): static
     {
         $this->loadLayout()
             ->_addBreadcrumb(Mage::helper('reports')->__('Reports'), Mage::helper('reports')->__('Reports'))
@@ -37,7 +37,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
     }
 
     #[Maho\Config\Route('/admin/report_statistics/_initReport')]
-    public function _initReportAction($blocks)
+    public function _initReportAction($blocks): static
     {
         if (!is_array($blocks)) {
             $blocks = [$blocks];

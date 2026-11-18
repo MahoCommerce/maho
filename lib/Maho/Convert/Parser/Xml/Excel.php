@@ -24,7 +24,7 @@ class Excel extends AbstractParser
     protected $_xmlElement;
 
     #[\Override]
-    public function parse()
+    public function parse(): static
     {
         $this->validateDataString();
 
@@ -83,7 +83,7 @@ class Excel extends AbstractParser
     }
 
     #[\Override]
-    public function unparse()
+    public function unparse(): static
     {
         if ($wsName = $this->getVar('single_sheet')) {
             $data = [$wsName => $this->getData()];

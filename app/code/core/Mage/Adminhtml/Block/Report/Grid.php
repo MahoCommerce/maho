@@ -56,14 +56,14 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
      */
     protected $_subReportSize = 5;
 
-    protected $_grandTotals;
+    protected ?\Maho\DataObject $_grandTotals = null;
 
-    protected $_errors = [];
+    protected array $_errors = [];
 
     /**
      * stores current currency code
      */
-    protected $_currentCurrencyCode = null;
+    protected ?string $_currentCurrencyCode = null;
 
     /**
      * @var Mage_Core_Model_Locale
@@ -235,7 +235,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
      *
      * @param bool $visible
      */
-    public function setStoreSwitcherVisibility($visible = true)
+    public function setStoreSwitcherVisibility($visible = true): void
     {
         $this->_storeSwitcherVisibility = $visible;
     }
@@ -265,7 +265,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
      *
      * @param bool $visible
      */
-    public function setDateFilterVisibility($visible = true)
+    public function setDateFilterVisibility($visible = true): void
     {
         $this->_dateFilterVisibility = $visible;
     }
@@ -285,7 +285,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
      *
      * @param bool $visible
      */
-    public function setExportVisibility($visible = true)
+    public function setExportVisibility($visible = true): void
     {
         $this->_exportVisibility = $visible;
     }
@@ -305,7 +305,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
      *
      * @param bool $visible
      */
-    public function setSubtotalVisibility($visible = true)
+    public function setSubtotalVisibility($visible = true): void
     {
         $this->_subtotalVisibility = $visible;
     }
@@ -320,25 +320,22 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
         return $this->_subtotalVisibility;
     }
 
-    public function getPeriods()
+    public function getPeriods(): array
     {
         return $this->getCollection()->getPeriods();
     }
 
-    public function getDateFormat()
+    public function getDateFormat(): string
     {
         return $this->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
     }
 
-    /**
-     * Return refresh button html
-     */
-    public function getRefreshButtonHtml()
+    public function getRefreshButtonHtml(): string
     {
         return $this->getChildHtml('refresh_button');
     }
 
-    public function setFilter($name, $value)
+    public function setFilter($name, $value): void
     {
         if ($name) {
             $this->_filters[$name] = $value;
@@ -351,12 +348,12 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
                 ? htmlspecialchars($this->getRequest()->getParam($name)) : '');
     }
 
-    public function setSubReportSize($size)
+    public function setSubReportSize(?int $size): void
     {
         $this->_subReportSize = $size;
     }
 
-    public function getSubReportSize()
+    public function getSubReportSize(): ?int
     {
         return $this->_subReportSize;
     }
@@ -399,7 +396,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
         return $this;
     }
 
-    public function getReport($from, $to)
+    public function getReport(?string $from, ?string $to): \Maho\Data\Collection
     {
         if ($from == '') {
             $from = $this->getFilter('report_from');
@@ -413,7 +410,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
         return $this->getCollection()->getReport($from, $to);
     }
 
-    public function addGrandTotals($total)
+    public function addGrandTotals(\Maho\DataObject $total): void
     {
         $totalData = $total->getData();
         foreach ($totalData as $key => $value) {
@@ -438,7 +435,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
         }
     }
 
-    public function getGrandTotals()
+    public function getGrandTotals(): \Maho\DataObject
     {
         if (!$this->_grandTotals) {
             $this->_grandTotals = new \Maho\DataObject();
@@ -446,7 +443,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
         return $this->_grandTotals;
     }
 
-    public function getPeriodText()
+    public function getPeriodText(): string
     {
         return $this->__('Period');
     }

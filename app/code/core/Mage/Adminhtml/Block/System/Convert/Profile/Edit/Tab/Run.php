@@ -16,7 +16,7 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Edit_Tab_Run extends Mage_Admi
         $this->setTemplate('system/convert/profile/run.phtml');
     }
 
-    public function getRunButtonHtml()
+    public function getRunButtonHtml(): string
     {
         $html = $this->getLayout()->createBlock('adminhtml/widget_button')->setType('button')
             ->setClass('save')->setLabel($this->__('Run Profile in Popup'))
@@ -31,7 +31,7 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Edit_Tab_Run extends Mage_Admi
         return Mage::registry('current_convert_profile')->getId();
     }
 
-    public function getImportedFiles()
+    public function getImportedFiles(): array
     {
         return Mage::helper('dataflow')->getImportFiles((string) $this->getParseType());
     }

@@ -93,9 +93,8 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         $service->useDefault($category, array_map(strval(...), $data->useDefault ?? []));
 
         // A store view write stores only the fields of the request.
-        $inherited = StoreScopeWrite::keepInheritedValues($category, $oldData, StoreScopeWrite::requestedCodes($data));
+        StoreScopeWrite::keepInheritedValues($category, $oldData, StoreScopeWrite::requestedCodes($data));
         $service->save($category, 'customAttributes.');
-        StoreScopeWrite::restoreInheritedValues($category, $oldData, $inherited);
         $this->logApiActivity('catalog/category', 'update', $oldData, $category);
 
         return $this->refreshDto($category);
@@ -211,8 +210,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Map the response from a new load in the same store scope, as a GET does: the save changes several values,
-     * and useDefault leaves the EAV false value in the model.
+     * Map the response from a new load in the same store scope, as a GET does: the save changes several values.
      */
     private function refreshDto(Mage_Catalog_Model_Category $category): Category
     {

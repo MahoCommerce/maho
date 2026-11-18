@@ -26,14 +26,14 @@ $_readonly = $_element->getReadonly();
         <div id="<?= $this->getHtmlId() ?>_default" class="gallery-use-default">
             <span><?= Mage::helper('catalog')->__('Use Default Value') ?>:</span>
             <label>
-                <input id="use_default_label" class="default-checkbox" name="use_default[]" type="checkbox" value="label"
+                <input id="use_default_label" class="default-checkbox" type="checkbox" value="label"
                     <?php if ($_element->getAttributeReadonly('label')): ?> disabled="disabled"<?php endif ?>
                     <?php if ($_element->usedDefault('label')): ?> checked<?php endif ?>
                        onclick="<?= $this->getJsObjectName() ?>.updateUseDefault(this)">
                 <?= Mage::helper('catalog')->__('Label') ?>
             </label>
             <label>
-                <input id="use_default_position" class="default-checkbox" name="use_default[]" type="checkbox" value="position"
+                <input id="use_default_position" class="default-checkbox" type="checkbox" value="position"
                     <?php if ($_element->getAttributeReadonly('position')): ?> disabled="disabled"<?php endif ?>
                     <?php if ($_element->usedDefault('position')): ?> checked<?php endif ?>
                        onclick="<?= $this->getJsObjectName() ?>.updateUseDefault(this)">

@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -11,7 +12,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Totals_Discount extends Mage_Admin
 {
     //protected $_template = 'tax/checkout/subtotal.phtml';
 
-    public function displayBoth()
+    public function displayBoth(): bool
     {
         return Mage::getSingleton('tax/config')->displayCartSubtotalBoth();
     }

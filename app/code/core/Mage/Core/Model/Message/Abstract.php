@@ -12,12 +12,12 @@ declare(strict_types=1);
 
 abstract class Mage_Core_Model_Message_Abstract
 {
-    protected $_type;
-    protected $_code;
-    protected $_class;
-    protected $_method;
-    protected $_identifier;
-    protected $_isSticky = false;
+    protected ?string $_type = null;
+    protected ?string $_code = null;
+    protected ?string $_class = null;
+    protected ?string $_method = null;
+    protected ?string $_identifier = null;
+    protected bool $_isSticky = false;
     /** @var list<string|\Maho\Message\Link|null>|null */
     protected ?array $_textArgs = null;
 

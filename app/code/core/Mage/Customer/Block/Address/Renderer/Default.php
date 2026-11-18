@@ -28,13 +28,8 @@ class Mage_Customer_Block_Address_Renderer_Default extends Mage_Core_Block_Abstr
         return $this->_type;
     }
 
-    /**
-     * Retrieve format type object
-     *
-     * @return $this
-     */
     #[\Override]
-    public function setType(\Maho\DataObject $type)
+    public function setType(\Maho\DataObject $type): static
     {
         $this->_type = $type;
         return $this;
@@ -82,6 +77,10 @@ class Mage_Customer_Block_Address_Renderer_Default extends Mage_Core_Block_Abstr
         foreach ($attributes as $attribute) {
             /** @var Mage_Customer_Model_Attribute $attribute */
             if (!$attribute->getIsVisible()) {
+                continue;
+            }
+            // The address keeps the value of a field that its condition hides, but does not print it
+            if (Mage::helper('eav')->isHidden($address, $attribute)) {
                 continue;
             }
             if ($attribute->getAttributeCode() == 'country_id') {

@@ -409,3 +409,40 @@ it('names the customer groups of a set on its edit page, and keeps the values wh
         ->and($helper->getSetNote($set))->toContain('The fields of the first group, General, join the other fields of the form with no title.')
         ->and($helper->getSetDeleteQuestion($set))->toContain('The values of the customers stay');
 });
+
+it('puts a field whose sort order is lower than every standard field at the top of the form', function () {
+    $top = $this->attributes[] = customerSetTestCreateAttribute('customer_address', 'pest_top_' . $this->suffix, null, ['customer_address_edit']);
+    $top->setSortOrder(1)->save();
+    $bottom = $this->attributes[] = customerSetTestCreateAttribute('customer_address', 'pest_bottom_' . $this->suffix, null, ['customer_address_edit']);
+    $bottom->setSortOrder(500)->save();
+    Mage::getSingleton('eav/config')->clear();
+
+    $codes = function (?string $placement): array {
+        $block = Mage::app()->getLayout()->createBlock('customer/form_attributes')
+            ->setCustomerForm('customer_address_edit', Mage::getModel('customer/address'))
+            ->setPlacement($placement);
+        return array_map(fn($attribute) => $attribute->getAttributeCode(), $block->getAttributes());
+    };
+
+    expect($codes(Mage_Customer_Block_Form_Attributes::PLACEMENT_TOP))->toContain($top->getAttributeCode())
+        ->not->toContain($bottom->getAttributeCode())
+        ->and($codes(Mage_Customer_Block_Form_Attributes::PLACEMENT_BOTTOM))->toContain($bottom->getAttributeCode())
+        ->not->toContain($top->getAttributeCode())
+        ->and($codes(null))->toContain($top->getAttributeCode(), $bottom->getAttributeCode());
+});
+
+it('starts the condition controller only in the block at the bottom of the form', function () {
+    $type = $this->attributes[] = customerSetTestCreateAttribute('customer_address', 'pest_type_' . $this->suffix, null, ['customer_address_edit']);
+    $type->setSortOrder(1)->save();
+    $note = $this->attributes[] = customerSetTestCreateAttribute('customer_address', 'pest_note_' . $this->suffix, null, ['customer_address_edit']);
+    $note->setDependsOn([$type->getAttributeCode() => ['__any__']])->save();
+    Mage::getSingleton('eav/config')->clear();
+
+    $json = fn(string $placement) => Mage::app()->getLayout()->createBlock('customer/form_attributes')
+        ->setCustomerForm('customer_address_edit', Mage::getModel('customer/address'))
+        ->setPlacement($placement)
+        ->getDependenceJson();
+
+    expect($json(Mage_Customer_Block_Form_Attributes::PLACEMENT_TOP))->toBeNull()
+        ->and($json(Mage_Customer_Block_Form_Attributes::PLACEMENT_BOTTOM))->toContain($note->getAttributeCode());
+});

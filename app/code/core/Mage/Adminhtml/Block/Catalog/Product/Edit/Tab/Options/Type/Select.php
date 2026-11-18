@@ -48,12 +48,12 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Type_Select extends 
         return parent::_prepareLayout();
     }
 
-    public function getAddButtonHtml()
+    public function getAddButtonHtml(): string
     {
         return $this->getChildHtml('add_select_row_button');
     }
 
-    public function getDeleteButtonHtml()
+    public function getDeleteButtonHtml(): string
     {
         return $this->getChildHtml('delete_select_row_button');
     }

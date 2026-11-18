@@ -140,7 +140,7 @@ class Mage_SalesRule_Model_Observer
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     #[Maho\Config\Observer('sales_order_payment_cancel')]
-    public function sales_order_paymentCancel($observer)
+    public function sales_order_paymentCancel($observer): void
     {
         $event = $observer->getEvent();
         /** @var Mage_Sales_Model_Order $order */
@@ -225,7 +225,7 @@ class Mage_SalesRule_Model_Observer
      * @param Mage_Rule_Model_Condition_Combine $combine
      * @param string $attributeCode
      */
-    protected function _removeAttributeFromConditions($combine, $attributeCode)
+    protected function _removeAttributeFromConditions($combine, $attributeCode): void
     {
         $conditions = $combine->getConditions();
         foreach ($conditions as $conditionId => $condition) {

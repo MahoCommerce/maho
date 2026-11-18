@@ -214,6 +214,66 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Addresses extends Mage_Adminhtml_Bl
     }
 
     /**
+     * The template renders the form once for each address, so it starts one dependence controller for each address.
+     */
+    #[\Override]
+    protected function getAttributeDependenceHtml(): string
+    {
+        return '';
+    }
+
+    /**
+     * Return the conditions that show the address fields and the conditions that make optional address fields
+     * required, keyed by field code, every field that they read, and the values of the fields that the form does not
+     * have: for each saved address, and under the key 0 for a new address, which has only the customer fields.
+     */
+    public function getAttributeDependenceJson(): string
+    {
+        $depends = [];
+        $required = [];
+        $fields = [];
+        $formFields = [];
+        foreach ($this->getForm()->getAllElements() as $element) {
+            $code = (string) $element->getId();
+            $formFields[] = $code;
+            $attribute = $element->getEntityAttribute();
+            if (!$attribute instanceof Mage_Eav_Model_Entity_Attribute_Abstract) {
+                continue;
+            }
+            if ($condition = $attribute->getDependsOn()) {
+                $depends[$code] = $condition;
+                $fields = [...$fields, $code, ...\Maho\Data\Form\Condition::fields($condition)];
+            }
+            if (!$attribute->getIsRequired() && ($condition = $attribute->getRequiredWhen())) {
+                $required[$code] = $condition;
+                $fields = [...$fields, $code, ...\Maho\Data\Form\Condition::fields($condition)];
+            }
+        }
+        $absent = array_values(array_diff(array_unique($fields), $formFields));
+        $values = [];
+        if ($absent) {
+            /** @var Mage_Customer_Model_Customer $customer */
+            $customer = Mage::registry('current_customer');
+            $newAddress = Mage::getModel('customer/address')->setCustomer($customer);
+            foreach ([0 => $newAddress, ...$customer->getAddresses()] as $address) {
+                $data = Mage::helper('eav')->getConditionData($address, $absent);
+                foreach ($absent as $field) {
+                    $value = $data[$field] ?? null;
+                    if ($value !== null && $value !== '' && $value !== false) {
+                        $values[(int) $address->getId()][$field] = \Maho\Data\Form\Condition::fieldValues($value);
+                    }
+                }
+            }
+        }
+        return Mage::helper('core')->jsonEncode([
+            'depends' => (object) $depends,
+            'required' => (object) $required,
+            'fields' => array_values(array_unique($fields)),
+            'values' => (object) $values,
+        ]);
+    }
+
+    /**
      * @return string
      */
     public function getCancelButtonHtml()

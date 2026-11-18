@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -9,7 +10,7 @@
 
 class Mage_Shipping_Model_Tracking_Result
 {
-    protected $_trackings = [];
+    protected array $_trackings = [];
     protected $_error = null;
 
     /**
@@ -25,7 +26,7 @@ class Mage_Shipping_Model_Tracking_Result
     /**
      * @param string $error
      */
-    public function setError($error)
+    public function setError($error): void
     {
         $this->_error = $error;
     }
@@ -59,7 +60,7 @@ class Mage_Shipping_Model_Tracking_Result
     /**
      * Return all trackings in the result
      */
-    public function getAllTrackings()
+    public function getAllTrackings(): array
     {
         return $this->_trackings;
     }

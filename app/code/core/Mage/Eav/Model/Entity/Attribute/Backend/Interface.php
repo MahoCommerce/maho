@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -18,9 +19,9 @@ declare(strict_types=1);
 interface Mage_Eav_Model_Entity_Attribute_Backend_Interface
 {
     public function getTable();
-    public function isStatic();
-    public function getType();
-    public function getEntityIdField();
+    public function isStatic(): bool;
+    public function getType(): ?string;
+    public function getEntityIdField(): ?string;
 
     /**
      * @param int $valueId

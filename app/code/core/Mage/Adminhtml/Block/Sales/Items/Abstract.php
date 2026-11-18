@@ -66,15 +66,7 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
         return $this;
     }
 
-    /**
-     * Add column renderer
-     *
-     * @param string $column
-     * @param string $block
-     * @param string $template
-     * @return $this
-     */
-    public function addColumnRender($column, $block, $template, $type = null)
+    public function addColumnRender(string $column, string $block, string $template, ?string $type = null): static
     {
         if (!is_null($type)) {
             $column .= '_' . $type;
@@ -191,7 +183,7 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
         return '&nbsp;';
     }
 
-    public function getCreditmemo()
+    public function getCreditmemo(): ?Mage_Sales_Model_Order_Creditmemo
     {
         return Mage::registry('current_creditmemo');
     }
@@ -404,11 +396,10 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
     /**
      * Setter for flag _canEditQty
      *
-     * @return $this
      * @see self::_canEditQty
      * @see self::canEditQty
      */
-    public function setCanEditQty($value)
+    public function setCanEditQty(?bool $value = true): static
     {
         $this->_canEditQty = $value;
         return $this;
@@ -447,7 +438,7 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
         return true;
     }
 
-    public function canCapture()
+    public function canCapture(): bool
     {
         if (Mage::getSingleton('admin/session')->isAllowed('sales/order/actions/capture')) {
             return $this->getInvoice()->canCapture();
@@ -484,7 +475,7 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
      * CREDITMEMO
      */
 
-    public function canReturnToStock()
+    public function canReturnToStock(): bool
     {
         if (Mage::getStoreConfig(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_CAN_SUBTRACT)) {
             return true;
@@ -567,7 +558,7 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
         return true;
     }
 
-    public function isShipmentRegular()
+    public function isShipmentRegular(): bool
     {
         if (!$this->canShipPartiallyItem() || !$this->canShipPartially()) {
             return false;
