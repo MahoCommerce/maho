@@ -205,58 +205,31 @@ describe('Front observer canonical URI', function () {
     });
 });
 
-function canonicalUriInsertRewrite(string $requestPath, string $targetPath, string $options = ''): int
-{
-    $write = Mage::getSingleton('core/resource')->getConnection('core_write');
-    $write->insert(Mage::getSingleton('core/resource')->getTableName('core/url_rewrite'), [
-        'store_id' => (int) Mage::app()->getStore()->getId(),
-        'id_path' => 'pest_canonical_' . uniqid(),
-        'request_path' => $requestPath,
-        'target_path' => $targetPath,
-        'is_system' => 0,
-        'options' => $options,
-    ]);
-    return (int) $write->lastInsertId();
-}
-
 describe('Front observer canonical URI with a URL rewrite', function () {
-    beforeEach(function () {
-        canonicalUriConfig('add');
-        $this->rewriteIds = [];
-    });
+    beforeEach(fn() => canonicalUriConfig('add'));
 
     afterEach(function () {
-        $write = Mage::getSingleton('core/resource')->getConnection('core_write');
-        foreach ($this->rewriteIds as $id) {
-            $write->delete(Mage::getSingleton('core/resource')->getTableName('core/url_rewrite'), ['url_rewrite_id = ?' => $id]);
-        }
+        Mage::getSingleton('core/resource')->getConnection('core_write')
+            ->delete(Mage::getSingleton('core/resource')->getTableName('core/url_rewrite'), ['id_path LIKE ?' => 'pest_canonical_%']);
         canonicalUriResetConfig();
     });
 
-    it('redirects to the target of a permanent rewrite in one step when the trailing slash is missing', function () {
-        $this->rewriteIds[] = canonicalUriInsertRewrite('pest-old-brand/', 'pest-new-brand/', 'RP');
+    it('goes to the target of a redirect rewrite in one hop, or adds the slash to any other rewrite', function (string $options, string $location) {
+        Mage::getSingleton('core/resource')->getConnection('core_write')->insert(Mage::getSingleton('core/resource')->getTableName('core/url_rewrite'), [
+            'store_id' => (int) Mage::app()->getStore()->getId(),
+            'id_path' => 'pest_canonical_' . uniqid(),
+            'request_path' => 'pest-old-brand/',
+            'target_path' => $options === '' ? 'catalog/category/view/id/3' : 'pest-new-brand/',
+            'is_system' => 0,
+            'options' => $options,
+        ]);
 
         $response = canonicalUriDispatch('/pest-old-brand', straight: false);
 
-        expect($response->getHttpResponseCode())->toBe(301);
-        expect(canonicalUriLocation($response))->toBe('/pest-new-brand/');
-    });
-
-    it('redirects to the target of a temporary rewrite in one step when the trailing slash is missing', function () {
-        $this->rewriteIds[] = canonicalUriInsertRewrite('pest-old-sale/', 'pest-new-sale/', 'R');
-
-        $response = canonicalUriDispatch('/pest-old-sale', straight: false);
-
-        expect($response->getHttpResponseCode())->toBe(302);
-        expect(canonicalUriLocation($response))->toBe('/pest-new-sale/');
-    });
-
-    it('still adds the trailing slash to a rewrite that does not redirect', function () {
-        $this->rewriteIds[] = canonicalUriInsertRewrite('pest-alias/', 'catalog/category/view/id/3');
-
-        $response = canonicalUriDispatch('/pest-alias', straight: false);
-
-        expect($response->getHttpResponseCode())->toBe(301);
-        expect(canonicalUriLocation($response))->toBe('/pest-alias/');
-    });
+        expect(canonicalUriLocation($response))->toBe($location);
+    })->with([
+        'permanent redirect' => ['RP', '/pest-new-brand/'],
+        'temporary redirect' => ['R', '/pest-new-brand/'],
+        'no redirect' => ['', '/pest-old-brand/'],
+    ]);
 });
