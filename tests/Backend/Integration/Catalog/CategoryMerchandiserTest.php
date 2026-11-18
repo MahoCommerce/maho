@@ -123,6 +123,48 @@ it('puts the products that are out of stock last in the default scope, with the 
     expect($ours($this->merchandiser->getStorefrontOrder($category)))->toBe([$b, $c, $a]);
 });
 
+/**
+ * @return array<string, mixed> the JSON answer of the tiles action
+ */
+function merchandiserTilesAnswer(int $categoryId, int $storeId, array $post): array
+{
+    $request = new Mage_Core_Controller_Request_Http();
+    $request->setParam('id', $categoryId);
+    $request->setParam('store', $storeId);
+    $request->setPost($post);
+    $response = new Mage_Core_Controller_Response_Http();
+    Mage::unregister('category');
+    Mage::unregister('current_category');
+    (new Mage_Adminhtml_Catalog_CategoryController($request, $response))->tilesAction();
+    Mage::unregister('category');
+    Mage::unregister('current_category');
+
+    return Mage::helper('core')->jsonDecode($response->getBody());
+}
+
+it('sends the order of the storefront once for a category that sorts by something else, and then pages the posted order', function () {
+    [$a, $b, $c] = $this->ids;
+    $this->db->insertMultiple($this->tables['sales'], [
+        ['product_id' => $a, 'store_id' => $this->storeId, 'qty_ordered' => 9, 'revenue' => 90],
+        ['product_id' => $b, 'store_id' => $this->storeId, 'qty_ordered' => 4, 'revenue' => 40],
+    ]);
+    $attribute = Mage::getSingleton('eav/config')->getAttribute('catalog_category', 'default_sort_by');
+    $this->db->insertOnDuplicate($attribute->getBackend()->getTable(), [
+        'entity_id' => $this->rootId,
+        'entity_type_id' => $attribute->getEntityTypeId(),
+        'attribute_id' => $attribute->getId(),
+        'store_id' => $this->storeId,
+        'value' => 'bestsellers',
+    ], ['value']);
+
+    $first = merchandiserTilesAnswer($this->rootId, $this->storeId, []);
+    $second = merchandiserTilesAnswer($this->rootId, $this->storeId, ['ids' => "$c,$a,$b", 'offset' => 0, 'limit' => 100]);
+
+    expect(array_values(array_intersect($first['order'], [$a, $b, $c])))->toBe([$a, $b, $c])
+        ->and(array_column($second['tiles'], 'id'))->toBe([$c, $a, $b])
+        ->and($second['order'])->toBeNull();
+});
+
 it('gives each tile the stock status and the sales of the last days', function () {
     [$a, $b] = $this->ids;
     $this->db->insert($this->tables['sales'], ['product_id' => $a, 'store_id' => $this->storeId, 'qty_ordered' => 9, 'revenue' => 90]);

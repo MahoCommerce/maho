@@ -362,11 +362,15 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
     }
 
     /**
-     * Retrieve the direction that a sort uses when the shopper picks none
+     * Retrieve the direction that a sort uses when the shopper picks none.
+     * The default direction of the page belongs to the default sort only.
      */
     public function getOrderDirection(string $order): string
     {
-        return in_array($order, Mage_Catalog_Model_Config::DESCENDING_SORTS, true) ? 'desc' : $this->_direction;
+        if (in_array($order, Mage_Catalog_Model_Config::DESCENDING_SORTS, true)) {
+            return 'desc';
+        }
+        return $order === $this->_orderField ? $this->_direction : 'asc';
     }
 
     /**

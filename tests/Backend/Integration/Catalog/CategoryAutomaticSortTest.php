@@ -124,3 +124,15 @@ it('lists the highest value first for the automatic sorts, unless the shopper pi
     $toolbar->setAvailableOrders(['position' => 'Position', 'bestsellers' => 'Bestsellers'])->setDefaultOrder('bestsellers');
     expect($toolbar->getCurrentDirection())->toBe('desc');
 });
+
+it('gives the default direction of the page to the default sort only', function () {
+    $toolbar = Mage::app()->getLayout()->createBlock('catalog/product_list_toolbar')
+        ->setAvailableOrders(['relevance' => 'Relevance', 'name' => 'Name', 'price' => 'Price'])
+        ->setDefaultOrder('relevance')
+        ->setDefaultDirection('desc');
+
+    expect($toolbar->getOrderDirection('relevance'))->toBe('desc')
+        ->and($toolbar->getOrderDirection('name'))->toBe('asc')
+        ->and($toolbar->getOrderDirection('price'))->toBe('asc')
+        ->and($toolbar->getOrderDirection('newest'))->toBe('desc');
+});
