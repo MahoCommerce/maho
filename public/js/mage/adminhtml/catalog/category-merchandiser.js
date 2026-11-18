@@ -63,10 +63,12 @@ class CategoryMerchandiser {
         this.consumed = 0;
         this.selected = new Set();
         this.isDirty = false;
+        this.isGridStale = false;
         this.isLoading = false;
         this.ranks = new Map();
         this.pinned = new Map();
         this.requestId = 0;
+        this.searchId = 0;
 
         this.order = [];
         this.rebuildOrder();
@@ -153,7 +155,8 @@ class CategoryMerchandiser {
                 this.order = [];
             }
             this.refresh();
-        } else if (this.isDirty) {
+        } else if (this.isDirty || this.isGridStale) {
+            this.isGridStale = false;
             this.onShowGrid?.();
         }
     }
@@ -295,6 +298,7 @@ class CategoryMerchandiser {
 
         this.isLoading = true;
         const requestId = ++this.requestId;
+        let hasLoaded = false;
         try {
             const body = new URLSearchParams();
             let ids;
@@ -321,7 +325,9 @@ class CategoryMerchandiser {
             this.view.push(...(ids ?? result.tiles.map((tile) => tile.id)));
             this.total = this.isServerPaged() ? result.total : this.order.length;
             this.consumed += result.consumed ?? 0;
+            this.isLoading = false;
             this.render();
+            hasLoaded = true;
         } catch (error) {
             setMessagesDiv(this.labels.error, 'error');
         } finally {
@@ -329,7 +335,7 @@ class CategoryMerchandiser {
                 this.isLoading = false;
             }
         }
-        if ((this.isServerPaged() ? this.consumed : this.view.length) < (this.isServerPaged() ? this.total : this.order.length) && this.isSentinelVisible()) {
+        if (hasLoaded && (this.isServerPaged() ? this.consumed : this.view.length) < (this.isServerPaged() ? this.total : this.order.length) && this.isSentinelVisible()) {
             this.loadMore();
         }
     }
@@ -577,6 +583,8 @@ class CategoryMerchandiser {
             await this.ensureTiles(this.view);
         } catch (error) {
             setMessagesDiv(this.labels.error, 'error');
+            await this.refresh();
+            return;
         }
         this.render();
     }
@@ -643,12 +651,16 @@ class CategoryMerchandiser {
         const results = this.ui.addResults;
         results.replaceChildren();
         results.hidden = true;
+        const searchId = ++this.searchId;
         if (q.length < 2) {
             return;
         }
         try {
             const body = new URLSearchParams({ q, ids: this.order.join(',') });
             const result = await mahoFetch(this.config.searchUrl, { method: 'POST', body, loaderArea: false });
+            if (searchId !== this.searchId) {
+                return;
+            }
             result.tiles.forEach((tile) => {
                 this.tiles.set(tile.id, tile);
                 const item = document.createElement('li');
@@ -695,6 +707,7 @@ class CategoryMerchandiser {
         this.pinned.clear();
         this.rebuildOrder();
         this.restorePins();
+        this.isGridStale = this.isDirty;
         this.isDirty = false;
         this.onChange();
         this.renderNotes();

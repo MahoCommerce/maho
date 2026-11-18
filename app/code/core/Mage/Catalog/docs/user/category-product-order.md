@@ -88,7 +88,7 @@ The sort lists of the category and of the storefront offer three more sort order
 |------------|--------------------|
 | Newest | The date when the product was created. The newest product comes first |
 | Bestsellers | The units that the product sold in the last days. The highest number comes first |
-| Most Viewed | The views of the product page in the last days. The highest number comes first. It needs the Reports module and the setting **Enable Recently Viewed Products**, because the store records the views only then |
+| Most Viewed | The views of the product page in the last days. The highest number comes first. It needs the Reports module and the settings **Enable Reports** and **Enable Recently Viewed Products**, because the store records the views only then |
 
 A product with no sales, or no views, in the period comes last, in both directions. The shopper can
 reverse the direction with the arrow next to **Sort By**.

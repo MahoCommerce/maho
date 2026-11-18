@@ -137,10 +137,12 @@ it('lists the highest value first for the automatic sorts, unless the shopper pi
 
 it('gives the default direction of the page to the first sort when the default sort is not available', function () {
     $toolbar = Mage::app()->getLayout()->createBlock('catalog/product_list_toolbar')
+        ->setDefaultOrder('position')
         ->setAvailableOrders(['name' => 'Name', 'price' => 'Price'])
         ->setDefaultDirection('desc');
 
-    expect($toolbar->getOrderDirection('name'))->toBe('desc')
+    expect($toolbar->getEffectiveDefaultOrder())->toBe('name')
+        ->and($toolbar->getOrderDirection('name'))->toBe('desc')
         ->and($toolbar->getOrderDirection('price'))->toBe('asc');
 });
 

@@ -374,6 +374,10 @@ class CategoryEditForm {
      * @param {Object<string, string>} options.questions - the confirmation for each set that loses values
      */
     async changeAttributeSet(select, { savedValue = null, questions = {} } = {}) {
+        if (!this.confirmDiscardProductOrder()) {
+            select.value = [...select.options].find((option) => option.defaultSelected)?.value ?? savedValue;
+            return;
+        }
         const question = questions[select.value];
         if (question && !confirm(question)) {
             select.value = [...select.options].find((option) => option.defaultSelected)?.value ?? savedValue;

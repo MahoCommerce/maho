@@ -390,7 +390,7 @@ class Mage_Catalog_Model_Config extends Mage_Eav_Model_Config
             self::SORT_NEWEST => $helper->__('Newest'),
             self::SORT_BESTSELLERS => $helper->__('Bestsellers'),
         ];
-        if ($helper->isModuleEnabled('Mage_Reports') && Mage::helper('reports')->isRecentlyViewedEnabled()) {
+        if ($helper->isModuleEnabled('Mage_Reports') && Mage::helper('reports')->isReportsEnabled() && Mage::helper('reports')->isRecentlyViewedEnabled()) {
             $options[self::SORT_MOST_VIEWED] = $helper->__('Most Viewed');
         }
         return $options;
