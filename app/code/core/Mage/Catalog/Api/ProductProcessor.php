@@ -192,13 +192,12 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         $this->applyStockData($product, $data);
 
         // A store view write stores only the fields of the request.
-        $inherited = StoreScopeWrite::keepInheritedValues(
+        StoreScopeWrite::keepInheritedValues(
             $product,
             $oldData,
             StoreScopeWrite::requestedCodes($data, $data->isActive !== null ? ['status'] : []),
         );
         $service->save($product);
-        StoreScopeWrite::restoreInheritedValues($product, $oldData, $inherited);
         $this->logApiActivity('catalog/product', 'update', $oldData, $product);
 
         return $this->refreshDto($product);

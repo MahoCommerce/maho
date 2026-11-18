@@ -170,6 +170,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function typeOfDisplay($product, $compareTo = null, $zone = null, $store = null)
     {
+        $store ??= $this->getStoreIdOfItem($product);
         if (!$this->isEnabled($store)) {
             return false;
         }
@@ -202,6 +203,23 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
             return in_array($type, $compareTo);
         }
         return $type == $compareTo;
+    }
+
+    /**
+     * Return the store of a product, a quote item or a sales item. An invoice item and a credit
+     * memo item have no store, so they return the store of their order item.
+     */
+    protected function getStoreIdOfItem(mixed $item): ?int
+    {
+        if (!$item instanceof Maho\DataObject) {
+            return null;
+        }
+        $storeId = $item->getStoreId();
+        if ($storeId === null && ($item instanceof Mage_Sales_Model_Order_Invoice_Item || $item instanceof Mage_Sales_Model_Order_Creditmemo_Item)) {
+            $orderItem = $item->getOrderItem();
+            $storeId = $orderItem instanceof Mage_Sales_Model_Order_Item ? $orderItem->getStoreId() : null;
+        }
+        return $storeId === null ? null : (int) $storeId;
     }
 
     /**

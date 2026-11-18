@@ -289,6 +289,61 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Return the value that the store view inherits for $attributeCode: the recorded default value, else the loaded
+     * value when the store view had no value of its own, else null.
+     */
+    public function getInheritedValue(string $attributeCode): mixed
+    {
+        $default = $this->getAttributeDefaultValue($attributeCode);
+        if ($default !== false) {
+            return $default;
+        }
+        return $this->getExistsStoreValueFlag($attributeCode) ? null : $this->getOrigData($attributeCode);
+    }
+
+    /**
+     * Make the store view use the default value of the attribute $attributeCode. The data gets the default value
+     * now, and the next save deletes the store view value. A locked attribute or a read-only model does not change,
+     * as with setData().
+     */
+    public function useDefaultValue(string $attributeCode): static
+    {
+        if ($this->hasLockedAttributes() ? $this->isLockedAttribute($attributeCode) : $this->isReadonly()) {
+            return $this;
+        }
+        $this->setData($attributeCode, $this->getInheritedValue($attributeCode));
+        $codes = $this->getUseDefault() ?? [];
+        if (!in_array($attributeCode, $codes, true)) {
+            $codes[] = $attributeCode;
+        }
+        return $this->setUseDefault($codes);
+    }
+
+    public function usesDefaultValue(string $attributeCode): bool
+    {
+        return in_array($attributeCode, $this->getUseDefault() ?? [], true);
+    }
+
+    /**
+     * Codes of the attributes whose store view value the next save deletes
+     *
+     * @return list<string>|null
+     */
+    public function getUseDefault(): ?array
+    {
+        $value = $this->getData('use_default');
+        return is_array($value) ? array_values(array_map(strval(...), $value)) : null;
+    }
+
+    /**
+     * @param list<string>|null $value
+     */
+    public function setUseDefault(?array $value): static
+    {
+        return $this->setData('use_default', $value);
+    }
+
+    /**
      * Before save unlock attributes
      */
     #[\Override]
@@ -297,6 +352,17 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
         $this->unlockAttributes();
         $this->_sanitizeWysiwygAttributes();
         return parent::_beforeSave();
+    }
+
+    /**
+     * The save deleted the store view values, so a later save must not delete them again
+     */
+    #[\Override]
+    protected function _afterSave()
+    {
+        parent::_afterSave();
+        $this->unsetData('use_default');
+        return $this;
     }
 
     /**

@@ -216,8 +216,10 @@ class Mage_Catalog_Service_Product
      */
     public function useDefault(Product $product, array $codes): void
     {
+        // A form field can also fill use_default, so the list keeps only the codes that pass the check
+        $product->setUseDefault(null);
         foreach (Mage::helper('catalog')->getStoreScopeAttributes(Product::ENTITY, $codes, (int) $product->getStoreId()) as $attribute) {
-            $product->setData($attribute->getAttributeCode(), false);
+            $product->useDefaultValue($attribute->getAttributeCode());
         }
     }
 
@@ -516,8 +518,8 @@ class Mage_Catalog_Service_Product
         if (trim((string) $product->getSku()) === '') {
             $errors->addError('sku', $helper->__('SKU is required'));
         }
-        // In a store view, false means that the store view uses the default name
-        if ($product->getName() !== false && trim((string) $product->getName()) === '') {
+        // A store view on the default value has no name of its own
+        if (!$product->usesDefaultValue('name') && $product->getName() !== false && trim((string) $product->getName()) === '') {
             $errors->addError('name', $helper->__('Name is required'));
         }
         $product->validateRecord($errors)->throwIfErrors();

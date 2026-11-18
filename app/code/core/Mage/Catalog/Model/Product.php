@@ -1908,6 +1908,28 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     }
 
     /**
+     * Get the category that the store shows for this product when the request names no category.
+     */
+    public function getPrimaryCategoryId(): ?int
+    {
+        return $this->_getResource()->getPrimaryCategoryId($this, (int) $this->getStoreId());
+    }
+
+    /**
+     * Tell if the current category of the product page is the primary category, not a category of the request.
+     */
+    public function getUsesPrimaryCategory(): ?bool
+    {
+        $value = $this->getData('uses_primary_category');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setUsesPrimaryCategory(?bool $value = true): static
+    {
+        return $this->setData('uses_primary_category', $value);
+    }
+
+    /**
      * Retrieve category ids where product is available
      *
      * @return array

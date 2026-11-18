@@ -179,8 +179,14 @@ it('indexes the children of a configurable and a bundle product in one batch', f
         [(string) Mage_CatalogInventory_Model_Stock_Status::STATUS_IN_STOCK],
     ));
 
-    expect($dataIndex[$configurable] ?? null)->toBe($text("batch-conf-{$suffix}", 'Batch configurable', []))
-        ->and($dataIndex[$bundle] ?? null)->toBe($text("batch-bundle-{$suffix}", 'Batch bundle', ['Batch option']));
+    // The children query has no ORDER BY, so PostgreSQL can write the child names in another order
+    $parts = static function (?string $index): array {
+        $parts = explode('|', (string) $index);
+        sort($parts);
+        return $parts;
+    };
+    expect($parts($dataIndex[$configurable] ?? null))->toBe($parts($text("batch-conf-{$suffix}", 'Batch configurable', [])))
+        ->and($parts($dataIndex[$bundle] ?? null))->toBe($parts($text("batch-bundle-{$suffix}", 'Batch bundle', ['Batch option'])));
 });
 
 it('reads the batch size from the configuration', function () {
