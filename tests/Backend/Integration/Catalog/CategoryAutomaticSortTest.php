@@ -38,6 +38,7 @@ beforeEach(function (): void {
         ]);
     }
     $this->storeId = (int) Mage::app()->getDefaultStoreView()->getId();
+    Mage::app()->getStore()->setConfig('catalog/recently_products/enabled_recently_viewed', '1');
 });
 
 afterEach(function (): void {
@@ -67,7 +68,7 @@ it('offers the three automatic sorts next to position', function () {
 });
 
 it('offers Most Viewed only when the store records the views of products', function () {
-    $store = Mage::app()->getStore($this->storeId);
+    $store = Mage::app()->getStore();
     $store->setConfig('catalog/recently_products/enabled_recently_viewed', '0');
     expect(array_keys(Mage::getSingleton('catalog/config')->getAutomaticSortOptions()))->not->toContain('most_viewed');
 
