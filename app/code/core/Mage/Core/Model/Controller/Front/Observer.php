@@ -187,7 +187,7 @@ class Mage_Core_Model_Controller_Front_Observer
         $rewrite->loadByRequestPath($requestCases);
 
         $fromStore = $request->getQuery('___from_store');
-        if (!$rewrite->getId() && $fromStore) {
+        if (!$rewrite->getId() && is_string($fromStore) && $fromStore) {
             $this->handleCrossStoreRedirect($rewrite, $response, $fromStore, $requestCases);
             \Maho\Profiler::stop('mage::dispatch::db_url_rewrite');
             return;

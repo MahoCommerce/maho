@@ -211,7 +211,17 @@ describe('Front observer canonical URI with a URL rewrite', function () {
     afterEach(function () {
         Mage::getSingleton('core/resource')->getConnection('core_write')
             ->delete(Mage::getSingleton('core/resource')->getTableName('core/url_rewrite'), ['id_path LIKE ?' => 'pest_canonical_%']);
+        unset($_GET['___from_store']);
         canonicalUriResetConfig();
+    });
+
+    it('adds the slash when ___from_store is an array and no rewrite matches', function () {
+        $_GET['___from_store'] = ['default'];
+
+        $response = canonicalUriDispatch('/pest-no-rewrite', straight: false);
+
+        expect($response->getHttpResponseCode())->toBe(301)
+            ->and(canonicalUriLocation($response))->toBe('/pest-no-rewrite/');
     });
 
     it('goes to the target of a redirect rewrite with one redirect, or adds the slash to any other rewrite', function (string $options, string $target, string $uri, int $code, string $location) {
