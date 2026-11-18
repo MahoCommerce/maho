@@ -119,7 +119,7 @@ function visitCategoryTiles(int $categoryId): object
     );
     $page->click('#category_info_tabs_products');
     $page->click('#category_products_view_tiles');
-    $page->text('.merchandiser-tile:visible');
+    waitForScript($page, "[...document.querySelectorAll('.merchandiser-tile')].some((tile) => tile.offsetParent !== null)");
 
     return $page;
 }
@@ -145,7 +145,7 @@ it('keeps the order that the merchant drags after Save Category and a reload', f
     $page->navigate($page->url());
     $page->click('#category_info_tabs_products');
     $page->click('#category_products_view_tiles');
-    $page->text('.merchandiser-tile:visible');
+    waitForScript($page, "[...document.querySelectorAll('.merchandiser-tile')].some((tile) => tile.offsetParent !== null)");
 
     expect(categoryTilesOrder($page))->toBe("$gamma,$alpha,$beta");
 });
