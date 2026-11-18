@@ -1779,7 +1779,7 @@ return function (SchemaEditor $schema): void {
             ->setUnquotedName('catalog_category_anc_products_index_idx')
             ->addColumn(Schema::column('category_id', Types::INTEGER, unsigned: true, default: 0))
             ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
-            ->addColumn(Schema::column('position', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('position', Types::INTEGER, notNull: false))
             ->addIndex(Index::editor()->setUnquotedColumnNames('category_id', 'product_id', 'position'))
             ->setComment('Catalog Category Anchor Product Indexer Index Table')
             ->create(),
@@ -1790,7 +1790,7 @@ return function (SchemaEditor $schema): void {
             ->setUnquotedName('catalog_category_anc_products_index_tmp')
             ->addColumn(Schema::column('category_id', Types::INTEGER, unsigned: true, default: 0))
             ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
-            ->addColumn(Schema::column('position', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('position', Types::INTEGER, notNull: false))
             ->addIndex(Index::editor()->setUnquotedColumnNames('category_id', 'product_id', 'position'))
             ->setComment('Catalog Category Anchor Product Indexer Temp Table')
             ->create(),
