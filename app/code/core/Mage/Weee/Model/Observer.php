@@ -298,10 +298,11 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
             return $this;
         }
 
-        $amount = $weeeHelper->getAmountForDisplay($_product);
-        $origAmount = $weeeHelper->getOriginalAmount($_product);
+        $store = Mage::app()->getStore();
+        $amount = $store->convertPrice($weeeHelper->getAmountForDisplay($_product));
+        $origAmount = $store->convertPrice($weeeHelper->getOriginalAmount($_product));
         $attributes = $weeeHelper->getProductWeeeAttributes($_product, null, null, null, $weeeHelper->isTaxable());
-        $amountInclTaxes = $weeeHelper->getAmountInclTaxes($attributes);
+        $amountInclTaxes = $store->convertPrice($weeeHelper->getAmountInclTaxes($attributes));
         $taxes = $amountInclTaxes - $amount;
 
         if ($weeeHelper->typeOfDisplay($_product, 3)) {
@@ -350,9 +351,10 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
             return $this;
         }
 
-        $amount = $weeeHelper->getAmountForDisplay($selection);
+        $store = Mage::app()->getStore();
+        $amount = $store->convertPrice($weeeHelper->getAmountForDisplay($selection));
         $attributes = $weeeHelper->getProductWeeeAttributes($_product, null, null, null, $weeeHelper->isTaxable());
-        $amountInclTaxes = $weeeHelper->getAmountInclTaxes($attributes);
+        $amountInclTaxes = $store->convertPrice($weeeHelper->getAmountInclTaxes($attributes));
         $taxes = $amountInclTaxes - $amount;
 
         if ($weeeHelper->typeOfDisplay($_product, 3)) {
