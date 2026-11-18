@@ -463,7 +463,8 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
         $offset = max(0, (int) $this->getRequest()->getPost('offset'));
         $limit = min(100, max(1, (int) $this->getRequest()->getPost('limit', 100)));
 
-        $tiles = $merchandiser->getTiles($category, array_slice($matches, $offset, $limit));
+        $page = array_slice($matches, $offset, $limit);
+        $tiles = $merchandiser->getTiles($category, $page);
         foreach ($tiles as &$tile) {
             $tile['rank'] = $ranks[$tile['id']] + 1;
         }
@@ -472,6 +473,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
         $this->getResponse()->setBodyJson([
             'tiles' => $tiles,
             'total' => count($matches),
+            'consumed' => count($page),
             'order' => $isOrdered ? null : $ids,
         ]);
     }

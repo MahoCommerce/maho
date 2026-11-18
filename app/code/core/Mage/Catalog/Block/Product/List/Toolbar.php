@@ -304,12 +304,7 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
         }
 
         $orders = $this->getAvailableOrders();
-        $defaultOrder = $this->_orderField;
-
-        if (!isset($orders[$defaultOrder])) {
-            $keys = array_keys($orders);
-            $defaultOrder = $keys[0];
-        }
+        $defaultOrder = $this->getEffectiveDefaultOrder();
 
         $order = $this->getRequest()->getParam($this->getOrderVarName());
         if ($order && isset($orders[$order])) {
@@ -362,6 +357,15 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
     }
 
     /**
+     * Retrieve the sort that the toolbar uses when the shopper picks none: the default sort, or the first sort of the list
+     */
+    public function getEffectiveDefaultOrder(): ?string
+    {
+        $orders = $this->getAvailableOrders();
+        return isset($orders[$this->_orderField]) ? $this->_orderField : array_key_first($orders);
+    }
+
+    /**
      * Retrieve the direction that a sort uses when the shopper picks none.
      * The default direction of the page belongs to the default sort only.
      */
@@ -370,7 +374,7 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
         if (in_array($order, Mage_Catalog_Model_Config::DESCENDING_SORTS, true)) {
             return 'desc';
         }
-        return $order === $this->_orderField ? $this->_direction : 'asc';
+        return $order === $this->getEffectiveDefaultOrder() ? $this->_direction : 'asc';
     }
 
     /**

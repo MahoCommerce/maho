@@ -60,6 +60,7 @@ class CategoryMerchandiser {
         this.tiles = new Map();
         this.view = [];
         this.total = 0;
+        this.consumed = 0;
         this.selected = new Set();
         this.isDirty = false;
         this.isLoading = false;
@@ -148,6 +149,9 @@ class CategoryMerchandiser {
         this.ui.tilesButton.setAttribute('aria-pressed', String(isTiles));
         this.ui.gridButton.setAttribute('aria-pressed', String(!isTiles));
         if (isTiles) {
+            if (!this.isManual) {
+                this.order = [];
+            }
             this.refresh();
         } else if (this.isDirty) {
             this.onShowGrid?.();
@@ -260,6 +264,7 @@ class CategoryMerchandiser {
         this.rebuildOrder();
         this.view = [];
         this.total = 0;
+        this.consumed = 0;
         this.selected.clear();
         this.requestId++;
         this.isLoading = false;
@@ -280,7 +285,7 @@ class CategoryMerchandiser {
             return;
         }
         const total = this.isServerPaged() ? this.total : this.order.length;
-        if (this.view.length > 0 && this.view.length >= total) {
+        if (this.view.length > 0 && (this.isServerPaged() ? this.consumed : this.view.length) >= total) {
             return;
         }
         if (!this.isServerPaged() && this.order.length === 0) {
@@ -297,7 +302,7 @@ class CategoryMerchandiser {
                 if (this.order.length > 0) {
                     body.set('ids', this.order.join(','));
                 }
-                body.set('offset', String(this.view.length));
+                body.set('offset', String(this.consumed));
                 body.set('q', this.filters.search);
                 body.set('out_of_stock', this.filters.outOfStock ? '1' : '');
                 body.set('limit', String(CategoryMerchandiser.PAGE_SIZE));
@@ -315,6 +320,7 @@ class CategoryMerchandiser {
             result.tiles.forEach((tile) => this.tiles.set(tile.id, tile));
             this.view.push(...(ids ?? result.tiles.map((tile) => tile.id)));
             this.total = this.isServerPaged() ? result.total : this.order.length;
+            this.consumed += result.consumed ?? 0;
             this.render();
         } catch (error) {
             setMessagesDiv(this.labels.error, 'error');
@@ -323,7 +329,7 @@ class CategoryMerchandiser {
                 this.isLoading = false;
             }
         }
-        if (this.view.length < (this.isServerPaged() ? this.total : this.order.length) && this.isSentinelVisible()) {
+        if ((this.isServerPaged() ? this.consumed : this.view.length) < (this.isServerPaged() ? this.total : this.order.length) && this.isSentinelVisible()) {
             this.loadMore();
         }
     }

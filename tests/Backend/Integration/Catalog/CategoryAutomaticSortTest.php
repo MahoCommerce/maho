@@ -135,6 +135,15 @@ it('lists the highest value first for the automatic sorts, unless the shopper pi
     expect($toolbar->getCurrentDirection())->toBe('desc');
 });
 
+it('gives the default direction of the page to the first sort when the default sort is not available', function () {
+    $toolbar = Mage::app()->getLayout()->createBlock('catalog/product_list_toolbar')
+        ->setAvailableOrders(['name' => 'Name', 'price' => 'Price'])
+        ->setDefaultDirection('desc');
+
+    expect($toolbar->getOrderDirection('name'))->toBe('desc')
+        ->and($toolbar->getOrderDirection('price'))->toBe('asc');
+});
+
 it('gives the default direction of the page to the default sort only', function () {
     $toolbar = Mage::app()->getLayout()->createBlock('catalog/product_list_toolbar')
         ->setAvailableOrders(['relevance' => 'Relevance', 'name' => 'Name', 'price' => 'Price'])
