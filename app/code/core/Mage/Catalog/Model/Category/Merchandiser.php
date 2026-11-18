@@ -116,7 +116,7 @@ class Mage_Catalog_Model_Category_Merchandiser
     }
 
     /**
-     * Retrieve the products of the category that are not in $excluded and match $search, up to $limit.
+     * Retrieve the products of the catalog that are not in $excluded and match $search, up to $limit.
      *
      * @param list<int> $excluded
      * @return list<int>
@@ -215,12 +215,9 @@ class Mage_Catalog_Model_Category_Merchandiser
      */
     protected function getStockStatuses(array $ids, int $storeId): array
     {
-        $websiteId = (int) Mage::app()->getStore($storeId)->getWebsiteId();
-        if ($websiteId === 0) {
-            $websiteId = (int) Mage::app()->getDefaultStoreView()?->getWebsiteId();
-        }
+        $resource = Mage::getResourceSingleton('cataloginventory/stock_status');
         $statuses = [];
-        foreach (Mage::getResourceSingleton('cataloginventory/stock_status')->getProductStatus($ids, $websiteId) as $productId => $status) {
+        foreach ($resource->getProductStatus($ids, $resource->getWebsiteIdOfStore($storeId)) as $productId => $status) {
             $statuses[(int) $productId] = (int) $status === Mage_CatalogInventory_Model_Stock_Status::STATUS_IN_STOCK;
         }
         return $statuses;

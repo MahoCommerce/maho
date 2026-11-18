@@ -219,14 +219,11 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
      * Mage_Catalog_Model_Config::getSortDays() gives, for each store and for all stores (store 0).
      * Each period of the daily table is a calendar day, but the window of this table is exact to the second.
      * The revenue is the row total of the order items, without tax, less the discount.
-     *
-     * @return $this
      */
-    protected function _aggregateRolling()
+    protected function _aggregateRolling(): static
     {
         $adapter = $this->_getWriteAdapter();
         $table = $this->getTable('sales/bestsellers_aggregated_rolling');
-        $columns = ['product_id', 'store_id', 'qty_ordered', 'revenue'];
 
         $select = $adapter->select()
             ->from(['o' => $this->getTable('sales/order')], [
@@ -242,28 +239,7 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
             ->where('o.store_id != ?', Mage_Core_Model_App::ADMIN_STORE_ID)
             ->group(['i.product_id', 'o.store_id']);
 
-        $allStores = $adapter->select()
-            ->from($table, [
-                'product_id',
-                'store_id' => new Maho\Db\Expr((string) Mage_Core_Model_App::ADMIN_STORE_ID),
-                'qty_ordered' => new Maho\Db\Expr('SUM(qty_ordered)'),
-                'revenue' => new Maho\Db\Expr('SUM(revenue)'),
-            ])
-            ->where('store_id != ?', Mage_Core_Model_App::ADMIN_STORE_ID)
-            ->group('product_id');
-
-        $adapter->beginTransaction();
-        try {
-            $adapter->delete($table);
-            $adapter->query($adapter->insertFromSelect($select, $table, $columns));
-            $adapter->query($adapter->insertFromSelect($allStores, $table, $columns));
-            $adapter->commit();
-        } catch (Exception $e) {
-            $adapter->rollBack();
-            throw $e;
-        }
-
-        return $this;
+        return $this->_replaceRollingRows($table, $select, ['qty_ordered', 'revenue']);
     }
 
     /**

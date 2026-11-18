@@ -51,7 +51,6 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Products extends Mage_Adminhtml_
         $helper = Mage::helper('catalog');
         $isManual = $merchandiser->isManual($category);
         $storeId = (int) $category->getStoreId();
-        $days = Mage::getSingleton('catalog/config')->getSortDays();
 
         $readonlyMessage = '';
         if (!$isManual) {
@@ -74,7 +73,6 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Products extends Mage_Adminhtml_
             'placement' => $category->getNewProductPlacement(),
             'outOfStockLast' => $category->getOutOfStockLast(),
             'pinned' => $category->getPinnedProducts(),
-            'salesDays' => $days,
             'salesUpdatedAt' => $this->formatUpdatedAt($merchandiser->getUpdatedAt('bestsellers')),
             'viewsUpdatedAt' => $merchandiser->getSort($category) === Mage_Catalog_Model_Config::SORT_MOST_VIEWED
                 ? $this->formatUpdatedAt($merchandiser->getUpdatedAt('viewed'))

@@ -1271,7 +1271,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      */
     public function addOutOfStockLastSort(): static
     {
-        $websiteId = (int) Mage::app()->getStore($this->getStoreId())->getWebsiteId();
+        $websiteId = Mage::getResourceSingleton('cataloginventory/stock_status')->getWebsiteIdOfStore((int) $this->getStoreId());
         $this->getSelect()
             ->joinLeft(
                 ['stock_status_sort' => $this->getTable('cataloginventory/stock_status')],

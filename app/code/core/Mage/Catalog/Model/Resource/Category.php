@@ -383,10 +383,9 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
     /**
      * Get the IDs of the products that keep their slot in the manual order
      *
-     * @param Mage_Catalog_Model_Category $category
      * @return list<int>
      */
-    public function getPinnedProducts($category): array
+    public function getPinnedProducts(Mage_Catalog_Model_Category $category): array
     {
         $select = $this->_getWriteAdapter()->select()
             ->from($this->_categoryProductTable, ['product_id'])

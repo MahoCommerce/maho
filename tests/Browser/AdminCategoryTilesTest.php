@@ -150,6 +150,25 @@ it('keeps the order that the merchant drags after Save Category and a reload', f
     expect(categoryTilesOrder($page))->toBe("$gamma,$alpha,$beta");
 });
 
+it('saves the product that the merchant pins', function () {
+    $fixtures = createCategoryTilesFixtures();
+    [, $beta] = $fixtures['products'];
+
+    $page = visitCategoryTiles($fixtures['category']);
+    $page->click(".merchandiser-tile[data-id=\"$beta\"] .merchandiser-pin");
+    $page->click('button.save');
+    $page->text('.success-msg');
+
+    $resource = Mage::getSingleton('core/resource');
+    $adapter = $resource->getConnection('core_read');
+    $isPinned = $adapter->fetchOne($adapter->select()
+        ->from($resource->getTableName('catalog/category_product'), ['is_pinned'])
+        ->where('category_id = ?', $fixtures['category'])
+        ->where('product_id = ?', $beta));
+
+    expect((int) $isPinned)->toBe(1);
+});
+
 it('shows read-only tiles and the reason when the category sorts by Bestsellers', function () {
     $fixtures = createCategoryTilesFixtures('bestsellers');
 

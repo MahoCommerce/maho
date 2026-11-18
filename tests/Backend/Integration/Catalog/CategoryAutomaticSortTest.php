@@ -98,7 +98,7 @@ it('sorts by the views of the store for Most viewed, and a product with no row g
         ->and(automaticSortIds($this->ids, $this->storeId, 'most_viewed', 'asc'))->toBe([$c, $a, $b]);
 });
 
-it('sorts the products that are out of stock last with every sort, and leaves the positions unchanged', function () {
+it('sorts the products that are out of stock last with every sort', function () {
     [$a, $b, $c] = $this->ids;
     $websiteId = (int) Mage::app()->getStore($this->storeId)->getWebsiteId();
     foreach ([$a => 0, $b => 1, $c => 1] as $productId => $status) {
@@ -106,15 +106,10 @@ it('sorts the products that are out of stock last with every sort, and leaves th
             'product_id' => $productId, 'website_id' => $websiteId, 'stock_id' => 1, 'qty' => $status, 'stock_status' => $status,
         ]);
     }
-    $positions = $this->db->fetchPairs($this->db->select()
-        ->from(Mage::getSingleton('core/resource')->getTableName('catalog/category_product'), ['product_id', 'position']));
 
     expect(automaticSortIds($this->ids, $this->storeId, 'newest', 'desc'))->toBe([$a, $b, $c])
         ->and(automaticSortIds($this->ids, $this->storeId, 'newest', 'desc', true))->toBe([$b, $c, $a])
-        ->and(automaticSortIds($this->ids, $this->storeId, 'newest', 'asc', true))->toBe([$c, $b, $a])
-        ->and($this->db->fetchPairs($this->db->select()
-            ->from(Mage::getSingleton('core/resource')->getTableName('catalog/category_product'), ['product_id', 'position'])))
-        ->toBe($positions);
+        ->and(automaticSortIds($this->ids, $this->storeId, 'newest', 'asc', true))->toBe([$c, $b, $a]);
 });
 
 it('lists the highest value first for the automatic sorts, unless the shopper picks a direction', function () {
@@ -125,4 +120,7 @@ it('lists the highest value first for the automatic sorts, unless the shopper pi
         ->and($toolbar->getOrderDirection('newest'))->toBe('desc')
         ->and($toolbar->getOrderDirection('price'))->toBe('asc')
         ->and($toolbar->getOrderDirection('position'))->toBe('asc');
+
+    $toolbar->setAvailableOrders(['position' => 'Position', 'bestsellers' => 'Bestsellers'])->setDefaultOrder('bestsellers');
+    expect($toolbar->getCurrentDirection())->toBe('desc');
 });

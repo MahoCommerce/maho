@@ -18,7 +18,7 @@
                 <label for="toolbar-sortby"><?= $this->__('Sort By') ?></label>
                 <select id="toolbar-sortby" onchange="window.location.href=this.value" title="<?= $this->quoteEscape($this->__('Sort By')) ?>">
                     <?php foreach ($this->getAvailableOrders() as $_key => $_order): ?>
-                        <option value="<?= $this->getOrderUrl($_key, $this->getOrderDirection($_key)) ?>"<?php if ($this->isOrderCurrent($_key)): ?> selected="selected"<?php endif ?>>
+                        <option value="<?= $this->getOrderUrl($_key, in_array($_key, Mage_Catalog_Model_Config::DESCENDING_SORTS, true) ? 'desc' : 'asc') ?>"<?php if ($this->isOrderCurrent($_key)): ?> selected="selected"<?php endif ?>>
                             <?= $this->__($_order) ?>
                         </option>
                     <?php endforeach ?>

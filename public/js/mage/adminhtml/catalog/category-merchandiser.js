@@ -293,7 +293,7 @@ class CategoryMerchandiser {
             const body = new URLSearchParams();
             let ids;
             if (this.isServerPaged()) {
-                if (this.isManual) {
+                if (this.order.length > 0) {
                     body.set('ids', this.order.join(','));
                 }
                 body.set('offset', String(this.view.length));
@@ -307,6 +307,9 @@ class CategoryMerchandiser {
             const result = await mahoFetch(this.config.tilesUrl, { method: 'POST', body, loaderArea: false });
             if (requestId !== this.requestId) {
                 return;
+            }
+            if (result.order) {
+                this.order = result.order;
             }
             result.tiles.forEach((tile) => this.tiles.set(tile.id, tile));
             this.view.push(...(ids ?? result.tiles.map((tile) => tile.id)));
@@ -339,9 +342,11 @@ class CategoryMerchandiser {
         if (missing.length === 0) {
             return;
         }
-        const body = new URLSearchParams({ ids: missing.join(',') });
-        const result = await mahoFetch(this.config.tilesUrl, { method: 'POST', body, loaderArea: false });
-        result.tiles.forEach((tile) => this.tiles.set(tile.id, tile));
+        for (let start = 0; start < missing.length; start += CategoryMerchandiser.PAGE_SIZE) {
+            const body = new URLSearchParams({ ids: missing.slice(start, start + CategoryMerchandiser.PAGE_SIZE).join(',') });
+            const result = await mahoFetch(this.config.tilesUrl, { method: 'POST', body, loaderArea: false });
+            result.tiles.forEach((tile) => this.tiles.set(tile.id, tile));
+        }
     }
 
     rankOf(tile) {

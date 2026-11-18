@@ -110,6 +110,19 @@ it('lists the products in the order of the storefront, and the products that are
     expect($ours($this->merchandiser->getStorefrontOrder($category)))->toBe([$b, $c, $a]);
 });
 
+it('puts the products that are out of stock last in the default scope, with the stock of the default store view', function () {
+    [$a, $b, $c] = $this->ids;
+    $this->db->insertMultiple($this->tables['sales'], [
+        ['product_id' => $a, 'store_id' => 0, 'qty_ordered' => 9, 'revenue' => 90],
+        ['product_id' => $b, 'store_id' => 0, 'qty_ordered' => 4, 'revenue' => 40],
+    ]);
+    $ours = static fn(array $order): array => array_values(array_intersect($order, [$a, $b, $c]));
+
+    $category = merchandiserCategory(0, $this->rootId, ['default_sort_by' => 'bestsellers', 'available_sort_by' => null, 'out_of_stock_last' => 1]);
+
+    expect($ours($this->merchandiser->getStorefrontOrder($category)))->toBe([$b, $c, $a]);
+});
+
 it('gives each tile the stock status and the sales of the last days', function () {
     [$a, $b] = $this->ids;
     $this->db->insert($this->tables['sales'], ['product_id' => $a, 'store_id' => $this->storeId, 'qty_ordered' => 9, 'revenue' => 90]);

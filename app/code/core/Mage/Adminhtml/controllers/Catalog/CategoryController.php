@@ -439,16 +439,19 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * Retrieve a page of tiles for the product tile view.
      * A category that sorts by position takes its order from the posted IDs, which hold the moves that the
-     * admin has not saved. Any other category takes the order of the storefront.
+     * admin has not saved. Any other category takes the order of the storefront, and sends it back in `order`,
+     * so that the next pages post it and do not read the storefront again.
      */
     #[Maho\Config\Route('/admin/catalog_category/tiles', methods: ['POST'])]
     public function tilesAction(): void
     {
         $category = $this->_initCategory(true);
         $merchandiser = Mage::getModel('catalog/category_merchandiser');
-        $ids = $merchandiser->isManual($category)
-            ? $this->_getPostedProductIds('ids')
-            : $merchandiser->getStorefrontOrder($category);
+        $ids = $this->_getPostedProductIds('ids');
+        $isOrdered = $merchandiser->isManual($category) || $ids !== [];
+        if (!$isOrdered) {
+            $ids = $merchandiser->getStorefrontOrder($category);
+        }
         $ranks = array_flip($ids);
 
         $matches = $merchandiser->filter(
@@ -469,6 +472,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
         $this->getResponse()->setBodyJson([
             'tiles' => $tiles,
             'total' => count($matches),
+            'order' => $isOrdered ? null : $ids,
         ]);
     }
 

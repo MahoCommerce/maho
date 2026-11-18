@@ -228,3 +228,14 @@ it('puts the products that a dynamic category rule adds at the place that the ca
     'top' => ['top', 'bca'],
     'bottom' => ['bottom', 'abc'],
 ]);
+
+it('keeps a pinned product in the last slot when its slot is past the end of the list after other products leave', function () {
+    [$a, $b, $c, $d, $e] = manualOrderProducts(5);
+    $category = manualOrderCategory();
+    manualOrderSave($category, [$a => 1, $b => 2, $c => 3, $d => 4, $e => 5], [$e]);
+
+    manualOrderSave($category, [$c => 3, $d => 4, $e => 5]);
+
+    expect(manualOrderList($category))->toBe([$c, $d, $e])
+        ->and(manualOrderRows($category)[$e]['position'])->toBe(3);
+});
