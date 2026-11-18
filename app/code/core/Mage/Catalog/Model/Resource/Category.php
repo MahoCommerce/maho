@@ -348,16 +348,17 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
                 $pinChanged[] = $productId;
             }
         }
+        $changed = [];
         foreach (array_unique(array_merge(array_keys($update), $pinChanged)) as $productId) {
-            $where = [
-                'category_id = ?' => (int) $id,
-                'product_id = ?' => (int) $productId,
-            ];
-            $bind  = [
+            $changed[] = [
+                'category_id' => (int) $id,
+                'product_id' => (int) $productId,
                 'position' => (int) $products[$productId],
                 'is_pinned' => (int) isset($newPinned[$productId]),
             ];
-            $adapter->update($this->_categoryProductTable, $bind, $where);
+        }
+        if ($changed !== []) {
+            $adapter->insertOnDuplicate($this->_categoryProductTable, $changed, ['position', 'is_pinned']);
         }
 
         if (!empty($insert) || !empty($delete)) {
