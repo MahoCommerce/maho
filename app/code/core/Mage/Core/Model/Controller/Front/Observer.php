@@ -123,26 +123,22 @@ class Mage_Core_Model_Controller_Front_Observer
 
         // A leading "//" or "/\" makes the browser read the Location as another origin.
         $path = '/' . ltrim(preg_replace('#/{2,}#', '/', $path), '/\\');
+        $onlyTrailingSlashDiffers = $path . $query === $requestUri;
         $urlHelper = Mage::helper('core/url');
         $path = $urlHelper->keepBasePathSlash($urlHelper->addOrRemoveTrailingSlash($path));
 
         $canonicalUri = $path . $query;
-        // A redirect rewrite of this path redirects later in the chain, so the client gets one hop.
-        if ($canonicalUri !== $requestUri && !$this->hasRedirectRewrite($request)) {
-            $response->setRedirect($canonicalUri, 301);
+        if ($canonicalUri === $requestUri) {
+            return;
         }
-    }
-
-    private function hasRedirectRewrite(Mage_Core_Controller_Request_Http $request): bool
-    {
-        if (Mage::app()->getStore()->isAdmin() || $request->isStraight()) {
-            return false;
+        // When a rewrite of this path redirects, the client goes to its target with one redirect, not two.
+        if ($onlyTrailingSlashDiffers) {
+            $this->rewriteDb($request, $response);
+            if ($response->isRedirect()) {
+                return;
+            }
         }
-        $urlHelper = Mage::helper('core/url');
-        $rewrite = Mage::getModel('core/url_rewrite')
-            ->setStoreId((int) Mage::app()->getStore()->getId())
-            ->loadByRequestPath($urlHelper->getRequestPathCandidates($request->getPathInfo(), $urlHelper->getRewriteQueryString($request)));
-        return $rewrite->getId() && ($rewrite->hasOption('R') || $rewrite->hasOption('RP'));
+        $response->setRedirect($canonicalUri, 301);
     }
 
     /**

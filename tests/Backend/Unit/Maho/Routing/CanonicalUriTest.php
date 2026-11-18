@@ -214,22 +214,25 @@ describe('Front observer canonical URI with a URL rewrite', function () {
         canonicalUriResetConfig();
     });
 
-    it('goes to the target of a redirect rewrite in one hop, or adds the slash to any other rewrite', function (string $options, string $location) {
+    it('goes to the target of a redirect rewrite with one redirect, or adds the slash to any other rewrite', function (string $options, string $target, string $uri, int $code, string $location) {
         Mage::getSingleton('core/resource')->getConnection('core_write')->insert(Mage::getSingleton('core/resource')->getTableName('core/url_rewrite'), [
             'store_id' => (int) Mage::app()->getStore()->getId(),
             'id_path' => 'pest_canonical_' . uniqid(),
             'request_path' => 'pest-old-brand/',
-            'target_path' => $options === '' ? 'catalog/category/view/id/3' : 'pest-new-brand/',
+            'target_path' => $target,
             'is_system' => 0,
             'options' => $options,
         ]);
 
-        $response = canonicalUriDispatch('/pest-old-brand', straight: false);
+        $response = canonicalUriDispatch($uri, straight: false);
 
-        expect(canonicalUriLocation($response))->toBe($location);
+        expect($response->getHttpResponseCode())->toBe($code)
+            ->and(canonicalUriLocation($response))->toBe($location);
     })->with([
-        'permanent redirect' => ['RP', '/pest-new-brand/'],
-        'temporary redirect' => ['R', '/pest-new-brand/'],
-        'no redirect' => ['', '/pest-old-brand/'],
+        'permanent redirect' => ['RP', 'pest-new-brand/', '/pest-old-brand', 301, '/pest-new-brand/'],
+        'temporary redirect' => ['R', 'pest-new-brand/', '/pest-old-brand', 302, '/pest-new-brand/'],
+        'external target' => ['', 'https://example.com/new-brand/', '/pest-old-brand', 302, 'https://example.com/new-brand/'],
+        'no redirect' => ['', 'catalog/category/view/id/3', '/pest-old-brand', 301, '/pest-old-brand/'],
+        'script name in the path' => ['RP', 'pest-new-brand/', '/index.php/pest-old-brand', 301, '/pest-old-brand/'],
     ]);
 });
