@@ -336,7 +336,9 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
                     'is_pinned'   => (int) isset($newPinned[$productId]),
                 ];
             }
-            $adapter->insertMultiple($this->_categoryProductTable, $data);
+            foreach (array_chunk($data, 1000) as $chunk) {
+                $adapter->insertMultiple($this->_categoryProductTable, $chunk);
+            }
         }
 
         /**
