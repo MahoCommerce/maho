@@ -123,13 +123,22 @@ class Mage_Core_Model_Controller_Front_Observer
 
         // A leading "//" or "/\" makes the browser read the Location as another origin.
         $path = '/' . ltrim(preg_replace('#/{2,}#', '/', $path), '/\\');
+        $onlyTrailingSlashDiffers = $path . $query === $requestUri;
         $urlHelper = Mage::helper('core/url');
         $path = $urlHelper->keepBasePathSlash($urlHelper->addOrRemoveTrailingSlash($path));
 
         $canonicalUri = $path . $query;
-        if ($canonicalUri !== $requestUri) {
-            $response->setRedirect($canonicalUri, 301);
+        if ($canonicalUri === $requestUri) {
+            return;
         }
+        // When a rewrite of this path redirects, the client goes to its target with one redirect, not two.
+        if ($onlyTrailingSlashDiffers) {
+            $this->rewriteDb($request, $response);
+            if ($response->isRedirect()) {
+                return;
+            }
+        }
+        $response->setRedirect($canonicalUri, 301);
     }
 
     /**
@@ -178,7 +187,7 @@ class Mage_Core_Model_Controller_Front_Observer
         $rewrite->loadByRequestPath($requestCases);
 
         $fromStore = $request->getQuery('___from_store');
-        if (!$rewrite->getId() && $fromStore) {
+        if (!$rewrite->getId() && is_string($fromStore) && $fromStore) {
             $this->handleCrossStoreRedirect($rewrite, $response, $fromStore, $requestCases);
             \Maho\Profiler::stop('mage::dispatch::db_url_rewrite');
             return;
