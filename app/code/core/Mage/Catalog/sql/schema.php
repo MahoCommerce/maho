@@ -300,6 +300,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('category_id', Types::INTEGER, unsigned: true, default: 0))
             ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
             ->addColumn(Schema::column('position', Types::INTEGER, default: 0))
+            ->addColumn(Schema::column('is_pinned', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('category_id', 'product_id')

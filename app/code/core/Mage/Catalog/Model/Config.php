@@ -11,6 +11,16 @@
 class Mage_Catalog_Model_Config extends Mage_Eav_Model_Config
 {
     public const XML_PATH_LIST_DEFAULT_SORT_BY     = 'catalog/frontend/default_sort_by';
+    public const XML_PATH_SORT_DAYS                = 'catalog/frontend/sort_days';
+
+    public const SORT_NEWEST      = 'newest';
+    public const SORT_BESTSELLERS = 'bestsellers';
+    public const SORT_MOST_VIEWED = 'most_viewed';
+
+    /**
+     * Sorts that list the highest value first, unless the shopper picks a direction.
+     */
+    public const DESCENDING_SORTS = [self::SORT_NEWEST, self::SORT_BESTSELLERS, self::SORT_MOST_VIEWED];
 
     protected ?array $_attributeSetsById = null;
     protected ?array $_attributeSetsByName = null;
@@ -364,7 +374,42 @@ class Mage_Catalog_Model_Config extends Mage_Eav_Model_Config
             $options[$attribute->getAttributeCode()] = $attribute->getStoreLabel();
         }
 
+        return $options + $this->getAutomaticSortOptions();
+    }
+
+    /**
+     * Retrieve the sorts that the store computes, with the code as key and the label as value.
+     * The Most Viewed sort needs the Mage_Reports module.
+     *
+     * @return array<string, string>
+     */
+    public function getAutomaticSortOptions(): array
+    {
+        $helper = Mage::helper('catalog');
+        $options = [
+            self::SORT_NEWEST => $helper->__('Newest'),
+            self::SORT_BESTSELLERS => $helper->__('Bestsellers'),
+        ];
+        if ($helper->isModuleEnabled('Mage_Reports')) {
+            $options[self::SORT_MOST_VIEWED] = $helper->__('Most Viewed');
+        }
         return $options;
+    }
+
+    /**
+     * Retrieve the number of days that the Bestsellers and Most Viewed sorts count.
+     */
+    public function getSortDays(): int
+    {
+        return max(1, Mage::getStoreConfigAsInt(self::XML_PATH_SORT_DAYS));
+    }
+
+    /**
+     * Retrieve the start of the window that the Bestsellers and Most Viewed sorts count, in UTC ('Y-m-d H:i:s').
+     */
+    public function getSortWindowStart(): string
+    {
+        return (string) Mage::app()->getLocale()->formatDateForDb('-' . $this->getSortDays() . ' days');
     }
 
     /**

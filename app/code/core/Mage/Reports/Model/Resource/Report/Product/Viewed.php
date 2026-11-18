@@ -189,7 +189,57 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed extends Mage_Sales_Model
         $helper
             ->updateReportRatingPos('year', 'views_num', $mainTable, $this->getTable(self::AGGREGATION_YEARLY));
 
+        $this->_aggregateRolling();
+
         $this->_setFlagData(Mage_Reports_Model_Flag::REPORT_PRODUCT_VIEWED_FLAG_CODE);
+
+        return $this;
+    }
+
+    /**
+     * Rebuild the rolling table: the views of each product in the last days that
+     * Mage_Catalog_Model_Config::getSortDays() gives, for each store and for all stores (store 0).
+     * Each period of the daily table is a calendar day, but the window of this table is exact to the second.
+     *
+     * @return $this
+     */
+    protected function _aggregateRolling()
+    {
+        $adapter = $this->_getWriteAdapter();
+        $table = $this->getTable('reports/viewed_aggregated_rolling');
+        $columns = ['product_id', 'store_id', 'views_num'];
+
+        $select = $adapter->select()
+            ->from(['e' => $this->getTable('reports/event')], [
+                'product_id' => 'e.object_id',
+                'store_id' => 'e.store_id',
+                'views_num' => new Maho\Db\Expr('COUNT(e.event_id)'),
+            ])
+            ->joinInner(['p' => $this->getTable('catalog/product')], 'p.entity_id = e.object_id', [])
+            ->where('e.event_type_id = ?', Mage_Reports_Model_Event::EVENT_PRODUCT_VIEW)
+            ->where('e.store_id != ?', Mage_Core_Model_App::ADMIN_STORE_ID)
+            ->where('e.logged_at >= ?', Mage::getSingleton('catalog/config')->getSortWindowStart())
+            ->group(['e.object_id', 'e.store_id']);
+
+        $allStores = $adapter->select()
+            ->from($table, [
+                'product_id',
+                'store_id' => new Maho\Db\Expr((string) Mage_Core_Model_App::ADMIN_STORE_ID),
+                'views_num' => new Maho\Db\Expr('SUM(views_num)'),
+            ])
+            ->where('store_id != ?', Mage_Core_Model_App::ADMIN_STORE_ID)
+            ->group('product_id');
+
+        $adapter->beginTransaction();
+        try {
+            $adapter->delete($table);
+            $adapter->query($adapter->insertFromSelect($select, $table, $columns));
+            $adapter->query($adapter->insertFromSelect($allStores, $table, $columns));
+            $adapter->commit();
+        } catch (Exception $e) {
+            $adapter->rollBack();
+            throw $e;
+        }
 
         return $this;
     }

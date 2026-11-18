@@ -342,9 +342,10 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
         }
 
         $directions = ['asc', 'desc'];
+        $defaultDirection = $this->getOrderDirection($this->getCurrentOrder());
         $dir = strtolower($this->getRequest()->getParam($this->getDirectionVarName(), ''));
         if ($dir && in_array($dir, $directions)) {
-            if ($dir == $this->_direction) {
+            if ($dir == $defaultDirection) {
                 Mage::getSingleton('catalog/session')->unsSortDirection();
             } else {
                 $this->_memorizeParam('sort_direction', $dir);
@@ -354,10 +355,18 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
         }
         // validate direction
         if (!$dir || !in_array($dir, $directions)) {
-            $dir = $this->_direction;
+            $dir = $defaultDirection;
         }
         $this->setData('_current_grid_direction', $dir);
         return $dir;
+    }
+
+    /**
+     * Retrieve the direction that a sort uses when the shopper picks none
+     */
+    public function getOrderDirection(string $order): string
+    {
+        return in_array($order, Mage_Catalog_Model_Config::DESCENDING_SORTS, true) ? 'desc' : $this->_direction;
     }
 
     /**

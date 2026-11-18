@@ -1,0 +1,51 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
+ */
+
+/** @var Mage_Adminhtml_Block_Catalog_Category_Tab_Products $this */
+$labels = $this->getLabels();
+?>
+<?php if ($this->hasTiles()): ?>
+<div class="merchandiser-views d-join" role="group" aria-label="<?= $this->escapeHtml($labels['view']) ?>">
+    <button type="button" class="d-join-item" id="category_products_view_grid" aria-pressed="true"><?= $this->escapeHtml($labels['grid']) ?></button>
+    <button type="button" class="d-join-item" id="category_products_view_tiles" aria-pressed="false"><?= $this->escapeHtml($labels['tiles']) ?></button>
+</div>
+<?php endif ?>
+<div id="category_products_grid_view">
+    <?= $this->getGridBlock()->toHtml() ?>
+</div>
+<?php if ($this->hasTiles()): ?>
+<div id="category_products_tiles_view" class="merchandiser" hidden>
+    <div class="merchandiser-notes" id="merchandiser_notes" hidden></div>
+    <div class="merchandiser-toolbar">
+        <input type="search" class="d-input d-input-sm" id="merchandiser_search" placeholder="<?= $this->escapeHtml($labels['search']) ?>" aria-label="<?= $this->escapeHtml($labels['search']) ?>">
+        <label class="merchandiser-check">
+            <input type="checkbox" class="d-checkbox d-checkbox-sm" id="merchandiser_out_of_stock">
+            <?= $this->escapeHtml($labels['outOfStockOnly']) ?>
+        </label>
+        <span class="merchandiser-add" id="merchandiser_add_box">
+            <input type="search" class="d-input d-input-sm" id="merchandiser_add" placeholder="<?= $this->escapeHtml($labels['add']) ?>" aria-label="<?= $this->escapeHtml($labels['add']) ?>" autocomplete="off">
+            <ul class="merchandiser-add-results" id="merchandiser_add_results" hidden></ul>
+        </span>
+        <button type="button" class="d-btn-sm" id="merchandiser_reset"><?= $this->escapeHtml($labels['reset']) ?></button>
+    </div>
+    <div class="merchandiser-bulk" id="merchandiser_bulk">
+        <span id="merchandiser_selected"></span>
+        <button type="button" class="d-btn-sm" data-action="top"><?= $this->escapeHtml($labels['moveTop']) ?></button>
+        <button type="button" class="d-btn-sm" data-action="bottom"><?= $this->escapeHtml($labels['moveBottom']) ?></button>
+        <span class="merchandiser-position-move">
+            <input type="number" min="1" class="d-input d-input-sm" id="merchandiser_position" aria-label="<?= $this->escapeHtml($labels['movePosition']) ?>" placeholder="<?= $this->escapeHtml($labels['position']) ?>">
+            <button type="button" class="d-btn-sm" data-action="position"><?= $this->escapeHtml($labels['movePosition']) ?></button>
+        </span>
+        <button type="button" class="d-btn-sm" data-action="pin"><?= $this->escapeHtml($labels['pin']) ?></button>
+        <button type="button" class="d-btn-sm" data-action="unpin"><?= $this->escapeHtml($labels['unpin']) ?></button>
+    </div>
+    <ol class="merchandiser-tiles" id="merchandiser_tiles"></ol>
+    <p class="merchandiser-empty" id="merchandiser_empty" hidden></p>
+    <div id="merchandiser_sentinel" aria-hidden="true"></div>
+    <div class="merchandiser-statistics" id="merchandiser_statistics"></div>
+</div>
+<?php endif ?>

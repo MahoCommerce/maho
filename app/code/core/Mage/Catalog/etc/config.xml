@@ -8,7 +8,7 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Mage_Catalog>
-            <version>2.0.4</version>
+            <version>2.0.5</version>
         </Mage_Catalog>
     </modules>
     <admin>
@@ -701,6 +701,7 @@ SPDX-License-Identifier: AFL-3.0
                 <grid_per_page>12</grid_per_page>
                 <list_per_page>10</list_per_page>
                 <default_sort_by>position</default_sort_by>
+                <sort_days>30</sort_days>
                 <parse_url_directives>1</parse_url_directives>
                 <enable_addtocart_in_product_listings>1</enable_addtocart_in_product_listings>
                 <category_image_fallback>0</category_image_fallback>
