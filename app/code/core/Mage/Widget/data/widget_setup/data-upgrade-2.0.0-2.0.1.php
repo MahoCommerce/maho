@@ -16,6 +16,7 @@
  * To get them back, enable the module and save each of these widget instances again.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Widget
  */
