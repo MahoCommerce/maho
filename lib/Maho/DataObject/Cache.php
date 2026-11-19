@@ -40,14 +40,14 @@ class Cache
     protected $_objects = [];
 
     /**
-     * SPL object hashes
+     * Cache keys by object ID
      *
      * @var array
      */
     protected $_hashes = [];
 
     /**
-     * SPL hashes by object
+     * Object IDs by cache key
      *
      * @var array
      */
@@ -136,16 +136,17 @@ class Cache
             return false;
         }
 
-        $hash = spl_object_hash($object);
+        $objectId = spl_object_id($object);
         if (!is_null($idx) && strpos($idx, '{')) {
-            $idx = str_replace('{hash}', $hash, $idx);
+            // Preserve the format used in cache keys that contain {hash}.
+            $idx = str_replace('{hash}', sprintf('%016x0000000000000000', $objectId), $idx);
         }
-        if (isset($this->_hashes[$hash])) {
+        if (isset($this->_hashes[$objectId])) {
             //throw new Exception('test');
             if (!is_null($idx)) {
-                $this->_references[$idx] = $this->_hashes[$hash];
+                $this->_references[$idx] = $this->_hashes[$objectId];
             }
-            return $this->_hashes[$hash];
+            return $this->_hashes[$objectId];
         }
 
         $idx ??= '#' . (++$this->_idx);
@@ -155,8 +156,8 @@ class Cache
 
         $this->_objects[$idx] = $object;
 
-        $this->_hashes[$hash] = $idx;
-        $this->_objectHashes[$idx] = $hash;
+        $this->_hashes[$objectId] = $idx;
+        $this->_objectHashes[$idx] = $objectId;
 
         if (is_string($tags)) {
             $this->_tags[$tags][$idx] = true;
@@ -313,7 +314,7 @@ class Cache
 
     public function findByHash(string $hash): ?object
     {
-        return isset($this->_hashes[$hash]) ? $this->_objects[$this->_hashes[$hash]] : null;
+        return isset($this->_hashes[$objectId]) ? $this->_objects[$this->_hashes[$objectId]] : null;
     }
 
     /**

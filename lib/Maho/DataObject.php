@@ -778,7 +778,8 @@ class DataObject implements ArrayAccess, JsonSerializable
     public function debug($data = null, &$objects = [])
     {
         if (is_null($data)) {
-            $hash = spl_object_hash($this);
+            // Keep the original hash format in the caller's visited-object array.
+            $hash = sprintf('%016x0000000000000000', spl_object_id($this));
             if (!empty($objects[$hash])) {
                 return '*** RECURSION ***';
             }
