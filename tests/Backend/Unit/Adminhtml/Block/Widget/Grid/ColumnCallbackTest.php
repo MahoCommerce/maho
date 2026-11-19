@@ -70,7 +70,7 @@ it('does not call a frame callback that is not bound to an object', function (mi
     '[Class, method] array' => [gridColumnCallbackStatic('frame')],
 ]);
 
-it('calls a frame callback that is bound to an object', function (mixed $callback) {
+it('calls a frame callback that is bound to an object', function (callable $callback) {
     $column = gridColumnCallbackColumn(['frame_callback' => $callback]);
 
     expect($column->getRowField(new Maho\DataObject(['name' => 'value'])))->toBe('framed');

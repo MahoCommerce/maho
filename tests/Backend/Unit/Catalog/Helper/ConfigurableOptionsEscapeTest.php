@@ -44,6 +44,20 @@ it('escapes the configurable option labels that an order keeps', function (strin
     Mage_Sales_Block_Order_Email_Items_Default::class,
 ]);
 
+it('does not cut an HTML entity when it truncates an option value', function (string $value, string $expected): void {
+    $block = new Mage_Sales_Block_Order_Item_Renderer_Default();
+    $catalogResult = Mage::helper('catalog/product_configuration')->getFormattedOptionValue($value, ['max_length' => 55, 'cut_replacer' => '']);
+
+    expect($block->getFormatedOptionValue($value)['value'])->toStartWith($expected)
+        ->and($catalogResult['value'])->toBe($expected)
+        ->and($catalogResult['full_view'])->toBe($value);
+})->with([
+    'quotation mark at the boundary' => [str_repeat('a', 52) . '&quot;b', str_repeat('a', 52)],
+    'ampersand at the boundary' => [str_repeat('a', 53) . '&amp;b', str_repeat('a', 53)],
+    'numeric entity at the boundary' => [str_repeat('a', 54) . '&#039;b', str_repeat('a', 54)],
+    'full entity before the boundary' => [str_repeat('a', 50) . '&amp;' . str_repeat('b', 5), str_repeat('a', 50) . '&amp;'],
+]);
+
 it('escapes the configurable option labels in the order email', function (): void {
     $orderItem = Mage::getModel('sales/order_item')->setProductOptions(['attributes_info' => rawAttributesInfo()]);
     $block = new Mage_Sales_Block_Order_Email_Items_Order_Default();

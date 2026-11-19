@@ -110,6 +110,18 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
     }
 
     /**
+     * Cut an HTML option value to $length characters, without a part of an HTML entity at the end.
+     */
+    public function truncateOptionValue(string $value, int $length): string
+    {
+        $truncated = Mage::helper('core/string')->truncate($value, $length, '');
+        if ($truncated === $value) {
+            return $truncated;
+        }
+        return (string) preg_replace('/&#?[a-z0-9]*$/iD', '', $truncated);
+    }
+
+    /**
      * Retrieves configuration options for grouped product
      *
      * @return array
@@ -229,7 +241,7 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
             return ['value' => $truncatedValue];
         }
         if ($maxLength) {
-            $truncatedValue = Mage::helper('core/string')->truncate($optionValue, $maxLength, '');
+            $truncatedValue = $this->truncateOptionValue((string) $optionValue, (int) $maxLength);
         } else {
             $truncatedValue = $optionValue;
         }

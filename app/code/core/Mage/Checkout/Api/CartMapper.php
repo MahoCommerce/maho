@@ -516,8 +516,8 @@ class CartMapper
                 $label = $option['label'] ?? '';
                 $value = $option['value'] ?? '';
 
-                // The helpers return HTML option values, and JSON carries plain text
-                $toText = static fn(mixed $v): string => strip_tags(html_entity_decode((string) $v, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+                // The helpers return HTML option values, and JSON carries plain text. Strip the tags first, so an escaped "<" stays text
+                $toText = static fn(mixed $v): string => html_entity_decode(strip_tags((string) $v), ENT_QUOTES | ENT_HTML5, 'UTF-8');
                 $value = is_array($value) ? implode(', ', array_map($toText, $value)) : $toText($value);
 
                 if ($label !== '' && $value !== '') {

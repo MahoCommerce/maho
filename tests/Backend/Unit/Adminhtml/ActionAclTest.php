@@ -363,6 +363,44 @@ it('refuses a create step of an order edit for another customer or store', funct
     'start of a new order allowed' => ['start', ['customer_id' => '4'], true],
 ]);
 
+it('refuses an order edit step whose order[comment] names another customer or store', function (array $comment, bool $expected): void {
+    actionAclLogin(['sales/order/actions/edit']);
+    $request = actionAclRequest('save', [], ['order' => ['comment' => $comment]]);
+    $controller = new Mage_Adminhtml_Sales_Order_EditController($request, new Mage_Core_Controller_Response_Http());
+
+    actionAclWithQuoteSession(
+        ['order_id' => 12, 'customer_id' => 3, 'store_id' => 1],
+        fn() => expect(actionAclIsAllowed($controller))->toBe($expected),
+    );
+})->with([
+    'a customer note allowed' => [['customer_note' => 'Leave at the door'], true],
+    'the store of the edit allowed' => [['store_id' => '1'], true],
+    'another store denied' => [['store_id' => '2'], false],
+    'another customer denied' => [['customer_id' => '4'], false],
+    'a store that is not a scalar denied' => [['store_id' => ['1']], false],
+]);
+
+it('opens the order after the cancel of an order edit', function (): void {
+    $request = actionAclRequest('cancel');
+    $request->setRouteName('adminhtml')->setControllerName('sales_order_edit');
+    $response = new Mage_Core_Controller_Response_Http();
+    $controller = new Mage_Adminhtml_Sales_Order_EditController($request, $response);
+    // The admin URL model resolves "*" from the request of the app
+    $appRequest = Mage::app()->getRequest();
+    Mage::app()->setRequest($request);
+
+    try {
+        actionAclWithQuoteSession(['order_id' => 12, 'customer_id' => 3, 'store_id' => 1], function () use ($controller, $response): void {
+            $controller->cancelAction();
+
+            expect($response->getSymfonyResponse()->headers->get('Location'))->toContain('/sales_order/view/order_id/12/')
+                ->and(Mage::getSingleton('adminhtml/session_quote')->getOrderId())->toBeNull();
+        });
+    } finally {
+        Mage::app()->setRequest($appRequest);
+    }
+});
+
 it('allows the Profiles permission only for the profiles of the profile wizard and their batches', function (string $action, array $params, ?array $post, array $granted, bool $expected): void {
     actionAclLogin($granted);
     // Profile 1 is a profile of the wizard, profile 2 is an Advanced Profile, profile 3 does not exist.

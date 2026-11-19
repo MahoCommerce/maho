@@ -122,7 +122,7 @@ class Mage_Sales_Block_Order_Item_Renderer_Default extends Mage_Core_Block_Templ
             $truncatedValue = nl2br($truncatedValue);
             return ['value' => $truncatedValue];
         }
-        $truncatedValue = Mage::helper('core/string')->truncate($optionValue, 55, '');
+        $truncatedValue = Mage::helper('catalog/product_configuration')->truncateOptionValue((string) $optionValue, 55);
         $truncatedValue = nl2br($truncatedValue);
 
         $result = ['value' => $truncatedValue];

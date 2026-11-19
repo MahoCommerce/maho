@@ -83,6 +83,16 @@ describe('Mage_Core_Model_Variable code', function () {
         expect(Mage::getModel('core/variable')->loadByCode($code)->getName())->toBe('Legacy renamed');
     });
 
+    it('keeps an existing code that is not valid when a variable that loadByCode() loaded is saved', function (): void {
+        $code = 'legacy code ' . uniqid();
+        $this->codes[] = $code;
+        $this->adapter->insert($this->table, ['code' => $code, 'name' => 'Legacy']);
+
+        Mage::getModel('core/variable')->loadByCode($code)->setName('Legacy renamed')->save();
+
+        expect(Mage::getModel('core/variable')->loadByCode($code)->getName())->toBe('Legacy renamed');
+    });
+
     it('refuses to change the code of an existing variable to a code that is not valid', function (): void {
         $code = 'test_code_' . uniqid();
         $badCode = 'bad code ' . uniqid();

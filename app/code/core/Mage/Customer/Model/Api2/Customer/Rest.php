@@ -33,6 +33,9 @@ abstract class Mage_Customer_Model_Api2_Customer_Rest extends Mage_Customer_Mode
 
         /** @var Mage_Customer_Model_Customer $customer */
         $customer = Mage::getModel('customer/customer');
+        if (array_key_exists('confirmation', $data)) {
+            $data['confirmation'] = Mage::helper('customer')->prepareApiConfirmationForWrite($customer, $data['confirmation']);
+        }
         $customer->setData($data);
 
         try {
@@ -146,6 +149,10 @@ abstract class Mage_Customer_Model_Api2_Customer_Rest extends Mage_Customer_Mode
                 $this->_error($error, Mage_Api2_Model_Server::HTTP_BAD_REQUEST);
             }
             $this->_critical(self::RESOURCE_DATA_PRE_VALIDATION_ERROR);
+        }
+
+        if (array_key_exists('confirmation', $data)) {
+            $data['confirmation'] = Mage::helper('customer')->prepareApiConfirmationForWrite($customer, $data['confirmation']);
         }
 
         $customer->addData($data);

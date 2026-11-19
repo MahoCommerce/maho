@@ -68,6 +68,8 @@ class Mage_Core_Model_Variable extends Mage_Core_Model_Abstract
     public function loadByCode($code)
     {
         $this->getResource()->loadByCode($this, $code);
+        // isCodeAllowed() compares the code with the original data, as after load()
+        $this->setOrigData();
         return $this;
     }
 

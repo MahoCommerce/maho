@@ -9,7 +9,8 @@
  *
  * The script writes each removed layout update to var/log/widget_instance_cleanup.log before it deletes
  * it, with its XML, handle, sort order and store links. It also writes there the layout updates that
- * have a storefront link and belong to no widget instance, but it does not delete them.
+ * have a storefront link and belong to no widget instance, but it does not delete them. When it cannot
+ * write the log, the upgrade stops before it deletes the batch, and the next run continues from there.
  *
  * The script reads the widget types of the modules that are enabled when it runs. When a module that
  * gives widgets is disabled at that time, the layout updates of its widget instances are removed.
@@ -31,8 +32,16 @@ $installer->startSetup();
 Mage::app()->removeCache('widget_config');
 Mage::getSingleton('widget/widget')->resetDeclaredTypes();
 
-$log = static function (string $message): void {
-    Mage::log($message, Mage::LOG_WARNING, 'widget_instance_cleanup.log', true);
+// Mage::log() hides a failed write, and a removal must not run before its record is in the log
+$logFile = Mage::getBaseDir('log') . '/widget_instance_cleanup.log';
+$log = static function (string $message) use ($logFile): void {
+    $logDir = dirname($logFile);
+    $line = Mage_Core_Model_Locale::nowUtc() . ' ' . $message . PHP_EOL;
+    if ((!is_dir($logDir) && !@mkdir($logDir, 0o777, true) && !is_dir($logDir))
+        || @file_put_contents($logFile, $line, FILE_APPEND | LOCK_EX) === false
+    ) {
+        throw new RuntimeException(sprintf('Cannot write %s. Make it writable and run the upgrade again.', $logFile));
+    }
 };
 // A stored type or XML can contain quotes, markup or line breaks
 $encode = static fn(mixed $data): string => json_encode(

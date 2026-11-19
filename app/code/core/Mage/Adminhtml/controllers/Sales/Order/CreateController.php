@@ -676,16 +676,20 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
      * Return true when the request keeps the customer and the store of the order edit.
      *
      * The edit form posts the customer and the store of the edit. A request with another
-     * customer or store moves the edited order to it.
+     * customer or store moves the edited order to it. importPostData() copies order[comment]
+     * into the quote, so the check reads that array too.
      */
     protected function _isRequestForEditedOrder(): bool
     {
         $session = $this->_getSession();
         $request = $this->getRequest();
+        $order = $request->getPost('order');
+        $comment = is_array($order) && is_array($order['comment'] ?? null) ? $order['comment'] : [];
         foreach (['customer_id' => (int) $session->getCustomerId(), 'store_id' => (int) $session->getStoreId()] as $param => $current) {
-            $requested = $request->getParam($param);
-            if ($requested !== null && $requested !== '' && (int) $requested !== $current) {
-                return false;
+            foreach ([$request->getParam($param), $comment[$param] ?? null] as $requested) {
+                if ($requested !== null && $requested !== '' && (!is_scalar($requested) || (int) $requested !== $current)) {
+                    return false;
+                }
             }
         }
 
