@@ -20,6 +20,7 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
 use Maho\ApiPlatform\CrudResource;
+use Maho\ApiPlatform\Security\OperationAccessChecker;
 use Maho\ApiPlatform\Metadata\ListFilter;
 
 #[ApiResource(
@@ -55,6 +56,7 @@ use Maho\ApiPlatform\Metadata\ListFilter;
             uriTemplate: '/orders/{orderId}/credit-memos',
             uriVariables: ['orderId' => new Link(toProperty: 'orderId')],
             security: "is_granted('ROLE_ADMIN') or is_granted('credit-memos/create')",
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/creditmemo'],
             description: 'Create a credit memo / refund for an order',
         ),
     ],
@@ -79,6 +81,7 @@ use Maho\ApiPlatform\Metadata\ListFilter;
         ),
         new Mutation(
             name: 'create',
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/creditmemo'],
             description: 'Create a credit memo / refund for an order',
             args: [
                 'orderId' => ['type' => 'Int!'],

@@ -195,6 +195,12 @@ class Mage_Adminhtml_Permissions_RoleController extends Mage_Adminhtml_Controlle
             return;
         }
 
+        if ($this->_changesOwnRole($role, $roleUsers, $oldRoleUsers)) {
+            $this->_getSession()->addError($this->__('You cannot change your own role.'));
+            $this->_redirect('*/*/editrole', ['rid' => $rid]);
+            return;
+        }
+
         try {
             $roleName = $this->getRequest()->getParam('rolename', false);
 
@@ -240,6 +246,29 @@ class Mage_Adminhtml_Permissions_RoleController extends Mage_Adminhtml_Controlle
         $this->getResponse()->setBody(
             $this->getLayout()->createBlock('adminhtml/permissions_role_grid_user')->toHtml(),
         );
+    }
+
+    /**
+     * Return true when the save removes the current admin user from $role, or moves this user to $role.
+     *
+     * The save removes each user of $oldRoleUsers from the role and adds each user of $roleUsers. Adding a
+     * user moves it from its current role.
+     *
+     * @param array<int|string> $roleUsers
+     * @param array<int|string> $oldRoleUsers
+     */
+    protected function _changesOwnRole(Mage_Admin_Model_Roles $role, array $roleUsers, array $oldRoleUsers): bool
+    {
+        $userId = (int) Mage::getSingleton('admin/session')->getUser()->getId();
+        $isMember = (int) $role->getId() > 0 && in_array(
+            (int) $role->getId(),
+            array_map(intval(...), Mage::getModel('admin/user')->setId($userId)->getRoles()),
+            true,
+        );
+        $isAdded = in_array($userId, array_map(intval(...), $roleUsers), true);
+        $isRemoved = in_array($userId, array_map(intval(...), $oldRoleUsers), true) && !$isAdded;
+
+        return $isMember ? $isRemoved : $isAdded;
     }
 
     /**

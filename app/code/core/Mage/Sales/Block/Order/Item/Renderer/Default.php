@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2020-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Sales
@@ -60,7 +60,7 @@ class Mage_Sales_Block_Order_Item_Renderer_Default extends Mage_Core_Block_Templ
             }
             $result = array_merge($result, $this->getOrderItem()->getProductAdditionalOptions());
             if (isset($options['attributes_info'])) {
-                $result = array_merge($result, $options['attributes_info']);
+                $result = array_merge($result, Mage::helper('catalog/product_configuration')->escapeAttributesInfo($options['attributes_info']));
             }
         }
         return $result;
@@ -122,7 +122,7 @@ class Mage_Sales_Block_Order_Item_Renderer_Default extends Mage_Core_Block_Templ
             $truncatedValue = nl2br($truncatedValue);
             return ['value' => $truncatedValue];
         }
-        $truncatedValue = Mage::helper('core/string')->truncate($optionValue, 55, '');
+        $truncatedValue = Mage::helper('catalog/product_configuration')->truncateOptionValue((string) $optionValue, 55);
         $truncatedValue = nl2br($truncatedValue);
 
         $result = ['value' => $truncatedValue];

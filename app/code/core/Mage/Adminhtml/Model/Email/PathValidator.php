@@ -8,8 +8,16 @@
  * @package Mage_Adminhtml
  */
 
+declare(strict_types=1);
+
 class Mage_Adminhtml_Model_Email_PathValidator
 {
+    /**
+     * A plain config path: segments of letters, digits, underscore, dot and hyphen.
+     * Maho\Simplexml\Element::descend() reads other syntax, such as a `node@attribute=value` segment, as a node selector.
+     */
+    public const PLAIN_PATH_PATTERN = '#^[A-Za-z0-9_.\-]+(?:/[A-Za-z0-9_.\-]+)*$#';
+
     public function isValid(mixed $value): bool
     {
         if (null === $value || '' === $value) {
@@ -17,6 +25,10 @@ class Mage_Adminhtml_Model_Email_PathValidator
         }
 
         $pathNode = is_array($value) ? array_shift($value) : $value;
+        // A template can pass a number, such as getConfig(1)
+        if (is_int($pathNode) || is_float($pathNode)) {
+            $pathNode = (string) $pathNode;
+        }
         if (!$this->isEncryptedNodePath($pathNode)) {
             return false;
         }
@@ -26,12 +38,17 @@ class Mage_Adminhtml_Model_Email_PathValidator
 
     /**
      * A parent of an encrypted path is encrypted too: getConfig() on a group returns its children decrypted.
+     * A path that is not plain is encrypted too: a string comparison cannot tell which node it selects.
      */
     private function isEncryptedNodePath(string $path): bool
     {
         $path = trim($path, '/');
         if ($path === '') {
             return false;
+        }
+
+        if (preg_match(self::PLAIN_PATH_PATTERN, $path) !== 1) {
+            return true;
         }
 
         foreach (Mage::getSingleton('adminhtml/config')->getEncryptedNodeEntriesPaths() as $encryptedPath) {

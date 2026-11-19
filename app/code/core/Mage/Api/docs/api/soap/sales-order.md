@@ -480,7 +480,6 @@ Allows you to retrieve the required order information.
 | string | method               | Payment method                        |
 | string | po_number            | Purchase order number                 |
 | string | cc_type              | Credit card type                      |
-| string | cc_number_enc        | Credit card number                    |
 | string | cc_last4             | Credit card last 4 digits             |
 | string | cc_owner             | Credit card owner                     |
 | string | cc_exp_month         | Credit card expiration month          |

@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2021-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
@@ -145,7 +145,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
          * should return new version of rendered value
          */
         $frameCallback = $this->getFrameCallback();
-        if (is_callable($frameCallback)) {
+        if (self::isBoundCallback($frameCallback)) {
             $renderedValue = call_user_func($frameCallback, (string) $renderedValue, $row, $this, false);
         }
 
@@ -173,11 +173,26 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
          * should return new version of rendered value
          */
         $frameCallback = $this->getFrameCallback();
-        if (is_callable($frameCallback)) {
+        if (self::isBoundCallback($frameCallback)) {
             $renderedValue = call_user_func($frameCallback, (string) $renderedValue, $row, $this, true);
         }
 
         return $renderedValue;
+    }
+
+    /**
+     * Return true when $callback is a closure, an invokable object or an [object, method] array. Column
+     * options can come from layout XML, which can give a string such as "Class::method" but not an object.
+     */
+    public static function isBoundCallback(mixed $callback): bool
+    {
+        if (is_object($callback)) {
+            return is_callable($callback);
+        }
+        return is_array($callback)
+            && count($callback) === 2
+            && is_object($callback[0] ?? null)
+            && is_callable($callback);
     }
 
     /**

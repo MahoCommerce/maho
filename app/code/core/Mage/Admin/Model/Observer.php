@@ -50,8 +50,11 @@ class Mage_Admin_Model_Observer
         if (in_array($requestedActionName, $openActions)) {
             $request->setDispatched(true);
         } else {
-            if ($user) {
-                $user->reload();
+            if ($user && !$session->reloadUser()) {
+                if ($user->getId()) {
+                    $this->endSession($session);
+                }
+                $user = null;
             }
             if (!$user || !$user->getId()) {
                 if ($request->getPost('login')) {
@@ -103,6 +106,15 @@ class Mage_Admin_Model_Observer
         }
 
         $session->refreshAcl();
+    }
+
+    protected function endSession(Mage_Admin_Model_Session $session): void
+    {
+        $session->unsetAll();
+        $session->renewSession();
+        Mage::getSingleton('adminhtml/session')->addError(
+            Mage::helper('adminhtml')->__('You did not sign in correctly or your account is temporarily disabled.'),
+        );
     }
 
     /**

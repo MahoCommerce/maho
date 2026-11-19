@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2020-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Cms
@@ -93,7 +93,9 @@ class Mage_Cms_Helper_Page extends Mage_Core_Helper_Abstract
         $action->loadLayoutUpdates();
         $layoutUpdate = ($page->getCustomLayoutUpdateXml() && $inRange)
             ? $page->getCustomLayoutUpdateXml() : $page->getLayoutUpdateXml();
-        $action->getLayout()->getUpdate()->addUpdate($layoutUpdate);
+        $action->getLayout()->getUpdate()->addUpdate(
+            Mage::getModel('core/layout_validator')->getValidLayoutUpdate((string) $layoutUpdate),
+        );
         $action->generateLayoutXml()->generateLayoutBlocks();
 
         $contentHeadingBlock = $action->getLayout()->getBlock('page_content_heading');

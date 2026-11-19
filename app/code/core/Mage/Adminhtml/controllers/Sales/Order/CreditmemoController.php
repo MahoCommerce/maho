@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2021-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
@@ -80,6 +80,11 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
 
         $creditmemo = false;
         $creditmemoId = $this->getRequest()->getParam('creditmemo_id');
+        // _isAllowed() checks the same for each action. This check also covers the other callers.
+        if (!$creditmemoId && !$this->_isCreateAllowed()) {
+            $this->_getSession()->addError($this->__('Access denied.'));
+            return false;
+        }
         $orderId = $this->getRequest()->getParam('order_id');
         if ($creditmemoId) {
             $creditmemo = Mage::getModel('sales/order_creditmemo')->load($creditmemoId);
@@ -366,15 +371,14 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
     public function addCommentAction(): void
     {
         try {
-            $this->getRequest()->setParam(
-                'creditmemo_id',
-                $this->getRequest()->getParam('id'),
-            );
+            $creditmemoId = (int) $this->getRequest()->getParam('id');
+            $this->getRequest()->setParam('creditmemo_id', $creditmemoId);
             $data = $this->getRequest()->getPost('comment');
             if (empty($data['comment'])) {
                 Mage::throwException($this->__('The Comment Text field cannot be empty.'));
             }
-            $creditmemo = $this->_initCreditmemo();
+            // Without a credit memo ID, _initCreditmemo() prepares a new credit memo from the order
+            $creditmemo = ($creditmemoId > 0 ? $this->_initCreditmemo() : false) ?: Mage::throwException($this->__('The credit memo no longer exists.'));
             $creditmemo->addComment(
                 $data['comment'],
                 isset($data['is_customer_notified']),
@@ -410,5 +414,39 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
     {
         $this->_initCreditmemo();
         parent::printAction();
+    }
+
+    /**
+     * Check the Credit Memos order action in addition to the Credit Memos permission to create,
+     * cancel or void a credit memo.
+     *
+     * Without a credit memo ID, an action prepares a new credit memo from the order, so it needs
+     * the order action too. addComment reads the credit memo ID from its id parameter.
+     */
+    #[\Override]
+    protected function _isAllowed(): bool
+    {
+        if (!parent::_isAllowed()) {
+            return false;
+        }
+
+        $request = $this->getRequest();
+        $action = strtolower($request->getActionName());
+        $creditmemoId = (int) $request->getParam($action === 'addcomment' ? 'id' : 'creditmemo_id');
+        if (in_array($action, ['start', 'new', 'updateqty', 'save', 'cancel', 'void'], true)
+            || ($creditmemoId === 0 && (int) $request->getParam('order_id') > 0)
+        ) {
+            return $this->_isCreateAllowed();
+        }
+
+        return true;
+    }
+
+    /**
+     * Return true when the admin may create, cancel or void a credit memo.
+     */
+    protected function _isCreateAllowed(): bool
+    {
+        return Mage::getSingleton('admin/session')->isAllowed('sales/order/actions/creditmemo');
     }
 }

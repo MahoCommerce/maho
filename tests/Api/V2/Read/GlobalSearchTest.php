@@ -224,7 +224,7 @@ describe('Global search', function (): void {
 
     it('applies the admin ACL of each source', function (): void {
         $fixture = globalSearchFixture();
-        $token = adminTokenWithAcl(['admin/global_search', 'admin/customer', 'admin/catalog'], 'apitest_gsearch_nosales');
+        $token = adminTokenWithAcl(['admin/global_search', 'admin/customer/manage', 'admin/catalog/products', 'admin/sales/order/actions/create'], 'apitest_gsearch_nosales');
 
         expect(globalSearchIds(globalSearchItems(globalSearchOrderPrefix($fixture['order']), $token), 'order'))->toBe([])
             ->and(globalSearchIds(globalSearchItems((string) $fixture['customer']->getLastname(), $token), 'customer'))
