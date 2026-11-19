@@ -154,16 +154,27 @@ it('reactivates an expired card only when the refund extension is above 0', func
     'extension of 30 days' => ['30', Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE],
     'no extension' => ['0', Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED],
 ]);
-it('uses the resource writer for the credit, history, reload and rollback', function (bool $historyFails): void {
+it('uses the resource writer for the credit, history, state synchronization and rollback', function (bool $historyFails): void {
     $core = Mage::getSingleton('core/resource');
     $write = $core->createUnsharedConnection('core_write');
     $originalCardResource = Mage::getResourceSingleton('giftcard/giftcard');
     $originalHistoryResource = Mage::getResourceSingleton('giftcard/history');
     $cardResource = new class ($write) extends Maho_Giftcard_Model_Resource_Giftcard {
+        /** @var list<Maho\Db\Adapter\AdapterInterface> */
+        public array $readConnections = [];
+
         public function __construct(Maho\Db\Adapter\AdapterInterface $write)
         {
             parent::__construct();
             $this->_connections['write'] = $write;
+        }
+
+        #[\Override]
+        public function getReadConnection(): Maho\Db\Adapter\AdapterInterface
+        {
+            $connection = parent::getReadConnection();
+            $this->readConnections[] = $connection;
+            return $connection;
         }
     };
     $historyResource = new class ($write) extends Maho_Giftcard_Model_Resource_History {
@@ -187,22 +198,26 @@ it('uses the resource writer for the credit, history, reload and rollback', func
                 ->and($write->getTransactionLevel())->toBe(0);
             return;
         }
-        $card = new class extends Maho_Giftcard_Model_Giftcard {
-            public ?Maho\Db\Adapter\AdapterInterface $reloadConnection = null;
-
-            #[\Override]
-            protected function _beforeLoad($id, $field = null): self
-            {
-                $this->reloadConnection = $this->getResource()->getReadConnection();
-                return parent::_beforeLoad($id, $field);
-            }
-        };
-        $card->setData($this->refundCard->getData());
+        $card = Mage::getModel('giftcard/giftcard');
+        $card->setData($this->refundCard->getData())->setMessage('Unsaved message');
+        $write->update($cardResource->getMainTable(), ['balance' => 125.0], ['giftcard_id = ?' => $card->getId()]);
         $card->refund(10.0);
 
-        expect($card->reloadConnection)->toBe($write)
-            ->and($card->getBalance())->toBe(110.0)
-            ->and($card->getHistoryCollection()->addFieldToFilter('action', Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED)->getSize())->toBe(1);
+        $storedBalance = $write->fetchOne($write->select()
+            ->from($cardResource->getMainTable(), ['balance'])
+            ->where('giftcard_id = ?', $card->getId()));
+        $history = $card->getHistoryCollection()
+            ->addFieldToFilter('action', Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED);
+
+        expect(array_last($cardResource->readConnections))->toBe($write)
+            ->and($card->getBalance())->toBe(135.0)
+            ->and((float) $card->getOrigData('balance'))->toBe(135.0)
+            ->and($card->getMessage())->toBe('Unsaved message')
+            ->and((float) $storedBalance)->toBe(135.0)
+            ->and($history->getSize())->toBe(1)
+            ->and((float) $history->getFirstItem()->getBalanceBefore())->toBe(125.0)
+            ->and((float) $history->getFirstItem()->getBalanceAfter())->toBe(135.0)
+            ->and($write->getTransactionLevel())->toBe(0);
     } finally {
         Mage::unregister('_resource_singleton/giftcard/giftcard');
         Mage::register('_resource_singleton/giftcard/giftcard', $originalCardResource);
@@ -211,7 +226,7 @@ it('uses the resource writer for the credit, history, reload and rollback', func
         $write->closeConnection();
     }
 })->with([
-    'reload and history' => [false],
+    'credit and history' => [false],
     'history failure' => [true],
 ]);
 
