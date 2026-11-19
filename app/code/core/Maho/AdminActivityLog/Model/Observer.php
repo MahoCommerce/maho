@@ -110,17 +110,17 @@ class Maho_AdminActivityLog_Model_Observer
                 return;
             }
 
-            $objectHash = spl_object_hash($object);
+            $objectId = spl_object_id($object);
 
             if ($object instanceof Mage_Core_Model_Config_Data) {
-                $this->_oldData[$objectHash] = [
+                $this->_oldData[$objectId] = [
                     'path' => $object->getPath(),
                     'website_code' => $object->getWebsiteCode(),
                     'store_code' => $object->getStoreCode(),
                     'value' => $object->getOldValue(),
                 ];
             } else {
-                $this->_oldData[$objectHash] = $object->getOrigData();
+                $this->_oldData[$objectId] = $object->getOrigData();
             }
         } catch (Exception $e) {
             Mage::logException($e);
@@ -155,9 +155,9 @@ class Maho_AdminActivityLog_Model_Observer
                 return;
             }
 
-            $objectHash = spl_object_hash($object);
+            $objectId = spl_object_id($object);
 
-            $oldData = $this->_oldData[$objectHash] ?? [];
+            $oldData = $this->_oldData[$objectId] ?? [];
             $newData = $object->getData();
 
             $oldChangedData = [];
@@ -205,7 +205,7 @@ class Maho_AdminActivityLog_Model_Observer
             if (count(array_keys($newChangedData)) > 0) {
                 Mage::getModel('adminactivitylog/activity')->logActivity($data);
             }
-            unset($this->_oldData[$objectHash]);
+            unset($this->_oldData[$objectId]);
         } catch (Exception $e) {
             Mage::logException($e);
         }
@@ -224,8 +224,8 @@ class Maho_AdminActivityLog_Model_Observer
                 return;
             }
 
-            $objectHash = spl_object_hash($object);
-            $oldData = $this->_oldData[$objectHash] ?? $object->getData();
+            $objectId = spl_object_id($object);
+            $oldData = $this->_oldData[$objectId] ?? $object->getData();
 
             $dbFields = Mage::helper('adminactivitylog')->getDbFields($object);
 
