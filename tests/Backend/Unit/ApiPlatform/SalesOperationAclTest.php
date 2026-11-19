@@ -8,9 +8,12 @@
 
 declare(strict_types=1);
 
+use ApiPlatform\Mcp\Security\ElementAccessCheckerInterface;
 use ApiPlatform\Metadata\Operation;
+use ApiPlatform\Metadata\Operation\Factory\OperationMetadataFactoryInterface;
 use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\GraphQl\AdminAclProvider;
+use Maho\ApiPlatform\Mcp\PermissionElementAccessChecker;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Security\OperationAccessChecker;
 use Maho\Config\ApiResource;
@@ -111,3 +114,35 @@ it('checks the ACL path of each GraphQL operation before the read', function (st
     'hold' => ['hold', 'sales/order/actions/hold'],
     'place order, a public operation' => ['place', 'sales/order/actions/create'],
 ]);
+
+it('hides the MCP guest order tool from an admin without the Create order action', function (): void {
+    $operation = salesOperationAclOperations(Mage\Sales\Api\Order::class)['place_guest_order']->withClass(Mage\Sales\Api\Order::class);
+    $metadata = $this->createMock(OperationMetadataFactoryInterface::class);
+    $metadata->method('create')->willReturn($operation);
+    $decorated = $this->createMock(ElementAccessCheckerInterface::class);
+    $decorated->method('isGranted')->willReturn(true);
+    $isListed = function (bool $asAdmin) use ($metadata, $decorated): bool {
+        $tokenStorage = new TokenStorage();
+        if ($asAdmin) {
+            $admin = new ApiUser('admin', ['ROLE_ADMIN'], adminId: (int) Mage::getSingleton('admin/session')->getUser()->getId());
+            $tokenStorage->setToken(new PreAuthenticatedToken($admin, 'api', $admin->getRoles()));
+        }
+        return new PermissionElementAccessChecker($decorated, $metadata, new OperationAccessChecker($tokenStorage))
+            ->isGranted('place_guest_order');
+    };
+
+    $user = AdminRoleFixture::login(['admin/sales', 'admin/sales/order']);
+    try {
+        expect($isListed(true))->toBeFalse()
+            ->and($isListed(false))->toBeTrue();
+    } finally {
+        AdminRoleFixture::delete($user);
+    }
+
+    $user = AdminRoleFixture::login(['admin/sales', 'admin/sales/order', 'admin/sales/order/actions', 'admin/sales/order/actions/create']);
+    try {
+        expect($isListed(true))->toBeTrue();
+    } finally {
+        AdminRoleFixture::delete($user);
+    }
+});
