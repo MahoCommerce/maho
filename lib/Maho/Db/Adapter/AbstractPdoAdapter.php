@@ -703,6 +703,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             } else {
                 $term = $this->quoteInto($cond, $term);
             }
+            $term = '(' . $term . ')';
         }
 
         return implode(' AND ', $where);
