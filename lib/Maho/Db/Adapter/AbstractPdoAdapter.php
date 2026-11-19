@@ -710,7 +710,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     /**
-     * Join the WHERE parts of $select with the AND or OR that each part holds.
+     * Return the WHERE conditions of $select as SQL, without the WHERE keyword.
+     * Example: where('a = 1')->orWhere('b = 2') gives '(a = 1) OR (b = 2)'.
      */
     protected function _renderSelectWhere(Select $select): string
     {
@@ -730,9 +731,11 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     /**
-     * Build the FROM and WHERE clauses of an UPDATE ... FROM query. The join conditions of $select go in the WHERE clause.
+     * Return the FROM and WHERE text that comes after SET in an UPDATE on PostgreSQL and SQLite.
+     * Example: join(['s' => 'src'], 't.id = s.id')->where('s.x = 1') gives ' FROM "src" AS "s" WHERE (t.id = s.id) AND ((s.x = 1))'.
+     * These databases cannot JOIN ... ON the table that the UPDATE changes, so the join conditions go in the WHERE text.
      */
-    protected function _renderUpdateFromAndWhere(Select $select, string $tableAlias): string
+    protected function _renderFromAndWhereForUpdate(Select $select, string $tableAlias): string
     {
         $fromTables = [];
         $where = [];

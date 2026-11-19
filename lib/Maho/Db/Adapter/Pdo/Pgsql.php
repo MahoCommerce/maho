@@ -2063,7 +2063,7 @@ class Pgsql extends AbstractPdoAdapter
             $query .= sprintf(' SET %s', implode(', ', $setClauses));
         }
 
-        $query .= $this->_renderUpdateFromAndWhere($select, $tableAlias);
+        $query .= $this->_renderFromAndWhereForUpdate($select, $tableAlias);
 
         return $query;
     }

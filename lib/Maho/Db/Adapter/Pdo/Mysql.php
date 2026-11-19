@@ -3767,26 +3767,9 @@ class Mysql extends AbstractPdoAdapter
             $query .= ' ' . implode('', $from);
         }
 
-        // Add WHERE clause
-        $wherePart = $select->getPart(\Maho\Db\Select::WHERE);
-        if ($wherePart) {
-            $where = [];
-            foreach ($wherePart as $term) {
-                if (is_array($term)) {
-                    foreach ($term as $type => $cond) {
-                        if (!empty($where)) {
-                            $where[] = $type;
-                        }
-                        $where[] = $cond;
-                    }
-                } else {
-                    if (!empty($where)) {
-                        $where[] = 'AND';
-                    }
-                    $where[] = $term;
-                }
-            }
-            $query .= ' WHERE ' . implode(' ', $where);
+        $where = $this->_renderSelectWhere($select);
+        if ($where !== '') {
+            $query .= ' WHERE ' . $where;
         }
 
         return $query;
