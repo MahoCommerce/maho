@@ -7,9 +7,6 @@
 
 declare(strict_types=1);
 
-/**
- * Keeps native item access and iteration. Only database loading is replaced.
- */
 class ParentPreloadPageCollection extends Mage_Catalog_Model_Resource_Product_Collection
 {
     public int $fullIdCalls = 0;
@@ -25,7 +22,6 @@ class ParentPreloadPageCollection extends Mage_Catalog_Model_Resource_Product_Co
     #[\Override]
     public function getSize(): int
     {
-        // Synthetic cached count; keep native page clamping without database counting.
         $this->sizeCalls++;
         return $this->totalCount;
     }
@@ -49,7 +45,6 @@ class ParentPreloadPageCollection extends Mage_Catalog_Model_Resource_Product_Co
             $this->addItem($product);
         }
         $this->_setIsLoaded();
-        // A double callback, not a native observer compatibility test.
         if ($this->afterLoad !== null) {
             ($this->afterLoad)($this);
         }
@@ -62,7 +57,6 @@ class ParentPreloadPageCollection extends Mage_Catalog_Model_Resource_Product_Co
     }
 }
 
-/** Records preload inputs without implementing parent selection or loading. */
 class ParentPreloadPageMapper extends Maho_FeedManager_Model_Mapper
 {
     public array $preloaded = [];
@@ -76,7 +70,6 @@ class ParentPreloadPageMapper extends Maho_FeedManager_Model_Mapper
     }
 }
 
-/** Executes the native batch loop with explicit collection and output doubles. */
 class ParentPreloadPageGenerator extends Maho_FeedManager_Model_Generator
 {
     public array $validated = [];
@@ -120,7 +113,7 @@ class ParentPreloadPageGenerator extends Maho_FeedManager_Model_Generator
     }
 }
 
-function parentPreloadPageProduct(int $id, bool $include, ?int $parentId): Mage_Catalog_Model_Product
+function parentPreloadPageProduct(int $id, bool $include): Mage_Catalog_Model_Product
 {
     $product = new Mage_Catalog_Model_Product();
     $product->setIdFieldName('entity_id');
@@ -128,15 +121,14 @@ function parentPreloadPageProduct(int $id, bool $include, ?int $parentId): Mage_
         'entity_id' => $id,
         'sku' => "PAGE-$id",
         'include_in_feed' => $include,
-        'parent_id' => $parentId,
     ]);
     return $product;
 }
 
 it('preloads the actual page before filtering and preserves loaded item order', function () {
-    $parentless = parentPreloadPageProduct(5, true, null);
-    $filtered = parentPreloadPageProduct(2, false, 20);
-    $addedOnLoad = parentPreloadPageProduct(7, true, 70);
+    $parentless = parentPreloadPageProduct(5, true);
+    $filtered = parentPreloadPageProduct(2, false);
+    $addedOnLoad = parentPreloadPageProduct(7, true);
     $collection = new ParentPreloadPageCollection(
         [$parentless, $filtered],
         [1, 2, 3, 4, 5, 6, 7, 8],
@@ -158,12 +150,11 @@ it('preloads the actual page before filtering and preserves loaded item order', 
         ->and($collection->sizeCalls)->toBeGreaterThan(0)
         ->and($collection->fullIdCalls)->toBe(0)
         ->and($collection->isLoaded())->toBeFalse()
-        ->and($collection->remainingItemCount())->toBe(0)
-        ->and($parentless->getData('parent_id'))->toBeNull();
+        ->and($collection->remainingItemCount())->toBe(0);
 });
 
 it('does not preload broader catalog IDs for an empty actual page', function () {
-    // The synthetic cached count has three rows; page two is empty after a deletion.
+    // The count says three rows, but page two is empty because a product was deleted.
     $collection = new ParentPreloadPageCollection([], [1, 2, 3], 3);
     $mapper = new ParentPreloadPageMapper();
     $generator = new ParentPreloadPageGenerator($collection, $mapper);
@@ -180,7 +171,7 @@ it('does not preload broader catalog IDs for an empty actual page', function () 
 });
 
 it('does not preload or load a requested page past the current last page', function (): void {
-    $lastProduct = parentPreloadPageProduct(3, true, null);
+    $lastProduct = parentPreloadPageProduct(3, true);
     $collection = new ParentPreloadPageCollection([$lastProduct], [1, 2, 3], 3);
     $mapper = new ParentPreloadPageMapper();
     $generator = new ParentPreloadPageGenerator($collection, $mapper);

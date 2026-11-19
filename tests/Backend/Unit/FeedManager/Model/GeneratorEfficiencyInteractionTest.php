@@ -7,7 +7,6 @@
 
 declare(strict_types=1);
 
-/** Retains native item access, iteration and clear; replaces database loading. */
 class EfficiencyInteractionCollection extends Mage_Catalog_Model_Resource_Product_Collection
 {
     public array $loadedPages = [];
@@ -23,7 +22,6 @@ class EfficiencyInteractionCollection extends Mage_Catalog_Model_Resource_Produc
     #[\Override]
     public function getSize(): int
     {
-        // Synthetic cached count; keep native page clamping without database counting.
         $this->sizeCalls++;
         return $this->totalCount;
     }
@@ -54,7 +52,6 @@ class EfficiencyInteractionCollection extends Mage_Catalog_Model_Resource_Produc
     }
 }
 
-/** Supplies synthetic parent rows; keeps the real resolver and transformer pipeline. */
 class EfficiencyInteractionMapper extends Maho_FeedManager_Model_Mapper
 {
     public array $preloads = [];
@@ -91,7 +88,6 @@ class EfficiencyInteractionMapper extends Maho_FeedManager_Model_Mapper
     }
 }
 
-/** Uses the real batch and renderer; output stays in memory without stock or file I/O. */
 class EfficiencyInteractionGenerator extends Maho_FeedManager_Model_Generator
 {
     public array $xml = [];
@@ -150,7 +146,6 @@ class EfficiencyInteractionGenerator extends Maho_FeedManager_Model_Generator
     #[\Override]
     protected function _checkErrorThreshold(int $errorCount, int $processed): void
     {
-        // Fail the component test directly; never consult application configuration.
         throw new LogicException(implode('; ', $this->_errors));
     }
 }
@@ -197,7 +192,7 @@ it('uses each loaded page while rendering current row values and changed templat
         ->and($collection->isLoaded())->toBeFalse()
         ->and($collection->remainingItemCount())->toBe(0);
 
-    // Same template and instance, different feed settings: formatting remains per row.
+    // The template stays the same, so the new price format must still apply.
     $feed->setData('price_currency', 'EUR')->setData('price_decimals', 1);
     expect($generator->render($second))
         ->toBe('<item><sku>parent-two</sku><name>BETA</name><amount>2.5 EUR</amount></item>');
