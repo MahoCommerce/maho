@@ -24,7 +24,10 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
     public function moveFileFromTmp($baseTmpPath, $basePath, $file)
     {
         if (isset($file[0])) {
-            $fileName = $file[0]['file'];
+            $fileName = $file[0]['file'] ?? null;
+            if (!is_string($fileName) || \Maho\Io::getPathWithinMount(Mage::getStorage('downloadable'), $basePath, $fileName) === null) {
+                Mage::throwException(Mage::helper('downloadable')->__('An error occurred while saving the file(s).'));
+            }
             if ($file[0]['status'] == 'new') {
                 try {
                     $fileName = $this->_moveFileFromTmp(

@@ -605,10 +605,16 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
      */
     protected function _copyImage($file)
     {
+        $mount = $this->_getMount();
+        if (!is_string($file)
+            || \Maho\Io::getPathWithinMount($mount, $this->_getConfig()->getBaseMediaStoragePath(), $file) === null
+        ) {
+            Mage::throwException(Mage::helper('catalog')->__('Detected malicious path or filename input.'));
+        }
+
         try {
             $file = str_replace(DS, '/', $file);
             $destFile = $this->_getUniqueFileName($file, '/');
-            $mount = $this->_getMount();
 
             if (!$mount->fileExists($this->_getConfig()->getMediaStoragePath($file))) {
                 throw new Exception();

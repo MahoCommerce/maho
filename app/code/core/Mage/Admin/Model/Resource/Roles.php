@@ -78,7 +78,7 @@ class Mage_Admin_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstra
     protected function _afterSave(Mage_Core_Model_Abstract $role)
     {
         $this->_updateRoleUsersAcl($role);
-        Mage::app()->getCache()->clean([Mage_Adminhtml_Block_Page_Menu::CACHE_TAGS]);
+        $this->getUserResource()->cleanMenuCache();
         return $this;
     }
 
@@ -90,9 +90,16 @@ class Mage_Admin_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstra
     #[\Override]
     protected function _afterDelete(Mage_Core_Model_Abstract $role)
     {
+        // Read the members before their rows are deleted, so that their sessions lose the role
+        $users = $role instanceof Mage_Admin_Model_Roles ? $this->getRoleUsers($role) : [];
+
         $adapter = $this->_getWriteAdapter();
         $adapter->delete($this->getMainTable(), ['parent_id = ?' => (int) $role->getId()]);
         $adapter->delete($this->_ruleTable, ['role_id = ?' => (int) $role->getId()]);
+
+        if ($this->getUserResource()->bumpAclVersion($users) > 0) {
+            $this->getUserResource()->cleanMenuCache();
+        }
         return $this;
     }
 
@@ -113,23 +120,15 @@ class Mage_Admin_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstra
     }
 
     /**
-     * Update role users
-     *
-     * @return bool
+     * Give each member of $role a new ACL version.
      */
-    private function _updateRoleUsersAcl(Mage_Admin_Model_Roles $role)
+    private function _updateRoleUsersAcl(Mage_Admin_Model_Roles $role): bool
     {
-        $users = $this->getRoleUsers($role);
-        $rowsCount = 0;
+        return $this->getUserResource()->bumpAclVersion($this->getRoleUsers($role)) > 0;
+    }
 
-        if (count($users)) {
-            $rowsCount = $this->_getWriteAdapter()->update(
-                $this->_usersTable,
-                ['reload_acl_flag' => 1],
-                ['user_id IN (?)' => $users],
-            );
-        }
-
-        return $rowsCount > 0;
+    protected function getUserResource(): Mage_Admin_Model_Resource_User
+    {
+        return Mage::getResourceSingleton('admin/user');
     }
 }

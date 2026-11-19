@@ -156,7 +156,8 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
                 }
                 $this->setIsFirstPageAfterLogin(true);
                 $this->setUser($user);
-                $this->setAcl(Mage::getResourceModel('admin/acl')->loadAcl());
+                $this->setAcl($this->loadAcl());
+                $this->setAclVersion($user->getAclVersion() ?? 0);
                 if ($backendLocale = $user->getBackendLocale()) {
                     Mage::getSingleton('adminhtml/session')->setLocale($backendLocale);
                 }
@@ -189,7 +190,9 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
-     * Refresh ACL resources stored in session
+     * Build the ACL of the session again when the acl_version of $user is not the version that the
+     * session used for its ACL. Mage_Admin_Model_Resource_User::bumpAclVersion() changes the version,
+     * so each session of the user gets the new permissions, not only the first one.
      *
      * @param  Mage_Admin_Model_User $user
      * @return $this
@@ -200,13 +203,25 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
         if (!$user) {
             return $this;
         }
-        if (!$this->getAcl() || $user->getReloadAclFlag()) {
-            $this->setAcl(Mage::getResourceModel('admin/acl')->loadAcl());
+        if ($user->getReloadAclFlag() && $user->getId()) {
+            // Another session of the user can take the request first, so read the version in all cases
+            $resource = $user->getResource();
+            $resource->takeReloadAclFlag($user);
+            $user->setReloadAclFlag(false)
+                ->setOrigData('reload_acl_flag', 0)
+                ->setAclVersion($resource->getAclVersion($user));
         }
-        if ($user->getReloadAclFlag()) {
-            $user->getResource()->saveReloadAclFlag($user, 0);
+        $version = $user->getAclVersion() ?? 0;
+        if (!$this->getAcl() || $this->getAclVersion() !== $version) {
+            $this->setAcl($this->loadAcl());
+            $this->setAclVersion($version);
         }
         return $this;
+    }
+
+    protected function loadAcl(): Mage_Admin_Model_Acl
+    {
+        return Mage::getResourceModel('admin/acl')->loadAcl();
     }
 
     /**
@@ -316,6 +331,17 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
     public function setAcl(?Mage_Admin_Model_Acl $value): static
     {
         return $this->setData('acl', $value);
+    }
+
+    public function getAclVersion(bool $clear = false): ?int
+    {
+        $value = $this->getData('acl_version', $clear ?: null);
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAclVersion(?int $value): static
+    {
+        return $this->setData('acl_version', $value);
     }
 
     public function getActiveTabId(bool $clear = false): ?int

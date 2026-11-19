@@ -25,7 +25,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_View extends Mage_Adminhtml_Bl
         $this->_removeButton('reset');
         $this->_removeButton('delete');
 
-        if ($this->getCreditmemo()->canCancel()) {
+        if ($this->_isAllowedAction('creditmemo') && $this->getCreditmemo()->canCancel()) {
             $this->_addButton('cancel', [
                 'label'     => Mage::helper('sales')->__('Cancel'),
                 'class'     => 'delete',
@@ -51,7 +51,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_View extends Mage_Adminhtml_Bl
             ]);
         }
 
-        if ($this->getCreditmemo()->canVoid()) {
+        if ($this->_isAllowedAction('creditmemo') && $this->getCreditmemo()->canVoid()) {
             $this->_addButton('void', [
                 'label'     => Mage::helper('sales')->__('Void'),
                 'class'     => 'save',

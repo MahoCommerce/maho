@@ -117,7 +117,7 @@ beforeEach(function () {
 
     $this->lastname = 'Gsearch' . substr(str_shuffle('abcdefghijklmnopqrstuvwxyz'), 0, 10);
     $this->customers = [globalSearchCreateCustomer($this->lastname), globalSearchCreateCustomer($this->lastname)];
-    $this->user = AdminRoleFixture::login(['admin/global_search', 'admin/customer']);
+    $this->user = AdminRoleFixture::login(['admin/global_search', 'admin/customer/manage']);
 });
 
 afterEach(function () {
@@ -155,7 +155,7 @@ it('gives no results for a query that is too short on both transports', function
 
 it('searches only the sources that the admin role allows on both transports', function () {
     AdminRoleFixture::delete($this->user);
-    $this->user = AdminRoleFixture::login(['admin/global_search', 'admin/catalog']);
+    $this->user = AdminRoleFixture::login(['admin/global_search', 'admin/catalog/products']);
 
     expect(globalSearchAdminCustomerIds(globalSearchViaAdmin(['query' => $this->lastname])))->toBe([])
         ->and(globalSearchApiCustomerIds(globalSearchViaApi(['query' => $this->lastname])))->toBe([]);

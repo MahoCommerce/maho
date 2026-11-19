@@ -52,6 +52,10 @@ class Mage_Admin_Model_Observer
         } else {
             if ($user) {
                 $user->reload();
+                if ($user->getId() && !$this->isSessionUserAllowed($session, $user)) {
+                    $this->endSession($session);
+                    $user = null;
+                }
             }
             if (!$user || !$user->getId()) {
                 if ($request->getPost('login')) {
@@ -103,6 +107,26 @@ class Mage_Admin_Model_Observer
         }
 
         $session->refreshAcl();
+    }
+
+    /**
+     * Return false when the ACL of the current roles has no role for $user. login() refuses such a user
+     * with Mage_Admin_Model_User::authenticate(), and this check ends the sessions that the user already has.
+     */
+    protected function isSessionUserAllowed(Mage_Admin_Model_Session $session, Mage_Admin_Model_User $user): bool
+    {
+        $session->refreshAcl($user);
+        $acl = $session->getAcl();
+        return $acl !== null && $acl->hasRole($user->getAclRole());
+    }
+
+    protected function endSession(Mage_Admin_Model_Session $session): void
+    {
+        $session->unsetAll();
+        $session->renewSession();
+        Mage::getSingleton('adminhtml/session')->addError(
+            Mage::helper('adminhtml')->__('You did not sign in correctly or your account is temporarily disabled.'),
+        );
     }
 
     /**

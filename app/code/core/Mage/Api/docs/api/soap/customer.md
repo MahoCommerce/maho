@@ -103,13 +103,11 @@ Allows you to retrieve the list of customers.
 | string  | suffix        | Customer suffix                       |
 | string  | dob           | Customer date of birth                |
 | string  | taxvat        | Taxvat value                          |
-| boolean | confirmation  | Confirmation flag                     |
-| string  | password_hash | Password hash                         |
+| boolean | confirmation  | True when the confirmation is pending |
 
-**Note**: The `password_hash` parameter will only match exactly with the same MD5 and salt
-as was used when Maho stored the value.
-If you try to match with an unsalted MD5 hash or any salt other than what Maho used, it will not match.
-This is just a straight string comparison.
+**Note**: The list never returns `password_hash`, `rp_token`, `rp_token_created_at` or the confirmation key.
+A filter on one of these attributes returns a `filters_invalid` fault.
+A filter on `confirmation` accepts only a `null` or `notnull` condition.
 
 ### Examples
 
@@ -183,9 +181,6 @@ array
       'firstname' => string 'John' (length=4)
       'group_id' => string '1' (length=1)
       'lastname' => string 'Doe' (length=3)
-      'password_hash' => string 'cccfb3ecf54c9644a34106783148eff2:sp' (length=35)
-      'rp_token' => string '15433dd072f1f4e5aae83231b93f72d0' (length=32)
-      'rp_token_created_at' => string '2012-03-30 15:10:31' (length=19)
   1 =>
     array
       'customer_id' => string '4' (length=1)
@@ -201,7 +196,6 @@ array
       'firstname' => string 'Shon' (length=4)
       'group_id' => string '1' (length=1)
       'lastname' => string 'McMiland' (length=8)
-      'password_hash' => string '5670581cabba4e2189e5edee99ed0c86:5q' (length=35)
 ```
 
 ## Create
@@ -362,10 +356,9 @@ The `customer_id` value is always returned.
 | string  | suffix              | Customer suffix                        |
 | string  | dob                 | Customer date of birth                 |
 | string  | taxvat              | Tax/VAT number                         |
-| boolean | confirmation        | Confirmation flag                      |
-| string  | password_hash       | Password hash                          |
-| string  | rp_token            | Reset password token                   |
-| string  | rp_token_created_at | Date when the password was reset       |
+| boolean | confirmation        | True when the confirmation is pending  |
+
+**Note**: The response never contains `password_hash`, `rp_token`, `rp_token_created_at` or the confirmation key.
 
 ### Examples
 
@@ -412,7 +405,7 @@ array
   'increment_id' => null
   'store_id' => string '2' (length=1)
   'website_id' => string '2' (length=1)
-  'confirmation' => null
+  'confirmation' => boolean false
   'created_in' => string 'English' (length=7)
   'default_billing' => null
   'default_shipping' => string '2' (length=1)
@@ -424,10 +417,7 @@ array
   'group_id' => string '1' (length=1)
   'lastname' => string 'doe' (length=3)
   'middlename' => null
-  'password_hash' => string 'cccfb3ecf54c9644a34106783148eff2:sp' (length=35)
   'prefix' => null
-  'rp_token' => string '15433dd072f1f4e5aae83231b93f72d0' (length=32)
-  'rp_token_created_at' => string '2012-03-30 15:10:31' (length=19)
   'suffix' => null
   'taxvat' => null
 ```

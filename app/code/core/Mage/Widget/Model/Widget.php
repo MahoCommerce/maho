@@ -37,18 +37,61 @@ class Mage_Widget_Model_Widget extends \Maho\DataObject
     }
 
     /**
+     * Whether each widget type checked so far is declared in a widget.xml, by type
+     *
+     * @var array<string, bool>
+     */
+    protected array $_declaredTypes = [];
+
+    /**
      * Return widget XML config element based on its type
+     *
+     * The type is compared as a string and never goes into an XPath expression.
      *
      * @param string $type Widget type
      * @return null|\Maho\Simplexml\Element
      */
     public function getXmlElementByType($type)
     {
-        $elements = $this->getXmlConfig()->getXpath('*[@type="' . $type . '"]');
-        if (is_array($elements) && isset($elements[0]) && $elements[0] instanceof \Maho\Simplexml\Element) {
-            return $elements[0];
+        if (!is_string($type) || $type === '') {
+            return null;
         }
+
+        $widgets = $this->getXmlConfig()->getNode();
+        if (!$widgets instanceof \Maho\Simplexml\Element) {
+            return null;
+        }
+
+        foreach ($widgets->children() as $element) {
+            if ($element->getAttribute('type') === $type) {
+                return $element;
+            }
+        }
+
         return null;
+    }
+
+    /**
+     * Check if a widget.xml of an enabled module declares the widget type
+     *
+     * The result for each type stays for the rest of the request. resetDeclaredTypes() clears it.
+     */
+    public function isWidgetTypeDeclared(mixed $type): bool
+    {
+        if (!is_string($type) || $type === '') {
+            return false;
+        }
+
+        return $this->_declaredTypes[$type] ??= $this->getXmlElementByType($type) !== null;
+    }
+
+    /**
+     * Clear the results of isWidgetTypeDeclared(), so that the next check reads the widget config again
+     */
+    public function resetDeclaredTypes(): static
+    {
+        $this->_declaredTypes = [];
+        return $this;
     }
 
     /**

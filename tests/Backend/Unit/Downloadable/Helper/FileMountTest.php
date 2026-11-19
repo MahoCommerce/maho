@@ -67,4 +67,18 @@ describe('Mage_Downloadable_Helper_File::moveFileFromTmp() on the downloadable m
             [['file' => '/../../../secret.pdf', 'status' => 'new']],
         ))->toThrow(Mage_Core_Exception::class);
     });
+
+    it('refuses a name of a file that is not new when the name leaves the file directory', function (mixed $file): void {
+        expect(fn() => $this->helper->moveFileFromTmp(
+            Mage_Downloadable_Model_Link::getBaseTmpStoragePath(),
+            Mage_Downloadable_Model_Link::getBaseStoragePath(),
+            [['file' => $file, 'status' => 'old']],
+        ))->toThrow(Mage_Core_Exception::class);
+    })->with([
+        'parent directory' => '/../../../app/etc/local.xml',
+        'backslash parent directory' => '\\..\\..\\..\\secret.pdf',
+        'NUL byte' => "/m/a/manual.pdf\0.png",
+        'not a string' => [['/m/a/manual.pdf']],
+        'missing' => [null],
+    ]);
 });

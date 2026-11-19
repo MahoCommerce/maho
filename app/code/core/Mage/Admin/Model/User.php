@@ -903,6 +903,17 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         return $this;
     }
 
+    public function getAclVersion(): ?int
+    {
+        $value = $this->getData('acl_version');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAclVersion(?int $value): static
+    {
+        return $this->setData('acl_version', $value);
+    }
+
     public function getCreated(): ?string
     {
         $value = $this->getData('created');

@@ -198,6 +198,7 @@ Default,Default
 "Enter your current password to change your email.","Enter your current password to change your email."
 "Escape HTML Entities","Escape HTML Entities"
 "Excel XML","Excel XML"
+"Filtering by ""%s"" is not allowed.","Filtering by ""%s"" is not allowed."
 "First Name","First Name"
 "Force all customers to set up two-factor authentication before they can use their account.","Force all customers to set up two-factor authentication before they can use their account."
 "Forgot and Remind Email Sender","Forgot and Remind Email Sender"

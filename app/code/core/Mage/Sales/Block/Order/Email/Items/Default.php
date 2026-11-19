@@ -32,7 +32,7 @@ class Mage_Sales_Block_Order_Email_Items_Default extends Mage_Core_Block_Templat
             }
             $result = array_merge($result, $this->getItem()->getOrderItem()->getProductAdditionalOptions());
             if (isset($options['attributes_info'])) {
-                $result = array_merge($result, $options['attributes_info']);
+                $result = array_merge($result, Mage::helper('catalog/product_configuration')->escapeAttributesInfo($options['attributes_info']));
             }
         }
 

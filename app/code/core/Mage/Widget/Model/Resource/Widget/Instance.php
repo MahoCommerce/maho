@@ -8,6 +8,11 @@
  * @package Mage_Widget
  */
 
+/**
+ * @phpstan-type LayoutLink array{store_id: int, area: string, package: string, theme: string}
+ * @phpstan-type LayoutUpdate array{layout_update_id: int, handle: string, sort_order: int, xml: string, links: list<LayoutLink>}
+ * @phpstan-type LayoutUpdateRemoval array{layout_update_id: int, handle: string, sort_order: int, xml: string, links: list<LayoutLink>, instance_id: int, type: string, reason: string}
+ */
 class Mage_Widget_Model_Resource_Widget_Instance extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
@@ -228,6 +233,243 @@ class Mage_Widget_Model_Resource_Widget_Instance extends Mage_Core_Model_Resourc
                 $inCond,
             );
         }
+        return $this;
+    }
+
+    /**
+     * Delete the layout updates of widget instances that generateLayoutUpdateXml() does not give
+     *
+     * This removes a layout update when no widget.xml of an enabled module declares the type of its
+     * widget instance, or when its XML does not have the shape that
+     * Mage_Widget_Model_Widget_Instance::generateLayoutUpdateXml() gives for that type. The widget
+     * instance and its page rows stay: a save of the instance makes its layout updates again.
+     *
+     * The method reads the layout updates in batches, in the order of their IDs. It gives each batch to
+     * $beforeDelete before it deletes the batch. It deletes the links of each layout update itself,
+     * because setup scripts run with the foreign key checks off.
+     *
+     * @param (callable(list<LayoutUpdateRemoval>): void)|null $beforeDelete
+     * @return int the number of deleted layout updates
+     */
+    public function deleteUnexpectedLayoutUpdates(?callable $beforeDelete = null, int $batchSize = 200): int
+    {
+        $adapter = $this->_getWriteAdapter();
+        $batchSize = max(1, $batchSize);
+        $deleted = 0;
+        $lastId = 0;
+
+        /** @var Mage_Widget_Model_Widget_Instance $checker */
+        $checker = Mage::getModel('widget/widget_instance');
+
+        do {
+            $ids = array_map(intval(...), $adapter->fetchCol(
+                $adapter->select()
+                    ->distinct()
+                    ->from(['page_layout' => $this->getTable('widget/widget_instance_page_layout')], ['layout_update_id'])
+                    ->join(['page' => $this->getTable('widget/widget_instance_page')], 'page.page_id = page_layout.page_id', [])
+                    ->join(['instance' => $this->getMainTable()], 'instance.instance_id = page.instance_id', [])
+                    ->where('page_layout.layout_update_id > ?', $lastId)
+                    ->order('page_layout.layout_update_id ' . \Maho\Db\Select::SQL_ASC)
+                    ->limit($batchSize),
+            ));
+            $fetched = count($ids);
+            if ($fetched === 0) {
+                break;
+            }
+
+            $lastId = max($ids);
+
+            $rows = $adapter->fetchAll(
+                $adapter->select()
+                    ->from(['layout_update' => $this->getTable('core/layout_update')], ['layout_update_id', 'handle', 'xml', 'sort_order'])
+                    ->join(['page_layout' => $this->getTable('widget/widget_instance_page_layout')], 'page_layout.layout_update_id = layout_update.layout_update_id', [])
+                    ->join(['page' => $this->getTable('widget/widget_instance_page')], 'page.page_id = page_layout.page_id', [])
+                    ->join(['instance' => $this->getMainTable()], 'instance.instance_id = page.instance_id', ['instance_id', 'instance_type'])
+                    ->where('layout_update.layout_update_id IN (?)', $ids)
+                    ->order(['layout_update.layout_update_id ' . \Maho\Db\Select::SQL_ASC, 'instance.instance_id ' . \Maho\Db\Select::SQL_ASC]),
+            );
+
+            $removals = [];
+            foreach ($rows as $row) {
+                $layoutUpdateId = (int) $row['layout_update_id'];
+                if (isset($removals[$layoutUpdateId])) {
+                    continue;
+                }
+
+                // Several instances can share a layout update: it goes when one of them does not give it
+                $type = (string) $row['instance_type'];
+                $reason = $checker->setType($type)->getLayoutUpdateRemovalReason((string) $row['xml']);
+                if ($reason === null) {
+                    continue;
+                }
+
+                $removals[$layoutUpdateId] = [
+                    'layout_update_id' => $layoutUpdateId,
+                    'handle' => (string) $row['handle'],
+                    'sort_order' => (int) $row['sort_order'],
+                    'xml' => (string) $row['xml'],
+                    'links' => [],
+                    'instance_id' => (int) $row['instance_id'],
+                    'type' => $type,
+                    'reason' => $reason,
+                ];
+            }
+
+            if ($removals === []) {
+                continue;
+            }
+
+            $links = $this->_fetchLayoutLinks(array_keys($removals));
+            foreach (array_keys($removals) as $layoutUpdateId) {
+                $removals[$layoutUpdateId]['links'] = $links[$layoutUpdateId] ?? [];
+            }
+
+            if ($beforeDelete !== null) {
+                $beforeDelete(array_values($removals));
+            }
+
+            $this->_deleteLayoutUpdatesWithLinks(array_keys($removals));
+            $deleted += count($removals);
+        } while ($fetched === $batchSize);
+
+        return $deleted;
+    }
+
+    /**
+     * Find the layout updates that have a storefront link, belong to no widget instance, and do not have the shape of generateLayoutUpdateXml()
+     *
+     * These rows still show on the storefront, but no admin page shows them. The method only reports
+     * them: other modules also write core_layout_update, so a row with no widget instance is not
+     * always a widget row. It does not report an empty update, or an update with the shape of a
+     * declared widget type, which a widget instance deleted outside the admin can leave.
+     *
+     * @param callable(list<LayoutUpdate>): void $report
+     * @return int the number of reported layout updates
+     */
+    public function reportUnownedLayoutUpdates(callable $report, int $batchSize = 200): int
+    {
+        $adapter = $this->_getWriteAdapter();
+        $batchSize = max(1, $batchSize);
+        $reported = 0;
+        $lastId = 0;
+
+        /** @var Mage_Widget_Model_Widget_Instance $checker */
+        $checker = Mage::getModel('widget/widget_instance');
+
+        do {
+            $linked = $adapter->select()
+                ->from(['link' => $this->getTable('core/layout_link')], []);
+            $owned = $adapter->select()
+                ->from(['page_layout' => $this->getTable('widget/widget_instance_page_layout')], [])
+                ->join(['page' => $this->getTable('widget/widget_instance_page')], 'page.page_id = page_layout.page_id', [])
+                ->join(['instance' => $this->getMainTable()], 'instance.instance_id = page.instance_id', []);
+
+            $rows = $adapter->fetchAll(
+                $adapter->select()
+                    ->from(['layout_update' => $this->getTable('core/layout_update')], ['layout_update_id', 'handle', 'xml', 'sort_order'])
+                    ->where('layout_update.layout_update_id > ?', $lastId)
+                    ->exists($linked, 'link.layout_update_id = layout_update.layout_update_id')
+                    ->exists($owned, 'page_layout.layout_update_id = layout_update.layout_update_id', false)
+                    ->order('layout_update.layout_update_id ' . \Maho\Db\Select::SQL_ASC)
+                    ->limit($batchSize),
+            );
+            $fetched = count($rows);
+            if ($fetched === 0) {
+                break;
+            }
+
+            $found = [];
+            foreach ($rows as $row) {
+                $layoutUpdateId = (int) $row['layout_update_id'];
+                $lastId = max($lastId, $layoutUpdateId);
+
+                $xml = (string) $row['xml'];
+                $type = $checker->getGeneratedLayoutUpdateBlockType($xml);
+                if (trim($xml) === '' || ($type !== null && $checker->setType($type)->isTypeDeclared())) {
+                    continue;
+                }
+
+                $found[$layoutUpdateId] = [
+                    'layout_update_id' => $layoutUpdateId,
+                    'handle' => (string) $row['handle'],
+                    'sort_order' => (int) $row['sort_order'],
+                    'xml' => $xml,
+                    'links' => [],
+                ];
+            }
+
+            if ($found === []) {
+                continue;
+            }
+
+            $links = $this->_fetchLayoutLinks(array_keys($found));
+            foreach (array_keys($found) as $layoutUpdateId) {
+                $found[$layoutUpdateId]['links'] = $links[$layoutUpdateId] ?? [];
+            }
+
+            $report(array_values($found));
+            $reported += count($found);
+        } while ($fetched === $batchSize);
+
+        return $reported;
+    }
+
+    /**
+     * Return the stores and themes of each layout update, by layout update ID
+     *
+     * @param list<int> $layoutUpdateIds
+     * @return array<int, list<LayoutLink>>
+     */
+    protected function _fetchLayoutLinks(array $layoutUpdateIds): array
+    {
+        $adapter = $this->_getWriteAdapter();
+        $rows = $adapter->fetchAll(
+            $adapter->select()
+                ->from($this->getTable('core/layout_link'), ['layout_update_id', 'store_id', 'area', 'package', 'theme'])
+                ->where('layout_update_id IN (?)', $layoutUpdateIds)
+                ->order('layout_link_id ' . \Maho\Db\Select::SQL_ASC),
+        );
+
+        $links = [];
+        foreach ($rows as $row) {
+            $links[(int) $row['layout_update_id']][] = [
+                'store_id' => (int) $row['store_id'],
+                'area' => (string) $row['area'],
+                'package' => (string) $row['package'],
+                'theme' => (string) $row['theme'],
+            ];
+        }
+
+        return $links;
+    }
+
+    /**
+     * Delete layout updates, their store links and their widget page rows in one transaction
+     *
+     * Unlike _deleteLayoutUpdates(), this method does not need ON DELETE CASCADE, so it also works
+     * when the foreign key checks are off, as in setup scripts.
+     *
+     * @param list<int> $layoutUpdateIds
+     */
+    protected function _deleteLayoutUpdatesWithLinks(array $layoutUpdateIds): static
+    {
+        if ($layoutUpdateIds === []) {
+            return $this;
+        }
+
+        $adapter = $this->_getWriteAdapter();
+        $where = ['layout_update_id IN (?)' => $layoutUpdateIds];
+        $adapter->beginTransaction();
+        try {
+            $adapter->delete($this->getTable('core/layout_link'), $where);
+            $adapter->delete($this->getTable('widget/widget_instance_page_layout'), $where);
+            $adapter->delete($this->getTable('core/layout_update'), $where);
+            $adapter->commit();
+        } catch (\Throwable $throwable) {
+            $adapter->rollBack();
+            throw $throwable;
+        }
+
         return $this;
     }
 

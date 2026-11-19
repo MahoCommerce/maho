@@ -42,7 +42,9 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_View extends Mage_Adminhtml_Bloc
                 'onclick'   => Mage::helper('core/js')->getSetLocationJs($this->getPrintUrl()),
             ]);
 
-            if ($this->getShipment()->canCancel()) {
+            if ($this->getShipment()->canCancel()
+                && Mage::getSingleton('admin/session')->isAllowed('sales/order/actions/ship')
+            ) {
                 $this->_addButton('cancel', [
                     'label'     => Mage::helper('sales')->__('Cancel'),
                     'class'     => 'delete',

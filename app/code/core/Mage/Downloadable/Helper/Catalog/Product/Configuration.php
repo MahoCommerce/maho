@@ -55,6 +55,8 @@ class Mage_Downloadable_Helper_Catalog_Product_Configuration extends Mage_Core_H
     /**
      * Retrieves product options
      *
+     * The option values are HTML, as the custom option values that their option type formats.
+     *
      * @return array
      */
     #[\Override]
@@ -69,7 +71,7 @@ class Mage_Downloadable_Helper_Catalog_Product_Configuration extends Mage_Core_H
                 'value' => [],
             ];
             foreach ($links as $link) {
-                $linksOption['value'][] = $link->getTitle();
+                $linksOption['value'][] = $this->escapeHtml($link->getTitle());
             }
             $options[] = $linksOption;
         }

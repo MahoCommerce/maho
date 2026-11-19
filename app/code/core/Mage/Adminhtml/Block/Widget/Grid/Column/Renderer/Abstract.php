@@ -70,7 +70,7 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
             if (is_string($getter)) {
                 return $row->$getter();
             }
-            if (is_callable($getter)) {
+            if (Mage_Adminhtml_Block_Widget_Grid_Column::isBoundCallback($getter)) {
                 return call_user_func($getter, $row);
             }
             return '';

@@ -12,7 +12,7 @@
 <span class="field-row grid" id="shipment_tracking_info">
 
 <?php if ($this->getTrackingInfo()): ?>
-    <strong><?= $this->escapeHtml($this->getTrackingInfo()->getCarrierTitle()) ?></strong> - <?= $this->getTrackingInfo()->getTracking() ?>
+    <strong><?= $this->escapeHtml($this->getTrackingInfo()->getCarrierTitle()) ?></strong> - <?= $this->escapeHtml($this->getTrackingInfo()->getTracking()) ?>
     <div class="info">
         <?php if ($this->getTrackingInfo()->getErrorMessage()): ?>
             <?= $this->escapeHtml($this->getTrackingInfo()->getErrorMessage()) ?>

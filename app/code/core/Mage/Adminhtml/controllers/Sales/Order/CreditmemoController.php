@@ -70,6 +70,12 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
 
         $service = Mage::getService('sales/order_document');
         $creditmemoId = (int) $this->getRequest()->getParam('creditmemo_id');
+        // _isAllowed() checks the same for each action. This check also covers the other callers.
+        if (!$creditmemoId && !$this->_isCreateAllowed()) {
+            $this->_getSession()->addError($this->__('Access denied.'));
+            return false;
+        }
+
         try {
             if ($creditmemoId) {
                 $creditmemo = $service->requireCreditmemo($creditmemoId);
@@ -314,10 +320,12 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
     public function addCommentAction(): void
     {
         try {
-            $this->getRequest()->setParam('creditmemo_id', $this->getRequest()->getParam('id'));
+            $creditmemoId = (int) $this->getRequest()->getParam('id');
+            $this->getRequest()->setParam('creditmemo_id', $creditmemoId);
             $data = (array) $this->getRequest()->getPost('comment');
+            // Without a credit memo ID, _initCreditmemo() prepares a new credit memo from the order
             Mage::getService('sales/order_document')->addComment(
-                $this->_initCreditmemo() ?: Mage::throwException($this->__('The credit memo no longer exists.')),
+                ($creditmemoId > 0 ? $this->_initCreditmemo() : false) ?: Mage::throwException($this->__('The credit memo no longer exists.')),
                 (string) ($data['comment'] ?? ''),
                 !empty($data['is_customer_notified']),
                 isset($data['is_visible_on_front']),
@@ -343,5 +351,39 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
     {
         $this->_initCreditmemo();
         parent::printAction();
+    }
+
+    /**
+     * Check the Credit Memos order action on top of the Credit Memos permission to create, cancel
+     * or void a credit memo.
+     *
+     * Without a credit memo ID, an action prepares a new credit memo from the order, so it needs
+     * the order action too. addComment reads the credit memo ID from its id parameter.
+     */
+    #[\Override]
+    protected function _isAllowed(): bool
+    {
+        if (!parent::_isAllowed()) {
+            return false;
+        }
+
+        $request = $this->getRequest();
+        $action = strtolower($request->getActionName());
+        $creditmemoId = (int) $request->getParam($action === 'addcomment' ? 'id' : 'creditmemo_id');
+        if (in_array($action, ['start', 'new', 'updateqty', 'save', 'cancel', 'void'], true)
+            || ($creditmemoId === 0 && (int) $request->getParam('order_id') > 0)
+        ) {
+            return $this->_isCreateAllowed();
+        }
+
+        return true;
+    }
+
+    /**
+     * Return true when the admin may create, cancel or void a credit memo.
+     */
+    protected function _isCreateAllowed(): bool
+    {
+        return Mage::getSingleton('admin/session')->isAllowed('sales/order/actions/creditmemo');
     }
 }

@@ -117,11 +117,68 @@ it('checks the leaf of each action', function (string $class, string $action, ar
     yield 'order export allowed to order viewers' => [$order, 'exportCsv', [], $view, true];
     yield 'order cancel denied without cancel' => [$order, 'cancel', [], $view, false];
 
-    $edit = Mage_Adminhtml_Sales_Order_EditController::class;
-    foreach (['start', 'index', 'loadBlock', 'save', 'cancel'] as $action) {
-        yield "order edit $action denied to create" => [$edit, $action, [], ['sales/order/actions/create'], false];
-        yield "order edit $action allowed with edit" => [$edit, $action, [], ['sales/order/actions/edit'], true];
+    // The order actions are needed on top of the document permission, never instead of it
+    $invoice = Mage_Adminhtml_Sales_Order_InvoiceController::class;
+    $newDoc = ['order_id' => '5'];
+    $existingInvoice = ['invoice_id' => '7'];
+    $invoiceGrid = ['sales/invoice'];
+    foreach (['start', 'new', 'updateQty', 'save'] as $action) {
+        yield "invoice $action denied to invoice grid" => [$invoice, $action, $newDoc, $invoiceGrid, false];
+        yield "invoice $action denied to order invoice alone" => [$invoice, $action, $newDoc, ['sales/order/actions/invoice'], false];
+        yield "invoice $action allowed with order invoice" => [$invoice, $action, $newDoc, [...$invoiceGrid, 'sales/order/actions/invoice'], true];
     }
+    yield 'invoice capture denied to invoice grid' => [$invoice, 'capture', $existingInvoice, $invoiceGrid, false];
+    yield 'invoice capture denied to capture alone' => [$invoice, 'capture', $existingInvoice, ['sales/order/actions/capture'], false];
+    yield 'invoice capture allowed with capture' => [$invoice, 'capture', $existingInvoice, [...$invoiceGrid, 'sales/order/actions/capture'], true];
+    yield 'invoice capture of a new invoice denied without order invoice' => [$invoice, 'capture', $newDoc, [...$invoiceGrid, 'sales/order/actions/capture'], false];
+    yield 'invoice capture of a new invoice allowed with capture and invoice' => [$invoice, 'capture', $newDoc, [...$invoiceGrid, 'sales/order/actions/capture', 'sales/order/actions/invoice'], true];
+    foreach (['cancel', 'void'] as $action) {
+        yield "invoice $action denied to invoice grid" => [$invoice, $action, $existingInvoice, $invoiceGrid, false];
+        yield "invoice $action denied to order invoice" => [$invoice, $action, $existingInvoice, [...$invoiceGrid, 'sales/order/actions/invoice'], false];
+        yield "invoice $action denied to cancel alone" => [$invoice, $action, $existingInvoice, ['sales/order/actions/cancel'], false];
+        yield "invoice $action allowed with cancel" => [$invoice, $action, $existingInvoice, [...$invoiceGrid, 'sales/order/actions/cancel'], true];
+    }
+    yield 'invoice view allowed to invoice grid' => [$invoice, 'view', $existingInvoice, $invoiceGrid, true];
+    yield 'invoice print allowed to invoice grid' => [$invoice, 'print', $existingInvoice, $invoiceGrid, true];
+    yield 'invoice comment allowed to invoice grid' => [$invoice, 'addComment', ['id' => '7', 'order_id' => '5'], $invoiceGrid, true];
+    yield 'invoice comment without an invoice id denied to invoice grid' => [$invoice, 'addComment', [...$existingInvoice, ...$newDoc], $invoiceGrid, false];
+    yield 'invoice view of a new invoice denied to invoice grid' => [$invoice, 'view', $newDoc, $invoiceGrid, false];
+
+    $shipment = Mage_Adminhtml_Sales_Order_ShipmentController::class;
+    $existingShipment = ['shipment_id' => '7'];
+    $shipmentGrid = ['sales/shipment'];
+    foreach (['start', 'new', 'save'] as $action) {
+        yield "shipment $action denied to shipment grid" => [$shipment, $action, $newDoc, $shipmentGrid, false];
+        yield "shipment $action denied to ship alone" => [$shipment, $action, $newDoc, ['sales/order/actions/ship'], false];
+        yield "shipment $action allowed with ship" => [$shipment, $action, $newDoc, [...$shipmentGrid, 'sales/order/actions/ship'], true];
+    }
+    foreach (['addTrack', 'removeTrack', 'createLabel', 'printLabel', 'email'] as $action) {
+        yield "shipment $action allowed to shipment grid" => [$shipment, $action, $existingShipment, $shipmentGrid, true];
+        yield "shipment $action on a new shipment denied to shipment grid" => [$shipment, $action, $newDoc, $shipmentGrid, false];
+        yield "shipment $action on a new shipment allowed with ship" => [$shipment, $action, $newDoc, [...$shipmentGrid, 'sales/order/actions/ship'], true];
+    }
+    yield 'shipment cancel denied to shipment grid' => [$shipment, 'cancel', $existingShipment, $shipmentGrid, false];
+    yield 'shipment cancel allowed with ship' => [$shipment, 'cancel', $existingShipment, [...$shipmentGrid, 'sales/order/actions/ship'], true];
+    yield 'shipment comment allowed to shipment grid' => [$shipment, 'addComment', ['id' => '7', 'order_id' => '5'], $shipmentGrid, true];
+    yield 'shipment comment without a shipment id denied to shipment grid' => [$shipment, 'addComment', [...$existingShipment, ...$newDoc], $shipmentGrid, false];
+
+    $creditmemo = Mage_Adminhtml_Sales_Order_CreditmemoController::class;
+    $existingCreditmemo = ['creditmemo_id' => '7'];
+    $creditmemoGrid = ['sales/creditmemo'];
+    foreach (['start', 'new', 'updateQty', 'save'] as $action) {
+        yield "credit memo $action denied to credit memo grid" => [$creditmemo, $action, $newDoc, $creditmemoGrid, false];
+        yield "credit memo $action denied to order credit memos alone" => [$creditmemo, $action, $newDoc, ['sales/order/actions/creditmemo'], false];
+        yield "credit memo $action allowed with order credit memos" => [$creditmemo, $action, $newDoc, [...$creditmemoGrid, 'sales/order/actions/creditmemo'], true];
+    }
+    foreach (['cancel', 'void'] as $action) {
+        yield "credit memo $action denied to credit memo grid" => [$creditmemo, $action, $existingCreditmemo, $creditmemoGrid, false];
+        yield "credit memo $action allowed with order credit memos" => [$creditmemo, $action, $existingCreditmemo, [...$creditmemoGrid, 'sales/order/actions/creditmemo'], true];
+    }
+    yield 'credit memo from an invoice denied to credit memo grid' => [$creditmemo, 'new', ['order_id' => '5', 'invoice_id' => '6'], [...$creditmemoGrid, 'sales/invoice'], false];
+    yield 'credit memo view allowed to credit memo grid' => [$creditmemo, 'view', $existingCreditmemo, $creditmemoGrid, true];
+    yield 'credit memo comment allowed to credit memo grid' => [$creditmemo, 'addComment', ['id' => '7', 'order_id' => '5'], $creditmemoGrid, true];
+    yield 'credit memo comment without a credit memo id denied to credit memo grid' => [$creditmemo, 'addComment', [...$existingCreditmemo, ...$newDoc], $creditmemoGrid, false];
+    yield 'credit memo view denied to order credit memos alone' => [$creditmemo, 'view', $existingCreditmemo, ['sales/order/actions/creditmemo'], false];
 
     $shopcart = Mage_Adminhtml_Report_ShopcartController::class;
     yield 'abandoned cart export denied to products in cart' => [$shopcart, 'exportAbandonedCsv', [], ['report/shopcart/product'], false];
@@ -238,6 +295,151 @@ it('checks Edit for the create steps that the order edit page calls', function (
         yield "$action allowed with edit" => [$action, ['sales/order/actions/edit'], true];
         yield "$action denied to create" => [$action, ['sales/order/actions/create'], false];
     }
+});
+
+/**
+ * Put $data into the quote session of order creation, run $check, then clear the session again.
+ *
+ * @param array{order_id?: int, reordered?: int, customer_id?: int, store_id?: int} $data
+ */
+function actionAclWithQuoteSession(array $data, Closure $check): void
+{
+    Mage::getSingleton('adminhtml/session_quote')
+        ->setOrderId($data['order_id'] ?? null)
+        ->setReordered($data['reordered'] ?? null)
+        ->setCustomerId($data['customer_id'] ?? null)
+        ->setStoreId($data['store_id'] ?? null);
+    try {
+        $check();
+    } finally {
+        Mage::getSingleton('adminhtml/session_quote')->setOrderId(null)->setReordered(null)->setCustomerId(null)->setStoreId(null);
+    }
+}
+
+it('checks Edit and an edit in progress for the customer and the store of the edit, for the steps of an order edit', function (string $action, array $session, array $params, array $granted, bool $expected): void {
+    actionAclLogin($granted);
+    $controller = new Mage_Adminhtml_Sales_Order_EditController(actionAclRequest($action, $params), new Mage_Core_Controller_Response_Http());
+
+    actionAclWithQuoteSession($session, fn() => expect(actionAclIsAllowed($controller))->toBe($expected));
+})->with(function (): Generator {
+    $edit = ['sales/order/actions/edit'];
+    $create = ['sales/order/actions/create'];
+    $editing = ['order_id' => 12, 'customer_id' => 3, 'store_id' => 1];
+    $reordering = ['reordered' => 12, 'customer_id' => 3, 'store_id' => 1];
+    $sameOrder = ['customer_id' => '3', 'store_id' => '1'];
+
+    foreach (['start', 'cancel'] as $action) {
+        yield "$action denied to create" => [$action, [], [], $create, false];
+        yield "$action allowed with edit" => [$action, [], [], $edit, true];
+    }
+    foreach (['index', 'loadBlock', 'processData', 'addConfigured', 'configureProductToAdd', 'configureQuoteItems', 'save'] as $action) {
+        yield "$action during an edit allowed with edit" => [$action, $editing, $sameOrder, $edit, true];
+        yield "$action during an edit denied to create" => [$action, $editing, $sameOrder, $create, false];
+        yield "$action without an edit denied to edit" => [$action, [], [], $edit, false];
+        yield "$action without an edit denied to create" => [$action, [], [], $create, false];
+        yield "$action during a reorder denied to edit" => [$action, $reordering, [], $edit, false];
+    }
+    yield 'reorder denied to edit' => ['reorder', $editing, ['order_id' => '12'], $edit, false];
+    yield 'reorder denied to edit and reorder' => ['reorder', $editing, ['order_id' => '12'], [...$edit, 'sales/order/actions/reorder'], false];
+    yield 'edit of a guest order allowed with edit' => ['loadBlock', ['order_id' => 12, 'store_id' => 1], ['customer_id' => 'false', 'store_id' => '1'], $edit, true];
+    yield 'edit without customer and store params allowed with edit' => ['index', $editing, [], $edit, true];
+    yield 'switching the customer of an edit denied to edit' => ['index', $editing, ['customer_id' => '4'], $edit, false];
+    yield 'switching the store of an edit denied to edit' => ['loadBlock', $editing, ['customer_id' => '3', 'store_id' => '2'], $edit, false];
+    yield 'switching the customer of an edit denied to edit and create' => ['save', $editing, ['customer_id' => '4'], [...$edit, ...$create], false];
+});
+
+it('refuses a create step of an order edit for another customer or store', function (string $action, array $params, bool $expected): void {
+    actionAclLogin(['sales/order/actions/edit', 'sales/order/actions/create']);
+    $controller = new Mage_Adminhtml_Sales_Order_CreateController(actionAclRequest($action, $params), new Mage_Core_Controller_Response_Http());
+
+    actionAclWithQuoteSession(
+        ['order_id' => 12, 'customer_id' => 3, 'store_id' => 1],
+        fn() => expect(actionAclIsAllowed($controller))->toBe($expected),
+    );
+})->with([
+    'save for the same customer allowed' => ['save', ['customer_id' => '3', 'store_id' => '1'], true],
+    'save for another customer denied' => ['save', ['customer_id' => '4'], false],
+    'block load for another store denied' => ['loadBlock', ['store_id' => '2'], false],
+    'start of a new order allowed' => ['start', ['customer_id' => '4'], true],
+]);
+
+it('allows the Profiles permission only for the profiles of the profile wizard and their batches', function (string $action, array $params, ?array $post, array $granted, bool $expected): void {
+    actionAclLogin($granted);
+    // Profile 1 is a profile of the wizard, profile 2 is an Advanced Profile, profile 3 does not exist.
+    // Batch N ran profile N with the adapter of the wizard. Batch 4 ran profile 1 with another adapter.
+    $controller = new class (actionAclRequest($action, $params, $post), new Mage_Core_Controller_Response_Http()) extends Mage_Adminhtml_System_Convert_GuiController {
+        #[\Override]
+        protected function _getGuiEntityType(int $profileId): ?string
+        {
+            return $profileId === 1 ? 'product' : null;
+        }
+
+        #[\Override]
+        protected function _loadBatch(int $batchId): Mage_Dataflow_Model_Batch
+        {
+            return Mage::getModel('dataflow/batch')->setData([
+                'batch_id' => $batchId,
+                'profile_id' => $batchId === 4 ? 1 : $batchId,
+                'adapter' => $batchId === 4 ? 'catalog/product' : 'catalog/convert_adapter_product',
+            ]);
+        }
+    };
+
+    expect(actionAclIsAllowed($controller))->toBe($expected);
+})->with(function (): Generator {
+    $gui = ['system/convert/gui'];
+
+    foreach (['edit', 'run', 'delete', 'history', 'upload', 'download'] as $action) {
+        yield "$action of a wizard profile allowed with profiles" => [$action, ['id' => '1'], null, $gui, true];
+        yield "$action of an advanced profile denied to profiles" => [$action, ['id' => '2'], null, $gui, false];
+    }
+    yield 'save of a wizard profile allowed with profiles' => ['save', ['profile_id' => '1'], null, $gui, true];
+    yield 'save of an advanced profile denied to profiles' => ['save', ['profile_id' => '2'], null, $gui, false];
+    yield 'save of an advanced profile by posted id denied to profiles' => ['save', [], ['profile_id' => '2'], $gui, false];
+    yield 'save of a new profile allowed with profiles' => ['save', [], null, $gui, true];
+    yield 'new profile allowed with profiles' => ['new', [], null, $gui, true];
+    yield 'edit of a missing profile denied to profiles' => ['edit', ['id' => '3'], null, $gui, false];
+    yield 'batch run of a wizard profile allowed with profiles' => ['batchRun', [], ['batch_id' => '1'], $gui, true];
+    yield 'batch run of an advanced profile denied to profiles' => ['batchRun', [], ['batch_id' => '2'], $gui, false];
+    yield 'batch run of a missing profile denied to profiles' => ['batchRun', [], ['batch_id' => '3'], $gui, false];
+    yield 'batch run with another adapter denied to profiles' => ['batchRun', [], ['batch_id' => '4'], $gui, false];
+    yield 'batch finish of a wizard profile allowed with profiles' => ['batchFinish', ['id' => '1'], null, $gui, true];
+    yield 'batch finish of an advanced profile denied to profiles' => ['batchFinish', ['id' => '2'], null, $gui, false];
+    yield 'batch finish of a missing profile denied to profiles' => ['batchFinish', ['id' => '3'], null, $gui, false];
+    yield 'wizard profiles denied to advanced profiles' => ['edit', ['id' => '1'], null, ['system/convert/profiles'], false];
+});
+
+it('shows the results of a global search source only with the permission that opens its grid', function (string $source, array $granted, bool $expected): void {
+    actionAclLogin(['global_search', ...$granted]);
+    $acl = (string) Mage::getConfig()->getNode(Mage_Adminhtml_Service_GlobalSearch::XML_PATH_SOURCES . "/$source/acl");
+
+    expect($acl)->not->toBe('')
+        ->and(Mage::getSingleton('admin/session')->isAllowed($acl))->toBe($expected);
+})->with([
+    'products denied to url rewrites' => ['products', ['catalog/urlrewrite'], false],
+    'products allowed with manage products' => ['products', ['catalog/products'], true],
+    'customers denied to customer groups' => ['customers', ['customer/group'], false],
+    'customers allowed with manage customers' => ['customers', ['customer/manage'], true],
+    'orders denied to tax rules' => ['sales', ['sales/tax/rules'], false],
+    'orders denied to order create' => ['sales', ['sales/order/actions/create'], false],
+    'orders allowed with order view' => ['sales', ['sales/order/actions/view'], true],
+]);
+
+it('keeps the capture and shipment options of a new invoice only with their permission', function (array $granted, array $expectedKeys): void {
+    actionAclLogin($granted);
+    $controller = new Mage_Adminhtml_Sales_Order_InvoiceController(actionAclRequest('save'), new Mage_Core_Controller_Response_Http());
+    $data = ['capture_case' => 'online', 'do_shipment' => '1', 'comment_text' => 'note'];
+
+    $filtered = (fn(): array => $this->_filterInvoiceData($data))->call($controller);
+
+    expect(array_keys($filtered))->toBe($expectedKeys);
+})->with(function (): Generator {
+    $invoice = ['sales/order/actions/invoice'];
+
+    yield 'invoice alone drops capture and shipment' => [$invoice, ['comment_text']];
+    yield 'capture keeps the capture choice' => [[...$invoice, 'sales/order/actions/capture'], ['capture_case', 'comment_text']];
+    yield 'ship keeps the shipment option' => [[...$invoice, 'sales/order/actions/ship'], ['do_shipment', 'comment_text']];
+    yield 'all three keep both' => [[...$invoice, 'sales/order/actions/capture', 'sales/order/actions/ship'], ['capture_case', 'do_shipment', 'comment_text']];
 });
 
 it('allows Pending Tags to act only on tags that are still pending', function (string $action, array $params, array $statuses, array $granted, bool $expected): void {

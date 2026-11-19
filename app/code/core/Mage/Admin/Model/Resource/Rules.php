@@ -69,6 +69,9 @@ class Mage_Admin_Model_Resource_Rules extends Mage_Core_Model_Resource_Db_Abstra
                 }
             }
 
+            // Saving the role gave the members a new version before the rules changed, and a session can
+            // have built its ACL with the old rules since then
+            $hasMembers = $this->reloadRoleUsersAcl((int) $roleId);
             $adapter->commit();
         } catch (Mage_Core_Exception $e) {
             $adapter->rollBack();
@@ -76,7 +79,24 @@ class Mage_Admin_Model_Resource_Rules extends Mage_Core_Model_Resource_Db_Abstra
         } catch (Exception $e) {
             $adapter->rollBack();
             Mage::logException($e);
+            return;
         }
+
+        if ($hasMembers) {
+            Mage::getResourceSingleton('admin/user')->cleanMenuCache();
+        }
+    }
+
+    /**
+     * Give each member of the role $roleId a new ACL version.
+     *
+     * @return bool true when the role has members
+     */
+    protected function reloadRoleUsersAcl(int $roleId): bool
+    {
+        $role = Mage::getModel('admin/roles')->setId($roleId);
+        return Mage::getResourceSingleton('admin/user')
+            ->bumpAclVersion(Mage::getResourceSingleton('admin/roles')->getRoleUsers($role)) > 0;
     }
 
     /**

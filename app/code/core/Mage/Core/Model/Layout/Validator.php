@@ -52,6 +52,17 @@ class Mage_Core_Model_Layout_Validator
     protected array $_disallowedBlocks = [];
 
     /**
+     * Admin blocks expect a signed-in admin user. On the storefront, a grid shows a full collection
+     * and a grid column calls the callbacks that its options give.
+     *
+     * @var list<class-string>
+     */
+    protected array $adminhtmlBlockClasses = [
+        Mage_Adminhtml_Block_Abstract::class,
+        Mage_Adminhtml_Block_Template::class,
+    ];
+
+    /**
      * @var array<string, string>
      */
     protected array $_messageTemplates = [];
@@ -190,9 +201,9 @@ class Mage_Core_Model_Layout_Validator
     }
 
     /**
-     * Return true when a block is of a disallowed class or of a subclass of one. The class comes from the
-     * "class" and the "type" attributes, as Mage_Core_Model_Layout::_generateBlock() reads them,
-     * or from an action argument.
+     * Return true when a block is an admin block (see isAdminhtmlBlock()), or is of a disallowed class or
+     * of a subclass of one. The class comes from the "class" and the "type" attributes, as
+     * Mage_Core_Model_Layout::_generateBlock() reads them, or from an action argument.
      */
     protected function _hasDisallowedBlock(\Maho\Simplexml\Element $xml): bool
     {
@@ -203,15 +214,15 @@ class Mage_Core_Model_Layout_Validator
                 $disallowed[] = $className;
             }
         }
-        if ($disallowed === []) {
-            return false;
-        }
 
         // An action can create a block from an argument, as addOptionRenderer() and addItemRender() do
         foreach ($xml->xpath('//block/@class | //block/@type | //action//*[not(*)]') ?: [] as $node) {
             $className = $this->_getBlockClassName((string) $node);
             if ($className === '') {
                 continue;
+            }
+            if ($this->isAdminhtmlBlock($className)) {
+                return true;
             }
             foreach ($disallowed as $disallowedClass) {
                 if (strcasecmp($className, $disallowedClass) === 0) {
@@ -226,6 +237,22 @@ class Mage_Core_Model_Layout_Validator
         }
 
         return false;
+    }
+
+    /**
+     * Return true when $className is an admin block: a core admin block ("adminhtml/..." gives
+     * Mage_Adminhtml_Block_...), a class with "Block_Adminhtml" in its name, as the admin blocks of
+     * other modules have, or a subclass of a class in $adminhtmlBlockClasses.
+     */
+    protected function isAdminhtmlBlock(string $className): bool
+    {
+        if (preg_match('/^Mage_Adminhtml_|[_\\\\]Block[_\\\\]Adminhtml(?:[_\\\\]|$)/i', $className) === 1) {
+            return true;
+        }
+        if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*(\\\\[A-Za-z_][A-Za-z0-9_]*)*$/', $className)) {
+            return false;
+        }
+        return array_any($this->adminhtmlBlockClasses, fn($adminhtmlBlockClass) => is_a($className, $adminhtmlBlockClass, true));
     }
 
     /**

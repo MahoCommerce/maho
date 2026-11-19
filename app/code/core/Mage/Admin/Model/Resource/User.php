@@ -314,6 +314,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
         ];
 
         $dbh->delete($this->getTable('admin/role'), $condition);
+        $this->saveReloadAclFlag($user, 1);
         return $this;
     }
 
@@ -387,27 +388,122 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
     }
 
     /**
-     * Set reload ACL flag
+     * Make each session of the user build its ACL again on its next request. A $flag that is not 0
+     * gives the user a new ACL version (see bumpAclVersion()). A $flag of 0 clears the reload_acl_flag.
      *
      * @param Mage_Core_Model_Abstract $object
-     * @param int $flag
+     * @param int|bool $flag
      * @return $this
      */
     public function saveReloadAclFlag($object, $flag)
     {
-        if ($object->getId()) {
+        $userId = (int) $object->getId();
+        if ($userId <= 0) {
+            return $this;
+        }
+        if ((int) $flag !== 0) {
+            $this->bumpAclVersion([$userId]);
+            $this->cleanMenuCache();
+        } else {
             $this->_getWriteAdapter()->update(
                 $this->getMainTable(),
-                ['reload_acl_flag' => $flag],
-                ['user_id = ?' => (int) $object->getId()],
+                ['reload_acl_flag' => 0],
+                ['user_id = ?' => $userId],
             );
-            if ($flag) {
-                // refresh cache menu
-                Mage::app()->getCache()->clean([Mage_Adminhtml_Block_Page_Menu::CACHE_TAGS]);
-            }
         }
 
         return $this;
+    }
+
+    /**
+     * Add 1 to the acl_version of each user in $userIds, so that each session of these users builds its
+     * ACL again (see Mage_Admin_Model_Session::refreshAcl()). The update is one statement, so two
+     * concurrent calls do not lose a change. Call cleanMenuCache() after the transaction commits.
+     *
+     * @param array<int|string> $userIds
+     * @return int the number of users that the update changed
+     */
+    public function bumpAclVersion(array $userIds): int
+    {
+        $userIds = array_values(array_filter(array_map(intval(...), $userIds), static fn(int $id): bool => $id > 0));
+        if ($userIds === []) {
+            return 0;
+        }
+
+        $adapter = $this->_getWriteAdapter();
+        return $adapter->update(
+            $this->getMainTable(),
+            ['acl_version' => new \Maho\Db\Expr($adapter->quoteIdentifier('acl_version') . ' + 1')],
+            ['user_id IN (?)' => $userIds],
+        );
+    }
+
+    /**
+     * Change a reload_acl_flag that is not 0 into a new ACL version for $user. Code that does not
+     * know the ACL version sets reload_acl_flag to ask for a reload.
+     *
+     * @return bool true when this call took the request
+     */
+    public function takeReloadAclFlag(Mage_Admin_Model_User $user): bool
+    {
+        $userId = (int) $user->getId();
+        if ($userId <= 0) {
+            return false;
+        }
+
+        $adapter = $this->_getWriteAdapter();
+        return $adapter->update(
+            $this->getMainTable(),
+            [
+                'acl_version' => new \Maho\Db\Expr($adapter->quoteIdentifier('acl_version') . ' + 1'),
+                'reload_acl_flag' => 0,
+            ],
+            ['user_id = ?' => $userId, 'reload_acl_flag <> ?' => 0],
+        ) > 0;
+    }
+
+    /**
+     * Read the current acl_version of $user from the database.
+     */
+    public function getAclVersion(Mage_Admin_Model_User $user): int
+    {
+        $userId = (int) $user->getId();
+        if ($userId <= 0) {
+            return 0;
+        }
+
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from($this->getMainTable(), ['acl_version'])
+            ->where('user_id = ?', $userId);
+
+        return (int) $adapter->fetchOne($select);
+    }
+
+    /**
+     * Clean the cache of the admin menu, which depends on the ACL.
+     */
+    public function cleanMenuCache(): void
+    {
+        Mage::app()->getCache()->clean([Mage_Adminhtml_Block_Page_Menu::CACHE_TAGS]);
+    }
+
+    /**
+     * Do not write acl_version, or a reload_acl_flag that did not change, when a loaded user is saved.
+     * The value that the request loaded can be old, and writing it back undoes a concurrent change.
+     */
+    #[\Override]
+    protected function _prepareDataForSave(Mage_Core_Model_Abstract $object)
+    {
+        $data = parent::_prepareDataForSave($object);
+        if ((int) $object->getId() > 0) {
+            unset($data['acl_version']);
+            if (array_key_exists('reload_acl_flag', $data) && !$object->dataHasChangedFor('reload_acl_flag')) {
+                unset($data['reload_acl_flag']);
+            }
+        }
+
+        return $data;
     }
 
     /**
