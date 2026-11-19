@@ -3719,26 +3719,9 @@ class Mysql extends AbstractPdoAdapter
 
         $query = sprintf("%s\nSET %s", $query, implode(', ', $columns));
 
-        // render WHERE - handle array structure correctly
-        $wherePart = $select->getPart(\Maho\Db\Select::WHERE);
-        if ($wherePart) {
-            $where = [];
-            foreach ($wherePart as $term) {
-                if (is_array($term)) {
-                    foreach ($term as $type => $cond) {
-                        if (!empty($where)) {
-                            $where[] = $type;
-                        }
-                        $where[] = $cond;
-                    }
-                } else {
-                    if (!empty($where)) {
-                        $where[] = 'AND';
-                    }
-                    $where[] = $term;
-                }
-            }
-            $query = sprintf("%s\nWHERE %s", $query, implode(' ', $where));
+        $where = $this->_renderSelectWhere($select);
+        if ($where !== '') {
+            $query = sprintf("%s\nWHERE %s", $query, $where);
         }
 
         return $query;

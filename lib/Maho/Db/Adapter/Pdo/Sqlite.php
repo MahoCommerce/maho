@@ -1801,58 +1801,7 @@ class Sqlite extends AbstractPdoAdapter
             $query .= sprintf(' SET %s', implode(', ', $setClauses));
         }
 
-        // Add FROM clause
-        $from = $select->getPart(\Maho\Db\Select::FROM);
-        $fromTables = [];
-        $joinConditions = [];
-        foreach ($from as $alias => $tableInfo) {
-            if ($alias !== $tableAlias) {
-                if ($tableInfo['tableName'] instanceof \Maho\Db\Select) {
-                    $fromTables[] = sprintf(
-                        '(%s) AS %s',
-                        $tableInfo['tableName']->assemble(),
-                        $this->quoteIdentifier($alias),
-                    );
-                } else {
-                    $fromTables[] = sprintf(
-                        '%s AS %s',
-                        $this->quoteIdentifier($tableInfo['tableName']),
-                        $this->quoteIdentifier($alias),
-                    );
-                }
-                if (!empty($tableInfo['joinCondition'])) {
-                    $joinConditions[] = $tableInfo['joinCondition'];
-                }
-            }
-        }
-
-        if ($fromTables) {
-            $query .= sprintf(' FROM %s', implode(', ', $fromTables));
-        }
-
-        // Build WHERE clause
-        $whereClauses = $joinConditions;
-
-        $where = $select->getPart(\Maho\Db\Select::WHERE);
-        if ($where) {
-            foreach ($where as $wherePart) {
-                if (is_array($wherePart)) {
-                    foreach ($wherePart as $conjunction => $condition) {
-                        if (!empty($whereClauses) && strtoupper($conjunction) === 'OR') {
-                            $whereClauses[] = 'OR ' . $condition;
-                        } else {
-                            $whereClauses[] = $condition;
-                        }
-                    }
-                } else {
-                    $whereClauses[] = $wherePart;
-                }
-            }
-        }
-
-        if ($whereClauses) {
-            $query .= ' WHERE ' . implode(' AND ', $whereClauses);
-        }
+        $query .= $this->_renderUpdateFromAndWhere($select, $tableAlias);
 
         return $query;
     }

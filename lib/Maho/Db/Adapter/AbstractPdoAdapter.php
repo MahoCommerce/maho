@@ -709,6 +709,54 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         return implode(' AND ', $where);
     }
 
+    /**
+     * Join the WHERE parts of $select with the AND or OR that each part holds.
+     */
+    protected function _renderSelectWhere(Select $select): string
+    {
+        $where = [];
+        foreach ($select->getPart(Select::WHERE) as $term) {
+            if (!is_array($term)) {
+                $term = [Select::SQL_AND => $term];
+            }
+            foreach ($term as $type => $cond) {
+                if ($where) {
+                    $where[] = $type;
+                }
+                $where[] = $cond;
+            }
+        }
+        return implode(' ', $where);
+    }
+
+    /**
+     * Build the FROM and WHERE clauses of an UPDATE ... FROM query. The join conditions of $select go in the WHERE clause.
+     */
+    protected function _renderUpdateFromAndWhere(Select $select, string $tableAlias): string
+    {
+        $fromTables = [];
+        $where = [];
+        foreach ($select->getPart(Select::FROM) as $alias => $tableInfo) {
+            if ($alias === $tableAlias) {
+                continue;
+            }
+            $fromTables[] = $tableInfo['tableName'] instanceof Select
+                ? sprintf('(%s) AS %s', $tableInfo['tableName']->assemble(), $this->quoteIdentifier($alias))
+                : sprintf('%s AS %s', $this->quoteIdentifier($tableInfo['tableName']), $this->quoteIdentifier($alias));
+            if (!empty($tableInfo['joinCondition'])) {
+                $where[] = '(' . $tableInfo['joinCondition'] . ')';
+            }
+        }
+
+        $selectWhere = $this->_renderSelectWhere($select);
+        if ($selectWhere !== '') {
+            $where[] = '(' . $selectWhere . ')';
+        }
+
+        return ($fromTables ? ' FROM ' . implode(', ', $fromTables) : '')
+            . ($where ? ' WHERE ' . implode(' AND ', $where) : '');
+    }
+
     // =========================================================================
     // Platform-Specific Insert Operations (Abstract)
     // =========================================================================
