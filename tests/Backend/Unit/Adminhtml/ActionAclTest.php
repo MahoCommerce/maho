@@ -405,6 +405,7 @@ it('allows the Profiles permission only for the profiles of the profile wizard a
     actionAclLogin($granted);
     // Profile 1 is a profile of the wizard, profile 2 is an Advanced Profile, profile 3 does not exist.
     // Batch N ran profile N with the adapter of the wizard. Batch 4 ran profile 1 with another adapter.
+    // Batch 5 ran profile 1 and has no adapter.
     $controller = new class (actionAclRequest($action, $params, $post), new Mage_Core_Controller_Response_Http()) extends Mage_Adminhtml_System_Convert_GuiController {
         #[\Override]
         protected function _getGuiEntityType(int $profileId): ?string
@@ -417,8 +418,12 @@ it('allows the Profiles permission only for the profiles of the profile wizard a
         {
             return Mage::getModel('dataflow/batch')->setData([
                 'batch_id' => $batchId,
-                'profile_id' => $batchId === 4 ? 1 : $batchId,
-                'adapter' => $batchId === 4 ? 'catalog/product' : 'catalog/convert_adapter_product',
+                'profile_id' => in_array($batchId, [4, 5], true) ? 1 : $batchId,
+                'adapter' => match ($batchId) {
+                    4 => 'catalog/product',
+                    5 => null,
+                    default => 'catalog/convert_adapter_product',
+                },
             ]);
         }
     };
@@ -434,6 +439,7 @@ it('allows the Profiles permission only for the profiles of the profile wizard a
     yield 'save of a wizard profile allowed with profiles' => ['save', ['profile_id' => '1'], null, $gui, true];
     yield 'save of an advanced profile denied to profiles' => ['save', ['profile_id' => '2'], null, $gui, false];
     yield 'save of an advanced profile by posted id denied to profiles' => ['save', [], ['profile_id' => '2'], $gui, false];
+    yield 'edit with a wizard id and an advanced profile_id denied to profiles' => ['edit', ['id' => '1', 'profile_id' => '2'], null, $gui, false];
     yield 'save of a new profile allowed with profiles' => ['save', [], null, $gui, true];
     yield 'new profile allowed with profiles' => ['new', [], null, $gui, true];
     yield 'edit of a missing profile denied to profiles' => ['edit', ['id' => '3'], null, $gui, false];
@@ -441,6 +447,7 @@ it('allows the Profiles permission only for the profiles of the profile wizard a
     yield 'batch run of an advanced profile denied to profiles' => ['batchRun', [], ['batch_id' => '2'], $gui, false];
     yield 'batch run of a missing profile denied to profiles' => ['batchRun', [], ['batch_id' => '3'], $gui, false];
     yield 'batch run with another adapter denied to profiles' => ['batchRun', [], ['batch_id' => '4'], $gui, false];
+    yield 'batch run of a wizard profile without an adapter allowed with profiles' => ['batchRun', [], ['batch_id' => '5'], $gui, true];
     yield 'batch finish of a wizard profile allowed with profiles' => ['batchFinish', ['id' => '1'], null, $gui, true];
     yield 'batch finish of an advanced profile denied to profiles' => ['batchFinish', ['id' => '2'], null, $gui, false];
     yield 'batch finish of a missing profile denied to profiles' => ['batchFinish', ['id' => '3'], null, $gui, false];
