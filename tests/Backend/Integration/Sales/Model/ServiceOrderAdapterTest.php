@@ -96,6 +96,7 @@ function serviceOrderAdapterSummary(Mage_Sales_Model_Abstract $document): array
     foreach ($document->getAllItems() as $item) {
         $qtys[$item->getOrderItem()->getSku()] = (float) $item->getQty();
     }
+    ksort($qtys);
     return [
         'total_qty' => (float) $document->getTotalQty(),
         'base_grand_total' => round((float) $document->getBaseGrandTotal(), 4),
