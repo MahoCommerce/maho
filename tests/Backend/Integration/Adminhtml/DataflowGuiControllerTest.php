@@ -48,7 +48,7 @@ function dataflowGuiController(string $action, array $params = [], ?array $post 
         }
 
         #[\Override]
-        protected function _initProfile(string $idFieldName = 'id'): static|false
+        protected function _initProfile($idFieldName = 'id'): static|false
         {
             $this->initProfileCalls[] = [$this->getRequest()->getParam($idFieldName), $this->getRequest()->getPost()];
             if ($this->profile === null) {
