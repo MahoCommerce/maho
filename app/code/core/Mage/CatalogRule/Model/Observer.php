@@ -131,7 +131,7 @@ class Mage_CatalogRule_Model_Observer
             $productIds[] = $item->getProductId();
         }
 
-        $cacheKey = spl_object_hash($quote);
+        $cacheKey = spl_object_id($quote);
 
         $this->_preloadedPrices[$cacheKey] ??= Mage::getResourceSingleton('catalogrule/rule')
              ->getRulePrices($date, $wId, $gId, $productIds);
