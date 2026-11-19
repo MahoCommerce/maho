@@ -3761,53 +3761,12 @@ class Mysql extends AbstractPdoAdapter
 
         $query = sprintf("%s\nSET %s", $query, implode(', ', $columns));
 
-        // render WHERE - handle array structure correctly
-        $wherePart = $select->getPart(\Maho\Db\Select::WHERE);
-        if ($wherePart) {
-            $where = [];
-            foreach ($wherePart as $term) {
-                if (is_array($term)) {
-                    foreach ($term as $type => $cond) {
-                        if (!empty($where)) {
-                            $where[] = $type;
-                        }
-                        $where[] = $cond;
-                    }
-                } else {
-                    if (!empty($where)) {
-                        $where[] = 'AND';
-                    }
-                    $where[] = $term;
-                }
-            }
-            $query = sprintf("%s\nWHERE %s", $query, implode(' ', $where));
+        $where = $this->_renderSelectWhere($select);
+        if ($where !== '') {
+            $query = sprintf("%s\nWHERE %s", $query, $where);
         }
 
         return $query;
-    }
-
-    /**
-     * Deletes table rows based on a WHERE clause.
-     *
-     * @param string|array|\Maho\Db\Select $table The table to update.
-     * @param string|array $where DELETE WHERE clause(s).
-     * @return int The number of affected rows.
-     */
-    #[\Override]
-    public function delete(string|array|\Maho\Db\Select $table, string|array $where = ''): int
-    {
-        $where = $this->_whereExpr($where);
-
-        // Build the DELETE statement
-        $sql = sprintf(
-            'DELETE FROM %s%s',
-            $this->quoteIdentifier($table),
-            ($where) ? " WHERE $where" : '',
-        );
-
-        // Execute the statement and return the number of affected rows
-        $stmt = $this->query($sql);
-        return $stmt->rowCount();
     }
 
     /**
@@ -3850,26 +3809,9 @@ class Mysql extends AbstractPdoAdapter
             $query .= ' ' . implode('', $from);
         }
 
-        // Add WHERE clause
-        $wherePart = $select->getPart(\Maho\Db\Select::WHERE);
-        if ($wherePart) {
-            $where = [];
-            foreach ($wherePart as $term) {
-                if (is_array($term)) {
-                    foreach ($term as $type => $cond) {
-                        if (!empty($where)) {
-                            $where[] = $type;
-                        }
-                        $where[] = $cond;
-                    }
-                } else {
-                    if (!empty($where)) {
-                        $where[] = 'AND';
-                    }
-                    $where[] = $term;
-                }
-            }
-            $query .= ' WHERE ' . implode(' ', $where);
+        $where = $this->_renderSelectWhere($select);
+        if ($where !== '') {
+            $query .= ' WHERE ' . $where;
         }
 
         return $query;
