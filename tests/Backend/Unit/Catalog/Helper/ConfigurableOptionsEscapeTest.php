@@ -48,7 +48,7 @@ it('does not cut an HTML entity when it truncates an option value', function (st
     $block = new Mage_Sales_Block_Order_Item_Renderer_Default();
     $catalogResult = Mage::helper('catalog/product_configuration')->getFormattedOptionValue($value, ['max_length' => 55, 'cut_replacer' => '']);
 
-    expect($block->getFormatedOptionValue($value)['value'])->toStartWith($expected)
+    expect($block->getFormatedOptionValue($value)['value'])->toBe($expected . ' <a href="#" class="dots" onclick="return false">...</a>')
         ->and($catalogResult['value'])->toBe($expected)
         ->and($catalogResult['full_view'])->toBe($value);
 })->with([

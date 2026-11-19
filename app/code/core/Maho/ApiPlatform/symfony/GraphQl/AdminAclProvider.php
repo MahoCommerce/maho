@@ -19,7 +19,8 @@ use Maho\ApiPlatform\Security\OperationAccessChecker;
  *
  * AdminAclListener checks a REST request through its `_api_resource_class` attribute. The
  * GraphQL entry point has no such attribute, and one request runs many operations, so this
- * provider checks each operation that the resolver runs, nested resource fields included.
+ * provider checks each operation that the resolver runs. A nested field that the parent already
+ * holds, such as the addresses of an order, runs no provider and falls under the ACL of the parent.
  *
  * @implements ProviderInterface<object>
  */
