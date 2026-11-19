@@ -8,6 +8,7 @@
 
 declare(strict_types=1);
 
+use OpenTelemetry\API\Trace\TraceFlags;
 use OpenTelemetry\SDK\Common\Export\TransportInterface;
 use OpenTelemetry\SDK\Common\Future\CancellationInterface;
 use OpenTelemetry\SDK\Common\Future\CompletedFuture;
@@ -297,7 +298,10 @@ it('propagates trace context to the outgoing request headers', function () {
 
     // The receiver parents to the client span, not to the request that issued it
     expect($traceparent)->toHaveCount(1)
-        ->and($traceparent[0])->toBe("traceparent: 00-{$httpSpan['traceId']}-{$httpSpan['spanId']}-01");
+        ->and($traceparent[0])->toMatch("/^traceparent: 00-{$httpSpan['traceId']}-{$httpSpan['spanId']}-[0-9a-f]{2}\$/");
+
+    // W3C Trace Context Level 2 can add the random flag next to the sampled flag
+    expect(hexdec(substr($traceparent[0], -2)) & TraceFlags::SAMPLED)->toBe(TraceFlags::SAMPLED);
 });
 
 it('finishes at shutdown a request that exited with spans still open', function () {
