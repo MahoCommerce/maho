@@ -169,6 +169,39 @@ describe('updateFromSelect', function () {
         expect($sql)->toBeString();
         expect($sql)->toContain('UPDATE');
     });
+
+    describe('with rows', function () {
+        beforeEach(function () {
+            foreach (['test1', 'test2', 'test3'] as $index => $name) {
+                $this->adapter->insert($this->tempTableTarget, ['name' => $name, 'value' => 0]);
+                $this->adapter->update($this->tempTableSource, ['status' => $index + 1], ['name = ?' => $name]);
+            }
+            $this->targetValues = fn() => $this->adapter->fetchPairs(
+                $this->adapter->select()->from($this->tempTableTarget, ['name', 'value'])->order('name'),
+            );
+        });
+
+        it('applies the WHERE conditions to every row that a join condition with OR matches', function () {
+            $select = $this->adapter->select()
+                ->join(['s' => $this->tempTableSource], 't.name = s.name OR t.value = s.value', ['value' => 'value'])
+                ->where('s.status = ?', 1);
+
+            $this->adapter->query($this->adapter->updateFromSelect($select, ['t' => $this->tempTableTarget]));
+
+            expect(array_map('intval', ($this->targetValues)()))->toBe(['test1' => 100, 'test2' => 0, 'test3' => 0]);
+        });
+
+        it('keeps an orWhere() condition after the join conditions', function () {
+            $select = $this->adapter->select()
+                ->join(['s' => $this->tempTableSource], 't.name = s.name', ['value' => 'value'])
+                ->where('s.status = ?', 1)
+                ->orWhere('s.status = ?', 3);
+
+            $this->adapter->query($this->adapter->updateFromSelect($select, ['t' => $this->tempTableTarget]));
+
+            expect(array_map('intval', ($this->targetValues)()))->toBe(['test1' => 100, 'test2' => 0, 'test3' => 300]);
+        });
+    });
 });
 
 describe('deleteFromSelect', function () {
