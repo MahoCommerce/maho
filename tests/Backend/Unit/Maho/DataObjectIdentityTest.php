@@ -19,8 +19,10 @@ it('keeps hash placeholders and aliases for the same cached object', function ()
     expect($key)->toMatch('/^item-[0-9a-f]{16}0{16}$/')
         ->and($cache->save($object, 'alias'))->toBe($key)
         ->and($cache->load('alias'))->toBe($object)
+        ->and($cache->findByHash(substr($key, 5)))->toBe($object)
         ->and($cache->save($other, 'item-{hash}'))->not->toBe($key)
         ->and($cache->delete($key))->toBeTrue()
+        ->and($cache->findByHash(substr($key, 5)))->toBeNull()
         ->and($cache->save($object, 'restored'))->toBe('restored');
 });
 

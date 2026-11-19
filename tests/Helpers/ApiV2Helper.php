@@ -803,10 +803,11 @@ class ApiV2Helper
         }
 
         $context = stream_context_create($options);
+        http_clear_last_response_headers();
         $raw = @file_get_contents($requestUrl, false, $context);
 
         $status = 500;
-        $responseHeaders = $http_response_header ?? [];
+        $responseHeaders = http_get_last_response_headers() ?? [];
         if (!empty($responseHeaders)) {
             if (preg_match('/HTTP\/\d+\.?\d*\s+(\d+)/', $responseHeaders[0], $matches)) {
                 $status = (int) $matches[1];
@@ -998,10 +999,11 @@ class ApiV2Helper
         }
 
         $context = stream_context_create($options);
+        http_clear_last_response_headers();
         $raw = @file_get_contents($requestUrl, false, $context);
 
         $status = 500;
-        $responseHeaders = $http_response_header ?? [];
+        $responseHeaders = http_get_last_response_headers() ?? [];
         if (!empty($responseHeaders)) {
             if (preg_match('/HTTP\/\d+\.?\d*\s+(\d+)/', $responseHeaders[0], $matches)) {
                 $status = (int) $matches[1];
