@@ -559,6 +559,7 @@
 "Value must be a string.","Value must be a string."
 "Value must be between %d and %d","Value must be between %d and %d"
 "Variable Code must be unique.","Variable Code must be unique."
+"Variable Code must start with a letter and contain only letters, digits, underscores, hyphens and slashes.","Variable Code must start with a letter and contain only letters, digits, underscores, hyphens and slashes."
 "VAT Number","VAT Number"
 "View Entry","View Entry"
 "Warning! Enabling this feature is not recommended on production environments because it represents a potential security risk.","Warning! Enabling this feature is not recommended on production environments because it represents a potential security risk."

@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2017-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2017-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Core
@@ -569,7 +569,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             $variablesString = str_replace("\n", '', $variablesString);
             $variables = Mage::helper('core')->jsonDecode($variablesString);
         }
-        return $variables;
+        return is_array($variables) ? $variables : [];
     }
 
     /**
@@ -584,9 +584,12 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         $variables = $this->_parseVariablesString($this->getData('orig_template_variables'));
         if ($variables) {
             foreach ($variables as $value => $label) {
+                if (!is_scalar($label)) {
+                    continue;
+                }
                 $optionArray[] = [
                     'value' => '{{' . $value . '}}',
-                    'label' => Mage::helper('core')->__($label),
+                    'label' => Mage::helper('core')->__((string) $label),
                 ];
             }
             if ($withGroup) {

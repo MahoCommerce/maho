@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2018-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2018-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
@@ -108,6 +108,12 @@ class Mage_Adminhtml_Permissions_UserController extends Mage_Adminhtml_Controlle
         unset($data['current_password']);
         $result = $this->_validateCurrentPassword($currentPassword);
 
+        // The posted user_id must not move the save to a user that is not the loaded one
+        if ($model->getId()) {
+            $data['user_id'] = (int) $model->getId();
+        } else {
+            unset($data['user_id']);
+        }
         $model->setData($data);
         // A blank password field keeps the current password
         if ($model->hasNewPassword() && $model->getNewPassword() === '') {

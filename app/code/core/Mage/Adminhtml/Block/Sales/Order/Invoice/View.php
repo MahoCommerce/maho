@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2022-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
@@ -78,7 +78,8 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_View extends Mage_Adminhtml_Block
             ]);
         }
 
-        if ($this->getInvoice()->canVoid()) {
+        // A void also cancels the invoice
+        if ($this->_isAllowedAction('cancel') && $this->getInvoice()->canVoid()) {
             $this->_addButton('void', [
                 'label'     => Mage::helper('sales')->__('Void'),
                 'class'     => 'save',

@@ -1,7 +1,7 @@
 <?php
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2021-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2021-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: AFL-3.0
  * @package base_default
@@ -12,7 +12,7 @@
 <span class="field-row grid" id="shipment_tracking_info">
 
 <?php if ($this->getTrackingInfo()): ?>
-    <strong><?= $this->escapeHtml($this->getTrackingInfo()->getCarrierTitle()) ?></strong> - <?= $this->getTrackingInfo()->getTracking() ?>
+    <strong><?= $this->escapeHtml($this->getTrackingInfo()->getCarrierTitle()) ?></strong> - <?= $this->escapeHtml($this->getTrackingInfo()->getTracking()) ?>
     <div class="info">
         <?php if ($this->getTrackingInfo()->getErrorMessage()): ?>
             <?= $this->escapeHtml($this->getTrackingInfo()->getErrorMessage()) ?>

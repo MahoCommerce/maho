@@ -69,7 +69,8 @@ class AdminAclListener
         // Only API Platform routes (resource_class is set by the API Platform
         // routing). The /api/admin/graphql controller dispatches multiple
         // operations within one request and is gated separately by per-handler
-        // AdminAcl::checkResource() calls.
+        // AdminAcl::checkResource() calls. \Maho\ApiPlatform\GraphQl\AdminAclProvider
+        // checks each operation of the /api/graphql entry point.
         $resourceClass = $request->attributes->get('_api_resource_class');
         $operationName = $request->attributes->get('_api_operation_name');
         if (!is_string($resourceClass) || $resourceClass === '' || !is_string($operationName)) {
