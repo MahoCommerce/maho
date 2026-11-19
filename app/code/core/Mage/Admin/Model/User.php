@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2018-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2018-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Admin
@@ -894,6 +894,17 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             $this->setData('twofa_secret', $encrypted);
         }
         return $this;
+    }
+
+    public function getAclVersion(): ?int
+    {
+        $value = $this->getData('acl_version');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAclVersion(?int $value): static
+    {
+        return $this->setData('acl_version', $value);
     }
 
     public function getCreated(): ?string

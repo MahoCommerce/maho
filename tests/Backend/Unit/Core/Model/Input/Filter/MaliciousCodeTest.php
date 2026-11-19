@@ -21,16 +21,17 @@ describe('Mage_Core_Model_Input_Filter_MaliciousCode::linkFilter', function () {
         // present, since the no-link early return skips the DOMDocument round-trip.
         $result = $this->filter->linkFilter('<div>Grüße ö</div><a href="x">l</a>');
 
-        expect($result)->toContain('&uuml;')
-            ->and($result)->toContain('&szlig;')
-            ->and($result)->toContain('&ouml;')
-            ->and($result)->not->toContain('&Atilde;');
+        // An older libxml writes "ü" as &uuml;, a newer one as the character itself
+        expect(html_entity_decode($result, ENT_QUOTES | ENT_HTML5, 'UTF-8'))->toContain('<div>Grüße ö</div>')
+            ->and($result)->not->toContain('&Atilde;')
+            ->and($result)->not->toContain('Ã');
     });
 
     it('does not leave the injected XML processing instruction in the output', function () {
         $result = $this->filter->linkFilter('<div>ö</div><a href="x">l</a>');
 
-        expect($result)->not->toContain('<?xml');
+        // A newer libxml keeps the instruction as the comment <!--?xml ...-->
+        expect($result)->not->toContain('?xml');
     });
 
     it('adds safe rel and target attributes to links', function () {

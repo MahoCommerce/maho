@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2019-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Core
@@ -18,6 +18,12 @@ class Mage_Core_Model_Variable extends Mage_Core_Model_Abstract
 {
     public const TYPE_TEXT = 'text';
     public const TYPE_HTML = 'html';
+
+    /**
+     * A variable code starts with a letter and holds only letters, digits, underscores, hyphens and slashes.
+     * The admin form checks the same rule with validate-xml-identifier.
+     */
+    public const CODE_PATTERN = '/^[a-z][a-z0-9_\/-]*$/iD';
 
     protected $_storeId = 0;
 
@@ -62,6 +68,8 @@ class Mage_Core_Model_Variable extends Mage_Core_Model_Abstract
     public function loadByCode($code)
     {
         $this->getResource()->loadByCode($this, $code);
+        // isCodeAllowed() compares the code with the original data, as after load()
+        $this->setOrigData();
         return $this;
     }
 
@@ -93,6 +101,9 @@ class Mage_Core_Model_Variable extends Mage_Core_Model_Abstract
     public function validate()
     {
         if ($this->getCode() && $this->getName()) {
+            if (!$this->isCodeAllowed()) {
+                return $this->getInvalidCodeMessage();
+            }
             $variable = $this->getResource()->getVariableByCode($this->getCode());
             if (!empty($variable) && $variable['variable_id'] != $this->getId()) {
                 return Mage::helper('core')->__('Variable Code must be unique.');
@@ -100,6 +111,44 @@ class Mage_Core_Model_Variable extends Mage_Core_Model_Abstract
             return true;
         }
         return Mage::helper('core')->__('Validation has failed.');
+    }
+
+    public static function isValidCode(mixed $code): bool
+    {
+        return is_string($code) && preg_match(self::CODE_PATTERN, $code) === 1;
+    }
+
+    /**
+     * @throws Mage_Core_Exception_Input when the code is new or changed and is not a valid variable code
+     */
+    #[\Override]
+    protected function _beforeSave()
+    {
+        if (!$this->isCodeAllowed()) {
+            new Mage_Core_Exception_Input()->addError('code', $this->getInvalidCodeMessage())->throwIfErrors();
+        }
+        return parent::_beforeSave();
+    }
+
+    /**
+     * Return true when the code is valid. An existing variable keeps a code that it has from before this rule,
+     * when the code does not change.
+     */
+    protected function isCodeAllowed(): bool
+    {
+        if (self::isValidCode($this->getData('code'))) {
+            return true;
+        }
+        return $this->getId() !== null
+            && $this->getOrigData('code') !== null
+            && (string) $this->getOrigData('code') === (string) $this->getData('code');
+    }
+
+    protected function getInvalidCodeMessage(): string
+    {
+        return Mage::helper('core')->__(
+            'Variable Code must start with a letter and contain only letters, digits, underscores, hyphens and slashes.',
+        );
     }
 
     /**

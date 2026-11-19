@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Security\AdminAcl;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -64,6 +65,9 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
         $notifyCustomer = $args['notifyCustomer'] ?? false;
         if (!is_scalar($notifyCustomer)) {
             throw new BadRequestHttpException('notifyCustomer must be a boolean');
+        }
+        if ($captureCase !== null && $captureCase !== \Mage_Sales_Model_Order_Invoice::NOT_CAPTURE) {
+            AdminAcl::checkPath('sales/order/actions/capture');
         }
 
         $order = \Mage::getModel('sales/order')->load($orderId);

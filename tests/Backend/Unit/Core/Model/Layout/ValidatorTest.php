@@ -11,6 +11,8 @@ uses(Tests\MahoBackendTestCase::class);
 
 class LayoutValidatorTestCompleteBlock extends Mage_Install_Block_Complete {}
 
+class LayoutValidatorTestAdminBlock extends Mage_Adminhtml_Block_Template {}
+
 describe(Mage_Core_Model_Layout_Validator::class, function () {
     beforeEach(function () {
         $this->validator = Mage::getModel('core/layout_validator');
@@ -66,6 +68,19 @@ describe(Mage_Core_Model_Layout_Validator::class, function () {
         'subclass in the class attribute' => ['<block type="core/text" class="layoutvalidatortestcompleteblock" name="z"/>'],
         'action argument as alias' => ['<reference name="product.info.options"><action method="addOptionRenderer"><a>text</a><b>rss/order_new</b></action></reference>'],
         'action argument as class name' => ['<reference name="content"><action method="addItemRender"><a>simple</a><b>Mage_Rss_Block_Order_New</b></action></reference>'],
+    ]);
+
+    it('refuses an admin block in any form that the layout instantiates', function (string $xml) {
+        expect($this->validator->isValid($xml))->toBeFalse()
+            ->and($this->validator->getMessages())->toBe(['Disallowed block name for frontend.']);
+    })->with([
+        'alias' => ['<reference name="content"><block type="adminhtml/sales_order_grid" name="g"/></reference>'],
+        'class name' => ['<reference name="content"><block type="Mage_Adminhtml_Block_Sales_Order_Grid" name="g"/></reference>'],
+        'class name in lower case' => ['<reference name="content"><block type="mage_adminhtml_block_customer_grid" name="g"/></reference>'],
+        'class attribute' => ['<reference name="content"><block type="core/text" class="Mage_Adminhtml_Block_Customer_Grid" name="g"/></reference>'],
+        'admin block of another module' => ['<reference name="content"><block type="Mage_Usa_Block_Adminhtml_Dhl_Unitofmeasure" name="g"/></reference>'],
+        'subclass of an admin block' => ['<reference name="content"><block type="LayoutValidatorTestAdminBlock" name="g"/></reference>'],
+        'action argument' => ['<reference name="content"><action method="addItemRender"><a>simple</a><b>adminhtml/widget_grid_column</b></action></reference>'],
     ]);
 
     it('refuses setTemplate and setDataUsingMethod with a template in any case', function (string $xml) {

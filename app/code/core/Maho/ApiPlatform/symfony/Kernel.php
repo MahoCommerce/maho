@@ -482,6 +482,13 @@ class Kernel extends BaseKernel
             ->arg('$decorated', new Reference(GraphQl\EnumSourceTypeConverter::class . '.inner'))
             ->arg('$typesContainer', new Reference('api_platform.graphql.types_container'));
 
+        // The admin ACL for each GraphQL operation; see the class docblock. Priority 50 (below
+        // ResolverProvider's 190) makes it outermost, so the check precedes the read and the resolver.
+        $services->set(GraphQl\AdminAclProvider::class)
+            ->autoconfigure(false)
+            ->decorate('api_platform.graphql.state_provider', null, 50)
+            ->arg('$inner', new Reference(GraphQl\AdminAclProvider::class . '.inner'));
+
         // Translate IriConverter input errors (bare `id: 1` instead of an IRI)
         // into proper GraphQL null-results / 404s instead of HTTP 500. See the
         // class docblock for the full rationale.

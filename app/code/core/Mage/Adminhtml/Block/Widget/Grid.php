@@ -579,7 +579,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
         if ($this->getCollection()) {
             $field = $column->getFilterIndex() ?: $column->getIndex();
             $conditionCallback = $column->getFilterConditionCallback();
-            if (is_callable($conditionCallback)) {
+            if (Mage_Adminhtml_Block_Widget_Grid_Column::isBoundCallback($conditionCallback)) {
                 call_user_func($conditionCallback, $this->getCollection(), $column);
             } else {
                 $cond = $column->getFilter()->getCondition();

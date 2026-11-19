@@ -89,13 +89,7 @@ class Mage_Catalog_Model_Design extends Mage_Core_Model_Abstract
         ) {
             $customLayout = $object->getCustomLayoutUpdate();
             if ($customLayout) {
-                try {
-                    if (!Mage::getModel('core/layout_validator')->isValid($customLayout)) {
-                        $customLayout = '';
-                    }
-                } catch (Exception) {
-                    $customLayout = '';
-                }
+                $customLayout = Mage::getModel('core/layout_validator')->getValidLayoutUpdate((string) $customLayout);
             }
             $settings->setCustomDesign($object->getCustomDesign())
                 ->setPageLayout($object->getPageLayout())

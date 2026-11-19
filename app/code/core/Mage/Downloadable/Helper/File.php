@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Downloadable
@@ -24,7 +24,10 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
     public function moveFileFromTmp($baseTmpPath, $basePath, $file)
     {
         if (isset($file[0])) {
-            $fileName = $file[0]['file'];
+            $fileName = $file[0]['file'] ?? null;
+            if (!is_string($fileName) || \Maho\Io::getPathWithinMount(Mage::getStorage('downloadable'), $basePath, $fileName) === null) {
+                Mage::throwException(Mage::helper('downloadable')->__('An error occurred while saving the file(s).'));
+            }
             if ($file[0]['status'] == 'new') {
                 try {
                     $fileName = $this->_moveFileFromTmp(

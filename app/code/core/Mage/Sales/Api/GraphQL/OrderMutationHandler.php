@@ -42,6 +42,7 @@ class OrderMutationHandler
     public function handlePlaceOrder(array $variables, array $context): array
     {
         AdminAcl::checkResource(Order::class);
+        AdminAcl::checkPath('sales/order/actions/create');
         $cartId = $variables['cartId'] ?? null;
         if (!$cartId) {
             throw ValidationException::requiredField('cartId');
@@ -189,6 +190,7 @@ class OrderMutationHandler
     public function handleProcessReturn(array $variables, array $context): array
     {
         AdminAcl::checkResource(CreditMemo::class);
+        AdminAcl::checkPath('sales/order/actions/creditmemo');
         $orderId = $variables['orderId'] ?? null;
         $items = $variables['items'] ?? [];
         $adjustmentPositive = (float) ($variables['adjustmentPositive'] ?? 0);

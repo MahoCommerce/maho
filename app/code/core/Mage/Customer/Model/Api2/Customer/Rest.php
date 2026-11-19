@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2020-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Customer
@@ -33,6 +33,9 @@ abstract class Mage_Customer_Model_Api2_Customer_Rest extends Mage_Customer_Mode
 
         /** @var Mage_Customer_Model_Customer $customer */
         $customer = Mage::getModel('customer/customer');
+        if (array_key_exists('confirmation', $data)) {
+            $data['confirmation'] = Mage::helper('customer')->prepareApiConfirmationForWrite($customer, $data['confirmation']);
+        }
         $customer->setData($data);
 
         try {
@@ -56,7 +59,7 @@ abstract class Mage_Customer_Model_Api2_Customer_Rest extends Mage_Customer_Mode
     protected function _retrieve()
     {
         $customer = $this->_loadCustomerById($this->getRequest()->getParam('id'));
-        return $customer->getData();
+        return $this->_prepareCustomerDataForResponse($customer->getData());
     }
 
     /**
@@ -67,7 +70,63 @@ abstract class Mage_Customer_Model_Api2_Customer_Rest extends Mage_Customer_Mode
     protected function _retrieveCollection()
     {
         $data = $this->_getCollectionForRetrieve()->load()->toArray();
-        return $data['items'] ?? $data;
+        $items = $data['items'] ?? $data;
+
+        foreach ($items as $key => $item) {
+            if (is_array($item)) {
+                $items[$key] = $this->_prepareCustomerDataForResponse($item);
+            }
+        }
+
+        return $items;
+    }
+
+    /**
+     * Refuse a collection filter that can find a credential or the confirmation key, whatever attributes the API
+     * role allows. See Mage_Customer_Helper_Data::isApiFilterAllowed().
+     *
+     * @throws Mage_Api2_Exception
+     */
+    protected function _validateSecretFilters(): void
+    {
+        $filter = $this->getRequest()->getFilter();
+        if (!is_array($filter)) {
+            return;
+        }
+
+        $helper = Mage::helper('customer');
+        foreach ($filter as $filterEntry) {
+            if (!is_array($filterEntry) || !isset($filterEntry['attribute']) || !is_scalar($filterEntry['attribute'])) {
+                continue;
+            }
+
+            $attributeCode = strtolower(trim((string) $filterEntry['attribute']));
+            unset($filterEntry['attribute']);
+            if (!$helper->isApiFilterAllowed([$attributeCode], $filterEntry)) {
+                $this->_critical(self::RESOURCE_COLLECTION_FILTERING_ERROR);
+            }
+        }
+    }
+
+    /**
+     * Remove the credentials from customer data before the response, whatever attributes the API role allows. For
+     * the confirmation key, return only whether the confirmation is pending.
+     *
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
+    protected function _prepareCustomerDataForResponse(array $data): array
+    {
+        $helper = Mage::helper('customer');
+        foreach ($helper->getApiSecretAttributeCodes() as $attributeCode) {
+            unset($data[$attributeCode]);
+        }
+
+        if (array_key_exists('confirmation', $data)) {
+            $data['confirmation'] = $helper->prepareApiConfirmationForRead($data['confirmation']);
+        }
+
+        return $data;
     }
 
     /**
@@ -90,6 +149,10 @@ abstract class Mage_Customer_Model_Api2_Customer_Rest extends Mage_Customer_Mode
                 $this->_error($error, Mage_Api2_Model_Server::HTTP_BAD_REQUEST);
             }
             $this->_critical(self::RESOURCE_DATA_PRE_VALIDATION_ERROR);
+        }
+
+        if (array_key_exists('confirmation', $data)) {
+            $data['confirmation'] = Mage::helper('customer')->prepareApiConfirmationForWrite($customer, $data['confirmation']);
         }
 
         $customer->addData($data);
@@ -134,6 +197,7 @@ abstract class Mage_Customer_Model_Api2_Customer_Rest extends Mage_Customer_Mode
             $this->getAvailableAttributes($this->getUserType(), Mage_Api2_Model_Resource::OPERATION_ATTRIBUTE_READ),
         ));
 
+        $this->_validateSecretFilters();
         $this->_applyCollectionModifiers($collection);
         return $collection;
     }

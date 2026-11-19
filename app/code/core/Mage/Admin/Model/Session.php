@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2018-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2018-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Admin
@@ -156,7 +156,8 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
                 }
                 $this->setIsFirstPageAfterLogin(true);
                 $this->setUser($user);
-                $this->setAcl(Mage::getResourceModel('admin/acl')->loadAcl());
+                $this->setAcl(null);
+                $this->refreshAcl($user);
                 if ($backendLocale = $user->getBackendLocale()) {
                     Mage::getSingleton('adminhtml/session')->setLocale($backendLocale);
                 }
@@ -189,7 +190,9 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
-     * Refresh ACL resources stored in session
+     * Build the ACL of the session again when the acl_version of $user is not the version that the
+     * session used for its ACL. Mage_Admin_Model_Resource_User::bumpAclVersion() changes the version,
+     * so each session of the user gets the new permissions, not only the first one.
      *
      * @param  Mage_Admin_Model_User $user
      * @return $this
@@ -200,13 +203,45 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
         if (!$user) {
             return $this;
         }
-        if (!$this->getAcl() || $user->getReloadAclFlag()) {
-            $this->setAcl(Mage::getResourceModel('admin/acl')->loadAcl());
+        if ($user->getReloadAclFlag() && $user->getId()) {
+            // Another session of the user can take the request first, so read the version in all cases
+            $resource = $user->getResource();
+            $resource->takeReloadAclFlag($user);
+            $user->setReloadAclFlag(false)
+                ->setOrigData('reload_acl_flag', 0)
+                ->setAclVersion($resource->getAclVersion($user));
         }
-        if ($user->getReloadAclFlag()) {
-            $user->getResource()->saveReloadAclFlag($user, 0);
+        $version = $user->getAclVersion() ?? 0;
+        // Each user counts its own versions, so a version of another user says nothing about this ACL
+        if (!$this->getAcl()
+            || $this->getAclVersion() !== $version
+            || $this->getData('acl_user_id') !== (int) $user->getId()
+        ) {
+            $this->setAcl($this->loadAcl());
+            $this->setAclVersion($version);
+            $this->setData('acl_user_id', (int) $user->getId());
         }
         return $this;
+    }
+
+    /**
+     * Load the user of the session again, and build its ACL again when its permissions changed.
+     * Return false when the user does not exist, or when no role of the ACL holds it: login() refuses such a user.
+     */
+    public function reloadUser(): bool
+    {
+        $user = $this->getUser();
+        if (!$user?->reload()->getId()) {
+            return false;
+        }
+        $this->refreshAcl($user);
+        $acl = $this->getAcl();
+        return $acl !== null && $acl->hasRole($user->getAclRole());
+    }
+
+    protected function loadAcl(): Mage_Admin_Model_Acl
+    {
+        return Mage::getResourceModel('admin/acl')->loadAcl();
     }
 
     /**
@@ -316,6 +351,17 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
     public function setAcl(?Mage_Admin_Model_Acl $value): static
     {
         return $this->setData('acl', $value);
+    }
+
+    public function getAclVersion(bool $clear = false): ?int
+    {
+        $value = $this->getData('acl_version', $clear ?: null);
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAclVersion(?int $value): static
+    {
+        return $this->setData('acl_version', $value);
     }
 
     public function getActiveTabId(bool $clear = false): ?int

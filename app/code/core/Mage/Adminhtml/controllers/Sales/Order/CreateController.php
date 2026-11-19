@@ -11,6 +11,15 @@
 class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Controller_Action
 {
     /**
+     * The actions that build and submit the quote of a new order, a reorder or an order edit.
+     * The edit page calls some of them on this controller.
+     */
+    protected const QUOTE_ACTIONS = [
+        'index', 'save', 'loadblock', 'processdata', 'addconfigured',
+        'configureproducttoadd', 'configurequoteitems',
+    ];
+
+    /**
      * Additional initialization
      */
     #[\Override]
@@ -538,6 +547,14 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     #[\Override]
     protected function _isAllowed()
     {
+        $action = strtolower($this->getRequest()->getActionName());
+        if (in_array($action, self::QUOTE_ACTIONS, true)
+            && $this->_isOrderEditInProgress()
+            && !$this->_isRequestForEditedOrder()
+        ) {
+            return false;
+        }
+
         return Mage::getSingleton('admin/session')->isAllowed($this->_getAclResourse());
     }
 
@@ -549,15 +566,8 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     protected function _getAclResourse()
     {
         $action = strtolower($this->getRequest()->getActionName());
-        // These actions build and submit the quote of a new order, a reorder or an order edit.
-        // The edit page calls some of them on this controller.
-        $quoteActions = [
-            'index', 'save', 'loadblock', 'processdata', 'addconfigured',
-            'configureproducttoadd', 'configurequoteitems',
-        ];
-        if (in_array($action, $quoteActions, true)) {
-            $session = $this->_getSession();
-            $action = $session->getReordered() ? 'reorder' : ($session->getOrderId() ? 'edit' : 'index');
+        if (in_array($action, self::QUOTE_ACTIONS, true)) {
+            $action = $this->_getSession()->getReordered() ? 'reorder' : ($this->_isOrderEditInProgress() ? 'edit' : 'index');
         }
         $aclResource = match ($action) {
             'index', 'start' => 'sales/order/actions/create',
@@ -645,5 +655,38 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
         $this->_initSession();
         $this->_processData();
         $this->_forward('index');
+    }
+
+    /**
+     * Return true when the session quote holds an order edit, not a new order or a reorder.
+     */
+    protected function _isOrderEditInProgress(): bool
+    {
+        $session = $this->_getSession();
+        return (int) $session->getOrderId() !== 0 && (int) $session->getReordered() === 0;
+    }
+
+    /**
+     * Return true when the request keeps the customer and the store of the order edit.
+     *
+     * The edit form posts the customer and the store of the edit. A request with another
+     * customer or store moves the edited order to it. importPostData() copies order[comment]
+     * into the quote, so the check reads that array too.
+     */
+    protected function _isRequestForEditedOrder(): bool
+    {
+        $session = $this->_getSession();
+        $request = $this->getRequest();
+        $order = $request->getPost('order');
+        $comment = is_array($order) && is_array($order['comment'] ?? null) ? $order['comment'] : [];
+        foreach (['customer_id' => (int) $session->getCustomerId(), 'store_id' => (int) $session->getStoreId()] as $param => $current) {
+            foreach ([$request->getParam($param), $comment[$param] ?? null] as $requested) {
+                if ($requested !== null && $requested !== '' && (!is_scalar($requested) || (int) $requested !== $current)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

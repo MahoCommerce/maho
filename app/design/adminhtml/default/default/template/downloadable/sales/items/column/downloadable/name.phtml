@@ -1,7 +1,7 @@
 <?php
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2021-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: AFL-3.0
  * @package default_default
@@ -21,9 +21,10 @@
             <?php if (isset($_option['custom_view']) && $_option['custom_view']): ?>
                 <?= $_option['value'] ?>
             <?php else: ?>
-                <?= Mage::helper('core/string')->truncate($_option['value'], 55, '', $_remainder) ?>
-                <?php if ($_remainder): ?>
-                    ... <span id="<?= $_id = 'id' . uniqid() ?>"><?= $_remainder ?></span>
+                <?php $_formattedOption = $this->getFormattedOption($_option['value']); ?>
+                <?= $_formattedOption['value'] ?>
+                <?php if ($_formattedOption['remainder']): ?>
+                    ... <span id="<?= $_id = 'id' . uniqid() ?>"><?= $_formattedOption['remainder'] ?></span>
                     <script>
                     document.getElementById('<?= $_id ?>').style.display = 'none';
                     document.getElementById('<?= $_id ?>').parentElement.addEventListener('mouseover', function(){document.getElementById('<?= $_id ?>').style.display = '';});
