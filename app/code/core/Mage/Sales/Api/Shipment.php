@@ -23,6 +23,7 @@ use ApiPlatform\Metadata\GraphQl\Mutation;
 use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use Maho\ApiPlatform\CrudResource;
+use Maho\ApiPlatform\Security\OperationAccessChecker;
 use Maho\ApiPlatform\Metadata\ListFilter;
 
 #[ApiResource(
@@ -61,6 +62,7 @@ use Maho\ApiPlatform\Metadata\ListFilter;
                 'orderId' => new Link(toProperty: 'orderId'),
             ],
             security: "is_granted('ROLE_ADMIN') or is_granted('shipments/create')",
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/ship'],
             description: 'Create a shipment for an order',
             // The processor reads the raw body, so none of it maps to a writable
             // DTO property: without this the spec advertises no request body at all.
@@ -183,6 +185,7 @@ use Maho\ApiPlatform\Metadata\ListFilter;
         ),
         new Mutation(
             name: 'create',
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/ship'],
             args: [
                 'orderId' => ['type' => 'Int!', 'description' => 'Order ID to ship'],
                 'items' => ['type' => 'Iterable', 'description' => 'Items to ship: [{orderItemId: ID!, qty: Float!}]. Ships all if omitted.'],

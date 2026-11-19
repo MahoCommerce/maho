@@ -14,6 +14,7 @@ namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Http\RequestInput;
+use Maho\ApiPlatform\Security\AdminAcl;
 
 final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -41,6 +42,9 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
         $items = $input->rows('items');
         $comment = $input->string('comment');
         $notifyCustomer = $input->bool('notifyCustomer') ?? false;
+        if ($captureCase !== null && $captureCase !== \Mage_Sales_Model_Order_Invoice::NOT_CAPTURE) {
+            AdminAcl::checkPath('sales/order/actions/capture');
+        }
 
         $service = \Mage::getService('sales/order_document');
         $order = \Mage::getService('sales/order')->getById((int) ($uriVariables['orderId'] ?? 0));

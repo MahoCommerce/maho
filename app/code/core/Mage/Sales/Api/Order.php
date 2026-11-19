@@ -23,6 +23,7 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
 use Maho\ApiPlatform\CrudResource;
+use Maho\ApiPlatform\Security\OperationAccessChecker;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 use Mage\Customer\Api\Address;
 use ApiPlatform\Metadata\Exception\AccessDeniedException as MetadataAccessDeniedException;
@@ -65,6 +66,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             // enumerable numeric cart ids.
             uriTemplate: '/orders',
             name: 'place_order',
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/create'],
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/create')",
             description: 'Place a new order from an authenticated customer cart. Body: cartId, plus the full checkout state in one shot: shippingAddress, billingAddress (each with the fields of the shipping-address body of a cart, and an optional customAttributes map that follows the Address Book and Checkout form), guestEmail, guestCustomer (a guest order only: prefix, firstname, middlename, lastname, suffix, dob, taxvat and gender, for a store that asks a guest for them), customerCustomAttributes (a guest order only: the values of the Checkout Registration form, with each required attribute of it), paymentMethod, paymentData, shippingMethod (carrier_method), orderNote, agreementIds (the IDs of the terms and conditions that the customer accepted: each required one when the store asks for them), sendConfirmation (an admin or an API token with the grant to create orders only: false places the order without the new order email)',
         ),
@@ -90,6 +92,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             // so this can't be used to check out an arbitrary enumerable cart id.
             uriTemplate: '/carts/{id}/place-order',
             name: 'place_customer_order',
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/create'],
             requirements: ['id' => '\d+'],
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/create')",
             description: 'Place order from the authenticated customer cart. Body carries the full checkout state in one shot: shippingAddress, billingAddress (each with the fields of the shipping-address body of a cart, and an optional customAttributes map that follows the Address Book and Checkout form), guestEmail, guestCustomer (a guest order only: prefix, firstname, middlename, lastname, suffix, dob, taxvat and gender, for a store that asks a guest for them), customerCustomAttributes (a guest order only: the values of the Checkout Registration form, with each required attribute of it), paymentMethod, paymentData, shippingMethod (carrier_method), orderNote, agreementIds (the IDs of the terms and conditions that the customer accepted: each required one when the store asks for them), sendConfirmation (an admin or an API token with the grant to create orders only: false places the order without the new order email)',
@@ -101,6 +104,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
         new Post(
             uriTemplate: '/orders/{id}/hold',
             name: 'order_hold',
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/hold'],
             requirements: ['id' => '\d+'],
             security: "is_granted('ROLE_ADMIN') or is_granted('orders/write')",
             description: 'Put an order on hold',
@@ -108,6 +112,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
         new Post(
             uriTemplate: '/orders/{id}/unhold',
             name: 'order_unhold',
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/unhold'],
             requirements: ['id' => '\d+'],
             security: "is_granted('ROLE_ADMIN') or is_granted('orders/write')",
             description: 'Release an order from hold',
@@ -115,6 +120,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
         new Post(
             uriTemplate: '/orders/{id}/cancel',
             name: 'order_cancel',
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/cancel'],
             requirements: ['id' => '\d+'],
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/write')",
             description: 'Cancel an order',
@@ -122,6 +128,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
         new Post(
             uriTemplate: '/orders/{id}/comments',
             name: 'order_add_comment',
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/comment'],
             requirements: ['id' => '\d+'],
             security: "is_granted('ROLE_ADMIN') or is_granted('orders/write')",
             description: 'Add a status-history comment to an order. Optional status must be one assigned to the order\'s current state',
@@ -193,6 +200,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
         new Mutation(
             security: 'true',
             name: 'place',
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/create'],
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],
@@ -209,6 +217,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
         ),
         new Mutation(
             name: 'cancel',
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/cancel'],
             args: [
                 'orderId' => ['type' => 'ID'],
                 'incrementId' => ['type' => 'String'],
@@ -222,6 +231,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
         // a stuttering holdOrderOrder.
         new Mutation(
             name: 'hold',
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/hold'],
             args: [
                 'orderId' => ['type' => 'ID'],
                 'incrementId' => ['type' => 'String'],
@@ -232,6 +242,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
         ),
         new Mutation(
             name: 'unhold',
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/unhold'],
             args: [
                 'orderId' => ['type' => 'ID'],
                 'incrementId' => ['type' => 'String'],
@@ -242,6 +253,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
         ),
         new Mutation(
             name: 'addComment',
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/comment'],
             args: [
                 'orderId' => ['type' => 'ID'],
                 'incrementId' => ['type' => 'String'],

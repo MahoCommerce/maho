@@ -72,3 +72,45 @@ describe('Admin ACL, REST', function (): void {
         expect($response['status'])->not->toBe(403);
     });
 });
+
+describe('Admin ACL, order actions', function (): void {
+
+    it('denies (403) a document action without its order action permission', function (string $path, array $acl): void {
+        $token = adminTokenWithAcl($acl, 'pest_acl_order_action_' . md5($path));
+        $response = apiPost($path, [], $token);
+        expect($response['status'])->toBe(403);
+    })->with([
+        'invoice create without invoice' => ['/api/rest/v2/orders/1/invoices', ['sales/invoice']],
+        'invoice capture without capture' => ['/api/rest/v2/invoices/1/capture', ['sales/invoice']],
+        'invoice void without cancel' => ['/api/rest/v2/invoices/1/void', ['sales/invoice']],
+        'invoice cancel without cancel' => ['/api/rest/v2/invoices/1/cancel', ['sales/invoice']],
+        'shipment create without ship' => ['/api/rest/v2/orders/1/shipments', ['sales/shipment']],
+        'credit memo create without creditmemo' => ['/api/rest/v2/orders/1/credit-memos', ['sales/creditmemo']],
+        'order hold without hold' => ['/api/rest/v2/orders/1/hold', ['sales/order']],
+        'order unhold without unhold' => ['/api/rest/v2/orders/1/unhold', ['sales/order']],
+        'order cancel without cancel' => ['/api/rest/v2/orders/1/cancel', ['sales/order']],
+        'order comment without comment' => ['/api/rest/v2/orders/1/comments', ['sales/order']],
+    ]);
+
+    it('admits a document action with its order action permission', function (): void {
+        $token = adminTokenWithAcl(['sales/invoice', 'sales/order/actions/capture'], 'pest_acl_order_action_capture');
+        $response = apiPost('/api/rest/v2/invoices/999999999/capture', [], $token);
+        expect($response['status'])->not->toBe(403);
+    });
+});
+
+describe('Admin ACL, GraphQL', function (): void {
+
+    $query = '{ orders(first: 1) { edges { node { id } } } }';
+
+    it('admits an admin whose role allows the resource', function () use ($query): void {
+        $response = gqlQuery($query, [], adminTokenWithAcl(['sales/order'], 'pest_acl_gql_grant'));
+        expect($response['json'])->not->toHaveKey('errors');
+    });
+
+    it('denies an admin whose role does not allow the resource', function () use ($query): void {
+        $response = gqlQuery($query, [], adminTokenWithAcl(['catalog/products'], 'pest_acl_gql_deny'));
+        expect($response['json'])->toHaveKey('errors')
+            ->and($response['json']['data']['orders'] ?? null)->toBeNull();
+    });
+});
