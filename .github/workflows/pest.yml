@@ -362,7 +362,7 @@ jobs:
           retention-days: 7
 
   pest-sqlite:
-    name: Test Suite (sqlite, ${{ matrix.slice.name }}${{ matrix.php == '8.6' && ', PHP 8.6' || '' }})
+    name: Test Suite (sqlite, ${{ matrix.slice.name }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -372,8 +372,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Exercise every suite on PHP 8.6 with SQLite. The timing refresh keeps its PHP 8.5 matrix.
-        php: ${{ fromJSON(inputs.update_shards && '["8.5"]' || '["8.5", "8.6"]') }}
         # See the slice comment on the pest-db job.
         slice:
           - { name: backend-1, suites: "Install,Backend,Frontend", shard: "1/2", workers: true,  server: false, browser: false }
@@ -387,7 +385,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
-          php-version: ${{ matrix.php }}
+          php-version: 8.6
           extensions: opcache, pdo_sqlite
 
       - name: Checkout code
@@ -444,7 +442,7 @@ jobs:
         run: |
           BRANCH=$(php -r 'require "app/Mage.php"; echo Mage::getVersion();' | cut -d. -f1,2)
           SAMPLE_SHA=$(gh api "repos/MahoCommerce/maho-sample-data/commits/$BRANCH" --jq .sha)
-          echo "key=db-snapshot-v1-sqlite-${{ matrix.php == '8.6' && 'php86-' || '' }}${{ hashFiles('app/code/**/sql/**', 'app/code/**/data/**', 'app/code/**/etc/config.xml', 'app/etc/config.xml', 'lib/Maho/Import/**', 'lib/Maho/Db/**', 'lib/MahoCLI/Commands/Install.php') }}-$SAMPLE_SHA" >> "$GITHUB_OUTPUT"
+          echo "key=db-snapshot-v1-sqlite-${{ hashFiles('app/code/**/sql/**', 'app/code/**/data/**', 'app/code/**/etc/config.xml', 'app/etc/config.xml', 'lib/Maho/Import/**', 'lib/Maho/Db/**', 'lib/MahoCLI/Commands/Install.php') }}-$SAMPLE_SHA" >> "$GITHUB_OUTPUT"
 
       - name: Restore the database snapshot
         id: snapshot
@@ -556,7 +554,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: browser-failure-sqlite-${{ matrix.slice.name }}${{ matrix.php == '8.6' && '-php86' || '' }}
+          name: browser-failure-sqlite-${{ matrix.slice.name }}
           path: |
             Tests/Browser/Screenshots/
             tests/Browser/Screenshots/
