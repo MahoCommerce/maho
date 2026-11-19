@@ -74,7 +74,7 @@ it('reads no ACL path from an operation that declares none', function (): void {
 });
 
 /**
- * Run $operation of the Order resource through AdminAclProvider for an admin token, and return true when the read ran.
+ * Run the operation $operationName of the Order resource through AdminAclProvider for an admin token, and return true when the read ran.
  */
 function salesOperationAclProvide(string $operationName): bool
 {

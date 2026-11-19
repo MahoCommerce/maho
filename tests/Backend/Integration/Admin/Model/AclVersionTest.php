@@ -187,3 +187,28 @@ it('refuses the session user in reloadUser() once the user has no role', functio
         Mage::getModel('admin/role')->load($roleId)->delete();
     }
 });
+
+function aclVersionApiRequest(): Symfony\Component\HttpFoundation\Request
+{
+    return Symfony\Component\HttpFoundation\Request::create(
+        '/api/admin/graphql',
+        'POST',
+        [],
+        [Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE => 'pest-session-id'],
+    );
+}
+
+it('refuses an admin API request whose session user has no role', function (): void {
+    $user = AdminRoleFixture::login(['admin/sales']);
+    $roleId = (int) $user->getRole()->getId();
+    try {
+        expect(Maho\ApiPlatform\Security\AdminSessionAuthenticator::startAdminSession(aclVersionApiRequest()))->toBeTrue();
+
+        Mage::getModel('admin/user')->setRoleId($roleId)->setUserId((int) $user->getId())->deleteFromRole();
+
+        expect(Maho\ApiPlatform\Security\AdminSessionAuthenticator::startAdminSession(aclVersionApiRequest()))->toBeFalse();
+    } finally {
+        aclVersionDeleteUser($user);
+        Mage::getModel('admin/role')->load($roleId)->delete();
+    }
+});
