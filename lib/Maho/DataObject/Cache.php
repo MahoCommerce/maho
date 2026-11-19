@@ -136,10 +136,9 @@ class Cache
             return false;
         }
 
-        // Keep the hash format accepted by findByHash() and used in {hash} cache keys.
-        $hash = sprintf('%016x0000000000000000', spl_object_id($object));
+        $hash = spl_object_id($object);
         if (!is_null($idx) && strpos($idx, '{')) {
-            $idx = str_replace('{hash}', $hash, $idx);
+            $idx = str_replace('{hash}', (string) $hash, $idx);
         }
         if (isset($this->_hashes[$hash])) {
             //throw new Exception('test');
