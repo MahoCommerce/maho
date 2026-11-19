@@ -68,3 +68,43 @@ it('escapes the configurable option labels in the order email', function (): voi
         'Black &amp; &quot;White&quot;',
     ]);
 });
+
+it('escapes the titles of downloadable links in the item options', function (): void {
+    $product = Mage::getModel('catalog/product')
+        ->setTypeId('downloadable')
+        ->setLinksTitle('Links');
+    $item = new class ($product) implements Mage_Catalog_Model_Product_Configuration_Item_Interface {
+        public function __construct(private Mage_Catalog_Model_Product $product) {}
+
+        #[\Override]
+        public function getProduct()
+        {
+            return $this->product;
+        }
+
+        #[\Override]
+        public function getOptionByCode($code)
+        {
+            return null;
+        }
+
+        #[\Override]
+        public function getFileDownloadParams()
+        {
+            return null;
+        }
+    };
+    $helper = new class extends Mage_Downloadable_Helper_Catalog_Product_Configuration {
+        #[\Override]
+        public function getLinks(Mage_Catalog_Model_Product_Configuration_Item_Interface $item)
+        {
+            return [new Maho\DataObject(['title' => '<img src=x onerror=alert(1)>'])];
+        }
+    };
+
+    $options = $helper->getOptions($item);
+
+    expect($options)->toHaveCount(1)
+        ->and($options[0]['label'])->toBe('Links')
+        ->and($options[0]['value'])->toBe(['&lt;img src=x onerror=alert(1)&gt;']);
+});

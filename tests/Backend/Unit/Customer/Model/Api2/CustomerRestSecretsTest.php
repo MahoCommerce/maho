@@ -41,6 +41,7 @@ it('removes the credentials and the confirmation key from a REST customer respon
         'rp_token' => 'reset-token',
         'rp_token_created_at' => '2026-01-01 00:00:00',
         'rp_customer_id' => 'reset-id',
+        'twofa_secret' => 'encrypted-totp-secret',
         'confirmation' => 'confirmation-key',
     ]);
 
@@ -56,6 +57,7 @@ it('refuses a REST collection filter that can find a credential or the confirmat
 })->throws(Mage_Api2_Exception::class)->with([
     'password hash' => [['attribute' => 'password_hash', 'like' => '%']],
     'reset token in upper case' => [['attribute' => ' RP_TOKEN ', 'eq' => 'x']],
+    'two-factor secret' => [['attribute' => 'twofa_secret', 'notnull' => true]],
     'confirmation key value' => [['attribute' => 'confirmation', 'eq' => 'confirmation-key']],
 ]);
 
@@ -66,3 +68,29 @@ it('accepts a REST collection filter on a pending confirmation or a plain attrib
     'pending confirmation' => [['attribute' => 'confirmation', 'notnull' => true]],
     'email' => [['attribute' => 'email', 'like' => '%@example.com']],
 ]);
+
+it('refuses a secret filter when it builds the REST collection', function (): void {
+    $resource = customerRestResource([['attribute' => 'password_hash', 'like' => '%']]);
+    $resource->setResourceType('customer');
+    $resource->setUserType('admin');
+    // A role that allows the attribute, so that only the secret check can refuse the filter
+    $resource->setFilter(new class ($resource) extends Mage_Api2_Model_Acl_Filter {
+        #[\Override]
+        public function getAllowedAttributes($operationType = null)
+        {
+            return ['email', 'password_hash'];
+        }
+    });
+    callCustomerRest($resource, '_getCollectionForRetrieve');
+})->throws(Mage_Api2_Exception::class);
+
+it('never stores a confirmation key that an API client writes', function (): void {
+    $helper = Mage::helper('customer');
+    $customer = Mage::getModel('customer/customer');
+
+    expect($helper->prepareApiConfirmationForWrite($customer, 'chosen-key'))->toBeString()->not->toBe('chosen-key')->not->toBe('');
+
+    $customer->setConfirmation('existing-key');
+    expect($helper->prepareApiConfirmationForWrite($customer, 'chosen-key'))->toBe('existing-key')
+        ->and($helper->prepareApiConfirmationForWrite($customer, false))->toBeNull();
+});

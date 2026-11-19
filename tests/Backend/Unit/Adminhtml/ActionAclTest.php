@@ -8,7 +8,11 @@
 
 declare(strict_types=1);
 
+use Mage\Sales\Api\GraphQL\OrderMutationHandler;
+use Mage\Sales\Api\OrderProvider;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -117,7 +121,7 @@ it('checks the leaf of each action', function (string $class, string $action, ar
     yield 'order export allowed to order viewers' => [$order, 'exportCsv', [], $view, true];
     yield 'order cancel denied without cancel' => [$order, 'cancel', [], $view, false];
 
-    // The order actions are needed on top of the document permission, never instead of it
+    // The order actions are needed in addition to the document permission, never instead of it
     $invoice = Mage_Adminhtml_Sales_Order_InvoiceController::class;
     $newDoc = ['order_id' => '5'];
     $existingInvoice = ['invoice_id' => '7'];
@@ -714,3 +718,16 @@ it('saves the tag that the check reads, not a tag_id of the POST body', function
         $adapter->delete($table, ['tag_id IN (?)' => $tagIds]);
     }
 });
+
+it('refuses the admin GraphQL place order and credit memo mutations without the order action', function (string $granted, string $mutation, string $aclPath): void {
+    actionAclLogin([$granted]);
+    $handler = new OrderMutationHandler(new OrderProvider($this->createMock(Security::class)));
+    $call = $mutation === 'place'
+        ? fn() => $handler->handlePlaceOrder(['cartId' => 1])
+        : fn() => $handler->handleCreateCreditMemo(['orderId' => 1], []);
+
+    expect($call)->toThrow(AccessDeniedHttpException::class, $aclPath);
+})->with([
+    'place order' => ['sales/order', 'place', 'sales/order/actions/create'],
+    'credit memo' => ['sales/creditmemo', 'creditmemo', 'sales/order/actions/creditmemo'],
+]);

@@ -640,7 +640,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     }
 
     /**
-     * Check the Ship order action on top of the Shipments permission to create or cancel a shipment.
+     * Check the Ship order action in addition to the Shipments permission to create or cancel a shipment.
      *
      * Without a shipment ID, an action prepares a new shipment from the order, and a tracking
      * number or a label saves it, so it needs the Ship order action too. addComment reads the

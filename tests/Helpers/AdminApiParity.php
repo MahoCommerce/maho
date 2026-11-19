@@ -110,9 +110,10 @@ final class AdminApiParity
      *
      * @param class-string<\Mage_Adminhtml_Controller_Action> $controllerClass
      * @param array<string, mixed> $fields
+     * @param array<string, mixed> $params the parameters of the URL, such as the user_id of an edit page
      * @return array{success: list<string>, errors: list<string>}
      */
-    public static function admin(string $controllerClass, string $action, array $fields = []): array
+    public static function admin(string $controllerClass, string $action, array $fields = [], array $params = []): array
     {
         // Mage_Directory_Adminhtml_Directory_RegionController is the controller directory_region of the admin route
         [$route, $controller] = ['adminhtml', strtolower((string) preg_replace('/^.*?_Adminhtml_|Controller$/', '', $controllerClass))];
@@ -120,6 +121,7 @@ final class AdminApiParity
             SymfonyRequest::create("http://localhost/admin/{$controller}/{$action}", 'POST', $fields),
         );
         $request->setRouteName($route)->setControllerName($controller)->setActionName($action)->setDispatched(true);
+        $request->setParams($params);
         \Mage::app()->setRequest($request);
         // A message that an earlier test left in the session is not an outcome of this action
         self::adminMessages();

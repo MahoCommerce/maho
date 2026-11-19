@@ -32,8 +32,8 @@ final class OperationAccessChecker
     public const RESOURCE_CONSTANT = 'ADMIN_RESOURCE';
 
     /**
-     * Key of an operation's `extraProperties` that names an ACL path that an admin needs on top of the
-     * ADMIN_RESOURCE of the class, such as `sales/order/actions/capture` for an invoice capture.
+     * Key of an operation's `extraProperties` that names an ACL path that an admin needs in addition
+     * to the ADMIN_RESOURCE of the class, such as `sales/order/actions/capture` for an invoice capture.
      */
     public const OPERATION_RESOURCE_KEY = 'mahoAdminResource';
 
@@ -63,13 +63,15 @@ final class OperationAccessChecker
     /**
      * Throw 403 when the caller is an admin token whose Maho role doesn't permit
      * the resource class's ADMIN_RESOURCE, or the ACL path that the operation
-     * declares under OPERATION_RESOURCE_KEY. No-op for public operations and for
-     * non-admin tokens, which are gated by `ApiUserVoter` and the customer JWT
-     * through the operation's own `security:` expression.
+     * declares under OPERATION_RESOURCE_KEY. A public operation needs only the
+     * second path. No-op for non-admin tokens, which are gated by `ApiUserVoter`
+     * and the customer JWT through the operation's own `security:` expression.
      */
     public function checkAdminAcl(string $resourceClass, ?Operation $operation): void
     {
-        if (self::isPublic($operation)) {
+        $isPublic = self::isPublic($operation);
+        $operationPath = self::resolveOperationResource($operation);
+        if ($isPublic && $operationPath === null) {
             return;
         }
 
@@ -78,8 +80,8 @@ final class OperationAccessChecker
             return;
         }
 
-        $aclPath = self::resolveAdminResource($resourceClass);
-        if ($aclPath === null) {
+        $aclPath = $isPublic ? null : self::resolveAdminResource($resourceClass);
+        if ($aclPath === null && !$isPublic) {
             // Default-deny: every admin-callable resource must opt in by declaring
             // ADMIN_RESOURCE, exactly like Mage_Adminhtml_Controller_Action does.
             \Mage::log(
@@ -97,7 +99,7 @@ final class OperationAccessChecker
             throw new AccessDeniedHttpException('Admin session unavailable.');
         }
 
-        foreach ([$aclPath, self::resolveOperationResource($operation)] as $path) {
+        foreach ([$aclPath, $operationPath] as $path) {
             if ($path !== null && !$session->isAllowed($path)) {
                 throw new AccessDeniedHttpException(
                     sprintf('Your admin role does not grant access to "%s".', $path),

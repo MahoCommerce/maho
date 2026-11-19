@@ -27,7 +27,14 @@ function aclVersionRunObserver(): Mage_Core_Controller_Request_Http
     $request = Mage::app()->getRequest();
     $request->setActionName('index');
     $request->setInternallyForwarded(false);
-    new Mage_Admin_Model_Observer()->actionPreDispatchAdmin(new \Maho\Event\Observer());
+    new class extends Mage_Admin_Model_Observer {
+        // The test has no browser session, so it has no session cookie to renew
+        #[\Override]
+        protected function endSession(Mage_Admin_Model_Session $session): void
+        {
+            $session->unsetAll();
+        }
+    }->actionPreDispatchAdmin(new \Maho\Event\Observer());
     return $request;
 }
 
@@ -130,5 +137,37 @@ it('ends the sessions of the members of a deleted role', function (): void {
         expect(Mage::getSingleton('admin/session')->getUser())->toBeNull();
     } finally {
         aclVersionDeleteUser($user);
+    }
+});
+
+it('does not write an old acl_version back when a loaded user is saved', function (): void {
+    $user = AdminRoleFixture::login(['admin/sales']);
+    try {
+        $resource = Mage::getResourceSingleton('admin/user');
+        $copy = aclVersionReloadUser($user);
+        $resource->bumpAclVersion([(int) $user->getId()]);
+        $bumped = $resource->getAclVersion($user);
+
+        $copy->setFirstname('Changed')->save();
+
+        expect($resource->getAclVersion($user))->toBe($bumped)
+            ->and(aclVersionReloadUser($user)->getFirstname())->toBe('Changed');
+    } finally {
+        AdminRoleFixture::delete($user);
+    }
+});
+
+it('builds the ACL again when the session changes to a user with the same acl_version', function (): void {
+    $first = AdminRoleFixture::login(['admin/sales']);
+    $second = null;
+    try {
+        $second = AdminRoleFixture::login(['admin/customer']);
+
+        expect(Mage::getSingleton('admin/session')->isAllowed('customer'))->toBeTrue();
+    } finally {
+        if ($second) {
+            AdminRoleFixture::delete($second);
+        }
+        AdminRoleFixture::delete($first);
     }
 });

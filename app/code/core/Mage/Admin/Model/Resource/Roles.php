@@ -77,7 +77,9 @@ class Mage_Admin_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstra
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $role)
     {
-        $this->_updateRoleUsersAcl($role);
+        if ($role instanceof Mage_Admin_Model_Roles) {
+            $this->reloadRoleUsersAcl($role);
+        }
         $this->getUserResource()->cleanMenuCache();
         return $this;
     }
@@ -121,8 +123,10 @@ class Mage_Admin_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstra
 
     /**
      * Give each member of $role a new ACL version.
+     *
+     * @return bool true when the role has members
      */
-    private function _updateRoleUsersAcl(Mage_Admin_Model_Roles $role): bool
+    public function reloadRoleUsersAcl(Mage_Admin_Model_Roles $role): bool
     {
         return $this->getUserResource()->bumpAclVersion($this->getRoleUsers($role)) > 0;
     }

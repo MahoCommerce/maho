@@ -156,8 +156,8 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
                 }
                 $this->setIsFirstPageAfterLogin(true);
                 $this->setUser($user);
-                $this->setAcl($this->loadAcl());
-                $this->setAclVersion($user->getAclVersion() ?? 0);
+                $this->setAcl(null);
+                $this->refreshAcl($user);
                 if ($backendLocale = $user->getBackendLocale()) {
                     Mage::getSingleton('adminhtml/session')->setLocale($backendLocale);
                 }
@@ -212,9 +212,14 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
                 ->setAclVersion($resource->getAclVersion($user));
         }
         $version = $user->getAclVersion() ?? 0;
-        if (!$this->getAcl() || $this->getAclVersion() !== $version) {
+        // Each user counts its own versions, so a version of another user says nothing about this ACL
+        if (!$this->getAcl()
+            || $this->getAclVersion() !== $version
+            || $this->getData('acl_user_id') !== (int) $user->getId()
+        ) {
             $this->setAcl($this->loadAcl());
             $this->setAclVersion($version);
+            $this->setData('acl_user_id', (int) $user->getId());
         }
         return $this;
     }

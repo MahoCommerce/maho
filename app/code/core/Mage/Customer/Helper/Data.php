@@ -611,7 +611,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getApiSecretAttributeCodes(): array
     {
-        return ['password_hash', 'rp_token', 'rp_token_created_at', 'rp_customer_id'];
+        return ['password_hash', 'rp_token', 'rp_token_created_at', 'rp_customer_id', 'twofa_secret'];
     }
 
     /**

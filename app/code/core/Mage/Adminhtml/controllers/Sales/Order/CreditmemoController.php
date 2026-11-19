@@ -354,8 +354,8 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
     }
 
     /**
-     * Check the Credit Memos order action on top of the Credit Memos permission to create, cancel
-     * or void a credit memo.
+     * Check the Credit Memos order action in addition to the Credit Memos permission to create,
+     * cancel or void a credit memo.
      *
      * Without a credit memo ID, an action prepares a new credit memo from the order, so it needs
      * the order action too. addComment reads the credit memo ID from its id parameter.

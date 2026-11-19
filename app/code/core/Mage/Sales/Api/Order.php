@@ -82,6 +82,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             ],
             requirements: ['maskedQuoteId' => \Mage_Checkout_Service_Cart::MASKED_ID_PATTERN],
             security: 'true',
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/create'],
             description: 'Place order from guest cart. Body carries the full checkout state in one shot: shippingAddress, billingAddress (each with the fields of the shipping-address body of a cart, and an optional customAttributes map that follows the Address Book and Checkout form), guestEmail, guestCustomer (a guest order only: prefix, firstname, middlename, lastname, suffix, dob, taxvat and gender, for a store that asks a guest for them), customerCustomAttributes (a guest order only: the values of the Checkout Registration form, with each required attribute of it), paymentMethod, paymentData, shippingMethod (carrier_method), orderNote, agreementIds (the IDs of the terms and conditions that the customer accepted: each required one when the store asks for them), sendConfirmation (an admin or an API token with the grant to create orders only: false places the order without the new order email)',
         ),
         new Post(

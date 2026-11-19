@@ -112,6 +112,24 @@ class Mage_Core_Model_Layout_Validator
     }
 
     /**
+     * Return $layoutUpdate when the validator accepts it, and an empty string when it does not.
+     * The save validates the update, but an update saved before a rule existed must not run.
+     */
+    public function getValidLayoutUpdate(string $layoutUpdate): string
+    {
+        if (trim($layoutUpdate) === '') {
+            return $layoutUpdate;
+        }
+        try {
+            if ($this->isValid($layoutUpdate)) {
+                return $layoutUpdate;
+            }
+        } catch (Exception) {
+        }
+        return '';
+    }
+
+    /**
      * Returns true if and only if $value meets the validation requirements
      */
     public function isValid(\Maho\Simplexml\Element|string $value): bool
@@ -224,13 +242,12 @@ class Mage_Core_Model_Layout_Validator
             if ($this->isAdminhtmlBlock($className)) {
                 return true;
             }
+            $isClassName = $this->isClassName($className);
             foreach ($disallowed as $disallowedClass) {
                 if (strcasecmp($className, $disallowedClass) === 0) {
                     return true;
                 }
-                if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*(\\\\[A-Za-z_][A-Za-z0-9_]*)*$/', $className)
-                    && is_a($className, $disallowedClass, true)
-                ) {
+                if ($isClassName && is_a($className, $disallowedClass, true)) {
                     return true;
                 }
             }
@@ -249,10 +266,18 @@ class Mage_Core_Model_Layout_Validator
         if (preg_match('/^Mage_Adminhtml_|[_\\\\]Block[_\\\\]Adminhtml(?:[_\\\\]|$)/i', $className) === 1) {
             return true;
         }
-        if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*(\\\\[A-Za-z_][A-Za-z0-9_]*)*$/', $className)) {
+        if (!$this->isClassName($className)) {
             return false;
         }
         return array_any($this->adminhtmlBlockClasses, fn($adminhtmlBlockClass) => is_a($className, $adminhtmlBlockClass, true));
+    }
+
+    /**
+     * Return true when $className is a valid PHP class name, so that is_a() can autoload it.
+     */
+    private function isClassName(string $className): bool
+    {
+        return preg_match('/^[A-Za-z_][A-Za-z0-9_]*(\\\\[A-Za-z_][A-Za-z0-9_]*)*$/', $className) === 1;
     }
 
     /**

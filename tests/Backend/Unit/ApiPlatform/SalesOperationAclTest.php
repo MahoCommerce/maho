@@ -17,6 +17,7 @@ use Maho\Config\ApiResource;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Tests\Helpers\AdminRoleFixture;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -69,9 +70,12 @@ it('reads no ACL path from an operation that declares none', function (): void {
         ->and(OperationAccessChecker::resolveOperationResource(salesOperationAclOperations(Mage\Sales\Api\Invoice::class)['invoice_get']))->toBeNull();
 });
 
-it('checks the admin ACL of each GraphQL operation before the read', function (): void {
-    $operation = salesOperationAclOperations(Mage\Sales\Api\Order::class)['hold'];
-    $admin = new ApiUser('admin', ['ROLE_ADMIN'], adminId: 1);
+/**
+ * Run $operation of the Order resource through AdminAclProvider for an admin token, and return true when the read ran.
+ */
+function salesOperationAclProvide(string $operationName): bool
+{
+    $admin = new ApiUser('admin', ['ROLE_ADMIN'], adminId: (int) Mage::getSingleton('admin/session')->getUser()->getId());
     $tokenStorage = new TokenStorage();
     $tokenStorage->setToken(new PreAuthenticatedToken($admin, 'api', $admin->getRoles()));
     $inner = new class implements ProviderInterface {
@@ -83,9 +87,27 @@ it('checks the admin ACL of each GraphQL operation before the read', function ()
             return null;
         }
     };
+    new AdminAclProvider($inner, new OperationAccessChecker($tokenStorage))
+        ->provide(salesOperationAclOperations(Mage\Sales\Api\Order::class)[$operationName]->withClass(Mage\Sales\Api\Order::class));
+    return $inner->called;
+}
 
-    // The test has no admin session, so the checker refuses the admin token
-    expect(fn() => new AdminAclProvider($inner, new OperationAccessChecker($tokenStorage))->provide($operation))
-        ->toThrow(AccessDeniedHttpException::class)
-        ->and($inner->called)->toBeFalse();
-});
+it('checks the ACL path of each GraphQL operation before the read', function (string $operationName, string $aclPath): void {
+    $user = AdminRoleFixture::login(['admin/sales', 'admin/sales/order']);
+    try {
+        expect(fn() => salesOperationAclProvide($operationName))
+            ->toThrow(AccessDeniedHttpException::class, $aclPath);
+    } finally {
+        AdminRoleFixture::delete($user);
+    }
+
+    $user = AdminRoleFixture::login(['admin/sales', 'admin/sales/order', 'admin/sales/order/actions', 'admin/' . $aclPath]);
+    try {
+        expect(salesOperationAclProvide($operationName))->toBeTrue();
+    } finally {
+        AdminRoleFixture::delete($user);
+    }
+})->with([
+    'hold' => ['hold', 'sales/order/actions/hold'],
+    'place order, a public operation' => ['place', 'sales/order/actions/create'],
+]);

@@ -105,7 +105,7 @@ Allows you to retrieve the list of customers.
 | string  | taxvat        | Taxvat value                          |
 | boolean | confirmation  | True when the confirmation is pending |
 
-**Note**: The list never returns `password_hash`, `rp_token`, `rp_token_created_at` or the confirmation key.
+**Note**: The list never returns `password_hash`, `rp_token`, `rp_token_created_at`, `twofa_secret` or the confirmation key.
 A filter on one of these attributes returns a `filters_invalid` fault.
 A filter on `confirmation` accepts only a `null` or `notnull` condition.
 
@@ -358,7 +358,7 @@ The `customer_id` value is always returned.
 | string  | taxvat              | Tax/VAT number                         |
 | boolean | confirmation        | True when the confirmation is pending  |
 
-**Note**: The response never contains `password_hash`, `rp_token`, `rp_token_created_at` or the confirmation key.
+**Note**: The response never contains `password_hash`, `rp_token`, `rp_token_created_at`, `twofa_secret` or the confirmation key.
 
 ### Examples
 

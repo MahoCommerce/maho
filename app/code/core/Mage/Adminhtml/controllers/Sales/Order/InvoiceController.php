@@ -279,7 +279,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     }
 
     /**
-     * Check the order action of each change on top of the Invoices permission.
+     * Check the order action of each change in addition to the Invoices permission.
      *
      * Without an invoice ID, an action prepares a new invoice from the order, so it needs the
      * Invoice order action. addComment reads the invoice ID from its id parameter. A void also

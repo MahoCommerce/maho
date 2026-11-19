@@ -94,7 +94,9 @@ class Mage_Cms_Helper_Page extends Mage_Core_Helper_Abstract
         $action->loadLayoutUpdates();
         $layoutUpdate = ($page->getCustomLayoutUpdateXml() && $inRange)
             ? $page->getCustomLayoutUpdateXml() : $page->getLayoutUpdateXml();
-        $action->getLayout()->getUpdate()->addUpdate($this->getValidLayoutUpdate((string) $layoutUpdate));
+        $action->getLayout()->getUpdate()->addUpdate(
+            Mage::getModel('core/layout_validator')->getValidLayoutUpdate((string) $layoutUpdate),
+        );
         $action->generateLayoutXml()->generateLayoutBlocks();
 
         $contentHeadingBlock = $action->getLayout()->getBlock('page_content_heading');
@@ -123,24 +125,6 @@ class Mage_Cms_Helper_Page extends Mage_Core_Helper_Abstract
         }
 
         return true;
-    }
-
-    /**
-     * Return $layoutUpdate when the layout validator accepts it, and an empty string when it does not.
-     * The save validates the update, but an update saved before a rule existed must not run.
-     */
-    protected function getValidLayoutUpdate(string $layoutUpdate): string
-    {
-        if (trim($layoutUpdate) === '') {
-            return $layoutUpdate;
-        }
-        try {
-            if (Mage::getModel('core/layout_validator')->isValid($layoutUpdate)) {
-                return $layoutUpdate;
-            }
-        } catch (Exception) {
-        }
-        return '';
     }
 
     /**
