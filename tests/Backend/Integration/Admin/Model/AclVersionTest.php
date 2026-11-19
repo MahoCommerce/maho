@@ -210,5 +210,7 @@ it('refuses an admin API request whose session user has no role', function (): v
     } finally {
         aclVersionDeleteUser($user);
         Mage::getModel('admin/role')->load($roleId)->delete();
+        // startAdminSession() starts a PHP session, and a later test cannot rename an open one
+        Mage_Core_Model_Session_Abstract::closeSession();
     }
 });
