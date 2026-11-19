@@ -50,12 +50,11 @@ class Mage_Admin_Model_Observer
         if (in_array($requestedActionName, $openActions)) {
             $request->setDispatched(true);
         } else {
-            if ($user) {
-                $user->reload();
-                if ($user->getId() && !$this->isSessionUserAllowed($session, $user)) {
+            if ($user && !$session->reloadUser()) {
+                if ($user->getId()) {
                     $this->endSession($session);
-                    $user = null;
                 }
+                $user = null;
             }
             if (!$user || !$user->getId()) {
                 if ($request->getPost('login')) {
@@ -107,17 +106,6 @@ class Mage_Admin_Model_Observer
         }
 
         $session->refreshAcl();
-    }
-
-    /**
-     * Return false when the ACL of the current roles has no role for $user. login() refuses such a user
-     * with Mage_Admin_Model_User::authenticate(), and this check ends the sessions that the user already has.
-     */
-    protected function isSessionUserAllowed(Mage_Admin_Model_Session $session, Mage_Admin_Model_User $user): bool
-    {
-        $session->refreshAcl($user);
-        $acl = $session->getAcl();
-        return $acl !== null && $acl->hasRole($user->getAclRole());
     }
 
     protected function endSession(Mage_Admin_Model_Session $session): void

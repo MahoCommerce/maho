@@ -171,3 +171,19 @@ it('builds the ACL again when the session changes to a user with the same acl_ve
         AdminRoleFixture::delete($first);
     }
 });
+
+it('refuses the session user in reloadUser() once the user has no role', function (): void {
+    $user = AdminRoleFixture::login(['admin/sales']);
+    $roleId = (int) $user->getRole()->getId();
+    try {
+        $session = Mage::getSingleton('admin/session');
+        expect($session->reloadUser())->toBeTrue();
+
+        Mage::getModel('admin/user')->setRoleId($roleId)->setUserId((int) $user->getId())->deleteFromRole();
+
+        expect($session->reloadUser())->toBeFalse();
+    } finally {
+        aclVersionDeleteUser($user);
+        Mage::getModel('admin/role')->load($roleId)->delete();
+    }
+});

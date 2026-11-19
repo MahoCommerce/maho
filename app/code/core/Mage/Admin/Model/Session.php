@@ -224,6 +224,21 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
         return $this;
     }
 
+    /**
+     * Load the user of the session again, and build its ACL again when its permissions changed.
+     * Return false when the user does not exist, or when no role of the ACL holds it: login() refuses such a user.
+     */
+    public function reloadUser(): bool
+    {
+        $user = $this->getUser();
+        if (!$user?->reload()->getId()) {
+            return false;
+        }
+        $this->refreshAcl($user);
+        $acl = $this->getAcl();
+        return $acl !== null && $acl->hasRole($user->getAclRole());
+    }
+
     protected function loadAcl(): Mage_Admin_Model_Acl
     {
         return Mage::getResourceModel('admin/acl')->loadAcl();
