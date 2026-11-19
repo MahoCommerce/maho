@@ -124,7 +124,7 @@ final class Mage
      */
     public static function getVersion(): string
     {
-        return '26.11.2';
+        return '26.11.3';
     }
 
     /**
