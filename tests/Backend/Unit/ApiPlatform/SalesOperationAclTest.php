@@ -11,6 +11,7 @@ declare(strict_types=1);
 use ApiPlatform\Mcp\Security\ElementAccessCheckerInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Operation\Factory\OperationMetadataFactoryInterface;
+use ApiPlatform\Metadata\Post;
 use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\GraphQl\AdminAclProvider;
 use Maho\ApiPlatform\Mcp\PermissionElementAccessChecker;
@@ -145,4 +146,13 @@ it('hides the MCP guest order tool from an admin without the Create order action
     } finally {
         AdminRoleFixture::delete($user);
     }
+});
+
+it('hides a public MCP tool that has no resource class', function (): void {
+    $metadata = $this->createMock(OperationMetadataFactoryInterface::class);
+    $metadata->method('create')->willReturn(new Post(name: 'classless', security: 'true'));
+    $decorated = $this->createMock(ElementAccessCheckerInterface::class);
+    $decorated->method('isGranted')->willReturn(true);
+
+    expect(new PermissionElementAccessChecker($decorated, $metadata, new OperationAccessChecker(new TokenStorage()))->isGranted('classless'))->toBeFalse();
 });
