@@ -3745,30 +3745,6 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
-     * Deletes table rows based on a WHERE clause.
-     *
-     * @param string|array|\Maho\Db\Select $table The table to update.
-     * @param string|array $where DELETE WHERE clause(s).
-     * @return int The number of affected rows.
-     */
-    #[\Override]
-    public function delete(string|array|\Maho\Db\Select $table, string|array $where = ''): int
-    {
-        $where = $this->_whereExpr($where);
-
-        // Build the DELETE statement
-        $sql = sprintf(
-            'DELETE FROM %s%s',
-            $this->quoteIdentifier($table),
-            ($where) ? " WHERE $where" : '',
-        );
-
-        // Execute the statement and return the number of affected rows
-        $stmt = $this->query($sql);
-        return $stmt->rowCount();
-    }
-
-    /**
      * Get delete from select object query
      *
      * @param string $table the table name or alias used in select
