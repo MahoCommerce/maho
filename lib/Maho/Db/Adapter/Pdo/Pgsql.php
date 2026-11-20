@@ -1227,6 +1227,11 @@ class Pgsql extends AbstractPdoAdapter
      * rows of ON DUPLICATE KEY UPDATE in order, so each run goes in its own statement, in order.
      * A row with a NULL or an Expr in a key column never conflicts with another row of the batch.
      *
+     * PostgreSQL compares the keys by column type, which PHP does not know here: 1 and '1.0' are
+     * equal in a numeric column, 'a' and 'A' in a citext column, 'a' and 'a ' in a char column.
+     * So the key ignores the form of a number, case and trailing spaces. When it joins two
+     * values that PostgreSQL keeps apart, the batch only gets one more statement.
+     *
      * @param list<array<string, mixed>> $rows
      * @param list<string> $keyColumns
      * @return list<list<array<string, mixed>>>
@@ -1244,7 +1249,8 @@ class Pgsql extends AbstractPdoAdapter
                     $key = null;
                     break;
                 }
-                $key[] = (string) $value;
+                $value = (string) $value;
+                $key[] = is_numeric($value) ? var_export((float) $value, true) : mb_strtolower(rtrim($value, ' '));
             }
             if ($key !== null) {
                 $key = serialize($key);

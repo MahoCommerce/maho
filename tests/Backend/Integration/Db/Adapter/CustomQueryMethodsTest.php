@@ -376,6 +376,32 @@ describe('insertOnDuplicate', function () {
         expect(array_map(intval(...), $values))->toBe(['other' => 5, 'repeat' => 2]);
     });
 
+    it('applies two rows in order when their keys differ as text but are the same number', function () {
+        $table = 'test_numeric_key_' . uniqid();
+        $this->adapter->createTable(
+            $this->adapter->newTable($table)
+                ->addColumn('id', \Maho\Db\Ddl\Table::TYPE_INTEGER, null, ['nullable' => false, 'primary' => true], 'ID')
+                ->addColumn('value', \Maho\Db\Ddl\Table::TYPE_INTEGER, null, [], 'Value'),
+        );
+
+        try {
+            $this->adapter->insertOnDuplicate(
+                $table,
+                [
+                    ['id' => 1, 'value' => 1],
+                    ['id' => '01', 'value' => 2],
+                ],
+                ['value'],
+            );
+
+            $values = $this->adapter->fetchPairs("SELECT id, value FROM {$table}");
+
+            expect(array_map(intval(...), $values))->toBe([1 => 2]);
+        } finally {
+            $this->adapter->dropTable($table);
+        }
+    });
+
     it('keeps the bytes of a binary column when an expression in the same row takes no bind position', function () {
         $table = 'test_binary_' . uniqid();
         $this->adapter->createTable(
