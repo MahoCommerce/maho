@@ -473,6 +473,9 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         if ($this->_formattedOptionValue === null) {
             try {
                 $value = Mage::helper('core/unserializeArray')->unserialize($optionValue);
+                if (!$value) {
+                    return $optionValue;
+                }
 
                 $customOptionUrlParams = $this->getCustomOptionUrlParams() ?: [
                     'id'  => $this->getConfigurationItemOption()->getId(),
@@ -566,6 +569,9 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
     {
         try {
             $value = Mage::helper('core/unserializeArray')->unserialize($optionValue);
+            if (!$value) {
+                return $optionValue;
+            }
             return sprintf(
                 '%s [%d]',
                 Mage::helper('core')->escapeHtml($value['title']),

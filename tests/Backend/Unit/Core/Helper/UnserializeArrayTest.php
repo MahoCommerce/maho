@@ -55,20 +55,26 @@ describe('Legacy serialized data conversion via core/unserializeArray helper', f
             ->toThrow(Exception::class);
     });
 
-    it('throws on missing input without emitting a PHP warning', function (?string $input) {
+    it('returns an empty array for null or empty input', function () {
+        expect($this->helper->unserialize(null))->toBe([])
+            ->and($this->helper->unserialize(''))->toBe([]);
+    });
+
+    it('does not call unserialize() on empty input', function () {
+        // PHP 8.6 warns on unserialize(''), and the Api suite reports a warning that @ suppressed
         $warnings = [];
-        set_error_handler(static function (int $severity, string $message) use (&$warnings): bool {
+        set_error_handler(function (int $errno, string $message) use (&$warnings) {
             $warnings[] = $message;
             return true;
-        }, E_WARNING);
+        });
         try {
-            expect(fn() => $this->helper->unserialize($input))->toThrow(Exception::class, 'Error unserializing data.');
+            $this->helper->unserialize('');
         } finally {
             restore_error_handler();
         }
 
         expect($warnings)->toBe([]);
-    })->with(['null' => [null], 'empty string' => ['']]);
+    });
 });
 
 /**

@@ -114,7 +114,7 @@ class Mage_Catalog_Service_Product_Option
         } catch (Exception) {
             $value = null;
         }
-        if (!is_array($value)) {
+        if (!is_array($value) || !$value) {
             throw new Mage_Core_Exception_NoSuchEntity($helper->__('File not found'));
         }
         if (!isset($value['secret_key']) || !hash_equals((string) $value['secret_key'], $key)) {
