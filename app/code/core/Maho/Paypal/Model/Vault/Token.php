@@ -28,6 +28,14 @@ class Maho_Paypal_Model_Vault_Token extends Mage_Core_Model_Abstract
         return $this;
     }
 
+    /**
+     * Return true when the token is active and belongs to the customer $customerId.
+     */
+    public function isUsableBy(int $customerId): bool
+    {
+        return $customerId && $this->getId() && $this->getIsActive() && (int) $this->getCustomerId() === $customerId;
+    }
+
     public function getDisplayLabel(): string
     {
         if ($this->getLabel()) {

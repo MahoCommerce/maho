@@ -162,13 +162,13 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
     }
 
     /**
-     * Return the vault token $tokenId when it belongs to the customer $customerId, or null.
+     * Return the vault token $tokenId when the customer $customerId can use it, or null.
      */
     protected function _getCustomerToken(mixed $tokenId, int $customerId): ?Maho_Paypal_Model_Vault_Token
     {
         /** @var Maho_Paypal_Model_Vault_Token $token */
         $token = Mage::getModel('paypal/vault_token')->load($tokenId);
 
-        return $customerId && $token->getId() && (int) $token->getCustomerId() === $customerId ? $token : null;
+        return $token->isUsableBy($customerId) ? $token : null;
     }
 }

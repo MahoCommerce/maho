@@ -82,6 +82,63 @@ describe('paypal vault assignData ownership', function (): void {
         }
     });
 
+    it('charges a token of the customer of the order', function (): void {
+        $owner = vaultAssignDataCreateCustomer();
+        $token = vaultAssignDataCreateToken((int) $owner->getId());
+        $quote = createPricedQuote(loadSimplePricedProduct());
+
+        try {
+            $payment = Mage::getModel('sales/order_payment')
+                ->setOrder(Mage::getModel('sales/order')->setCustomerId((int) $owner->getId()))
+                ->setQuote($quote);
+            $payment->setAdditionalInformation('vault_token_id', (int) $token->getId());
+
+            $client = new class extends Maho_Paypal_Model_Api_Client {
+                public array $sent = [];
+
+                #[\Override]
+                public function createOrder(array $orderRequest): array
+                {
+                    $this->sent = $orderRequest;
+                    throw new \RuntimeException('pest stop');
+                }
+            };
+            $method = new Maho_Paypal_Model_Method_Vault();
+            $method->setInfoInstance($payment);
+            $method->setApiClient($client);
+
+            expect(fn() => $method->initialize('authorize', new \Maho\DataObject()))
+                ->toThrow(Mage_Core_Exception::class, 'Failed to create PayPal order: pest stop');
+            expect($client->sent['body']['payment_source']['paypal']['vault_id'] ?? null)
+                ->toBe($token->getPaypalTokenId());
+        } finally {
+            $quote->delete();
+            $token->delete();
+            $owner->delete();
+        }
+    });
+
+    it('refuses to charge a token that the customer removed', function (): void {
+        $owner = vaultAssignDataCreateCustomer();
+        $token = vaultAssignDataCreateToken((int) $owner->getId());
+        $token->setIsActive(0)->save();
+
+        try {
+            $payment = Mage::getModel('sales/order_payment')
+                ->setOrder(Mage::getModel('sales/order')->setCustomerId((int) $owner->getId()));
+            $payment->setAdditionalInformation('vault_token_id', (int) $token->getId());
+
+            $method = new Maho_Paypal_Model_Method_Vault();
+            $method->setInfoInstance($payment);
+
+            expect(fn() => $method->initialize('authorize', new \Maho\DataObject()))
+                ->toThrow(Mage_Core_Exception::class, 'No saved payment methods available for this customer.');
+        } finally {
+            $token->delete();
+            $owner->delete();
+        }
+    });
+
     it('refuses to charge a token of another customer that the order payment holds', function (): void {
         $owner = vaultAssignDataCreateCustomer();
         $other = vaultAssignDataCreateCustomer();
