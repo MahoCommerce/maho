@@ -499,6 +499,7 @@ class Mage_Checkout_Model_Type_Onepage
         if (empty($data)) {
             return ['error' => -1, 'message' => Mage::helper('checkout')->__('Invalid data.')];
         }
+<<<<<<< HEAD
         $quote = $this->getQuote();
         if ($quote->isVirtual()) {
             $quote->getBillingAddress()->setPaymentMethod($data['method'] ?? null);
@@ -518,12 +519,33 @@ class Mage_Checkout_Model_Type_Onepage
         $payment->importData($data);
 
         $quote->save();
+=======
+        $this->_getCartService()->selectPaymentMethod($this->getQuote(), (array) $data);
+        $this->_completePaymentStep();
+>>>>>>> 082d1088 (Fixed the one-step checkout losing a card payment method when a section reloads (#1896))
 
+        return [];
+    }
+
+    /**
+     * Specify the quote payment method without the data of its form, as the one-step checkout does when the customer
+     * selects a method. Placing the order validates the payment data.
+     *
+     * @throws Mage_Core_Exception when the method is not available for the cart
+     */
+    public function savePaymentMethod(string $methodCode): array
+    {
+        $this->_getCartService()->selectPaymentMethodCode($this->getQuote(), $methodCode);
+        $this->_completePaymentStep();
+
+        return [];
+    }
+
+    protected function _completePaymentStep(): void
+    {
         $this->getCheckout()
             ->setStepData('payment', 'complete', true)
             ->setStepData('review', 'allow', true);
-
-        return [];
     }
 
     /**

@@ -75,7 +75,23 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
             ],
         );
 
-        $this->setMethod($data->getMethod());
+        $method = $this->selectMethod($data->getMethod(), $data->getChecks());
+        $method->assignData($data);
+        /*
+        * validating the payment data
+        */
+        $method->validate();
+        return $this;
+    }
+
+    /**
+     * Set the payment method $code and check that the quote can use it, without the data of its form.
+     *
+     * @throws Mage_Core_Exception when the quote cannot use the method
+     */
+    public function selectMethod(?string $code, ?int $checks = null): Mage_Payment_Model_Method_Abstract
+    {
+        $this->setMethod($code);
         $method = $this->getMethodInstance();
 
         /**
@@ -85,19 +101,14 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
         $this->getQuote()->collectTotals();
 
         // Fail closed: a caller that passes no checks gets the full set for its scope
-        $checks = $data->getChecks() ?? Mage_Payment_Model_Method_Abstract::checksForCurrentScope();
+        $checks ??= Mage_Payment_Model_Method_Abstract::checksForCurrentScope();
         if (!$method->isAvailable($this->getQuote())
             || !$method->isApplicableToQuote($this->getQuote(), $checks)
         ) {
             Mage::throwException(Mage::helper('sales')->__('The requested Payment Method is not available.'));
         }
 
-        $method->assignData($data);
-        /*
-        * validating the payment data
-        */
-        $method->validate();
-        return $this;
+        return $method;
     }
 
     #[\Override]

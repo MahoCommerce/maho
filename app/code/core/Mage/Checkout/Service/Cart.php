@@ -17,6 +17,12 @@ class Mage_Checkout_Service_Cart
 {
     private const MAX_ITEM_QTY = 10000;
 
+    /** The keys of a payment form that assignData() puts on the quote payment as they are, with no check. */
+    private const PAYMENT_RESERVED_KEYS = [
+        'additional_data', 'additional_information', 'method_instance',
+        'payment_id', 'quote_id', 'parent_id', 'created_at', 'updated_at',
+    ];
+
     /** The shape of a masked cart id, bare of delimiters so a route requirement can reuse it. */
     public const MASKED_ID_PATTERN = '[a-f0-9]{32}';
 
@@ -845,6 +851,180 @@ class Mage_Checkout_Service_Cart
      */
     public function applyShippingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): void
     {
+<<<<<<< HEAD
+=======
+        if ($code === '') {
+            throw new \Mage_Core_Exception_Input()->addError('shipping_method', \Mage::helper('checkout')->__('Invalid shipping method.'));
+        }
+
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $code): \Mage_Sales_Model_Quote {
+            $address = $quote->getShippingAddress();
+            $address->collectShippingRates();
+            $this->assertShippingMethodAvailable($quote, $code);
+            $address->setShippingMethod($code);
+            $this->collectAndSave($quote);
+
+            return $quote;
+        });
+    }
+
+    /**
+     * Return the checks of a payment method for $actor. Staff enters an order in the back office, with the
+     * methods for internal use. A customer has the methods of the checkout.
+     */
+    public function getPaymentChecks(\Mage_Checkout_Model_Actor $actor): int
+    {
+        return $actor === \Mage_Checkout_Model_Actor::Staff
+            ? \Mage_Payment_Model_Method_Abstract::CHECKS_INTERNAL
+            : \Mage_Payment_Model_Method_Abstract::CHECKS_CHECKOUT;
+    }
+
+    /**
+     * Give $quote the payment method and the data of $paymentData, and save the cart. The method must be available
+     * for the cart and must accept the data. $actor gives the checks of the method, see getPaymentChecks(): the
+     * client cannot choose them.
+     *
+     * @param array<string, mixed> $paymentData the code of the method in "method", and the fields of its form
+     * @throws \Mage_Core_Exception
+     */
+    public function selectPaymentMethod(
+        \Mage_Sales_Model_Quote $quote,
+        array $paymentData,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+    ): \Mage_Sales_Model_Quote {
+        return $this->savePaymentSelection($quote, $paymentData, $actor, false);
+    }
+
+    /**
+     * Give $quote the payment method $methodCode without the data of its form, and save the cart. The method must be
+     * available for the cart, but it does not validate its form: placing the order does.
+     *
+     * @throws \Mage_Core_Exception when the method is not available for the cart
+     */
+    public function selectPaymentMethodCode(\Mage_Sales_Model_Quote $quote, string $methodCode): \Mage_Sales_Model_Quote
+    {
+        return $this->savePaymentSelection($quote, ['method' => $methodCode], \Mage_Checkout_Model_Actor::Customer, true);
+    }
+
+    /**
+     * @param array<string, mixed> $paymentData
+     * @throws \Mage_Core_Exception
+     */
+    private function savePaymentSelection(
+        \Mage_Sales_Model_Quote $quote,
+        array $paymentData,
+        \Mage_Checkout_Model_Actor $actor,
+        bool $methodOnly,
+    ): \Mage_Sales_Model_Quote {
+        $paymentData = array_diff_key($paymentData, array_flip(self::PAYMENT_RESERVED_KEYS));
+        $paymentData['checks'] = $this->getPaymentChecks($actor);
+        $import = fn() => $this->importPayment($quote, $paymentData, $methodOnly);
+        // Staff imports in the scope of the caller, in which Mage_Sales_Service_Order::submit() also places the order
+        $actor === \Mage_Checkout_Model_Actor::Staff ? $import() : $this->inQuoteStoreScope($quote, $import);
+        $this->collectAndSave($quote);
+
+        return $quote;
+    }
+
+    /**
+     * Give $quote the checkout data that a client sends with its order, in one pass: the addresses, the shipping
+     * method, and the payment method with its data. A null value keeps what the cart has. The totals are collected
+     * for the addresses and the shipping method, then again for the payment method, and the cart is saved once at
+     * the end. When a step fails, nothing is saved.
+     *
+     * @param array<string, mixed>|null $shippingAddress the fields of the address model, see applyShippingAddress()
+     * @param array<string, mixed>|null $billingAddress the fields of the address model, see applyBillingAddress()
+     * @param string|null $shippingMethod "carrier_method"
+     * @param array<string, mixed>|null $paymentData see setPaymentMethod()
+     * @throws \Mage_Core_Exception_Input when an address is not valid. The name of each field starts with
+     *                                    "shipping_address." or "billing_address."
+     * @throws \Mage_Core_Exception when the shipping method or the payment method is not available for the cart
+     */
+    public function applyCheckoutState(
+        \Mage_Sales_Model_Quote $quote,
+        ?array $shippingAddress = null,
+        ?array $billingAddress = null,
+        ?string $shippingMethod = null,
+        ?string $paymentMethod = null,
+        ?array $paymentData = null,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+    ): \Mage_Sales_Model_Quote {
+        $addresses = ['shipping_address' => $shippingAddress, 'billing_address' => $billingAddress];
+        foreach ($addresses as $prefix => $addressData) {
+            if ($addressData === null) {
+                continue;
+            }
+            try {
+                $prefix === 'shipping_address'
+                    ? $this->applyShippingAddress($quote, $addressData, $actor)
+                    : $this->applyBillingAddress($quote, $addressData, $actor);
+            } catch (\Mage_Core_Exception_Input $e) {
+                $fields = array_unique(array_column($e->getErrors(), 'field'));
+                throw $e->withFieldNames(array_combine($fields, array_map(fn(string $field): string => "{$prefix}.{$field}", $fields)));
+            }
+        }
+
+        $hasShippingMethod = (string) $shippingMethod !== '' && !$quote->isVirtual();
+        if ($hasShippingMethod) {
+            $quote->getShippingAddress()->setShippingMethod($shippingMethod)->setCollectShippingRates(true);
+        }
+        // One collection gives the prices of the addresses and of the shipping method, and the totals that the
+        // payment method checks
+        $this->collectAndVerifyTotals($quote);
+        if ($hasShippingMethod) {
+            // A method that the client made up has no rate, and must not go to the saved cart
+            $this->assertShippingMethodAvailable($quote, (string) $shippingMethod);
+        }
+
+        if ((string) $paymentMethod !== '') {
+            $this->assertPaymentMethodAvailable($quote, (string) $paymentMethod);
+            $this->importPaymentData($quote, (string) $paymentMethod, $paymentData, $this->getPaymentChecks($actor));
+            // The payment method can add a total, such as a payment fee
+            $this->collectAndVerifyTotals($quote);
+        }
+        $this->inQuoteStoreScope($quote, fn() => $quote->save());
+
+        return $quote;
+    }
+
+    /**
+     * @param array<string, mixed> $paymentData
+     * @throws \Mage_Core_Exception
+     */
+    private function importPayment(\Mage_Sales_Model_Quote $quote, array $paymentData, bool $methodOnly = false): void
+    {
+        $methodCode = (string) ($paymentData['method'] ?? '');
+        if (empty(\Mage::helper('payment')->getPaymentMethods($quote->getStoreId())[$methodCode]['model'])) {
+            throw new \Mage_Core_Exception(\Mage::helper('sales')->__('The requested Payment Method is not available.'));
+        }
+        if ($quote->isVirtual()) {
+            $quote->getBillingAddress()->setPaymentMethod($methodCode);
+        } else {
+            // A payment method can change the shipping rates
+            $quote->getShippingAddress()->setPaymentMethod($methodCode)->setCollectShippingRates(true);
+        }
+        if ($methodOnly) {
+            $quote->getPayment()->selectMethod($methodCode, $paymentData['checks'] ?? null);
+        } else {
+            $quote->getPayment()->importData($paymentData);
+        }
+    }
+
+    /**
+     * Give the shipping address of $quote the fields of $addressData and check it, without a save, for callers that
+     * batch several checkout fields and collect once afterwards, as applyCheckoutState() does. $actor gives the address
+     * form of the check, see validateAddress(). The save_in_address_book field
+     * applies to a customer cart only. The address is no longer the same as the billing address, as on the shipping
+     * step of the checkout, so that the order adds it to the address book on its own.
+     *
+     * @throws \Mage_Core_Exception_Input when the address is not valid
+     */
+    public function applyShippingAddress(
+        \Mage_Sales_Model_Quote $quote,
+        array $addressData,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+    ): void {
+>>>>>>> 082d1088 (Fixed the one-step checkout losing a card payment method when a section reloads (#1896))
         $address = $quote->getShippingAddress();
         $address->addData(StoreDefaults::filterAddressKeys($this->sanitizeAddressData($addressData)));
 
@@ -970,8 +1150,7 @@ class Mage_Checkout_Service_Cart
         // ids assert "already paid", and the storefront accepts one only after its replay
         // checks (assertPaypalOrderMatchesQuoteOrOrder), which this path never runs.
         $reservedKeys = array_flip([
-            'method', 'checks', 'additional_data', 'additional_information', 'method_instance',
-            'payment_id', 'quote_id', 'parent_id', 'created_at', 'updated_at',
+            'method', 'checks', ...self::PAYMENT_RESERVED_KEYS,
             'paypal_order_id', 'paypal_authorization_id', 'paypal_capture_id',
         ]);
         $paymentData = ['method' => $methodCode];
