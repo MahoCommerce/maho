@@ -60,12 +60,16 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
         string $paymentAction,
         \Maho\DataObject $stateObject,
     ): void {
+        $token = $this->_getCustomerToken(
+            $payment->getAdditionalInformation('vault_token_id'),
+            (int) $payment->getOrder()->getCustomerId(),
+        );
+        if (!$token) {
+            Mage::throwException(Mage::helper('paypal')->__('No saved payment methods available for this customer.'));
+        }
+
         /** @var Mage_Sales_Model_Quote $quote */
         $quote = $payment->getQuote() ?: Mage::getSingleton('adminhtml/session_quote')->getQuote();
-
-        $vaultTokenId = $payment->getAdditionalInformation('vault_token_id');
-        /** @var Maho_Paypal_Model_Vault_Token $token */
-        $token = Mage::getModel('paypal/vault_token')->load($vaultTokenId);
 
         $intent = ($paymentAction === 'authorize') ? 'AUTHORIZE' : 'CAPTURE';
         $quote->reserveOrderId();
@@ -139,9 +143,6 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
         $info = $this->getInfoInstance();
         $vaultTokenId = $data->getVaultTokenId();
         if ($vaultTokenId) {
-            /** @var Maho_Paypal_Model_Vault_Token $token */
-            $token = Mage::getModel('paypal/vault_token')->load($vaultTokenId);
-
             // Quote customer first: stateless API flows have no session
             $quoteCustomerId = $info instanceof Mage_Sales_Model_Quote_Payment
                 ? (int) $info->getQuote()->getCustomerId()
@@ -150,12 +151,24 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
                 ?: (int) (Mage::getSingleton('customer/session')->getCustomerId()
                     ?: Mage::getSingleton('adminhtml/session_quote')->getCustomerId());
 
-            if ($customerId && $token->getId() && (int) $token->getCustomerId() === $customerId) {
+            $token = $this->_getCustomerToken($vaultTokenId, $customerId);
+            if ($token) {
                 $info->setAdditionalInformation('vault_token_id', $vaultTokenId);
                 $info->setAdditionalInformation('vault_label', $token->getDisplayLabel());
             }
         }
 
         return $this;
+    }
+
+    /**
+     * Return the vault token $tokenId when it belongs to the customer $customerId, or null.
+     */
+    protected function _getCustomerToken(mixed $tokenId, int $customerId): ?Maho_Paypal_Model_Vault_Token
+    {
+        /** @var Maho_Paypal_Model_Vault_Token $token */
+        $token = Mage::getModel('paypal/vault_token')->load($tokenId);
+
+        return $customerId && $token->getId() && (int) $token->getCustomerId() === $customerId ? $token : null;
     }
 }

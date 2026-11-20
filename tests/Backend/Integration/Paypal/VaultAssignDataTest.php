@@ -82,4 +82,26 @@ describe('paypal vault assignData ownership', function (): void {
         }
     });
 
+    it('refuses to charge a token of another customer that the order payment holds', function (): void {
+        $owner = vaultAssignDataCreateCustomer();
+        $other = vaultAssignDataCreateCustomer();
+        $token = vaultAssignDataCreateToken((int) $owner->getId());
+
+        try {
+            $payment = Mage::getModel('sales/order_payment')
+                ->setOrder(Mage::getModel('sales/order')->setCustomerId((int) $other->getId()));
+            $payment->setAdditionalInformation('vault_token_id', (int) $token->getId());
+
+            $method = new Maho_Paypal_Model_Method_Vault();
+            $method->setInfoInstance($payment);
+
+            expect(fn() => $method->initialize('authorize', new \Maho\DataObject()))
+                ->toThrow(Mage_Core_Exception::class, 'No saved payment methods available for this customer.');
+        } finally {
+            $token->delete();
+            $other->delete();
+            $owner->delete();
+        }
+    });
+
 });
