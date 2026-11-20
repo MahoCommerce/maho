@@ -1108,7 +1108,7 @@
 @layer components {
     /* Tile view of the products of a category (Catalog > Categories > Category Products) */
     .merchandiser-views {
-        margin-block-end: var(--maho-space-3);
+        margin-block: var(--maho-space-5) var(--maho-space-4);
     }
 
     .merchandiser [hidden],
@@ -1167,10 +1167,6 @@
             border: 0;
             background: none;
         }
-    }
-
-    .merchandiser-bulk input[type="number"] {
-        width: 6rem;
     }
 
     .merchandiser-tiles {
@@ -1281,10 +1277,18 @@
     }
 }
 
-/* The d-btn rules sit in the utilities layer, so the pressed button of the view switch, the pinned icon and the position of the checkbox are here */
+/* The d-btn and d-input rules sit in the utilities layer, so the pressed button of the view switch, the pinned icon, the position of the checkbox and the input widths are here */
 @layer utilities {
     .merchandiser-select {
         position: absolute;
+    }
+
+    .merchandiser-bulk input[type="number"] {
+        width: 6rem;
+    }
+
+    .merchandiser-add input {
+        width: 16rem;
     }
 
     .merchandiser-pin[aria-pressed="true"] {
