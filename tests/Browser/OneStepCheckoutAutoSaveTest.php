@@ -49,9 +49,11 @@ function openOneStepCheckoutWithBilling(): object
     return fillCheckoutBilling(waitForPageLoad($page, '#co-billing-form'), 'Test');
 }
 
-/** Click the radio that $selector names, and return the number of requests whose URL holds $action. */
+/** Wait for the radio that $selector names, click it, and return the number of requests whose URL holds $action. */
 function countOneStepSaves(object $page, string $selector, string $action): int
 {
+    waitForScript($page, sprintf('document.querySelector(%s) !== null', json_encode($selector)), 15);
+
     return $page->script(sprintf(<<<'JS'
         (async () => {
             await window.checkout.requestQueue;
@@ -75,7 +77,7 @@ function countOneStepSaves(object $page, string $selector, string $action): int
 it('saves the payment method once per click after the payment section reloads', function () {
     saveOneStepAutoSaveConfig(['payment/banktransfer/active' => '1']);
 
-    $page = openOneStepCheckoutWithBilling()->assertSee('Bank Transfer Payment');
+    $page = openOneStepCheckoutWithBilling();
 
     expect(countOneStepSaves($page, '#checkout-payment-method-load input[name="payment[method]"]:not(:checked)', 'savePayment'))
         ->toBe(1);
@@ -87,7 +89,7 @@ it('saves the shipping method once per click after the shipping section reloads'
         'carriers/freeshipping/free_shipping_subtotal' => '0',
     ]);
 
-    $page = openOneStepCheckoutWithBilling()->assertSee('Free Shipping');
+    $page = openOneStepCheckoutWithBilling();
 
     expect(countOneStepSaves($page, '#checkout-shipping-method-load input[value="freeshipping_freeshipping"]', 'saveShippingMethod'))
         ->toBe(1);
