@@ -376,7 +376,7 @@ describe('insertOnDuplicate', function () {
         expect(array_map(intval(...), $values))->toBe(['other' => 5, 'repeat' => 2]);
     });
 
-    it('applies two rows in order when their keys differ as text but are the same number', function () {
+    it('applies two rows in order when their keys differ as text but are the same number', function (int $firstId, string $secondId) {
         $table = 'test_numeric_key_' . uniqid();
         $this->adapter->createTable(
             $this->adapter->newTable($table)
@@ -388,19 +388,22 @@ describe('insertOnDuplicate', function () {
             $this->adapter->insertOnDuplicate(
                 $table,
                 [
-                    ['id' => 1, 'value' => 1],
-                    ['id' => '01', 'value' => 2],
+                    ['id' => $firstId, 'value' => 1],
+                    ['id' => $secondId, 'value' => 2],
                 ],
                 ['value'],
             );
 
             $values = $this->adapter->fetchPairs("SELECT id, value FROM {$table}");
 
-            expect(array_map(intval(...), $values))->toBe([1 => 2]);
+            expect(array_map(intval(...), $values))->toBe([$firstId => 2]);
         } finally {
             $this->adapter->dropTable($table);
         }
-    });
+    })->with([
+        'a leading zero' => [1, '01'],
+        'a negative zero' => [0, '-0'],
+    ]);
 
     it('keeps the bytes of a binary column when an expression in the same row takes no bind position', function () {
         $table = 'test_binary_' . uniqid();

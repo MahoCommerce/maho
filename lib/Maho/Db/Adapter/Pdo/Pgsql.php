@@ -1250,7 +1250,7 @@ class Pgsql extends AbstractPdoAdapter
                     break;
                 }
                 $value = (string) $value;
-                $key[] = is_numeric($value) ? var_export((float) $value, true) : mb_strtolower(rtrim($value, ' '));
+                $key[] = is_numeric($value) ? var_export((float) $value + 0.0, true) : mb_strtolower(rtrim($value, ' '));
             }
             if ($key !== null) {
                 $key = serialize($key);
