@@ -54,8 +54,7 @@ class Mage_Rule_Model_Condition_Metadata
 
         $appLocale->setLocaleCode($locale);
         if ($switch) {
-            // The translator keeps its first cache key, so a translator that loaded data before must reload
-            $translator->setLocale($locale)->init(Mage_Core_Model_App_Area::AREA_ADMINHTML, $previousArea !== null);
+            $translator->setLocale($locale)->init(Mage_Core_Model_App_Area::AREA_ADMINHTML);
         }
         Mage_Rule_Model_Condition_Abstract::setTranslateLabels(true);
 
@@ -67,7 +66,7 @@ class Mage_Rule_Model_Condition_Metadata
             if ($switch) {
                 $translator->setLocale($previousTranslatorLocale);
                 if (is_string($previousArea)) {
-                    $translator->init($previousArea, true);
+                    $translator->init($previousArea);
                 }
             }
         }

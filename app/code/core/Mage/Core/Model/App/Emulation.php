@@ -79,7 +79,7 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
             $this->_emulateDesign($storeId, $area);
             $this->_app->setCurrentStore($storeId);
             $this->_emulateLocale($storeId);
-            $this->_app->getTranslator()->init($area, true);
+            $this->_app->getTranslator()->init($area);
         } catch (\Throwable $e) {
             $environment->restore();
             throw $e;

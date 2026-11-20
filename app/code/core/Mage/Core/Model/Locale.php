@@ -1131,7 +1131,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
             $this->_localeCode = Mage::getStoreConfig(self::XML_PATH_DEFAULT_LOCALE, $storeId);
             Mage::getSingleton('core/translate')
                 ->setLocale($this->_localeCode)
-                ->init(Mage_Core_Model_App_Area::AREA_FRONTEND, true);
+                ->init(Mage_Core_Model_App_Area::AREA_FRONTEND);
         } else {
             $this->_emulatedLocales[] = false;
         }
@@ -1144,7 +1144,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     {
         if ($locale = array_pop($this->_emulatedLocales)) {
             $this->_localeCode = $locale;
-            Mage::getSingleton('core/translate')->setLocale($this->_localeCode)->init('adminhtml', true);
+            Mage::getSingleton('core/translate')->setLocale($this->_localeCode)->init(Mage_Core_Model_App_Area::AREA_ADMINHTML);
         }
     }
 

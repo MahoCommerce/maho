@@ -63,6 +63,13 @@ class Mage_Core_Model_Translate
     protected $_dataScope;
 
     /**
+     * The sets of translations that this translator loaded, by cache ID.
+     *
+     * @var array<string, array>
+     */
+    private array $loadedSets = [];
+
+    /**
      * Initialization translation data
      *
      * @param string $area
@@ -72,18 +79,27 @@ class Mage_Core_Model_Translate
     public function init($area, $forceReload = false)
     {
         $this->setConfig([self::CONFIG_KEY_AREA => $area]);
+        $cacheId = $this->getCacheId();
 
         if (!$forceReload) {
-            if ($this->_canUseCache()) {
-                $this->_data = $this->_loadCache();
-                if ($this->_data !== false) {
+            $useCache = (bool) $this->_canUseCache();
+            // A set in memory is valid while its cache entry exists, so a cache clean in another process drops it
+            if (isset($this->loadedSets[$cacheId]) && (!$useCache || Mage::app()->testCache($cacheId))) {
+                $this->_data = $this->loadedSets[$cacheId];
+                return $this;
+            }
+            if ($useCache) {
+                $data = $this->_loadCache();
+                if ($data !== false) {
+                    $this->_data = $this->loadedSets[$cacheId] = $data;
                     return $this;
                 }
             }
-            Mage::app()->removeCache($this->getCacheId());
+            Mage::app()->removeCache($cacheId);
         }
 
         $this->_data = [];
+        $this->_dataScope = [];
 
         foreach ($this->getModulesConfig() as $moduleName => $info) {
             $info = $info->asArray();
@@ -96,6 +112,7 @@ class Mage_Core_Model_Translate
         if (!$forceReload && $this->_canUseCache()) {
             $this->_saveCache();
         }
+        $this->loadedSets[$cacheId] = $this->_data;
 
         return $this;
     }
@@ -127,6 +144,7 @@ class Mage_Core_Model_Translate
     public function setConfig($config)
     {
         $this->_config = $config;
+        $this->_cacheId = null;
         $this->_config[self::CONFIG_KEY_LOCALE] ??= $this->getLocale();
         $this->_config[self::CONFIG_KEY_STORE] ??= Mage::app()->getStore()->getId();
         $this->_config[self::CONFIG_KEY_DESIGN_PACKAGE] ??= Mage::getDesign()->getPackageName();
@@ -178,7 +196,7 @@ class Mage_Core_Model_Translate
             }
             $key    = $this->_prepareDataString($key);
             $value  = $value === null ? '' : $this->_prepareDataString($value);
-            if ($scope && isset($this->_dataScope[$key]) && !$forceReload) {
+            if ($scope && isset($this->_dataScope[$key])) {
                 /**
                  * Checking previous value
                  */
