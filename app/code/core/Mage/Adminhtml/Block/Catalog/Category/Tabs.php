@@ -123,7 +123,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tabs extends Mage_Adminhtml_Block_Wi
         }
 
         $this->addTab('products', [
-            'label'     => Mage::helper('catalog')->__('Category Products'),
+            'label'     => Mage::helper('catalog')->__('Products'),
             'content'   => $this->getLayout()->createBlock(
                 'adminhtml/catalog_category_tab_products',
                 'category.products.tab',

@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Adds the category attributes new_product_placement and out_of_stock_last.
+ * Adds the category attributes new_product_placement and out_of_stock_last, and renames the attribute
+ * group Dynamic Category to Dynamic Rules.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -40,3 +41,17 @@ $installer->addAttribute(Mage_Catalog_Model_Category::ENTITY, 'out_of_stock_last
     'sort_order'    => 70,
     'group'         => 'Display Settings',
 ]);
+
+$connection = $installer->getConnection();
+$categorySetIds = $connection->fetchCol(
+    $connection->select()
+        ->from($installer->getTable('eav/attribute_set'), ['attribute_set_id'])
+        ->where('entity_type_id = ?', $installer->getEntityTypeId(Mage_Catalog_Model_Category::ENTITY)),
+);
+if ($categorySetIds) {
+    $connection->update(
+        $installer->getTable('eav/attribute_group'),
+        ['attribute_group_name' => 'Dynamic Rules'],
+        ['attribute_group_name = ?' => 'Dynamic Category', 'attribute_set_id IN (?)' => $categorySetIds],
+    );
+}

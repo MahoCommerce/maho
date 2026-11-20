@@ -5,14 +5,14 @@ admin_pages: [catalog_category]
 
 # The Order of Products in a Category
 
-You give each product of a category a position on the **Category Products** tab of the category.
+You give each product of a category a position on the **Products** tab of the category.
 The storefront uses these positions only when the category page sorts by **Position**. Another
 sort order, a sort order that the customer picked, or an index that is not up to date can each
 hide your positions.
 
 ## Where you set the positions
 
-Go to **Catalog > Categories**, select the category, and open the **Category Products**
+Go to **Catalog > Categories**, select the category, and open the **Products**
 tab. The **Position** column holds the position of each product in this category. A lower number
 comes first when the direction is ascending, which is the default. Save the category.
 
@@ -21,7 +21,7 @@ in another category.
 
 ## The tile view
 
-On the **Category Products** tab, the switch above the grid shows **Grid** and **Tiles**. The
+On the **Products** tab, the switch above the grid shows **Grid** and **Tiles**. The
 browser remembers your last choice. The tile view shows each product with its image, name, SKU and
 price, its stock status, a flag when it is disabled or hidden, the units sold and the revenue of
 the last days, and its position.

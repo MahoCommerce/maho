@@ -1299,10 +1299,22 @@
         align-items: center;
         gap: var(--maho-space-1);
         margin-block-start: auto;
+        padding-block-start: var(--maho-space-3);
     }
 
     .merchandiser-position {
         width: 4.5rem;
+    }
+
+    .merchandiser-position,
+    .merchandiser-bulk input[type="number"] {
+        appearance: textfield;
+
+        &::-webkit-inner-spin-button,
+        &::-webkit-outer-spin-button {
+            appearance: none;
+            margin: 0;
+        }
     }
 
     .merchandiser-break {
@@ -1323,7 +1335,7 @@
     }
 }
 
-/* The d-btn and d-input rules sit in the utilities layer, so the pressed button of the view switch, the pinned icon, the position of the checkbox and the input widths are here */
+/* The d-btn and d-input rules sit in the utilities layer, so the pressed button of the view switch, the pin, the position of the checkbox, the input widths and the hover states are here */
 @layer utilities {
     .merchandiser-select {
         position: absolute;
@@ -1364,6 +1376,36 @@
 
     .merchandiser-pin[aria-pressed="true"] {
         color: var(--maho-accent-strong);
+    }
+
+    .merchandiser-tile.is-pinned .merchandiser-position:disabled {
+        color: var(--maho-ink);
+        font-weight: 600;
+        background: transparent;
+        border-color: transparent;
+        opacity: 1;
+    }
+
+    .merchandiser-foot button {
+        height: 1.75rem;
+        min-height: 1.75rem;
+    }
+
+    .merchandiser-pin {
+        width: 1.75rem;
+        padding: 0;
+    }
+
+    .merchandiser-pin:hover {
+        --d-btn-bg: var(--maho-surface-sunken);
+        --d-btn-border: var(--maho-border);
+        color: var(--maho-accent-strong);
+    }
+
+    .merchandiser-remove:hover {
+        --d-btn-bg: var(--maho-error-bg);
+        --d-btn-border: var(--maho-error-border);
+        color: var(--maho-error-strong);
     }
 
     .merchandiser-views button[aria-pressed="true"] {
