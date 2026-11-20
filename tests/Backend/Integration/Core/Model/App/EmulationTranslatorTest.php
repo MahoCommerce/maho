@@ -68,6 +68,19 @@ describe('Store emulation restores the translator', function () {
         expect($translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA))->toBe(Mage_Core_Model_App_Area::AREA_ADMINHTML);
     });
 
+    it('leaves a translator that had no area without an area', function () {
+        Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+        Mage::getDesign()->setArea(Mage_Core_Model_App_Area::AREA_ADMINHTML);
+        $translator = Mage::app()->getTranslator();
+        expect($translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA))->toBeNull();
+
+        $emulation = Mage::getModel('core/app_emulation');
+        $emulation->stopEnvironmentEmulation($emulation->startEnvironmentEmulation(1));
+
+        expect($translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA))->toBeNull()
+            ->and($translator->getData())->toBe([]);
+    });
+
     it('returns to the admin area after a frontend email renders in an admin request', function () use ($startAdmin) {
         $translator = $startAdmin(Mage::getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_LOCALE, 1));
 

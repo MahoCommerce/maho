@@ -304,6 +304,20 @@ class Mage_Core_Model_Translate
     }
 
     /**
+     * Return the loaded translations and their configuration. Pass the result to setState() to put them back.
+     */
+    public function getState(): array
+    {
+        return [$this->_locale, $this->_config, $this->_cacheId, $this->_data, $this->_dataScope];
+    }
+
+    public function setState(array $state): static
+    {
+        [$this->_locale, $this->_config, $this->_cacheId, $this->_data, $this->_dataScope] = $state;
+        return $this;
+    }
+
+    /**
      * Retrieve DB resource model
      *
      * @return Mage_Core_Model_Resource_Translate

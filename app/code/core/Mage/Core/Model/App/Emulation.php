@@ -40,8 +40,7 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
     ) {
         $area ??= Mage_Core_Model_App_Area::AREA_FRONTEND;
         $translator = $this->_app->getTranslator();
-        $initialTranslatorArea = $translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA);
-        $initialTranslatorLocale = $translator->getLocale();
+        $initialTranslatorState = $translator->getState();
 
         $initialDesign = $this->_emulateDesign($storeId, $area);
         // Current store needs to be changed right before locale change and after design change
@@ -51,8 +50,7 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
         $initialEnvironmentInfo = new \Maho\DataObject();
         $initialEnvironmentInfo->setInitialDesign($initialDesign)
             ->setInitialLocaleCode($initialLocaleCode)
-            ->setInitialTranslatorArea($initialTranslatorArea)
-            ->setInitialTranslatorLocale($initialTranslatorLocale);
+            ->setInitialTranslatorState($initialTranslatorState);
 
         $translator->init($area, true);
 
@@ -75,11 +73,7 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
         // Current store needs to be changed right before locale change and after design change
         $this->_app->setCurrentStore($initialDesign['store']);
         $this->_restoreInitialLocale($initialEnvironmentInfo->getInitialLocaleCode());
-
-        // The start replaced the translations, so load the initial ones again even when the locale did not change
-        $this->_app->getTranslator()
-            ->setLocale($initialEnvironmentInfo->getInitialTranslatorLocale())
-            ->init($initialEnvironmentInfo->getInitialTranslatorArea() ?? $initialDesign['area'], true);
+        $this->_app->getTranslator()->setState($initialEnvironmentInfo->getInitialTranslatorState());
         return $this;
     }
 
