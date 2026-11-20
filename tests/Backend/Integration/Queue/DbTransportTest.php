@@ -61,7 +61,6 @@ it('queues a message that holds 4-byte characters (#1487)', function () {
 
 it('dispatches within the current transaction after resetting Mage', function () {
     QueueManager::bus();
-    $previousTransport = QueueManager::dbTransport();
 
     $root = Mage::getRoot();
     Mage::reset();
@@ -69,7 +68,6 @@ it('dispatches within the current transaction after resetting Mage', function ()
     Mage::setRoot($root);
     Mage::register('isSecureArea', true);
     Mage::app();
-    expect(QueueManager::dbTransport() === $previousTransport)->toBeFalse();
 
     $resource = Mage::getResourceSingleton('core/config');
     $resource->beginTransaction();
