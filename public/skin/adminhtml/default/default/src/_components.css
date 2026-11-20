@@ -1299,7 +1299,7 @@
         align-items: center;
         gap: var(--maho-space-1);
         margin-block-start: auto;
-        padding-block-start: var(--maho-space-3);
+        padding-block-start: var(--maho-space-2);
     }
 
     .merchandiser-position {
@@ -1386,7 +1386,7 @@
         opacity: 1;
     }
 
-    .merchandiser-foot button {
+    .merchandiser-foot :is(button, input) {
         height: 1.75rem;
         min-height: 1.75rem;
     }
