@@ -24,29 +24,33 @@ class Mage_Bundle_Model_Resource_Option extends Mage_Core_Model_Resource_Db_Abst
     {
         parent::_afterSave($object);
 
+        $storeId = $object->getStoreId();
+        $defaultTitleProvided = $object->hasData('default_title');
+        $storeCondition = $defaultTitleProvided ? 'store_id = ? OR store_id = 0' : 'store_id = ?';
         $condition = [
             'option_id = ?' => $object->getId(),
-            'store_id = ? OR store_id = 0' => $object->getStoreId(),
+            $storeCondition => $storeId,
         ];
 
         $write = $this->_getWriteAdapter();
-        $write->delete($this->getTable('bundle/option_value'), $condition);
+        $table = $this->getTable('bundle/option_value');
+        $write->delete($table, $condition);
 
         $data = new \Maho\DataObject();
         $data->setOptionId($object->getId())
-            ->setStoreId($object->getStoreId())
+            ->setStoreId($storeId)
             ->setTitle($object->getTitle());
 
-        $write->insert($this->getTable('bundle/option_value'), $data->getData());
+        $write->insert($table, $data->getData());
 
-        /**
-         * also saving default value if this store view scope
-         */
-
-        if ($object->getStoreId()) {
-            $data->setStoreId(0);
-            $data->setTitle($object->getDefaultTitle());
-            $write->insert($this->getTable('bundle/option_value'), $data->getData());
+        if ($storeId) {
+            $data->setStoreId(0)->setTitle($object->getDefaultTitle());
+            if ($defaultTitleProvided) {
+                $write->insert($table, $data->getData());
+            } else {
+                // The option collection joins the default row even when its title is empty.
+                $write->insertIgnore($table, $data->getData());
+            }
         }
 
         return $this;
