@@ -55,10 +55,11 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
     protected function _afterLoad()
     {
         $guiData = '';
-        if (is_string($this->getGuiData())) {
+        $storedGuiData = $this->getGuiData();
+        if (is_string($storedGuiData) && $storedGuiData !== '') {
             try {
                 $guiData = Mage::helper('core/unserializeArray')
-                    ->unserialize($this->getGuiData());
+                    ->unserialize($storedGuiData);
             } catch (Exception $e) {
                 Mage::logException($e);
             }
