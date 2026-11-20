@@ -322,6 +322,120 @@ describe('insertOnDuplicate', function () {
 
         expect((int) $count)->toBe(3);
     });
+
+    it('writes each value into its column when the rows list their keys in different orders', function () {
+        $this->adapter->insertOnDuplicate(
+            $this->tempTableTarget,
+            [
+                ['name' => 'order1', 'value' => 1],
+                ['value' => 2, 'name' => 'order2'],
+            ],
+            ['value'],
+        );
+
+        $values = $this->adapter->fetchPairs(
+            "SELECT name, value FROM {$this->tempTableTarget} WHERE name LIKE 'order%' ORDER BY name",
+        );
+
+        expect(array_map(intval(...), $values))->toBe(['order1' => 1, 'order2' => 2]);
+    });
+
+    it('rejects a row that does not have the same columns as the first row', function (array $secondRow) {
+        expect(fn() => $this->adapter->insertOnDuplicate(
+            $this->tempTableTarget,
+            [['name' => 'keys1', 'value' => 1], $secondRow],
+            ['value'],
+        ))->toThrow(\Maho\Db\Exception::class, 'Invalid data for insert');
+    })->with([
+        'a missing column' => [['name' => 'keys2']],
+        'an extra column' => [['name' => 'keys2', 'value' => 2, 'status' => 0]],
+    ]);
+
+    it('rejects empty data without a write', function () {
+        expect(fn() => $this->adapter->insertOnDuplicate($this->tempTableTarget, [], ['value']))
+            ->toThrow(\Maho\Db\Exception::class, 'Invalid data for insert');
+
+        expect((int) $this->adapter->fetchOne("SELECT COUNT(*) FROM {$this->tempTableTarget}"))->toBe(0);
+    });
+
+    it('applies two rows with the same key in order, so the last row wins', function () {
+        $this->adapter->insertOnDuplicate(
+            $this->tempTableTarget,
+            [
+                ['name' => 'repeat', 'value' => 1],
+                ['name' => 'other', 'value' => 5],
+                ['name' => 'repeat', 'value' => 2],
+            ],
+            ['value'],
+        );
+
+        $values = $this->adapter->fetchPairs(
+            "SELECT name, value FROM {$this->tempTableTarget} WHERE name IN ('repeat', 'other') ORDER BY name",
+        );
+
+        expect(array_map(intval(...), $values))->toBe(['other' => 5, 'repeat' => 2]);
+    });
+
+    it('applies two rows in order when their keys differ as text but are the same number', function (int $firstId, string $secondId) {
+        $table = 'test_numeric_key_' . uniqid();
+        $this->adapter->createTable(
+            $this->adapter->newTable($table)
+                ->addColumn('id', \Maho\Db\Ddl\Table::TYPE_INTEGER, null, ['nullable' => false, 'primary' => true], 'ID')
+                ->addColumn('value', \Maho\Db\Ddl\Table::TYPE_INTEGER, null, [], 'Value'),
+        );
+
+        try {
+            $this->adapter->insertOnDuplicate(
+                $table,
+                [
+                    ['id' => $firstId, 'value' => 1],
+                    ['id' => $secondId, 'value' => 2],
+                ],
+                ['value'],
+            );
+
+            $values = $this->adapter->fetchPairs("SELECT id, value FROM {$table}");
+
+            expect(array_map(intval(...), $values))->toBe([$firstId => 2]);
+        } finally {
+            $this->adapter->dropTable($table);
+        }
+    })->with([
+        'a leading zero' => [1, '01'],
+        'a negative zero' => [0, '-0'],
+    ]);
+
+    it('keeps the bytes of a binary column when an expression in the same row takes no bind position', function () {
+        $table = 'test_binary_' . uniqid();
+        $this->adapter->createTable(
+            $this->adapter->newTable($table)
+                ->addColumn('code', \Maho\Db\Ddl\Table::TYPE_TEXT, 32, ['nullable' => false, 'primary' => true], 'Code')
+                ->addColumn('value', \Maho\Db\Ddl\Table::TYPE_INTEGER, null, [], 'Value')
+                ->addColumn('data', \Maho\Db\Ddl\Table::TYPE_VARBINARY, 16, [], 'Data'),
+        );
+
+        try {
+            $bytes = ['a' => "\x80\xff\x01", 'b' => "\xfe\x7f\xc3", 'c' => "\x90\xa0\xb0"];
+            $this->adapter->insertOnDuplicate(
+                $table,
+                [
+                    ['code' => 'a', 'value' => new \Maho\Db\Expr('1 + 1'), 'data' => $bytes['a']],
+                    ['code' => 'b', 'value' => 3, 'data' => $bytes['b']],
+                    ['code' => 'c', 'value' => new \Maho\Db\Expr('2 + 2'), 'data' => $bytes['c']],
+                ],
+                ['value', 'data'],
+            );
+
+            $stored = [];
+            foreach ($this->adapter->fetchAll("SELECT code, data FROM {$table} ORDER BY code") as $row) {
+                $stored[$row['code']] = is_resource($row['data']) ? stream_get_contents($row['data']) : $row['data'];
+            }
+
+            expect($stored)->toBe($bytes);
+        } finally {
+            $this->adapter->dropTable($table);
+        }
+    });
 });
 
 describe('insertMultiple', function () {

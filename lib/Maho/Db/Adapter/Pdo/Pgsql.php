@@ -1112,26 +1112,8 @@ class Pgsql extends AbstractPdoAdapter
     #[\Override]
     public function insertOnDuplicate(string|array|\Maho\Db\Select $table, array $data, array $fields = []): int
     {
-        $row = array_first($data);
-        $bind = [];
-        $values = [];
-        $boundColumns = [];
-
-        if (is_array($row)) {
-            $cols = array_keys($row);
-            foreach ($data as $row) {
-                if (array_diff($cols, array_keys($row))) {
-                    throw new \Maho\Db\Exception('Invalid data for insert');
-                }
-                $values[] = $this->_prepareInsertData($row, $bind);
-                $boundColumns = array_merge($boundColumns, $this->_boundColumnsFromRow($row));
-            }
-            unset($row);
-        } else {
-            $cols = array_keys($data);
-            $values[] = $this->_prepareInsertData($data, $bind);
-            $boundColumns = $this->_boundColumnsFromRow($data);
-        }
+        $rows = $this->_alignInsertRows($data);
+        $cols = array_keys($rows[0]);
 
         $updateFields = [];
         if (empty($fields)) {
@@ -1180,44 +1162,109 @@ class Pgsql extends AbstractPdoAdapter
         $primaryKey = $this->_getPrimaryKeyColumns($tableName);
         $returningColumn = empty($primaryKey) ? null : $primaryKey[0];
 
-        $insertSql = $this->_getInsertSqlQuery($table, $cols, $values);
-
+        $conflictSql = '';
         if ($updateFields) {
             $conflictCols = array_map($this->quoteIdentifier(...), $conflictColumns);
-            $insertSql .= sprintf(
+            $conflictSql = sprintf(
                 ' ON CONFLICT (%s) DO UPDATE SET %s',
                 implode(', ', $conflictCols),
                 implode(', ', $updateFields),
             );
         }
+        $returningSql = $returningColumn === null ? '' : sprintf(' RETURNING %s', $this->quoteIdentifier($returningColumn));
 
-        // Add RETURNING clause if we have a primary key
-        if ($returningColumn !== null) {
-            $insertSql .= sprintf(' RETURNING %s', $this->quoteIdentifier($returningColumn));
+        $runs = $updateFields ? $this->_splitRowsByConflictKey($rows, $conflictColumns) : [$rows];
+        $useTransaction = count($runs) > 1;
+        if ($useTransaction) {
+            $this->beginTransaction();
         }
+        try {
+            $affected = 0;
+            foreach ($runs as $run) {
+                $bind = [];
+                $values = [];
+                $boundColumns = [];
+                foreach ($run as $row) {
+                    $values[] = $this->_prepareInsertData($row, $bind);
+                    array_push($boundColumns, ...$this->_boundColumnsFromRow($row));
+                }
 
-        $params = $this->_encodeBinaryBindValues($tableName, $boundColumns, array_values($bind));
-        $stmt = $this->query($insertSql, $params);
+                $insertSql = $this->_getInsertSqlQuery($table, $cols, $values) . $conflictSql . $returningSql;
+                $params = $this->_encodeBinaryBindValues($tableName, $boundColumns, $bind);
+                $stmt = $this->query($insertSql, $params);
 
-        // Capture the returned ID if available
-        if ($returningColumn !== null) {
-            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-            if ($row && isset($row[$returningColumn])) {
-                $this->_lastInsertedId = $row[$returningColumn];
+                if ($returningColumn !== null && $this->_lastInsertedId === null) {
+                    $returned = $stmt->fetch(\PDO::FETCH_ASSOC);
+                    if ($returned && isset($returned[$returningColumn])) {
+                        $this->_lastInsertedId = $returned[$returningColumn];
+                    }
+                }
+                $affected += $stmt->rowCount() ?: 1;
             }
+            if ($useTransaction) {
+                $this->commit();
+            }
+        } catch (\Throwable $e) {
+            if ($useTransaction) {
+                $this->rollBack();
+            }
+            throw $e;
         }
 
         // Explicit values bypass the sequence; bump it so the next
         // auto-increment insert does not collide (see insert()).
-        if (is_array(array_first($data))) {
-            foreach ($data as $dataRow) {
-                $this->bumpIdentitySequencesForBind($tableName, $dataRow);
-            }
-        } else {
-            $this->bumpIdentitySequencesForBind($tableName, $data);
+        foreach ($rows as $row) {
+            $this->bumpIdentitySequencesForBind($tableName, $row);
         }
 
-        return $stmt->rowCount() ?: 1;
+        return $affected;
+    }
+
+    /**
+     * Split the rows of an upsert into runs. No two rows of a run have the same values in $keyColumns.
+     *
+     * ON CONFLICT DO UPDATE cannot change one row two times in one statement. MySQL applies the
+     * rows of ON DUPLICATE KEY UPDATE in order, so each run goes in its own statement, in order.
+     * A row with a NULL or an Expr in a key column never conflicts with another row of the batch.
+     *
+     * PostgreSQL compares the keys by column type, which PHP does not know here: 1 and '1.0' are
+     * equal in a numeric column, 'a' and 'A' in a citext column, 'a' and 'a ' in a char column.
+     * So the key ignores the form of a number, case and trailing spaces. When it joins two
+     * values that PostgreSQL keeps apart, the batch only gets one more statement.
+     *
+     * @param list<array<string, mixed>> $rows
+     * @param list<string> $keyColumns
+     * @return list<list<array<string, mixed>>>
+     */
+    protected function _splitRowsByConflictKey(array $rows, array $keyColumns): array
+    {
+        $runs = [];
+        $run = [];
+        $seen = [];
+        foreach ($rows as $row) {
+            $key = [];
+            foreach ($keyColumns as $column) {
+                $value = $row[$column] ?? null;
+                if ($value === null || $value instanceof \Maho\Db\Expr) {
+                    $key = null;
+                    break;
+                }
+                $value = (string) $value;
+                $key[] = is_numeric($value) ? var_export((float) $value + 0.0, true) : mb_strtolower(rtrim($value, ' '));
+            }
+            if ($key !== null) {
+                $key = serialize($key);
+                if (isset($seen[$key])) {
+                    $runs[] = $run;
+                    $run = [];
+                    $seen = [];
+                }
+                $seen[$key] = true;
+            }
+            $run[] = $row;
+        }
+        $runs[] = $run;
+        return $runs;
     }
 
     /**
