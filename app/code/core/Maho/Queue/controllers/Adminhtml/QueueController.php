@@ -44,7 +44,7 @@ class Maho_Queue_Adminhtml_QueueController extends Mage_Adminhtml_Controller_Act
         return $this;
     }
 
-    #[Maho\Config\Route('/admin/queue')]
+    #[Maho\Config\Route('/admin/queue/index')]
     public function indexAction(): void
     {
         $this->_title(Mage::helper('queue')->__('Message Queue'));
