@@ -40,6 +40,12 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     public const CACHE_TAG             = 'catalog_category';
 
     /**
+     * Where a product that enters the category goes in the manual order
+     */
+    public const PLACEMENT_TOP         = 'top';
+    public const PLACEMENT_BOTTOM      = 'bottom';
+
+    /**
      * Store config flag enabling the product-derived category image fallback
      */
     public const XML_PATH_IMAGE_FALLBACK = 'catalog/frontend/category_image_fallback';
@@ -1304,6 +1310,65 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     public function setPostedProducts(?array $value): static
     {
         return $this->setData('posted_products', $value);
+    }
+
+    /**
+     * Retrieve the IDs of the products that keep their slot in the manual order, as posted by the admin.
+     * Null means that the post holds no pins, so the saved pins stay.
+     *
+     * @return list<int>|null
+     */
+    public function getPostedPinnedProducts(): ?array
+    {
+        return $this->getData('posted_pinned_products');
+    }
+
+    /**
+     * @param list<int>|null $value
+     */
+    public function setPostedPinnedProducts(?array $value): static
+    {
+        return $this->setData('posted_pinned_products', $value);
+    }
+
+    /**
+     * Retrieve the IDs of the products that keep their slot in the manual order.
+     *
+     * @return list<int>
+     */
+    public function getPinnedProducts(): array
+    {
+        if (!$this->getId()) {
+            return [];
+        }
+        $ids = $this->getData('pinned_products');
+        if ($ids === null) {
+            $ids = $this->getResource()->getPinnedProducts($this);
+            $this->setData('pinned_products', $ids);
+        }
+        return $ids;
+    }
+
+    public function getNewProductPlacement(): string
+    {
+        return $this->getData('new_product_placement') === self::PLACEMENT_BOTTOM
+            ? self::PLACEMENT_BOTTOM
+            : self::PLACEMENT_TOP;
+    }
+
+    public function setNewProductPlacement(?string $value): static
+    {
+        return $this->setData('new_product_placement', $value);
+    }
+
+    public function getOutOfStockLast(): bool
+    {
+        return (bool) $this->getData('out_of_stock_last');
+    }
+
+    public function setOutOfStockLast(?bool $value = true): static
+    {
+        return $this->setData('out_of_stock_last', $value);
     }
 
     public function getUrlKey(): ?string

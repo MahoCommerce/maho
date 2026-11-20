@@ -240,9 +240,13 @@ class Mage_Adminhtml_Block_Catalog_Category_Edit_Form extends Mage_Adminhtml_Blo
         $gridBlock = $this->getLayout()->getBlock('category.product.grid');
         if ($gridBlock && $gridJsObject = $gridBlock->getJsObjectName()) {
             $products = $this->getCategory()->getProductsPosition();
+            $tab = $this->getLayout()->getBlock('category.products.tab');
             return Mage::helper('core')->jsonEncode([
                 'gridJsObjectName' => $gridJsObject,
                 'products' => (object) $products,
+                'merchandiser' => $tab instanceof Mage_Adminhtml_Block_Catalog_Category_Tab_Products && $tab->hasTiles()
+                    ? $tab->getConfig()
+                    : null,
             ]);
         }
         return '{}';

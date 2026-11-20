@@ -292,6 +292,14 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
          */
         $oldProducts = $category->getProductsPosition();
 
+        $oldPinned = array_flip($this->getPinnedProducts($category));
+        $newPinned = array_intersect(
+            array_map(intval(...), $category->getPostedPinnedProducts() ?? array_keys($oldPinned)),
+            array_keys($products),
+        );
+        $products = $this->_arrangeProducts($products, $oldProducts, $newPinned, $category->getNewProductPlacement());
+        $newPinned = array_flip($newPinned);
+
         $insert = array_diff_key($products, $oldProducts);
         $delete = array_diff_key($oldProducts, $products);
 
@@ -325,23 +333,34 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
                     'category_id' => (int) $id,
                     'product_id'  => (int) $productId,
                     'position'    => (int) $position,
+                    'is_pinned'   => (int) isset($newPinned[$productId]),
                 ];
             }
-            $adapter->insertMultiple($this->_categoryProductTable, $data);
+            foreach (array_chunk($data, 1000) as $chunk) {
+                $adapter->insertMultiple($this->_categoryProductTable, $chunk);
+            }
         }
 
         /**
          * Update product positions in category
          */
-        if (!empty($update)) {
-            foreach ($update as $productId => $position) {
-                $where = [
-                    'category_id = ?' => (int) $id,
-                    'product_id = ?' => (int) $productId,
-                ];
-                $bind  = ['position' => (int) $position];
-                $adapter->update($this->_categoryProductTable, $bind, $where);
+        $pinChanged = [];
+        foreach (array_keys(array_intersect_key($products, $oldProducts)) as $productId) {
+            if (isset($oldPinned[$productId]) !== isset($newPinned[$productId])) {
+                $pinChanged[] = $productId;
             }
+        }
+        $changed = [];
+        foreach (array_unique(array_merge(array_keys($update), $pinChanged)) as $productId) {
+            $changed[] = [
+                'category_id' => (int) $id,
+                'product_id' => (int) $productId,
+                'position' => (int) $products[$productId],
+                'is_pinned' => (int) isset($newPinned[$productId]),
+            ];
+        }
+        foreach (array_chunk($changed, 1000) as $chunk) {
+            $adapter->insertOnDuplicate($this->_categoryProductTable, $chunk, ['position', 'is_pinned']);
         }
 
         if (!empty($insert) || !empty($delete)) {
@@ -362,6 +381,100 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
             $category->setAffectedProductIds($productIds);
         }
         return $this;
+    }
+
+    /**
+     * Get the IDs of the products that keep their slot in the manual order
+     *
+     * @return list<int>
+     */
+    public function getPinnedProducts(Mage_Catalog_Model_Category $category): array
+    {
+        $select = $this->_getWriteAdapter()->select()
+            ->from($this->_categoryProductTable, ['product_id'])
+            ->where('category_id = :category_id')
+            ->where('is_pinned = 1');
+
+        return array_map(
+            intval(...),
+            $this->_getWriteAdapter()->fetchCol($select, ['category_id' => (int) $category->getId()]),
+        );
+    }
+
+    /**
+     * Give the products that enter the category a position, and keep each pinned product in its slot.
+     *
+     * A product with position 0 that is not in $oldProducts gets no position from the admin: it goes to the top or
+     * to the bottom of the list, as $placement says. Without pins, only these products get a new position. With
+     * pins, the position of a pinned product is its slot, and the other products fill the free slots in their
+     * order, so every product gets a position from 1 to the number of products.
+     *
+     * @param array<int|string, int|string> $products position of each product, by product ID
+     * @param array<int|string, int|string> $oldProducts the saved positions
+     * @param list<int> $pinned
+     * @return array<int, int>
+     */
+    protected function _arrangeProducts(array $products, array $oldProducts, array $pinned, string $placement): array
+    {
+        $products = array_map(intval(...), $products);
+        $entering = array_keys(array_filter(
+            array_diff_key($products, $oldProducts),
+            fn(int $position): bool => $position === 0,
+        ));
+        if ($pinned === [] && $entering === []) {
+            return $products;
+        }
+
+        $top = $placement === Mage_Catalog_Model_Category::PLACEMENT_TOP;
+        sort($entering);
+
+        if ($pinned === []) {
+            $others = array_diff_key($products, array_flip($entering));
+            $first = match (true) {
+                $others === [] => 1,
+                $top => min(min($others), 1) - count($entering),
+                default => max($others) + 1,
+            };
+            foreach ($entering as $index => $productId) {
+                $products[$productId] = $first + $index;
+            }
+            return $products;
+        }
+
+        $count = count($products);
+        ksort($products);
+        $slots = [];
+        $pinnedPositions = array_intersect_key($products, array_flip($pinned));
+        asort($pinnedPositions);
+        foreach ($pinnedPositions as $productId => $position) {
+            $slot = min(max($position, 1), $count);
+            while (isset($slots[$slot])) {
+                $slot++;
+            }
+            if ($slot > $count) {
+                $slot = 1;
+                while (isset($slots[$slot])) {
+                    $slot++;
+                }
+            }
+            $slots[$slot] = $productId;
+        }
+
+        $others = array_diff_key($products, $pinnedPositions);
+        foreach ($entering as $productId) {
+            if (isset($others[$productId])) {
+                $others[$productId] = $top ? PHP_INT_MIN : PHP_INT_MAX;
+            }
+        }
+        asort($others);
+        $others = array_keys($others);
+
+        $arranged = [];
+        $next = 0;
+        for ($slot = 1; $slot <= $count; $slot++) {
+            $arranged[$slots[$slot] ?? $others[$next++]] = $slot;
+        }
+        return $arranged;
     }
 
     /**

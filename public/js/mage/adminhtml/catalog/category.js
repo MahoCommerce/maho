@@ -17,6 +17,7 @@ class CategoryEditForm {
      * @param {string} [config.addRootCategoryBtn] - DOM ID of "Add Root Category" button
      * @param {string} [config.addSubCategoryBtn] - DOM ID of "Add Subcategory" button
      * @param {string} [config.categoryProductsEl] - DOM ID of "Category Products" grid container
+     * @param {string} [config.categoryPinnedProductsEl] - DOM ID of the hidden field that sends the pinned products
      * @param {boolean} [config.useAjax] - Whether to load the main content via AJAX
      * @param {string} [config.tabsJsObjectName] - varien tabs JS variable name
      */
@@ -35,6 +36,7 @@ class CategoryEditForm {
             addRootCategoryBtn: null,
             addSubCategoryBtn: null,
             categoryProductsEl: null,
+            categoryPinnedProductsEl: null,
             useAjax: true,
             tabsJsObjectName: null,
             ...config,
@@ -116,7 +118,8 @@ class CategoryEditForm {
     }
 
     initProductsGrid() {
-        const { gridJsObjectName, products } = window.productsInfo ?? {};
+        this.merchandiser = null;
+        const { gridJsObjectName, products, merchandiser } = window.productsInfo ?? {};
         const gridObj = window[gridJsObjectName];
         const inputEl = document.getElementById(this.config.categoryProductsEl);
 
@@ -134,6 +137,9 @@ class CategoryEditForm {
             const positionEl = row.querySelector('.input-text');
             if (checkboxEl && positionEl) {
                 positionEl.disabled = !checkboxEl.checked;
+                if (checkboxEl.checked && checkboxEl.value in products) {
+                    positionEl.value = products[checkboxEl.value];
+                }
                 positionEl.addEventListener('change', (event) => {
                     if (checkboxEl.checked) {
                         products[checkboxEl.value] = positionEl.value;
@@ -170,6 +176,24 @@ class CategoryEditForm {
 
         gridObj.rows.forEach((row) => gridObj.initRowCallback(gridObj, row));
         gridObj.updateSelected();
+
+        const pinnedEl = document.getElementById(this.config.categoryPinnedProductsEl);
+        if (merchandiser && pinnedEl && typeof CategoryMerchandiser !== 'undefined') {
+            this.merchandiser = new CategoryMerchandiser(merchandiser, products, {
+                pinnedEl,
+                onChange: () => gridObj.updateSelected(),
+                onShowGrid: () => gridObj.reload(),
+            });
+        }
+    }
+
+    /**
+     * Ask before the page drops the moves of the product tiles that the merchant did not save.
+     *
+     * @returns {boolean} true when the page can go on
+     */
+    confirmDiscardProductOrder() {
+        return this.discardConfirmed || !this.merchandiser?.isDirty || confirm(this.merchandiser.labels.confirmLeave);
     }
 
     renderTree(config) {
@@ -209,6 +233,10 @@ class CategoryEditForm {
     changeCategory() {
         const category = this.getSelectedCategory();
         if (category && (category.id != window.categoryInfo?.category_id || this.storeId != window.categoryInfo?.store_id)) {
+            if (!this.confirmDiscardProductOrder()) {
+                this.tree.getNodeById(window.categoryInfo.category_id)?.select();
+                return;
+            }
             this.updateContent(
                 setRouteParams(this.getEditUrl(), {
                     store: this.storeId > 0 ? this.storeId : null,
@@ -271,6 +299,9 @@ class CategoryEditForm {
         const parent = isRoot ? { id: 1 } : this.getSelectedCategory();
         if (!parent) {
             alert(Translator.translate('Please select a parent category before adding a new one.'));
+            return;
+        }
+        if (!this.confirmDiscardProductOrder()) {
             return;
         }
         if (parent.id === 1) {
@@ -343,6 +374,10 @@ class CategoryEditForm {
      * @param {Object<string, string>} options.questions - the confirmation for each set that loses values
      */
     async changeAttributeSet(select, { savedValue = null, questions = {} } = {}) {
+        if (!this.confirmDiscardProductOrder()) {
+            select.value = [...select.options].find((option) => option.defaultSelected)?.value ?? savedValue;
+            return;
+        }
         const question = questions[select.value];
         if (question && !confirm(question)) {
             select.value = [...select.options].find((option) => option.defaultSelected)?.value ?? savedValue;
@@ -357,6 +392,10 @@ class CategoryEditForm {
     }
 
     async switchStore(event, switcher) {
+        if (!switcher.useConfirm && !this.confirmDiscardProductOrder()) {
+            event.target.value = this.storeId === 0 ? '' : this.storeId;
+            return;
+        }
         if (switcher.useConfirm) {
             const confirmed = confirm(Translator.translate('Please confirm site switching. All data that hasn\'t been saved will be lost.'));
             if (!confirmed) {
@@ -367,6 +406,7 @@ class CategoryEditForm {
 
         const storeId = parseInt(event.target.value) || 0;
         const category = this.getSelectedCategory();
+        this.discardConfirmed = true;
 
         if (!this.config.useAjax) {
             return setLocation(
@@ -388,6 +428,8 @@ class CategoryEditForm {
 
         } catch (error) {
             setMessagesDiv(error.message, 'error');
+        } finally {
+            this.discardConfirmed = false;
         }
     }
 

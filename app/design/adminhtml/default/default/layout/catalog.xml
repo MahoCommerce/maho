@@ -315,6 +315,7 @@ Layout handle for configurable products
             <action method="addJs"><name>sortable.min.js</name></action>
             <action method="addJs"><name>maho-tree.js</name></action>
             <action method="addJs"><name>mage/adminhtml/catalog/category.js</name></action>
+            <action method="addJs"><name>mage/adminhtml/catalog/category-merchandiser.js</name></action>
             <action method="addJs"><name>mage/adminhtml/wysiwyg/catalog.js</name></action>
         </reference>
         <reference name="left">

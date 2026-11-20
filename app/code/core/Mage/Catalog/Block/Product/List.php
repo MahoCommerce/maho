@@ -67,6 +67,9 @@ class Mage_Catalog_Block_Product_List extends Mage_Catalog_Block_Product_Abstrac
             $this->_productCollection = $layer->getProductCollection();
 
             $this->prepareSortableFieldsByCategory($layer->getCurrentCategory());
+            if ($layer->getCurrentCategory()->getOutOfStockLast()) {
+                $this->_productCollection->addOutOfStockLastSort();
+            }
 
             if ($origCategory) {
                 $layer->setCurrentCategory($origCategory);

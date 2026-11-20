@@ -202,6 +202,8 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
             $this->_updateRatingPos(self::AGGREGATION_MONTHLY);
             $this->_updateRatingPos(self::AGGREGATION_YEARLY);
 
+            $this->_aggregateRolling();
+
             $this->_setFlagData(Mage_Reports_Model_Flag::REPORT_BESTSELLERS_FLAG_CODE);
         } catch (Exception $e) {
             //$this->_getWriteAdapter()->rollBack();
@@ -210,6 +212,34 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
 
         //$this->_getWriteAdapter()->commit();
         return $this;
+    }
+
+    /**
+     * Rebuild the rolling table: the units and the revenue of each product in the last days that
+     * Mage_Catalog_Model_Config::getSortDays() gives, for each store and for all stores (store 0).
+     * Each period of the daily table is a calendar day, but the window of this table is exact to the second.
+     * The revenue is the row total of the order items, without tax, less the discount.
+     */
+    protected function _aggregateRolling(): static
+    {
+        $adapter = $this->_getWriteAdapter();
+        $table = $this->getTable('sales/bestsellers_aggregated_rolling');
+
+        $select = $adapter->select()
+            ->from(['o' => $this->getTable('sales/order')], [
+                'product_id' => 'i.product_id',
+                'store_id' => 'o.store_id',
+                'qty_ordered' => new Maho\Db\Expr('SUM(i.qty_ordered)'),
+                'revenue' => new Maho\Db\Expr('SUM(i.base_row_total - COALESCE(i.base_discount_amount, 0))'),
+            ])
+            ->joinInner(['i' => $this->getTable('sales/order_item')], 'i.order_id = o.entity_id', [])
+            ->joinInner(['p' => $this->getTable('catalog/product')], 'p.entity_id = i.product_id', [])
+            ->where('o.created_at >= ?', Mage::getSingleton('catalog/config')->getSortWindowStart())
+            ->where('o.state != ?', Mage_Sales_Model_Order::STATE_CANCELED)
+            ->where('o.store_id != ?', Mage_Core_Model_App::ADMIN_STORE_ID)
+            ->group(['i.product_id', 'o.store_id']);
+
+        return $this->_replaceRollingRows($table, $select, ['qty_ordered', 'revenue']);
     }
 
     /**

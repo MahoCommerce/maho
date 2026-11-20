@@ -1761,6 +1761,39 @@ return function (SchemaEditor $schema): void {
 
     $schema->addTable(
         Table::editor()
+            ->setUnquotedName('sales_bestsellers_aggregated_rolling')
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('qty_ordered', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('revenue', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()->setUnquotedColumnNames('product_id', 'store_id')->create(),
+            )
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('product_id')
+                    ->setUnquotedReferencedTableName('catalog_product_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Sales Bestsellers Aggregated Rolling')
+            ->create(),
+    );
+
+    $schema->addTable(
+        Table::editor()
             ->setUnquotedName('sales_billing_agreement')
             ->addColumn(Schema::column('agreement_id', Types::INTEGER, unsigned: true, autoincrement: true))
             ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true))

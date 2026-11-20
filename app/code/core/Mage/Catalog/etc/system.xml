@@ -99,6 +99,16 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </default_sort_by>
+                        <sort_days translate="label comment">
+                            <label>Days Counted by Bestsellers and Most Viewed</label>
+                            <comment>The Bestsellers and Most Viewed sorts, and the sales on the category product tiles, count the units ordered and the views of this number of days before the last refresh of the statistics.</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-greater-than-zero</validate>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </sort_days>
                         <list_allow_all translate="label comment">
                             <label>Allow All Products per Page</label>
                             <comment>Whether to show "All" option in the "Show X Per Page" dropdown.</comment>

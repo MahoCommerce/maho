@@ -1209,6 +1209,17 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             $this->getSelect()->order('is_saleable ' . $dir);
             return $this;
         }
+        if ($attribute === Mage_Catalog_Model_Config::SORT_NEWEST) {
+            $dir = strtoupper((string) $dir) === self::SORT_ORDER_DESC ? 'DESC' : 'ASC';
+            $this->getSelect()->order(['e.created_at ' . $dir, 'e.entity_id ' . $dir]);
+            return $this;
+        }
+        if ($attribute === Mage_Catalog_Model_Config::SORT_BESTSELLERS) {
+            return $this->_addRollingSort('sales/bestsellers_aggregated_rolling', 'qty_ordered', $dir);
+        }
+        if ($attribute === Mage_Catalog_Model_Config::SORT_MOST_VIEWED) {
+            return $this->_addRollingSort('reports/viewed_aggregated_rolling', 'views_num', $dir);
+        }
 
         $storeId = $this->getStoreId();
         if ($attribute == 'price' && $storeId != 0) {
@@ -1226,6 +1237,51 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         }
 
         return parent::addAttributeToSort($attribute, $dir);
+    }
+
+    /**
+     * Sort by a column of a rolling statistics table for the store of the collection.
+     * A product with no row goes last, in both directions.
+     *
+     * @return $this
+     */
+    protected function _addRollingSort(string $table, string $column, string $dir): static
+    {
+        $alias = 'rolling_' . $column;
+        $select = $this->getSelect();
+        if (!array_key_exists($alias, $select->getPart(Maho\Db\Select::FROM))) {
+            $select->joinLeft(
+                [$alias => $this->getTable($table)],
+                "{$alias}.product_id = e.entity_id AND {$alias}.store_id = " . (int) $this->getStoreId(),
+                [],
+            );
+        }
+        $dir = strtoupper($dir) === self::SORT_ORDER_DESC ? 'DESC' : 'ASC';
+        $select->order([
+            new Maho\Db\Expr("CASE WHEN {$alias}.{$column} IS NULL THEN 1 ELSE 0 END ASC"),
+            new Maho\Db\Expr("{$alias}.{$column} {$dir}"),
+            new Maho\Db\Expr('e.entity_id ASC'),
+        ]);
+        return $this;
+    }
+
+    /**
+     * Sort the products that are in stock before the products that are out of stock.
+     * Call it before the other sorts of the collection, which then order the products inside each group.
+     */
+    public function addOutOfStockLastSort(): static
+    {
+        $websiteId = Mage::getResourceSingleton('cataloginventory/stock_status')->getWebsiteIdOfStore((int) $this->getStoreId());
+        $this->getSelect()
+            ->joinLeft(
+                ['stock_status_sort' => $this->getTable('cataloginventory/stock_status')],
+                'stock_status_sort.product_id = e.entity_id'
+                    . " AND stock_status_sort.website_id = {$websiteId}"
+                    . ' AND stock_status_sort.stock_id = ' . Mage_CatalogInventory_Model_Stock::DEFAULT_STOCK_ID,
+                [],
+            )
+            ->order(new Maho\Db\Expr('COALESCE(stock_status_sort.stock_status, 0) DESC'));
+        return $this;
     }
 
     /**
