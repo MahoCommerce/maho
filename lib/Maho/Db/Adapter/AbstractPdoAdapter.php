@@ -1370,18 +1370,30 @@ abstract class AbstractPdoAdapter implements AdapterInterface
      * the first row and binds the values by position, so every row must have the same keys.
      *
      * @return list<array<string, mixed>>
-     * @throws Exception when a row does not have the same keys as the first row
+     * @throws Exception when $data is empty, or when a row does not have the same keys as the first row
      */
     protected function _alignInsertRows(array $data): array
     {
+        if ($data === []) {
+            throw new Exception('Invalid data for insert');
+        }
+
         $first = array_first($data);
         if (!is_array($first)) {
             return [$data];
         }
 
+        $cols = array_keys($first);
         $rows = [];
         foreach ($data as $row) {
-            if (!is_array($row) || count($row) !== count($first) || array_diff_key($row, $first)) {
+            if (!is_array($row)) {
+                throw new Exception('Invalid data for insert');
+            }
+            if (array_keys($row) === $cols) {
+                $rows[] = $row;
+                continue;
+            }
+            if (count($row) !== count($cols) || array_diff_key($row, $first)) {
                 throw new Exception('Invalid data for insert');
             }
             $rows[] = array_replace($first, $row);

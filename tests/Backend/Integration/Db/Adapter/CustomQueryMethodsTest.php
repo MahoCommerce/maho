@@ -351,6 +351,13 @@ describe('insertOnDuplicate', function () {
         'an extra column' => [['name' => 'keys2', 'value' => 2, 'status' => 0]],
     ]);
 
+    it('rejects empty data without a write', function () {
+        expect(fn() => $this->adapter->insertOnDuplicate($this->tempTableTarget, [], ['value']))
+            ->toThrow(\Maho\Db\Exception::class, 'Invalid data for insert');
+
+        expect((int) $this->adapter->fetchOne("SELECT COUNT(*) FROM {$this->tempTableTarget}"))->toBe(0);
+    });
+
     it('applies two rows with the same key in order, so the last row wins', function () {
         $this->adapter->insertOnDuplicate(
             $this->tempTableTarget,
