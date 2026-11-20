@@ -183,8 +183,7 @@ SPDX-License-Identifier: AFL-3.0
     .loading > & {
         pointer-events: none;
 
-        /* Fade in only when the request is slow, so a fast reload of the section does not flash.
-           The delay is on the loading state only: the overlay still fades out at once. */
+        /* Delay the fade-in so that a fast reload does not flash. The fade-out stays immediate. */
         &::before,
         &::after {
             opacity: 1;

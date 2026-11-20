@@ -109,8 +109,7 @@
         .loading > & {
             @apply pointer-events-none;
 
-            /* Fade in only when the request is slow, so a fast reload of the section does not flash.
-               The delay is on the loading state only: the overlay still fades out at once. */
+            /* Delay the fade-in so that a fast reload does not flash. The fade-out stays immediate. */
             &::before,
             &::after {
                 @apply opacity-100 delay-600;
