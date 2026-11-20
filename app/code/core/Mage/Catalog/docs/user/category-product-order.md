@@ -9,7 +9,7 @@ Category merchandising decides which products a shopper sees first on a category
 you three tools:
 
 - The visual merchandiser, a view of product tiles where you set the order with drag and drop, pins
-  and bulk moves (see [The visual merchandiser](#the-visual-merchandiser)).
+  and bulk moves (see [Visual merchandiser](#visual-merchandiser)).
 - The automatic sorts **Newest**, **Bestsellers** and **Most Viewed**, which keep the order up to date
   with no manual work (see [Automatic sorts](#automatic-sorts)).
 - Two category settings: where new products go, and whether out of stock products show last.
@@ -28,7 +28,7 @@ comes first when the direction is ascending, which is the default. Save the cate
 The position belongs to the product in this category. The same product can have another position
 in another category.
 
-## The visual merchandiser
+## Visual merchandiser
 
 The visual merchandiser shows the products of the category as tiles, in the order of the storefront,
 and you set the order with drag and drop. The **Tiles** button opens it, so this page also calls it
@@ -48,7 +48,7 @@ Each tile shows:
 - The image, the name, the SKU and the price of the product.
 - The stock status, and a flag when the product is disabled or hidden.
 - The units sold and the revenue of the last days. **Days Counted by Bestsellers and Most Viewed**
-  sets the number of days (see [The statistics](#the-statistics)).
+  sets the number of days (see [Statistics](#statistics)).
 - The position of the product in the category.
 
 The products that a dynamic category rule added show the badge **Added by a rule**.
@@ -171,7 +171,7 @@ reverse the direction with the arrow next to **Sort By**.
 
 ![A storefront category sorted by Bestsellers](images/category-sort-by-storefront.webp)
 
-### The statistics
+### Statistics
 
 The number of days is **Days Counted by Bestsellers and Most Viewed** in
 **System > Configuration > Catalog > Catalog**, group **Frontend**. The default is 30. The period is
@@ -213,7 +213,7 @@ The direction counts too. The arrow next to the **Sort By** list changes it, and
 remembers the direction that the customer picked in the same way as the sort order. With the
 descending direction, the highest position comes first.
 
-## The sort settings of a category
+## Sort settings of a category
 
 On the **Display Settings** tab of the category:
 
@@ -242,7 +242,7 @@ the anchor category too, and give it a position there.
 Products with the same position, for example 0 for every product, are sorted by their product ID.
 Give each product its own position when the order matters.
 
-## The Category Products index
+## Category Products index
 
 Category pages read the positions from the **Category Products** index, not from the category
 directly. In **Update on Save** mode, the store updates the index when you save the category. In
