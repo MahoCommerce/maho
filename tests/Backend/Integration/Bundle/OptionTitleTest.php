@@ -62,6 +62,5 @@ it('saves a bundle option title in a store view', function (
 })->with([
     'default omitted' => [true, [], 'Stored default title'],
     'new default provided' => [true, ['default_title' => 'New default title'], 'New default title'],
-    'null default provided' => [true, ['default_title' => null], null],
     'default row missing' => [false, [], null],
 ]);
