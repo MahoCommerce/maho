@@ -88,10 +88,16 @@ describe('Store emulation puts back the environment of the caller', function () 
         $locale = $otherLocale();
         $startAdmin($locale);
 
-        $emulation = Mage::getModel('core/app_emulation');
-        $environment = $emulation->startEnvironmentEmulation(1);
-        expect((int) Mage::app()->getStore()->getId())->toBe(1);
-        $emulation->stopEnvironmentEmulation($environment);
+        // The methods are deprecated, and developer mode turns the deprecation into an exception
+        set_error_handler(fn(): bool => true, E_USER_DEPRECATED);
+        try {
+            $emulation = Mage::getModel('core/app_emulation');
+            $environment = $emulation->startEnvironmentEmulation(1);
+            expect((int) Mage::app()->getStore()->getId())->toBe(1);
+            $emulation->stopEnvironmentEmulation($environment);
+        } finally {
+            restore_error_handler();
+        }
 
         $expectAdmin($locale);
     });

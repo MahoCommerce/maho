@@ -96,10 +96,10 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
      * Save current design config and replace with design config from specified store
      * Event is not dispatched.
      *
-     * @deprecated since 27.1, call setDesignConfig() and render in Mage_Core_Model_App::emulate()
      * @param int|string $storeId
      * @param string $area
      */
+    #[\Deprecated(message: 'call setDesignConfig() and render in Mage_Core_Model_App::emulate()', since: '27.1')]
     public function emulateDesign($storeId, $area = self::DEFAULT_DESIGN_AREA): void
     {
         if ($storeId) {
@@ -118,9 +118,8 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
 
     /**
      * Revert to last design config, used before emulation
-     *
-     * @deprecated since 27.1, call setDesignConfig() and render in Mage_Core_Model_App::emulate()
      */
+    #[\Deprecated(message: 'call setDesignConfig() and render in Mage_Core_Model_App::emulate()', since: '27.1')]
     public function revertDesign(): void
     {
         if ($this->_emulatedDesignConfig) {

@@ -44,10 +44,10 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
      * Switch to the environment of the store $storeId. Pass the result to stopEnvironmentEmulation() to put back the
      * environment of the caller.
      *
-     * @deprecated since 27.1, use Mage_Core_Model_App::emulate()
      * @param int|string|Mage_Core_Model_Store $storeId
      * @param string|null $area
      */
+    #[\Deprecated(message: 'use Mage_Core_Model_App::emulate()', since: '27.1')]
     public function startEnvironmentEmulation($storeId, $area = Mage_Core_Model_App_Area::AREA_FRONTEND): \Maho\DataObject
     {
         $storeId = (int) $this->_app->getStore($storeId)->getId();
@@ -55,10 +55,10 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
     }
 
     /**
-     * @deprecated since 27.1, use Mage_Core_Model_App::emulate()
      * @param \Maho\DataObject $initialEnvironmentInfo the result of startEnvironmentEmulation()
      * @return $this
      */
+    #[\Deprecated(message: 'use Mage_Core_Model_App::emulate()', since: '27.1')]
     public function stopEnvironmentEmulation(\Maho\DataObject $initialEnvironmentInfo)
     {
         $environment = $initialEnvironmentInfo->getData('environment');
