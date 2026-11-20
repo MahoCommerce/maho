@@ -34,6 +34,9 @@ class Mage_Catalog_Model_Category_Attribute_Source_Sortby extends Mage_Eav_Model
                     'value' => $attribute['attribute_code'],
                 ];
             }
+            foreach ($this->_getCatalogConfig()->getAutomaticSortOptions() as $code => $label) {
+                $this->_options[] = ['label' => $label, 'value' => $code];
+            }
         }
         return $this->_options;
     }

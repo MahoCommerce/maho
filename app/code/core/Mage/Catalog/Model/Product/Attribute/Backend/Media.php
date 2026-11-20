@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2017-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2017-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Catalog
@@ -605,10 +605,16 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
      */
     protected function _copyImage($file)
     {
+        $mount = $this->_getMount();
+        if (!is_string($file)
+            || \Maho\Io::getPathWithinMount($mount, $this->_getConfig()->getBaseMediaStoragePath(), $file) === null
+        ) {
+            Mage::throwException(Mage::helper('catalog')->__('Detected malicious path or filename input.'));
+        }
+
         try {
             $file = str_replace(DS, '/', $file);
             $destFile = $this->_getUniqueFileName($file, '/');
-            $mount = $this->_getMount();
 
             if (!$mount->fileExists($this->_getConfig()->getMediaStoragePath($file))) {
                 throw new Exception();

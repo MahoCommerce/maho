@@ -12,13 +12,15 @@ class Mage_Core_Helper_UnserializeArray extends Mage_Core_Helper_Abstract
 {
     /**
      * @param mixed $str  Serialized string, JSON string, or already-decoded value (passed through)
-     * @return mixed      Decoded array for serialized/JSON input; input unchanged for non-string input
+     * @return mixed      Decoded array for serialized/JSON input; an empty array for null or ''; input unchanged for other non-string input
      * @throws Exception  When string input cannot be decoded
      * @SuppressWarnings("PHPMD.ErrorControlOperator")
      */
     public function unserialize($str)
     {
-        $str ??= '';
+        if ($str === null || $str === '') {
+            return [];
+        }
 
         // Pass through if the value has already been decoded upstream
         // (e.g., a previous _afterLoad pass did setExtra(array), and the

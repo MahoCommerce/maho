@@ -1,0 +1,159 @@
+name: Merge on green
+
+# A pull request with the label "merge on green" is merged when every check on its head commit
+# passes. Only fballiano can set the label: the guard job removes it when another account adds
+# it, or when another account pushes a commit after it.
+
+on:
+  pull_request_target:
+    types: [labeled, synchronize]
+  # The CI workflows. A run of one of them can be the last check that a pull request waits for.
+  workflow_run:
+    workflows:
+      - Pest Tests
+      - Lint
+      - PHPStan
+      - PHP Syntax
+      - Maho Install
+      - CodeQL
+      - Check JS Libraries
+      - Docs
+      - Security
+      - Storage buckets
+    types: [completed]
+  # The checks of other apps, such as CodeRabbit and the CodeQL summary, do not start a workflow_run.
+  check_run:
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    name: Keep the label for fballiano
+    if: >
+      github.event_name == 'pull_request_target'
+      && github.event.sender.login != 'fballiano'
+      && (
+        (github.event.action == 'labeled' && github.event.label.name == 'merge on green')
+        || (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'merge on green'))
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Remove the label
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number }}
+          ACTION: ${{ github.event.action }}
+          SENDER: ${{ github.event.sender.login }}
+        run: |
+          gh pr edit "$NUMBER" --remove-label "merge on green"
+          if [ "$ACTION" = "synchronize" ]; then
+            gh pr comment "$NUMBER" --body "@$SENDER pushed a new commit, so this pull request no longer merges by itself. A maintainer must add the label \`merge on green\` again."
+          fi
+
+  find:
+    name: Find the pull requests to merge
+    if: >
+      github.event_name != 'pull_request_target'
+      || (
+        github.event.action == 'labeled'
+        && github.event.label.name == 'merge on green'
+        && github.event.sender.login == 'fballiano'
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+      checks: read
+      statuses: read
+    outputs:
+      ready: ${{ steps.find.outputs.ready }}
+    steps:
+      - name: Find the green pull requests with the label
+        id: find
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          SELF: ${{ github.workflow }}
+        run: |
+          READY='[]'
+          for number in $(gh pr list --label "merge on green" --state open --limit 100 --json number --jq '.[].number'); do
+            pr=$(gh pr view "$number" --json headRefOid,isDraft,mergeable,statusCheckRollup)
+            if [ "$(jq -r .isDraft <<<"$pr")" = "true" ]; then
+              echo "#$number is a draft."
+              continue
+            fi
+            if [ "$(jq -r .mergeable <<<"$pr")" != "MERGEABLE" ]; then
+              echo "#$number is not mergeable now: $(jq -r .mergeable <<<"$pr")."
+              continue
+            fi
+            # A pull request without a check of GitHub Actions has no CI yet, so it waits.
+            state=$(jq -r --arg self "$SELF" '
+              [(.statusCheckRollup // [])[] | select((.workflowName // "") != $self)] as $checks
+              | if ([$checks[] | select((.workflowName // "") != "")] | length) == 0 then "waiting"
+                elif any($checks[];
+                  (.__typename == "CheckRun" and .status != "COMPLETED")
+                  or (.__typename == "StatusContext" and (.state == "PENDING" or .state == "EXPECTED")))
+                then "waiting"
+                elif all($checks[];
+                  if .__typename == "CheckRun" then (.conclusion | IN("SUCCESS", "SKIPPED", "NEUTRAL"))
+                  else .state == "SUCCESS" end)
+                then "green"
+                else "red" end' <<<"$pr")
+            echo "#$number: $state"
+            if [ "$state" = "green" ]; then
+              READY=$(jq -c --argjson n "$number" --arg sha "$(jq -r .headRefOid <<<"$pr")" '. + [{number: $n, sha: $sha}]' <<<"$READY")
+            fi
+          done
+          echo "ready=$READY" >> "$GITHUB_OUTPUT"
+
+  merge:
+    name: Merge the green pull requests
+    needs: find
+    # The environment of the CI app allows only main. A run for a pull request to a release
+    # branch has that branch as its ref, so it leaves the merge to the next run on main.
+    if: needs.find.outputs.ready != '[]' && needs.find.outputs.ready != '' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: maho-ci
+    concurrency:
+      group: merge-on-green
+      cancel-in-progress: false
+    steps:
+      # A merge with the GITHUB_TOKEN starts no workflow, so the backport and the push
+      # workflows on main would not run. The token of the CI app starts them.
+      - name: Get a token of the CI app
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ secrets.MAHO_CI_APP_CLIENT_ID }}
+          private-key: ${{ secrets.MAHO_CI_APP_PRIVATE_KEY }}
+
+      # --match-head-commit refuses the merge when a commit arrived after the check.
+      - name: Merge
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+          READY: ${{ needs.find.outputs.ready }}
+        run: |
+          STATUS=0
+          for row in $(jq -c '.[]' <<<"$READY"); do
+            number=$(jq -r .number <<<"$row")
+            sha=$(jq -r .sha <<<"$row")
+            if [ "$(gh pr view "$number" --json state --jq .state)" != "OPEN" ]; then
+              continue
+            fi
+            if output=$(gh pr merge "$number" --squash --match-head-commit "$sha" 2>&1); then
+              echo "Merged #$number."
+              continue
+            fi
+            echo "::error::Could not merge #$number: $output"
+            gh pr edit "$number" --remove-label "merge on green"
+            # shellcheck disable=SC2016
+            printf 'The merge failed, so the label `merge on green` is removed.\n\n```\n%s\n```\n' "$output" | gh pr comment "$number" --body-file -
+            STATUS=1
+          done
+          exit $STATUS

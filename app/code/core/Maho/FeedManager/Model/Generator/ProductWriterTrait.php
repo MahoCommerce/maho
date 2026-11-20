@@ -47,6 +47,11 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
     protected string $_xmlItemTag = 'item';
     protected string $_xmlItemTemplate = '';
 
+    protected ?string $_parsedItemTemplate = null;
+
+    /** @var list<array{int, int, array<string, string>}> Offsets, lengths, and field parameters of the last template */
+    protected array $_itemTemplateFields = [];
+
     /** @var array<int|string, mixed>|null Parsed JSON structure for json format */
     protected ?array $_jsonStructureParsed = null;
 
@@ -218,7 +223,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
             return 0;
         }
 
-        $productIds = $collection->getAllIds();
+        $productIds = $collection->getColumnValues('entity_id');
         if (!empty($productIds)) {
             $this->_mapper->preloadParentMappings($productIds);
         }
@@ -445,23 +450,27 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
         $productData = $this->_templateCompatRow($this->_mapper->extractProductData($product));
         $productData['_product'] = $product;
 
-        // Find all field configurations in the template: {type="..." value="..." ...}
-        preg_match_all(Maho_FeedManager_Model_Feed_Fields::TEMPLATE_FIELD_PATTERN, $template, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+        if ($this->_parsedItemTemplate !== $template) {
+            $this->_parsedItemTemplate = $template;
+            $this->_itemTemplateFields = [];
+            preg_match_all(Maho_FeedManager_Model_Feed_Fields::TEMPLATE_FIELD_PATTERN, $template, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+
+            foreach ($matches as $match) {
+                [$fullMatch, $offset] = $match[0];
+                $config = Maho_FeedManager_Model_Feed_Fields::parseField($match[1][0]);
+                if (empty($config)) {
+                    continue;
+                }
+
+                $length = strlen($fullMatch);
+                $config['tag'] = Maho_FeedManager_Model_Feed_Fields::enclosingTag($template, $offset, $length);
+                $this->_itemTemplateFields[] = [$offset, $length, $config];
+            }
+        }
 
         $rendered = '';
         $cursor = 0;
-        foreach ($matches as $match) {
-            [$fullMatch, $offset] = $match[0];
-            $config = Maho_FeedManager_Model_Feed_Fields::parseField($match[1][0]);
-
-            if (empty($config)) {
-                continue;
-            }
-
-            // The element around the placeholder names the platform field, so the resolver
-            // reads the measure the platform wants for it.
-            $config['tag'] = Maho_FeedManager_Model_Feed_Fields::enclosingTag($template, $offset, strlen($fullMatch));
-
+        foreach ($this->_itemTemplateFields as [$offset, $length, $config]) {
             $value = $this->_resolveTemplateField($config, $productData, $product);
             $value = $this->_applyFormat($value, $config, $feed);
 
@@ -471,7 +480,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
             }
 
             $rendered .= substr($template, $cursor, $offset - $cursor) . $value;
-            $cursor = $offset + strlen($fullMatch);
+            $cursor = $offset + $length;
         }
         $template = $rendered . substr($template, $cursor);
 

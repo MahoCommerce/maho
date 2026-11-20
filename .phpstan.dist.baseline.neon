@@ -13,12 +13,6 @@ parameters:
 			path: app/code/core/Mage/Admin/Model/Resource/Acl.php
 
 		-
-			rawMessage: 'Parameter #1 $role of method Mage_Admin_Model_Resource_Roles::_updateRoleUsersAcl() expects Mage_Admin_Model_Roles, Mage_Core_Model_Abstract given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Admin/Model/Resource/Roles.php
-
-		-
 			rawMessage: 'Method Mage_Admin_Model_Resource_Variable::getAllowedPaths() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -1823,12 +1817,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Core/Model/App.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Core_Model_Abstract::init().'
-			identifier: method.notFound
-			count: 2
-			path: app/code/core/Mage/Core/Model/App/Emulation.php
 
 		-
 			rawMessage: 'Method Mage_Core_Model_Config::getNode() has parameter $scope with no type specified.'

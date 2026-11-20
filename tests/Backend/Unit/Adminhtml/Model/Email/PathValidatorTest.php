@@ -98,6 +98,26 @@ describe('Mage_Adminhtml_Model_Email_PathValidator', function () {
             expect($this->validator->isValid($path))->toBeTrue();
         })->with(['system/smtp', 'system', '/system/smtp/password/']);
 
+        it('returns true for a path that is not plain, because a string comparison cannot tell which node it selects', function (string $path) {
+            expect($this->validator->isValid($path))->toBeTrue();
+        })->with([
+            'attribute selector on the field' => ['system/smtp/password@x='],
+            'quoted attribute selector on the field' => ['system/smtp/password@x=""'],
+            'attribute selector on the group' => ['system/smtp@x=/password'],
+            'attribute selector on the section' => ['system@x=/smtp/password'],
+            'attribute selector on a field that is not encrypted' => ['general/store_information/name@x='],
+            'empty segment' => ['system//smtp/password'],
+            'surrounding white space' => [' system/smtp/password'],
+        ]);
+
+        it('returns false for a plain path with a hyphen and a dot in a segment', function () {
+            expect($this->validator->isValid('some-module/group.name/field_1'))->toBeFalse();
+        });
+
+        it('returns false for a number', function () {
+            expect($this->validator->isValid([1.0]))->toBeFalse();
+        });
+
         it('returns false for a path that only shares a prefix with an encrypted path', function () {
             expect($this->validator->isValid('system/smtp/password_not'))->toBeFalse();
             expect($this->validator->isValid('system/smt'))->toBeFalse();

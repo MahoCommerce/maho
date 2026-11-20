@@ -423,7 +423,6 @@ Allows you to retrieve full information about the shopping cart (quote).
 | string | customer_is_guest                 | Defines whether the customer is a guest      |
 | string | applied_rule_ids                  | Applied rule IDs                             |
 | string | reserved_order_id                 | Reserved order ID                            |
-| string | password_hash                     | Password hash                                |
 | string | coupon_code                       | Coupon code                                  |
 | string | global_currency_code              | Global currency code                         |
 | double | base_to_global_rate               | Base to global rate                          |
@@ -550,9 +549,7 @@ Allows you to retrieve full information about the shopping cart (quote).
 | string | updated_at             | Date of updating                       |
 | string | method                 | Payment method                         |
 | string | cc_type                | Credit card type                       |
-| string | cc_number_enc          | Credit card number                     |
 | string | cc_last4               | Last four digits on the credit card    |
-| string | cc_cid_enc             | Credit card CID                        |
 | string | cc_owner               | Credit card owner                      |
 | string | cc_exp_month           | Credit card expiration month           |
 | string | cc_exp_year            | Credit card expiration year            |

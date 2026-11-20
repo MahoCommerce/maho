@@ -22,6 +22,12 @@ class Mage_Checkout_Service_Cart
         'telephone', 'fax', 'email', 'vat_id',
     ];
 
+    /** The keys of a payment form that assignData() puts on the quote payment as they are, with no check. */
+    private const PAYMENT_RESERVED_KEYS = [
+        'additional_data', 'additional_information', 'method_instance',
+        'payment_id', 'quote_id', 'parent_id', 'created_at', 'updated_at',
+    ];
+
     /** The shape of a masked cart id, bare of delimiters so a route requirement can reuse it. */
     public const MASKED_ID_PATTERN = '[a-f0-9]{32}';
 
@@ -1144,8 +1150,33 @@ class Mage_Checkout_Service_Cart
         array $paymentData,
         \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
     ): \Mage_Sales_Model_Quote {
+        return $this->savePaymentSelection($quote, $paymentData, $actor, false);
+    }
+
+    /**
+     * Give $quote the payment method $methodCode without the data of its form, and save the cart. The method must be
+     * available for the cart, but it does not validate its form: placing the order does.
+     *
+     * @throws \Mage_Core_Exception when the method is not available for the cart
+     */
+    public function selectPaymentMethodCode(\Mage_Sales_Model_Quote $quote, string $methodCode): \Mage_Sales_Model_Quote
+    {
+        return $this->savePaymentSelection($quote, ['method' => $methodCode], \Mage_Checkout_Model_Actor::Customer, true);
+    }
+
+    /**
+     * @param array<string, mixed> $paymentData
+     * @throws \Mage_Core_Exception
+     */
+    private function savePaymentSelection(
+        \Mage_Sales_Model_Quote $quote,
+        array $paymentData,
+        \Mage_Checkout_Model_Actor $actor,
+        bool $methodOnly,
+    ): \Mage_Sales_Model_Quote {
+        $paymentData = array_diff_key($paymentData, array_flip(self::PAYMENT_RESERVED_KEYS));
         $paymentData['checks'] = $this->getPaymentChecks($actor);
-        $import = fn() => $this->importPayment($quote, $paymentData);
+        $import = fn() => $this->importPayment($quote, $paymentData, $methodOnly);
         // Staff imports in the scope of the caller, in which Mage_Sales_Service_Order::submit() also places the order
         $actor === \Mage_Checkout_Model_Actor::Staff ? $import() : $this->inQuoteStoreScope($quote, $import);
         $this->collectAndSave($quote);
@@ -1218,7 +1249,7 @@ class Mage_Checkout_Service_Cart
      * @param array<string, mixed> $paymentData
      * @throws \Mage_Core_Exception
      */
-    private function importPayment(\Mage_Sales_Model_Quote $quote, array $paymentData): void
+    private function importPayment(\Mage_Sales_Model_Quote $quote, array $paymentData, bool $methodOnly = false): void
     {
         $methodCode = (string) ($paymentData['method'] ?? '');
         if (empty(\Mage::helper('payment')->getPaymentMethods($quote->getStoreId())[$methodCode]['model'])) {
@@ -1230,7 +1261,11 @@ class Mage_Checkout_Service_Cart
             // A payment method can change the shipping rates
             $quote->getShippingAddress()->setPaymentMethod($methodCode)->setCollectShippingRates(true);
         }
-        $quote->getPayment()->importData($paymentData);
+        if ($methodOnly) {
+            $quote->getPayment()->selectMethod($methodCode, $paymentData['checks'] ?? null);
+        } else {
+            $quote->getPayment()->importData($paymentData);
+        }
     }
 
     /**
@@ -1415,8 +1450,7 @@ class Mage_Checkout_Service_Cart
         // ids assert "already paid", and the storefront accepts one only after its replay
         // checks (assertPaypalOrderMatchesQuoteOrOrder), which this path never runs.
         $reservedKeys = array_flip([
-            'method', 'checks', 'additional_data', 'additional_information', 'method_instance',
-            'payment_id', 'quote_id', 'parent_id', 'created_at', 'updated_at',
+            'method', 'checks', ...self::PAYMENT_RESERVED_KEYS,
             'paypal_order_id', 'paypal_authorization_id', 'paypal_capture_id',
         ]);
         $paymentData = ['method' => $methodCode];

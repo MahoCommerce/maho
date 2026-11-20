@@ -75,6 +75,15 @@ class Mage_CatalogInventory_Model_Resource_Stock_Status extends Mage_Core_Model_
     }
 
     /**
+     * Retrieve the website whose stock status rows a store uses. The admin store has none: use the default store view.
+     */
+    public function getWebsiteIdOfStore(int $storeId): int
+    {
+        $websiteId = (int) Mage::app()->getStore($storeId)->getWebsiteId();
+        return $websiteId === 0 ? (int) Mage::app()->getDefaultStoreView()?->getWebsiteId() : $websiteId;
+    }
+
+    /**
      * Retrieve product status
      * Return array as key product id, value - stock status
      *

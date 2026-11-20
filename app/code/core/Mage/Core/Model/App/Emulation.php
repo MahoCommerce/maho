@@ -11,13 +11,6 @@
 class Mage_Core_Model_App_Emulation extends \Maho\DataObject
 {
     /**
-     * Factory instance
-     *
-     * @var Mage_Core_Model_Factory
-     */
-    protected $_factory;
-
-    /**
      * Application instance
      *
      * @var Mage_Core_Model_App
@@ -26,7 +19,6 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
 
     public function __construct(array $args = [])
     {
-        $this->_factory = empty($args['factory']) ? Mage::getSingleton('core/factory') : $args['factory'];
         $this->_app = empty($args['app']) ? Mage::app() : $args['app'];
         unset($args['factory'], $args['app']);
         parent::__construct($args);
@@ -47,16 +39,20 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
         $area = Mage_Core_Model_App_Area::AREA_FRONTEND,
     ) {
         $area ??= Mage_Core_Model_App_Area::AREA_FRONTEND;
+        $translator = $this->_app->getTranslator();
+        $initialTranslatorState = $translator->getState();
+
         $initialDesign = $this->_emulateDesign($storeId, $area);
         // Current store needs to be changed right before locale change and after design change
         $this->_app->setCurrentStore($storeId);
-        $initialLocaleCode = $this->_emulateLocale($storeId, $area);
+        $initialLocaleCode = $this->_emulateLocale($storeId);
 
         $initialEnvironmentInfo = new \Maho\DataObject();
         $initialEnvironmentInfo->setInitialDesign($initialDesign)
-            ->setInitialLocaleCode($initialLocaleCode);
+            ->setInitialLocaleCode($initialLocaleCode)
+            ->setInitialTranslatorState($initialTranslatorState);
 
-        Mage::app()->getTranslator()->init($area, true);
+        $translator->init($area, true);
 
         return $initialEnvironmentInfo;
     }
@@ -76,7 +72,8 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
         $this->_restoreInitialDesign($initialDesign);
         // Current store needs to be changed right before locale change and after design change
         $this->_app->setCurrentStore($initialDesign['store']);
-        $this->_restoreInitialLocale($initialEnvironmentInfo->getInitialLocaleCode(), $initialDesign['area']);
+        $this->_restoreInitialLocale($initialEnvironmentInfo->getInitialLocaleCode());
+        $this->_app->getTranslator()->setState($initialEnvironmentInfo->getInitialTranslatorState());
         return $this;
     }
 
@@ -104,17 +101,16 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
      * Apply locale of the specified store
      *
      * @param null|string|bool|int|Mage_Core_Model_Store $storeId
-     * @param string $area
      *
      * @return string initial locale code
      */
-    protected function _emulateLocale($storeId, $area = Mage_Core_Model_App_Area::AREA_FRONTEND)
+    protected function _emulateLocale($storeId)
     {
         $initialLocaleCode = $this->_app->getLocale()->getLocaleCode();
         $newLocaleCode = $this->_getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_LOCALE, $storeId);
         if ($initialLocaleCode != $newLocaleCode) {
             $this->_app->getLocale()->setLocaleCode($newLocaleCode);
-            $this->_factory->getSingleton('core/translate')->setLocale($newLocaleCode)->init($area, true);
+            $this->_app->getTranslator()->setLocale($newLocaleCode);
         }
         return $initialLocaleCode;
     }
@@ -148,18 +144,14 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
      * Restore locale of the initial store
      *
      * @param string $initialLocaleCode
-     * @param string $initialArea
      *
      * @return $this
      */
-    protected function _restoreInitialLocale(
-        $initialLocaleCode,
-        $initialArea = Mage_Core_Model_App_Area::AREA_ADMINHTML,
-    ) {
+    protected function _restoreInitialLocale($initialLocaleCode)
+    {
         $currentLocaleCode = $this->_app->getLocale()->getLocaleCode();
         if ($currentLocaleCode != $initialLocaleCode) {
             $this->_app->getLocale()->setLocaleCode($initialLocaleCode);
-            $this->_factory->getSingleton('core/translate')->setLocale($initialLocaleCode)->init($initialArea, true);
         }
         return $this;
     }

@@ -703,9 +703,61 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             } else {
                 $term = $this->quoteInto($cond, $term);
             }
+            $term = '(' . $term . ')';
         }
 
         return implode(' AND ', $where);
+    }
+
+    /**
+     * Return the WHERE conditions of $select as SQL, without the WHERE keyword.
+     * Example: where('a = 1')->orWhere('b = 2') gives '(a = 1) OR (b = 2)'.
+     */
+    protected function _renderSelectWhere(Select $select): string
+    {
+        $where = [];
+        foreach ($select->getPart(Select::WHERE) as $term) {
+            if (!is_array($term)) {
+                $term = [Select::SQL_AND => $term];
+            }
+            foreach ($term as $type => $cond) {
+                if ($where) {
+                    $where[] = $type;
+                }
+                $where[] = $cond;
+            }
+        }
+        return implode(' ', $where);
+    }
+
+    /**
+     * Return the FROM and WHERE text that comes after SET in an UPDATE on PostgreSQL and SQLite.
+     * Example: join(['s' => 'src'], 't.id = s.id')->where('s.x = 1') gives ' FROM "src" AS "s" WHERE (t.id = s.id) AND ((s.x = 1))'.
+     * These databases cannot JOIN ... ON the table that the UPDATE changes, so the join conditions go in the WHERE text.
+     */
+    protected function _renderFromAndWhereForUpdate(Select $select, string $tableAlias): string
+    {
+        $fromTables = [];
+        $where = [];
+        foreach ($select->getPart(Select::FROM) as $alias => $tableInfo) {
+            if ($alias === $tableAlias) {
+                continue;
+            }
+            $fromTables[] = $tableInfo['tableName'] instanceof Select
+                ? sprintf('(%s) AS %s', $tableInfo['tableName']->assemble(), $this->quoteIdentifier($alias))
+                : sprintf('%s AS %s', $this->quoteIdentifier($tableInfo['tableName']), $this->quoteIdentifier($alias));
+            if (!empty($tableInfo['joinCondition'])) {
+                $where[] = '(' . $tableInfo['joinCondition'] . ')';
+            }
+        }
+
+        $selectWhere = $this->_renderSelectWhere($select);
+        if ($selectWhere !== '') {
+            $where[] = '(' . $selectWhere . ')';
+        }
+
+        return ($fromTables ? ' FROM ' . implode(', ', $fromTables) : '')
+            . ($where ? ' WHERE ' . implode(' AND ', $where) : '');
     }
 
     // =========================================================================
@@ -1310,6 +1362,44 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     // =========================================================================
     // Insert Helper Methods
     // =========================================================================
+
+    /**
+     * Return the rows of an insert, each with its values in the key order of the first row.
+     *
+     * $data is one row (column => value) or a list of rows. The SQL takes its column list from
+     * the first row and binds the values by position, so every row must have the same keys.
+     *
+     * @return list<array<string, mixed>>
+     * @throws Exception when $data is empty, or when a row does not have the same keys as the first row
+     */
+    protected function _alignInsertRows(array $data): array
+    {
+        if ($data === []) {
+            throw new Exception('Invalid data for insert');
+        }
+
+        $first = array_first($data);
+        if (!is_array($first)) {
+            return [$data];
+        }
+
+        $cols = array_keys($first);
+        $rows = [];
+        foreach ($data as $row) {
+            if (!is_array($row)) {
+                throw new Exception('Invalid data for insert');
+            }
+            if (array_keys($row) === $cols) {
+                $rows[] = $row;
+                continue;
+            }
+            if (count($row) !== count($cols) || array_diff_key($row, $first)) {
+                throw new Exception('Invalid data for insert');
+            }
+            $rows[] = array_replace($first, $row);
+        }
+        return $rows;
+    }
 
     /**
      * Prepare row data for insert

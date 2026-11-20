@@ -72,4 +72,16 @@ describe('Mage_Catalog_Model_Product_Attribute_Backend_Media on the media mount'
         expect(fn() => $this->backend->moveFromTmp('/../../../secret.png.tmp'))
             ->toThrow(Exception::class, 'Detected malicious path');
     });
+
+    it('refuses to copy an image path that leaves the product image directory', function (string $file): void {
+        $this->mount->write('wysiwyg/secret.png', 'other');
+
+        expect(fn() => $this->backend->copy($file))
+            ->toThrow(Mage_Core_Exception::class, 'Detected malicious path');
+
+        expect($this->mount->listFiles('wysiwyg')->toArray())->toHaveCount(1);
+    })->with([
+        'slash' => '/../../wysiwyg/secret.png',
+        'backslash' => '\\..\\..\\wysiwyg\\secret.png',
+    ]);
 });

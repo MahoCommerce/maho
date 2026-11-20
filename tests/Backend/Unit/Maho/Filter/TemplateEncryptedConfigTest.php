@@ -29,6 +29,15 @@ describe('getConfig() in a template variable', function () {
         expect($this->filter->filter("{{var store.getConfig('{$path}')}}"))->toBe('');
     })->with(['system/smtp', 'system', '/system/smtp/password/']);
 
+    it('does not return an encrypted value through an attribute selector in the path', function (string $directive) {
+        expect($this->filter->filter($directive))->toBe('');
+    })->with([
+        'on the field' => ["{{var store.getConfig('system/smtp/password@x=')}}"],
+        'on the group' => ["{{var store.getConfig('system/smtp@x=/password')}}"],
+        'on the section' => ["{{var store.getConfig('system@x=/smtp/password')}}"],
+        'in a condition' => ["{{depend store.getConfig('system/smtp/password@x=')}}set{{/depend}}"],
+    ]);
+
     it('returns a value that is not encrypted', function (string $path) {
         expect($this->filter->filter("{{var store.getConfig('{$path}')}}"))->toBe('value-of:' . $path);
     })->with(['general/store_information/name', 'system/smtp/password_not']);

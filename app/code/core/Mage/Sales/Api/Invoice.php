@@ -17,6 +17,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
 use Maho\ApiPlatform\CrudResource;
+use Maho\ApiPlatform\Security\OperationAccessChecker;
 use Maho\ApiPlatform\Metadata\ListFilter;
 
 #[ApiResource(
@@ -90,6 +91,7 @@ use Maho\ApiPlatform\Metadata\ListFilter;
         new Post(
             uriTemplate: '/orders/{orderId}/invoices',
             name: 'order_invoice_create',
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/invoice'],
             uriVariables: ['orderId' => new Link(toProperty: 'orderId')],
             security: "is_granted('ROLE_ADMIN') or is_granted('invoices/create')",
             description: 'Create an invoice for an order (full or partial). Body: items [{orderItemId, qty}] (all invoiceable items if omitted), capture ("online"|"offline"|"not_capture"), comment, notifyCustomer',
@@ -97,6 +99,7 @@ use Maho\ApiPlatform\Metadata\ListFilter;
         new Post(
             uriTemplate: '/invoices/{id}/capture',
             name: 'invoice_capture',
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/capture'],
             requirements: ['id' => '\d+'],
             security: "is_granted('ROLE_ADMIN') or is_granted('invoices/write')",
             description: 'Capture an open invoice through the order\'s payment gateway',
@@ -104,6 +107,7 @@ use Maho\ApiPlatform\Metadata\ListFilter;
         new Post(
             uriTemplate: '/invoices/{id}/void',
             name: 'invoice_void',
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/cancel'],
             requirements: ['id' => '\d+'],
             security: "is_granted('ROLE_ADMIN') or is_granted('invoices/write')",
             description: 'Void a captured invoice',
@@ -111,6 +115,7 @@ use Maho\ApiPlatform\Metadata\ListFilter;
         new Post(
             uriTemplate: '/invoices/{id}/cancel',
             name: 'invoice_cancel',
+            extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/cancel'],
             requirements: ['id' => '\d+'],
             security: "is_granted('ROLE_ADMIN') or is_granted('invoices/write')",
             description: 'Cancel an open invoice',

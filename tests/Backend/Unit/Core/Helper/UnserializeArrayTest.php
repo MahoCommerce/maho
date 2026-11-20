@@ -55,9 +55,9 @@ describe('Legacy serialized data conversion via core/unserializeArray helper', f
             ->toThrow(Exception::class);
     });
 
-    it('throws on null or empty input', function () {
-        expect(fn() => $this->helper->unserialize(null))->toThrow(Exception::class);
-        expect(fn() => $this->helper->unserialize(''))->toThrow(Exception::class);
+    it('returns an empty array for null or empty input', function () {
+        expect($this->helper->unserialize(null))->toBe([])
+            ->and($this->helper->unserialize(''))->toBe([]);
     });
 });
 

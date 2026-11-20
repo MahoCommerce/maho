@@ -15,7 +15,7 @@ describe('Customer Attributes Integration Tests', function () {
     });
 
     describe('Birthday Calculations (days_until_birthday)', function () {
-        test('matches the customers whose birthday is in the given number of days', function (string $days, string $member, string $monthDay) {
+        test('matches the customers whose birthday is in the given number of days', function (string $days, string $member) {
             $segment = createCustomerAttributesTestSegment('Birthday in ' . $days . ' days', [
                 'type' => 'customersegmentation/segment_condition_customer_attributes',
                 'attribute' => 'days_until_birthday',
@@ -36,6 +36,8 @@ describe('Customer Attributes Integration Tests', function () {
             expect($sql)->toContain('CASE')
                 ->and($sql)->toMatch('/DATEDIFF|::date|DATE\\(|JULIANDAY/');
 
+            $fixtureDob = Mage::getModel('customer/customer')->load($this->customers[$member])->getDob();
+            $monthDay = date('m-d', strtotime($fixtureDob));
             foreach ($matchedCustomers as $customerId) {
                 $dob = Mage::getModel('customer/customer')->load($customerId)->getDob();
                 expect($dob)->not->toBeEmpty();
@@ -48,8 +50,8 @@ describe('Customer Attributes Integration Tests', function () {
                 expect($dobMonthDay)->toBe($monthDay, "Customer {$customerId} DOB {$dob}");
             }
         })->with([
-            'today' => ['0', 'Birthday Today', date('m-d')],
-            'tomorrow' => ['1', 'Birthday Tomorrow', date('m-d', strtotime('+1 day'))],
+            'today' => ['0', 'Birthday Today'],
+            'tomorrow' => ['1', 'Birthday Tomorrow'],
         ]);
 
         test('excludes customers with no birthday (null dob)', function () {
@@ -123,6 +125,8 @@ describe('Customer Attributes Integration Tests', function () {
     });
 
     describe('Customer Demographics and EAV Attributes', function () {
+        $registeredSince = date('Y-m-d', strtotime('-1 year'));
+
         test('matches the customers by an attribute', function (string $attribute, string $operator, string $value, ?string $member, Closure $passes) {
             $segment = createCustomerAttributesTestSegment('Attribute ' . $attribute, [
                 'type' => 'customersegmentation/segment_condition_customer_attributes',
@@ -145,7 +149,7 @@ describe('Customer Attributes Integration Tests', function () {
             'first name' => ['firstname', '==', 'John', 'John BigSpender', fn($c) => $c->getFirstname() === 'John'],
             'customer group' => ['group_id', '==', '2', 'Birthday Yesterday', fn($c) => (int) $c->getGroupId() === 2],
             'date of birth' => ['dob', '==', '1990-06-15', 'Single Purchase', fn($c) => !empty($c->getDob()) && date('Y-m-d', strtotime($c->getDob())) === '1990-06-15'],
-            'registered in the last year' => ['created_at', '>=', date('Y-m-d', strtotime('-1 year')), 'New Customer', fn($c) => date('Y-m-d', strtotime($c->getCreatedAt())) >= date('Y-m-d', strtotime('-1 year'))],
+            'registered in the last year' => ['created_at', '>=', $registeredSince, 'New Customer', fn($c) => date('Y-m-d', strtotime($c->getCreatedAt())) >= $registeredSince],
             'registered since 2020' => ['created_at', '>=', '2020-01-01', 'New Customer', fn($c) => date('Y-m-d', strtotime($c->getCreatedAt())) >= '2020-01-01'],
             'store view' => ['store_id', '==', '1', null, fn($c) => (int) $c->getStoreId() === 1],
         ]);

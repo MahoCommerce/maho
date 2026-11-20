@@ -113,6 +113,7 @@ class JsonRpcClient
         ];
 
         $context = stream_context_create($context);
+        http_clear_last_response_headers();
         $response = file_get_contents($url, false, $context);
 
         if ($response === false) {
@@ -121,12 +122,10 @@ class JsonRpcClient
 
         // Get HTTP response code from headers
         $httpCode = 200;
-        if (isset($http_response_header)) {
-            foreach ($http_response_header as $header) {
-                if (preg_match('/HTTP\/\d\.\d\s+(\d+)/', $header, $matches)) {
-                    $httpCode = (int) $matches[1];
-                    break;
-                }
+        foreach (http_get_last_response_headers() ?? [] as $header) {
+            if (preg_match('/HTTP\/\d\.\d\s+(\d+)/', $header, $matches)) {
+                $httpCode = (int) $matches[1];
+                break;
             }
         }
 

@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2022-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
@@ -30,6 +30,12 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
 
         $service = Mage::getService('sales/order_document');
         $invoiceId = (int) $this->getRequest()->getParam('invoice_id');
+        // _isAllowed() checks the same for each action. This check also covers the other callers.
+        if (!$invoiceId && !$this->_isCreateAllowed()) {
+            $this->_getSession()->addError($this->__('Access denied.'));
+            return false;
+        }
+
         try {
             $invoice = $invoiceId
                 ? $service->requireInvoice($invoiceId)
@@ -140,7 +146,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     #[Maho\Config\Route('/admin/sales_order_invoice/save')]
     public function saveAction(): void
     {
-        $data = (array) $this->getRequest()->getPost('invoice');
+        $data = $this->_filterInvoiceData((array) $this->getRequest()->getPost('invoice'));
         $orderId = $this->getRequest()->getParam('order_id');
 
         if (!empty($data['comment_text'])) {
@@ -238,9 +244,11 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     public function addCommentAction(): void
     {
         try {
-            $this->getRequest()->setParam('invoice_id', $this->getRequest()->getParam('id'));
+            $invoiceId = (int) $this->getRequest()->getParam('id');
+            $this->getRequest()->setParam('invoice_id', $invoiceId);
             $data = (array) $this->getRequest()->getPost('comment');
-            $invoice = $this->_initInvoice() ?: Mage::throwException($this->__('The invoice no longer exists.'));
+            // Without an invoice ID, _initInvoice() prepares a new invoice from the order
+            $invoice = ($invoiceId > 0 ? $this->_initInvoice() : false) ?: Mage::throwException($this->__('The invoice no longer exists.'));
             Mage::getService('sales/order_document')->addComment(
                 $invoice,
                 (string) ($data['comment'] ?? ''),
@@ -268,5 +276,70 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     {
         $this->_initInvoice();
         parent::printAction();
+    }
+
+    /**
+     * Check the order action of each change in addition to the Invoices permission.
+     *
+     * Without an invoice ID, an action prepares a new invoice from the order, so it needs the
+     * Invoice order action. addComment reads the invoice ID from its id parameter. A void also
+     * cancels the invoice, so it needs Cancel.
+     */
+    #[\Override]
+    protected function _isAllowed(): bool
+    {
+        if (!parent::_isAllowed()) {
+            return false;
+        }
+
+        $request = $this->getRequest();
+        $action = strtolower($request->getActionName());
+        $aclResource = match ($action) {
+            'start', 'new', 'updateqty', 'save' => 'sales/order/actions/invoice',
+            'capture' => 'sales/order/actions/capture',
+            'cancel', 'void' => 'sales/order/actions/cancel',
+            default => null,
+        };
+        if ($aclResource !== null && !Mage::getSingleton('admin/session')->isAllowed($aclResource)) {
+            return false;
+        }
+
+        $invoiceId = (int) $request->getParam($action === 'addcomment' ? 'id' : 'invoice_id');
+        if ($invoiceId === 0 && (int) $request->getParam('order_id') > 0) {
+            return $this->_isCreateAllowed();
+        }
+
+        return true;
+    }
+
+    /**
+     * Return true when the admin may create an invoice.
+     */
+    protected function _isCreateAllowed(): bool
+    {
+        return Mage::getSingleton('admin/session')->isAllowed('sales/order/actions/invoice');
+    }
+
+    /**
+     * Remove the invoice options that the admin may not use.
+     *
+     * The invoice form shows the capture choice only with the Capture permission, and the
+     * Create Shipment option only with the Ship permission.
+     *
+     * @param array<string, mixed> $data the posted invoice data
+     * @return array<string, mixed>
+     */
+    protected function _filterInvoiceData(array $data): array
+    {
+        $session = Mage::getSingleton('admin/session');
+        if (!$session->isAllowed('sales/order/actions/capture')) {
+            unset($data['capture_case']);
+        }
+
+        if (!$session->isAllowed('sales/order/actions/ship')) {
+            unset($data['do_shipment']);
+        }
+
+        return $data;
     }
 }

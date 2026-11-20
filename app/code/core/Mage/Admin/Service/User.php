@@ -56,16 +56,23 @@ class Mage_Admin_Service_User
     /**
      * Check $user with validate(), save it, and give it the role $roleId when it is set. A new user
      * triggers the new admin user notification when admin/security/crate_admin_user_notification is on.
-     * $actingUserId is the admin user who makes the request. This user cannot deactivate the own account.
+     * $actingUserId is the admin user who makes the request. This user cannot deactivate the own account,
+     * and cannot change the own role.
      *
      * @throws Mage_Core_Exception_Input with the errors of validate()
-     * @throws Mage_Core_Exception_Conflict when $actingUserId deactivates the own account
+     * @throws Mage_Core_Exception_Conflict when $actingUserId deactivates the own account or changes the own role
      */
     public function save(User $user, ?int $roleId = null, ?int $actingUserId = null): User
     {
         $isNew = !$user->getId();
-        if (!$isNew && $actingUserId === (int) $user->getId() && $user->getIsActive() === false) {
-            throw new Mage_Core_Exception_Conflict(Mage::helper('adminhtml')->__('You cannot deactivate your own account.'));
+        if (!$isNew && $actingUserId === (int) $user->getId()) {
+            if ($user->getIsActive() === false) {
+                throw new Mage_Core_Exception_Conflict(Mage::helper('adminhtml')->__('You cannot deactivate your own account.'));
+            }
+            // A session loses the permissions of its old role on the next request, so a change can lock the admin out
+            if ($roleId !== null && !in_array($roleId, array_map(intval(...), $user->getRoles()), true)) {
+                throw new Mage_Core_Exception_Conflict(Mage::helper('adminhtml')->__('You cannot change your own role.'));
+            }
         }
         Mage_Core_Exception_Input::assertValid($user->validate(), 'user');
 

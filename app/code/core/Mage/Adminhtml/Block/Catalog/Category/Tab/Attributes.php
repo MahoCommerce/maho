@@ -168,13 +168,9 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
 
         $form->addValues($this->getCategory()->getData());
 
-        // Add note to the "Is Dynamic Category" field
+        // The tab that holds the "Is Dynamic Category" field also holds the rules, whatever the name of its group
         if ($element = $form->getElement('is_dynamic')) {
             $element->setNote(Mage::helper('catalog')->__('When enabled, associated products are automatically recalculated when reindex runs.'));
-        }
-
-        // If this is the Dynamic Category attribute group, add the dynamic rules form
-        if ($group->getAttributeGroupName() == 'Dynamic Category') {
             $rule = $this->getDynamicRule();
 
             // Rule-level behaviour, not a condition: this maps the matched set onto another set rather
@@ -211,7 +207,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
 
             // Add dynamic rules fieldset
             $rulesFieldset = $form->addFieldset('dynamic_rules_fieldset', [
-                'legend' => Mage::helper('catalog')->__('Dynamic Category Rules'),
+                'legend' => Mage::helper('catalog')->__('Conditions'),
                 'class'  => 'fieldset-wide',
             ]);
 
@@ -283,9 +279,8 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
     {
         $formHtml = parent::getFormHtml();
 
-        // Add rules JavaScript if this is the Dynamic Category group
-        $group = $this->getGroup();
-        if ($group && $group->getAttributeGroupName() == 'Dynamic Category') {
+        // Add rules JavaScript if this tab holds the dynamic rules
+        if ($this->getForm()?->getElement('is_dynamic')) {
             $newChildUrl = $this->getUrl('*/*/newConditionHtml/form/dynamic_conditions_fieldset');
 
             $script = '<script>

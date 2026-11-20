@@ -44,6 +44,7 @@ class OrderMutationHandler
     public function handlePlaceOrder(array $variables): array
     {
         AdminAcl::checkResource(Order::class);
+        AdminAcl::checkPath('sales/order/actions/create');
         $input = RequestInput::of($variables);
         $cartId = $input->int('cartId');
         if (!$cartId) {
@@ -178,6 +179,7 @@ class OrderMutationHandler
     public function handleCreateCreditMemo(array $variables, array $context): array
     {
         AdminAcl::checkResource(CreditMemo::class);
+        AdminAcl::checkPath('sales/order/actions/creditmemo');
         $input = RequestInput::of($variables);
         $orderId = $input->int('orderId');
         $items = $input->rows('items') ?? [];
