@@ -297,7 +297,7 @@ it('refuses an order with a card method that the one-step checkout saved without
     $store->setConfig('payment/authorizenet/active', '1');
     $store->setConfig('payment/authorizenet/cctypes', 'VI');
     $store->setConfig('payment/authorizenet/useccv', '0');
-    Mage::getService('checkout/cart')->selectPaymentMethod($this->carts[0], ['method' => 'authorizenet'], methodOnly: true);
+    Mage::getService('checkout/cart')->selectPaymentMethodCode($this->carts[0], 'authorizenet');
 
     $web = placeOrderViaWeb(placeOrderReload($this->carts[0]), ['payment' => []]);
 

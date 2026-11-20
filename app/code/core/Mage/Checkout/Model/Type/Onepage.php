@@ -412,24 +412,42 @@ class Mage_Checkout_Model_Type_Onepage
     }
 
     /**
-     * Specify quote payment method. With $methodOnly, the method gets no form data: placing the order validates it.
+     * Specify quote payment method
      *
      * @param   array $data
      * @return  array
      * @throws  Mage_Core_Exception when the method is not available for the cart, or refuses the data
      */
-    public function savePayment($data, bool $methodOnly = false)
+    public function savePayment($data)
     {
         if (empty($data)) {
             return ['error' => -1, 'message' => Mage::helper('checkout')->__('Invalid data.')];
         }
-        $this->_getCartService()->selectPaymentMethod($this->getQuote(), (array) $data, methodOnly: $methodOnly);
+        $this->_getCartService()->selectPaymentMethod($this->getQuote(), (array) $data);
+        $this->_completePaymentStep();
 
+        return [];
+    }
+
+    /**
+     * Specify the quote payment method without the data of its form, as the one-step checkout does when the customer
+     * selects a method. Placing the order validates the payment data.
+     *
+     * @throws Mage_Core_Exception when the method is not available for the cart
+     */
+    public function savePaymentMethod(string $methodCode): array
+    {
+        $this->_getCartService()->selectPaymentMethodCode($this->getQuote(), $methodCode);
+        $this->_completePaymentStep();
+
+        return [];
+    }
+
+    protected function _completePaymentStep(): void
+    {
         $this->getCheckout()
             ->setStepData('payment', 'complete', true)
             ->setStepData('review', 'allow', true);
-
-        return [];
     }
 
     /**

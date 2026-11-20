@@ -1140,7 +1140,7 @@ class Mage_Checkout_Service_Cart
     /**
      * Give $quote the payment method and the data of $paymentData, and save the cart. The method must be available
      * for the cart and must accept the data. $actor gives the checks of the method, see getPaymentChecks(): the
-     * client cannot choose them. With $methodOnly, the method gets no form data and does not validate it.
+     * client cannot choose them.
      *
      * @param array<string, mixed> $paymentData the code of the method in "method", and the fields of its form
      * @throws \Mage_Core_Exception
@@ -1149,7 +1149,30 @@ class Mage_Checkout_Service_Cart
         \Mage_Sales_Model_Quote $quote,
         array $paymentData,
         \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
-        bool $methodOnly = false,
+    ): \Mage_Sales_Model_Quote {
+        return $this->savePaymentSelection($quote, $paymentData, $actor, false);
+    }
+
+    /**
+     * Give $quote the payment method $methodCode without the data of its form, and save the cart. The method must be
+     * available for the cart, but it does not validate its form: placing the order does.
+     *
+     * @throws \Mage_Core_Exception when the method is not available for the cart
+     */
+    public function selectPaymentMethodCode(\Mage_Sales_Model_Quote $quote, string $methodCode): \Mage_Sales_Model_Quote
+    {
+        return $this->savePaymentSelection($quote, ['method' => $methodCode], \Mage_Checkout_Model_Actor::Customer, true);
+    }
+
+    /**
+     * @param array<string, mixed> $paymentData
+     * @throws \Mage_Core_Exception
+     */
+    private function savePaymentSelection(
+        \Mage_Sales_Model_Quote $quote,
+        array $paymentData,
+        \Mage_Checkout_Model_Actor $actor,
+        bool $methodOnly,
     ): \Mage_Sales_Model_Quote {
         $paymentData = array_diff_key($paymentData, array_flip(self::PAYMENT_RESERVED_KEYS));
         $paymentData['checks'] = $this->getPaymentChecks($actor);
