@@ -1,6 +1,6 @@
 ---
 description: How to order the products of a category - the tile view with drag and drop and pinned products, the automatic sorts Newest, Bestsellers and Most Viewed, out of stock products last, where new products go, and why a category ignores the positions of its products.
-admin_pages: [catalog_category]
+admin_pages: [catalog_category, report_statistics]
 ---
 
 # The Order of Products in a Category
@@ -21,48 +21,110 @@ in another category.
 
 ## The tile view
 
-On the **Products** tab, the switch above the grid shows **Grid** and **Tiles**. The
-browser remembers your last choice. The tile view shows each product with its image, name, SKU and
-price, its stock status, a flag when it is disabled or hidden, the units sold and the revenue of
-the last days, and its position.
+The tile view is a visual merchandiser: it shows the products of the category as tiles in the order
+of the storefront, and you set the order with drag and drop. The admin calls the position order
+**Best Value**. The **Sort By** list of the storefront calls it **Position**.
 
-When the category sorts by **Best Value** (the position order), you can change the order:
+To open the tile view:
+
+1. Go to **Catalog > Categories** and select the category.
+2. Open the **Products** tab.
+3. Click **Tiles**. The browser remembers your choice for the next category.
+
+![The Products tab of a category in the tile view, with the Grid and Tiles switch, the search, Add product and Reset order](images/category-tiles.webp)
+
+Each tile shows:
+
+- The image, the name, the SKU and the price of the product.
+- The stock status, and a flag when the product is disabled or hidden.
+- The units sold and the revenue of the last days. **Days Counted by Bestsellers and Most Viewed**
+  sets the number of days (see [The statistics](#the-statistics)).
+- The position of the product in the category.
+
+The products that a dynamic category rule added show the badge **Added by a rule**.
+
+## Change the order
+
+When the category sorts by **Best Value**, you can change the order in four ways:
 
 - Drag a tile to a new place.
 - Type a number in the position field of a tile.
-- Select tiles. A bar at the bottom of the screen shows **Move to top**, **Move to bottom**,
-  **Move to position**, **Pin**, **Unpin** and **Clear selection**.
-- Use the search field to filter the tiles by name or SKU, or tick **Out of stock only**. While a
-  filter is on, you cannot drag the tiles, but the actions for the selected tiles still work.
-- A dashed line between the tiles marks the end of each page, counted by position. The line uses the
-  number of products per page of the store. A product that the storefront hides, or an out of stock
-  product that the storefront shows last, can move the real page end.
-- The tiles load 100 at a time when you scroll. **Move to position** reaches a slot that the page
-  did not load yet.
-- Click **Add product** and search by name or SKU to add a product. Click **Remove** on a tile to
-  remove it.
-  A dynamic category does not offer both, because its rules decide which products it holds.
-- **Reset order** discards the changes that you did not save.
+- Click the pin of a tile to keep it in its slot (see [Pinned products](#pinned-products)).
+- Select tiles with their checkboxes and use the bar at the bottom of the screen.
 
-Your changes stay in the page until you click **Save Category**. The grid and the tile view change
-the same list, so you can use both before you save. When you select another category or store view
-with unsaved changes, the page asks you first.
+![Drag a tile to the first slot, pin a tile, then select two tiles and click Move to top](images/category-tiles-drag-and-drop.webp)
 
-When the category sorts by something else, the tiles are read-only and show the order of the
-storefront. A line above them says which sort the category uses, for example "This category sorts by
-Bestsellers", and what to change. The store looks at the value for the store view that you selected
-at the top of the page, with **Use Config Settings** included.
+The bar shows when you select at least one tile. It has these actions:
+
+| Action | What it does |
+|--------|--------------|
+| Move to top | Moves the selected products to the first slots |
+| Move to bottom | Moves the selected products to the last slots |
+| Move to position | Moves the selected products to the position that you type in the field before it |
+| Pin | Pins the selected products in their slots |
+| Unpin | Removes the pin of the selected products |
+| Clear selection | Clears the checkboxes and hides the bar |
+
+![A pinned tile, two selected tiles and the bar of actions at the bottom of the screen](images/category-tiles-pin-and-bulk.webp)
+
+A dashed line between the tiles marks the end of each storefront page, counted by position. The line
+uses the number of products per page of the store. A product that the storefront hides, or an out of
+stock product that the storefront shows last, can move the real end of a page.
+
+The tiles load 100 at a time when you scroll. **Move to position** also reaches a slot that the page
+did not load yet.
+
+## Find, add and remove products
+
+- Type in **Search by name or SKU** to show only the matching tiles.
+- Tick **Out of stock only** to show only the products that are out of stock.
+
+While a search or a filter is on, you cannot drag the tiles. The actions of the bar still work.
+
+To add a product:
+
+1. Click **Add product**.
+2. Type a part of the name or of the SKU.
+3. Click the product in the list. The tile shows at the top or at the bottom of the list, as
+   **New Products Go To** sets.
+
+![The Add product panel, with the products that match "camera"](images/category-tiles-add-product.webp)
+
+To remove a product, click **Remove** on its tile. A dynamic category offers neither **Add product**
+nor **Remove**, because its rules decide which products it holds.
+
+## Save or discard the changes
+
+Your changes stay in the page until you click **Save Category**. While the order has unsaved
+changes, a line above the tiles says so, and the **Products** tab shows the mark of a changed tab.
+**Reset order** discards the changes that you did not save.
+
+The grid and the tile view change the same list, so you can use both before you save. When you select
+another category or store view with unsaved changes, the page asks you first.
 
 The order that you set is the same in all store views. The tile view says so when you select a store
-view. A sort order that is not Best Value never changes the positions. The manual order comes back
-when you set the sort to Best Value again.
+view.
+
+## When the tiles are read-only
+
+When the category sorts by something else than Best Value, the tiles are read-only and show the
+order of the storefront. A line above them names the sort order of the category and says what to
+change. The store uses the value of the store view that you selected at the top of the page, with
+**Use Config Settings** included. With **All Store Views**, the Bestsellers and Most Viewed sorts
+count the sales and the views of all store views. Select a store view to see its own order.
+
+![The read-only tiles of a category that sorts by Bestsellers](images/category-tiles-read-only.webp)
+
+A sort order that is not Best Value never changes the positions. The manual order comes back when you
+set the sort order to Best Value again.
 
 ## Pinned products
 
 Pin a product to keep it in its slot. The other products move around the pinned slots: when a
 product enters the category, leaves it, or moves in the list, a pinned product stays at the same
-position number. A pinned product does not move when you drag other tiles, and you cannot drag it.
-Unpin it to move it again. Pins work only in the manual order.
+position number. A pinned tile has a colored background, and its position number is fixed. You
+cannot drag it, and it does not move when you drag other tiles. Unpin it to move it again. Pins work
+only in the manual order.
 
 ## Where new products go
 
@@ -72,6 +134,8 @@ It applies to the products that a dynamic category rule adds, to the products th
 grid without a position, and to the products that you add in the tile view. When you type a
 position for a product, the store keeps your position.
 
+![The Display Settings tab, with New Products Go To and Show Out of Stock Products Last](images/category-display-settings-order.webp)
+
 ## Out of stock products last
 
 Set **Show Out of Stock Products Last** to Yes on the **Display Settings** tab to put the products
@@ -79,7 +143,8 @@ that are out of stock after the products that are in stock, with every sort orde
 by stock status first, and then by the sort order of the category. It never changes the positions,
 so a product goes back to its slot when it is in stock again. This rule is stronger than a pin. It
 matters only when the store shows out of stock products
-(**System > Configuration > Inventory > Stock Options**).
+(**System > Configuration > Inventory > Stock Options**). The tile view shows a line when the setting
+is on.
 
 ## Automatic sorts
 
@@ -94,16 +159,29 @@ The sort lists of the category and of the storefront offer three more sort order
 A product with no sales, or no views, in the period comes last, in both directions. The shopper can
 reverse the direction with the arrow next to **Sort By**.
 
+![A storefront category sorted by Bestsellers](images/category-sort-by-storefront.webp)
+
+### The statistics
+
 The number of days is **Days Counted by Bestsellers and Most Viewed** in
 **System > Configuration > Catalog > Catalog**, group **Frontend**. The default is 30. The period is
 the last days before the last refresh of the statistics, not a calendar month. The store counts the
 orders of every state except Canceled.
 
+![The Days Counted by Bestsellers and Most Viewed setting in the Frontend group](images/catalog-config-sort-days.webp)
+
 The statistics refresh with the daily jobs of the reports, at midnight by default
-(**System > Configuration > Reports > Cron Settings**). **Reports > Statistics > Refresh Statistics**
-refreshes them too, for the Bestsellers and the Most Viewed reports. After you change the number of
-days, the new period starts at the next refresh. The tile view shows when the statistics were
-updated last.
+(**System > Configuration > Reports > Cron Settings**). To refresh them now:
+
+1. Go to **Reports > Statistics > Refresh Statistics**.
+2. Tick **Bestsellers**, **Most Viewed**, or both.
+3. In **Actions**, select **Refresh Statistics for the Last Day** or **Refresh Lifetime Statistics**,
+   and click **Submit**.
+
+![The Refresh Statistics page, with the Bestsellers and Most Viewed reports](images/reports-refresh-statistics.webp)
+
+After you change the number of days, the new period starts at the next refresh. The tile view shows
+when the statistics were updated last.
 
 ## Which sort order the category page uses
 
