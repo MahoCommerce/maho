@@ -278,7 +278,7 @@ function getItems(array $response): array
 | API v2 Test Availability Check
 |--------------------------------------------------------------------------
 |
-| Skip Api/V2 tests when no API server is reachable.
+| Skip Api/V2 and Api/Soap tests when no API server is reachable.
 | CI environments install Maho but do not start a web server,
 | so these integration tests can only run locally or in environments
 | where the API is served.
@@ -348,7 +348,7 @@ uses()
             $this->markTestSkipped('API server not reachable - skipping API integration tests');
         }
     })
-    ->in('Api/V2');
+    ->in('Api/V2', 'Api/Soap');
 
 uses()
     ->beforeEach(function (): void {
