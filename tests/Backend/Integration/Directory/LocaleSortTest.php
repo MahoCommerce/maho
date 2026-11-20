@@ -55,3 +55,16 @@ it('sorts localized values in French and renumbers their keys', function () {
         $locale->setLocaleCode($previous);
     }
 });
+
+it('sorts the country options of the locale model in French', function () {
+    $locale = Mage::app()->getLocale();
+    $previous = $locale->getLocaleCode();
+    try {
+        $locale->setLocaleCode('fr_FR');
+        $codes = array_column($locale->getOptionCountries(), 'value');
+
+        expect(array_values(array_intersect($codes, ['ZM', 'EG', 'CA'])))->toBe(['CA', 'EG', 'ZM']);
+    } finally {
+        $locale->setLocaleCode($previous);
+    }
+});
