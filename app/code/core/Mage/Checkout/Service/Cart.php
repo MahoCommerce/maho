@@ -22,6 +22,12 @@ class Mage_Checkout_Service_Cart
         'telephone', 'fax', 'email', 'vat_id',
     ];
 
+    /** The keys of a payment form that assignData() puts on the quote payment as they are, with no check. */
+    private const PAYMENT_RESERVED_KEYS = [
+        'additional_data', 'additional_information', 'method_instance',
+        'payment_id', 'quote_id', 'parent_id', 'created_at', 'updated_at',
+    ];
+
     /** The shape of a masked cart id, bare of delimiters so a route requirement can reuse it. */
     public const MASKED_ID_PATTERN = '[a-f0-9]{32}';
 
@@ -1145,6 +1151,7 @@ class Mage_Checkout_Service_Cart
         \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
         bool $methodOnly = false,
     ): \Mage_Sales_Model_Quote {
+        $paymentData = array_diff_key($paymentData, array_flip(self::PAYMENT_RESERVED_KEYS));
         $paymentData['checks'] = $this->getPaymentChecks($actor);
         $import = fn() => $this->importPayment($quote, $paymentData, $methodOnly);
         // Staff imports in the scope of the caller, in which Mage_Sales_Service_Order::submit() also places the order
@@ -1420,8 +1427,7 @@ class Mage_Checkout_Service_Cart
         // ids assert "already paid", and the storefront accepts one only after its replay
         // checks (assertPaypalOrderMatchesQuoteOrOrder), which this path never runs.
         $reservedKeys = array_flip([
-            'method', 'checks', 'additional_data', 'additional_information', 'method_instance',
-            'payment_id', 'quote_id', 'parent_id', 'created_at', 'updated_at',
+            'method', 'checks', ...self::PAYMENT_RESERVED_KEYS,
             'paypal_order_id', 'paypal_authorization_id', 'paypal_capture_id',
         ]);
         $paymentData = ['method' => $methodCode];

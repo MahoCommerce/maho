@@ -288,6 +288,18 @@ describe('a shipping method', function () {
 });
 
 describe('a payment method', function () {
+    it('does not take the additional information of the storefront form', function () {
+        Mage::app()->getStore()->setConfig('payment/banktransfer/active', '1');
+
+        $web = checkoutOnepagePost($this->carts[0], 'savePayment', ['payment' => [
+            'method' => 'banktransfer',
+            'additional_information' => ['paypal_capture_id' => 'pest-capture'],
+        ]]);
+
+        expect($web)->not->toHaveKey('error')
+            ->and(checkoutStepsReload($this->carts[0])->getPayment()->getAdditionalInformation('paypal_capture_id'))->toBeNull();
+    });
+
     it('that is available is selected on both transports', function () {
         [$webCart, $apiCart] = $this->carts;
 
