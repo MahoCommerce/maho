@@ -7795,12 +7795,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/App/Area.php
 
 		-
-			rawMessage: 'Call to an undefined method Mage_Core_Model_Abstract::init().'
-			identifier: method.notFound
-			count: 2
-			path: app/code/core/Mage/Core/Model/App/Emulation.php
-
-		-
 			rawMessage: 'Method Mage_Core_Model_Config::_makeEventsLowerCase() has no return type specified.'
 			identifier: missingType.return
 			count: 1
