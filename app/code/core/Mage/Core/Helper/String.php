@@ -295,16 +295,8 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
         if (empty($sort)) {
             return false;
         }
-        $oldLocale = setlocale(LC_COLLATE, '0');
-        $localeCode = Mage::app()->getLocale()->getLocaleCode();
-        // use fallback locale if $localeCode is not available
-        setlocale(LC_COLLATE, $localeCode . '.UTF8', 'C.UTF-8', 'en_US.utf8');
-        if ($preserveKeys) {
-            asort($sort, SORT_LOCALE_STRING);
-        } else {
-            sort($sort, SORT_LOCALE_STRING);
-        }
-        setlocale(LC_COLLATE, $oldLocale);
+        $sorted = $this->sortByStoreLocale($sort);
+        $sort = $preserveKeys ? $sorted : array_values($sorted);
 
         return $sort;
     }
@@ -319,14 +311,28 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
         if (empty($sort)) {
             return false;
         }
-        $oldLocale = setlocale(LC_COLLATE, '0');
-        $localeCode = Mage::app()->getLocale()->getLocaleCode();
-        // use fallback locale if $localeCode is not available
-        setlocale(LC_COLLATE, $localeCode . '.UTF8', 'C.UTF-8', 'en_US.utf8');
-        ksort($sort, SORT_LOCALE_STRING);
-        setlocale(LC_COLLATE, $oldLocale);
+        $order = array_flip(array_values($this->sortByStoreLocale(array_keys($sort))));
+        uksort($sort, static fn(int|string $a, int|string $b): int => $order[$a] <=> $order[$b]);
 
         return $sort;
+    }
+
+    private function sortByStoreLocale(array $values): array
+    {
+        $locale = Mage::app()->getLocale()->getLocaleCode();
+        $sorted = $values;
+        try {
+            $collator = new Collator($locale);
+            if ($collator->asort($sorted, Collator::SORT_STRING)) {
+                return $sorted;
+            }
+        } catch (IntlException) {
+            // Use the same fallback when intl.use_exceptions is enabled.
+        }
+
+        // Start with the original array if ICU could not compare its values.
+        asort($values, SORT_STRING);
+        return $values;
     }
 
     /**
