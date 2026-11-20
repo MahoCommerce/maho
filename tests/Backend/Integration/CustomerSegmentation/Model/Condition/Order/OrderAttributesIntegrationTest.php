@@ -15,9 +15,8 @@ describe('Order Attributes Condition Integration Tests', function () {
     });
 
     describe('Basic Order Field Attributes', function () {
-        $now = time();
-        $createdSince = date('Y-m-d', strtotime('-30 days', $now));
-        $updatedSince = date('Y-m-d', strtotime('-15 days', $now));
+        $createdSince = date('Y-m-d', strtotime('-30 days'));
+        $updatedSince = date('Y-m-d', strtotime('-15 days'));
 
         test('matches the customers by a field of one of their orders', function (string $attribute, string $operator, string $value, ?string $member, Closure $matches) {
             $segment = createOrderAttributesTestSegment('Order ' . $attribute, [
