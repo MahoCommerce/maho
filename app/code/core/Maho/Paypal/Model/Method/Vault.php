@@ -151,11 +151,10 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
                 ?: (int) (Mage::getSingleton('customer/session')->getCustomerId()
                     ?: Mage::getSingleton('adminhtml/session_quote')->getCustomerId());
 
+            // A token that the customer cannot use also clears the token of an earlier selection
             $token = $this->_getCustomerToken($vaultTokenId, $customerId);
-            if ($token) {
-                $info->setAdditionalInformation('vault_token_id', $vaultTokenId);
-                $info->setAdditionalInformation('vault_label', $token->getDisplayLabel());
-            }
+            $info->setAdditionalInformation('vault_token_id', $token ? $vaultTokenId : null);
+            $info->setAdditionalInformation('vault_label', $token?->getDisplayLabel());
         }
 
         return $this;

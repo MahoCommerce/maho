@@ -139,6 +139,33 @@ describe('paypal vault assignData ownership', function (): void {
         }
     });
 
+    it('clears the token of an earlier selection when the customer selects a token of another customer', function (): void {
+        $owner = vaultAssignDataCreateCustomer();
+        $other = vaultAssignDataCreateCustomer();
+        $ownToken = vaultAssignDataCreateToken((int) $owner->getId());
+        $otherToken = vaultAssignDataCreateToken((int) $other->getId());
+        $quote = createPricedQuote(loadSimplePricedProduct());
+
+        try {
+            $quote->setCustomerId((int) $owner->getId());
+            $payment = $quote->getPayment();
+            $method = new Maho_Paypal_Model_Method_Vault();
+            $method->setInfoInstance($payment);
+            $method->assignData(['vault_token_id' => (int) $ownToken->getId()]);
+
+            $method->assignData(['vault_token_id' => (int) $otherToken->getId()]);
+
+            expect($payment->getAdditionalInformation('vault_token_id'))->toBeNull()
+                ->and($payment->getAdditionalInformation('vault_label'))->toBeNull();
+        } finally {
+            $quote->delete();
+            $otherToken->delete();
+            $ownToken->delete();
+            $other->delete();
+            $owner->delete();
+        }
+    });
+
     it('refuses to charge a token of another customer that the order payment holds', function (): void {
         $owner = vaultAssignDataCreateCustomer();
         $other = vaultAssignDataCreateCustomer();
