@@ -134,6 +134,14 @@ final class Resolver
         });
     }
 
+    public function regionId(string $countryId, string $codeOrName): ?int
+    {
+        return $this->remember("region:$countryId", $codeOrName, function () use ($countryId, $codeOrName): ?int {
+            $id = Mage::getModel('directory/region')->loadByCodeOrName($codeOrName, $countryId)->getId();
+            return $id ? (int) $id : null;
+        });
+    }
+
     /**
      * @param callable(): ?int $lookup
      */

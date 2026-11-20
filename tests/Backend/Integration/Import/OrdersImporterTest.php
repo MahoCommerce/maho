@@ -219,6 +219,23 @@ it('orders the variant of a configurable through its parent', function (): void 
     unlink($path);
 });
 
+it('resolves an imported region code within its country', function (): void {
+    $item = loadSimplePricedProduct()->getSku() . ':1';
+    $canada = ordersRow('IMP-ORD-REGION-1', 'pending', 1, 'imp.guest@example.org', $item);
+    $canada[9] = 'AB';
+    $canada[11] = 'CA';
+    $unitedStates = ordersRow('IMP-ORD-REGION-2', 'pending', 1, 'imp.guest@example.org', $item);
+    $unitedStates[9] = 'AB';
+    $path = ordersCsv([$canada, $unitedStates]);
+
+    try {
+        expect(fn() => new Orders()->validate($path))
+            ->toThrow(RowException::class, "line 3: region 'AB' is not a region of US");
+    } finally {
+        unlink($path);
+    }
+});
+
 it('rejects an unknown sku, a bad item, a bad status and a missing region before writing', function (): void {
     $product = loadSimplePricedProduct();
     $importer = new Orders();
