@@ -137,6 +137,7 @@ final class Mage
      */
     public static function reset(): void
     {
+        \Maho\Queue\QueueManager::reset();
         $resource = self::$_registry['_singleton/core/resource'] ?? null;
         if ($resource instanceof Mage_Core_Model_Resource) {
             $resource->closeConnections();

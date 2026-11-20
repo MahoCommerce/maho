@@ -59,6 +59,30 @@ it('queues a message that holds 4-byte characters (#1487)', function () {
     expect($envelopes[0]->getMessage()->subject)->toBe("\u{1F60A} Hi, question about my order");
 });
 
+it('dispatches within the current transaction after resetting Mage', function () {
+    QueueManager::bus();
+    $previousTransport = QueueManager::dbTransport();
+
+    $root = Mage::getRoot();
+    Mage::reset();
+    restore_error_handler();
+    Mage::setRoot($root);
+    Mage::register('isSecureArea', true);
+    Mage::app();
+    expect(QueueManager::dbTransport() === $previousTransport)->toBeFalse();
+
+    $resource = Mage::getResourceSingleton('core/config');
+    $resource->beginTransaction();
+    try {
+        QueueManager::dispatch(makeEmailMessage());
+        expect(fetchQueueRows())->toHaveCount(1);
+    } finally {
+        $resource->rollBack();
+    }
+
+    expect(fetchQueueRows())->toBe([]);
+});
+
 it('claims a message atomically so a second consumer gets nothing', function () {
     QueueManager::dispatch(makeEmailMessage());
 
