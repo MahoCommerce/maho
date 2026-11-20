@@ -243,8 +243,7 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
 
             $storeId = (int) $item->getStoreId();
             $sender->setDesignConfig(['area' => Mage_Core_Model_App_Area::AREA_FRONTEND, 'store' => $storeId]);
-            $send = fn() => $sender->send($email, $name, ['subscriber' => $item, 'is_newsletter' => true]);
-            $successSend = $storeId === (int) Mage::app()->getStore()->getId() ? $send() : Mage::app()->emulate($storeId, $send);
+            $successSend = Mage::app()->emulate($storeId, fn() => $sender->send($email, $name, ['subscriber' => $item, 'is_newsletter' => true]));
 
             if ($successSend) {
                 $item->received($this);

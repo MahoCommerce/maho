@@ -50,11 +50,10 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
     protected function withDesignConfig(\Closure $callback): mixed
     {
         $storeId = $this->getDesignConfigStoreId();
-        $area = (string) $this->getDesignConfig()->getArea();
-        if ($storeId === null || ($storeId === (int) Mage::app()->getStore()->getId() && in_array($area, ['', Mage::getDesign()->getArea()], true))) {
+        if ($storeId === null) {
             return $callback();
         }
-        return Mage::app()->emulate($storeId, $callback, $area ?: self::DEFAULT_DESIGN_AREA);
+        return Mage::app()->emulate($storeId, $callback, $this->getDesignConfig()->getArea() ?: self::DEFAULT_DESIGN_AREA);
     }
 
     private function getDesignConfigStoreId(): ?int

@@ -51,10 +51,25 @@ describe('Store emulation puts back the environment of the caller', function () 
         $expectAdmin($locale);
     });
 
+    it('runs the callback as it is when the request already runs in the store and the area', function () use ($startAdmin, $otherLocale) {
+        $locale = $otherLocale();
+        $startAdmin($locale);
+        $translator = Mage::app()->getTranslator()->getState();
+
+        $inside = Mage::app()->emulate(
+            Mage_Core_Model_App::ADMIN_STORE_ID,
+            fn(): string => Mage::app()->getLocale()->getLocaleCode(),
+            Mage_Core_Model_App_Area::AREA_ADMINHTML,
+        );
+
+        expect($inside)->toBe($locale)
+            ->and(Mage::app()->getTranslator()->getState())->toBe($translator);
+    });
+
     it('puts back the package and the theme of the caller', function () {
-        Mage::app()->setCurrentStore(1);
+        Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
         $design = Mage::getDesign();
-        $design->setStore(1)->setArea(Mage_Core_Model_App_Area::AREA_FRONTEND)->setTheme('emulation_test');
+        $design->setStore(Mage_Core_Model_App::ADMIN_STORE_ID)->setArea(Mage_Core_Model_App_Area::AREA_FRONTEND)->setTheme('emulation_test');
         $design->setPackageName('emulation_test');
 
         $insidePackage = Mage::app()->emulate(1, fn(): string => $design->getPackageName());

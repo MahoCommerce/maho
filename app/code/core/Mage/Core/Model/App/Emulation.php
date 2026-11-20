@@ -24,7 +24,8 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
 
     /**
      * Run $callback in the store $storeId, with the design, the locale and the translations of that store for $area.
-     * Then put back the environment of the caller, also when $callback throws.
+     * Then put back the environment of the caller, also when $callback throws. When the request already runs in
+     * $storeId and $area, run $callback as it is.
      *
      * @template T
      * @param \Closure(): T $callback
@@ -32,6 +33,9 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
      */
     public function emulate(int $storeId, \Closure $callback, string $area = Mage_Core_Model_App_Area::AREA_FRONTEND): mixed
     {
+        if ($storeId === (int) $this->_app->getStore()->getId() && $area === Mage::getDesign()->getArea()) {
+            return $callback();
+        }
         $environment = $this->start($storeId, $area);
         try {
             return $callback();
