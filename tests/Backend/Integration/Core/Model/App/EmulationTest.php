@@ -84,6 +84,39 @@ describe('Store emulation puts back the environment of the caller', function () 
         $expectAdmin($locale);
     });
 
+    $renderStoreAndArea = function (array $designConfig): string {
+        $template = Mage::getModel('core/email_template');
+        $template->setDesignConfig($designConfig);
+        $template->setTemplateType(Mage_Core_Model_Template::TYPE_TEXT);
+        $template->setTemplateText('');
+        $template->setTemplateFilter(new class extends Mage_Core_Model_Email_Template_Filter {
+            #[\Override]
+            public function filter($value): string
+            {
+                return Mage::app()->getStore()->getId() . '|' . Mage::getDesign()->getArea();
+            }
+        });
+        return $template->getProcessedTemplate([]);
+    };
+
+    it('renders an email template in the store that its design config names by code', function () use ($startAdmin, $otherLocale, $renderStoreAndArea) {
+        $startAdmin($otherLocale());
+
+        $rendered = $renderStoreAndArea(['area' => Mage_Core_Model_App_Area::AREA_FRONTEND, 'store' => Mage::app()->getStore(1)->getCode()]);
+
+        expect($rendered)->toBe('1|' . Mage_Core_Model_App_Area::AREA_FRONTEND);
+    });
+
+    it('renders an email template in the area of its design config when the store is the current one', function () use ($renderStoreAndArea) {
+        Mage::app()->setCurrentStore(1);
+        Mage::getDesign()->setStore(1)->setArea(Mage_Core_Model_App_Area::AREA_FRONTEND);
+
+        $rendered = $renderStoreAndArea(['area' => Mage_Core_Model_App_Area::AREA_ADMINHTML, 'store' => 1]);
+
+        expect($rendered)->toBe('1|' . Mage_Core_Model_App_Area::AREA_ADMINHTML)
+            ->and(Mage::getDesign()->getArea())->toBe(Mage_Core_Model_App_Area::AREA_FRONTEND);
+    });
+
     it('keeps startEnvironmentEmulation() and stopEnvironmentEmulation() working', function () use ($startAdmin, $expectAdmin, $otherLocale) {
         $locale = $otherLocale();
         $startAdmin($locale);

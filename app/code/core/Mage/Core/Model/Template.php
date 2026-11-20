@@ -50,17 +50,17 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
     protected function withDesignConfig(\Closure $callback): mixed
     {
         $storeId = $this->getDesignConfigStoreId();
-        if ($storeId === null || $storeId === (int) Mage::app()->getStore()->getId()) {
+        $area = (string) $this->getDesignConfig()->getArea();
+        if ($storeId === null || ($storeId === (int) Mage::app()->getStore()->getId() && in_array($area, ['', Mage::getDesign()->getArea()], true))) {
             return $callback();
         }
-        return Mage::app()->emulate($storeId, $callback, $this->getDesignConfig()->getArea() ?: self::DEFAULT_DESIGN_AREA);
+        return Mage::app()->emulate($storeId, $callback, $area ?: self::DEFAULT_DESIGN_AREA);
     }
 
     private function getDesignConfigStoreId(): ?int
     {
         $store = $this->getDesignConfig()->getStore();
-        $storeId = is_object($store) ? $store->getId() : $store;
-        return $storeId === null || $storeId === '' ? null : (int) $storeId;
+        return $store === null || $store === '' ? null : (int) Mage::app()->getStore($store)->getId();
     }
 
     /**
@@ -107,7 +107,7 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
             $this->_emulatedDesignConfig = clone $this->getDesignConfig();
             if ($this->getDesignConfig()->getStore() != $storeId) {
                 $this->setDesignConfig(['area' => $area, 'store' => $storeId]);
-                if ((int) $storeId !== (int) Mage::app()->getStore()->getId()) {
+                if ((int) Mage::app()->getStore($storeId)->getId() !== (int) Mage::app()->getStore()->getId()) {
                     $this->emulatedEnvironment = Mage::getSingleton('core/app_emulation')->startEnvironmentEmulation($storeId, $area);
                 }
             }
