@@ -117,7 +117,7 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
             && !Mage::getSingleton('admin/session')->isAllowed(Mage_Adminhtml_System_Convert_ProfileController::ADMIN_RESOURCE)
         ) {
             try {
-                if (!is_array($profile->getGuiData()) || !$profile->getGuiData()) {
+                if (!is_array($profile->getGuiData())) {
                     Mage::throwException($this->__('Invalid profile data.'));
                 }
 

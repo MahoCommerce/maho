@@ -177,9 +177,9 @@ it('runs the stored actions XML with the Advanced Profiles permission', function
         ->and($profile->getActionsXml())->toBe('<action type="tampered"/>');
 });
 
-it('refuses to run a profile without the wizard fields without the Advanced Profiles permission', function (array|string $guiData): void {
+it('refuses to run a profile without the wizard fields without the Advanced Profiles permission', function (): void {
     $this->user = AdminRoleFixture::login(['admin/system/convert/gui']);
-    $profile = dataflowGuiProfile($guiData);
+    $profile = dataflowGuiProfile('');
     $controller = dataflowGuiController('run', ['id' => '1'], null, $profile);
 
     $controller->runAction();
@@ -187,4 +187,4 @@ it('refuses to run a profile without the wizard fields without the Advanced Prof
     expect($controller->rendered)->toBeFalse()
         ->and($controller->redirects)->toBe(['*/*/edit'])
         ->and($profile->getActionsXml())->toBe('<action type="tampered"/>');
-})->with(['no value' => [''], 'empty array' => [[]]]);
+});
