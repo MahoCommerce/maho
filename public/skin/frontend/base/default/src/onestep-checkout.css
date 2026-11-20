@@ -109,9 +109,10 @@
         .loading > & {
             @apply pointer-events-none;
 
+            /* Delay the fade-in so that a fast reload does not flash. The fade-out stays immediate. */
             &::before,
             &::after {
-                @apply opacity-100;
+                @apply opacity-100 delay-600;
             }
         }
     }
@@ -367,6 +368,19 @@
     .onestep-checkout #checkout-step-payment .checkout-agreements {
         @apply m-0 p-0;
     }
+}
+
+/* Unlayered: setLoading() of onestepcheckout.js toggles a .loading class on the section, which
+   collides with the DaisyUI loading-spinner component: the section would shrink to a 24px masked
+   spinner while it reloads. The product gallery has the same fix, see _components.css */
+.onestep-section.loading {
+    width: auto;
+    aspect-ratio: auto;
+    vertical-align: baseline;
+    pointer-events: auto;
+    background-color: transparent;
+    -webkit-mask: none;
+    mask: none;
 }
 
 @keyframes onestep-spin {
