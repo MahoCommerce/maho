@@ -433,6 +433,27 @@ class Mage_Checkout_Model_Type_Onepage
     }
 
     /**
+     * Specify the quote payment method without the data of its form, as the one-step checkout does when the customer
+     * selects a method. A card method does not refuse its empty card fields here: placing the order imports and
+     * validates the payment data.
+     *
+     * @throws Mage_Core_Exception when the method is not available for the cart
+     */
+    public function savePaymentMethod(string $methodCode): array
+    {
+        if ($methodCode === '') {
+            return ['error' => -1, 'message' => Mage::helper('checkout')->__('Invalid data.')];
+        }
+        $this->_getCartService()->selectPaymentMethodCode($this->getQuote(), $methodCode);
+
+        $this->getCheckout()
+            ->setStepData('payment', 'complete', true)
+            ->setStepData('review', 'allow', true);
+
+        return [];
+    }
+
+    /**
      * Mage_Sales_Service_Order::validateQuote() checks the quote when the order is placed. A subclass can add a check
      * of the one page checkout here.
      */

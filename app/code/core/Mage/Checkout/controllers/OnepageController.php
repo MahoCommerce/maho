@@ -547,7 +547,11 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
             }
 
             $data = $this->getRequest()->getPost('payment', []);
-            $result = $this->getOnepage()->savePayment($data);
+            // The one-step checkout saves the method as soon as the customer selects it, before the card fields
+            // are filled in: only the method is saved, and placing the order validates the payment data
+            $result = $this->getRequest()->getPost('method_only')
+                ? $this->getOnepage()->savePaymentMethod((string) ($data['method'] ?? ''))
+                : $this->getOnepage()->savePayment($data);
 
             // get section and redirect data
             $redirectUrl = $this->getOnepage()->getQuote()->getPayment()->getCheckoutRedirectUrl();

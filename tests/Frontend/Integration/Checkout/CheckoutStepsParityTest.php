@@ -341,6 +341,44 @@ describe('a card method (D12)', function () {
     });
 });
 
+describe('the one-step checkout auto-save of a payment method (method_only)', function () {
+    beforeEach(function () {
+        $store = Mage::app()->getStore();
+        $store->setConfig('payment/authorizenet/active', '1');
+        $store->setConfig('payment/authorizenet/cctypes', 'VI');
+        $store->setConfig('payment/authorizenet/useccv', '0');
+    });
+
+    it('selects a card method before its card fields are filled in', function () {
+        $web = checkoutOnepagePost($this->carts[0], 'savePayment', ['payment' => ['method' => 'authorizenet'], 'method_only' => '1']);
+
+        expect($web)->not->toHaveKey('error')
+            ->and($web['goto_section'] ?? null)->toBe('review')
+            ->and(checkoutStepsReload($this->carts[0])->getPayment()->getMethod())->toBe('authorizenet');
+    });
+
+    it('does not change the full save, which still refuses a card method without its card fields', function () {
+        $web = checkoutOnepagePost($this->carts[0], 'savePayment', ['payment' => ['method' => 'authorizenet']]);
+
+        expect($web)->toHaveKey('error')
+            ->and(checkoutStepsReload($this->carts[0])->getPayment()->getMethod())->toBeNull();
+    });
+
+    it('refuses a method that the cart cannot use', function () {
+        Mage::app()->getStore()->setConfig('payment/checkmo/min_order_total', '999999');
+
+        expect(checkoutOnepagePost($this->carts[0], 'savePayment', ['payment' => ['method' => 'checkmo'], 'method_only' => '1']))
+            ->toBe(['error' => 'The requested Payment Method is not available.'])
+            ->and(checkoutStepsReload($this->carts[0])->getPayment()->getMethod())->toBeNull();
+    });
+
+    it('refuses a method that the store does not have', function () {
+        expect(checkoutOnepagePost($this->carts[0], 'savePayment', ['payment' => ['method' => 'pest_unknown'], 'method_only' => '1']))
+            ->toBe(['error' => 'The requested Payment Method is not available.'])
+            ->and(checkoutStepsReload($this->carts[0])->getPayment()->getMethod())->toBeNull();
+    });
+});
+
 describe('the shipping method step of the storefront', function () {
     beforeEach(function () {
         Mage::getService('checkout/cart')->setShippingAddress(

@@ -1154,6 +1154,42 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
+     * Give $quote the payment method $methodCode without the data of its form, and save the cart. The one-step
+     * checkout calls it when the customer selects a method, before the card fields are filled in. The method must be
+     * available for the cart, with the same checks as selectPaymentMethod(), but its assignData() and validate() do
+     * not run: placing the order imports and validates the full payment data.
+     *
+     * @throws \Mage_Core_Exception when the method is not available for the cart
+     */
+    public function selectPaymentMethodCode(
+        \Mage_Sales_Model_Quote $quote,
+        string $methodCode,
+        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+    ): \Mage_Sales_Model_Quote {
+        $checks = $this->getPaymentChecks($actor);
+        $this->inQuoteStoreScope($quote, function () use ($quote, $methodCode, $checks): void {
+            if (empty(\Mage::helper('payment')->getPaymentMethods($quote->getStoreId())[$methodCode]['model'])) {
+                throw new \Mage_Core_Exception(\Mage::helper('sales')->__('The requested Payment Method is not available.'));
+            }
+            if ($quote->isVirtual()) {
+                $quote->getBillingAddress()->setPaymentMethod($methodCode);
+            } else {
+                // A payment method can change the shipping rates
+                $quote->getShippingAddress()->setPaymentMethod($methodCode)->setCollectShippingRates(true);
+            }
+            $method = $quote->getPayment()->setMethod($methodCode)->getMethodInstance();
+            // The availability of a method depends on the totals, as in Mage_Sales_Model_Quote_Payment::importData()
+            $quote->collectTotals();
+            if (!$method->isAvailable($quote) || !$method->isApplicableToQuote($quote, $checks)) {
+                throw new \Mage_Core_Exception(\Mage::helper('sales')->__('The requested Payment Method is not available.'));
+            }
+        });
+        $this->collectAndSave($quote);
+
+        return $quote;
+    }
+
+    /**
      * Give $quote the checkout data that a client sends with its order, in one pass: the addresses, the shipping
      * method, and the payment method with its data. A null value keeps what the cart has. The totals are collected
      * for the addresses and the shipping method, then again for the payment method, and the cart is saved once at
