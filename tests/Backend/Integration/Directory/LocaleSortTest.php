@@ -28,14 +28,29 @@ it('reorders localized keys while retaining references and the next numeric key'
     try {
         $locale->setLocaleCode('sv_SE');
         $label = 'First value';
-        $options = ['ö' => &$label, 'z' => 'Second value', 999 => 'Removed value'];
+        $options = ['Zambie' => 'Second value', 'Égypte' => &$label, 999 => 'Removed value'];
         unset($options[999]);
 
         Mage::helper('core/string')->ksortMultibyte($options);
         $label = 'Updated value';
         $options[] = 'Appended value';
 
-        expect($options)->toBe(['z' => 'Second value', 'ö' => 'Updated value', 1000 => 'Appended value']);
+        expect($options)->toBe(['Égypte' => 'Updated value', 'Zambie' => 'Second value', 1000 => 'Appended value']);
+    } finally {
+        $locale->setLocaleCode($previous);
+    }
+});
+
+it('sorts localized values in French and renumbers their keys', function () {
+    $locale = Mage::app()->getLocale();
+    $previous = $locale->getLocaleCode();
+    try {
+        $locale->setLocaleCode('fr_FR');
+        $values = ['x' => 'Zambie', 'y' => 'Égypte'];
+
+        Mage::helper('core/string')->sortMultibyte($values);
+
+        expect($values)->toBe(['Égypte', 'Zambie']);
     } finally {
         $locale->setLocaleCode($previous);
     }
