@@ -34,10 +34,13 @@ class CategoryMerchandiser {
             tilesView: document.getElementById('category_products_tiles_view'),
             gridButton: document.getElementById('category_products_view_grid'),
             tilesButton: document.getElementById('category_products_view_tiles'),
+            toolbar: document.getElementById('merchandiser_toolbar'),
             notes: document.getElementById('merchandiser_notes'),
             search: document.getElementById('merchandiser_search'),
             outOfStock: document.getElementById('merchandiser_out_of_stock'),
             addBox: document.getElementById('merchandiser_add_box'),
+            addToggle: document.getElementById('merchandiser_add_toggle'),
+            addPanel: document.getElementById('merchandiser_add_panel'),
             add: document.getElementById('merchandiser_add'),
             addResults: document.getElementById('merchandiser_add_results'),
             reset: document.getElementById('merchandiser_reset'),
@@ -106,12 +109,23 @@ class CategoryMerchandiser {
         this.ui.reset.addEventListener('click', () => this.reset());
         this.ui.reset.hidden = !this.isEditable;
 
-        this.ui.bulk.hidden = !this.isEditable;
         this.ui.bulk.querySelectorAll('button[data-action]').forEach((button) => {
             button.addEventListener('click', () => this.runBulk(button.dataset.action));
         });
 
         this.ui.addBox.hidden = !this.canChangeProducts;
+        this.ui.addToggle.addEventListener('click', () => this.toggleAddPanel(this.ui.addPanel.hidden));
+        this.ui.addBox.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                this.toggleAddPanel(false);
+                this.ui.addToggle.focus();
+            }
+        });
+        document.addEventListener('click', (event) => {
+            if (!this.ui.addPanel.hidden && !this.ui.addBox.contains(event.target)) {
+                this.toggleAddPanel(false);
+            }
+        });
         let addTimer = null;
         this.ui.add.addEventListener('input', () => {
             clearTimeout(addTimer);
@@ -147,6 +161,7 @@ class CategoryMerchandiser {
         const isTiles = name === 'tiles';
         localStorage.setItem(CategoryMerchandiser.STORAGE_KEY, name);
         this.ui.tilesView.hidden = !isTiles;
+        this.ui.toolbar.hidden = !isTiles;
         this.ui.gridView.hidden = isTiles;
         this.ui.tilesButton.setAttribute('aria-pressed', String(isTiles));
         this.ui.gridButton.setAttribute('aria-pressed', String(!isTiles));
@@ -516,10 +531,7 @@ class CategoryMerchandiser {
 
     renderSelection() {
         this.ui.selected.textContent = this.labels.selected.replace('%s', String(this.selected.size));
-        this.ui.bulk.querySelectorAll('button[data-action]').forEach((button) => {
-            button.disabled = this.selected.size === 0;
-        });
-        this.ui.position.disabled = this.selected.size === 0;
+        this.ui.bulk.hidden = !this.isEditable || this.selected.size === 0;
     }
 
     renderNotes() {
@@ -624,7 +636,10 @@ class CategoryMerchandiser {
 
     runBulk(action) {
         const ids = [...this.selected];
-        if (action === 'top' || action === 'bottom') {
+        if (action === 'clear') {
+            this.selected.clear();
+            this.render();
+        } else if (action === 'top' || action === 'bottom') {
             this.moveProducts(ids, action);
         } else if (action === 'position') {
             const slot = parseInt(this.ui.position.value, 10);
@@ -666,8 +681,14 @@ class CategoryMerchandiser {
                 const item = document.createElement('li');
                 const button = document.createElement('button');
                 button.type = 'button';
+                button.className = 'merchandiser-add-result';
                 button.dataset.id = String(tile.id);
-                button.textContent = `${tile.name} (${tile.sku})`;
+                const name = document.createElement('span');
+                name.textContent = tile.name;
+                const sku = document.createElement('span');
+                sku.className = 'merchandiser-add-sku';
+                sku.textContent = tile.sku;
+                button.append(name, sku);
                 item.append(button);
                 results.append(item);
             });
@@ -682,10 +703,21 @@ class CategoryMerchandiser {
         }
     }
 
+    toggleAddPanel(isOpen) {
+        this.ui.addPanel.hidden = !isOpen;
+        this.ui.addToggle.setAttribute('aria-expanded', String(isOpen));
+        if (isOpen) {
+            this.ui.add.focus();
+        } else {
+            this.searchId++;
+            this.ui.addResults.replaceChildren();
+            this.ui.addResults.hidden = true;
+            this.ui.add.value = '';
+        }
+    }
+
     addProduct(id) {
-        this.ui.addResults.replaceChildren();
-        this.ui.addResults.hidden = true;
-        this.ui.add.value = '';
+        this.toggleAddPanel(false);
         if (id in this.products) {
             return;
         }

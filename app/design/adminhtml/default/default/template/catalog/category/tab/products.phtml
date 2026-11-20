@@ -9,9 +9,40 @@
 $labels = $this->getLabels();
 ?>
 <?php if ($this->hasTiles()): ?>
-<div class="merchandiser-views d-join" role="group" aria-label="<?= $this->escapeHtml($labels['view']) ?>">
-    <button type="button" class="d-join-item" id="category_products_view_grid" aria-pressed="true"><?= $this->escapeHtml($labels['grid']) ?></button>
-    <button type="button" class="d-join-item" id="category_products_view_tiles" aria-pressed="false"><?= $this->escapeHtml($labels['tiles']) ?></button>
+<div class="merchandiser-header">
+    <div class="merchandiser-views d-join" role="group" aria-label="<?= $this->escapeHtml($labels['view']) ?>">
+        <button type="button" class="d-join-item" id="category_products_view_grid" aria-pressed="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18M3 12h18M3 19h18"/></svg>
+            <?= $this->escapeHtml($labels['grid']) ?>
+        </button>
+        <button type="button" class="d-join-item" id="category_products_view_tiles" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            <?= $this->escapeHtml($labels['tiles']) ?>
+        </button>
+    </div>
+    <div class="merchandiser-toolbar" id="merchandiser_toolbar" hidden>
+        <label class="d-input merchandiser-search">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="search" id="merchandiser_search" placeholder="<?= $this->escapeHtml($labels['search']) ?>" aria-label="<?= $this->escapeHtml($labels['search']) ?>">
+        </label>
+        <label class="merchandiser-check">
+            <input type="checkbox" class="d-checkbox d-checkbox-sm" id="merchandiser_out_of_stock">
+            <?= $this->escapeHtml($labels['outOfStockOnly']) ?>
+        </label>
+        <div class="merchandiser-actions">
+            <div class="merchandiser-add" id="merchandiser_add_box">
+                <button type="button" id="merchandiser_add_toggle" aria-expanded="false" aria-controls="merchandiser_add_panel">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    <?= $this->escapeHtml($labels['addProduct']) ?>
+                </button>
+                <div class="merchandiser-add-panel" id="merchandiser_add_panel" hidden>
+                    <input type="search" class="d-input d-input-sm" id="merchandiser_add" placeholder="<?= $this->escapeHtml($labels['add']) ?>" aria-label="<?= $this->escapeHtml($labels['add']) ?>" autocomplete="off">
+                    <ul class="merchandiser-add-results" id="merchandiser_add_results" hidden></ul>
+                </div>
+            </div>
+            <button type="button" id="merchandiser_reset"><?= $this->escapeHtml($labels['reset']) ?></button>
+        </div>
+    </div>
 </div>
 <?php endif ?>
 <div id="category_products_grid_view">
@@ -20,32 +51,21 @@ $labels = $this->getLabels();
 <?php if ($this->hasTiles()): ?>
 <div id="category_products_tiles_view" class="merchandiser" hidden>
     <div class="merchandiser-notes" id="merchandiser_notes" hidden></div>
-    <div class="merchandiser-toolbar">
-        <input type="search" class="d-input d-input-sm" id="merchandiser_search" placeholder="<?= $this->escapeHtml($labels['search']) ?>" aria-label="<?= $this->escapeHtml($labels['search']) ?>">
-        <label class="merchandiser-check">
-            <input type="checkbox" class="d-checkbox d-checkbox-sm" id="merchandiser_out_of_stock">
-            <?= $this->escapeHtml($labels['outOfStockOnly']) ?>
-        </label>
-        <span class="merchandiser-add" id="merchandiser_add_box">
-            <input type="search" class="d-input d-input-sm" id="merchandiser_add" placeholder="<?= $this->escapeHtml($labels['add']) ?>" aria-label="<?= $this->escapeHtml($labels['add']) ?>" autocomplete="off">
-            <ul class="merchandiser-add-results" id="merchandiser_add_results" hidden></ul>
-        </span>
-        <button type="button" class="d-btn-sm" id="merchandiser_reset"><?= $this->escapeHtml($labels['reset']) ?></button>
-    </div>
-    <div class="merchandiser-bulk" id="merchandiser_bulk">
-        <span id="merchandiser_selected"></span>
-        <button type="button" class="d-btn-sm" data-action="top"><?= $this->escapeHtml($labels['moveTop']) ?></button>
-        <button type="button" class="d-btn-sm" data-action="bottom"><?= $this->escapeHtml($labels['moveBottom']) ?></button>
-        <span class="merchandiser-position-move">
-            <input type="number" min="1" class="d-input d-input-sm" id="merchandiser_position" aria-label="<?= $this->escapeHtml($labels['movePosition']) ?>" placeholder="<?= $this->escapeHtml($labels['position']) ?>">
-            <button type="button" class="d-btn-sm" data-action="position"><?= $this->escapeHtml($labels['movePosition']) ?></button>
-        </span>
-        <button type="button" class="d-btn-sm" data-action="pin"><?= $this->escapeHtml($labels['pin']) ?></button>
-        <button type="button" class="d-btn-sm" data-action="unpin"><?= $this->escapeHtml($labels['unpin']) ?></button>
-    </div>
     <ol class="merchandiser-tiles" id="merchandiser_tiles"></ol>
     <p class="merchandiser-empty" id="merchandiser_empty" hidden></p>
     <div id="merchandiser_sentinel" aria-hidden="true"></div>
     <div class="merchandiser-statistics" id="merchandiser_statistics"></div>
+    <div class="merchandiser-bulk" id="merchandiser_bulk" role="toolbar" aria-label="<?= $this->escapeHtml($labels['bulk']) ?>" hidden>
+        <span class="merchandiser-selected" id="merchandiser_selected"></span>
+        <button type="button" class="d-btn-sm" data-action="top"><?= $this->escapeHtml($labels['moveTop']) ?></button>
+        <button type="button" class="d-btn-sm" data-action="bottom"><?= $this->escapeHtml($labels['moveBottom']) ?></button>
+        <span class="merchandiser-position-move d-join">
+            <input type="number" min="1" class="d-input d-input-sm d-join-item" id="merchandiser_position" aria-label="<?= $this->escapeHtml($labels['position']) ?>" placeholder="<?= $this->escapeHtml($labels['position']) ?>">
+            <button type="button" class="d-btn-sm d-join-item" data-action="position"><?= $this->escapeHtml($labels['movePosition']) ?></button>
+        </span>
+        <button type="button" class="d-btn-sm" data-action="pin"><?= $this->escapeHtml($labels['pin']) ?></button>
+        <button type="button" class="d-btn-sm" data-action="unpin"><?= $this->escapeHtml($labels['unpin']) ?></button>
+        <button type="button" class="d-btn-sm d-btn-ghost" data-action="clear"><?= $this->escapeHtml($labels['clear']) ?></button>
+    </div>
 </div>
 <?php endif ?>

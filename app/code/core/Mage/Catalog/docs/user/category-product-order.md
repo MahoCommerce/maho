@@ -30,8 +30,8 @@ When the category sorts by **Best Value** (the position order), you can change t
 
 - Drag a tile to a new place.
 - Type a number in the position field of a tile.
-- Select tiles, then use **Move to top**, **Move to bottom**, **Move to position**, **Pin** or
-  **Unpin**.
+- Select tiles. A bar at the bottom of the screen shows **Move to top**, **Move to bottom**,
+  **Move to position**, **Pin**, **Unpin** and **Clear selection**.
 - Use the search field to filter the tiles by name or SKU, or tick **Out of stock only**. While a
   filter is on, you cannot drag the tiles, but the actions for the selected tiles still work.
 - A dashed line between the tiles marks the end of each page, counted by position. The line uses the
@@ -39,9 +39,10 @@ When the category sorts by **Best Value** (the position order), you can change t
   product that the storefront shows last, can move the real page end.
 - The tiles load 100 at a time when you scroll. **Move to position** reaches a slot that the page
   did not load yet.
-- Use **Add a product by name or SKU** to add a product, and **Remove** on a tile to remove it.
+- Click **Add product** and search by name or SKU to add a product. Click **Remove** on a tile to
+  remove it.
   A dynamic category does not offer both, because its rules decide which products it holds.
-- **Reset** discards the changes that you did not save.
+- **Reset order** discards the changes that you did not save.
 
 Your changes stay in the page until you click **Save Category**. The grid and the tile view change
 the same list, so you can use both before you save. When you select another category or store view

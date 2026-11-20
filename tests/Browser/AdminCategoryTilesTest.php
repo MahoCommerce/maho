@@ -169,6 +169,26 @@ it('saves the product that the merchant pins', function () {
     expect((int) $isPinned)->toBe(1);
 });
 
+it('shows the actions for the selected tiles only while a tile is selected', function () {
+    $fixtures = createCategoryTilesFixtures();
+    [$alpha, $beta, $gamma] = $fixtures['products'];
+
+    $page = visitCategoryTiles($fixtures['category']);
+    $page->assertMissing('#merchandiser_bulk');
+
+    $page->click(".merchandiser-tile[data-id=\"$gamma\"] .merchandiser-select");
+    $page->assertVisible('#merchandiser_bulk');
+
+    $page->click('#merchandiser_bulk [data-action="top"]');
+    waitForScript($page, "document.querySelector('.merchandiser-tile').dataset.id === '$gamma'");
+    expect(categoryTilesOrder($page))->toBe("$gamma,$alpha,$beta");
+    $page->assertMissing('#merchandiser_bulk');
+
+    $page->click(".merchandiser-tile[data-id=\"$alpha\"] .merchandiser-select");
+    $page->click('#merchandiser_bulk [data-action="clear"]');
+    $page->assertMissing('#merchandiser_bulk');
+});
+
 it('shows read-only tiles and the reason when the category sorts by Bestsellers', function () {
     $fixtures = createCategoryTilesFixtures('bestsellers');
 

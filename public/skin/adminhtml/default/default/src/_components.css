@@ -1107,8 +1107,21 @@
 
 @layer components {
     /* Tile view of the products of a category (Catalog > Categories > Category Products) */
-    .merchandiser-views {
+    .merchandiser-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--maho-space-3) var(--maho-space-5);
         margin-block: var(--maho-space-4);
+
+        & [hidden] {
+            display: none;
+        }
+    }
+
+    .merchandiser-views button,
+    .merchandiser-actions button {
+        gap: var(--maho-space-2);
     }
 
     .merchandiser [hidden],
@@ -1128,44 +1141,59 @@
         }
     }
 
-    .merchandiser-toolbar,
-    .merchandiser-bulk {
+    .merchandiser-toolbar {
         display: flex;
+        flex: 1;
         flex-wrap: wrap;
         align-items: center;
-        gap: var(--maho-space-2);
-        margin-block-end: var(--maho-space-3);
+        gap: var(--maho-space-3) var(--maho-space-4);
+    }
+
+    .merchandiser-search svg {
+        color: var(--maho-ink-muted);
     }
 
     .merchandiser-check {
         display: inline-flex;
         align-items: center;
-        gap: var(--maho-space-1);
+        gap: var(--maho-space-2);
+        white-space: nowrap;
+    }
+
+    .merchandiser-actions {
+        display: flex;
+        align-items: center;
+        gap: var(--maho-space-2);
+        margin-inline-start: auto;
     }
 
     .merchandiser-add {
         position: relative;
     }
 
-    .merchandiser-add-results {
+    .merchandiser-add-panel {
         position: absolute;
         z-index: 10;
-        inset-block-start: 100%;
-        inset-inline-start: 0;
-        min-width: 100%;
-        margin: 0;
-        padding: var(--maho-space-1);
-        list-style: none;
+        inset-block-start: calc(100% + var(--maho-space-2));
+        inset-inline-end: 0;
+        width: 22rem;
+        padding: var(--maho-space-3);
         background: var(--maho-surface-overlay);
         border: 1px solid var(--maho-border);
         border-radius: var(--maho-radius-md);
-        box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
+        box-shadow: var(--maho-shadow-float);
+    }
 
-        & button {
-            width: 100%;
-            justify-content: flex-start;
-            border: 0;
-            background: none;
+    .merchandiser-add-results {
+        margin: var(--maho-space-2) 0 0;
+        padding: 0;
+        max-height: 18rem;
+        overflow-y: auto;
+        list-style: none;
+
+        & li:not(:has(button)) {
+            padding: var(--maho-space-2) var(--maho-space-3);
+            color: var(--maho-ink-muted);
         }
     }
 
@@ -1242,10 +1270,28 @@
         }
     }
 
-    .merchandiser-position-move {
-        display: inline-flex;
+    .merchandiser-bulk {
+        position: sticky;
+        z-index: 20;
+        inset-block-end: var(--maho-space-4);
+        display: flex;
+        flex-wrap: wrap;
         align-items: center;
-        gap: var(--maho-space-1);
+        gap: var(--maho-space-2);
+        width: fit-content;
+        max-width: 100%;
+        margin: var(--maho-space-4) auto 0;
+        padding: var(--maho-space-2) var(--maho-space-3);
+        background: var(--maho-surface-overlay);
+        border: 1px solid var(--maho-border);
+        border-radius: var(--maho-radius-lg);
+        box-shadow: var(--maho-shadow-float);
+    }
+
+    .merchandiser-selected {
+        margin-inline-end: var(--maho-space-2);
+        font-weight: 600;
+        white-space: nowrap;
     }
 
     .merchandiser-foot {
@@ -1287,8 +1333,33 @@
         width: 6rem;
     }
 
-    .merchandiser-add input {
-        width: 16rem;
+    .merchandiser-search {
+        width: 18rem;
+    }
+
+    .merchandiser-add-panel input {
+        width: 100%;
+    }
+
+    .merchandiser-add-result {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+        width: 100%;
+        height: auto;
+        padding: var(--maho-space-2) var(--maho-space-3);
+        font-weight: normal;
+        line-height: 1.3;
+        text-align: start;
+        white-space: normal;
+        --d-btn-bg: transparent;
+        --d-btn-border: transparent;
+        --d-btn-shadow: none;
+    }
+
+    .merchandiser-add-sku {
+        font-size: 0.85em;
+        color: var(--maho-ink-muted);
     }
 
     .merchandiser-pin[aria-pressed="true"] {
