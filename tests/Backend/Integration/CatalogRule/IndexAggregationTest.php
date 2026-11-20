@@ -142,3 +142,71 @@ it('collapses the rule rows of one group into one index row per rule date', func
         $adapter->dropTemporaryTable($tmpTable);
     }
 });
+
+it('keeps each ordered rule group when inserting a full batch and its tail', function (): void {
+    $resource = Mage::getSingleton('core/resource');
+    $adapter = $resource->getConnection('core_write');
+    $productIds = array_map(intval(...), $adapter->fetchCol(
+        $adapter->select()->from($resource->getTableName('catalog/product'), 'entity_id')->order('entity_id')->limit(335),
+    ));
+    if (count($productIds) < 335) {
+        $this->markTestSkipped('Requires 335 sample products to fill the price index insert batch.');
+    }
+
+    $refresh = catalogRuleBuildRefreshIndexer();
+    $website = Mage::app()->getWebsite();
+    $rules = Mage::getResourceSingleton('catalogrule/rule');
+    $priceTable = $resource->getTableName('catalogrule/rule_product_price');
+    $at = strtotime('2026-11-20 12:00:00 UTC');
+    $dates = array_keys(catalogRuleInvoke($refresh, '_getRuleDates', [$at]));
+    // Three dates per group. The penultimate group completes the first insert.
+    $stopProductId = $productIds[333];
+
+    $fixtures = [];
+    foreach (array_reverse($productIds) as $productId) {
+        $common = [
+            'grouped_id' => sprintf('%010d-0', $productId),
+            'product_id' => $productId,
+            'customer_group_id' => 0,
+            'action_operator' => 'to_fixed',
+            'sort_order' => 0,
+            'price' => 100,
+            'from_time' => 0,
+            'to_time' => 0,
+        ];
+        $fixtures[] = $common + ['rule_product_id' => 2, 'action_amount' => 30, 'action_stop' => 0];
+        $fixtures[] = $common + ['rule_product_id' => 1, 'action_amount' => 50, 'action_stop' => (int) ($productId === $stopProductId)];
+    }
+
+    catalogRuleInvoke($refresh, '_createTemporaryTable');
+    $tmpTable = catalogRuleInvoke($refresh, '_getTemporaryTable');
+    try {
+        $rules->beginTransaction();
+        try {
+            $criteria = ['product_id IN (?)' => $productIds, 'website_id = ?' => (int) $website->getId(), 'customer_group_id = ?' => 0];
+            $adapter->delete($priceTable, $criteria);
+            $adapter->insertMultiple($tmpTable, $fixtures);
+            catalogRuleInvoke($refresh, '_fillIndexData', [$website, $at]);
+
+            $select = $adapter->select()->from($priceTable, ['product_id', 'rule_date', 'rule_price'])->order('rule_product_price_id');
+            foreach ($criteria as $condition => $value) {
+                $select->where($condition, $value);
+            }
+            $actual = array_map(
+                static fn(array $row): array => [(int) $row['product_id'], $row['rule_date'], (float) $row['rule_price']],
+                $adapter->fetchAll($select),
+            );
+            $expected = [];
+            foreach ($productIds as $productId) {
+                foreach ($dates as $date) {
+                    $expected[] = [$productId, $date, $productId === $stopProductId ? 50.0 : 30.0];
+                }
+            }
+            expect($actual)->toBe($expected);
+        } finally {
+            $rules->rollBack();
+        }
+    } finally {
+        $adapter->dropTemporaryTable($tmpTable);
+    }
+});
