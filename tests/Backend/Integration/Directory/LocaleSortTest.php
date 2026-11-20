@@ -64,6 +64,7 @@ it('sorts the country options of the locale model in French', function () {
         $codes = array_column($locale->getOptionCountries(), 'value');
 
         expect(array_values(array_intersect($codes, ['ZM', 'EG', 'CA'])))->toBe(['CA', 'EG', 'ZM']);
+        expect(array_values(array_intersect(array_keys($locale->getCountryTranslationList()), ['ZM', 'EG', 'CA'])))->toBe(['CA', 'EG', 'ZM']);
     } finally {
         $locale->setLocaleCode($previous);
     }
