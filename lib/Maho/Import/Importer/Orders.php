@@ -215,19 +215,17 @@ class Orders extends AbstractImporter
     private function addLine(\Mage_Checkout_Service_Cart $cart, \Mage_Sales_Model_Quote $quote, int $storeId, array $orderLine): void
     {
         $request = ['qty' => $orderLine['qty']];
-        $productId = $orderLine['product_id'];
+        $product = Mage::getModel('catalog/product')->setStoreId($storeId)
+            ->load($orderLine['parent_id'] ?? $orderLine['product_id']);
         if ($orderLine['parent_id'] !== null) {
-            $parent = Mage::getModel('catalog/product')->setStoreId($storeId)->load($orderLine['parent_id']);
             /** @var \Mage_Catalog_Model_Product_Type_Configurable $type */
-            $type = $parent->getTypeInstance(true);
+            $type = $product->getTypeInstance(true);
             $request['super_attribute'] = [];
-            foreach ($type->getConfigurableAttributesAsArray($parent) as $attribute) {
+            foreach ($type->getConfigurableAttributesAsArray($product) as $attribute) {
                 $request['super_attribute'][$attribute['attribute_id']] = Mage::getResourceSingleton('catalog/product')
-                    ->getAttributeRawValue($productId, $attribute['attribute_code'], $storeId);
+                    ->getAttributeRawValue($orderLine['product_id'], $attribute['attribute_code'], $storeId);
             }
-            $productId = $orderLine['parent_id'];
         }
-        $product = Mage::getModel('catalog/product')->setStoreId($storeId)->load($productId);
         $cart->addProduct($quote, $product, new \Maho\DataObject($request), \Mage_Checkout_Model_Actor::Staff, save: false);
     }
 
