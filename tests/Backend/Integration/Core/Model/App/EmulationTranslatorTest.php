@@ -68,6 +68,26 @@ describe('Store emulation restores the translator', function () {
         expect($translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA))->toBe(Mage_Core_Model_App_Area::AREA_ADMINHTML);
     });
 
+    it('keeps the translations that were loaded before the emulation', function () use ($startAdmin) {
+        $locale = Mage::getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_LOCALE, 1);
+        $translator = $startAdmin($locale);
+        $before = $translator->getData();
+
+        $resource = Mage::getSingleton('core/resource');
+        $table = $resource->getTableName('core/translate');
+        $write = $resource->getConnection('core_write');
+        $string = 'Emulation restore marker';
+        $write->insert($table, ['string' => $string, 'translate' => 'Reloaded', 'store_id' => 0, 'locale' => $locale, 'crc_string' => crc32($string)]);
+        try {
+            $emulation = Mage::getModel('core/app_emulation');
+            $emulation->stopEnvironmentEmulation($emulation->startEnvironmentEmulation(1));
+
+            expect($translator->getData())->toBe($before);
+        } finally {
+            $write->delete($table, ['string = ?' => $string]);
+        }
+    });
+
     it('leaves a translator that had no area without an area', function () {
         Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
         Mage::getDesign()->setArea(Mage_Core_Model_App_Area::AREA_ADMINHTML);
