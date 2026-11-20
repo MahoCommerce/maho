@@ -379,7 +379,9 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
         try {
             while ($row = $statement->fetch()) {
                 if ((string) $row['grouped_id'] !== $groupedId) {
-                    $pending = array_merge($pending, array_values($group));
+                    foreach ($group as $entry) {
+                        $pending[] = $entry;
+                    }
                     $group = [];
                     $groupedId = (string) $row['grouped_id'];
                     $price = $this->_applyRuleAction((float) $row['price'], $row);
@@ -403,7 +405,9 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
                 }
             }
 
-            $pending = array_merge($pending, array_values($group));
+            foreach ($group as $entry) {
+                $pending[] = $entry;
+            }
             if ($pending) {
                 $this->_connection->insertMultiple($table, $pending);
             }
