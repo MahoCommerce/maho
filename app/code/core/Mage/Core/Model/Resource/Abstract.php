@@ -61,7 +61,7 @@ abstract class Mage_Core_Model_Resource_Abstract
      */
     public function addCommitCallback($callback)
     {
-        $adapterKey = spl_object_hash($this->_getWriteAdapter());
+        $adapterKey = spl_object_id($this->_getWriteAdapter());
         self::$_commitCallbacks[$adapterKey][] = $callback;
         return $this;
     }
@@ -78,7 +78,7 @@ abstract class Mage_Core_Model_Resource_Abstract
          * Process after commit callbacks
          */
         if ($this->_getWriteAdapter()->getTransactionLevel() === 0) {
-            $adapterKey = spl_object_hash($this->_getWriteAdapter());
+            $adapterKey = spl_object_id($this->_getWriteAdapter());
             if (isset(self::$_commitCallbacks[$adapterKey])) {
                 $callbacks = self::$_commitCallbacks[$adapterKey];
                 self::$_commitCallbacks[$adapterKey] = [];
@@ -99,7 +99,7 @@ abstract class Mage_Core_Model_Resource_Abstract
     {
         $this->_getWriteAdapter()->rollBack();
         if ($this->_getWriteAdapter()->getTransactionLevel() === 0) {
-            $adapterKey = spl_object_hash($this->_getWriteAdapter());
+            $adapterKey = spl_object_id($this->_getWriteAdapter());
             if (isset(self::$_commitCallbacks[$adapterKey])) {
                 self::$_commitCallbacks[$adapterKey] = [];
             }
