@@ -422,7 +422,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
         foreach ($option as $item) {
             $data[$item['value']] = $item['label'];
         }
-        asort($data);
+        Mage::helper('core/string')->sortMultibyte($data, true);
         $option = [];
         foreach ($data as $key => $label) {
             $option[] = [
@@ -1486,7 +1486,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
             }
         }
 
-        asort($countries);
+        Mage::helper('core/string')->sortMultibyte($countries, true);
         return $countries;
     }
 
