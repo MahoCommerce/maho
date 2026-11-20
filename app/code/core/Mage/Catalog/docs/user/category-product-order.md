@@ -1,14 +1,23 @@
 ---
-description: How to order the products of a category - the tile view with drag and drop and pinned products, the automatic sorts Newest, Bestsellers and Most Viewed, out of stock products last, where new products go, and why a category ignores the positions of its products.
+description: Category merchandising - order the products of a category with the visual merchandiser (drag and drop, pinned products, bulk moves), the automatic sorts Newest, Bestsellers and Most Viewed, out of stock products last, where new products go, and why a category ignores the positions of its products.
 admin_pages: [catalog_category, report_statistics]
 ---
 
-# The Order of Products in a Category
+# Category Merchandising
 
-You give each product of a category a position on the **Products** tab of the category.
-The storefront uses these positions only when the category page sorts by **Position**. Another
-sort order, a sort order that the customer picked, or an index that is not up to date can each
-hide your positions.
+Category merchandising decides which products a shopper sees first on a category page. Maho gives
+you three tools:
+
+- The visual merchandiser, a view of product tiles where you set the order with drag and drop, pins
+  and bulk moves (see [The visual merchandiser](#the-visual-merchandiser)).
+- The automatic sorts **Newest**, **Bestsellers** and **Most Viewed**, which keep the order up to date
+  with no manual work (see [Automatic sorts](#automatic-sorts)).
+- Two category settings: where new products go, and whether out of stock products show last.
+
+The manual order works with positions. You give each product of a category a position on the
+**Products** tab of the category. The storefront uses these positions only when the category page
+sorts by **Position**. Another sort order, a sort order that the customer picked, or an index that
+is not up to date can each hide your positions.
 
 ## Where you set the positions
 
@@ -19,13 +28,14 @@ comes first when the direction is ascending, which is the default. Save the cate
 The position belongs to the product in this category. The same product can have another position
 in another category.
 
-## The tile view
+## The visual merchandiser
 
-The tile view is a visual merchandiser: it shows the products of the category as tiles in the order
-of the storefront, and you set the order with drag and drop. The admin calls the position order
+The visual merchandiser shows the products of the category as tiles, in the order of the storefront,
+and you set the order with drag and drop. The **Tiles** button opens it, so this page also calls it
+the tile view. The admin calls the position order
 **Best Value**. The **Sort By** list of the storefront calls it **Position**.
 
-To open the tile view:
+To open the visual merchandiser:
 
 1. Go to **Catalog > Categories** and select the category.
 2. Open the **Products** tab.
