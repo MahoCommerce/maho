@@ -256,6 +256,7 @@ class CategoryMerchandiser {
         this.indexRanks();
         this.writePins();
         this.isDirty = true;
+        this.ui.tilesView.setHasChanges();
         this.onChange();
         this.renderNotes();
     }
@@ -423,7 +424,7 @@ class CategoryMerchandiser {
         if (this.isEditable) {
             const select = document.createElement('input');
             select.type = 'checkbox';
-            select.className = 'd-checkbox d-checkbox-sm merchandiser-select';
+            select.className = 'd-checkbox d-checkbox-sm merchandiser-select no-changes';
             select.checked = this.selected.has(tile.id);
             select.setAttribute('aria-label', this.labels.select);
             select.addEventListener('change', () => {
