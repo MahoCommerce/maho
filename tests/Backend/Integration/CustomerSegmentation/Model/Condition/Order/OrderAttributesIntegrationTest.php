@@ -15,6 +15,10 @@ describe('Order Attributes Condition Integration Tests', function () {
     });
 
     describe('Basic Order Field Attributes', function () {
+        $now = time();
+        $createdSince = date('Y-m-d', strtotime('-30 days', $now));
+        $updatedSince = date('Y-m-d', strtotime('-15 days', $now));
+
         test('matches the customers by a field of one of their orders', function (string $attribute, string $operator, string $value, ?string $member, Closure $matches) {
             $segment = createOrderAttributesTestSegment('Order ' . $attribute, [
                 'type' => 'customersegmentation/segment_condition_order_attributes',
@@ -48,8 +52,8 @@ describe('Order Attributes Condition Integration Tests', function () {
             'grand total' => ['grand_total', '>=', '500.00', null, fn($o) => (float) $o->getGrandTotal() >= 500.00],
             'status' => ['status', '==', 'complete', 'High Value', fn($o) => $o->getStatus() === 'complete'],
             'status is not canceled' => ['status', '!=', 'canceled', 'Recent Buyer', fn($o) => $o->getStatus() !== 'canceled'],
-            'creation date' => ['created_at', '>=', date('Y-m-d', strtotime('-30 days')), 'Recent Buyer', fn($o) => date('Y-m-d', strtotime($o->getCreatedAt())) >= date('Y-m-d', strtotime('-30 days'))],
-            'update date' => ['updated_at', '>=', date('Y-m-d', strtotime('-15 days')), 'Recent Buyer', fn($o) => date('Y-m-d', strtotime($o->getUpdatedAt())) >= date('Y-m-d', strtotime('-15 days'))],
+            'creation date' => ['created_at', '>=', $createdSince, 'Recent Buyer', fn($o) => date('Y-m-d', strtotime($o->getCreatedAt())) >= $createdSince],
+            'update date' => ['updated_at', '>=', $updatedSince, 'Recent Buyer', fn($o) => date('Y-m-d', strtotime($o->getUpdatedAt())) >= $updatedSince],
             'currency' => ['currency_code', '==', 'USD', 'High Value', fn($o) => $o->getOrderCurrencyCode() === 'USD'],
             'store' => ['store_id', '==', '1', 'High Value', fn($o) => (int) $o->getStoreId() === 1],
             'payment method' => ['payment_method', '==', 'checkmo', 'High Value', fn($o) => $o->getPayment() && $o->getPayment()->getMethod() === 'checkmo'],

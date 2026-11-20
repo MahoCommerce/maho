@@ -30,6 +30,7 @@ beforeAll(function (): void {
         return;
     }
     $now = gmdate('Y-m-d H:i:s', time() - 60);
+    $GLOBALS['dashboardVisitors']['visitDate'] = substr($now, 0, 10);
     ReportFixture::addVisit(
         $storeId,
         $now,
@@ -66,18 +67,25 @@ describe('Dashboard visitors', function (): void {
         if (!$GLOBALS['dashboardVisitors']['clean']) {
             $this->markTestSkipped('The last store view already has visits');
         }
-        $response = apiGet(DASHBOARD_VISITORS_PATH . '?days=1&storeId=' . $GLOBALS['dashboardVisitors']['storeId'], adminToken());
+        $token = adminToken();
+        $requestDate = gmdate('Y-m-d');
+        $response = apiGet(DASHBOARD_VISITORS_PATH . '?days=1&storeId=' . $GLOBALS['dashboardVisitors']['storeId'], $token);
+        $responseDate = gmdate('Y-m-d');
         expect($response['status'])->toBe(200);
         $json = $response['json'];
+        // The summary and trend can read the UTC date on either side of midnight.
+        $possibleDates = [$requestDate, $responseDate];
+        $visitDate = $GLOBALS['dashboardVisitors']['visitDate'];
+        $possibleTodayCounts = array_map(static fn(string $date): int => $date === $visitDate ? 2 : 0, $possibleDates);
 
         expect($json['enabled'])->toBeTrue()
             ->and($json['days'])->toBe(1)
-            ->and($json['summary']['today'])->toBe(2)
+            ->and($json['summary']['today'])->toBeIn($possibleTodayCounts)
             ->and($json['summary']['sessions'])->toBe(2)
             ->and($json['summary']['averagePages'])->toEqual(1.5)
             ->and($json['summary']['bounceRate'])->toEqual(50.0)
             ->and($json['trend'])->toHaveCount(30)
-            ->and($json['trend'][29]['date'])->toBe(gmdate('Y-m-d'))
+            ->and($json['trend'][29]['date'])->toBeIn($possibleDates)
             ->and(array_sum($json['devices']['types']))->toBe(2)
             ->and(array_column($json['devices']['browsers'], 'visitors', 'name'))->toEqualCanonicalizing(['Firefox' => 1, 'Chrome' => 1])
             ->and($json['engagement'])->toBe(['visitors' => 2, 'loggedIn' => 0, 'loginRate' => 0, 'new' => 1, 'returning' => 1])
