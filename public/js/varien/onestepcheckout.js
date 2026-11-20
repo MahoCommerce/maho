@@ -362,15 +362,17 @@ class OneStepCheckout {
     }
 
     initShippingMethodAutoSave() {
-        // Listen for shipping method selection changes
+        // Listen for shipping method selection changes. Each reload of the section calls this again, so
+        // the handler is one function: addEventListener() ignores a listener that is already registered.
         const container = document.getElementById('checkout-shipping-method-load');
         if (!container) return;
 
-        container.addEventListener('change', (e) => {
+        this.onShippingMethodChange ??= (e) => {
             if (e.target.name === 'shipping_method') {
                 this.saveShippingMethod();
             }
-        });
+        };
+        container.addEventListener('change', this.onShippingMethodChange);
     }
 
     saveShippingMethod() {
@@ -408,15 +410,17 @@ class OneStepCheckout {
     }
 
     initPaymentMethodAutoSave() {
-        // Listen for payment method selection changes
+        // Listen for payment method selection changes. Each reload of the section calls this again, so
+        // the handler is one function: addEventListener() ignores a listener that is already registered.
         const container = document.getElementById('checkout-payment-method-load');
         if (!container) return;
 
-        container.addEventListener('change', (e) => {
+        this.onPaymentMethodChange ??= (e) => {
             if (e.target.name === 'payment[method]') {
                 this.savePayment();
             }
-        });
+        };
+        container.addEventListener('change', this.onPaymentMethodChange);
     }
 
     savePayment() {
