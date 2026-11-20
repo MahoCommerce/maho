@@ -1134,7 +1134,7 @@ class Mage_Checkout_Service_Cart
     /**
      * Give $quote the payment method and the data of $paymentData, and save the cart. The method must be available
      * for the cart and must accept the data. $actor gives the checks of the method, see getPaymentChecks(): the
-     * client cannot choose them.
+     * client cannot choose them. With $methodOnly, the method gets no form data and does not validate it.
      *
      * @param array<string, mixed> $paymentData the code of the method in "method", and the fields of its form
      * @throws \Mage_Core_Exception
@@ -1143,47 +1143,12 @@ class Mage_Checkout_Service_Cart
         \Mage_Sales_Model_Quote $quote,
         array $paymentData,
         \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
+        bool $methodOnly = false,
     ): \Mage_Sales_Model_Quote {
         $paymentData['checks'] = $this->getPaymentChecks($actor);
-        $import = fn() => $this->importPayment($quote, $paymentData);
+        $import = fn() => $this->importPayment($quote, $paymentData, $methodOnly);
         // Staff imports in the scope of the caller, in which Mage_Sales_Service_Order::submit() also places the order
         $actor === \Mage_Checkout_Model_Actor::Staff ? $import() : $this->inQuoteStoreScope($quote, $import);
-        $this->collectAndSave($quote);
-
-        return $quote;
-    }
-
-    /**
-     * Give $quote the payment method $methodCode without the data of its form, and save the cart. The one-step
-     * checkout calls it when the customer selects a method, before the card fields are filled in. The method must be
-     * available for the cart, with the same checks as selectPaymentMethod(), but its assignData() and validate() do
-     * not run: placing the order imports and validates the full payment data.
-     *
-     * @throws \Mage_Core_Exception when the method is not available for the cart
-     */
-    public function selectPaymentMethodCode(
-        \Mage_Sales_Model_Quote $quote,
-        string $methodCode,
-        \Mage_Checkout_Model_Actor $actor = \Mage_Checkout_Model_Actor::Customer,
-    ): \Mage_Sales_Model_Quote {
-        $checks = $this->getPaymentChecks($actor);
-        $this->inQuoteStoreScope($quote, function () use ($quote, $methodCode, $checks): void {
-            if (empty(\Mage::helper('payment')->getPaymentMethods($quote->getStoreId())[$methodCode]['model'])) {
-                throw new \Mage_Core_Exception(\Mage::helper('sales')->__('The requested Payment Method is not available.'));
-            }
-            if ($quote->isVirtual()) {
-                $quote->getBillingAddress()->setPaymentMethod($methodCode);
-            } else {
-                // A payment method can change the shipping rates
-                $quote->getShippingAddress()->setPaymentMethod($methodCode)->setCollectShippingRates(true);
-            }
-            $method = $quote->getPayment()->setMethod($methodCode)->getMethodInstance();
-            // The availability of a method depends on the totals, as in Mage_Sales_Model_Quote_Payment::importData()
-            $quote->collectTotals();
-            if (!$method->isAvailable($quote) || !$method->isApplicableToQuote($quote, $checks)) {
-                throw new \Mage_Core_Exception(\Mage::helper('sales')->__('The requested Payment Method is not available.'));
-            }
-        });
         $this->collectAndSave($quote);
 
         return $quote;
@@ -1254,7 +1219,7 @@ class Mage_Checkout_Service_Cart
      * @param array<string, mixed> $paymentData
      * @throws \Mage_Core_Exception
      */
-    private function importPayment(\Mage_Sales_Model_Quote $quote, array $paymentData): void
+    private function importPayment(\Mage_Sales_Model_Quote $quote, array $paymentData, bool $methodOnly = false): void
     {
         $methodCode = (string) ($paymentData['method'] ?? '');
         if (empty(\Mage::helper('payment')->getPaymentMethods($quote->getStoreId())[$methodCode]['model'])) {
@@ -1266,7 +1231,11 @@ class Mage_Checkout_Service_Cart
             // A payment method can change the shipping rates
             $quote->getShippingAddress()->setPaymentMethod($methodCode)->setCollectShippingRates(true);
         }
-        $quote->getPayment()->importData($paymentData);
+        if ($methodOnly) {
+            $quote->getPayment()->selectMethod($methodCode, $paymentData['checks'] ?? null);
+        } else {
+            $quote->getPayment()->importData($paymentData);
+        }
     }
 
     /**

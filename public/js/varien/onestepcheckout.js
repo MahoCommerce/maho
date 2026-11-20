@@ -429,8 +429,6 @@ class OneStepCheckout {
         // Only send the payment method selection, not CC details.
         // Full payment data (CC number, expiration, etc.) is validated during saveOrder.
         // Sending incomplete CC fields here would trigger server-side validation errors.
-        // method_only makes the server save the method without validating its (empty) payment data,
-        // so a card method stays selected when the payment section reloads.
         const formData = new FormData();
         formData.set('payment[method]', selectedMethod.value);
         formData.set('method_only', '1');

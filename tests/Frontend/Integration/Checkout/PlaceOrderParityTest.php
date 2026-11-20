@@ -292,6 +292,20 @@ it('refuses a payment method that is no longer available, for a caller that sele
         ->and(placeOrderOf($this->carts[0])->getId())->toBeNull();
 });
 
+it('refuses an order with a card method that the one-step checkout saved without its card fields', function () {
+    $store = Mage::app()->getStore();
+    $store->setConfig('payment/authorizenet/active', '1');
+    $store->setConfig('payment/authorizenet/cctypes', 'VI');
+    $store->setConfig('payment/authorizenet/useccv', '0');
+    Mage::getService('checkout/cart')->selectPaymentMethod($this->carts[0], ['method' => 'authorizenet'], methodOnly: true);
+
+    $web = placeOrderViaWeb(placeOrderReload($this->carts[0]), ['payment' => []]);
+
+    expect($web['success'] ?? null)->toBeFalse()
+        ->and($web['error_messages'] ?? null)->toBe('Incorrect credit card expiration date.')
+        ->and(placeOrderOf($this->carts[0])->getId())->toBeNull();
+});
+
 describe('the minimum order amount', function () {
     beforeEach(function () {
         Mage::app()->getStore()->setConfig('sales/minimum_order/active', '1');

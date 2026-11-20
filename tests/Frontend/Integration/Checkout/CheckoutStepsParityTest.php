@@ -357,6 +357,15 @@ describe('the one-step checkout auto-save of a payment method (method_only)', fu
             ->and(checkoutStepsReload($this->carts[0])->getPayment()->getMethod())->toBe('authorizenet');
     });
 
+    it('replaces the method that the cart already has with a card method', function () {
+        checkoutOnepagePost($this->carts[0], 'savePayment', ['payment' => ['method' => 'checkmo']]);
+
+        $web = checkoutOnepagePost($this->carts[0], 'savePayment', ['payment' => ['method' => 'authorizenet'], 'method_only' => '1']);
+
+        expect($web)->not->toHaveKey('error')
+            ->and(checkoutStepsReload($this->carts[0])->getPayment()->getMethod())->toBe('authorizenet');
+    });
+
     it('does not change the full save, which still refuses a card method without its card fields', function () {
         $web = checkoutOnepagePost($this->carts[0], 'savePayment', ['payment' => ['method' => 'authorizenet']]);
 
