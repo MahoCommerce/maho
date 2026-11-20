@@ -255,6 +255,38 @@ describe('a balance that a refund changed after the client saw it', function ():
     });
 });
 
+describe('a status that a refund changed after the admin opened the form', function (): void {
+    it('keeps the stored status when the admin does not change it', function (): void {
+        $giftcard = giftcardParityCard('STATUS-KEEP', ['balance' => 0.0, 'initial_balance' => 50.0, 'status' => Maho_Giftcard_Model_Giftcard::STATUS_USED]);
+        Mage::getModel('giftcard/giftcard')->load($giftcard->getId())->refund(10.0);
+
+        $admin = TransportParity::admin(Maho_Giftcard_Adminhtml_GiftcardController::class, 'save', [
+            'id' => $giftcard->getId(), 'giftcard_id' => $giftcard->getId(), 'code' => $giftcard->getCode(),
+            'status' => Maho_Giftcard_Model_Giftcard::STATUS_USED, 'shown_status' => Maho_Giftcard_Model_Giftcard::STATUS_USED,
+            'website_ids' => [(int) Mage::app()->getStore()->getWebsiteId()], 'balance' => 0.0, 'shown_balance' => 0.0,
+        ]);
+
+        $stored = Mage::getModel('giftcard/giftcard')->load($giftcard->getId());
+        expect($admin['errors'])->toBe([])
+            ->and($stored->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE)
+            ->and((float) $stored->getBalance())->toBe(10.0);
+    });
+
+    it('saves the status that the admin changed', function (): void {
+        $giftcard = giftcardParityCard('STATUS-CHANGE', ['balance' => 0.0, 'initial_balance' => 50.0, 'status' => Maho_Giftcard_Model_Giftcard::STATUS_USED]);
+        Mage::getModel('giftcard/giftcard')->load($giftcard->getId())->refund(10.0);
+
+        $admin = TransportParity::admin(Maho_Giftcard_Adminhtml_GiftcardController::class, 'save', [
+            'id' => $giftcard->getId(), 'giftcard_id' => $giftcard->getId(), 'code' => $giftcard->getCode(),
+            'status' => Maho_Giftcard_Model_Giftcard::STATUS_DISABLED, 'shown_status' => Maho_Giftcard_Model_Giftcard::STATUS_USED,
+            'website_ids' => [(int) Mage::app()->getStore()->getWebsiteId()], 'balance' => 0.0, 'shown_balance' => 0.0,
+        ]);
+
+        expect($admin['errors'])->toBe([])
+            ->and(Mage::getModel('giftcard/giftcard')->load($giftcard->getId())->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_DISABLED);
+    });
+});
+
 it('refuses an unknown status on the admin mass action and in the API, and keeps the balance', function (): void {
     $giftcard = giftcardParityCard('STATUS');
 

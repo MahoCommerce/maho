@@ -327,7 +327,7 @@ Open any gift card from the grid to access the edit form.
 | Field | Description | Notes |
 |-------|-------------|-------|
 | **Code** | Unique gift card code | Auto-generated if left blank on creation; cannot be changed after save |
-| **Status** | Gift card state | Active, Used, Disabled, or Expired |
+| **Status** | Gift card state | Active, Used, Disabled, or Expired. If you do not change it, the save keeps the stored status, also when an order or a refund changed it while the form was open |
 | **Websites** | Websites the card is valid on | <span class="version-badge">v26.9+</span> Multiselect, editable after creation. All selected websites must share one base currency, which is shown next to the field |
 | **Initial Balance** | Original amount | Display only for existing gift cards (shows historical reference) |
 | **Amount / Current Balance** | Gift card value | For new cards: sets initial amount; For existing cards: edit to manually adjust balance. If the balance changes while the form is open (for example, a credit memo refunds the card), the save stops with an error that shows the new balance. Check it and save again. <span class="version-badge">v26.9+</span> Shown to up to 4 decimals, so a balance left over from a partial redemption or a currency conversion is displayed exactly rather than rounded |

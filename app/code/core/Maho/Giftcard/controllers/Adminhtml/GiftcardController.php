@@ -102,13 +102,15 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
         $this->_title($model->getId() ? $model->getCode() : Mage::helper('giftcard')->__('New Gift Card'));
 
         $storedBalance = $model->getBalance();
+        $storedStatus = $model->getStatus();
         $data = Mage::getSingleton('adminhtml/session')->getFormData(true);
         if (is_array($data) && $data !== []) {
             $model->setData($data);
         }
         if ($model->getId()) {
-            // The save compares the posted balance with this one, also after a failed save
+            // The save compares the posted balance and status with these, also after a failed save
             $model->setData('shown_balance', $storedBalance);
+            $model->setData('shown_status', $storedStatus);
         }
 
         Mage::register('current_giftcard', $model);
@@ -141,6 +143,11 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             // The balance that the form showed: a refund can change the stored one meanwhile
             $shownBalance = $model->getId() && is_numeric($saveData['shown_balance'] ?? null) ? (float) $saveData['shown_balance'] : null;
             unset($saveData['shown_balance']);
+            // An untouched status keeps the stored one, which a refund or an order can change meanwhile
+            if ($model->getId() && isset($saveData['status'], $saveData['shown_status']) && $saveData['status'] === $saveData['shown_status']) {
+                unset($saveData['status']);
+            }
+            unset($saveData['shown_status']);
 
             // A form that does not post the balance keeps the balance of the card
             $saveData['balance'] ??= $model->getData('balance');
