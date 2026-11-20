@@ -362,17 +362,15 @@ class OneStepCheckout {
     }
 
     initShippingMethodAutoSave() {
-        // Listen for shipping method selection changes. Each reload of the section calls this again, so
-        // the handler is one function: addEventListener() ignores a listener that is already registered.
+        // Listen for shipping method selection changes
         const container = document.getElementById('checkout-shipping-method-load');
         if (!container) return;
 
-        this.onShippingMethodChange ??= (e) => {
+        container.addEventListener('change', (e) => {
             if (e.target.name === 'shipping_method') {
                 this.saveShippingMethod();
             }
-        };
-        container.addEventListener('change', this.onShippingMethodChange);
+        });
     }
 
     saveShippingMethod() {
@@ -410,17 +408,15 @@ class OneStepCheckout {
     }
 
     initPaymentMethodAutoSave() {
-        // Listen for payment method selection changes. Each reload of the section calls this again, so
-        // the handler is one function: addEventListener() ignores a listener that is already registered.
+        // Listen for payment method selection changes
         const container = document.getElementById('checkout-payment-method-load');
         if (!container) return;
 
-        this.onPaymentMethodChange ??= (e) => {
+        container.addEventListener('change', (e) => {
             if (e.target.name === 'payment[method]') {
                 this.savePayment();
             }
-        };
-        container.addEventListener('change', this.onPaymentMethodChange);
+        });
     }
 
     savePayment() {
@@ -464,8 +460,6 @@ class OneStepCheckout {
             if (placeholder) {
                 placeholder.style.display = 'none';
             }
-            // Re-init any scripts
-            this.initShippingMethodAutoSave();
             // If only one shipping method, trigger save to load payment methods
             this.autoSelectSingleShippingMethod();
         }
@@ -491,8 +485,6 @@ class OneStepCheckout {
             if (placeholder) {
                 placeholder.style.display = 'none';
             }
-            // Re-init any scripts
-            this.initPaymentMethodAutoSave();
 
             // Call payment.init() since innerHTML doesn't execute <script> tags
             // Server already marks the selected method as checked, and init() will
