@@ -28,7 +28,6 @@
         "ext-mbstring": "*",
         "ext-openssl": "*",
         "ext-pdo": "*",
-        "ext-pdo_mysql": "*",
         "ext-session": "*",
         "ext-simplexml": "*",
         "ext-soap": "*",
@@ -124,6 +123,7 @@
         "symfony/ai-ollama-platform": "^1.0"
     },
     "suggest": {
+        "ext-pdo_mysql": "Required for MySQL and MariaDB database support",
         "ext-pdo_pgsql": "Required for PostgreSQL database support",
         "ext-pdo_sqlite": "Required for SQLite database support",
         "fballiano/openmage-cloudflare-turnstile": "Turnstile: Cloudflare captcha-like antispam solution",

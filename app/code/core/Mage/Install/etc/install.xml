@@ -81,7 +81,11 @@ SPDX-License-Identifier: AFL-3.0
                     <mcrypt/>
                 </mcrypt>
                 <pdo/>
-                <pdo_mysql/>
+                <database_driver>
+                    <pdo_mysql/>
+                    <pdo_pgsql/>
+                    <pdo_sqlite/>
+                </database_driver>
                 <session/>
                 <simplexml/>
                 <soap/>
