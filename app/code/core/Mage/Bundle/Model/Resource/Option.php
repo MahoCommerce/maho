@@ -48,7 +48,7 @@ class Mage_Bundle_Model_Resource_Option extends Mage_Core_Model_Resource_Db_Abst
             if ($defaultTitleProvided) {
                 $write->insert($table, $data->getData());
             } else {
-                // The option collection joins the default row even when its title is empty.
+                // getSearchableData() skips an option that has no store 0 row.
                 $write->insertIgnore($table, $data->getData());
             }
         }
