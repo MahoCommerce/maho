@@ -1819,12 +1819,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/App.php
 
 		-
-			rawMessage: 'Call to an undefined method Mage_Core_Model_Abstract::init().'
-			identifier: method.notFound
-			count: 2
-			path: app/code/core/Mage/Core/Model/App/Emulation.php
-
-		-
 			rawMessage: 'Method Mage_Core_Model_Config::getNode() has parameter $scope with no type specified.'
 			identifier: missingType.parameter
 			count: 1
