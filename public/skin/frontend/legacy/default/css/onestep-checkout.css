@@ -153,8 +153,9 @@ SPDX-License-Identifier: AFL-3.0
         pointer-events: none;
         transition: opacity 0.15s ease;
 
+        /* No fade, but keep the transition so the loading delay below still applies */
         @media (prefers-reduced-motion: reduce) {
-            transition: none;
+            transition-duration: 0s;
         }
     }
 
@@ -182,9 +183,12 @@ SPDX-License-Identifier: AFL-3.0
     .loading > & {
         pointer-events: none;
 
+        /* Fade in only when the request is slow, so a fast reload of the section does not flash.
+           The delay is on the loading state only: the overlay still fades out at once. */
         &::before,
         &::after {
             opacity: 1;
+            transition-delay: 0.6s;
         }
     }
 }
