@@ -460,8 +460,6 @@ class OneStepCheckout {
             if (placeholder) {
                 placeholder.style.display = 'none';
             }
-            // Re-init any scripts
-            this.initShippingMethodAutoSave();
             // If only one shipping method, trigger save to load payment methods
             this.autoSelectSingleShippingMethod();
         }
@@ -487,8 +485,6 @@ class OneStepCheckout {
             if (placeholder) {
                 placeholder.style.display = 'none';
             }
-            // Re-init any scripts
-            this.initPaymentMethodAutoSave();
 
             // Call payment.init() since innerHTML doesn't execute <script> tags
             // Server already marks the selected method as checked, and init() will
