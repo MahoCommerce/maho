@@ -493,7 +493,7 @@ class CategoryMerchandiser {
         if (this.isEditable) {
             const pin = document.createElement('button');
             pin.type = 'button';
-            pin.className = 'merchandiser-pin d-btn-ghost d-btn-xs';
+            pin.className = 'merchandiser-pin d-btn-ghost d-btn-square';
             pin.innerHTML = CategoryMerchandiser.PIN_ICON;
             pin.title = isPinned ? this.labels.unpin : this.labels.pin;
             pin.setAttribute('aria-label', pin.title);
@@ -505,7 +505,7 @@ class CategoryMerchandiser {
         const position = document.createElement('input');
         position.type = 'number';
         position.min = '1';
-        position.className = 'd-input d-input-xs merchandiser-position';
+        position.className = 'd-input w-18 merchandiser-position';
         position.value = String(this.rankOf(tile));
         position.disabled = !this.isEditable || this.pinned.has(tile.id);
         position.setAttribute('aria-label', this.labels.position);
@@ -522,7 +522,7 @@ class CategoryMerchandiser {
         if (this.canChangeProducts) {
             const remove = document.createElement('button');
             remove.type = 'button';
-            remove.className = 'merchandiser-remove d-btn-ghost d-btn-xs';
+            remove.className = 'merchandiser-remove d-btn-ghost';
             remove.textContent = this.labels.remove;
             remove.addEventListener('click', () => this.removeProduct(tile.id));
             footer.append(remove);
@@ -687,7 +687,7 @@ class CategoryMerchandiser {
                 const name = document.createElement('span');
                 name.textContent = tile.name;
                 const sku = document.createElement('span');
-                sku.className = 'merchandiser-add-sku';
+                sku.className = 'merchandiser-add-sku text-sm';
                 sku.textContent = tile.sku;
                 button.append(name, sku);
                 item.append(button);

@@ -21,7 +21,7 @@ $labels = $this->getLabels();
         </button>
     </div>
     <div class="merchandiser-toolbar" id="merchandiser_toolbar" hidden>
-        <label class="d-input merchandiser-search">
+        <label class="d-input w-72 merchandiser-search">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
             <input type="search" class="no-changes" id="merchandiser_search" placeholder="<?= $this->escapeHtml($labels['search']) ?>" aria-label="<?= $this->escapeHtml($labels['search']) ?>">
         </label>
@@ -35,9 +35,9 @@ $labels = $this->getLabels();
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
                     <?= $this->escapeHtml($labels['addProduct']) ?>
                 </button>
-                <div class="merchandiser-add-panel" id="merchandiser_add_panel" hidden>
+                <div class="merchandiser-add-panel w-88" id="merchandiser_add_panel" hidden>
                     <input type="search" class="d-input d-input-sm no-changes" id="merchandiser_add" placeholder="<?= $this->escapeHtml($labels['add']) ?>" aria-label="<?= $this->escapeHtml($labels['add']) ?>" autocomplete="off">
-                    <ul class="merchandiser-add-results" id="merchandiser_add_results" hidden></ul>
+                    <ul class="merchandiser-add-results max-h-72" id="merchandiser_add_results" hidden></ul>
                 </div>
             </div>
             <button type="button" id="merchandiser_reset"><?= $this->escapeHtml($labels['reset']) ?></button>
@@ -60,7 +60,7 @@ $labels = $this->getLabels();
         <button type="button" class="d-btn-sm" data-action="top"><?= $this->escapeHtml($labels['moveTop']) ?></button>
         <button type="button" class="d-btn-sm" data-action="bottom"><?= $this->escapeHtml($labels['moveBottom']) ?></button>
         <span class="merchandiser-position-move d-join">
-            <input type="number" min="1" class="d-input d-input-sm d-join-item no-changes" id="merchandiser_position" aria-label="<?= $this->escapeHtml($labels['position']) ?>" placeholder="<?= $this->escapeHtml($labels['position']) ?>">
+            <input type="number" min="1" class="d-input d-input-sm d-join-item w-24 no-changes" id="merchandiser_position" aria-label="<?= $this->escapeHtml($labels['position']) ?>" placeholder="<?= $this->escapeHtml($labels['position']) ?>">
             <button type="button" class="d-btn-sm d-join-item" data-action="position"><?= $this->escapeHtml($labels['movePosition']) ?></button>
         </span>
         <button type="button" class="d-btn-sm" data-action="pin"><?= $this->escapeHtml($labels['pin']) ?></button>
