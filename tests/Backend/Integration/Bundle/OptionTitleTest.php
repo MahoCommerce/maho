@@ -15,15 +15,6 @@ it('saves a bundle option title in a store view', function (
     array $defaultData,
     ?string $expectedDefaultTitle,
 ): void {
-    $productId = (int) Mage::getResourceModel('catalog/product_collection')
-        ->addAttributeToFilter('type_id', Mage_Catalog_Model_Product_Type::TYPE_BUNDLE)
-        ->setPageSize(1)
-        ->getFirstItem()
-        ->getId();
-    if ($productId === 0) {
-        $this->markTestSkipped('The store has no bundle product');
-    }
-
     $storeId = (int) Mage::app()->getDefaultStoreView()->getId();
     $resources = Mage::getSingleton('core/resource');
     $write = $resources->getConnection('core_write');
@@ -34,7 +25,19 @@ it('saves a bundle option title in a store view', function (
     $resource = $option->getResource();
     $resource->beginTransaction();
     try {
-        $option->setParentId($productId)->setType('select')->setRequired(false)->setPosition(0)
+        $attributeSetId = (int) Mage::getSingleton('eav/config')
+            ->getEntityType('catalog_product')
+            ->getDefaultAttributeSetId();
+        $product = Mage::getModel('catalog/product')->setStoreId(0)
+            ->setAttributeSetId($attributeSetId)
+            ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_BUNDLE)
+            ->setSku('bundle-option-title-' . bin2hex(random_bytes(6)))
+            ->setName('Bundle title test')
+            ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_DISABLED)
+            ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE)
+            ->setPrice(0)
+            ->save();
+        $option->setParentId((int) $product->getId())->setType('select')->setRequired(false)->setPosition(0)
             ->setStoreId(0)->setTitle('Stored default title')->save();
         $optionId = (int) $option->getId();
         if (!$hasDefaultRow) {
