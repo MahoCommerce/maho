@@ -48,8 +48,6 @@ jobs:
 
             Review and merge to ship the fix in the next `${target_branch}.x`
             patch release.
-          # Leave the source PR's non-backport labels off the backport PR.
-          copy_labels_pattern: '^(?!backport ).*$'
           # A conflicting cherry-pick still gets a draft PR with the conflict
           # markers committed, so the resolution happens on a branch instead of
           # the backport silently evaporating. Such a target still counts as
