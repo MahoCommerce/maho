@@ -288,6 +288,19 @@ describe('a shipping method', function () {
 });
 
 describe('a payment method', function () {
+    it('does not let the storefront form write the payment of another cart', function () {
+        [$cart, $otherCart] = $this->carts;
+        Mage::app()->getStore()->setConfig('payment/banktransfer/active', '1');
+        checkoutOnepagePost($otherCart, 'savePayment', ['payment' => ['method' => 'checkmo']]);
+        $otherPaymentId = (int) checkoutStepsReload($otherCart)->getPayment()->getId();
+
+        checkoutOnepagePost($cart, 'savePayment', ['payment' => ['method' => 'banktransfer', 'payment_id' => (string) $otherPaymentId]]);
+
+        $otherPayment = checkoutStepsReload($otherCart)->getPayment();
+        expect((int) $otherPayment->getId())->toBe($otherPaymentId)
+            ->and($otherPayment->getMethod())->toBe('checkmo');
+    });
+
     it('does not take the additional information of the storefront form', function () {
         Mage::app()->getStore()->setConfig('payment/banktransfer/active', '1');
 
