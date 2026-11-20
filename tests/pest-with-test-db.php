@@ -123,7 +123,7 @@ class PestTestRunner
             echo "Setting up fresh test database for local testing ({$this->dbType})...\n";
             $this->setupTestDatabase();
             $this->injectPaypalSandboxConfig();
-            // Mirrors CI. Non-fatal: if it can't start, the HTTP tests skip.
+            // Mirrors CI, which also stops when the server does not answer.
             $this->startServer();
             $exitCode = $this->runPest($pestArgs);
 
@@ -479,8 +479,7 @@ class PestTestRunner
         );
         $pid = (int) trim((string) shell_exec($cmd));
         if ($pid <= 0) {
-            echo "⚠ Could not start the test server; HTTP tests will skip.\n";
-            return;
+            throw new Exception('Could not start the test server');
         }
         $this->serverPid = $pid;
 
@@ -504,7 +503,8 @@ class PestTestRunner
             }
             usleep(250000);
         }
-        echo "⚠ Test server did not become ready; HTTP tests may skip.\n";
+        echo trim((string) shell_exec('tail -5 /tmp/maho-test-server.log 2>/dev/null')) . "\n";
+        throw new Exception("Test server at {$baseUrl} did not become ready");
     }
 
     private function isServerAlive(): bool

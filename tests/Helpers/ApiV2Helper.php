@@ -1055,9 +1055,28 @@ class ApiV2Helper
         return $available;
     }
 
+    /**
+     * Tell if the run started a server. CI and composer test set API_BASE_URL when they start one.
+     */
+    public static function isServerRequired(): bool
+    {
+        return self::getEnvBaseUrl() !== '';
+    }
+
     public static function getBaseUrlPublic(): string
     {
         return self::getBaseUrl();
+    }
+
+    private static function getEnvBaseUrl(): string
+    {
+        // PHP CLI's default variables_order ("GPCS") does not populate $_ENV from the
+        // environment, so a workflow that exports API_BASE_URL is only visible through getenv().
+        $envBaseUrl = $_ENV['API_BASE_URL'] ?? '';
+        if ($envBaseUrl === '') {
+            $envBaseUrl = getenv('API_BASE_URL') ?: '';
+        }
+        return $envBaseUrl;
     }
 
     private static function getBaseUrl(): string
@@ -1066,14 +1085,7 @@ class ApiV2Helper
             return self::$baseUrl;
         }
 
-        // Read via getenv() as well as $_ENV: PHP CLI's default variables_order
-        // ("GPCS") does not populate $_ENV from the environment, so a workflow
-        // that exports API_BASE_URL is only visible through getenv(). Without
-        // this the whole Api/V2 suite silently self-skips in CI.
-        $envBaseUrl = $_ENV['API_BASE_URL'] ?? '';
-        if ($envBaseUrl === '') {
-            $envBaseUrl = getenv('API_BASE_URL') ?: '';
-        }
+        $envBaseUrl = self::getEnvBaseUrl();
         if ($envBaseUrl !== '') {
             self::$baseUrl = rtrim($envBaseUrl, '/');
             return self::$baseUrl;

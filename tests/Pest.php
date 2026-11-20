@@ -278,7 +278,8 @@ function getItems(array $response): array
 | API Test Availability Check
 |--------------------------------------------------------------------------
 |
-| Skip Api/V2 and Api/Soap tests when no API server is reachable.
+| Api/V2 and Api/Soap tests need an API server. A run that started one
+| (API_BASE_URL is set) fails when it does not answer. Other runs skip.
 |
 */
 
@@ -324,9 +325,13 @@ uses()
         $protocolsEnabled = true;
     })
     ->beforeEach(function (): void {
-        if (!ApiV2Helper::isServerAvailable()) {
-            $this->markTestSkipped('API server not reachable - skipping API integration tests');
+        if (ApiV2Helper::isServerAvailable()) {
+            return;
         }
+        if (ApiV2Helper::isServerRequired()) {
+            $this->fail('API server at ' . ApiV2Helper::getBaseUrlPublic() . ' did not answer within 15 seconds');
+        }
+        $this->markTestSkipped('API server not reachable - skipping API integration tests');
     })
     ->in('Api/V2', 'Api/Soap');
 
