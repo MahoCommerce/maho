@@ -21,21 +21,7 @@ const PAGE_BUILDER_ADMIN_USER = 'page-builder-admin';
 const PAGE_BUILDER_ADMIN_PASSWORD = 'Password123!';
 
 beforeEach(function () {
-    deletePageBuilderAdmin();
-    $user = Mage::getModel('admin/user')
-        ->setUsername(PAGE_BUILDER_ADMIN_USER)
-        ->setFirstname('Page')
-        ->setLastname('Builder')
-        ->setEmail('page-builder@example.test')
-        ->setPassword(PAGE_BUILDER_ADMIN_PASSWORD)
-        ->setIsActive()
-        ->save();
-    $roleId = Mage::getModel('admin/role')->getCollection()
-        ->addFieldToFilter('role_type', Mage_Admin_Model_Acl::ROLE_TYPE_GROUP)
-        ->setPageSize(1)
-        ->getFirstItem()
-        ->getId();
-    Mage::getModel('admin/user')->load($user->getId())->setRoleIds([$roleId])->saveRelations();
+    createBrowserAdmin(PAGE_BUILDER_ADMIN_USER, PAGE_BUILDER_ADMIN_PASSWORD);
 
     $this->block = Mage::getModel('cms/block')
         ->setTitle('Page Builder')
@@ -47,17 +33,9 @@ beforeEach(function () {
 });
 
 afterEach(function () {
-    deletePageBuilderAdmin();
+    deleteBrowserAdmin(PAGE_BUILDER_ADMIN_USER);
     $this->block->delete();
 });
-
-function deletePageBuilderAdmin(): void
-{
-    $user = Mage::getModel('admin/user')->loadByUsername(PAGE_BUILDER_ADMIN_USER);
-    if ($user->getId()) {
-        $user->delete();
-    }
-}
 
 /** Poll $script in the page until it returns 1. */
 function pageBuilderWaitFor(object $page, string $script, string $what, int $seconds = 15): void

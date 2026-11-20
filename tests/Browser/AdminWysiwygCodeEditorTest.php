@@ -35,21 +35,7 @@ const CODE_EDITOR_TYPE = <<<'JS'
     JS;
 
 beforeEach(function () {
-    deleteCodeEditorAdmin();
-    $user = Mage::getModel('admin/user')
-        ->setUsername(CODE_EDITOR_ADMIN_USER)
-        ->setFirstname('Wysiwyg')
-        ->setLastname('Code')
-        ->setEmail('wysiwyg-code@example.test')
-        ->setPassword(CODE_EDITOR_ADMIN_PASSWORD)
-        ->setIsActive()
-        ->save();
-    $roleId = Mage::getModel('admin/role')->getCollection()
-        ->addFieldToFilter('role_type', Mage_Admin_Model_Acl::ROLE_TYPE_GROUP)
-        ->setPageSize(1)
-        ->getFirstItem()
-        ->getId();
-    Mage::getModel('admin/user')->load($user->getId())->setRoleIds([$roleId])->saveRelations();
+    createBrowserAdmin(CODE_EDITOR_ADMIN_USER, CODE_EDITOR_ADMIN_PASSWORD);
 
     $this->block = Mage::getModel('cms/block')
         ->setTitle('Code editor block')
@@ -61,17 +47,9 @@ beforeEach(function () {
 });
 
 afterEach(function () {
-    deleteCodeEditorAdmin();
+    deleteBrowserAdmin(CODE_EDITOR_ADMIN_USER);
     $this->block->delete();
 });
-
-function deleteCodeEditorAdmin(): void
-{
-    $user = Mage::getModel('admin/user')->loadByUsername(CODE_EDITOR_ADMIN_USER);
-    if ($user->getId()) {
-        $user->delete();
-    }
-}
 
 /** Open the block, switch to the plain HTML view, and put the cursor after `card`. */
 function openCodeEditor(object $test): object

@@ -20,21 +20,7 @@ const WYSIWYG_RENDER_ADMIN_USER = 'wysiwyg-render-admin';
 const WYSIWYG_RENDER_ADMIN_PASSWORD = 'Password123!';
 
 beforeEach(function () {
-    deleteWysiwygRenderAdmin();
-    $user = Mage::getModel('admin/user')
-        ->setUsername(WYSIWYG_RENDER_ADMIN_USER)
-        ->setFirstname('Wysiwyg')
-        ->setLastname('Render')
-        ->setEmail('wysiwyg-render@example.test')
-        ->setPassword(WYSIWYG_RENDER_ADMIN_PASSWORD)
-        ->setIsActive()
-        ->save();
-    $roleId = Mage::getModel('admin/role')->getCollection()
-        ->addFieldToFilter('role_type', Mage_Admin_Model_Acl::ROLE_TYPE_GROUP)
-        ->setPageSize(1)
-        ->getFirstItem()
-        ->getId();
-    Mage::getModel('admin/user')->load($user->getId())->setRoleIds([$roleId])->saveRelations();
+    createBrowserAdmin(WYSIWYG_RENDER_ADMIN_USER, WYSIWYG_RENDER_ADMIN_PASSWORD);
 
     $this->inner = Mage::getModel('cms/block')
         ->setTitle('Rendered inner block')
@@ -53,18 +39,10 @@ beforeEach(function () {
 });
 
 afterEach(function () {
-    deleteWysiwygRenderAdmin();
+    deleteBrowserAdmin(WYSIWYG_RENDER_ADMIN_USER);
     $this->holder->delete();
     $this->inner->delete();
 });
-
-function deleteWysiwygRenderAdmin(): void
-{
-    $user = Mage::getModel('admin/user')->loadByUsername(WYSIWYG_RENDER_ADMIN_USER);
-    if ($user->getId()) {
-        $user->delete();
-    }
-}
 
 it('shows a block as the storefront shows it and an icon as its SVG, and saves the directives', function () {
     $page = adminLoginAndVisit(

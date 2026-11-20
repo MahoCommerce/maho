@@ -239,4 +239,111 @@ return function (SchemaEditor $schema): void {
             ->setComment('Storefront Paths That Answered 404')
             ->create(),
     );
+
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('report_saved')
+            ->addColumn(Schema::column('saved_report_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('admin_user_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('name', Types::STRING, length: 255))
+            ->addColumn(Schema::column('definition', Types::TEXT))
+            ->addColumn(Schema::column('is_shared', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_IMMUTABLE))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_IMMUTABLE))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('saved_report_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('admin_user_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('admin_user_id')
+                    ->setUnquotedReferencedTableName('admin_user')
+                    ->setUnquotedReferencedColumnNames('user_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Saved Reports of the Report Explorer')
+            ->create(),
+    );
+
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('report_dashboard_item')
+            ->addColumn(Schema::column('item_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('admin_user_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('saved_report_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('position', Types::SMALLINT, unsigned: true, default: 0))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('item_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('admin_user_id', 'saved_report_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('saved_report_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('admin_user_id')
+                    ->setUnquotedReferencedTableName('admin_user')
+                    ->setUnquotedReferencedColumnNames('user_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('saved_report_id')
+                    ->setUnquotedReferencedTableName('report_saved')
+                    ->setUnquotedReferencedColumnNames('saved_report_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Saved Reports on the Dashboard of each Administrator')
+            ->create(),
+    );
+
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('report_annotation')
+            ->addColumn(Schema::column('annotation_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('admin_user_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('annotation_date', Types::DATE_IMMUTABLE))
+            ->addColumn(Schema::column('title', Types::STRING, length: 255))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_IMMUTABLE))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('annotation_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('annotation_date'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('admin_user_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('admin_user_id')
+                    ->setUnquotedReferencedTableName('admin_user')
+                    ->setUnquotedReferencedColumnNames('user_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::SET_NULL)
+                    ->create(),
+            )
+            ->setComment('Notes on the Dates of the Report Explorer Charts')
+            ->create(),
+    );
+
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('report_target')
+            ->addColumn(Schema::column('target_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('dataset', Types::STRING, length: 64))
+            ->addColumn(Schema::column('metric', Types::STRING, length: 64))
+            ->addColumn(Schema::column('month', Types::DATE_IMMUTABLE))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('value', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_IMMUTABLE))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('target_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('dataset', 'metric', 'store_id', 'month'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Monthly Targets of the Report Explorer Metrics')
+            ->create(),
+    );
 };

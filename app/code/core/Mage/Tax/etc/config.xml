@@ -11,6 +11,13 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_Tax>
     </modules>
     <global>
+        <reports>
+            <datasets>
+                <sales_taxes>
+                    <class>tax/report_dataset_taxes</class>
+                </sales_taxes>
+            </datasets>
+        </reports>
         <docs>
             <user>docs/user</user>
         </docs>

@@ -206,6 +206,18 @@ return [
         'templateCode', 'templateSenderEmail', 'templateSenderName', 'templateStyles',
         'templateSubject', 'templateText', 'templateType',
     ],
+    'ExplorerDataset' => [
+        'code', 'extensions',
+    ],
+    'ExplorerExplanation' => [
+        'dataset', 'extensions',
+    ],
+    'ExplorerRecords' => [
+        'dataset', 'extensions',
+    ],
+    'ExplorerReport' => [
+        'dataset', 'extensions',
+    ],
     'GiftCard' => [
         'balance', 'code', 'createdAt', 'currencyCode', 'emailScheduledAt', 'emailSentAt', 'expiresAt',
         'extensions', 'history', 'id', 'initialBalance', 'message', 'purchaseOrderId',
@@ -304,8 +316,14 @@ return [
     'ProductsViewedReport' => [
         'extensions', 'report',
     ],
+    'ReportAnnotation' => [
+        'adminUserId', 'date', 'extensions', 'id', 'title',
+    ],
     'ReportStatistic' => [
         'code', 'description', 'extensions', 'label', 'updatedAt',
+    ],
+    'ReportTarget' => [
+        'dataset', 'extensions', 'id', 'metric', 'month', 'storeId', 'value',
     ],
     'ReportsPermission' => [
         'extensions',
@@ -336,6 +354,9 @@ return [
     ],
     'SalesTaxReport' => [
         'extensions', 'report',
+    ],
+    'SavedReport' => [
+        'adminUserId', 'createdAt', 'extensions', 'id', 'isPinned', 'isShared', 'name', 'request', 'updatedAt',
     ],
     'ScheduledTask' => [
         'adminUserId', 'cronExpr', 'extensions', 'id', 'instruction', 'isActive', 'lastRunAt', 'nextRunAt', 'notify',

@@ -26,6 +26,9 @@ nav:
   - Email automation: email-automation.md
   - Gift cards: gift-cards.md
   - Feed manager: feed-manager.md
+- Reports:
+  - Report Explorer: report-explorer.md
+  - Report metrics: report-metrics.md
 - Customer accounts:
   - Customer and address attributes: customer-attributes.md
   - Magic link authentication: magic-link-authentication.md

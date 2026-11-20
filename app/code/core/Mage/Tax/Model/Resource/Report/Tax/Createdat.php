@@ -76,7 +76,7 @@ class Mage_Tax_Model_Resource_Report_Tax_Createdat extends Mage_Reports_Model_Re
                 'order_status'          => $writeAdapter->getIfNullSql('e.status', "''"),
                 'percent'               => 'MAX(tax.' . $writeAdapter->quoteIdentifier('percent') . ')',
                 'orders_count'          => 'COUNT(DISTINCT e.entity_id)',
-                'tax_base_amount_sum'   => 'SUM(tax.base_amount * e.base_to_global_rate)',
+                'tax_base_amount_sum'   => 'SUM(' . $writeAdapter->getIfNullSql('tax.base_real_amount', 'tax.base_amount') . ' * e.base_to_global_rate)',
             ];
 
             $select = $writeAdapter->select();

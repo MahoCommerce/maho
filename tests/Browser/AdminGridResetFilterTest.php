@@ -46,10 +46,7 @@ function deleteGridResetFixtures(): void
         ['title IN (?)' => [GRID_RESET_ALPHA, GRID_RESET_BETA]],
     );
 
-    $user = Mage::getModel('admin/user')->loadByUsername(GRID_RESET_ADMIN_USERNAME);
-    if ($user->getId()) {
-        $user->delete();
-    }
+    deleteBrowserAdmin(GRID_RESET_ADMIN_USERNAME);
 }
 
 function createGridResetFixtures(): void
@@ -64,22 +61,7 @@ function createGridResetFixtures(): void
         ]);
     }
 
-    $user = Mage::getModel('admin/user')
-        ->setUsername(GRID_RESET_ADMIN_USERNAME)
-        ->setFirstname('Grid')
-        ->setLastname('Reset')
-        ->setEmail('grid-reset@example.test')
-        ->setPassword(GRID_RESET_ADMIN_PASSWORD)
-        ->setIsActive()
-        ->save();
-
-    $roleId = Mage::getModel('admin/role')->getCollection()
-        ->addFieldToFilter('role_type', Mage_Admin_Model_Acl::ROLE_TYPE_GROUP)
-        ->setPageSize(1)
-        ->getFirstItem()
-        ->getId();
-
-    Mage::getModel('admin/user')->load($user->getId())->setRoleIds([$roleId])->saveRelations();
+    createBrowserAdmin(GRID_RESET_ADMIN_USERNAME, GRID_RESET_ADMIN_PASSWORD);
 }
 
 /** Run $script on the grid object, then wait for the page that it opens. */

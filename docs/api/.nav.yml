@@ -7,6 +7,7 @@ nav:
   - REST endpoints: v2/endpoints.md
   - GraphQL: v2/graphql.md
   - MCP (AI agents): v2/mcp.md
+  - Report Explorer: report-explorer.md
   - Errors: v2/errors.md
   - CAPTCHA: v2/captcha.md
   - Architecture: v2/architecture.md
