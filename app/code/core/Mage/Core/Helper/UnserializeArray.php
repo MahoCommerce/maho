@@ -18,7 +18,9 @@ class Mage_Core_Helper_UnserializeArray extends Mage_Core_Helper_Abstract
      */
     public function unserialize($str)
     {
-        $str ??= '';
+        if ($str === null || $str === '') {
+            throw new Exception('Error unserializing data.');
+        }
 
         // Pass through if the value has already been decoded upstream
         // (e.g., a previous _afterLoad pass did setExtra(array), and the

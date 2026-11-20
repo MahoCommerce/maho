@@ -55,10 +55,20 @@ describe('Legacy serialized data conversion via core/unserializeArray helper', f
             ->toThrow(Exception::class);
     });
 
-    it('throws on null or empty input', function () {
-        expect(fn() => $this->helper->unserialize(null))->toThrow(Exception::class);
-        expect(fn() => $this->helper->unserialize(''))->toThrow(Exception::class);
-    });
+    it('throws on missing input without emitting a PHP warning', function (?string $input) {
+        $warnings = [];
+        set_error_handler(static function (int $severity, string $message) use (&$warnings): bool {
+            $warnings[] = $message;
+            return true;
+        }, E_WARNING);
+        try {
+            expect(fn() => $this->helper->unserialize($input))->toThrow(Exception::class, 'Error unserializing data.');
+        } finally {
+            restore_error_handler();
+        }
+
+        expect($warnings)->toBe([]);
+    })->with(['null' => [null], 'empty string' => ['']]);
 });
 
 /**
