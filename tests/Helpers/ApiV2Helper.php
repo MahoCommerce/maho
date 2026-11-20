@@ -1029,9 +1029,32 @@ class ApiV2Helper
         ];
     }
 
-    /**
-     * Public accessor for getBaseUrl (used by Pest.php availability check)
-     */
+    public static function isServerAvailable(): bool
+    {
+        // Pest binds the hook to a new test instance for each case. Keep the result here.
+        static $available = false;
+        if ($available) {
+            return true;
+        }
+
+        try {
+            $handle = curl_init(self::getBaseUrl() . '/api/rest/v2/store-config');
+            curl_setopt_array($handle, [
+                CURLOPT_RETURNTRANSFER => true,
+                // The first API request builds the HTTP kernel and its cache.
+                CURLOPT_TIMEOUT => 15,
+                CURLOPT_CONNECTTIMEOUT => 2,
+                CURLOPT_SSL_VERIFYPEER => false,
+            ]);
+            curl_exec($handle);
+            $available = curl_getinfo($handle, CURLINFO_HTTP_CODE) !== 0;
+        } catch (\Throwable) {
+            return false;
+        }
+
+        return $available;
+    }
+
     public static function getBaseUrlPublic(): string
     {
         return self::getBaseUrl();

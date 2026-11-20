@@ -275,13 +275,10 @@ function getItems(array $response): array
 
 /*
 |--------------------------------------------------------------------------
-| API v2 Test Availability Check
+| API Test Availability Check
 |--------------------------------------------------------------------------
 |
 | Skip Api/V2 and Api/Soap tests when no API server is reachable.
-| CI environments install Maho but do not start a web server,
-| so these integration tests can only run locally or in environments
-| where the API is served.
 |
 */
 
@@ -327,24 +324,7 @@ uses()
         $protocolsEnabled = true;
     })
     ->beforeEach(function (): void {
-        static $apiAvailable = null;
-
-        if ($apiAvailable === null) {
-            try {
-                $baseUrl = ApiV2Helper::getBaseUrlPublic();
-                $ch = curl_init($baseUrl . '/api/rest/v2/store-config');
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 3);
-                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_exec($ch);
-                $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                $apiAvailable = ($code !== 0);
-            } catch (\Throwable) {
-                $apiAvailable = false;
-            }
-        }
-        if (!$apiAvailable) {
+        if (!ApiV2Helper::isServerAvailable()) {
             $this->markTestSkipped('API server not reachable - skipping API integration tests');
         }
     })
