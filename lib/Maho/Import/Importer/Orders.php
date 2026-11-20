@@ -47,7 +47,6 @@ class Orders extends AbstractImporter
     {
         $rows = [];
         $references = [];
-        $regionIds = [];
         foreach ($file as $line => $row) {
             foreach ($this->requiredColumns() as $column) {
                 $this->requireValue($file, $line, $row, $column);
@@ -67,9 +66,7 @@ class Orders extends AbstractImporter
             if (!filter_var($row['email'], FILTER_VALIDATE_EMAIL)) {
                 $this->fail($file, $line, "email '{$row['email']}' is not valid");
             }
-            $countryId = $row['country_id'];
-            $region = $row['region'] ?? '';
-            $row['region_id'] = $regionIds[$countryId][$region] ??= $this->regionId($file, $line, $countryId, $region);
+            $row['region_id'] = $this->regionId($file, $line, $row['country_id'], $row['region'] ?? '');
             $row['lines'] = [];
             foreach (CsvFile::list($row['items']) as $item) {
                 if (!preg_match('/^(.+):(\d+)$/', $item, $match) || (int) $match[2] < 1) {
@@ -353,9 +350,9 @@ class Orders extends AbstractImporter
     private function regionId(CsvFile $file, int $line, string $countryId, string $region): ?int
     {
         if ($region !== '') {
-            $regionId = Mage::getModel('directory/region')->loadByCodeOrName($region, $countryId)->getId();
-            if ($regionId) {
-                return (int) $regionId;
+            $regionId = $this->resolver->regionId($countryId, $region);
+            if ($regionId !== null) {
+                return $regionId;
             }
         }
         if (Mage::helper('directory')->isRegionRequired($countryId)) {
