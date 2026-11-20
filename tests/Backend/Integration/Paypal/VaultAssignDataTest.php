@@ -110,7 +110,7 @@ describe('paypal vault assignData ownership', function (): void {
             expect(fn() => $method->initialize('authorize', new \Maho\DataObject()))
                 ->toThrow(Mage_Core_Exception::class, 'Failed to create PayPal order: pest stop');
             expect($client->sent['body']['payment_source']['paypal']['vault_id'] ?? null)
-                ->toBe($token->getPaypalTokenId());
+                ->toBe(Mage::getModel('paypal/vault_token')->load($token->getId())->getPaypalTokenId());
         } finally {
             $quote->delete();
             $token->delete();
