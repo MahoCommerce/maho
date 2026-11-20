@@ -136,9 +136,9 @@ class Cache
             return false;
         }
 
-        $hash = spl_object_hash($object);
+        $hash = spl_object_id($object);
         if (!is_null($idx) && strpos($idx, '{')) {
-            $idx = str_replace('{hash}', $hash, $idx);
+            $idx = str_replace('{hash}', (string) $hash, $idx);
         }
         if (isset($this->_hashes[$hash])) {
             //throw new Exception('test');

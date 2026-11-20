@@ -73,7 +73,7 @@ final class SocialLoginJwt
     /**
      * @param array<string, mixed> $claims
      */
-    public static function idToken(string $kid, string $issuer, string $audience, array $claims = [], ?\DateTimeImmutable $expiresAt = null): string
+    public static function idToken(string $kid, string $issuer, string $audience, array $claims = [], ?\DateTimeImmutable $expiresAt = null, bool $expires = true): string
     {
         $pair = self::keypair();
         $config = Configuration::forAsymmetricSigner(
@@ -86,8 +86,10 @@ final class SocialLoginJwt
             ->withHeader('kid', $kid)
             ->issuedBy($issuer)
             ->permittedFor($audience)
-            ->issuedAt($now)
-            ->expiresAt($expiresAt ?? $now->modify('+1 hour'));
+            ->issuedAt($now);
+        if ($expires) {
+            $builder = $builder->expiresAt($expiresAt ?? $now->modify('+1 hour'));
+        }
         foreach ($claims as $name => $value) {
             // "sub" is a registered claim; lcobucci's builder rejects it in withClaim()
             $builder = $name === 'sub' ? $builder->relatedTo($value) : $builder->withClaim($name, $value);
