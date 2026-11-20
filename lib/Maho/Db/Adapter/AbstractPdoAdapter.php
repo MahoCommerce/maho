@@ -1364,6 +1364,32 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     // =========================================================================
 
     /**
+     * Return the rows of an insert, each with its values in the key order of the first row.
+     *
+     * $data is one row (column => value) or a list of rows. The SQL takes its column list from
+     * the first row and binds the values by position, so every row must have the same keys.
+     *
+     * @return list<array<string, mixed>>
+     * @throws Exception when a row does not have the same keys as the first row
+     */
+    protected function _alignInsertRows(array $data): array
+    {
+        $first = array_first($data);
+        if (!is_array($first)) {
+            return [$data];
+        }
+
+        $rows = [];
+        foreach ($data as $row) {
+            if (!is_array($row) || count($row) !== count($first) || array_diff_key($row, $first)) {
+                throw new Exception('Invalid data for insert');
+            }
+            $rows[] = array_replace($first, $row);
+        }
+        return $rows;
+    }
+
+    /**
      * Prepare row data for insert
      *
      * @param mixed $row Row data

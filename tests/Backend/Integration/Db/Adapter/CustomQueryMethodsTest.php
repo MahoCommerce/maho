@@ -303,9 +303,9 @@ describe('insertOnDuplicate', function () {
 
     it('inserts multiple rows at once', function () {
         $data = [
-            ['name' => 'bulk1', 'value' => new \Maho\Db\Expr('10 + 1')],
+            ['name' => 'bulk1', 'value' => 11],
             ['name' => 'bulk2', 'value' => 22],
-            ['name' => 'bulk3', 'value' => new \Maho\Db\Expr('30 + 3')],
+            ['name' => 'bulk3', 'value' => 33],
         ];
 
         $affected = $this->adapter->insertOnDuplicate(
@@ -316,11 +316,89 @@ describe('insertOnDuplicate', function () {
 
         expect($affected)->toBeGreaterThan(0);
 
-        $values = $this->adapter->fetchCol(
-            "SELECT value FROM {$this->tempTableTarget} WHERE name LIKE 'bulk%' ORDER BY name",
+        $count = $this->adapter->fetchOne(
+            "SELECT COUNT(*) FROM {$this->tempTableTarget} WHERE name LIKE 'bulk%'",
         );
 
-        expect(array_map(intval(...), $values))->toBe([11, 22, 33]);
+        expect((int) $count)->toBe(3);
+    });
+
+    it('writes each value into its column when the rows list their keys in different orders', function () {
+        $this->adapter->insertOnDuplicate(
+            $this->tempTableTarget,
+            [
+                ['name' => 'order1', 'value' => 1],
+                ['value' => 2, 'name' => 'order2'],
+            ],
+            ['value'],
+        );
+
+        $values = $this->adapter->fetchPairs(
+            "SELECT name, value FROM {$this->tempTableTarget} WHERE name LIKE 'order%' ORDER BY name",
+        );
+
+        expect(array_map(intval(...), $values))->toBe(['order1' => 1, 'order2' => 2]);
+    });
+
+    it('rejects a row that does not have the same columns as the first row', function (array $secondRow) {
+        expect(fn() => $this->adapter->insertOnDuplicate(
+            $this->tempTableTarget,
+            [['name' => 'keys1', 'value' => 1], $secondRow],
+            ['value'],
+        ))->toThrow(\Maho\Db\Exception::class, 'Invalid data for insert');
+    })->with([
+        'a missing column' => [['name' => 'keys2']],
+        'an extra column' => [['name' => 'keys2', 'value' => 2, 'status' => 0]],
+    ]);
+
+    it('applies two rows with the same key in order, so the last row wins', function () {
+        $this->adapter->insertOnDuplicate(
+            $this->tempTableTarget,
+            [
+                ['name' => 'repeat', 'value' => 1],
+                ['name' => 'other', 'value' => 5],
+                ['name' => 'repeat', 'value' => 2],
+            ],
+            ['value'],
+        );
+
+        $values = $this->adapter->fetchPairs(
+            "SELECT name, value FROM {$this->tempTableTarget} WHERE name IN ('repeat', 'other') ORDER BY name",
+        );
+
+        expect(array_map(intval(...), $values))->toBe(['other' => 5, 'repeat' => 2]);
+    });
+
+    it('keeps the bytes of a binary column when an expression in the same row takes no bind position', function () {
+        $table = 'test_binary_' . uniqid();
+        $this->adapter->createTable(
+            $this->adapter->newTable($table)
+                ->addColumn('code', \Maho\Db\Ddl\Table::TYPE_TEXT, 32, ['nullable' => false, 'primary' => true], 'Code')
+                ->addColumn('value', \Maho\Db\Ddl\Table::TYPE_INTEGER, null, [], 'Value')
+                ->addColumn('data', \Maho\Db\Ddl\Table::TYPE_VARBINARY, 16, [], 'Data'),
+        );
+
+        try {
+            $bytes = ['a' => "\x80\xff\x01", 'b' => "\xfe\x7f\xc3", 'c' => "\x90\xa0\xb0"];
+            $this->adapter->insertOnDuplicate(
+                $table,
+                [
+                    ['code' => 'a', 'value' => new \Maho\Db\Expr('1 + 1'), 'data' => $bytes['a']],
+                    ['code' => 'b', 'value' => 3, 'data' => $bytes['b']],
+                    ['code' => 'c', 'value' => new \Maho\Db\Expr('2 + 2'), 'data' => $bytes['c']],
+                ],
+                ['value', 'data'],
+            );
+
+            $stored = [];
+            foreach ($this->adapter->fetchAll("SELECT code, data FROM {$table} ORDER BY code") as $row) {
+                $stored[$row['code']] = is_resource($row['data']) ? stream_get_contents($row['data']) : $row['data'];
+            }
+
+            expect($stored)->toBe($bytes);
+        } finally {
+            $this->adapter->dropTable($table);
+        }
     });
 });
 

@@ -899,22 +899,12 @@ class Sqlite extends AbstractPdoAdapter
     #[\Override]
     public function insertOnDuplicate(string|array|\Maho\Db\Select $table, array $data, array $fields = []): int
     {
-        $row = array_first($data);
+        $rows = $this->_alignInsertRows($data);
+        $cols = array_keys($rows[0]);
         $bind = [];
         $values = [];
-
-        if (is_array($row)) {
-            $cols = array_keys($row);
-            foreach ($data as $row) {
-                if (array_diff($cols, array_keys($row))) {
-                    throw new \Maho\Db\Exception('Invalid data for insert');
-                }
-                $values[] = $this->_prepareInsertData($row, $bind);
-            }
-            unset($row);
-        } else {
-            $cols = array_keys($data);
-            $values[] = $this->_prepareInsertData($data, $bind);
+        foreach ($rows as $row) {
+            $values[] = $this->_prepareInsertData($row, $bind);
         }
 
         $updateFields = [];

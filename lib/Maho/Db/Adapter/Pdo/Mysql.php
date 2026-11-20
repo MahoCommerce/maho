@@ -1842,23 +1842,12 @@ class Mysql extends AbstractPdoAdapter
     #[\Override]
     public function insertOnDuplicate(string|array|\Maho\Db\Select $table, array $data, array $fields = []): int
     {
-        // extract and quote col names from the array keys
-        $row    = array_first($data);
-        $bind   = []; // SQL bind array
+        $rows   = $this->_alignInsertRows($data);
+        $cols   = array_keys($rows[0]);
+        $bind   = [];
         $values = [];
-
-        if (is_array($row)) { // Array of column-value pairs
-            $cols = array_keys($row);
-            foreach ($data as $row) {
-                if (array_diff($cols, array_keys($row))) {
-                    throw new \Maho\Db\Exception('Invalid data for insert');
-                }
-                $values[] = $this->_prepareInsertData($row, $bind);
-            }
-            unset($row);
-        } else { // Column-value pairs
-            $cols     = array_keys($data);
-            $values[] = $this->_prepareInsertData($data, $bind);
+        foreach ($rows as $row) {
+            $values[] = $this->_prepareInsertData($row, $bind);
         }
 
         $updateFields = [];
