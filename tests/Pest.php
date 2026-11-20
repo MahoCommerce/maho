@@ -459,6 +459,40 @@ function waitForScript(object $page, string $script, int $seconds = 5): void
     }
 }
 
+/** A salable, priced, visible simple product page URL, with stock guaranteed for the run. */
+function salableProductUrl(): string
+{
+    $product = Mage::getResourceModel('catalog/product_collection')
+        ->addAttributeToFilter('type_id', 'simple')
+        ->addAttributeToFilter('status', 1)
+        ->addAttributeToFilter('visibility', ['in' => [3, 4]])
+        ->addAttributeToFilter('price', ['gt' => 0])
+        ->setPageSize(1)
+        ->getFirstItem();
+
+    Mage::getModel('cataloginventory/stock_item')->loadByProduct((int) $product->getId())
+        ->setData('use_config_manage_stock', 0)
+        ->setData('manage_stock', 0)
+        ->setData('is_in_stock', 1)
+        ->setData('qty', 1000)
+        ->save();
+
+    return '/catalog/product/view/id/' . (int) $product->getId() . '/';
+}
+
+/** Fill the billing step, using $firstname to tell one save apart from the next. */
+function fillCheckoutBilling(object $page, string $firstname): object
+{
+    return $page->fill('#billing\\:firstname', $firstname)
+        ->fill('#billing\\:lastname', 'Buyer')
+        ->fill('#billing\\:email', 'checkout@example.test')
+        ->fill('#billing\\:street1', '1 Infinite Loop')
+        ->fill('#billing\\:city', 'Cupertino')
+        ->select('#billing\\:region_id', 'California')
+        ->fill('#billing\\:postcode', '95014')
+        ->fill('#billing\\:telephone', '5551234567');
+}
+
 /**
  * Turn an admin path into one carrying the secret key its GET validation expects.
  *
