@@ -1108,7 +1108,7 @@
 @layer components {
     /* Tile view of the products of a category (Catalog > Categories > Category Products) */
     .merchandiser-views {
-        margin-block: var(--maho-space-5) var(--maho-space-4);
+        margin-block: var(--maho-space-4);
     }
 
     .merchandiser [hidden],
