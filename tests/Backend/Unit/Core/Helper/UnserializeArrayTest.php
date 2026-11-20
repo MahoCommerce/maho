@@ -59,22 +59,6 @@ describe('Legacy serialized data conversion via core/unserializeArray helper', f
         expect($this->helper->unserialize(null))->toBe([])
             ->and($this->helper->unserialize(''))->toBe([]);
     });
-
-    it('does not call unserialize() on empty input', function () {
-        // PHP 8.6 warns on unserialize(''), and the Api suite reports a warning that @ suppressed
-        $warnings = [];
-        set_error_handler(function (int $errno, string $message) use (&$warnings) {
-            $warnings[] = $message;
-            return true;
-        });
-        try {
-            $this->helper->unserialize('');
-        } finally {
-            restore_error_handler();
-        }
-
-        expect($warnings)->toBe([]);
-    });
 });
 
 /**

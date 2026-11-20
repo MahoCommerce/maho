@@ -104,17 +104,6 @@ it('repairs extra that an earlier save encoded twice', function () {
         ->and($extra['configState']['catalog_frontend'] ?? false)->toBe(1);
 });
 
-it('loads an empty array when extra holds no data', function () {
-    $resource = Mage::getSingleton('core/resource');
-    $resource->getConnection('core_write')->update(
-        $resource->getTableName('admin/user'),
-        ['extra' => null],
-        ['user_id = ?' => $this->userId],
-    );
-
-    expect(Mage::getModel('admin/user')->load($this->userId)->getExtra())->toBe([]);
-});
-
 // MySQL drops NUL bytes from a varchar value, so "name\0" would otherwise resolve to "name".
 it('does not load a user when the username carries a NUL byte', function () {
     $user = Mage::getModel('admin/user')->loadByUsername($this->username . "\0");

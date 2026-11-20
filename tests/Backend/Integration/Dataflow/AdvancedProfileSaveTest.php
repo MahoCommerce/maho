@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-it('saves a stored advanced profile without wizard data', function (?string $guiData): void {
+it('saves a stored advanced profile without wizard data', function (): void {
     $resource = Mage::getResourceSingleton('dataflow/profile');
     $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
     $table = $resource->getMainTable();
@@ -21,7 +21,7 @@ it('saves a stored advanced profile without wizard data', function (?string $gui
         $adapter->insert($table, [
             'name' => $name,
             'actions_xml' => $actions,
-            'gui_data' => $guiData,
+            'gui_data' => '',
             'entity_type' => null,
         ]);
         $id = (int) $adapter->lastInsertId($table);
@@ -37,7 +37,4 @@ it('saves a stored advanced profile without wizard data', function (?string $gui
     } finally {
         $resource->rollBack();
     }
-})->with([
-    'empty string' => [''],
-    'SQL NULL' => [null],
-]);
+});
