@@ -145,7 +145,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             unset($saveData['shown_balance']);
             // An untouched status keeps the stored one, which a refund or an order can change meanwhile
             if ($model->getId() && isset($saveData['status'], $saveData['shown_status']) && $saveData['status'] === $saveData['shown_status']) {
-                unset($saveData['status']);
+                $saveData['status'] = $model->getStatus();
             }
             unset($saveData['shown_status']);
 
