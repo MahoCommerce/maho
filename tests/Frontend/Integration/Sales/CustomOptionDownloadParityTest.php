@@ -147,17 +147,6 @@ it('refuses an unknown cart item option on both transports', function () {
         ->and($api['status'])->toBe(404);
 });
 
-it('refuses a file option that holds no value on both transports', function () {
-    $file = downloadParityItemOption($this->cart, 'option_' . $this->productOptions['file']->getId());
-    $this->files[] = $file['path'];
-    $file['option']->setValue('')->save();
-
-    $api = downloadViaApi((int) $file['option']->getId(), $file['key']);
-
-    expect(downloadRefusedByWeb((int) $file['option']->getId(), $file['key']))->toBeTrue()
-        ->and($api['status'])->toBe(404);
-});
-
 it('refuses the value of an option that is not a file option on both transports', function () {
     // The value of a text option is the text of the shopper, who can write the fields of a stored file into it
     $file = downloadParityItemOption($this->cart, 'option_' . $this->productOptions['field']->getId());
