@@ -499,30 +499,12 @@ class Mage_Checkout_Model_Type_Onepage
         if (empty($data)) {
             return ['error' => -1, 'message' => Mage::helper('checkout')->__('Invalid data.')];
         }
-<<<<<<< HEAD
-        $quote = $this->getQuote();
-        if ($quote->isVirtual()) {
-            $quote->getBillingAddress()->setPaymentMethod($data['method'] ?? null);
-        } else {
-            $quote->getShippingAddress()->setPaymentMethod($data['method'] ?? null);
-        }
-
-        // shipping totals may be affected by payment method
-        if (!$quote->isVirtual() && $quote->getShippingAddress()) {
-            $quote->getShippingAddress()->setCollectShippingRates();
-        }
-
-        // A client must not choose its own checks mask
-        unset($data['checks']);
-
-        $payment = $quote->getPayment();
-        $payment->importData($data);
-
-        $quote->save();
-=======
-        $this->_getCartService()->selectPaymentMethod($this->getQuote(), (array) $data);
+        // A client must not choose its own checks mask, or the keys that assignData() keeps with no check
+        $data = array_diff_key((array) $data, array_flip(['checks', ...Mage_Checkout_Service_Cart::PAYMENT_RESERVED_KEYS]));
+        $this->_setAddressPaymentMethod($data['method'] ?? null);
+        $this->getQuote()->getPayment()->importData($data);
+        $this->getQuote()->save();
         $this->_completePaymentStep();
->>>>>>> 082d1088 (Fixed the one-step checkout losing a card payment method when a section reloads (#1896))
 
         return [];
     }
@@ -535,10 +517,23 @@ class Mage_Checkout_Model_Type_Onepage
      */
     public function savePaymentMethod(string $methodCode): array
     {
-        $this->_getCartService()->selectPaymentMethodCode($this->getQuote(), $methodCode);
+        $this->_setAddressPaymentMethod($methodCode);
+        $this->getQuote()->getPayment()->selectMethod($methodCode);
+        $this->getQuote()->save();
         $this->_completePaymentStep();
 
         return [];
+    }
+
+    protected function _setAddressPaymentMethod(?string $methodCode): void
+    {
+        $quote = $this->getQuote();
+        if ($quote->isVirtual()) {
+            $quote->getBillingAddress()->setPaymentMethod($methodCode);
+        } else {
+            // A payment method can change the shipping rates
+            $quote->getShippingAddress()->setPaymentMethod($methodCode)->setCollectShippingRates(true);
+        }
     }
 
     protected function _completePaymentStep(): void
