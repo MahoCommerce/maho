@@ -431,6 +431,7 @@ class OneStepCheckout {
         // Sending incomplete CC fields here would trigger server-side validation errors.
         const formData = new FormData();
         formData.set('payment[method]', selectedMethod.value);
+        formData.set('method_only', '1');
 
         // Show review loading immediately since that's what gets updated
         this.setLoading('onestep-review', true);

@@ -499,31 +499,48 @@ class Mage_Checkout_Model_Type_Onepage
         if (empty($data)) {
             return ['error' => -1, 'message' => Mage::helper('checkout')->__('Invalid data.')];
         }
+        // A client must not choose its own checks mask, or the keys that assignData() keeps with no check
+        $data = array_diff_key((array) $data, array_flip(['checks', ...Mage_Checkout_Service_Cart::PAYMENT_RESERVED_KEYS]));
+        $this->_setAddressPaymentMethod($data['method'] ?? null);
+        $this->getQuote()->getPayment()->importData($data);
+        $this->getQuote()->save();
+        $this->_completePaymentStep();
+
+        return [];
+    }
+
+    /**
+     * Specify the quote payment method without the data of its form, as the one-step checkout does when the customer
+     * selects a method. Placing the order validates the payment data.
+     *
+     * @throws Mage_Core_Exception when the method is not available for the cart
+     */
+    public function savePaymentMethod(string $methodCode): array
+    {
+        $this->_setAddressPaymentMethod($methodCode);
+        $this->getQuote()->getPayment()->selectMethod($methodCode);
+        $this->getQuote()->save();
+        $this->_completePaymentStep();
+
+        return [];
+    }
+
+    protected function _setAddressPaymentMethod(?string $methodCode): void
+    {
         $quote = $this->getQuote();
         if ($quote->isVirtual()) {
-            $quote->getBillingAddress()->setPaymentMethod($data['method'] ?? null);
+            $quote->getBillingAddress()->setPaymentMethod($methodCode);
         } else {
-            $quote->getShippingAddress()->setPaymentMethod($data['method'] ?? null);
+            // A payment method can change the shipping rates
+            $quote->getShippingAddress()->setPaymentMethod($methodCode)->setCollectShippingRates(true);
         }
+    }
 
-        // shipping totals may be affected by payment method
-        if (!$quote->isVirtual() && $quote->getShippingAddress()) {
-            $quote->getShippingAddress()->setCollectShippingRates();
-        }
-
-        // A client must not choose its own checks mask
-        unset($data['checks']);
-
-        $payment = $quote->getPayment();
-        $payment->importData($data);
-
-        $quote->save();
-
+    protected function _completePaymentStep(): void
+    {
         $this->getCheckout()
             ->setStepData('payment', 'complete', true)
             ->setStepData('review', 'allow', true);
-
-        return [];
     }
 
     /**
