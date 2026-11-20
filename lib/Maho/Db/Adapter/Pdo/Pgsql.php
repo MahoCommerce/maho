@@ -1124,7 +1124,7 @@ class Pgsql extends AbstractPdoAdapter
                     throw new \Maho\Db\Exception('Invalid data for insert');
                 }
                 $values[] = $this->_prepareInsertData($row, $bind);
-                $boundColumns = array_merge($boundColumns, $this->_boundColumnsFromRow($row));
+                array_push($boundColumns, ...$this->_boundColumnsFromRow($row));
             }
             unset($row);
         } else {

@@ -303,9 +303,9 @@ describe('insertOnDuplicate', function () {
 
     it('inserts multiple rows at once', function () {
         $data = [
-            ['name' => 'bulk1', 'value' => 11],
+            ['name' => 'bulk1', 'value' => new \Maho\Db\Expr('10 + 1')],
             ['name' => 'bulk2', 'value' => 22],
-            ['name' => 'bulk3', 'value' => 33],
+            ['name' => 'bulk3', 'value' => new \Maho\Db\Expr('30 + 3')],
         ];
 
         $affected = $this->adapter->insertOnDuplicate(
@@ -316,11 +316,11 @@ describe('insertOnDuplicate', function () {
 
         expect($affected)->toBeGreaterThan(0);
 
-        $count = $this->adapter->fetchOne(
-            "SELECT COUNT(*) FROM {$this->tempTableTarget} WHERE name LIKE 'bulk%'",
+        $values = $this->adapter->fetchCol(
+            "SELECT value FROM {$this->tempTableTarget} WHERE name LIKE 'bulk%' ORDER BY name",
         );
 
-        expect((int) $count)->toBe(3);
+        expect(array_map(intval(...), $values))->toBe([11, 22, 33]);
     });
 });
 
