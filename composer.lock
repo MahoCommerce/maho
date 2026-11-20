@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3267e8aa267555b5e4b50267ca3f0c7f",
+    "content-hash": "acfe8cfcf49bd9c4f542f7c55ba0fd9a",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -2176,16 +2176,16 @@
         },
         {
             "name": "mahocommerce/maho-composer-plugin",
-            "version": "v5.2.2",
+            "version": "v5.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-composer-plugin.git",
-                "reference": "277e1ea137fdc2aaf6d8f98ec3b7f3ea10979ee5"
+                "reference": "24b1de74caa967e9c0ae9a0dbd6efd51284ebcaf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/277e1ea137fdc2aaf6d8f98ec3b7f3ea10979ee5",
-                "reference": "277e1ea137fdc2aaf6d8f98ec3b7f3ea10979ee5",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/24b1de74caa967e9c0ae9a0dbd6efd51284ebcaf",
+                "reference": "24b1de74caa967e9c0ae9a0dbd6efd51284ebcaf",
                 "shasum": ""
             },
             "require": {
@@ -2223,7 +2223,7 @@
             "description": "Extension for Composer to copy assets and enable autoloading for Maho projects.",
             "support": {
                 "issues": "https://github.com/MahoCommerce/maho-composer-plugin/issues",
-                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v5.2.2"
+                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v5.2.3"
             },
             "funding": [
                 {
@@ -2239,7 +2239,8 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-11-07T14:24:45+00:00"
+            "time": "2026-11-19T23:44:18+00:00",
+            "published-time": "2026-11-19T23:46:58+00:00"
         },
         {
             "name": "masterminds/html5",
@@ -13698,7 +13699,8 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-11-03T12:14:22+00:00"
+            "time": "2026-11-03T12:14:22+00:00",
+            "published-time": "2026-11-03T12:14:36+00:00"
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
