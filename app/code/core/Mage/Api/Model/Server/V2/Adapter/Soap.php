@@ -64,6 +64,9 @@ class Mage_Api_Model_Server_V2_Adapter_Soap extends Mage_Api_Model_Server_Adapte
                         $this->_soap->handle(),
                     ),
                 );
+
+                // SoapServer has already set the length of the unformatted response.
+                header_remove('Content-Length');
                 $this->getController()->getResponse()
                     ->clearHeaders()
                     ->setHeader('Content-Type', 'text/xml; charset=' . $apiConfigCharset)
