@@ -136,6 +136,24 @@ class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Render the payment information block in secure mode, with the design of the store $storeId. Emails use it.
+     */
+    public function getInfoBlockHtmlForStore(Mage_Payment_Model_Info|false $info, int $storeId): string
+    {
+        $render = function () use ($info, $storeId): string {
+            $block = $this->getInfoBlock($info)->setIsSecureMode(true);
+            if ($block instanceof Mage_Payment_Block_Info) {
+                $block->getMethod()->setStore($storeId);
+            }
+            return $block->toHtml();
+        };
+        if ($storeId === (int) Mage::app()->getStore()->getId()) {
+            return $render();
+        }
+        return Mage::app()->emulate($storeId, $render);
+    }
+
+    /**
      * Retrieve available billing agreement methods
      *
      * @param mixed $store

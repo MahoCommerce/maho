@@ -318,23 +318,19 @@ class Mage_Wishlist_Service_Wishlist
         $core->rateLimiterBy('wishlist_share', "customer:{$customerId}", $limit, self::SHARE_RATE_LIMIT_WINDOW)->attemptOrThrow();
 
         $message = nl2br(htmlspecialchars($message));
-        $emulation = Mage::getSingleton('core/app_emulation');
-        $environment = $emulation->startEnvironmentEmulation($storeId);
-        try {
+        $variables = Mage::app()->emulate($storeId, function () use ($withRssLink, $helper, $customer, $wishlist, $message): array {
             $layout = Mage::app()->getLayout();
             if ($withRssLink) {
                 $helper->setCustomer($customer);
                 $message .= $layout->createBlock('wishlist/share_email_rss')->setWishlistId((int) $wishlist->getId())->toHtml();
             }
-            $variables = [
+            return [
                 'customer' => $customer,
                 'items' => $layout->createBlock('wishlist/share_email_items')->setWishlist($wishlist)->toHtml(),
                 'viewOnSiteLink' => Mage::getUrl('wishlist/shared/index', ['code' => $wishlist->getSharingCode()]),
                 'message' => $message,
             ];
-        } finally {
-            $emulation->stopEnvironmentEmulation($environment);
-        }
+        });
 
         $template = Mage::getModel('core/email_template');
         foreach ($emails as $email) {

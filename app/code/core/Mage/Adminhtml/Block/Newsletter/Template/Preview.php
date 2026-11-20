@@ -36,9 +36,7 @@ class Mage_Adminhtml_Block_Newsletter_Template_Preview extends Mage_Adminhtml_Bl
             $vars['subscriber']->load($this->getRequest()->getParam('subscriber'));
         }
 
-        $template->emulateDesign($storeId);
-        $templateProcessed = $template->getProcessedTemplate($vars, true);
-        $template->revertDesign();
+        $templateProcessed = Mage::app()->emulate((int) $storeId, fn() => $template->getProcessedTemplate($vars, true));
 
         if ($template->isPlain()) {
             $templateProcessed = '<pre>' . htmlspecialchars($templateProcessed) . '</pre>';

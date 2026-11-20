@@ -173,19 +173,18 @@ class ApiV2Helper
         if (!empty(self::$createdEntities['product'])) {
             $ids = self::$createdEntities['product'];
             try {
-                $appEmulation = \Mage::getSingleton('core/app_emulation');
-                $initialEnv = $appEmulation->startEnvironmentEmulation(0, 'admin');
-                foreach ($ids as $id) {
-                    try {
-                        $product = \Mage::getModel('catalog/product')->load((int) $id);
-                        if ($product->getId()) {
-                            $product->delete();
+                \Mage::app()->emulate(\Mage_Core_Model_App::ADMIN_STORE_ID, function () use ($ids, $write): void {
+                    foreach ($ids as $id) {
+                        try {
+                            $product = \Mage::getModel('catalog/product')->load((int) $id);
+                            if ($product->getId()) {
+                                $product->delete();
+                            }
+                        } catch (\Exception $e) {
+                            $write->query('DELETE FROM catalog_product_entity WHERE entity_id = ' . (int) $id);
                         }
-                    } catch (\Exception $e) {
-                        $write->query('DELETE FROM catalog_product_entity WHERE entity_id = ' . (int) $id);
                     }
-                }
-                $appEmulation->stopEnvironmentEmulation($initialEnv);
+                }, \Mage_Core_Model_App_Area::AREA_ADMINHTML);
             } catch (\Exception $e) {
                 // Ignore cleanup errors
             }

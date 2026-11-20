@@ -847,7 +847,7 @@ class Mage_Core_Model_App
     /**
      * Run $callback with the current store switched to $storeId, then restore
      * the caller's store. Only the store scope switches, not design, locale,
-     * or translations (see Mage_Core_Model_App_Emulation for those).
+     * or translations (see emulate() for those).
      */
     public function withStore(int $storeId, \Closure $callback): mixed
     {
@@ -861,6 +861,21 @@ class Mage_Core_Model_App
         } finally {
             $this->setCurrentStore($previousStoreId);
         }
+    }
+
+    /**
+     * Run $callback in the store $storeId, with the design, the locale and the translations of that store for $area.
+     * Then put back the environment of the caller, also when $callback throws.
+     *
+     * @template T
+     * @param \Closure(): T $callback
+     * @return T
+     */
+    public function emulate(int $storeId, \Closure $callback, string $area = Mage_Core_Model_App_Area::AREA_FRONTEND): mixed
+    {
+        /** @var Mage_Core_Model_App_Emulation $emulation */
+        $emulation = Mage::getSingleton('core/app_emulation');
+        return $emulation->emulate($storeId, $callback, $area);
     }
 
     /**

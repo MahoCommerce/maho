@@ -37,9 +37,7 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Preview extends Mage_Adminhtml_Block
 
         $vars['subscriber'] = Mage::getModel('newsletter/subscriber');
 
-        $template->emulateDesign($storeId);
-        $templateProcessed = $template->getProcessedTemplate($vars, true);
-        $template->revertDesign();
+        $templateProcessed = Mage::app()->emulate((int) $storeId, fn() => $template->getProcessedTemplate($vars, true));
 
         if ($template->isPlain()) {
             $templateProcessed = '<pre>' . htmlspecialchars($templateProcessed) . '</pre>';

@@ -197,6 +197,26 @@ class Mage_Core_Model_Design_Package
     }
 
     /**
+     * Return the store, the area, the package and the theme. Pass the result to setState() to put them back.
+     *
+     * @return array{0: string|int|Mage_Core_Model_Store|null, 1: ?string, 2: ?string, 3: ?array}
+     */
+    public function getState(): array
+    {
+        return [$this->_store, $this->_area, $this->_name, $this->_theme];
+    }
+
+    /**
+     * @param array{0: string|int|Mage_Core_Model_Store|null, 1: ?string, 2: ?string, 3: ?array} $state
+     */
+    public function setState(array $state): static
+    {
+        [$this->_store, $this->_area, $this->_name, $this->_theme] = $state;
+        $this->_fallback?->setStore($this->getStore());
+        return $this;
+    }
+
+    /**
      * Retrieve package name
      *
      * @return string
