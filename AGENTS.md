@@ -640,23 +640,8 @@ an API client), in their words. Code terms go in `## How it works`.
   It names the result for that user and where it shows: "Fixed the REST API returning a price of
   0 for every variant of a configurable product", "Added items that are not in the catalog to
   admin order creation, with a free name, price and tax class"
-- Body: these `##` sections, in this order. Leave out an optional section that has nothing in it
-  1. `## What it does`: what the user can now do, or what was broken, and where (admin path,
-     endpoint, CLI command). One to three sentences, then `Closes #N`
-  2. `## Decision needed` (optional): a choice that the maintainer must make before the merge
-  3. `## How it works`: the design, for the reviewer. The first sentence says what the code does
-     and where, as a fact: "A custom line is a quote item and an order item with `product_id`
-     NULL", not "Maho creates no product". The next sentence gives the reason for the design.
-     Then one paragraph for each other part. Never open with what the change does not do, or with
-     a detail
-  4. `## Also in this PR` (optional): a change that is not part of the main one, and its reason
-  5. `## Good to know` (optional): limits of the change, and anything you could not confirm,
-     with where you looked
-  6. `## Release notes`: what reaches a store that upgrades and does nothing more: a break, a
-     change in what the store already does, or a step that someone must run. The test: does an
-     existing store notice the upgrade before anyone uses the new feature? A schema change that
-     the sync applies, or a limit of the new feature, stays out. Write "Nothing to note." when
-     there is none, so the release author knows that it was checked
+- Body: the sections of `.github/pull_request_template.md`, in that order. Read the template
+  before you write the body: each section holds its rules in an HTML comment. Delete the comments
 - Screenshots: a change that shows on a page (admin, storefront, PDF, email) gets one or more
   screenshots in `## What it does`, under the sentences. An API, CLI or schema change gets none
   - Use a store with sample data (`./maho import:sample-data`), never real customer data. Pick a
