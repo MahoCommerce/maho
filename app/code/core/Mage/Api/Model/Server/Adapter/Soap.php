@@ -180,14 +180,19 @@ class Mage_Api_Model_Server_Adapter_Soap extends \Maho\DataObject implements Mag
         if ($this->_extensionLoaded()) {
             throw new SoapFault($code, $message);
         }
-        die('<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+        die($this->_getFaultXml($code, $message));
+    }
+
+    protected function _getFaultXml($code, $message): string
+    {
+        return '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
                 <SOAP-ENV:Body>
                 <SOAP-ENV:Fault>
-                <faultcode>' . $code . '</faultcode>
-                <faultstring>' . $message . '</faultstring>
+                <faultcode>' . htmlspecialchars((string) $code, ENT_XML1 | ENT_QUOTES, 'UTF-8') . '</faultcode>
+                <faultstring>' . htmlspecialchars((string) $message, ENT_XML1 | ENT_QUOTES, 'UTF-8') . '</faultstring>
                 </SOAP-ENV:Fault>
                 </SOAP-ENV:Body>
-                </SOAP-ENV:Envelope>');
+                </SOAP-ENV:Envelope>';
     }
 
     /**
