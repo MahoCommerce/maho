@@ -1214,9 +1214,10 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         if (!isset($attributes['media_gallery'])) {
             return $this;
         }
-        $mediaGalleryAttribute = $attributes['media_gallery'];
-        /** @var Mage_Catalog_Model_Resource_Eav_Attribute $mediaGalleryAttribute */
-        $mediaGalleryAttribute->getBackend()->addImage($this, $file, $mediaAttribute, $move, $exclude);
+        $backend = $attributes['media_gallery']->getBackend();
+        if ($backend instanceof Mage_Catalog_Model_Product_Attribute_Backend_Media) {
+            $backend->addImage($this, $file, $mediaAttribute, $move, $exclude);
+        }
         return $this;
     }
 

@@ -155,7 +155,7 @@ class Mage_Catalog_Block_Navigation extends Mage_Core_Block_Template
     /**
      * Get url for category data
      *
-     * @param Mage_Catalog_Model_Category $category
+     * @param \Maho\DataObject $category
      * @return string
      */
     public function getCategoryUrl($category)
@@ -201,7 +201,7 @@ class Mage_Catalog_Block_Navigation extends Mage_Core_Block_Template
     /**
      * Render category to html
      *
-     * @param Mage_Catalog_Model_Category $category
+     * @param \Maho\Data\Tree\Node $category
      * @param int $level Nesting level number
      * @param bool $isLast Whether ot not this item is last, affects list item class
      * @param bool $isFirst Whether ot not this item is first, affects list item class

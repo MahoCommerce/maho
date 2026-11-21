@@ -20,4 +20,10 @@ class Mage_Catalog_Model_Product_Configuration_Item_Option extends \Maho\DataObj
     {
         return $this->_getData('value');
     }
+
+    #[\Override]
+    public function setValue(?string $value): static
+    {
+        return $this->setData('value', $value);
+    }
 }

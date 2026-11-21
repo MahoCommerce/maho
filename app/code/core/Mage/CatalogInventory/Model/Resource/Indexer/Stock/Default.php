@@ -88,6 +88,7 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Default extends Mage_Ca
      * @param bool $flag
      * @return $this
      */
+    #[\Override]
     public function setIsComposite($flag)
     {
         $this->_isComposite = (bool) $flag;

@@ -19,6 +19,6 @@ class Mage_Dataflow_Model_Convert
         $container->setData($data)->setVar($vars);
 
         $action->run();
-        return $action->getData();
+        return $container->getData();
     }
 }

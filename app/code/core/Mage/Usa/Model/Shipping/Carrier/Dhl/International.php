@@ -221,6 +221,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      *
      * @param string $freeMethod
      */
+    #[\Override]
     protected function _setFreeMethodRequest($freeMethod): void
     {
         $rawRequest = $this->_rawRequest;
@@ -765,6 +766,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      *
      * @return Mage_Shipping_Model_Rate_Result
      */
+    #[\Override]
     protected function _getQuotes()
     {
         $responseBody = '';

@@ -231,6 +231,7 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock extends Mage_Catalog_Mo
      * Retrieve Stock Indexer Models per Product Type
      *
      * @return array
+     * @throws \RuntimeException
      */
     protected function _getTypeIndexers()
     {
@@ -240,8 +241,11 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock extends Mage_Catalog_Mo
             foreach ($types as $typeId => $typeInfo) {
                 $modelName = $typeInfo['stock_indexer'] ?? $this->_defaultIndexer;
                 $isComposite = !empty($typeInfo['composite']);
-                $indexer = Mage::getResourceModel($modelName)
-                    ->setTypeId($typeId)
+                $indexer = Mage::getResourceModel($modelName);
+                if (!$indexer instanceof Mage_CatalogInventory_Model_Resource_Indexer_Stock_Interface) {
+                    throw new \RuntimeException("Resource model {$modelName} is not a stock indexer.");
+                }
+                $indexer->setTypeId($typeId)
                     ->setIsComposite($isComposite);
 
                 $this->_indexers[$typeId] = $indexer;

@@ -738,6 +738,16 @@ class Db extends Collection
     }
 
     /**
+     * Add the FROM part to the select. A subclass that has a main table overrides this method.
+     *
+     * @return $this
+     */
+    protected function _initSelect()
+    {
+        return $this;
+    }
+
+    /**
      * Reset collection
      *
      * @return $this

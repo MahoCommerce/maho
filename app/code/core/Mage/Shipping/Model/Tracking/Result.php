@@ -41,14 +41,14 @@ class Mage_Shipping_Model_Tracking_Result
 
     /**
      * Add a tracking to the result
-     * @param Mage_Shipping_Model_Tracking_Result_Abstract|Mage_Shipping_Model_Rate_Result $result
+     * @param Mage_Shipping_Model_Tracking_Result_Abstract|Mage_Shipping_Model_Tracking_Result $result
      * @return $this
      */
     public function append($result)
     {
         if ($result instanceof Mage_Shipping_Model_Tracking_Result_Abstract) {
             $this->_trackings[] = $result;
-        } elseif ($result instanceof Mage_Shipping_Model_Rate_Result) {
+        } elseif ($result instanceof Mage_Shipping_Model_Tracking_Result) {
             $trackings = $result->getAllTrackings();
             foreach ($trackings as $track) {
                 $this->append($track);

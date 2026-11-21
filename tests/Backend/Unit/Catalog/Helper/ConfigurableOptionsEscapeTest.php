@@ -93,6 +93,12 @@ it('escapes the titles of downloadable links in the item options', function (): 
         {
             return null;
         }
+
+        #[\Override]
+        public function getQty(): ?float
+        {
+            return 1.0;
+        }
     };
     $helper = new class extends Mage_Downloadable_Helper_Catalog_Product_Configuration {
         #[\Override]

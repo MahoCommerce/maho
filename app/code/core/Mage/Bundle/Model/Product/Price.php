@@ -387,7 +387,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      */
     public function getMinimalPrice($product)
     {
-        return $this->getPricesTierPrice($product, 'min');
+        return $this->getTotalPrices($product, 'min');
     }
 
     /**
@@ -398,7 +398,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      */
     public function getMaximalPrice($product)
     {
-        return $this->getPricesTierPrice($product, 'max');
+        return $this->getTotalPrices($product, 'max');
     }
 
     /**

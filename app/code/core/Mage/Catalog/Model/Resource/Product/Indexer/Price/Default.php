@@ -42,6 +42,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
      * @param string $typeCode
      * @return $this
      */
+    #[\Override]
     public function setTypeId($typeCode)
     {
         $this->_typeId = $typeCode;
@@ -53,6 +54,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
      *
      * @return string
      */
+    #[\Override]
     public function getTypeId()
     {
         if (is_null($this->_typeId)) {
@@ -67,6 +69,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
      * @param bool $flag
      * @return $this
      */
+    #[\Override]
     public function setIsComposite($flag)
     {
         $this->_isComposite = (bool) $flag;
@@ -78,6 +81,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
      *
      * @return bool
      */
+    #[\Override]
     public function getIsComposite()
     {
         return $this->_isComposite;

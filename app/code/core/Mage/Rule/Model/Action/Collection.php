@@ -53,6 +53,9 @@ class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
                     continue;
                 }
                 $action = Mage::getModel($actArr['type']);
+                if (!$action instanceof Mage_Rule_Model_Action_Abstract) {
+                    continue;
+                }
                 $action->loadArray($actArr);
                 $this->addAction($action);
             }
@@ -63,7 +66,7 @@ class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
     /**
      * @return $this
      */
-    public function addAction(Mage_Rule_Model_Action_Interface $action)
+    public function addAction(Mage_Rule_Model_Action_Abstract $action)
     {
         $actions = $this->getActions();
 

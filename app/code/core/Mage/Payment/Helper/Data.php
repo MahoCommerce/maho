@@ -114,22 +114,22 @@ class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
     public function getInfoBlock(Mage_Payment_Model_Info|false $info)
     {
         $method = $info === false ? $this->__('No Data Found') : $info->getMethod();
-        if ($this->getMethodModelClassName($method) !== null) {
-            $blockType = $info->getMethodInstance()->getInfoBlockType();
-        } else {
+        $block = null;
+        if ($this->getMethodModelClassName($method) === null) {
             Mage::log(
                 sprintf('Payment method was not found: %s', $method),
                 Mage::LOG_NOTICE,
             );
+        } elseif ($this->getLayout()) {
+            $block = $this->getLayout()->createBlock($info->getMethodInstance()->getInfoBlockType());
+        } else {
+            $className = Mage::getConfig()->getBlockClassName($info->getMethodInstance()->getInfoBlockType());
+            $block = new $className();
+        }
+        if (!$block instanceof Mage_Core_Block_Abstract) {
             return ($this->getLayout() ?? Mage::app()->getLayout())
                 ->createBlock('core/text')
                 ->setText($method);
-        }
-        if ($this->getLayout()) {
-            $block = $this->getLayout()->createBlock($blockType);
-        } else {
-            $className = Mage::getConfig()->getBlockClassName($blockType);
-            $block = new $className();
         }
         $block->setInfo($info);
         return $block;

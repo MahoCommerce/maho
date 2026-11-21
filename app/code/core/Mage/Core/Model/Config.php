@@ -1501,7 +1501,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * Retrieve resource type configuration for resource name
      *
      * @param string $type
-     * @return SimpleXMLElement|\Maho\Simplexml\Element|Mage_Core_Model_Config_Element
+     * @return Mage_Core_Model_Config_Element
      */
     public function getResourceTypeConfig($type)
     {

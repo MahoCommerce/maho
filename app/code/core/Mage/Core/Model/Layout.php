@@ -149,7 +149,7 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
                     }
 
                     foreach ($ignoreNodes as $block) {
-                        if ($block->getAttribute('ignore') !== null) {
+                        if (isset($block->attributes()->ignore)) {
                             continue;
                         }
                         $acl = (string) $attributes->acl;
@@ -177,6 +177,9 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
         if (empty($parent)) {
             $parent = $this->getNode();
         }
+        if (!$parent instanceof Mage_Core_Model_Layout_Element) {
+            return;
+        }
         foreach ($parent as $node) {
             $attributes = $node->attributes();
             if ((bool) $attributes->ignore) {
@@ -203,7 +206,7 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
      * Add block object to layout based on xml node data
      *
      * @param \Maho\Simplexml\Element $node
-     * @param Mage_Core_Model_Layout_Element|\Maho\Simplexml\Element $parent
+     * @param Mage_Core_Model_Layout_Element $parent
      * @return $this
      */
     protected function _generateBlock($node, $parent)
@@ -267,7 +270,7 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
 
     /**
      * @param \Maho\Simplexml\Element $node
-     * @param Mage_Core_Model_Layout_Element|\Maho\Simplexml\Element $parent
+     * @param Mage_Core_Model_Layout_Element $parent
      * @return $this
      */
     protected function _generateAction($node, $parent)

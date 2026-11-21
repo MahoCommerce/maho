@@ -21,6 +21,19 @@ class Mage_Paygate_Block_Authorizenet_Form_Cc extends Mage_Payment_Block_Form
     }
 
     /**
+     * @throws Mage_Core_Exception
+     */
+    #[\Override]
+    public function getMethod(): Mage_Paygate_Model_Authorizenet
+    {
+        $method = parent::getMethod();
+        if (!$method instanceof Mage_Paygate_Model_Authorizenet) {
+            Mage::throwException($this->__('Cannot retrieve the payment method model object.'));
+        }
+        return $method;
+    }
+
+    /**
      * Retrieve payment method form block
      *
      * @return Mage_Payment_Block_Form_Cc
@@ -146,7 +159,7 @@ class Mage_Paygate_Block_Authorizenet_Form_Cc extends Mage_Payment_Block_Form
     /**
      * Return flag - is partial authorization process started
      *
-     * @return string
+     * @return bool
      */
     public function isPartialAuthorization()
     {

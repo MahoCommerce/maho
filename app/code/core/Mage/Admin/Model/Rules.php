@@ -34,16 +34,6 @@ class Mage_Admin_Model_Rules extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Update rules
-     * @return $this
-     */
-    public function update()
-    {
-        $this->getResource()->update($this);
-        return $this;
-    }
-
-    /**
      * Initialize and retrieve permissions collection
      * @return Object
      */

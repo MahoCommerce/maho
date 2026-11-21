@@ -503,9 +503,9 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
             $commentInfo = $element->comment->asArray();
             if (is_array($commentInfo)) {
                 if (isset($commentInfo['model'])) {
-                    $model = Mage::getModel($commentInfo['model']);
-                    if ($model && method_exists($model, 'getCommentText')) {
-                        $comment = $model->getCommentText($element, $currentValue);
+                    $callback = [Mage::getModel($commentInfo['model']), 'getCommentText'];
+                    if (is_callable($callback)) {
+                        $comment = $callback($element, $currentValue);
                     }
                 }
             } else {
