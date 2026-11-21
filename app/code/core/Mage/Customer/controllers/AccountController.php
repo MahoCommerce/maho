@@ -139,14 +139,15 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         $session = $this->_getSession();
 
         if ($this->getRequest()->isPost()) {
-            $login = $this->getRequest()->getPost('login');
-            if (!empty($login['username']) && !empty($login['password'])) {
+            $username = $this->getLoginPostValue('username') ?? '';
+            $password = $this->getLoginPostValue('password') ?? '';
+            if ($username !== '' && $password !== '') {
                 try {
                     $customer = $this->getAuthentication()->authenticate(
-                        (string) $login['username'],
-                        (string) $login['password'],
+                        $username,
+                        $password,
                         (int) Mage::app()->getStore()->getWebsiteId(),
-                        isset($login['twofa_verification_code']) ? (string) $login['twofa_verification_code'] : null,
+                        $this->getLoginPostValue('twofa_verification_code'),
                     );
                     $session->setRememberMe((bool) $this->getRequest()->getPost('remember_me'))
                             ->setCustomerAsLoggedIn($customer);
@@ -161,13 +162,13 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                             $helper->__('This account is not confirmed. %s to resend confirmation email.'),
                             new \Maho\Message\Link(
                                 $helper->__('Click here'),
-                                $helper->getEmailConfirmationUrl($login['username']),
+                                $helper->getEmailConfirmationUrl($username),
                             ),
                         );
                     } else {
                         $session->addError($e->getMessage());
                     }
-                    $session->setUsername($login['username']);
+                    $session->setUsername($username);
                 } catch (Exception) {
                     // Mage::logException($e); // PA DSS violation: this exception log can disclose customer password
                 }
@@ -194,12 +195,13 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         $result = [];
 
         $session = $this->_getSession();
-        $login = $this->getRequest()->getPost('login');
+        $username = $this->getLoginPostValue('username') ?? '';
+        $password = $this->getLoginPostValue('password') ?? '';
         if (!$session->isLoggedIn() && Mage::getStoreConfigFlag('customer/password/allow_2fa')
-            && !empty($login['username']) && !empty($login['password'])
+            && $username !== '' && $password !== ''
         ) {
             try {
-                $this->getAuthentication()->authenticate((string) $login['username'], (string) $login['password'], (int) Mage::app()->getStore()->getWebsiteId());
+                $this->getAuthentication()->authenticate($username, $password, (int) Mage::app()->getStore()->getWebsiteId());
             } catch (Mage_Customer_Exception_SecondFactorRequired) {
                 $result['require_twofa'] = true;
             } catch (Exception) {
@@ -208,6 +210,15 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         }
 
         $this->getResponse()->setBodyJson($result);
+    }
+
+    /**
+     * Return the login[$key] post value, or null when it is missing or is not a string.
+     */
+    protected function getLoginPostValue(string $key): ?string
+    {
+        $value = $this->getRequest()->getPost('login')[$key] ?? null;
+        return is_string($value) ? $value : null;
     }
 
     /**
@@ -758,10 +769,9 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     public function magicLinkRequestPostAction(): void
     {
         // Handle both 'email' field (from magic link request page) and 'login[username]' (from login form)
-        $email = (string) $this->getRequest()->getPost('email');
-        if (!$email) {
-            $loginData = $this->getRequest()->getPost('login');
-            $email = is_array($loginData) ? (string) ($loginData['username'] ?? '') : '';
+        $email = $this->getRequest()->getPost('email');
+        if (!is_string($email) || !$email) {
+            $email = $this->getLoginPostValue('username') ?? '';
         }
 
         try {
