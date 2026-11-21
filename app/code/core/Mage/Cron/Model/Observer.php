@@ -287,24 +287,47 @@ class Mage_Cron_Model_Observer
             return $this;
         }
 
-        $history = Mage::getModel('cron/schedule')->getCollection()
-            ->addFieldToFilter('status', ['in' => [
-                Mage_Cron_Model_Schedule::STATUS_SUCCESS,
-                Mage_Cron_Model_Schedule::STATUS_MISSED,
-                Mage_Cron_Model_Schedule::STATUS_ERROR,
-            ]])
-            ->load();
-
-        $historyLifetimes = [
-            Mage_Cron_Model_Schedule::STATUS_SUCCESS => Mage::getStoreConfig(self::XML_PATH_HISTORY_SUCCESS) * 60,
-            Mage_Cron_Model_Schedule::STATUS_MISSED => Mage::getStoreConfig(self::XML_PATH_HISTORY_FAILURE) * 60,
-            Mage_Cron_Model_Schedule::STATUS_ERROR => Mage::getStoreConfig(self::XML_PATH_HISTORY_FAILURE) * 60,
+        $history = Mage::getModel('cron/schedule')->getCollection();
+        $adapter = $history->getConnection();
+        $retention = [
+            self::XML_PATH_HISTORY_SUCCESS => [Mage_Cron_Model_Schedule::STATUS_SUCCESS],
+            self::XML_PATH_HISTORY_FAILURE => [Mage_Cron_Model_Schedule::STATUS_MISSED, Mage_Cron_Model_Schedule::STATUS_ERROR],
         ];
-
         $now = time();
+        $locale = Mage::app()->getLocale();
+        $storedReferenceTime = 'COALESCE(main_table.executed_at, main_table.scheduled_at)';
+        $expiryPredicate = "$storedReferenceTime < ?";
+        if ($adapter instanceof Maho\Db\Adapter\Pdo\Sqlite) {
+            // SQLite imports can carry timestamps that need the PHP date parser.
+            $expiryPredicate = "($expiryPredicate OR $storedReferenceTime IS NOT datetime($storedReferenceTime, '+0 seconds'))";
+        } elseif ($adapter instanceof Maho\Db\Adapter\Pdo\Pgsql) {
+            // PostgreSQL can return infinity or years that strtotime cannot parse.
+            $expiryPredicate = "($expiryPredicate OR $storedReferenceTime >= '10000-01-01 00:00:00')";
+        }
+
+        $expired = [];
+        $cutoffs = [];
+        $firstSqlTimestamp = strtotime('1000-01-01 UTC');
+        $lastSqlTimestamp = strtotime('9999-12-31 23:59:59 UTC');
+        foreach ($retention as $path => $statuses) {
+            $cutoff = $now - Mage::getStoreConfig($path) * 60;
+            foreach ($statuses as $status) {
+                $cutoffs[$status] = $cutoff;
+            }
+            $statusCondition = $adapter->quoteInto('main_table.status IN (?)', $statuses);
+            $sqlTimestamp = ceil($cutoff);
+            if ($sqlTimestamp < $firstSqlTimestamp || $sqlTimestamp > $lastSqlTimestamp) {
+                $expired[] = "($statusCondition)";
+                continue;
+            }
+            $timeCondition = $adapter->quoteInto($expiryPredicate, $locale->formatDateForDb((int) $sqlTimestamp));
+            $expired[] = "($statusCondition AND $timeCondition)";
+        }
+        $history->getSelect()->where(implode(' OR ', $expired));
+
         foreach ($history->getIterator() as $record) {
             $referenceTime = $record->getExecutedAt() ?: $record->getScheduledAt();
-            if ($referenceTime && strtotime($referenceTime) < $now - $historyLifetimes[$record->getStatus()]) {
+            if ($referenceTime && strtotime($referenceTime) < $cutoffs[$record->getStatus()]) {
                 $record->delete();
             }
         }
