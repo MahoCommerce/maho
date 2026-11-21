@@ -209,11 +209,9 @@ class Mage_Tax_Model_Observer
     #[Maho\Config\CronJob('aggregate_sales_report_tax_data', configPath: 'reports/crontab/tax_expr')]
     public function aggregateSalesReportTaxData($schedule)
     {
-        Mage::app()->getLocale()->emulate(0);
         $currentDate = Mage::app()->getLocale()->utcToStore();
         $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('tax/report_tax')->aggregate($date);
-        Mage::app()->getLocale()->revert();
         return $this;
     }
 

@@ -19,6 +19,7 @@ nav:
 - Core & architecture:
   - Routing: routing.md
   - Services: services.md
+  - Store emulation: store-emulation.md
   - Event observers: observers.md
   - Override configs: override-configurations.md
   - Attribute admin pages: eav-attribute-admin.md

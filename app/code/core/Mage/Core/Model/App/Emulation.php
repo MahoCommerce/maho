@@ -8,11 +8,9 @@
  * @package Mage_Core
  */
 
-class Mage_Core_Model_App_Emulation extends \Maho\DataObject
+class Mage_Core_Model_App_Emulation
 {
     /**
-     * Application instance
-     *
      * @var Mage_Core_Model_App
      */
     protected $_app;
@@ -20,99 +18,127 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
     public function __construct(array $args = [])
     {
         $this->_app = empty($args['app']) ? Mage::app() : $args['app'];
-        unset($args['factory'], $args['app']);
-        parent::__construct($args);
     }
 
     /**
-     * Start environment emulation of the specified store
+     * Run $callback in the store $storeId, with the design, the locale and the translations of that store. The admin
+     * store runs in the admin area, any other store in the frontend area. Then put back the environment of the
+     * caller, also when $callback throws. When the request already runs in $storeId, and its translator is loaded for
+     * that store and area, skip the switch: the locale of the caller stays, so an admin page that emulates the admin
+     * store keeps the interface locale of the admin user.
      *
-     * Function returns information about initial store environment and emulates environment of another store
-     *
-     * @param int $storeId
-     * @param string $area
-     *
-     * @return \Maho\DataObject information about environment of the initial store
+     * @template T
+     * @param \Closure(): T $callback
+     * @return T
      */
-    public function startEnvironmentEmulation(
-        $storeId,
-        $area = Mage_Core_Model_App_Area::AREA_FRONTEND,
-    ) {
-        $area ??= Mage_Core_Model_App_Area::AREA_FRONTEND;
-        $translator = $this->_app->getTranslator();
-        $initialTranslatorState = $translator->getState();
-
-        $initialDesign = $this->_emulateDesign($storeId, $area);
-        // Current store needs to be changed right before locale change and after design change
-        $this->_app->setCurrentStore($storeId);
-        $initialLocaleCode = $this->_emulateLocale($storeId);
-
-        $initialEnvironmentInfo = new \Maho\DataObject();
-        $initialEnvironmentInfo->setInitialDesign($initialDesign)
-            ->setInitialLocaleCode($initialLocaleCode)
-            ->setInitialTranslatorState($initialTranslatorState);
-
-        $translator->init($area, true);
-
-        return $initialEnvironmentInfo;
+    public function emulate(int $storeId, \Closure $callback): mixed
+    {
+        $area = $storeId === Mage_Core_Model_App::ADMIN_STORE_ID
+            ? Mage_Core_Model_App_Area::AREA_ADMINHTML
+            : Mage_Core_Model_App_Area::AREA_FRONTEND;
+        $environment = Mage_Core_Model_App_Environment::capture($this->_app);
+        try {
+            if (!$this->runsIn($storeId, $area)) {
+                $this->switchTo($storeId, $area);
+            }
+            return $callback();
+        } finally {
+            $environment->restore();
+        }
     }
 
     /**
-     * Stop enviromment emulation
+     * Tell if the request runs in the store $storeId and the area $area, with its translator loaded for them
+     */
+    private function runsIn(int $storeId, string $area): bool
+    {
+        $translator = $this->_app->getTranslator();
+        return $storeId === (int) $this->_app->getStore()->getId()
+            && $area === Mage::getDesign()->getArea()
+            && $area === $translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA)
+            && $storeId === (int) $translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_STORE);
+    }
+
+    /**
+     * Switch to the environment of the store $storeId. Pass the result to stopEnvironmentEmulation() to put back the
+     * environment of the caller.
      *
-     * Function restores initial store environment
-     *
-     * @param \Maho\DataObject $initialEnvironmentInfo information about environment of the initial store
-     *
+     * @param int|string|Mage_Core_Model_Store $storeId
+     * @param string|null $area
+     */
+    #[\Deprecated(message: 'use Mage_Core_Model_App::emulate()', since: '27.1')]
+    public function startEnvironmentEmulation($storeId, $area = Mage_Core_Model_App_Area::AREA_FRONTEND): \Maho\DataObject
+    {
+        $storeId = (int) $this->_app->getStore($storeId)->getId();
+        return new \Maho\DataObject(['environment' => $this->start($storeId, $area ?? Mage_Core_Model_App_Area::AREA_FRONTEND)]);
+    }
+
+    /**
+     * @param \Maho\DataObject $initialEnvironmentInfo the result of startEnvironmentEmulation()
      * @return $this
      */
+    #[\Deprecated(message: 'use Mage_Core_Model_App::emulate()', since: '27.1')]
     public function stopEnvironmentEmulation(\Maho\DataObject $initialEnvironmentInfo)
     {
-        $initialDesign = $initialEnvironmentInfo->getInitialDesign();
-        $this->_restoreInitialDesign($initialDesign);
-        // Current store needs to be changed right before locale change and after design change
-        $this->_app->setCurrentStore($initialDesign['store']);
-        $this->_restoreInitialLocale($initialEnvironmentInfo->getInitialLocaleCode());
-        $this->_app->getTranslator()->setState($initialEnvironmentInfo->getInitialTranslatorState());
+        $environment = $initialEnvironmentInfo->getData('environment');
+        if (!$environment instanceof Mage_Core_Model_App_Environment) {
+            throw new \InvalidArgumentException('Pass the result of startEnvironmentEmulation() to stopEnvironmentEmulation().');
+        }
+        $environment->restore();
         return $this;
     }
 
     /**
-     * Apply design of the specified store
-     *
-     * @param int $storeId
-     * @param string $area
-     *
-     * @return array initial design parameters(package, store, area)
+     * Switch to the environment of the store $storeId and return the environment of the caller.
      */
-    protected function _emulateDesign($storeId, $area = Mage_Core_Model_App_Area::AREA_FRONTEND)
+    protected function start(int $storeId, string $area): Mage_Core_Model_App_Environment
     {
-        $initialDesign = Mage::getDesign()->setAllGetOld([
-            'package' => $this->_getStoreConfig('design/package/name', $storeId),
-            'store'   => $storeId,
-            'area'    => $area,
-        ]);
-        Mage::getDesign()->setTheme('');
-        Mage::getDesign()->setPackageName('');
-        return $initialDesign;
+        $environment = Mage_Core_Model_App_Environment::capture($this->_app);
+        try {
+            $this->switchTo($storeId, $area);
+        } catch (\Throwable $e) {
+            $environment->restore();
+            throw $e;
+        }
+        return $environment;
     }
 
     /**
-     * Apply locale of the specified store
-     *
-     * @param null|string|bool|int|Mage_Core_Model_Store $storeId
-     *
-     * @return string initial locale code
+     * Switch to the design, the store, the locale and the translations of the store $storeId for $area
      */
-    protected function _emulateLocale($storeId)
+    private function switchTo(int $storeId, string $area): void
     {
-        $initialLocaleCode = $this->_app->getLocale()->getLocaleCode();
-        $newLocaleCode = $this->_getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_LOCALE, $storeId);
-        if ($initialLocaleCode != $newLocaleCode) {
-            $this->_app->getLocale()->setLocaleCode($newLocaleCode);
-            $this->_app->getTranslator()->setLocale($newLocaleCode);
+        $this->_emulateDesign($storeId, $area);
+        $this->_app->setCurrentStore($storeId);
+        $this->_emulateLocale($storeId);
+        $this->_app->getTranslator()->init($area);
+    }
+
+    /**
+     * Apply the design of the store $storeId for $area. The admin area uses the package and the themes of the admin
+     * store, as an admin request does.
+     */
+    protected function _emulateDesign(int $storeId, string $area): void
+    {
+        $design = Mage::getDesign()->setStore($storeId);
+        if ($area === Mage_Core_Model_App_Area::AREA_ADMINHTML) {
+            $design->applyAdminDesign();
+            return;
         }
-        return $initialLocaleCode;
+        $design->setArea($area)->setTheme('');
+        $design->setPackageName('');
+    }
+
+    /**
+     * Apply the locale of the store $storeId.
+     */
+    protected function _emulateLocale(int $storeId): void
+    {
+        $localeCode = (string) $this->_getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_LOCALE, $storeId);
+        if ($this->_app->getLocale()->getLocaleCode() !== $localeCode) {
+            $this->_app->getLocale()->setLocaleCode($localeCode);
+            $this->_app->getTranslator()->setLocale($localeCode);
+        }
     }
 
     /**
@@ -125,34 +151,5 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
     protected function _getStoreConfig($path, $store = null)
     {
         return Mage::getStoreConfig($path, $store);
-    }
-
-    /**
-     * Restore design of the initial store
-     *
-     * @return $this
-     */
-    protected function _restoreInitialDesign(array $initialDesign)
-    {
-        Mage::getDesign()->setAllGetOld($initialDesign);
-        Mage::getDesign()->setTheme('');
-        Mage::getDesign()->setPackageName('');
-        return $this;
-    }
-
-    /**
-     * Restore locale of the initial store
-     *
-     * @param string $initialLocaleCode
-     *
-     * @return $this
-     */
-    protected function _restoreInitialLocale($initialLocaleCode)
-    {
-        $currentLocaleCode = $this->_app->getLocale()->getLocaleCode();
-        if ($currentLocaleCode != $initialLocaleCode) {
-            $this->_app->getLocale()->setLocaleCode($initialLocaleCode);
-        }
-        return $this;
     }
 }

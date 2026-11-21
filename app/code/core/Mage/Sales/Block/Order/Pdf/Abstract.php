@@ -30,6 +30,16 @@ abstract class Mage_Sales_Block_Order_Pdf_Abstract extends Mage_Core_Block_Pdf
     }
 
     /**
+     * Return the page of one document, without a stylesheet. The PDF model puts all the pages in one HTML document
+     * with one stylesheet, because dompdf applies each stylesheet to every page.
+     */
+    #[\Override]
+    protected function _toHtml(): string
+    {
+        return Mage_Core_Block_Template::_toHtml();
+    }
+
+    /**
      * Return the label and the value of each customer attribute of the order that a storefront form
      * shows, because the document goes to the customer.
      *

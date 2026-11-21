@@ -244,18 +244,16 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             $processor->setStoreId($variables['subscriber']->getStoreId());
         }
 
-        // Apply design config so that all subsequent code will run within the context of the correct store
-        $this->_applyDesignConfig();
+        // Run in the store of the design config, so that all the code below reads the correct store
+        return $this->withDesignConfig(function () use ($processor, $variables) {
+            // Populate the variables array with store, store info, logo, etc. variables
+            $variables = $this->_addEmailVariables($variables, $processor->getStoreId());
 
-        // Populate the variables array with store, store info, logo, etc. variables
-        $variables = $this->_addEmailVariables($variables, $processor->getStoreId());
+            $processor
+                ->setTemplateProcessor($this->getTemplateByConfigPath(...))
+                ->setIncludeProcessor($this->getInclude(...))
+                ->setVariables($variables);
 
-        $processor
-            ->setTemplateProcessor($this->getTemplateByConfigPath(...))
-            ->setIncludeProcessor($this->getInclude(...))
-            ->setVariables($variables);
-
-        try {
             // Filter the template text so that all HTML content will be present
             $result = $processor->filter($this->getTemplateText());
             $transport = new \Maho\DataObject(['html' => $result]);
@@ -268,13 +266,8 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             // If the {{inlinecss file=""}} directive was included in the template, grab filename to use for inlining
             $this->setInlineCssFile($processor->getInlineCssFile());
             // Now that all HTML has been assembled, run email through CSS inlining process
-            $processedResult = $this->getPreparedTemplateText($result);
-        } catch (Exception $e) {
-            $this->_cancelDesignConfig();
-            throw $e;
-        }
-        $this->_cancelDesignConfig();
-        return $processedResult;
+            return $this->getPreparedTemplateText($result);
+        });
     }
 
     /**
@@ -339,6 +332,19 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         $variables['name'] = reset($names);
 
         $this->setUseAbsoluteLinks(true);
+
+        // The email belongs to the store of its design config, so its event and its message are made there too
+        return $this->withDesignConfig(fn(): bool => $this->renderAndDispatch($emails, $names, $variables));
+    }
+
+    /**
+     * Render the email for $emails and $names, and send it or put it in the queue
+     *
+     * @param list<string> $emails
+     * @param list<string> $names
+     */
+    private function renderAndDispatch(array $emails, array $names, array $variables): bool
+    {
         $text = $this->getProcessedTemplate($variables);
         $subject = $this->getProcessedTemplateSubject($variables);
 
@@ -485,15 +491,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
 
         $processor->setVariables($variables);
 
-        $this->_applyDesignConfig();
-        try {
-            $processedResult = $processor->filter($this->getTemplateSubject());
-        } catch (Exception $e) {
-            $this->_cancelDesignConfig();
-            throw $e;
-        }
-        $this->_cancelDesignConfig();
-        return $processedResult;
+        return $this->withDesignConfig(fn() => $processor->filter($this->getTemplateSubject()));
     }
 
     /**

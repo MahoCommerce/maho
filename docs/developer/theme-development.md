@@ -240,6 +240,12 @@ Copy a template from `base/default` into your theme only when a layout or CSS ch
 
 A template you write yourself can use Tailwind class names. That needs your own build, see the next section.
 
+### Sales PDFs <span class="version-badge">v27.1+</span>
+
+The invoice, shipment and credit memo PDFs use the templates in `template/sales/order/pdf/` of the store design. Each document renders in the design of the store view of its order, so a theme can give the PDFs of its store their own look. To change a PDF, copy its template from `base/default` into your theme.
+
+The PDF does not load the CSS of the storefront. It reads `template/sales/order/pdf/pdf.css` from the theme instead. A PDF of several documents takes `pdf.css` from the store of the first document. The logo and the address come from **Sales > Sales > Invoice and Packing Slip Design** in the configuration of the store view.
+
 ## Your own Tailwind build
 
 Use this when you write your own templates with Tailwind class names, or `@apply` in your CSS. Scaffold the theme with the build shape:

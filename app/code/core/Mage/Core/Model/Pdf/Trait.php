@@ -97,31 +97,13 @@ trait Mage_Core_Model_Pdf_Trait
         }
     }
 
+    /**
+     * Read sales/order/pdf/pdf.css from the current design
+     */
     protected function getCssContent(): string
     {
-        // Ensure we're in adminhtml design area for CSS loading
-        $originalArea = Mage::getDesign()->getArea();
-        Mage::getDesign()->setArea('adminhtml');
-
-        try {
-            $cssPath = Mage::getDesign()->getTemplateFilename('sales/order/pdf/pdf.css', [
-                '_type' => 'template',
-                '_package' => Mage::getDesign()->getPackageName(),
-                '_theme' => Mage::getDesign()->getTheme('template'),
-            ]);
-
-            if (file_exists($cssPath)) {
-                return file_get_contents($cssPath);
-            }
-
-            // Return empty string if CSS file doesn't exist
-            return '';
-        } finally {
-            // Restore original area
-            if ($originalArea !== 'adminhtml') {
-                Mage::getDesign()->setArea($originalArea);
-            }
-        }
+        $cssPath = Mage::getDesign()->getTemplateFilename('sales/order/pdf/pdf.css');
+        return is_file($cssPath) ? (string) file_get_contents($cssPath) : '';
     }
 
     protected function wrapHtmlDocument(string $html): string

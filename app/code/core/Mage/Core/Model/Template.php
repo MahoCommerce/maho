@@ -36,44 +36,30 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
     protected $_emulatedDesignConfig = false;
 
     /**
-     * Initial environment information
-     * @see self::_applyDesignConfig()
-     *
-     * @var \Maho\DataObject|null
+     * The environment that emulateDesign() replaced.
      */
-    protected $_initialEnvironmentInfo = null;
+    private ?\Maho\DataObject $emulatedEnvironment = null;
 
     /**
-     * Applying of design config
+     * Run $callback in the store of the design config. Then put back the environment of the caller.
      *
-     * @return $this
+     * @template T
+     * @param \Closure(): T $callback
+     * @return T
      */
-    protected function _applyDesignConfig()
+    protected function withDesignConfig(\Closure $callback): mixed
     {
-        $designConfig = $this->getDesignConfig();
-        $store = $designConfig->getStore();
-        $storeId = is_object($store) ? $store->getId() : $store;
-        $area = $designConfig->getArea();
-        if (!is_null($storeId) && ($storeId != Mage::app()->getStore()->getId())) {
-            $appEmulation = Mage::getSingleton('core/app_emulation');
-            $this->_initialEnvironmentInfo = $appEmulation->startEnvironmentEmulation($storeId, $area);
+        $storeId = $this->getDesignConfigStoreId();
+        if ($storeId === null) {
+            return $callback();
         }
-        return $this;
+        return Mage::app()->emulate($storeId, $callback);
     }
 
-    /**
-     * Revert design settings to previous
-     *
-     * @return $this
-     */
-    protected function _cancelDesignConfig()
+    private function getDesignConfigStoreId(): ?int
     {
-        if (!empty($this->_initialEnvironmentInfo)) {
-            $appEmulation = Mage::getSingleton('core/app_emulation');
-            $appEmulation->stopEnvironmentEmulation($this->_initialEnvironmentInfo);
-            $this->_initialEnvironmentInfo = null;
-        }
-        return $this;
+        $store = $this->getDesignConfig()->getStore();
+        return $store === null || $store === '' ? null : (int) Mage::app()->getStore($store)->getId();
     }
 
     /**
@@ -112,6 +98,7 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
      * @param int|string $storeId
      * @param string $area
      */
+    #[\Deprecated(message: 'call setDesignConfig() and render in Mage_Core_Model_App::emulate()', since: '27.1')]
     public function emulateDesign($storeId, $area = self::DEFAULT_DESIGN_AREA): void
     {
         if ($storeId) {
@@ -119,7 +106,9 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
             $this->_emulatedDesignConfig = clone $this->getDesignConfig();
             if ($this->getDesignConfig()->getStore() != $storeId) {
                 $this->setDesignConfig(['area' => $area, 'store' => $storeId]);
-                $this->_applyDesignConfig();
+                if ((int) Mage::app()->getStore($storeId)->getId() !== (int) Mage::app()->getStore()->getId()) {
+                    $this->emulatedEnvironment = Mage::getSingleton('core/app_emulation')->startEnvironmentEmulation($storeId, $area);
+                }
             }
         } else {
             $this->_emulatedDesignConfig = false;
@@ -129,11 +118,15 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
     /**
      * Revert to last design config, used before emulation
      */
+    #[\Deprecated(message: 'call setDesignConfig() and render in Mage_Core_Model_App::emulate()', since: '27.1')]
     public function revertDesign(): void
     {
         if ($this->_emulatedDesignConfig) {
             $this->setDesignConfig($this->_emulatedDesignConfig->getData());
-            $this->_cancelDesignConfig();
+            if ($this->emulatedEnvironment !== null) {
+                Mage::getSingleton('core/app_emulation')->stopEnvironmentEmulation($this->emulatedEnvironment);
+                $this->emulatedEnvironment = null;
+            }
             $this->_emulatedDesignConfig = false;
         }
     }

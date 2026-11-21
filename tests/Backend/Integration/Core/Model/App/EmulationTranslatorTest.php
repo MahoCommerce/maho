@@ -26,11 +26,8 @@ describe('Store emulation restores the translator', function () {
         $storeLocale = Mage::getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_LOCALE, 1);
         $translator = $startAdmin($storeLocale);
 
-        $emulation = Mage::getModel('core/app_emulation');
-        $environment = $emulation->startEnvironmentEmulation(1);
-        expect($translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA))->toBe(Mage_Core_Model_App_Area::AREA_FRONTEND);
-
-        $emulation->stopEnvironmentEmulation($environment);
+        $area = Mage::app()->emulate(1, fn() => $translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA));
+        expect($area)->toBe(Mage_Core_Model_App_Area::AREA_FRONTEND);
 
         expect($translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA))->toBe(Mage_Core_Model_App_Area::AREA_ADMINHTML)
             ->and($translator->getLocale())->toBe($storeLocale)
@@ -41,11 +38,7 @@ describe('Store emulation restores the translator', function () {
         $adminLocale = Mage::getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_LOCALE, 1) === 'de_DE' ? 'fr_FR' : 'de_DE';
         $translator = $startAdmin($adminLocale);
 
-        $emulation = Mage::getModel('core/app_emulation');
-        $environment = $emulation->startEnvironmentEmulation(1);
-        expect($translator->getLocale())->not->toBe($adminLocale);
-
-        $emulation->stopEnvironmentEmulation($environment);
+        expect(Mage::app()->emulate(1, fn() => $translator->getLocale()))->not->toBe($adminLocale);
 
         expect($translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA))->toBe(Mage_Core_Model_App_Area::AREA_ADMINHTML)
             ->and($translator->getLocale())->toBe($adminLocale)
@@ -55,15 +48,12 @@ describe('Store emulation restores the translator', function () {
     it('returns to the outer emulation when two emulations nest', function () use ($startAdmin) {
         $translator = $startAdmin(Mage::getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_LOCALE, 1));
 
-        $outer = Mage::getModel('core/app_emulation');
-        $outerEnvironment = $outer->startEnvironmentEmulation(1);
-        $inner = Mage::getModel('core/app_emulation');
-        $inner->stopEnvironmentEmulation($inner->startEnvironmentEmulation(1, Mage_Core_Model_App_Area::AREA_ADMINHTML));
+        Mage::app()->emulate(1, function () use ($translator): void {
+            Mage::app()->emulate(Mage_Core_Model_App::ADMIN_STORE_ID, fn() => null);
 
-        expect($translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA))->toBe(Mage_Core_Model_App_Area::AREA_FRONTEND)
-            ->and((int) $translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_STORE))->toBe(1);
-
-        $outer->stopEnvironmentEmulation($outerEnvironment);
+            expect($translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA))->toBe(Mage_Core_Model_App_Area::AREA_FRONTEND)
+                ->and((int) $translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_STORE))->toBe(1);
+        });
 
         expect($translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA))->toBe(Mage_Core_Model_App_Area::AREA_ADMINHTML);
     });
@@ -79,8 +69,7 @@ describe('Store emulation restores the translator', function () {
         $string = 'Emulation restore marker';
         $write->insert($table, ['string' => $string, 'translate' => 'Reloaded', 'store_id' => 0, 'locale' => $locale, 'crc_string' => crc32($string)]);
         try {
-            $emulation = Mage::getModel('core/app_emulation');
-            $emulation->stopEnvironmentEmulation($emulation->startEnvironmentEmulation(1));
+            Mage::app()->emulate(1, fn() => null);
 
             expect($translator->getData())->toBe($before);
         } finally {
@@ -94,8 +83,7 @@ describe('Store emulation restores the translator', function () {
         $translator = Mage::app()->getTranslator();
         expect($translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA))->toBeNull();
 
-        $emulation = Mage::getModel('core/app_emulation');
-        $emulation->stopEnvironmentEmulation($emulation->startEnvironmentEmulation(1));
+        Mage::app()->emulate(1, fn() => null);
 
         expect($translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA))->toBeNull()
             ->and($translator->getData())->toBe([]);

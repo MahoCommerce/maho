@@ -197,6 +197,48 @@ class Mage_Core_Model_Design_Package
     }
 
     /**
+     * Return the store, the area, the package and the themes. Pass the result to setState() to put them back.
+     */
+    public function getState(): Mage_Core_Model_Design_State
+    {
+        return new Mage_Core_Model_Design_State(
+            store: $this->_store,
+            area: $this->_area,
+            package: $this->_name,
+            theme: $this->_theme,
+        );
+    }
+
+    public function setState(Mage_Core_Model_Design_State $state): static
+    {
+        $this->_store = $state->store;
+        $this->_area = $state->area;
+        $this->_name = $state->package;
+        $this->_theme = $state->theme;
+        $this->_fallback?->setStore($this->getStore());
+        return $this;
+    }
+
+    /**
+     * Use the admin area, with the package and the themes that the admin store configures.
+     * Mage_Adminhtml_Controller_Action::preDispatch() calls it for each admin request.
+     */
+    public function applyAdminDesign(): static
+    {
+        $config = Mage::getConfig();
+        $this->setArea(Mage_Core_Model_App_Area::AREA_ADMINHTML)
+            ->setPackageName((string) $config->getNode('stores/admin/design/package/name'))
+            ->setTheme((string) $config->getNode('stores/admin/design/theme/openmage'));
+        foreach (['layout', 'template', 'skin', 'locale'] as $type) {
+            $theme = (string) $config->getNode("stores/admin/design/theme/{$type}");
+            if ($theme !== '') {
+                $this->setTheme($type, $theme);
+            }
+        }
+        return $this;
+    }
+
+    /**
      * Retrieve package name
      *
      * @return string
