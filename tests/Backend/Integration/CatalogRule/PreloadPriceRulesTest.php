@@ -54,8 +54,7 @@ it('reloads preloaded prices when the same quote changes customer group', functi
         public function __construct(
             private readonly int $storeId,
             private readonly int $productId,
-        ) {
-        }
+        ) {}
 
         public function getStoreId(): int
         {
