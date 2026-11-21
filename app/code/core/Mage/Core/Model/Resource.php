@@ -325,7 +325,7 @@ class Mage_Core_Model_Resource
      * Creates new if doesn't exist
      *
      * @param string $type
-     * @return Mage_Core_Model_Resource_Type_Abstract
+     * @return Mage_Core_Model_Resource_Type_Db
      */
     public function getConnectionTypeInstance($type)
     {

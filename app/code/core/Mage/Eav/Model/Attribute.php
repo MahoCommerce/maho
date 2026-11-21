@@ -64,6 +64,19 @@ abstract class Mage_Eav_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
     }
 
     /**
+     * @return Mage_Eav_Model_Resource_Attribute
+     */
+    #[\Override]
+    protected function _getResource()
+    {
+        $resource = parent::_getResource();
+        if (!$resource instanceof Mage_Eav_Model_Resource_Attribute) {
+            throw new \RuntimeException('The resource model of an attribute must extend Mage_Eav_Model_Resource_Attribute.');
+        }
+        return $resource;
+    }
+
+    /**
      * Return forms in which the attribute
      *
      * @return array

@@ -48,12 +48,13 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     public function getConditions(): ?Mage_Rule_Model_Condition_Combine
     {
         if (!$this->_conditions) {
-            $this->_resetConditions();
+            $combine = $this->getConditionsInstance();
+            $this->_resetConditions($combine);
 
             if ($this->getConditionsSerialized()) {
                 $conditions = $this->_decodeRuleData($this->getConditionsSerialized(), 'conditions_serialized');
                 if (is_array($conditions) && !empty($conditions)) {
-                    $this->_conditions->setConditions([])->loadArray($conditions);
+                    $combine->setConditions([])->loadArray($conditions);
                 }
             }
         }

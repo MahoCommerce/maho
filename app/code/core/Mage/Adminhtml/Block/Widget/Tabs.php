@@ -277,7 +277,7 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
     }
 
     /**
-     * @param \Maho\DataObject|Mage_Adminhtml_Block_Widget_Tab_Interface $tab
+     * @param \Maho\DataObject|(Mage_Core_Block_Abstract&Mage_Adminhtml_Block_Widget_Tab_Interface) $tab
      * @param bool $withPrefix
      * @return string
      */
@@ -371,12 +371,12 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
     }
 
     /**
-     * @param \Maho\DataObject|Mage_Adminhtml_Block_Widget_Tab_Interface $tab
+     * @param \Maho\DataObject|(Mage_Core_Block_Abstract&Mage_Adminhtml_Block_Widget_Tab_Interface) $tab
      * @return string
      */
     public function getTabContent($tab)
     {
-        if ($tab instanceof Mage_Adminhtml_Block_Widget_Tab_Interface) {
+        if ($tab instanceof Mage_Core_Block_Abstract && $tab instanceof Mage_Adminhtml_Block_Widget_Tab_Interface) {
             if ($tab->getSkipGenerateContent()) {
                 return '';
             }

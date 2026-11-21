@@ -276,6 +276,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
      *
      * @return Mage_Shipping_Model_Rate_Result
      */
+    #[\Override]
     protected function _getQuotes()
     {
         return $this->_getRestQuotes();
@@ -287,6 +288,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
      * @param string $freeMethod
      * @return void
      */
+    #[\Override]
     protected function _setFreeMethodRequest($freeMethod)
     {
         $r = $this->_rawRequest;

@@ -131,6 +131,11 @@ class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
             $className = Mage::getConfig()->getBlockClassName($blockType);
             $block = new $className();
         }
+        if (!$block instanceof Mage_Core_Block_Abstract) {
+            return ($this->getLayout() ?? Mage::app()->getLayout())
+                ->createBlock('core/text')
+                ->setText($method);
+        }
         $block->setInfo($info);
         return $block;
     }

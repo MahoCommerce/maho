@@ -30,17 +30,6 @@ class Mage_Admin_Model_Roles extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Update object into database
-     *
-     * @return $this
-     */
-    public function update()
-    {
-        $this->getResource()->update($this);
-        return $this;
-    }
-
-    /**
      * Retrieve users collection
      *
      * @return Mage_Admin_Model_Resource_Roles_User_Collection

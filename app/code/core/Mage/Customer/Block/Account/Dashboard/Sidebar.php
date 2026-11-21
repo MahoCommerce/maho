@@ -51,11 +51,8 @@ class Mage_Customer_Block_Account_Dashboard_Sidebar extends Mage_Core_Block_Temp
             $this->_wishlist = Mage::getModel('wishlist/wishlist')
                 ->loadByCustomer(Mage::getSingleton('customer/session')->getCustomer());
             $this->_wishlist->getItemsCollection()
-                ->addAttributeToSelect('name')
-                ->addAttributeToSelect('price')
-                ->addAttributeToSelect('image')
-                ->addAttributeToFilter('store_id', ['in' => $this->_wishlist->getSharedStoreIds()])
-                ->addAttributeToSort('added_at', 'desc')
+                ->addStoreFilter($this->_wishlist->getSharedStoreIds())
+                ->setOrder('added_at', 'desc')
                 ->setCurPage(1)
                 ->setPageSize(3)
                 ->load();

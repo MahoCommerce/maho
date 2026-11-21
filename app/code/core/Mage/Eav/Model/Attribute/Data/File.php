@@ -201,7 +201,7 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
         }
 
         // A private mount named after the entity type holds its files. Other types keep a folder on media.
-        $entityType = $attribute->getEntity()->getEntityTypeCode();
+        $entityType = $attribute->getEntityType()->getEntityTypeCode();
         [$mount, $path] = \Maho\Storage\MountRegistry::has($entityType)
             ? [Mage::getStorage($entityType), '']
             : [Mage::getStorage('media'), $entityType];

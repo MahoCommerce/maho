@@ -49,7 +49,7 @@ class Mage_Catalog_Model_Observer
     public function catalogProductImportAfter(\Maho\Event\Observer $observer)
     {
         Mage::getModel('catalog/url')->refreshRewrites();
-        Mage::getResourceSingleton('catalog/category')->refreshProductIndex();
+        Mage::getResourceSingleton('catalog/category_indexer_product')->reindexAll();
         return $this;
     }
 

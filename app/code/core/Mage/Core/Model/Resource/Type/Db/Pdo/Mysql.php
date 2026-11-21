@@ -14,6 +14,7 @@ class Mage_Core_Model_Resource_Type_Db_Pdo_Mysql extends Mage_Core_Model_Resourc
      * @param array $config Connection config
      * @return Maho\Db\Adapter\Pdo\Mysql
      */
+    #[\Override]
     public function getConnection($config)
     {
         $configArr = (array) $config;

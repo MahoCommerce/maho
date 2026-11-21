@@ -322,7 +322,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
     /**
      * Retrieve price indexers per product type
      *
-     * @return array
+     * @return array<string, Mage_Catalog_Model_Resource_Product_Indexer_Price_Interface>
      */
     public function getTypeIndexers()
     {
@@ -332,8 +332,11 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
             foreach ($types as $typeId => $typeInfo) {
                 $modelName = $typeInfo['price_indexer'] ?? $this->_defaultPriceIndexer;
                 $isComposite = !empty($typeInfo['composite']);
-                $indexer = Mage::getResourceModel($modelName)
-                    ->setTypeId($typeId)
+                $indexer = Mage::getResourceModel($modelName);
+                if (!$indexer instanceof Mage_Catalog_Model_Resource_Product_Indexer_Price_Interface) {
+                    throw new \RuntimeException("Resource model {$modelName} is not a price indexer.");
+                }
+                $indexer->setTypeId($typeId)
                     ->setIsComposite($isComposite);
 
                 $this->_indexers[$typeId] = $indexer;

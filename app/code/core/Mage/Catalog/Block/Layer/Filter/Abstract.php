@@ -18,9 +18,9 @@ declare(strict_types=1);
 abstract class Mage_Catalog_Block_Layer_Filter_Abstract extends Mage_Core_Block_Template
 {
     /**
-     * Catalog Layer Filter Attribute model
+     * Catalog Layer Filter model
      *
-     * @var Mage_Catalog_Model_Layer_Filter_Attribute
+     * @var Mage_Catalog_Model_Layer_Filter_Abstract
      */
     protected $_filter;
 
@@ -67,8 +67,12 @@ abstract class Mage_Catalog_Block_Layer_Filter_Abstract extends Mage_Core_Block_
         if (!$this->_filterModelName) {
             Mage::throwException(Mage::helper('catalog')->__('Filter model name must be declared.'));
         }
-        $this->_filter = Mage::getModel($this->_filterModelName)
-            ->setLayer($this->getLayer());
+        $filter = Mage::getModel($this->_filterModelName);
+        if (!$filter instanceof Mage_Catalog_Model_Layer_Filter_Abstract) {
+            throw new \RuntimeException("Model {$this->_filterModelName} is not a layer filter model.");
+        }
+        $filter->setLayer($this->getLayer());
+        $this->_filter = $filter;
         $this->_prepareFilter();
 
         $this->_filter->apply($this->getRequest(), $this);

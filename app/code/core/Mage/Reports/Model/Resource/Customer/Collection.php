@@ -65,11 +65,11 @@ class Mage_Reports_Model_Resource_Customer_Collection extends Mage_Customer_Mode
             if ($quote instanceof Mage_Sales_Model_Quote) {
                 $totals = $quote->getTotals();
                 $item->setTotal($totals['subtotal']->getValue());
-                $quoteItems = Mage::getResourceModel('sales/quote_item_collection')->setQuoteFilter($quote->getId());
+                $quoteItems = Mage::getResourceModel('sales/quote_item_collection')->setQuote($quote);
                 $quoteItems->load();
                 $item->setItems($quoteItems->count());
             } else {
-                $item->remove();
+                $this->removeItemByKey($item->getId());
             }
         }
         return $this;

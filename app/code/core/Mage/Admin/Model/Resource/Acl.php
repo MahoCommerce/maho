@@ -109,7 +109,11 @@ class Mage_Admin_Model_Resource_Acl extends Mage_Core_Model_Resource_Db_Abstract
 
             $assert = null;
             if ($rule['assert_id'] != 0) {
-                $assertClass = Mage::getSingleton('admin/config')->getAclAssert($rule['assert_type'])->getClassName();
+                $assertConfig = Mage::getSingleton('admin/config')->getAclAssert($rule['assert_type']);
+                $assertClass = $assertConfig instanceof Mage_Core_Model_Config_Element ? $assertConfig->getClassName() : false;
+                if (!$assertClass) {
+                    throw new \RuntimeException(sprintf('The ACL assert type "%s" is not configured.', $rule['assert_type']));
+                }
                 $assert = new $assertClass(unserialize($rule['assert_data'], ['allowed_classes' => false]));
             }
             try {

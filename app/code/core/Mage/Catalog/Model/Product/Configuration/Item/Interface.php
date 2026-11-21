@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -17,6 +18,8 @@ interface Mage_Catalog_Model_Product_Configuration_Item_Interface
      * @return Mage_Catalog_Model_Product
      */
     public function getProduct();
+
+    public function getQty(): ?float;
 
     /**
      * Get item option by code

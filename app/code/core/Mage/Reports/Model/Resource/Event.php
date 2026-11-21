@@ -52,7 +52,7 @@ class Mage_Reports_Model_Resource_Event extends Mage_Core_Model_Resource_Db_Abst
      * @return $this
      */
     public function applyLogToCollection(
-        \Maho\Data\Collection\Db $collection,
+        Mage_Core_Model_Resource_Db_Collection_Abstract|Mage_Eav_Model_Entity_Collection_Abstract $collection,
         $eventTypeId,
         $eventSubjectId,
         $subtype,

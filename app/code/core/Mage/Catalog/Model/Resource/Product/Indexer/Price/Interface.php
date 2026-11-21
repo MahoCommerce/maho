@@ -28,4 +28,34 @@ interface Mage_Catalog_Model_Resource_Product_Indexer_Price_Interface
      * Register data required by product type process in event object
      */
     public function registerEvent(Mage_Index_Model_Event $event): void;
+
+    /**
+     * Set Product Type code
+     *
+     * @param string $typeCode
+     * @return $this
+     */
+    public function setTypeId($typeCode);
+
+    /**
+     * Retrieve Product Type Code
+     *
+     * @return string
+     */
+    public function getTypeId();
+
+    /**
+     * Set Product Type Composite flag
+     *
+     * @param bool $flag
+     * @return $this
+     */
+    public function setIsComposite($flag);
+
+    /**
+     * Check product type is composite
+     *
+     * @return bool
+     */
+    public function getIsComposite();
 }

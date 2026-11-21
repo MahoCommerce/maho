@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -19,9 +20,9 @@ class Mage_Adminhtml_Block_Permissions_Tab_Userroles extends Mage_Adminhtml_Bloc
             ->getCollection()
             ->load();
 
-        $userRoles = Mage::getModel('admin/roles')
-            ->getUsersCollection()
-            ->setUserFilter($uid)
+        $userRoles = Mage::getResourceModel('admin/role_collection')
+            ->addFieldToFilter('user_id', (int) $uid)
+            ->addFieldToFilter('role_type', Mage_Admin_Model_Acl::ROLE_TYPE_USER)
             ->load();
 
         $this->setTemplate('permissions/userroles.phtml')

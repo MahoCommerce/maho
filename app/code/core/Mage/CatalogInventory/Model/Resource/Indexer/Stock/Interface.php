@@ -33,4 +33,12 @@ interface Mage_CatalogInventory_Model_Resource_Indexer_Stock_Interface
      * @throws Mage_Core_Exception
      */
     public function getTypeId(): string;
+
+    /**
+     * Set Product Type Composite flag
+     *
+     * @param bool $flag
+     * @return $this
+     */
+    public function setIsComposite($flag);
 }

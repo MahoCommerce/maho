@@ -202,7 +202,7 @@ class Mage_Catalog_Model_Product_Status extends Mage_Core_Model_Abstract
     /**
      * Add Value Sort To Collection Select
      *
-     * @param Mage_Eav_Model_Entity_Collection_Abstract $collection
+     * @param Mage_Catalog_Model_Resource_Product_Collection $collection
      * @param string $dir direction
      * @return Mage_Catalog_Model_Product_Status
      * @throws Mage_Core_Exception

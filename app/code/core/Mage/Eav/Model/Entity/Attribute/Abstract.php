@@ -177,6 +177,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     /**
      * @return mixed
      */
+    #[\Override]
     public function getAttributeCode()
     {
         return $this->_getData('attribute_code');
@@ -572,7 +573,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     public function getIdByCode($entityType, $code)
     {
         $k = "{$entityType}|{$code}";
-        $this->_attributeIdCache[$k] ??= $this->getResource()->getIdByCode($entityType, $code);
+        $this->_attributeIdCache[$k] ??= $this->_getResource()->getIdByCode($entityType, $code);
         return $this->_attributeIdCache[$k];
     }
 

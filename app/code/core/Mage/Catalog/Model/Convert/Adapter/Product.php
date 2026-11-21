@@ -396,8 +396,11 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
     #[\Override]
     protected function _getCollectionForLoad($entityType)
     {
-        return parent::_getCollectionForLoad($entityType)
-            ->setStoreId($this->getStoreId())
+        $collection = parent::_getCollectionForLoad($entityType);
+        if (!$collection instanceof Mage_Catalog_Model_Resource_Product_Collection) {
+            throw new \RuntimeException("Entity type {$entityType} has no product collection.");
+        }
+        return $collection->setStoreId($this->getStoreId())
             ->addStoreFilter($this->getStoreId());
     }
 
@@ -448,7 +451,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
 
         $collections = $this->getData();
         if ($collections instanceof Mage_Catalog_Model_Resource_Product_Collection) {
-            $collections = [$collections->getEntity()->getStoreId() => $collections];
+            $collections = [$collections->getStoreId() => $collections];
         } elseif (!is_array($collections)) {
             $this->addException(
                 Mage::helper('catalog')->__('No product collections found.'),

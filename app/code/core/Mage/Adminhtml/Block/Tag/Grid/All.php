@@ -76,12 +76,10 @@ class Mage_Adminhtml_Block_Tag_Grid_All extends Mage_Adminhtml_Block_Widget_Grid
     #[\Override]
     protected function _addColumnFilterToCollection($column)
     {
-        if ($this->getCollection() && $column->getFilter()->getValue()) {
-            if ($column->getIndex() === 'stores') {
-                $this->getCollection()->addAttributeToFilter($column->getIndex(), $column->getFilter()->getCondition());
-            } else {
-                $this->getCollection()->addStoreFilter($column->getFilter()->getCondition());
-            }
+        if ($column->getIndex() === 'stores') {
+            $this->getCollection()->addStoreFilter($column->getFilter()->getCondition(), false);
+        } else {
+            parent::_addColumnFilterToCollection($column);
         }
         return $this;
     }

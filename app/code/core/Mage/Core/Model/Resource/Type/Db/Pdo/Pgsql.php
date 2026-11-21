@@ -17,6 +17,7 @@ class Mage_Core_Model_Resource_Type_Db_Pdo_Pgsql extends Mage_Core_Model_Resourc
      * @param array $config Connection config
      * @return \Maho\Db\Adapter\Pdo\Pgsql
      */
+    #[\Override]
     public function getConnection($config)
     {
         $configArr = (array) $config;

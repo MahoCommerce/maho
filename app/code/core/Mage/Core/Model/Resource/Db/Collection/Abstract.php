@@ -161,6 +161,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
      *
      * @return $this
      */
+    #[\Override]
     protected function _initSelect()
     {
         $this->getSelect()->from(['main_table' => $this->getMainTable()]);
