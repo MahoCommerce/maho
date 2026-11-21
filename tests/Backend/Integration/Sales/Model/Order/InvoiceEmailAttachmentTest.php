@@ -15,7 +15,7 @@ uses(Tests\MahoBackendTestCase::class);
  * Build a persisted, PDF-renderable order + invoice so the attachment path exercises
  * real DomPdf rendering rather than a stub.
  */
-function createRenderableInvoice(): Mage_Sales_Model_Order_Invoice
+function createRenderableInvoice(string $productName = 'Test Product'): Mage_Sales_Model_Order_Invoice
 {
     // Non-numeric token so our increment IDs never collide with the default
     // 100000xxx order/invoice sequence other tests in the suite generate
@@ -56,7 +56,7 @@ function createRenderableInvoice(): Mage_Sales_Model_Order_Invoice
     $item = Mage::getModel('sales/order_item')
         ->setData([
             'sku'          => 'TEST-SKU',
-            'name'         => 'Test Product',
+            'name'         => $productName,
             'qty_ordered'  => 2,
             'price'        => 50.00,
             'base_price'   => 50.00,
@@ -82,6 +82,14 @@ function createRenderableInvoice(): Mage_Sales_Model_Order_Invoice
 }
 
 describe('Invoice email PDF attachment', function () {
+    it('embeds a Unicode font for invoice text', function (): void {
+        $invoice = createRenderableInvoice('Łódź, Český Krumlov, Őr, Київ');
+        $pdf = Mage::getModel('sales/order_pdf_invoice')->getPdf([$invoice]);
+
+        expect(str_contains($pdf, 'DejaVuSans'))->toBeTrue()
+            ->and(str_contains($pdf, '/ToUnicode'))->toBeTrue();
+    });
+
     it('renders the admin PDF templates outside the admin, and restores the design', function () {
         $invoice = createRenderableInvoice();
 
