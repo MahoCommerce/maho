@@ -13,16 +13,12 @@
  */
 class Mage_Oauth_Model_Resource_Nonce extends Mage_Core_Model_Resource_Db_Abstract
 {
-    /**
-     * The `oauth_nonce` table has no auto‑increment primary key. The base
-     * resource model assumes an identity column and attempts to retrieve the
-     * last inserted ID, which fails on PostgreSQL and MySQL when the table
-     * lacks a primary key. Setting this flag disables the identity lookup
-     * after an insert, allowing the model to persist non‑PK rows without
-     * raising `Doctrine\DBAL\Driver\Exception\NoIdentityValue`.
-     */
     #[\Override]
     protected $_isPkAutoIncrement = false;
+
+    #[\Override]
+    protected bool $_fetchIdAfterInsert = false;
+
     #[\Override]
     protected function _construct(): void
     {

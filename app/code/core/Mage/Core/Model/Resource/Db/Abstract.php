@@ -66,6 +66,8 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
      */
     protected $_isPkAutoIncrement = true;
 
+    protected bool $_fetchIdAfterInsert = true;
+
     /**
      * Use is object new method for save of object
      *
@@ -441,7 +443,9 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
             }
             $this->_getWriteAdapter()->insert($this->getMainTable(), $bind);
 
-            $object->setId((int) $this->_getWriteAdapter()->lastInsertId($this->getMainTable()));
+            if ($this->_fetchIdAfterInsert) {
+                $object->setId((int) $this->_getWriteAdapter()->lastInsertId($this->getMainTable()));
+            }
 
             if ($this->_useIsObjectNew) {
                 $object->isObjectNew(false);
