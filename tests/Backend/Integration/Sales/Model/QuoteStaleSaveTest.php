@@ -330,3 +330,47 @@ it('retries an explicit reopen with the loaded values after rolling back multipl
         ->and($stored->getReservedOrderId())->toBeNull()
         ->and($stored->getCustomerNote())->toBe('Example note');
 });
+
+it('immediately retries the same cart save after an outer adapter rollback', function (): void {
+    $quoteId = $this->quote->getId();
+    $loaded = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $adapter->beginTransaction();
+    try {
+        $loaded->setIsActive(false)->setReservedOrderId('example-order')->save();
+    } finally {
+        $adapter->rollBack();
+    }
+
+    $stored = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+    expect($stored->getIsActive())->toBeTrue()
+        ->and($stored->getReservedOrderId())->toBeNull();
+
+    $loaded->save();
+
+    $stored->loadByIdWithoutStore($quoteId);
+    expect($stored->getIsActive())->toBeFalse()
+        ->and($stored->getReservedOrderId())->toBe('example-order');
+});
+
+it('keeps a reload of the same cart separate from an earlier rolled back save', function (): void {
+    $quoteId = $this->quote->getId();
+    $loaded = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $adapter->beginTransaction();
+    try {
+        $loaded->setIsActive(false)->setReservedOrderId('example-order')->save();
+        $loaded->loadByIdWithoutStore($quoteId);
+        expect($loaded->getIsActive())->toBeFalse()
+            ->and($loaded->getReservedOrderId())->toBe('example-order');
+    } finally {
+        $adapter->rollBack();
+    }
+
+    $loaded->setCustomerNote('Example note')->save();
+
+    $stored = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+    expect($stored->getIsActive())->toBeTrue()
+        ->and($stored->getReservedOrderId())->toBeNull()
+        ->and($stored->getCustomerNote())->toBe('Example note');
+});
