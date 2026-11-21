@@ -332,8 +332,11 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         $variables['name'] = reset($names);
 
         $this->setUseAbsoluteLinks(true);
-        $text = $this->getProcessedTemplate($variables);
-        $subject = $this->getProcessedTemplateSubject($variables);
+        // One emulation for the body and the subject, not one for each
+        [$text, $subject] = $this->withDesignConfig(fn(): array => [
+            $this->getProcessedTemplate($variables),
+            $this->getProcessedTemplateSubject($variables),
+        ]);
 
         $setReturnPath = Mage::getStoreConfig(self::XML_PATH_SENDING_SET_RETURN_PATH);
         $returnPathEmail = match ($setReturnPath) {
