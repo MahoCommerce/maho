@@ -37,7 +37,6 @@ SPDX-License-Identifier: AFL-3.0
                         <base_rules translate="label comment">
                             <label>Base Rules</label>
                             <frontend_type>textarea</frontend_type>
-                            <frontend_model>sitemap/adminhtml_system_config_baserules</frontend_model>
                             <comment><![CDATA[Rules only, one per line, without User-agent lines. They are written into the wildcard group and repeated inside every named group, because RFC 9309 gives a named group no access to the wildcard rules. Rules that name the admin path are dropped, so the path stays private.]]></comment>
                             <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>

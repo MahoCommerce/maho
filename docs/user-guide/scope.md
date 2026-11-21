@@ -38,7 +38,8 @@ or at **Default Config** has no effect on that store view.
 At the top left of **System > Configuration**, the **Current Configuration Scope** dropdown selects
 the scope that you edit: **Default Config**, a website, or a store view.
 
-Each setting shows a label next to it. The label is the most specific scope where you can set it:
+Each setting shows a label next to it. In the configuration, the label is after the **Use Default**
+checkbox, without the brackets. The label is the most specific scope where you can set it:
 
 | Label | Where you can set the value |
 |-------|-----------------------------|
@@ -51,17 +52,26 @@ setting is not in the page when you select a website.
 
 ### Use Default and Use Website
 
-When you select a website or a store view, each setting has a checkbox on its right:
+Each setting has a checkbox on its right:
 
 | Selected scope | Checkbox | When it is selected |
 |----------------|----------|---------------------|
+| Default Config | **Use Default** | The setting uses the value that Maho, or the extension that adds the setting, ships. The checkbox shows only when the shipped value is not empty, and not on a setting that checks its value when you save it |
 | Website | **Use Default** | The website uses the value of **Default Config** |
 | Store view | **Use Website** | The store view uses the value of its website. The checkbox has this name when the setting exists at website level |
 | Store view | **Use Default** | The store view uses the value of **Default Config**. The checkbox has this name when the setting does not exist at website level |
 
 To give a scope its own value, clear the checkbox, change the value and save. To remove the value
 of a scope, select the checkbox again and save: the store deletes the value of that scope, and the
-value of the scope above it applies again.
+value of the scope above it applies again. In **Default Config**, the shipped value applies again.
+
+To get the shipped value of a setting back, select **Default Config**, select **Use Default** and
+save. If a website or a store view has its own value, select it and select **Use Default** or **Use
+Website** too. An empty field is a value of its own: if you clear the field and save, the setting
+stays empty.
+
+A setting that checks its value when you save it, such as **Allowed Currencies**, has no **Use
+Default** checkbox in **Default Config**. Enter the value that you want and save.
 
 !!! note "Values set by the server"
     The hosting can also set a configuration value with an environment variable. A value set this
@@ -145,6 +155,7 @@ categories and the scope labels. It saves all product and category values as def
 
 | What you see | Why | What to do |
 |--------------|-----|------------|
+| You want the original value of a setting back | **Default Config** has a saved value | Select **Default Config**, select **Use Default** and save |
 | You changed a setting in **Default Config**, but one store view does not change | The store view, or its website, has its own value | Select that store view in **Current Configuration Scope**, select **Use Website** or **Use Default**, and save. Do the same for the website |
 | A setting is missing when you select a store view | The setting is [GLOBAL] or [WEBSITE] | Select **Default Config** or the website |
 | You changed a setting in the admin, but the store does not use the new value | The hosting sets this value with an environment variable | Ask the hosting to change or remove the variable |
