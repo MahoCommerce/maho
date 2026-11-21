@@ -47,6 +47,11 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     public const AUTH_ERR_2FA_INVALID = 3;
 
     /**
+     * Fixed bcrypt hash at the cost used for newly stored admin passwords
+     */
+    private const DUMMY_PASSWORD_HASH = '$2y$12$4ddFSMeI6Uc3LPaqcj9CvuIELIa4G6ohq38VL6PoR8mXHva0yQnvi';
+
+    /**
      * Model event prefix
      *
      * @var string
@@ -67,8 +72,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
      * @var bool
      */
     protected $_hasAvailableResources = true;
-
-    private static ?string $dummyPasswordHash = null;
 
     /**
      * Initialize user model
@@ -327,8 +330,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             $this->loadByUsername($username);
 
             if (!$this->getId()) {
-                self::$dummyPasswordHash ??= Mage::helper('core')->getHashPassword('admin-user-not-found');
-                $this->validatePasswordHash($password, self::$dummyPasswordHash);
+                $this->validateDummyPasswordHash($password);
                 throw new Mage_Core_Exception(
                     Mage::helper('adminhtml')->__('Access denied.'),
                     self::AUTH_ERR_ACCESS_DENIED,
@@ -337,6 +339,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
             $useCaseSensitiveLogin = Mage::getStoreConfigFlag('admin/security/use_case_sensitive_login');
             if ($useCaseSensitiveLogin && $this->getUsername() !== $username) {
+                $this->validateDummyPasswordHash($password);
                 throw new Mage_Core_Exception(
                     Mage::helper('adminhtml')->__('Access denied.'),
                     self::AUTH_ERR_ACCESS_DENIED,
@@ -368,6 +371,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
             if (!$usedPasskey) {
                 if (!$this->getPasswordEnabled()) {
+                    $this->validateDummyPasswordHash($password);
                     throw new Mage_Core_Exception(
                         Mage::helper('adminhtml')->__('Access denied.'),
                         self::AUTH_ERR_ACCESS_DENIED,
@@ -375,6 +379,9 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
                 }
 
                 if (!$this->validatePasswordHash($password, $this->getPassword())) {
+                    if (password_get_info((string) $this->getPassword())['algo'] === null) {
+                        $this->validateDummyPasswordHash($password);
+                    }
                     throw new Mage_Core_Exception(
                         Mage::helper('adminhtml')->__('Access denied.'),
                         self::AUTH_ERR_ACCESS_DENIED,
@@ -537,6 +544,11 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     public function validatePasswordHash(#[\SensitiveParameter] string $string1, string $string2): bool
     {
         return Mage::helper('core')->validateHash($string1, $string2);
+    }
+
+    private function validateDummyPasswordHash(#[\SensitiveParameter] string $password): void
+    {
+        $this->validatePasswordHash($password, self::DUMMY_PASSWORD_HASH);
     }
 
     public function passwordHashNeedsUpgrade(): bool

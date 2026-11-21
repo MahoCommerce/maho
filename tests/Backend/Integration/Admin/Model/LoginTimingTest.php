@@ -48,3 +48,29 @@ it('checks a password hash once for a known username with a wrong password', fun
         ->toThrow(Mage_Core_Exception::class)
         ->and(TimingAdminUser::$passwordChecks)->toBe(1);
 });
+
+it('performs the same expensive check after a failed legacy hash', function () {
+    Mage::getSingleton('core/resource')->getConnection('core_write')->update(
+        Mage::getSingleton('core/resource')->getTableName('admin/user'),
+        ['password' => hash('sha256', 'correct-password')],
+        ['user_id = ?' => $this->user->getId()],
+    );
+    $user = new TimingAdminUser();
+
+    expect(fn() => $user->authenticate($this->user->getUsername(), 'wrong-password'))
+        ->toThrow(Mage_Core_Exception::class)
+        ->and(TimingAdminUser::$passwordChecks)->toBe(2);
+});
+
+it('performs a dummy password check for an account without password login', function () {
+    $this->user
+        ->setPasskeyCredentialIdHash('credential-id')
+        ->setPasskeyPublicKey('public-key')
+        ->setPasswordEnabled(false)
+        ->save();
+    $user = new TimingAdminUser();
+
+    expect(fn() => $user->authenticate($this->user->getUsername(), 'not-a-passkey-payload'))
+        ->toThrow(Mage_Core_Exception::class)
+        ->and(TimingAdminUser::$passwordChecks)->toBe(1);
+});
