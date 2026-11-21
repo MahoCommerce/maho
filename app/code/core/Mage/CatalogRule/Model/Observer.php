@@ -11,13 +11,6 @@
 class Mage_CatalogRule_Model_Observer
 {
     /**
-     * Preload price rules for all items in quote
-     *
-     * @var array
-     */
-    protected $_preloadedPrices = [];
-
-    /**
      * Store calculated catalog rules prices for products
      * Prices collected per website, customer group, date and product
      *
@@ -131,12 +124,10 @@ class Mage_CatalogRule_Model_Observer
             $productIds[] = $item->getProductId();
         }
 
-        $cacheKey = spl_object_id($quote);
+        $prices = Mage::getResourceSingleton('catalogrule/rule')
+            ->getRulePrices($date, $wId, $gId, $productIds);
 
-        $this->_preloadedPrices[$cacheKey] ??= Mage::getResourceSingleton('catalogrule/rule')
-             ->getRulePrices($date, $wId, $gId, $productIds);
-
-        foreach ($this->_preloadedPrices[$cacheKey] as $pId => $price) {
+        foreach ($prices as $pId => $price) {
             $key = $this->_getRulePricesKey([$date, $wId, $gId, $pId]);
             $this->_rulePrices[$key] = $price;
         }
