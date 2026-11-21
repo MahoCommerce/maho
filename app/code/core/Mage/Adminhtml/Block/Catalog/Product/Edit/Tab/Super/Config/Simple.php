@@ -65,7 +65,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Simple extends 
                 if (!in_array($inputType, $availableTypes)) {
                     continue;
                 }
-                $attribute->setAttributeCode('simple_product_' . $attributeCode);
+                $formAttribute = clone $attribute;
+                $formAttribute->setAttributeCode('simple_product_' . $attributeCode);
                 $element = $fieldset->addField(
                     'simple_product_' . $attributeCode,
                     $inputType,
@@ -74,7 +75,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Simple extends 
                         'name'     => $attributeCode,
                         'required' => $attribute->getIsRequired(),
                     ],
-                )->setEntityAttribute($attribute);
+                )->setEntityAttribute($formAttribute);
 
                 if (in_array($attributeCode, $attributesConfig['autogenerate'])) {
                     $element->setDisabled(true);
