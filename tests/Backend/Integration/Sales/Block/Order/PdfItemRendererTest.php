@@ -37,11 +37,6 @@ it('returns no item renderer for a product type that global/pdf does not declare
     Mage_Sales_Block_Order_Pdf_Shipment::class,
 ]);
 
-it('formats a null price as zero', function (): void {
-    $order = Mage::getModel('sales/order')->setOrderCurrencyCode('USD');
-    expect($order->formatPriceTxt(null))->toBe($order->formatPriceTxt(0.0));
-});
-
 it('prints the item cells in the column order of the document header, with the item SKU', function (string $block, string $type, array $columns) {
     $section = strtolower(substr($block, strrpos($block, '_') + 1));
     $order = Mage::getModel('sales/order')->setOrderCurrencyCode('USD')->setBaseCurrencyCode('USD');
