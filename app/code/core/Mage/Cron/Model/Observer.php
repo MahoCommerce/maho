@@ -279,26 +279,26 @@ class Mage_Cron_Model_Observer
             return $this;
         }
 
-        $history = Mage::getModel('cron/schedule')->getCollection()
-            ->addFieldToFilter('status', ['in' => [
-                Mage_Cron_Model_Schedule::STATUS_SUCCESS,
-                Mage_Cron_Model_Schedule::STATUS_MISSED,
-                Mage_Cron_Model_Schedule::STATUS_ERROR,
-            ]])
-            ->load();
-
-        $historyLifetimes = [
-            Mage_Cron_Model_Schedule::STATUS_SUCCESS => Mage::getStoreConfig(self::XML_PATH_HISTORY_SUCCESS) * 60,
-            Mage_Cron_Model_Schedule::STATUS_MISSED => Mage::getStoreConfig(self::XML_PATH_HISTORY_FAILURE) * 60,
-            Mage_Cron_Model_Schedule::STATUS_ERROR => Mage::getStoreConfig(self::XML_PATH_HISTORY_FAILURE) * 60,
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_write');
+        $table = $resource->getTableName('cron/schedule');
+        $locale = Mage::app()->getLocale();
+        $retention = [
+            self::XML_PATH_HISTORY_SUCCESS => [Mage_Cron_Model_Schedule::STATUS_SUCCESS],
+            self::XML_PATH_HISTORY_FAILURE => [Mage_Cron_Model_Schedule::STATUS_MISSED, Mage_Cron_Model_Schedule::STATUS_ERROR],
         ];
-
         $now = time();
-        foreach ($history->getIterator() as $record) {
-            $referenceTime = $record->getExecutedAt() ?: $record->getScheduledAt();
-            if ($referenceTime && strtotime($referenceTime) < $now - $historyLifetimes[$record->getStatus()]) {
-                $record->delete();
+        $earliestSqlDate = strtotime('1000-01-01 UTC');
+        foreach ($retention as $path => $statuses) {
+            $cutoff = $now - (int) Mage::getStoreConfig($path) * 60;
+            if ($cutoff < $earliestSqlDate) {
+                continue;
             }
+
+            $adapter->delete($table, [
+                'status IN (?)' => $statuses,
+                'COALESCE(executed_at, scheduled_at) < ?' => $locale->formatDateForDb($cutoff),
+            ]);
         }
 
         // save time history cleanup was ran with no expiration
