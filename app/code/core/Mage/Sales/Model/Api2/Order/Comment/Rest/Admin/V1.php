@@ -74,6 +74,12 @@ class Mage_Sales_Model_Api2_Order_Comment_Rest_Admin_V1 extends Mage_Sales_Model
             $this->_critical(self::RESOURCE_NOT_FOUND);
         }
 
+        $parentOrder = $this->_loadOrderById((int) $comment->getParentId());
+        $contextOrderId = (int) $this->getRequest()->getParam(self::PARAM_ORDER_CONTEXT_ID);
+        if ($contextOrderId && $contextOrderId !== (int) $parentOrder->getId()) {
+            $this->_critical(self::RESOURCE_NOT_FOUND);
+        }
+
         return $comment->getData();
     }
 }
