@@ -373,4 +373,24 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
     {
         return Mage::getStoreConfig(self::XML_PATH_CONTENT_DISPOSITION, $store);
     }
+
+    /**
+     * Build one RFC 6266 disposition parameter from the configured disposition and a download name.
+     */
+    public static function formatContentDisposition(string $disposition, string $filename): string
+    {
+        $type = strtolower(trim(explode(';', $disposition, 2)[0]));
+        $type = $type === \Symfony\Component\HttpFoundation\HeaderUtils::DISPOSITION_INLINE
+            ? \Symfony\Component\HttpFoundation\HeaderUtils::DISPOSITION_INLINE
+            : \Symfony\Component\HttpFoundation\HeaderUtils::DISPOSITION_ATTACHMENT;
+
+        $filename = basename(str_replace('\\', '/', $filename));
+        $filename = preg_replace('/[\x00-\x1F\x7F]/', '', $filename) ?? '';
+        $filename = trim($filename) !== '' ? $filename : 'download';
+        $fallback = preg_replace('/[^\x20-\x7E]/', '_', $filename) ?? '';
+        $fallback = str_replace(['%', '/', '\\'], '_', $fallback);
+        $fallback = trim($fallback) !== '' ? $fallback : 'download';
+
+        return \Symfony\Component\HttpFoundation\HeaderUtils::makeDisposition($type, $filename, $fallback);
+    }
 }
