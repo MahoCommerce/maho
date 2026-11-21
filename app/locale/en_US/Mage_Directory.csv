@@ -146,6 +146,7 @@
 "Two character ISO code (usually same as Country ID)","Two character ISO code (usually same as Country ID)"
 "Unable to calculate rate for %s to %s.","Unable to calculate rate for %s to %s."
 "Unable to initialize the import model.","Unable to initialize the import model."
+"Unable to store rate for %s to %s.","Unable to store rate for %s to %s."
 "Undefined rate from ""%s-%s"".","Undefined rate from ""%s-%s""."
 "Update existing regions and localized names","Update existing regions and localized names"
 "Your Currency","Your Currency"
