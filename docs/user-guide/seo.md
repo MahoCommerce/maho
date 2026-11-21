@@ -56,9 +56,9 @@ The layered-navigation controls below sit on top of this chain for category page
 
 ### Social sharing previews
 
-Under **System > Configuration > Catalog > Catalog > Social Sharing**, set **Enable Open Graph**
-to **Yes** for the store views where you want Maho to provide link preview metadata. The setting
-defaults to **No** so each theme or extension can continue to provide its own previews.
+Under **System > Configuration > Catalog > Catalog > Social Sharing**, select the configuration
+scope. Clear **Use Default** or **Use Website**, set **Enable Open Graph** to **Yes**, and save.
+The setting defaults to **No** so each theme or extension can continue to provide its own previews.
 
 Maho adds the page title, description, canonical URL, store name, language and a public image on
 indexable home, CMS, product and category pages. A product or category image takes precedence over
