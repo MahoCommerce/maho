@@ -272,7 +272,6 @@ it('applies a rule only on the dates when that rule is active', function (): voi
                 ->where('website_id = ?', (int) $website->getId())
                 ->where('customer_group_id = ?', 0),
         );
-        dump($prices);
         expect((float) $prices['2026-11-19'])->toBe(85.5)
             ->and((float) $prices['2026-11-20'])->toBe(85.5)
             ->and((float) $prices['2026-11-21'])->toBe(95.0);
