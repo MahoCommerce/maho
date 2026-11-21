@@ -188,7 +188,10 @@ class Vendor_MyModule_Checkout_CartController extends Mage_Checkout_CartControll
 
 ### Legacy XML chain (back-compatibility)
 
-Magento 1's "module chain" override declared in `config.xml` still works, and **wins over the compiled inheritance override**, so existing modules behave identically until you choose to migrate.
+Magento 1's "module chain" override declared in `config.xml` still works and **wins over the compiled inheritance override**.
+
+Composer autoloads the parent controller. Remove legacy `require_once` calls that build the path to a core controller with
+`Mage::getModuleDir('controllers', ...)`. That method builds a path in the project. Composer installs the core under `vendor/`.
 
 **Admin** - register your module under the admin chain and ship a subclass with the same controller name:
 
