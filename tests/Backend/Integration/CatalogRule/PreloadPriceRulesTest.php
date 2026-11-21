@@ -83,6 +83,7 @@ it('reloads preloaded prices when the same quote changes customer group', functi
     $event->setQuote($quote);
     $observer = new Maho\Event\Observer();
     $observer->setEvent($event);
+    $observer->setQuote($quote);
     $catalogRuleObserver = Mage::getSingleton('catalogrule/observer');
     $priceCache = new ReflectionProperty($catalogRuleObserver, '_rulePrices');
 

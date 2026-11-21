@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-function runCurrencyCronBackend(mixed $time, int $frequency = 1): Mage_Adminhtml_Model_System_Config_Backend_Currency_Cron
+function runCurrencyCronBackend(mixed $time, int|string $frequency = 1): Mage_Adminhtml_Model_System_Config_Backend_Currency_Cron
 {
     $model = Mage::getModel('adminhtml/system_config_backend_currency_cron');
     $model->setData('groups/import/fields/time/value', $time);
