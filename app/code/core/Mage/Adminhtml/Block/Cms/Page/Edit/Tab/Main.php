@@ -37,6 +37,9 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Main extends Mage_Adminhtml_Block_W
             $fieldset->addField('page_id', 'hidden', [
                 'name' => 'page_id',
             ]);
+            $fieldset->addField(Mage_Cms_Model_Page::EDIT_REVISION, 'hidden', [
+                'name' => Mage_Cms_Model_Page::EDIT_REVISION,
+            ]);
         }
 
         $fieldset->addField('title', 'text', [
