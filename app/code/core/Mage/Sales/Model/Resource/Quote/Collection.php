@@ -17,4 +17,25 @@ class Mage_Sales_Model_Resource_Quote_Collection extends Mage_Core_Model_Resourc
     {
         $this->_init('sales/quote');
     }
+
+    #[\Override]
+    protected function _afterLoad()
+    {
+        foreach ($this->_items as $quote) {
+            if ($quote instanceof Mage_Sales_Model_Quote) {
+                $quote->rememberLoadedCheckoutFields();
+            }
+        }
+        return parent::_afterLoad();
+    }
+
+    #[\Override]
+    public function fetchItem()
+    {
+        $quote = parent::fetchItem();
+        if ($quote instanceof Mage_Sales_Model_Quote) {
+            $quote->rememberLoadedCheckoutFields();
+        }
+        return $quote;
+    }
 }

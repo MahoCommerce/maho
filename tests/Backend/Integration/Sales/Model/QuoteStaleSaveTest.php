@@ -78,6 +78,21 @@ it('allows a quote adapter to keep a previously loaded cart active', function ()
         ->and($stored->getReservedOrderId())->toBe($order->getIncrementId());
 });
 
+it('preserves newer checkout fields on a cart loaded from a collection', function (bool $streamed): void {
+    $quoteId = $this->quote->getId();
+    $collection = Mage::getResourceModel('sales/quote_collection');
+    $collection->getSelect()->where('main_table.entity_id = ?', $quoteId);
+    $loaded = $streamed ? $collection->fetchItem() : $collection->getFirstItem();
+
+    $this->quote->setIsActive(false)->setReservedOrderId('example-order')->save();
+    $loaded->setCustomerNote('Example note')->save();
+
+    $stored = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+    expect($stored->getIsActive())->toBeFalse()
+        ->and($stored->getReservedOrderId())->toBe('example-order')
+        ->and($stored->getCustomerNote())->toBe('Example note');
+})->with(['collection' => [false], 'streamed collection' => [true]]);
+
 it('closes and reopens a loaded cart and clears its reservation on the second save', function (): void {
     $quoteId = (int) $this->quote->getId();
     $loaded = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
