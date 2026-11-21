@@ -10,6 +10,9 @@
 
 class Mage_Usa_Model_Shipping_Carrier_UpsAuth extends Mage_Usa_Model_Shipping_Carrier_Abstract implements Mage_Shipping_Model_Carrier_Interface
 {
+    #[\Override]
+    protected $_code = 'ups';
+
     /**
      * Cache key prefix for UPS API token
      */

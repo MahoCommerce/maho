@@ -1675,7 +1675,9 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         } else {
             $authUrl = $this->_defaultUrls['AuthUrl'];
         }
-        return Mage::getModel('usa/shipping_carrier_upsAuth')->getAccessToken($userId, $userIdPass, $authUrl);
+        return Mage::getModel('usa/shipping_carrier_upsAuth')
+            ->setStore($this->getStore())
+            ->getAccessToken($userId, $userIdPass, $authUrl);
     }
 
     /**
