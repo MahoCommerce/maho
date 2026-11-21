@@ -109,11 +109,13 @@ class Mage_Dataflow_Model_Convert_Profile_Collection
         if (!$this->_xml) {
             return $this;
         }
-        $nodes = $this->_xml->xpath("//profile[@name='" . $name . "']");
-        if (!$nodes) {
+        $profileNode = array_find(
+            $this->_xml->xpath('//profile') ?: [],
+            static fn($node): bool => (string) $node['name'] === $name,
+        );
+        if ($profileNode === null) {
             return $this;
         }
-        $profileNode = $nodes[0];
 
         $profile = $this->addProfile($name);
         $profile->setContainers($this->getContainers());

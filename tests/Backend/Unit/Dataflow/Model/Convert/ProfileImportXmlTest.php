@@ -23,3 +23,13 @@ describe('Mage_Dataflow_Model_Convert_Profile_Abstract::importXml', function () 
             ->and($container->getAction()->getParam('method'))->toBe('parse');
     });
 });
+
+it('finds a profile whose name contains both quote types', function (): void {
+    $profiles = new Mage_Dataflow_Model_Convert_Profile_Collection();
+    $profiles->importXml(new Maho\Simplexml\Element(
+        '<config><profile name="O&apos;Brien &quot;VIP&quot;"></profile></config>',
+    ));
+
+    expect($profiles->getProfile('O\'Brien "VIP"'))->not->toBeNull()
+        ->and($profiles->getProfile('missing'))->toBeNull();
+});

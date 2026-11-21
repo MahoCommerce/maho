@@ -53,7 +53,7 @@ class Mage_Dataflow_Model_Resource_Import extends Mage_Core_Model_Resource_Db_Ab
         $select = $read->select()
             ->from($this->getTable('dataflow/import'))
             ->where('import_id >= :min_id')
-            ->where('import_id >= :max_id')
+            ->where('import_id <= :max_id')
             ->where('status= :status')
             ->where('session_id = :session_id');
         return $read->fetchAll($select, $bind);
@@ -78,7 +78,7 @@ class Mage_Dataflow_Model_Resource_Import extends Mage_Core_Model_Resource_Db_Ab
                 ['max' => 'max(import_id)', 'min' => 'min(import_id)', 'cnt' => 'count(*)'],
             )
             ->where('status = :status')
-            ->where('session_id = :$session_id');
+            ->where('session_id = :session_id');
         return $read->fetchRow($select, $bind);
     }
 
