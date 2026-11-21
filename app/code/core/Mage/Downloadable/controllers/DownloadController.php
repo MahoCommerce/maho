@@ -65,7 +65,7 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
         if ($contentDisposition = $helper->getContentDisposition()) {
             $this->getResponse()->setHeader(
                 'Content-Disposition',
-                Mage_Downloadable_Helper_Download::formatContentDisposition($contentDisposition, (string) $fileName),
+                Mage_Downloadable_Helper_Download::formatContentDisposition((string) $contentDisposition, (string) $fileName),
             );
         }
 
