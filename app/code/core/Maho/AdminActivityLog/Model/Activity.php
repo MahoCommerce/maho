@@ -43,12 +43,12 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
             $this->setActionGroupId($data['action_group_id']);
         }
 
-        $helper = Mage::helper('core');
+        $jsonFlags = JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_SUBSTITUTE;
         if (isset($data['old_data']) && is_array($data['old_data'])) {
-            $data['old_data'] = $helper->jsonEncode($data['old_data']);
+            $data['old_data'] = json_encode($data['old_data'], $jsonFlags);
         }
         if (isset($data['new_data']) && is_array($data['new_data'])) {
-            $data['new_data'] = $helper->jsonEncode($data['new_data']);
+            $data['new_data'] = json_encode($data['new_data'], $jsonFlags);
         }
 
         $this->setData($data);
