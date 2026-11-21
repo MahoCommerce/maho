@@ -295,10 +295,17 @@ class Mage_Cron_Model_Observer
             self::XML_PATH_HISTORY_SUCCESS => [Mage_Cron_Model_Schedule::STATUS_SUCCESS],
             self::XML_PATH_HISTORY_FAILURE => [Mage_Cron_Model_Schedule::STATUS_MISSED, Mage_Cron_Model_Schedule::STATUS_ERROR],
         ];
+        $now = time();
+        $earliestSqlDate = strtotime('1000-01-01 UTC');
         foreach ($retention as $path => $statuses) {
+            $cutoff = $now - (int) Mage::getStoreConfig($path) * 60;
+            if ($cutoff < $earliestSqlDate) {
+                continue;
+            }
+
             $adapter->delete($table, [
                 'status IN (?)' => $statuses,
-                'COALESCE(executed_at, scheduled_at) < ?' => $locale->formatDateForDb(time() - (int) Mage::getStoreConfig($path) * 60),
+                'COALESCE(executed_at, scheduled_at) < ?' => $locale->formatDateForDb($cutoff),
             ]);
         }
 
