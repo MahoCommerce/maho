@@ -96,7 +96,37 @@ class Maho_Paypal_Model_Webhook_Processor
         try {
             $event->save();
         } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException) {
-            return null;
+            /** @var Maho_Paypal_Model_Webhook_Event $existing */
+            $existing = Mage::getModel('paypal/webhook_event')->load($payload['id'], 'paypal_event_id');
+            $status = (string) $existing->getStatus();
+            if (!$existing->getId() || in_array($status, ['processed', 'skipped', 'processing'], true)) {
+                return null;
+            }
+
+            $data = [
+                'event_type'      => $payload['event_type'],
+                'resource_type'   => $payload['resource_type'] ?? null,
+                'resource_id'     => $payload['resource']['id'] ?? null,
+                'summary'         => $payload['summary'] ?? null,
+                'status'          => 'processing',
+                'payload'         => Mage::helper('core')->jsonEncode($payload),
+                'error_message'   => null,
+                'processed_at'    => null,
+            ];
+            $updated = Mage::getSingleton('core/resource')->getConnection('core_write')->update(
+                $existing->getResource()->getMainTable(),
+                $data,
+                [
+                    'event_id = ?' => (int) $existing->getId(),
+                    'status = ?'   => $status,
+                ],
+            );
+            if ($updated !== 1) {
+                return null;
+            }
+
+            $existing->addData($data);
+            return $existing;
         }
 
         return $event;
