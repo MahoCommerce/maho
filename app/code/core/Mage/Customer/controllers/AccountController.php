@@ -140,13 +140,16 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 
         if ($this->getRequest()->isPost()) {
             $login = $this->getRequest()->getPost('login');
-            if (!empty($login['username']) && !empty($login['password'])) {
+            $login = is_array($login) ? $login : [];
+            $username = is_string($login['username'] ?? null) ? $login['username'] : '';
+            $password = is_string($login['password'] ?? null) ? $login['password'] : '';
+            if ($username !== '' && $password !== '') {
                 try {
                     $customer = $this->getAuthentication()->authenticate(
-                        (string) $login['username'],
-                        (string) $login['password'],
+                        $username,
+                        $password,
                         (int) Mage::app()->getStore()->getWebsiteId(),
-                        isset($login['twofa_verification_code']) ? (string) $login['twofa_verification_code'] : null,
+                        is_string($login['twofa_verification_code'] ?? null) ? $login['twofa_verification_code'] : null,
                     );
                     $session->setRememberMe((bool) $this->getRequest()->getPost('remember_me'))
                             ->setCustomerAsLoggedIn($customer);
@@ -161,13 +164,13 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                             $helper->__('This account is not confirmed. %s to resend confirmation email.'),
                             new \Maho\Message\Link(
                                 $helper->__('Click here'),
-                                $helper->getEmailConfirmationUrl($login['username']),
+                                $helper->getEmailConfirmationUrl($username),
                             ),
                         );
                     } else {
                         $session->addError($e->getMessage());
                     }
-                    $session->setUsername($login['username']);
+                    $session->setUsername($username);
                 } catch (Exception) {
                     // Mage::logException($e); // PA DSS violation: this exception log can disclose customer password
                 }
@@ -195,11 +198,14 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 
         $session = $this->_getSession();
         $login = $this->getRequest()->getPost('login');
+        $login = is_array($login) ? $login : [];
+        $username = is_string($login['username'] ?? null) ? $login['username'] : '';
+        $password = is_string($login['password'] ?? null) ? $login['password'] : '';
         if (!$session->isLoggedIn() && Mage::getStoreConfigFlag('customer/password/allow_2fa')
-            && !empty($login['username']) && !empty($login['password'])
+            && $username !== '' && $password !== ''
         ) {
             try {
-                $this->getAuthentication()->authenticate((string) $login['username'], (string) $login['password'], (int) Mage::app()->getStore()->getWebsiteId());
+                $this->getAuthentication()->authenticate($username, $password, (int) Mage::app()->getStore()->getWebsiteId());
             } catch (Mage_Customer_Exception_SecondFactorRequired) {
                 $result['require_twofa'] = true;
             } catch (Exception) {
