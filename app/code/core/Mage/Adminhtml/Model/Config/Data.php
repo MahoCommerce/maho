@@ -73,28 +73,8 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
         $oldConfigAdditionalGroups = [];
 
         foreach ($groups as $group => $groupData) {
-            /**
-             * Map field names if they were cloned
-             */
             $groupConfig = $sections->descend($section . '/groups/' . $group);
-
-            if ($clonedFields = !empty($groupConfig->clone_fields)) {
-                if ($groupConfig->clone_model) {
-                    $cloneModel = Mage::getModel((string) $groupConfig->clone_model);
-                } else {
-                    Mage::throwException('Config form fieldset clone model required to be able to clone fields');
-                }
-                $mappedFields = [];
-                $fieldsConfig = $sections->descend($section . '/groups/' . $group . '/fields');
-
-                if ($fieldsConfig->hasChildren()) {
-                    foreach ($fieldsConfig->children() as $field => $node) {
-                        foreach ($cloneModel->getPrefixes() as $prefix) {
-                            $mappedFields[$prefix['field'] . (string) $field] = (string) $field;
-                        }
-                    }
-                }
-            }
+            $mappedFields = $this->getClonedFieldMap($groupConfig);
             // set value for group field entry by fieldname
             // use extra memory
             $fieldsetData = [];
@@ -107,7 +87,7 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
             foreach ($groupData['fields'] as $field => $fieldData) {
                 $field = ltrim($field, '/');
                 $fieldConfig = $sections->descend($section . '/groups/' . $group . '/fields/' . $field);
-                if (!$fieldConfig && $clonedFields && isset($mappedFields[$field])) {
+                if (!$fieldConfig && isset($mappedFields[$field])) {
                     $fieldConfig = $sections->descend($section . '/groups/' . $group . '/fields/'
                         . $mappedFields[$field]);
                 }
@@ -473,24 +453,15 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
         $sections = Mage::getModel('adminhtml/config')->getSections();
 
         foreach ($groups as $group => $groupData) {
-            $groupConfig = $sections->descend($section . '/groups/' . $group);
+            $groupPath = $section . '/groups/' . $group;
+            $groupConfig = $sections->descend($groupPath);
+            $mappedFields = null;
             foreach ($groupData['fields'] as $field => $fieldData) {
-                $fieldName = $field;
-                if ($groupConfig && $groupConfig->clone_fields) {
-                    if ($groupConfig->clone_model) {
-                        $cloneModel = Mage::getModel((string) $groupConfig->clone_model);
-                    } else {
-                        Mage::throwException(
-                            Mage::helper('adminhtml')->__('Config form fieldset clone model required to be able to clone fields'),
-                        );
-                    }
-                    foreach ($cloneModel->getPrefixes() as $prefix) {
-                        if (str_starts_with($field, $prefix['field'])) {
-                            $field = substr($field, strlen($prefix['field']));
-                        }
-                    }
+                $mappedFields ??= $this->getClonedFieldMap($groupConfig);
+                $fieldConfig = $sections->descend($groupPath . '/fields/' . $field);
+                if (!$fieldConfig && isset($mappedFields[$field])) {
+                    $fieldConfig = $sections->descend($groupPath . '/fields/' . $mappedFields[$field]);
                 }
-                $fieldConfig = $sections->descend($section . '/groups/' . $group . '/fields/' . $field);
                 if (!$fieldConfig) {
                     $node = $sections->xpath($section . '//' . $group . '[@type="group"]/fields/' . $field);
                     if ($node) {
@@ -501,13 +472,39 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
                     $message = Mage::helper('adminhtml')->__('Wrong field specified.') . ' ' . Mage::helper('adminhtml')->__('(%s/%s/%s)', $section, $group, $field);
                     Mage::throwException($message);
                 }
-                $groupsSecure[$group]['fields'][$fieldName] = $fieldData;
+                $groupsSecure[$group]['fields'][$field] = $fieldData;
             }
         }
 
         $this->setGroups($groupsSecure);
 
         return $this;
+    }
+
+    /** @return array<string, string> */
+    private function getClonedFieldMap(\Maho\Simplexml\Element|false $groupConfig): array
+    {
+        if (!$groupConfig || !$groupConfig->clone_fields) {
+            return [];
+        }
+        if (!$groupConfig->clone_model) {
+            Mage::throwException(
+                Mage::helper('adminhtml')->__('Config form fieldset clone model required to be able to clone fields'),
+            );
+        }
+
+        $mappedFields = [];
+        $fieldsConfig = $groupConfig->descend('fields');
+        if ($fieldsConfig) {
+            $prefixes = Mage::getModel((string) $groupConfig->clone_model)->getPrefixes();
+            foreach ($fieldsConfig->children() as $field) {
+                $fieldName = $field->getName();
+                foreach ($prefixes as $prefix) {
+                    $mappedFields[$prefix['field'] . $fieldName] = $fieldName;
+                }
+            }
+        }
+        return $mappedFields;
     }
 
     /**
