@@ -13,18 +13,19 @@ uses(Tests\MahoBackendTestCase::class);
 class CartMoveAtomicQuote extends Mage_Sales_Model_Quote
 {
     public static ?int $failQuoteId = null;
+    public static ?Throwable $failure = null;
 
     #[\Override]
     public function save()
     {
-        if (self::$failQuoteId !== null && self::$failQuoteId === (int) $this->getId()) {
-            throw new RuntimeException('Source quote save failed.');
+        if (self::$failure !== null && self::$failQuoteId === (int) $this->getId()) {
+            throw self::$failure;
         }
         return parent::save();
     }
 }
 
-it('rolls back the target cart when the source cart save fails', function (): void {
+it('rolls back the target cart when the source cart save fails', function (Throwable $failure, string $errorMessage): void {
     $config = Mage::getConfig();
     $config->setNode('global/models/sales/rewrite/quote', CartMoveAtomicQuote::class);
     CartMoveAtomicQuote::$failQuoteId = null;
@@ -59,6 +60,8 @@ it('rolls back the target cart when the source cart save fails', function (): vo
     $targetId = (int) $target->getId();
     try {
         CartMoveAtomicQuote::$failQuoteId = $sourceId;
+        CartMoveAtomicQuote::$failure = $failure;
+        $resource = $source->getResource();
 
         try {
             (new Mage_Checkout_Model_Cart_Product_Api())->moveToCustomerQuote(
@@ -67,7 +70,7 @@ it('rolls back the target cart when the source cart save fails', function (): vo
                 1,
             );
             $error = null;
-        } catch (Mage_Api_Exception $e) {
+        } catch (Mage_Api_Exception|Error $e) {
             $error = $e->getMessage();
         }
 
@@ -78,14 +81,23 @@ it('rolls back the target cart when the source cart save fails', function (): vo
             $quote->getAllVisibleItems(),
         );
 
-        expect($error)->toBe('product_move_quote_save_fault')
+        expect($error)->toBe($errorMessage)
+            ->and($resource->getReadConnection()->getTransactionLevel())->toBe(0)
             ->and($itemProductIds($reloadedTarget))->toBe([])
             ->and($itemProductIds($reloadedSource))->toBe([$productId]);
     } finally {
         CartMoveAtomicQuote::$failQuoteId = null;
+        CartMoveAtomicQuote::$failure = null;
+        $resource = $source->getResource();
+        while ($resource->getReadConnection()->getTransactionLevel() > 0) {
+            $resource->rollBack();
+        }
         $config->setNode('global/models/sales/rewrite/quote', '');
         Mage::getModel('sales/quote')->load($targetId)->delete();
         Mage::getModel('sales/quote')->load($sourceId)->delete();
         $customer->delete();
     }
-});
+})->with([
+    'exception' => [new RuntimeException('Source quote save failed.'), 'product_move_quote_save_fault'],
+    'error' => [new Error('Source quote save failed.'), 'Source quote save failed.'],
+]);
