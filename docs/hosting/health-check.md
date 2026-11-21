@@ -135,6 +135,22 @@ Some details that change what the numbers mean:
   shared database are left alone.
 - The command refuses to run inside an open transaction, since no backend can rebuild a table in one.
 
+## Restore missing bundle option titles
+
+Maho 26.11.0 through 26.11.3 could remove default bundle option titles when an option was saved. After upgrading to a release with the fixes, restore the original titles from a backup if you have one. If a store view has titles that also work as defaults, use its code to preview a repair. This example uses the `default` store view.
+
+```bash
+./maho legacy:fix-bundle-option-titles default
+```
+
+Review the option IDs before applying the repair. You can repeat `--option=ID` to limit the repair to selected options. Use `--force` to apply it. The command fills missing or blank default titles and preserves store-view titles. It lists options with no title in the chosen view so you can review them in the admin.
+
+If search was reindexed while titles were missing, rebuild the search index after the repair.
+
+```bash
+./maho index:reindex catalogsearch_fulltext
+```
+
 ## Automate it
 
 The CLI exits with a non-zero code when a check fails, so it fits a cron job or a monitoring probe:
