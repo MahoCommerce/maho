@@ -22,4 +22,9 @@ class Mage_Install_Block_Complete extends Mage_Install_Block_Abstract
     {
         return Mage::getSingleton('install/session')->getLanguagePackCommand() ?: null;
     }
+
+    public function getLocalConfigChmodCommand(): ?string
+    {
+        return Mage::helper('install')->getLocalConfigChmodCommand();
+    }
 }
