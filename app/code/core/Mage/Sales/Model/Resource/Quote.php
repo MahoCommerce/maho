@@ -10,10 +10,80 @@
 
 class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
 {
+    /** @var array<int, array<string, mixed>> */
+    private array $checkoutFieldWrites = [];
+
     #[\Override]
     protected function _construct(): void
     {
         $this->_init('sales/quote', 'entity_id');
+    }
+
+    #[\Override]
+    public function save(Mage_Core_Model_Abstract $object)
+    {
+        if (!$object instanceof Mage_Sales_Model_Quote) {
+            return parent::save($object);
+        }
+
+        $key = spl_object_id($object);
+        $outerWrite = $this->checkoutFieldWrites[$key] ?? null;
+        $this->checkoutFieldWrites[$key] = [];
+        try {
+            $result = parent::save($object);
+            $saved = $this->checkoutFieldWrites[$key];
+        } finally {
+            if ($outerWrite === null) {
+                unset($this->checkoutFieldWrites[$key]);
+            } else {
+                $this->checkoutFieldWrites[$key] = $outerWrite;
+            }
+        }
+
+        if ($saved === []) {
+            return $result;
+        }
+
+        $adapter = $this->_getWriteAdapter();
+        if ($adapter->getTransactionLevel() === 0) {
+            $object->rememberSavedCheckoutFields($saved);
+        } elseif ($adapter instanceof \Maho\Db\Adapter\AbstractPdoAdapter) {
+            $adapter->afterTransactionRollback($object->getCheckoutFieldsRollback());
+            $object->rememberSavedCheckoutFields($saved);
+        } else {
+            $id = $object->getId();
+            $this->addCommitCallback(static function () use ($object, $saved, $id): void {
+                if ($object->getId() === $id) {
+                    $object->rememberSavedCheckoutFields($saved);
+                }
+            });
+        }
+        return $result;
+    }
+
+    #[\Override]
+    protected function _prepareDataForSave(Mage_Core_Model_Abstract $object)
+    {
+        $data = parent::_prepareDataForSave($object);
+        if ($object instanceof Mage_Sales_Model_Quote) {
+            $changed = $object->getCheckoutFieldsForSave();
+            $unchanged = array_diff_key(Mage_Sales_Model_Quote::CHECKOUT_FIELDS, $changed);
+            $data = array_diff_key($data, $unchanged);
+            $key = spl_object_id($object);
+            if (isset($this->checkoutFieldWrites[$key])) {
+                $this->checkoutFieldWrites[$key] = array_intersect_key($changed, $data);
+            }
+        }
+        return $data;
+    }
+
+    #[\Override]
+    protected function _afterLoad(Mage_Core_Model_Abstract $object)
+    {
+        if ($object instanceof Mage_Sales_Model_Quote) {
+            $object->rememberLoadedCheckoutFields();
+        }
+        return parent::_afterLoad($object);
     }
 
     /**

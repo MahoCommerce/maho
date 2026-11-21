@@ -86,6 +86,16 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      */
     protected $_preventSaving = false;
 
+    public const array CHECKOUT_FIELDS = ['is_active' => true, 'reserved_order_id' => true];
+
+    /** @var array<string, true> */
+    private array $checkoutFieldAssignments = [];
+
+    /** @var array<string, mixed> */
+    private array $savedCheckoutFields = [];
+
+    private int $checkoutLoadVersion = 0;
+
     /**
      * Init resource model
      */
@@ -1819,6 +1829,62 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
             return $this;
         }
         return parent::save();
+    }
+
+    #[\Override]
+    public function setData($key, $value = null)
+    {
+        if (is_array($key)) {
+            $this->checkoutFieldAssignments = array_intersect_key(self::CHECKOUT_FIELDS, $key);
+        } elseif (is_string($key) && isset(self::CHECKOUT_FIELDS[$key])) {
+            $this->checkoutFieldAssignments[$key] = true;
+        }
+        return parent::setData($key, $value);
+    }
+
+    public function rememberLoadedCheckoutFields(): void
+    {
+        $this->checkoutLoadVersion++;
+        $this->checkoutFieldAssignments = [];
+        $this->savedCheckoutFields = array_intersect_key($this->getData(), self::CHECKOUT_FIELDS);
+    }
+
+    /** @return array<string, mixed> */
+    public function getCheckoutFieldsForSave(): array
+    {
+        $previous = $this->savedCheckoutFields + ($this->getOrigData() ?? []);
+        $fields = array_intersect_key($this->getData(), self::CHECKOUT_FIELDS);
+        return array_filter($fields, fn(mixed $value, string $field): bool
+            => isset($this->checkoutFieldAssignments[$field])
+            || !array_key_exists($field, $previous)
+            || $value !== $previous[$field], ARRAY_FILTER_USE_BOTH);
+    }
+
+    /** @param array<string, mixed> $fields */
+    public function rememberSavedCheckoutFields(array $fields): void
+    {
+        foreach ($fields as $field => $value) {
+            $this->savedCheckoutFields[$field] = $value;
+            if ($this->getData($field) === $value) {
+                unset($this->checkoutFieldAssignments[$field]);
+            }
+        }
+    }
+
+    public function getCheckoutFieldsRollback(): Closure
+    {
+        $id = $this->getId();
+        $loadVersion = $this->checkoutLoadVersion;
+        $savedFields = $this->savedCheckoutFields;
+        $assignments = $this->checkoutFieldAssignments;
+
+        return function () use ($id, $loadVersion, $savedFields, $assignments): void {
+            if ($this->getId() === $id && $this->checkoutLoadVersion === $loadVersion) {
+                $this->savedCheckoutFields = $savedFields;
+                $this->checkoutFieldAssignments += $assignments;
+                $this->setDataChanges(true);
+            }
+        };
     }
 
     public function getCouponCode(): string
