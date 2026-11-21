@@ -47,27 +47,23 @@ class Mage_Rule_Model_Condition_Metadata
         $appLocale = $app->getLocale();
         $translator = $app->getTranslator();
         $previousLocale = $appLocale->getLocaleCode();
-        $previousArea = $translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA);
-        $previousTranslatorLocale = $translator->getLocale();
+        $translatorState = $translator->getState();
         $previousFlag = Mage_Rule_Model_Condition_Abstract::getTranslateLabels();
-        $switch = $previousArea !== Mage_Core_Model_App_Area::AREA_ADMINHTML || $previousTranslatorLocale !== $locale;
-
-        $appLocale->setLocaleCode($locale);
-        if ($switch) {
-            $translator->setLocale($locale)->init(Mage_Core_Model_App_Area::AREA_ADMINHTML);
-        }
-        Mage_Rule_Model_Condition_Abstract::setTranslateLabels(true);
+        $switch = $translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA) !== Mage_Core_Model_App_Area::AREA_ADMINHTML
+            || $translator->getLocale() !== $locale;
 
         try {
+            $appLocale->setLocaleCode($locale);
+            if ($switch) {
+                $translator->setLocale($locale)->init(Mage_Core_Model_App_Area::AREA_ADMINHTML);
+            }
+            Mage_Rule_Model_Condition_Abstract::setTranslateLabels(true);
             return $app->withStore(Mage_Core_Model_App::ADMIN_STORE_ID, $callback);
         } finally {
             Mage_Rule_Model_Condition_Abstract::setTranslateLabels($previousFlag);
             $appLocale->setLocaleCode($previousLocale);
             if ($switch) {
-                $translator->setLocale($previousTranslatorLocale);
-                if (is_string($previousArea)) {
-                    $translator->init($previousArea);
-                }
+                $translator->setState($translatorState);
             }
         }
     }

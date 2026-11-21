@@ -95,6 +95,13 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      */
     protected $_emulatedLocales = [];
 
+    /**
+     * The translator state before each emulate(), null for an emulate() that changed nothing
+     *
+     * @var list<Mage_Core_Model_Translate_State|null>
+     */
+    private array $emulatedTranslatorStates = [];
+
     protected static array $_currencyCache = [];
     /** @var NumberFormatter[] */
     protected static $_numberFormatterCache = [];
@@ -1120,31 +1127,67 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     }
 
     /**
-     * Push current locale to stack and replace with locale from specified store
-     * Event is not dispatched.
+     * Run $callback with the locale of the store $store, and with the translations of that locale in the area that the
+     * translator uses. Then put back the locale and the translations of the caller, also when $callback throws.
+     * The current store does not change: Mage_Core_Model_App::emulate() changes the store, the design and the locale.
+     *
+     * @template T
+     * @param \Closure(): T $callback
+     * @return T
      */
-    public function emulate(mixed $store): void
+    public function withStoreLocale(int|string|Mage_Core_Model_Store $store, \Closure $callback): mixed
     {
-        if ($store) {
-            $this->_emulatedLocales[] = $this->getLocaleCode();
-            $storeId = $store instanceof Mage_Core_Model_Store ? $store->getId() : $store;
-            $this->_localeCode = Mage::getStoreConfig(self::XML_PATH_DEFAULT_LOCALE, $storeId);
-            Mage::getSingleton('core/translate')
-                ->setLocale($this->_localeCode)
-                ->init(Mage_Core_Model_App_Area::AREA_FRONTEND);
-        } else {
-            $this->_emulatedLocales[] = false;
+        $localeCode = (string) Mage::getStoreConfig(self::XML_PATH_DEFAULT_LOCALE, $store);
+        $previousLocaleCode = $this->getLocaleCode();
+        if ($localeCode === $previousLocaleCode) {
+            return $callback();
+        }
+
+        $translator = Mage::app()->getTranslator();
+        $translatorState = $translator->getState();
+        $area = $translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA) ?? Mage_Core_Model_App_Area::AREA_FRONTEND;
+        $this->_localeCode = $localeCode;
+        try {
+            $translator->setLocale($localeCode)->init($area);
+            return $callback();
+        } finally {
+            $this->_localeCode = $previousLocaleCode;
+            $translator->setState($translatorState);
         }
     }
 
     /**
-     * Get last locale, used before last emulation
+     * Push current locale to stack and replace with locale from specified store
+     * Event is not dispatched.
      */
+    #[\Deprecated(message: 'use withStoreLocale()', since: '27.1')]
+    public function emulate(mixed $store): void
+    {
+        if ($store) {
+            $translator = Mage::app()->getTranslator();
+            $this->_emulatedLocales[] = $this->getLocaleCode();
+            $this->emulatedTranslatorStates[] = $translator->getState();
+            $storeId = $store instanceof Mage_Core_Model_Store ? $store->getId() : $store;
+            $this->_localeCode = Mage::getStoreConfig(self::XML_PATH_DEFAULT_LOCALE, $storeId);
+            $translator->setLocale($this->_localeCode)->init(Mage_Core_Model_App_Area::AREA_FRONTEND);
+        } else {
+            $this->_emulatedLocales[] = false;
+            $this->emulatedTranslatorStates[] = null;
+        }
+    }
+
+    /**
+     * Put back the locale and the translations that the last emulate() replaced
+     */
+    #[\Deprecated(message: 'use withStoreLocale()', since: '27.1')]
     public function revert(): void
     {
+        $translatorState = array_pop($this->emulatedTranslatorStates);
         if ($locale = array_pop($this->_emulatedLocales)) {
             $this->_localeCode = $locale;
-            Mage::getSingleton('core/translate')->setLocale($this->_localeCode)->init(Mage_Core_Model_App_Area::AREA_ADMINHTML);
+            if ($translatorState !== null) {
+                Mage::app()->getTranslator()->setState($translatorState);
+            }
         }
     }
 
