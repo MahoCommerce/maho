@@ -40,6 +40,9 @@ SPDX-License-Identifier: AFL-3.0
     </frontend>
     <default>
         <catalog>
+            <social_sharing>
+                <open_graph_enabled>0</open_graph_enabled>
+            </social_sharing>
             <structured_data>
                 <enabled>1</enabled>
                 <product>
