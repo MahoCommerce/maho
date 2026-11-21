@@ -75,8 +75,9 @@ abstract class Mage_Sitemap_Model_Resource_Catalog_Abstract extends Mage_Core_Mo
         $storeOrder = new \Maho\Db\Expr(
             'CASE WHEN store_id = ' . (int) $storeId . ' THEN 0 WHEN store_id = 0 THEN 1 ELSE 2 END',
         );
+        $attributeTable = $this->getTable([$this->_mainTable, 'varchar']);
         $select = $read->select()
-            ->from(['attr' => $this->_attributeEntityType . '_entity_varchar'], ['entity_id', 'attribute_id', 'value', 'store_id'])
+            ->from(['attr' => $attributeTable], ['entity_id', 'attribute_id', 'value', 'store_id'])
             ->where('attr.entity_id IN (?)', $entityIds)
             ->where('attr.attribute_id IN (?)', array_keys($attributeMap))
             ->where('attr.store_id IN (?)', [0, $storeId])

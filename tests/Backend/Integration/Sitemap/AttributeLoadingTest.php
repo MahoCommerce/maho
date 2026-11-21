@@ -101,8 +101,10 @@ it('preserves sitemap attribute fallback and ordered entity keys', function (str
     'category default store' => ['category', true],
 ]);
 
-it('reads the attribute rows without fetchAll', function (string $class): void {
-    $connection = Mage::getSingleton('core/resource')->getConnection('core_read');
+it('reads from the mapped attribute table without fetchAll', function (string $class): void {
+    $resource = Mage::getSingleton('core/resource');
+    $connection = $resource->getConnection('core_read');
+    $resource->setMappedTableName('catalog_' . $class . '_entity', 'sitemap_test_entity');
     $adapter = $this->createMock(Maho\Db\Adapter\AdapterInterface::class);
     foreach (new ReflectionClass(Maho\Db\Adapter\AdapterInterface::class)->getMethods() as $method) {
         if (!in_array($method->getName(), ['fetchAll', 'query'], true)) {
@@ -115,7 +117,9 @@ it('reads the attribute rows without fetchAll', function (string $class): void {
     $statement->method('fetchAll')->willThrowException(new LogicException('fetchAll'));
     $rows = [['entity_id' => 5, 'attribute_id' => $attributeId, 'value' => 'Name', 'store_id' => 0]];
     $statement->expects($this->exactly(2))->method('fetch')->willReturn($rows[0], false);
-    $adapter->method('query')->willReturn($statement);
+    $adapter->expects($this->once())->method('query')->with($this->callback(
+        fn(Maho\Db\Select $select): bool => $select->getPart(Maho\Db\Select::FROM)['attr']['tableName'] === 'sitemap_test_entity_varchar',
+    ))->willReturn($statement);
     $subclass = $class === 'product'
         ? new class ($adapter) extends Mage_Sitemap_Model_Resource_Catalog_Product {
             public function __construct(private Maho\Db\Adapter\AdapterInterface $adapter)
