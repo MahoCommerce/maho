@@ -54,6 +54,17 @@ value it finds:
 
 The layered-navigation controls below sit on top of this chain for category pages.
 
+### Social sharing previews
+
+Under **System > Configuration > Catalog > Catalog > Social Sharing**, select the configuration
+scope. Clear **Use Default** or **Use Website**, set **Enable Open Graph** to **Yes**, and save.
+The setting defaults to **No** so each theme or extension can continue to provide its own previews.
+
+Maho adds the page title, description, canonical URL, store name, language and a public image on
+indexable home, CMS, product and category pages. A product or category image takes precedence over
+the storefront logo. A preview needs a title, URL and image. Use a PNG or JPEG logo for previews
+that require a raster image.
+
 ## Canonical tags
 
 A canonical tag tells search engines which URL is the "official" version of a page, consolidating

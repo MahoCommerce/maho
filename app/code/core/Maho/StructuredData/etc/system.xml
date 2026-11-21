@@ -7,6 +7,24 @@ SPDX-License-Identifier: AFL-3.0
     <sections>
         <catalog>
             <groups>
+                <social_sharing translate="label" module="structureddata">
+                    <label>Social Sharing</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>410</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <open_graph_enabled translate="label">
+                            <label>Enable Open Graph</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </open_graph_enabled>
+                    </fields>
+                </social_sharing>
                 <structured_data translate="label comment" module="structureddata">
                     <label>Structured Data (schema.org)</label>
                     <comment><![CDATA[Outputs <strong>JSON-LD structured data</strong> following schema.org and Google's requirements, enabling rich results for products, breadcrumbs, organization info and site search. Validate your pages with the <a href="https://search.google.com/test/rich-results" target="_blank">Google Rich Results Test</a>.]]></comment>
