@@ -106,10 +106,22 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
         $storedExpiry = $model->getExpiresAt();
         $data = Mage::getSingleton('adminhtml/session')->getFormData(true);
         if (is_array($data) && $data !== []) {
-            $model->setData($data);
+            if ($model->getId()) {
+                foreach (['status', 'expires_at'] as $field) {
+                    if (isset($data[$field], $data['shown_' . $field]) && $data[$field] === $data['shown_' . $field]) {
+                        unset($data[$field]);
+                    }
+                }
+                if (is_numeric($data['balance'] ?? null) && is_numeric($data['shown_balance'] ?? null)
+                    && round((float) $data['balance'] - (float) $data['shown_balance'], 4) === 0.0
+                ) {
+                    unset($data['balance']);
+                }
+            }
+            $model->addData($data);
         }
         if ($model->getId()) {
-            // The save compares the posted balance and status with these, also after a failed save
+            // A retry compares the remaining edits with the latest stored values.
             $model->setData('shown_balance', $storedBalance);
             $model->setData('shown_status', $storedStatus);
             $model->setData('shown_expires_at', substr($storedExpiry ?? '', 0, 10));
