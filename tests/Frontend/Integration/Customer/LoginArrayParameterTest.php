@@ -19,6 +19,8 @@ beforeEach(function (): void {
     $session = new Session(new MockArraySessionStorage());
     $session->start();
     Mage::register(Mage_Core_Model_Session_Abstract::REGISTRY_KEY, $session);
+    // A message that an earlier test left in the session is not an outcome of this test
+    Mage::getSingleton('customer/session')->getMessages(true);
 });
 
 it('rejects an array login field as a missing field', function (array $login): void {
