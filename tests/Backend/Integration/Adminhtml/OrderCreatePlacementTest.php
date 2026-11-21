@@ -17,11 +17,11 @@ uses(Tests\MahoBackendTestCase::class);
  * Return a guest quote of the admin order create, with a product, the addresses and check / money order. Without
  * $shippingMethod, the quote has no shipping method.
  */
-function orderCreatePlacementQuote(bool $shippingMethod = true): Mage_Sales_Model_Quote
+function orderCreatePlacementQuote(Mage_Catalog_Model_Product $product, bool $shippingMethod = true): Mage_Sales_Model_Quote
 {
     $quote = Mage::getModel('sales/quote')->setStoreId(1)->setIsSuperMode(true)->setIsActive(false)
         ->setCustomerIsGuest(true)->setCustomerGroupId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
-    $quote->addProduct(loadSimplePricedProduct(), 1);
+    $quote->addProduct($product, 1);
     foreach ([$quote->getBillingAddress(), $quote->getShippingAddress()] as $address) {
         $address->setCountryId('US')->setRegionId(12)->setPostcode('90210')->setFirstname('Admin')->setLastname('Order')
             ->setStreet('1 Admin St')->setCity('Los Angeles')->setTelephone('5550100')->setEmail('admin.order@example.com');
@@ -70,6 +70,14 @@ beforeEach(function () {
             = ['type' => 'singleton', 'model' => 'order_create_placement_listener', 'method' => 'record'];
     })->call(Mage::app());
     $this->quotes = [];
+    $this->product = Mage::getModel('catalog/product')->setStoreId(0)->setWebsiteIds([1])
+        ->setAttributeSetId((int) Mage::getModel('catalog/product')->getDefaultAttributeSetId())
+        ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+        ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+        ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
+        ->setSku('order-create-' . bin2hex(random_bytes(4)))->setName('Example product')->setPrice(10)->setWeight(1)
+        ->setStockData(['qty' => 10, 'is_in_stock' => 1])->save();
+    $this->product = Mage::getModel('catalog/product')->setStoreId(1)->load($this->product->getId());
 });
 
 afterEach(function () {
@@ -88,10 +96,16 @@ afterEach(function () {
         }
         $quote->delete();
     }
+    Mage::register('isSecureArea', true, true);
+    try {
+        $this->product->delete();
+    } finally {
+        Mage::unregister('isSecureArea');
+    }
 });
 
 it('places the order with one checkout_submit_all_after, and sends the email only when the admin asks for it', function () {
-    $this->quotes = [$withEmail = orderCreatePlacementQuote(), $withoutEmail = orderCreatePlacementQuote()];
+    $this->quotes = [$withEmail = orderCreatePlacementQuote($this->product), $withoutEmail = orderCreatePlacementQuote($this->product)];
 
     $first = orderCreatePlacementModel($withEmail, true)->createOrder();
     $second = orderCreatePlacementModel($withoutEmail, false)->createOrder();
@@ -103,7 +117,7 @@ it('places the order with one checkout_submit_all_after, and sends the email onl
 });
 
 it('refuses a quote without a shipping method with the message of the order service', function () {
-    $this->quotes = [$quote = orderCreatePlacementQuote(shippingMethod: false)];
+    $this->quotes = [$quote = orderCreatePlacementQuote($this->product, shippingMethod: false)];
 
     $errors = [];
     try {
@@ -129,7 +143,7 @@ function orderCreatePlacementEdit(?Mage_Sales_Model_Order $order): void
 }
 
 it('leaves the old order of an order edit and its payment as they are when the new order cannot be placed', function () {
-    $this->quotes = [$first = orderCreatePlacementQuote(), $second = orderCreatePlacementQuote()];
+    $this->quotes = [$first = orderCreatePlacementQuote($this->product), $second = orderCreatePlacementQuote($this->product)];
     $old = orderCreatePlacementModel($first, false)->createOrder();
     $failing = new class extends Mage_Sales_Service_Order {
         #[\Override]
@@ -161,7 +175,7 @@ it('leaves the old order of an order edit and its payment as they are when the n
 });
 
 it('cancels the old order of an order edit and links it to the new order', function () {
-    $this->quotes = [$first = orderCreatePlacementQuote(), $second = orderCreatePlacementQuote()];
+    $this->quotes = [$first = orderCreatePlacementQuote($this->product), $second = orderCreatePlacementQuote($this->product)];
     $old = orderCreatePlacementModel($first, false)->createOrder();
     $create = orderCreatePlacementModel($second, false);
     orderCreatePlacementEdit($old);
@@ -177,4 +191,29 @@ it('cancels the old order of an order edit and links it to the new order', funct
         ->and((int) $reloaded->getRelationChildId())->toBe((int) $new->getId())
         ->and((int) $new->getRelationParentId())->toBe((int) $old->getId())
         ->and($new->getIncrementId())->toBe($old->getIncrementId() . '-1');
+});
+
+it('preserves a newer reservation on a cart that was saved during an order edit', function () {
+    $this->quotes = [$first = orderCreatePlacementQuote($this->product), $second = orderCreatePlacementQuote($this->product)];
+    $adapter = (fn() => $this->_getWriteAdapter())->call($second->getResource());
+    expect($adapter)->toBe(Mage::getSingleton('core/resource')->getConnection('core_write'));
+    $old = orderCreatePlacementModel($first, false)->createOrder();
+    $create = orderCreatePlacementModel($second, false);
+    orderCreatePlacementEdit($old);
+
+    try {
+        $new = $create->createOrder();
+    } finally {
+        orderCreatePlacementEdit(null);
+    }
+
+    $stored = Mage::getModel('sales/quote')->loadByIdWithoutStore($second->getId());
+    expect($stored->getReservedOrderId())->toBe($new->getIncrementId());
+    $stored->getResource()->save($stored->setReservedOrderId('new-reservation'));
+
+    $second->setCustomerNote('Example note')->save();
+
+    $stored->loadByIdWithoutStore($second->getId());
+    expect($stored->getReservedOrderId())->toBe('new-reservation')
+        ->and($stored->getCustomerNote())->toBe('Example note');
 });

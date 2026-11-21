@@ -10,6 +10,9 @@
 
 class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
 {
+    /** @var array<int, array<string, mixed>> */
+    private array $checkoutFieldWrites = [];
+
     #[\Override]
     protected function _construct(): void
     {
@@ -19,17 +22,37 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
     #[\Override]
     public function save(Mage_Core_Model_Abstract $object)
     {
-        $result = parent::save($object);
-        if ($object instanceof Mage_Sales_Model_Quote && !$object->isDeleted() && $this->_getWriteAdapter()->getTransactionLevel() > 0) {
-            $saved = $object->getCheckoutFieldsForSave();
-            $id = $object->getId();
-            if ($saved !== []) {
-                $this->addCommitCallback(static function () use ($object, $saved, $id): void {
-                    if ($object->getId() === $id) {
-                        $object->rememberSavedCheckoutFields($saved);
-                    }
-                });
+        if (!$object instanceof Mage_Sales_Model_Quote) {
+            return parent::save($object);
+        }
+
+        $key = spl_object_id($object);
+        $outerWrite = $this->checkoutFieldWrites[$key] ?? null;
+        $this->checkoutFieldWrites[$key] = [];
+        try {
+            $result = parent::save($object);
+            $saved = $this->checkoutFieldWrites[$key];
+        } finally {
+            if ($outerWrite === null) {
+                unset($this->checkoutFieldWrites[$key]);
+            } else {
+                $this->checkoutFieldWrites[$key] = $outerWrite;
             }
+        }
+
+        if ($saved === []) {
+            return $result;
+        }
+
+        if ($this->_getWriteAdapter()->getTransactionLevel() === 0) {
+            $object->rememberSavedCheckoutFields($saved);
+        } else {
+            $id = $object->getId();
+            $this->addCommitCallback(static function () use ($object, $saved, $id): void {
+                if ($object->getId() === $id) {
+                    $object->rememberSavedCheckoutFields($saved);
+                }
+            });
         }
         return $result;
     }
@@ -38,15 +61,25 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
     protected function _prepareDataForSave(Mage_Core_Model_Abstract $object)
     {
         $data = parent::_prepareDataForSave($object);
-        if ($object instanceof Mage_Sales_Model_Quote && $this->_getWriteAdapter()->getTransactionLevel() > 0) {
+        if ($object instanceof Mage_Sales_Model_Quote) {
             $changed = $object->getCheckoutFieldsForSave();
-            foreach (['is_active', 'reserved_order_id'] as $field) {
-                if (!array_key_exists($field, $changed)) {
-                    unset($data[$field]);
-                }
+            $unchanged = array_diff_key(Mage_Sales_Model_Quote::CHECKOUT_FIELDS, $changed);
+            $data = array_diff_key($data, $unchanged);
+            $key = spl_object_id($object);
+            if (isset($this->checkoutFieldWrites[$key])) {
+                $this->checkoutFieldWrites[$key] = array_intersect_key($changed, $data);
             }
         }
         return $data;
+    }
+
+    #[\Override]
+    protected function _afterLoad(Mage_Core_Model_Abstract $object)
+    {
+        if ($object instanceof Mage_Sales_Model_Quote) {
+            $object->rememberLoadedCheckoutFields();
+        }
+        return parent::_afterLoad($object);
     }
 
     /**
