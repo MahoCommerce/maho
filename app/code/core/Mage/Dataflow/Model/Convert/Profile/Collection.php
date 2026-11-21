@@ -111,7 +111,7 @@ class Mage_Dataflow_Model_Convert_Profile_Collection
         }
         $profileNode = array_find(
             $this->_xml->xpath('//profile') ?: [],
-            static fn($node): bool => (string) $node['name'] === $name,
+            static fn(SimpleXMLElement $node): bool => isset($node['name']) && (string) $node['name'] === $name,
         );
         if ($profileNode === null) {
             return $this;

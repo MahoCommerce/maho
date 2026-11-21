@@ -33,3 +33,13 @@ it('finds a profile whose name contains both quote types', function (): void {
     expect($profiles->getProfile('O\'Brien "VIP"'))->not->toBeNull()
         ->and($profiles->getProfile('missing'))->toBeNull();
 });
+
+it('distinguishes a missing profile name from an empty name', function (): void {
+    $unnamed = new Mage_Dataflow_Model_Convert_Profile_Collection();
+    $unnamed->importXml('<config><profile/></config>');
+    $emptyName = new Mage_Dataflow_Model_Convert_Profile_Collection();
+    $emptyName->importXml('<config><profile name=""/></config>');
+
+    expect($unnamed->getProfile(''))->toBeNull()
+        ->and($emptyName->getProfile(''))->not->toBeNull();
+});
