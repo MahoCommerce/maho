@@ -34,7 +34,7 @@ class Textarea extends AbstractElement
     #[\Override]
     public function getHtmlAttributes()
     {
-        return ['title', 'class', 'style', 'onclick', 'onchange', 'rows', 'cols', 'readonly', 'disabled', 'onkeyup', 'tabindex'];
+        return ['title', 'class', 'style', 'onclick', 'onchange', 'rows', 'cols', 'readonly', 'disabled', 'onkeyup', 'tabindex', 'data-code-editor'];
     }
 
     /**

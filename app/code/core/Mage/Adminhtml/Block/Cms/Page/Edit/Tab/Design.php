@@ -56,6 +56,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Design extends Mage_Adminhtml_Block
             'label'     => Mage::helper('cms')->__('Layout Update XML'),
             'style'     => 'height:24em;',
             'disabled'  => $isElementDisabled,
+            'data-code-editor' => 'xml',
         ]);
 
         $designFieldset = $form->addFieldset('design_fieldset', [
@@ -103,6 +104,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Design extends Mage_Adminhtml_Block
             'label'     => Mage::helper('cms')->__('Custom Layout Update XML'),
             'style'     => 'height:24em;',
             'disabled'  => $isElementDisabled,
+            'data-code-editor' => 'xml',
         ]);
 
         Mage::dispatchEvent('adminhtml_cms_page_edit_tab_design_prepare_form', ['form' => $form]);

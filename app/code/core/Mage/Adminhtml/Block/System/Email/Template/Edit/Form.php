@@ -112,6 +112,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
             $fieldset->addField('template_styles', 'textarea', [
                 'name' => 'template_styles',
                 'label' => Mage::helper('adminhtml')->__('Template Styles'),
+                'data-code-editor' => 'css',
             ]);
         }
 

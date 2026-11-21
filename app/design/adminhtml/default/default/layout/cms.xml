@@ -23,9 +23,6 @@ SPDX-License-Identifier: AFL-3.0
 
     <adminhtml_cms_page_edit>
         <update handle="editor"/>
-        <reference name="head">
-            <action method="addItem"><type>js</type><name>mage/adminhtml/textarea-code-editor.js</name><params>type="module"</params></action>
-        </reference>
         <reference name="content">
             <block type="adminhtml/cms_page_edit" name="cms_page_edit"></block>
         </reference>
