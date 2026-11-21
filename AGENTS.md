@@ -642,13 +642,16 @@ an API client), in their words. Code terms go in `## How it works`.
   admin order creation, with a free name, price and tax class"
 - Body: these `##` sections, in this order. Leave out an optional section that has nothing in it
   1. `## What it does`: what the user can now do, or what was broken, and where (admin path,
-     endpoint, CLI command). One to three sentences, then `Closes #N`
+     endpoint, CLI command). Then why the change is necessary: who meets the problem, in which
+     steps, and what it costs them. A bug that only a request made by hand can reach says so.
+     One to four sentences, then `Closes #N`
   2. `## Decision needed` (optional): a choice that the maintainer must make before the merge
   3. `## How it works`: the design, for the reviewer. The first sentence says what the code does
      and where, as a fact: "A custom line is a quote item and an order item with `product_id`
      NULL", not "Maho creates no product". The next sentence gives the reason for the design.
      Then one paragraph for each other part. Never open with what the change does not do, or with
-     a detail
+     a detail. A bug fix names the commit or pull request that caused the bug, and what that
+     change did. When there is no single cause, write "No single origin" and the reason
   4. `## Also in this PR` (optional): a change that is not part of the main one, and its reason
   5. `## Good to know` (optional): limits of the change, and anything you could not confirm,
      with where you looked
