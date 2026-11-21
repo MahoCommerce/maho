@@ -341,6 +341,12 @@ export const createXmlView = (parent, doc, extensions = []) => new EditorView({
     ],
 });
 
+export const createCssView = (parent, doc, extensions = []) => new EditorView({
+    parent,
+    doc,
+    extensions: [basicSetup, css(), syntaxHighlighting(HIGHLIGHT), THEME, EditorView.lineWrapping, ...extensions],
+});
+
 /**
  * The source view of a content field: CodeMirror before `content`, the content of the rich text
  * editor. The textarea stays the form field, and it stays hidden. Each change writes it and fires

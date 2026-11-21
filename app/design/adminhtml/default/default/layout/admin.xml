@@ -142,6 +142,7 @@ SPDX-License-Identifier: AFL-3.0
         <update handle="editor"/>
         <reference name="head">
             <action method="addJs"><name>mage/adminhtml/system/email-template.js</name></action>
+            <action method="addItem"><type>js</type><name>mage/adminhtml/textarea-code-editor.js</name><params>type="module"</params></action>
         </reference>
     </adminhtml_system_email_template_edit>
 
