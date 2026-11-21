@@ -89,6 +89,7 @@ class Mage_Core_Block_Adminhtml_Email_Log_View extends Mage_Adminhtml_Block_Widg
                 . 'try{var h=f.contentDocument.documentElement.scrollHeight;if(h)f.style.height=h+"px"}catch(e){}'
                 . '}'
                 . 'f.addEventListener("load",function(){'
+                . 'f.contentDocument.addEventListener("click",function(e){if(e.target.closest("a"))e.preventDefault()});'
                 . 'resize();'
                 . 'var imgs=f.contentDocument.images;'
                 . 'for(var i=0;i<imgs.length;i++)imgs[i].addEventListener("load",resize);'
