@@ -465,11 +465,9 @@ class Mage_Core_Model_Translate
         if (!$this->_canUseCache()) {
             return false;
         }
+        // A locale with no translations has an empty set, which is a hit too
         $data = Mage::app()->loadCache($this->getCacheId());
-        if (!$data) {
-            return false;
-        }
-        return $data;
+        return is_array($data) ? $data : false;
     }
 
     /**

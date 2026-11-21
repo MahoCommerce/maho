@@ -94,4 +94,52 @@ describe('Translator sets', function () {
 
         expect($translator->getCacheId())->toContain('_de_DE_');
     });
+
+    it('reads an empty set from the cache, and does not read the files again', function () {
+        $translator = new class extends Mage_Core_Model_Translate {
+            public int $fileReads = 0;
+
+            #[\Override]
+            public function getModulesConfig()
+            {
+                return ['Mage_First' => new \Maho\Simplexml\Element('<Mage_First><files><default>first.csv</default></files></Mage_First>')];
+            }
+
+            #[\Override]
+            protected function _getFileData($file)
+            {
+                $this->fileReads++;
+                return [];
+            }
+
+            #[\Override]
+            protected function _loadThemeTranslation()
+            {
+                return $this;
+            }
+
+            #[\Override]
+            protected function _loadDbTranslation()
+            {
+                return $this;
+            }
+
+            #[\Override]
+            protected function _canUseCache()
+            {
+                return true;
+            }
+        };
+        $translator->setLocale('xx_XX');
+
+        try {
+            $translator->init(Mage_Core_Model_App_Area::AREA_FRONTEND);
+            $translator->init(Mage_Core_Model_App_Area::AREA_FRONTEND);
+
+            expect($translator->fileReads)->toBe(1)
+                ->and($translator->getData())->toBe([]);
+        } finally {
+            Mage::app()->removeCache($translator->getCacheId());
+        }
+    });
 });
