@@ -1714,11 +1714,12 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     /**
      * Retrieve currency formatted string.
      *
-     * @param float|string $price Numeric value or field name, e.g. "grand_total".
+     * @param float|string|null $price Numeric value, order field name or null for a zero price.
      * @return string
      */
     public function formatPriceTxt($price)
     {
+        $price ??= 0.0;
         $price = (float) (is_numeric($price) ? $price : $this->_getData($price));
         return $this->getOrderCurrency()->formatTxt($price);
     }

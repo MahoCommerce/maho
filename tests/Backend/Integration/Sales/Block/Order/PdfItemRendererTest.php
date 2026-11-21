@@ -37,6 +37,28 @@ it('returns no item renderer for a product type that global/pdf does not declare
     Mage_Sales_Block_Order_Pdf_Shipment::class,
 ]);
 
+it('formats missing tax-inclusive invoice item amounts as zero', function (): void {
+    $store = Mage::app()->getStore();
+    $configPath = Mage_Tax_Model_Config::XML_PATH_DISPLAY_SALES_PRICE;
+    $previousPriceDisplay = $store->getConfig($configPath);
+    $store->setConfig($configPath, Mage_Tax_Model_Config::DISPLAY_TYPE_INCLUDING_TAX);
+
+    $order = Mage::getModel('sales/order')->setOrderCurrencyCode('USD');
+    $item = Mage::getModel('sales/order_invoice_item')->setPriceInclTax(null)->setRowTotalInclTax(null);
+    $renderer = new Mage_Bundle_Model_Sales_Order_Pdf_Items_Invoice()->setOrder($order)->setItem($item);
+
+    set_error_handler(static fn(int $level, string $message): never => throw new ErrorException($message, 0, $level), E_DEPRECATED);
+    try {
+        $prices = $renderer->getItemPricesForDisplay();
+    } finally {
+        restore_error_handler();
+        $store->setConfig($configPath, $previousPriceDisplay);
+    }
+
+    $zero = $order->formatPriceTxt(0.0);
+    expect($prices)->toBe([['price' => $zero, 'subtotal' => $zero]]);
+});
+
 it('prints the item cells in the column order of the document header, with the item SKU', function (string $block, string $type, array $columns) {
     $section = strtolower(substr($block, strrpos($block, '_') + 1));
     $order = Mage::getModel('sales/order')->setOrderCurrencyCode('USD')->setBaseCurrencyCode('USD');
