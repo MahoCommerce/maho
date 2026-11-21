@@ -334,7 +334,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         if (!$this->isValidForSend()) {
             $field = $this->getMissingSendField();
             $message = $field === null ? 'This letter cannot be sent.' : "This letter cannot be sent. Missing $field.";
-            Mage::log($message, Mage::LOG_ERROR, 'exception.log');
+            Mage::logException(new Exception($message));
             return false;
         }
 

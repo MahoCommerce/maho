@@ -34,7 +34,7 @@ it('logs which required field is missing when a transactional email cannot be se
     }
 
     expect($handler->getRecords())->toHaveCount(1)
-        ->and($handler->getRecords()[0]->message)->toBe("This letter cannot be sent. Missing $label.");
+        ->and($handler->getRecords()[0]->message)->toContain("This letter cannot be sent. Missing $label.");
 })->with([
     'sender name' => ['sender_name', 'sender name'],
     'sender email' => ['sender_email', 'sender email'],
