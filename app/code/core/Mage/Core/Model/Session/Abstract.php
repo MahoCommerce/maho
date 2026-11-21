@@ -27,6 +27,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     public const VALIDATOR_HTTP_VIA_KEY                = 'http_via';
     public const VALIDATOR_REMOTE_ADDR_KEY             = 'remote_addr';
     public const VALIDATOR_PASSWORD_CREATE_TIMESTAMP   = 'password_create_timestamp';
+    public const VALIDATOR_CUSTOMER_ID_KEY             = '_customer_id';
     public const SECURE_COOKIE_CHECK_KEY               = '_secure_cookie_check';
 
     public const XML_PATH_COOKIE_DOMAIN        = 'web/cookie/cookie_domain';
@@ -1043,19 +1044,21 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
             return array_any($userAgentValidated, fn($agent) => preg_match('/' . $agent . '/iu', $validatorData[self::VALIDATOR_HTTP_USER_AGENT_KEY]));
         }
 
+        return $this->validateSessionPasswordTimestamp();
+    }
+
+    /**
+     * Reject a session whose password was changed after its last legitimate use.
+     */
+    protected function validateSessionPasswordTimestamp(): bool
+    {
         // A deferred session has no metadata yet, and it began in this request
         $session = $this->getSymfonySession();
-        if ($session?->isStarted()) {
-            $metadataBag = $session->getMetadataBag();
-
-            if ($this->useValidateSessionPasswordTimestamp()) {
-                if ($metadataBag->getLastUsed() < ($validatorData[self::VALIDATOR_PASSWORD_CREATE_TIMESTAMP] ?? 0)) {
-                    return false;
-                }
-            }
+        if (!$session?->isStarted() || !$this->useValidateSessionPasswordTimestamp()) {
+            return true;
         }
 
-        return true;
+        return $session->getMetadataBag()->getLastUsed() >= $this->getValidatorPasswordTimestamp();
     }
 
     /**
@@ -1071,13 +1074,48 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
             self::VALIDATOR_HTTP_USER_AGENT_KEY      => $request->headers->get('User-Agent', ''),
         ];
 
-        // get time when password was last changed
-        if (isset($this->_data['visitor_data']['customer_id'])) {
+        if ($customerId = $this->getValidatorCustomerId()) {
             $parts[self::VALIDATOR_PASSWORD_CREATE_TIMESTAMP]
-                = Mage::helper('customer')->getPasswordTimestamp($this->_data['visitor_data']['customer_id']);
+                = Mage::helper('customer')->getPasswordTimestamp($customerId);
         }
 
         return $parts;
+    }
+
+    /**
+     * Retrieve the authenticated customer whose password timestamp must invalidate this session.
+     */
+    protected function getValidatorCustomerId(): ?int
+    {
+        $customerId = $_SESSION[self::VALIDATOR_CUSTOMER_ID_KEY]
+            ?? $this->_data['visitor_data']['customer_id']
+            ?? null;
+        if ($customerId === null) {
+            // Sessions stored before the canonical key existed keep their identity in the
+            // website-aware customer namespace.
+            foreach ($_SESSION as $namespace => $data) {
+                if (!is_array($data) || !str_starts_with((string) $namespace, 'customer')) {
+                    continue;
+                }
+                $customerId = $data['customer_id'] ?? $data['id'] ?? null;
+                if ($customerId !== null) {
+                    break;
+                }
+            }
+        }
+
+        return $customerId === null ? null : (int) $customerId;
+    }
+
+    /**
+     * Read the password timestamp at validation time, including for sessions stored before it was added.
+     */
+    protected function getValidatorPasswordTimestamp(): int
+    {
+        $customerId = $this->getValidatorCustomerId();
+        return $customerId === null
+            ? 0
+            : (int) Mage::helper('customer')->getPasswordTimestamp($customerId);
     }
 
     public function getSessionValidatorData(): array
