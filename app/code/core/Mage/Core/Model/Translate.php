@@ -88,11 +88,11 @@ class Mage_Core_Model_Translate
 
         foreach ($this->getModulesConfig() as $moduleName => $info) {
             $info = $info->asArray();
-            $this->_loadModuleTranslation($moduleName, $info['files'], $forceReload);
+            $this->_loadModuleTranslation($moduleName, $info['files']);
         }
 
-        $this->_loadThemeTranslation($forceReload);
-        $this->_loadDbTranslation($forceReload);
+        $this->_loadThemeTranslation();
+        $this->_loadDbTranslation();
 
         if (!$forceReload && $this->_canUseCache()) {
             $this->_saveCache();
@@ -152,10 +152,9 @@ class Mage_Core_Model_Translate
      *
      * @param string $moduleName
      * @param array $files
-     * @param bool $forceReload
      * @return $this
      */
-    protected function _loadModuleTranslation($moduleName, $files, $forceReload = false)
+    protected function _loadModuleTranslation($moduleName, $files)
     {
         foreach ($files as $file) {
             $file = $this->_getModuleFilePath($moduleName, $file);
@@ -217,10 +216,9 @@ class Mage_Core_Model_Translate
     /**
      * Loading current theme translation
      *
-     * @param bool $forceReload
      * @return $this
      */
-    protected function _loadThemeTranslation($forceReload = false)
+    protected function _loadThemeTranslation()
     {
         $file = Mage::getDesign()->getLocaleFileName('translate.csv');
         $this->_addData($this->_getFileData($file), false);
@@ -230,10 +228,9 @@ class Mage_Core_Model_Translate
     /**
      * Loading current store translation from DB
      *
-     * @param bool $forceReload
      * @return $this
      */
-    protected function _loadDbTranslation($forceReload = false)
+    protected function _loadDbTranslation()
     {
         $arr = $this->getResource()->getTranslationArray(null, $this->getLocale());
         $this->_addData($arr, $this->getConfig(self::CONFIG_KEY_STORE));

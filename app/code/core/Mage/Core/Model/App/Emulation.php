@@ -25,7 +25,7 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
     /**
      * Run $callback in the store $storeId, with the design, the locale and the translations of that store for $area.
      * Then put back the environment of the caller, also when $callback throws. When the request already runs in
-     * $storeId and $area, run $callback as it is.
+     * $storeId and $area, and its translator is loaded for $area, run $callback as it is.
      *
      * @template T
      * @param \Closure(): T $callback

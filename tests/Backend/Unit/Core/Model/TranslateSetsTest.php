@@ -49,13 +49,13 @@ function translatorWithFixtureFiles(): Mage_Core_Model_Translate
         }
 
         #[\Override]
-        protected function _loadThemeTranslation($forceReload = false)
+        protected function _loadThemeTranslation()
         {
             return $this;
         }
 
         #[\Override]
-        protected function _loadDbTranslation($forceReload = false)
+        protected function _loadDbTranslation()
         {
             return $this;
         }
