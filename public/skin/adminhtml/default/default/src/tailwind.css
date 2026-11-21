@@ -27,9 +27,6 @@
 /* Mage_Adminhtml_Block_Page_Menu writes the main menu, and Tailwind does not scan app/code */
 @source inline("d-menu d-menu-horizontal");
 
-/* Mage_Adminhtml_Block_System_Config_Form_Field writes the scope badge and the Use Default toggle */
-@source inline("d-badge d-badge-ghost d-badge-sm d-toggle d-toggle-sm");
-
 /* Admin classes that share a name with a Tailwind utility but mean something else:
    a data grid (.grid), grid table borders (table.border), the grid filter row
    (tr.filter), the scheme selector icons (.scheme-dark) and others. */

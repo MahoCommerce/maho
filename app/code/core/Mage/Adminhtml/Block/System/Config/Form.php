@@ -64,9 +64,9 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     {
         parent::__construct();
         $this->_scopeLabels = [
-            self::SCOPE_DEFAULT  => Mage::helper('adminhtml')->__('[GLOBAL]'),
-            self::SCOPE_WEBSITES => Mage::helper('adminhtml')->__('[WEBSITE]'),
-            self::SCOPE_STORES   => Mage::helper('adminhtml')->__('[STORE VIEW]'),
+            self::SCOPE_DEFAULT  => Mage::helper('adminhtml')->__('Global'),
+            self::SCOPE_WEBSITES => Mage::helper('adminhtml')->__('Website'),
+            self::SCOPE_STORES   => Mage::helper('adminhtml')->__('Store View'),
         ];
     }
 

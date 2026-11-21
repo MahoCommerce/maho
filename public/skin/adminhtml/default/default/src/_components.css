@@ -1389,20 +1389,31 @@
         color: var(--maho-btn-ink);
     }
 
-    .form-list td.label .config-scope {
-        margin-top: var(--maho-space-1);
-        font-size: 10px;
-        letter-spacing: 0.04em;
-        color: var(--maho-ink-muted);
+    .form-list td.use-default .config-scope-group {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--maho-space-2);
+        padding: var(--maho-space-1) var(--maho-space-2);
+        border: 1px solid var(--maho-border-soft);
+        border-radius: 8px;
+        font-size: var(--maho-text-sm);
+        white-space: nowrap;
     }
 
     .form-list td.use-default .config-inherit-label {
         display: inline-flex;
         align-items: center;
-        gap: var(--maho-space-2);
-        color: var(--maho-ink-muted);
-        font-size: var(--maho-text-sm);
-        white-space: nowrap;
+        gap: 6px;
         cursor: pointer;
+    }
+
+    .form-list td.use-default .config-scope-divider {
+        align-self: stretch;
+        width: 1px;
+        background: var(--maho-border-soft);
+    }
+
+    .form-list td.use-default .config-scope {
+        color: var(--maho-ink-faint);
     }
 }

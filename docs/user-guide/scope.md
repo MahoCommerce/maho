@@ -38,8 +38,8 @@ or at **Default Config** has no effect on that store view.
 At the top left of **System > Configuration**, the **Current Configuration Scope** dropdown selects
 the scope that you edit: **Default Config**, a website, or a store view.
 
-Each setting shows a label: in the configuration it is under the name of the setting, without the
-brackets. The label is the most specific scope where you can set it:
+Each setting shows a label next to it. In the configuration, the label is after the **Use Default**
+checkbox, without the brackets. The label is the most specific scope where you can set it:
 
 | Label | Where you can set the value |
 |-------|-----------------------------|
@@ -52,7 +52,7 @@ setting is not in the page when you select a website.
 
 ### Use Default and Use Website
 
-Each setting has a checkbox on its right. In the configuration, it is a switch:
+Each setting has a checkbox on its right:
 
 | Selected scope | Checkbox | When it is selected |
 |----------------|----------|---------------------|
