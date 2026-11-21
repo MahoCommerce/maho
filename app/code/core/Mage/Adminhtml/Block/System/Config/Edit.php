@@ -65,6 +65,7 @@ class Mage_Adminhtml_Block_System_Config_Edit extends Mage_Adminhtml_Block_Widge
 
     /**
      * @return $this
+     * @throws \RuntimeException
      */
     public function initForm()
     {

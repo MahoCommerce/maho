@@ -105,6 +105,9 @@ class Mage_Catalog_Block_Layer_View extends Mage_Core_Block_Template
         return parent::_prepareLayout();
     }
 
+    /**
+     * @throws \RuntimeException
+     */
     protected function _createFilterBlock(string $type): Mage_Catalog_Block_Layer_Filter_Abstract
     {
         $block = $this->getLayout()->createBlock($type);

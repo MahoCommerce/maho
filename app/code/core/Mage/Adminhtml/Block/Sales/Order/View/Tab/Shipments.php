@@ -27,6 +27,9 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Shipments extends Mage_Adminhtml
         return 'sales/order_shipment_grid_collection';
     }
 
+    /**
+     * @throws \RuntimeException
+     */
     #[\Override]
     protected function _prepareCollection()
     {

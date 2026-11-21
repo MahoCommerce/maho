@@ -183,6 +183,7 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
      * Get collection instance
      *
      * @return Mage_Catalog_Model_Resource_Collection_Abstract
+     * @throws \RuntimeException
      */
     #[\Override]
     public function getResourceCollection()

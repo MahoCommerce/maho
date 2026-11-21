@@ -65,6 +65,7 @@ abstract class Mage_Eav_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
 
     /**
      * @return Mage_Eav_Model_Resource_Attribute
+     * @throws \RuntimeException
      */
     #[\Override]
     protected function _getResource()

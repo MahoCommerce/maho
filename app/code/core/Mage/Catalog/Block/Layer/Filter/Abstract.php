@@ -61,6 +61,7 @@ abstract class Mage_Catalog_Block_Layer_Filter_Abstract extends Mage_Core_Block_
      * Init filter model object
      *
      * @return Mage_Catalog_Block_Layer_Filter_Abstract
+     * @throws \RuntimeException
      */
     protected function _initFilter()
     {

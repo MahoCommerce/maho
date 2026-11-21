@@ -27,6 +27,9 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Invoices extends Mage_Adminhtml_
         return 'sales/order_invoice_grid_collection';
     }
 
+    /**
+     * @throws \RuntimeException
+     */
     #[\Override]
     protected function _prepareCollection()
     {

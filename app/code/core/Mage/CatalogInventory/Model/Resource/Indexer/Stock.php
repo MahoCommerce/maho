@@ -231,6 +231,7 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock extends Mage_Catalog_Mo
      * Retrieve Stock Indexer Models per Product Type
      *
      * @return array
+     * @throws \RuntimeException
      */
     protected function _getTypeIndexers()
     {

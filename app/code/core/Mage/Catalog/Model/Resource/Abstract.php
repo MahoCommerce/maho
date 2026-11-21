@@ -199,6 +199,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * @param Mage_Eav_Model_Entity_Attribute_Abstract|Mage_Catalog_Model_Resource_Eav_Attribute $attribute
      * @param mixed $value
      * @return Mage_Catalog_Model_Resource_Abstract
+     * @throws \InvalidArgumentException
      */
     protected function _saveAttributeValue($object, $attribute, $value)
     {

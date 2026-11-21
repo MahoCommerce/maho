@@ -15,6 +15,7 @@ abstract class Mage_Catalog_Model_Attribute_Backend_Urlkey_Abstract extends Mage
      *
      * @param \Maho\DataObject $object
      * @return $this
+     * @throws \RuntimeException
      */
     #[\Override]
     public function beforeSave($object)

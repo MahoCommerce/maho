@@ -12,6 +12,7 @@ abstract class Mage_Dataflow_Model_Batch_Abstract extends Mage_Core_Model_Abstra
 {
     /**
      * @return Mage_Dataflow_Model_Resource_Batch_Abstract
+     * @throws \RuntimeException
      */
     #[\Override]
     public function getResource()

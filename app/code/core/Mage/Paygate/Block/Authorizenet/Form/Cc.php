@@ -20,6 +20,9 @@ class Mage_Paygate_Block_Authorizenet_Form_Cc extends Mage_Payment_Block_Form
         $this->setTemplate('paygate/form/cc.phtml');
     }
 
+    /**
+     * @throws Mage_Core_Exception
+     */
     #[\Override]
     public function getMethod(): Mage_Paygate_Model_Authorizenet
     {

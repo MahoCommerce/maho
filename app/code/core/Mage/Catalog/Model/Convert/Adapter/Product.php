@@ -392,6 +392,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
      *
      * @param string $entityType
      * @return Mage_Catalog_Model_Resource_Product_Collection
+     * @throws \RuntimeException
      */
     #[\Override]
     protected function _getCollectionForLoad($entityType)

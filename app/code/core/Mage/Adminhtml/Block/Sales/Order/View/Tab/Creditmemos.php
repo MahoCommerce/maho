@@ -27,6 +27,9 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Creditmemos extends Mage_Adminht
         return 'sales/order_creditmemo_grid_collection';
     }
 
+    /**
+     * @throws \RuntimeException
+     */
     #[\Override]
     protected function _prepareCollection()
     {

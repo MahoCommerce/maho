@@ -323,6 +323,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
      * Retrieve price indexers per product type
      *
      * @return array<string, Mage_Catalog_Model_Resource_Product_Indexer_Price_Interface>
+     * @throws \RuntimeException
      */
     public function getTypeIndexers()
     {

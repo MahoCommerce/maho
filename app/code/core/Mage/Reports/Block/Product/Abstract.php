@@ -75,6 +75,7 @@ abstract class Mage_Reports_Block_Product_Abstract extends Mage_Catalog_Block_Pr
      * Retrieve Product Index model instance
      *
      * @return Mage_Reports_Model_Product_Index_Abstract
+     * @throws \RuntimeException
      */
     protected function _getModel()
     {
