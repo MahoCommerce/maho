@@ -1581,9 +1581,9 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             // The cancel returns the stock that the new order takes, so it comes first. One transaction holds the
             // two steps: a new order that fails keeps the old order as it is, and a cancel that fails places no order.
             $placeNewOrder = $placeOrder;
-            $placeOrder = function () use ($quote, $orderService, $oldOrder, $orderData, $placeNewOrder, &$order): void {
-                $resource = $quote->getResource();
-                $resource->beginTransaction();
+            $placeOrder = function () use ($orderService, $oldOrder, $orderData, $placeNewOrder, &$order): void {
+                $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+                $adapter->beginTransaction();
                 try {
                     $orderService->cancel($oldOrder);
                     $placeNewOrder();
@@ -1595,9 +1595,9 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
 
                     $oldOrder->save();
                     $order->save();
-                    $resource->commit();
+                    $adapter->commit();
                 } catch (Throwable $e) {
-                    $resource->rollBack();
+                    $adapter->rollBack();
                     // The order of the session is again the order of the database
                     $oldOrder->reset()->load((int) $orderData['relation_parent_id']);
                     throw $e;

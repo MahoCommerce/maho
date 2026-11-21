@@ -44,7 +44,11 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
             return $result;
         }
 
-        if ($this->_getWriteAdapter()->getTransactionLevel() === 0) {
+        $adapter = $this->_getWriteAdapter();
+        if ($adapter->getTransactionLevel() === 0) {
+            $object->rememberSavedCheckoutFields($saved);
+        } elseif ($adapter instanceof \Maho\Db\Adapter\AbstractPdoAdapter) {
+            $adapter->afterTransactionRollback($object->getCheckoutFieldsRollback());
             $object->rememberSavedCheckoutFields($saved);
         } else {
             $id = $object->getId();
