@@ -25,7 +25,7 @@ class CartMoveAtomicQuote extends Mage_Sales_Model_Quote
     }
 }
 
-it('rolls back the target cart when the source cart save fails', function (Throwable $failure, string $errorMessage): void {
+it('moves items between carts as one transaction', function (?Throwable $failure, ?string $errorMessage): void {
     $config = Mage::getConfig();
     $config->setNode('global/models/sales/rewrite/quote', CartMoveAtomicQuote::class);
     CartMoveAtomicQuote::$failQuoteId = null;
@@ -64,13 +64,14 @@ it('rolls back the target cart when the source cart save fails', function (Throw
         $resource = $source->getResource();
 
         try {
-            (new Mage_Checkout_Model_Cart_Product_Api())->moveToCustomerQuote(
+            $moved = (new Mage_Checkout_Model_Cart_Product_Api())->moveToCustomerQuote(
                 $sourceId,
                 [['product_id' => $productId, 'qty' => 1]],
                 1,
             );
             $error = null;
         } catch (Mage_Api_Exception|Error $e) {
+            $moved = false;
             $error = $e->getMessage();
         }
 
@@ -81,10 +82,11 @@ it('rolls back the target cart when the source cart save fails', function (Throw
             $quote->getAllVisibleItems(),
         );
 
-        expect($error)->toBe($errorMessage)
+        expect($moved)->toBe($failure === null)
+            ->and($error)->toBe($errorMessage)
             ->and($resource->getReadConnection()->getTransactionLevel())->toBe(0)
-            ->and($itemProductIds($reloadedTarget))->toBe([])
-            ->and($itemProductIds($reloadedSource))->toBe([$productId]);
+            ->and($itemProductIds($reloadedTarget))->toBe($failure === null ? [$productId] : [])
+            ->and($itemProductIds($reloadedSource))->toBe($failure === null ? [] : [$productId]);
     } finally {
         CartMoveAtomicQuote::$failQuoteId = null;
         CartMoveAtomicQuote::$failure = null;
@@ -98,6 +100,7 @@ it('rolls back the target cart when the source cart save fails', function (Throw
         $customer->delete();
     }
 })->with([
+    'successful move' => [null, null],
     'exception' => [new RuntimeException('Source quote save failed.'), 'product_move_quote_save_fault'],
     'error' => [new Error('Source quote save failed.'), 'Source quote save failed.'],
 ]);
