@@ -50,13 +50,7 @@ it('prints the item cells in the column order of the document header, with the i
     $renderer = pdfItemRenderer(new $block(), $type);
     $renderer->setItem($item)->setOrder($order)->setSource($document);
 
-    $restoreDesign = (new ReflectionMethod(Mage_Sales_Model_Order_Pdf_Abstract::class, 'useAdminDesign'))
-        ->invoke(Mage::getModel("sales/order_pdf_{$section}"));
-    try {
-        $html = $renderer->toHtml();
-    } finally {
-        $restoreDesign();
-    }
+    $html = Mage::app()->emulate(1, fn(): string => $renderer->toHtml());
 
     preg_match_all('/<td class="col-([a-z]+)/', $html, $cells);
     expect($cells[1])->toBe($columns)

@@ -42,14 +42,7 @@ A nested call uses the fast path too. An email that a caller renders inside `emu
 - The registry. Values in `Mage::registry()` stay.
 - The session, with the customer and the currency that it holds.
 
-If the callback needs one of these for the emulated store, set it in the callback and put it back before the callback returns. The same applies to the design: a callback can change it, and `emulate()` puts it back. The sales PDF does this, because its templates are in the admin design:
-
-```php
-Mage::app()->emulate($storeId, function () use ($document): string {
-    Mage::getDesign()->applyAdminDesign();
-    return $this->renderDocumentHtml($document);
-});
-```
+If the callback needs one of these for the emulated store, set it in the callback and put it back before the callback returns.
 
 ## Email templates
 

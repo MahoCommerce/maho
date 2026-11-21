@@ -86,40 +86,32 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
 
         $html = '';
         $isFirst = true;
+        foreach ($documents as $document) {
+            // The templates are in the design of the store, so a store theme can change the PDF of its documents
+            $blockHtml = Mage::app()->emulate($this->getDocumentStoreId($document), fn(): string => $this->renderDocumentHtml($document));
 
-        // The PDF templates live in the admin design. Outside the admin (API, emails sent
-        // from the storefront or cron) the storefront package finds none, and the PDF
-        // comes out blank, so switch the whole design, not only the area.
-        $restoreDesign = $this->useAdminDesign();
-
-        try {
-            foreach ($documents as $document) {
-                $storeId = (int) $document->getStoreId();
-                $blockHtml = $storeId
-                    ? Mage::app()->emulate($storeId, function () use ($document): string {
-                        // The templates of the PDF are in the admin design, and emulate() puts back the design after
-                        Mage::getDesign()->applyAdminDesign();
-                        return $this->renderDocumentHtml($document);
-                    })
-                    : $this->renderDocumentHtml($document);
-
-                if (!empty($blockHtml)) {
-                    if (!$isFirst) {
-                        $html .= '<div style="page-break-before: always;"></div>';
-                    }
-                    $html .= $blockHtml;
-                    $isFirst = false;
+            if (!empty($blockHtml)) {
+                if (!$isFirst) {
+                    $html .= '<div style="page-break-before: always;"></div>';
                 }
-
-                // Memory management for large document sets
-                gc_collect_cycles();
+                $html .= $blockHtml;
+                $isFirst = false;
             }
 
-            // pdf.css is in the admin design too.
-            return $this->wrapHtmlDocument($html);
-        } finally {
-            $restoreDesign();
+            // Memory management for large document sets
+            gc_collect_cycles();
         }
+
+        // A PDF has one stylesheet, so a PDF of several documents takes pdf.css from the store of the first one
+        return Mage::app()->emulate($this->getDocumentStoreId(reset($documents)), fn(): string => $this->wrapHtmlDocument($html));
+    }
+
+    /**
+     * Get the store view of $document, or the default store view when the store view of $document no longer exists
+     */
+    protected function getDocumentStoreId(\Maho\DataObject $document): int
+    {
+        return (int) $document->getStoreId() ?: (int) Mage::app()->getDefaultStoreView()->getId();
     }
 
     protected function renderDocumentHtml(\Maho\DataObject $document): string
@@ -134,6 +126,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
     /**
      * Switch to the admin design, as an admin request does, and return a callback that restores the previous design.
      */
+    #[\Deprecated(message: 'the PDF templates are in the frontend design: render in Mage_Core_Model_App::emulate()', since: '27.1')]
     protected function useAdminDesign(): \Closure
     {
         $design = Mage::getDesign();
