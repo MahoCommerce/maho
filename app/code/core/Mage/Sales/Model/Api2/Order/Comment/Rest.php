@@ -18,6 +18,7 @@ abstract class Mage_Sales_Model_Api2_Order_Comment_Rest extends Mage_Sales_Model
      */
     public const PARAM_ORDER_ID = 'id';
     public const PARAM_COMMENT_ID = 'id';
+    public const PARAM_ORDER_CONTEXT_ID = 'order_id';
 
     /**
      * Get sales order comments
