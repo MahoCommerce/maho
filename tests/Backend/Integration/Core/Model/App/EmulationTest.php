@@ -75,6 +75,19 @@ describe('Store emulation puts back the environment of the caller', function () 
         expect($area)->toBe(Mage_Core_Model_App_Area::AREA_FRONTEND);
     });
 
+    it('loads the translations of the store when only the current store changed', function () {
+        Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+        Mage::getDesign()->setArea(Mage_Core_Model_App_Area::AREA_FRONTEND);
+        Mage::app()->getTranslator()->init(Mage_Core_Model_App_Area::AREA_FRONTEND);
+
+        $translatorStore = Mage::app()->withStore(1, fn() => Mage::app()->emulate(
+            1,
+            fn() => Mage::app()->getTranslator()->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_STORE),
+        ));
+
+        expect((int) $translatorStore)->toBe(1);
+    });
+
     it('puts back the package and the theme of the caller', function () {
         Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
         $design = Mage::getDesign();
