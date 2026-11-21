@@ -39,7 +39,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset extends Mage_Adminhtml_Bl
     protected function _getHeaderHtml($element)
     {
         if ($element->getIsNested()) {
-            $html = '<tr class="nested"><td colspan="4"><div class="' . $this->_getFrontendClass($element) . '">';
+            $html = '<div class="config-row nested"><div class="' . $this->_getFrontendClass($element) . '">';
         } else {
             $html = '<div class="' . $this->_getFrontendClass($element) . '">';
         }
@@ -53,9 +53,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset extends Mage_Adminhtml_Bl
 
         $html .= $this->_getHeaderCommentHtml($element);
 
-        // field label column
-        $html .= '<table cellspacing="0" class="form-list"><colgroup class="label"><colgroup class="value">'
-            . '<colgroup class="use-default"><colgroup class=""><tbody>';
+        $html .= '<div class="form-list config-fields">';
 
         return $html;
     }
@@ -145,11 +143,11 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset extends Mage_Adminhtml_Bl
     protected function _getFooterHtml($element)
     {
         $tooltipsExist = false;
-        $html = '</tbody></table>';
+        $html = '</div>';
         $html .= '</fieldset>' . $this->_getExtraJs($element, $tooltipsExist);
 
         if ($element->getIsNested()) {
-            $html .= '</div></td></tr>';
+            $html .= '</div></div>';
         } else {
             $html .= '</div>';
         }

@@ -26,7 +26,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Field extends Mage_Adminhtml_Block
     {
         $id = $element->getHtmlId();
 
-        $html = '<td class="label"><label for="' . $id . '" id="' . $id . '-label">' . $element->getLabel() . '</label></td>';
+        $html = '<div class="config-label"><label for="' . $id . '" id="' . $id . '-label">' . $element->getLabel() . '</label></div>';
 
         //$isDefault = !$this->getRequest()->getParam('website') && !$this->getRequest()->getParam('store');
         $isMultiple = $element->getExtType() === 'multiple';
@@ -56,17 +56,17 @@ class Mage_Adminhtml_Block_System_Config_Form_Field extends Mage_Adminhtml_Block
         }
 
         if ($element->getTooltip()) {
-            $html .= '<td class="value with-tooltip">';
+            $html .= '<div class="config-value with-tooltip">';
             $html .= $this->_getElementHtml($element);
             $html .= '<div class="field-tooltip"><div>' . $element->getTooltip() . '</div></div>';
         } else {
-            $html .= '<td class="value">';
+            $html .= '<div class="config-value">';
             $html .= $this->_getElementHtml($element);
         }
         if ($element->getComment()) {
             $html .= '<p class="note"><span>' . $element->getComment() . '</span></p>';
         }
-        $html .= '</td>';
+        $html .= '</div>';
 
         $inheritHtml = '';
         if ($addInheritCheckbox) {
@@ -96,7 +96,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Field extends Mage_Adminhtml_Block
             $inheritHtml = '<label class="config-inherit-label" title="' . htmlspecialchars($defText) . '">'
                 . '<input id="' . $id . '_inherit" name="' . $namePrefix . '[inherit]" type="checkbox" value="1"'
                 . ' class="checkbox config-inherit" ' . $inherit
-                . ' onclick="toggleValueElements(this, this.closest(\'td\').previousElementSibling)" />'
+                . ' onclick="toggleValueElements(this, this.closest(\'.config-use-default\').previousElementSibling)" />'
                 . '<span>' . $checkboxLabel . '</span></label>';
         }
 
@@ -104,10 +104,10 @@ class Mage_Adminhtml_Block_System_Config_Form_Field extends Mage_Adminhtml_Block
             ? '<span class="config-scope">' . $element->getScopeLabel() . '</span>'
             : '';
         if ($inheritHtml !== '' || $scopeHtml !== '') {
-            $html .= '<td class="use-default"><span class="config-scope-group">'
+            $html .= '<div class="config-use-default"><span class="config-scope-group">'
                 . $inheritHtml
                 . ($inheritHtml !== '' && $scopeHtml !== '' ? '<span class="config-scope-divider"></span>' : '')
-                . $scopeHtml . '</span></td>';
+                . $scopeHtml . '</span></div>';
         }
 
         return $this->_decorateRowHtml($element, $html);
@@ -122,6 +122,6 @@ class Mage_Adminhtml_Block_System_Config_Form_Field extends Mage_Adminhtml_Block
      */
     protected function _decorateRowHtml($element, $html)
     {
-        return '<tr id="row_' . $element->getHtmlId() . '">' . $html . '</tr>';
+        return '<div class="config-row" id="row_' . $element->getHtmlId() . '">' . $html . '</div>';
     }
 }
