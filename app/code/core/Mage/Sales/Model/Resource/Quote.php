@@ -84,6 +84,21 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
             $object->rememberLoadedCheckoutFields();
         }
         return parent::_afterLoad($object);
+
+public function lockExpiredQuote(int $quoteId, int $storeId, string $cutoff, bool $inactiveOnly): bool
+    {
+        $write = $this->_getWriteAdapter();
+        $idField = $this->getIdFieldName();
+        $select = $write->select()->from($this->getMainTable(), $idField)
+            ->where($idField . ' = ?', $quoteId)
+            ->where('store_id = ?', $storeId)
+            ->where('updated_at <= ?', $cutoff)
+            ->forUpdate();
+        if ($inactiveOnly) {
+            $select->where('is_active = ?', 0);
+        }
+
+        return $write->fetchOne($select) !== false;
     }
 
     /**

@@ -31,13 +31,14 @@ class Mage_Sales_Model_Observer
 
         foreach ($lifetimes as $storeId => $day) {
             $day = (int) $day;
-            $lifetime = 86400 * $day;
+            $cutoff = date(Mage_Core_Model_Locale::DATE_FORMAT, time() - 86400 * $day);
+            $inactiveOnly = $day === 0;
 
             /** @var Mage_Sales_Model_Resource_Quote_Collection $quotes */
             $quotes = Mage::getResourceModel('sales/quote_collection');
             $quotes->addFieldToFilter('store_id', $storeId);
-            $quotes->addFieldToFilter('updated_at', ['to' => date(Mage_Core_Model_Locale::DATE_FORMAT, time() - $lifetime)]);
-            if ($day == 0) {
+            $quotes->addFieldToFilter('updated_at', ['to' => $cutoff]);
+            if ($inactiveOnly) {
                 $quotes->addFieldToFilter('is_active', 0);
             }
 
@@ -47,7 +48,7 @@ class Mage_Sales_Model_Observer
 
             foreach ($quotes as $quote) {
                 try {
-                    $quote->delete();
+                    $quote->deleteIfExpired($storeId, $cutoff, $inactiveOnly);
                 } catch (Exception $e) {
                     Mage::logException($e);
                 }

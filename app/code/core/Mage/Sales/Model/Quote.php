@@ -36,6 +36,9 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     #[\Override]
     protected $_eventObject = 'quote';
 
+    /** @var array{storeId: int, cutoff: string, inactiveOnly: bool}|null */
+    private ?array $expiration = null;
+
     /**
      * Model cache tag for clear cache in after save and after delete
      *
@@ -293,10 +296,27 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _beforeDelete()
     {
+        if ($this->expiration !== null
+            && !$this->_getResource()->lockExpiredQuote((int) $this->getId(), ...$this->expiration)
+        ) {
+            throw new Mage_Sales_Model_Quote_NotExpiredException();
+        }
+
         // A copy that fails keeps the quote, so the sweep keeps its files for the next attempt
         $this->_getResource()->copyOrderedItemFiles($this);
 
         return parent::_beforeDelete();
+    }
+
+    public function deleteIfExpired(int $storeId, string $cutoff, bool $inactiveOnly): void
+    {
+        $this->expiration = ['storeId' => $storeId, 'cutoff' => $cutoff, 'inactiveOnly' => $inactiveOnly];
+        try {
+            $this->delete();
+        } catch (Mage_Sales_Model_Quote_NotExpiredException) {
+        } finally {
+            $this->expiration = null;
+        }
     }
 
     /**
