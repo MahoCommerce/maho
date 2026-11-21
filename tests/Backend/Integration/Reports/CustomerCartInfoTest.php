@@ -12,7 +12,7 @@ uses(Tests\MahoBackendTestCase::class);
 
 use Tests\Helpers\ReportFixture;
 
-afterEach(fn() => ReportFixture::restore());
+afterEach(fn() => ReportFixture::deleteFixtures());
 
 it('counts the items in the cart of the customer', function () {
     $customer = ReportFixture::createCustomer('cart-info');
