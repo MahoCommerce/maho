@@ -44,6 +44,14 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
             return ;
         }
 
+        if (!$this->getRequest()->isPost()) {
+            $this->renderConfirmation(
+                $this->__('Unsubscribe from price alerts for this product?'),
+                Mage::getUrl('productalert/unsubscribe/price', ['product' => $productId]),
+            );
+            return;
+        }
+
         try {
             $this->unsubscribe(Mage_ProductAlert_Model_Type::Price, $productId);
             $session->addSuccess($this->__('The alert subscription has been deleted.'));
@@ -56,6 +64,14 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
     #[Maho\Config\Route('/productalert/unsubscribe/priceAll', name: 'productalert.unsubscribe.priceall')]
     public function priceAllAction(): void
     {
+        if (!$this->getRequest()->isPost()) {
+            $this->renderConfirmation(
+                $this->__('Unsubscribe from all price alerts?'),
+                Mage::getUrl('productalert/unsubscribe/priceAll'),
+            );
+            return;
+        }
+
         $session = Mage::getSingleton('customer/session');
         /** @var Mage_Customer_Model_Session $session */
 
@@ -91,6 +107,14 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
             return ;
         }
 
+        if (!$this->getRequest()->isPost()) {
+            $this->renderConfirmation(
+                $this->__('Unsubscribe from stock alerts for this product?'),
+                Mage::getUrl('productalert/unsubscribe/stock', ['product' => $productId]),
+            );
+            return;
+        }
+
         try {
             $this->unsubscribe(Mage_ProductAlert_Model_Type::Stock, $productId);
             $session->addSuccess($this->__('You will no longer receive stock alerts for this product.'));
@@ -103,6 +127,14 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
     #[Maho\Config\Route('/productalert/unsubscribe/stockAll', name: 'productalert.unsubscribe.stockall')]
     public function stockAllAction(): void
     {
+        if (!$this->getRequest()->isPost()) {
+            $this->renderConfirmation(
+                $this->__('Unsubscribe from all stock alerts?'),
+                Mage::getUrl('productalert/unsubscribe/stockAll'),
+            );
+            return;
+        }
+
         $session = Mage::getSingleton('customer/session');
 
         try {
@@ -116,6 +148,22 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
             $session->addException($e, $this->__('Unable to update the alert subscription.'));
         }
         $this->_redirect('customer/account/');
+    }
+
+    private function renderConfirmation(string $message, string $actionUrl): void
+    {
+        $this->loadLayout();
+        $this->_initLayoutMessages('customer/session');
+        $this->_initLayoutMessages('catalog/session');
+
+        $block = $this->getLayout()->createBlock('core/template', 'productalert.unsubscribe.confirmation', [
+            'template' => 'productalert/unsubscribe/confirm.phtml',
+            'message' => $message,
+            'action_url' => $actionUrl,
+        ]);
+        $this->getLayout()->getBlock('content')->append($block);
+        $this->getLayout()->getBlock('head')->setTitle($this->__('Product Alert'));
+        $this->renderLayout();
     }
 
     /**
