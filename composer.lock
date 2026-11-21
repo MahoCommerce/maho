@@ -12186,16 +12186,16 @@
         },
         {
             "name": "mahocommerce/maho-phpstan-plugin",
-            "version": "v5.2.2",
+            "version": "v5.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-phpstan-plugin.git",
-                "reference": "fe2c364229dd3fd9a469ddc007e1f3f8ecbff22a"
+                "reference": "5a00dd9b93b51b7e3a7813a7eb55dd6172f22ad7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/fe2c364229dd3fd9a469ddc007e1f3f8ecbff22a",
-                "reference": "fe2c364229dd3fd9a469ddc007e1f3f8ecbff22a",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/5a00dd9b93b51b7e3a7813a7eb55dd6172f22ad7",
+                "reference": "5a00dd9b93b51b7e3a7813a7eb55dd6172f22ad7",
                 "shasum": ""
             },
             "require": {
@@ -12204,6 +12204,7 @@
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.95",
+                "pestphp/pest": "^5",
                 "phpstan/phpstan-deprecation-rules": "^2.0",
                 "phpstan/phpstan-strict-rules": "^2.0",
                 "rector/rector": "^2.6"
@@ -12227,7 +12228,7 @@
             ],
             "description": "Extension for PHPStan to allow static analysis of Maho projects.",
             "support": {
-                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v5.2.2"
+                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v5.3.0"
             },
             "funding": [
                 {
@@ -12243,7 +12244,8 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-11-03T00:14:49+00:00"
+            "time": "2026-11-21T16:52:27+00:00",
+            "published-time": "2026-11-21T16:52:47+00:00"
         },
         {
             "name": "myclabs/deep-copy",
