@@ -376,6 +376,11 @@ class Mage_Oauth_Model_Server
         // validate signature
         $this->_validateSignature();
 
+        // Claim the nonce only after the request has been authenticated
+        if (self::SIGNATURE_PLAIN !== $this->_protocolParams['oauth_signature_method']) {
+            $this->_validateNonce($this->_protocolParams['oauth_nonce'], $this->_protocolParams['oauth_timestamp']);
+        }
+
         // save token if signature validation succeed
         $this->_saveToken();
 
@@ -498,7 +503,6 @@ class Mage_Oauth_Model_Server
             if (empty($this->_protocolParams['oauth_timestamp'])) {
                 $this->_throwException('oauth_timestamp', self::ERR_PARAMETER_ABSENT);
             }
-            $this->_validateNonce($this->_protocolParams['oauth_nonce'], $this->_protocolParams['oauth_timestamp']);
         }
     }
 

@@ -113,10 +113,14 @@ class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
         /** @var Mage_Oauth_Helper_Data $helper */
         $helper = Mage::helper('oauth');
 
-        $this->setType(self::TYPE_ACCESS);
-        $this->setToken($helper->generateToken());
-        $this->setSecret($helper->generateTokenSecret());
-        $this->save();
+        $token = $helper->generateToken();
+        $secret = $helper->generateTokenSecret();
+        if (!$this->getResource()->claimRequestToken((int) $this->getId(), $token, $secret)) {
+            throw new Mage_Core_Exception('Token is already used', Mage_Oauth_Model_Server::ERR_TOKEN_USED);
+        }
+        $this->setType(self::TYPE_ACCESS)
+            ->setToken($token)
+            ->setSecret($secret);
 
         return $this;
     }
