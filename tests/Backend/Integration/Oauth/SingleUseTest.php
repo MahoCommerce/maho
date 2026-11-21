@@ -79,6 +79,32 @@ it('claims a nonce only after the signature is accepted', function (): void {
     }
 });
 
+it('rejects a replayed nonce even when its timestamp differs', function (): void {
+    $nonce = bin2hex(random_bytes(16));
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $table = Mage::getSingleton('core/resource')->getTableName('oauth/nonce');
+    $connection->insert($table, [
+        'nonce' => $nonce,
+        'timestamp' => time() - 1,
+    ]);
+
+    $server = new OauthSingleUseServer($nonce);
+    $server->acceptSignature = true;
+
+    try {
+        $error = null;
+        try {
+            $server->process();
+        } catch (Mage_Core_Exception $exception) {
+            $error = $exception->getCode();
+        }
+
+        expect($error)->toBe(Mage_Oauth_Model_Server::ERR_NONCE_USED);
+    } finally {
+        $connection->delete($table, ['nonce = ?' => $nonce]);
+    }
+});
+
 it('converts one request token to access only once', function (): void {
     $helper = Mage::helper('oauth');
     $consumer = Mage::getModel('oauth/consumer')->setData([

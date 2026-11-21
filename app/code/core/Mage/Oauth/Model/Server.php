@@ -455,15 +455,14 @@ class Mage_Oauth_Model_Server
         }
         /** @var Mage_Oauth_Model_Nonce $nonceObj */
         $nonceObj = Mage::getModel('oauth/nonce');
+        $nonceObj->setNonce($nonce)
+            ->setTimestamp($timestamp);
 
-        $nonceObj->load($nonce, 'nonce');
-
-        if ($nonceObj->getTimestamp() == $timestamp) {
+        try {
+            $nonceObj->save();
+        } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException) {
             $this->_throwException('', self::ERR_NONCE_USED);
         }
-        $nonceObj->setNonce($nonce)
-            ->setTimestamp($timestamp)
-            ->save();
     }
 
     /**
