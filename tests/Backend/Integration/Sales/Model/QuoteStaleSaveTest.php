@@ -166,3 +166,74 @@ it('preserves the lifecycle updates from two saves in one outer transaction', fu
     expect($stored->getIsActive())->toBeTrue()
         ->and($stored->getReservedOrderId())->toBeNull();
 });
+
+it('preserves a newer cart state when an older load recollects totals', function (): void {
+    $this->quote->setTriggerRecollect(true)->save();
+    $loaded = new class extends Mage_Sales_Model_Quote {
+        public Closure $afterHydration;
+
+        #[\Override]
+        protected function _afterLoad()
+        {
+            ($this->afterHydration)();
+            return parent::_afterLoad();
+        }
+    };
+    $loaded->afterHydration = fn() => $this->quote->setIsActive(false)->setReservedOrderId('example-order')->save();
+    $loaded->loadActive($this->quote->getId());
+
+    $stored = Mage::getModel('sales/quote')->loadByIdWithoutStore($this->quote->getId());
+    expect($loaded->getTotalsCollectedFlag())->toBeTrue()
+        ->and($stored->getIsActive())->toBeFalse()
+        ->and($stored->getReservedOrderId())->toBe('example-order')
+        ->and($stored->getTriggerRecollect())->toBeFalse();
+});
+
+it('preserves newer cart state on a direct resource save after an earlier direct save', function (): void {
+    $quoteId = $this->quote->getId();
+    $loaded = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+    $resource = $loaded->getResource();
+    $resource->save($loaded->setIsActive()->setReservedOrderId('first-reservation'));
+
+    $stored = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+    expect($stored->getReservedOrderId())->toBe('first-reservation');
+    $stored->setIsActive(false)->setReservedOrderId('example-order')->save();
+    $resource->save($loaded->setCustomerNote('Example note'));
+
+    $stored = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+    expect($stored->getIsActive())->toBeFalse()
+        ->and($stored->getReservedOrderId())->toBe('example-order')
+        ->and($stored->getCustomerNote())->toBe('Example note');
+});
+
+it('writes a resource after-save assignment on the next save of the same cart', function (): void {
+    $loaded = new class extends Mage_Sales_Model_Quote {
+        public Mage_Sales_Model_Resource_Quote $testResource;
+
+        #[\Override]
+        protected function _getResource()
+        {
+            return $this->testResource;
+        }
+    };
+    $loaded->testResource = new class extends Mage_Sales_Model_Resource_Quote {
+        #[\Override]
+        protected function _afterSave(Mage_Core_Model_Abstract $object)
+        {
+            if ($object->getReservedOrderId() === 'first-reservation') {
+                $object->setReservedOrderId('next-reservation');
+            }
+            return parent::_afterSave($object);
+        }
+    };
+    $quoteId = $this->quote->getId();
+    $loaded->loadByIdWithoutStore($quoteId)->setReservedOrderId('first-reservation')->save();
+
+    $stored = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+    expect($stored->getReservedOrderId())->toBe('first-reservation');
+
+    $loaded->setCustomerNote('Example note')->save();
+
+    $stored = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+    expect($stored->getReservedOrderId())->toBe('next-reservation');
+});

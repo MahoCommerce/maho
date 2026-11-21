@@ -86,7 +86,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      */
     protected $_preventSaving = false;
 
-    private const array CHECKOUT_FIELDS = ['is_active' => true, 'reserved_order_id' => true];
+    public const array CHECKOUT_FIELDS = ['is_active' => true, 'reserved_order_id' => true];
 
     /** @var array<string, true> */
     private array $checkoutFieldAssignments = [];
@@ -1840,14 +1840,10 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return parent::setData($key, $value);
     }
 
-    #[\Override]
-    public function setOrigData($key = null, $data = null)
+    public function rememberLoadedCheckoutFields(): void
     {
-        if ($key === null) {
-            $this->checkoutFieldAssignments = [];
-            $this->savedCheckoutFields = [];
-        }
-        return parent::setOrigData($key, $data);
+        $this->checkoutFieldAssignments = [];
+        $this->savedCheckoutFields = array_intersect_key($this->getData(), self::CHECKOUT_FIELDS);
     }
 
     /** @return array<string, mixed> */
