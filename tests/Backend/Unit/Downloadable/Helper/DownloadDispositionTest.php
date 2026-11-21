@@ -26,6 +26,6 @@ it('provides an ASCII fallback and removes control characters', function () {
     );
 
     expect($header)->toStartWith('inline;')
-        ->toContain('filename=r_sum__.pdf')
+        ->toContain('filename=r__sum__.pdf')
         ->toContain("filename*=utf-8''r%C3%A9sum%C3%A9.pdf");
 });
