@@ -332,11 +332,21 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         $variables['name'] = reset($names);
 
         $this->setUseAbsoluteLinks(true);
-        // One emulation for the body and the subject, not one for each
-        [$text, $subject] = $this->withDesignConfig(fn(): array => [
-            $this->getProcessedTemplate($variables),
-            $this->getProcessedTemplateSubject($variables),
-        ]);
+
+        // The email belongs to the store of its design config, so its event and its message are made there too
+        return $this->withDesignConfig(fn(): bool => $this->renderAndDispatch($emails, $names, $variables));
+    }
+
+    /**
+     * Render the email for $emails and $names, and send it or put it in the queue
+     *
+     * @param list<string> $emails
+     * @param list<string> $names
+     */
+    private function renderAndDispatch(array $emails, array $names, array $variables): bool
+    {
+        $text = $this->getProcessedTemplate($variables);
+        $subject = $this->getProcessedTemplateSubject($variables);
 
         $setReturnPath = Mage::getStoreConfig(self::XML_PATH_SENDING_SET_RETURN_PATH);
         $returnPathEmail = match ($setReturnPath) {

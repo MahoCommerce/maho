@@ -184,6 +184,35 @@ describe('Store emulation puts back the environment of the caller', function () 
             ->and(Mage::getDesign()->getArea())->toBe(Mage_Core_Model_App_Area::AREA_FRONTEND);
     });
 
+    it('dispatches the event of an email in the store of its design config', function () {
+        Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+        $observer = new class {
+            public ?int $storeId = null;
+
+            public function record(): never
+            {
+                $this->storeId = (int) Mage::app()->getStore()->getId();
+                throw new \RuntimeException('Stop before the send');
+            }
+        };
+        Mage::register('_singleton/emulation_test/observer', $observer);
+        Mage::getConfig()->setNode('global/events/email_template_dispatch_before/observers/emulation_test/type', 'singleton');
+        Mage::getConfig()->setNode('global/events/email_template_dispatch_before/observers/emulation_test/class', 'emulation_test/observer');
+        Mage::getConfig()->setNode('global/events/email_template_dispatch_before/observers/emulation_test/method', 'record');
+
+        $template = Mage::getModel('core/email_template')
+            ->setDesignConfig(['area' => Mage_Core_Model_App_Area::AREA_FRONTEND, 'store' => 1])
+            ->setTemplateType(Mage_Core_Model_Template::TYPE_TEXT)
+            ->setTemplateText('Hello')
+            ->setTemplateSubject('Subject')
+            ->setSenderName('Store')
+            ->setSenderEmail('store@example.com');
+
+        expect(fn() => $template->send('customer@example.com', 'Customer'))->toThrow(\RuntimeException::class, 'Stop before the send')
+            ->and($observer->storeId)->toBe(1)
+            ->and((int) Mage::app()->getStore()->getId())->toBe(Mage_Core_Model_App::ADMIN_STORE_ID);
+    });
+
     it('keeps startEnvironmentEmulation() and stopEnvironmentEmulation() working', function () use ($startAdmin, $expectAdmin, $otherLocale) {
         $locale = $otherLocale();
         $startAdmin($locale);

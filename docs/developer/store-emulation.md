@@ -46,7 +46,7 @@ If the callback needs one of these for the emulated store, set it in the callbac
 
 ## Email templates
 
-An email template renders in the store of its design config. `send()` renders the body and the subject in one emulation:
+An email belongs to the store of its design config. `send()` runs in that store: it renders the body and the subject, dispatches `email_template_dispatch_before`, and sends the message or puts it in the queue, all in one emulation:
 
 ```php
 $template = Mage::getModel('core/email_template');
