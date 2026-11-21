@@ -23,6 +23,32 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
         $this->_init('cms/page', 'page_id');
     }
 
+    public function advanceEditRevision(int $pageId, ?int $expectedRevision): void
+    {
+        $adapter = $this->_getWriteAdapter();
+        $column = Mage_Cms_Model_Page::EDIT_REVISION;
+        $condition = ['page_id = ?' => $pageId];
+        if ($expectedRevision !== null) {
+            $condition[$adapter->quoteIdentifier($column) . ' = ?'] = $expectedRevision;
+        }
+        $rows = $adapter->update($this->getMainTable(), [
+            $column => new Maho\Db\Expr($adapter->quoteIdentifier($column) . ' + 1'),
+        ], $condition);
+        if ($expectedRevision !== null && $rows === 0) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('cms')->__(
+                'This page changed after you opened it. Copy your edits and reopen the page before saving.',
+            ));
+        }
+    }
+
+    #[\Override]
+    protected function _prepareDataForSave(Mage_Core_Model_Abstract $object)
+    {
+        $data = parent::_prepareDataForSave($object);
+        unset($data[Mage_Cms_Model_Page::EDIT_REVISION]);
+        return $data;
+    }
+
     /**
      * @throws Mage_Core_Exception_Conflict when the configuration uses the page
      */

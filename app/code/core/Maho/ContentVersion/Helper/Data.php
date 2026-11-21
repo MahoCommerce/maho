@@ -23,7 +23,7 @@ class Maho_ContentVersion_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Create a version snapshot of the entity's original state (before modification).
      *
-     * All model fields are captured automatically, excluding only the primary key.
+     * Model fields are captured automatically, excluding the primary key and the CMS page edit revision.
      * Uses getOrigData() to capture the DB state before in-memory changes.
      * Falls back to getData() when origData is not available (e.g. restoreVersion).
      */
@@ -36,9 +36,12 @@ class Maho_ContentVersion_Helper_Data extends Mage_Core_Helper_Abstract
         $idField = $model->getIdFieldName();
         $hasOrigData = $model->getOrigData() !== null;
 
-        // Snapshot all fields except the primary key
         $sourceData = $hasOrigData ? $model->getOrigData() : $model->getData();
-        $snapshot = array_diff_key($sourceData, [$idField => true]);
+        $excluded = [$idField => true];
+        if ($model instanceof Mage_Cms_Model_Page) {
+            $excluded[Mage_Cms_Model_Page::EDIT_REVISION] = true;
+        }
+        $snapshot = array_diff_key($sourceData, $excluded);
 
         // Skip if nothing meaningful has changed
         if ($hasOrigData) {

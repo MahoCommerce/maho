@@ -25,6 +25,8 @@ class Mage_Cms_Model_Page extends Mage_Core_Model_Abstract
     /** The EAV entity type that holds the custom attributes of CMS pages. */
     public const ENTITY = 'cms_page';
 
+    public const EDIT_REVISION = '_edit_revision';
+
     /**
      * Page's Statuses
      */
@@ -43,10 +45,27 @@ class Mage_Cms_Model_Page extends Mage_Core_Model_Abstract
     #[\Override]
     protected $_eventPrefix = 'cms_page';
 
+    private ?int $expectedEditRevision = null;
+
     #[\Override]
     protected function _construct()
     {
         $this->_init('cms/page');
+    }
+
+    public function setExpectedEditRevision(?int $revision): void
+    {
+        $this->expectedEditRevision = $revision;
+    }
+
+    #[\Override]
+    protected function _beforeSave()
+    {
+        if ($this->getId()) {
+            // Lock the page before the save observers write its history.
+            $this->getResource()->advanceEditRevision((int) $this->getId(), $this->expectedEditRevision);
+        }
+        return parent::_beforeSave();
     }
 
     /**

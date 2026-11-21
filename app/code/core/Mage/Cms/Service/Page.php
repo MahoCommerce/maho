@@ -89,6 +89,16 @@ class Mage_Cms_Service_Page
         return $page;
     }
 
+    public function saveWithEditRevision(Mage_Cms_Model_Page $page, int $revision): Mage_Cms_Model_Page
+    {
+        $page->setExpectedEditRevision($revision);
+        try {
+            return $this->save($page);
+        } finally {
+            $page->setExpectedEditRevision(null);
+        }
+    }
+
     /**
      * @throws Mage_Core_Exception_Conflict when the configuration uses the page, for example as the home page
      */

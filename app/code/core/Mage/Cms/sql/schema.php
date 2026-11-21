@@ -80,6 +80,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('content', Types::TEXT, length: 2097152, notNull: false))
             ->addColumn(Schema::column('creation_time', Types::DATETIME_IMMUTABLE, notNull: false))
             ->addColumn(Schema::column('update_time', Types::DATETIME_IMMUTABLE, notNull: false))
+            ->addColumn(Schema::column('_edit_revision', Types::INTEGER, default: 0))
             ->addColumn(Schema::column('is_active', Types::SMALLINT, default: 1))
             ->addColumn(Schema::column('sort_order', Types::SMALLINT, default: 0))
             ->addColumn(Schema::column('layout_update_xml', Types::TEXT, length: 65535, notNull: false))

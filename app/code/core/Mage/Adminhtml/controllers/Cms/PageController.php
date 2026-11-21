@@ -85,6 +85,9 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
         $data = Mage::getSingleton('adminhtml/session')->getFormData(true);
         if (!empty($data)) {
             $data['store_id'] = $data['stores'];
+            if ($model->getId()) {
+                $data[Mage_Cms_Model_Page::EDIT_REVISION] ??= $model->getData(Mage_Cms_Model_Page::EDIT_REVISION);
+            }
             $model->setData($data);
         }
 
@@ -116,13 +119,27 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
         $session = $this->_getSession();
         $id = (int) $this->getRequest()->getParam('page_id');
         $model = Mage::getModel('cms/page');
+        $revision = null;
         try {
             if ($id) {
                 $model = $this->pageService()->getById($id);
+                if (array_key_exists(Mage_Cms_Model_Page::EDIT_REVISION, $data)) {
+                    $revision = filter_var($data[Mage_Cms_Model_Page::EDIT_REVISION], FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+                    if ($revision === false) {
+                        $data[Mage_Cms_Model_Page::EDIT_REVISION] = '';
+                        throw new Mage_Core_Exception_Conflict(Mage::helper('cms')->__(
+                            'The page revision is invalid. Copy your edits and reopen the page before saving.',
+                        ));
+                    }
+                }
             }
-            $model->setData($data);
+            $model->setData(array_diff_key($data, [Mage_Cms_Model_Page::EDIT_REVISION => true]));
             Mage::dispatchEvent('cms_page_prepare_save', ['page' => $model, 'request' => $this->getRequest()]);
-            $this->pageService()->save($model);
+            if ($revision === null) {
+                $this->pageService()->save($model);
+            } else {
+                $this->pageService()->saveWithEditRevision($model, $revision);
+            }
 
             $session->addSuccess(Mage::helper('cms')->__('The page has been saved.'));
             $session->setFormData(false);
