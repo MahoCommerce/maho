@@ -18,16 +18,19 @@ class Mage_Directory_Model_Currency_Import_Testgood extends Mage_Directory_Model
 {
     public static int $calls = 0;
 
+    public static array $rates = ['XTS' => ['XTS' => 1.0]];
+
     protected function _convert($currencyFrom, $currencyTo)
     {
         return 1;
     }
 
+    #[\Override]
     public function fetchRates()
     {
         self::$calls++;
         $this->_messages = [];
-        return ['XTS' => ['XTS' => 1.0]];
+        return self::$rates;
     }
 }
 
@@ -35,14 +38,21 @@ class Mage_Directory_Model_Currency_Import_Testbad extends Mage_Directory_Model_
 {
     public static int $calls = 0;
 
+    public static ?array $ratesWithoutWarnings = null;
+
     protected function _convert($currencyFrom, $currencyTo)
     {
         return 1;
     }
 
+    #[\Override]
     public function fetchRates()
     {
         self::$calls++;
+        if (self::$ratesWithoutWarnings !== null) {
+            $this->_messages = [];
+            return self::$ratesWithoutWarnings;
+        }
         $this->_messages = ['service is down'];
         return ['XTS' => ['XTS' => null]];
     }
@@ -78,7 +88,9 @@ function deleteTestRates(): void
 describe('currency import fallback', function () {
     beforeEach(function () {
         Mage_Directory_Model_Currency_Import_Testgood::$calls = 0;
+        Mage_Directory_Model_Currency_Import_Testgood::$rates = ['XTS' => ['XTS' => 1.0]];
         Mage_Directory_Model_Currency_Import_Testbad::$calls = 0;
+        Mage_Directory_Model_Currency_Import_Testbad::$ratesWithoutWarnings = null;
 
         deleteTestRates();
 
@@ -119,6 +131,51 @@ describe('currency import fallback', function () {
         expect(Mage_Directory_Model_Currency_Import_Testbad::$calls)->toBe(0);
         expect(testRateExists())->toBeTrue();
     });
+
+    it('rejects an import with a rate that cannot be stored and tries the next service', function (float $invalidRate, bool $fallbackEnabled): void {
+        Mage::getModel('directory/currency')->saveRates(['XTS' => ['XTA' => 1.25, 'XTB' => 2.5]]);
+        $listener = new class {
+            public array $batches = [];
+
+            public function record(Maho\Event\Observer $observer): void
+            {
+                $this->batches[] = $observer->getData('rates');
+            }
+        };
+        Mage::register('_singleton/currency_import_batch_listener', $listener);
+        (function (): void {
+            $this->_events['global']['directory_currency_rates_save_after']['observers']['currency_import_batch_listener']
+                = ['type' => 'singleton', 'model' => 'currency_import_batch_listener', 'method' => 'record'];
+        })->call(Mage::app());
+        Mage_Directory_Model_Currency_Import_Testbad::$ratesWithoutWarnings = ['XTS' => ['XTA' => 2.0, 'XTB' => $invalidRate]];
+        Mage_Directory_Model_Currency_Import_Testgood::$rates = ['XTS' => ['XTA' => 1.5, 'XTB' => 3.0]];
+        registerFakeService('testbad', 'directory/currency_import_testbad', 10);
+        registerFakeService('testgood', 'directory/currency_import_testgood', 20);
+        $this->store->setConfig('currency/testgood/active', $fallbackEnabled ? '1' : '0');
+        $this->store->setConfig(Mage_Directory_Model_Observer::IMPORT_SERVICE, 'testbad');
+        $observer = new class extends Mage_Directory_Model_Observer {
+            public array $warnings = [];
+
+            #[\Override]
+            protected function _sendImportWarnings(array $importWarnings): void
+            {
+                $this->warnings = $importWarnings;
+            }
+        };
+
+        $observer->scheduledUpdateCurrencyRates();
+
+        $helper = Mage::helper('directory');
+        expect($helper->getRate('XTS', 'XTA'))->toBe($fallbackEnabled ? 1.5 : 1.25)
+            ->and($helper->getRate('XTS', 'XTB'))->toBe($fallbackEnabled ? 3.0 : 2.5)
+            ->and(Mage_Directory_Model_Currency_Import_Testgood::$calls)->toBe($fallbackEnabled ? 1 : 0)
+            ->and($listener->batches)->toBe($fallbackEnabled ? [Mage_Directory_Model_Currency_Import_Testgood::$rates] : [])
+            ->and($observer->warnings)->toContain('Testbad: Unable to store rate for XTS to XTB.');
+    })->with([
+        'below the column scale' => [1e-15, true],
+        'above the column precision' => [5e13, true],
+        'without a fallback service' => [1e-15, false],
+    ]);
 
     it('tries the enabled services in sort order when none is configured', function () {
         registerFakeService('testgood', 'directory/currency_import_testgood', 5);

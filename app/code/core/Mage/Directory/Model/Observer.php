@@ -117,8 +117,21 @@ class Mage_Directory_Model_Observer
         }
 
         $warnings = array_merge($warnings, $result['warnings']);
+        $rates = $result['rates'];
+        if ($warnings !== [] || $rates === []) {
+            return null;
+        }
 
-        return $warnings === [] && $result['rates'] !== [] ? $result['rates'] : null;
+        foreach ($rates as $currencyFrom => $currencyRates) {
+            foreach ($currencyRates as $currencyTo => $rate) {
+                if (!Mage_Directory_Model_Resource_Currency::isStorableRate($rate)) {
+                    $warnings[] = Mage::helper('directory')->__('Unable to store rate for %s to %s.', $currencyFrom, $currencyTo);
+                    return null;
+                }
+            }
+        }
+
+        return $rates;
     }
 
     protected function _sendImportWarnings(array $importWarnings): void
