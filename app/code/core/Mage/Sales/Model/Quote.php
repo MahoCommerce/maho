@@ -94,6 +94,8 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     /** @var array<string, mixed> */
     private array $savedCheckoutFields = [];
 
+    private int $checkoutLoadVersion = 0;
+
     /**
      * Init resource model
      */
@@ -1842,6 +1844,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
 
     public function rememberLoadedCheckoutFields(): void
     {
+        $this->checkoutLoadVersion++;
         $this->checkoutFieldAssignments = [];
         $this->savedCheckoutFields = array_intersect_key($this->getData(), self::CHECKOUT_FIELDS);
     }
@@ -1866,6 +1869,21 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
                 unset($this->checkoutFieldAssignments[$field]);
             }
         }
+    }
+
+    public function getCheckoutFieldsRollback(): Closure
+    {
+        $id = $this->getId();
+        $loadVersion = $this->checkoutLoadVersion;
+        $savedFields = $this->savedCheckoutFields;
+        $assignments = $this->checkoutFieldAssignments;
+
+        return function () use ($id, $loadVersion, $savedFields, $assignments): void {
+            if ($this->getId() === $id && $this->checkoutLoadVersion === $loadVersion) {
+                $this->savedCheckoutFields = $savedFields;
+                $this->checkoutFieldAssignments += $assignments;
+            }
+        };
     }
 
     public function getCouponCode(): string

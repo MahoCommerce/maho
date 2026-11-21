@@ -237,3 +237,96 @@ it('writes a resource after-save assignment on the next save of the same cart', 
     $stored = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
     expect($stored->getReservedOrderId())->toBe('next-reservation');
 });
+
+it('keeps deliberate cart changes available for retry after an adapter rollback', function (): void {
+    $quoteId = $this->quote->getId();
+    $loaded = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $adapter->beginTransaction();
+    try {
+        $loaded->setIsActive(false)->setReservedOrderId('example-order')->save();
+    } finally {
+        $adapter->rollBack();
+    }
+
+    $this->quote->setCustomerNote('First note')->save();
+    $stored = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+    expect($stored->getIsActive())->toBeTrue()->and($stored->getReservedOrderId())->toBeNull();
+
+    $loaded->setCustomerNote('Second note')->save();
+
+    $stored->loadByIdWithoutStore($quoteId);
+    expect($stored->getIsActive())->toBeFalse()
+        ->and($stored->getReservedOrderId())->toBe('example-order')
+        ->and($stored->getCustomerNote())->toBe('Second note');
+});
+
+it('preserves a newer cart state after a direct adapter commit', function (): void {
+    $quoteId = $this->quote->getId();
+    $loaded = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $adapter->beginTransaction();
+    try {
+        $loaded->setIsActive(false)->setReservedOrderId('first-reservation')->save();
+        $adapter->commit();
+    } catch (Throwable $exception) {
+        $adapter->rollBack();
+        throw $exception;
+    }
+
+    $stored = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+    expect($stored->getIsActive())->toBeFalse()->and($stored->getReservedOrderId())->toBe('first-reservation');
+    $stored->getResource()->save($stored->setIsActive()->setReservedOrderId(null));
+
+    $loaded->setCustomerNote('Example note')->save();
+
+    $stored->loadByIdWithoutStore($quoteId);
+    expect($stored->getIsActive())->toBeTrue()
+        ->and($stored->getReservedOrderId())->toBeNull()
+        ->and($stored->getCustomerNote())->toBe('Example note');
+});
+
+it('preserves a newer cart state between two saves of another copy in one transaction', function (): void {
+    $quoteId = $this->quote->getId();
+    $loaded = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $adapter->beginTransaction();
+    try {
+        $loaded->setIsActive(false)->setReservedOrderId('first-reservation')->save();
+        $this->quote->setIsActive()->setReservedOrderId(null)->save();
+        $loaded->setCustomerNote('Example note')->save();
+        $adapter->commit();
+    } catch (Throwable $exception) {
+        $adapter->rollBack();
+        throw $exception;
+    }
+
+    $stored = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+    expect($stored->getIsActive())->toBeTrue()
+        ->and($stored->getReservedOrderId())->toBeNull()
+        ->and($stored->getCustomerNote())->toBe('Example note');
+});
+
+it('retries an explicit reopen with the loaded values after rolling back multiple saves', function (): void {
+    $quoteId = $this->quote->getId();
+    $loaded = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+    $this->quote->setIsActive(false)->setReservedOrderId('stored-reservation')->save();
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $adapter->beginTransaction();
+    try {
+        $loaded->setIsActive(false)->setReservedOrderId('first-reservation')->save();
+        $loaded->setIsActive()->setReservedOrderId(null)->save();
+    } finally {
+        $adapter->rollBack();
+    }
+
+    $stored = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+    expect($stored->getIsActive())->toBeFalse()->and($stored->getReservedOrderId())->toBe('stored-reservation');
+
+    $loaded->setCustomerNote('Example note')->save();
+
+    $stored->loadByIdWithoutStore($quoteId);
+    expect($stored->getIsActive())->toBeTrue()
+        ->and($stored->getReservedOrderId())->toBeNull()
+        ->and($stored->getCustomerNote())->toBe('Example note');
+});

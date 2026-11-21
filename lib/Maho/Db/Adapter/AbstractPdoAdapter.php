@@ -91,6 +91,9 @@ abstract class AbstractPdoAdapter implements AdapterInterface
      */
     protected int $_transactionLevel = 0;
 
+    /** @var list<\Closure(): void> */
+    private array $afterRollbackCallbacks = [];
+
     /**
      * Set attribute to connection flag
      */
@@ -231,6 +234,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         $this->_connection = null;
         $this->_connectionFlagsSet = false;
         $this->_transactionLevel = 0;
+        $this->runAfterRollbackCallbacks();
     }
 
     /**
@@ -276,6 +280,22 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     // Transaction Management (Platform-Agnostic)
     // =========================================================================
 
+    public function afterTransactionRollback(\Closure $callback): void
+    {
+        if ($this->_transactionLevel > 0) {
+            $this->afterRollbackCallbacks[] = $callback;
+        }
+    }
+
+    private function runAfterRollbackCallbacks(): void
+    {
+        $callbacks = $this->afterRollbackCallbacks;
+        $this->afterRollbackCallbacks = [];
+        foreach (array_reverse($callbacks) as $callback) {
+            $callback();
+        }
+    }
+
     #[\Override]
     public function beginTransaction(): static
     {
@@ -309,6 +329,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             $this->_debugTimer();
             $this->_connection->commit();
             $this->_debugStat(self::DEBUG_TRANSACTION, 'COMMIT');
+            $this->afterRollbackCallbacks = [];
         }
         if ($this->_transactionLevel > 0) {
             --$this->_transactionLevel;
@@ -319,13 +340,17 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     #[\Override]
     public function rollBack(): static
     {
+        if ($this->_transactionLevel === 0) {
+            return $this;
+        }
         if ($this->_transactionLevel === 1) {
             $this->_debugTimer();
             $this->_connection->rollBack();
             $this->_debugStat(self::DEBUG_TRANSACTION, 'ROLLBACK');
         }
-        if ($this->_transactionLevel > 0) {
-            --$this->_transactionLevel;
+        --$this->_transactionLevel;
+        if ($this->_transactionLevel === 0) {
+            $this->runAfterRollbackCallbacks();
         }
         return $this;
     }
