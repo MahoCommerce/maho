@@ -28,8 +28,6 @@ class Mage_Cron_Model_Observer
 
     protected ?Mage_Cron_Model_Resource_Schedule_Collection $_pendingSchedules = null;
 
-    private ?array $generatedScheduleKeys = null;
-
     /**
      * Check if cron is running and warn admin users if not
      */
@@ -201,18 +199,15 @@ class Mage_Cron_Model_Observer
             $exists[$schedule->getJobCode() . '/' . $schedule->getScheduledAt()] = 1;
         }
 
-        $this->generatedScheduleKeys = [];
-        try {
-            foreach (['crontab/jobs', 'default/crontab/jobs'] as $path) {
-                $config = Mage::getConfig()->getNode($path);
-                if ($config instanceof Mage_Core_Model_Config_Element) {
-                    $this->_generateJobs($config->children(), $exists);
-                }
+        // A job code that an attribute declares belongs to the attribute, as in dispatch().
+        $compiledJobs = Maho::getCompiledAttributes()['crontab'] ?? [];
+        foreach (['crontab/jobs', 'default/crontab/jobs'] as $path) {
+            $config = Mage::getConfig()->getNode($path);
+            if ($config instanceof Mage_Core_Model_Config_Element) {
+                $this->_generateJobs(array_diff_key(iterator_to_array($config->children()), $compiledJobs), $exists);
             }
-            $this->_generateCompiledJobs($exists + $this->generatedScheduleKeys);
-        } finally {
-            $this->generatedScheduleKeys = null;
         }
+        $this->_generateCompiledJobs($exists);
 
         /**
          * save time schedules generation was ran with no expiration
@@ -225,7 +220,7 @@ class Mage_Cron_Model_Observer
     /**
      * Generate jobs for config information
      *
-     * @param   SimpleXMLElement $jobs
+     * @param   iterable<string, SimpleXMLElement> $jobs
      * @param   array $exists
      * @return  $this
      */
@@ -256,8 +251,8 @@ class Mage_Cron_Model_Observer
                 ->setStatus(Mage_Cron_Model_Schedule::STATUS_PENDING);
 
             for ($time = $now; $time < $timeAhead; $time += 60) {
-                $key = $jobCode . '/' . gmdate('Y-m-d H:i:00', $time);
-                if (!empty($exists[$key]) || isset($this->generatedScheduleKeys[$key])) {
+                $ts = gmdate('Y-m-d H:i:00', $time);
+                if (!empty($exists[$jobCode . '/' . $ts])) {
                     // already scheduled
                     continue;
                 }
@@ -266,9 +261,6 @@ class Mage_Cron_Model_Observer
                     continue;
                 }
                 $schedule->unsScheduleId()->save();
-                if ($this->generatedScheduleKeys !== null) {
-                    $this->generatedScheduleKeys[$key] = 1;
-                }
             }
         }
         return $this;

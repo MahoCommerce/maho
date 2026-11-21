@@ -10,13 +10,13 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-it('schedules distinct times from XML and attributes and keeps legacy XML jobs', function (string $compiledExpression): void {
+it('schedules an attribute job once when the admin saves its schedule, and keeps legacy XML jobs', function (): void {
     $configPath = 'crontab/jobs/sitemap_generate/schedule/cron_expr';
     Mage::getConfig()->setNode('default/' . $configPath, '* * * * *');
     Mage::getConfig()->setNode('crontab/jobs/legacy_schedule_test/schedule/cron_expr', '* * * * *');
 
     $app = Mage::app();
-    $app->getStore()->setConfig($configPath, $compiledExpression);
+    $app->getStore()->setConfig($configPath, '* * * * *');
     $app->getStore()->setConfig(Mage_Cron_Model_Observer::XML_PATH_SCHEDULE_AHEAD_FOR, '2');
     $app->removeCache(Mage_Cron_Model_Observer::CACHE_KEY_LAST_SCHEDULE_GENERATE_AT);
 
@@ -41,8 +41,4 @@ it('schedules distinct times from XML and attributes and keeps legacy XML jobs',
         $adapter->rollBack();
         $app->removeCache(Mage_Cron_Model_Observer::CACHE_KEY_LAST_SCHEDULE_GENERATE_AT);
     }
-})->with([
-    'same expression in both sources' => '* * * * *',
-    'empty expression in the attribute' => '',
-    'additional times from XML' => '*/2 * * * *',
-]);
+});

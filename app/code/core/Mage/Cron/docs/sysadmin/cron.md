@@ -230,7 +230,7 @@ For config-driven schedules:
 #[Maho\Config\CronJob('catalog_product_alert', configPath: 'crontab/jobs/catalog_product_alert/schedule/cron_expr')]
 ```
 
-Remove the corresponding XML blocks from `config.xml` after migrating. If both sources schedule a job for the same time, the scheduler creates one pending entry for that time.
+Remove the corresponding XML blocks from `config.xml` after migrating. If an attribute and an XML node declare the same job code, the attribute wins.
 
 ### Automated migration
 
