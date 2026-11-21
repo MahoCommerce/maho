@@ -94,18 +94,15 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
 
         try {
             foreach ($documents as $document) {
-                if ($document->getStoreId()) {
-                    Mage::app()->getLocale()->emulate($document->getStoreId());
-                    Mage::app()->setCurrentStore($document->getStoreId());
-                }
-
-                // Create block directly instead of using layout
-                $blockClass = $this->_getBlockClass();
-                $block = new $blockClass();
-
-                $block->setDocument($document);
-                $block->setOrder($document->getOrder());
-                $blockHtml = $block->toHtml();
+                $storeId = (int) $document->getStoreId();
+                $blockHtml = $storeId
+                    ? Mage::app()->emulate($storeId, function () use ($document): string {
+                        // The emulation switches to the design of the store, but the templates and their translate.csv are in the admin design
+                        $this->useAdminDesign();
+                        Mage::app()->getTranslator()->init(Mage_Core_Model_App_Area::AREA_ADMINHTML);
+                        return $this->renderDocumentHtml($document);
+                    }, Mage_Core_Model_App_Area::AREA_ADMINHTML)
+                    : $this->renderDocumentHtml($document);
 
                 if (!empty($blockHtml)) {
                     if (!$isFirst) {
@@ -113,13 +110,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
                     }
                     $html .= $blockHtml;
                     $isFirst = false;
-                }
-
-                // Clear block reference for memory management
-                unset($block);
-
-                if ($document->getStoreId()) {
-                    Mage::app()->getLocale()->revert();
                 }
 
                 // Memory management for large document sets
@@ -131,6 +121,15 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
         } finally {
             $restoreDesign();
         }
+    }
+
+    protected function renderDocumentHtml(\Maho\DataObject $document): string
+    {
+        $blockClass = $this->_getBlockClass();
+        $block = new $blockClass();
+        $block->setDocument($document);
+        $block->setOrder($document->getOrder());
+        return $block->toHtml();
     }
 
     /**
