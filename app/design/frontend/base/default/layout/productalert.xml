@@ -25,10 +25,11 @@ SPDX-License-Identifier: AFL-3.0
         </reference>
     </catalog_product_view>
     <productalert_unsubscribe_confirm>
+        <update handle="customer_account"/>
         <reference name="head">
             <action method="setTitle" translate="title" module="productalert"><title>Product Alert</title></action>
         </reference>
-        <reference name="content">
+        <reference name="my.account.wrapper">
             <block type="core/template" name="productalert.unsubscribe.confirm" template="productalert/unsubscribe/confirm.phtml"/>
         </reference>
     </productalert_unsubscribe_confirm>
