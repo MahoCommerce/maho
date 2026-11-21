@@ -123,6 +123,10 @@ class Maho_Captcha_Model_Observer
         } elseif ($url = $request->getParam(Mage_Core_Controller_Varien_Action::PARAM_NAME_URL_ENCODED)) {
             $refererUrl = Mage::helper('core')->urlDecodeAndEscape($url);
         }
+        $refererUrl = (string) $refererUrl;
+        if ($refererUrl === '' || !Mage::helper('core/url')->isInternalUrl($refererUrl)) {
+            $refererUrl = Mage::getBaseUrl();
+        }
         $controller->getResponse()->setRedirect($refererUrl);
     }
 }
