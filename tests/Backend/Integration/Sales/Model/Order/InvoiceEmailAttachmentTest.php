@@ -101,6 +101,14 @@ describe('Invoice email PDF attachment', function () {
         expect((int) Mage::app()->getStore()->getId())->toBe(Mage_Core_Model_App::ADMIN_STORE_ID);
     });
 
+    it('puts one stylesheet in a PDF of several documents', function () {
+        $pdf = Mage::getModel('sales/order_pdf_invoice');
+        $html = (new ReflectionMethod($pdf, '_renderDocumentsHtml'))->invoke($pdf, [createRenderableInvoice(), createRenderableInvoice()]);
+
+        expect(substr_count($html, '<style>'))->toBe(1)
+            ->and(substr_count($html, '<html>'))->toBe(1);
+    });
+
     it('renders the PDF templates of the store from an admin request, and restores the admin design', function () {
         $invoice = createRenderableInvoice();
 
