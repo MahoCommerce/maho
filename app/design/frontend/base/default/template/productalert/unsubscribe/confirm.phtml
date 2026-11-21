@@ -3,24 +3,20 @@
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: AFL-3.0
- * @package Mage_ProductAlert
+ * @package base_default
  */
 
 /** @var Mage_Core_Block_Template $this */
 ?>
 <div class="page-title">
-    <h1><?= $this->__('Product Alert') ?></h1>
+    <h1><?= $this->helper('productalert')->__('Product Alert') ?></h1>
 </div>
 <?= $this->getMessagesBlock()->toHtml() ?>
 <p><?= $this->escapeHtml($this->getMessage()) ?></p>
-<form action="<?= $this->escapeUrl($this->getActionUrl()) ?>" method="post">
+<form action="" method="post">
     <?= $this->getBlockHtml('formkey') ?>
     <div class="buttons-set">
-        <a class="back-link" href="<?= $this->escapeUrl($this->getUrl('customer/account/')) ?>">
-            <small>&laquo; </small><?= $this->__('Back') ?>
-        </a>
-        <button type="submit" class="button" title="<?= $this->__('Unsubscribe') ?>">
-            <span><span><?= $this->__('Unsubscribe') ?></span></span>
-        </button>
+        <p class="back-link"><a href="<?= $this->escapeUrl($this->getUrl('customer/account/')) ?>"><small>&laquo; </small><?= $this->__('Back') ?></a></p>
+        <button type="submit" title="<?= $this->quoteEscape($this->helper('productalert')->__('Unsubscribe')) ?>" class="button"><?= $this->helper('productalert')->__('Unsubscribe') ?></button>
     </div>
 </form>

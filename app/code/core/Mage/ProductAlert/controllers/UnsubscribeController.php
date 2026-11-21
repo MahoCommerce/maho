@@ -45,10 +45,7 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
         }
 
         if (!$this->getRequest()->isPost()) {
-            $this->renderConfirmation(
-                $this->__('Unsubscribe from price alerts for this product?'),
-                Mage::getUrl('productalert/unsubscribe/price', ['product' => $productId]),
-            );
+            $this->renderConfirmation($this->__('Unsubscribe from price alerts for %s?', $product->getName()));
             return;
         }
 
@@ -65,10 +62,7 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
     public function priceAllAction(): void
     {
         if (!$this->getRequest()->isPost()) {
-            $this->renderConfirmation(
-                $this->__('Unsubscribe from all price alerts?'),
-                Mage::getUrl('productalert/unsubscribe/priceAll'),
-            );
+            $this->renderConfirmation($this->__('Unsubscribe from all price alerts?'));
             return;
         }
 
@@ -108,10 +102,7 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
         }
 
         if (!$this->getRequest()->isPost()) {
-            $this->renderConfirmation(
-                $this->__('Unsubscribe from stock alerts for this product?'),
-                Mage::getUrl('productalert/unsubscribe/stock', ['product' => $productId]),
-            );
+            $this->renderConfirmation($this->__('Unsubscribe from stock alerts for %s?', $product->getName()));
             return;
         }
 
@@ -128,10 +119,7 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
     public function stockAllAction(): void
     {
         if (!$this->getRequest()->isPost()) {
-            $this->renderConfirmation(
-                $this->__('Unsubscribe from all stock alerts?'),
-                Mage::getUrl('productalert/unsubscribe/stockAll'),
-            );
+            $this->renderConfirmation($this->__('Unsubscribe from all stock alerts?'));
             return;
         }
 
@@ -150,19 +138,12 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
         $this->_redirect('customer/account/');
     }
 
-    private function renderConfirmation(string $message, string $actionUrl): void
+    private function renderConfirmation(string $message): void
     {
         $this->loadLayout();
         $this->_initLayoutMessages('customer/session');
         $this->_initLayoutMessages('catalog/session');
-
-        $block = $this->getLayout()->createBlock('core/template', 'productalert.unsubscribe.confirmation', [
-            'template' => 'productalert/unsubscribe/confirm.phtml',
-            'message' => $message,
-            'action_url' => $actionUrl,
-        ]);
-        $this->getLayout()->getBlock('content')->append($block);
-        $this->getLayout()->getBlock('head')->setTitle($this->__('Product Alert'));
+        $this->getLayout()->getBlock('productalert.unsubscribe.confirm')->setMessage($message);
         $this->renderLayout();
     }
 
