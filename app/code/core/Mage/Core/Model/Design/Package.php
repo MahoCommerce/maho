@@ -476,6 +476,19 @@ class Mage_Core_Model_Design_Package
         return $result;
     }
 
+    public function getStoreSkinFilename(string $file, Mage_Core_Model_Store $store): string|false
+    {
+        [$package, $theme] = $this->_config->getStoreSkinTheme((int) $store->getId());
+        $design = clone $this;
+        $design->_fallback = Mage::getModel('core/design_fallback', ['config' => $this->_config]);
+        return $design->setStore($store)->getFilename($file, [
+            '_type' => 'skin',
+            '_area' => self::DEFAULT_AREA,
+            '_package' => $package,
+            '_theme' => $theme,
+        ]);
+    }
+
     /**
      * @param string $file
      * @return string
