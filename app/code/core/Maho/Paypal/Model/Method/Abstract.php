@@ -108,7 +108,8 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
         }
 
         $payments = $result['purchase_units'][0]['payments'] ?? [];
-        $captureId = $payments['captures'][0]['id'] ?? null;
+        $capture = $payments['captures'][0] ?? [];
+        $captureId = $capture['id'] ?? null;
         $authId = $payments['authorizations'][0]['id'] ?? null;
 
         if (!in_array($status, ['COMPLETED', 'APPROVED'], true) || (!$captureId && !$authId)) {
@@ -119,7 +120,7 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
         }
 
         if ($captureId) {
-            $payment->setAdditionalInformation('paypal_capture_id', $captureId);
+            Mage::helper('paypal')->setCaptureInformation($payment, $capture);
         }
         if ($authId) {
             $payment->setAdditionalInformation('paypal_authorization_id', $authId);
@@ -295,7 +296,15 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
         }
         $invoice = $order->prepareInvoice();
         $invoice->setTransactionId($captureId);
+        $captured = $payment->getAdditionalInformation('paypal_completed_capture_amount');
+        $matchesInvoice = is_array($captured) && Mage::helper('paypal')->isFullInvoiceCapture($captured, $invoice);
+        if ($matchesInvoice) {
+            $invoice->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
+        }
         $invoice->register();
+        if ($matchesInvoice && $invoice->wasPayCalled()) {
+            $payment->setBaseAmountPaidOnline($payment->getBaseAmountPaidOnline() + (float) $captured['value']);
+        }
         $order->addRelatedObject($invoice);
     }
 

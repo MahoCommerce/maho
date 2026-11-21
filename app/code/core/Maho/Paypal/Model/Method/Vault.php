@@ -101,7 +101,8 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
 
         $payments = $result['purchase_units'][0]['payments'] ?? [];
         $authId = $payments['authorizations'][0]['id'] ?? null;
-        $captureId = $payments['captures'][0]['id'] ?? null;
+        $capture = $payments['captures'][0] ?? [];
+        $captureId = $capture['id'] ?? null;
 
         if (!$authId && !$captureId) {
             if ($intent === 'AUTHORIZE') {
@@ -109,14 +110,15 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
                 $authId = $result['purchase_units'][0]['payments']['authorizations'][0]['id'] ?? null;
             } else {
                 $result = $client->captureOrder($paypalOrderId);
-                $captureId = $result['purchase_units'][0]['payments']['captures'][0]['id'] ?? null;
+                $capture = $result['purchase_units'][0]['payments']['captures'][0] ?? [];
+                $captureId = $capture['id'] ?? null;
             }
         }
 
         if ($captureId) {
             $payment->setTransactionId($captureId);
             $payment->setIsTransactionClosed(true);
-            $payment->setAdditionalInformation('paypal_capture_id', $captureId);
+            Mage::helper('paypal')->setCaptureInformation($payment, $capture);
             $payment->addTransaction(Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE);
             $this->_createCaptureInvoice($payment, $captureId);
         } elseif ($authId) {
