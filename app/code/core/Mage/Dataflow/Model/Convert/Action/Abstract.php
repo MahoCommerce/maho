@@ -118,7 +118,9 @@ abstract class Mage_Dataflow_Model_Convert_Action_Abstract implements Mage_Dataf
     public function setContainer(Mage_Dataflow_Model_Convert_Container_Interface $container): static
     {
         $this->_container = $container;
-        $this->_container->setProfile($this->getProfile());
+        if ($this->getProfile()) {
+            $this->_container->setProfile($this->getProfile());
+        }
         $this->_container->setAction($this);
         return $this;
     }
