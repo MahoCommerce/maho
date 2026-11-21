@@ -153,15 +153,13 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
         ) {
             for ($index = 0; $index < 3; $index++) {
                 if ($_FILES['file_' . ($index + 1)]['tmp_name']) {
-                    $uploader = Mage::getModel('core/file_uploader', 'file_' . ($index + 1));
+                    $uploader = $this->_createUploader('file_' . ($index + 1));
                     $uploader->setAllowedExtensions(['csv','xml']);
                     $path = Mage::getBaseDir('tmp') . '/';
                     $uploader->save($path);
                     $uploadFile = $uploader->getUploadedFileName();
 
-                    if ($_FILES['file_' . ($index + 1)]['type'] == 'text/csv'
-                        || $_FILES['file_' . ($index + 1)]['type'] == 'application/vnd.ms-excel'
-                    ) {
+                    if ($this->_isCsvUpload($uploadFile)) {
                         $fileData = $csvParser->getData($path . $uploadFile);
                         $fileData = array_shift($fileData);
                     } else {
@@ -228,6 +226,16 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
         }
         parent::_afterSave();
         return $this;
+    }
+
+    protected function _isCsvUpload(string $uploadFile): bool
+    {
+        return strtolower(pathinfo($uploadFile, PATHINFO_EXTENSION)) === 'csv';
+    }
+
+    protected function _createUploader(string $fieldName): Mage_Core_Model_File_Uploader
+    {
+        return Mage::getModel('core/file_uploader', $fieldName);
     }
 
     /**
