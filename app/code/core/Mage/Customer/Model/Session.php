@@ -41,6 +41,30 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
 
     protected ?int $_checkedCustomerId = null;
 
+    #[\Override]
+    protected function getValidatorCustomerId(): ?int
+    {
+        return $this->getCustomerId() ?? parent::getValidatorCustomerId();
+    }
+
+    /**
+     * Enforce the password version for the customer session even when another namespace
+     * already evaluated the shared validator in this request.
+     */
+    #[\Override]
+    public function validate(): self
+    {
+        $sharedValidationAlreadyRan = self::$isValidated;
+        parent::validate();
+
+        if ($sharedValidationAlreadyRan && !$this->validateSessionPasswordTimestamp()) {
+            $this->getCookie()->delete($this->getSessionName());
+            throw new Mage_Core_Model_Session_Exception('');
+        }
+
+        return $this;
+    }
+
     /**
      * Retrieve customer sharing configuration model
      *
@@ -83,6 +107,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
         }
         $this->_customer = $customer;
         $this->setId($customer->getId());
+        $_SESSION[self::VALIDATOR_CUSTOMER_ID_KEY] = $customer->getId();
         // save customer as confirmed, if it is not
         if ((!$customer->isConfirmationRequired()) && $customer->getConfirmation()) {
             $customer->setConfirmation(null)->save();
@@ -380,6 +405,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
     protected function _logout()
     {
         $this->setId(null);
+        unset($_SESSION[self::VALIDATOR_CUSTOMER_ID_KEY]);
         $this->unsRememberMe();
         $this->setCustomerGroupId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
         $this->getCookie()->delete($this->getSessionName());
