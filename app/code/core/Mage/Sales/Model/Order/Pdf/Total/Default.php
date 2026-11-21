@@ -25,7 +25,7 @@ class Mage_Sales_Model_Order_Pdf_Total_Default extends \Maho\DataObject
      */
     public function getTotalsForDisplay()
     {
-        $amount = $this->getOrder()->formatPriceTxt($this->getAmount());
+        $amount = $this->getOrder()->formatPriceTxt((float) $this->getAmount());
         if ($this->getAmountPrefix()) {
             $amount = $this->getAmountPrefix() . $amount;
         }
@@ -74,7 +74,7 @@ class Mage_Sales_Model_Order_Pdf_Total_Default extends \Maho\DataObject
         if (!empty($taxClassAmount)) {
             foreach ($taxClassAmount as &$tax) {
                 $percent          = $tax['percent'] ? ' (' . $tax['percent'] . '%)' : '';
-                $tax['amount']    = $this->getAmountPrefix() . $this->getOrder()->formatPriceTxt($tax['tax_amount']);
+                $tax['amount']    = $this->getAmountPrefix() . $this->getOrder()->formatPriceTxt((float) $tax['tax_amount']);
                 $tax['label']     = $this->_getTaxHelper()->__($tax['title']) . $percent . ':';
                 $tax['font_size'] = $fontSize;
             }
@@ -94,7 +94,7 @@ class Mage_Sales_Model_Order_Pdf_Total_Default extends \Maho\DataObject
                         $percent = $rate['percent'] ? ' (' . $rate['percent'] . '%)' : '';
 
                         $taxInfo[] = [
-                            'amount'    => $this->getAmountPrefix() . $this->getOrder()->formatPriceTxt($_amount),
+                            'amount'    => $this->getAmountPrefix() . $this->getOrder()->formatPriceTxt((float) $_amount),
                             'label'     => $this->_getTaxHelper()->__($rate['title']) . $percent . ':',
                             'font_size' => $fontSize,
                         ];
