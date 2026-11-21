@@ -66,6 +66,15 @@ describe('Store emulation puts back the environment of the caller', function () 
             ->and(Mage::app()->getTranslator()->getState())->toBe($translator);
     });
 
+    it('loads the translations when the request runs in the store but has none for the area', function () {
+        Mage::app()->setCurrentStore(1);
+        Mage::getDesign()->setStore(1)->setArea(Mage_Core_Model_App_Area::AREA_FRONTEND);
+
+        $area = Mage::app()->emulate(1, fn() => Mage::app()->getTranslator()->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA));
+
+        expect($area)->toBe(Mage_Core_Model_App_Area::AREA_FRONTEND);
+    });
+
     it('puts back the package and the theme of the caller', function () {
         Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
         $design = Mage::getDesign();
@@ -143,6 +152,24 @@ describe('Store emulation puts back the environment of the caller', function () 
             $environment = $emulation->startEnvironmentEmulation(1);
             expect((int) Mage::app()->getStore()->getId())->toBe(1);
             $emulation->stopEnvironmentEmulation($environment);
+        } finally {
+            restore_error_handler();
+        }
+
+        $expectAdmin($locale);
+    });
+
+    it('keeps emulateDesign() and revertDesign() working', function () use ($startAdmin, $expectAdmin, $otherLocale) {
+        $locale = $otherLocale();
+        $startAdmin($locale);
+        Mage::getDesign()->setStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+
+        set_error_handler(fn(): bool => true, E_USER_DEPRECATED);
+        try {
+            $template = Mage::getModel('core/email_template');
+            $template->emulateDesign(1);
+            expect((int) Mage::app()->getStore()->getId())->toBe(1);
+            $template->revertDesign();
         } finally {
             restore_error_handler();
         }

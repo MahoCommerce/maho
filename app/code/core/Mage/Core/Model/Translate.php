@@ -63,13 +63,6 @@ class Mage_Core_Model_Translate
     protected $_dataScope;
 
     /**
-     * The sets of translations that this translator loaded, by cache ID.
-     *
-     * @var array<string, array>
-     */
-    private array $loadedSets = [];
-
-    /**
      * Initialization translation data
      *
      * @param string $area
@@ -79,23 +72,15 @@ class Mage_Core_Model_Translate
     public function init($area, $forceReload = false)
     {
         $this->setConfig([self::CONFIG_KEY_AREA => $area]);
-        $cacheId = $this->getCacheId();
 
         if (!$forceReload) {
-            $useCache = (bool) $this->_canUseCache();
-            // A set in memory is valid while its cache entry exists, so a cache clean in another process drops it
-            if (isset($this->loadedSets[$cacheId]) && (!$useCache || Mage::app()->testCache($cacheId))) {
-                $this->_data = $this->loadedSets[$cacheId];
-                return $this;
-            }
-            if ($useCache) {
-                $data = $this->_loadCache();
-                if ($data !== false) {
-                    $this->_data = $this->loadedSets[$cacheId] = $data;
+            if ($this->_canUseCache()) {
+                $this->_data = $this->_loadCache();
+                if ($this->_data !== false) {
                     return $this;
                 }
             }
-            Mage::app()->removeCache($cacheId);
+            Mage::app()->removeCache($this->getCacheId());
         }
 
         $this->_data = [];
@@ -112,7 +97,6 @@ class Mage_Core_Model_Translate
         if (!$forceReload && $this->_canUseCache()) {
             $this->_saveCache();
         }
-        $this->loadedSets[$cacheId] = $this->_data;
 
         return $this;
     }
@@ -175,7 +159,7 @@ class Mage_Core_Model_Translate
     {
         foreach ($files as $file) {
             $file = $this->_getModuleFilePath($moduleName, $file);
-            $this->_addData($this->_getFileData($file), $moduleName, $forceReload);
+            $this->_addData($this->_getFileData($file), $moduleName);
         }
         return $this;
     }
@@ -185,10 +169,9 @@ class Mage_Core_Model_Translate
      *
      * @param array $data
      * @param string $scope
-     * @param bool $forceReload
      * @return $this
      */
-    protected function _addData($data, $scope, $forceReload = false)
+    protected function _addData($data, $scope)
     {
         foreach ($data as $key => $value) {
             if ($key === $value) {
@@ -240,7 +223,7 @@ class Mage_Core_Model_Translate
     protected function _loadThemeTranslation($forceReload = false)
     {
         $file = Mage::getDesign()->getLocaleFileName('translate.csv');
-        $this->_addData($this->_getFileData($file), false, $forceReload);
+        $this->_addData($this->_getFileData($file), false);
         return $this;
     }
 
@@ -253,7 +236,7 @@ class Mage_Core_Model_Translate
     protected function _loadDbTranslation($forceReload = false)
     {
         $arr = $this->getResource()->getTranslationArray(null, $this->getLocale());
-        $this->_addData($arr, $this->getConfig(self::CONFIG_KEY_STORE), $forceReload);
+        $this->_addData($arr, $this->getConfig(self::CONFIG_KEY_STORE));
         return $this;
     }
 

@@ -33,7 +33,10 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
      */
     public function emulate(int $storeId, \Closure $callback, string $area = Mage_Core_Model_App_Area::AREA_FRONTEND): mixed
     {
-        if ($storeId === (int) $this->_app->getStore()->getId() && $area === Mage::getDesign()->getArea()) {
+        if ($storeId === (int) $this->_app->getStore()->getId()
+            && $area === Mage::getDesign()->getArea()
+            && $area === $this->_app->getTranslator()->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA)
+        ) {
             return $callback();
         }
         $environment = $this->start($storeId, $area);
