@@ -370,8 +370,8 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
         );
 
         $groupedId = null;
-        $price = 0.0;
-        $actionStop = 0;
+        $prices = [];
+        $actionStops = [];
         $group = [];
         $pending = [];
 
@@ -384,18 +384,22 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
                     }
                     $group = [];
                     $groupedId = (string) $row['grouped_id'];
-                    $price = $this->_applyRuleAction((float) $row['price'], $row);
-                    $actionStop = (int) $row['action_stop'];
-                } else {
-                    if ($actionStop === 0) {
-                        $price = $this->_applyRuleAction($price, $row);
-                    }
-                    $actionStop += (int) $row['action_stop'];
+                    $prices = [];
+                    $actionStops = [];
                 }
 
                 foreach ($dates as $date => $timestamp) {
                     if ($this->_isRuleActiveAt($row, $timestamp)) {
-                        $this->_collectRulePrice($group, $date, $row, $price, $websiteId);
+                        if (!array_key_exists($date, $prices)) {
+                            $prices[$date] = $this->_applyRuleAction((float) $row['price'], $row);
+                            $actionStops[$date] = (int) $row['action_stop'];
+                        } else {
+                            if ($actionStops[$date] === 0) {
+                                $prices[$date] = $this->_applyRuleAction($prices[$date], $row);
+                            }
+                            $actionStops[$date] += (int) $row['action_stop'];
+                        }
+                        $this->_collectRulePrice($group, $date, $row, $prices[$date], $websiteId);
                     }
                 }
 
