@@ -17,9 +17,6 @@ class Mage_Oauth_Model_Resource_Nonce extends Mage_Core_Model_Resource_Db_Abstra
     protected $_isPkAutoIncrement = false;
 
     #[\Override]
-    protected bool $_fetchIdAfterInsert = false;
-
-    #[\Override]
     protected function _construct(): void
     {
         $this->_init('oauth/nonce', null);
