@@ -193,10 +193,12 @@ describe('Feed generation with saved products and mappings', function (): void {
         // Reload saved products so this status change does not reuse their stock creation data.
         Mage::getModel('catalog/product')->setStoreId(0)->load($ids[0])->setStatus(Mage_Catalog_Model_Product_Status::STATUS_DISABLED)->save();
         Mage::getModel('catalog/product')->setStoreId(0)->load($ids[2])->setStatus(Mage_Catalog_Model_Product_Status::STATUS_DISABLED)->save();
-        $survivors = Mage::getResourceModel('catalog/product_collection')->setStoreId(1)
+        // getAllIds() drops the sort order, so the database returns the IDs in any order
+        $survivors = array_map(intval(...), Mage::getResourceModel('catalog/product_collection')->setStoreId(1)
             ->addIdFilter($ids)->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
-            ->addAttributeToSort('entity_id', 'ASC')->getAllIds();
-        expect(array_map(intval(...), $survivors))->toBe([$ids[1], $ids[3]]);
+            ->getAllIds());
+        sort($survivors);
+        expect($survivors)->toBe([$ids[1], $ids[3]]);
         $second = new FeedCompositionBatch();
         $second->productIds = $ids;
         $result = $second->processBatch($job['job_id']);
