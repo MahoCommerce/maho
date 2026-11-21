@@ -43,6 +43,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     protected array $_bccEmails = [];
     protected ?string $_replyToEmail = null;
     protected ?string $_returnPathEmail = null;
+    private ?string $missingSendField = null;
 
     /** @var Mage_Core_Model_Email_Attachment[] */
     protected array $_attachments = [];
@@ -210,17 +211,26 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      */
     public function isValidForSend()
     {
-        return $this->getMissingSendField() === null;
-    }
-
-    private function getMissingSendField(): ?string
-    {
-        return match (true) {
+        $this->missingSendField = match (true) {
             !$this->getSenderName() => 'sender name',
             !$this->getSenderEmail() => 'sender email',
             !$this->getTemplateSubject() => 'subject',
             default => null,
         };
+
+        return $this->missingSendField === null;
+    }
+
+    /** @return array{bool, ?string} */
+    private function validateSend(): array
+    {
+        $this->missingSendField = null;
+        try {
+            $valid = $this->isValidForSend();
+            return [$valid, $this->missingSendField];
+        } finally {
+            $this->missingSendField = null;
+        }
     }
 
     /**
@@ -331,8 +341,8 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      **/
     public function send(#[\SensitiveParameter] $email, $name = null, array $variables = [])
     {
-        if (!$this->isValidForSend()) {
-            $field = $this->getMissingSendField();
+        [$isValid, $field] = $this->validateSend();
+        if (!$isValid) {
             $message = $field === null ? 'This letter cannot be sent.' : "This letter cannot be sent. Missing $field.";
             Mage::logException(new Exception($message));
             return false;

@@ -40,3 +40,18 @@ it('logs which required field is missing when a transactional email cannot be se
     'sender email' => ['sender_email', 'sender email'],
     'subject' => ['template_subject', 'subject'],
 ]);
+
+it('leaves sender fields unread when a template rewrite rejects the send', function (): void {
+    $template = $this->createPartialMock(Mage_Core_Model_Email_Template::class, ['isValidForSend', 'getSenderName']);
+    $template->expects($this->once())->method('isValidForSend')->willReturn(false);
+    $template->expects($this->never())->method('getSenderName');
+
+    expect($template->send('recipient@example.test'))->toBeFalse();
+});
+
+it('reads a missing sender field once during the send', function (): void {
+    $template = $this->createPartialMock(Mage_Core_Model_Email_Template::class, ['getSenderName']);
+    $template->expects($this->once())->method('getSenderName')->willReturn(null);
+
+    expect($template->send('recipient@example.test'))->toBeFalse();
+});
