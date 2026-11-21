@@ -24,8 +24,10 @@ final class SameOriginGuard
 {
     public static function assert(Request $request): void
     {
-        $origin = $request->headers->get('Origin')
-            ?? self::originOf((string) $request->headers->get('Referer'));
+        $originHeader = $request->headers->get('Origin');
+        $origin = $originHeader !== null
+            ? self::originOf($originHeader)
+            : self::originOf((string) $request->headers->get('Referer'));
 
         if ($origin === null || !in_array($origin, self::allowedOrigins(), true)) {
             throw new AccessDeniedHttpException('Cross-origin request rejected');
@@ -39,8 +41,14 @@ final class SameOriginGuard
         if (empty($parts['host']) || empty($parts['scheme'])) {
             return null;
         }
-        return $parts['scheme'] . '://' . $parts['host']
-            . (isset($parts['port']) ? ':' . $parts['port'] : '');
+        $scheme = strtolower($parts['scheme']);
+        $host = strtolower($parts['host']);
+        $port = isset($parts['port']) ? (int) $parts['port'] : null;
+        if (($scheme === 'http' && $port === 80) || ($scheme === 'https' && $port === 443)) {
+            $port = null;
+        }
+
+        return $scheme . '://' . $host . ($port === null ? '' : ':' . $port);
     }
 
     /** @return list<string> Origins of the store's secure and unsecure base URLs. */
