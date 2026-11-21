@@ -38,6 +38,14 @@ it('adds the form key to a POST form that posts to this site', function () {
     expect(formKeyFallbackAdded($page, MahoServer::baseUrl() . '/checkout/cart/add'))->toBeTrue();
 });
 
+it('adds the form key to a POST form when URL.canParse is unavailable', function () {
+    $page = visit(MahoServer::baseUrl() . '/');
+    waitForPageLoad($page, 'body:visible');
+    $page->page()->evaluate('() => { delete URL.canParse; }');
+
+    expect(formKeyFallbackAdded($page, '/checkout/cart/add'))->toBeTrue();
+});
+
 it('adds the form key when a script calls form.submit(), which fires no submit event', function () {
     $page = visit(MahoServer::baseUrl() . '/');
     waitForPageLoad($page, 'body:visible');

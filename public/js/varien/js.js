@@ -111,7 +111,11 @@ function addFormKey(form) {
         return;
     }
     const action = form.getAttribute('action') ?? '';
-    if (!URL.canParse(action, location.href) || new URL(action, location.href).origin !== location.origin) {
+    try {
+        if (new URL(action, location.href).origin !== location.origin) {
+            return;
+        }
+    } catch {
         return;
     }
     const input = document.createElement('input');
