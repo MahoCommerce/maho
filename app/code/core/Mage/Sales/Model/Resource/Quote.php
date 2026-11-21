@@ -16,6 +16,39 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
         $this->_init('sales/quote', 'entity_id');
     }
 
+    #[\Override]
+    public function save(Mage_Core_Model_Abstract $object)
+    {
+        $result = parent::save($object);
+        if ($object instanceof Mage_Sales_Model_Quote && !$object->isDeleted() && $this->_getWriteAdapter()->getTransactionLevel() > 0) {
+            $saved = $object->getCheckoutFieldsForSave();
+            $id = $object->getId();
+            if ($saved !== []) {
+                $this->addCommitCallback(static function () use ($object, $saved, $id): void {
+                    if ($object->getId() === $id) {
+                        $object->rememberSavedCheckoutFields($saved);
+                    }
+                });
+            }
+        }
+        return $result;
+    }
+
+    #[\Override]
+    protected function _prepareDataForSave(Mage_Core_Model_Abstract $object)
+    {
+        $data = parent::_prepareDataForSave($object);
+        if ($object instanceof Mage_Sales_Model_Quote && $this->_getWriteAdapter()->getTransactionLevel() > 0) {
+            $changed = $object->getCheckoutFieldsForSave();
+            foreach (['is_active', 'reserved_order_id'] as $field) {
+                if (!array_key_exists($field, $changed)) {
+                    unset($data[$field]);
+                }
+            }
+        }
+        return $data;
+    }
+
     /**
      * Retrieve select object for load object data
      *

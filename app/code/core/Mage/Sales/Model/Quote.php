@@ -86,6 +86,14 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      */
     protected $_preventSaving = false;
 
+    private const array CHECKOUT_FIELDS = ['is_active' => true, 'reserved_order_id' => true];
+
+    /** @var array<string, true> */
+    private array $checkoutFieldAssignments = [];
+
+    /** @var array<string, mixed> */
+    private array $savedCheckoutFields = [];
+
     /**
      * Init resource model
      */
@@ -1819,6 +1827,49 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
             return $this;
         }
         return parent::save();
+    }
+
+    #[\Override]
+    public function setData($key, $value = null)
+    {
+        if (is_array($key)) {
+            $this->checkoutFieldAssignments = array_intersect_key(self::CHECKOUT_FIELDS, $key);
+        } elseif (is_string($key) && isset(self::CHECKOUT_FIELDS[$key])) {
+            $this->checkoutFieldAssignments[$key] = true;
+        }
+        return parent::setData($key, $value);
+    }
+
+    #[\Override]
+    public function setOrigData($key = null, $data = null)
+    {
+        if ($key === null) {
+            $this->checkoutFieldAssignments = [];
+            $this->savedCheckoutFields = [];
+        }
+        return parent::setOrigData($key, $data);
+    }
+
+    /** @return array<string, mixed> */
+    public function getCheckoutFieldsForSave(): array
+    {
+        $previous = $this->savedCheckoutFields + ($this->getOrigData() ?? []);
+        $fields = array_intersect_key($this->getData(), self::CHECKOUT_FIELDS);
+        return array_filter($fields, fn(mixed $value, string $field): bool
+            => isset($this->checkoutFieldAssignments[$field])
+            || !array_key_exists($field, $previous)
+            || $value !== $previous[$field], ARRAY_FILTER_USE_BOTH);
+    }
+
+    /** @param array<string, mixed> $fields */
+    public function rememberSavedCheckoutFields(array $fields): void
+    {
+        foreach ($fields as $field => $value) {
+            $this->savedCheckoutFields[$field] = $value;
+            if ($this->getData($field) === $value) {
+                unset($this->checkoutFieldAssignments[$field]);
+            }
+        }
     }
 
     public function getCouponCode(): string
