@@ -116,7 +116,7 @@ class Mage_Core_Model_Resource_Transaction
      * Initialize objects save transaction
      *
      * @return $this
-     * @throws Exception
+     * @throws Throwable
      */
     public function save()
     {
@@ -127,14 +127,14 @@ class Mage_Core_Model_Resource_Transaction
             foreach ($this->_objects as $object) {
                 $object->save();
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $error = $e;
         }
 
         if ($error === false) {
             try {
                 $this->_runCallbacks();
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
                 $error = $e;
             }
         }
