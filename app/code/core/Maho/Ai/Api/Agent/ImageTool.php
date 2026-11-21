@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Maho\Ai\Api\Agent;
 
+use Maho\Ai\Model\Chat\Attachment;
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
 use Symfony\AI\Platform\Tool\ToolEffectHints;
@@ -62,6 +63,29 @@ final class ImageTool
     }
 
     /**
+     * Read a provider data URI or referenced file without allocating more than the media upload budget.
+     */
+    public static function decodeImageSource(string $source, ?int $maxBytes = null): string|false
+    {
+        $maxBytes ??= Attachment::maxBytes();
+        if ($maxBytes <= 0) {
+            return false;
+        }
+        if (str_starts_with($source, 'data:')) {
+            $payload = (string) preg_replace('/^data:[^,]*,/', '', $source);
+            $maxEncodedBytes = 4 * intdiv($maxBytes + 2, 3);
+            if (strlen($payload) > $maxEncodedBytes) {
+                return false;
+            }
+            $bytes = base64_decode($payload, true);
+            return is_string($bytes) && strlen($bytes) <= $maxBytes ? $bytes : false;
+        }
+
+        $bytes = file_get_contents($source, false, null, 0, $maxBytes + 1);
+        return is_string($bytes) && strlen($bytes) <= $maxBytes ? $bytes : false;
+    }
+
+    /**
      * @param array<string, mixed> $arguments
      * @return array{ok: bool, text: string}
      */
@@ -87,14 +111,12 @@ final class ImageTool
 
         try {
             $source = \Mage::helper('ai')->generateImage($prompt, $options, consumer: 'assistant');
-            $bytes = str_starts_with($source, 'data:')
-                ? base64_decode((string) preg_replace('/^data:[^,]*,/', '', $source), true)
-                : (string) file_get_contents($source);
+            $bytes = self::decodeImageSource((string) $source);
         } catch (\Throwable $e) {
             return ['ok' => false, 'text' => 'The image could not be generated: ' . $e->getMessage()];
         }
         if (!is_string($bytes) || $bytes === '' || @getimagesizefromstring($bytes) === false) {
-            return ['ok' => false, 'text' => 'The provider returned no image.'];
+            return ['ok' => false, 'text' => 'The provider returned no image or an image above the size limit.'];
         }
 
         try {
