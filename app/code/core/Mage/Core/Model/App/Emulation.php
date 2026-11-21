@@ -8,7 +8,7 @@
  * @package Mage_Core
  */
 
-class Mage_Core_Model_App_Emulation extends \Maho\DataObject
+class Mage_Core_Model_App_Emulation
 {
     /**
      * @var Mage_Core_Model_App
@@ -18,14 +18,13 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
     public function __construct(array $args = [])
     {
         $this->_app = empty($args['app']) ? Mage::app() : $args['app'];
-        unset($args['factory'], $args['app']);
-        parent::__construct($args);
     }
 
     /**
      * Run $callback in the store $storeId, with the design, the locale and the translations of that store for $area.
      * Then put back the environment of the caller, also when $callback throws. When the request already runs in
-     * $storeId and $area, and its translator is loaded for them, run $callback as it is.
+     * $storeId and $area, and its translator is loaded for them, run $callback as it is: the locale of the caller
+     * stays, so an admin page that emulates the admin store keeps the interface locale of the admin user.
      *
      * @template T
      * @param \Closure(): T $callback
@@ -96,14 +95,17 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
     }
 
     /**
-     * Apply the design of the store $storeId for $area.
+     * Apply the design of the store $storeId for $area. The admin area uses the package and the themes of the admin
+     * store, as an admin request does.
      */
     protected function _emulateDesign(int $storeId, string $area): void
     {
-        $design = Mage::getDesign();
-        $design->setStore($storeId)
-            ->setArea($area)
-            ->setTheme('');
+        $design = Mage::getDesign()->setStore($storeId);
+        if ($area === Mage_Core_Model_App_Area::AREA_ADMINHTML) {
+            $design->applyAdminDesign();
+            return;
+        }
+        $design->setArea($area)->setTheme('');
         $design->setPackageName('');
     }
 

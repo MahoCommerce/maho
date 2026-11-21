@@ -51,7 +51,7 @@ describe('Store emulation puts back the environment of the caller', function () 
         $expectAdmin($locale);
     });
 
-    it('runs the callback as it is when the request already runs in the store and the area', function () use ($startAdmin, $otherLocale) {
+    it('keeps the locale of the caller when the request already runs in the store and the area', function () use ($startAdmin, $otherLocale) {
         $locale = $otherLocale();
         $startAdmin($locale);
         $translator = Mage::app()->getTranslator()->getState();
@@ -63,7 +63,7 @@ describe('Store emulation puts back the environment of the caller', function () 
         );
 
         expect($inside)->toBe($locale)
-            ->and(Mage::app()->getTranslator()->getState())->toBe($translator);
+            ->and(Mage::app()->getTranslator()->getState())->toEqual($translator);
     });
 
     it('loads the translations when the request runs in the store but has none for the area', function () {
@@ -99,6 +99,23 @@ describe('Store emulation puts back the environment of the caller', function () 
         expect($insidePackage)->not->toBe('emulation_test')
             ->and($design->getPackageName())->toBe('emulation_test')
             ->and($design->getTheme('template'))->toBe('emulation_test');
+    });
+
+    it('uses the package and the themes of the admin store when it emulates the admin area', function () {
+        Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+        $store = Mage::app()->getStore(1);
+        $storePackage = Mage::getStoreConfig('design/package/name', 1);
+        $store->setConfig('design/package/name', 'emulation_test');
+        try {
+            $package = fn(): string => Mage::getDesign()->getPackageName();
+            $frontendPackage = Mage::app()->emulate(1, $package);
+            $adminPackage = Mage::app()->emulate(1, $package, Mage_Core_Model_App_Area::AREA_ADMINHTML);
+        } finally {
+            $store->setConfig('design/package/name', $storePackage);
+        }
+
+        expect($frontendPackage)->toBe('emulation_test')
+            ->and($adminPackage)->toBe((string) Mage::getConfig()->getNode('stores/admin/design/package/name'));
     });
 
     it('puts back the environment when an email template throws an Error', function () use ($startAdmin, $expectAdmin, $otherLocale) {
@@ -159,15 +176,12 @@ describe('Store emulation puts back the environment of the caller', function () 
         $startAdmin($locale);
 
         // The methods are deprecated, and developer mode turns the deprecation into an exception
-        set_error_handler(fn(): bool => true, E_USER_DEPRECATED);
-        try {
+        withoutDeprecations(function () {
             $emulation = Mage::getModel('core/app_emulation');
             $environment = $emulation->startEnvironmentEmulation(1);
             expect((int) Mage::app()->getStore()->getId())->toBe(1);
             $emulation->stopEnvironmentEmulation($environment);
-        } finally {
-            restore_error_handler();
-        }
+        });
 
         $expectAdmin($locale);
     });
@@ -177,15 +191,12 @@ describe('Store emulation puts back the environment of the caller', function () 
         $startAdmin($locale);
         Mage::getDesign()->setStore(Mage_Core_Model_App::ADMIN_STORE_ID);
 
-        set_error_handler(fn(): bool => true, E_USER_DEPRECATED);
-        try {
+        withoutDeprecations(function () {
             $template = Mage::getModel('core/email_template');
             $template->emulateDesign(1);
             expect((int) Mage::app()->getStore()->getId())->toBe(1);
             $template->revertDesign();
-        } finally {
-            restore_error_handler();
-        }
+        });
 
         $expectAdmin($locale);
     });

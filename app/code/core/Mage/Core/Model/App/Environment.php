@@ -12,26 +12,22 @@ declare(strict_types=1);
 
 final readonly class Mage_Core_Model_App_Environment
 {
-    /**
-     * @param array{0: string|int|Mage_Core_Model_Store|null, 1: ?string, 2: ?string, 3: ?array} $design
-     * @param array{0: ?string, 1: ?array, 2: ?string, 3: ?array, 4: ?array} $translator
-     */
     private function __construct(
         private Mage_Core_Model_App $app,
         private int $storeId,
-        private array $design,
+        private Mage_Core_Model_Design_State $design,
         private string $localeCode,
-        private array $translator,
+        private Mage_Core_Model_Translate_State $translator,
     ) {}
 
     public static function capture(Mage_Core_Model_App $app): self
     {
         return new self(
-            $app,
-            (int) $app->getStore()->getId(),
-            Mage::getDesign()->getState(),
-            $app->getLocale()->getLocaleCode(),
-            $app->getTranslator()->getState(),
+            app: $app,
+            storeId: (int) $app->getStore()->getId(),
+            design: Mage::getDesign()->getState(),
+            localeCode: $app->getLocale()->getLocaleCode(),
+            translator: $app->getTranslator()->getState(),
         );
     }
 

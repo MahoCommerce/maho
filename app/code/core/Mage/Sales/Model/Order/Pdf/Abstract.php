@@ -96,12 +96,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
             foreach ($documents as $document) {
                 $storeId = (int) $document->getStoreId();
                 $blockHtml = $storeId
-                    ? Mage::app()->emulate($storeId, function () use ($document): string {
-                        // The emulation switches to the design of the store, but the templates and their translate.csv are in the admin design
-                        $this->useAdminDesign();
-                        Mage::app()->getTranslator()->init(Mage_Core_Model_App_Area::AREA_ADMINHTML);
-                        return $this->renderDocumentHtml($document);
-                    }, Mage_Core_Model_App_Area::AREA_ADMINHTML)
+                    ? Mage::app()->emulate($storeId, fn(): string => $this->renderDocumentHtml($document), Mage_Core_Model_App_Area::AREA_ADMINHTML)
                     : $this->renderDocumentHtml($document);
 
                 if (!empty($blockHtml)) {
@@ -133,33 +128,15 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
     }
 
     /**
-     * Switch to the admin design package and theme, as Mage_Adminhtml_Controller_Action::preDispatch()
-     * does, and return a callback that restores the previous design.
+     * Switch to the admin design, as an admin request does, and return a callback that restores the previous design.
      */
     protected function useAdminDesign(): \Closure
     {
         $design = Mage::getDesign();
-        $area = $design->getArea();
-        $package = $design->getPackageName();
-        $themes = [];
-        foreach (['layout', 'template', 'skin', 'locale'] as $type) {
-            $themes[$type] = $design->getTheme($type);
-        }
-
-        $design->setArea('adminhtml')
-            ->setPackageName((string) Mage::getConfig()->getNode('stores/admin/design/package/name'))
-            ->setTheme((string) Mage::getConfig()->getNode('stores/admin/design/theme/openmage'));
-        foreach (array_keys($themes) as $type) {
-            if ($value = (string) Mage::getConfig()->getNode("stores/admin/design/theme/{$type}")) {
-                $design->setTheme($type, $value);
-            }
-        }
-
-        return function () use ($design, $area, $package, $themes): void {
-            $design->setArea($area)->setPackageName($package);
-            foreach ($themes as $type => $theme) {
-                $design->setTheme($type, $theme);
-            }
+        $state = $design->getState();
+        $design->applyAdminDesign();
+        return static function () use ($design, $state): void {
+            $design->setState($state);
         };
     }
 
