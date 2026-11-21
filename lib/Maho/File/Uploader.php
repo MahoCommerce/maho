@@ -212,7 +212,6 @@ class Uploader
         $this->_result = $this->_moveFile($this->_file['tmp_name'], $destinationFile);
 
         if ($this->_result) {
-            chmod($destinationFile, 0666);
             if ($this->_enableFilesDispersion) {
                 $fileName = str_replace(
                     DIRECTORY_SEPARATOR,
