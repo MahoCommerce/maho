@@ -62,14 +62,14 @@ function seedRuleChain(int $productId, int $websiteId, array $steps): int
     $ruleId = (int) $write->lastInsertId(chainTable('catalogrule/rule'));
 
     foreach ($steps as $step) {
-        $write->insert(chainTable('catalogrule/rule_product'), array_merge($step, [
+        $write->insert(chainTable('catalogrule/rule_product'), array_merge([
             'rule_id' => $ruleId,
             'from_time' => strtotime('2026-01-01 00:00:00 UTC'),
             'to_time' => strtotime('2026-12-31 00:00:00 UTC'),
             'customer_group_id' => 0,
             'product_id' => $productId,
             'website_id' => $websiteId,
-        ]));
+        ], $step));
     }
 
     return $ruleId;
@@ -175,4 +175,47 @@ it('indexes nothing for a rule whose window has passed', function () {
     runCatalogRuleIndexer();
 
     expect(indexedPrices($productId))->toBeEmpty();
+});
+
+it('applies only the rules active on each indexed date', function () {
+    $product = chainProduct();
+    $productId = (int) $product->getId();
+    $basePrice = (float) $product->getPrice();
+    $websiteId = (int) Mage::app()->getWebsite(true)->getId();
+    $today = strtotime('today UTC');
+    $tomorrow = $today + 86400;
+    $dayAfterTomorrow = $tomorrow + 86400;
+
+    seedRuleChain($productId, $websiteId, [
+        [
+            'sort_order' => 0,
+            'action_operator' => 'by_percent',
+            'action_amount' => 10,
+            'action_stop' => 0,
+            'from_time' => $today - 86400,
+            'to_time' => $tomorrow - 1,
+        ],
+        [
+            'sort_order' => 1,
+            'action_operator' => 'by_percent',
+            'action_amount' => 5,
+            'action_stop' => 0,
+            'from_time' => $today,
+            'to_time' => $dayAfterTomorrow - 1,
+        ],
+    ]);
+
+    runCatalogRuleIndexer();
+
+    $prices = [];
+    foreach (indexedPrices($productId) as $row) {
+        $prices[$row['rule_date']] = (float) $row['rule_price'];
+    }
+    expect($prices)->toHaveCount(3)
+        ->and($prices[Mage::app()->getLocale()->formatDateForDb($today - 86400, withTime: false)])
+        ->toEqualWithDelta($basePrice * 0.9, 0.0001)
+        ->and($prices[Mage::app()->getLocale()->formatDateForDb($today, withTime: false)])
+        ->toEqualWithDelta($basePrice * 0.9 * 0.95, 0.0001)
+        ->and($prices[Mage::app()->getLocale()->formatDateForDb($tomorrow, withTime: false)])
+        ->toEqualWithDelta($basePrice * 0.95, 0.0001);
 });
