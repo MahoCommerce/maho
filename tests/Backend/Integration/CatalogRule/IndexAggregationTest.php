@@ -210,3 +210,74 @@ it('keeps each ordered rule group when inserting a full batch and its tail', fun
         $adapter->dropTemporaryTable($tmpTable);
     }
 });
+
+it('applies a rule only on the dates when that rule is active', function (): void {
+    $resource = Mage::getSingleton('core/resource');
+    $adapter = $resource->getConnection('core_write');
+    $productId = (int) $adapter->fetchOne(
+        $adapter->select()->from($resource->getTableName('catalog/product'), ['entity_id'])->limit(1),
+    );
+    if (!$productId) {
+        $this->markTestSkipped('No products available to satisfy the price index foreign key.');
+    }
+
+    $refresh = catalogRuleBuildRefreshIndexer();
+    $website = Mage::app()->getWebsite();
+    $priceTable = $resource->getTableName('catalogrule/rule_product_price');
+    $cleanup = [
+        'product_id = ?' => $productId,
+        'website_id = ?' => (int) $website->getId(),
+        'customer_group_id = ?' => 0,
+    ];
+    $at = strtotime('2026-11-20 12:00:00 UTC');
+    $common = [
+        'grouped_id' => $productId . '-0',
+        'product_id' => $productId,
+        'customer_group_id' => 0,
+        'price' => 100.0,
+        'action_stop' => 0,
+    ];
+
+    catalogRuleInvoke($refresh, '_createTemporaryTable');
+    $tmpTable = catalogRuleInvoke($refresh, '_getTemporaryTable');
+    try {
+        $adapter->insert($tmpTable, $common + [
+            'rule_product_id' => 1,
+            'sort_order' => 1,
+            'action_operator' => 'by_percent',
+            'action_amount' => 10.0,
+            'from_time' => strtotime('2026-11-19 00:00:00 UTC'),
+            'to_time' => strtotime('2026-11-20 23:59:59 UTC'),
+            'from_date' => '2026-11-19',
+            'to_date' => '2026-11-20',
+        ]);
+        $adapter->insert($tmpTable, $common + [
+            'rule_product_id' => 2,
+            'sort_order' => 2,
+            'action_operator' => 'by_percent',
+            'action_amount' => 5.0,
+            'from_time' => strtotime('2026-11-19 00:00:00 UTC'),
+            'to_time' => strtotime('2026-11-21 23:59:59 UTC'),
+            'from_date' => '2026-11-19',
+            'to_date' => '2026-11-21',
+        ]);
+        $adapter->delete($priceTable, $cleanup);
+
+        catalogRuleInvoke($refresh, '_fillIndexData', [$website, $at]);
+
+        $prices = $adapter->fetchPairs(
+            $adapter->select()
+                ->from($priceTable, ['rule_date', 'rule_price'])
+                ->where('product_id = ?', $productId)
+                ->where('website_id = ?', (int) $website->getId())
+                ->where('customer_group_id = ?', 0),
+        );
+        dump($prices);
+        expect((float) $prices['2026-11-19'])->toBe(85.5)
+            ->and((float) $prices['2026-11-20'])->toBe(85.5)
+            ->and((float) $prices['2026-11-21'])->toBe(95.0);
+    } finally {
+        $adapter->delete($priceTable, $cleanup);
+        $adapter->dropTemporaryTable($tmpTable);
+    }
+});
