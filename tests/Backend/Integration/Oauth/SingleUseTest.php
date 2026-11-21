@@ -14,7 +14,10 @@ final class OauthSingleUseServer extends Mage_Oauth_Model_Server
 {
     public bool $acceptSignature = false;
 
-    public function __construct(private readonly string $nonce) {}
+    public function __construct(
+        private readonly string $nonce,
+        private readonly int $timestamp = 0,
+    ) {}
 
     public function process(): void
     {
@@ -29,7 +32,7 @@ final class OauthSingleUseServer extends Mage_Oauth_Model_Server
             'oauth_signature_method' => self::SIGNATURE_HMAC,
             'oauth_signature' => 'signature',
             'oauth_nonce' => $this->nonce,
-            'oauth_timestamp' => (string) time(),
+            'oauth_timestamp' => (string) ($this->timestamp ?: time()),
         ];
     }
 
@@ -71,6 +74,29 @@ it('claims a nonce only after the signature is accepted', function (): void {
         $server->process();
         expect(oauthSingleUseNonceExists($nonce))->toBeTrue()
             ->and(fn() => $server->process())->toThrow(Mage_Core_Exception::class);
+    } finally {
+        Mage::getSingleton('core/resource')->getConnection('core_write')->delete(
+            Mage::getSingleton('core/resource')->getTableName('oauth/nonce'),
+            ['nonce = ?' => $nonce],
+        );
+    }
+});
+
+it('rejects a stale timestamp without claiming its nonce', function (): void {
+    $nonce = bin2hex(random_bytes(16));
+    $server = new OauthSingleUseServer($nonce, time() - Mage_Oauth_Model_Server::TIME_DEVIATION - 1);
+    $server->acceptSignature = true;
+
+    try {
+        $error = null;
+        try {
+            $server->process();
+        } catch (Mage_Core_Exception $exception) {
+            $error = $exception->getCode();
+        }
+
+        expect($error)->toBe(Mage_Oauth_Model_Server::ERR_TIMESTAMP_REFUSED)
+            ->and(oauthSingleUseNonceExists($nonce))->toBeFalse();
     } finally {
         Mage::getSingleton('core/resource')->getConnection('core_write')->delete(
             Mage::getSingleton('core/resource')->getTableName('oauth/nonce'),

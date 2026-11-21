@@ -450,7 +450,7 @@ class Mage_Oauth_Model_Server
     {
         $timestamp = (int) $timestamp;
 
-        if ($timestamp <= 0 || $timestamp > (time() + self::TIME_DEVIATION)) {
+        if ($timestamp <= 0 || $timestamp < (time() - self::TIME_DEVIATION) || $timestamp > (time() + self::TIME_DEVIATION)) {
             $this->_throwException('', self::ERR_TIMESTAMP_REFUSED);
         }
         /** @var Mage_Oauth_Model_Nonce $nonceObj */
