@@ -199,22 +199,14 @@ class Mage_Cron_Model_Observer
             $exists[$schedule->getJobCode() . '/' . $schedule->getScheduledAt()] = 1;
         }
 
-        /**
-         * generate global crontab jobs
-         */
-        $config = Mage::getConfig()->getNode('crontab/jobs');
-        if ($config instanceof Mage_Core_Model_Config_Element) {
-            $this->_generateJobs($config->children(), $exists);
+        // A job code that an attribute declares belongs to the attribute, as in dispatch().
+        $compiledJobs = Maho::getCompiledAttributes()['crontab'] ?? [];
+        foreach (['crontab/jobs', 'default/crontab/jobs'] as $path) {
+            $config = Mage::getConfig()->getNode($path);
+            if ($config instanceof Mage_Core_Model_Config_Element) {
+                $this->_generateJobs(array_diff_key(iterator_to_array($config->children()), $compiledJobs), $exists);
+            }
         }
-
-        /**
-         * generate configurable crontab jobs
-         */
-        $config = Mage::getConfig()->getNode('default/crontab/jobs');
-        if ($config instanceof Mage_Core_Model_Config_Element) {
-            $this->_generateJobs($config->children(), $exists);
-        }
-
         $this->_generateCompiledJobs($exists);
 
         /**
@@ -228,7 +220,7 @@ class Mage_Cron_Model_Observer
     /**
      * Generate jobs for config information
      *
-     * @param   SimpleXMLElement $jobs
+     * @param   iterable<string, SimpleXMLElement> $jobs
      * @param   array $exists
      * @return  $this
      */
