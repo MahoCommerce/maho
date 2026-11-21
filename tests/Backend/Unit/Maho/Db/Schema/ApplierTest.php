@@ -41,7 +41,7 @@ function applierTable(string $name): TableEditor
 
 // --- autoIncrementRestores ----------------------------------------------
 
-it('re-asserts AUTO_INCREMENT after a primary-key rebuild on MySQL', function () {
+it('re-asserts AUTO_INCREMENT once after a primary-key rebuild', function (string $serverVersion): void {
     $live = applierTable('t')
         ->addColumn(
             Column::editor()
@@ -80,13 +80,17 @@ it('re-asserts AUTO_INCREMENT after a primary-key rebuild on MySQL', function ()
         ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create())
         ->create();
 
-    $result = invokeApplierMethod('autoIncrementRestores', [new MySQLPlatform(), new TypeRegistry(), [$live], [$target]]);
+    $platform = DriverManager::getConnection(['driver' => 'pdo_mysql', 'serverVersion' => $serverVersion])->getDatabasePlatform();
+    $result = invokeApplierMethod('autoIncrementRestores', [$platform, new TypeRegistry(), [$live], [$target]]);
 
-    expect($result)->toHaveCount(1);
-    expect($result[0])->toContain('MODIFY');
-    expect($result[0])->toContain('AUTO_INCREMENT');
-    expect($result[0])->toContain('id');
-});
+    expect($result)->toBe(['ALTER TABLE t MODIFY id INT UNSIGNED AUTO_INCREMENT NOT NULL']);
+})->with([
+    'MySQL 8.4' => ['8.4.0'],
+    'MySQL 9' => ['9.0.0'],
+    'MariaDB 10.11' => ['10.11.0-MariaDB'],
+    'MariaDB 11.8' => ['11.8.0-MariaDB'],
+    'MariaDB 12.3' => ['12.3.4-MariaDB'],
+]);
 
 it('emits no restore when the primary key is unchanged', function () {
     $pk = fn(): PrimaryKeyConstraint => PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create();

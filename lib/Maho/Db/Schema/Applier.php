@@ -612,11 +612,15 @@ final class Applier
             // primary key, so a plain MODIFY re-asserting AUTO_INCREMENT is both
             // valid and sufficient. The type SQL comes from the column's own
             // type (public Type::getSQLDeclaration, e.g. "INT UNSIGNED").
+            $columnType = $types->get($autoColumn->getTypeName())->getSQLDeclaration(
+                array_replace($autoColumn->toArray(true), ['autoincrement' => false]),
+                $platform,
+            );
             $restores[] = sprintf(
                 'ALTER TABLE %s MODIFY %s %s AUTO_INCREMENT NOT NULL',
                 $target->getObjectName()->toString(),
                 $autoColumn->getObjectName()->toString(),
-                $types->get($autoColumn->getTypeName())->getSQLDeclaration($autoColumn->toArray(true), $platform),
+                $columnType,
             );
         }
 
