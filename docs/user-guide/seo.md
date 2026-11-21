@@ -211,8 +211,9 @@ rewrite is present.
 The **Google Sitemap** module (Catalog > Google Sitemap) generates standards-compliant XML
 sitemaps covering your **categories**, **products**, and **CMS pages**. Key capabilities:
 
-- **Per-entity settings**: change frequency, priority, and a `lastmod` timestamp configurable
-  separately for categories, products, and CMS pages.
+- Set the change frequency, priority, and whether to show `lastmod` separately for categories,
+  products, and CMS pages. The `lastmod` date comes from the content record. URLs without a valid
+  recorded date omit the tag, including the blog index.
 - **Image extension**: product and category images can be included as `<image:image>` entries to
   help image search.
 - **Automatic file splitting**: when a sitemap exceeds the configured maximum URLs per file

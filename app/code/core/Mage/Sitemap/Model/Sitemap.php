@@ -396,6 +396,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
 
     /**
      * Write a single sitemap file for a collection page
+     * An item's sitemap_updated_at replaces the fallback date when $lastmod is enabled.
      */
     public function writeSingleSitemapFile(string $type, array $items, string $baseUrl, string $lastmod, string $changefreq, float $priority, int $pageNumber, int $totalItems, int $maxUrlsPerFile): void
     {
@@ -405,10 +406,11 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
 
         $filename = $this->getSplitSitemapFilename($type, $pageNumber, $totalItems, $maxUrlsPerFile);
         $file = $this->openUrlsetFile($filename);
+        $today = Mage::app()->getLocale()->todayUtc();
 
         $this->_sitemapFiles[] = [
             'filename' => $filename,
-            'lastmod' => Mage::app()->getLocale()->todayUtc(),
+            'lastmod' => $today,
         ];
 
         $urlHelper = Mage::helper('core/url');
@@ -434,12 +436,25 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
             }
 
             $url = $urlHelper->keepBasePathSlash($urlHelper->addOrRemoveTrailingSlash($baseUrl . $item->getUrl(), $storeId), $storeId, false);
-            $xml = $this->getSitemapRow($url, $lastmod, $changefreq, $priority, $imageUrl, $imageTitle);
+            $entryLastmod = $lastmod !== '' && $item->hasData('sitemap_updated_at')
+                ? $this->formatEntityLastmod($item->getData('sitemap_updated_at'), $today)
+                : $lastmod;
+            $xml = $this->getSitemapRow($url, $entryLastmod, $changefreq, $priority, $imageUrl, $imageTitle);
             $file->write($xml);
         }
 
         $file->write('</urlset>');
         $file->close();
+    }
+
+    private function formatEntityLastmod(mixed $updatedAt, string $today): ?string
+    {
+        if (!is_string($updatedAt) || !preg_match('/\A(\d{4})-(\d{2})-(\d{2})(?: (?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,6})?)?\z/', $updatedAt, $parts)) {
+            return null;
+        }
+
+        $date = substr($updatedAt, 0, 10);
+        return $date <= $today && checkdate((int) $parts[2], (int) $parts[3], (int) $parts[1]) ? $date : null;
     }
 
     /**
