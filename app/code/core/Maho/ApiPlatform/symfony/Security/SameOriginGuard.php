@@ -24,23 +24,36 @@ final class SameOriginGuard
 {
     public static function assert(Request $request): void
     {
-        $origin = $request->headers->get('Origin')
-            ?? self::originOf((string) $request->headers->get('Referer'));
+        $originHeader = $request->headers->get('Origin');
+        $origin = $originHeader !== null
+            ? self::originOf($originHeader, originOnly: true)
+            : self::originOf((string) $request->headers->get('Referer'));
 
         if ($origin === null || !in_array($origin, self::allowedOrigins(), true)) {
             throw new AccessDeniedHttpException('Cross-origin request rejected');
         }
     }
 
-    /** Normalize a URL to scheme://host[:port], or null if it has no host. */
-    public static function originOf(string $url): ?string
+    /** Normalize a URL or a serialized origin to scheme://host[:port]. */
+    public static function originOf(string $url, bool $originOnly = false): ?string
     {
         $parts = parse_url($url);
         if (empty($parts['host']) || empty($parts['scheme'])) {
             return null;
         }
-        return $parts['scheme'] . '://' . $parts['host']
-            . (isset($parts['port']) ? ':' . $parts['port'] : '');
+        $scheme = $parts['scheme'];
+        $host = $parts['host'];
+        $port = $parts['port'] ?? null;
+        if ($originOnly && $url !== $scheme . '://' . $host . ($port === null ? '' : ':' . $port)) {
+            return null;
+        }
+
+        $scheme = strtolower($scheme);
+        if (($scheme === 'http' && $port === 80) || ($scheme === 'https' && $port === 443)) {
+            $port = null;
+        }
+
+        return $scheme . '://' . strtolower($host) . ($port === null ? '' : ':' . $port);
     }
 
     /** @return list<string> Origins of the store's secure and unsecure base URLs. */
