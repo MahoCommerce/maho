@@ -48,24 +48,6 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
-     * Enforce the password version for the customer session even when another namespace
-     * already evaluated the shared validator in this request.
-     */
-    #[\Override]
-    public function validate(): self
-    {
-        $sharedValidationAlreadyRan = self::$isValidated;
-        parent::validate();
-
-        if ($sharedValidationAlreadyRan && !$this->validateSessionPasswordTimestamp()) {
-            $this->getCookie()->delete($this->getSessionName());
-            throw new Mage_Core_Model_Session_Exception('');
-        }
-
-        return $this;
-    }
-
-    /**
      * Retrieve customer sharing configuration model
      *
      * @return Mage_Customer_Model_Config_Share
