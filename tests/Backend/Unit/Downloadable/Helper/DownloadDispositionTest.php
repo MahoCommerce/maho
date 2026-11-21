@@ -16,17 +16,16 @@ it('keeps spaces and punctuation in one downloadable filename parameter', functi
         'Quarterly report; final v2.pdf',
     );
 
-    expect($header)->toStartWith('attachment;')
-        ->toContain("filename*=utf-8''Quarterly%20report%3B%20final%20v2.pdf");
+    expect($header)->toBe('attachment; filename="Quarterly report; final v2.pdf"');
 });
 
 it('provides an ASCII fallback and removes control characters', function () {
     $header = Mage_Downloadable_Helper_Download::formatContentDisposition(
         'inline',
-        "r\u00e9sum\u00e9\n.pdf",
+        "résumé\n.pdf",
     );
 
     expect($header)->toStartWith('inline;')
-        ->toContain('filename="r_sum__.pdf"')
+        ->toContain('filename=r_sum__.pdf')
         ->toContain("filename*=utf-8''r%C3%A9sum%C3%A9.pdf");
 });
