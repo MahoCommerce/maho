@@ -585,15 +585,19 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     }
 
     /**
-     * Return true when the default scope edits $path and the XML files give it a value.
+     * Return true when the default scope edits $path and the XML files give it a value that is not empty.
      *
      * A field with a backend model gets no checkbox: the delete skips the checks and side effects of that model.
      */
     public function canUseSystemValue(string $path, \Maho\Simplexml\Element $field): bool
     {
-        return $this->getScope() === self::SCOPE_DEFAULT
-            && Mage::helper('adminhtml/config')->getBackendModelByFieldConfig($field) === null
-            && Mage::getConfig()->getShippedDefaults()->descend($path) !== false;
+        if ($this->getScope() !== self::SCOPE_DEFAULT
+            || Mage::helper('adminhtml/config')->getBackendModelByFieldConfig($field) !== null
+        ) {
+            return false;
+        }
+        $shipped = Mage::getConfig()->getShippedDefaults()->descend($path);
+        return $shipped !== false && trim((string) $shipped) !== '';
     }
 
     /**

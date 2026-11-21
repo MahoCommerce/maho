@@ -63,16 +63,19 @@ it('returns the shipped value when the default scope has a saved value', functio
         ->toBe(shippedBaseRules());
 });
 
-it('offers the system value only at default scope, for a shipped path, and without a backend model', function (): void {
+it('offers the system value only at default scope, for a shipped value that is not empty, and without a backend model', function (): void {
     $sections = Mage::getSingleton('adminhtml/config')->getSections();
     $baseRules = $sections->descend('crawlers/groups/robots/fields/base_rules');
     $allowedCurrencies = $sections->descend('currency/groups/options/fields/allow');
+    $llmsDescription = $sections->descend('crawlers/groups/llms/fields/description');
     $form = new Mage_Adminhtml_Block_System_Config_Form();
 
     expect((string) Mage::getConfig()->getShippedDefaults()->descend('currency/options/allow'))->not->toBe('')
         ->and($form->setScope('default')->canUseSystemValue(USE_SYSTEM_VALUE_PATH, $baseRules))->toBeTrue()
         ->and($form->canUseSystemValue('crawlers/robots/not_shipped', $baseRules))->toBeFalse()
         ->and($form->canUseSystemValue('currency/options/allow', $allowedCurrencies))->toBeFalse()
+        ->and(Mage::getConfig()->getShippedDefaults()->descend('crawlers/llms/description'))->not->toBeFalse()
+        ->and($form->canUseSystemValue('crawlers/llms/description', $llmsDescription))->toBeFalse()
         ->and($form->setScope('websites')->canUseSystemValue(USE_SYSTEM_VALUE_PATH, $baseRules))->toBeFalse();
 });
 

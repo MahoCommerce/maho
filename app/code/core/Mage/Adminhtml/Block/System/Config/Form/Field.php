@@ -26,7 +26,12 @@ class Mage_Adminhtml_Block_System_Config_Form_Field extends Mage_Adminhtml_Block
     {
         $id = $element->getHtmlId();
 
-        $html = '<td class="label"><label for="' . $id . '" id="' . $id . '-label">' . $element->getLabel() . '</label></td>';
+        $html = '<td class="label"><label for="' . $id . '" id="' . $id . '-label">' . $element->getLabel() . '</label>';
+        if ($element->getScope() && $element->getScopeLabel()) {
+            $html .= '<span class="config-scope d-badge d-badge-ghost d-badge-sm">'
+                . trim((string) $element->getScopeLabel(), '[] ') . '</span>';
+        }
+        $html .= '</td>';
 
         //$isDefault = !$this->getRequest()->getParam('website') && !$this->getRequest()->getParam('store');
         $isMultiple = $element->getExtType() === 'multiple';
@@ -92,21 +97,14 @@ class Mage_Adminhtml_Block_System_Config_Form_Field extends Mage_Adminhtml_Block
                 $defText = implode(', ', $defTextArr);
             }
 
-            // default value
             $html .= '<td class="use-default">';
+            $html .= '<label class="config-inherit-label" title="' . htmlspecialchars($defText) . '">';
             $html .= '<input id="' . $id . '_inherit" name="'
-                . $namePrefix . '[inherit]" type="checkbox" value="1" class="checkbox config-inherit" '
-                . $inherit . ' onclick="toggleValueElements(this, this.parentNode.previousElementSibling)" /> ';
-            $html .= '<label for="' . $id . '_inherit" class="inherit" title="'
-                . htmlspecialchars($defText) . '">' . $checkboxLabel . '</label>';
+                . $namePrefix . '[inherit]" type="checkbox" value="1" class="d-toggle d-toggle-sm config-inherit" '
+                . $inherit . ' onclick="toggleValueElements(this, this.closest(\'td\').previousElementSibling)" />';
+            $html .= '<span>' . $checkboxLabel . '</span></label>';
             $html .= '</td>';
         }
-
-        $html .= '<td class="scope-label">';
-        if ($element->getScope()) {
-            $html .= $element->getScopeLabel();
-        }
-        $html .= '</td>';
 
         return $this->_decorateRowHtml($element, $html);
     }

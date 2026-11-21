@@ -38,7 +38,8 @@ or at **Default Config** has no effect on that store view.
 At the top left of **System > Configuration**, the **Current Configuration Scope** dropdown selects
 the scope that you edit: **Default Config**, a website, or a store view.
 
-Each setting shows a label next to it. The label is the most specific scope where you can set it:
+Each setting shows a label: in the configuration it is under the name of the setting, without the
+brackets. The label is the most specific scope where you can set it:
 
 | Label | Where you can set the value |
 |-------|-----------------------------|
@@ -51,11 +52,11 @@ setting is not in the page when you select a website.
 
 ### Use Default and Use Website
 
-Each setting has a checkbox on its right:
+Each setting has a checkbox on its right. In the configuration, it is a switch:
 
 | Selected scope | Checkbox | When it is selected |
 |----------------|----------|---------------------|
-| Default Config | **Use Default** | The setting uses the value that Maho, or the extension that adds the setting, ships. The checkbox shows only when a shipped value exists, and not on a setting that checks its value when you save it |
+| Default Config | **Use Default** | The setting uses the value that Maho, or the extension that adds the setting, ships. The checkbox shows only when the shipped value is not empty, and not on a setting that checks its value when you save it |
 | Website | **Use Default** | The website uses the value of **Default Config** |
 | Store view | **Use Website** | The store view uses the value of its website. The checkbox has this name when the setting exists at website level |
 | Store view | **Use Default** | The store view uses the value of **Default Config**. The checkbox has this name when the setting does not exist at website level |

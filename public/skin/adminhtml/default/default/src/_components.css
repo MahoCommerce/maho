@@ -1388,4 +1388,21 @@
         --d-btn-border: var(--maho-btn-bg);
         color: var(--maho-btn-ink);
     }
+
+    .form-list td.label .config-scope {
+        margin-top: var(--maho-space-1);
+        font-size: 10px;
+        letter-spacing: 0.04em;
+        color: var(--maho-ink-muted);
+    }
+
+    .form-list td.use-default .config-inherit-label {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--maho-space-2);
+        color: var(--maho-ink-muted);
+        font-size: var(--maho-text-sm);
+        white-space: nowrap;
+        cursor: pointer;
+    }
 }

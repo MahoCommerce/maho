@@ -1049,7 +1049,7 @@ input.price {
     width: 220px
 }
 
-.form-list td.use-default label {
+.form-list td.use-default label:not(.config-inherit-label) {
     display: inline-block;
     vertical-align: middle;
     padding: 0 var(--maho-space-1)
