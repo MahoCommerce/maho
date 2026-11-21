@@ -382,9 +382,13 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
                 }
             }
             $this->setData('cached_items_all', $items);
+            return $items;
         }
 
-        return $this->getData('cached_items_all');
+        return array_values(array_filter(
+            $this->getData('cached_items_all'),
+            static fn(\Maho\DataObject $item): bool => !$item->isDeleted(),
+        ));
     }
 
     /**
