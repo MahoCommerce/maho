@@ -292,7 +292,7 @@ describe('Refund Flow - Multiple Gift Cards', function () {
         expect((float) $history2->getBaseAmount())->toBe(70.00);
     });
 
-    test('refunds no gift card when the refund of one card fails', function () {
+    test('refunds no gift card when the refund of one card fails', function (bool $nested) {
         $fake = new class extends Maho_Giftcard_Model_Resource_History {
             public int $failOn = 0;
 
@@ -320,10 +320,23 @@ describe('Refund Flow - Multiple Gift Cards', function () {
         $eventObserver = new Maho\Event\Observer();
         $eventObserver->setEvent($event);
 
+        $resource = $this->giftcard1->getResource();
+        if ($nested) {
+            $resource->beginTransaction();
+        }
         try {
+            if ($nested) {
+                $this->giftcard1->setMessage('Earlier work')->save();
+            }
             expect(fn() => $this->observer->refundGiftcardBalance($eventObserver))
                 ->toThrow(RuntimeException::class, 'Test history failure');
+            if ($nested) {
+                $resource->commit();
+            }
         } finally {
+            if ($nested && $resource->getReadConnection()->getTransactionLevel() > 0) {
+                $resource->rollBack();
+            }
             Mage::unregister($key);
             if ($original) {
                 Mage::register($key, $original);
@@ -334,7 +347,10 @@ describe('Refund Flow - Multiple Gift Cards', function () {
         expect((float) $card1->getBalance())->toBe(0.0)
             ->and($card1->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_USED)
             ->and($card1->getHistoryCollection()->addFieldToFilter('action', Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED)->getSize())->toBe(0);
-    });
+        if ($nested) {
+            expect($card1->getMessage())->toBe('Earlier work');
+        }
+    })->with(['standalone' => [false], 'after earlier work' => [true]]);
 
     test('gives the share of a deleted gift card to the other cards', function () {
         $this->giftcard2->delete();

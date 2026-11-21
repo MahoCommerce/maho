@@ -99,7 +99,9 @@ class Maho_Giftcard_Service_Giftcard
         $balance = (float) $giftcard->getData('balance');
         // A card that was not loaded has no stored balance to compare with
         $storedBalance = $giftcard->getOrigData('balance');
-        if ($giftcard->getId() && $storedBalance !== null && $balance !== (float) $storedBalance) {
+        if ($giftcard->getId() && $storedBalance !== null
+            && ($balance !== (float) $storedBalance || ($expectedBalance !== null && round($balance - $expectedBalance, 4) !== 0.0))
+        ) {
             // adjustBalance() is the only writer of the balance of an existing card
             $giftcard->setData('balance', (float) $storedBalance);
             return $this->update($giftcard, $balance, null, $comment, $expectedBalance);
@@ -135,21 +137,23 @@ class Maho_Giftcard_Service_Giftcard
      */
     public function update(Maho_Giftcard_Model_Giftcard $giftcard, ?float $balance, ?string $status, ?string $comment = null, ?float $expectedBalance = null): Maho_Giftcard_Model_Giftcard
     {
-        $resource = $giftcard->getResource();
-        $resource->beginTransaction();
-        try {
+        $giftcard->inBalanceTransaction(function () use ($giftcard, $balance, $status, $comment, $expectedBalance): void {
+            if ($status === null && $giftcard->dataHasChangedFor('status')) {
+                $status = $giftcard->getStatus();
+            }
             if ($balance !== null) {
+                $changesExpiry = $giftcard->hasData('expires_at') && $giftcard->dataHasChangedFor('expires_at');
+                $expiry = $giftcard->getExpiresAt();
                 $this->adjustBalance($giftcard, $balance, $comment, $expectedBalance);
+                if ($changesExpiry) {
+                    $giftcard->setExpiresAt($expiry);
+                }
             }
             if ($status !== null && $status !== $giftcard->getStatus()) {
                 $giftcard->setStatus($status);
             }
             $giftcard->save();
-            $resource->commit();
-        } catch (Throwable $e) {
-            $resource->rollBack();
-            throw $e;
-        }
+        });
         return $giftcard;
     }
 

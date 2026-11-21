@@ -103,6 +103,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
 
         $storedBalance = $model->getBalance();
         $storedStatus = $model->getStatus();
+        $storedExpiry = $model->getExpiresAt();
         $data = Mage::getSingleton('adminhtml/session')->getFormData(true);
         if (is_array($data) && $data !== []) {
             $model->setData($data);
@@ -111,6 +112,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             // The save compares the posted balance and status with these, also after a failed save
             $model->setData('shown_balance', $storedBalance);
             $model->setData('shown_status', $storedStatus);
+            $model->setData('shown_expires_at', substr($storedExpiry ?? '', 0, 10));
         }
 
         Mage::register('current_giftcard', $model);
@@ -148,6 +150,10 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
                 $saveData['status'] = $model->getStatus();
             }
             unset($saveData['shown_status']);
+            if (isset($saveData['expires_at'], $saveData['shown_expires_at']) && $saveData['expires_at'] === $saveData['shown_expires_at']) {
+                unset($saveData['expires_at']);
+            }
+            unset($saveData['shown_expires_at']);
 
             // A form that does not post the balance keeps the balance of the card
             $saveData['balance'] ??= $model->getData('balance');

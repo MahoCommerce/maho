@@ -153,6 +153,10 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
             $fieldset->addField('shown_status', 'hidden', [
                 'name'  => 'shown_status',
             ]);
+
+            $fieldset->addField('shown_expires_at', 'hidden', [
+                'name'  => 'shown_expires_at',
+            ]);
         }
 
         $fieldset->addField('expires_at', 'date', [

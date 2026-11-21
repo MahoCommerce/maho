@@ -99,6 +99,11 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
         $data = parent::_prepareDataForSave($object);
         if ($object->getId()) {
             unset($data['balance']);
+            foreach (['status', 'expires_at'] as $field) {
+                if (!$object->dataHasChangedFor($field)) {
+                    unset($data[$field]);
+                }
+            }
         }
         return $data;
     }

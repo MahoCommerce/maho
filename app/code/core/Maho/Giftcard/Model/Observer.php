@@ -460,15 +460,14 @@ class Maho_Giftcard_Model_Observer
      */
     protected function _refundGiftcards(array $applied, float $baseAmount, Mage_Sales_Model_Order $order, string $comment): void
     {
-        $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
-        $giftcardTable = Mage::getSingleton('core/resource')->getTableName('giftcard/giftcard');
-
-        // A row lock holds only inside a transaction, and the cancel of an order runs outside one
-        $adapter->beginTransaction();
-        try {
+        $giftcard = Mage::getModel('giftcard/giftcard');
+        $giftcard->inBalanceTransaction(static function (Maho\Db\Adapter\AdapterInterface $adapter) use ($giftcard, $applied, $baseAmount, $order, $comment): void {
+            $giftcardTable = $giftcard->getResource()->getMainTable();
             // Lock every card first, so the share of a card that no longer exists goes to the other cards
             $ids = [];
-            foreach (array_keys($applied) as $code) {
+            $codes = array_keys($applied);
+            sort($codes, SORT_STRING);
+            foreach ($codes as $code) {
                 $id = $adapter->fetchOne(
                     $adapter->select()->from($giftcardTable, ['giftcard_id'])->where('code = ?', (string) $code)->forUpdate(),
                 );
@@ -494,11 +493,7 @@ class Maho_Giftcard_Model_Observer
                 Mage::getModel('giftcard/giftcard')->load($ids[$code])
                     ->refund($restoreAmount, (int) $order->getId(), $comment, (int) $order->getStoreId());
             }
-            $adapter->commit();
-        } catch (\Throwable $e) {
-            $adapter->rollBack();
-            throw $e;
-        }
+        });
     }
 
     /**

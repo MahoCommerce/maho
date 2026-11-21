@@ -8,6 +8,8 @@
 
 declare(strict_types=1);
 
+use Maho\Db\Adapter\AdapterInterface;
+
 /**
  * Gift Card Model
  */
@@ -529,6 +531,36 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         return $this;
     }
 
+    /** @param callable(AdapterInterface): void $operation */
+    public function inBalanceTransaction(callable $operation): void
+    {
+        $resource = $this->getResource();
+        $resource->beginTransaction();
+        $write = $resource->getReadConnection();
+        $savepoint = null;
+        try {
+            if ($write->getTransactionLevel() > 1) {
+                $name = 'giftcard_balance_' . $write->getTransactionLevel();
+                $write->getConnection()->createSavepoint($name);
+                $savepoint = $name;
+            }
+
+            $operation($write);
+            if ($savepoint !== null) {
+                $write->getConnection()->releaseSavepoint($savepoint);
+            }
+            $resource->commit();
+        } catch (Throwable $e) {
+            // The adapter clears every transaction level on a deadlock or lock timeout.
+            if ($savepoint !== null && $write->getTransactionLevel() > 0) {
+                $write->getConnection()->rollbackSavepoint($savepoint);
+                $write->getConnection()->releaseSavepoint($savepoint);
+            }
+            $resource->rollBack();
+            throw $e;
+        }
+    }
+
     /**
      * Lock the row of this card and give its stored balance, status and expiry date to $change, or null when
      * the card no longer exists. $change returns the columns to write and the history entry, or null for no
@@ -543,17 +575,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     protected function _changeBalance(callable $change): void
     {
         $resource = $this->getResource();
-        $resource->beginTransaction();
-        // Resource reads use its writer while the transaction is open
-        $write = $resource->getReadConnection();
-        $savepoint = null;
-        try {
-            // Adapter nesting counts transactions without creating savepoints
-            if ($write->getTransactionLevel() > 1) {
-                $savepoint = 'giftcard_balance_' . $write->getTransactionLevel();
-                $write->getConnection()->createSavepoint($savepoint);
-            }
-
+        $this->inBalanceTransaction(function (AdapterInterface $write) use ($resource, $change): void {
             // The row lock stops two requests from changing the same balance
             $stored = $write->fetchRow(
                 $write->select()
@@ -581,20 +603,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             foreach ($values as $key => $value) {
                 $this->setData($key, $value)->setOrigData($key, $value);
             }
-
-            if ($savepoint !== null) {
-                $write->getConnection()->releaseSavepoint($savepoint);
-            }
-            $resource->commit();
-        } catch (\Throwable $e) {
-            // After a deadlock or a lock timeout the adapter has rolled back everything, and the savepoint is gone
-            if ($savepoint !== null && $write->getTransactionLevel() > 0) {
-                $write->getConnection()->rollbackSavepoint($savepoint);
-                $write->getConnection()->releaseSavepoint($savepoint);
-            }
-            $resource->rollBack();
-            throw $e;
-        }
+        });
     }
 
     /**
