@@ -18,6 +18,16 @@ class Mage_Adminhtml_Model_System_Config_Backend_Currency_Cron extends Mage_Core
         $time = $this->getData('groups/import/fields/time/value');
         $frequency = $this->getData('groups/import/fields/frequency/value');
 
+        if (!is_array($time) || !array_key_exists(0, $time) || !array_key_exists(1, $time)
+            || !is_numeric($time[0]) || !is_numeric($time[1])
+            || (int) $time[0] < 0 || (int) $time[0] > 23
+            || (int) $time[1] < 0 || (int) $time[1] > 59
+        ) {
+            throw new Mage_Core_Exception(
+                Mage::helper('adminhtml')->__('Currency import time must contain a valid hour and minute.'),
+            );
+        }
+
         $frequencyWeekly = Mage_Adminhtml_Model_System_Config_Source_Cron_Frequency::CRON_WEEKLY;
         $frequencyMonthly = Mage_Adminhtml_Model_System_Config_Source_Cron_Frequency::CRON_MONTHLY;
 
