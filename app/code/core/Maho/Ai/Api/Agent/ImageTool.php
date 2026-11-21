@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Maho\Ai\Api\Agent;
 
-use Maho\Ai\Model\Chat\Attachment;
+use Maho_Ai_Model_Chat_Attachment as Attachment;
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
 use Symfony\AI\Platform\Tool\ToolEffectHints;
