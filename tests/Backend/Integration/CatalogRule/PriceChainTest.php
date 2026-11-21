@@ -218,4 +218,39 @@ it('applies only the rules active on each indexed date', function () {
         ->toEqualWithDelta($basePrice * 0.9 * 0.95, 0.0001)
         ->and($prices[Mage::app()->getLocale()->formatDateForDb($tomorrow, withTime: false)])
         ->toEqualWithDelta($basePrice * 0.95, 0.0001);
+
+it('includes catalog rule windows at their exact start and end boundaries', function () {
+    $product = chainProduct();
+    $productId = (int) $product->getId();
+    $websiteId = (int) Mage::app()->getWebsite(true)->getId();
+    $ruleId = seedRuleChain($productId, $websiteId, [
+        ['sort_order' => 0, 'action_operator' => 'by_percent', 'action_amount' => 10, 'action_stop' => 0],
+    ]);
+    $fromTime = strtotime('2026-05-01 12:00:00 UTC');
+    $toTime = strtotime('2026-05-31 12:00:00 UTC');
+
+    chainWrite()->update(
+        chainTable('catalogrule/rule_product'),
+        ['from_time' => $fromTime, 'to_time' => $toTime],
+        ['rule_id = ?' => $ruleId],
+    );
+
+    $storedRule = chainWrite()->fetchRow(
+        chainWrite()->select()
+            ->from(chainTable('catalogrule/rule_product'))
+            ->where('rule_id = ?', $ruleId),
+    );
+    expect((int) $storedRule['from_time'])->toBe($fromTime)
+        ->and((int) $storedRule['to_time'])->toBe($toTime);
+
+    $resource = Mage::getResourceSingleton('catalogrule/rule');
+    $matchingRuleIds = static fn(int $timestamp): array => array_map(
+        static fn(array $row): int => (int) $row['rule_id'],
+        $resource->getRulesFromProduct($timestamp, $websiteId, 0, $productId),
+    );
+
+    expect($matchingRuleIds($fromTime))->toContain($ruleId)
+        ->and($matchingRuleIds($toTime))->toContain($ruleId)
+        ->and($matchingRuleIds($fromTime - 1))->not->toContain($ruleId)
+        ->and($matchingRuleIds($toTime + 1))->not->toContain($ruleId);
 });
