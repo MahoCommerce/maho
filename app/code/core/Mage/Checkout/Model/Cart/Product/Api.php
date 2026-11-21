@@ -298,12 +298,12 @@ class Mage_Checkout_Model_Cart_Product_Api extends Mage_Checkout_Model_Api_Resou
         }
 
         try {
-            $customerQuote
-                ->collectTotals()
-                ->save();
+            $customerQuote->collectTotals();
+            $quote->collectTotals();
 
-            $quote
-                ->collectTotals()
+            Mage::getModel('core/resource_transaction')
+                ->addObject($customerQuote)
+                ->addObject($quote)
                 ->save();
         } catch (Exception $e) {
             $this->_fault('product_move_quote_save_fault', $e->getMessage());
