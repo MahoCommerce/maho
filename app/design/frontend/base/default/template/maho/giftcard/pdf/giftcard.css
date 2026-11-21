@@ -7,7 +7,7 @@ SPDX-License-Identifier: OSL-3.0
 */
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'DejaVu Sans', sans-serif; font-size: 10pt; color: #333; }
+body { font-size: 10pt; color: #333; }
 
 .giftcard {
     width: 500px;
