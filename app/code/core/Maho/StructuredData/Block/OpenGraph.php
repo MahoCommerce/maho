@@ -93,10 +93,9 @@ class Maho_StructuredData_Block_OpenGraph extends Mage_Core_Block_Abstract
         $urlHelper = Mage::helper('core/url');
         $storeQuery = $urlHelper->getCanonicalStoreQuery();
         if ($product !== null) {
-            return $this->_absoluteHttpUrl($product->getUrlModel()->getUrl($product, [
-                '_ignore_category' => true,
-                '_query' => $storeQuery,
-            ]));
+            $product = clone $product;
+            $product->unsetData('url')->unsetData('request_path')->setDoNotUseCategoryId(true);
+            return $this->_absoluteHttpUrl($product->getUrlModel()->getUrl($product, ['_query' => $storeQuery]));
         }
         $url = $category->getUrl();
         return $this->_absoluteHttpUrl($storeQuery ? $urlHelper->addRequestParam($url, $storeQuery) : $url);

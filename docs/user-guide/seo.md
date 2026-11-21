@@ -62,7 +62,8 @@ defaults to **No** so each theme or extension can continue to provide its own pr
 
 Maho adds the page title, description, canonical URL, store name, language and a public image on
 indexable home, CMS, product and category pages. A product or category image takes precedence over
-the storefront logo. A preview needs a title, URL and image.
+the storefront logo. A preview needs a title, URL and image. Use a PNG or JPEG logo for previews
+that require a raster image.
 
 ## Canonical tags
 

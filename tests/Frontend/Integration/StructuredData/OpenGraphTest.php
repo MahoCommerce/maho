@@ -29,12 +29,18 @@ function openGraphEnable(): void
     Mage::app()->getStore()->setConfig('catalog/social_sharing/open_graph_enabled', '1');
 }
 
+function openGraphLogo(string $url = 'https://media.example.test/share.png'): void
+{
+    Mage::app()->getStore()->setConfig('design/header/logo_src', $url);
+    Mage::app()->getLayout()->createBlock('page/html_header', 'header');
+}
+
 it('only adds the Open Graph block to supported layout handles', function (): void {
     foreach (['cms_index_index', 'cms_page_view', 'catalog_product_view', 'catalog_category_view'] as $handle) {
         $update = Mage::getModel('core/layout_update')->addHandle($handle)->load();
         expect($update->asString())->toContain('name="structured_data.open_graph"');
     }
-    foreach (['cms_index_noroute', 'cms_preview_view', 'catalogsearch_result_index', 'checkout_cart_index'] as $handle) {
+    foreach (['cms_index_noroute', 'cms_preview_view', 'blog_index_view', 'catalogsearch_result_index', 'checkout_cart_index'] as $handle) {
         $update = Mage::getModel('core/layout_update')->addHandle($handle)->load();
         expect($update->asString())->not->toContain('name="structured_data.open_graph"');
     }
@@ -42,8 +48,13 @@ it('only adds the Open Graph block to supported layout handles', function (): vo
 
 it('keeps Open Graph disabled by default', function (): void {
     openGraphHead()->addLinkRel('canonical', 'https://example.test/product');
+    openGraphLogo();
 
     expect(openGraphHtml())->toBe('');
+
+    openGraphEnable();
+
+    expect(openGraphHtml())->toContain('<meta property="og:url" content="https://example.test/product">');
 });
 
 it('renders escaped metadata with the head canonical URL and the product image', function (): void {
@@ -69,6 +80,30 @@ it('renders escaped metadata with the head canonical URL and the product image',
     );
 });
 
+it('builds the product URL without a category when another block has already generated its category URL', function (): void {
+    openGraphEnable();
+    openGraphHead();
+    $store = Mage::app()->getStore();
+    $store->setConfig(Mage_Catalog_Helper_Product::XML_PATH_PRODUCT_URL_USE_CATEGORY, '1');
+    $product = Mage::getModel('catalog/product')->setData([
+        'entity_id' => 999991,
+        'store_id' => $store->getId(),
+        'category_id' => 999992,
+        'url_key' => 'example-product',
+        'request_path' => 'example-category/example-product.html',
+        'image' => '/e/x/example.jpg',
+    ]);
+    Mage::register('current_product', $product);
+    $categoryUrl = $product->getProductUrl();
+    $canonical = Mage::getUrl('catalog/product/view', ['id' => $product->getId(), 's' => $product->getUrlKey()]);
+    expect($categoryUrl)->not->toBe($canonical)
+        ->and($product->getData('url'))->toBe($categoryUrl);
+
+    preg_match('/<meta property="og:url" content="([^"]+)">/', openGraphHtml(), $matches);
+    expect($matches[1] ?? null)->toBe($canonical)
+        ->and($product->getData('url'))->toBe($categoryUrl);
+});
+
 it('uses the category URL and public media image when the head has no canonical link', function (): void {
     openGraphEnable();
     openGraphHead();
@@ -90,12 +125,11 @@ it('uses the CMS canonical URL and the storefront logo for a content page', func
     openGraphEnable();
     $store = Mage::app()->getStore();
     $store->setConfig('web/default/cms_home_page', 'home');
-    $store->setConfig('design/header/logo_src', $logo);
+    openGraphLogo($logo);
     Mage::getSingleton('cms/page')->setIdentifier($identifier)->setTitle('Example page');
     openGraphHead();
 
     $layout = Mage::app()->getLayout();
-    $layout->createBlock('page/html_header', 'header');
     $page = $layout->createBlock('cms/page', 'cms_page');
     $canonical = htmlspecialchars($page->getCanonicalUrl(), ENT_QUOTES, 'UTF-8');
     $image = str_starts_with($logo, '//') ? Mage::app()->getRequest()->getScheme() . ':' . $logo : $logo;
@@ -109,10 +143,27 @@ it('uses the CMS canonical URL and the storefront logo for a content page', func
     'content page with a scheme-relative logo URL' => ['about', '//media.example.test/share.png'],
 ]);
 
+it('uses the storefront logo when the catalog page has no image', function (string $entity): void {
+    openGraphEnable();
+    openGraphHead()->addLinkRel('canonical', 'https://example.test/catalog');
+    $model = Mage::getModel('catalog/' . $entity)->setData('image', $entity === 'product' ? 'no_selection' : '');
+    Mage::register('current_' . $entity, $model);
+    openGraphLogo('');
+
+    expect(openGraphHtml())->toBe('');
+
+    openGraphLogo();
+
+    expect(openGraphHtml())->toContain('<meta property="og:image" content="https://media.example.test/share.png">');
+})->with(['product', 'category']);
+
 it('omits Open Graph on noindex and error responses', function (string $robots, int $status, string $robotsHeader): void {
     openGraphEnable();
     $head = openGraphHead();
     $head->addLinkRel('canonical', 'https://example.test/content');
+    openGraphLogo();
+    expect(openGraphHtml())->toContain('<meta property="og:url" content="https://example.test/content">');
+
     $head->setRobots($robots);
     $response = Mage::app()->getResponse();
     $response->setHttpResponseCode($status);
