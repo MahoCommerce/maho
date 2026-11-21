@@ -118,39 +118,43 @@ class Mage_Sales_Model_Order_Invoice_Api extends Mage_Sales_Model_Api_Resource
             $this->_fault('order_not_exists');
         }
 
-        /**
-         * Check invoice create availability
-         */
-        if (!$order->canInvoice()) {
-            $this->_fault('data_invalid', Mage::helper('sales')->__('Cannot do invoice for order.'));
-        }
-
-        $invoice = $order->prepareInvoice($itemsQty);
-
-        $invoice->register();
-
-        if ($comment !== null) {
-            $invoice->addComment($comment, $notifyCustomer);
-        }
-
-        if ($notifyCustomer) {
-            $invoice->setEmailSent(true);
-        }
-
-        $invoice->getOrder()->setIsInProcess(true);
-
         try {
-            $transactionSave = Mage::getModel('core/resource_transaction')
-                ->addObject($invoice)
-                ->addObject($invoice->getOrder())
-                ->save();
+            return Mage::getService('sales/order')->withOrderLock((int) $order->getId(), function () use (
+                $order,
+                $itemsQty,
+                $comment,
+                $notifyCustomer,
+                $includeComment,
+            ): string {
+                $order->load((int) $order->getId());
+                if (!$order->canInvoice()) {
+                    $this->_fault('data_invalid', Mage::helper('sales')->__('Cannot do invoice for order.'));
+                }
 
-            $invoice->sendEmail($notifyCustomer, ($includeComment ? $comment : ''));
-        } catch (Mage_Core_Exception $e) {
+                $invoice = $order->prepareInvoice($itemsQty);
+                $invoice->register();
+                if ($comment !== null) {
+                    $invoice->addComment($comment, $notifyCustomer);
+                }
+                if ($notifyCustomer) {
+                    $invoice->setEmailSent(true);
+                }
+                $invoice->getOrder()->setIsInProcess(true);
+
+                try {
+                    Mage::getModel('core/resource_transaction')
+                        ->addObject($invoice)
+                        ->addObject($invoice->getOrder())
+                        ->save();
+                    $invoice->sendEmail($notifyCustomer, ($includeComment ? $comment : ''));
+                } catch (Mage_Core_Exception $e) {
+                    $this->_fault('data_invalid', $e->getMessage());
+                }
+                return $invoice->getIncrementId();
+            });
+        } catch (Mage_Core_Exception_Conflict $e) {
             $this->_fault('data_invalid', $e->getMessage());
         }
-
-        return $invoice->getIncrementId();
     }
 
     /**
