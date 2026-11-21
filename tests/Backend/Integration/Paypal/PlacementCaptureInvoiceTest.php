@@ -146,7 +146,13 @@ it('registers a new confirmed capture when checkout saved only an authorization'
     }
 });
 
-it('pays the placement invoice only when PayPal confirms the full capture', function (array $capture, bool $paid, float $orderTotal = 100.0): void {
+it('pays the placement invoice only when PayPal confirms the full capture', function (
+    array $capture,
+    bool $paid,
+    float $orderTotal = 100.0,
+    string $currency = 'USD',
+    ?bool $paidAfterNotification = null,
+): void {
     $suffix = bin2hex(random_bytes(6));
     $paypalOrderId = 'ORDER-' . $suffix;
     $captureId = 'CAPTURE-' . $suffix;
@@ -156,7 +162,7 @@ it('pays the placement invoice only when PayPal confirms the full capture', func
         ->setIncrementId($incrementId)
         ->setCustomerIsGuest()
         ->setCustomerEmail('paypal-invoice@example.invalid')
-        ->setBaseCurrencyCode('USD')->setOrderCurrencyCode('USD')->setGlobalCurrencyCode('USD')
+        ->setBaseCurrencyCode($currency)->setOrderCurrencyCode($currency)->setGlobalCurrencyCode($currency)
         ->setBaseToOrderRate(1)->setBaseToGlobalRate(1)
         ->setSubtotal($orderTotal)->setBaseSubtotal($orderTotal)
         ->setGrandTotal($orderTotal)->setBaseGrandTotal($orderTotal)
@@ -173,12 +179,13 @@ it('pays the placement invoice only when PayPal confirms the full capture', func
     $payment->setAdditionalInformation('paypal_order_id', $paypalOrderId);
     $order->setPayment($payment);
     $order->getStore()->setConfig('payment/paypal_standard_checkout/payment_action', 'capture');
+    $paypalValue = in_array($currency, ['HUF', 'JPY', 'TWD'], true) ? '100' : '100.00';
 
     $client = $this->createMock(Maho_Paypal_Model_Api_Client::class);
     $client->expects($this->once())->method('getOrder')->with($paypalOrderId)->willReturn([
         'id' => $paypalOrderId,
         'status' => 'APPROVED',
-        'purchase_units' => [['invoice_id' => $incrementId, 'amount' => ['currency_code' => 'USD', 'value' => '100.00']]],
+        'purchase_units' => [['invoice_id' => $incrementId, 'amount' => ['currency_code' => $currency, 'value' => $paypalValue]]],
     ]);
     $client->expects($this->once())->method('captureOrder')->with($paypalOrderId)->willReturn([
         'id' => $paypalOrderId,
@@ -213,6 +220,18 @@ it('pays the placement invoice only when PayPal confirms the full capture', func
                 ->and((float) $saved->getBaseTotalPaid())->toBe($orderTotal)
                 ->and((float) $saved->getPayment()->getBaseAmountPaidOnline())->toBe(100.0);
         }
+
+        if ($paidAfterNotification !== null) {
+            notifyPaypalCaptureCompleted($saved, $captureId, $currency, $paypalValue);
+            notifyPaypalCaptureCompleted($saved, $captureId, $currency, $paypalValue);
+            $confirmed = Mage::getModel('sales/order')->load($saved->getId());
+            $confirmedInvoice = $confirmed->getInvoiceCollection()->getFirstItem();
+            expect($confirmed->getInvoiceCollection()->count())->toBe(1)
+                ->and($confirmedInvoice->getId())->toBe($invoice->getId())
+                ->and((int) $confirmedInvoice->getState())->toBe($paidAfterNotification ? Mage_Sales_Model_Order_Invoice::STATE_PAID : Mage_Sales_Model_Order_Invoice::STATE_OPEN)
+                ->and((float) $confirmed->getBaseTotalPaid())->toBe($paidAfterNotification ? $orderTotal : 0.0)
+                ->and((float) $confirmed->getPayment()->getBaseAmountPaidOnline())->toBe($paidAfterNotification ? 100.0 : 0.0);
+        }
     } finally {
         $connection->rollBack();
     }
@@ -222,4 +241,16 @@ it('pays the placement invoice only when PayPal confirms the full capture', func
     'pending capture' => [['status' => 'PENDING', 'amount' => ['currency_code' => 'USD', 'value' => '100.00']], false],
     'completed partial capture' => [['status' => 'COMPLETED', 'amount' => ['currency_code' => 'USD', 'value' => '90.00']], false],
     'completed capture in another currency' => [['status' => 'COMPLETED', 'amount' => ['currency_code' => 'EUR', 'value' => '100.00']], false],
+    'completed full capture in HUF' => [['status' => 'COMPLETED', 'amount' => ['currency_code' => 'HUF', 'value' => '100']], true, 100.0, 'HUF'],
+    'pending full capture in HUF' => [['status' => 'PENDING', 'amount' => ['currency_code' => 'HUF', 'value' => '100']], false, 100.0, 'HUF', true],
+    'completed capture for fractional HUF order' => [['status' => 'COMPLETED', 'amount' => ['currency_code' => 'HUF', 'value' => '100']], false, 100.004, 'HUF'],
+    'pending capture for fractional HUF order' => [['status' => 'PENDING', 'amount' => ['currency_code' => 'HUF', 'value' => '100']], false, 100.004, 'HUF', false],
+    'completed full capture in JPY' => [['status' => 'COMPLETED', 'amount' => ['currency_code' => 'JPY', 'value' => '100']], true, 100.0, 'JPY'],
+    'pending full capture in JPY' => [['status' => 'PENDING', 'amount' => ['currency_code' => 'JPY', 'value' => '100']], false, 100.0, 'JPY', true],
+    'completed capture for fractional JPY order' => [['status' => 'COMPLETED', 'amount' => ['currency_code' => 'JPY', 'value' => '100']], false, 100.004, 'JPY'],
+    'pending capture for fractional JPY order' => [['status' => 'PENDING', 'amount' => ['currency_code' => 'JPY', 'value' => '100']], false, 100.004, 'JPY', false],
+    'completed full capture in TWD' => [['status' => 'COMPLETED', 'amount' => ['currency_code' => 'TWD', 'value' => '100']], true, 100.0, 'TWD'],
+    'pending full capture in TWD' => [['status' => 'PENDING', 'amount' => ['currency_code' => 'TWD', 'value' => '100']], false, 100.0, 'TWD', true],
+    'completed capture for fractional TWD order' => [['status' => 'COMPLETED', 'amount' => ['currency_code' => 'TWD', 'value' => '100']], false, 100.004, 'TWD'],
+    'pending capture for fractional TWD order' => [['status' => 'PENDING', 'amount' => ['currency_code' => 'TWD', 'value' => '100']], false, 100.004, 'TWD', false],
 ]);

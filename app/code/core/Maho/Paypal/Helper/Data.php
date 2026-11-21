@@ -60,10 +60,16 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function isFullInvoiceCapture(array $amount, Mage_Sales_Model_Order_Invoice $invoice): bool
     {
-        return ($amount['currency_code'] ?? null) === $invoice->getOrder()->getBaseCurrencyCode()
+        $currency = $invoice->getOrder()->getBaseCurrencyCode();
+        $invoiceTotal = (float) $invoice->getBaseGrandTotal();
+        $wholeUnitsOnly = in_array($currency, ['HUF', 'JPY', 'TWD'], true);
+        $roundedTotal = round($invoiceTotal, $wholeUnitsOnly ? 0 : 2);
+
+        return ($amount['currency_code'] ?? null) === $currency
             && is_numeric($amount['value'] ?? null)
             && (float) $amount['value'] > 0
-            && (float) $amount['value'] === round((float) $invoice->getBaseGrandTotal(), 2);
+            && (!$wholeUnitsOnly || round($invoiceTotal, 4) === $roundedTotal)
+            && (float) $amount['value'] === $roundedTotal;
     }
 
     /**
