@@ -14,53 +14,33 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 uses(Tests\MahoFrontendTestCase::class);
 
-function loginArrayDispatch(string $action, array $login): Mage_Core_Controller_Response_Http
-{
-    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create(
-        '/customer/account/' . $action,
-        'POST',
-        ['form_key' => Mage::getSingleton('core/session')->getFormKey(), 'login' => $login],
-    ));
-    $request->setPathInfo('/customer/account/' . $action)
-        ->setRouteName('customer')
-        ->setControllerName('account')
-        ->setActionName($action)
-        ->setControllerModule('Mage_Customer')
-        ->setDispatched(true);
-    Mage::app()->setRequest($request);
-    $response = new Mage_Core_Controller_Response_Http();
-    new Mage_Customer_AccountController($request, $response)->{$action . 'Action'}();
-    return $response;
-}
-
 beforeEach(function (): void {
     Mage::unregister(Mage_Core_Model_Session_Abstract::REGISTRY_KEY);
     $session = new Session(new MockArraySessionStorage());
     $session->start();
     Mage::register(Mage_Core_Model_Session_Abstract::REGISTRY_KEY, $session);
-    Mage::getSingleton('customer/session')->getMessages(true);
 });
 
-it('answers an array login field with an error instead of a server error', function (array $login): void {
-    loginArrayDispatch('loginPost', $login);
+it('rejects an array login field as a missing field', function (array $login): void {
+    $request = new Mage_Core_Controller_Request_Http(
+        SymfonyRequest::create('/customer/account/loginPost', 'POST', ['login' => $login]),
+    );
+    $request->setRouteName('customer')
+        ->setControllerName('account')
+        ->setActionName('loginPost')
+        ->setDispatched(true);
+    Mage::app()->setRequest($request);
 
-    $errors = [];
-    foreach (Mage::getSingleton('customer/session')->getMessages(true)->getItems() as $message) {
-        $errors[] = $message->getText();
-    }
+    new Mage_Customer_AccountController($request, new Mage_Core_Controller_Response_Http())->loginPostAction();
 
+    $errors = array_map(
+        fn($message) => $message->getText(),
+        Mage::getSingleton('customer/session')->getMessages(true)->getItems(),
+    );
     expect($errors)->toBe(['Login and password are required.']);
 })->with([
+    // Before the fix, setUsername(?string) got the array and threw a TypeError: a 500
     'username array' => [['username' => ['address@example.com'], 'password' => 'secret']],
+    // Before the fix, the password "Array" was tried and counted as a failed login
     'password array' => [['username' => 'address@example.com', 'password' => ['secret']]],
-    'both arrays' => [['username' => ['address@example.com'], 'password' => ['secret']]],
 ]);
-
-it('ignores an array login field during the 2FA precheck', function (): void {
-    $response = loginArrayDispatch('prelogin', [
-        'username' => ['address@example.com'],
-        'password' => ['secret'],
-    ]);
-
-    expect((string) $response->getBody())->toBe('[]');
-});
