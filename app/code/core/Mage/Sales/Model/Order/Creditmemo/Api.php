@@ -99,29 +99,39 @@ class Mage_Sales_Model_Order_Creditmemo_Api extends Mage_Sales_Model_Api_Resourc
         if (!$order->getId()) {
             $this->_fault('order_not_exists');
         }
-        if (!$order->canCreditmemo()) {
-            $this->_fault('cannot_create_creditmemo');
-        }
-        $creditmemoData = $this->_prepareCreateData($creditmemoData);
 
-        $creditmemo = Mage::getService('sales/order')->buildCreditmemo($order, $creditmemoData);
-
-        $creditmemo->setPaymentRefundDisallowed(true)->register();
-        // add comment to creditmemo
-        if (!empty($comment)) {
-            $creditmemo->addComment($comment, $notifyCustomer);
-        }
         try {
-            Mage::getModel('core/resource_transaction')
-                ->addObject($creditmemo)
-                ->addObject($order)
-                ->save();
-            // send email notification
-            $creditmemo->sendEmail($notifyCustomer, ($includeComment ? $comment : ''));
-        } catch (Mage_Core_Exception $e) {
+            return Mage::getService('sales/order')->withOrderLock((int) $order->getId(), function () use (
+                $order,
+                $creditmemoData,
+                $comment,
+                $notifyCustomer,
+                $includeComment,
+            ): string {
+                $order->load((int) $order->getId());
+                if (!$order->canCreditmemo()) {
+                    $this->_fault('cannot_create_creditmemo');
+                }
+                $creditmemoData = $this->_prepareCreateData($creditmemoData);
+                $creditmemo = Mage::getService('sales/order')->buildCreditmemo($order, $creditmemoData);
+                $creditmemo->setPaymentRefundDisallowed(true)->register();
+                if (!empty($comment)) {
+                    $creditmemo->addComment($comment, $notifyCustomer);
+                }
+                try {
+                    Mage::getModel('core/resource_transaction')
+                        ->addObject($creditmemo)
+                        ->addObject($order)
+                        ->save();
+                    $creditmemo->sendEmail($notifyCustomer, ($includeComment ? $comment : ''));
+                } catch (Mage_Core_Exception $e) {
+                    $this->_fault('data_invalid', $e->getMessage());
+                }
+                return $creditmemo->getIncrementId();
+            });
+        } catch (Mage_Core_Exception_Conflict $e) {
             $this->_fault('data_invalid', $e->getMessage());
         }
-        return $creditmemo->getIncrementId();
     }
 
     /**
