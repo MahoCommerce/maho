@@ -82,11 +82,12 @@ function createRenderableInvoice(): Mage_Sales_Model_Order_Invoice
 }
 
 describe('Invoice email PDF attachment', function () {
-    it('renders the admin PDF templates outside the admin, and restores the design', function () {
+    it('renders the admin PDF templates outside the admin, and restores the design and the store', function () {
         $invoice = createRenderableInvoice();
 
         // An API request, an email sent from the storefront, or cron: the storefront design is active
         $design = Mage::getDesign()->setArea('frontend')->setPackageName('base')->setTheme('default');
+        Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
 
         $pdf = Mage::getModel('sales/order_pdf_invoice');
         $html = (new ReflectionMethod($pdf, '_renderDocumentsHtml'))->invoke($pdf, [$invoice]);
@@ -97,6 +98,7 @@ describe('Invoice email PDF attachment', function () {
         expect($pdfCss[1] ?? '')->not->toBeEmpty();
         expect($design->getArea())->toBe('frontend');
         expect($design->getPackageName())->toBe('base');
+        expect((int) Mage::app()->getStore()->getId())->toBe(Mage_Core_Model_App::ADMIN_STORE_ID);
     });
 
     it('renders and attaches the real invoice PDF via the queue-safe descriptor path', function () {
