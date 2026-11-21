@@ -8,6 +8,8 @@
  * @package Mage_Bundle
  */
 
+declare(strict_types=1);
+
 class Mage_Bundle_Model_CatalogIndex_Data_Bundle extends Mage_CatalogIndex_Model_Data_Simple
 {
     /**
@@ -49,20 +51,5 @@ class Mage_Bundle_Model_CatalogIndex_Data_Bundle extends Mage_CatalogIndex_Model
             'parent_field' => 'parent_product_id',
             'child_field' => 'product_id',
         ];
-    }
-
-    /**
-     * Prepare select statement before 'fetchLinkInformation' function result fetch
-     *
-     * @param int $store
-     * @param string $table
-     * @param string $idField
-     * @param string $whereField
-     * @param int $id
-     * @param array $additionalWheres
-     */
-    protected function _prepareLinkFetchSelect($store, $table, $idField, $whereField, $id, $additionalWheres = []): void
-    {
-        $this->_addAttributeFilter($this->_getLinkSelect(), 'required_options', 'l', $idField, $store, 0);
     }
 }

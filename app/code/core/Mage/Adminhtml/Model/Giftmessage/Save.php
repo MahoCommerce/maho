@@ -137,12 +137,10 @@ class Mage_Adminhtml_Model_Giftmessage_Save extends \Maho\DataObject
     /**
      * Delete a single gift message from entity
      *
-     * @param \Maho\DataObject $entityModel
-     * @param Mage_GiftMessage_Model_Message|null $giftmessageModel
      * @return $this
      * @throws Throwable
      */
-    protected function _deleteOne($entityModel, $giftmessageModel = null)
+    protected function _deleteOne(Mage_Core_Model_Abstract $entityModel, ?Mage_GiftMessage_Model_Message $giftmessageModel = null)
     {
         $giftmessageModel ??= Mage::getModel('giftmessage/message')
             ->load($entityModel->getGiftMessageId());

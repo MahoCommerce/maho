@@ -20,7 +20,8 @@ class Mage_Adminhtml_Model_System_Config_Backend_Baseurl extends Mage_Core_Model
         $value = str_replace(' ', '', $this->getValue());
 
         if ($value === '') {
-            $label = $this->getFieldConfig()->descend('label');
+            $fieldConfig = $this->getFieldConfig();
+            $label = $fieldConfig ? (string) $fieldConfig->label : $this->getPath();
             Mage::throwException(Mage::helper('core')->__('"%s" is a required value.', $label));
         }
 

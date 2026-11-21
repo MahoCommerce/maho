@@ -50,6 +50,7 @@ Default layout, loads most of the pages
                 <action method="addJs"><script>mage/adminhtml/tools.js</script></action>
                 <action method="addJs"><script>mage/adminhtml/uploader.js</script></action>
                 <action method="addJs"><script>mage/adminhtml/product.js</script></action>
+                <action method="addItem"><type>js</type><name>mage/adminhtml/textarea-code-editor.js</name><params>type="module"</params></action>
 
 
                 <action method="addItem"><type>skin_css</type><name>css/styles.css</name></action>

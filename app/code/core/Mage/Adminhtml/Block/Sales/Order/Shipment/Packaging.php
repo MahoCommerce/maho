@@ -266,11 +266,10 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_Packaging extends Mage_Adminhtml
      */
     public function isGirthAllowed()
     {
-        return $this
-            ->getShipment()
-            ->getOrder()
-            ->getShippingCarrier()
-            ->isGirthAllowed($this->getShipment()->getOrder()->getShippingAddress()->getCountryId());
+        $order = $this->getShipment()->getOrder();
+        $carrier = $order->getShippingCarrier();
+        return $carrier instanceof Mage_Usa_Model_Shipping_Carrier_Abstract
+            && $carrier->isGirthAllowed($order->getShippingAddress()->getCountryId());
     }
 
     /**

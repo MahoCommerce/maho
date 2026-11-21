@@ -306,6 +306,7 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
         return $this;
     }
 
+    #[\Override]
     public function getQty(): ?float
     {
         $value = $this->getData('qty');

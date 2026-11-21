@@ -8,6 +8,8 @@
  * @package Mage_Checkout
  */
 
+declare(strict_types=1);
+
 abstract class Mage_Checkout_Model_Type_Abstract extends \Maho\DataObject
 {
     /**
@@ -112,21 +114,5 @@ abstract class Mage_Checkout_Model_Type_Abstract extends \Maho\DataObject
             $this->setData('customer_default_billing_address', $address);
         }
         return $address;
-    }
-
-    /**
-     * @param Mage_Sales_Model_Quote_Address $address
-     * @return Mage_Sales_Model_Order
-     */
-    protected function _createOrderFromAddress($address)
-    {
-        return Mage::getModel('sales/order')->createFromQuoteAddress($address)
-            ->setCustomerId($this->getCustomer()->getId())
-            ->setGlobalCurrencyCode('USD')
-            ->setBaseCurrencyCode('USD')
-            ->setStoreCurrencyCode('USD')
-            ->setOrderCurrencyCode('USD')
-            ->setStoreToBaseRate(1)
-            ->setStoreToOrderRate(1);
     }
 }

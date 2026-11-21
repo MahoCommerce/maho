@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 SPDX-FileCopyrightText: 2022 The OpenMage Contributors <https://openmage.org>
 SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
 SPDX-License-Identifier: AFL-3.0
@@ -23,4 +24,25 @@ SPDX-License-Identifier: AFL-3.0
             </reference>
         </reference>
     </catalog_product_view>
+    <productalert_unsubscribe_confirm>
+        <update handle="customer_account"/>
+        <reference name="head">
+            <action method="setTitle" translate="title" module="productalert"><title>Product Alert</title></action>
+        </reference>
+        <reference name="my.account.wrapper">
+            <block type="core/template" name="productalert.unsubscribe.confirm" template="productalert/unsubscribe/confirm.phtml"/>
+        </reference>
+    </productalert_unsubscribe_confirm>
+    <productalert_unsubscribe_price>
+        <update handle="productalert_unsubscribe_confirm"/>
+    </productalert_unsubscribe_price>
+    <productalert_unsubscribe_priceall>
+        <update handle="productalert_unsubscribe_confirm"/>
+    </productalert_unsubscribe_priceall>
+    <productalert_unsubscribe_stock>
+        <update handle="productalert_unsubscribe_confirm"/>
+    </productalert_unsubscribe_stock>
+    <productalert_unsubscribe_stockall>
+        <update handle="productalert_unsubscribe_confirm"/>
+    </productalert_unsubscribe_stockall>
 </layout>

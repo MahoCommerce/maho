@@ -74,7 +74,7 @@ class Mage_Catalog_Block_Layer_View extends Mage_Core_Block_Template
         $stateBlock = $this->getLayout()->createBlock($this->_stateBlockName)
             ->setLayer($this->getLayer());
 
-        $categoryBlock = $this->getLayout()->createBlock($this->_categoryBlockName)
+        $categoryBlock = $this->_createFilterBlock($this->_categoryBlockName)
             ->setLayer($this->getLayer())
             ->init();
 
@@ -93,7 +93,7 @@ class Mage_Catalog_Block_Layer_View extends Mage_Core_Block_Template
 
             $this->setChild(
                 $attribute->getAttributeCode() . '_filter',
-                $this->getLayout()->createBlock($filterBlockName)
+                $this->_createFilterBlock($filterBlockName)
                     ->setLayer($this->getLayer())
                     ->setAttributeModel($attribute)
                 ->init(),
@@ -103,6 +103,18 @@ class Mage_Catalog_Block_Layer_View extends Mage_Core_Block_Template
         $this->getLayer()->apply();
 
         return parent::_prepareLayout();
+    }
+
+    /**
+     * @throws \RuntimeException
+     */
+    protected function _createFilterBlock(string $type): Mage_Catalog_Block_Layer_Filter_Abstract
+    {
+        $block = $this->getLayout()->createBlock($type);
+        if (!$block instanceof Mage_Catalog_Block_Layer_Filter_Abstract) {
+            throw new \RuntimeException("Block {$type} is not a layer filter block.");
+        }
+        return $block;
     }
 
     /**

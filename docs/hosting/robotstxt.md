@@ -25,7 +25,9 @@ of a site they may crawl. The file uses the
 Maho serves a generated `/robots.txt`. Configure it for each store view in
 **System > Configuration > Catalog > Crawlers & robots.txt**. The settings are:
 
-- **Base Rules**: the rules for all crawlers, one per line. The default rules are listed below.
+- **Base Rules**: the rules for all crawlers, one per line. The default rules are listed below. To
+  get them back, select **Default Config**, select **Use Default** and save. If a website or a
+  store view has its own value, select it, select **Use Default** or **Use Website** and save.
 - **Blocked AI Crawlers**: each selected crawler gets its own `Disallow: /` group.
 - **Custom Instructions**: more groups, added at the end of the file.
 - **Content signals**: what AI systems may do with your pages. See

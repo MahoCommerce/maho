@@ -135,6 +135,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      *
      * @return $this
      */
+    #[\Override]
     protected function _initSelect()
     {
         $this->getSelect()->from(['e' => $this->getEntity()->getEntityTable()]);

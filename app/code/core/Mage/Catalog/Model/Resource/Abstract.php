@@ -199,9 +199,13 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * @param Mage_Eav_Model_Entity_Attribute_Abstract|Mage_Catalog_Model_Resource_Eav_Attribute $attribute
      * @param mixed $value
      * @return Mage_Catalog_Model_Resource_Abstract
+     * @throws \InvalidArgumentException
      */
     protected function _saveAttributeValue($object, $attribute, $value)
     {
+        if (!$attribute instanceof Mage_Catalog_Model_Resource_Eav_Attribute) {
+            throw new \InvalidArgumentException('A catalog entity saves only attributes of the type Mage_Catalog_Model_Resource_Eav_Attribute.');
+        }
         $write   = $this->_getWriteAdapter();
         $storeId = (int) Mage::app()->getStore($object->getStoreId())->getId();
         $table   = $attribute->getBackend()->getTable();
@@ -410,13 +414,14 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
          */
         foreach ($info as $itemData) {
             $attribute = $this->getAttribute($itemData['attribute_id']);
-            if ($attribute->isScopeStore()) {
-                $storeAttributes[] = (int) $itemData['attribute_id'];
-            } elseif ($attribute->isScopeWebsite()) {
-                $websiteAttributes[] = (int) $itemData['attribute_id'];
-            } else {
+            if (!$attribute instanceof Mage_Catalog_Model_Resource_Eav_Attribute || $attribute->isScopeGlobal()) {
                 $globalValues[] = (int) $itemData['value_id'];
                 continue;
+            }
+            if ($attribute->isScopeStore()) {
+                $storeAttributes[] = (int) $itemData['attribute_id'];
+            } else {
+                $websiteAttributes[] = (int) $itemData['attribute_id'];
             }
             if ($object instanceof Mage_Catalog_Model_Abstract) {
                 $this->_recordDefaultValue($object, $attribute->getAttributeCode());
@@ -533,6 +538,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * Checks also attribute's store scope:
      * We should insert on duplicate key update values if we unchecked 'STORE VIEW' checkbox in store view.
      *
+     * @param Mage_Catalog_Model_Resource_Eav_Attribute $attribute
      * @param mixed $value New value of the attribute.
      * @return bool
      */

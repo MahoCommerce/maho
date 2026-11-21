@@ -27,11 +27,17 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Invoices extends Mage_Adminhtml_
         return 'sales/order_invoice_grid_collection';
     }
 
+    /**
+     * @throws \RuntimeException
+     */
     #[\Override]
     protected function _prepareCollection()
     {
-        $collection = Mage::getResourceModel($this->_getCollectionClass())
-            ->addFieldToSelect('entity_id')
+        $collection = Mage::getResourceModel($this->_getCollectionClass());
+        if (!$collection instanceof Mage_Sales_Model_Resource_Order_Collection_Abstract) {
+            throw new \RuntimeException("Collection {$this->_getCollectionClass()} is not an order collection.");
+        }
+        $collection->addFieldToSelect('entity_id')
             ->addFieldToSelect('created_at')
             ->addFieldToSelect('order_id')
             ->addFieldToSelect('increment_id')

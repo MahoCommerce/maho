@@ -402,6 +402,24 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
     }
 
     /**
+     * Change the raw request so that the next _getQuotes() call quotes $freeMethod for the free method weight.
+     * A carrier that quotes a reduced weight for its free method overrides this method and _getQuotes().
+     *
+     * @return void
+     */
+    protected function _setFreeMethodRequest(string $freeMethod) {}
+
+    /**
+     * Request the rates from the carrier. The default returns null, so _updateFreeMethodQuote() keeps the old price.
+     *
+     * @return Mage_Shipping_Model_Rate_Result|null
+     */
+    protected function _getQuotes()
+    {
+        return null;
+    }
+
+    /**
      * Calculate price considering free shipping and handling fee
      *
      * @param float $cost

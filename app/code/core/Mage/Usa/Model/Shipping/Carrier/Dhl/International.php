@@ -221,6 +221,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      *
      * @param string $freeMethod
      */
+    #[\Override]
     protected function _setFreeMethodRequest($freeMethod): void
     {
         $rawRequest = $this->_rawRequest;
@@ -765,6 +766,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      *
      * @return Mage_Shipping_Model_Rate_Result
      */
+    #[\Override]
     protected function _getQuotes()
     {
         $responseBody = '';
@@ -1086,8 +1088,9 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     protected function getCountryParams($countryCode)
     {
         if (empty($this->_countryParams)) {
-            $dhlConfigPath = Mage::getModuleDir('etc', 'Mage_Usa') . DS . 'dhl' . DS;
-            $countriesXml = file_get_contents($dhlConfigPath . 'international' . DS . 'countries.xml');
+            $moduleDirectory = Mage::getModuleDir('etc', 'Mage_Usa');
+            $countriesFile = $moduleDirectory . DS . 'dhl' . DS . 'international' . DS . 'countries.xml';
+            $countriesXml = file_get_contents(Maho::findFile($countriesFile) ?: $countriesFile);
             $this->_countryParams = new \Maho\Simplexml\Element($countriesXml);
         }
         if (isset($this->_countryParams->$countryCode)) {

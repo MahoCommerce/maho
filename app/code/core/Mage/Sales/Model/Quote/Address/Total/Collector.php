@@ -87,7 +87,7 @@ class Mage_Sales_Model_Quote_Address_Total_Collector extends Mage_Sales_Model_Co
      *
      * @param string $class
      * @param string $totalCode
-     * @param array $totalConfig
+     * @param Mage_Core_Model_Config_Element $totalConfig
      * @return false|Mage_Core_Model_Abstract
      * @throws Mage_Core_Exception
      */

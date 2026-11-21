@@ -41,7 +41,7 @@ class Mage_Api2_Helper_Data extends Mage_Core_Helper_Abstract
      */
     protected static function _compareOrder($a, $b)
     {
-        return $a['order'] <=> $b['order'];
+        return ($a['order'] ?? 0) <=> ($b['order'] ?? 0);
     }
 
     /**
@@ -60,12 +60,11 @@ class Mage_Api2_Helper_Data extends Mage_Core_Helper_Abstract
         $adapters = $adapters->asArray();
 
         if ($enabledOnly) {
-            foreach ($adapters as $adapter) {
+            foreach ($adapters as $key => $adapter) {
                 if (empty($adapter['enabled'])) {
-                    unset($adapters);
+                    unset($adapters[$key]);
                 }
             }
-            $adapters = (array) $adapters;
         }
         uasort($adapters, ['Mage_Api2_Helper_Data', '_compareOrder']);
 

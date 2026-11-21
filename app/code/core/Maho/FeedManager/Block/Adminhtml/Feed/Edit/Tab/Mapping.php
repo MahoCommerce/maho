@@ -127,6 +127,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
             'value' => $headerValue,
             'style' => 'width: 100% !important; height: ' . ($headerLines * 21 + 24) . 'px !important;',
             'note' => $this->__('Opening XML tags. Variables: {{store_name}}, {{store_url}}, {{generation_date}}'),
+            'data-code-editor' => 'xml',
         ]);
 
         $xmlFieldset->addField('xml_item_tag', 'text', [
@@ -155,6 +156,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
             'value' => $footerValue,
             'style' => 'width: 100% !important; height: ' . ($footerLines * 21 + 24) . 'px !important;',
             'note' => $this->__('Closing XML tags'),
+            'data-code-editor' => 'xml',
         ]);
 
         // CSV Builder Section (shown for CSV format)

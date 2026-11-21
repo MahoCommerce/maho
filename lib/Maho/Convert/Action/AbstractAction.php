@@ -107,7 +107,9 @@ abstract class AbstractAction implements ActionInterface
     public function setContainer(ContainerInterface $container): static
     {
         $this->_container = $container;
-        $this->_container->setProfile($this->getProfile());
+        if ($this->getProfile()) {
+            $this->_container->setProfile($this->getProfile());
+        }
         return $this;
     }
 

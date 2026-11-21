@@ -203,6 +203,7 @@ class EmailTemplateEditForm {
             }
 
             this.getEditorInstance()?.syncPlainToWysiwyg();
+            this.elements.templateStyles?.mahoCodeEditor?.load();
 
         } catch (error) {
             alert(`Failed to load template: ${error.message}`);

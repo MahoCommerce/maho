@@ -142,10 +142,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
      */
     public function getCollection($storeId)
     {
-        if (!isset($this->_collections[$storeId])) {
-            $this->_collections[$storeId] = Mage::getResourceModel('customer/customer_collection');
-            $this->_collections[$storeId]->getEntity()->setStore($storeId);
-        }
+        $this->_collections[$storeId] ??= Mage::getResourceModel('customer/customer_collection');
         return $this->_collections[$storeId];
     }
 

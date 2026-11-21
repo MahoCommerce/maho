@@ -259,7 +259,10 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
                 if ($this->_productsFilter) {
                     $productCollection->addIdFilter($this->_productsFilter);
                 }
-                $this->getConditions()->collectValidatedAttributes($productCollection);
+                $conditions = $this->getConditions();
+                if ($conditions instanceof Mage_Catalog_Model_Rule_Condition_Combine) {
+                    $conditions->collectValidatedAttributes($productCollection);
+                }
 
                 Mage::getSingleton('core/resource_iterator')->walk(
                     $productCollection->getSelect(),

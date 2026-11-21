@@ -1102,7 +1102,10 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
         } elseif (Mage::registry('current_creditmemo')) {
             $source = Mage::registry('current_creditmemo');
         } elseif ($source == null) {
-            $source = $this->_app->getOrder();
+            $source = Mage::registry('current_order');
+        }
+        if ($source === null) {
+            return $allWeee;
         }
 
         $helper = Mage::helper('weee');

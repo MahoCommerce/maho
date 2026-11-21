@@ -355,6 +355,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      *
      * @return Mage_Shipping_Model_Rate_Result
      */
+    #[\Override]
     protected function _getQuotes()
     {
         $this->_result = Mage::getModel('shipping/rate_result');
@@ -496,6 +497,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     /**
      * Set free method request
      */
+    #[\Override]
     protected function _setFreeMethodRequest(string $freeMethod): void
     {
         $r = $this->_rawRequest;

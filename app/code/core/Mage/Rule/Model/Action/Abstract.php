@@ -375,6 +375,11 @@ abstract class Mage_Rule_Model_Action_Abstract extends \Maho\DataObject implemen
         return $this->getData('rule');
     }
 
+    public function setRule(?Mage_Rule_Model_Abstract $value): static
+    {
+        return $this->setData('rule', $value);
+    }
+
     public function getType(): ?string
     {
         $value = $this->getData('type');

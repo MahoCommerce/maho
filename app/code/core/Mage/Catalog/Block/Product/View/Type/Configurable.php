@@ -271,7 +271,10 @@ class Mage_Catalog_Block_Product_View_Type_Configurable extends Mage_Catalog_Blo
         $jsonConfig = $this->getJsonConfig();
         foreach ($this->getChild('attr_renderers')->getSortedChildren() as $rendererName) {
             $renderer = $this->getChild('attr_renderers')->getChild($rendererName);
-            if (method_exists($renderer, 'shouldRender') && $renderer->shouldRender($attribute, $jsonConfig)) {
+            if ($renderer instanceof Mage_Core_Block_Abstract
+                && method_exists($renderer, 'shouldRender')
+                && $renderer->shouldRender($attribute, $jsonConfig)
+            ) {
                 $renderer->setProduct($product);
                 $renderer->setAttributeObj($attribute);
                 return $renderer->toHtml();

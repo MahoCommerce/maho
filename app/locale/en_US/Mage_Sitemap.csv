@@ -60,7 +60,6 @@
 "Priority","Priority"
 "Products Options","Products Options"
 "Reference: index, excerpt and link back","Reference: index, excerpt and link back"
-"Restore recommended rules","Restore recommended rules"
 "robots.txt","robots.txt"
 "robots.txt is served per domain, not per store view. When several store views share one domain, the store view that the bare domain resolves to is the one that answers.","robots.txt is served per domain, not per store view. When several store views share one domain, the store view that the bare domain resolves to is the one that answers."
 "Rules only, one per line, without User-agent lines. They are written into the wildcard group and repeated inside every named group, because RFC 9309 gives a named group no access to the wildcard rules. Rules that name the admin path are dropped, so the path stays private.","Rules only, one per line, without User-agent lines. They are written into the wildcard group and repeated inside every named group, because RFC 9309 gives a named group no access to the wildcard rules. Rules that name the admin path are dropped, so the path stays private."

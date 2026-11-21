@@ -1388,4 +1388,94 @@
         --d-btn-border: var(--maho-btn-bg);
         color: var(--maho-btn-ink);
     }
+
+    /* System > Configuration lays out its rows as one grid: each .config-row is a subgrid, so the columns line up */
+    .config-fields {
+        display: grid;
+        grid-template-columns: 220px minmax(330px, max-content) auto 1fr;
+    }
+
+    .config-fields > .config-row {
+        display: grid;
+        grid-column: 1 / -1;
+        grid-template-columns: subgrid;
+        align-items: start;
+    }
+
+    .config-fields > .config-row.nested,
+    .config-fields > .config-row.system-fieldset-sub-head {
+        display: block;
+        padding: var(--maho-space-5) var(--maho-space-2) var(--maho-space-2);
+    }
+
+    .config-fields > .config-row.system-fieldset-sub-head:first-child {
+        padding-top: var(--maho-space-2);
+    }
+
+    .config-label {
+        padding: var(--maho-space-2) var(--maho-space-4) var(--maho-space-2) var(--maho-space-2);
+    }
+
+    .config-label label {
+        display: block;
+        font-weight: 400;
+        color: var(--maho-ink-soft);
+    }
+
+    .config-value {
+        min-width: 0;
+        padding: var(--maho-space-2) 0;
+    }
+
+    .config-value :is(input.input-text, textarea, select) {
+        width: 330px;
+    }
+
+    .config-value textarea {
+        height: 15em;
+    }
+
+    .config-value p.note {
+        max-width: 330px;
+        margin: 0;
+        color: var(--maho-ink-muted);
+        font-size: var(--maho-text-xs);
+        font-weight: 400;
+    }
+
+    .config-value input.input-text + strong {
+        padding-inline-start: 0.75rem;
+    }
+
+    .config-use-default {
+        padding: var(--maho-space-2) 0 var(--maho-space-2) var(--maho-space-3);
+    }
+
+    .config-use-default .config-scope-group {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--maho-space-2);
+        padding: var(--maho-space-1) var(--maho-space-2);
+        border: 1px solid var(--maho-border-soft);
+        border-radius: 8px;
+        font-size: var(--maho-text-sm);
+        white-space: nowrap;
+    }
+
+    .config-use-default .config-inherit-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+    }
+
+    .config-use-default .config-scope-divider {
+        align-self: stretch;
+        width: 1px;
+        background: var(--maho-border-soft);
+    }
+
+    .config-use-default .config-scope {
+        color: var(--maho-ink-faint);
+    }
 }
