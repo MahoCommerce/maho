@@ -68,6 +68,8 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
      */
     protected $_hasAvailableResources = true;
 
+    private static ?string $dummyPasswordHash = null;
+
     /**
      * Initialize user model
      */
@@ -325,6 +327,8 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             $this->loadByUsername($username);
 
             if (!$this->getId()) {
+                self::$dummyPasswordHash ??= Mage::helper('core')->getHashPassword('admin-user-not-found');
+                $this->validatePasswordHash($password, self::$dummyPasswordHash);
                 throw new Mage_Core_Exception(
                     Mage::helper('adminhtml')->__('Access denied.'),
                     self::AUTH_ERR_ACCESS_DENIED,
