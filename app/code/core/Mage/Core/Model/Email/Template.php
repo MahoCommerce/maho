@@ -210,9 +210,17 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      */
     public function isValidForSend()
     {
-        return $this->getSenderName()
-            && $this->getSenderEmail()
-            && $this->getTemplateSubject();
+        return $this->getMissingSendField() === null;
+    }
+
+    private function getMissingSendField(): ?string
+    {
+        return match (true) {
+            !$this->getSenderName() => 'sender name',
+            !$this->getSenderEmail() => 'sender email',
+            !$this->getTemplateSubject() => 'subject',
+            default => null,
+        };
     }
 
     /**
@@ -324,7 +332,9 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     public function send(#[\SensitiveParameter] $email, $name = null, array $variables = [])
     {
         if (!$this->isValidForSend()) {
-            Mage::logException(new Exception('This letter cannot be sent.'));
+            $field = $this->getMissingSendField();
+            $message = $field === null ? 'This letter cannot be sent.' : "This letter cannot be sent. Missing $field.";
+            Mage::log($message, Mage::LOG_ERROR, 'exception.log');
             return false;
         }
 
