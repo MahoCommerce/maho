@@ -60,13 +60,11 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     protected $_idFieldName;
 
     /**
-     * Primery key auto increment flag
+     * Whether the primary key is auto-incremented and must be read back after an insert
      *
      * @var bool
      */
     protected $_isPkAutoIncrement = true;
-
-    protected bool $_fetchIdAfterInsert = true;
 
     /**
      * Use is object new method for save of object
@@ -443,7 +441,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
             }
             $this->_getWriteAdapter()->insert($this->getMainTable(), $bind);
 
-            if ($this->_fetchIdAfterInsert) {
+            if ($this->_isPkAutoIncrement) {
                 $object->setId((int) $this->_getWriteAdapter()->lastInsertId($this->getMainTable()));
             }
 
