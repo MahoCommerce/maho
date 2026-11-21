@@ -204,7 +204,7 @@ abstract class Mage_Core_Model_Email_Template_Abstract extends Mage_Core_Model_T
                 '_theme' => $theme,
             ],
         );
-        if ($filePath === false) {
+        if (!$filePath) {
             return '';
         }
 
