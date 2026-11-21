@@ -769,10 +769,9 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     public function magicLinkRequestPostAction(): void
     {
         // Handle both 'email' field (from magic link request page) and 'login[username]' (from login form)
-        $email = (string) $this->getRequest()->getPost('email');
-        if (!$email) {
-            $loginData = $this->getRequest()->getPost('login');
-            $email = is_array($loginData) ? (string) ($loginData['username'] ?? '') : '';
+        $email = $this->getRequest()->getPost('email');
+        if (!is_string($email) || !$email) {
+            $email = $this->getLoginPostValue('username') ?? '';
         }
 
         try {
