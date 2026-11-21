@@ -375,7 +375,7 @@ class Mage_CatalogSearch_Helper_Data extends Mage_Core_Helper_Abstract
              */
             if ($engine && Mage::getConfig()->getResourceModelClassName($engine)) {
                 $model = Mage::getResourceSingleton($engine);
-                if ($model && $model->test()) {
+                if ($model && method_exists($model, 'test') && $model->test()) {
                     $this->_engine = $model;
                 }
             }

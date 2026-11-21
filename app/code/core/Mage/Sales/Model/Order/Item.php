@@ -534,21 +534,6 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
         }
         return false;
     }
-    /**
-     * Check if discount has to be applied to parent item
-     *
-     * @return bool
-     */
-    public function getForceApplyDiscountToParentItem()
-    {
-        if ($this->getParentItem()) {
-            $product = $this->getParentItem()->getProduct();
-        } else {
-            $product = $this->getProduct();
-        }
-
-        return $product->getTypeInstance()->getForceApplyDiscountToParentItem();
-    }
 
     /**
      * Return checking of what shipment

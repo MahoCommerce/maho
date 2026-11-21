@@ -262,6 +262,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      *
      * @return Mage_Shipping_Model_Rate_Result
      */
+    #[\Override]
     protected function _getQuotes()
     {
         return $this->_getRestQuotes();
@@ -674,6 +675,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     /**
      * Set free method request
      */
+    #[\Override]
     protected function _setFreeMethodRequest(string $freeMethod): void
     {
         $r = $this->_rawRequest;

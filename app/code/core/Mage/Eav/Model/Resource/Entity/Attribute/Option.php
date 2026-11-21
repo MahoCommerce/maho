@@ -19,7 +19,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Option extends Mage_Core_Model_Re
     /**
      * Add Join with option value for collection select
      *
-     * @param Mage_Eav_Model_Entity_Collection_Abstract $collection
+     * @param Mage_Catalog_Model_Resource_Collection_Abstract $collection
      * @param Mage_Eav_Model_Entity_Attribute $attribute
      * @param Maho\Db\Expr $valueExpr
      * @return $this

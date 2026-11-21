@@ -538,6 +538,7 @@ class Mage_Sales_Model_Order_Payment_Transaction extends Mage_Core_Model_Abstrac
                 ? $this->_paymentObject->getOrder()->getId()
                 : $this->_paymentObject->getParentId();
         }
+        return null;
     }
 
     /**

@@ -25,6 +25,6 @@ class Convert
         $container->setData($data)->setVars($vars);
 
         $action->run();
-        return $action->getData();
+        return $container->getData();
     }
 }

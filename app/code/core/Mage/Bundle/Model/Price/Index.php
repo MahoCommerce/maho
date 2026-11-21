@@ -27,19 +27,6 @@ class Mage_Bundle_Model_Price_Index extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Reindex Product price
-     *
-     * @param int $productId
-     * @param int $priceType
-     * @return $this
-     */
-    protected function _reindexProduct($productId, $priceType)
-    {
-        $this->_getResource()->reindexProduct($productId, $priceType);
-        return $this;
-    }
-
-    /**
      * Reindex Bundle product Price Index
      *
      * @param Mage_Catalog_Model_Product|Mage_Catalog_Model_Product_Condition_Interface|array|int $products

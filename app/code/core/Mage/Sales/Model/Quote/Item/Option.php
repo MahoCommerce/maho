@@ -181,6 +181,7 @@ class Mage_Sales_Model_Quote_Item_Option extends Mage_Core_Model_Abstract implem
         return $this->setData('product_id', $value);
     }
 
+    #[\Override]
     public function setValue(?string $value): static
     {
         return $this->setData('value', $value);

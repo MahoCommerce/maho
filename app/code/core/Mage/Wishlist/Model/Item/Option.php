@@ -142,6 +142,7 @@ class Mage_Wishlist_Model_Item_Option extends Mage_Core_Model_Abstract implement
         return $this->setData('product_id', $value);
     }
 
+    #[\Override]
     public function setValue(?string $value): static
     {
         return $this->setData('value', $value);
