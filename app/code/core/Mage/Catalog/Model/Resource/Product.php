@@ -297,25 +297,6 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
     }
 
     /**
-     * Refresh Product Enabled Index
-     *
-     * @param Mage_Catalog_Model_Product $product
-     * @return $this
-     */
-    public function refreshIndex($product)
-    {
-        Mage::getResourceSingleton('catalog/category_indexer_product')
-            ->reindexProductIds([(int) $product->getId()]);
-
-        /**
-         * Refresh enabled products index (visibility state)
-         */
-        $this->refreshEnabledIndex(null, $product);
-
-        return $this;
-    }
-
-    /**
      * Refresh index for visibility of enabled product in store
      * if store parameter is null - index will refreshed for all stores
      * if product parameter is null - idex will be refreshed for all products
