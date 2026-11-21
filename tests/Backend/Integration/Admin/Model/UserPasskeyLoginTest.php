@@ -78,7 +78,7 @@ it('asks for the 2FA code at prelogin and signs in with the code afterwards', fu
     $this->session->prelogin($this->user->getUsername(), $payload);
     expect($this->session->getRequireTwofa())->toBeTrue();
 
-    $code = \OTPHP\TOTP::createFromSecret($secret)->now();
+    $code = \OTPHP\TOTP::createFromSecret($secret, new \Maho\UtcClock())->now();
     expect(Mage::getModel('admin/user')->authenticate($this->user->getUsername(), $payload, $code))->toBeTrue();
 });
 

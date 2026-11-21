@@ -78,6 +78,6 @@ it('accepts a valid challenge code against the stored secret', function () {
     [$customer, $secret] = makeEnrolledTwofaCustomer();
 
     // The challenge verifies the live TOTP code against the decrypted secret
-    $code = \OTPHP\TOTP::createFromSecret($secret)->now();
+    $code = \OTPHP\TOTP::createFromSecret($secret, new \Maho\UtcClock())->now();
     expect(Mage::helper('core/security')->verifyTotpCode($customer->getTwofaSecret() ?? '', $code))->toBeTrue();
 });

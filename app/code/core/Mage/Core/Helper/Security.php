@@ -46,7 +46,7 @@ class Mage_Core_Helper_Security extends Mage_Core_Helper_Abstract
      */
     public function generateTotpSecret(): string
     {
-        return \OTPHP\TOTP::generate()->getSecret();
+        return \OTPHP\TOTP::generate(new \Maho\UtcClock())->getSecret();
     }
 
     /**
@@ -56,7 +56,7 @@ class Mage_Core_Helper_Security extends Mage_Core_Helper_Abstract
     {
         $issuer ??= Mage::getStoreConfig('general/store_information/name') ?: 'Maho';
 
-        $otp = \OTPHP\TOTP::createFromSecret($secret)
+        $otp = \OTPHP\TOTP::createFromSecret($secret, new \Maho\UtcClock())
             ->withLabel($label)
             ->withIssuer($issuer)
             ->withParameter('image', 'https://mahocommerce.com/assets/maho-logo-square.png');
@@ -75,7 +75,7 @@ class Mage_Core_Helper_Security extends Mage_Core_Helper_Abstract
      */
     public function verifyTotpCode(#[\SensitiveParameter] string $secret, #[\SensitiveParameter] string $code): bool
     {
-        $otp = \OTPHP\TOTP::createFromSecret($secret);
+        $otp = \OTPHP\TOTP::createFromSecret($secret, new \Maho\UtcClock());
         return $otp->verify($code);
     }
 }
