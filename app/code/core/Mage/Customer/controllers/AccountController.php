@@ -139,17 +139,15 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         $session = $this->_getSession();
 
         if ($this->getRequest()->isPost()) {
-            $login = $this->getRequest()->getPost('login');
-            $login = is_array($login) ? $login : [];
-            $username = is_string($login['username'] ?? null) ? $login['username'] : '';
-            $password = is_string($login['password'] ?? null) ? $login['password'] : '';
+            $username = $this->getLoginPostValue('username') ?? '';
+            $password = $this->getLoginPostValue('password') ?? '';
             if ($username !== '' && $password !== '') {
                 try {
                     $customer = $this->getAuthentication()->authenticate(
                         $username,
                         $password,
                         (int) Mage::app()->getStore()->getWebsiteId(),
-                        is_string($login['twofa_verification_code'] ?? null) ? $login['twofa_verification_code'] : null,
+                        $this->getLoginPostValue('twofa_verification_code'),
                     );
                     $session->setRememberMe((bool) $this->getRequest()->getPost('remember_me'))
                             ->setCustomerAsLoggedIn($customer);
@@ -197,10 +195,8 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         $result = [];
 
         $session = $this->_getSession();
-        $login = $this->getRequest()->getPost('login');
-        $login = is_array($login) ? $login : [];
-        $username = is_string($login['username'] ?? null) ? $login['username'] : '';
-        $password = is_string($login['password'] ?? null) ? $login['password'] : '';
+        $username = $this->getLoginPostValue('username') ?? '';
+        $password = $this->getLoginPostValue('password') ?? '';
         if (!$session->isLoggedIn() && Mage::getStoreConfigFlag('customer/password/allow_2fa')
             && $username !== '' && $password !== ''
         ) {
@@ -214,6 +210,15 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         }
 
         $this->getResponse()->setBodyJson($result);
+    }
+
+    /**
+     * Return the login[$key] post value, or null when it is missing or is not a string.
+     */
+    protected function getLoginPostValue(string $key): ?string
+    {
+        $value = $this->getRequest()->getPost('login')[$key] ?? null;
+        return is_string($value) ? $value : null;
     }
 
     /**
