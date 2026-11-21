@@ -8,11 +8,20 @@ the screenshot rules are in AGENTS.md, under "Pull requests". Delete these comme
 
 <!--
 What the user can now do, or what was broken, and where (admin path, endpoint, CLI command).
-Then why the change is necessary: who meets the problem, in which steps, and what it costs them.
-If only a request made by hand can reach the bug, say so. One to four sentences.
+One to three sentences.
 -->
 
 Closes #
+
+## Why it is needed
+
+<!--
+Who meets the problem, in which steps, and what it costs them today. If only a request made by
+hand can reach the bug, say so. For a feature, the work that it saves or the request that asked
+for it.
+A bug fix names where the bug comes from: the commit or pull request that caused it, and what that
+change did. If there is no single cause, write "No single origin" and the reason.
+-->
 
 <!--
 ## Decision needed (optional)
@@ -26,8 +35,6 @@ The design, for the reviewer. The first sentence says what the code does and whe
 "A custom line is a quote item and an order item with product_id NULL", not "Maho creates no
 product". The next sentence gives the reason for the design. Then one paragraph for each other
 part. Never open with what the change does not do, or with a detail.
-A bug fix names the commit or pull request that caused the bug, and what that change did. If
-there is no single cause, write "No single origin" and the reason.
 -->
 
 <!--
