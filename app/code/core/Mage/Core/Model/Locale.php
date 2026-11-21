@@ -1130,7 +1130,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      * Push current locale to stack and replace with locale from specified store
      * Event is not dispatched.
      */
-    #[\Deprecated(message: 'use Mage_Core_Model_App::withLocale()', since: '27.1')]
+    #[\Deprecated(message: 'use Mage_Core_Model_App::emulate()', since: '27.1')]
     public function emulate(mixed $store): void
     {
         if ($store) {
@@ -1149,7 +1149,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     /**
      * Put back the locale and the translations that the last emulate() replaced
      */
-    #[\Deprecated(message: 'use Mage_Core_Model_App::withLocale()', since: '27.1')]
+    #[\Deprecated(message: 'use Mage_Core_Model_App::emulate()', since: '27.1')]
     public function revert(): void
     {
         $translatorState = array_pop($this->emulatedTranslatorStates);

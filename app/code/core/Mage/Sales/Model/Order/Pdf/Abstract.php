@@ -96,7 +96,11 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
             foreach ($documents as $document) {
                 $storeId = (int) $document->getStoreId();
                 $blockHtml = $storeId
-                    ? Mage::app()->emulate($storeId, fn(): string => $this->renderDocumentHtml($document), Mage_Core_Model_App_Area::AREA_ADMINHTML)
+                    ? Mage::app()->emulate($storeId, function () use ($document): string {
+                        // The templates of the PDF are in the admin design, and emulate() puts back the design after
+                        Mage::getDesign()->applyAdminDesign();
+                        return $this->renderDocumentHtml($document);
+                    })
                     : $this->renderDocumentHtml($document);
 
                 if (!empty($blockHtml)) {

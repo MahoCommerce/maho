@@ -41,7 +41,7 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
     private ?\Maho\DataObject $emulatedEnvironment = null;
 
     /**
-     * Run $callback in the store and the area of the design config. Then put back the environment of the caller.
+     * Run $callback in the store of the design config. Then put back the environment of the caller.
      *
      * @template T
      * @param \Closure(): T $callback
@@ -53,7 +53,7 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
         if ($storeId === null) {
             return $callback();
         }
-        return Mage::app()->emulate($storeId, $callback, $this->getDesignConfig()->getArea() ?: self::DEFAULT_DESIGN_AREA);
+        return Mage::app()->emulate($storeId, $callback);
     }
 
     private function getDesignConfigStoreId(): ?int

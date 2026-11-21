@@ -49,7 +49,7 @@ describe('Store emulation restores the translator', function () {
         $translator = $startAdmin(Mage::getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_LOCALE, 1));
 
         Mage::app()->emulate(1, function () use ($translator): void {
-            Mage::app()->emulate(1, fn() => null, Mage_Core_Model_App_Area::AREA_ADMINHTML);
+            Mage::app()->emulate(Mage_Core_Model_App::ADMIN_STORE_ID, fn() => null);
 
             expect($translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA))->toBe(Mage_Core_Model_App_Area::AREA_FRONTEND)
                 ->and((int) $translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_STORE))->toBe(1);

@@ -21,17 +21,21 @@ class Mage_Core_Model_App_Emulation
     }
 
     /**
-     * Run $callback in the store $storeId, with the design, the locale and the translations of that store for $area.
-     * Then put back the environment of the caller, also when $callback throws. When the request already runs in
-     * $storeId and $area, and its translator is loaded for them, run $callback as it is: the locale of the caller
-     * stays, so an admin page that emulates the admin store keeps the interface locale of the admin user.
+     * Run $callback in the store $storeId, with the design, the locale and the translations of that store. The admin
+     * store runs in the admin area, any other store in the frontend area. Then put back the environment of the
+     * caller, also when $callback throws. When the request already runs in $storeId, and its translator is loaded for
+     * that store and area, run $callback as it is: the locale of the caller stays, so an admin page that emulates the
+     * admin store keeps the interface locale of the admin user.
      *
      * @template T
      * @param \Closure(): T $callback
      * @return T
      */
-    public function emulate(int $storeId, \Closure $callback, string $area = Mage_Core_Model_App_Area::AREA_FRONTEND): mixed
+    public function emulate(int $storeId, \Closure $callback): mixed
     {
+        $area = $storeId === Mage_Core_Model_App::ADMIN_STORE_ID
+            ? Mage_Core_Model_App_Area::AREA_ADMINHTML
+            : Mage_Core_Model_App_Area::AREA_FRONTEND;
         if ($storeId === (int) $this->_app->getStore()->getId()
             && $area === Mage::getDesign()->getArea()
             && $area === $this->_app->getTranslator()->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA)
