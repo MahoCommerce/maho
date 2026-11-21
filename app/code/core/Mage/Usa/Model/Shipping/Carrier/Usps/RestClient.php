@@ -149,103 +149,102 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_RestClient
      */
     private function makeRequest(string $method, string $endpoint, ?array $data, array $additionalHeaders = []): array
     {
-        $accessToken = $this->oauthClient->getAccessToken();
-
-        $client = $this->_createHttpClient();
-
-        $headers = [
-            'Authorization' => 'Bearer ' . $accessToken,
-            'Content-Type' => 'application/json',
-        ];
-
-        // Merge additional headers (like payment auth token)
-        $headers = array_merge($headers, $additionalHeaders);
-
-        $options = [
-            'headers' => $headers,
-        ];
-
-        if ($data !== null && $method === 'POST') {
-            $options['json'] = $data;
-        }
-
-        $debugData = [
-            'request' => [
-                'method' => $method,
-                'url' => $this->baseUrl . $endpoint,
-                'data' => $data,
-                'headers' => array_keys($additionalHeaders), // Log header names only, not values
-            ],
-        ];
-
-        try {
-            $response = $client->request($method, $this->baseUrl . $endpoint, $options);
-            $statusCode = $response->getStatusCode();
-
-            // Validate successful response
-            if ($statusCode !== 200 && $statusCode !== 201) {
-                throw new Exception(
-                    sprintf('USPS API returned unexpected status code: %d', $statusCode),
-                );
+        $retriedUnauthorized = false;
+        while (true) {
+            $accessToken = $this->oauthClient->getAccessToken();
+            $client = $this->_createHttpClient();
+            $headers = array_merge([
+                'Authorization' => 'Bearer ' . $accessToken,
+                'Content-Type' => 'application/json',
+            ], $additionalHeaders);
+            $options = ['headers' => $headers];
+            if ($data !== null && $method === 'POST') {
+                $options['json'] = $data;
             }
-
-            $contentType = $response->getHeaders()['content-type'][0] ?? '';
-
-            // Handle JSON responses
-            if (str_contains($contentType, 'application/json')) {
-                $responseData = Mage::helper('core')->jsonDecode($response->getContent());
-
-                // Check for error responses in successful HTTP responses
-                if (isset($responseData['error'])) {
-                    throw new Exception($this->extractErrorMessage($responseData));
-                }
-            } else {
-                // Handle binary responses (labels)
-                $responseData = [
-                    'content' => base64_encode($response->getContent()),
-                    'contentType' => $contentType,
-                ];
-            }
-
-            $debugData['response'] = is_array($responseData) && isset($responseData['content'])
-                ? ['contentType' => $responseData['contentType'], 'size' => strlen($responseData['content'])]
-                : $responseData;
-
-            if ($this->debugMode) {
-                Mage::log($debugData, Mage::LOG_DEBUG, 'usps_rest_api.log');
-            }
-
-            return $responseData;
-        } catch (Exception $e) {
-            $debugData['error'] = [
-                'message' => $e->getMessage(),
-                'code' => $e->getCode(),
+            $debugData = [
+                'request' => [
+                    'method' => $method,
+                    'url' => $this->baseUrl . $endpoint,
+                    'data' => $data,
+                    'headers' => array_keys($additionalHeaders),
+                ],
             ];
+            $response = null;
 
-            // The status check throws before the body is read. Read the body here to get the USPS error.
-            $errorMessage = null;
             try {
-                if (isset($response)) {
-                    $errorContent = $response->getContent(false);
-                    $debugData['error']['response_body'] = $errorContent;
-                    $errorData = Mage::helper('core')->jsonDecode($errorContent);
-                    if (isset($errorData['error'])) {
-                        $errorMessage = $this->extractErrorMessage($errorData);
-                    }
+                $response = $client->request($method, $this->baseUrl . $endpoint, $options);
+                $statusCode = $response->getStatusCode();
+
+                if ($statusCode === 401 && !$retriedUnauthorized) {
+                    $retriedUnauthorized = true;
+                    $this->oauthClient->clearAccessToken();
+                    continue;
                 }
-            } catch (Exception) {
-                // Keep the original exception when the response is unavailable or not JSON.
-            }
 
-            if ($this->debugMode) {
-                Mage::log($debugData, Mage::LOG_ERROR, 'usps_rest_api.log');
-            }
+                if ($statusCode !== 200 && $statusCode !== 201) {
+                    throw new Exception(
+                        sprintf('USPS API returned unexpected status code: %d', $statusCode),
+                    );
+                }
 
-            if ($errorMessage !== null && $errorMessage !== $e->getMessage()) {
-                throw new Exception($errorMessage, $e->getCode(), $e);
-            }
+                $contentType = $response->getHeaders()['content-type'][0] ?? '';
 
-            throw $e;
+                // Handle JSON responses
+                if (str_contains($contentType, 'application/json')) {
+                    $responseData = Mage::helper('core')->jsonDecode($response->getContent());
+
+                    // Check for error responses in successful HTTP responses
+                    if (isset($responseData['error'])) {
+                        throw new Exception($this->extractErrorMessage($responseData));
+                    }
+                } else {
+                    // Handle binary responses (labels)
+                    $responseData = [
+                        'content' => base64_encode($response->getContent()),
+                        'contentType' => $contentType,
+                    ];
+                }
+
+                $debugData['response'] = is_array($responseData) && isset($responseData['content'])
+                    ? ['contentType' => $responseData['contentType'], 'size' => strlen($responseData['content'])]
+                    : $responseData;
+
+                if ($this->debugMode) {
+                    Mage::log($debugData, Mage::LOG_DEBUG, 'usps_rest_api.log');
+                }
+
+                return $responseData;
+            } catch (Exception $e) {
+                $debugData['error'] = [
+                    'message' => $e->getMessage(),
+                    'code' => $e->getCode(),
+                ];
+
+                // The status check throws before the body is read. Read the body here to get the USPS error.
+                $errorMessage = null;
+                try {
+                    if ($response !== null) {
+                        $errorContent = $response->getContent(false);
+                        $debugData['error']['response_body'] = $errorContent;
+                        $errorData = Mage::helper('core')->jsonDecode($errorContent);
+                        if (isset($errorData['error'])) {
+                            $errorMessage = $this->extractErrorMessage($errorData);
+                        }
+                    }
+                } catch (Exception) {
+                    // Keep the original exception when the response is unavailable or not JSON.
+                }
+
+                if ($this->debugMode) {
+                    Mage::log($debugData, Mage::LOG_ERROR, 'usps_rest_api.log');
+                }
+
+                if ($errorMessage !== null && $errorMessage !== $e->getMessage()) {
+                    throw new Exception($errorMessage, $e->getCode(), $e);
+                }
+
+                throw $e;
+            }
         }
     }
 
