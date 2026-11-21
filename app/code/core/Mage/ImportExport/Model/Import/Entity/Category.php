@@ -738,7 +738,16 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
 
     protected function _getImageSource(string $image): string
     {
-        return rtrim((string) $this->_parameters[self::PARAM_MEDIA_DIR], '/') . '/' . ltrim($image, '/');
+        $directory = realpath((string) $this->_parameters[self::PARAM_MEDIA_DIR]);
+        if ($directory === false) {
+            return '';
+        }
+        $source = realpath(rtrim($directory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . ltrim($image, '/\\'));
+        if ($source === false) {
+            return '';
+        }
+        $prefix = rtrim($directory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        return str_starts_with($source, $prefix) ? $source : '';
     }
 
     /**
@@ -750,6 +759,9 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
             return $image;
         }
         $source = $this->_getImageSource($image);
+        if ($source === '') {
+            Mage::throwException(Mage::helper('importexport')->__('Image "%s" not found, or not an image file', $image));
+        }
         $path = Mage_Catalog_Model_Category_Attribute_Backend_Image::STORAGE_PATH . '/' . basename($source);
         $mount = Mage::getStorage('media');
         $root = $mount->localRoot();

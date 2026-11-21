@@ -57,6 +57,7 @@
 "Filter","Filter"
 "From","From"
 "Header column names already set","Header column names already set"
+"Image ""%s"" not found, or not an image file","Image ""%s"" not found, or not an image file"
 "Import","Import"
 "Import/Export","Import/Export"
 "Import Behavior","Import Behavior"
