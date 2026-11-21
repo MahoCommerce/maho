@@ -7,7 +7,7 @@ SPDX-License-Identifier: OSL-3.0
 */
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: Helvetica, sans-serif; font-size: 10pt; color: #333; }
+body { font-size: 10pt; color: #333; }
 
 .giftcard {
     width: 500px;
@@ -49,7 +49,7 @@ body { font-family: Helvetica, sans-serif; font-size: 10pt; color: #333; }
 }
 .giftcard-code-block { margin-bottom: 8px; }
 .giftcard-label { font-size: 8pt; color: #666; text-transform: uppercase; margin-bottom: 2px; }
-.giftcard-code { font-size: 13pt; font-weight: bold; font-family: Courier, monospace; letter-spacing: 1px; }
+.giftcard-code { font-size: 13pt; font-weight: bold; font-family: 'DejaVu Sans Mono', monospace; letter-spacing: 1px; }
 .giftcard-balance { font-size: 20pt; font-weight: bold; color: #3260a8; }
 
 .giftcard-qr {
