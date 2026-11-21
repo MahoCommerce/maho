@@ -660,8 +660,10 @@ class DataObject implements ArrayAccess, JsonSerializable
                 //Maho\Profiler::stop('HAS: '.get_class($this).'::'.$method);
                 return isset($this->_data[$key]);
         }
+
+        $argumentTypes = implode(', ', array_map(get_debug_type(...), $args));
         throw new Exception(
-            'Invalid method ' . static::class . '::' . $method . '(' . print_r($args, true) . ')',
+            'Invalid method ' . static::class . '::' . $method . '(' . $argumentTypes . ')',
         );
     }
 
