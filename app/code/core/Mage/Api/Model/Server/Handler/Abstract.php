@@ -405,6 +405,9 @@ abstract class Mage_Api_Model_Server_Handler_Abstract
 
                 try {
                     $model = Mage::getModel($modelName);
+                    if ($model instanceof Mage_Api_Model_Resource_Abstract) {
+                        $model->setResourceConfig($resources->$resourceName);
+                    }
                 } catch (Exception $e) {
                     throw new Mage_Api_Exception('resource_path_not_callable');
                 }
