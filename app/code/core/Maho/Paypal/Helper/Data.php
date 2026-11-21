@@ -49,6 +49,23 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
         return hash_hmac('sha256', 'paypal_shipping_callback|' . $quoteId, Mage::getEncryptionKeyAsHex());
     }
 
+    public function setCaptureInformation(Mage_Payment_Model_Info $payment, array $capture): void
+    {
+        $payment->setAdditionalInformation('paypal_capture_id', $capture['id']);
+        $payment->setAdditionalInformation(
+            'paypal_completed_capture_amount',
+            ($capture['status'] ?? null) === 'COMPLETED' ? ($capture['amount'] ?? null) : null,
+        );
+    }
+
+    public function isFullInvoiceCapture(array $amount, Mage_Sales_Model_Order_Invoice $invoice): bool
+    {
+        return ($amount['currency_code'] ?? null) === $invoice->getOrder()->getBaseCurrencyCode()
+            && is_numeric($amount['value'] ?? null)
+            && (float) $amount['value'] > 0
+            && (float) $amount['value'] === round((float) $invoice->getBaseGrandTotal(), 2);
+    }
+
     /**
      * Refuse a PayPal order that was not created for the given quote or order, or whose
      * total was changed since: invoice_id must equal the reserved order id, and currency
@@ -192,9 +209,9 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
         $paymentsData = $purchaseUnit['payments'] ?? [];
 
         if ($intent === Maho_Paypal_Model_Config::PAYMENT_ACTION_CAPTURE) {
-            $captureId = $paymentsData['captures'][0]['id'] ?? null;
-            if ($captureId) {
-                $payment->setAdditionalInformation('paypal_capture_id', $captureId);
+            $capture = $paymentsData['captures'][0] ?? [];
+            if (!empty($capture['id'])) {
+                $this->setCaptureInformation($payment, $capture);
             }
         }
 
@@ -246,42 +263,6 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
 
         $quote->setIsActive(false);
         $quote->save();
-
-        // Register capture on the order immediately so payment data is complete
-        // before any external system (e.g. dispatch) pulls it, instead of
-        // relying on the CaptureCompleted webhook which may arrive seconds later.
-        if ($intent === Maho_Paypal_Model_Config::PAYMENT_ACTION_CAPTURE) {
-            $capture = $paymentsData['captures'][0] ?? [];
-            $captureId = $capture['id'] ?? '';
-            $captureAmount = (float) ($capture['amount']['value'] ?? 0);
-
-            if ($captureId && $captureAmount) {
-                try {
-                    $order = Mage::getModel('sales/order')->load($quote->getId(), 'quote_id');
-                    if ($order->getId()) {
-                        $orderPayment = $order->getPayment();
-                        $orderPayment->setAdditionalInformation('paypal_capture_id', $captureId);
-                        $orderPayment->setTransactionId($captureId);
-                        $orderPayment->setIsTransactionClosed(true);
-                        $orderPayment->registerCaptureNotification($captureAmount);
-
-                        $invoice = $orderPayment->getCreatedInvoice();
-                        $transactionSave = Mage::getModel('core/resource_transaction')
-                            ->addObject($order);
-                        if ($invoice) {
-                            $transactionSave->addObject($invoice);
-                        }
-                        $transactionSave->save();
-                    }
-                } catch (\Throwable $e) {
-                    Mage::log(
-                        sprintf('Inline capture registration failed for PayPal order %s: %s', $paypalResult['id'], $e->getMessage()),
-                        Mage::LOG_ERROR,
-                        'paypal.log',
-                    );
-                }
-            }
-        }
     }
 
     /**

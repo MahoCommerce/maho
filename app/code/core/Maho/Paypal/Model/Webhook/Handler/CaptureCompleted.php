@@ -15,7 +15,13 @@ class Maho_Paypal_Model_Webhook_Handler_CaptureCompleted extends Maho_Paypal_Mod
     {
         $resource = $payload['resource'] ?? [];
         $captureId = $resource['id'] ?? '';
-        $amount = (float) ($resource['amount']['value'] ?? 0);
+        $amount = $resource['amount'] ?? [];
+        $value = $amount['value'] ?? null;
+        if ($captureId === '' || ($resource['status'] ?? 'COMPLETED') !== 'COMPLETED'
+            || !is_numeric($value) || !is_finite((float) $value) || (float) $value <= 0
+        ) {
+            return;
+        }
 
         $order = $this->_findOrder($payload);
         if (!$order) {
@@ -23,20 +29,44 @@ class Maho_Paypal_Model_Webhook_Handler_CaptureCompleted extends Maho_Paypal_Mod
             return;
         }
 
-        // Skip if this capture was already registered during order placement
-        $existing = Mage::getModel('sales/order_payment_transaction');
-        $existing->load($captureId, 'txn_id');
-        if ($existing->getId()) {
-            $this->_log("CaptureCompleted: capture {$captureId} already registered for order {$order->getIncrementId()}, skipping");
+        $orderId = (int) $order->getId();
+        Mage::getService('sales/order')->withOrderLock($orderId, function () use ($orderId, $captureId, $amount): void {
+            $order = Mage::getModel('sales/order')->load($orderId);
+            if ($order->getId() && ($amount['currency_code'] ?? null) === $order->getBaseCurrencyCode()) {
+                $this->registerCapture($order, $captureId, $amount);
+            }
+        });
+    }
+
+    private function registerCapture(Mage_Sales_Model_Order $order, string $captureId, array $amount): void
+    {
+        $payment = $order->getPayment();
+        $invoiceForCapture = null;
+        foreach ($order->getInvoiceCollection() as $invoice) {
+            if ($invoice->getTransactionId() === $captureId) {
+                $invoiceForCapture = $invoice;
+                break;
+            }
+            if ((int) $invoice->getState() === Mage_Sales_Model_Order_Invoice::STATE_OPEN) {
+                $invoiceForCapture ??= $invoice;
+            }
+        }
+        $invoiceCaptureId = $invoiceForCapture?->getTransactionId();
+        if ($invoiceCaptureId !== $captureId && $payment->getTransaction($captureId)) {
             return;
         }
-
-        $payment = $order->getPayment();
+        if ($invoiceForCapture && (
+            (int) $invoiceForCapture->getState() !== Mage_Sales_Model_Order_Invoice::STATE_OPEN
+            || ($invoiceCaptureId && $invoiceCaptureId !== $captureId)
+            || !Mage::helper('paypal')->isFullInvoiceCapture($amount, $invoiceForCapture)
+        )) {
+            return;
+        }
 
         $payment->setAdditionalInformation('paypal_capture_id', $captureId);
         $payment->setTransactionId($captureId);
         $payment->setIsTransactionClosed(true);
-        $payment->registerCaptureNotification($amount);
+        $payment->registerCaptureNotification((float) $amount['value']);
 
         $invoice = $payment->getCreatedInvoice();
 
