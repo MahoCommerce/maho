@@ -60,6 +60,30 @@ class Mage_Oauth_Model_Resource_Token extends Mage_Core_Model_Resource_Db_Abstra
     }
 
     /**
+     * Replace a request token with an access token only when the request token is still unconverted.
+     */
+    public function claimRequestToken(
+        int $tokenId,
+        #[\SensitiveParameter]
+        string $token,
+        #[\SensitiveParameter]
+        string $secret,
+    ): bool {
+        return $this->_getWriteAdapter()->update(
+            $this->getMainTable(),
+            [
+                'type' => Mage_Oauth_Model_Token::TYPE_ACCESS,
+                'token' => $token,
+                'secret' => $secret,
+            ],
+            [
+                'entity_id = ?' => $tokenId,
+                'type = ?' => Mage_Oauth_Model_Token::TYPE_REQUEST,
+            ],
+        ) > 0;
+    }
+
+    /**
      * Delete old entries
      *
      * @param int $minutes
