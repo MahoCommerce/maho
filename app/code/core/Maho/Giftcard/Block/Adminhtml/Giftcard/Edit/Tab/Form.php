@@ -145,6 +145,18 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
                 'class'    => 'validate-number',
                 'note'     => $currencyNote . '<br>' . Mage::helper('giftcard')->__('Edit this to manually adjust the balance. Use "Admin Comment" to explain the adjustment.'),
             ]);
+
+            $fieldset->addField('shown_balance', 'hidden', [
+                'name'  => 'shown_balance',
+            ]);
+
+            $fieldset->addField('shown_status', 'hidden', [
+                'name'  => 'shown_status',
+            ]);
+
+            $fieldset->addField('shown_expires_at', 'hidden', [
+                'name'  => 'shown_expires_at',
+            ]);
         }
 
         $fieldset->addField('expires_at', 'date', [
@@ -206,7 +218,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
 
         // Stored as decimal(12,4): render full precision so an untouched field posts back unchanged
         $data = $model->getData();
-        foreach (['balance', 'initial_balance'] as $field) {
+        foreach (['balance', 'initial_balance', 'shown_balance'] as $field) {
             if (isset($data[$field]) && $data[$field] !== '') {
                 $data[$field] = Mage::helper('adminhtml')->formatPriceForInput($data[$field]);
             }

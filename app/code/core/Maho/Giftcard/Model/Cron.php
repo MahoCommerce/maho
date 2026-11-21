@@ -36,11 +36,28 @@ class Maho_Giftcard_Model_Cron
                 ->addFieldToFilter('expires_at', ['lt' => $currentTimeUtc->format(Mage_Core_Model_Locale::DATETIME_FORMAT)]);
 
             $expired = 0;
+            $write = Mage::getSingleton('core/resource')->getConnection('core_write');
+            $table = Mage::getSingleton('core/resource')->getTableName('giftcard/giftcard');
 
             foreach ($collection as $giftcard) {
                 try {
-                    $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED);
-                    $giftcard->save();
+                    // Write only the status: a save() would overwrite a balance that a refund changed after the load
+                    $changed = $write->update(
+                        $table,
+                        [
+                            'status' => Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED,
+                            'updated_at' => Mage::app()->getLocale()->formatDateForDb('now'),
+                        ],
+                        [
+                            'giftcard_id = ?' => $giftcard->getId(),
+                            'status = ?' => Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE,
+                            'expires_at < ?' => $currentTimeUtc->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                        ],
+                    );
+                    if ($changed === 0) {
+                        continue;
+                    }
+                    $giftcard->load($giftcard->getId());
 
                     // Add history entry
                     $history = Mage::getModel('giftcard/history');

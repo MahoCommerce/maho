@@ -89,7 +89,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
             throw new \Mage_Core_Exception_Input()->addError('website_ids', \Mage::helper('giftcard')->__('websiteIds cannot be changed through update'));
         }
 
-        $service->update($giftcard, $data->balance, $data->status, $data->comment ?? 'API balance adjustment');
+        $service->update($giftcard, $data->balance, $data->status, $data->comment ?? 'API balance adjustment', $data->expectedBalance);
         $this->logApiActivity('gift_card', 'update', $oldData, $giftcard);
 
         return GiftCard::fromModel($service->getById($id));
@@ -117,7 +117,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
         $service = \Mage::getService('giftcard/giftcard');
         $giftcard = $service->getByCode($code);
         $this->assertAllWebsitesAllowed($giftcard->getWebsiteIds(), $user, 'gift card');
-        $service->update($giftcard, $input->float('newBalance') ?? 0.0, null, $input->string('comment'));
+        $service->update($giftcard, $input->float('newBalance') ?? 0.0, null, $input->string('comment'), $input->float('expectedBalance'));
 
         return GiftCard::fromModel($giftcard);
     }

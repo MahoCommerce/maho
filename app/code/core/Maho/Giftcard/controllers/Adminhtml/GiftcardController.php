@@ -101,9 +101,30 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
 
         $this->_title($model->getId() ? $model->getCode() : Mage::helper('giftcard')->__('New Gift Card'));
 
+        $storedBalance = $model->getBalance();
+        $storedStatus = $model->getStatus();
+        $storedExpiry = $model->getExpiresAt();
         $data = Mage::getSingleton('adminhtml/session')->getFormData(true);
         if (is_array($data) && $data !== []) {
-            $model->setData($data);
+            if ($model->getId()) {
+                foreach (['status', 'expires_at'] as $field) {
+                    if (isset($data[$field], $data['shown_' . $field]) && $data[$field] === $data['shown_' . $field]) {
+                        unset($data[$field]);
+                    }
+                }
+                if (is_numeric($data['balance'] ?? null) && is_numeric($data['shown_balance'] ?? null)
+                    && round((float) $data['balance'] - (float) $data['shown_balance'], 4) === 0.0
+                ) {
+                    unset($data['balance']);
+                }
+            }
+            $model->addData($data);
+        }
+        if ($model->getId()) {
+            // A retry compares the remaining edits with the latest stored values.
+            $model->setData('shown_balance', $storedBalance);
+            $model->setData('shown_status', $storedStatus);
+            $model->setData('shown_expires_at', substr($storedExpiry ?? '', 0, 10));
         }
 
         Mage::register('current_giftcard', $model);
@@ -133,13 +154,26 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             $websiteIds = $saveData['website_ids'] ?? null;
             unset($saveData['website_ids']);
 
+            // The balance that the form showed: a refund can change the stored one meanwhile
+            $shownBalance = $model->getId() && is_numeric($saveData['shown_balance'] ?? null) ? (float) $saveData['shown_balance'] : null;
+            unset($saveData['shown_balance']);
+            // An untouched status keeps the stored one, which a refund or an order can change meanwhile
+            if ($model->getId() && isset($saveData['status'], $saveData['shown_status']) && $saveData['status'] === $saveData['shown_status']) {
+                $saveData['status'] = $model->getStatus();
+            }
+            unset($saveData['shown_status']);
+            if (isset($saveData['expires_at'], $saveData['shown_expires_at']) && $saveData['expires_at'] === $saveData['shown_expires_at']) {
+                unset($saveData['expires_at']);
+            }
+            unset($saveData['shown_expires_at']);
+
             // A form that does not post the balance keeps the balance of the card
             $saveData['balance'] ??= $model->getData('balance');
             $model->setData($saveData);
             if ($websiteIds !== null) {
                 $model->setWebsiteIds(is_array($websiteIds) ? $websiteIds : [$websiteIds]);
             }
-            $this->getService()->save($model, $saveData['comment'] ?? 'Admin adjustment');
+            $this->getService()->save($model, $saveData['comment'] ?? 'Admin adjustment', $shownBalance);
 
             $session->addSuccess(Mage::helper('giftcard')->__('The gift card has been saved.'));
             $session->setFormData(false);
