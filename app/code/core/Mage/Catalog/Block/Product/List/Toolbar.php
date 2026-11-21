@@ -171,7 +171,7 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
     }
 
     /**
-     * Disable list state params memorizing
+     * Disable writes to the session for list preferences.
      */
     public function disableParamsMemorizing(): static
     {
@@ -188,11 +188,21 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
      */
     protected function _memorizeParam($param, $value)
     {
+        if (!$this->_paramsMemorizeAllowed) {
+            return $this;
+        }
         $session = Mage::getSingleton('catalog/session');
-        if ($this->_paramsMemorizeAllowed && !$session->getParamsMemorizeDisabled()) {
+        if (!$session->getParamsMemorizeDisabled()) {
             $session->setData($param, $value);
         }
         return $this;
+    }
+
+    private function clearMemorizedParam(string $param): void
+    {
+        if ($this->_paramsMemorizeAllowed) {
+            Mage::getSingleton('catalog/session')->unsetData($param);
+        }
     }
 
     /**
@@ -309,7 +319,7 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
         $order = $this->getRequest()->getParam($this->getOrderVarName());
         if ($order && isset($orders[$order])) {
             if ($order == $defaultOrder) {
-                Mage::getSingleton('catalog/session')->unsSortOrder();
+                $this->clearMemorizedParam('sort_order');
             } else {
                 $this->_memorizeParam('sort_order', $order);
             }
@@ -341,7 +351,7 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
         $dir = strtolower($this->getRequest()->getParam($this->getDirectionVarName(), ''));
         if ($dir && in_array($dir, $directions)) {
             if ($dir == $defaultDirection) {
-                Mage::getSingleton('catalog/session')->unsSortDirection();
+                $this->clearMemorizedParam('sort_direction');
             } else {
                 $this->_memorizeParam('sort_direction', $dir);
             }
@@ -514,7 +524,7 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
         $mode = $this->getRequest()->getParam($this->getModeVarName());
         if ($mode) {
             if ($mode == $defaultMode) {
-                Mage::getSingleton('catalog/session')->unsDisplayMode();
+                $this->clearMemorizedParam('display_mode');
             } else {
                 $this->_memorizeParam('display_mode', $mode);
             }
@@ -733,7 +743,7 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
         $limit = $this->getRequest()->getParam($this->getLimitVarName());
         if ($limit && isset($limits[$limit])) {
             if ($limit == $defaultLimit) {
-                Mage::getSingleton('catalog/session')->unsLimitPage();
+                $this->clearMemorizedParam('limit_page');
             } else {
                 $this->_memorizeParam('limit_page', $limit);
             }
