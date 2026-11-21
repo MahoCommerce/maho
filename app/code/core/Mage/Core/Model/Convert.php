@@ -16,7 +16,8 @@ class Mage_Core_Model_Convert extends Mage_Dataflow_Model_Convert_Profile_Collec
         $moduleName = $classArr[0] . '_' . $classArr[1];
         $etcDir = Mage::getConfig()->getModuleDir('etc', $moduleName);
 
-        $fileName = Maho::findFile($etcDir . DS . 'convert.xml');
+        $path = $etcDir . DS . 'convert.xml';
+        $fileName = is_readable($path) ? $path : Maho::findFile($path);
         if ($fileName !== false && is_readable($fileName)) {
             $data = file_get_contents($fileName);
             $this->importXml($data);
