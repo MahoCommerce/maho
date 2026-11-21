@@ -21,10 +21,10 @@ class Mage_Payment_Model_Resource_Restriction_Collection extends Mage_Core_Model
 
     public function addStoreFilter(int $storeId): self
     {
-        return $this->addFieldToFilter([
-            ['attribute' => 'store_ids', 'like' => '%' . $storeId . '%'],
-            ['attribute' => 'store_ids', 'eq' => ''],
-            ['attribute' => 'store_ids', 'null' => true],
+        return $this->addFieldToFilter('store_ids', [
+            ['finset' => $storeId],
+            ['eq' => ''],
+            ['null' => true],
         ]);
     }
 }
