@@ -203,6 +203,186 @@ describe('a card above a lowered highest balance', function (): void {
     });
 });
 
+/**
+ * Create a card with a balance of 50, then refund 10 to it, as a credit memo does while a client edits the card.
+ */
+function giftcardParityRefundedCard(string $suffix): Maho_Giftcard_Model_Giftcard
+{
+    $giftcard = giftcardParityCard($suffix, ['balance' => 50.0]);
+    Mage::getModel('giftcard/giftcard')->load($giftcard->getId())->refund(10.0);
+    return $giftcard;
+}
+
+/**
+ * @return array{success: list<string>, errors: list<string>}
+ */
+function giftcardParityAdminBalance(Maho_Giftcard_Model_Giftcard $giftcard, float $balance, float $shownBalance): array
+{
+    return TransportParity::admin(Maho_Giftcard_Adminhtml_GiftcardController::class, 'save', [
+        'id' => $giftcard->getId(), 'giftcard_id' => $giftcard->getId(), 'code' => $giftcard->getCode(),
+        'status' => Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE, 'website_ids' => [(int) Mage::app()->getStore()->getWebsiteId()],
+        'balance' => $balance, 'shown_balance' => $shownBalance,
+    ]);
+}
+
+describe('a balance that a refund changed after the client saw it', function (): void {
+    it('refuses a new balance with the same conflict on the admin page and in the API', function (float $requested): void {
+        $adminCard = giftcardParityRefundedCard('SEEN-ADMIN');
+        $apiCard = giftcardParityRefundedCard('SEEN-API');
+
+        $admin = giftcardParityAdminBalance($adminCard, $requested, 50.0);
+        $api = giftcardParityApi(['balance' => $requested, 'expectedBalance' => 50.0], (int) $apiCard->getId());
+
+        expect($admin['errors'])->toHaveCount(1)
+            ->and($admin['errors'][0])->toContain('The balance of this gift card changed to')
+            ->and($api['status'])->toBe(409)
+            ->and($api['errors'])->toBe($admin['errors'])
+            ->and((float) Mage::getModel('giftcard/giftcard')->load($adminCard->getId())->getBalance())->toBe(60.0)
+            ->and((float) Mage::getModel('giftcard/giftcard')->load($apiCard->getId())->getBalance())->toBe(60.0);
+    })->with(['different from stored balance' => [80.0], 'equal to stored balance' => [60.0]]);
+
+    it('keeps the refund on the admin page and in the API when the client sends back the balance that it saw', function (): void {
+        $adminCard = giftcardParityRefundedCard('KEEP-ADMIN');
+        $apiCard = giftcardParityRefundedCard('KEEP-API');
+
+        $admin = giftcardParityAdminBalance($adminCard, 50.0, 50.0);
+        $api = giftcardParityApi(['balance' => 50.0, 'expectedBalance' => 50.0], (int) $apiCard->getId());
+
+        expect($admin['errors'])->toBe([])
+            ->and($api['status'])->toBe(200)
+            ->and($api['result']->balance)->toBe(60.0)
+            ->and((float) Mage::getModel('giftcard/giftcard')->load($adminCard->getId())->getBalance())->toBe(60.0);
+    });
+});
+
+it('keeps a refund extension when the admin leaves the expiry date alone', function (): void {
+    $giftcard = giftcardParityCard('EXPIRY-KEEP', ['balance' => 0.0, 'initial_balance' => 50.0, 'expires_at' => '2020-06-14 00:00:00']);
+    $store = Mage::app()->getStore();
+    $store->setConfig('giftcard/general/refund_expiration_extension', '30');
+    $refunded = Mage::getModel('giftcard/giftcard')->load($giftcard->getId())->refund(10.0);
+
+    $admin = TransportParity::admin(Maho_Giftcard_Adminhtml_GiftcardController::class, 'save', [
+        'id' => $giftcard->getId(), 'giftcard_id' => $giftcard->getId(),
+        'status' => Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE, 'website_ids' => [$this->websiteId],
+        'balance' => 0.0, 'shown_balance' => 0.0,
+        'expires_at' => '2020-06-14', 'shown_expires_at' => '2020-06-14', 'message' => 'Example note',
+    ]);
+
+    $stored = Mage::getModel('giftcard/giftcard')->load($giftcard->getId());
+    expect($admin['errors'])->toBe([])
+        ->and($stored->getBalance())->toBe(10.0)
+        ->and($stored->getExpiresAt())->toBe($refunded->getExpiresAt())
+        ->and($stored->getMessage())->toBe('Example note');
+});
+
+it('saves an explicit status and expiry date with an admin balance adjustment', function (): void {
+    $giftcard = giftcardParityCard('EXPIRY-CHANGE', ['balance' => 50.0, 'expires_at' => '2030-06-14 00:00:00']);
+
+    $admin = TransportParity::admin(Maho_Giftcard_Adminhtml_GiftcardController::class, 'save', [
+        'id' => $giftcard->getId(), 'giftcard_id' => $giftcard->getId(), 'website_ids' => [$this->websiteId],
+        'status' => Maho_Giftcard_Model_Giftcard::STATUS_DISABLED, 'shown_status' => Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE,
+        'balance' => 25.0, 'shown_balance' => 50.0,
+        'expires_at' => '2031-06-14', 'shown_expires_at' => '2030-06-14',
+    ]);
+
+    $stored = Mage::getModel('giftcard/giftcard')->load($giftcard->getId());
+    expect($admin['errors'])->toBe([])
+        ->and($stored->getBalance())->toBe(25.0)
+        ->and($stored->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_DISABLED)
+        ->and(substr($stored->getExpiresAt(), 0, 10))->toBe('2031-06-14');
+});
+
+it('keeps only the admin edits when reopening a gift card after a save error', function (bool $editsStatusAndExpiry, bool $balanceConflict): void {
+    $giftcard = giftcardParityCard('RETRY', ['balance' => 50.0, 'status' => 'expired', 'expires_at' => '2020-06-14 17:20:21']);
+    Mage::app()->getStore()->setConfig('giftcard/general/refund_expiration_extension', '30');
+    $refunded = Mage::getModel('giftcard/giftcard')->load($giftcard->getId())->refund(10.0);
+
+    $posted = [
+        'id' => $giftcard->getId(), 'giftcard_id' => $giftcard->getId(),
+        'website_ids' => [$balanceConflict ? $this->websiteId : PHP_INT_MAX],
+        'status' => $editsStatusAndExpiry ? 'disabled' : 'expired', 'shown_status' => 'expired',
+        'balance' => $balanceConflict ? '55.00' : '50.00', 'shown_balance' => '50.00',
+        'expires_at' => $editsStatusAndExpiry ? '' : '2020-06-14', 'shown_expires_at' => '2020-06-14',
+    ];
+    $admin = TransportParity::admin(Maho_Giftcard_Adminhtml_GiftcardController::class, 'save', $posted);
+    expect($admin['errors'])->toHaveCount(1);
+
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/admin/giftcard/edit', 'GET', ['id' => $giftcard->getId()]));
+    $controller = new class ($request, new Mage_Core_Controller_Response_Http()) extends Maho_Giftcard_Adminhtml_GiftcardController {
+        #[\Override]
+        protected function _initAction()
+        {
+            return $this;
+        }
+
+        #[\Override]
+        public function renderLayout($output = '')
+        {
+            return $this;
+        }
+    };
+    $controller->editAction();
+    $form = Mage::registry('current_giftcard');
+
+    $expiry = substr($form->getExpiresAt() ?? '', 0, 10);
+    $storedExpiry = substr($refunded->getExpiresAt(), 0, 10);
+    expect($form->getCode())->toBe($giftcard->getCode())
+        ->and($form->getBalance())->toBe($balanceConflict ? 55.0 : 60.0)
+        ->and($form->getData('shown_balance'))->toBe(60.0)
+        ->and($form->getStatus())->toBe($editsStatusAndExpiry ? 'disabled' : 'active')
+        ->and($form->getData('shown_status'))->toBe('active')
+        ->and($expiry)->toBe($editsStatusAndExpiry ? '' : $storedExpiry)
+        ->and($form->getData('shown_expires_at'))->toBe($storedExpiry);
+
+    $retry = TransportParity::admin(Maho_Giftcard_Adminhtml_GiftcardController::class, 'save', array_replace($posted, [
+        'website_ids' => [$this->websiteId],
+        'status' => $form->getStatus(), 'shown_status' => $form->getData('shown_status'),
+        'balance' => $balanceConflict ? 65.0 : $form->getBalance(), 'shown_balance' => $form->getData('shown_balance'),
+        'expires_at' => $expiry, 'shown_expires_at' => $form->getData('shown_expires_at'),
+    ]));
+    $stored = Mage::getModel('giftcard/giftcard')->load($giftcard->getId());
+    expect($retry['errors'])->toBe([])
+        ->and($stored->getBalance())->toBe($balanceConflict ? 65.0 : 60.0)
+        ->and($stored->getStatus())->toBe($editsStatusAndExpiry ? 'disabled' : 'active')
+        ->and($stored->getExpiresAt())->toBe($editsStatusAndExpiry ? null : $refunded->getExpiresAt());
+})->with([
+    'untouched status and expiry' => [false, true],
+    'edited status and expiry' => [true, true],
+    'untouched balance' => [true, false],
+]);
+
+describe('a status that a refund changed after the admin opened the form', function (): void {
+    it('keeps the stored status when the admin does not change it', function (): void {
+        $giftcard = giftcardParityCard('STATUS-KEEP', ['balance' => 0.0, 'initial_balance' => 50.0, 'status' => Maho_Giftcard_Model_Giftcard::STATUS_USED]);
+        Mage::getModel('giftcard/giftcard')->load($giftcard->getId())->refund(10.0);
+
+        $admin = TransportParity::admin(Maho_Giftcard_Adminhtml_GiftcardController::class, 'save', [
+            'id' => $giftcard->getId(), 'giftcard_id' => $giftcard->getId(), 'code' => $giftcard->getCode(),
+            'status' => Maho_Giftcard_Model_Giftcard::STATUS_USED, 'shown_status' => Maho_Giftcard_Model_Giftcard::STATUS_USED,
+            'website_ids' => [(int) Mage::app()->getStore()->getWebsiteId()], 'balance' => 0.0, 'shown_balance' => 0.0,
+        ]);
+
+        $stored = Mage::getModel('giftcard/giftcard')->load($giftcard->getId());
+        expect($admin['errors'])->toBe([])
+            ->and($stored->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE)
+            ->and((float) $stored->getBalance())->toBe(10.0);
+    });
+
+    it('saves the status that the admin changed', function (): void {
+        $giftcard = giftcardParityCard('STATUS-CHANGE', ['balance' => 0.0, 'initial_balance' => 50.0, 'status' => Maho_Giftcard_Model_Giftcard::STATUS_USED]);
+        Mage::getModel('giftcard/giftcard')->load($giftcard->getId())->refund(10.0);
+
+        $admin = TransportParity::admin(Maho_Giftcard_Adminhtml_GiftcardController::class, 'save', [
+            'id' => $giftcard->getId(), 'giftcard_id' => $giftcard->getId(), 'code' => $giftcard->getCode(),
+            'status' => Maho_Giftcard_Model_Giftcard::STATUS_DISABLED, 'shown_status' => Maho_Giftcard_Model_Giftcard::STATUS_USED,
+            'website_ids' => [(int) Mage::app()->getStore()->getWebsiteId()], 'balance' => 0.0, 'shown_balance' => 0.0,
+        ]);
+
+        expect($admin['errors'])->toBe([])
+            ->and(Mage::getModel('giftcard/giftcard')->load($giftcard->getId())->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_DISABLED);
+    });
+});
+
 it('refuses an unknown status on the admin mass action and in the API, and keeps the balance', function (): void {
     $giftcard = giftcardParityCard('STATUS');
 
