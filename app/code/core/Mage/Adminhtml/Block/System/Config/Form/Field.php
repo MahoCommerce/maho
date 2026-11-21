@@ -43,6 +43,9 @@ class Mage_Adminhtml_Block_System_Config_Form_Field extends Mage_Adminhtml_Block
         } elseif ($element->getCanUseDefaultValue()) {
             $addInheritCheckbox = true;
             $checkboxLabel = $this->__('Use Default');
+        } elseif ($element->getCanUseSystemValue()) {
+            $addInheritCheckbox = true;
+            $checkboxLabel = $this->__('Use system value');
         }
 
         if ($addInheritCheckbox) {

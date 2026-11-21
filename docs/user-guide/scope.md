@@ -1,5 +1,5 @@
 ---
-description: Which value wins between the default, the website and the store view - the scope switcher in the configuration and on products, the Use Default and Use Website checkboxes, global, website and store view attributes, and the Catalog Price Scope.
+description: Which value wins between the default, the website and the store view - the scope switcher in the configuration and on products, the Use system value, Use Default and Use Website checkboxes, global, website and store view attributes, and the Catalog Price Scope.
 admin_pages: [system_config/edit, catalog_product/edit, catalog_category/edit, system_store]
 ---
 
@@ -49,19 +49,23 @@ Each setting shows a label next to it. The label is the most specific scope wher
 A setting that you cannot change at the selected scope does not show. For example, a [GLOBAL]
 setting is not in the page when you select a website.
 
-### Use Default and Use Website
+### Use system value, Use Default and Use Website
 
-When you select a website or a store view, each setting has a checkbox on its right:
+Each setting has a checkbox on its right:
 
 | Selected scope | Checkbox | When it is selected |
 |----------------|----------|---------------------|
+| Default Config | **Use system value** | The setting uses the value that Maho, or the extension that adds the setting, ships. The checkbox shows only when a shipped value exists |
 | Website | **Use Default** | The website uses the value of **Default Config** |
 | Store view | **Use Website** | The store view uses the value of its website. The checkbox has this name when the setting exists at website level |
 | Store view | **Use Default** | The store view uses the value of **Default Config**. The checkbox has this name when the setting does not exist at website level |
 
 To give a scope its own value, clear the checkbox, change the value and save. To remove the value
 of a scope, select the checkbox again and save: the store deletes the value of that scope, and the
-value of the scope above it applies again.
+value of the scope above it applies again. In **Default Config**, the shipped value applies again.
+
+To get the shipped value of a setting back, select **Default Config**, select **Use system value** and
+save. An empty field is a value of its own: if you clear the field and save, the setting stays empty.
 
 !!! note "Values set by the server"
     The hosting can also set a configuration value with an environment variable. A value set this
@@ -145,6 +149,7 @@ categories and the scope labels. It saves all product and category values as def
 
 | What you see | Why | What to do |
 |--------------|-----|------------|
+| You want the original value of a setting back | **Default Config** has a saved value | Select **Default Config**, select **Use system value** and save |
 | You changed a setting in **Default Config**, but one store view does not change | The store view, or its website, has its own value | Select that store view in **Current Configuration Scope**, select **Use Website** or **Use Default**, and save. Do the same for the website |
 | A setting is missing when you select a store view | The setting is [GLOBAL] or [WEBSITE] | Select **Default Config** or the website |
 | You changed a setting in the admin, but the store does not use the new value | The hosting sets this value with an environment variable | Ask the hosting to change or remove the variable |

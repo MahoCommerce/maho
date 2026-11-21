@@ -204,6 +204,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      */
     private $_moduleNamespaces = null;
 
+    private ?Mage_Core_Model_Config_Element $shippedDefaults = null;
+
     /**
      * Modules allowed to load
      * If empty - all modules are allowed
@@ -304,21 +306,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             return $this;
         }
 
-        $files = [];
-
-        foreach (Maho::getInstalledPackages() as $package => $info) {
-            foreach (glob($info['path'] . '/app/etc/*.xml') as $file) {
-                $basename = basename($file);
-                if ($basename === 'local.xml' && $package !== 'root') {
-                    continue;
-                }
-                $files[$basename] = $file;
-            }
-        }
-
         // Merge all config files
         $this->loadString('<?xml version="1.0"?><config></config>');
-        foreach ($files as $basename => $file) {
+        foreach ($this->getBaseConfigFiles() as $basename => $file) {
             $merge = clone $this->_prototype;
             $merge->loadFile($file);
             if ($basename === 'local.xml') {
@@ -329,6 +319,71 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         }
 
         return $this;
+    }
+
+    /**
+     * Return the app/etc/*.xml files of all packages, keyed by file name. Only the root package gives local.xml.
+     *
+     * @return array<string, string>
+     */
+    protected function getBaseConfigFiles(): array
+    {
+        $files = [];
+        foreach (Maho::getInstalledPackages() as $package => $info) {
+            foreach (glob($info['path'] . '/app/etc/*.xml') as $file) {
+                $basename = basename($file);
+                if ($basename === 'local.xml' && $package !== 'root') {
+                    continue;
+                }
+                $files[$basename] = $file;
+            }
+        }
+        return $files;
+    }
+
+    /**
+     * Return the default scope values of the XML files, without the values of core_config_data and of the environment.
+     */
+    public function getShippedDefaults(): Mage_Core_Model_Config_Element
+    {
+        if ($this->shippedDefaults !== null) {
+            return $this->shippedDefaults;
+        }
+
+        $cacheId = 'config_shipped_defaults';
+        $useCache = Mage::app()->useCache('config');
+        $xmlString = $useCache ? Mage::app()->loadCache($cacheId) : false;
+        if (!is_string($xmlString) || $xmlString === '') {
+            $xmlString = $this->loadShippedDefaults()->asXML();
+            if ($useCache) {
+                Mage::app()->saveCache($xmlString, $cacheId, [self::CACHE_TAG]);
+            }
+        }
+
+        $this->shippedDefaults = new Mage_Core_Model_Config_Element($xmlString);
+        return $this->shippedDefaults;
+    }
+
+    /**
+     * Merge the XML files in the same order as init() and return their default node.
+     */
+    protected function loadShippedDefaults(): \Maho\Simplexml\Element
+    {
+        $config = clone $this->_prototype;
+        $config->loadString('<config/>');
+        foreach ($this->getBaseConfigFiles() as $file) {
+            $merge = clone $this->_prototype;
+            $merge->loadFile($file);
+            $config->extend($merge);
+        }
+
+        $resourceConfig = sprintf('config.%s.xml', $this->_getResourceConnectionModel('core'));
+        $this->loadModulesConfiguration(['config.xml', $resourceConfig], $config);
+        if ($this->_isLocalConfigLoaded) {
+            $config->extend($this->_refLocalConfigObject);
+        }
+
+        return $config->getNode('default') ?: new Mage_Core_Model_Config_Element('<default/>');
     }
 
     /**
@@ -426,6 +481,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $this->_isLocalConfigLoaded = false;
         $this->_allowCacheForInit = false;
         $this->_useCache = false;
+        $this->shippedDefaults = null;
         return $this->init($options);
     }
 

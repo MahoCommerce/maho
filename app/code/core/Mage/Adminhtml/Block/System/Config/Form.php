@@ -397,6 +397,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
                     'scope_label'           => $this->getScopeLabel($element),
                     'can_use_default_value' => $this->canUseDefaultValue((int) $element->show_in_default),
                     'can_use_website_value' => $this->canUseWebsiteValue((int) $element->show_in_website),
+                    'can_use_system_value'  => $this->canUseSystemValue($path),
                 ]);
                 $this->_prepareFieldOriginalData($field, $element);
 
@@ -581,6 +582,15 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
             return true;
         }
         return false;
+    }
+
+    /**
+     * Return true when the default scope edits $path and the XML files give it a value.
+     */
+    public function canUseSystemValue(string $path): bool
+    {
+        return $this->getScope() === self::SCOPE_DEFAULT
+            && Mage::getConfig()->getShippedDefaults()->descend($path) !== false;
     }
 
     /**
