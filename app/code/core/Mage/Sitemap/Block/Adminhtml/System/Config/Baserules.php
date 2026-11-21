@@ -53,8 +53,9 @@ class Mage_Sitemap_Block_Adminhtml_System_Config_Baserules extends Mage_Adminhtm
      */
     public function getRecommendedRules(): string
     {
-        $file = Mage::getConfig()->getModuleDir('etc', 'Mage_Sitemap') . DS . 'config.xml';
-        $xml = is_file($file) ? simplexml_load_file($file) : false;
+        $moduleDirectory = Mage::getModuleDir('etc', 'Mage_Sitemap');
+        $file = Maho::findFile($moduleDirectory . DS . 'config.xml');
+        $xml = $file !== false && is_file($file) ? simplexml_load_file($file) : false;
         if ($xml === false) {
             return '';
         }
