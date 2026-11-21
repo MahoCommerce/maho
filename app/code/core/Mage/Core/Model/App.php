@@ -847,7 +847,7 @@ class Mage_Core_Model_App
     /**
      * Run $callback with the current store switched to $storeId, then restore
      * the caller's store. Only the store scope switches, not design, locale,
-     * or translations (see emulate() for those).
+     * or translations (see withLocale() and emulate() for those).
      */
     public function withStore(int $storeId, \Closure $callback): mixed
     {
@@ -860,6 +860,37 @@ class Mage_Core_Model_App
             return $callback();
         } finally {
             $this->setCurrentStore($previousStoreId);
+        }
+    }
+
+    /**
+     * Run $callback with the locale of the store $storeId, and with the translations of that locale in the area that
+     * the translator uses. Then put back the locale and the translations of the caller, also when $callback throws.
+     * Only the locale switches, not the store or the design (see emulate() for those).
+     *
+     * @template T
+     * @param \Closure(): T $callback
+     * @return T
+     */
+    public function withLocale(int $storeId, \Closure $callback): mixed
+    {
+        $locale = $this->getLocale();
+        $localeCode = (string) Mage::getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_LOCALE, $storeId);
+        $previousLocaleCode = $locale->getLocaleCode();
+        if ($localeCode === $previousLocaleCode) {
+            return $callback();
+        }
+
+        $translator = $this->getTranslator();
+        $translatorState = $translator->getState();
+        $area = $translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA) ?? Mage_Core_Model_App_Area::AREA_FRONTEND;
+        try {
+            $locale->setLocaleCode($localeCode);
+            $translator->setLocale($localeCode)->init($area);
+            return $callback();
+        } finally {
+            $locale->setLocaleCode($previousLocaleCode);
+            $translator->setState($translatorState);
         }
     }
 

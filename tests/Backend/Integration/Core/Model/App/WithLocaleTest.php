@@ -10,7 +10,7 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * Mage_Core_Model_Locale::withStoreLocale() runs a callback with the locale of a store. After the callback, the locale
+ * Mage_Core_Model_App::withLocale() runs a callback with the locale of a store. After the callback, the locale
  * and the translator must be the ones of the caller, also when the callback throws.
  */
 describe('The locale of a store', function () {
@@ -27,7 +27,7 @@ describe('The locale of a store', function () {
         $startAdmin($locale);
         $translator = Mage::app()->getTranslator()->getState();
 
-        $inside = Mage::app()->getLocale()->withStoreLocale(1, fn(): array => [
+        $inside = Mage::app()->withLocale(1, fn(): array => [
             Mage::app()->getLocale()->getLocaleCode(),
             Mage::app()->getTranslator()->getLocale(),
             Mage::app()->getTranslator()->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA),
@@ -45,7 +45,7 @@ describe('The locale of a store', function () {
         $startAdmin($locale);
         $translator = Mage::app()->getTranslator()->getState();
 
-        expect(fn() => Mage::app()->getLocale()->withStoreLocale(1, fn() => throw new \Error('Format failed')))
+        expect(fn() => Mage::app()->withLocale(1, fn() => throw new \Error('Format failed')))
             ->toThrow(\Error::class, 'Format failed');
 
         expect(Mage::app()->getLocale()->getLocaleCode())->toBe($locale)
@@ -56,7 +56,7 @@ describe('The locale of a store', function () {
         $startAdmin(Mage::getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_LOCALE, 1));
         $translator = Mage::app()->getTranslator()->getState();
 
-        $inside = Mage::app()->getLocale()->withStoreLocale(1, fn() => Mage::app()->getTranslator()->getState());
+        $inside = Mage::app()->withLocale(1, fn() => Mage::app()->getTranslator()->getState());
 
         expect($inside)->toEqual($translator);
     });
@@ -84,7 +84,7 @@ describe('The locale of a store', function () {
         $translator = Mage::app()->getTranslator()->getState();
 
         $format = Mage::helper('core')->jsonDecode(Mage::helper('tax')->getPriceFormat(1));
-        $pattern = Mage::app()->getLocale()->withStoreLocale(1, fn(): string => Mage::app()->getStore(1)->getCurrentCurrency()->getOutputFormat());
+        $pattern = Mage::app()->withLocale(1, fn(): string => Mage::app()->getStore(1)->getCurrentCurrency()->getOutputFormat());
 
         expect($format)->toHaveKey('pattern', $pattern)
             ->and(Mage::app()->getLocale()->getLocaleCode())->toBe($locale)

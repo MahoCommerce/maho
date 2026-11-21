@@ -10,12 +10,11 @@ Each method on this page takes a callback. The method switches the context, runs
 
 ## Pick the method
 
-| Method | Switches | Use it to |
-|---|---|---|
-| `Mage::app()->emulate($storeId, $callback, $area)` | The current store, the design, the locale and the translations | Render an email, a block or a PDF for another store view |
-| `Mage::app()->withStore($storeId, $callback)` | The current store only | Read the configuration or the data of another store, with no output |
-| `Mage::app()->getLocale()->withStoreLocale($store, $callback)` | The locale and the translations only | Format a number, a price or a date with the locale of a store |
-| `Mage_Rule_Model_Condition_Metadata::runInLocale($locale, $callback)` | The admin store, a locale and the labels of rule conditions | Build the condition labels of a rule in one locale, for the API |
+The three methods are on `Mage::app()`. Each takes the ID of a store view and a callback.
+
+- `withStore($storeId, $callback)` switches the current store only. Use it to read the configuration or the data of another store, when the callback renders nothing.
+- `withLocale($storeId, $callback)` switches the locale and the translations only. Use it to format a number, a price or a date with the locale of a store.
+- `emulate($storeId, $callback, $area)` switches the current store, the design, the locale and the translations. Use it to render an email, a block or a PDF for another store view.
 
 Each method returns the value of the callback:
 
@@ -82,12 +81,44 @@ return $this->withDesignConfig(fn(): string => $processor->filter($this->getTemp
 
 These methods are deprecated with the `#[\Deprecated]` attribute. Developer mode throws an exception on a call.
 
-| Old code | New code |
-|---|---|
-| `$env = $emulation->startEnvironmentEmulation($storeId, $area);` ... `$emulation->stopEnvironmentEmulation($env);` | `Mage::app()->emulate($storeId, fn() => ..., $area);` |
-| `$template->emulateDesign($storeId);` ... `$template->revertDesign();` | `$template->setDesignConfig(['area' => 'frontend', 'store' => $storeId]);` and render in `Mage::app()->emulate()` |
-| `$locale->emulate($store);` ... `$locale->revert();` | `$locale->withStoreLocale($store, fn() => ...);` |
+Replace `startEnvironmentEmulation()` and `stopEnvironmentEmulation()` with `emulate()`:
+
+```php
+// Old
+$emulation = Mage::getSingleton('core/app_emulation');
+$environment = $emulation->startEnvironmentEmulation($storeId, $area);
+$html = $block->toHtml();
+$emulation->stopEnvironmentEmulation($environment);
+
+// New
+$html = Mage::app()->emulate($storeId, fn(): string => $block->toHtml(), $area);
+```
 
 The result of `startEnvironmentEmulation()` holds only an `environment` key. `getInitialDesign()`, `getInitialLocaleCode()` and `getInitialTranslatorState()` on it return null.
+
+Replace `emulateDesign()` and `revertDesign()` of a template with its design config:
+
+```php
+// Old
+$template->emulateDesign($storeId);
+$template->send($email, $name, $variables);
+$template->revertDesign();
+
+// New
+$template->setDesignConfig(['area' => 'frontend', 'store' => $storeId]);
+$template->send($email, $name, $variables);
+```
+
+Replace `emulate()` and `revert()` of the locale model with `withLocale()`:
+
+```php
+// Old
+Mage::app()->getLocale()->emulate($storeId);
+$format = Mage::app()->getLocale()->getJsPriceFormat();
+Mage::app()->getLocale()->revert();
+
+// New
+$format = Mage::app()->withLocale($storeId, fn(): array => Mage::app()->getLocale()->getJsPriceFormat());
+```
 
 `Mage_Core_Model_Locale::emulate()` does nothing for the admin store (`0`). Remove such a call. Do not replace it.

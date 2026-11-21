@@ -1127,40 +1127,10 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     }
 
     /**
-     * Run $callback with the locale of the store $store, and with the translations of that locale in the area that the
-     * translator uses. Then put back the locale and the translations of the caller, also when $callback throws.
-     * The current store does not change: Mage_Core_Model_App::emulate() changes the store, the design and the locale.
-     *
-     * @template T
-     * @param \Closure(): T $callback
-     * @return T
-     */
-    public function withStoreLocale(int|string|Mage_Core_Model_Store $store, \Closure $callback): mixed
-    {
-        $localeCode = (string) Mage::getStoreConfig(self::XML_PATH_DEFAULT_LOCALE, $store);
-        $previousLocaleCode = $this->getLocaleCode();
-        if ($localeCode === $previousLocaleCode) {
-            return $callback();
-        }
-
-        $translator = Mage::app()->getTranslator();
-        $translatorState = $translator->getState();
-        $area = $translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA) ?? Mage_Core_Model_App_Area::AREA_FRONTEND;
-        $this->_localeCode = $localeCode;
-        try {
-            $translator->setLocale($localeCode)->init($area);
-            return $callback();
-        } finally {
-            $this->_localeCode = $previousLocaleCode;
-            $translator->setState($translatorState);
-        }
-    }
-
-    /**
      * Push current locale to stack and replace with locale from specified store
      * Event is not dispatched.
      */
-    #[\Deprecated(message: 'use withStoreLocale()', since: '27.1')]
+    #[\Deprecated(message: 'use Mage_Core_Model_App::withLocale()', since: '27.1')]
     public function emulate(mixed $store): void
     {
         if ($store) {
@@ -1179,7 +1149,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     /**
      * Put back the locale and the translations that the last emulate() replaced
      */
-    #[\Deprecated(message: 'use withStoreLocale()', since: '27.1')]
+    #[\Deprecated(message: 'use Mage_Core_Model_App::withLocale()', since: '27.1')]
     public function revert(): void
     {
         $translatorState = array_pop($this->emulatedTranslatorStates);
