@@ -601,8 +601,9 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
         } catch (Exception $e) {
             $result = '';
             Mage::logException($e);
+        } finally {
+            Mage::unregister('varProcessing');
         }
-        Mage::unregister('varProcessing');
         return $result;
     }
 }
