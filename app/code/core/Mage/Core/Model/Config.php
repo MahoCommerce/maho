@@ -382,6 +382,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if ($this->_isLocalConfigLoaded) {
             $config->extend($this->_refLocalConfigObject);
         }
+        $config->applyExtends();
 
         return $config->getNode('default') ?: new Mage_Core_Model_Config_Element('<default/>');
     }

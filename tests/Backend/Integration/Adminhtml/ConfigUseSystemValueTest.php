@@ -63,26 +63,31 @@ it('returns the shipped value when the default scope has a saved value', functio
         ->toBe(shippedBaseRules());
 });
 
-it('offers the system value only at default scope and only for a shipped path', function (): void {
+it('offers the system value only at default scope, for a shipped path, and without a backend model', function (): void {
+    $sections = Mage::getSingleton('adminhtml/config')->getSections();
+    $baseRules = $sections->descend('crawlers/groups/robots/fields/base_rules');
+    $allowedCurrencies = $sections->descend('currency/groups/options/fields/allow');
     $form = new Mage_Adminhtml_Block_System_Config_Form();
 
-    expect($form->setScope('default')->canUseSystemValue(USE_SYSTEM_VALUE_PATH))->toBeTrue()
-        ->and($form->canUseSystemValue('crawlers/robots/not_shipped'))->toBeFalse()
-        ->and($form->setScope('websites')->canUseSystemValue(USE_SYSTEM_VALUE_PATH))->toBeFalse();
+    expect((string) Mage::getConfig()->getShippedDefaults()->descend('currency/options/allow'))->not->toBe('')
+        ->and($form->setScope('default')->canUseSystemValue(USE_SYSTEM_VALUE_PATH, $baseRules))->toBeTrue()
+        ->and($form->canUseSystemValue('crawlers/robots/not_shipped', $baseRules))->toBeFalse()
+        ->and($form->canUseSystemValue('currency/options/allow', $allowedCurrencies))->toBeFalse()
+        ->and($form->setScope('websites')->canUseSystemValue(USE_SYSTEM_VALUE_PATH, $baseRules))->toBeFalse();
 });
 
-it('checks Use system value when the default scope has no saved value', function (): void {
+it('checks Use Default at default scope when the default scope has no saved value', function (): void {
     $element = baseRulesElement();
     $html = $element->toHtml();
 
     expect($element->getCanUseSystemValue())->toBeTrue()
         ->and($element->getInherit())->toBeTrue()
-        ->and($html)->toContain('Use system value')
+        ->and($html)->toContain('Use Default')
         ->and($html)->toMatch('/id="crawlers_robots_base_rules_inherit"[^>]*checked="checked"/')
         ->and($html)->toMatch('/<textarea[^>]*disabled/');
 });
 
-it('clears Use system value when the default scope has a saved value', function (): void {
+it('clears Use Default at default scope when the default scope has a saved value', function (): void {
     Mage::getConfig()->saveConfig(USE_SYSTEM_VALUE_PATH, 'Disallow: /private/');
     $element = baseRulesElement();
 
@@ -91,13 +96,14 @@ it('clears Use system value when the default scope has a saved value', function 
 });
 
 it('keeps Use Default at website scope', function (): void {
-    $html = baseRulesElement('base')->toHtml();
+    $element = baseRulesElement('base');
 
-    expect($html)->toContain('Use Default')
-        ->and($html)->not->toContain('Use system value');
+    expect($element->getCanUseSystemValue())->toBeFalse()
+        ->and($element->getCanUseDefaultValue())->toBeTrue()
+        ->and($element->toHtml())->toContain('Use Default');
 });
 
-it('deletes the saved default value when Use system value is saved', function (): void {
+it('deletes the saved default value when Use Default is saved at default scope', function (): void {
     Mage::getConfig()->saveConfig(USE_SYSTEM_VALUE_PATH, '');
     expect(defaultScopeBaseRulesRows())->toBe(['']);
 
