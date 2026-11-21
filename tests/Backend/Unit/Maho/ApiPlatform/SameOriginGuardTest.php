@@ -38,6 +38,11 @@ it('accepts a browser origin with the default port omitted', function (): void {
         ]);
 
         expect(fn() => SameOriginGuard::assert($otherPort))->toThrow(AccessDeniedHttpException::class);
+        $originWithPath = Request::create('http://localhost/api/admin/graphql', server: [
+            'HTTP_ORIGIN' => 'http://localhost/catalog/',
+            'HTTP_REFERER' => 'http://localhost/catalog/',
+        ]);
+        expect(fn() => SameOriginGuard::assert($originWithPath))->toThrow(AccessDeniedHttpException::class);
     } finally {
         $store->setConfig('web/secure/base_url', $secure);
         $store->setConfig('web/unsecure/base_url', $unsecure);

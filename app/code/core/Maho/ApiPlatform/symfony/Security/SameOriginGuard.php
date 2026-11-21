@@ -26,7 +26,7 @@ final class SameOriginGuard
     {
         $originHeader = $request->headers->get('Origin');
         $origin = $originHeader !== null
-            ? self::originOf($originHeader)
+            ? self::originOf($originHeader, originOnly: true)
             : self::originOf((string) $request->headers->get('Referer'));
 
         if ($origin === null || !in_array($origin, self::allowedOrigins(), true)) {
@@ -34,21 +34,26 @@ final class SameOriginGuard
         }
     }
 
-    /** Normalize a URL to scheme://host[:port], or null if it has no host. */
-    public static function originOf(string $url): ?string
+    /** Normalize a URL or a serialized origin to scheme://host[:port]. */
+    public static function originOf(string $url, bool $originOnly = false): ?string
     {
         $parts = parse_url($url);
         if (empty($parts['host']) || empty($parts['scheme'])) {
             return null;
         }
-        $scheme = strtolower($parts['scheme']);
-        $host = strtolower($parts['host']);
-        $port = isset($parts['port']) ? (int) $parts['port'] : null;
+        $scheme = $parts['scheme'];
+        $host = $parts['host'];
+        $port = $parts['port'] ?? null;
+        if ($originOnly && $url !== $scheme . '://' . $host . ($port === null ? '' : ':' . $port)) {
+            return null;
+        }
+
+        $scheme = strtolower($scheme);
         if (($scheme === 'http' && $port === 80) || ($scheme === 'https' && $port === 443)) {
             $port = null;
         }
 
-        return $scheme . '://' . $host . ($port === null ? '' : ':' . $port);
+        return $scheme . '://' . strtolower($host) . ($port === null ? '' : ':' . $port);
     }
 
     /** @return list<string> Origins of the store's secure and unsecure base URLs. */
