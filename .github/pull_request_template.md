@@ -1,6 +1,7 @@
 <!--
-Title: plain, past tense, no "feat:" or "fix:" prefix. A bug fix starts with "Fixed" and names
-what the user sees and where. The full rules are in AGENTS.md, under "Pull requests".
+Write the title and the opening of the body for the person who uses the change (a merchant, an
+admin user, an API client), in their words. Code terms go in "How it works". The title rules and
+the screenshot rules are in AGENTS.md, under "Pull requests". Delete these comments.
 -->
 
 ## What it does
@@ -8,29 +9,41 @@ what the user sees and where. The full rules are in AGENTS.md, under "Pull reque
 <!--
 What the user can now do, or what was broken, and where (admin path, endpoint, CLI command).
 Then why the change is necessary: who meets the problem, in which steps, and what it costs them.
-If only a request made by hand can reach the bug, say so.
+If only a request made by hand can reach the bug, say so. One to four sentences.
 -->
 
 Closes #
 
+<!--
+## Decision needed (optional)
+A choice that the maintainer must make before the merge.
+-->
+
 ## How it works
 
 <!--
-First sentence: what the code does and where. Next sentence: the reason for the design.
-For a bug fix, name the commit or pull request that caused the bug, and what that change did.
-If there is no single cause, write "No single origin" and the reason.
+The design, for the reviewer. The first sentence says what the code does and where, as a fact:
+"A custom line is a quote item and an order item with product_id NULL", not "Maho creates no
+product". The next sentence gives the reason for the design. Then one paragraph for each other
+part. Never open with what the change does not do, or with a detail.
+A bug fix names the commit or pull request that caused the bug, and what that change did. If
+there is no single cause, write "No single origin" and the reason.
+-->
+
+<!--
+## Also in this PR (optional)
+A change that is not part of the main one, and its reason.
+
+## Good to know (optional)
+Limits of the change, and anything that you could not confirm, with where you looked.
 -->
 
 ## Release notes
 
 <!--
-What an existing store notices after the upgrade, before anyone uses the new feature: a break,
-a change in what the store already does, or a step that someone must run.
-Write "Nothing to note." when there is none.
--->
-
-<!--
-Optional sections, in this order, only when they have content:
-"## Decision needed" after "What it does", and "## Also in this PR" and "## Good to know"
-after "How it works".
+What reaches a store that upgrades and does nothing more: a break, a change in what the store
+already does, or a step that someone must run. The test: does an existing store notice the
+upgrade before anyone uses the new feature? A schema change that the sync applies, or a limit of
+the new feature, stays out. Write "Nothing to note." when there is none, so the release author
+knows that it was checked.
 -->
