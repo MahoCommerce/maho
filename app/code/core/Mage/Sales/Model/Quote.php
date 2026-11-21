@@ -1882,6 +1882,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
             if ($this->getId() === $id && $this->checkoutLoadVersion === $loadVersion) {
                 $this->savedCheckoutFields = $savedFields;
                 $this->checkoutFieldAssignments += $assignments;
+                $this->setDataChanges(true);
             }
         };
     }
