@@ -15,6 +15,7 @@ use Mage;
 use Mage_Catalog_Model_Product;
 use Mage_Catalog_Model_Product_Option;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Response;
 
 final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
@@ -68,11 +69,24 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
             Response::HTTP_OK,
             [
                 'Content-Type' => $file['type'],
-                'Content-Disposition' => 'attachment; filename="' . addslashes($file['title']) . '"',
+                'Content-Disposition' => $this->downloadDisposition((string) $file['title']),
                 'Content-Length' => (string) strlen($content),
                 'Cache-Control' => 'private, max-age=3600',
             ],
         );
+    }
+
+    private function downloadDisposition(string $title): string
+    {
+        $filename = str_replace('\\', '/', $title);
+        $filename = basename($filename);
+        $filename = preg_replace('/[\x00-\x1F\x7F]/', '', $filename) ?? '';
+        $filename = trim($filename) !== '' ? $filename : 'download';
+        $fallback = preg_replace('/[^\x20-\x7E]/', '_', $filename) ?? '';
+        $fallback = str_replace(['%', '/', '\\'], '_', $fallback);
+        $fallback = trim($fallback) !== '' ? $fallback : 'download';
+
+        return HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $filename, $fallback);
     }
 
     /**
