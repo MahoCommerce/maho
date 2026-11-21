@@ -387,7 +387,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
 
         return array_values(array_filter(
             $this->getData('cached_items_all'),
-            static fn(Mage_Sales_Model_Quote_Item_Abstract $item): bool => !$item->isDeleted(),
+            static fn(\Maho\DataObject $item): bool => !$item->isDeleted(),
         ));
     }
 
