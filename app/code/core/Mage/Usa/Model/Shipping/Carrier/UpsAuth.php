@@ -20,13 +20,24 @@ class Mage_Usa_Model_Shipping_Carrier_UpsAuth extends Mage_Usa_Model_Shipping_Ca
      */
     public function getAccessToken(string $clientId, string $clientSecret, string $clientUrl): string
     {
-        $cacheKey = self::CACHE_KEY_PREFIX;
+        $cacheKey = $this->getCacheKey($clientId, $clientSecret, $clientUrl);
         $cache = Mage::app()->getCache();
         $result = $cache->load($cacheKey);
         if ($result) {
             return $result;
         }
 
+        $result = $this->fetchAccessToken($clientId, $clientSecret, $clientUrl);
+        $cache->save($result['access_token'], $cacheKey, [], $result['expires_in']);
+        return $result['access_token'];
+    }
+
+    /**
+     * @return array{access_token: string, expires_in: int}
+     * @throws Exception
+     */
+    protected function fetchAccessToken(string $clientId, string $clientSecret, string $clientUrl): array
+    {
         $headers = [
             'Content-Type: application/x-www-form-urlencoded',
             "x-merchant-id: $clientId",
@@ -62,10 +73,15 @@ class Mage_Usa_Model_Shipping_Carrier_UpsAuth extends Mage_Usa_Model_Shipping_Ca
             Mage::throwException('Error decoding auth token from UPS');
         }
 
-        $result = $responseData->access_token;
-        $expiresIn = $responseData->expires_in ?? 10000;
-        $cache->save($result, $cacheKey, [], $expiresIn);
-        return $result;
+        return [
+            'access_token' => (string) $responseData->access_token,
+            'expires_in' => (int) ($responseData->expires_in ?? 10000),
+        ];
+    }
+
+    protected function getCacheKey(string $clientId, string $clientSecret, string $clientUrl): string
+    {
+        return self::CACHE_KEY_PREFIX . hash('sha256', $clientId . "\0" . $clientSecret . "\0" . $clientUrl);
     }
 
     #[\Override]

@@ -25,20 +25,36 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_OAuthClient
      */
     public function getAccessToken(): string
     {
-        $cacheKey = self::TOKEN_CACHE_KEY_PREFIX . md5($this->clientId . $this->tokenEndpoint);
+        $cacheKey = $this->getCacheKey();
         $cachedToken = $this->cache->load($cacheKey);
 
         if ($cachedToken) {
             return $cachedToken;
         }
 
-        return $this->fetchNewToken();
+        $result = $this->fetchNewToken();
+        $this->cache->save(
+            $result['access_token'],
+            $cacheKey,
+            ['usps_oauth'],
+            max(60, $result['expires_in'] - 300),
+        );
+
+        return $result['access_token'];
+    }
+
+    public function clearAccessToken(): void
+    {
+        $this->cache->remove($this->getCacheKey());
     }
 
     /**
      * Fetch new OAuth token using client credentials flow
      */
-    private function fetchNewToken(): string
+    /**
+     * @return array{access_token: string, expires_in: int}
+     */
+    protected function fetchNewToken(): array
     {
         $client = \Maho\Http\Client::create([
             'timeout' => 10,  // OAuth endpoints should respond quickly
@@ -58,15 +74,17 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_OAuthClient
         $accessToken = $data['access_token'];
         $expiresIn = $data['expires_in'] ?? 28800; // Default 8 hours
 
-        // Cache token for slightly less than expiry time (5 min buffer)
-        $cacheKey = self::TOKEN_CACHE_KEY_PREFIX . md5($this->clientId . $this->tokenEndpoint);
-        $this->cache->save(
-            $accessToken,
-            $cacheKey,
-            ['usps_oauth'],
-            max(60, $expiresIn - 300),
-        );
+        return [
+            'access_token' => (string) $accessToken,
+            'expires_in' => (int) $expiresIn,
+        ];
+    }
 
-        return $accessToken;
+    private function getCacheKey(): string
+    {
+        return self::TOKEN_CACHE_KEY_PREFIX . hash(
+            'sha256',
+            $this->clientId . "\0" . $this->clientSecret . "\0" . $this->tokenEndpoint,
+        );
     }
 }
