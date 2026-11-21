@@ -34,7 +34,7 @@ class Mage_Sitemap_Model_Resource_Catalog_Product extends Mage_Sitemap_Model_Res
         }
 
         $this->_select = $this->_getWriteAdapter()->select()
-            ->from(['main_table' => $this->getMainTable()], [$this->getIdFieldName()])
+            ->from(['main_table' => $this->getMainTable()], [$this->getIdFieldName(), 'sitemap_updated_at' => 'updated_at'])
             ->join(
                 ['w' => $this->getTable('catalog/product_website')],
                 'main_table.entity_id = w.product_id',

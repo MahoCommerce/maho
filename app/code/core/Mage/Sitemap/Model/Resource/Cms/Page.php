@@ -28,7 +28,7 @@ class Mage_Sitemap_Model_Resource_Cms_Page extends Mage_Core_Model_Resource_Db_A
         $noRoute = Mage::helper('cms/page')->getConfigPageIdentifier(Mage_Cms_Helper_Page::XML_PATH_NO_ROUTE_PAGE, (int) $storeId);
 
         $select = $this->_getWriteAdapter()->select()
-            ->from(['main_table' => $this->getMainTable()], [$this->getIdFieldName(), 'identifier AS url'])
+            ->from(['main_table' => $this->getMainTable()], [$this->getIdFieldName(), 'identifier AS url', 'sitemap_updated_at' => 'update_time'])
             ->join(
                 ['store_table' => $this->getTable('cms/page_store')],
                 'main_table.page_id=store_table.page_id',
@@ -58,6 +58,7 @@ class Mage_Sitemap_Model_Resource_Cms_Page extends Mage_Core_Model_Resource_Db_A
         $object = new \Maho\DataObject();
         $object->setId($data[$this->getIdFieldName()]);
         $object->setUrl($data['url']);
+        $object->setData('sitemap_updated_at', $data['sitemap_updated_at'] ?? null);
 
         return $object;
     }

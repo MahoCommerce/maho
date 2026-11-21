@@ -43,7 +43,7 @@ class Mage_Sitemap_Model_Resource_Catalog_Category extends Mage_Sitemap_Model_Re
         }
 
         $this->_select = $this->_getWriteAdapter()->select()
-            ->from(['main_table' => $this->getMainTable()], [$this->getIdFieldName()])
+            ->from(['main_table' => $this->getMainTable()], [$this->getIdFieldName(), 'sitemap_updated_at' => 'updated_at'])
             ->where('main_table.path LIKE ?', $categoryRow['path'] . '/%');
 
         $storeId = (int) $store->getId();

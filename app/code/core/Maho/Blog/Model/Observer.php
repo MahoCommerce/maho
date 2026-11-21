@@ -107,12 +107,14 @@ class Maho_Blog_Model_Observer
         // Add blog index as first item
         $blogIndex = new \Maho\DataObject();
         $blogIndex->setUrl(str_replace($baseUrl, '', Mage::helper('blog')->getBlogUrl($storeId)));
+        $blogIndex->setData('sitemap_updated_at');
         $blogItems[] = $blogIndex;
 
         // Add all blog posts
         foreach ($posts as $post) {
             $blogPost = new \Maho\DataObject();
             $blogPost->setUrl(str_replace($baseUrl, '', $post->getUrl()));
+            $blogPost->setData('sitemap_updated_at', $post->getUpdatedAt());
 
             // Only set image data if the post has an image AND images are enabled in configuration
             if ($includeBlogImages && $post->hasImage()) {
@@ -128,6 +130,7 @@ class Maho_Blog_Model_Observer
             foreach ($categories as $category) {
                 $blogCategory = new \Maho\DataObject();
                 $blogCategory->setUrl(str_replace($baseUrl, '', $category->getUrl()));
+                $blogCategory->setData('sitemap_updated_at', $category->getUpdatedAt());
                 $blogItems[] = $blogCategory;
             }
         }
