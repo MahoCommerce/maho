@@ -43,7 +43,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
     {
         $this->_title($this->__('Promotions'))->_title($this->__('Catalog Price Rules'));
 
-        if (Mage::getModel('catalogrule/flag')->loadSelf()->hasChangesToApply()) {
+        if (Mage::getModel('catalogrule/flag')->hasChangesToApply()) {
             Mage::getSingleton('adminhtml/session')->addNotice(
                 \Maho\Queue\QueueManager::dbTransport()->inFlightRowExists(Mage_CatalogRule_Model_ApplyAllMessage::DEDUPE_KEY)
                     ? Mage::helper('catalogrule')->__('The rules will be applied in the background. A message in the notifications tells you when they are applied.')

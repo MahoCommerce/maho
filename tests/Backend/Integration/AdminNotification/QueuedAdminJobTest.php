@@ -166,16 +166,26 @@ describe('runAndNotify()', function () {
     });
 });
 
-/**
- * Catalog price rule that saves the "rules not applied" flag during applyAll(), as an administrator who saves a rule.
- */
 class Qaj_Test_RuleSavedDuringRun extends Mage_CatalogRule_Model_Rule
 {
+    public static ?Closure $afterRulesLoaded = null;
+
     #[\Override]
     protected function _cleanCache()
     {
-        Mage::getModel('catalogrule/flag')->loadSelf()->setState(1)->save();
+        $afterRulesLoaded = self::$afterRulesLoaded;
+        self::$afterRulesLoaded = null;
+        $afterRulesLoaded?->__invoke();
         return parent::_cleanCache();
+    }
+}
+
+class Qaj_Test_FlagAtSameSecond extends Mage_CatalogRule_Model_Flag
+{
+    #[\Override]
+    public function setLastUpdate(?string $value): static
+    {
+        return parent::setLastUpdate('2026-01-01 12:00:00');
     }
 }
 
@@ -223,25 +233,52 @@ describe('Admin actions that run in the queue', function () {
             ->and(Mage::getSingleton('core/lock')->isHeld(Mage_CatalogRule_Model_Rule::APPLY_LOCK))->toBeFalse();
     });
 
-    test('a rule saved during the run keeps the "rules not applied" flag, because its change is not in the prices', function () {
-        $flag = Mage::getModel('catalogrule/flag')->loadSelf()->setState(1)->save();
-        // An older time than the save in the run, which writes the current second
-        $resource = Mage::getSingleton('core/resource');
-        $resource->getConnection('core_write')->update(
-            $resource->getTableName('core/flag'),
-            ['last_update' => '2000-01-01 00:00:00'],
-            ['flag_id = ?' => (int) $flag->getId()],
-        );
-
+    test('keeps a rule change saved in the same second during application until the next successful run', function () {
+        Mage::getConfig()->setNode('global/models/catalogrule/rewrite/flag', Qaj_Test_FlagAtSameSecond::class);
         Mage::getConfig()->setNode('global/models/catalogrule/rewrite/rule', Qaj_Test_RuleSavedDuringRun::class);
+        $service = Mage::getService('catalogrule/rule');
+        $rule = $service->newRule()
+            ->setName('Catalog rule apply test ' . uniqid())
+            ->setWebsiteIds([1])
+            ->setCustomerGroupIds([0])
+            ->setIsActive(true)
+            ->setData('discount_amount', 10);
+        $service->save($rule);
+        $ruleId = (int) $rule->getId();
+        Qaj_Test_RuleSavedDuringRun::$afterRulesLoaded = static fn() => $service->save($rule->setData('discount_amount', 20));
 
-        (new Mage_CatalogRule_Model_ApplyAllMessageHandler())
-            ->applyAll(new Mage_CatalogRule_Model_ApplyAllMessage(qajAdminUserId()));
-        $state = (int) Mage::getModel('catalogrule/flag')->loadSelf()->getState();
-        Mage::getModel('catalogrule/flag')->loadSelf()->setState(0)->save();
-        qajTakeNotices('The catalog price rules have been applied');
+        try {
+            $service->apply();
+            $flag = Mage::getModel('catalogrule/flag')->loadSelf();
+            expect((float) $service->getById($ruleId)->getDiscountAmount())->toBe(20.0)
+                ->and((int) $flag->getState())->toBe(1)
+                ->and($flag->getLastUpdate())->toBe('2026-01-01 12:00:00');
 
-        expect($state)->toBe(1);
+            $write = Mage::getSingleton('core/resource')->getConnection('core_write');
+            $write->beginTransaction();
+            try {
+                $service->save($service->getById($ruleId)->setData('discount_amount', 30));
+                $updatedFlag = Mage::getModel('catalogrule/flag')->loadSelf();
+                expect($updatedFlag->getData('flag_data'))->not->toBe($flag->getData('flag_data'));
+            } finally {
+                $write->rollBack();
+            }
+            $flagAfterRollback = Mage::getModel('catalogrule/flag')->loadSelf();
+            expect($flagAfterRollback->getData('flag_data'))->toBe($flag->getData('flag_data'))
+                ->and((float) $service->getById($ruleId)->getDiscountAmount())->toBe(20.0);
+
+            Qaj_Test_RuleSavedDuringRun::$afterRulesLoaded = static fn() => throw new RuntimeException('Apply interrupted');
+            expect($service->apply(...))->toThrow(RuntimeException::class, 'Apply interrupted')
+                ->and((int) Mage::getModel('catalogrule/flag')->loadSelf()->getState())->toBe(1);
+
+            Qaj_Test_RuleSavedDuringRun::$afterRulesLoaded = null;
+            $service->apply();
+            expect((int) Mage::getModel('catalogrule/flag')->loadSelf()->getState())->toBe(0);
+        } finally {
+            Qaj_Test_RuleSavedDuringRun::$afterRulesLoaded = null;
+            $rule->delete();
+            Mage::getModel('catalogrule/flag')->loadSelf()->setState(0)->save();
+        }
     });
 
     test('Generate of a sitemap queues one run for each sitemap', function () {

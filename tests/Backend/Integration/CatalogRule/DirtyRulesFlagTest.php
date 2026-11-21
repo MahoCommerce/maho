@@ -33,6 +33,19 @@ it('clears the flag when there is no rule and no rule price', function (): void 
         ->and((int) Mage::getModel('catalogrule/flag')->loadSelf()->getState())->toBe(0);
 });
 
+it('clears all pending legacy flag rows when there is no rule and no rule price', function (): void {
+    $table = dirtyRulesTable('core/flag');
+    $this->write->insertMultiple($table, [
+        ['flag_code' => 'catalog_rules_dirty', 'state' => 1],
+        ['flag_code' => 'catalog_rules_dirty', 'state' => 1],
+    ]);
+    $pending = $this->write->select()->from($table, 'flag_id')
+        ->where('flag_code = ?', 'catalog_rules_dirty')->where('state <> ?', 0);
+
+    expect(Mage::getModel('catalogrule/flag')->loadSelf()->hasChangesToApply())->toBeFalse()
+        ->and($this->write->fetchCol($pending))->toBe([]);
+});
+
 it('keeps the flag when a rule exists', function (): void {
     $this->write->insert(dirtyRulesTable('catalogrule/rule'), ['name' => 'Dirty flag test rule']);
     Mage::getModel('catalogrule/flag')->loadSelf()->setState(1)->save();

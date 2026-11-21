@@ -75,12 +75,12 @@ class Mage_CatalogRule_Model_Observer
     #[Maho\Config\Observer('catalog_product_import_after', area: 'adminhtml', type: 'singleton')]
     public function applyAllRules($observer)
     {
+        $flag = Mage::getModel('catalogrule/flag');
+        $pending = $flag->capturePendingChanges();
         /** @var Mage_CatalogRule_Model_Resource_Rule $resource */
         $resource = Mage::getResourceSingleton('catalogrule/rule');
         $resource->applyAllRules();
-        Mage::getModel('catalogrule/flag')->loadSelf()
-            ->setState(0)
-            ->save();
+        $flag->clearAppliedChanges($pending);
 
         return $this;
     }

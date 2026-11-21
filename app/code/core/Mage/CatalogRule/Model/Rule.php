@@ -344,8 +344,8 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
             throw new RuntimeException(Mage::helper('catalogrule')->__('Another run of the catalog price rules is in progress.'));
         }
         try {
-            // Read before the rules: a save during the run changes this time, and its rule is not in the prices
-            $flagUpdatedAt = Mage::getModel('catalogrule/flag')->loadSelf()->getLastUpdate();
+            $flag = Mage::getModel('catalogrule/flag');
+            $pending = $flag->capturePendingChanges();
             $this->getResourceCollection()->walk([$this->_getResource(), 'updateRuleProductData']);
             $this->_getResource()->applyAllRules();
             $this->_cleanCache();
@@ -354,10 +354,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
                 $indexProcess->changeStatus(Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX);
                 $indexProcess->reindexAll();
             }
-            $flag = Mage::getModel('catalogrule/flag')->loadSelf();
-            if ($flag->getLastUpdate() === $flagUpdatedAt) {
-                $flag->setState(0)->save();
-            }
+            $flag->clearAppliedChanges($pending);
         } finally {
             $lock->release(self::APPLY_LOCK);
         }
