@@ -186,13 +186,12 @@ class Vendor_MyModule_Checkout_CartController extends Mage_Checkout_CartControll
 - Two *sibling* subclasses extending the same base independently are a **conflict**: the compiler logs an error naming both and falls back to module load order (local/community over core). Resolve it by having one override extend the other.
 - A subclass that adds **new** actions still needs its own `#[Route]` for those actions - inheritance only carries over the base's existing routes.
 
+Composer autoloads the parent controller, so an override needs no `require_once`. Remove any `require_once` that builds the path to a core controller with `Mage::getModuleDir('controllers', ...)`. That method builds a path under `app/code`. On a Composer installation, that path does not exist, because the core is in `vendor/`.
+
 ### Legacy XML chain (back-compatibility)
 
 For routes matched by Symfony, a legacy Magento 1 module chain in `config.xml` **wins over compiled inheritance overrides**.
 For an internal admin forward, Maho checks the compiled lookup before the XML admin chain.
-
-Composer autoloads the parent controller. Remove legacy `require_once` calls that build the path to a core controller with
-`Mage::getModuleDir('controllers', ...)`. That method builds a path in the project. Composer installs the core under `vendor/`.
 
 **Admin** - register your module under the admin chain and ship a subclass with the same controller name:
 
@@ -310,7 +309,7 @@ After writing, the action calls `opcache_reset()` so the next request picks up t
 
 - **Matching** uses Symfony's `CompiledUrlMatcher` reading the static array dumped to `vendor/composer/maho_url_matcher.php`. The compiled form is opcached, so route lookup is effectively a hash table read.
 - **Generation** uses Symfony's `CompiledUrlGenerator` reading `maho_url_generator.php`, also opcached.
-- **Controller overrides** for Symfony-matched routes use three tiers in `Maho\Routing\ControllerDispatcher`. Maho checks the XML `<args><modules>` chain first, then the compiled `controllerLookup`, then the route's own controller. The compiled lookup points to the most-derived inheritance override. The order for internal admin forwards is described in [Legacy XML chain](#legacy-xml-chain-back-compatibility).
+- **Controller overrides** for Symfony-matched routes use three tiers in `Maho\Routing\ControllerDispatcher`. Maho checks the XML `<args><modules>` chain first, then the compiled `controllerLookup`, then the route's own controller. The compiled lookup points to the most-derived inheritance override. See [Legacy XML chain](#legacy-xml-chain-back-compatibility) for the order of internal admin forwards.
 - **Legacy XML routes** (`<frontend><routers><MyMod><use>standard</use>...`) are matched by `ControllerDispatcher::dispatchLegacyPath()` *after* the Symfony matcher misses, so attribute-defined routes always take priority. A single `LOG_NOTICE` is emitted once per process listing legacy front names that are still in use.
 - **Performance**: 6.3 μs mean / 8 μs p99 per match in the new system, vs 46 μs / 93 μs in the legacy router chain (40k matches, opcache on).
 
