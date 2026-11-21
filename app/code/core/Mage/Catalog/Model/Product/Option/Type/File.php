@@ -984,6 +984,15 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
                     Mage::helper('catalog')->__('The file claims to be an image but does not contain valid image data.'),
                 );
             }
+            if (Mage_Core_Model_File_Validator_Image::exceedsPixelBudget((int) $imageInfo[0], (int) $imageInfo[1])) {
+                Mage::throwException(
+                    Mage::helper('catalog')->__(
+                        'The image dimensions are too large. The image contains %1 pixels, and the maximum is %2.',
+                        (int) $imageInfo[0] * (int) $imageInfo[1],
+                        Mage_Core_Model_File_Validator_Image::getMaxPixels(),
+                    ),
+                );
+            }
             // Re-render image via GD to strip any embedded malicious payloads (polyglot defense)
             $srcImage = imagecreatefromstring($decodedData);
             if ($srcImage !== false) {

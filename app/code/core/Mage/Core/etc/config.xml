@@ -395,6 +395,7 @@ SPDX-License-Identifier: AFL-3.0
             <media_storage_configuration>
                 <image_file_type>18</image_file_type>
                 <image_quality>85</image_quality>
+                <max_image_pixels>40000000</max_image_pixels>
             </media_storage_configuration>
         </system>
         <trans_email>

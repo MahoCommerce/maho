@@ -12,6 +12,10 @@ class Mage_Core_Model_File_Validator_Image
 {
     public const NAME = 'isImage';
 
+    public const DEFAULT_MAX_PIXELS = 40_000_000;
+
+    public const XML_PATH_MAX_PIXELS = 'system/media_storage_configuration/max_image_pixels';
+
     protected ?string $_originalFileName = null;
 
     protected array $_allowedImageTypes = [
@@ -72,6 +76,27 @@ class Mage_Core_Model_File_Validator_Image
     }
 
     /**
+     * Return the configured decoded-pixel budget, falling back to the safe default.
+     */
+    public static function getMaxPixels(): int
+    {
+        $configured = Mage::getStoreConfigAsInt(self::XML_PATH_MAX_PIXELS);
+        return $configured > 0 ? $configured : self::DEFAULT_MAX_PIXELS;
+    }
+
+    /**
+     * Check dimensions without multiplying them, so very large headers cannot overflow an int.
+     */
+    public static function exceedsPixelBudget(int $width, int $height, ?int $maxPixels = null): bool
+    {
+        if ($width <= 0 || $height <= 0) {
+            return true;
+        }
+        $maxPixels ??= self::getMaxPixels();
+        return $maxPixels <= 0 || $width > intdiv($maxPixels, $height);
+    }
+
+    /**
      * Validation callback for checking if file is image
      * Destroy malicious code in image by reprocessing
      *
@@ -91,6 +116,16 @@ class Mage_Core_Model_File_Validator_Image
 
         [$imageWidth, $imageHeight, $fileType] = \Maho\Io::getImageSize($filePath);
         if ($fileType) {
+            if (self::exceedsPixelBudget((int) $imageWidth, (int) $imageHeight)) {
+                throw Mage::exception(
+                    'Mage_Core',
+                    Mage::helper('core')->__(
+                        'Image dimensions are too large. The image contains %1 pixels, and the maximum is %2.',
+                        (int) $imageWidth * (int) $imageHeight,
+                        self::getMaxPixels(),
+                    ),
+                );
+            }
             if ($this->isImageType($fileType)) {
                 $imageQuality = Mage::getStoreConfigAsInt('system/media_storage_configuration/image_quality');
                 //replace tmp image with re-sampled copy to exclude images with malicious data
