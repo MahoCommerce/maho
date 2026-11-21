@@ -867,8 +867,8 @@ class Mage_Core_Model_App
      * Run $callback in the store $storeId, with the design, the locale and the translations of that store. The admin
      * store runs in the admin area, any other store in the frontend area. Then put back the environment of the
      * caller, also when $callback throws. When the request already runs in $storeId, and its translator is loaded for
-     * that store and area, run $callback as it is: the locale of the caller stays, so an admin page that emulates the
-     * admin store keeps the interface locale of the admin user.
+     * that store and area, skip the switch: the locale of the caller stays, so an admin page that emulates the admin
+     * store keeps the interface locale of the admin user.
      *
      * @template T
      * @param \Closure(): T $callback

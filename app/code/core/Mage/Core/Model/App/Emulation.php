@@ -24,8 +24,8 @@ class Mage_Core_Model_App_Emulation
      * Run $callback in the store $storeId, with the design, the locale and the translations of that store. The admin
      * store runs in the admin area, any other store in the frontend area. Then put back the environment of the
      * caller, also when $callback throws. When the request already runs in $storeId, and its translator is loaded for
-     * that store and area, run $callback as it is: the locale of the caller stays, so an admin page that emulates the
-     * admin store keeps the interface locale of the admin user.
+     * that store and area, skip the switch: the locale of the caller stays, so an admin page that emulates the admin
+     * store keeps the interface locale of the admin user.
      *
      * @template T
      * @param \Closure(): T $callback
@@ -36,19 +36,27 @@ class Mage_Core_Model_App_Emulation
         $area = $storeId === Mage_Core_Model_App::ADMIN_STORE_ID
             ? Mage_Core_Model_App_Area::AREA_ADMINHTML
             : Mage_Core_Model_App_Area::AREA_FRONTEND;
-        if ($storeId === (int) $this->_app->getStore()->getId()
-            && $area === Mage::getDesign()->getArea()
-            && $area === $this->_app->getTranslator()->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA)
-            && $storeId === (int) $this->_app->getTranslator()->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_STORE)
-        ) {
-            return $callback();
-        }
-        $environment = $this->start($storeId, $area);
+        $environment = Mage_Core_Model_App_Environment::capture($this->_app);
         try {
+            if (!$this->runsIn($storeId, $area)) {
+                $this->switchTo($storeId, $area);
+            }
             return $callback();
         } finally {
             $environment->restore();
         }
+    }
+
+    /**
+     * Tell if the request runs in the store $storeId and the area $area, with its translator loaded for them
+     */
+    private function runsIn(int $storeId, string $area): bool
+    {
+        $translator = $this->_app->getTranslator();
+        return $storeId === (int) $this->_app->getStore()->getId()
+            && $area === Mage::getDesign()->getArea()
+            && $area === $translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA)
+            && $storeId === (int) $translator->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_STORE);
     }
 
     /**
@@ -87,15 +95,23 @@ class Mage_Core_Model_App_Emulation
     {
         $environment = Mage_Core_Model_App_Environment::capture($this->_app);
         try {
-            $this->_emulateDesign($storeId, $area);
-            $this->_app->setCurrentStore($storeId);
-            $this->_emulateLocale($storeId);
-            $this->_app->getTranslator()->init($area);
+            $this->switchTo($storeId, $area);
         } catch (\Throwable $e) {
             $environment->restore();
             throw $e;
         }
         return $environment;
+    }
+
+    /**
+     * Switch to the design, the store, the locale and the translations of the store $storeId for $area
+     */
+    private function switchTo(int $storeId, string $area): void
+    {
+        $this->_emulateDesign($storeId, $area);
+        $this->_app->setCurrentStore($storeId);
+        $this->_emulateLocale($storeId);
+        $this->_app->getTranslator()->init($area);
     }
 
     /**

@@ -62,6 +62,25 @@ describe('Store emulation puts back the environment of the caller', function () 
             ->and(Mage::app()->getTranslator()->getState())->toEqual($translator);
     });
 
+    it('puts back what the callback changes when the request already runs in the store', function () use ($otherLocale) {
+        Mage::app()->setCurrentStore(1);
+        $design = Mage::getDesign()->setStore(1)->setArea(Mage_Core_Model_App_Area::AREA_FRONTEND);
+        Mage::app()->getTranslator()->init(Mage_Core_Model_App_Area::AREA_FRONTEND);
+        $package = $design->getPackageName();
+        $locale = Mage::app()->getLocale()->getLocaleCode();
+        $translator = Mage::app()->getTranslator()->getState();
+
+        Mage::app()->emulate(1, function () use ($design, $otherLocale): void {
+            $design->setPackageName('emulation_test');
+            Mage::app()->getLocale()->setLocaleCode($otherLocale());
+            Mage::app()->getTranslator()->setLocale($otherLocale());
+        });
+
+        expect($design->getPackageName())->toBe($package)
+            ->and(Mage::app()->getLocale()->getLocaleCode())->toBe($locale)
+            ->and(Mage::app()->getTranslator()->getState())->toEqual($translator);
+    });
+
     it('loads the translations when the request runs in the store but has none for the area', function () {
         Mage::app()->setCurrentStore(1);
         Mage::getDesign()->setStore(1)->setArea(Mage_Core_Model_App_Area::AREA_FRONTEND);

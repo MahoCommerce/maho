@@ -30,7 +30,7 @@ If a step before the callback fails, `emulate()` puts back the snapshot and thro
 
 ### The fast path
 
-If the request already runs in the store, and its translator is loaded for that store and area, `emulate()` runs the callback as it is. In this case the locale of the caller stays. So an admin page that emulates the admin store keeps the interface locale of the admin user.
+If the request already runs in the store, and its translator is loaded for that store and area, `emulate()` skips the switch. In this case the locale of the caller stays. So an admin page that emulates the admin store keeps the interface locale of the admin user. `emulate()` still takes the snapshot, so it puts back what the callback changes, as in any other case.
 
 A nested call uses the fast path too. An email that a caller renders inside `emulate()` for the same store does not switch the context again.
 
