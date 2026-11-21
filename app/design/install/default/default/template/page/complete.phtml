@@ -51,6 +51,14 @@
     </div>
     <?php endif ?>
 
+    <?php if ($chmodCommand = $this->getLocalConfigChmodCommand()): ?>
+    <div class="langpack-notice">
+        <p><?= $this->__('Other users on this server can read app/etc/local.xml, which holds the database password and the encryption key.') ?></p>
+        <p><?= $this->__('Make sure that the web server reads the file as its owner or its group, then run:') ?></p>
+        <code><?= $this->escapeHtml($chmodCommand) ?></code>
+    </div>
+    <?php endif ?>
+
     <div class="button-set">
         <a target="_blank" href="<?= $this->getUrl('') ?>" class="form-button">
             <span><?= $this->__('Go to Frontend') ?></span>

@@ -111,6 +111,7 @@ class Install extends BaseMahoCommand
             return Command::FAILURE;
         }
 
+        $this->showLocalConfigWarning($output);
         $this->showLocalizationSuggestions($locale, $output);
 
         $output->writeln('');
@@ -120,6 +121,20 @@ class Install extends BaseMahoCommand
         }
 
         return Command::SUCCESS;
+    }
+
+    private function showLocalConfigWarning(OutputInterface $output): void
+    {
+        $command = Mage::helper('install')->getLocalConfigChmodCommand();
+        if ($command === null) {
+            return;
+        }
+
+        $output->writeln('');
+        $output->writeln('<comment>  Other users on this server can read app/etc/local.xml, which holds the database</comment>');
+        $output->writeln('<comment>  password and the encryption key. Make sure that the web server reads the file as</comment>');
+        $output->writeln('<comment>  its owner or its group, then run:</comment>');
+        $output->writeln("    {$command}");
     }
 
     private function showLocalizationSuggestions(?string $locale, OutputInterface $output): void

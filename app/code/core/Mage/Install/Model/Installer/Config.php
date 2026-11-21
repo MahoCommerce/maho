@@ -87,7 +87,6 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
         }
 
         file_put_contents($this->_localConfigFile, $template);
-        chmod($this->_localConfigFile, 0660);
     }
 
     public function getFormData(): Maho\DataObject

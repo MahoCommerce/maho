@@ -82,4 +82,19 @@ class Mage_Install_Helper_Data extends Mage_Core_Helper_Abstract
             return false;
         }
     }
+
+    /**
+     * Return the command that removes the access of other users to app/etc/local.xml.
+     * Return null when other users have no access, or when the file does not exist.
+     */
+    public function getLocalConfigChmodCommand(): ?string
+    {
+        $file = Mage::getBaseDir('etc') . DS . 'local.xml';
+        clearstatcache(true, $file);
+        if (!is_file($file) || (fileperms($file) & 0007) === 0) {
+            return null;
+        }
+
+        return 'chmod o-rwx ' . escapeshellarg($file);
+    }
 }
