@@ -39,7 +39,7 @@ class Mage_Core_Block_Html_Select extends Mage_Core_Block_Abstract
     /**
      * Add an option to HTML select
      *
-     * @param string $value  HTML value
+     * @param string|int $value  HTML value
      * @param string $label  HTML label
      * @param array  $params HTML attributes
      * @return $this

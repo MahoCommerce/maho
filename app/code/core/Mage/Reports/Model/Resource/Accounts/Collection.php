@@ -8,7 +8,7 @@
  * @package Mage_Reports
  */
 
-class Mage_Reports_Model_Resource_Accounts_Collection extends Mage_Reports_Model_Resource_Customer_Collection
+class Mage_Reports_Model_Resource_Accounts_Collection extends Mage_Reports_Model_Resource_Customer_Collection implements Mage_Reports_Model_Resource_DateRangeInterface
 {
     /**
      * Join created_at and accounts fields
@@ -35,6 +35,7 @@ class Mage_Reports_Model_Resource_Accounts_Collection extends Mage_Reports_Model
      * @param string $to
      * @return $this
      */
+    #[\Override]
     public function setDateRange($from, $to)
     {
         $this->_reset()
@@ -48,6 +49,7 @@ class Mage_Reports_Model_Resource_Accounts_Collection extends Mage_Reports_Model
      * @param array $storeIds
      * @return $this
      */
+    #[\Override]
     public function setStoreIds($storeIds)
     {
         if ($storeIds) {

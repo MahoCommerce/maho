@@ -59,8 +59,8 @@ class Mage_Catalog_Block_Widget_Link extends Mage_Core_Block_Html_Link implement
             if (isset($idPath[0]) && isset($idPath[1]) && $idPath[0] == 'product') {
                 /** @var Mage_Catalog_Helper_Product $helper */
                 $helper = $this->_getFactory()->getHelper('catalog/product');
-                $productId = $idPath[1];
-                $categoryId = $idPath[2] ?? null;
+                $productId = (int) $idPath[1];
+                $categoryId = isset($idPath[2]) ? (int) $idPath[2] : null;
 
                 $this->_href = $helper->getFullProductUrl($productId, $categoryId);
             } elseif (isset($idPath[0]) && isset($idPath[1]) && $idPath[0] == 'category') {
@@ -104,7 +104,7 @@ class Mage_Catalog_Block_Widget_Link extends Mage_Core_Block_Html_Link implement
             if (!$this->_getData('anchor_text')) {
                 $idPath = explode('/', (string) $this->_getData('id_path'));
                 if (isset($idPath[1])) {
-                    $id = $idPath[1];
+                    $id = (int) $idPath[1];
                     if ($id) {
                         $this->_anchorText = $this->_entityResource
                             ->getAttributeRawValue($id, 'name', $store);

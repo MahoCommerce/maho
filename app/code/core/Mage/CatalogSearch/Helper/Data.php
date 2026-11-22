@@ -57,11 +57,9 @@ class Mage_CatalogSearch_Helper_Data extends Mage_Core_Helper_Abstract
     protected ?bool $_canLogQuery = null;
 
     /**
-     * Search engine model
-     *
-     * @var Mage_CatalogSearch_Model_Resource_Fulltext_Engine
+     * Search engine model. A custom engine is any resource model with a test() method.
      */
-    protected $_engine;
+    protected ?object $_engine = null;
 
     /**
      * Retrieve search query parameter name
@@ -360,10 +358,8 @@ class Mage_CatalogSearch_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Get current search engine resource model
-     *
-     * @return object
      */
-    public function getEngine()
+    public function getEngine(): object
     {
         if (!$this->_engine) {
             $engine = Mage::getStoreConfig('catalog/search/engine');

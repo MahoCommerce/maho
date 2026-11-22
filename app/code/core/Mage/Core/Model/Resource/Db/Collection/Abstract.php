@@ -443,7 +443,11 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
     public function getResource()
     {
         if (empty($this->_resource)) {
-            $this->_resource = Mage::getResourceModel($this->getResourceModelName());
+            $resource = Mage::getResourceModel($this->getResourceModelName());
+            if (!$resource instanceof Mage_Core_Model_Resource_Db_Abstract) {
+                throw new \UnexpectedValueException("Invalid resource model: {$this->getResourceModelName()}");
+            }
+            $this->_resource = $resource;
         }
         return $this->_resource;
     }

@@ -132,9 +132,9 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
     /**
      * Update entity row
      *
-     * @param string $code
+     * @param string|int $code The code or the ID of the entity type
      * @param array|string $field
-     * @param string $value
+     * @param mixed $value
      * @return $this
      */
     public function updateEntityType($code, $field, $value = null)
@@ -370,9 +370,8 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
      * Retrieve Default Attribute Set for Entity Type
      *
      * @param string|int $entityType
-     * @return string
      */
-    public function getDefaultAttributeSetId($entityType)
+    public function getDefaultAttributeSetId($entityType): int
     {
         $bind = ['entity_type' => $entityType];
         if (is_numeric($entityType)) {
@@ -384,7 +383,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
             ->from($this->getTable('eav/entity_type'), 'default_attribute_set_id')
             ->where($where);
 
-        return $this->getConnection()->fetchOne($select, $bind);
+        return (int) $this->getConnection()->fetchOne($select, $bind);
     }
 
     /******************* ATTRIBUTE GROUPS *****************/

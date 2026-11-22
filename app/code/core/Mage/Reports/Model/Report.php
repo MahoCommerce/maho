@@ -17,10 +17,7 @@
  */
 class Mage_Reports_Model_Report extends Mage_Core_Model_Abstract
 {
-    /**
-     * @var Mage_Reports_Model_Report
-     */
-    protected $_reportModel;
+    protected (\Maho\Data\Collection\Db&Mage_Reports_Model_Resource_DateRangeInterface)|null $_reportModel = null;
 
     /**
      * @param string $modelClass
@@ -28,7 +25,13 @@ class Mage_Reports_Model_Report extends Mage_Core_Model_Abstract
      */
     public function initCollection($modelClass)
     {
-        $this->_reportModel = Mage::getResourceModel($modelClass);
+        $collection = Mage::getResourceModel($modelClass);
+        if (!$collection instanceof \Maho\Data\Collection\Db
+            || !$collection instanceof Mage_Reports_Model_Resource_DateRangeInterface
+        ) {
+            throw new \UnexpectedValueException("Invalid report collection: {$modelClass}");
+        }
+        $this->_reportModel = $collection;
 
         return $this;
     }
@@ -42,7 +45,7 @@ class Mage_Reports_Model_Report extends Mage_Core_Model_Abstract
     {
         return $this->_reportModel
             ->setDateRange($from, $to)
-            ->setPageSize(false)
+            ->setPageSize(null)
             ->setStoreIds($this->getStoreIds());
     }
 

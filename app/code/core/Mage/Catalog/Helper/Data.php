@@ -77,7 +77,7 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
             $path = [];
             if ($category = $this->getCategory()) {
                 $pathInStore = $category->getPathInStore();
-                $pathIds = array_reverse(explode(',', $pathInStore));
+                $pathIds = array_map(intval(...), array_reverse(explode(',', $pathInStore)));
 
                 $categories = $category->getParentCategories();
 

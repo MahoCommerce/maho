@@ -919,7 +919,7 @@ class Mage_Core_Model_Resource_Setup
      * Save configuration data
      *
      * @param string $path
-     * @param string $value
+     * @param string|int|float $value
      * @param int|string $scope
      * @param int $scopeId
      * @param int $inherit

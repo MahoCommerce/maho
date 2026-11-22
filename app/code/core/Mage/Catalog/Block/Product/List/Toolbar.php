@@ -17,12 +17,7 @@ declare(strict_types=1);
  */
 class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
 {
-    /**
-     * Products collection
-     *
-     * @var Mage_Core_Model_Resource_Db_Collection_Abstract
-     */
-    protected $_collection = null;
+    protected ?\Maho\Data\Collection $_collection = null;
 
     /**
      * GET parameter page variable
@@ -198,10 +193,9 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
     /**
      * Set collection to pager
      *
-     * @param \Maho\Data\Collection $collection
      * @return $this
      */
-    public function setCollection($collection)
+    public function setCollection(\Maho\Data\Collection $collection)
     {
         $this->_collection = $collection;
 
@@ -220,10 +214,8 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
 
     /**
      * Return products collection instance
-     *
-     * @return Mage_Core_Model_Resource_Db_Collection_Abstract
      */
-    public function getCollection()
+    public function getCollection(): ?\Maho\Data\Collection
     {
         return $this->_collection;
     }

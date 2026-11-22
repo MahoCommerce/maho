@@ -26,7 +26,7 @@ class Mage_Downloadable_Model_Link_Api_Uploader extends \Maho\ApiPlatform\Servic
     public function __construct($file)
     {
         if (!is_array($file)) {
-            throw new Exception('', 'file_data_not_correct');
+            throw new Exception('The file data is not correct.');
         }
 
         $tmpFileName = tempnam(sys_get_temp_dir(), $this->_filePrefix);

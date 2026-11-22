@@ -57,9 +57,9 @@ class Mage_Adminhtml_Block_Catalog_Product_Widget_Chooser extends Mage_Adminhtml
             $value = explode('/', $element->getValue());
             $productId = false;
             if (isset($value[0], $value[1]) && $value[0] === 'product') {
-                $productId = $value[1];
+                $productId = (int) $value[1];
             }
-            $categoryId = $value[2] ?? false;
+            $categoryId = (int) ($value[2] ?? 0);
             $label = '';
             if ($categoryId) {
                 $label = Mage::getResourceSingleton('catalog/category')

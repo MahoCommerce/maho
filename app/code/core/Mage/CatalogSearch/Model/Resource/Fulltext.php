@@ -667,7 +667,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
      * Return all product children ids
      *
      * @param int $productId
-     * @param int $typeId
+     * @param string $typeId
      * @param null|int $websiteId
      * @return array|null
      */

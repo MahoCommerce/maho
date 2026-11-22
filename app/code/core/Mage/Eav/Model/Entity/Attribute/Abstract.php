@@ -363,7 +363,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     public function getEntity()
     {
         if (!$this->_entity) {
-            $this->_entity = $this->getEntityType();
+            $this->_entity = $this->getEntityType()->getEntity();
         }
         return $this->_entity;
     }
@@ -390,7 +390,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
                 $this->setBackendModel($this->_getDefaultBackendModel());
             }
             $backend = Mage::getModel($this->getBackendModel());
-            if (!$backend) {
+            if (!$backend instanceof Mage_Eav_Model_Entity_Attribute_Backend_Abstract) {
                 throw Mage::exception('Mage_Eav', 'Invalid backend model specified: ' . $this->getBackendModel());
             }
             $this->_backend = $backend->setAttribute($this);
@@ -410,8 +410,11 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
             if (!$this->getFrontendModel()) {
                 $this->setFrontendModel($this->_getDefaultFrontendModel());
             }
-            $this->_frontend = Mage::getModel($this->getFrontendModel())
-                ->setAttribute($this);
+            $frontend = Mage::getModel($this->getFrontendModel());
+            if (!$frontend instanceof Mage_Eav_Model_Entity_Attribute_Frontend_Abstract) {
+                throw Mage::exception('Mage_Eav', 'Invalid frontend model specified: ' . $this->getFrontendModel());
+            }
+            $this->_frontend = $frontend->setAttribute($this);
         }
 
         return $this->_frontend;
@@ -429,7 +432,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
                 $this->setSourceModel($this->getDefaultSourceModel());
             }
             $source = Mage::getModel($this->getSourceModel());
-            if (!$source) {
+            if (!$source instanceof Mage_Eav_Model_Entity_Attribute_Source_Abstract) {
                 throw Mage::exception(
                     'Mage_Eav',
                     Mage::helper('eav')->__(
@@ -478,12 +481,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
         if ($this->getFrontendInput() === 'boolean') {
             return 'eav/entity_attribute_source_boolean';
         }
-        // getEntity() gives the entity type, which names no default, when no entity model loaded this attribute
-        $entity = $this->getEntity();
-
-        return $entity instanceof Mage_Eav_Model_Entity_Abstract
-            ? (string) $entity->getDefaultAttributeSourceModel()
-            : Mage_Eav_Model_Entity::DEFAULT_SOURCE_MODEL;
+        return (string) $this->getEntity()->getDefaultAttributeSourceModel();
     }
 
     /**

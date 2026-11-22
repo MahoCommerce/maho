@@ -1524,7 +1524,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * Get resource configuration for resource name
      *
      * @param string $name
-     * @return Mage_Core_Model_Config_Element|SimpleXMLElement
+     * @return Mage_Core_Model_Config_Element
      */
     public function getResourceConfig($name)
     {

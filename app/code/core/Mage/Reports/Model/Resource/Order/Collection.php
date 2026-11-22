@@ -285,8 +285,8 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
      * Calculate From and To dates (or times) by given period
      *
      * @param string $range
-     * @param string $customStart
-     * @param string $customEnd
+     * @param string|null $customStart
+     * @param string|null $customEnd
      * @param bool $returnObjects
      * @return ($returnObjects is true ? array{0: DateTime, 1: DateTime} : array{from: DateTime, to: DateTime, datetime: true})
      */
@@ -826,7 +826,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
      */
     public function addCreateAtPeriodFilter($period)
     {
-        [$from, $to] = $this->getDateRange($period, 0, 0, true);
+        [$from, $to] = $this->getDateRange($period, null, null, true);
 
         $this->checkIsLive($period);
 

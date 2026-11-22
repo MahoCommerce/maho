@@ -10,12 +10,7 @@
 
 class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales extends Mage_Adminhtml_Block_Template
 {
-    /**
-     * Sales entity collection
-     *
-     * @var Mage_Sales_Model_Resource_Sale_Collection
-     */
-    protected $_collection;
+    protected ?Mage_Sales_Model_Resource_Sale_Collection $_collection = null;
 
     protected ?array $_groupedCollection = null;
     protected array $_websiteCounts = [];

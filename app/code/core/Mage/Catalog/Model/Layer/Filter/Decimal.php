@@ -70,9 +70,9 @@ class Mage_Catalog_Model_Layer_Filter_Decimal extends Mage_Catalog_Model_Layer_F
             return $this;
         }
 
-        [$index, $range] = $filter;
-        if ((int) $index && (int) $range) {
-            $this->setRange((int) $range);
+        [$index, $range] = array_map(intval(...), $filter);
+        if ($index && $range) {
+            $this->setRange($range);
 
             $this->_getResource()->applyFilterToCollection($this, $range, $index);
             $this->getLayer()->getState()->addFilter(
