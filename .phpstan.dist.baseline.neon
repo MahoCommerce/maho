@@ -331,6 +331,12 @@ parameters:
 			path: app/code/core/Mage/CatalogRule/Model/Observer.php
 
 		-
+			rawMessage: 'Property Mage_CatalogSearch_Helper_Data::$_engine (Mage_CatalogSearch_Model_Resource_Fulltext_Engine|null) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract.'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/CatalogSearch/Helper/Data.php
+
+		-
 			rawMessage: 'Parameter #1 $product of method Mage_Catalog_Model_Product_Type_Abstract::getSearchableData() expects Mage_Catalog_Model_Product|null, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
