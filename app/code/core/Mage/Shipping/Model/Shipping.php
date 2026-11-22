@@ -150,40 +150,9 @@ class Mage_Shipping_Model_Shipping
             if (!$result instanceof Mage_Shipping_Model_Rate_Result_Error) {
                 if ($carrier->getConfigData('shipment_requesttype')) {
                     $packages = $this->composePackagesForCarrier($carrier, $request);
-                    if (!empty($packages)) {
-                        $sumResults = [];
-                        $packageRequest = clone $request;
-                        foreach ($packages as $weight => $packageCount) {
-                            //clone carrier for multi-requests
-                            $carrierObj = clone $carrier;
-                            $packageRequest->setPackageWeight($weight);
-                            $result = $carrierObj->collectRates($packageRequest);
-                            if (!$result) {
-                                return $this;
-                            }
-                            $result->updateRatePrice($packageCount);
-                            $sumResults[] = $result;
-                        }
-                        if (count($sumResults) > 1) {
-                            $result = [];
-                            foreach ($sumResults as $res) {
-                                if (empty($result)) {
-                                    $result = $res;
-                                    continue;
-                                }
-                                foreach ($res->getAllRates() as $method) {
-                                    foreach ($result->getAllRates() as $resultMethod) {
-                                        if ($method->getMethod() == $resultMethod->getMethod()) {
-                                            $resultMethod->setPrice($method->getPrice() + $resultMethod->getPrice());
-                                            continue;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        $result = $carrier->collectRates($request);
-                    }
+                    $result = empty($packages)
+                        ? $carrier->collectRates($request)
+                        : $this->collectPackageRates($carrier, $request, $packages);
                 } else {
                     $result = $carrier->collectRates($request);
                 }
@@ -201,6 +170,96 @@ class Mage_Shipping_Model_Shipping
             $this->getResult()->append($result);
         }
         return $this;
+    }
+
+    /** @param array<int|string, int> $packages */
+    private function collectPackageRates(
+        Mage_Shipping_Model_Carrier_Abstract $carrier,
+        Mage_Shipping_Model_Rate_Request $request,
+        array $packages,
+    ): ?Mage_Shipping_Model_Rate_Result {
+        $result = Mage::getModel('shipping/rate_result');
+        $rates = null;
+        $errors = [];
+        $singlePackage = count($packages) === 1;
+        $packageRequest = clone $request;
+        foreach ($packages as $weight => $packageCount) {
+            $packageRequest->setPackageWeight($weight);
+            $quote = (clone $carrier)->collectRates($packageRequest);
+            if ($quote instanceof Mage_Shipping_Model_Rate_Result_Error) {
+                $quote = Mage::getModel('shipping/rate_result')->append($quote);
+            }
+            if (!$quote instanceof Mage_Shipping_Model_Rate_Result) {
+                return null;
+            }
+            if ($singlePackage && $packageCount === 1) {
+                $quote->updateRatePrice(1);
+                return $quote;
+            }
+
+            if ($quote->getError()) {
+                $result->setError(true);
+            }
+            foreach ($quote->getAllRates() as $rate) {
+                if ($rate instanceof Mage_Shipping_Model_Rate_Result_Error) {
+                    $errors[serialize([$rate->getCarrier(), $rate->getErrorMessage()])] ??= $rate;
+                }
+            }
+
+            $packageRates = $this->pricePackageMethods($quote, $packageCount);
+            if ($rates === null) {
+                $rates = $packageRates;
+                continue;
+            }
+            $rates = array_intersect_key($rates, $packageRates);
+            foreach ($rates as $code => $rate) {
+                $packageRate = $packageRates[$code];
+                $rate->setPrice($rate->getPrice() + $packageRate->getPrice());
+                $cost = $rate->getCost();
+                $packageCost = $packageRate->getCost();
+                $rate->setCost($cost === null || $packageCost === null ? null : $cost + $packageCost);
+            }
+        }
+        foreach ($rates ?? [] as $rate) {
+            $result->append($rate);
+        }
+        foreach ($errors as $error) {
+            $result->append($error);
+        }
+        return $result;
+    }
+
+    /** @return array<string, Mage_Shipping_Model_Rate_Result_Method> */
+    private function pricePackageMethods(Mage_Shipping_Model_Rate_Result $quote, int $packageCount): array
+    {
+        $methods = clone $quote;
+        $methods->reset();
+        $unitCosts = [];
+        foreach ($quote->getAllRates() as $rate) {
+            if ($rate instanceof Mage_Shipping_Model_Rate_Result_Method && $rate->getPrice() !== null) {
+                $code = serialize([$rate->getCarrier(), $rate->getMethod()]);
+                $unitCosts[$code] = $rate->getCost();
+                $methods->append(clone $rate);
+            }
+        }
+        $methods->updateRatePrice($packageCount);
+
+        $rates = [];
+        foreach ($methods->getAllRates() as $rate) {
+            if ($rate->getPrice() === null) {
+                continue;
+            }
+            $code = serialize([$rate->getCarrier(), $rate->getMethod()]);
+            $unitCost = $unitCosts[$code] ?? null;
+            $quotedCost = $rate->getCost();
+            $cost = is_numeric($quotedCost) ? (float) $quotedCost : null;
+            if ($cost !== null && is_numeric($unitCost) && $cost === (float) $unitCost) {
+                $cost *= $packageCount;
+            }
+            $rate->setCost($cost);
+            $rates[$code] = $rate;
+        }
+        return $rates;
     }
 
     /**
@@ -249,11 +308,11 @@ class Mage_Shipping_Model_Shipping
                         $changeQty  = false;
                     } else {
                         $itemWeight = $itemWeight * $item->getQty();
-                        if ($itemWeight > $maxWeight) {
+                        if ($maxWeight > 0 && $itemWeight > $maxWeight) {
                             $qtyItem = floor($itemWeight / $maxWeight);
                             $decimalItems[] = ['weight' => $maxWeight, 'qty' => $qtyItem];
-                            $weightItem = Mage::helper('core')->getExactDivision($itemWeight, $maxWeight);
-                            if ($weightItem) {
+                            $weightItem = $itemWeight - $qtyItem * $maxWeight;
+                            if ($weightItem > $itemWeight * PHP_FLOAT_EPSILON) {
                                 $decimalItems[] = ['weight' => $weightItem, 'qty' => 1];
                             }
                             $checkWeight = false;

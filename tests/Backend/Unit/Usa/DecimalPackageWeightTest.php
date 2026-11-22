@@ -43,7 +43,9 @@ $decimalPackageCases = [
     'fractional quantity above one' => [8.0, 1.5, true, null, [12.0]],
     'weight at the package limit' => [40.0, 1.75, true, null, [70.0]],
     'weight above the package limit' => [50.0, 1.5, true, null, [70.0, 5.0]],
+    'weight just below two package limits' => [93.332, 1.5, true, null, [70.0, 69.998]],
     'two packages of the same weight' => [80.0, 1.75, true, null, [70.0, 70.0]],
+    'weight just above two package limits' => [93.334, 1.5, true, null, [70.0, 70.0, 0.001]],
     'quantity increments' => [8.0, 1.5, true, 0.5, [12.0]],
     'indivisible quantity' => [8.0, 0.5, false, null, [4.0]],
 ];
@@ -54,13 +56,14 @@ it('quotes the actual package weights for decimal quantities', function (
     bool $divisible,
     ?float $increment,
     array $expected,
+    int $maxWeight = 70,
 ): void {
     $request = decimalPackageRequest($weight, $qty, $divisible, $increment);
-    $carrier = new class extends Mage_Shipping_Model_Carrier_Abstract {
+    $carrier = new class ($maxWeight) extends Mage_Shipping_Model_Carrier_Abstract {
         /** @var ArrayObject<int, float> */
         public ArrayObject $weights;
 
-        public function __construct()
+        public function __construct(private readonly int $maxWeight)
         {
             parent::__construct();
             $this->weights = new ArrayObject();
@@ -71,7 +74,7 @@ it('quotes the actual package weights for decimal quantities', function (
         {
             return match ($field) {
                 'shipment_requesttype' => 1,
-                'max_package_weight' => 70,
+                'max_package_weight' => $this->maxWeight,
                 default => 0,
             };
         }
@@ -113,10 +116,14 @@ it('quotes the actual package weights for decimal quantities', function (
 
     $packages = $shipping->composePackagesForCarrier($carrier, $request);
     $uniqueWeights = array_values(array_unique($expected, SORT_NUMERIC));
-    expect(array_map(floatval(...), array_keys($packages)))->toBe($uniqueWeights)
-        ->and($carrier->weights->getArrayCopy())->toBe($uniqueWeights)
-        ->and($shipping->getResult()->getCheapestRate()?->getPrice())->toBe(array_sum($expected));
-})->with($decimalPackageCases);
+    $roundWeight = static fn(float|int|string $weight): float => round((float) $weight, 3);
+    expect(array_map($roundWeight, array_keys($packages)))->toBe($uniqueWeights)
+        ->and(array_map($roundWeight, $carrier->weights->getArrayCopy()))->toBe($uniqueWeights)
+        ->and($shipping->getResult()->getCheapestRate()?->getPrice())->toBe(round(array_sum($expected), 2));
+})->with([
+    ...$decimalPackageCases,
+    'no package weight limit' => [8.0, 1.5, true, null, [12.0], 0],
+]);
 
 it('writes the actual package weights into the DHL quote XML', function (
     float $weight,
@@ -125,9 +132,11 @@ it('writes the actual package weights into the DHL quote XML', function (
     ?float $increment,
     array $expected,
     string $storeUnit = 'K',
+    string $originCountry = 'IT',
+    string $expectedUnit = 'KG',
 ): void {
     $request = decimalPackageRequest($weight, $qty, $divisible, $increment);
-    $request->setOrigCountryId('IT')
+    $request->setOrigCountryId($originCountry)
         ->setOrigCity('Rome')
         ->setOrigPostcode('00100')
         ->setDestCountryId('IT')
@@ -175,10 +184,11 @@ it('writes the actual package weights into the DHL quote XML', function (
     foreach ($details->Pieces->Piece as $piece) {
         $weights[] = (float) $piece->Weight;
     }
-    expect((string) $details->WeightUnit)->toBe('KG')
+    expect((string) $details->WeightUnit)->toBe($expectedUnit)
         ->and($weights)->toBe($expected);
 })->with([
     ...$decimalPackageCases,
+    'US origin converts 140 kilograms across two pieces' => [80.0, 1.75, true, null, [154.324, 154.323], 'K', 'US', 'LB'],
     'pounds converted to kilograms once' => [5.0, 0.5, true, null, [1.134], 'L'],
     'pounds converted to kilograms across the package limit' => [100.0, 2.0, true, null, [70.0, 20.718], 'L'],
 ]);

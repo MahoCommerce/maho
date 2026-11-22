@@ -600,8 +600,8 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
                         if ($convertedWeight > $maxWeight) {
                             $qtyItem = floor($convertedWeight / $maxWeight);
                             $decimalItems[] = ['weight' => $maxWeight, 'qty' => $qtyItem];
-                            $weightItem = Mage::helper('core')->getExactDivision($convertedWeight, $maxWeight);
-                            if ($weightItem) {
+                            $weightItem = round($convertedWeight - $qtyItem * $maxWeight, 3);
+                            if ($weightItem > 0) {
                                 $decimalItems[] = ['weight' => $weightItem, 'qty' => 1];
                             }
                             $checkWeight = false;
