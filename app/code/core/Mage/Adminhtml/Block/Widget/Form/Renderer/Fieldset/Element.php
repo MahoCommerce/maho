@@ -23,7 +23,7 @@ class Mage_Adminhtml_Block_Widget_Form_Renderer_Fieldset_Element extends Mage_Ad
         $this->setTemplate('widget/form/renderer/fieldset/element.phtml');
     }
 
-    public function getElement()
+    public function getElement(): ?\Maho\Data\Form\Element\AbstractElement
     {
         return $this->_element;
     }

@@ -30,7 +30,7 @@ class Mage_Adminhtml_Block_Dashboard_Bar extends Mage_Adminhtml_Block_Dashboard_
         return $this->_totals;
     }
 
-    public function addTotal($label, $value, $isQuantity = false): static
+    public function addTotal(string $label, ?float $value, bool $isQuantity = false): static
     {
         if (!$isQuantity) {
             $value = $this->format($value);

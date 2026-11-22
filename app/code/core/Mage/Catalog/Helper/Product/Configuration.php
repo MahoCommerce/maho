@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2020-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Catalog
@@ -72,6 +72,8 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
     /**
      * Retrieves configuration options for configurable product
      *
+     * The option values are HTML, as the custom option values that their option type formats.
+     *
      * @return array
      */
     public function getConfigurableOptions(Mage_Catalog_Model_Product_Configuration_Item_Interface $item)
@@ -83,8 +85,40 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
         }
         /** @var Mage_Catalog_Model_Product_Type_Configurable $productType */
         $productType = $product->getTypeInstance(true);
-        $attributes = $productType->getSelectedAttributesInfo($product);
+        $attributes = $this->escapeAttributesInfo($productType->getSelectedAttributesInfo($product));
         return array_merge($attributes, $this->getCustomOptions($item));
+    }
+
+    /**
+     * Escape the option values of configurable attributes for the HTML output.
+     *
+     * Mage_Catalog_Model_Product_Type_Configurable::getSelectedAttributesInfo() returns the option labels raw, and
+     * an order keeps them raw in its "attributes_info" product option.
+     *
+     * @param array<array-key, mixed> $attributesInfo
+     * @return array<array-key, mixed>
+     */
+    public function escapeAttributesInfo(array $attributesInfo): array
+    {
+        foreach ($attributesInfo as $key => $attribute) {
+            if (is_array($attribute) && isset($attribute['value'])) {
+                $attributesInfo[$key]['value'] = $this->escapeHtml($attribute['value']);
+            }
+        }
+
+        return $attributesInfo;
+    }
+
+    /**
+     * Cut an HTML option value to $length characters, without a part of an HTML entity at the end.
+     */
+    public function truncateOptionValue(string $value, int $length): string
+    {
+        $truncated = Mage::helper('core/string')->truncate($value, $length, '');
+        if ($truncated === $value) {
+            return $truncated;
+        }
+        return (string) preg_replace('/&#?[a-z0-9]*$/iD', '', $truncated);
     }
 
     /**
@@ -207,7 +241,7 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
             return ['value' => $truncatedValue];
         }
         if ($maxLength) {
-            $truncatedValue = Mage::helper('core/string')->truncate($optionValue, $maxLength, '');
+            $truncatedValue = $this->truncateOptionValue((string) $optionValue, (int) $maxLength);
         } else {
             $truncatedValue = $optionValue;
         }

@@ -170,11 +170,11 @@ class Mage_Widget_Block_Adminhtml_Widget_Options extends Mage_Adminhtml_Block_Wi
         // extra html preparations
         if ($helper = $parameter->getHelperBlock()) {
             $helperBlock = $this->getLayout()->createBlock($helper->getType(), '', $helper->getData());
-            if ($helperBlock instanceof \Maho\DataObject) {
+            if ($helperBlock instanceof \Maho\DataObject && method_exists($helperBlock, 'prepareElementHtml')) {
                 $helperBlock->setConfig($helper->getData())
                     ->setFieldsetId($fieldset->getId())
-                    ->setTranslationHelper($this->getTranslationHelper())
-                    ->prepareElementHtml($field);
+                    ->setTranslationHelper($this->getTranslationHelper());
+                $helperBlock->prepareElementHtml($field);
             }
         }
 

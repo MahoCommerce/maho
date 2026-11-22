@@ -271,6 +271,11 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
             if (isset($data['category_products']) && !$category->getProductsReadonly()) {
                 $products = Mage::helper('core/string')->parseQueryStr($data['category_products']);
                 $category->setPostedProducts($products);
+                if (isset($data['category_pinned_products'])) {
+                    $category->setPostedPinnedProducts(
+                        array_values(array_filter(array_map(intval(...), explode(',', (string) $data['category_pinned_products'])))),
+                    );
+                }
             }
 
             // Store dynamic category rule data for the observer to handle. The rule fields are split
@@ -429,6 +434,73 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
         $this->getResponse()->setBody(
             $this->getLayout()->createBlock('adminhtml/catalog_category_tab_product', 'category.product.grid')->toHtml(),
         );
+    }
+
+    /**
+     * Retrieve a page of tiles for the product tile view.
+     * A category that sorts by position takes its order from the posted IDs, which hold the moves that the
+     * admin has not saved. Any other category takes the order of the storefront, and sends it back in `order`,
+     * so that the next pages post it and do not read the storefront again.
+     */
+    #[Maho\Config\Route('/admin/catalog_category/tiles', methods: ['POST'])]
+    public function tilesAction(): void
+    {
+        $category = $this->_initCategory(true);
+        $merchandiser = Mage::getModel('catalog/category_merchandiser');
+        $ids = $this->_getPostedProductIds('ids');
+        $isOrdered = $merchandiser->isManual($category) || $ids !== [];
+        if (!$isOrdered) {
+            $ids = $merchandiser->getStorefrontOrder($category);
+        }
+        $ranks = array_flip($ids);
+
+        $matches = $merchandiser->filter(
+            $ids,
+            (int) $category->getStoreId(),
+            trim((string) $this->getRequest()->getPost('q')),
+            (bool) $this->getRequest()->getPost('out_of_stock'),
+        );
+        $offset = max(0, (int) $this->getRequest()->getPost('offset'));
+        $limit = min(100, max(1, (int) $this->getRequest()->getPost('limit', 100)));
+
+        $page = array_slice($matches, $offset, $limit);
+        $tiles = $merchandiser->getTiles($category, $page);
+        foreach ($tiles as &$tile) {
+            $tile['rank'] = $ranks[$tile['id']] + 1;
+        }
+        unset($tile);
+
+        $this->getResponse()->setBodyJson([
+            'tiles' => $tiles,
+            'total' => count($matches),
+            'consumed' => count($page),
+            'order' => $isOrdered ? null : $ids,
+        ]);
+    }
+
+    /**
+     * Find the products that are not in the posted list of products, for the search box of the tile view.
+     */
+    #[Maho\Config\Route('/admin/catalog_category/tileSearch', methods: ['POST'])]
+    public function tileSearchAction(): void
+    {
+        $category = $this->_initCategory(true);
+        $search = trim((string) $this->getRequest()->getPost('q'));
+        $merchandiser = Mage::getModel('catalog/category_merchandiser');
+        $ids = $search === ''
+            ? []
+            : $merchandiser->search($search, $this->_getPostedProductIds('ids'), (int) $category->getStoreId(), 10);
+
+        $this->getResponse()->setBodyJson(['tiles' => $merchandiser->getTiles($category, $ids)]);
+    }
+
+    /**
+     * @return list<int>
+     */
+    protected function _getPostedProductIds(string $key): array
+    {
+        $posted = (string) $this->getRequest()->getPost($key);
+        return array_values(array_unique(array_filter(array_map(intval(...), explode(',', $posted)))));
     }
 
     /**

@@ -577,7 +577,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
         if ($this->getCollection()) {
             $field = $column->getFilterIndex() ?: $column->getIndex();
             $conditionCallback = $column->getFilterConditionCallback();
-            if (is_callable($conditionCallback)) {
+            if (Mage_Adminhtml_Block_Widget_Grid_Column::isBoundCallback($conditionCallback)) {
                 call_user_func($conditionCallback, $this->getCollection(), $column);
             } else {
                 $cond = $column->getFilter()->getCondition();
@@ -671,19 +671,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
         return $this;
     }
 
-    /**
-     * Decode URL encoded filter value recursive callback method
-     *
-     * @param string $value
-     */
-    protected function _decodeFilter(&$value): void
-    {
-        /** @var Mage_Adminhtml_Helper_Data $helper */
-        $helper = $this->helper('adminhtml');
-        $value = $helper->decodeFilter($value);
-    }
-
-    protected function _preparePage()
+    protected function _preparePage(): void
     {
         $this->getCollection()->setPageSize((int) $this->getParam($this->getVarNameLimit(), $this->_defaultLimit));
         $this->getCollection()->setCurPage((int) $this->getParam($this->getVarNamePage(), $this->_defaultPage));

@@ -24,12 +24,7 @@ class Mage_Reports_Model_Resource_Report_Collection
      */
     protected $_to;
 
-    /**
-     * Report period
-     *
-     * @var int
-     */
-    protected $_period;
+    protected ?string $_period = null;
 
     /**
      * Model object
@@ -61,13 +56,7 @@ class Mage_Reports_Model_Resource_Report_Collection
 
     protected function _construct(): void {}
 
-    /**
-     * Set period
-     *
-     * @param int $period
-     * @return $this
-     */
-    public function setPeriod($period)
+    public function setPeriod(string $period): static
     {
         $this->_period = $period;
         return $this;

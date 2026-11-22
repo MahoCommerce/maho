@@ -13,11 +13,8 @@ use Maho\Convert\Action;
 
 class Convert
 {
-    public static function convert($class, $method, $data, array $vars = [])
+    public static function convert(string $class, string $method, mixed $data, array $vars = []): mixed
     {
-        if (is_string($class)) {
-            $class = new $class();
-        }
         $action = new Action();
         $action->setParam('method', $method)->setParam('class', $class);
 
@@ -25,6 +22,6 @@ class Convert
         $container->setData($data)->setVars($vars);
 
         $action->run();
-        return $action->getData();
+        return $container->getData();
     }
 }

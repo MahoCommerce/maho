@@ -174,11 +174,9 @@ class Mage_Sales_Model_Observer
     #[Maho\Config\CronJob('aggregate_sales_report_order_data', configPath: 'reports/crontab/sales_expr')]
     public function aggregateSalesReportOrderData()
     {
-        Mage::app()->getLocale()->emulate(0);
         $currentDate = Mage::app()->getLocale()->utcToStore();
         $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_order')->aggregate($date);
-        Mage::app()->getLocale()->revert();
         return $this;
     }
 
@@ -190,11 +188,9 @@ class Mage_Sales_Model_Observer
     #[Maho\Config\CronJob('aggregate_sales_report_shipment_data', configPath: 'reports/crontab/shipping_expr')]
     public function aggregateSalesReportShipmentData()
     {
-        Mage::app()->getLocale()->emulate(0);
         $currentDate = Mage::app()->getLocale()->utcToStore();
         $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_shipping')->aggregate($date);
-        Mage::app()->getLocale()->revert();
         return $this;
     }
 
@@ -206,11 +202,9 @@ class Mage_Sales_Model_Observer
     #[Maho\Config\CronJob('aggregate_sales_report_invoiced_data', configPath: 'reports/crontab/invoiced_expr')]
     public function aggregateSalesReportInvoicedData()
     {
-        Mage::app()->getLocale()->emulate(0);
         $currentDate = Mage::app()->getLocale()->utcToStore();
         $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_invoiced')->aggregate($date);
-        Mage::app()->getLocale()->revert();
         return $this;
     }
 
@@ -222,11 +216,9 @@ class Mage_Sales_Model_Observer
     #[Maho\Config\CronJob('aggregate_sales_report_refunded_data', configPath: 'reports/crontab/refunded_expr')]
     public function aggregateSalesReportRefundedData()
     {
-        Mage::app()->getLocale()->emulate(0);
         $currentDate = Mage::app()->getLocale()->utcToStore();
         $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_refunded')->aggregate($date);
-        Mage::app()->getLocale()->revert();
         return $this;
     }
 
@@ -238,11 +230,9 @@ class Mage_Sales_Model_Observer
     #[Maho\Config\CronJob('aggregate_sales_report_bestsellers_data', configPath: 'reports/crontab/bestsellers_expr')]
     public function aggregateSalesReportBestsellersData()
     {
-        Mage::app()->getLocale()->emulate(0);
         $currentDate = Mage::app()->getLocale()->utcToStore();
         $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_bestsellers')->aggregate($date);
-        Mage::app()->getLocale()->revert();
         return $this;
     }
 

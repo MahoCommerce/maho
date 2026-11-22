@@ -275,13 +275,11 @@ function getItems(array $response): array
 
 /*
 |--------------------------------------------------------------------------
-| API v2 Test Availability Check
+| API Test Availability Check
 |--------------------------------------------------------------------------
 |
-| Skip Api/V2 tests when no API server is reachable.
-| CI environments install Maho but do not start a web server,
-| so these integration tests can only run locally or in environments
-| where the API is served.
+| Api/V2 and Api/Soap tests need an API server. A run that started one
+| (API_BASE_URL is set) fails when it does not answer. Other runs skip.
 |
 */
 
@@ -327,28 +325,15 @@ uses()
         $protocolsEnabled = true;
     })
     ->beforeEach(function (): void {
-        static $apiAvailable = null;
-
-        if ($apiAvailable === null) {
-            try {
-                $baseUrl = ApiV2Helper::getBaseUrlPublic();
-                $ch = curl_init($baseUrl . '/api/rest/v2/store-config');
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 3);
-                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_exec($ch);
-                $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                $apiAvailable = ($code !== 0);
-            } catch (\Throwable) {
-                $apiAvailable = false;
-            }
+        if (ApiV2Helper::isServerAvailable()) {
+            return;
         }
-        if (!$apiAvailable) {
-            $this->markTestSkipped('API server not reachable - skipping API integration tests');
+        if (ApiV2Helper::isServerRequired()) {
+            $this->fail('API server at ' . ApiV2Helper::getBaseUrlPublic() . ' did not answer within 15 seconds');
         }
+        $this->markTestSkipped('API server not reachable - skipping API integration tests');
     })
-    ->in('Api/V2');
+    ->in('Api/V2', 'Api/Soap');
 
 uses()
     ->beforeEach(function (): void {
@@ -457,6 +442,40 @@ function waitForScript(object $page, string $script, int $seconds = 5): void
         }
         usleep(50_000);
     }
+}
+
+/** A salable, priced, visible simple product page URL, with stock guaranteed for the run. */
+function salableProductUrl(): string
+{
+    $product = Mage::getResourceModel('catalog/product_collection')
+        ->addAttributeToFilter('type_id', 'simple')
+        ->addAttributeToFilter('status', 1)
+        ->addAttributeToFilter('visibility', ['in' => [3, 4]])
+        ->addAttributeToFilter('price', ['gt' => 0])
+        ->setPageSize(1)
+        ->getFirstItem();
+
+    Mage::getModel('cataloginventory/stock_item')->loadByProduct((int) $product->getId())
+        ->setData('use_config_manage_stock', 0)
+        ->setData('manage_stock', 0)
+        ->setData('is_in_stock', 1)
+        ->setData('qty', 1000)
+        ->save();
+
+    return '/catalog/product/view/id/' . (int) $product->getId() . '/';
+}
+
+/** Fill the billing step, using $firstname to tell one save apart from the next. */
+function fillCheckoutBilling(object $page, string $firstname): object
+{
+    return $page->fill('#billing\\:firstname', $firstname)
+        ->fill('#billing\\:lastname', 'Buyer')
+        ->fill('#billing\\:email', 'checkout@example.test')
+        ->fill('#billing\\:street1', '1 Infinite Loop')
+        ->fill('#billing\\:city', 'Cupertino')
+        ->select('#billing\\:region_id', 'California')
+        ->fill('#billing\\:postcode', '95014')
+        ->fill('#billing\\:telephone', '5551234567');
 }
 
 /**

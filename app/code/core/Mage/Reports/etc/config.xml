@@ -41,6 +41,9 @@ SPDX-License-Identifier: AFL-3.0
                     <viewed_aggregated_yearly>
                         <table>report_viewed_product_aggregated_yearly</table>
                     </viewed_aggregated_yearly>
+                    <viewed_aggregated_rolling>
+                        <table>report_viewed_product_aggregated_rolling</table>
+                    </viewed_aggregated_rolling>
                     <not_found>
                         <table>report_not_found</table>
                     </not_found>

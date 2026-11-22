@@ -107,7 +107,7 @@ class DataObject implements ArrayAccess, JsonSerializable
      * Inits mapping array of object's previously used fields to new fields.
      * Must be overloaded by descendants to set concrete fields map.
      */
-    protected function _initOldFieldsMap() {}
+    protected function _initOldFieldsMap(): void {}
 
     /**
      * Called after old fields are inited. Forms synchronization map to sync old fields and new fields
@@ -660,8 +660,10 @@ class DataObject implements ArrayAccess, JsonSerializable
                 //Maho\Profiler::stop('HAS: '.get_class($this).'::'.$method);
                 return isset($this->_data[$key]);
         }
+
+        $argumentTypes = implode(', ', array_map(get_debug_type(...), $args));
         throw new Exception(
-            'Invalid method ' . static::class . '::' . $method . '(' . print_r($args, true) . ')',
+            'Invalid method ' . static::class . '::' . $method . '(' . $argumentTypes . ')',
         );
     }
 
@@ -778,7 +780,7 @@ class DataObject implements ArrayAccess, JsonSerializable
     public function debug($data = null, &$objects = [])
     {
         if (is_null($data)) {
-            $hash = spl_object_hash($this);
+            $hash = spl_object_id($this);
             if (!empty($objects[$hash])) {
                 return '*** RECURSION ***';
             }

@@ -173,19 +173,18 @@ class ApiV2Helper
         if (!empty(self::$createdEntities['product'])) {
             $ids = self::$createdEntities['product'];
             try {
-                $appEmulation = \Mage::getSingleton('core/app_emulation');
-                $initialEnv = $appEmulation->startEnvironmentEmulation(0, 'admin');
-                foreach ($ids as $id) {
-                    try {
-                        $product = \Mage::getModel('catalog/product')->load((int) $id);
-                        if ($product->getId()) {
-                            $product->delete();
+                \Mage::app()->emulate(\Mage_Core_Model_App::ADMIN_STORE_ID, function () use ($ids, $write): void {
+                    foreach ($ids as $id) {
+                        try {
+                            $product = \Mage::getModel('catalog/product')->load((int) $id);
+                            if ($product->getId()) {
+                                $product->delete();
+                            }
+                        } catch (\Exception $e) {
+                            $write->query('DELETE FROM catalog_product_entity WHERE entity_id = ' . (int) $id);
                         }
-                    } catch (\Exception $e) {
-                        $write->query('DELETE FROM catalog_product_entity WHERE entity_id = ' . (int) $id);
                     }
-                }
-                $appEmulation->stopEnvironmentEmulation($initialEnv);
+                }, \Mage_Core_Model_App_Area::AREA_ADMINHTML);
             } catch (\Exception $e) {
                 // Ignore cleanup errors
             }
@@ -803,10 +802,11 @@ class ApiV2Helper
         }
 
         $context = stream_context_create($options);
+        http_clear_last_response_headers();
         $raw = @file_get_contents($requestUrl, false, $context);
 
         $status = 500;
-        $responseHeaders = $http_response_header ?? [];
+        $responseHeaders = http_get_last_response_headers() ?? [];
         if (!empty($responseHeaders)) {
             if (preg_match('/HTTP\/\d+\.?\d*\s+(\d+)/', $responseHeaders[0], $matches)) {
                 $status = (int) $matches[1];
@@ -998,10 +998,11 @@ class ApiV2Helper
         }
 
         $context = stream_context_create($options);
+        http_clear_last_response_headers();
         $raw = @file_get_contents($requestUrl, false, $context);
 
         $status = 500;
-        $responseHeaders = $http_response_header ?? [];
+        $responseHeaders = http_get_last_response_headers() ?? [];
         if (!empty($responseHeaders)) {
             if (preg_match('/HTTP\/\d+\.?\d*\s+(\d+)/', $responseHeaders[0], $matches)) {
                 $status = (int) $matches[1];
@@ -1027,12 +1028,54 @@ class ApiV2Helper
         ];
     }
 
+    public static function isServerAvailable(): bool
+    {
+        // Pest binds the hook to a new test instance for each case. Keep the result here.
+        static $available = false;
+        if ($available) {
+            return true;
+        }
+
+        try {
+            $handle = curl_init(self::getBaseUrl() . '/api/rest/v2/store-config');
+            curl_setopt_array($handle, [
+                CURLOPT_RETURNTRANSFER => true,
+                // The first API request builds the HTTP kernel and its cache.
+                CURLOPT_TIMEOUT => 15,
+                CURLOPT_CONNECTTIMEOUT => 2,
+                CURLOPT_SSL_VERIFYPEER => false,
+            ]);
+            curl_exec($handle);
+            $available = curl_getinfo($handle, CURLINFO_HTTP_CODE) !== 0;
+        } catch (\Throwable) {
+            return false;
+        }
+
+        return $available;
+    }
+
     /**
-     * Public accessor for getBaseUrl (used by Pest.php availability check)
+     * Tell if the run started a server. CI and composer test set API_BASE_URL when they start one.
      */
+    public static function isServerRequired(): bool
+    {
+        return self::getEnvBaseUrl() !== '';
+    }
+
     public static function getBaseUrlPublic(): string
     {
         return self::getBaseUrl();
+    }
+
+    private static function getEnvBaseUrl(): string
+    {
+        // PHP CLI's default variables_order ("GPCS") does not populate $_ENV from the
+        // environment, so a workflow that exports API_BASE_URL is only visible through getenv().
+        $envBaseUrl = $_ENV['API_BASE_URL'] ?? '';
+        if ($envBaseUrl === '') {
+            $envBaseUrl = getenv('API_BASE_URL') ?: '';
+        }
+        return $envBaseUrl;
     }
 
     private static function getBaseUrl(): string
@@ -1041,14 +1084,7 @@ class ApiV2Helper
             return self::$baseUrl;
         }
 
-        // Read via getenv() as well as $_ENV: PHP CLI's default variables_order
-        // ("GPCS") does not populate $_ENV from the environment, so a workflow
-        // that exports API_BASE_URL is only visible through getenv(). Without
-        // this the whole Api/V2 suite silently self-skips in CI.
-        $envBaseUrl = $_ENV['API_BASE_URL'] ?? '';
-        if ($envBaseUrl === '') {
-            $envBaseUrl = getenv('API_BASE_URL') ?: '';
-        }
+        $envBaseUrl = self::getEnvBaseUrl();
         if ($envBaseUrl !== '') {
             self::$baseUrl = rtrim($envBaseUrl, '/');
             return self::$baseUrl;

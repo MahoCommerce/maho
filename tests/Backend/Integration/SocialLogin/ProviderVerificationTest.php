@@ -22,9 +22,9 @@ const SL_APPLE_SERVICE_ID = 'com.example.test.service';
 /**
  * @param array<string, mixed> $claims
  */
-function slIdToken(string $issuer, string $audience, array $claims = [], ?DateTimeImmutable $expiresAt = null): string
+function slIdToken(string $issuer, string $audience, array $claims = [], ?DateTimeImmutable $expiresAt = null, bool $expires = true): string
 {
-    return SocialLoginJwt::idToken(SL_TEST_KID, $issuer, $audience, $claims, $expiresAt);
+    return SocialLoginJwt::idToken(SL_TEST_KID, $issuer, $audience, $claims, $expiresAt, $expires);
 }
 
 beforeEach(function () {
@@ -88,6 +88,15 @@ it('rejects an expired Google token', function () {
         'email' => 'a@b.c',
         'email_verified' => true,
     ], $expired);
+    Mage::getModel('sociallogin/provider_google')->verify($token, $this->storeId);
+})->throws(InvalidArgumentException::class);
+
+it('rejects a Google token without an expiry', function () {
+    $token = slIdToken('https://accounts.google.com', SL_GOOGLE_CLIENT_ID, [
+        'sub' => 's',
+        'email' => 'a@b.c',
+        'email_verified' => true,
+    ], expires: false);
     Mage::getModel('sociallogin/provider_google')->verify($token, $this->storeId);
 })->throws(InvalidArgumentException::class);
 

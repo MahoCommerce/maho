@@ -431,6 +431,7 @@ class OneStepCheckout {
         // Sending incomplete CC fields here would trigger server-side validation errors.
         const formData = new FormData();
         formData.set('payment[method]', selectedMethod.value);
+        formData.set('method_only', '1');
 
         // Show review loading immediately since that's what gets updated
         this.setLoading('onestep-review', true);
@@ -460,8 +461,6 @@ class OneStepCheckout {
             if (placeholder) {
                 placeholder.style.display = 'none';
             }
-            // Re-init any scripts
-            this.initShippingMethodAutoSave();
             // If only one shipping method, trigger save to load payment methods
             this.autoSelectSingleShippingMethod();
         }
@@ -487,8 +486,6 @@ class OneStepCheckout {
             if (placeholder) {
                 placeholder.style.display = 'none';
             }
-            // Re-init any scripts
-            this.initPaymentMethodAutoSave();
 
             // Call payment.init() since innerHTML doesn't execute <script> tags
             // Server already marks the selected method as checked, and init() will

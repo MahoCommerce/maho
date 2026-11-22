@@ -12,7 +12,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Currency_Service
 {
     protected ?array $_options = null;
 
-    public function toOptionArray($isMultiselect)
+    public function toOptionArray(bool $isMultiselect = false): array
     {
         if (!$this->_options) {
             $this->_options = [];

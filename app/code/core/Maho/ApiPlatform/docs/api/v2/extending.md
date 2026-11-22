@@ -28,6 +28,8 @@ Options: `--route` (REST URI base, defaults to the kebab-cased plural of the res
 
 After generating, run `composer dump-autoload` (compiles the permission registry from the attribute) and `./maho cache:flush` (refreshes API resource discovery). The resource is then live over REST and GraphQL, with ACL entries in the admin role editor. Reads are gated behind `<resource>/read` by default; change the read operations' `security:` to `'true'` to make them public.
 
+An admin token also needs the admin ACL of the resource, which REST, GraphQL and MCP check: the `ADMIN_RESOURCE` constant of the class. When an operation needs more than that, it names its own ACL path in `extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/capture']`. The admin then needs both paths, as in the admin panel, where the Invoices grid does not give the Capture action.
+
 To audit the resources discovered across your installation, with REST routes, HTTP methods, GraphQL availability, access level and permission ids:
 
 ```bash

@@ -86,6 +86,9 @@ class Mage_Adminhtml_Model_System_Config_Backend_File extends Mage_Core_Model_Co
     protected function _addWhetherScopeInfo()
     {
         $fieldConfig = $this->getFieldConfig();
+        if (!$fieldConfig instanceof \Maho\Simplexml\Element) {
+            return false;
+        }
         $el = $fieldConfig->descend('upload_dir');
         return (!empty($el['scope_info']));
     }

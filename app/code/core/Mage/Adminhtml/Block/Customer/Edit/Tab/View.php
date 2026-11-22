@@ -81,7 +81,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View extends Mage_Adminhtml_Block_T
         return null;
     }
 
-    public function getStoreCreateDateTimezone()
+    public function getStoreCreateDateTimezone(): ?string
     {
         return Mage::app()->getStore($this->getCustomer()->getStoreId())
             ->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
@@ -114,7 +114,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View extends Mage_Adminhtml_Block_T
         return Mage::helper('customer')->__('Never');
     }
 
-    public function getStoreLastLoginDateTimezone()
+    public function getStoreLastLoginDateTimezone(): ?string
     {
         return Mage::app()->getStore($this->getCustomer()->getStoreId())
             ->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
@@ -150,7 +150,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View extends Mage_Adminhtml_Block_T
         return Mage::helper('customer')->__('Not confirmed, can login');
     }
 
-    public function getCreatedInStore()
+    public function getCreatedInStore(): ?string
     {
         return Mage::app()->getStore($this->getCustomer()->getStoreId())->getName();
     }

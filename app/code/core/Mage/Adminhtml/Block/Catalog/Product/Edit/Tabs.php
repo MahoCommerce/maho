@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tabs
 {
-    protected $_attributeTabBlock = 'adminhtml/catalog_product_edit_tab_attributes';
+    protected string $_attributeTabBlock = 'adminhtml/catalog_product_edit_tab_attributes';
 
     public function __construct()
     {

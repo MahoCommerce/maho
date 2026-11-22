@@ -1,7 +1,7 @@
 <?php
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2018-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2018-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: AFL-3.0
  * @package default_default
@@ -347,9 +347,9 @@
                     <?php if (isset($option['custom_view']) && $option['custom_view']): ?>
                         <?= $option['value'] ?>
                     <?php else: ?>
-                        <?= Mage::helper('core/string')->truncate($option['value'], 55, '', $_remainder) ?>
+                        <?= $this->escapeHtml(Mage::helper('core/string')->truncate($option['value'], 55, '', $_remainder)) ?>
                         <?php if ($_remainder): ?>
-                            ... <span id="<?= $_id = 'id' . uniqid() ?>"><?= $_remainder ?></span>
+                            ... <span id="<?= $_id = 'id' . uniqid() ?>"><?= $this->escapeHtml($_remainder) ?></span>
                             <script>
                             document.getElementById('<?= $_id ?>').style.display = 'none';
                             document.getElementById('<?= $_id ?>').parentElement.addEventListener('mouseover', function(){document.getElementById('<?= $_id ?>').style.display = '';});

@@ -65,7 +65,7 @@ const ACCOUNT_RULES_PASSWORD = 'Password123!';
  */
 function accountRulesTwofaCode(string $secret): string
 {
-    $totp = \OTPHP\TOTP::createFromSecret($secret);
+    $totp = \OTPHP\TOTP::createFromSecret($secret, new \Maho\UtcClock());
     if ($totp->expiresIn() < 5) {
         sleep($totp->expiresIn() + 1);
     }
@@ -511,7 +511,7 @@ it('logs in with a magic link one time, and keeps the link when the 2FA code is 
     expect($error)->toBe('twofa_required')
         ->and($wrong)->toBe('twofa_invalid')
         ->and((int) $loggedIn->getId())->toBe((int) $customer->getId())
-        ->and(fn() => $this->auth->authenticateByMagicLink($token, \OTPHP\TOTP::createFromSecret($secret)->now()))->toThrow(Mage_Core_Exception::class);
+        ->and(fn() => $this->auth->authenticateByMagicLink($token, \OTPHP\TOTP::createFromSecret($secret, new \Maho\UtcClock())->now()))->toThrow(Mage_Core_Exception::class);
 });
 
 it('confirms an account and turns 2FA on through the API operations', function () {

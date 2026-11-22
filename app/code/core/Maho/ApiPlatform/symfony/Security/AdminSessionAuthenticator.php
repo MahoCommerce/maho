@@ -135,7 +135,8 @@ class AdminSessionAuthenticator extends AbstractAuthenticator
         \Mage::getSingleton('core/cookie')->setStore(\Mage_Core_Model_Store::ADMIN_CODE);
         \Mage::getSingleton('core/session', ['name' => $sessionName])->start();
 
-        return (bool) \Mage::getSingleton('admin/session')->isLoggedIn();
+        $session = \Mage::getSingleton('admin/session');
+        return $session->isLoggedIn() && $session->reloadUser();
     }
 
     /**

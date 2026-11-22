@@ -84,14 +84,15 @@ class Mage_Core_Model_Translate
         }
 
         $this->_data = [];
+        $this->_dataScope = [];
 
         foreach ($this->getModulesConfig() as $moduleName => $info) {
             $info = $info->asArray();
-            $this->_loadModuleTranslation($moduleName, $info['files'], $forceReload);
+            $this->_loadModuleTranslation($moduleName, $info['files']);
         }
 
-        $this->_loadThemeTranslation($forceReload);
-        $this->_loadDbTranslation($forceReload);
+        $this->_loadThemeTranslation();
+        $this->_loadDbTranslation();
 
         if (!$forceReload && $this->_canUseCache()) {
             $this->_saveCache();
@@ -127,6 +128,7 @@ class Mage_Core_Model_Translate
     public function setConfig($config)
     {
         $this->_config = $config;
+        $this->_cacheId = null;
         $this->_config[self::CONFIG_KEY_LOCALE] ??= $this->getLocale();
         $this->_config[self::CONFIG_KEY_STORE] ??= Mage::app()->getStore()->getId();
         $this->_config[self::CONFIG_KEY_DESIGN_PACKAGE] ??= Mage::getDesign()->getPackageName();
@@ -150,14 +152,13 @@ class Mage_Core_Model_Translate
      *
      * @param string $moduleName
      * @param array $files
-     * @param bool $forceReload
      * @return $this
      */
-    protected function _loadModuleTranslation($moduleName, $files, $forceReload = false)
+    protected function _loadModuleTranslation($moduleName, $files)
     {
         foreach ($files as $file) {
             $file = $this->_getModuleFilePath($moduleName, $file);
-            $this->_addData($this->_getFileData($file), $moduleName, $forceReload);
+            $this->_addData($this->_getFileData($file), $moduleName);
         }
         return $this;
     }
@@ -167,10 +168,9 @@ class Mage_Core_Model_Translate
      *
      * @param array $data
      * @param string $scope
-     * @param bool $forceReload
      * @return $this
      */
-    protected function _addData($data, $scope, $forceReload = false)
+    protected function _addData($data, $scope)
     {
         foreach ($data as $key => $value) {
             if ($key === $value) {
@@ -178,7 +178,7 @@ class Mage_Core_Model_Translate
             }
             $key    = $this->_prepareDataString($key);
             $value  = $value === null ? '' : $this->_prepareDataString($value);
-            if ($scope && isset($this->_dataScope[$key]) && !$forceReload) {
+            if ($scope && isset($this->_dataScope[$key])) {
                 /**
                  * Checking previous value
                  */
@@ -216,26 +216,24 @@ class Mage_Core_Model_Translate
     /**
      * Loading current theme translation
      *
-     * @param bool $forceReload
      * @return $this
      */
-    protected function _loadThemeTranslation($forceReload = false)
+    protected function _loadThemeTranslation()
     {
         $file = Mage::getDesign()->getLocaleFileName('translate.csv');
-        $this->_addData($this->_getFileData($file), false, $forceReload);
+        $this->_addData($this->_getFileData($file), false);
         return $this;
     }
 
     /**
      * Loading current store translation from DB
      *
-     * @param bool $forceReload
      * @return $this
      */
-    protected function _loadDbTranslation($forceReload = false)
+    protected function _loadDbTranslation()
     {
         $arr = $this->getResource()->getTranslationArray(null, $this->getLocale());
-        $this->_addData($arr, $this->getConfig(self::CONFIG_KEY_STORE), $forceReload);
+        $this->_addData($arr, $this->getConfig(self::CONFIG_KEY_STORE));
         return $this;
     }
 
@@ -300,6 +298,30 @@ class Mage_Core_Model_Translate
     public function setLocale($locale)
     {
         $this->_locale = $locale;
+        return $this;
+    }
+
+    /**
+     * Return the loaded translations and their configuration. Pass the result to setState() to put them back.
+     */
+    public function getState(): Mage_Core_Model_Translate_State
+    {
+        return new Mage_Core_Model_Translate_State(
+            locale: $this->_locale,
+            config: $this->_config,
+            cacheId: $this->_cacheId,
+            data: $this->_data,
+            dataScope: $this->_dataScope,
+        );
+    }
+
+    public function setState(Mage_Core_Model_Translate_State $state): static
+    {
+        $this->_locale = $state->locale;
+        $this->_config = $state->config;
+        $this->_cacheId = $state->cacheId;
+        $this->_data = $state->data;
+        $this->_dataScope = $state->dataScope;
         return $this;
     }
 
@@ -443,11 +465,9 @@ class Mage_Core_Model_Translate
         if (!$this->_canUseCache()) {
             return false;
         }
+        // A locale with no translations has an empty set, which is a hit too
         $data = Mage::app()->loadCache($this->getCacheId());
-        if (!$data) {
-            return false;
-        }
-        return $data;
+        return is_array($data) ? $data : false;
     }
 
     /**

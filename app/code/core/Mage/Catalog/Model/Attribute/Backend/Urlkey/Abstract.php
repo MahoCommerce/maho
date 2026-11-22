@@ -15,6 +15,7 @@ abstract class Mage_Catalog_Model_Attribute_Backend_Urlkey_Abstract extends Mage
      *
      * @param \Maho\DataObject $object
      * @return $this
+     * @throws \RuntimeException
      */
     #[\Override]
     public function beforeSave($object)
@@ -27,6 +28,10 @@ abstract class Mage_Catalog_Model_Attribute_Backend_Urlkey_Abstract extends Mage
         }
         if ($urlKey == '') {
             $urlKey = $object->getName();
+        }
+
+        if (!$object instanceof Mage_Catalog_Model_Product && !$object instanceof Mage_Catalog_Model_Category) {
+            throw new \RuntimeException('The URL key backend accepts only a product or a category.');
         }
 
         $locale = Mage::getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_LOCALE, $object->getStoreId());

@@ -178,10 +178,8 @@ class Mage_SalesRule_Model_Observer
     #[Maho\Config\CronJob('aggregate_sales_report_coupons_data', configPath: 'reports/crontab/coupons_expr')]
     public function aggregateSalesReportCouponsData($schedule)
     {
-        Mage::app()->getLocale()->emulate(0);
         $date = Mage::app()->getLocale()->utcToStore()->modify('-25 hours');
         Mage::getResourceModel('salesrule/report_rule')->aggregate($date);
-        Mage::app()->getLocale()->revert();
         return $this;
     }
 

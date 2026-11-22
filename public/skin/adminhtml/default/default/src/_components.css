@@ -1152,3 +1152,378 @@
         color: inherit !important;
     }
 }
+
+@layer components {
+    /* Tile view of the products of a category (Catalog > Categories > Category Products) */
+    .merchandiser-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--maho-space-3) var(--maho-space-5);
+        margin-block: var(--maho-space-4);
+
+        & [hidden] {
+            display: none;
+        }
+    }
+
+    .merchandiser-views button,
+    .merchandiser-actions button {
+        gap: var(--maho-space-2);
+    }
+
+    .merchandiser [hidden],
+    .merchandiser[hidden] {
+        display: none;
+    }
+
+    .merchandiser-notes {
+        margin-block-end: var(--maho-space-3);
+        padding: var(--maho-space-2) var(--maho-space-3);
+        background: var(--maho-info-bg);
+        border: 1px solid var(--maho-info-border);
+        border-radius: var(--maho-radius-md);
+
+        & p {
+            margin: 0;
+        }
+    }
+
+    .merchandiser-toolbar {
+        display: flex;
+        flex: 1;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--maho-space-3) var(--maho-space-4);
+    }
+
+    .merchandiser-search svg {
+        color: var(--maho-ink-muted);
+    }
+
+    .merchandiser-check {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--maho-space-2);
+        white-space: nowrap;
+    }
+
+    .merchandiser-actions {
+        display: flex;
+        align-items: center;
+        gap: var(--maho-space-2);
+        margin-inline-start: auto;
+    }
+
+    .merchandiser-add {
+        position: relative;
+    }
+
+    .merchandiser-add-panel {
+        position: absolute;
+        z-index: 10;
+        inset-block-start: calc(100% + var(--maho-space-2));
+        inset-inline-end: 0;
+        padding: var(--maho-space-3);
+        background: var(--maho-surface-overlay);
+        border: 1px solid var(--maho-border);
+        border-radius: var(--maho-radius-md);
+        box-shadow: var(--maho-shadow-float);
+    }
+
+    .merchandiser-add-results {
+        margin: var(--maho-space-2) 0 0;
+        padding: 0;
+        overflow-y: auto;
+        list-style: none;
+
+        & li:not(:has(button)) {
+            padding: var(--maho-space-2) var(--maho-space-3);
+            color: var(--maho-ink-muted);
+        }
+    }
+
+    .merchandiser-tiles {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+        gap: var(--maho-space-3);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .merchandiser-tile {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: var(--maho-space-1);
+        padding: var(--maho-space-2);
+        background: var(--maho-surface-raised);
+        border: 1px solid var(--maho-border);
+        border-radius: var(--maho-radius-md);
+        cursor: grab;
+
+        &.is-pinned {
+            background: var(--maho-row-selected);
+            border-color: var(--maho-accent);
+            cursor: default;
+        }
+
+        &.is-out-of-stock .merchandiser-image {
+            opacity: 0.5;
+        }
+
+        &.is-dragging {
+            opacity: 0.4;
+        }
+    }
+
+    .merchandiser-select {
+        inset-block-start: var(--maho-space-3);
+        inset-inline-start: var(--maho-space-3);
+        z-index: 1;
+        background: var(--maho-surface-raised);
+    }
+
+    .merchandiser-image {
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: contain;
+        background: var(--maho-surface-sunken);
+        border-radius: var(--maho-radius-sm);
+    }
+
+    .merchandiser-name {
+        overflow-wrap: anywhere;
+    }
+
+    .merchandiser-sku {
+        color: var(--maho-ink-muted);
+        overflow-wrap: anywhere;
+    }
+
+    .merchandiser-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--maho-space-1);
+    }
+
+    .merchandiser-sales {
+        color: var(--maho-ink-muted);
+
+        & p {
+            margin: 0;
+        }
+    }
+
+    .merchandiser-bulk {
+        position: sticky;
+        z-index: 20;
+        inset-block-end: var(--maho-space-4);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--maho-space-2);
+        width: fit-content;
+        max-width: 100%;
+        margin: var(--maho-space-4) auto 0;
+        padding: var(--maho-space-2) var(--maho-space-3);
+        background: var(--maho-surface-overlay);
+        border: 1px solid var(--maho-border);
+        border-radius: var(--maho-radius-lg);
+        box-shadow: var(--maho-shadow-float);
+    }
+
+    .merchandiser-selected {
+        margin-inline-end: var(--maho-space-2);
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .merchandiser-foot {
+        display: flex;
+        align-items: center;
+        gap: var(--maho-space-1);
+        margin-block-start: auto;
+        padding-block-start: var(--maho-space-2);
+    }
+
+    .merchandiser-position,
+    .merchandiser-bulk input[type="number"] {
+        appearance: textfield;
+
+        &::-webkit-inner-spin-button,
+        &::-webkit-outer-spin-button {
+            appearance: none;
+            margin: 0;
+        }
+    }
+
+    .merchandiser-break {
+        grid-column: 1 / -1;
+        padding-block: var(--maho-space-1);
+        border-block-end: 2px dashed var(--maho-border-strong);
+        color: var(--maho-ink-muted);
+        text-align: end;
+    }
+
+    .merchandiser-empty,
+    .merchandiser-statistics {
+        color: var(--maho-ink-muted);
+
+        & p {
+            margin: 0;
+        }
+    }
+}
+
+/* The d-btn and d-input rules sit in the utilities layer, so the pressed button of the view switch, the pin, the position of the checkbox and the hover states are here */
+@layer utilities {
+    .merchandiser-select {
+        position: absolute;
+    }
+
+    .merchandiser-add-panel input {
+        width: 100%;
+    }
+
+    .merchandiser-add-result {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+        width: 100%;
+        height: auto;
+        padding: var(--maho-space-2) var(--maho-space-3);
+        font-weight: normal;
+        line-height: 1.3;
+        text-align: start;
+        white-space: normal;
+        --d-btn-bg: transparent;
+        --d-btn-border: transparent;
+        --d-btn-shadow: none;
+    }
+
+    .merchandiser-add-sku {
+        color: var(--maho-ink-muted);
+    }
+
+    .merchandiser-pin[aria-pressed="true"] {
+        color: var(--maho-accent-strong);
+    }
+
+    .merchandiser-tile.is-pinned .merchandiser-position:disabled {
+        color: var(--maho-ink);
+        font-weight: 600;
+        background: transparent;
+        border-color: transparent;
+        opacity: 1;
+    }
+
+    .merchandiser-pin:hover {
+        --d-btn-bg: var(--maho-surface-sunken);
+        --d-btn-border: var(--maho-border);
+        color: var(--maho-accent-strong);
+    }
+
+    .merchandiser-remove:hover {
+        --d-btn-bg: var(--maho-error-bg);
+        --d-btn-border: var(--maho-error-border);
+        color: var(--maho-error-strong);
+    }
+
+    .merchandiser-views button[aria-pressed="true"] {
+        --d-btn-bg: var(--maho-btn-bg);
+        --d-btn-border: var(--maho-btn-bg);
+        color: var(--maho-btn-ink);
+    }
+
+    /* System > Configuration lays out its rows as one grid: each .config-row is a subgrid, so the columns line up */
+    .config-fields {
+        display: grid;
+        grid-template-columns: 220px minmax(330px, max-content) auto 1fr;
+    }
+
+    .config-fields > .config-row {
+        display: grid;
+        grid-column: 1 / -1;
+        grid-template-columns: subgrid;
+        align-items: start;
+    }
+
+    .config-fields > .config-row.nested,
+    .config-fields > .config-row.system-fieldset-sub-head {
+        display: block;
+        padding: var(--maho-space-5) var(--maho-space-2) var(--maho-space-2);
+    }
+
+    .config-fields > .config-row.system-fieldset-sub-head:first-child {
+        padding-top: var(--maho-space-2);
+    }
+
+    .config-label {
+        padding: var(--maho-space-2) var(--maho-space-4) var(--maho-space-2) var(--maho-space-2);
+    }
+
+    .config-label label {
+        display: block;
+        font-weight: 400;
+        color: var(--maho-ink-soft);
+    }
+
+    .config-value {
+        min-width: 0;
+        padding: var(--maho-space-2) 0;
+    }
+
+    .config-value :is(input.input-text, textarea, select) {
+        width: 330px;
+    }
+
+    .config-value textarea {
+        height: 15em;
+    }
+
+    .config-value p.note {
+        max-width: 330px;
+        margin: 0;
+        color: var(--maho-ink-muted);
+        font-size: var(--maho-text-xs);
+        font-weight: 400;
+    }
+
+    .config-value input.input-text + strong {
+        padding-inline-start: 0.75rem;
+    }
+
+    .config-use-default {
+        padding: var(--maho-space-2) 0 var(--maho-space-2) var(--maho-space-3);
+    }
+
+    .config-use-default .config-scope-group {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--maho-space-2);
+        padding: var(--maho-space-1) var(--maho-space-2);
+        border: 1px solid var(--maho-border-soft);
+        border-radius: 8px;
+        font-size: var(--maho-text-sm);
+        white-space: nowrap;
+    }
+
+    .config-use-default .config-inherit-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+    }
+
+    .config-use-default .config-scope-divider {
+        align-self: stretch;
+        width: 1px;
+        background: var(--maho-border-soft);
+    }
+
+    .config-use-default .config-scope {
+        color: var(--maho-ink-faint);
+    }
+}

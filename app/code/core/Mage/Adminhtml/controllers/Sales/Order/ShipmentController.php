@@ -31,6 +31,12 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
 
         $service = Mage::getService('sales/order_document');
         $shipmentId = (int) $this->getRequest()->getParam('shipment_id');
+        // _isAllowed() checks the same for each action. This check also covers the other callers.
+        if (!$shipmentId && !$this->_isCreateAllowed()) {
+            $this->_getSession()->addError($this->__('Access denied.'));
+            return false;
+        }
+
         try {
             $shipment = $shipmentId
                 ? $service->requireShipment($shipmentId)
@@ -321,10 +327,12 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     public function addCommentAction(): void
     {
         try {
-            $this->getRequest()->setParam('shipment_id', $this->getRequest()->getParam('id'));
+            $shipmentId = (int) $this->getRequest()->getParam('id');
+            $this->getRequest()->setParam('shipment_id', $shipmentId);
             $data = (array) $this->getRequest()->getPost('comment');
+            // Without a shipment ID, _initShipment() prepares a new shipment from the order
             Mage::getService('sales/order_document')->addComment(
-                $this->_initShipment() ?: Mage::throwException($this->__('The shipment no longer exists.')),
+                ($shipmentId > 0 ? $this->_initShipment() : false) ?: Mage::throwException($this->__('The shipment no longer exists.')),
                 (string) ($data['comment'] ?? ''),
                 !empty($data['is_customer_notified']),
                 isset($data['is_visible_on_front']),
@@ -629,5 +637,39 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
                 ->setIndex($this->getRequest()->getParam('index'))
                 ->toHtml(),
         );
+    }
+
+    /**
+     * Check the Ship order action in addition to the Shipments permission to create or cancel a shipment.
+     *
+     * Without a shipment ID, an action prepares a new shipment from the order, and a tracking
+     * number or a label saves it, so it needs the Ship order action too. addComment reads the
+     * shipment ID from its id parameter.
+     */
+    #[\Override]
+    protected function _isAllowed(): bool
+    {
+        if (!parent::_isAllowed()) {
+            return false;
+        }
+
+        $request = $this->getRequest();
+        $action = strtolower($request->getActionName());
+        $shipmentId = (int) $request->getParam($action === 'addcomment' ? 'id' : 'shipment_id');
+        if (in_array($action, ['start', 'new', 'save', 'cancel'], true)
+            || ($shipmentId === 0 && (int) $request->getParam('order_id') > 0)
+        ) {
+            return $this->_isCreateAllowed();
+        }
+
+        return true;
+    }
+
+    /**
+     * Return true when the admin may create a shipment.
+     */
+    protected function _isCreateAllowed(): bool
+    {
+        return Mage::getSingleton('admin/session')->isAllowed('sales/order/actions/ship');
     }
 }

@@ -29,9 +29,11 @@ class Mage_Catalog_Model_Product_Option_Observer
                     if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE) {
                         /** @var Mage_Catalog_Model_Product_Option $option */
                         try {
-                            $option->groupFactory($option->getType())
-                                ->setQuoteItemOption($itemOption)
-                                ->copyQuoteToOrder();
+                            $group = $option->groupFactory($option->getType());
+                            if ($group instanceof Mage_Catalog_Model_Product_Option_Type_File) {
+                                $group->setQuoteItemOption($itemOption);
+                                $group->copyQuoteToOrder();
+                            }
                         } catch (Exception) {
                             continue;
                         }

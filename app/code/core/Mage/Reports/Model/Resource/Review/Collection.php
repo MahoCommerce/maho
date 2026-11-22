@@ -28,17 +28,6 @@ class Mage_Reports_Model_Resource_Review_Collection extends Mage_Review_Model_Re
     }
 
     /**
-     * Reset select
-     *
-     * @return $this
-     */
-    public function resetSelect()
-    {
-        $this->_joinFields();
-        return $this;
-    }
-
-    /**
      * Get select count sql
      *
      * @return Maho\Db\Select

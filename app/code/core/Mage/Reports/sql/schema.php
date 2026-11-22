@@ -214,6 +214,38 @@ return function (SchemaEditor $schema): void {
 
     $schema->addTable(
         Table::editor()
+            ->setUnquotedName('report_viewed_product_aggregated_rolling')
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('views_num', Types::INTEGER, default: 0))
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()->setUnquotedColumnNames('product_id', 'store_id')->create(),
+            )
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('product_id')
+                    ->setUnquotedReferencedTableName('catalog_product_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Reports Viewed Product Aggregated Rolling')
+            ->create(),
+    );
+
+    $schema->addTable(
+        Table::editor()
             ->setUnquotedName('report_not_found')
             ->addColumn(Schema::column('not_found_id', Types::INTEGER, unsigned: true, autoincrement: true))
             ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))

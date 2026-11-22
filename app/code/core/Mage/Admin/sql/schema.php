@@ -89,6 +89,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('logdate', Types::DATETIME_IMMUTABLE, notNull: false))
             ->addColumn(Schema::column('lognum', Types::SMALLINT, unsigned: true, default: 0))
             ->addColumn(Schema::column('reload_acl_flag', Types::SMALLINT, default: 0))
+            ->addColumn(Schema::column('acl_version', Types::INTEGER, unsigned: true, default: 0))
             ->addColumn(Schema::column('is_active', Types::SMALLINT, default: 1))
             ->addColumn(Schema::column('extra', Types::TEXT, length: 65535, notNull: false))
             ->addColumn(Schema::column('rp_token', Types::STRING, length: 255, notNull: false))

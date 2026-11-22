@@ -217,7 +217,8 @@ td:has(input.swatch-disabled) {
         margin-left: auto; }
 }
 
-.form-list tr:has(> td > .token-import) > td {
+.form-list tr:has(> td > .token-import) > td,
+.config-row:has(> .config-value > .token-import) > div {
   padding: var(--maho-space-2) 0; }
 
 .token-import {
@@ -308,12 +309,15 @@ td:has(input.swatch-disabled) {
     background: #fff;
     transform: translateX(var(--preview-offset)) scale(var(--preview-scale));
     transform-origin: 0 0; }
-.form-list tr.has-floating-preview > td {
+.form-list tr.has-floating-preview > td,
+.config-row.has-floating-preview > div {
   padding: 0;
   border: 0; }
-  .form-list tr.has-floating-preview > td:not(:has(.token-preview)) {
+  .form-list tr.has-floating-preview > td:not(:has(.token-preview)),
+  .config-row.has-floating-preview > div:not(:has(.token-preview)) {
     display: none; }
-  .form-list tr.has-floating-preview > td > *:not(.token-preview) {
+  .form-list tr.has-floating-preview > td > *:not(.token-preview),
+  .config-row.has-floating-preview > div > *:not(.token-preview) {
     display: none; }
 
   .token-preview.is-offscreen {

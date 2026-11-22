@@ -130,10 +130,9 @@ class Dbp extends Tree
      *
      * @param int|Node $parentNode
      * @param int $recursionLevel
-     * @return $this
      */
     #[\Override]
-    public function load($parentNode = null, $recursionLevel = 0)
+    public function load($parentNode = null, $recursionLevel = 0): static
     {
         if (!$this->_loaded) {
             $startLevel = 1;
@@ -225,10 +224,9 @@ class Dbp extends Tree
 
     /**
      * @param int|string $nodeId
-     * @return Node
      */
     #[\Override]
-    public function loadNode($nodeId)
+    public function loadNode($nodeId): Node
     {
         $select = clone $this->_select;
         if (is_numeric($nodeId)) {
@@ -248,10 +246,9 @@ class Dbp extends Tree
      * @param Node $node
      * @param bool $recursive
      * @param array $result
-     * @return array
      */
     #[\Override]
-    public function getChildren($node, $recursive = true, $result = [])
+    public function getChildren($node, $recursive = true, $result = []): array
     {
         if (is_numeric($node)) {
             $node = $this->getNodeById($node);

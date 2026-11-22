@@ -19,14 +19,10 @@ class Mage_Adminhtml_Block_Catalog_Form_Renderer_Fieldset_Element extends Mage_A
         $this->setTemplate('catalog/form/renderer/fieldset/element.phtml');
     }
 
-    /**
-     * Retrieve data object related with form
-     *
-     * @return Mage_Catalog_Model_Product | Mage_Catalog_Model_Category
-     */
-    public function getDataObject()
+    public function getDataObject(): ?Mage_Catalog_Model_Abstract
     {
-        return $this->getElement()->getForm()->getDataObject();
+        $object = $this->getElement()->getForm()->getDataObject();
+        return $object instanceof Mage_Catalog_Model_Abstract ? $object : null;
     }
 
     /**

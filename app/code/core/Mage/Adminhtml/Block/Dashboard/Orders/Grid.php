@@ -52,7 +52,7 @@ class Mage_Adminhtml_Block_Dashboard_Orders_Grid extends Mage_Adminhtml_Block_Da
      * Prepares page sizes for dashboard grid with las 5 orders
      */
     #[\Override]
-    protected function _preparePage()
+    protected function _preparePage(): void
     {
         $this->getCollection()->setPageSize($this->getParam($this->getVarNameLimit(), $this->_defaultLimit));
         // Remove count of total orders $this->getCollection()->setCurPage($this->getParam($this->getVarNamePage(), $this->_defaultPage));

@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Sales_Order_Create_Totals extends Mage_Adminhtml_Block_Sales_Order_Create_Abstract
 {
-    protected $_totalRenderers;
+    protected ?array $_totalRenderers = null;
     protected string $_defaultRenderer = 'adminhtml/sales_order_create_totals_default';
 
     public function __construct()

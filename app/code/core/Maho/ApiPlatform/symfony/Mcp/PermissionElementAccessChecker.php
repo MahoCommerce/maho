@@ -42,11 +42,8 @@ final class PermissionElementAccessChecker implements ElementAccessCheckerInterf
             return true;
         }
 
-        if (OperationAccessChecker::isPublic($operation)) {
-            return true;
-        }
-
-        if (!$this->accessChecker->isAuthenticated()) {
+        $isPublic = OperationAccessChecker::isPublic($operation);
+        if (!$isPublic && !$this->accessChecker->isAuthenticated()) {
             return false;
         }
 
@@ -61,6 +58,6 @@ final class PermissionElementAccessChecker implements ElementAccessCheckerInterf
             return false;
         }
 
-        return $this->decorated->isGranted($operationName);
+        return $isPublic || $this->decorated->isGranted($operationName);
     }
 }

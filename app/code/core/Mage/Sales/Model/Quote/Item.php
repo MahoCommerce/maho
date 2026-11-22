@@ -86,18 +86,6 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     }
 
     /**
-     * Init mapping array of short fields to
-     * its full names
-     *
-     * @return $this
-     */
-    #[\Override]
-    protected function _initOldFieldsMap()
-    {
-        return $this;
-    }
-
-    /**
      * Quote Item Before Save prepare data process
      *
      * @return $this

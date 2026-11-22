@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -90,7 +91,7 @@ abstract class Mage_Adminhtml_Block_Sales_Order_Create_Abstract extends Mage_Adm
         return $this->getStore()->formatPrice($value);
     }
 
-    public function convertPrice($value, $format = true)
+    public function convertPrice(?float $value, bool $format = true): float|string
     {
         return $this->getStore()->convertPrice($value, $format);
     }

@@ -8,10 +8,12 @@
  * @package Mage_Adminhtml
  */
 
+declare(strict_types=1);
+
 class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date
 {
     #[\Override]
-    public function getValue($index = null)
+    public function getValue(?string $index = null): array|string|null
     {
         if ($index) {
             if ($data = $this->getData('value', 'orig_' . $index)) {
@@ -68,13 +70,8 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
         return parent::_convertDate($date, $locale);
     }
 
-    /**
-     * Render filter html
-     *
-     * @return string
-     */
     #[\Override]
-    public function getHtml()
+    public function getHtml(): string
     {
         $fromLabel = Mage::helper('adminhtml')->__('From');
         $toLabel = Mage::helper('adminhtml')->__('To');

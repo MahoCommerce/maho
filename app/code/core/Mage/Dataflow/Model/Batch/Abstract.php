@@ -11,6 +11,20 @@
 abstract class Mage_Dataflow_Model_Batch_Abstract extends Mage_Core_Model_Abstract
 {
     /**
+     * @return Mage_Dataflow_Model_Resource_Batch_Abstract
+     * @throws \RuntimeException
+     */
+    #[\Override]
+    public function getResource()
+    {
+        $resource = parent::getResource();
+        if (!$resource instanceof Mage_Dataflow_Model_Resource_Batch_Abstract) {
+            throw new \RuntimeException('The resource model of a batch must extend Mage_Dataflow_Model_Resource_Batch_Abstract.');
+        }
+        return $resource;
+    }
+
+    /**
      * Set batch data
      * automatic convert to serialize data
      *

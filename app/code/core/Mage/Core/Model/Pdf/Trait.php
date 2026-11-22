@@ -36,7 +36,7 @@ trait Mage_Core_Model_Pdf_Trait
             $this->dompdfOptions->set('default_media_type', $config['default_media_type'] ?? 'print');
             $this->dompdfOptions->set('default_paper_size', $config['default_paper_size'] ?? 'a4');
             $this->dompdfOptions->set('default_paper_orientation', $config['default_paper_orientation'] ?? 'portrait');
-            $this->dompdfOptions->set('default_font', $config['default_font'] ?? 'Helvetica');
+            $this->dompdfOptions->set('default_font', $config['default_font'] ?? 'DejaVu Sans');
             $this->dompdfOptions->set('dpi', (int) ($config['dpi'] ?? 96));
             $this->dompdfOptions->set('font_height_ratio', (float) ($config['font_height_ratio'] ?? 1.1));
 
@@ -97,31 +97,13 @@ trait Mage_Core_Model_Pdf_Trait
         }
     }
 
+    /**
+     * Read sales/order/pdf/pdf.css from the current design
+     */
     protected function getCssContent(): string
     {
-        // Ensure we're in adminhtml design area for CSS loading
-        $originalArea = Mage::getDesign()->getArea();
-        Mage::getDesign()->setArea('adminhtml');
-
-        try {
-            $cssPath = Mage::getDesign()->getTemplateFilename('sales/order/pdf/pdf.css', [
-                '_type' => 'template',
-                '_package' => Mage::getDesign()->getPackageName(),
-                '_theme' => Mage::getDesign()->getTheme('template'),
-            ]);
-
-            if (file_exists($cssPath)) {
-                return file_get_contents($cssPath);
-            }
-
-            // Return empty string if CSS file doesn't exist
-            return '';
-        } finally {
-            // Restore original area
-            if ($originalArea !== 'adminhtml') {
-                Mage::getDesign()->setArea($originalArea);
-            }
-        }
+        $cssPath = Mage::getDesign()->getTemplateFilename('sales/order/pdf/pdf.css');
+        return is_file($cssPath) ? (string) file_get_contents($cssPath) : '';
     }
 
     protected function wrapHtmlDocument(string $html): string

@@ -141,16 +141,7 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
             ->setHeader('Pragma', 'no-cache', true)
             ->setHeader('Expires', 'Thu, 01 Jan 1970 00:00:00 GMT', true);
 
-        $theme = Mage::getConfig()->getNode('stores/admin/design/theme/openmage');
-        Mage::getDesign()
-            ->setArea($this->_currentArea)
-            ->setPackageName((string) Mage::getConfig()->getNode('stores/admin/design/package/name'))
-            ->setTheme((string) $theme);
-        foreach (['layout', 'template', 'skin', 'locale'] as $type) {
-            if ($value = (string) Mage::getConfig()->getNode("stores/admin/design/theme/{$type}")) {
-                Mage::getDesign()->setTheme($type, $value);
-            }
-        }
+        Mage::getDesign()->applyAdminDesign();
 
         $this->getLayout()->setArea($this->_currentArea);
 
@@ -302,10 +293,10 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
     }
 
     #[\Override]
-    protected function _forward($action, $controller = null, $module = null, ?array $params = null)
+    protected function _forward($action, $controller = null, $module = null, ?array $params = null): void
     {
         $this->_getSession()->setIsUrlNotice($this->getFlag('', self::FLAG_IS_URLS_CHECKED));
-        return parent::_forward($action, $controller, $module, $params);
+        parent::_forward($action, $controller, $module, $params);
     }
 
     /**

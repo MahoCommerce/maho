@@ -367,3 +367,63 @@ it('keeps the system attributes of categories off System > Attributes, is_dynami
         ->and($codes)->not->toContain('is_dynamic')
         ->and(Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Category::ENTITY, 'is_dynamic')->getIsUserDefined())->toBeFalse();
 });
+
+/**
+ * Render the category tab of the default set that holds $code. Give its group the name $groupName first, when it is set.
+ */
+function categoryAttributeAdminTabHtml(string $code, ?string $groupName = null): string
+{
+    $setId = categoryAttributeAdminDefaultSetId();
+    $category = Mage::getModel('catalog/category')->setStoreId(0)->setAttributeSetId($setId);
+    $groups = Mage::getResourceModel('eav/entity_attribute_group_collection')->setAttributeSetFilter($setId);
+
+    foreach ($groups as $group) {
+        $attributes = array_filter(
+            $category->getAttributes(),
+            fn($attribute) => $attribute->isInGroup($setId, $group->getId()),
+        );
+        if (!isset($attributes[$code])) {
+            continue;
+        }
+        if ($groupName !== null) {
+            $group->setAttributeGroupName($groupName);
+        }
+
+        // The rule conditions get their renderers from the layout of the current action
+        $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/index.php/admin/catalog_category/edit'));
+        $request->setRouteName('adminhtml')->setControllerName('catalog_category')->setActionName('edit');
+        $controller = new Mage_Adminhtml_Catalog_CategoryController($request, new Mage_Core_Controller_Response_Http());
+        $front = Mage::app()->getFrontController();
+        $previousAction = $front->getAction();
+
+        Mage::register('current_category', $category, true);
+        $design = Mage::getDesign();
+        [$area, $package, $theme] = [$design->getArea(), $design->getPackageName(), $design->getTheme('template')];
+        $design->setArea('adminhtml')->setPackageName('default')->setTheme('default');
+        $front->setAction($controller);
+        try {
+            $layout = $controller->getLayout();
+            $layout->createBlock('page/html_head', 'head');
+            return $layout->createBlock('adminhtml/catalog_category_tab_attributes')
+                ->setGroup($group)
+                ->setAttributes($attributes)
+                ->toHtml();
+        } finally {
+            $front->setAction($previousAction);
+            $design->setArea($area)->setPackageName($package)->setTheme($theme);
+            Mage::unregister('current_category');
+        }
+    }
+
+    throw new RuntimeException("No group of the default category set holds {$code}.");
+}
+
+it('shows the dynamic rules on the tab that holds Is Dynamic Category, whatever the name of its group', function () {
+    $rules = categoryAttributeAdminTabHtml('is_dynamic', 'Smart Category');
+    $general = categoryAttributeAdminTabHtml('name');
+
+    expect($rules)->toContain('rule[conditions]')
+        ->and($rules)->toContain('VarienRulesForm')
+        ->and($general)->not->toContain('rule[conditions]')
+        ->and($general)->not->toContain('VarienRulesForm');
+});

@@ -41,8 +41,9 @@ class Mage_Core_Block_Pdf extends Mage_Core_Block_Template
      */
     public function getLogoUrl(): ?string
     {
+        $store = $this->getStore();
         // First, try the PDF-specific logo
-        $logoFile = Mage::getStoreConfig('sales/identity/logo', $this->getStore());
+        $logoFile = $store->getConfig('sales/identity/logo');
         if (is_string($logoFile) && $logoFile !== '') {
             $mount = Mage::getStorage('media');
             $path = \Maho\Io::getPathWithinMount($mount, 'sales/store/logo', $logoFile);
@@ -54,13 +55,12 @@ class Mage_Core_Block_Pdf extends Mage_Core_Block_Template
             }
         }
 
-        // Fallback to the main store logo using Magento's fallback mechanism
-        $storeLogo = Mage::getStoreConfig('design/header/logo_src', $this->getStore());
+        $storeLogo = $store->getConfig('design/header/logo_src');
         if (is_string($storeLogo) && $storeLogo !== '') {
-            $logoPath = Mage::getDesign()->getFilename($storeLogo, [
-                '_type' => 'skin',
-                '_default' => false,
-            ]);
+            $design = Mage::getDesign();
+            $logoPath = $design->getArea() === Mage_Core_Model_App_Area::AREA_ADMINHTML && !$store->isAdmin()
+                ? $design->getStoreSkinFilename($storeLogo, $store)
+                : $design->getFilename($storeLogo, ['_type' => 'skin']);
 
             if ($logoPath && file_exists($logoPath) && is_readable($logoPath)) {
                 return $this->processLogoFile($logoPath);

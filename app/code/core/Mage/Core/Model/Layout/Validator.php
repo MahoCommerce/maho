@@ -52,6 +52,17 @@ class Mage_Core_Model_Layout_Validator
     protected array $_disallowedBlocks = [];
 
     /**
+     * Admin blocks expect a signed-in admin user. On the storefront, a grid shows a full collection
+     * and a grid column calls the callbacks that its options give.
+     *
+     * @var list<class-string>
+     */
+    protected array $adminhtmlBlockClasses = [
+        Mage_Adminhtml_Block_Abstract::class,
+        Mage_Adminhtml_Block_Template::class,
+    ];
+
+    /**
      * @var array<string, string>
      */
     protected array $_messageTemplates = [];
@@ -98,6 +109,24 @@ class Mage_Core_Model_Layout_Validator
     public function getMessages(): array
     {
         return $this->messages;
+    }
+
+    /**
+     * Return $layoutUpdate when the validator accepts it, and an empty string when it does not.
+     * The save validates the update, but an update saved before a rule existed must not run.
+     */
+    public function getValidLayoutUpdate(string $layoutUpdate): string
+    {
+        if (trim($layoutUpdate) === '') {
+            return $layoutUpdate;
+        }
+        try {
+            if ($this->isValid($layoutUpdate)) {
+                return $layoutUpdate;
+            }
+        } catch (Exception) {
+        }
+        return '';
     }
 
     /**
@@ -190,9 +219,9 @@ class Mage_Core_Model_Layout_Validator
     }
 
     /**
-     * Return true when a block is of a disallowed class or of a subclass of one. The class comes from the
-     * "class" and the "type" attributes, as Mage_Core_Model_Layout::_generateBlock() reads them,
-     * or from an action argument.
+     * Return true when a block is an admin block (see isAdminhtmlBlock()), or is of a disallowed class or
+     * of a subclass of one. The class comes from the "class" and the "type" attributes, as
+     * Mage_Core_Model_Layout::_generateBlock() reads them, or from an action argument.
      */
     protected function _hasDisallowedBlock(\Maho\Simplexml\Element $xml): bool
     {
@@ -203,9 +232,6 @@ class Mage_Core_Model_Layout_Validator
                 $disallowed[] = $className;
             }
         }
-        if ($disallowed === []) {
-            return false;
-        }
 
         // An action can create a block from an argument, as addOptionRenderer() and addItemRender() do
         foreach ($xml->xpath('//block/@class | //block/@type | //action//*[not(*)]') ?: [] as $node) {
@@ -213,19 +239,45 @@ class Mage_Core_Model_Layout_Validator
             if ($className === '') {
                 continue;
             }
+            if ($this->isAdminhtmlBlock($className)) {
+                return true;
+            }
+            $isClassName = $this->isClassName($className);
             foreach ($disallowed as $disallowedClass) {
                 if (strcasecmp($className, $disallowedClass) === 0) {
                     return true;
                 }
-                if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*(\\\\[A-Za-z_][A-Za-z0-9_]*)*$/', $className)
-                    && is_a($className, $disallowedClass, true)
-                ) {
+                if ($isClassName && is_a($className, $disallowedClass, true)) {
                     return true;
                 }
             }
         }
 
         return false;
+    }
+
+    /**
+     * Return true when $className is an admin block: a core admin block ("adminhtml/..." gives
+     * Mage_Adminhtml_Block_...), a class with "Block_Adminhtml" in its name, as the admin blocks of
+     * other modules have, or a subclass of a class in $adminhtmlBlockClasses.
+     */
+    protected function isAdminhtmlBlock(string $className): bool
+    {
+        if (preg_match('/^Mage_Adminhtml_|[_\\\\]Block[_\\\\]Adminhtml(?:[_\\\\]|$)/i', $className) === 1) {
+            return true;
+        }
+        if (!$this->isClassName($className)) {
+            return false;
+        }
+        return array_any($this->adminhtmlBlockClasses, fn($adminhtmlBlockClass) => is_a($className, $adminhtmlBlockClass, true));
+    }
+
+    /**
+     * Return true when $className is a valid PHP class name, so that is_a() can autoload it.
+     */
+    private function isClassName(string $className): bool
+    {
+        return preg_match('/^[A-Za-z_][A-Za-z0-9_]*(\\\\[A-Za-z_][A-Za-z0-9_]*)*$/', $className) === 1;
     }
 
     /**

@@ -1030,6 +1030,9 @@ SPDX-License-Identifier: AFL-3.0
                     <bestsellers_aggregated_yearly>
                         <table>sales_bestsellers_aggregated_yearly</table>
                     </bestsellers_aggregated_yearly>
+                    <bestsellers_aggregated_rolling>
+                        <table>sales_bestsellers_aggregated_rolling</table>
+                    </bestsellers_aggregated_rolling>
                     <billing_agreement>
                         <table>sales_billing_agreement</table>
                     </billing_agreement>

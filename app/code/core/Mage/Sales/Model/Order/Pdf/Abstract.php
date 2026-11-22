@@ -86,81 +86,54 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
 
         $html = '';
         $isFirst = true;
+        foreach ($documents as $document) {
+            // The templates are in the design of the store, so a store theme can change the PDF of its documents
+            $blockHtml = Mage::app()->emulate($this->getDocumentStoreId($document), fn(): string => $this->renderDocumentHtml($document));
 
-        // The PDF templates live in the admin design. Outside the admin (API, emails sent
-        // from the storefront or cron) the storefront package finds none, and the PDF
-        // comes out blank, so switch the whole design, not only the area.
-        $restoreDesign = $this->useAdminDesign();
-
-        try {
-            foreach ($documents as $document) {
-                if ($document->getStoreId()) {
-                    Mage::app()->getLocale()->emulate($document->getStoreId());
-                    Mage::app()->setCurrentStore($document->getStoreId());
+            if (!empty($blockHtml)) {
+                if (!$isFirst) {
+                    $html .= '<div style="page-break-before: always;"></div>';
                 }
-
-                // Create block directly instead of using layout
-                $blockClass = $this->_getBlockClass();
-                $block = new $blockClass();
-
-                $block->setDocument($document);
-                $block->setOrder($document->getOrder());
-                $blockHtml = $block->toHtml();
-
-                if (!empty($blockHtml)) {
-                    if (!$isFirst) {
-                        $html .= '<div style="page-break-before: always;"></div>';
-                    }
-                    $html .= $blockHtml;
-                    $isFirst = false;
-                }
-
-                // Clear block reference for memory management
-                unset($block);
-
-                if ($document->getStoreId()) {
-                    Mage::app()->getLocale()->revert();
-                }
-
-                // Memory management for large document sets
-                gc_collect_cycles();
+                $html .= $blockHtml;
+                $isFirst = false;
             }
 
-            // pdf.css is in the admin design too.
-            return $this->wrapHtmlDocument($html);
-        } finally {
-            $restoreDesign();
+            // Memory management for large document sets
+            gc_collect_cycles();
         }
+
+        // A PDF has one stylesheet, so a PDF of several documents takes pdf.css from the store of the first one
+        return Mage::app()->emulate($this->getDocumentStoreId(reset($documents)), fn(): string => $this->wrapHtmlDocument($html));
     }
 
     /**
-     * Switch to the admin design package and theme, as Mage_Adminhtml_Controller_Action::preDispatch()
-     * does, and return a callback that restores the previous design.
+     * Get the store view of $document, or the default store view when the store view of $document no longer exists
      */
+    protected function getDocumentStoreId(\Maho\DataObject $document): int
+    {
+        return (int) $document->getStoreId() ?: (int) Mage::app()->getDefaultStoreView()->getId();
+    }
+
+    protected function renderDocumentHtml(\Maho\DataObject $document): string
+    {
+        $blockClass = $this->_getBlockClass();
+        $block = new $blockClass();
+        $block->setDocument($document);
+        $block->setOrder($document->getOrder());
+        return $block->toHtml();
+    }
+
+    /**
+     * Switch to the admin design, as an admin request does, and return a callback that restores the previous design.
+     */
+    #[\Deprecated(message: 'the PDF templates are in the frontend design: render in Mage_Core_Model_App::emulate()', since: '27.1')]
     protected function useAdminDesign(): \Closure
     {
         $design = Mage::getDesign();
-        $area = $design->getArea();
-        $package = $design->getPackageName();
-        $themes = [];
-        foreach (['layout', 'template', 'skin', 'locale'] as $type) {
-            $themes[$type] = $design->getTheme($type);
-        }
-
-        $design->setArea('adminhtml')
-            ->setPackageName((string) Mage::getConfig()->getNode('stores/admin/design/package/name'))
-            ->setTheme((string) Mage::getConfig()->getNode('stores/admin/design/theme/openmage'));
-        foreach (array_keys($themes) as $type) {
-            if ($value = (string) Mage::getConfig()->getNode("stores/admin/design/theme/{$type}")) {
-                $design->setTheme($type, $value);
-            }
-        }
-
-        return function () use ($design, $area, $package, $themes): void {
-            $design->setArea($area)->setPackageName($package);
-            foreach ($themes as $type => $theme) {
-                $design->setTheme($type, $theme);
-            }
+        $state = $design->getState();
+        $design->applyAdminDesign();
+        return static function () use ($design, $state): void {
+            $design->setState($state);
         };
     }
 

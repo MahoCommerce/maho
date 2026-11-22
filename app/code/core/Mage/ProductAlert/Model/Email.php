@@ -222,20 +222,17 @@ class Mage_ProductAlert_Model_Email extends Mage_Core_Model_Abstract
             return false;
         }
 
-        $appEmulation = Mage::getSingleton('core/app_emulation');
-        $initialEnvironmentInfo = $appEmulation->startEnvironmentEmulation($storeId);
-
-        if ($this->_type == 'price') {
-            $this->_getPriceBlock()
-                ->setStore($store)
-                ->reset();
-            foreach ($this->_priceProducts as $product) {
-                $product->setCustomerGroupId($this->_customer->getGroupId());
-                $this->_getPriceBlock()->addProduct($product);
+        $block = Mage::app()->emulate((int) $storeId, function () use ($store): string {
+            if ($this->_type == 'price') {
+                $this->_getPriceBlock()
+                    ->setStore($store)
+                    ->reset();
+                foreach ($this->_priceProducts as $product) {
+                    $product->setCustomerGroupId($this->_customer->getGroupId());
+                    $this->_getPriceBlock()->addProduct($product);
+                }
+                return $this->_getPriceBlock()->toHtml();
             }
-            $block = $this->_getPriceBlock()->toHtml();
-            $templateId = Mage::getStoreConfig(self::XML_PATH_EMAIL_PRICE_TEMPLATE, $storeId);
-        } else {
             $this->_getStockBlock()
                 ->setStore($store)
                 ->reset();
@@ -243,11 +240,9 @@ class Mage_ProductAlert_Model_Email extends Mage_Core_Model_Abstract
                 $product->setCustomerGroupId($this->_customer->getGroupId());
                 $this->_getStockBlock()->addProduct($product);
             }
-            $block = $this->_getStockBlock()->toHtml();
-            $templateId = Mage::getStoreConfig(self::XML_PATH_EMAIL_STOCK_TEMPLATE, $storeId);
-        }
-
-        $appEmulation->stopEnvironmentEmulation($initialEnvironmentInfo);
+            return $this->_getStockBlock()->toHtml();
+        });
+        $templateId = Mage::getStoreConfig($this->_type == 'price' ? self::XML_PATH_EMAIL_PRICE_TEMPLATE : self::XML_PATH_EMAIL_STOCK_TEMPLATE, $storeId);
 
         Mage::getModel('core/email_template')
             ->setDesignConfig([

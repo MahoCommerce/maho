@@ -496,7 +496,7 @@ class PriceTemplateTest_WeeeHelper extends Mage_Weee_Helper_Data
     }
 
     #[\Override]
-    public function typeOfDisplay($product, $compareTo = null, $zone = null, $store = null)
+    public function typeOfDisplay(?Maho\DataObject $product, array|int|null $compareTo = null, ?string $zone = null, Mage_Core_Model_Store|int|null $store = null): bool|int
     {
         if (is_null($compareTo)) {
             return $this->getPriceDisplayType();

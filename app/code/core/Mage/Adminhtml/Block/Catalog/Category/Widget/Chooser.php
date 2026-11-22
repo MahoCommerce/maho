@@ -97,8 +97,11 @@ class Mage_Adminhtml_Block_Catalog_Category_Widget_Chooser extends Mage_Adminhtm
     protected function _getModelAttributeByEntityId($modelType, $attributeName, $entityId)
     {
         $result = '';
-        $model = Mage::getModel($modelType)
-            ->getCollection()
+        $model = Mage::getModel($modelType);
+        if (!$model instanceof Mage_Catalog_Model_Abstract) {
+            return $result;
+        }
+        $model = $model->getResourceCollection()
             ->addAttributeToSelect($attributeName)
             ->addAttributeToFilter('entity_id', $entityId)
             ->getFirstItem();

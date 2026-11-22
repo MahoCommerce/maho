@@ -42,18 +42,6 @@ class Mage_Catalog_Model_Observer
     }
 
     /**
-     * Process catalog data after products import
-     *
-     * @return  Mage_Catalog_Model_Observer
-     */
-    public function catalogProductImportAfter(\Maho\Event\Observer $observer)
-    {
-        Mage::getModel('catalog/url')->refreshRewrites();
-        Mage::getResourceSingleton('catalog/category')->refreshProductIndex();
-        return $this;
-    }
-
-    /**
      * Create the resized files of the new images of a saved product. The main image shows in
      * the listings, so its files are created after the save commits. The other gallery images
      * go to the queue, so a save with many images returns fast. A duplicate gets new copies of

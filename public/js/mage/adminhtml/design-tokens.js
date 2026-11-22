@@ -285,7 +285,7 @@ window.MahoDesignTokens = (function () {
         panel.classList.add('is-floating');
         // Collapse the row in place. Moving the panel out would reload the iframe, and
         // hiding the row would hide the panel with it
-        panel.closest('tr')?.classList.add('has-floating-preview');
+        panel.closest('tr, .config-row')?.classList.add('has-floating-preview');
         // The admin pins .content-header above this panel, so it sets the floor
         const header = document.querySelector('.content-header');
 

@@ -396,7 +396,11 @@ class Mage_Catalog_Model_Resource_Category_Tree extends \Maho\Data\Tree\Dbp
     public function move($category, $newParent, $prevNode = null): void
     {
         $this->_beforeMove($category, $newParent, $prevNode);
-        Mage::getResourceSingleton('catalog/category')->move($category->getId(), $newParent->getId());
+        $this->_conn->update(
+            $this->_table,
+            ['parent_id' => (int) $newParent->getId()],
+            ['entity_id = ?' => (int) $category->getId()],
+        );
         parent::move($category, $newParent, $prevNode);
 
         $this->_afterMove($category, $newParent, $prevNode);

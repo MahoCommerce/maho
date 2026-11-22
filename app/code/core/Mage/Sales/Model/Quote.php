@@ -96,18 +96,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Init mapping array of short fields to
-     * its full names
-     *
-     * @return \Maho\DataObject
-     */
-    #[\Override]
-    protected function _initOldFieldsMap()
-    {
-        return $this;
-    }
-
-    /**
      * Get quote store identifier
      *
      * @return int

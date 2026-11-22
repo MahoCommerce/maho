@@ -78,7 +78,7 @@ class Mage_Adminhtml_Block_Rating_Edit_Tab_Form extends Mage_Adminhtml_Block_Wid
         return parent::_prepareForm();
     }
 
-    protected function _setRatingCodes($ratingCodes): void
+    protected function _setRatingCodes(array $ratingCodes): void
     {
         foreach ($ratingCodes as $store => $value) {
             if ($element = $this->getForm()->getElement('rating_code_' . $store)) {

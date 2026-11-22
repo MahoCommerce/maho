@@ -23,6 +23,9 @@ class Mage_Adminhtml_Model_System_Config_Source_Catalog_ListSort
                 'value' => $attribute['attribute_code'],
             ];
         }
+        foreach ($this->_getCatalogConfig()->getAutomaticSortOptions() as $code => $label) {
+            $options[] = ['label' => $label, 'value' => $code];
+        }
         return $options;
     }
 

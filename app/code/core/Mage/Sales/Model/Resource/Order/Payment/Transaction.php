@@ -153,7 +153,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction extends Mage_Sales_Mod
         }
 
         // make sure unique key won't cause trouble
-        if ($transaction->isFailsafe()) {
+        if ($transaction instanceof Mage_Sales_Model_Order_Payment_Transaction && $transaction->isFailsafe()) {
             $autoincrementId = (int) $this->_lookupByTxnId($orderId, $paymentId, $txnId, $idFieldName);
             if ($autoincrementId) {
                 $transaction->setData($idFieldName, $autoincrementId)->isObjectNew(false);

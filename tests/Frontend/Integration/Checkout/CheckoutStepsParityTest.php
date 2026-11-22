@@ -288,6 +288,31 @@ describe('a shipping method', function () {
 });
 
 describe('a payment method', function () {
+    it('does not let the storefront form write the payment of another cart', function () {
+        [$cart, $otherCart] = $this->carts;
+        Mage::app()->getStore()->setConfig('payment/banktransfer/active', '1');
+        checkoutOnepagePost($otherCart, 'savePayment', ['payment' => ['method' => 'checkmo']]);
+        $otherPaymentId = (int) checkoutStepsReload($otherCart)->getPayment()->getId();
+
+        checkoutOnepagePost($cart, 'savePayment', ['payment' => ['method' => 'banktransfer', 'payment_id' => (string) $otherPaymentId]]);
+
+        $otherPayment = checkoutStepsReload($otherCart)->getPayment();
+        expect((int) $otherPayment->getId())->toBe($otherPaymentId)
+            ->and($otherPayment->getMethod())->toBe('checkmo');
+    });
+
+    it('does not take the additional information of the storefront form', function () {
+        Mage::app()->getStore()->setConfig('payment/banktransfer/active', '1');
+
+        $web = checkoutOnepagePost($this->carts[0], 'savePayment', ['payment' => [
+            'method' => 'banktransfer',
+            'additional_information' => ['paypal_capture_id' => 'pest-capture'],
+        ]]);
+
+        expect($web)->not->toHaveKey('error')
+            ->and(checkoutStepsReload($this->carts[0])->getPayment()->getAdditionalInformation('paypal_capture_id'))->toBeNull();
+    });
+
     it('that is available is selected on both transports', function () {
         [$webCart, $apiCart] = $this->carts;
 
@@ -338,6 +363,53 @@ describe('a card method (D12)', function () {
         expect(checkoutStepsReload($webCart)->getPayment()->getMethod())->toBe('authorizenet')
             ->and($api['status'])->toBe(422)
             ->and($api['errors'])->toBe(['Payment method is not available for this cart']);
+    });
+});
+
+describe('the one-step checkout auto-save of a payment method (method_only)', function () {
+    beforeEach(function () {
+        $store = Mage::app()->getStore();
+        $store->setConfig('payment/authorizenet/active', '1');
+        $store->setConfig('payment/authorizenet/cctypes', 'VI');
+        $store->setConfig('payment/authorizenet/useccv', '0');
+    });
+
+    it('selects a card method before its card fields are filled in', function () {
+        $web = checkoutOnepagePost($this->carts[0], 'savePayment', ['payment' => ['method' => 'authorizenet'], 'method_only' => '1']);
+
+        expect($web)->not->toHaveKey('error')
+            ->and($web['goto_section'] ?? null)->toBe('review')
+            ->and(checkoutStepsReload($this->carts[0])->getPayment()->getMethod())->toBe('authorizenet');
+    });
+
+    it('replaces the method that the cart already has with a card method', function () {
+        checkoutOnepagePost($this->carts[0], 'savePayment', ['payment' => ['method' => 'checkmo']]);
+
+        $web = checkoutOnepagePost($this->carts[0], 'savePayment', ['payment' => ['method' => 'authorizenet'], 'method_only' => '1']);
+
+        expect($web)->not->toHaveKey('error')
+            ->and(checkoutStepsReload($this->carts[0])->getPayment()->getMethod())->toBe('authorizenet');
+    });
+
+    it('does not change the full save, which still refuses a card method without its card fields', function () {
+        $web = checkoutOnepagePost($this->carts[0], 'savePayment', ['payment' => ['method' => 'authorizenet']]);
+
+        expect($web)->toHaveKey('error')
+            ->and(checkoutStepsReload($this->carts[0])->getPayment()->getMethod())->toBeNull();
+    });
+
+    it('refuses a method that the cart cannot use', function () {
+        Mage::app()->getStore()->setConfig('payment/checkmo/min_order_total', '999999');
+
+        expect(checkoutOnepagePost($this->carts[0], 'savePayment', ['payment' => ['method' => 'checkmo'], 'method_only' => '1']))
+            ->toBe(['error' => 'The requested Payment Method is not available.'])
+            ->and(checkoutStepsReload($this->carts[0])->getPayment()->getMethod())->toBeNull();
+    });
+
+    it('refuses a method that the store does not have', function () {
+        expect(checkoutOnepagePost($this->carts[0], 'savePayment', ['payment' => ['method' => 'pest_unknown'], 'method_only' => '1']))
+            ->toBe(['error' => 'The requested Payment Method is not available.'])
+            ->and(checkoutStepsReload($this->carts[0])->getPayment()->getMethod())->toBeNull();
     });
 });
 

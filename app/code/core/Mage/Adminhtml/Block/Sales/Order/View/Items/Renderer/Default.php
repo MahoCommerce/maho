@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Sales_Order_View_Items_Renderer_Default extends Mage_Adminhtml_Block_Sales_Items_Abstract
 {
-    public function getItem()
+    public function getItem(): ?Mage_Sales_Model_Order_Item
     {
         return $this->_getData('item');
     }

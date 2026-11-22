@@ -95,6 +95,13 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      */
     protected $_emulatedLocales = [];
 
+    /**
+     * The translator state before each emulate(), null for an emulate() that changed nothing
+     *
+     * @var list<Mage_Core_Model_Translate_State|null>
+     */
+    private array $emulatedTranslatorStates = [];
+
     protected static array $_currencyCache = [];
     /** @var NumberFormatter[] */
     protected static $_numberFormatterCache = [];
@@ -422,7 +429,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
         foreach ($option as $item) {
             $data[$item['value']] = $item['label'];
         }
-        asort($data);
+        Mage::helper('core/string')->sortMultibyte($data, true);
         $option = [];
         foreach ($data as $key => $label) {
             $option[] = [
@@ -1123,28 +1130,34 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      * Push current locale to stack and replace with locale from specified store
      * Event is not dispatched.
      */
+    #[\Deprecated(message: 'use Mage_Core_Model_App::emulate()', since: '27.1')]
     public function emulate(mixed $store): void
     {
         if ($store) {
+            $translator = Mage::app()->getTranslator();
             $this->_emulatedLocales[] = $this->getLocaleCode();
+            $this->emulatedTranslatorStates[] = $translator->getState();
             $storeId = $store instanceof Mage_Core_Model_Store ? $store->getId() : $store;
             $this->_localeCode = Mage::getStoreConfig(self::XML_PATH_DEFAULT_LOCALE, $storeId);
-            Mage::getSingleton('core/translate')
-                ->setLocale($this->_localeCode)
-                ->init(Mage_Core_Model_App_Area::AREA_FRONTEND, true);
+            $translator->setLocale($this->_localeCode)->init(Mage_Core_Model_App_Area::AREA_FRONTEND);
         } else {
             $this->_emulatedLocales[] = false;
+            $this->emulatedTranslatorStates[] = null;
         }
     }
 
     /**
-     * Get last locale, used before last emulation
+     * Put back the locale and the translations that the last emulate() replaced
      */
+    #[\Deprecated(message: 'use Mage_Core_Model_App::emulate()', since: '27.1')]
     public function revert(): void
     {
+        $translatorState = array_pop($this->emulatedTranslatorStates);
         if ($locale = array_pop($this->_emulatedLocales)) {
             $this->_localeCode = $locale;
-            Mage::getSingleton('core/translate')->setLocale($this->_localeCode)->init('adminhtml', true);
+            if ($translatorState !== null) {
+                Mage::app()->getTranslator()->setState($translatorState);
+            }
         }
     }
 
@@ -1486,7 +1499,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
             }
         }
 
-        asort($countries);
+        Mage::helper('core/string')->sortMultibyte($countries, true);
         return $countries;
     }
 

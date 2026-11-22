@@ -354,6 +354,26 @@ it('refuses to deactivate the own account of the admin user who saves it', funct
         ->toThrow(Mage_Core_Exception_Conflict::class);
 });
 
+it('saves the user of the edit page, not the user_id that the form posts', function (): void {
+    adminUserParityCreate('parity_a', 'parity-secret-1234', 'parity-a@example.test');
+    adminUserParityCreate('parity_b', 'parity-secret-1234', 'parity-b@example.test');
+    $userA = Mage::getModel('admin/user')->loadByUsername('parity_a');
+    $userB = Mage::getModel('admin/user')->loadByUsername('parity_b');
+
+    AdminApiParity::admin(Mage_Adminhtml_Permissions_UserController::class, 'save', [
+        'user_id' => $userB->getId(),
+        'username' => 'parity_a',
+        'firstname' => 'Changed',
+        'lastname' => 'User',
+        'email' => 'parity-a@example.test',
+        'is_active' => '1',
+        'current_password' => ADMIN_USER_PARITY_PASSWORD,
+    ], ['user_id' => $userA->getId()]);
+
+    expect($userA->reload()->getFirstname())->toBe('Changed')
+        ->and($userB->reload()->getFirstname())->toBe('Parity');
+});
+
 it('lets an admin user deactivate the account of another user', function (): void {
     adminUserParityCreate('parity_cli', 'parity-secret-1234', 'parity-cli@example.test');
     $other = Mage::getModel('admin/user')->loadByUsername('parity_cli');

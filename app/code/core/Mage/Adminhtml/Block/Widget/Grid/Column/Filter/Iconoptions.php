@@ -14,7 +14,7 @@
 class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Iconoptions extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Select
 {
     #[\Override]
-    public function getHtml()
+    public function getHtml(): string
     {
         $icons = $this->getColumn()->getIcons();
         if (!is_array($icons) || empty($icons)) {

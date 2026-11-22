@@ -226,7 +226,7 @@ class RegionUpdater {
                     label.insertAdjacentHTML('beforeend', ' <span class="required">*</span>');
                     wildCard = label.querySelector('span.required');
                 }
-                const topElement = label.closest('tr') || label.closest('li');
+                const topElement = label.closest('tr, .config-row') || label.closest('li');
                 if (!that.config.show_all_regions && topElement) {
                     if (regionRequired) {
                         topElement.style.display = '';
@@ -561,7 +561,7 @@ class formElementDependenceController {
             }
             return parent;
         }
-        return el.closest('tr');
+        return el.closest('tr, .config-row');
     }
 
     /**

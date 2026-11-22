@@ -199,22 +199,14 @@ class Mage_Cron_Model_Observer
             $exists[$schedule->getJobCode() . '/' . $schedule->getScheduledAt()] = 1;
         }
 
-        /**
-         * generate global crontab jobs
-         */
-        $config = Mage::getConfig()->getNode('crontab/jobs');
-        if ($config instanceof Mage_Core_Model_Config_Element) {
-            $this->_generateJobs($config->children(), $exists);
+        // A job code that an attribute declares belongs to the attribute, as in dispatch().
+        $compiledJobs = Maho::getCompiledAttributes()['crontab'] ?? [];
+        foreach (['crontab/jobs', 'default/crontab/jobs'] as $path) {
+            $config = Mage::getConfig()->getNode($path);
+            if ($config instanceof Mage_Core_Model_Config_Element) {
+                $this->_generateJobs(array_diff_key(iterator_to_array($config->children()), $compiledJobs), $exists);
+            }
         }
-
-        /**
-         * generate configurable crontab jobs
-         */
-        $config = Mage::getConfig()->getNode('default/crontab/jobs');
-        if ($config instanceof Mage_Core_Model_Config_Element) {
-            $this->_generateJobs($config->children(), $exists);
-        }
-
         $this->_generateCompiledJobs($exists);
 
         /**
@@ -228,7 +220,7 @@ class Mage_Cron_Model_Observer
     /**
      * Generate jobs for config information
      *
-     * @param   SimpleXMLElement $jobs
+     * @param   iterable<string, SimpleXMLElement> $jobs
      * @param   array $exists
      * @return  $this
      */
@@ -287,26 +279,26 @@ class Mage_Cron_Model_Observer
             return $this;
         }
 
-        $history = Mage::getModel('cron/schedule')->getCollection()
-            ->addFieldToFilter('status', ['in' => [
-                Mage_Cron_Model_Schedule::STATUS_SUCCESS,
-                Mage_Cron_Model_Schedule::STATUS_MISSED,
-                Mage_Cron_Model_Schedule::STATUS_ERROR,
-            ]])
-            ->load();
-
-        $historyLifetimes = [
-            Mage_Cron_Model_Schedule::STATUS_SUCCESS => Mage::getStoreConfig(self::XML_PATH_HISTORY_SUCCESS) * 60,
-            Mage_Cron_Model_Schedule::STATUS_MISSED => Mage::getStoreConfig(self::XML_PATH_HISTORY_FAILURE) * 60,
-            Mage_Cron_Model_Schedule::STATUS_ERROR => Mage::getStoreConfig(self::XML_PATH_HISTORY_FAILURE) * 60,
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_write');
+        $table = $resource->getTableName('cron/schedule');
+        $locale = Mage::app()->getLocale();
+        $retention = [
+            self::XML_PATH_HISTORY_SUCCESS => [Mage_Cron_Model_Schedule::STATUS_SUCCESS],
+            self::XML_PATH_HISTORY_FAILURE => [Mage_Cron_Model_Schedule::STATUS_MISSED, Mage_Cron_Model_Schedule::STATUS_ERROR],
         ];
-
         $now = time();
-        foreach ($history->getIterator() as $record) {
-            $referenceTime = $record->getExecutedAt() ?: $record->getScheduledAt();
-            if ($referenceTime && strtotime($referenceTime) < $now - $historyLifetimes[$record->getStatus()]) {
-                $record->delete();
+        $earliestSqlDate = strtotime('1000-01-01 UTC');
+        foreach ($retention as $path => $statuses) {
+            $cutoff = $now - (int) Mage::getStoreConfig($path) * 60;
+            if ($cutoff < $earliestSqlDate) {
+                continue;
             }
+
+            $adapter->delete($table, [
+                'status IN (?)' => $statuses,
+                'COALESCE(executed_at, scheduled_at) < ?' => $locale->formatDateForDb($cutoff),
+            ]);
         }
 
         // save time history cleanup was ran with no expiration

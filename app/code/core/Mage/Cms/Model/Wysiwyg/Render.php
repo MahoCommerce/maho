@@ -72,24 +72,18 @@ class Mage_Cms_Model_Wysiwyg_Render
     {
         return Mage::app()->getCache()->runWithout(
             Mage_Core_Block_Abstract::CACHE_GROUP,
-            function () use ($storeId): array {
-                $emulation = Mage::getSingleton('core/app_emulation');
-                $environment = $emulation->startEnvironmentEmulation($storeId);
-                try {
-                    $design = Mage::getDesign();
-                    $stylesFile = (string) $design->getFilename(Mage_Core_Model_Design_Content_Bundle::STYLES_FILE, ['_type' => 'skin']);
-                    // The admin cannot read the rules of a copy on another domain, such as a media mount on S3
-                    $contentUrl = Mage::getSingleton('core/design_content_bundle')->getUrl($stylesFile);
-                    $skinUrl = $design->getSkinUrl(Mage_Core_Model_Design_Content_Bundle::STYLES_FILE);
-                    return [
-                        'head' => $contentUrl === null ? $this->getHeadHtml() : str_replace($contentUrl, $skinUrl, $this->getHeadHtml()),
-                        'styles' => $skinUrl,
-                        'css' => Mage::getModel('core/design_content_previewCss')->getCss($stylesFile) ?? '',
-                    ];
-                } finally {
-                    $emulation->stopEnvironmentEmulation($environment);
-                }
-            },
+            fn(): array => Mage::app()->emulate($storeId, function (): array {
+                $design = Mage::getDesign();
+                $stylesFile = (string) $design->getFilename(Mage_Core_Model_Design_Content_Bundle::STYLES_FILE, ['_type' => 'skin']);
+                // The admin cannot read the rules of a copy on another domain, such as a media mount on S3
+                $contentUrl = Mage::getSingleton('core/design_content_bundle')->getUrl($stylesFile);
+                $skinUrl = $design->getSkinUrl(Mage_Core_Model_Design_Content_Bundle::STYLES_FILE);
+                return [
+                    'head' => $contentUrl === null ? $this->getHeadHtml() : str_replace($contentUrl, $skinUrl, $this->getHeadHtml()),
+                    'styles' => $skinUrl,
+                    'css' => Mage::getModel('core/design_content_previewCss')->getCss($stylesFile) ?? '',
+                ];
+            }),
         );
     }
 
@@ -99,9 +93,7 @@ class Mage_Cms_Model_Wysiwyg_Render
      */
     protected function renderInStore(array $directives, int $storeId): array
     {
-        $emulation = Mage::getSingleton('core/app_emulation');
-        $environment = $emulation->startEnvironmentEmulation($storeId);
-        try {
+        return Mage::app()->emulate($storeId, function () use ($directives, $storeId): array {
             $processor = Mage::helper('cms')->getPageTemplateProcessor();
             $html = array_fill_keys($directives, '');
             if (!$processor instanceof Mage_Core_Model_Email_Template_Filter) {
@@ -117,9 +109,7 @@ class Mage_Cms_Model_Wysiwyg_Render
                 }
             }
             return ['head' => $this->getHeadHtml(), 'html' => $html];
-        } finally {
-            $emulation->stopEnvironmentEmulation($environment);
-        }
+        });
     }
 
     /**

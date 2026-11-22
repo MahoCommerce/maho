@@ -53,7 +53,7 @@ class Mage_Adminhtml_Block_System_Currency_Rate_Matrix extends Mage_Adminhtml_Bl
         return $this->getUrl('*/*/saveRates');
     }
 
-    protected function _prepareRates($array)
+    protected function _prepareRates(?array $array): ?array
     {
         if (!is_array($array)) {
             return $array;

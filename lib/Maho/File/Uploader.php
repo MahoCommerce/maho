@@ -312,7 +312,7 @@ class Uploader
      *
      * @access public
      */
-    protected function _validateFile()
+    protected function _validateFile(): void
     {
         if ($this->_fileExists === false) {
             return;

@@ -25,7 +25,6 @@
             </extensions>
             <visibility>public</visibility>
             <visibility>protected</visibility>
-            <visibility>private</visibility>
         </api>
     </version>
     <template name="default"/>

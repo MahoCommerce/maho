@@ -206,11 +206,11 @@ describe('magic link', function () {
         $webState = [$session->isLoggedIn(), $session->getTwofaPendingCustomerId()];
         $webWrongCode = passwordlessParityWeb('POST', 'twofaChallengePost', ['twofa_verification_code' => '000000x']);
         $isLoggedInAfterWrongCode = $session->isLoggedIn();
-        $webCode = passwordlessParityWeb('POST', 'twofaChallengePost', ['twofa_verification_code' => \OTPHP\TOTP::createFromSecret($webSecret)->now()]);
+        $webCode = passwordlessParityWeb('POST', 'twofaChallengePost', ['twofa_verification_code' => \OTPHP\TOTP::createFromSecret($webSecret, new \Maho\UtcClock())->now()]);
 
         $apiNoCode = passwordlessParityToken(['grant_type' => 'magic_link', 'token' => $apiToken]);
         $apiWrongCode = passwordlessParityToken(['grant_type' => 'magic_link', 'token' => $apiToken, 'twofa_code' => '000000x']);
-        $apiCode = passwordlessParityToken(['grant_type' => 'magic_link', 'token' => $apiToken, 'twofa_code' => \OTPHP\TOTP::createFromSecret($apiSecret)->now()]);
+        $apiCode = passwordlessParityToken(['grant_type' => 'magic_link', 'token' => $apiToken, 'twofa_code' => \OTPHP\TOTP::createFromSecret($apiSecret, new \Maho\UtcClock())->now()]);
 
         expect($web['errors'])->toBe([])
             ->and($webState)->toBe([false, (int) $webCustomer->getId()])
@@ -257,7 +257,7 @@ describe('account confirmation', function () {
         $webState = [$session->isLoggedIn(), $session->getTwofaPendingCustomerId()];
         $again = passwordlessParityWeb('GET', 'confirm', ['id' => $customer->getId(), 'key' => 'web-key']);
         $isLoggedInAfterSecondLink = $session->isLoggedIn();
-        $totp = \OTPHP\TOTP::createFromSecret($secret);
+        $totp = \OTPHP\TOTP::createFromSecret($secret, new \Maho\UtcClock());
         // The code must stay valid until the request checks it, so it must not come from the end of a period
         if ($totp->expiresIn() < 5) {
             sleep($totp->expiresIn() + 1);

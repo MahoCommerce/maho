@@ -14,5 +14,5 @@ interface Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Interface
 {
     public function getColumn(): ?Mage_Adminhtml_Block_Widget_Grid_Column;
     public function setColumn(Mage_Adminhtml_Block_Widget_Grid_Column $column): static;
-    public function getHtml();
+    public function getHtml(): string;
 }

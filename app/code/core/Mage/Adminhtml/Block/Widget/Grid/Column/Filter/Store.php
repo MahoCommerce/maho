@@ -10,13 +10,8 @@
 
 class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Store extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
 {
-    /**
-     * Render HTML of the element
-     *
-     * @return string
-     */
     #[\Override]
-    public function getHtml()
+    public function getHtml(): string
     {
         $storeModel = Mage::getSingleton('adminhtml/system_store');
         /** @var Mage_Adminhtml_Model_System_Store $storeModel */

@@ -343,7 +343,7 @@ it('logs in no customer who uses 2FA without the code, on the service and on bot
     $apiNoCode = socialViaApi('google', socialParityToken($email, $sub), null);
     $apiEmptyCode = socialViaApi('google', socialParityToken($email, $sub), null, ' ');
     $apiWrongCode = socialViaApi('google', socialParityToken($email, $sub), null, '000000x');
-    $api = socialViaApi('google', socialParityToken($email, $sub), null, \OTPHP\TOTP::createFromSecret($secret)->now());
+    $api = socialViaApi('google', socialParityToken($email, $sub), null, \OTPHP\TOTP::createFromSecret($secret, new \Maho\UtcClock())->now());
 
     expect($pendingId)->toBe((int) $customer->getId())
         ->and($web['status'])->toBe(200)
@@ -365,7 +365,7 @@ it('logs in the customer of the storefront challenge with the right 2FA code', f
 
     $webNonce = Mage::getModel('sociallogin/nonce')->issue();
     socialViaWeb('google', socialParityToken($email, 'twofa-sub-' . uniqid(), $webNonce), $webNonce);
-    $errors = socialTwofaViaWeb(\OTPHP\TOTP::createFromSecret($secret)->now());
+    $errors = socialTwofaViaWeb(\OTPHP\TOTP::createFromSecret($secret, new \Maho\UtcClock())->now());
     $session = Mage::getSingleton('customer/session');
 
     expect($errors)->toBe([])

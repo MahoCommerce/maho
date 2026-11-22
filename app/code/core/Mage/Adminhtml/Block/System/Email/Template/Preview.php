@@ -18,13 +18,12 @@ class Mage_Adminhtml_Block_System_Email_Template_Preview extends Mage_Adminhtml_
     #[\Override]
     protected function _toHtml()
     {
-        // Start store emulation process
-        // Since the Transactional Email preview process has no mechanism for selecting a store view to use for
-        // previewing, use the default store view
-        $defaultStoreId = Mage::app()->getDefaultStoreView()->getId();
-        $appEmulation = Mage::getSingleton('core/app_emulation');
-        $initialEnvironmentInfo = $appEmulation->startEnvironmentEmulation($defaultStoreId);
+        // The Transactional Email preview has no store view selector, so it renders in the default store view
+        return Mage::app()->emulate((int) Mage::app()->getDefaultStoreView()->getId(), $this->renderTemplate(...));
+    }
 
+    protected function renderTemplate(): string
+    {
         /** @var Mage_Core_Model_Email_Template $template */
         $template = Mage::getModel('core/email_template');
         $id = (int) $this->getRequest()->getParam('id');
@@ -51,9 +50,6 @@ class Mage_Adminhtml_Block_System_Email_Template_Preview extends Mage_Adminhtml_
         }
 
         \Maho\Profiler::stop('email_template_proccessing');
-
-        // Stop store emulation process
-        $appEmulation->stopEnvironmentEmulation($initialEnvironmentInfo);
 
         return $templateProcessed;
     }

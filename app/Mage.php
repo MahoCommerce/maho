@@ -137,6 +137,7 @@ final class Mage
      */
     public static function reset(): void
     {
+        \Maho\Queue\QueueManager::reset();
         $resource = self::$_registry['_singleton/core/resource'] ?? null;
         if ($resource instanceof Mage_Core_Model_Resource) {
             $resource->closeConnections();
@@ -658,7 +659,7 @@ final class Mage
      */
     public static function throwException($message, $messageStorage = null)
     {
-        if ($messageStorage && ($storage = self::getSingleton($messageStorage))) {
+        if ($messageStorage && ($storage = self::getSingleton($messageStorage)) instanceof Mage_Core_Model_Session_Abstract) {
             $storage->addError($message);
         }
         throw new Mage_Core_Exception($message);

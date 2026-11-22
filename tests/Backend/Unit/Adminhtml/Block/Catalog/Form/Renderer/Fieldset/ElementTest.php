@@ -23,8 +23,9 @@ function makeFieldsetElementBlock(int $isGlobal, int $storeId): Mage_Adminhtml_B
     $dataObject = Mage::getModel('catalog/product');
     $dataObject->setStoreId($storeId);
 
-    $form = new Maho\DataObject(['data_object' => $dataObject]);
-    $element = new Maho\DataObject(['entity_attribute' => $attribute, 'form' => $form]);
+    $form = new Maho\Data\Form(['data_object' => $dataObject]);
+    $element = new Maho\Data\Form\Element\Text(['entity_attribute' => $attribute]);
+    $element->setForm($form);
 
     /** @var Mage_Adminhtml_Block_Catalog_Form_Renderer_Fieldset_Element $block */
     $block = Mage::app()->getLayout()->createBlock('adminhtml/catalog_form_renderer_fieldset_element');

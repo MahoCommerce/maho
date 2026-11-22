@@ -481,18 +481,14 @@ final class ReportFixture
             self::$customerIds = [];
         }
         if (self::$productIds !== []) {
-            $emulation = \Mage::getSingleton('core/app_emulation');
-            $environment = $emulation->startEnvironmentEmulation(0, 'admin');
-            try {
+            \Mage::app()->emulate(\Mage_Core_Model_App::ADMIN_STORE_ID, function (): void {
                 foreach (self::$productIds as $id) {
                     $product = \Mage::getModel('catalog/product')->load($id);
                     if ($product->getId()) {
                         $product->delete();
                     }
                 }
-            } finally {
-                $emulation->stopEnvironmentEmulation($environment);
-            }
+            }, \Mage_Core_Model_App_Area::AREA_ADMINHTML);
             self::$productIds = [];
         }
     }

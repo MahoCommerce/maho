@@ -153,7 +153,7 @@ However, these attributes are available for READ operations.
 | --- | --- |
 | Customer ID | Customer ID |
 | Last Logged In | Date when the customer was logged in last |
-| Is Confirmed | Defines whether the email confirmation is sent to the customer |
+| Confirmation Pending | Defines whether the customer must still confirm the email address. The confirmation key is never returned |
 | Created At | Date when the customer was created |
 | Associate to Website | Website ID to which the customer is associated |
 | Created From | Store view from which the customer was created |

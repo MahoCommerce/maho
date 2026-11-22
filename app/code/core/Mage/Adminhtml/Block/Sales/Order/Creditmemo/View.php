@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2022-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
@@ -25,7 +25,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_View extends Mage_Adminhtml_Bl
         $this->_removeButton('reset');
         $this->_removeButton('delete');
 
-        if ($this->getCreditmemo()->canCancel()) {
+        if ($this->_isAllowedAction('creditmemo') && $this->getCreditmemo()->canCancel()) {
             $this->_addButton('cancel', [
                 'label'     => Mage::helper('sales')->__('Cancel'),
                 'class'     => 'delete',
@@ -51,7 +51,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_View extends Mage_Adminhtml_Bl
             ]);
         }
 
-        if ($this->getCreditmemo()->canVoid()) {
+        if ($this->_isAllowedAction('creditmemo') && $this->getCreditmemo()->canVoid()) {
             $this->_addButton('void', [
                 'label'     => Mage::helper('sales')->__('Void'),
                 'class'     => 'save',
@@ -182,7 +182,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_View extends Mage_Adminhtml_Bl
      *
      * @return Mage_Adminhtml_Block_Widget_Container|Mage_Adminhtml_Block_Sales_Order_Creditmemo_View
      */
-    public function updateBackButtonUrl($flag)
+    public function updateBackButtonUrl(bool $flag)
     {
         if ($flag) {
             if ($this->getCreditmemo()->getBackUrl()) {

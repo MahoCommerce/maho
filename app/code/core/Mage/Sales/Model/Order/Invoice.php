@@ -108,16 +108,13 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
 
     /**
      * Init mapping array of short fields to its full names
-     *
-     * @return $this
      */
     #[\Override]
-    protected function _initOldFieldsMap()
+    protected function _initOldFieldsMap(): void
     {
         $this->_oldFieldsMap = [
             'base_shipping_hidden_tax_amount' => 'base_shipping_hidden_tax_amnt',
         ];
-        return $this;
     }
 
     /**
@@ -128,15 +125,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
      */
     public function loadByIncrementId($incrementId)
     {
-        $ids = $this->getCollection()
-            ->addAttributeToFilter('increment_id', $incrementId)
-            ->getAllIds();
-
-        if (!empty($ids)) {
-            reset($ids);
-            $this->load(current($ids));
-        }
-        return $this;
+        return $this->load($incrementId, 'increment_id');
     }
 
     /**
@@ -696,30 +685,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
             return $this;
         }
 
-        // Start store emulation process
-        if ($storeId != Mage::app()->getStore()->getId()) {
-            $appEmulation = Mage::getSingleton('core/app_emulation');
-            $initialEnvironmentInfo = $appEmulation->startEnvironmentEmulation($storeId);
-        }
-
-        try {
-            // Retrieve specified view block from appropriate design package (depends on emulated store)
-            $paymentBlock = Mage::helper('payment')->getInfoBlock($order->getPayment())
-                ->setIsSecureMode(true);
-            $paymentBlock->getMethod()->setStore($storeId);
-            $paymentBlockHtml = $paymentBlock->toHtml();
-        } catch (Exception $e) {
-            // Stop store emulation process
-            if (isset($appEmulation, $initialEnvironmentInfo)) {
-                $appEmulation->stopEnvironmentEmulation($initialEnvironmentInfo);
-            }
-            throw $e;
-        }
-
-        // Stop store emulation process
-        if (isset($appEmulation, $initialEnvironmentInfo)) {
-            $appEmulation->stopEnvironmentEmulation($initialEnvironmentInfo);
-        }
+        $paymentBlockHtml = Mage::helper('payment')->getInfoBlockHtmlForStore($order->getPayment(), (int) $storeId);
 
         // Retrieve corresponding email template id and customer name
         if ($order->getCustomerIsGuest()) {

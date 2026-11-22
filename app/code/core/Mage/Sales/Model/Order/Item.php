@@ -58,17 +58,14 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
     /**
      * Init mapping array of short fields to
      * its full names
-     *
-     * @return \Maho\DataObject
      */
     #[\Override]
-    protected function _initOldFieldsMap()
+    protected function _initOldFieldsMap(): void
     {
         // pre 1.6 fields names, old => new
         $this->_oldFieldsMap = [
             'base_weee_tax_applied_row_amount' => 'base_weee_tax_applied_row_amnt',
         ];
-        return $this;
     }
 
     /**
@@ -533,21 +530,6 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
             return true;
         }
         return false;
-    }
-    /**
-     * Check if discount has to be applied to parent item
-     *
-     * @return bool
-     */
-    public function getForceApplyDiscountToParentItem()
-    {
-        if ($this->getParentItem()) {
-            $product = $this->getParentItem()->getProduct();
-        } else {
-            $product = $this->getProduct();
-        }
-
-        return $product->getTypeInstance()->getForceApplyDiscountToParentItem();
     }
 
     /**

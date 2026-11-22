@@ -70,7 +70,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
      */
     protected $_locale;
 
-    protected $_filterValues;
+    protected ?array $_filterValues = null;
 
     /**
      * Mage_Adminhtml_Block_Report_Grid constructor.
@@ -158,7 +158,8 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
         /** @var Mage_Reports_Model_Resource_Report_Collection $collection */
         $collection = Mage::getResourceModel('reports/report_collection');
 
-        $collection->setPeriod($this->getFilter('report_period'));
+        $period = $this->getFilter('report_period');
+        $collection->setPeriod(is_string($period) ? $period : '');
 
         if ($this->getFilter('report_from') && $this->getFilter('report_to')) {
             /**
@@ -335,14 +336,14 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
         return $this->getChildHtml('refresh_button');
     }
 
-    public function setFilter($name, $value): void
+    public function setFilter(string $name, array|string $value): void
     {
         if ($name) {
             $this->_filters[$name] = $value;
         }
     }
 
-    public function getFilter($name)
+    public function getFilter(string $name): array|string
     {
         return $this->_filters[$name] ?? (($this->getRequest()->getParam($name))
                 ? htmlspecialchars($this->getRequest()->getParam($name)) : '');

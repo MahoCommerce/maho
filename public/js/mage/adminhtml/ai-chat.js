@@ -860,7 +860,7 @@ class MahoAiAssistant {
     fieldLabel(element) {
         const text = (node) => (node?.textContent ?? '').replace(/\s+/g, ' ').trim().replace(/\s*\*$/, '');
         const cell = element.closest('td');
-        return text(element.id ? document.querySelector(`label[for="${CSS.escape(element.id)}"]`) : null) || text(element.closest('tr')?.querySelector('td.label, th')) || text(cell ? this.columnHeader(cell) : null) || element.name || element.id;
+        return text(element.id ? document.querySelector(`label[for="${CSS.escape(element.id)}"]`) : null) || text(element.closest('tr, .config-row')?.querySelector('td.label, th, .config-label')) || text(cell ? this.columnHeader(cell) : null) || element.name || element.id;
     }
 
     /** The header cell above a table cell. Columns count by colspan, so a wide cell before it does not shift the match. */

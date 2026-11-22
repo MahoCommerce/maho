@@ -65,11 +65,40 @@ class Mage_Adminhtml_Sales_Order_EditController extends Mage_Adminhtml_Sales_Ord
     }
 
     /**
+     * Cancel the edit and open the order. The index of this controller needs an edit in progress.
+     */
+    #[\Override]
+    #[Maho\Config\Route('/admin/sales_order_edit/cancel')]
+    public function cancelAction(): void
+    {
+        $orderId = (int) $this->_getSession()->getOrderId();
+        $this->_getSession()->clear();
+        if ($orderId !== 0) {
+            $this->_redirect('*/sales_order/view', ['order_id' => $orderId]);
+            return;
+        }
+        $this->_redirect('*/sales_order/');
+    }
+
+    /**
      * Check the Edit permission for every action. The parent maps its actions to Create and Reorder.
+     *
+     * The quote actions of the parent are an edit only while an edit that startAction() began is in
+     * progress, for the customer and the store of that edit. Without one, they create an order, which
+     * this controller does not allow. A reorder belongs to the create controller.
      */
     #[\Override]
     protected function _isAllowed(): bool
     {
-        return Mage::getSingleton('admin/session')->isAllowed(self::ADMIN_RESOURCE);
+        $action = strtolower($this->getRequest()->getActionName());
+        if ($action === 'reorder' || !Mage::getSingleton('admin/session')->isAllowed(self::ADMIN_RESOURCE)) {
+            return false;
+        }
+
+        if (in_array($action, ['start', 'cancel'], true)) {
+            return true;
+        }
+
+        return $this->_isOrderEditInProgress() && $this->_isRequestForEditedOrder();
     }
 }

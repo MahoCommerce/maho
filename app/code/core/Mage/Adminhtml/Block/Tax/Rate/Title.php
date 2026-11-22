@@ -33,7 +33,7 @@ class Mage_Adminhtml_Block_Tax_Rate_Title extends Mage_Core_Block_Template
         return $this->_titles;
     }
 
-    public function getStores()
+    public function getStores(): Mage_Core_Model_Resource_Store_Collection
     {
         $stores = $this->getData('stores');
         if (is_null($stores)) {

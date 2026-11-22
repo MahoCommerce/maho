@@ -14,6 +14,7 @@ class Mage_Core_Model_Resource_Type_Db_Pdo_Sqlite extends Mage_Core_Model_Resour
      * @param array $config Connection config
      * @return \Maho\Db\Adapter\Pdo\Sqlite
      */
+    #[\Override]
     public function getConnection($config)
     {
         $configArr = (array) $config;

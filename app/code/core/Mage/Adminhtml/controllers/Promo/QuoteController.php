@@ -16,7 +16,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
      */
     public const ADMIN_RESOURCE = 'promo/quote';
 
-    protected function _initRule()
+    protected function _initRule(): static
     {
         $this->_title($this->__('Promotions'))->_title($this->__('Shopping Cart Price Rules'));
 
@@ -30,6 +30,8 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
         if ($id) {
             Mage::registry('current_promo_quote_rule')->load($id);
         }
+
+        return $this;
     }
 
     protected function _initAction(): static

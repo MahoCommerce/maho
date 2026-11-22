@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2020-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Downloadable
@@ -55,6 +55,8 @@ class Mage_Downloadable_Helper_Catalog_Product_Configuration extends Mage_Core_H
     /**
      * Retrieves product options
      *
+     * The option values are HTML, as the custom option values that their option type formats.
+     *
      * @return array
      */
     #[\Override]
@@ -69,7 +71,7 @@ class Mage_Downloadable_Helper_Catalog_Product_Configuration extends Mage_Core_H
                 'value' => [],
             ];
             foreach ($links as $link) {
-                $linksOption['value'][] = $link->getTitle();
+                $linksOption['value'][] = $this->escapeHtml($link->getTitle());
             }
             $options[] = $linksOption;
         }

@@ -91,12 +91,15 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
             $type = 'default';
         }
         if (is_null($this->_itemRenders[$type]['renderer'])) {
-            $this->_itemRenders[$type]['renderer'] = $this->getLayout()
+            $itemRenderer = $this->getLayout()
                 ->createBlock($this->_itemRenders[$type]['block'])
                 ->setTemplate($this->_itemRenders[$type]['template']);
-            foreach ($this->_columnRenders as $columnType => $renderer) {
-                $this->_itemRenders[$type]['renderer']->addColumnRender($columnType, $renderer['block'], $renderer['template']);
+            if ($itemRenderer instanceof self) {
+                foreach ($this->_columnRenders as $columnType => $renderer) {
+                    $itemRenderer->addColumnRender($columnType, $renderer['block'], $renderer['template']);
+                }
             }
+            $this->_itemRenders[$type]['renderer'] = $itemRenderer;
         }
         return $this->_itemRenders[$type]['renderer'];
     }
@@ -446,7 +449,7 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
         return false;
     }
 
-    public function formatPrice($price)
+    public function formatPrice(?float $price): string
     {
         return $this->getOrder()->formatPrice($price);
     }

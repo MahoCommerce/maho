@@ -899,22 +899,12 @@ class Sqlite extends AbstractPdoAdapter
     #[\Override]
     public function insertOnDuplicate(string|array|\Maho\Db\Select $table, array $data, array $fields = []): int
     {
-        $row = array_first($data);
+        $rows = $this->_alignInsertRows($data);
+        $cols = array_keys($rows[0]);
         $bind = [];
         $values = [];
-
-        if (is_array($row)) {
-            $cols = array_keys($row);
-            foreach ($data as $row) {
-                if (array_diff($cols, array_keys($row))) {
-                    throw new \Maho\Db\Exception('Invalid data for insert');
-                }
-                $values[] = $this->_prepareInsertData($row, $bind);
-            }
-            unset($row);
-        } else {
-            $cols = array_keys($data);
-            $values[] = $this->_prepareInsertData($data, $bind);
+        foreach ($rows as $row) {
+            $values[] = $this->_prepareInsertData($row, $bind);
         }
 
         $updateFields = [];
@@ -1801,58 +1791,7 @@ class Sqlite extends AbstractPdoAdapter
             $query .= sprintf(' SET %s', implode(', ', $setClauses));
         }
 
-        // Add FROM clause
-        $from = $select->getPart(\Maho\Db\Select::FROM);
-        $fromTables = [];
-        $joinConditions = [];
-        foreach ($from as $alias => $tableInfo) {
-            if ($alias !== $tableAlias) {
-                if ($tableInfo['tableName'] instanceof \Maho\Db\Select) {
-                    $fromTables[] = sprintf(
-                        '(%s) AS %s',
-                        $tableInfo['tableName']->assemble(),
-                        $this->quoteIdentifier($alias),
-                    );
-                } else {
-                    $fromTables[] = sprintf(
-                        '%s AS %s',
-                        $this->quoteIdentifier($tableInfo['tableName']),
-                        $this->quoteIdentifier($alias),
-                    );
-                }
-                if (!empty($tableInfo['joinCondition'])) {
-                    $joinConditions[] = $tableInfo['joinCondition'];
-                }
-            }
-        }
-
-        if ($fromTables) {
-            $query .= sprintf(' FROM %s', implode(', ', $fromTables));
-        }
-
-        // Build WHERE clause
-        $whereClauses = $joinConditions;
-
-        $where = $select->getPart(\Maho\Db\Select::WHERE);
-        if ($where) {
-            foreach ($where as $wherePart) {
-                if (is_array($wherePart)) {
-                    foreach ($wherePart as $conjunction => $condition) {
-                        if (!empty($whereClauses) && strtoupper($conjunction) === 'OR') {
-                            $whereClauses[] = 'OR ' . $condition;
-                        } else {
-                            $whereClauses[] = $condition;
-                        }
-                    }
-                } else {
-                    $whereClauses[] = $wherePart;
-                }
-            }
-        }
-
-        if ($whereClauses) {
-            $query .= ' WHERE ' . implode(' AND ', $whereClauses);
-        }
+        $query .= $this->_renderFromAndWhereForUpdate($select, $tableAlias);
 
         return $query;
     }
@@ -2860,7 +2799,7 @@ class Sqlite extends AbstractPdoAdapter
                 $value = (int) $value;
                 break;
             case 'bigint':
-                if (!is_integer($value)) {
+                if (!is_int($value)) {
                     $value = sprintf('%.0f', (float) $value);
                 }
                 break;

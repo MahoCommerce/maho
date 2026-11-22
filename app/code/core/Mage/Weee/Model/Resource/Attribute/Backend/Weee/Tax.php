@@ -34,7 +34,7 @@ class Mage_Weee_Model_Resource_Attribute_Backend_Weee_Tax extends Mage_Core_Mode
             ])
             ->where('entity_id = ?', (int) $product->getId())
             ->where('attribute_id = ?', (int) $attribute->getId());
-        if ($attribute->isScopeGlobal()) {
+        if ($this->isScopeGlobal($attribute)) {
             $select->where('website_id = ?', 0);
         } else {
             $storeId = $product->getStoreId();
@@ -60,7 +60,7 @@ class Mage_Weee_Model_Resource_Attribute_Backend_Weee_Tax extends Mage_Core_Mode
         ];
 
         $adapter   = $this->_getWriteAdapter();
-        if (!$attribute->isScopeGlobal()) {
+        if (!$this->isScopeGlobal($attribute)) {
             $storeId = $product->getStoreId();
             if ($storeId) {
                 $where['website_id IN(?)'] =  [0, Mage::app()->getStore($storeId)->getWebsiteId()];
@@ -84,5 +84,10 @@ class Mage_Weee_Model_Resource_Attribute_Backend_Weee_Tax extends Mage_Core_Mode
 
         $this->_getWriteAdapter()->insert($this->getMainTable(), $data);
         return $this;
+    }
+
+    private function isScopeGlobal(Mage_Eav_Model_Entity_Attribute_Abstract $attribute): bool
+    {
+        return $attribute instanceof Mage_Catalog_Model_Resource_Eav_Attribute && $attribute->isScopeGlobal();
     }
 }

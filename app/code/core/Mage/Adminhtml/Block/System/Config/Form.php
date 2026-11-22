@@ -64,9 +64,9 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     {
         parent::__construct();
         $this->_scopeLabels = [
-            self::SCOPE_DEFAULT  => Mage::helper('adminhtml')->__('[GLOBAL]'),
-            self::SCOPE_WEBSITES => Mage::helper('adminhtml')->__('[WEBSITE]'),
-            self::SCOPE_STORES   => Mage::helper('adminhtml')->__('[STORE VIEW]'),
+            self::SCOPE_DEFAULT  => Mage::helper('adminhtml')->__('Global'),
+            self::SCOPE_WEBSITES => Mage::helper('adminhtml')->__('Website'),
+            self::SCOPE_STORES   => Mage::helper('adminhtml')->__('Store View'),
         ];
     }
 
@@ -397,6 +397,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
                     'scope_label'           => $this->getScopeLabel($element),
                     'can_use_default_value' => $this->canUseDefaultValue((int) $element->show_in_default),
                     'can_use_website_value' => $this->canUseWebsiteValue((int) $element->show_in_website),
+                    'can_use_system_value'  => $this->canUseSystemValue($path, $element),
                 ]);
                 $this->_prepareFieldOriginalData($field, $element);
 
@@ -491,21 +492,17 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
 
     /**
      * Support models "getCommentText" method for field note generation
-     *
-     * @param Mage_Core_Model_Config_Element $element
-     * @param string $helper
-     * @return string
      */
-    protected function _prepareFieldComment($element, $helper, $currentValue)
+    protected function _prepareFieldComment(Mage_Core_Model_Config_Element $element, string $helper, mixed $currentValue): string
     {
         $comment = '';
         if ($element->comment) {
             $commentInfo = $element->comment->asArray();
             if (is_array($commentInfo)) {
                 if (isset($commentInfo['model'])) {
-                    $model = Mage::getModel($commentInfo['model']);
-                    if ($model && method_exists($model, 'getCommentText')) {
-                        $comment = $model->getCommentText($element, $currentValue);
+                    $callback = [Mage::getModel($commentInfo['model']), 'getCommentText'];
+                    if (is_callable($callback)) {
+                        $comment = $callback($element, $currentValue);
                     }
                 }
             } else {
@@ -581,6 +578,22 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
             return true;
         }
         return false;
+    }
+
+    /**
+     * Return true when the default scope edits $path and the XML files give it a value that is not empty.
+     *
+     * A field with a backend model gets no checkbox: the delete skips the checks and side effects of that model.
+     */
+    public function canUseSystemValue(string $path, \Maho\Simplexml\Element $field): bool
+    {
+        if ($this->getScope() !== self::SCOPE_DEFAULT
+            || Mage::helper('adminhtml/config')->getBackendModelByFieldConfig($field) !== null
+        ) {
+            return false;
+        }
+        $shipped = Mage::getConfig()->getShippedDefaults()->descend($path);
+        return $shipped !== false && trim((string) $shipped) !== '';
     }
 
     /**

@@ -24,7 +24,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Orders extends Mage_Adminhtml_
     }
 
     #[\Override]
-    protected function _preparePage()
+    protected function _preparePage(): void
     {
         $this->getCollection()
             ->setPageSize(5)

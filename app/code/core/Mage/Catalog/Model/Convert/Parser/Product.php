@@ -85,7 +85,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
     {
         if (!isset($this->_collections[$storeId])) {
             $this->_collections[$storeId] = Mage::getResourceModel('catalog/product_collection');
-            $this->_collections[$storeId]->getEntity()->setStore($storeId);
+            $this->_collections[$storeId]->setStore($storeId);
         }
         return $this->_collections[$storeId];
     }

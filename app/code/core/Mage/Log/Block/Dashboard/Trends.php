@@ -19,8 +19,6 @@ class Mage_Log_Block_Dashboard_Trends extends Mage_Adminhtml_Block_Dashboard_Gra
     #[\Override]
     protected function _prepareData(): void
     {
-        $this->setDataHelperName('log/dashboard');
-
         // Get trend data
         $trendData = Mage::helper('log/dashboard')->getVisitorTrends(30);
 

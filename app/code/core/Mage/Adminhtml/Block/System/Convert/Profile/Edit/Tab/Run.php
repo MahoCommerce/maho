@@ -26,9 +26,10 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Edit_Tab_Run extends Mage_Admi
         return $html;
     }
 
-    public function getProfileId()
+    public function getProfileId(): ?int
     {
-        return Mage::registry('current_convert_profile')->getId();
+        $id = Mage::registry('current_convert_profile')->getId();
+        return $id === null ? null : (int) $id;
     }
 
     public function getImportedFiles(): array
@@ -36,11 +37,12 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Edit_Tab_Run extends Mage_Admi
         return Mage::helper('dataflow')->getImportFiles((string) $this->getParseType());
     }
 
-    public function getParseType()
+    public function getParseType(): ?string
     {
         $data = Mage::registry('current_convert_profile')->getGuiData();
         if ($data) {
             return ($data['parse']['type'] == 'excel_xml') ? 'xml' : $data['parse']['type'];
         }
+        return null;
     }
 }

@@ -16,7 +16,7 @@ use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Lcobucci\JWT\Token\Parser;
 use Lcobucci\JWT\Token\Plain;
 use Lcobucci\JWT\Validation\Constraint\IssuedBy;
-use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
+use Lcobucci\JWT\Validation\Constraint\PermissiveValidAt;
 use Lcobucci\JWT\Validation\Constraint\PermittedFor;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\Validator;
@@ -83,12 +83,11 @@ abstract class Maho_SocialLogin_Model_Provider_IdTokenAbstract implements Maho_S
         $valid = $validator->validate(
             $parsed,
             new SignedWith(new Sha256(), InMemory::plainText(Maho_SocialLogin_Model_JwkToPem::convert($jwk))),
-            new LooseValidAt(new UtcClock(), new DateInterval('PT60S')),
+            new PermissiveValidAt(new UtcClock(), new DateInterval('PT60S')),
             new IssuedBy(...$this->getIssuers()),
             new PermittedFor($audience),
         );
-        // LooseValidAt skips absent time claims, so the expiry must be required explicitly
-        if (!$valid || !$parsed->claims()->has('exp')) {
+        if (!$valid) {
             throw new InvalidArgumentException('ID token failed validation');
         }
 

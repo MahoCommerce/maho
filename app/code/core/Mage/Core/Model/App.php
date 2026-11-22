@@ -847,7 +847,7 @@ class Mage_Core_Model_App
     /**
      * Run $callback with the current store switched to $storeId, then restore
      * the caller's store. Only the store scope switches, not design, locale,
-     * or translations (see Mage_Core_Model_App_Emulation for those).
+     * or translations (see emulate() for those).
      */
     public function withStore(int $storeId, \Closure $callback): mixed
     {
@@ -861,6 +861,24 @@ class Mage_Core_Model_App
         } finally {
             $this->setCurrentStore($previousStoreId);
         }
+    }
+
+    /**
+     * Run $callback in the store $storeId, with the design, the locale and the translations of that store. The admin
+     * store runs in the admin area, any other store in the frontend area. Then put back the environment of the
+     * caller, also when $callback throws. When the request already runs in $storeId, and its translator is loaded for
+     * that store and area, skip the switch: the locale of the caller stays, so an admin page that emulates the admin
+     * store keeps the interface locale of the admin user.
+     *
+     * @template T
+     * @param \Closure(): T $callback
+     * @return T
+     */
+    public function emulate(int $storeId, \Closure $callback): mixed
+    {
+        /** @var Mage_Core_Model_App_Emulation $emulation */
+        $emulation = Mage::getSingleton('core/app_emulation');
+        return $emulation->emulate($storeId, $callback);
     }
 
     /**

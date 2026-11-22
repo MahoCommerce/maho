@@ -10,13 +10,8 @@
 
 class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Theme extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
 {
-    /**
-     * Retrieve filter HTML
-     *
-     * @return string
-     */
     #[\Override]
-    public function getHtml()
+    public function getHtml(): string
     {
         $options = $this->getOptions();
         if ($this->getColumn()->getWithEmpty()) {

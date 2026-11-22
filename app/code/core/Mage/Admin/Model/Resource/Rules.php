@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Admin
@@ -69,6 +69,10 @@ class Mage_Admin_Model_Resource_Rules extends Mage_Core_Model_Resource_Db_Abstra
                 }
             }
 
+            // Saving the role gave the members a new version before the rules changed, and a session can
+            // have built its ACL with the old rules since then
+            $hasMembers = Mage::getResourceSingleton('admin/roles')
+                ->reloadRoleUsersAcl(Mage::getModel('admin/roles')->setId((int) $roleId));
             $adapter->commit();
         } catch (Mage_Core_Exception $e) {
             $adapter->rollBack();
@@ -76,6 +80,11 @@ class Mage_Admin_Model_Resource_Rules extends Mage_Core_Model_Resource_Db_Abstra
         } catch (Exception $e) {
             $adapter->rollBack();
             Mage::logException($e);
+            return;
+        }
+
+        if ($hasMembers) {
+            Mage::getResourceSingleton('admin/user')->cleanMenuCache();
         }
     }
 
