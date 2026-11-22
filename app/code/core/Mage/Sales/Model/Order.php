@@ -182,11 +182,9 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     /**
      * Init mapping array of short fields to
      * its full names
-     *
-     * @return \Maho\DataObject
      */
     #[\Override]
-    protected function _initOldFieldsMap()
+    protected function _initOldFieldsMap(): void
     {
         // pre 1.6 fields names, old => new
         $this->_oldFieldsMap = [
@@ -194,7 +192,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
             'forced_do_shipment_with_invoice' => 'forced_shipment_with_invoice',
             'base_shipping_hidden_tax_amount' => 'base_shipping_hidden_tax_amnt',
         ];
-        return $this;
     }
 
     /**

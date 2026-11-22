@@ -12,7 +12,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Checkbox extends Mage_Adm
 {
     #[\Override]
     protected ?int $_defaultWidth = 55;
-    protected $_values;
+    protected ?array $_values = null;
 
     /**
      * Returns values of the column

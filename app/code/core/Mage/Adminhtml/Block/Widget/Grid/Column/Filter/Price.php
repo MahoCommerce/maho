@@ -14,7 +14,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
     protected ?Mage_Directory_Model_Currency $_currencyModel = null;
 
     #[\Override]
-    public function getHtml()
+    public function getHtml(): string
     {
         $fromLabel = Mage::helper('adminhtml')->__('From');
         $toLabel = Mage::helper('adminhtml')->__('To');
@@ -41,18 +41,18 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
         return $html;
     }
 
-    public function getDisplayCurrencySelect()
+    public function getDisplayCurrencySelect(): bool
     {
         if (!is_null($this->getColumn()->getData('display_currency_select'))) {
-            return $this->getColumn()->getData('display_currency_select');
+            return (bool) $this->getColumn()->getData('display_currency_select');
         }
         return true;
     }
 
-    public function getCurrencyAffect()
+    public function getCurrencyAffect(): bool
     {
         if (!is_null($this->getColumn()->getData('currency_affect'))) {
-            return $this->getColumn()->getData('currency_affect');
+            return (bool) $this->getColumn()->getData('currency_affect');
         }
         return true;
     }
@@ -89,7 +89,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
         return $this->_currencyList;
     }
 
-    public function getValue($index = null)
+    public function getValue(?string $index = null): array|string|null
     {
         if ($index) {
             return $this->getData('value', $index);
@@ -134,12 +134,12 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
         return $value;
     }
 
-    protected function _getRate($from, $to): ?float
+    protected function _getRate(?string $from, ?string $to): ?float
     {
         return Mage::helper('directory')->getAnyRate((string) $from, (string) $to);
     }
 
-    public function prepareRates($displayCurrency): void
+    public function prepareRates(?string $displayCurrency): void
     {
         $storeCurrency = $this->getColumn()->getCurrencyCode();
 

@@ -58,17 +58,14 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
     /**
      * Init mapping array of short fields to
      * its full names
-     *
-     * @return \Maho\DataObject
      */
     #[\Override]
-    protected function _initOldFieldsMap()
+    protected function _initOldFieldsMap(): void
     {
         // pre 1.6 fields names, old => new
         $this->_oldFieldsMap = [
             'base_weee_tax_applied_row_amount' => 'base_weee_tax_applied_row_amnt',
         ];
-        return $this;
     }
 
     /**

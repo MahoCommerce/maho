@@ -11,7 +11,7 @@
 class Mage_Adminhtml_Block_System_Convert_Profile_Edit_Filter_Action extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
 {
     #[\Override]
-    public function getHtml()
+    public function getHtml(): string
     {
         $values = [
             ''       => '',

@@ -79,7 +79,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Info extends Mage_Adminhtml_Bloc
         return $this->getChildHtml('order_payment');
     }
 
-    public function getViewUrl($orderId)
+    public function getViewUrl(int|string $orderId): string
     {
         return $this->getUrl('*/*/*', ['order_id' => $orderId]);
     }

@@ -110,10 +110,7 @@ class Mage_Adminhtml_Block_Sales_Order_Status_Grid extends Mage_Adminhtml_Block_
      * No pegination for this grid
      */
     #[\Override]
-    protected function _preparePage()
-    {
-        return $this;
-    }
+    protected function _preparePage(): void {}
 
     #[\Override]
     public function getRowUrl($row)

@@ -165,7 +165,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
      * @param mixed                      $product
      * @param array|int|null             $compareTo
      * @param string                     $zone
-     * @param Mage_Core_Model_Store      $store
+     * @param bool|int|Mage_Core_Model_Store|null|string $store
      * @return bool|int
      */
     public function typeOfDisplay($product, $compareTo = null, $zone = null, $store = null)

@@ -43,7 +43,7 @@ class Mage_Dataflow_Model_Session_Adapter_Iterator extends Mage_Dataflow_Model_C
             ->walk($import->select($sessionId), $callbacks);
     }
 
-    protected function _getProgressBarHtml($sessionId, $totalRows)
+    protected function _getProgressBarHtml(int|string|null $sessionId, int|string $totalRows): string
     {
         $helper = Mage::helper('dataflow');
         return '

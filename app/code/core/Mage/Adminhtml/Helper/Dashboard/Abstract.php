@@ -80,7 +80,7 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
         $this->_params = $params;
     }
 
-    public function getParam($name)
+    public function getParam(string $name): mixed
     {
         return $this->_params[$name] ?? null;
     }

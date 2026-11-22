@@ -12,7 +12,7 @@ abstract class Mage_Adminhtml_Block_Dashboard_Abstract extends Mage_Adminhtml_Bl
 {
     protected ?string $_dataHelperName = null;
 
-    public function getCollection()
+    public function getCollection(): \Maho\Data\Collection|array
     {
         return $this->getDataHelper()->getCollection();
     }
@@ -22,9 +22,13 @@ abstract class Mage_Adminhtml_Block_Dashboard_Abstract extends Mage_Adminhtml_Bl
         return $this->getDataHelper()->getCount();
     }
 
-    public function getDataHelper()
+    public function getDataHelper(): Mage_Adminhtml_Helper_Dashboard_Abstract
     {
-        return $this->helper($this->getDataHelperName());
+        $helper = $this->helper($this->getDataHelperName());
+        if (!$helper instanceof Mage_Adminhtml_Helper_Dashboard_Abstract) {
+            throw new \UnexpectedValueException('The dashboard data helper must extend Mage_Adminhtml_Helper_Dashboard_Abstract.');
+        }
+        return $helper;
     }
 
     public function getDataHelperName(): ?string

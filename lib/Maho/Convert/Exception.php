@@ -23,9 +23,9 @@ class Exception extends MahoException
 
     protected ?ContainerInterface $_container = null;
 
-    protected $_level;
+    protected string|int|null $_level = null;
 
-    protected $_position;
+    protected ?string $_position = null;
 
     public function setContainer(?ContainerInterface $container): static
     {
@@ -38,23 +38,23 @@ class Exception extends MahoException
         return $this->_container;
     }
 
-    public function getLevel()
+    public function getLevel(): string|int|null
     {
         return $this->_level;
     }
 
-    public function setLevel($level): static
+    public function setLevel(string|int $level): static
     {
         $this->_level = $level;
         return $this;
     }
 
-    public function getPosition()
+    public function getPosition(): ?string
     {
         return $this->_position;
     }
 
-    public function setPosition($position): static
+    public function setPosition(?string $position): static
     {
         $this->_position = $position;
         return $this;

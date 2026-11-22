@@ -497,7 +497,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
      * @param string $helper
      * @return string
      */
-    protected function _prepareFieldComment($element, $helper, $currentValue)
+    protected function _prepareFieldComment($element, $helper, mixed $currentValue)
     {
         $comment = '';
         if ($element->comment) {

@@ -9,7 +9,7 @@
 
 class Mage_Adminhtml_Block_Sales_Order_Create_Comment extends Mage_Adminhtml_Block_Sales_Order_Create_Abstract
 {
-    protected $_form;
+    protected ?\Maho\Data\Form $_form = null;
 
     /**
      * @return string

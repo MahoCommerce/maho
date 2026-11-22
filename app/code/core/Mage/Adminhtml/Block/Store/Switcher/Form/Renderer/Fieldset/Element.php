@@ -27,17 +27,6 @@ class Mage_Adminhtml_Block_Store_Switcher_Form_Renderer_Fieldset_Element extends
     }
 
     /**
-     * Retrieve an element
-     *
-     * @return Maho\Data\Form\Element\AbstractElement
-     */
-    #[\Override]
-    public function getElement()
-    {
-        return $this->_element;
-    }
-
-    /**
      * Render element
      *
      * @return string

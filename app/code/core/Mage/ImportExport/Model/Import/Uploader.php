@@ -171,7 +171,7 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
      * Validate uploaded file by type and etc.
      */
     #[\Override]
-    protected function _validateFile()
+    protected function _validateFile(): void
     {
         if ($this->_validated) {
             return;

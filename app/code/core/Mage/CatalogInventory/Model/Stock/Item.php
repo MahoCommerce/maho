@@ -101,11 +101,9 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
     /**
      * Init mapping array of short fields to
      * its full names
-     *
-     * @return void
      */
     #[\Override]
-    protected function _initOldFieldsMap()
+    protected function _initOldFieldsMap(): void
     {
         // pre 1.6 fields names, old => new
         $this->_oldFieldsMap = [

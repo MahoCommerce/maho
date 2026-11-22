@@ -24,7 +24,7 @@ use Maho\Data\Form\Element\Renderer\RendererInterface;
  */
 abstract class AbstractElement extends AbstractForm
 {
-    protected $_id;
+    protected string|int|null $_id = null;
     protected ?string $_type = null;
     protected ?AbstractForm $_form = null;
     #[\Override]

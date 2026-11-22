@@ -11,8 +11,8 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Block_Sales_Items_Renderer_Default extends Mage_Adminhtml_Block_Sales_Items_Abstract
 {
-    public function getItem()
+    public function getItem(): Mage_Sales_Model_Order_Invoice_Item|Mage_Sales_Model_Order_Creditmemo_Item|Mage_Sales_Model_Order_Shipment_Item|null
     {
-        return $this->_getData('item');//->getOrderItem();
+        return $this->_getData('item');
     }
 }

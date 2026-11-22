@@ -10,10 +10,11 @@
 namespace Maho;
 
 use Maho\Convert\Action;
+use Maho\Convert\Container\ContainerInterface;
 
 class Convert
 {
-    public static function convert($class, $method, $data, array $vars = [])
+    public static function convert(string|ContainerInterface $class, string $method, mixed $data, array $vars = []): mixed
     {
         if (is_string($class)) {
             $class = new $class();

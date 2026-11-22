@@ -107,7 +107,7 @@ class DataObject implements ArrayAccess, JsonSerializable
      * Inits mapping array of object's previously used fields to new fields.
      * Must be overloaded by descendants to set concrete fields map.
      */
-    protected function _initOldFieldsMap() {}
+    protected function _initOldFieldsMap(): void {}
 
     /**
      * Called after old fields are inited. Forms synchronization map to sync old fields and new fields

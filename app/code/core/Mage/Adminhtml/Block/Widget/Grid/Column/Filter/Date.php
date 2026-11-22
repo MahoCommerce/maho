@@ -22,11 +22,10 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
     }
 
     /**
-     * @return string
      * @throws Exception
      */
     #[\Override]
-    public function getHtml()
+    public function getHtml(): string
     {
         $fromLabel = Mage::helper('adminhtml')->__('From');
         $toLabel = Mage::helper('adminhtml')->__('To');
@@ -67,7 +66,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
         return $this->getValue($index);
     }
 
-    public function getValue($index = null)
+    public function getValue(?string $index = null): array|string|null
     {
         if ($index) {
             if ($data = $this->getData('value', 'orig_' . $index)) {
@@ -88,7 +87,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
         return $this->getValue();
     }
 
-    public function setValue($value)
+    public function setValue(array|string|null $value): static
     {
         if (isset($value['locale'])) {
             if (!empty($value['from'])) {

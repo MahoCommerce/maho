@@ -449,7 +449,7 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
         return false;
     }
 
-    public function formatPrice($price)
+    public function formatPrice(?float $price): string
     {
         return $this->getOrder()->formatPrice($price);
     }

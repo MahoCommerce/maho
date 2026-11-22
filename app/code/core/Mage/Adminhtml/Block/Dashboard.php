@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Dashboard extends Mage_Adminhtml_Block_Template
 {
-    protected $_locale;
+    protected ?Mage_Core_Model_Locale $_locale = null;
 
     /**
      * Location of the "Enable Chart" config param
@@ -84,7 +84,7 @@ class Mage_Adminhtml_Block_Dashboard extends Mage_Adminhtml_Block_Template
         return parent::_prepareLayout();
     }
 
-    public function getSwitchUrl()
+    public function getSwitchUrl(): string
     {
         if ($url = $this->getData('switch_url')) {
             return $url;

@@ -143,10 +143,9 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
     }
 
     /**
-     * @param $nodeId
      * @return Node|null
      */
-    public function searchById($nodeId)
+    public function searchById(int|string|null $nodeId)
     {
         return $this->_nodes[$nodeId] ?? null;
     }

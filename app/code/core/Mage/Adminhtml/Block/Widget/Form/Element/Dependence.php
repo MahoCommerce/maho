@@ -210,7 +210,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
      *
      * @see self::addConfigOptions()
      */
-    public function addConfigOption(string $option, $value): self
+    public function addConfigOption(string $option, array|object|string|int|float|bool|null $value): self
     {
         $this->_configOptions[$option] = $value;
         return $this;

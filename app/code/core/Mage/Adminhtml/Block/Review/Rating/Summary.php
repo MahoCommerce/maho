@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Review_Rating_Summary extends Mage_Adminhtml_Block_Te
         $this->setReviewId(Mage::registry('review_data')->getId());
     }
 
-    public function getRating()
+    public function getRating(): Mage_Rating_Model_Resource_Rating_Option_Vote_Collection|false
     {
         if (!$this->getRatingCollection()) {
             $ratingCollection = Mage::getModel('rating/rating_option_vote')
@@ -28,7 +28,7 @@ class Mage_Adminhtml_Block_Review_Rating_Summary extends Mage_Adminhtml_Block_Te
         return $this->getRatingCollection();
     }
 
-    public function getRatingSummary()
+    public function getRatingSummary(): Mage_Rating_Model_Rating
     {
         if (!$this->getRatingSummaryCache()) {
             $this->setRatingSummaryCache(Mage::getModel('rating/rating')->getReviewSummary($this->getReviewId()));
