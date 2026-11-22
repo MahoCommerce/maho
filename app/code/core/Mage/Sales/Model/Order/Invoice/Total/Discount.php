@@ -22,19 +22,15 @@ class Mage_Sales_Model_Order_Invoice_Total_Discount extends Mage_Sales_Model_Ord
         $totalDiscountAmount     = 0;
         $baseTotalDiscountAmount = 0;
 
-        /**
-         * Checking if shipping discount was added in previous invoices.
-         * So basically if we have invoice with positive discount and it
-         * was not canceled we don't add shipping discount to this one.
-         */
-        $addShippingDicount = true;
-        foreach ($invoice->getOrder()->getInvoiceCollection() as $previusInvoice) {
-            if ($previusInvoice->getDiscountAmount() && !$previusInvoice->isCanceled()) {
-                $addShippingDicount = false;
+        $addShippingDiscount = true;
+        foreach ($invoice->getOrder()->getInvoiceCollection() as $previousInvoice) {
+            if (!$previousInvoice->isCanceled() && ($previousInvoice->getShippingAmount() || $previousInvoice->getBaseShippingAmount())) {
+                $addShippingDiscount = false;
+                break;
             }
         }
 
-        if ($addShippingDicount) {
+        if ($addShippingDiscount) {
             $totalDiscountAmount     = $totalDiscountAmount + $invoice->getOrder()->getShippingDiscountAmount();
             $baseTotalDiscountAmount = $baseTotalDiscountAmount + $invoice->getOrder()->getBaseShippingDiscountAmount();
         }
