@@ -122,9 +122,16 @@ Cart > Quote Lifetime (days)**), so a cart trend reaches back only that number o
 
 ## Differences from the classic reports
 
-The Orders preset **Sales overview**, with **Placed orders** and the order date or the update
-date, gives the same numbers as the classic **Sales > Orders** report, and a test checks this.
-No test compares the other presets with the classic reports. These are the known differences:
+Tests check that these reports give the same numbers as the classic reports:
+
+- **Sales overview**, with **Placed orders** and the order date or the update date, and the classic
+  **Sales > Orders** report.
+- **Shipping by method**, **Coupon performance**, **Invoiced by invoice date**, **Refunds by refund
+  date** and **Bestsellers**, and the classic Shipping, Coupons, Invoiced, Refunds and Bestsellers
+  reports, for orders of simple products with one invoice and at most one credit memo.
+- The tax of a group of two rates, and the classic Tax report.
+
+These are the known differences:
 
 | Classic report | Difference |
 |----------------|------------|
