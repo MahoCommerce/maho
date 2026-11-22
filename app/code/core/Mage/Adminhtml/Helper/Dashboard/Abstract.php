@@ -12,12 +12,7 @@ declare(strict_types=1);
 
 abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper_Data
 {
-    /**
-     * Helper collection
-     *
-     * @var Mage_Core_Model_Resource_Db_Collection_Abstract|Mage_Eav_Model_Entity_Collection_Abstract|array|null
-     */
-    protected $_collection;
+    protected ?\Maho\Data\Collection $_collection = null;
 
     /**
      * Parameters for helper
@@ -26,7 +21,7 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
      */
     protected $_params = [];
 
-    public function getCollection(): \Maho\Data\Collection|array
+    public function getCollection(): \Maho\Data\Collection
     {
         if (is_null($this->_collection)) {
             $this->_initCollection();
@@ -36,14 +31,9 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
 
     abstract protected function _initCollection(): void;
 
-    /**
-     * Returns collection items
-     *
-     * @return array
-     */
-    public function getItems()
+    public function getItems(): array
     {
-        return is_array($this->getCollection()) ? $this->getCollection() : $this->getCollection()->getItems();
+        return $this->getCollection()->getItems();
     }
 
     public function getCount(): int
