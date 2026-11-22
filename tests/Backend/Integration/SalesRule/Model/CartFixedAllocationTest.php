@@ -315,6 +315,14 @@ it('uses the fixed cart budget within the remaining capacity of every eligible l
         [[0.03, 0.3]], [[Rule::CART_FIXED_ACTION, 0.01, null], [Rule::BY_FIXED_ACTION, 0.10, null, 1]],
         1.00, 1.00, 'USD', 1.00, [0.01],
     ],
+    'a percentage preserves cart credit on fully discounted fractional lines' => [
+        [[0.03, 0.2], [0.03, 0.2]], [[Rule::CART_FIXED_ACTION, 0.02, null], [Rule::BY_PERCENT_ACTION, 90.0, null]],
+        1.00, 1.00, 'USD', 1.00, [0.01, 0.01],
+    ],
+    'a percentage preserves cart credit when only the base fractions round up' => [
+        [[0.03, 0.2], [0.03, 0.2]], [[Rule::CART_FIXED_ACTION, 0.02, null], [Rule::BY_PERCENT_ACTION, 90.0, null]],
+        1.00, 1.98, 'EUR', 1.00, [0.01, 0.01],
+    ],
     'a stepped item discount only covers eligible units' => [
         [[0.04, 1.3]], [[Rule::BY_FIXED_ACTION, 0.10, null, 1]], 1.01, 1.01, 'USD', 1.00, [0.04],
     ],

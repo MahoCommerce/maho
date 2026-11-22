@@ -471,10 +471,10 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                     $originalDiscountAmount = max(0.0, $qty * $itemOriginalPrice - $priorDiscount) * $_rulePct;
                     $baseOriginalDiscountAmount = max(0.0, $qty * $baseItemOriginalPrice - $priorBaseDiscount) * $_rulePct;
                 } else {
-                    $discountAmount = ($qty * $itemPrice - $item->getDiscountAmount()) * $_rulePct;
-                    $baseDiscountAmount = ($qty * $baseItemPrice - $item->getBaseDiscountAmount()) * $_rulePct;
-                    $originalDiscountAmount = ($qty * $itemOriginalPrice - $item->getDiscountAmount()) * $_rulePct;
-                    $baseOriginalDiscountAmount = ($qty * $baseItemOriginalPrice - $item->getDiscountAmount()) * $_rulePct;
+                    $discountAmount = max(0.0, $qty * $itemPrice - $item->getDiscountAmount()) * $_rulePct;
+                    $baseDiscountAmount = max(0.0, $qty * $baseItemPrice - $item->getBaseDiscountAmount()) * $_rulePct;
+                    $originalDiscountAmount = max(0.0, $qty * $itemOriginalPrice - $item->getDiscountAmount()) * $_rulePct;
+                    $baseOriginalDiscountAmount = max(0.0, $qty * $baseItemOriginalPrice - $item->getBaseDiscountAmount()) * $_rulePct;
                 }
 
                 if ($qty > 0 && $_rulePct > 0) {
@@ -626,7 +626,11 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
         if ($partialPercentCapacity === null) {
             $discountLimit = $itemPrice * $qty;
             $baseDiscountLimit = $baseItemPrice * $qty;
-            if ($rule->getSimpleAction() === Mage_SalesRule_Model_Rule::BY_FIXED_ACTION) {
+            if ($isPercentage) {
+                // A cart discount can cover a fractional line up to its rounded billable total.
+                $discountLimit = max($discountLimit, $previousDiscountAmount);
+                $baseDiscountLimit = max($baseDiscountLimit, $previousBaseDiscountAmount);
+            } elseif ($rule->getSimpleAction() === Mage_SalesRule_Model_Rule::BY_FIXED_ACTION) {
                 // This rule's quantity limit cannot reduce discounts already applied to the line.
                 $discountLimit = max($discountLimit, $itemDiscountAmount);
                 $baseDiscountLimit = max($baseDiscountLimit, $itemBaseDiscountAmount);
