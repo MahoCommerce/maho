@@ -8,7 +8,7 @@
 
 class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'cms/blog/posts';
+    public const string ADMIN_RESOURCE = 'cms/blog/posts';
 
     protected function _initAction(): self
     {

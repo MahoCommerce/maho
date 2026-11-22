@@ -17,10 +17,7 @@ declare(strict_types=1);
  */
 abstract class Mage_ImportExport_Model_Abstract extends \Maho\DataObject
 {
-    /**
-     * Log directory
-     */
-    public const LOG_DIRECTORY = 'log/import_export/';
+    public const string LOG_DIRECTORY = 'log/import_export/';
 
     /**
      * Enable logging

@@ -13,7 +13,7 @@ declare(strict_types=1);
  */
 class Maho_Blog_Model_Resource_Category_Collection extends Mage_Eav_Model_Entity_Collection_Abstract
 {
-    public const ENTITY = 'blog_category';
+    public const string ENTITY = 'blog_category';
 
     protected bool $_isFilteringStaticAttribute = false;
 

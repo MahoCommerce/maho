@@ -13,8 +13,8 @@ use phpseclib\Net\SFTP as PhpSecLibSftp;
 
 class Sftp extends \Maho\Io
 {
-    public const REMOTE_TIMEOUT = 10;
-    public const SSH2_PORT = 22;
+    public const int REMOTE_TIMEOUT = 10;
+    public const int SSH2_PORT = 22;
 
     /**
      * @var PhpSecLibSftp $_connection

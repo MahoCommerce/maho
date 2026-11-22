@@ -29,8 +29,8 @@ declare(strict_types=1);
 
 class PestTestRunner
 {
-    private const LOCAL_XML_PATH = 'app/etc/local.xml';
-    private const LOCAL_XML_BACKUP = 'app/etc/local.xml.backup';
+    private const string LOCAL_XML_PATH = 'app/etc/local.xml';
+    private const string LOCAL_XML_BACKUP = 'app/etc/local.xml.backup';
 
     private array $dbConfig = [];
     private string $testDbName;

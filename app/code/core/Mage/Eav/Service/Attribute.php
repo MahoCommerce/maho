@@ -15,9 +15,9 @@ use Mage_Eav_Model_Entity_Attribute as Attribute;
 
 class Mage_Eav_Service_Attribute
 {
-    public const OPTION_INPUT_TYPES = ['select', 'multiselect'];
+    public const array OPTION_INPUT_TYPES = ['select', 'multiselect'];
 
-    private const OPTION_SOURCE_MODEL = 'eav/entity_attribute_source_table';
+    private const string OPTION_SOURCE_MODEL = 'eav/entity_attribute_source_table';
 
     /**
      * Return a new attribute of the entity type $entityTypeCode, with the attribute model of the type.

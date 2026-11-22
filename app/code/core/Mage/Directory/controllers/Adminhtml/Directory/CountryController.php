@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'system/directory/countries';
+    public const string ADMIN_RESOURCE = 'system/directory/countries';
 
     protected function _initCountry(): Mage_Directory_Model_Country|false
     {

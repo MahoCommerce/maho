@@ -17,10 +17,7 @@ class Mage_Downloadable_Model_Link_Api_Uploader extends \Maho\ApiPlatform\Servic
      */
     protected $_filePrefix = 'Api';
 
-    /**
-     * Default file type
-     */
-    public const DEFAULT_FILE_TYPE = 'application/octet-stream';
+    public const string DEFAULT_FILE_TYPE = 'application/octet-stream';
 
     /**
      * @param array $file The file name, type and base64 content of the API request

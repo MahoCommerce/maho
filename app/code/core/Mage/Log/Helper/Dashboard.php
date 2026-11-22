@@ -13,9 +13,9 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
     #[\Override]
     protected $_moduleName = 'Mage_Log';
 
-    public const CACHE_TAG = 'log_dashboard';
-    public const CACHE_LIFETIME_REALTIME = 300;   // 5 minutes
-    public const CACHE_LIFETIME_HOURLY = 3600;    // 1 hour
+    public const string CACHE_TAG = 'log_dashboard';
+    public const int CACHE_LIFETIME_REALTIME = 300;   // 5 minutes
+    public const int CACHE_LIFETIME_HOURLY = 3600;    // 1 hour
 
     /**
      * Generate cache key with store ID for multi-store support

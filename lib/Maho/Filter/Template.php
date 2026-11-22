@@ -18,13 +18,13 @@ class Template
     /**
      * Cunstruction regular expression
      */
-    public const CONSTRUCTION_PATTERN = '/{{([a-z]{0,10})(.*?)}}/si';
+    public const string CONSTRUCTION_PATTERN = '/{{([a-z]{0,10})(.*?)}}/si';
 
     /**
      * Cunstruction logic regular expression
      */
-    public const CONSTRUCTION_DEPEND_PATTERN = '/{{depend\s*(.*?)}}(.*?){{\\/depend\s*}}/si';
-    public const CONSTRUCTION_IF_PATTERN = '/{{if\s*(.*?)}}(.*?)({{else}}(.*?))?{{\\/if\s*}}/si';
+    public const string CONSTRUCTION_DEPEND_PATTERN = '/{{depend\s*(.*?)}}(.*?){{\\/depend\s*}}/si';
+    public const string CONSTRUCTION_IF_PATTERN = '/{{if\s*(.*?)}}(.*?)({{else}}(.*?))?{{\\/if\s*}}/si';
 
     /**
      * Assigned template variables

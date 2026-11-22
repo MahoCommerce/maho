@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -9,8 +10,8 @@
 
 class Mage_Page_Model_Config
 {
-    public const XML_PATH_PAGE_LAYOUTS = 'global/page/layouts';
-    public const XML_PATH_CMS_LAYOUTS = 'global/cms/layouts';
+    public const string XML_PATH_PAGE_LAYOUTS = 'global/page/layouts';
+    public const string XML_PATH_CMS_LAYOUTS = 'global/cms/layouts';
 
     /**
      * Available page layouts

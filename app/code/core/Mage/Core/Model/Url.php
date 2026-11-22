@@ -60,40 +60,34 @@ declare(strict_types=1);
  */
 class Mage_Core_Model_Url extends \Maho\DataObject
 {
-    /**
-     * Default controller name
-     */
-    public const DEFAULT_CONTROLLER_NAME   = 'index';
+    public const string DEFAULT_CONTROLLER_NAME   = 'index';
 
-    /**
-     * Default action name
-     */
-    public const DEFAULT_ACTION_NAME       = 'index';
+    public const string DEFAULT_ACTION_NAME       = 'index';
 
     /**
      * XML base url path unsecure
      */
-    public const XML_PATH_UNSECURE_URL     = 'web/unsecure/base_url';
+    public const string XML_PATH_UNSECURE_URL     = 'web/unsecure/base_url';
 
     /**
      * XML base url path secure
      */
-    public const XML_PATH_SECURE_URL       = 'web/secure/base_url';
+    public const string XML_PATH_SECURE_URL       = 'web/secure/base_url';
 
     /**
      * XML path for using in adminhtml
      */
-    public const XML_PATH_SECURE_IN_ADMIN  = 'default/web/secure/use_in_adminhtml';
+    public const string XML_PATH_SECURE_IN_ADMIN  = 'default/web/secure/use_in_adminhtml';
 
     /**
      * XML path for using in frontend
      */
-    public const XML_PATH_SECURE_IN_FRONT  = 'web/secure/use_in_frontend';
+    public const string XML_PATH_SECURE_IN_FRONT  = 'web/secure/use_in_frontend';
 
     /**
      * Param name for form key functionality
      */
-    public const FORM_KEY = 'form_key';
+    public const string FORM_KEY = 'form_key';
 
     /**
      * Configuration data cache

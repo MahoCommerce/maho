@@ -107,11 +107,11 @@ use Maho\Config\ApiResource;
 )]
 class AttributeSet extends CrudResource
 {
-    public const MODEL = 'eav/entity_attribute_set';
-    public const PRIMARY_KEY = 'attribute_set_id';
+    public const string MODEL = 'eav/entity_attribute_set';
+    public const string PRIMARY_KEY = 'attribute_set_id';
 
     /** Admin ACL gate. Mirrors backend Mage_Adminhtml_Catalog_Product_SetController. */
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_Catalog_Product_SetController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_Catalog_Product_SetController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

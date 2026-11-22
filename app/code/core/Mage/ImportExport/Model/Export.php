@@ -12,32 +12,32 @@ declare(strict_types=1);
 
 class Mage_ImportExport_Model_Export extends Mage_ImportExport_Model_Abstract
 {
-    public const FILTER_ELEMENT_GROUP = 'export_filter';
-    public const FILTER_ELEMENT_SKIP  = 'skip_attr';
+    public const string FILTER_ELEMENT_GROUP = 'export_filter';
+    public const string FILTER_ELEMENT_SKIP  = 'skip_attr';
 
     /**
      * Filter fields types.
      */
-    public const FILTER_TYPE_SELECT = 'select';
-    public const FILTER_TYPE_INPUT  = 'input';
-    public const FILTER_TYPE_DATE   = 'date';
-    public const FILTER_TYPE_NUMBER = 'number';
+    public const string FILTER_TYPE_SELECT = 'select';
+    public const string FILTER_TYPE_INPUT  = 'input';
+    public const string FILTER_TYPE_DATE   = 'date';
+    public const string FILTER_TYPE_NUMBER = 'number';
 
     /**
      * Config keys.
      */
-    public const CONFIG_KEY_ENTITIES = 'global/importexport/export_entities';
-    public const CONFIG_KEY_FORMATS  = 'global/importexport/export_file_formats';
+    public const string CONFIG_KEY_ENTITIES = 'global/importexport/export_entities';
+    public const string CONFIG_KEY_FORMATS  = 'global/importexport/export_file_formats';
 
     /**
      * The private mount that keeps the export files until an administrator downloads them.
      */
-    public const STORAGE_MOUNT = 'importexport_exports';
+    public const string STORAGE_MOUNT = 'importexport_exports';
 
     /**
      * The number of days that an export file stays in the mount.
      */
-    public const FILE_LIFETIME_DAYS = 7;
+    public const int FILE_LIFETIME_DAYS = 7;
 
     /**
      * Entity adapter.

@@ -14,9 +14,9 @@ use Maho\ApiPlatform\Security\ApiUser;
 
 final class DashboardProvider extends ReportProviderBase
 {
-    public const PERIODS = ['24h', '7d', '1m', '3m', '6m', '1y', '2y'];
+    public const array PERIODS = ['24h', '7d', '1m', '3m', '6m', '1y', '2y'];
 
-    public const SECTIONS = [
+    public const array SECTIONS = [
         'lifetime', 'totals', 'chart', 'lastOrders', 'lastSearchTerms',
         'topSearchTerms', 'bestsellers', 'mostViewed', 'newCustomers', 'topCustomers',
     ];
@@ -24,7 +24,7 @@ final class DashboardProvider extends ReportProviderBase
     /**
      * The number of rows of each list, the same as the admin dashboard.
      */
-    public const LIST_SIZE = 5;
+    public const int LIST_SIZE = 5;
 
     #[\Override]
     protected function buildReport(array $filters, ApiUser $user): array

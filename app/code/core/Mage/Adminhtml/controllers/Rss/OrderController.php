@@ -12,11 +12,7 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Rss_OrderController extends Mage_Adminhtml_Controller_Rss_Abstract
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'sales/order/actions/view';
+    public const string ADMIN_RESOURCE = 'sales/order/actions/view';
 
     #[Maho\Config\Route('/admin/rss_order/new')]
     public function newAction(): void

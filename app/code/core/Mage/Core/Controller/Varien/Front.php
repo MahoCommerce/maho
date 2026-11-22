@@ -23,13 +23,13 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
 
     protected array $_urlCache = [];
 
-    public const XML_STORE_ROUTERS_PATH = 'web/routers';
+    public const string XML_STORE_ROUTERS_PATH = 'web/routers';
 
     /**
      * Maximum number of forward iterations before bailing out.
      * Guards against infinite _forward() loops between controllers.
      */
-    public const MAX_FORWARD_ITERATIONS = 100;
+    public const int MAX_FORWARD_ITERATIONS = 100;
 
     /**
      * @param array|string $key

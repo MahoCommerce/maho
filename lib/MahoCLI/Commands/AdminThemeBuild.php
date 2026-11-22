@@ -24,7 +24,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class AdminThemeBuild extends AbstractThemeBuild
 {
-    protected const SKIN_PATH = 'public/skin/adminhtml';
+    protected const string SKIN_PATH = 'public/skin/adminhtml';
 
     public function __invoke(
         InputInterface $input,

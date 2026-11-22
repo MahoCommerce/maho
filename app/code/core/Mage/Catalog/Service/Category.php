@@ -15,7 +15,7 @@ use Mage_Catalog_Model_Category as Category;
 class Mage_Catalog_Service_Category
 {
     /** The attributes that take the value of the configuration when they hold null. */
-    public const USE_CONFIG_CODES = ['available_sort_by', 'default_sort_by', 'filter_price_range'];
+    public const array USE_CONFIG_CODES = ['available_sort_by', 'default_sort_by', 'filter_price_range'];
 
     /**
      * Load the category $id with the values of the store view $storeId.

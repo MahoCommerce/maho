@@ -19,19 +19,19 @@ class Mage_Weee_Model_Tax extends Mage_Core_Model_Abstract
     /**
      * Including FPT only
      */
-    public const DISPLAY_INCL              = 0;
+    public const int DISPLAY_INCL              = 0;
     /**
      * Including FPT and FPT description
      */
-    public const DISPLAY_INCL_DESCR        = 1;
+    public const int DISPLAY_INCL_DESCR        = 1;
     /**
      * Excluding FPT, FPT description, final price
      */
-    public const DISPLAY_EXCL_DESCR_INCL   = 2;
+    public const int DISPLAY_EXCL_DESCR_INCL   = 2;
     /**
      * Excluding FPT
      */
-    public const DISPLAY_EXCL              = 3;
+    public const int DISPLAY_EXCL              = 3;
 
     /**
      * All weee attributes

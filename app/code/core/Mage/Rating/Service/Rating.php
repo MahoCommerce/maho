@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Mage_Rating_Service_Rating
 {
-    public const STARS = 5;
+    public const int STARS = 5;
 
     /**
      * @throws Mage_Core_Exception_NoSuchEntity

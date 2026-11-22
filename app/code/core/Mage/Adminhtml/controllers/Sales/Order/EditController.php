@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_Sales_Order_EditController extends Mage_Adminhtml_Sales_Order_CreateController
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'sales/order/actions/edit';
+    public const string ADMIN_RESOURCE = 'sales/order/actions/edit';
 
     /**
      * Start edit order initialization

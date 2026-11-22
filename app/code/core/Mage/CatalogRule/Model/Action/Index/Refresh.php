@@ -10,7 +10,7 @@
 
 class Mage_CatalogRule_Model_Action_Index_Refresh
 {
-    protected const INDEX_INSERT_BATCH = 1000;
+    protected const int INDEX_INSERT_BATCH = 1000;
 
     /**
      * Connection instance

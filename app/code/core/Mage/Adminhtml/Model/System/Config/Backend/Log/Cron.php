@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Model_System_Config_Backend_Log_Cron extends Mage_Core_Model_Config_Data
 {
-    public const CRON_STRING_PATH  = 'crontab/jobs/log_clean/schedule/cron_expr';
+    public const string CRON_STRING_PATH  = 'crontab/jobs/log_clean/schedule/cron_expr';
 
     /**
      * Cron settings after save

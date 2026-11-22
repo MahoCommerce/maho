@@ -18,13 +18,13 @@ use Intervention\Image\Interfaces\ImageInterface;
 
 class Mage_Core_Model_Image_Resizer
 {
-    public const QUEUE_NAME = 'image';
+    public const string QUEUE_NAME = 'image';
 
     /** Source files in one queue message. */
-    public const BATCH_SIZE = 100;
+    public const int BATCH_SIZE = 100;
 
     /** A source below this folder of its entity is a placeholder, which gets no watermark. */
-    public const PLACEHOLDER_FOLDER = 'placeholder';
+    public const string PLACEHOLDER_FOLDER = 'placeholder';
 
     /** @var array<string, ImageInterface|null> */
     protected array $watermarks = [];

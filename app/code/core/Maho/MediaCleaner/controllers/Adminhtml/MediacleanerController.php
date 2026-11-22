@@ -14,7 +14,7 @@ use Maho\Storage\Mount;
 
 class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'system/tools/mediacleaner';
+    public const string ADMIN_RESOURCE = 'system/tools/mediacleaner';
 
     #[Maho\Config\Route('/admin/mediacleaner/index')]
     public function indexAction(): void

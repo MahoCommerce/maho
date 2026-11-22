@@ -47,7 +47,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 final class McpAuthChallengeListener
 {
     /** Set by McpDispatchProvider when a tool is refused for want of a token. */
-    public const ATTRIBUTE_AUTH_REQUIRED = '_maho_mcp_auth_required';
+    public const string ATTRIBUTE_AUTH_REQUIRED = '_maho_mcp_auth_required';
 
     public function __construct(private readonly OperationAccessChecker $accessChecker) {}
 

@@ -16,8 +16,8 @@ use Maho\ApiPlatform\Security\ApiUser;
 
 trait CustomersRankingTrait
 {
-    public const DEFAULT_LIMIT = 20;
-    public const MAX_LIMIT = 100;
+    public const int DEFAULT_LIMIT = 20;
+    public const int MAX_LIMIT = 100;
 
     /**
      * Return the document of the report $report with the customers that the orders of the range rank first.

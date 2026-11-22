@@ -17,7 +17,7 @@ namespace Maho\Queue;
  */
 final readonly class Pool
 {
-    public const LOCK_PREFIX = 'queue.worker';
+    public const string LOCK_PREFIX = 'queue.worker';
 
     /**
      * @param list<string> $queues         Consume only these queues; empty consumes every queue not excluded

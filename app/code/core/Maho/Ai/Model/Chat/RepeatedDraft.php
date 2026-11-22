@@ -18,12 +18,12 @@ declare(strict_types=1);
  */
 final class Maho_Ai_Model_Chat_RepeatedDraft
 {
-    private const MIN_CHARS = 60;
+    private const int MIN_CHARS = 60;
 
-    private const MIN_SIMILARITY = 90.0;
+    private const float MIN_SIMILARITY = 90.0;
 
     /** Two wordings of one question differ more, and an answer never asks the same question twice. */
-    private const MIN_QUESTION_SIMILARITY = 75.0;
+    private const float MIN_QUESTION_SIMILARITY = 75.0;
 
     /**
      * Return the second paragraph when the text is two long, almost equal paragraphs with the same numbers and one line break between them.

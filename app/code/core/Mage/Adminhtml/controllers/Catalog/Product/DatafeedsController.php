@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Catalog_DatafeedsController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'catalog/products';
+    public const string ADMIN_RESOURCE = 'catalog/products';
 
     #[Maho\Config\Route('/admin/catalog_datafeeds/index')]
     public function indexAction(): void {}

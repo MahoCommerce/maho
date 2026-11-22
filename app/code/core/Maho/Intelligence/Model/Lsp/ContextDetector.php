@@ -20,19 +20,19 @@ declare(strict_types=1);
  */
 class Maho_Intelligence_Model_Lsp_ContextDetector
 {
-    public const CONTEXT_NONE = 'none';
-    public const CONTEXT_MODEL_ALIAS = 'model_alias';
-    public const CONTEXT_HELPER_ALIAS = 'helper_alias';
-    public const CONTEXT_BLOCK_ALIAS = 'block_alias';
-    public const CONTEXT_RESOURCE_MODEL_ALIAS = 'resource_model_alias';
-    public const CONTEXT_CONFIG_PATH = 'config_path';
-    public const CONTEXT_EVENT_NAME = 'event_name';
-    public const CONTEXT_XML_METHOD = 'xml_method';
-    public const CONTEXT_CRON_RUN_MODEL = 'cron_run_model';
-    public const CONTEXT_TEMPLATE_PATH = 'template_path';
-    public const CONTEXT_LAYOUT_HANDLE = 'layout_handle';
-    public const CONTEXT_FQCN = 'fqcn';
-    public const CONTEXT_XML_ELEMENT_NAME = 'xml_element_name';
+    public const string CONTEXT_NONE = 'none';
+    public const string CONTEXT_MODEL_ALIAS = 'model_alias';
+    public const string CONTEXT_HELPER_ALIAS = 'helper_alias';
+    public const string CONTEXT_BLOCK_ALIAS = 'block_alias';
+    public const string CONTEXT_RESOURCE_MODEL_ALIAS = 'resource_model_alias';
+    public const string CONTEXT_CONFIG_PATH = 'config_path';
+    public const string CONTEXT_EVENT_NAME = 'event_name';
+    public const string CONTEXT_XML_METHOD = 'xml_method';
+    public const string CONTEXT_CRON_RUN_MODEL = 'cron_run_model';
+    public const string CONTEXT_TEMPLATE_PATH = 'template_path';
+    public const string CONTEXT_LAYOUT_HANDLE = 'layout_handle';
+    public const string CONTEXT_FQCN = 'fqcn';
+    public const string CONTEXT_XML_ELEMENT_NAME = 'xml_element_name';
 
     private ?Maho_Intelligence_Model_Lsp_XmlStructureIndex $structureIndex = null;
 
@@ -47,7 +47,7 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
         return $this->structureIndex;
     }
 
-    private const CALL_PATTERNS = [
+    private const array CALL_PATTERNS = [
         self::CONTEXT_MODEL_ALIAS => [
             'Mage::getModel',
             'Mage::getSingleton',
@@ -76,7 +76,7 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
     /**
      * Tags whose meaning is unambiguous regardless of XML path.
      */
-    private const XML_TAG_TO_CONTEXT = [
+    private const array XML_TAG_TO_CONTEXT = [
         'source_model'  => self::CONTEXT_MODEL_ALIAS,
         'backend_model' => self::CONTEXT_MODEL_ALIAS,
         'frontend_model' => self::CONTEXT_BLOCK_ALIAS,
@@ -88,7 +88,7 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
     /**
      * Attributes whose meaning is unambiguous regardless of XML path.
      */
-    private const XML_ATTR_TO_CONTEXT = [
+    private const array XML_ATTR_TO_CONTEXT = [
         'type'     => self::CONTEXT_BLOCK_ALIAS,
         'template' => self::CONTEXT_TEMPLATE_PATH,
         'ifconfig' => self::CONTEXT_CONFIG_PATH,
@@ -100,7 +100,7 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
      * Checked in order — first match wins. The path is the parent
      * path (excluding the <class> tag itself).
      */
-    private const XML_CLASS_PATH_RULES = [
+    private const array XML_CLASS_PATH_RULES = [
         // Observer class: always a model alias
         '/\/events\/[^\/]+\/observers\/[^\/]+$/' => self::CONTEXT_MODEL_ALIAS,
         // Total collectors: model alias
@@ -120,7 +120,7 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
     /**
      * XML path patterns that determine what a <model> tag means.
      */
-    private const XML_MODEL_PATH_RULES = [
+    private const array XML_MODEL_PATH_RULES = [
         // Cron run callback: alias::method
         '/\/jobs\/[^\/]+\/run$/' => self::CONTEXT_CRON_RUN_MODEL,
     ];

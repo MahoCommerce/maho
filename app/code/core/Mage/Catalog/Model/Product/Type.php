@@ -13,15 +13,15 @@ class Mage_Catalog_Model_Product_Type
     /**
      * Available product types
      */
-    public const TYPE_SIMPLE       = 'simple';
-    public const TYPE_BUNDLE       = 'bundle';
-    public const TYPE_CONFIGURABLE = 'configurable';
-    public const TYPE_GROUPED      = 'grouped';
-    public const TYPE_VIRTUAL      = 'virtual';
+    public const string TYPE_SIMPLE       = 'simple';
+    public const string TYPE_BUNDLE       = 'bundle';
+    public const string TYPE_CONFIGURABLE = 'configurable';
+    public const string TYPE_GROUPED      = 'grouped';
+    public const string TYPE_VIRTUAL      = 'virtual';
 
-    public const DEFAULT_TYPE      = 'simple';
-    public const DEFAULT_TYPE_MODEL    = 'catalog/product_type_simple';
-    public const DEFAULT_PRICE_MODEL   = 'catalog/product_type_price';
+    public const string DEFAULT_TYPE      = 'simple';
+    public const string DEFAULT_TYPE_MODEL    = 'catalog/product_type_simple';
+    public const string DEFAULT_PRICE_MODEL   = 'catalog/product_type_price';
 
     protected static ?array $_types = null;
     protected static ?array $_compositeTypes = null;

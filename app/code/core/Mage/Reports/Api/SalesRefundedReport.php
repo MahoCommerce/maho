@@ -38,7 +38,7 @@ use ApiPlatform\Metadata\Get;
 )]
 class SalesRefundedReport extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = 'report/salesroot/refunded';
+    public const string ADMIN_RESOURCE = 'report/salesroot/refunded';
 
     #[ApiProperty(identifier: true, description: 'Report code')]
     public string $report = 'sales-refunded';

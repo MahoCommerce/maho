@@ -33,7 +33,7 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
      * DaisyUI's rating fills its stars up to the one marked `aria-current`, so authored star
      * markup lost its fill on save without it.
      */
-    public const EXTRA_ATTRIBUTES = SvgAllowlist::GLOBAL_ATTRIBUTES;
+    public const array EXTRA_ATTRIBUTES = SvgAllowlist::GLOBAL_ATTRIBUTES;
 
     /**
      * Input length ceiling, matching the storage the sanitized value is headed for.
@@ -44,7 +44,7 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
      * Mage/Cms/sql/schema.php: 2 MiB, which the DBAL maps to MEDIUMTEXT. Input past the cap is
      * still truncated silently, but nothing within the column's declared size can be.
      */
-    public const MAX_INPUT_LENGTH = 2_097_152;
+    public const int MAX_INPUT_LENGTH = 2_097_152;
 
     /**
      * Matches a data-* attribute name in the raw input.
@@ -54,9 +54,9 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
      * inert by definition, carry no browser behaviour, and merchants put arbitrary ones on CMS
      * markup for sliders and other JS, so an enumerated list would always be incomplete.
      */
-    public const DATA_ATTRIBUTE_PREFIX = 'data-';
+    public const string DATA_ATTRIBUTE_PREFIX = 'data-';
 
-    public const DATA_ATTRIBUTE_PATTERN = '/\b' . self::DATA_ATTRIBUTE_PREFIX . '[a-z][a-z0-9_-]*/i';
+    public const string DATA_ATTRIBUTE_PATTERN = '/\b' . self::DATA_ATTRIBUTE_PREFIX . '[a-z][a-z0-9_-]*/i';
 
     /**
      * How many per-data-attribute-set sanitizers to keep.
@@ -66,7 +66,7 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
      * request. The cap keeps the common case (one shape of content, reused) free while bounding
      * a mass save; building a sanitizer is cheap enough that a miss only costs the config.
      */
-    public const SANITIZER_CACHE_SIZE = 32;
+    public const int SANITIZER_CACHE_SIZE = 32;
 
     /**
      * HTML names that the W3C baseline allows and that SVG uses for a different purpose.
@@ -79,15 +79,15 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
      * an SVG `<font>`, so the element draws nothing and fetches nothing. A rule would only damage
      * a legacy HTML `<font>`. `a` is a third, and an author needs a link.
      */
-    public const SVG_ELEMENT_NAME_COLLISIONS = ['image'];
+    public const array SVG_ELEMENT_NAME_COLLISIONS = ['image'];
 
     /**
      * Elements of the document around the content. allowSafeElements() allows them, but a content
      * field never holds them, so forEditor() leaves them out.
      */
-    public const DOCUMENT_ELEMENTS = ['html', 'head', 'body', 'title', 'meta', 'link'];
+    public const array DOCUMENT_ELEMENTS = ['html', 'head', 'body', 'title', 'meta', 'link'];
 
-    public const ATTRIBUTE_SANITIZER_MODELS = [
+    public const array ATTRIBUTE_SANITIZER_MODELS = [
         'core/input_filter_svgPaint',
         'core/input_filter_svgAnimation',
         'core/input_filter_svgLink',

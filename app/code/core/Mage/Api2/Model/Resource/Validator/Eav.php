@@ -16,7 +16,7 @@ class Mage_Api2_Model_Resource_Validator_Eav extends Mage_Api2_Model_Resource_Va
     /**
      * Config node key of current validator
      */
-    public const CONFIG_NODE_KEY = 'eav';
+    public const string CONFIG_NODE_KEY = 'eav';
 
     /**
      * Form path

@@ -15,19 +15,19 @@ declare(strict_types=1);
  */
 class Maho_CatalogLinkRule_Model_Processor
 {
-    public const BATCH_SIZE = 100;
+    public const int BATCH_SIZE = 100;
 
-    public const MODE_REPLACE = 'replace';
-    public const MODE_MERGE   = 'merge';
+    public const string MODE_REPLACE = 'replace';
+    public const string MODE_MERGE   = 'merge';
 
-    public const CONFIG_MERGE_MODE = 'catalog/linkrule/merge_mode';
+    public const string CONFIG_MERGE_MODE = 'catalog/linkrule/merge_mode';
 
-    public const QUEUE_NAME = 'cataloglinkrule';
+    public const string QUEUE_NAME = 'cataloglinkrule';
 
     /**
      * Seconds that a run of the rules waits for another run to end
      */
-    public const LOCK_WAIT_SECONDS = 3600;
+    public const int LOCK_WAIT_SECONDS = 3600;
 
     /**
      * Resolve the configured merge mode (how rule results combine with existing links)

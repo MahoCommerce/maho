@@ -10,7 +10,7 @@
 
 class Mage_Reports_Model_Resource_Quote_Collection extends Mage_Sales_Model_Resource_Quote_Collection
 {
-    public const SELECT_COUNT_SQL_TYPE_CART = 1;
+    public const int SELECT_COUNT_SQL_TYPE_CART = 1;
 
     protected int $_selectCountSqlType = 0;
 

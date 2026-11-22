@@ -14,10 +14,10 @@ use Mage_Newsletter_Model_Subscriber as Subscriber;
 
 class Mage_Newsletter_Service_Subscriber
 {
-    public const XML_PATH_SUBSCRIBE_RATE_LIMIT = 'system/rate_limit/newsletter_subscribe';
-    public const XML_PATH_UNSUBSCRIBE_RATE_LIMIT = 'system/rate_limit/newsletter_unsubscribe';
+    public const string XML_PATH_SUBSCRIBE_RATE_LIMIT = 'system/rate_limit/newsletter_subscribe';
+    public const string XML_PATH_UNSUBSCRIBE_RATE_LIMIT = 'system/rate_limit/newsletter_unsubscribe';
 
-    public const RATE_LIMIT_WINDOW = 3600;
+    public const int RATE_LIMIT_WINDOW = 3600;
 
     /**
      * @throws Mage_Core_Exception_NoSuchEntity

@@ -17,33 +17,33 @@ declare(strict_types=1);
  */
 class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
 {
-    public const STATUS_NEW      = 1;
-    public const STATUS_CANCELED = 2;
+    public const int STATUS_NEW      = 1;
+    public const int STATUS_CANCELED = 2;
 
     protected static ?array $_statuses = null;
 
-    public const XML_PATH_EMAIL_TEMPLATE               = 'sales_email/shipment/template';
-    public const XML_PATH_EMAIL_GUEST_TEMPLATE         = 'sales_email/shipment/guest_template';
-    public const XML_PATH_EMAIL_IDENTITY               = 'sales_email/shipment/identity';
-    public const XML_PATH_EMAIL_COPY_TO                = 'sales_email/shipment/copy_to';
-    public const XML_PATH_EMAIL_COPY_METHOD            = 'sales_email/shipment/copy_method';
-    public const XML_PATH_EMAIL_ENABLED                = 'sales_email/shipment/enabled';
-    public const XML_PATH_EMAIL_ATTACH_PDF             = 'sales_email/shipment/attach_pdf';
+    public const string XML_PATH_EMAIL_TEMPLATE               = 'sales_email/shipment/template';
+    public const string XML_PATH_EMAIL_GUEST_TEMPLATE         = 'sales_email/shipment/guest_template';
+    public const string XML_PATH_EMAIL_IDENTITY               = 'sales_email/shipment/identity';
+    public const string XML_PATH_EMAIL_COPY_TO                = 'sales_email/shipment/copy_to';
+    public const string XML_PATH_EMAIL_COPY_METHOD            = 'sales_email/shipment/copy_method';
+    public const string XML_PATH_EMAIL_ENABLED                = 'sales_email/shipment/enabled';
+    public const string XML_PATH_EMAIL_ATTACH_PDF             = 'sales_email/shipment/attach_pdf';
 
-    public const XML_PATH_UPDATE_EMAIL_TEMPLATE        = 'sales_email/shipment_comment/template';
-    public const XML_PATH_UPDATE_EMAIL_GUEST_TEMPLATE  = 'sales_email/shipment_comment/guest_template';
-    public const XML_PATH_UPDATE_EMAIL_IDENTITY        = 'sales_email/shipment_comment/identity';
-    public const XML_PATH_UPDATE_EMAIL_COPY_TO         = 'sales_email/shipment_comment/copy_to';
-    public const XML_PATH_UPDATE_EMAIL_COPY_METHOD     = 'sales_email/shipment_comment/copy_method';
-    public const XML_PATH_UPDATE_EMAIL_ENABLED         = 'sales_email/shipment_comment/enabled';
+    public const string XML_PATH_UPDATE_EMAIL_TEMPLATE        = 'sales_email/shipment_comment/template';
+    public const string XML_PATH_UPDATE_EMAIL_GUEST_TEMPLATE  = 'sales_email/shipment_comment/guest_template';
+    public const string XML_PATH_UPDATE_EMAIL_IDENTITY        = 'sales_email/shipment_comment/identity';
+    public const string XML_PATH_UPDATE_EMAIL_COPY_TO         = 'sales_email/shipment_comment/copy_to';
+    public const string XML_PATH_UPDATE_EMAIL_COPY_METHOD     = 'sales_email/shipment_comment/copy_method';
+    public const string XML_PATH_UPDATE_EMAIL_ENABLED         = 'sales_email/shipment_comment/enabled';
 
-    public const REPORT_DATE_TYPE_ORDER_CREATED        = 'order_created';
-    public const REPORT_DATE_TYPE_SHIPMENT_CREATED     = 'shipment_created';
+    public const string REPORT_DATE_TYPE_ORDER_CREATED        = 'order_created';
+    public const string REPORT_DATE_TYPE_SHIPMENT_CREATED     = 'shipment_created';
 
     /**
      * Identifier for order history item
      */
-    public const HISTORY_ENTITY_NAME = 'shipment';
+    public const string HISTORY_ENTITY_NAME = 'shipment';
 
     /**
      * @var Mage_Sales_Model_Resource_Order_Shipment_Item_Collection|null

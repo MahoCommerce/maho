@@ -22,9 +22,9 @@ use Mage_Sales_Model_Resource_Order_Collection as OrderCollection;
  */
 class Mage_Sales_Service_Order
 {
-    public const XML_PATH_GUEST_LOOKUP_RATE_LIMIT = 'system/rate_limit/guest_order_lookup';
+    public const string XML_PATH_GUEST_LOOKUP_RATE_LIMIT = 'system/rate_limit/guest_order_lookup';
 
-    public const GUEST_LOOKUP_WINDOW = 3600;
+    public const int GUEST_LOOKUP_WINDOW = 3600;
 
     /**
      * Refuse the order of $quote when it is a guest order and its store does not allow guest checkout. A shopper who

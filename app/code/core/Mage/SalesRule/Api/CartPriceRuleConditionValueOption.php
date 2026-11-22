@@ -35,7 +35,7 @@ use ApiPlatform\Metadata\Get;
 )]
 class CartPriceRuleConditionValueOption extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_Promo_QuoteController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_Promo_QuoteController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, description: 'Condition type')]
     public string $type = '';

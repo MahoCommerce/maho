@@ -24,9 +24,9 @@ use Symfony\AI\Platform\Tool\ToolEffectHints;
  */
 final class MemoryTool
 {
-    public const REMEMBER = 'remember';
-    public const FORGET = 'forget';
-    public const NAMES = [self::REMEMBER, self::FORGET];
+    public const string REMEMBER = 'remember';
+    public const string FORGET = 'forget';
+    public const array NAMES = [self::REMEMBER, self::FORGET];
 
     public static function title(string $name): string
     {

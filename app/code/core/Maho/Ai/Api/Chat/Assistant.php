@@ -48,10 +48,10 @@ use Symfony\AI\Platform\TokenUsage\TokenUsageInterface;
  */
 final class Assistant
 {
-    public const USAGE_CONSUMER = Maho_Ai_Model_Conversation::USAGE_CONSUMER;
+    public const string USAGE_CONSUMER = Maho_Ai_Model_Conversation::USAGE_CONSUMER;
 
     /** Sent to the model, never stored: the run reached the tool round limit. */
-    public const WRAP_UP_INSTRUCTION = 'You reached the limit of tool rounds for this answer. Do not call a tool. '
+    public const string WRAP_UP_INSTRUCTION = 'You reached the limit of tool rounds for this answer. Do not call a tool. '
         . 'Answer now with the results of the tools that you already called. '
         . 'Say what you could not check, and suggest how the administrator can make the request narrower.';
 
@@ -584,7 +584,7 @@ final class Assistant
     }
 
     /** Admin controller prefix => tool section. */
-    private const ROUTE_SECTIONS = [
+    private const array ROUTE_SECTIONS = [
         'catalog' => 'catalog',
         'cms' => 'content',
         'blog' => 'content',

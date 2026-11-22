@@ -24,8 +24,8 @@ use Symfony\Component\Process\Process;
 
 abstract class AbstractThemeBuild extends BaseMahoCommand
 {
-    protected const SKIN_PATH = 'public/skin/frontend';
-    private const BUILD_TIMEOUT = 600;
+    protected const string SKIN_PATH = 'public/skin/frontend';
+    private const int BUILD_TIMEOUT = 600;
 
     protected function compileThemes(
         InputInterface $input,

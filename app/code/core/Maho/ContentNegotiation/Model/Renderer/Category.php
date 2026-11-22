@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Maho_ContentNegotiation_Model_Renderer_Category extends Maho_ContentNegotiation_Model_Renderer_AbstractRenderer
 {
     /** One document per category, so the list is capped instead of paged */
-    public const PRODUCTS_LIMIT = 100;
+    public const int PRODUCTS_LIMIT = 100;
 
     #[\Override]
     public function render(): ?string

@@ -12,10 +12,10 @@ declare(strict_types=1);
 
 class Mage_Dataflow_Model_Convert_Exception extends \Maho\Exception
 {
-    public const NOTICE = 'NOTICE';
-    public const WARNING = 'WARNING';
-    public const ERROR = 'ERROR';
-    public const FATAL = 'FATAL';
+    public const string NOTICE = 'NOTICE';
+    public const string WARNING = 'WARNING';
+    public const string ERROR = 'ERROR';
+    public const string FATAL = 'FATAL';
 
     protected ?Mage_Dataflow_Model_Convert_Container_Interface $_container = null;
 

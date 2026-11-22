@@ -12,7 +12,7 @@ class Mage_ImportExport_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Reso
      * Constants to be used for DB
      * PostgreSQL doesn't have packet size limits like MySQL, but we use a reasonable default
      */
-    public const DB_MAX_DATA_SIZE = 10485760; // 10MB reasonable default for PostgreSQL
+    public const int DB_MAX_DATA_SIZE = 10485760; // 10MB reasonable default for PostgreSQL
 
     /**
      * Returns maximum size of data that we can send to DB

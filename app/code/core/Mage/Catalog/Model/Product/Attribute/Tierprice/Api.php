@@ -13,7 +13,7 @@
  */
 class Mage_Catalog_Model_Product_Attribute_Tierprice_Api extends Mage_Catalog_Model_Api_Resource
 {
-    public const ATTRIBUTE_CODE = 'tier_price';
+    public const string ATTRIBUTE_CODE = 'tier_price';
 
     public function __construct()
     {

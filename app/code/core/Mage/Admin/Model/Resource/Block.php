@@ -10,10 +10,7 @@
 
 class Mage_Admin_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstract
 {
-    /**
-     * Cache id
-     */
-    public const CACHE_ID = 'permission_block_allowlist';
+    public const string CACHE_ID = 'permission_block_allowlist';
 
     /**
      * Disallowed names for block

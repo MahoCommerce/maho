@@ -10,7 +10,7 @@
 
 class Mage_CatalogSearch_Model_Layer extends Mage_Catalog_Model_Layer
 {
-    public const XML_PATH_DISPLAY_LAYER_COUNT = 'catalog/search/use_layered_navigation_count';
+    public const string XML_PATH_DISPLAY_LAYER_COUNT = 'catalog/search/use_layered_navigation_count';
 
     /**
      * Get current layer product collection

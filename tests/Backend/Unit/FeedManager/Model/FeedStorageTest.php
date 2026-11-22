@@ -70,7 +70,7 @@ class FeedStorageEmptyAfterCountGenerator extends Maho_FeedManager_Model_Generat
 {
     public static int $collectionCalls = 0;
 
-    private const COLLECTION_CALL_LIMIT = 3;
+    private const int COLLECTION_CALL_LIMIT = 3;
 
     #[\Override]
     protected function _getProductCollection(): Mage_Catalog_Model_Resource_Product_Collection

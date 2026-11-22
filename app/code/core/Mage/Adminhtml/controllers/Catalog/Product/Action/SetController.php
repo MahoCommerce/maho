@@ -8,11 +8,7 @@
 
 class Mage_Adminhtml_Catalog_Product_Action_SetController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'catalog/attributes/sets';
+    public const string ADMIN_RESOURCE = 'catalog/attributes/sets';
 
     #[\Override]
     protected function _construct()

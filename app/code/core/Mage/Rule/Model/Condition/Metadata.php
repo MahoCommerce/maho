@@ -15,12 +15,12 @@ class Mage_Rule_Model_Condition_Metadata
     /**
      * A list with more options than this gives only its count, and the client loads it page by page.
      */
-    public const DEFAULT_INLINE_OPTION_LIMIT = 100;
+    public const int DEFAULT_INLINE_OPTION_LIMIT = 100;
 
     /**
      * The chooser that a client opens to select the value, by product attribute code.
      */
-    protected const CHOOSERS = ['sku' => 'product', 'category_ids' => 'category'];
+    protected const array CHOOSERS = ['sku' => 'product', 'category_ids' => 'category'];
 
     /**
      * @param array<string, string> $roots The root condition type of each tree, by tree key

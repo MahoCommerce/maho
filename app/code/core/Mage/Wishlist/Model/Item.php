@@ -23,9 +23,9 @@ declare(strict_types=1);
  */
 class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_Catalog_Model_Product_Configuration_Item_Interface
 {
-    public const EXCEPTION_CODE_NOT_SALABLE            = 901;
-    public const EXCEPTION_CODE_HAS_REQUIRED_OPTIONS   = 902;
-    public const EXCEPTION_CODE_NOT_SPECIFIED_PRODUCT  = 904;
+    public const int EXCEPTION_CODE_NOT_SALABLE            = 901;
+    public const int EXCEPTION_CODE_HAS_REQUIRED_OPTIONS   = 902;
+    public const int EXCEPTION_CODE_NOT_SPECIFIED_PRODUCT  = 904;
 
     /**
      * Custom path to download attached file

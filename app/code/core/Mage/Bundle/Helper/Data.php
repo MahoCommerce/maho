@@ -10,7 +10,7 @@
 
 class Mage_Bundle_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public const XML_NODE_BUNDLE_PRODUCT_TYPE = 'global/catalog/product/type/bundle';
+    public const string XML_NODE_BUNDLE_PRODUCT_TYPE = 'global/catalog/product/type/bundle';
 
     #[\Override]
     protected $_moduleName = 'Mage_Bundle';

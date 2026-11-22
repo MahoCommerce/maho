@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_TaxController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'system/config/tax';
+    public const string ADMIN_RESOURCE = 'system/config/tax';
 
     /**
      * Set tax ignore notification flag and redirect back

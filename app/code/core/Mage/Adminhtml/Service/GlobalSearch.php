@@ -12,16 +12,16 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Service_GlobalSearch
 {
-    public const XML_PATH_ENABLE = 'admin/global_search/enable';
-    public const XML_PATH_SOURCES = 'adminhtml/global_search';
-    public const MIN_QUERY_LENGTH = 2;
-    public const DEFAULT_LIMIT = 10;
-    public const MAX_LIMIT = 25;
+    public const string XML_PATH_ENABLE = 'admin/global_search/enable';
+    public const string XML_PATH_SOURCES = 'adminhtml/global_search';
+    public const int MIN_QUERY_LENGTH = 2;
+    public const int DEFAULT_LIMIT = 10;
+    public const int MAX_LIMIT = 25;
 
     /**
      * The search sources of the core, with the entity of their results. Only these results have a store or a website.
      */
-    public const CORE_SOURCES = [
+    public const array CORE_SOURCES = [
         Mage_Adminhtml_Model_Search_Order::class => 'order',
         Mage_Adminhtml_Model_Search_Customer::class => 'customer',
         Mage_Adminhtml_Model_Search_Catalog::class => 'product',

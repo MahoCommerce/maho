@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_Intelligence_Model_Provider_Event
 {
-    private const AREAS = ['global', 'frontend', 'adminhtml', 'crontab', 'install'];
+    private const array AREAS = ['global', 'frontend', 'adminhtml', 'crontab', 'install'];
 
     private ?array $cachedEvents = null;
 

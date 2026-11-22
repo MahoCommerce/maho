@@ -20,7 +20,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
     /**
      * Default number of children levels when loading a tree node
      */
-    public const DEFAULT_RECURSION_LEVEL = 3;
+    public const int DEFAULT_RECURSION_LEVEL = 3;
 
     /**
      * Whether to load product count when calling self::getCategoryCollection()

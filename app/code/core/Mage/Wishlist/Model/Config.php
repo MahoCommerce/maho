@@ -10,7 +10,7 @@
 
 class Mage_Wishlist_Model_Config
 {
-    public const XML_PATH_PRODUCT_ATTRIBUTES = 'global/wishlist/item/product_attributes';
+    public const string XML_PATH_PRODUCT_ATTRIBUTES = 'global/wishlist/item/product_attributes';
 
     /**
      * Get product attributes that need in wishlist

@@ -17,8 +17,8 @@ class Maho_Queue_Model_Observer
      * well under the abandonment threshold, so the notice is never meaningfully
      * late. The retry/discard actions drop the key for instant feedback.
      */
-    public const ABANDONED_COUNT_CACHE_KEY = 'maho_queue_abandoned_count';
-    private const ABANDONED_COUNT_CACHE_SECONDS = 60;
+    public const string ABANDONED_COUNT_CACHE_KEY = 'maho_queue_abandoned_count';
+    private const int ABANDONED_COUNT_CACHE_SECONDS = 60;
 
     /**
      * Nothing re-queues a claim a dead worker left behind, so the grid is the

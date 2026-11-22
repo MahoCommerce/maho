@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'system/variable';
+    public const string ADMIN_RESOURCE = 'system/variable';
 
     /**
      * Initialize Layout and set breadcrumbs

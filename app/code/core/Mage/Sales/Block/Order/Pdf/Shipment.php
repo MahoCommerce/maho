@@ -8,7 +8,7 @@
 
 class Mage_Sales_Block_Order_Pdf_Shipment extends Mage_Sales_Block_Order_Pdf_Abstract
 {
-    protected const ITEM_RENDERER_SECTION = 'shipment';
+    protected const string ITEM_RENDERER_SECTION = 'shipment';
 
     protected ?Mage_Sales_Model_Order_Shipment $_shipment = null;
 

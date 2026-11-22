@@ -10,7 +10,7 @@
 
 class Mage_Core_Model_File_Validator_Image
 {
-    public const NAME = 'isImage';
+    public const string NAME = 'isImage';
 
     protected ?string $_originalFileName = null;
 

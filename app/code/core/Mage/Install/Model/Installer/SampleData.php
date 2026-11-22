@@ -16,7 +16,7 @@ use Maho\Import\SampleData\Package;
 
 class Mage_Install_Model_Installer_SampleData
 {
-    private const PROGRESS_FILE = 'sampledata_progress.json';
+    private const string PROGRESS_FILE = 'sampledata_progress.json';
 
     public function getProgressFilePath(): string
     {

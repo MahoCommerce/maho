@@ -17,11 +17,11 @@ use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
  */
 class Mage_Core_Controller_Request_Http
 {
-    public const XML_NODE_DIRECT_FRONT_NAMES = 'global/request/direct_front_name';
-    public const DEFAULT_HTTP_PORT = 80;
-    public const DEFAULT_HTTPS_PORT = 443;
-    public const SCHEME_HTTP = 'http';
-    public const SCHEME_HTTPS = 'https';
+    public const string XML_NODE_DIRECT_FRONT_NAMES = 'global/request/direct_front_name';
+    public const int DEFAULT_HTTP_PORT = 80;
+    public const int DEFAULT_HTTPS_PORT = 443;
+    public const string SCHEME_HTTP = 'http';
+    public const string SCHEME_HTTPS = 'https';
 
     /**
      * Symfony Request instance

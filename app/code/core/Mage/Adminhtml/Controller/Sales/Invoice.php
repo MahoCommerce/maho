@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_Controller_Sales_Invoice extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'sales/invoice';
+    public const string ADMIN_RESOURCE = 'sales/invoice';
 
     /**
      * Additional initialization

@@ -14,12 +14,12 @@ use Symfony\Component\Messenger\Stamp\TransportMessageIdStamp;
 
 class Mage_Reports_Service_Statistics
 {
-    public const XML_PATH_RATE_LIMIT = 'system/rate_limit/reports_refresh';
+    public const string XML_PATH_RATE_LIMIT = 'system/rate_limit/reports_refresh';
 
     /**
      * The window of the rate limit XML_PATH_RATE_LIMIT, in seconds.
      */
-    public const RATE_LIMIT_WINDOW = 60;
+    public const int RATE_LIMIT_WINDOW = 60;
 
     /**
      * Aggregate the orders of the last Mage_Reports_Model_Statistics::RECENT_HOURS hours again for each report in $codes.

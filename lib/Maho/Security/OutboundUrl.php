@@ -15,13 +15,13 @@ use Uri\WhatWg\Url;
 
 final class OutboundUrl
 {
-    public const SCHEMES = ['http', 'https'];
+    public const array SCHEMES = ['http', 'https'];
 
     /**
      * Special-purpose ranges that FILTER_FLAG_NO_RES_RANGE accepts. A host on a NAT64,
      * a cloud or a lab network can route them to an internal service.
      */
-    private const NON_PUBLIC_RANGES = [
+    private const array NON_PUBLIC_RANGES = [
         '100.64.0.0/10',
         '192.0.0.0/24',
         '192.0.2.0/24',

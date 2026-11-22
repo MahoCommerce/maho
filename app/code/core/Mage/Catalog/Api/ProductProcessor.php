@@ -34,7 +34,7 @@ use Maho\ApiPlatform\Service\StoreContext;
  */
 final class ProductProcessor extends \Maho\ApiPlatform\Processor
 {
-    private const VISIBILITY_MAP = [
+    private const array VISIBILITY_MAP = [
         'not_visible' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE,
         'catalog' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_CATALOG,
         'search' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_SEARCH,
@@ -42,7 +42,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
     ];
 
     /** The attribute that each scalar field of the DTO sets. A null field leaves the attribute as it is. */
-    private const SCALAR_ATTRIBUTE_FIELDS = [
+    private const array SCALAR_ATTRIBUTE_FIELDS = [
         'description' => 'description',
         'shortDescription' => 'short_description',
         'price' => 'price',
@@ -78,7 +78,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
     ];
 
     /** The attribute that each date field of the DTO sets. An empty string clears the date. */
-    private const DATE_ATTRIBUTE_FIELDS = [
+    private const array DATE_ATTRIBUTE_FIELDS = [
         'specialFromDate' => 'special_from_date',
         'specialToDate' => 'special_to_date',
         'newsFromDate' => 'news_from_date',

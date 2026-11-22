@@ -14,9 +14,9 @@ declare(strict_types=1);
  */
 class Maho_Blog_Model_Category extends Mage_Core_Model_Abstract
 {
-    public const ENTITY = 'blog_category';
+    public const string ENTITY = 'blog_category';
 
-    public const ROOT_PARENT_ID = 0;
+    public const int ROOT_PARENT_ID = 0;
 
     #[\Override]
     protected $_eventPrefix = 'blog_category';

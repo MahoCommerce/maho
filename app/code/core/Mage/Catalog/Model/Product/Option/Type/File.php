@@ -15,7 +15,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
     /**
      * MIME types that indicate executable/script content, always rejected for file uploads
      */
-    protected const DANGEROUS_MIME_TYPES = [
+    protected const array DANGEROUS_MIME_TYPES = [
         'text/x-php', 'application/x-php', 'application/x-httpd-php',
         'text/x-python', 'text/x-perl', 'text/x-shellscript',
         'application/x-executable', 'application/x-msdos-program',
@@ -27,12 +27,12 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * Extensions of files that a browser shows as an active document in the store origin.
      * An option with no list of allowed extensions refuses them.
      */
-    public const ACTIVE_CONTENT_EXTENSIONS = ['htm', 'html', 'svg', 'svgz', 'xhtml', 'xht', 'xml', 'xsl', 'xslt'];
+    public const array ACTIVE_CONTENT_EXTENSIONS = ['htm', 'html', 'svg', 'svgz', 'xhtml', 'xht', 'xml', 'xsl', 'xslt'];
 
     /**
      * MIME types of active documents. An option with no list of allowed extensions refuses them.
      */
-    protected const ACTIVE_CONTENT_MIME_TYPES = ['text/html', 'image/svg+xml', 'application/xhtml+xml'];
+    protected const array ACTIVE_CONTENT_MIME_TYPES = ['text/html', 'image/svg+xml', 'application/xhtml+xml'];
 
     /**
      * Url for custom option download controller

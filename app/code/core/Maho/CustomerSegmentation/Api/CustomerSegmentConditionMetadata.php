@@ -37,7 +37,7 @@ use Maho\ApiPlatform\Metadata\McpToolResourceMetadataCollectionFactory;
 )]
 class CustomerSegmentConditionMetadata extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = CustomerSegment::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = CustomerSegment::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, description: 'Hash of the document without the scope part')]
     public string $version = '';

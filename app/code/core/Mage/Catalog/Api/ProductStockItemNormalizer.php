@@ -36,9 +36,9 @@ final class ProductStockItemNormalizer implements NormalizerInterface, Normalize
 
     // Propagates into nested normalizations: fine while variants/linked
     // products are plain arrays, not Product DTOs with their own stockItem.
-    private const ALREADY_CALLED = 'maho_product_stock_item_normalizer';
+    private const string ALREADY_CALLED = 'maho_product_stock_item_normalizer';
 
-    private const BACKEND_COLUMNS = [
+    private const array BACKEND_COLUMNS = [
         'min_qty' => true,
         'notify_stock_qty' => true,
         'backorders' => true,

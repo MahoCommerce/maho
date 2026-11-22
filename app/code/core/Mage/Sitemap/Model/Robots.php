@@ -12,18 +12,18 @@ declare(strict_types=1);
 
 class Mage_Sitemap_Model_Robots
 {
-    public const XML_PATH_ENABLED = 'crawlers/robots/enabled';
-    public const XML_PATH_BASE_RULES = 'crawlers/robots/base_rules';
-    public const XML_PATH_BLOCKED_AGENTS = 'crawlers/robots/blocked_agents';
-    public const XML_PATH_INCLUDE_SITEMAPS = 'crawlers/robots/include_sitemaps';
-    public const XML_PATH_CUSTOM = 'crawlers/robots/custom';
+    public const string XML_PATH_ENABLED = 'crawlers/robots/enabled';
+    public const string XML_PATH_BASE_RULES = 'crawlers/robots/base_rules';
+    public const string XML_PATH_BLOCKED_AGENTS = 'crawlers/robots/blocked_agents';
+    public const string XML_PATH_INCLUDE_SITEMAPS = 'crawlers/robots/include_sitemaps';
+    public const string XML_PATH_CUSTOM = 'crawlers/robots/custom';
 
-    public const FALLBACK = "User-agent: *\nDisallow:\n";
+    public const string FALLBACK = "User-agent: *\nDisallow:\n";
 
-    public const CONTENT_SIGNAL_FIELD = 'Content-Signal';
+    public const string CONTENT_SIGNAL_FIELD = 'Content-Signal';
 
     /** Each signal, its config path, and the values it accepts. */
-    public const CONTENT_SIGNALS = [
+    public const array CONTENT_SIGNALS = [
         'search' => ['crawlers/robots/content_signal_search', [Mage_Sitemap_Model_Source_Signal::YES, Mage_Sitemap_Model_Source_Signal::NO]],
         'ai-input' => ['crawlers/robots/content_signal_ai_input', [Mage_Sitemap_Model_Source_Signal::YES, Mage_Sitemap_Model_Source_Signal::NO]],
         'ai-train' => ['crawlers/robots/content_signal_ai_train', [Mage_Sitemap_Model_Source_Signal::YES, Mage_Sitemap_Model_Source_Signal::NO]],
@@ -38,7 +38,7 @@ class Mage_Sitemap_Model_Robots
      * The notice from contentsignals.org, verbatim: it is what turns the signals below it from a
      * hint into a stated condition of access, so it is not ours to reword.
      */
-    public const CONTENT_SIGNAL_NOTICE = <<<'TXT'
+    public const string CONTENT_SIGNAL_NOTICE = <<<'TXT'
         # As a condition of accessing this website, you agree to abide by the following
         # content signals:
 

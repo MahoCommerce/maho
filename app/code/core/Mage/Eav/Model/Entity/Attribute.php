@@ -21,13 +21,13 @@ declare(strict_types=1);
 class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Abstract
 {
     /** The input types whose fields a condition reads by option. */
-    public const OPTION_INPUTS = ['select', 'multiselect', 'boolean'];
+    public const array OPTION_INPUTS = ['select', 'multiselect', 'boolean'];
 
     /**
      * The input types whose fields a condition reads only for a value or no value. A file, an image and a multiline
      * field are not here: their form inputs do not hold the stored value in one input.
      */
-    public const FREE_VALUE_INPUTS = ['text', 'textarea', 'date', 'datetime'];
+    public const array FREE_VALUE_INPUTS = ['text', 'textarea', 'date', 'datetime'];
 
     /**
      * Prefix of model events names
@@ -37,12 +37,12 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     #[\Override]
     protected $_eventPrefix                         = 'eav_entity_attribute';
 
-    public const ATTRIBUTE_CODE_MAX_LENGTH                 = 64;
+    public const int ATTRIBUTE_CODE_MAX_LENGTH                 = 64;
 
     /** The code of a new attribute: a letter a-z, then letters a-z, digits and underscores. "event" is not a valid code. */
-    public const ATTRIBUTE_CODE_PATTERN = '/^(?!event$)[a-z][a-z_0-9]{1,254}$/';
+    public const string ATTRIBUTE_CODE_PATTERN = '/^(?!event$)[a-z][a-z_0-9]{1,254}$/';
 
-    public const LABEL_MAX_LENGTH = 255;
+    public const int LABEL_MAX_LENGTH = 255;
 
     /**
      * Parameter name in event
@@ -54,7 +54,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     #[\Override]
     protected $_eventObject = 'attribute';
 
-    public const CACHE_TAG         = 'EAV_ATTRIBUTE';
+    public const string CACHE_TAG         = 'EAV_ATTRIBUTE';
     #[\Override]
     protected $_cacheTag    = 'EAV_ATTRIBUTE';
 

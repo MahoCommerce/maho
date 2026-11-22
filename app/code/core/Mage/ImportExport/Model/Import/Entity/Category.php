@@ -17,71 +17,62 @@ declare(strict_types=1);
 
 class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_Model_Import_Entity_Abstract
 {
-    /**
-     * Default Scope
-     */
-    public const SCOPE_DEFAULT = 1;
+    public const int SCOPE_DEFAULT = 1;
 
-    /**
-     * Store Scope
-     */
-    public const SCOPE_STORE = 0;
+    public const int SCOPE_STORE = 0;
 
-    /**
-     * Null Scope
-     */
-    public const SCOPE_NULL = -1;
+    public const int SCOPE_NULL = -1;
 
     /**
      * Permanent column names.
      */
-    public const COL_STORE = '_store';
-    public const COL_ROOT = '_root';
-    public const COL_PATH = '_path';
-    public const COL_CATEGORY_ID = 'category_id';
-    public const COL_PARENT_ID = 'parent_id';
+    public const string COL_STORE = '_store';
+    public const string COL_ROOT = '_root';
+    public const string COL_PATH = '_path';
+    public const string COL_CATEGORY_ID = 'category_id';
+    public const string COL_PARENT_ID = 'parent_id';
 
     /**
      * The name of the attribute set of the category. Without it, a new category takes the set of its
      * parent, and a saved category keeps its set.
      */
-    public const COL_ATTRIBUTE_SET = '_attribute_set';
+    public const string COL_ATTRIBUTE_SET = '_attribute_set';
 
     /**
      * The folder that the image column is relative to. Without it, the image must already be in media/catalog/category.
      */
-    public const PARAM_MEDIA_DIR = 'media_dir';
+    public const string PARAM_MEDIA_DIR = 'media_dir';
 
     /**
      * Error codes.
      */
-    public const ERROR_CATEGORY_PATH_EMPTY = 'categoryPathEmpty';
-    public const ERROR_CATEGORY_PATH_INVALID = 'categoryPathInvalid';
-    public const ERROR_PARENT_NOT_FOUND = 'parentNotFound';
-    public const ERROR_CIRCULAR_REFERENCE = 'circularReference';
-    public const ERROR_DUPLICATE_PATH = 'duplicatePath';
-    public const ERROR_INVALID_NAME = 'invalidName';
-    public const ERROR_INVALID_ATTRIBUTE_TYPE = 'invalidAttributeType';
-    public const ERROR_MISSING_REQUIRED_ATTRIBUTE = 'missingRequiredAttribute';
-    public const ERROR_DELETE_IDENTIFIER_MISSING = 'deleteIdentifierMissing';
-    public const ERROR_CATEGORY_ID_INVALID = 'categoryIdInvalid';
-    public const ERROR_INVALID_STORE = 'invalidStore';
-    public const ERROR_CATEGORY_NOT_FOUND = 'categoryNotFound';
-    public const ERROR_URL_KEY_MISMATCH = 'urlKeyMismatch';
-    public const ERROR_IMAGE_NOT_FOUND = 'imageNotFound';
-    public const ERROR_INVALID_ATTRIBUTE_SET = 'invalidAttributeSet';
-    public const ERROR_ATTRIBUTE_NOT_IN_SET = 'attributeNotInSet';
-    public const ERROR_INVALID_SORT_BY = 'invalidSortBy';
+    public const string ERROR_CATEGORY_PATH_EMPTY = 'categoryPathEmpty';
+    public const string ERROR_CATEGORY_PATH_INVALID = 'categoryPathInvalid';
+    public const string ERROR_PARENT_NOT_FOUND = 'parentNotFound';
+    public const string ERROR_CIRCULAR_REFERENCE = 'circularReference';
+    public const string ERROR_DUPLICATE_PATH = 'duplicatePath';
+    public const string ERROR_INVALID_NAME = 'invalidName';
+    public const string ERROR_INVALID_ATTRIBUTE_TYPE = 'invalidAttributeType';
+    public const string ERROR_MISSING_REQUIRED_ATTRIBUTE = 'missingRequiredAttribute';
+    public const string ERROR_DELETE_IDENTIFIER_MISSING = 'deleteIdentifierMissing';
+    public const string ERROR_CATEGORY_ID_INVALID = 'categoryIdInvalid';
+    public const string ERROR_INVALID_STORE = 'invalidStore';
+    public const string ERROR_CATEGORY_NOT_FOUND = 'categoryNotFound';
+    public const string ERROR_URL_KEY_MISMATCH = 'urlKeyMismatch';
+    public const string ERROR_IMAGE_NOT_FOUND = 'imageNotFound';
+    public const string ERROR_INVALID_ATTRIBUTE_SET = 'invalidAttributeSet';
+    public const string ERROR_ATTRIBUTE_NOT_IN_SET = 'attributeNotInSet';
+    public const string ERROR_INVALID_SORT_BY = 'invalidSortBy';
 
     /**
      * Columns that are not attributes, or attributes that the tree sets and an import never writes.
      */
-    protected const SKIPPED_COLUMNS = [
+    protected const array SKIPPED_COLUMNS = [
         self::COL_STORE, self::COL_ROOT, self::COL_PATH, self::COL_CATEGORY_ID, self::COL_PARENT_ID, self::COL_ATTRIBUTE_SET,
         'all_children', 'children', 'children_count', 'level', 'path', 'path_in_store', 'url_path',
     ];
 
-    protected const FLAG_ATTRIBUTES = ['is_active', 'include_in_menu', 'is_anchor'];
+    protected const array FLAG_ATTRIBUTES = ['is_active', 'include_in_menu', 'is_anchor'];
 
     /**
      * Particular attributes.

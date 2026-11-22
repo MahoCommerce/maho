@@ -16,30 +16,29 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Endpoint types with appropriate routes
      */
-    public const ENDPOINT_AUTHORIZE_ADMIN        = 'adminhtml/oauth_authorize';
-    public const ENDPOINT_AUTHORIZE_ADMIN_SIMPLE = 'adminhtml/oauth_authorize/simple';
-    public const ENDPOINT_INITIATE               = 'oauth/initiate';
-    public const ENDPOINT_TOKEN                  = 'oauth/token';
+    public const string ENDPOINT_AUTHORIZE_ADMIN        = 'adminhtml/oauth_authorize';
+    public const string ENDPOINT_AUTHORIZE_ADMIN_SIMPLE = 'adminhtml/oauth_authorize/simple';
+    public const string ENDPOINT_INITIATE               = 'oauth/initiate';
+    public const string ENDPOINT_TOKEN                  = 'oauth/token';
 
     /**
      * Cleanup xpath config settings
      */
-    public const XML_PATH_CLEANUP_PROBABILITY       = 'oauth/cleanup/cleanup_probability';
-    public const XML_PATH_CLEANUP_EXPIRATION_PERIOD = 'oauth/cleanup/expiration_period';
+    public const string XML_PATH_CLEANUP_PROBABILITY       = 'oauth/cleanup/cleanup_probability';
+    public const string XML_PATH_CLEANUP_EXPIRATION_PERIOD = 'oauth/cleanup/expiration_period';
 
-    /** Email template */
-    public const XML_PATH_EMAIL_TEMPLATE = 'oauth/email/template';
-    public const XML_PATH_EMAIL_IDENTITY = 'oauth/email/identity';
+    public const string XML_PATH_EMAIL_TEMPLATE = 'oauth/email/template';
+    public const string XML_PATH_EMAIL_IDENTITY = 'oauth/email/identity';
 
     /**
      * Cleanup expiration period in minutes
      */
-    public const CLEANUP_EXPIRATION_PERIOD_DEFAULT = 120;
+    public const int CLEANUP_EXPIRATION_PERIOD_DEFAULT = 120;
 
     /**
      * Query parameter as a sign that user rejects
      */
-    public const QUERY_PARAM_REJECTED = 'rejected';
+    public const string QUERY_PARAM_REJECTED = 'rejected';
 
     #[\Override]
     protected $_moduleName = 'Mage_Oauth';

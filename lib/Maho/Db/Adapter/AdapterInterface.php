@@ -13,35 +13,35 @@ namespace Maho\Db\Adapter;
 
 interface AdapterInterface
 {
-    public const INDEX_TYPE_PRIMARY    = 'primary';
-    public const INDEX_TYPE_UNIQUE     = 'unique';
-    public const INDEX_TYPE_INDEX      = 'index';
-    public const INDEX_TYPE_FULLTEXT   = 'fulltext';
+    public const string INDEX_TYPE_PRIMARY    = 'primary';
+    public const string INDEX_TYPE_UNIQUE     = 'unique';
+    public const string INDEX_TYPE_INDEX      = 'index';
+    public const string INDEX_TYPE_FULLTEXT   = 'fulltext';
 
-    public const FK_ACTION_CASCADE     = 'CASCADE';
-    public const FK_ACTION_SET_NULL    = 'SET NULL';
-    public const FK_ACTION_NO_ACTION   = 'NO ACTION';
-    public const FK_ACTION_RESTRICT    = 'RESTRICT';
-    public const FK_ACTION_SET_DEFAULT = 'SET DEFAULT';
+    public const string FK_ACTION_CASCADE     = 'CASCADE';
+    public const string FK_ACTION_SET_NULL    = 'SET NULL';
+    public const string FK_ACTION_NO_ACTION   = 'NO ACTION';
+    public const string FK_ACTION_RESTRICT    = 'RESTRICT';
+    public const string FK_ACTION_SET_DEFAULT = 'SET DEFAULT';
 
-    public const INSERT_ON_DUPLICATE   = 1;
-    public const INSERT_IGNORE         = 2;
+    public const int INSERT_ON_DUPLICATE   = 1;
+    public const int INSERT_IGNORE         = 2;
 
-    public const ISO_DATE_FORMAT       = 'yyyy-MM-dd';
-    public const ISO_DATETIME_FORMAT   = 'yyyy-MM-dd HH-mm-ss';
+    public const string ISO_DATE_FORMAT       = 'yyyy-MM-dd';
+    public const string ISO_DATETIME_FORMAT   = 'yyyy-MM-dd HH-mm-ss';
 
-    public const INTERVAL_SECOND       = 'SECOND';
-    public const INTERVAL_MINUTE       = 'MINUTES';
-    public const INTERVAL_HOUR         = 'HOURS';
-    public const INTERVAL_DAY          = 'DAYS';
-    public const INTERVAL_MONTH        = 'MONTHS';
-    public const INTERVAL_YEAR         = 'YEARS';
+    public const string INTERVAL_SECOND       = 'SECOND';
+    public const string INTERVAL_MINUTE       = 'MINUTES';
+    public const string INTERVAL_HOUR         = 'HOURS';
+    public const string INTERVAL_DAY          = 'DAYS';
+    public const string INTERVAL_MONTH        = 'MONTHS';
+    public const string INTERVAL_YEAR         = 'YEARS';
 
     /**
      * Error message for DDL query in transactions
      */
-    public const ERROR_DDL_MESSAGE = 'DDL statements are not allowed in transactions';
-    public const ERROR_TRANSACTION_NOT_COMMITTED = 'Some transactions have not been committed or rolled back';
+    public const string ERROR_DDL_MESSAGE = 'DDL statements are not allowed in transactions';
+    public const string ERROR_TRANSACTION_NOT_COMMITTED = 'Some transactions have not been committed or rolled back';
 
     /**
      * Begin new DB transaction for connection

@@ -28,25 +28,25 @@ use Composer\InstalledVersions;
  */
 final class Library
 {
-    public const AUDIENCE_USER = 'user';
-    public const AUDIENCE_DEVELOPER = 'developer';
-    public const AUDIENCE_SYSADMIN = 'sysadmin';
-    public const AUDIENCE_API = 'api';
-    public const AUDIENCES = [self::AUDIENCE_USER, self::AUDIENCE_DEVELOPER, self::AUDIENCE_SYSADMIN, self::AUDIENCE_API];
+    public const string AUDIENCE_USER = 'user';
+    public const string AUDIENCE_DEVELOPER = 'developer';
+    public const string AUDIENCE_SYSADMIN = 'sysadmin';
+    public const string AUDIENCE_API = 'api';
+    public const array AUDIENCES = [self::AUDIENCE_USER, self::AUDIENCE_DEVELOPER, self::AUDIENCE_SYSADMIN, self::AUDIENCE_API];
 
-    public const XML_PATH_DOCS = 'global/docs';
-    public const CORE_SOURCE = 'core';
-    public const CORE_PACKAGE = 'mahocommerce/maho';
-    public const MAX_PAGE_CHARS = 40000;
+    public const string XML_PATH_DOCS = 'global/docs';
+    public const string CORE_SOURCE = 'core';
+    public const string CORE_PACKAGE = 'mahocommerce/maho';
+    public const int MAX_PAGE_CHARS = 40000;
 
     /**
      * The badge of the release that added a feature, such as "v26.5+". A store reads the docs of its own release, so the
      * assistant does not need it. Other badges, such as "<v26.9" or "beta", stay: they change the meaning of the text.
      */
-    public const VERSION_BADGE_PATTERN = '#(?<=\S)[ \t]+<span class="version-badge">v[\d.]+\+</span>|<span class="version-badge">v[\d.]+\+</span>[ \t]?#';
+    public const string VERSION_BADGE_PATTERN = '#(?<=\S)[ \t]+<span class="version-badge">v[\d.]+\+</span>|<span class="version-badge">v[\d.]+\+</span>[ \t]?#';
 
     /** The folders of the core, under docs/ in the Maho package, with their audience. */
-    private const CORE_FOLDERS = [
+    private const array CORE_FOLDERS = [
         'user-guide' => self::AUDIENCE_USER,
         'hosting' => self::AUDIENCE_SYSADMIN,
         'developer' => self::AUDIENCE_DEVELOPER,

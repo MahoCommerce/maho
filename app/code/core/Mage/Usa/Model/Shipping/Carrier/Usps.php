@@ -13,36 +13,32 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     /**
      * USPS containers
      */
-    public const CONTAINER_VARIABLE           = 'VARIABLE';
-    public const CONTAINER_FLAT_RATE_BOX      = 'FLAT RATE BOX';
-    public const CONTAINER_FLAT_RATE_ENVELOPE = 'FLAT RATE ENVELOPE';
-    public const CONTAINER_RECTANGULAR        = 'RECTANGULAR';
-    public const CONTAINER_NONRECTANGULAR     = 'NONRECTANGULAR';
+    public const string CONTAINER_VARIABLE           = 'VARIABLE';
+    public const string CONTAINER_FLAT_RATE_BOX      = 'FLAT RATE BOX';
+    public const string CONTAINER_FLAT_RATE_ENVELOPE = 'FLAT RATE ENVELOPE';
+    public const string CONTAINER_RECTANGULAR        = 'RECTANGULAR';
+    public const string CONTAINER_NONRECTANGULAR     = 'NONRECTANGULAR';
 
     /**
      * USPS size
      */
-    public const SIZE_REGULAR = 'REGULAR';
-    public const SIZE_LARGE   = 'LARGE';
+    public const string SIZE_REGULAR = 'REGULAR';
+    public const string SIZE_LARGE   = 'LARGE';
 
     /**
      * Default api revision
-     *
-     * @var int
      */
-    public const DEFAULT_REVISION = 2;
+    public const int DEFAULT_REVISION = 2;
 
     /**
      * Code of the carrier
-     *
-     * @var string
      */
-    public const CODE = 'usps';
+    public const string CODE = 'usps';
 
     /**
      * Ounces in one pound for conversion
      */
-    public const OUNCES_POUND = 16;
+    public const int OUNCES_POUND = 16;
 
     /**
      * Code of the carrier
@@ -91,8 +87,8 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     /**
      * REST API base URLs
      */
-    protected const REST_BASE_URL_PRODUCTION = 'https://apis.usps.com';
-    protected const REST_BASE_URL_TEST = 'https://apis-tem.usps.com';
+    protected const string REST_BASE_URL_PRODUCTION = 'https://apis.usps.com';
+    protected const string REST_BASE_URL_TEST = 'https://apis-tem.usps.com';
 
     /**
      * Container types that could be customized for USPS carrier

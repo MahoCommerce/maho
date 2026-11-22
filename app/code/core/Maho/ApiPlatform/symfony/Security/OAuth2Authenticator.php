@@ -29,8 +29,8 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
  */
 class OAuth2Authenticator extends AbstractAuthenticator
 {
-    private const AUTHORIZATION_HEADER = 'Authorization';
-    private const BEARER_PREFIX = 'Bearer ';
+    private const string AUTHORIZATION_HEADER = 'Authorization';
+    private const string BEARER_PREFIX = 'Bearer ';
 
     public function __construct(
         private JwtService $jwtService,

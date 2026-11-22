@@ -10,9 +10,9 @@
 
 class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
 {
-    public const ICONV_CHARSET = 'UTF-8';
+    public const string ICONV_CHARSET = 'UTF-8';
 
-    public const MAX_SEARCH_WORDS = 10;
+    public const int MAX_SEARCH_WORDS = 10;
 
     #[\Override]
     protected $_moduleName = 'Mage_Core';

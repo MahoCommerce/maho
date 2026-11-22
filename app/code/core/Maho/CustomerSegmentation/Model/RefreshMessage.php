@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 final readonly class Maho_CustomerSegmentation_Model_RefreshMessage
 {
-    public const QUEUE_NAME = 'customersegmentation';
+    public const string QUEUE_NAME = 'customersegmentation';
 
     public function __construct(
         public int $segmentId,

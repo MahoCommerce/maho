@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Cms_Model_Preview_Provider_Block extends Mage_Cms_Model_Preview_Provider_Abstract
 {
-    public const FIELDS = ['title', 'identifier', 'content'];
+    public const array FIELDS = ['title', 'identifier', 'content'];
 
     /** @var array<int, string> */
     private array $savedIdentifiers = [];

@@ -16,7 +16,7 @@ class Mage_Reports_Model_Statistics
      * Code of each report with its aggregation resource model, flag code, label and description.
      * The label and the description are English source strings of the module in "module".
      */
-    public const REPORTS = [
+    public const array REPORTS = [
         'sales' => [
             'resource' => 'sales/report_order',
             'flag' => Mage_Reports_Model_Flag::REPORT_ORDER_FLAG_CODE,
@@ -78,7 +78,7 @@ class Mage_Reports_Model_Statistics
     /**
      * The recent refresh aggregates the orders of this number of hours before now.
      */
-    public const RECENT_HOURS = 25;
+    public const int RECENT_HOURS = 25;
 
     /**
      * @return list<string>

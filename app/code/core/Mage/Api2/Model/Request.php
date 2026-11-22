@@ -16,17 +16,17 @@ class Mage_Api2_Model_Request extends Mage_Core_Controller_Request_Http
     /**
      * Character set which must be used in request
      */
-    public const REQUEST_CHARSET = 'utf-8';
+    public const string REQUEST_CHARSET = 'utf-8';
 
     /**
      * Name of query ($_GET) parameters to use in navigation and so on
      */
-    public const QUERY_PARAM_REQ_ATTRS   = 'attrs';
-    public const QUERY_PARAM_PAGE_NUM    = 'page';
-    public const QUERY_PARAM_PAGE_SIZE   = 'limit';
-    public const QUERY_PARAM_ORDER_FIELD = 'order';
-    public const QUERY_PARAM_ORDER_DIR   = 'dir';
-    public const QUERY_PARAM_FILTER      = 'filter';
+    public const string QUERY_PARAM_REQ_ATTRS   = 'attrs';
+    public const string QUERY_PARAM_PAGE_NUM    = 'page';
+    public const string QUERY_PARAM_PAGE_SIZE   = 'limit';
+    public const string QUERY_PARAM_ORDER_FIELD = 'order';
+    public const string QUERY_PARAM_ORDER_DIR   = 'dir';
+    public const string QUERY_PARAM_FILTER      = 'filter';
 
     /**
      * Interpreter adapter

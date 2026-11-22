@@ -12,10 +12,10 @@ declare(strict_types=1);
 
 class Mage_Core_Model_Message
 {
-    public const ERROR     = 'error';
-    public const WARNING   = 'warning';
-    public const NOTICE    = 'notice';
-    public const SUCCESS   = 'success';
+    public const string ERROR     = 'error';
+    public const string WARNING   = 'warning';
+    public const string NOTICE    = 'notice';
+    public const string SUCCESS   = 'success';
 
     /**
      * Build a message of one type.

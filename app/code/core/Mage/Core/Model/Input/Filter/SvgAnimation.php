@@ -20,19 +20,19 @@ use Symfony\Component\HtmlSanitizer\Visitor\AttributeSanitizer\AttributeSanitize
 
 class Mage_Core_Model_Input_Filter_SvgAnimation implements AttributeSanitizerInterface
 {
-    public const VALUE_ATTRIBUTES = ['from', 'to', 'by', 'values', 'begin', 'end'];
+    public const array VALUE_ATTRIBUTES = ['from', 'to', 'by', 'values', 'begin', 'end'];
 
     /**
      * The colon matches every URL scheme, and the backslash matches a CSS escape. An animated
      * value needs neither. The quantifiers are possessive, so the quote in `url('#a')` cannot be
      * given up on a retry.
      */
-    public const UNSAFE_VALUE_PATTERN = '/[:\\\\]|url\(\s*+[\'"]?+(?!#)/i';
+    public const string UNSAFE_VALUE_PATTERN = '/[:\\\\]|url\(\s*+[\'"]?+(?!#)/i';
 
-    public const ATTRIBUTE_TYPES = ['xml', 'css', 'auto'];
+    public const array ATTRIBUTE_TYPES = ['xml', 'css', 'auto'];
 
     /** On an animation element `fill` says whether the end state holds. It paints nothing. */
-    public const FILL_MODES = ['freeze', 'remove'];
+    public const array FILL_MODES = ['freeze', 'remove'];
 
     #[\Override]
     public function getSupportedElements(): ?array

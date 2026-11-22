@@ -13,11 +13,7 @@
  */
 class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'system/api/rest_attributes';
+    public const string ADMIN_RESOURCE = 'system/api/rest_attributes';
 
     #[\Override]
     protected function _isAllowed(): bool

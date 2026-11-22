@@ -22,26 +22,26 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     /**
      * Related cache types config path
      */
-    public const XML_NODE_RELATED_CACHE = 'global/catalogrule/related_cache_types';
+    public const string XML_NODE_RELATED_CACHE = 'global/catalogrule/related_cache_types';
 
     /**
      * The lock that applyAll() holds while it runs
      */
-    public const APPLY_LOCK = 'catalogrule_apply_all';
+    public const string APPLY_LOCK = 'catalogrule_apply_all';
 
     /**
      * Seconds that applyAll() waits for another run to end
      */
-    public const APPLY_LOCK_WAIT_SECONDS = 3600;
+    public const int APPLY_LOCK_WAIT_SECONDS = 3600;
 
     /** Each child node is the code of an action that a rule accepts. A module adds a node for its action. */
-    public const XML_PATH_SIMPLE_ACTIONS = 'global/catalogrule/rule/simple_actions';
+    public const string XML_PATH_SIMPLE_ACTIONS = 'global/catalogrule/rule/simple_actions';
 
     /** The core actions of a catalog price rule. getSimpleActions() returns the list that a store accepts. */
-    public const SIMPLE_ACTIONS = ['by_percent', 'by_fixed', 'to_percent', 'to_fixed'];
+    public const array SIMPLE_ACTIONS = ['by_percent', 'by_fixed', 'to_percent', 'to_fixed'];
 
     /** The actions whose amount is a percentage */
-    public const PERCENT_ACTIONS = ['by_percent', 'to_percent'];
+    public const array PERCENT_ACTIONS = ['by_percent', 'to_percent'];
 
     /**
      * Prefix of model events names

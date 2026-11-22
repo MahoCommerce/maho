@@ -16,11 +16,11 @@ class Mage_Sales_Model_Api2_Order extends Mage_Api2_Model_Resource
     /**
      * Parameters' names in config with special ACL meaning
      */
-    public const PARAM_GIFT_MESSAGE   = '_gift_message';
-    public const PARAM_ORDER_COMMENTS = '_order_comments';
-    public const PARAM_PAYMENT_METHOD = '_payment_method';
-    public const PARAM_TAX_NAME       = '_tax_name';
-    public const PARAM_TAX_RATE       = '_tax_rate';
+    public const string PARAM_GIFT_MESSAGE   = '_gift_message';
+    public const string PARAM_ORDER_COMMENTS = '_order_comments';
+    public const string PARAM_PAYMENT_METHOD = '_payment_method';
+    public const string PARAM_TAX_NAME       = '_tax_name';
+    public const string PARAM_TAX_RATE       = '_tax_rate';
 
     /**
      * Add gift message info to select

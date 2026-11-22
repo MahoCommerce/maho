@@ -47,19 +47,19 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
      * Carries the derived filter schema to {@see \Maho\ApiPlatform\Mcp\ToolSchemaFactory},
      * which builds the advertised input schema but only receives the operation.
      */
-    public const LIST_ARGUMENTS = 'maho_mcp_list_arguments';
+    public const string LIST_ARGUMENTS = 'maho_mcp_list_arguments';
 
     /** Per-operation opt-out, set as `extraProperties: ['maho_mcp' => false]`. */
-    public const OPERATION_OPT_OUT = 'maho_mcp';
+    public const string OPERATION_OPT_OUT = 'maho_mcp';
 
     /**
      * The section of a plain API Platform resource that the grant of another resource protects,
      * set as `extraProperties: ['maho_mcp_section' => 'Customers']`, so its tools load with the tools of that resource.
      */
-    public const RESOURCE_SECTION = 'maho_mcp_section';
+    public const string RESOURCE_SECTION = 'maho_mcp_section';
 
     /** `Put` and `Patch` share `update`; the de-duplication below keeps the first. */
-    private const VERB_SUFFIX = [
+    private const array VERB_SUFFIX = [
         'GET' => 'get',
         'HEAD' => 'get',
         'POST' => 'create',

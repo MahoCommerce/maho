@@ -10,12 +10,12 @@
 
 class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Model_Export_Entity_Abstract
 {
-    public const CONFIG_KEY_PRODUCT_TYPES = 'global/importexport/export_product_types';
+    public const string CONFIG_KEY_PRODUCT_TYPES = 'global/importexport/export_product_types';
 
     /**
      * Value that means all entities (e.g. websites, groups etc.)
      */
-    public const VALUE_ALL = 'all';
+    public const string VALUE_ALL = 'all';
 
     /**
      * Permanent column names.
@@ -23,12 +23,12 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
      * Names that begins with underscore is not an attribute. This name convention is for
      * to avoid interference with same attribute name.
      */
-    public const COL_STORE    = '_store';
-    public const COL_ATTR_SET = '_attribute_set';
-    public const COL_TYPE     = '_type';
-    public const COL_CATEGORY = '_category';
-    public const COL_ROOT_CATEGORY = '_root_category';
-    public const COL_SKU      = 'sku';
+    public const string COL_STORE    = '_store';
+    public const string COL_ATTR_SET = '_attribute_set';
+    public const string COL_TYPE     = '_type';
+    public const string COL_CATEGORY = '_category';
+    public const string COL_ROOT_CATEGORY = '_root_category';
+    public const string COL_SKU      = 'sku';
 
     /**
      * Pairs of attribute set ID-to-name.

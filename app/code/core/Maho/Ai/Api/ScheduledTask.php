@@ -78,11 +78,11 @@ use Maho\Config\ApiResource;
 )]
 class ScheduledTask extends CrudResource
 {
-    public const MODEL = 'ai/task_schedule';
-    public const PRIMARY_KEY = 'schedule_id';
+    public const string MODEL = 'ai/task_schedule';
+    public const string PRIMARY_KEY = 'schedule_id';
 
     /** Admin ACL gate. Mirrors backend Maho_Ai_Adminhtml_Ai_ScheduleController. */
-    public const ADMIN_RESOURCE = \Maho_Ai_Adminhtml_Ai_ScheduleController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Maho_Ai_Adminhtml_Ai_ScheduleController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

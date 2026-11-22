@@ -16,14 +16,14 @@ declare(strict_types=1);
  */
 class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_Attribute
 {
-    public const SCOPE_STORE                           = 0;
-    public const SCOPE_GLOBAL                          = 1;
-    public const SCOPE_WEBSITE                         = 2;
+    public const int SCOPE_STORE                           = 0;
+    public const int SCOPE_GLOBAL                          = 1;
+    public const int SCOPE_WEBSITE                         = 2;
 
-    public const MODULE_NAME                           = 'Mage_Catalog';
-    public const ENTITY                                = 'catalog_eav_attribute';
+    public const string MODULE_NAME                           = 'Mage_Catalog';
+    public const string ENTITY                                = 'catalog_eav_attribute';
 
-    public const XML_PATH_ALLOWED_HTML_TAGS = 'system/catalog/frontend/allowed_html_tags_list';
+    public const string XML_PATH_ALLOWED_HTML_TAGS = 'system/catalog/frontend/allowed_html_tags_list';
 
     /**
      * @var string

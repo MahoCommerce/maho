@@ -12,9 +12,9 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Block_Page_Footer extends Mage_Adminhtml_Block_Template
 {
-    public const LOCALE_CACHE_LIFETIME = 7200;
-    public const LOCALE_CACHE_KEY      = 'footer_locale';
-    public const LOCALE_CACHE_TAG      = 'adminhtml';
+    public const int LOCALE_CACHE_LIFETIME = 7200;
+    public const string LOCALE_CACHE_KEY      = 'footer_locale';
+    public const string LOCALE_CACHE_TAG      = 'adminhtml';
 
     #[\Override]
     protected function _construct()

@@ -10,20 +10,20 @@
 
 class Mage_Core_Model_Translate
 {
-    public const CSV_SEPARATOR     = ',';
-    public const SCOPE_SEPARATOR   = '::';
-    public const CACHE_TAG         = 'translate';
+    public const string CSV_SEPARATOR     = ',';
+    public const string SCOPE_SEPARATOR   = '::';
+    public const string CACHE_TAG         = 'translate';
 
-    public const CONFIG_KEY_AREA   = 'area';
-    public const CONFIG_KEY_LOCALE = 'locale';
-    public const CONFIG_KEY_STORE  = 'store';
-    public const CONFIG_KEY_DESIGN_PACKAGE = 'package';
-    public const CONFIG_KEY_DESIGN_THEME   = 'theme';
+    public const string CONFIG_KEY_AREA   = 'area';
+    public const string CONFIG_KEY_LOCALE = 'locale';
+    public const string CONFIG_KEY_STORE  = 'store';
+    public const string CONFIG_KEY_DESIGN_PACKAGE = 'package';
+    public const string CONFIG_KEY_DESIGN_THEME   = 'theme';
 
     /**
      * Default translation string
      */
-    public const DEFAULT_STRING = 'Translate String';
+    public const string DEFAULT_STRING = 'Translate String';
 
     /**
      * Locale name

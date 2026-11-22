@@ -12,23 +12,23 @@ declare(strict_types=1);
 
 class Mage_Contacts_Service_Message
 {
-    public const XML_PATH_HONEYPOT_ENABLED = 'contacts/abuse/honeypot_enabled';
-    public const XML_PATH_RATE_LIMIT = 'system/rate_limit/contact';
-    public const XML_PATH_IP_RATE_LIMIT = 'system/rate_limit/contact_ip';
-    public const XML_PATH_RECIPIENT_RATE_LIMIT = 'system/rate_limit/contact_auto_reply';
-    public const XML_PATH_EMAIL_SENDER = 'contacts/email/sender_email_identity';
-    public const XML_PATH_EMAIL_RECIPIENT = 'contacts/email/recipient_email';
-    public const XML_PATH_EMAIL_TEMPLATE = 'contacts/email/email_template';
-    public const XML_PATH_AUTO_REPLY_ENABLED = 'contacts/auto_reply/enabled';
-    public const XML_PATH_AUTO_REPLY_EMAIL_TEMPLATE = 'contacts/auto_reply/email_template';
+    public const string XML_PATH_HONEYPOT_ENABLED = 'contacts/abuse/honeypot_enabled';
+    public const string XML_PATH_RATE_LIMIT = 'system/rate_limit/contact';
+    public const string XML_PATH_IP_RATE_LIMIT = 'system/rate_limit/contact_ip';
+    public const string XML_PATH_RECIPIENT_RATE_LIMIT = 'system/rate_limit/contact_auto_reply';
+    public const string XML_PATH_EMAIL_SENDER = 'contacts/email/sender_email_identity';
+    public const string XML_PATH_EMAIL_RECIPIENT = 'contacts/email/recipient_email';
+    public const string XML_PATH_EMAIL_TEMPLATE = 'contacts/email/email_template';
+    public const string XML_PATH_AUTO_REPLY_ENABLED = 'contacts/auto_reply/enabled';
+    public const string XML_PATH_AUTO_REPLY_EMAIL_TEMPLATE = 'contacts/auto_reply/email_template';
 
     /** The longest value of each field. The service cuts a longer value. A field of a custom form gets the length of comment. */
-    public const MAX_LENGTHS = ['name' => 255, 'email' => 255, 'comment' => 5000, 'telephone' => 50];
+    public const array MAX_LENGTHS = ['name' => 255, 'email' => 255, 'comment' => 5000, 'telephone' => 50];
 
-    public const RATE_LIMIT_WINDOW = 3600;
+    public const int RATE_LIMIT_WINDOW = 3600;
 
     /** Fields for the transport, the abuse checks and the aliases of the API. The email does not show them. */
-    private const CONTROL_FIELDS = ['form_key', 'captchaToken', 'maho_captcha', 'message', 'phone'];
+    private const array CONTROL_FIELDS = ['form_key', 'captchaToken', 'maho_captcha', 'message', 'phone'];
 
     public function isHoneypotEnabled(?int $storeId = null): bool
     {

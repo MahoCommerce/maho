@@ -16,24 +16,24 @@ class Mage_Api2_Model_Acl_Global_Rule_Tree extends Mage_Core_Helper_Abstract
     /**
      * Tree types
      */
-    public const TYPE_ATTRIBUTE = 'attribute';
-    public const TYPE_PRIVILEGE = 'privilege';
+    public const string TYPE_ATTRIBUTE = 'attribute';
+    public const string TYPE_PRIVILEGE = 'privilege';
 
     /**
      * Names
      */
-    public const NAME_CHILDREN         = 'children';
-    public const NAME_PRIVILEGE        = 'privilege';
-    public const NAME_OPERATION        = 'operation';
-    public const NAME_ATTRIBUTE        = 'attribute';
-    public const NAME_RESOURCE         = 'resource';
-    public const NAME_RESOURCE_GROUPS  = 'resource_groups';
-    public const NAME_GROUP            = 'group';
+    public const string NAME_CHILDREN         = 'children';
+    public const string NAME_PRIVILEGE        = 'privilege';
+    public const string NAME_OPERATION        = 'operation';
+    public const string NAME_ATTRIBUTE        = 'attribute';
+    public const string NAME_RESOURCE         = 'resource';
+    public const string NAME_RESOURCE_GROUPS  = 'resource_groups';
+    public const string NAME_GROUP            = 'group';
 
     /**
      * Separator for tree ID
      */
-    public const ID_SEPARATOR = '-';
+    public const string ID_SEPARATOR = '-';
 
     /**
      * Role

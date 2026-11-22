@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Reports_Block_Product_Compared extends Mage_Reports_Block_Product_Abstract
 {
-    public const XML_PATH_RECENTLY_COMPARED_COUNT  = 'catalog/recently_products/compared_count';
+    public const string XML_PATH_RECENTLY_COMPARED_COUNT  = 'catalog/recently_products/compared_count';
 
     /**
      * Compared Product Index model name

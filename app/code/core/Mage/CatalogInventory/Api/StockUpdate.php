@@ -81,10 +81,10 @@ use Maho\ApiPlatform\CrudResource;
 )]
 class StockUpdate extends CrudResource
 {
-    public const MODEL = 'cataloginventory/stock_item';
+    public const string MODEL = 'cataloginventory/stock_item';
 
     /** Admin ACL gate. Stock changes are gated under product management. */
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_Catalog_ProductController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_Catalog_ProductController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true)]
     public string $sku = '';

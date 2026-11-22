@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_PromoController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'promo';
+    public const string ADMIN_RESOURCE = 'promo';
 
     #[Maho\Config\Route('/admin/promo/index')]
     public function indexAction(): void

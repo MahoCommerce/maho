@@ -79,16 +79,16 @@ use Maho\ApiPlatform\CrudResource;
 )]
 class TaxClass extends CrudResource
 {
-    public const MODEL = 'tax/class';
+    public const string MODEL = 'tax/class';
 
-    public const PRIMARY_KEY = 'class_id';
+    public const string PRIMARY_KEY = 'class_id';
 
     /**
      * Admin ACL gate. Both Customer and Product tax class admin pages live under
      * sales/tax (Mage_Adminhtml_Tax_ClassController declares no ADMIN_RESOURCE of
      * its own), so gate the unified resource at the parent tax node.
      */
-    public const ADMIN_RESOURCE = 'sales/tax';
+    public const string ADMIN_RESOURCE = 'sales/tax';
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

@@ -23,10 +23,10 @@ use Maho\Db\Select;
  */
 class Dbp extends Tree
 {
-    public const ID_FIELD      = 'id';
-    public const PATH_FIELD    = 'path';
-    public const ORDER_FIELD   = 'order';
-    public const LEVEL_FIELD   = 'level';
+    public const string ID_FIELD      = 'id';
+    public const string PATH_FIELD    = 'path';
+    public const string ORDER_FIELD   = 'order';
+    public const string LEVEL_FIELD   = 'level';
 
     /**
      * DB connection

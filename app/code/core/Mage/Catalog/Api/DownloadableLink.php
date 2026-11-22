@@ -65,7 +65,7 @@ use ApiPlatform\Metadata\Put;
 class DownloadableLink extends \Maho\ApiPlatform\Resource
 {
     /** Admin ACL gate. Gated under product management. */
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_Catalog_ProductController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_Catalog_ProductController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, description: 'Link ID')]
     public ?int $id = null;

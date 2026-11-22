@@ -184,13 +184,13 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 )]
 class Address extends CrudResource
 {
-    public const MODEL = 'customer/address';
+    public const string MODEL = 'customer/address';
 
     /** Admin ACL gate. Customer addresses are gated by the same node as customer mgmt. */
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_CustomerController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_CustomerController::ADMIN_RESOURCE;
 
     /** An address has no admin page of its own: it is a tab of the customer page. */
-    public const ADMIN_RECORD_PAGE = false;
+    public const bool ADMIN_RECORD_PAGE = false;
 
     #[ApiProperty(identifier: true)]
     public ?int $id = null;

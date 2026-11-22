@@ -11,7 +11,7 @@
 class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
 {
     /** Config node that lists the layout handles that the {{layout}} directive can render. */
-    public const XML_PATH_EMAIL_LAYOUT_HANDLES = 'global/template/email_layout_handles';
+    public const string XML_PATH_EMAIL_LAYOUT_HANDLES = 'global/template/email_layout_handles';
 
     /**
      * Use absolute links flag

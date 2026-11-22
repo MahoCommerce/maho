@@ -14,7 +14,7 @@ use Maho\ApiPlatform\Security\ApiUser;
 
 final class SalesInvoicedReportProvider extends ReportProviderBase
 {
-    public const VALUES = [
+    public const array VALUES = [
         'ordersCount' => 'orders_count',
         'ordersInvoiced' => 'orders_invoiced',
         'invoiced' => 'invoiced',

@@ -17,7 +17,7 @@ namespace Maho\Security;
 
 final class RateLimiter
 {
-    public const CACHE_TAG = 'rate_limit';
+    public const string CACHE_TAG = 'rate_limit';
 
     public function __construct(
         private readonly string $key,

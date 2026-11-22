@@ -10,11 +10,7 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_System_Config_TestEmailController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'system/config/system';
+    public const string ADMIN_RESOURCE = 'system/config/system';
 
     #[Maho\Config\Route('/admin/system_config_testemail/send')]
     public function sendAction(): void

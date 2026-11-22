@@ -18,23 +18,23 @@ class Mage_Cms_Block_Widget_Youtube extends Mage_Core_Block_Template implements 
      * until the visitor actually starts the video, which is what makes the embed usable without
      * prior consent in most EU setups.
      */
-    public const EMBED_HOST = 'https://www.youtube-nocookie.com/embed/';
+    public const string EMBED_HOST = 'https://www.youtube-nocookie.com/embed/';
 
     /**
      * A YouTube id is 11 URL-safe base64 characters today. The range is deliberately loose enough
      * to outlive a format change but strict enough that the id can be interpolated into markup.
      */
-    public const VIDEO_ID_PATTERN = '/^[A-Za-z0-9_-]{6,20}$/';
+    public const string VIDEO_ID_PATTERN = '/^[A-Za-z0-9_-]{6,20}$/';
 
     /** Hosts a video id may be extracted from, compared with any leading "www." removed. */
-    public const VIDEO_HOSTS = ['youtube.com', 'youtu.be', 'youtube-nocookie.com', 'm.youtube.com'];
+    public const array VIDEO_HOSTS = ['youtube.com', 'youtu.be', 'youtube-nocookie.com', 'm.youtube.com'];
 
     /**
      * Path segments that introduce a video id on a youtube.com host. Only these carry one: a
      * /playlist, /results or /c/SomeChannel URL ends in an id-shaped segment too, and accepting it
      * would turn a merchant pasting the wrong link into a broken embed instead of nothing at all.
      */
-    public const VIDEO_PATH_PREFIXES = ['embed', 'shorts', 'live', 'v'];
+    public const array VIDEO_PATH_PREFIXES = ['embed', 'shorts', 'live', 'v'];
 
     #[\Override]
     protected function _construct(): void

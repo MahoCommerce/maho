@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_Ai_Block_Adminhtml_Schedule_Edit_Tab_Runs extends Mage_Adminhtml_Block_Widget_Grid implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
-    public const STATUS_AWAITING_CONFIRMATION = 'awaiting_confirmation';
+    public const string STATUS_AWAITING_CONFIRMATION = 'awaiting_confirmation';
 
     public function __construct()
     {

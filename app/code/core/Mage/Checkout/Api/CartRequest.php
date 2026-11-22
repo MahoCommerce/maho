@@ -18,7 +18,7 @@ use Maho\ApiPlatform\Service\StoreContext;
 final class CartRequest
 {
     /** The field of the quote address => the field of an address in the body, as mapAddress() reads it. */
-    public const ADDRESS_FIELD_NAMES = [
+    public const array ADDRESS_FIELD_NAMES = [
         'prefix' => 'prefix',
         'firstname' => 'firstName',
         'middlename' => 'middleName',

@@ -19,7 +19,7 @@ final class ReportFixture
     /**
      * The tables that the refresh of the statistics writes.
      */
-    public const AGGREGATED_TABLES = [
+    public const array AGGREGATED_TABLES = [
         'coupon_aggregated', 'coupon_aggregated_order', 'coupon_aggregated_updated',
         'report_viewed_product_aggregated_daily', 'report_viewed_product_aggregated_monthly', 'report_viewed_product_aggregated_yearly',
         'sales_bestsellers_aggregated_daily', 'sales_bestsellers_aggregated_monthly', 'sales_bestsellers_aggregated_yearly',

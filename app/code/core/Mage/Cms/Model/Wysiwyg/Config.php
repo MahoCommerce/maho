@@ -15,22 +15,19 @@ class Mage_Cms_Model_Wysiwyg_Config extends \Maho\DataObject
     /**
      * Wysiwyg behaviour: enabled
      */
-    public const WYSIWYG_ENABLED = 'enabled';
+    public const string WYSIWYG_ENABLED = 'enabled';
 
     /**
      * Wysiwyg behaviour: hidden
      */
-    public const WYSIWYG_HIDDEN = 'hidden';
+    public const string WYSIWYG_HIDDEN = 'hidden';
 
     /**
      * Wysiwyg behaviour: disabled
      */
-    public const WYSIWYG_DISABLED = 'disabled';
+    public const string WYSIWYG_DISABLED = 'disabled';
 
-    /**
-     * constant for image directory
-     */
-    public const IMAGE_DIRECTORY = 'wysiwyg';
+    public const string IMAGE_DIRECTORY = 'wysiwyg';
 
     /**
      * Return Wysiwyg config as \Maho\DataObject

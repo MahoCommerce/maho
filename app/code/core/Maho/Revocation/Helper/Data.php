@@ -10,18 +10,18 @@ declare(strict_types=1);
 
 class Maho_Revocation_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public const XML_PATH_ENABLED = 'revocation/general/enabled';
-    public const XML_PATH_BUTTON_LABEL = 'revocation/general/button_label';
-    public const XML_PATH_NOTIFY_EMAIL = 'revocation/general/notify_email';
-    public const XML_PATH_COOLING_OFF_DAYS = 'revocation/general/cooling_off_days';
-    public const XML_PATH_EMAIL_IDENTITY = 'revocation/email/identity';
-    public const XML_PATH_RECEIVED_TEMPLATE = 'revocation/email/received_template';
-    public const XML_PATH_MERCHANT_TEMPLATE = 'revocation/email/merchant_template';
-    public const XML_PATH_HONEYPOT_ENABLED = 'revocation/abuse/honeypot_enabled';
-    public const XML_PATH_MIN_SUBMIT_SECONDS = 'revocation/abuse/min_submit_seconds';
-    public const XML_PATH_IP_RATE_LIMIT = 'system/rate_limit/revocation_submit';
-    public const XML_PATH_RECIPIENT_RATE_LIMIT = 'system/rate_limit/revocation_receipt';
-    public const XML_PATH_MERCHANT_RATE_LIMIT = 'system/rate_limit/revocation_merchant_notification';
+    public const string XML_PATH_ENABLED = 'revocation/general/enabled';
+    public const string XML_PATH_BUTTON_LABEL = 'revocation/general/button_label';
+    public const string XML_PATH_NOTIFY_EMAIL = 'revocation/general/notify_email';
+    public const string XML_PATH_COOLING_OFF_DAYS = 'revocation/general/cooling_off_days';
+    public const string XML_PATH_EMAIL_IDENTITY = 'revocation/email/identity';
+    public const string XML_PATH_RECEIVED_TEMPLATE = 'revocation/email/received_template';
+    public const string XML_PATH_MERCHANT_TEMPLATE = 'revocation/email/merchant_template';
+    public const string XML_PATH_HONEYPOT_ENABLED = 'revocation/abuse/honeypot_enabled';
+    public const string XML_PATH_MIN_SUBMIT_SECONDS = 'revocation/abuse/min_submit_seconds';
+    public const string XML_PATH_IP_RATE_LIMIT = 'system/rate_limit/revocation_submit';
+    public const string XML_PATH_RECIPIENT_RATE_LIMIT = 'system/rate_limit/revocation_receipt';
+    public const string XML_PATH_MERCHANT_RATE_LIMIT = 'system/rate_limit/revocation_merchant_notification';
 
     #[\Override]
     protected $_moduleName = 'Maho_Revocation';

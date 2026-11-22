@@ -14,7 +14,7 @@ namespace Maho\ApiPlatform\Metadata;
 
 final class ValueLists
 {
-    public const META_ROBOTS = ['INDEX,FOLLOW', 'NOINDEX,FOLLOW', 'INDEX,NOFOLLOW', 'NOINDEX,NOFOLLOW'];
+    public const array META_ROBOTS = ['INDEX,FOLLOW', 'NOINDEX,FOLLOW', 'INDEX,NOFOLLOW', 'NOINDEX,NOFOLLOW'];
 
     /** @return list<int> */
     public static function websites(): array

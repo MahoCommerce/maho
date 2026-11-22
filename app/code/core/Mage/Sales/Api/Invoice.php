@@ -127,10 +127,10 @@ use Maho\ApiPlatform\Metadata\ListFilter;
 )]
 class Invoice extends CrudResource
 {
-    public const MODEL = 'sales/order_invoice';
+    public const string MODEL = 'sales/order_invoice';
 
     /** Admin ACL gate. References backend abstract controller's constant. */
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_Controller_Sales_Invoice::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_Controller_Sales_Invoice::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

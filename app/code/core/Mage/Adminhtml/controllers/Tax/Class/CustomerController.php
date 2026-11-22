@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_Tax_Class_CustomerController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'sales/tax/classes_customer';
+    public const string ADMIN_RESOURCE = 'sales/tax/classes_customer';
 
     /**
      * grid view

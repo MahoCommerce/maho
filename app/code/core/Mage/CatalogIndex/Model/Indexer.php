@@ -20,11 +20,11 @@ declare(strict_types=1);
  */
 class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
 {
-    public const REINDEX_TYPE_ALL = 0;
-    public const REINDEX_TYPE_PRICE = 1;
-    public const REINDEX_TYPE_ATTRIBUTE = 2;
+    public const int REINDEX_TYPE_ALL = 0;
+    public const int REINDEX_TYPE_PRICE = 1;
+    public const int REINDEX_TYPE_ATTRIBUTE = 2;
 
-    public const STEP_SIZE = 1000;
+    public const int STEP_SIZE = 1000;
 
     /**
      * Set of available indexers

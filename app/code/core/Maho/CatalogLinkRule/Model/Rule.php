@@ -231,7 +231,7 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
      * collection. Any sort order not listed here (including 'random' and the empty default) is
      * shuffled in PHP instead — see _isRandomSort(). Single source of truth for both call sites.
      */
-    protected const SORT_ORDERS = [
+    protected const array SORT_ORDERS = [
         'price_desc' => ['price', 'DESC'],
         'name_asc' => ['name', 'ASC'],
         'name_desc' => ['name', 'DESC'],

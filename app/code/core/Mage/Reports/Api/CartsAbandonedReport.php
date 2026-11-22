@@ -37,7 +37,7 @@ use ApiPlatform\Metadata\Get;
 )]
 class CartsAbandonedReport extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = 'report/shopcart/abandoned';
+    public const string ADMIN_RESOURCE = 'report/shopcart/abandoned';
 
     #[ApiProperty(identifier: true, description: 'Report code')]
     public string $report = 'carts-abandoned';

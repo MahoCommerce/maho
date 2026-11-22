@@ -50,10 +50,10 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
  */
 final class McpDispatchProvider implements ProviderInterface
 {
-    private const WRITE_METHODS = ['POST', 'PUT', 'PATCH'];
+    private const array WRITE_METHODS = ['POST', 'PUT', 'PATCH'];
 
     /** Attributes the read stage records on the request; the MCP handler reads them back. */
-    private const CARRIED_ATTRIBUTES = ['data', 'read_data', 'previous_data', 'mapped_data'];
+    private const array CARRIED_ATTRIBUTES = ['data', 'read_data', 'previous_data', 'mapped_data'];
 
     /**
      * @param ProviderInterface<object> $decorated

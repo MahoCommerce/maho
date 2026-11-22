@@ -12,9 +12,9 @@ class Mage_Adminhtml_Model_System_Config_Source_Cron_Frequency
 {
     protected static ?array $_options = null;
 
-    public const CRON_DAILY    = 'D';
-    public const CRON_WEEKLY   = 'W';
-    public const CRON_MONTHLY  = 'M';
+    public const string CRON_DAILY    = 'D';
+    public const string CRON_WEEKLY   = 'W';
+    public const string CRON_MONTHLY  = 'M';
 
     public function toOptionArray(): array
     {

@@ -16,11 +16,11 @@ declare(strict_types=1);
  */
 class Maho_Revocation_Model_Request extends Mage_Core_Model_Abstract
 {
-    public const PROCESSED_STATUS_ACCEPTED = 'accepted';
-    public const PROCESSED_STATUS_REJECTED = 'rejected';
-    public const PROCESSED_STATUS_INFO_REQUESTED = 'info_requested';
+    public const string PROCESSED_STATUS_ACCEPTED = 'accepted';
+    public const string PROCESSED_STATUS_REJECTED = 'rejected';
+    public const string PROCESSED_STATUS_INFO_REQUESTED = 'info_requested';
 
-    public const SUPPRESSED_REASON_RATE_LIMIT = 'rate_limit_recipient';
+    public const string SUPPRESSED_REASON_RATE_LIMIT = 'rate_limit_recipient';
 
     #[\Override]
     protected function _construct(): void

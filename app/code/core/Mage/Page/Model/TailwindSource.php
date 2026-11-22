@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Page_Model_TailwindSource
 {
-    public const CONFIG_PATHS = [
+    public const array CONFIG_PATHS = [
         'design/footer/copyright',
         'design/footer/absolute_footer',
         'design/head/demonotice_text',

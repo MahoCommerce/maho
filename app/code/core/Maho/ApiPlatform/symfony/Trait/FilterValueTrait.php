@@ -16,7 +16,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 trait FilterValueTrait
 {
-    public const MAX_SEARCH_WORDS = \Mage_Core_Helper_String::MAX_SEARCH_WORDS;
+    public const int MAX_SEARCH_WORDS = \Mage_Core_Helper_String::MAX_SEARCH_WORDS;
 
     /**
      * Return the filter $key as a string, or null when it is absent or empty.

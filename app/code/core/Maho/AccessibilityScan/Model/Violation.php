@@ -10,13 +10,13 @@ declare(strict_types=1);
 
 class Maho_AccessibilityScan_Model_Violation extends Mage_Core_Model_Abstract
 {
-    public const IMPACT_CRITICAL = 'critical';
-    public const IMPACT_SERIOUS  = 'serious';
-    public const IMPACT_MODERATE = 'moderate';
-    public const IMPACT_MINOR    = 'minor';
+    public const string IMPACT_CRITICAL = 'critical';
+    public const string IMPACT_SERIOUS  = 'serious';
+    public const string IMPACT_MODERATE = 'moderate';
+    public const string IMPACT_MINOR    = 'minor';
 
     /** Impact levels ordered from most to least severe */
-    public const IMPACT_LEVELS = [
+    public const array IMPACT_LEVELS = [
         self::IMPACT_CRITICAL,
         self::IMPACT_SERIOUS,
         self::IMPACT_MODERATE,

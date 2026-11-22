@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_Sitemap_Model_Source_Agents
 {
     /** @var array<string, list<string>> */
-    public const AGENTS = [
+    public const array AGENTS = [
         'training' => [
             'GPTBot',
             'ClaudeBot',

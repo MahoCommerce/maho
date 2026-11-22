@@ -58,7 +58,7 @@ use Maho\ApiPlatform\CrudResource;
 )]
 class Store extends CrudResource
 {
-    public const MODEL = 'core/store';
+    public const string MODEL = 'core/store';
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

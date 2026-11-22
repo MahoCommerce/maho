@@ -19,8 +19,8 @@ use Mage_Customer_Model_Config_Forgotpassword as Flow;
  */
 class Mage_Customer_Model_Flowpassword extends Mage_Core_Model_Abstract
 {
-    public const EMAIL_WINDOW = 86400;
-    public const IP_WINDOW = 3600;
+    public const int EMAIL_WINDOW = 86400;
+    public const int IP_WINDOW = 3600;
 
     #[\Override]
     protected function _construct()

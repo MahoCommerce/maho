@@ -98,14 +98,14 @@ use Maho\Config\ApiResource;
 )]
 class EmailTemplate extends CrudResource
 {
-    public const MODEL = 'core/email_template';
-    public const PRIMARY_KEY = 'template_id';
+    public const string MODEL = 'core/email_template';
+    public const string PRIMARY_KEY = 'template_id';
 
     /** Admin ACL gate. Mirrors backend Mage_Adminhtml_System_Email_TemplateController. */
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_System_Email_TemplateController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_System_Email_TemplateController::ADMIN_RESOURCE;
 
-    public const TYPE_TEXT = 'text';
-    public const TYPE_HTML = 'html';
+    public const string TYPE_TEXT = 'text';
+    public const string TYPE_HTML = 'html';
 
     #[ApiProperty(identifier: true, writable: false, description: 'Database id. Null for a built-in default template.')]
     public ?int $id = null;

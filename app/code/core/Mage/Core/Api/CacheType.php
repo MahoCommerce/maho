@@ -90,7 +90,7 @@ use Maho\Config\ApiResource;
 class CacheType extends \Maho\ApiPlatform\Resource
 {
     /** Admin ACL gate. Mirrors backend Mage_Adminhtml_CacheController. */
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_CacheController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_CacheController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false, description: 'Cache type code, for example config or block_html')]
     public string $code = '';

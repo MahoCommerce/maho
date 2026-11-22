@@ -18,13 +18,13 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public const XML_PATH_ENABLED = 'admin/captcha/enabled';
-    public const XML_PATH_FRONTEND_SELECTORS = 'admin/captcha/selectors';
-    public const CACHE_TAG = 'maho_captcha';
-    public const CHALLENGE_EXPIRATION = 60;
-    public const MAX_PAYLOAD_USES = 20;
+    public const string XML_PATH_ENABLED = 'admin/captcha/enabled';
+    public const string XML_PATH_FRONTEND_SELECTORS = 'admin/captcha/selectors';
+    public const string CACHE_TAG = 'maho_captcha';
+    public const int CHALLENGE_EXPIRATION = 60;
+    public const int MAX_PAYLOAD_USES = 20;
 
-    private const OWNER_NONE = 'none';
+    private const string OWNER_NONE = 'none';
 
     #[\Override]
     protected $_moduleName = 'Maho_Captcha';

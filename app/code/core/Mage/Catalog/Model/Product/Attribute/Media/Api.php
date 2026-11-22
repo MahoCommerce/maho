@@ -16,7 +16,7 @@ class Mage_Catalog_Model_Product_Attribute_Media_Api extends Mage_Catalog_Model_
     /**
      * Attribute code for media gallery
      */
-    public const ATTRIBUTE_CODE = 'media_gallery';
+    public const string ATTRIBUTE_CODE = 'media_gallery';
 
     /**
      * Allowed mime types for image

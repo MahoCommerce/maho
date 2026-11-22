@@ -18,7 +18,7 @@ class Maho_Ai_Model_Safety_OutputSanitizer
      * require recognisable phone shapes (E.164, or grouped digits with at
      * least one delimiter) so prose with stray long digit strings doesn't trip.
      */
-    private const PII_PATTERNS = [
+    private const array PII_PATTERNS = [
         'email' => '/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/',
         'phone' => '/(?:\+\d{1,3}[\s\-]?)?\(?\d{2,4}\)?[\s\-]\d{2,4}[\s\-]\d{2,4}(?:[\s\-]\d{2,4})?/',
         'ssn'   => '/\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b/',

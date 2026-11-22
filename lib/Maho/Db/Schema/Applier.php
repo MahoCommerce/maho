@@ -31,7 +31,7 @@ final class Applier
      * "anything but InnoDB": ARCHIVE, CSV, BLACKHOLE, FEDERATED and MRG_MyISAM
      * are deliberate choices a conversion would break.
      */
-    private const LEGACY_ENGINES = ['MyISAM', 'MEMORY', 'HEAP', 'Aria', 'MARIA'];
+    private const array LEGACY_ENGINES = ['MyISAM', 'MEMORY', 'HEAP', 'Aria', 'MARIA'];
 
     /**
      * Compute the SQL needed to reconcile the live database with the target Schema.

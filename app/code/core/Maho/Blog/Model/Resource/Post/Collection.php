@@ -11,7 +11,7 @@
  */
 class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Collection_Abstract
 {
-    public const ENTITY = 'blog_post';
+    public const string ENTITY = 'blog_post';
 
     /**
      * Flag to prevent infinite loops when filtering static attributes

@@ -21,11 +21,11 @@ class Maho_FeedManager_Model_Transformer_RelativeDateRange extends Maho_FeedMana
     #[\Override]
     protected string $_description = 'Output an ISO 8601 date range relative to the time of feed generation';
 
-    protected const DEFAULT_OUTPUT_FORMAT = 'c';
-    protected const DEFAULT_START_AMOUNT = '0';
-    protected const DEFAULT_END_AMOUNT = '90';
-    protected const DEFAULT_UNIT = 'days';
-    protected const DEFAULT_DIRECTION = '+';
+    protected const string DEFAULT_OUTPUT_FORMAT = 'c';
+    protected const string DEFAULT_START_AMOUNT = '0';
+    protected const string DEFAULT_END_AMOUNT = '90';
+    protected const string DEFAULT_UNIT = 'days';
+    protected const string DEFAULT_DIRECTION = '+';
 
     #[\Override]
     protected array $_optionDefinitions = [

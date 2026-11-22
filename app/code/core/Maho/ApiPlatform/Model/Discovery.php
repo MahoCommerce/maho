@@ -12,23 +12,23 @@ declare(strict_types=1);
 
 class Maho_ApiPlatform_Model_Discovery
 {
-    public const PATH_API_CATALOG = '.well-known/api-catalog';
-    public const PATH_AI_CATALOG = '.well-known/ai-catalog.json';
-    public const PATH_SERVER_CARD = '.well-known/mcp.json';
-    public const PATH_PROTECTED_RESOURCE = '.well-known/oauth-protected-resource';
-    public const PATH_AUTHORIZATION_SERVER = '.well-known/oauth-authorization-server';
+    public const string PATH_API_CATALOG = '.well-known/api-catalog';
+    public const string PATH_AI_CATALOG = '.well-known/ai-catalog.json';
+    public const string PATH_SERVER_CARD = '.well-known/mcp.json';
+    public const string PATH_PROTECTED_RESOURCE = '.well-known/oauth-protected-resource';
+    public const string PATH_AUTHORIZATION_SERVER = '.well-known/oauth-authorization-server';
 
-    public const TYPE_LINKSET = 'application/linkset+json';
-    public const TYPE_JSON = 'application/json';
-    public const TYPE_MCP_SERVER_CARD = 'application/mcp-server-card+json';
+    public const string TYPE_LINKSET = 'application/linkset+json';
+    public const string TYPE_JSON = 'application/json';
+    public const string TYPE_MCP_SERVER_CARD = 'application/mcp-server-card+json';
 
-    public const AI_CATALOG_SPEC_VERSION = '1.0';
+    public const string AI_CATALOG_SPEC_VERSION = '1.0';
 
     /** The registry schema the server card is written against. */
-    public const SERVER_CARD_SCHEMA = 'https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json';
+    public const string SERVER_CARD_SCHEMA = 'https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json';
 
     /** ServerDetail.description and ServerDetail.title are capped at 100 characters. */
-    protected const CARD_TEXT_LIMIT = 100;
+    protected const int CARD_TEXT_LIMIT = 100;
 
     /**
      * RFC 9727: one linkset context per API, anchored at the entry point a client would call,

@@ -19,9 +19,9 @@ declare(strict_types=1);
 class Maho_Ai_Model_Chat_SystemPrompt
 {
     /** The length of the custom instructions of the store owner, which every model request carries. */
-    public const MAX_CUSTOM_CHARS = 2000;
+    public const int MAX_CUSTOM_CHARS = 2000;
 
-    public const XML_PATH_CUSTOM_INSTRUCTIONS = 'ai/chat/custom_instructions';
+    public const string XML_PATH_CUSTOM_INSTRUCTIONS = 'ai/chat/custom_instructions';
 
     /**
      * @param array<string, mixed> $pageContext route, entity_type, entity_id, entity_label, store and screen of the admin page, and previous_page when the page changed since the last message

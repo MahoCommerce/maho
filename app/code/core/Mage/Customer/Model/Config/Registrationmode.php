@@ -15,8 +15,8 @@ declare(strict_types=1);
  */
 class Mage_Customer_Model_Config_Registrationmode
 {
-    public const MODE_REQUIRE_PASSWORD = 'require_password';
-    public const MODE_NO_PASSWORD = 'no_password';
+    public const string MODE_REQUIRE_PASSWORD = 'require_password';
+    public const string MODE_NO_PASSWORD = 'no_password';
 
     public function toOptionArray(): array
     {

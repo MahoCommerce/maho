@@ -8,9 +8,9 @@
 
 class Maho_AdminActivityLog_Model_Login extends Mage_Core_Model_Abstract
 {
-    public const TYPE_LOGIN = 'login';
-    public const TYPE_LOGOUT = 'logout';
-    public const TYPE_FAILED = 'failed';
+    public const string TYPE_LOGIN = 'login';
+    public const string TYPE_LOGOUT = 'logout';
+    public const string TYPE_FAILED = 'failed';
 
     #[\Override]
     protected function _construct(): void

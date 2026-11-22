@@ -13,7 +13,7 @@ abstract class Mage_Sales_Block_Order_Pdf_Abstract extends Mage_Core_Block_Pdf
     /**
      * The section under global/pdf that maps a product type to its item renderer.
      */
-    protected const ITEM_RENDERER_SECTION = '';
+    protected const string ITEM_RENDERER_SECTION = '';
 
     protected ?Mage_Sales_Model_Order $_order = null;
 

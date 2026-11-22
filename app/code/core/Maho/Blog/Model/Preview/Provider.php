@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Maho_Blog_Model_Preview_Provider extends Mage_Cms_Model_Preview_Provider_Abstract
 {
-    public const FIELDS = [
+    public const array FIELDS = [
         'title', 'content', 'short_content', 'publish_date',
         'meta_title', 'meta_description', 'meta_keywords', 'meta_robots',
     ];

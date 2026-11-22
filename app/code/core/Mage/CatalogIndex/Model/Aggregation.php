@@ -22,7 +22,7 @@ declare(strict_types=1);
  */
 class Mage_CatalogIndex_Model_Aggregation extends Mage_Core_Model_Abstract
 {
-    public const CACHE_FLAG_NAME   = 'layered_navigation';
+    public const string CACHE_FLAG_NAME   = 'layered_navigation';
 
     #[\Override]
     protected function _construct()

@@ -18,79 +18,69 @@ declare(strict_types=1);
  */
 class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
 {
-    /**
-     * Entity name
-     */
-    public const ENTITY = 'core_store';
+    public const string ENTITY = 'core_store';
 
     /**
      * Configuration paths
-     * @var string
      */
-    public const XML_PATH_STORE_STORE_NAME          = 'general/store_information/name';
-    public const XML_PATH_STORE_STORE_PHONE         = 'general/store_information/phone';
-    public const XML_PATH_STORE_STORE_HOURS         = 'general/store_information/hours';
-    public const XML_PATH_STORE_IN_URL              = 'web/url/use_store';
-    public const XML_PATH_UNSECURE_BASE_URL         = 'web/unsecure/base_url';
-    public const XML_PATH_UNSECURE_BASE_JS_URL      = 'web/unsecure/base_js_url';
-    public const XML_PATH_UNSECURE_BASE_LINK_URL    = 'web/unsecure/base_link_url';
-    public const XML_PATH_UNSECURE_BASE_MEDIA_URL   = 'web/unsecure/base_media_url';
-    public const XML_PATH_UNSECURE_BASE_SKIN_URL    = 'web/unsecure/base_skin_url';
-    public const XML_PATH_SECURE_BASE_URL           = 'web/secure/base_url';
-    public const XML_PATH_SECURE_BASE_JS_URL        = 'web/secure/base_js_url';
-    public const XML_PATH_SECURE_BASE_LINK_URL      = 'web/secure/base_link_url';
-    public const XML_PATH_SECURE_BASE_MEDIA_URL     = 'web/secure/base_media_url';
-    public const XML_PATH_SECURE_BASE_SKIN_URL      = 'web/secure/base_skin_url';
-    public const XML_PATH_SECURE_IN_FRONTEND        = 'web/secure/use_in_frontend';
-    public const XML_PATH_SECURE_IN_ADMINHTML       = 'web/secure/use_in_adminhtml';
-    public const XML_PATH_OFFLOADER_HEADER          = 'web/secure/offloader_header';
-    public const XML_PATH_PRICE_SCOPE               = 'catalog/price/scope';
+    public const string XML_PATH_STORE_STORE_NAME          = 'general/store_information/name';
+    public const string XML_PATH_STORE_STORE_PHONE         = 'general/store_information/phone';
+    public const string XML_PATH_STORE_STORE_HOURS         = 'general/store_information/hours';
+    public const string XML_PATH_STORE_IN_URL              = 'web/url/use_store';
+    public const string XML_PATH_UNSECURE_BASE_URL         = 'web/unsecure/base_url';
+    public const string XML_PATH_UNSECURE_BASE_JS_URL      = 'web/unsecure/base_js_url';
+    public const string XML_PATH_UNSECURE_BASE_LINK_URL    = 'web/unsecure/base_link_url';
+    public const string XML_PATH_UNSECURE_BASE_MEDIA_URL   = 'web/unsecure/base_media_url';
+    public const string XML_PATH_UNSECURE_BASE_SKIN_URL    = 'web/unsecure/base_skin_url';
+    public const string XML_PATH_SECURE_BASE_URL           = 'web/secure/base_url';
+    public const string XML_PATH_SECURE_BASE_JS_URL        = 'web/secure/base_js_url';
+    public const string XML_PATH_SECURE_BASE_LINK_URL      = 'web/secure/base_link_url';
+    public const string XML_PATH_SECURE_BASE_MEDIA_URL     = 'web/secure/base_media_url';
+    public const string XML_PATH_SECURE_BASE_SKIN_URL      = 'web/secure/base_skin_url';
+    public const string XML_PATH_SECURE_IN_FRONTEND        = 'web/secure/use_in_frontend';
+    public const string XML_PATH_SECURE_IN_ADMINHTML       = 'web/secure/use_in_adminhtml';
+    public const string XML_PATH_OFFLOADER_HEADER          = 'web/secure/offloader_header';
+    public const string XML_PATH_PRICE_SCOPE               = 'catalog/price/scope';
 
     /**
      * Price scope constants
      */
-    public const PRICE_SCOPE_GLOBAL              = 0;
-    public const PRICE_SCOPE_WEBSITE             = 1;
+    public const int PRICE_SCOPE_GLOBAL              = 0;
+    public const int PRICE_SCOPE_WEBSITE             = 1;
 
     /**
      * Possible URL types
      */
-    public const URL_TYPE_LINK                   = 'link';
-    public const URL_TYPE_DIRECT_LINK            = 'direct_link';
-    public const URL_TYPE_WEB                    = 'web';
-    public const URL_TYPE_SKIN                   = 'skin';
-    public const URL_TYPE_JS                     = 'js';
-    public const URL_TYPE_MEDIA                  = 'media';
+    public const string URL_TYPE_LINK                   = 'link';
+    public const string URL_TYPE_DIRECT_LINK            = 'direct_link';
+    public const string URL_TYPE_WEB                    = 'web';
+    public const string URL_TYPE_SKIN                   = 'skin';
+    public const string URL_TYPE_JS                     = 'js';
+    public const string URL_TYPE_MEDIA                  = 'media';
 
     /**
      * Code constants
      */
-    public const DEFAULT_CODE                    = 'default';
-    public const ADMIN_CODE                      = 'admin';
+    public const string DEFAULT_CODE                    = 'default';
+    public const string ADMIN_CODE                      = 'admin';
 
     /** A store view code: letters (a-z), digits (0-9), underscores and dashes, starting with a letter. */
-    public const CODE_PATTERN                    = '/^[a-z]+[a-z0-9_\-]*$/';
+    public const string CODE_PATTERN                    = '/^[a-z]+[a-z0-9_\-]*$/';
 
-    /**
-     * Cache tag
-     */
-    public const CACHE_TAG                       = 'store';
+    public const string CACHE_TAG                       = 'store';
 
-    /**
-     * Cookie name
-     */
-    public const COOKIE_NAME                     = 'store';
+    public const string COOKIE_NAME                     = 'store';
 
     /**
      * Cookie currency key
      */
     #[\Deprecated(message: 'No currency cookie is written or read any more. Kept so a module referencing the constant does not fatal.')]
-    public const COOKIE_CURRENCY                 = 'currency';
+    public const string COOKIE_CURRENCY                 = 'currency';
 
     /**
      * Script name, which returns all the images
      */
-    public const MEDIA_REWRITE_SCRIPT            = 'get.php/';
+    public const string MEDIA_REWRITE_SCRIPT            = 'get.php/';
 
     /**
      * Cache flag

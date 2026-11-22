@@ -50,7 +50,7 @@ class Maho_AccessibilityScan_Block_Pdf_Report extends Mage_Core_Block_Pdf
     }
 
     /** Marker colors by impact, matching the admin view CSS */
-    protected const MARKER_COLORS = [
+    protected const array MARKER_COLORS = [
         Maho_AccessibilityScan_Model_Violation::IMPACT_CRITICAL => '#d40707',
         Maho_AccessibilityScan_Model_Violation::IMPACT_SERIOUS  => '#e07c00',
         Maho_AccessibilityScan_Model_Violation::IMPACT_MODERATE => '#b8a000',
@@ -58,8 +58,8 @@ class Maho_AccessibilityScan_Block_Pdf_Report extends Mage_Core_Block_Pdf
     ];
 
     /** Content box available for a one-page screenshot, in DomPdf CSS pixels */
-    protected const SCREENSHOT_MAX_WIDTH = 680;
-    protected const SCREENSHOT_MAX_HEIGHT = 860;
+    protected const int SCREENSHOT_MAX_WIDTH = 680;
+    protected const int SCREENSHOT_MAX_HEIGHT = 860;
 
     /**
      * A page's screenshot as a data URI with the numbered violation markers

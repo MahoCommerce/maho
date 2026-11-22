@@ -10,8 +10,8 @@
 
 class Mage_GoogleAnalytics_Block_Ga extends Mage_Core_Block_Template
 {
-    protected const CHECKOUT_MODULE_NAME = 'checkout';
-    protected const CHECKOUT_CONTROLLER_NAME = 'onepage';
+    protected const string CHECKOUT_MODULE_NAME = 'checkout';
+    protected const string CHECKOUT_CONTROLLER_NAME = 'onepage';
 
     /**
      * Render regular page tracking javascript code

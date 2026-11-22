@@ -13,27 +13,27 @@ class Mage_Sitemap_Model_Observer
     /**
      * Enable/disable configuration
      */
-    public const XML_PATH_GENERATION_ENABLED = 'sitemap/generate/enabled';
+    public const string XML_PATH_GENERATION_ENABLED = 'sitemap/generate/enabled';
 
     /**
      * Cronjob expression configuration
      */
-    public const XML_PATH_CRON_EXPR = 'crontab/jobs/sitemap_generate/schedule/cron_expr';
+    public const string XML_PATH_CRON_EXPR = 'crontab/jobs/sitemap_generate/schedule/cron_expr';
 
     /**
      * Error email template configuration
      */
-    public const XML_PATH_ERROR_TEMPLATE  = 'sitemap/generate/error_email_template';
+    public const string XML_PATH_ERROR_TEMPLATE  = 'sitemap/generate/error_email_template';
 
     /**
      * Error email identity configuration
      */
-    public const XML_PATH_ERROR_IDENTITY  = 'sitemap/generate/error_email_identity';
+    public const string XML_PATH_ERROR_IDENTITY  = 'sitemap/generate/error_email_identity';
 
     /**
      * 'Send error emails to' configuration
      */
-    public const XML_PATH_ERROR_RECIPIENT = 'sitemap/generate/error_email';
+    public const string XML_PATH_ERROR_RECIPIENT = 'sitemap/generate/error_email';
 
     /**
      * Serve a sitemap file from a remote sitemaps mount. The web server serves a file on the

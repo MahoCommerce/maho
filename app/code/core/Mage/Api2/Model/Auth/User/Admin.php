@@ -13,10 +13,7 @@
  */
 class Mage_Api2_Model_Auth_User_Admin extends Mage_Api2_Model_Auth_User_Abstract
 {
-    /**
-     * User type
-     */
-    public const USER_TYPE = 'admin';
+    public const string USER_TYPE = 'admin';
 
     /**
      * Retrieve user human-readable label

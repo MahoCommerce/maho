@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Catalog_Model_Layer extends \Maho\DataObject
 {
-    public const XML_PATH_MAX_SELECTED_FILTERS = 'catalog/layered_navigation/max_selected_filters';
+    public const string XML_PATH_MAX_SELECTED_FILTERS = 'catalog/layered_navigation/max_selected_filters';
 
     /**
      * Product collections array

@@ -12,12 +12,12 @@ declare(strict_types=1);
 
 class Maho_Giftcard_Service_Giftcard
 {
-    public const XML_PATH_BALANCE_RATE_LIMIT = 'system/rate_limit/giftcard_balance';
-    public const BALANCE_RATE_LIMIT_WINDOW = 60;
+    public const string XML_PATH_BALANCE_RATE_LIMIT = 'system/rate_limit/giftcard_balance';
+    public const int BALANCE_RATE_LIMIT_WINDOW = 60;
 
     /** The failed lookups of one customer that the balance check accepts in CUSTOMER_FAILURE_WINDOW seconds. */
-    public const CUSTOMER_FAILURE_LIMIT = 10;
-    public const CUSTOMER_FAILURE_WINDOW = 3600;
+    public const int CUSTOMER_FAILURE_LIMIT = 10;
+    public const int CUSTOMER_FAILURE_WINDOW = 3600;
 
     /**
      * @throws Mage_Core_Exception_NoSuchEntity

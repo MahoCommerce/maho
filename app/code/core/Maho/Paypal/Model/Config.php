@@ -10,15 +10,15 @@ declare(strict_types=1);
 
 class Maho_Paypal_Model_Config extends Maho\DataObject
 {
-    public const METHOD_STANDARD_CHECKOUT = 'paypal_standard_checkout';
-    public const METHOD_ADVANCED_CHECKOUT = 'paypal_advanced_checkout';
-    public const METHOD_VAULT = 'paypal_vault';
+    public const string METHOD_STANDARD_CHECKOUT = 'paypal_standard_checkout';
+    public const string METHOD_ADVANCED_CHECKOUT = 'paypal_advanced_checkout';
+    public const string METHOD_VAULT = 'paypal_vault';
 
-    public const PAYMENT_ACTION_AUTHORIZE = 'authorize';
-    public const PAYMENT_ACTION_CAPTURE = 'capture';
+    public const string PAYMENT_ACTION_AUTHORIZE = 'authorize';
+    public const string PAYMENT_ACTION_CAPTURE = 'capture';
 
-    public const JS_SDK_URL_SANDBOX = 'https://www.sandbox.paypal.com/web-sdk/v6/core';
-    public const JS_SDK_URL_LIVE = 'https://www.paypal.com/web-sdk/v6/core';
+    public const string JS_SDK_URL_SANDBOX = 'https://www.sandbox.paypal.com/web-sdk/v6/core';
+    public const string JS_SDK_URL_LIVE = 'https://www.paypal.com/web-sdk/v6/core';
 
     public function getClientId(?int $storeId = null): string
     {

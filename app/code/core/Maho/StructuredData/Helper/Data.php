@@ -15,33 +15,33 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     #[\Override]
     protected $_moduleName = 'Maho_StructuredData';
 
-    public const XML_PATH_ENABLED = 'catalog/structured_data/enabled';
-    public const XML_PATH_PRODUCT_INCLUDE_REVIEWS = 'catalog/structured_data/product/include_reviews';
-    public const XML_PATH_PRODUCT_BRAND_ATTRIBUTE = 'catalog/structured_data/product/brand_attribute';
-    public const XML_PATH_PRODUCT_GTIN_ATTRIBUTE = 'catalog/structured_data/product/gtin_attribute';
-    public const XML_PATH_PRODUCT_MPN_ATTRIBUTE = 'catalog/structured_data/product/mpn_attribute';
-    public const XML_PATH_PRODUCT_CONDITION_ATTRIBUTE = 'catalog/structured_data/product/condition_attribute';
-    public const XML_PATH_ORGANIZATION_TYPE = 'catalog/structured_data/organization/type';
-    public const XML_PATH_SHIPPING_RATE = 'catalog/structured_data/shipping/rate';
-    public const XML_PATH_SHIPPING_CARRIERS = 'catalog/structured_data/shipping/carriers';
-    public const XML_PATH_SHIPPING_HANDLING_MIN = 'catalog/structured_data/shipping/handling_min';
-    public const XML_PATH_SHIPPING_HANDLING_MAX = 'catalog/structured_data/shipping/handling_max';
-    public const XML_PATH_SHIPPING_TRANSIT_MIN = 'catalog/structured_data/shipping/transit_min';
-    public const XML_PATH_SHIPPING_TRANSIT_MAX = 'catalog/structured_data/shipping/transit_max';
-    public const XML_PATH_RETURNS_POLICY = 'catalog/structured_data/returns/policy';
-    public const XML_PATH_RETURNS_DAYS = 'catalog/structured_data/returns/days';
-    public const XML_PATH_RETURNS_FEES = 'catalog/structured_data/returns/fees';
-    public const XML_PATH_RETURNS_METHOD = 'catalog/structured_data/returns/method';
-    public const XML_PATH_RETURNS_COUNTRIES = 'catalog/structured_data/returns/countries';
-    public const XML_PATH_WEIGHT_UNIT = Mage_Core_Model_Locale::XML_PATH_WEIGHT_UNIT;
+    public const string XML_PATH_ENABLED = 'catalog/structured_data/enabled';
+    public const string XML_PATH_PRODUCT_INCLUDE_REVIEWS = 'catalog/structured_data/product/include_reviews';
+    public const string XML_PATH_PRODUCT_BRAND_ATTRIBUTE = 'catalog/structured_data/product/brand_attribute';
+    public const string XML_PATH_PRODUCT_GTIN_ATTRIBUTE = 'catalog/structured_data/product/gtin_attribute';
+    public const string XML_PATH_PRODUCT_MPN_ATTRIBUTE = 'catalog/structured_data/product/mpn_attribute';
+    public const string XML_PATH_PRODUCT_CONDITION_ATTRIBUTE = 'catalog/structured_data/product/condition_attribute';
+    public const string XML_PATH_ORGANIZATION_TYPE = 'catalog/structured_data/organization/type';
+    public const string XML_PATH_SHIPPING_RATE = 'catalog/structured_data/shipping/rate';
+    public const string XML_PATH_SHIPPING_CARRIERS = 'catalog/structured_data/shipping/carriers';
+    public const string XML_PATH_SHIPPING_HANDLING_MIN = 'catalog/structured_data/shipping/handling_min';
+    public const string XML_PATH_SHIPPING_HANDLING_MAX = 'catalog/structured_data/shipping/handling_max';
+    public const string XML_PATH_SHIPPING_TRANSIT_MIN = 'catalog/structured_data/shipping/transit_min';
+    public const string XML_PATH_SHIPPING_TRANSIT_MAX = 'catalog/structured_data/shipping/transit_max';
+    public const string XML_PATH_RETURNS_POLICY = 'catalog/structured_data/returns/policy';
+    public const string XML_PATH_RETURNS_DAYS = 'catalog/structured_data/returns/days';
+    public const string XML_PATH_RETURNS_FEES = 'catalog/structured_data/returns/fees';
+    public const string XML_PATH_RETURNS_METHOD = 'catalog/structured_data/returns/method';
+    public const string XML_PATH_RETURNS_COUNTRIES = 'catalog/structured_data/returns/countries';
+    public const string XML_PATH_WEIGHT_UNIT = Mage_Core_Model_Locale::XML_PATH_WEIGHT_UNIT;
 
-    public const SCHEMA = 'https://schema.org/';
+    public const string SCHEMA = 'https://schema.org/';
 
     /** Carriers that calculate a rate from the configuration and the database, with no call to an outside service. */
-    public const DEFAULT_SHIPPING_CARRIERS = ['freeshipping', 'flatrate', 'tablerate'];
+    public const array DEFAULT_SHIPPING_CARRIERS = ['freeshipping', 'flatrate', 'tablerate'];
 
     /** UN/CEFACT codes for the weight units a store can declare, as Google expects them. */
-    public const WEIGHT_UNIT_CODES = [
+    public const array WEIGHT_UNIT_CODES = [
         Mage_Core_Model_Locale::WEIGHT_POUND => 'LBR',
         Mage_Core_Model_Locale::WEIGHT_KILOGRAM => 'KGM',
         Mage_Core_Model_Locale::WEIGHT_GRAM => 'GRM',
@@ -49,7 +49,7 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     ];
 
     /** @var array<int, string> social profile config paths (general business identity, shared across features) */
-    public const SOCIAL_PATHS = [
+    public const array SOCIAL_PATHS = [
         'general/social_profiles/facebook_url',
         'general/social_profiles/twitter_url',
         'general/social_profiles/instagram_url',

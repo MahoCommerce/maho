@@ -10,7 +10,7 @@
 
 class Mage_Catalog_Model_Product_Type_Price
 {
-    public const CACHE_TAG = 'PRODUCT_PRICE';
+    public const string CACHE_TAG = 'PRODUCT_PRICE';
 
     public static array $attributeCache = [];
 

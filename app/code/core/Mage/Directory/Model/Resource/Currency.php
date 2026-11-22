@@ -13,8 +13,8 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     /**
      * The rate column, DECIMAL(24,12)
      */
-    public const RATE_PRECISION = 24;
-    public const RATE_SCALE = 12;
+    public const int RATE_PRECISION = 24;
+    public const int RATE_SCALE = 12;
 
     /**
      * Currency rate table

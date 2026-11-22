@@ -14,9 +14,9 @@ declare(strict_types=1);
  */
 abstract class Mage_Catalog_Block_Product_Widget_Abstract extends Mage_Catalog_Block_Product_Abstract implements Mage_Widget_Block_Interface
 {
-    public const DEFAULT_SHOW_PAGER = false;
-    public const DEFAULT_PRODUCTS_COUNT = 5;
-    public const DEFAULT_PRODUCTS_PER_PAGE = 5;
+    public const bool DEFAULT_SHOW_PAGER = false;
+    public const int DEFAULT_PRODUCTS_COUNT = 5;
+    public const int DEFAULT_PRODUCTS_PER_PAGE = 5;
 
     /**
      * Request parameter name for the pager page number. Override per widget to avoid collisions.

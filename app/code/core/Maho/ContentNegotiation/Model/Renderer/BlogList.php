@@ -12,10 +12,10 @@ declare(strict_types=1);
 
 class Maho_ContentNegotiation_Model_Renderer_BlogList extends Maho_ContentNegotiation_Model_Renderer_AbstractRenderer
 {
-    public const EXCERPT_LENGTH = 200;
+    public const int EXCERPT_LENGTH = 200;
 
     /** One document per list, so the posts are capped instead of paged */
-    public const POSTS_LIMIT = 100;
+    public const int POSTS_LIMIT = 100;
 
     #[\Override]
     public function render(): ?string

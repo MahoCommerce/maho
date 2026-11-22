@@ -20,12 +20,9 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
     /**
      * Data key for matching result to be saved in
      */
-    public const EVENT_MATCH_RESULT_KEY = 'catalog_product_price_match_result';
+    public const string EVENT_MATCH_RESULT_KEY = 'catalog_product_price_match_result';
 
-    /**
-     * Reindex price event type
-     */
-    public const EVENT_TYPE_REINDEX_PRICE = 'catalog_reindex_price';
+    public const string EVENT_TYPE_REINDEX_PRICE = 'catalog_reindex_price';
 
     /**
      * Matched Entities instruction array

@@ -13,11 +13,7 @@
  */
 class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'system/api/roles';
+    public const string ADMIN_RESOURCE = 'system/api/roles';
 
     protected function _initAction()
     {

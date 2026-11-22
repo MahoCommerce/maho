@@ -17,7 +17,7 @@ trait RankedProductsTrait
     /**
      * Each period has at most this number of rows, the same as in the admin.
      */
-    public const ROWS_PER_PERIOD = 5;
+    public const int ROWS_PER_PERIOD = 5;
 
     /**
      * Return the totals and the periods of a ranked product report.

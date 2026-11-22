@@ -24,10 +24,10 @@ use Symfony\AI\Platform\Tool\ToolEffectHints;
  */
 final class FormTool
 {
-    public const READ_NAME = 'admin_read_form';
-    public const EDIT_NAME = 'admin_edit_text';
-    public const NAMES = [self::READ_NAME, self::EDIT_NAME];
-    public const MAX_EDITS = 50;
+    public const string READ_NAME = 'admin_read_form';
+    public const string EDIT_NAME = 'admin_edit_text';
+    public const array NAMES = [self::READ_NAME, self::EDIT_NAME];
+    public const int MAX_EDITS = 50;
 
     /** @var list<array{id: string, name: string, label: string, value: string, changed: bool}> */
     private array $fields = [];

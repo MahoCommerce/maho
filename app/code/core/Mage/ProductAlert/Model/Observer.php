@@ -13,27 +13,27 @@ class Mage_ProductAlert_Model_Observer
     /**
      * Error email template configuration
      */
-    public const XML_PATH_ERROR_TEMPLATE   = 'catalog/productalert_cron/error_email_template';
+    public const string XML_PATH_ERROR_TEMPLATE   = 'catalog/productalert_cron/error_email_template';
 
     /**
      * Error email identity configuration
      */
-    public const XML_PATH_ERROR_IDENTITY   = 'catalog/productalert_cron/error_email_identity';
+    public const string XML_PATH_ERROR_IDENTITY   = 'catalog/productalert_cron/error_email_identity';
 
     /**
      * 'Send error emails to' configuration
      */
-    public const XML_PATH_ERROR_RECIPIENT  = 'catalog/productalert_cron/error_email';
+    public const string XML_PATH_ERROR_RECIPIENT  = 'catalog/productalert_cron/error_email';
 
     /**
      * Allow price alert
      */
-    public const XML_PATH_PRICE_ALLOW      = 'catalog/productalert/allow_price';
+    public const string XML_PATH_PRICE_ALLOW      = 'catalog/productalert/allow_price';
 
     /**
      * Allow stock alert
      */
-    public const XML_PATH_STOCK_ALLOW      = 'catalog/productalert/allow_stock';
+    public const string XML_PATH_STOCK_ALLOW      = 'catalog/productalert/allow_stock';
 
     /**
      * Website collection array

@@ -15,16 +15,16 @@ use Maho\Job\StepState;
 
 class Mage_Index_Model_Progress
 {
-    public const VAR_SUBDIR = 'index_progress';
+    public const string VAR_SUBDIR = 'index_progress';
 
     /**
      * A record untouched for this long, with nothing holding the runner's lock, belongs to a worker
      * that was killed and will never write again.
      */
-    public const STALE_AFTER = 300;
+    public const int STALE_AFTER = 300;
 
     // \z rather than $, which would let a trailing newline into a file path
-    protected const TOKEN_PATTERN = '/\A[a-f0-9]{32}\z/';
+    protected const string TOKEN_PATTERN = '/\A[a-f0-9]{32}\z/';
 
     protected ?string $token = null;
 

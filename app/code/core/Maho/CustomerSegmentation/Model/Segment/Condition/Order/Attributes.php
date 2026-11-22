@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends Maho_CustomerSegmentation_Model_Segment_Condition_Abstract
 {
-    private const BASE_AMOUNT_COLUMNS = [
+    private const array BASE_AMOUNT_COLUMNS = [
         'total_amount' => 'base_grand_total',
         'subtotal' => 'base_subtotal',
         'tax_amount' => 'base_tax_amount',

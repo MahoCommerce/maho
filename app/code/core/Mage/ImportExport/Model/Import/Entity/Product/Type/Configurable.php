@@ -13,10 +13,10 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
     /**
      * Error codes.
      */
-    public const ERROR_ATTRIBUTE_CODE_IS_NOT_SUPER = 'attrCodeIsNotSuper';
-    public const ERROR_INVALID_PRICE_CORRECTION    = 'invalidPriceCorr';
-    public const ERROR_INVALID_OPTION_VALUE        = 'invalidOptionValue';
-    public const ERROR_INVALID_WEBSITE             = 'invalidSuperAttrWebsite';
+    public const string ERROR_ATTRIBUTE_CODE_IS_NOT_SUPER = 'attrCodeIsNotSuper';
+    public const string ERROR_INVALID_PRICE_CORRECTION    = 'invalidPriceCorr';
+    public const string ERROR_INVALID_OPTION_VALUE        = 'invalidOptionValue';
+    public const string ERROR_INVALID_WEBSITE             = 'invalidSuperAttrWebsite';
 
     /**
      * Validation failure message template definitions

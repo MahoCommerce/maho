@@ -24,7 +24,7 @@ use Maho\ApiPlatform\Service\JwtService;
 class ApiV2Helper
 {
     /** MCP spec revision the test client negotiates. */
-    public const MCP_PROTOCOL_VERSION = '2025-06-18';
+    public const string MCP_PROTOCOL_VERSION = '2025-06-18';
 
     private static ?string $baseUrl = null;
     private static ?string $jwtSecret = null;

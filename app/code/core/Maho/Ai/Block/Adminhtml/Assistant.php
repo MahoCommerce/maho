@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
 {
     /** Admin controller name => [entity type, id parameter, model alias, label attribute]. */
-    private const ENTITIES = [
+    private const array ENTITIES = [
         'catalog_product' => ['product', 'id', 'catalog/product', 'name'],
         'catalog_category' => ['category', 'id', 'catalog/category', 'name'],
         'customer' => ['customer', 'id', 'customer/customer', 'name'],
@@ -31,9 +31,9 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
     ];
 
     /** The admin session key of a conversation that a notification link asked the panel to open. */
-    public const SESSION_OPEN_CONVERSATION = 'ai_open_conversation';
+    public const string SESSION_OPEN_CONVERSATION = 'ai_open_conversation';
 
-    private const LOGO_PATH = 'M1075.34-395.845c5.796 0 10.492 4.654 10.492 10.392v109.133c0 64.867-53.088 117.45-118.571 117.45H854.981c-5.796 0-10.496-4.654-10.496-10.396v-115.717c0-61.225 50.113-110.863 111.929-110.863h118.925zm-111.229 40.954c-42.454 0-76.871 34.088-76.871 76.142s34.417 76.138 76.871 76.138 76.871-34.088 76.871-76.138-34.417-76.142-76.871-76.142z';
+    private const string LOGO_PATH = 'M1075.34-395.845c5.796 0 10.492 4.654 10.492 10.392v109.133c0 64.867-53.088 117.45-118.571 117.45H854.981c-5.796 0-10.496-4.654-10.496-10.396v-115.717c0-61.225 50.113-110.863 111.929-110.863h118.925zm-111.229 40.954c-42.454 0-76.871 34.088-76.871 76.142s34.417 76.138 76.871 76.138 76.871-34.088 76.871-76.138-34.417-76.142-76.871-76.142z';
 
     #[\Override]
     protected function _toHtml(): string

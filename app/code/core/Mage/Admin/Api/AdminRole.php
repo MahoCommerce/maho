@@ -58,11 +58,11 @@ use Maho\Config\ApiResource;
 )]
 class AdminRole extends CrudResource
 {
-    public const MODEL = 'admin/role';
-    public const PRIMARY_KEY = 'role_id';
+    public const string MODEL = 'admin/role';
+    public const string PRIMARY_KEY = 'role_id';
 
     /** Admin ACL gate. Mirrors backend Mage_Adminhtml_Permissions_RoleController. */
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_Permissions_RoleController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_Permissions_RoleController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

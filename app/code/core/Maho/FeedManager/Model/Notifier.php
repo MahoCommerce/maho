@@ -15,13 +15,13 @@ declare(strict_types=1);
  */
 class Maho_FeedManager_Model_Notifier
 {
-    public const MODE_NONE = 'none';
-    public const MODE_EMAIL = 'email';
-    public const MODE_ADMIN = 'admin';
-    public const MODE_BOTH = 'both';
+    public const string MODE_NONE = 'none';
+    public const string MODE_EMAIL = 'email';
+    public const string MODE_ADMIN = 'admin';
+    public const string MODE_BOTH = 'both';
 
-    public const FREQUENCY_ALWAYS = 'always';
-    public const FREQUENCY_ONCE_UNTIL_SUCCESS = 'once_until_success';
+    public const string FREQUENCY_ALWAYS = 'always';
+    public const string FREQUENCY_ONCE_UNTIL_SUCCESS = 'once_until_success';
 
     /**
      * Send failure notification for a feed

@@ -10,7 +10,7 @@
 
 class Mage_Sales_Model_Config
 {
-    public const XML_PATH_ORDER_STATES = 'global/sales/order/states';
+    public const string XML_PATH_ORDER_STATES = 'global/sales/order/states';
 
     /**
      * @param string $type

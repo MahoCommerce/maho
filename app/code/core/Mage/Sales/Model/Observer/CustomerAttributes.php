@@ -19,13 +19,13 @@ declare(strict_types=1);
  */
 class Mage_Sales_Model_Observer_CustomerAttributes
 {
-    public const COLUMN_PREFIX = 'customer_';
+    public const string COLUMN_PREFIX = 'customer_';
 
     /**
      * The customer forms of the storefront. Mage\Customer\Api\CustomAttributes::STOREFRONT_FORMS
      * has the same list, but the API classes load only in the API.
      */
-    public const STOREFRONT_FORMS = ['customer_account_create', 'customer_account_edit', 'checkout_register'];
+    public const array STOREFRONT_FORMS = ['customer_account_create', 'customer_account_edit', 'checkout_register'];
 
     /** @var array<string, Mage_Customer_Model_Attribute>|null */
     protected ?array $attributes = null;

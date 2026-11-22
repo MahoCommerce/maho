@@ -16,8 +16,8 @@ class Mage_Api2_Model_Acl_Global_Rule_Permission
     /**
      * Source keys
      */
-    public const TYPE_ALLOW = 1;
-    public const TYPE_DENY  = 0;
+    public const int TYPE_ALLOW = 1;
+    public const int TYPE_DENY  = 0;
 
     public static function toOptionArray(): array
     {

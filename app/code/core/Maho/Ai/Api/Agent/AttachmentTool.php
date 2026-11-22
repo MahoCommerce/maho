@@ -18,8 +18,8 @@ use Symfony\AI\Platform\Tool\ToolEffectHints;
 
 final class AttachmentTool
 {
-    public const NAME = 'attachment_read';
-    public const TITLE = 'Read an attachment';
+    public const string NAME = 'attachment_read';
+    public const string TITLE = 'Read an attachment';
 
     /** The tool reads a file that the administrator attached. It changes no store data. */
     public static function effectHints(): ToolEffectHints

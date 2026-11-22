@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'sales/checkoutagreement';
+    public const string ADMIN_RESOURCE = 'sales/checkoutagreement';
 
     #[Maho\Config\Route('/admin/checkout_agreement/index')]
     public function indexAction(): static

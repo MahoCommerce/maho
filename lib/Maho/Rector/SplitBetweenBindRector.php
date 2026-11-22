@@ -26,7 +26,7 @@ use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
  */
 final class SplitBetweenBindRector extends AbstractRector
 {
-    private const METHODS = ['where', 'having'];
+    private const array METHODS = ['where', 'having'];
 
     public function getRuleDefinition(): RuleDefinition
     {

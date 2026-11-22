@@ -20,10 +20,10 @@ use Maho\Db\Adapter\Pdo\Sqlite;
 class TableBloatScanner
 {
     /** Below this, a rebuild costs more downtime than the space it returns. */
-    public const MIN_TOTAL_BYTES = 50 * 1024 * 1024;
+    public const int MIN_TOTAL_BYTES = 50 * 1024 * 1024;
 
     /** Free share of a table below which fragmentation is ordinary churn, not bloat. */
-    public const MIN_RECLAIMABLE_RATIO = 0.30;
+    public const float MIN_RECLAIMABLE_RATIO = 0.30;
 
     /**
      * Tables holding more reclaimable space than the thresholds allow, largest first.

@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Core_Model_Resource_Design_Content extends Mage_Core_Model_Resource_Db_Abstract
 {
-    public const PAGE_SIZE = 1000;
+    public const int PAGE_SIZE = 1000;
 
     #[\Override]
     protected function _construct(): void

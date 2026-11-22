@@ -17,7 +17,7 @@ declare(strict_types=1);
  */
 class Mage_Catalog_Model_Layer_Filter_Decimal extends Mage_Catalog_Model_Layer_Filter_Abstract
 {
-    public const MIN_RANGE_POWER = 10;
+    public const int MIN_RANGE_POWER = 10;
 
     /**
      * Resource instance

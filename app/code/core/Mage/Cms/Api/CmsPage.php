@@ -74,10 +74,10 @@ use Maho\ApiPlatform\Service\CustomAttributes;
 )]
 class CmsPage extends CrudResource
 {
-    public const MODEL = 'cms/page';
+    public const string MODEL = 'cms/page';
 
     /** Admin ACL gate. Backend PageController has no ADMIN_RESOURCE; declare directly. */
-    public const ADMIN_RESOURCE = 'cms/page';
+    public const string ADMIN_RESOURCE = 'cms/page';
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
