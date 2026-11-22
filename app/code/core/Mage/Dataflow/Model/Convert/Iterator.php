@@ -37,13 +37,13 @@ class Mage_Dataflow_Model_Session_Adapter_Iterator extends Mage_Dataflow_Model_C
         }
         $callbacks[] = $this->updateProgress(...);
 
-        echo $this->_getProgressBarHtml($sessionId, $total['cnt']);
+        echo $this->_getProgressBarHtml($sessionId === null ? null : (int) $sessionId, (int) $total['cnt']);
 
         Mage::getModel('core/resource_iterator')
             ->walk($import->select($sessionId), $callbacks);
     }
 
-    protected function _getProgressBarHtml(int|string|null $sessionId, int|string $totalRows): string
+    protected function _getProgressBarHtml(?int $sessionId, int $totalRows): string
     {
         $helper = Mage::helper('dataflow');
         return '
