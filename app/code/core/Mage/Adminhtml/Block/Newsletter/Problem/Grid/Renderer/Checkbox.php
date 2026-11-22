@@ -14,11 +14,9 @@ class Mage_Adminhtml_Block_Newsletter_Problem_Grid_Renderer_Checkbox extends Mag
 {
     /**
      * Renders grid column
-     *
-     * @return  string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         return '<input type="checkbox" name="problem[]" value="' . $row->getId() . '" class="problemCheckbox">';
     }

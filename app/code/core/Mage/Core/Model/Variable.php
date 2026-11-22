@@ -25,7 +25,7 @@ class Mage_Core_Model_Variable extends Mage_Core_Model_Abstract
      */
     public const CODE_PATTERN = '/^[a-z][a-z0-9_\/-]*$/iD';
 
-    protected $_storeId = 0;
+    protected ?int $_storeId = 0;
 
     /**
      * Internal Constructor

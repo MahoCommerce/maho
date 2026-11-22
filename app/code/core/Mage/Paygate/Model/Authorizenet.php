@@ -924,7 +924,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param \Maho\DataObject $card
      * @return Mage_Sales_Model_Order_Payment_Transaction
      */
-    protected function _refundCardTransaction($payment, $amount, $card)
+    protected function _refundCardTransaction($payment, float|string $amount, $card)
     {
         /**
          * Card has last transaction with type "refund" when all captured amount is refunded.
@@ -1460,7 +1460,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
         $transactionType,
         array $transactionDetails = [],
         array $transactionAdditionalInfo = [],
-        $message = false,
+        string|false $message = false,
     ) {
         $payment->setTransactionId($transactionId);
         $payment->resetTransactionAdditionalInfo();

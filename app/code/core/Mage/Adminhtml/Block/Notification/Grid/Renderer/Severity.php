@@ -12,11 +12,9 @@ class Mage_Adminhtml_Block_Notification_Grid_Renderer_Severity extends Mage_Admi
 {
     /**
      * Renders grid column
-     *
-     * @return  string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         $notice = Mage::getSingleton('adminnotification/inbox');
 

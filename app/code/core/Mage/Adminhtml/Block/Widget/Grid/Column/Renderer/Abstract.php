@@ -36,11 +36,9 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
 
     /**
      * Renders grid column
-     *
-     * @return  string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): mixed
     {
         if ($this->getColumn()->getEditable()) {
             return $this->_getInputValueElement($row);

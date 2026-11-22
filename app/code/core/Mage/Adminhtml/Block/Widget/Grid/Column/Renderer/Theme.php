@@ -12,11 +12,9 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Theme extends Mage_Adminh
 {
     /**
      * Renders grid column
-     *
-     * @return  string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string|false|null
     {
         $options = $this->getOptions();
         $value   = $this->_getValue($row);

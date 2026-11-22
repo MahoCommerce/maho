@@ -12,11 +12,9 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid_Renderer_I
 {
     /**
      * Renders grid column value
-     *
-     * @return string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         $inStock = $this->_getValue($row);
         return $inStock

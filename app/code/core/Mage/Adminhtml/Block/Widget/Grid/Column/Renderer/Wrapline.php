@@ -19,11 +19,9 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Wrapline extends Mage_Adm
 
     /**
      * Renders grid column
-     *
-     * @return string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         $line = parent::_getValue($row);
         $wrappedLine = '';

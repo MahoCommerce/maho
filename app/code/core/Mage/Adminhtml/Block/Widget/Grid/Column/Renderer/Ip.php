@@ -12,11 +12,9 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Ip extends Mage_Adminhtml
 {
     /**
      * Render the grid cell value
-     *
-     * @return string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string|false
     {
         /**
          * The output of the "inet_ntop" function was disabled to prevent an error throwing

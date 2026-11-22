@@ -12,11 +12,9 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Action extends Mage_Admin
 {
     /**
      * Renders column
-     *
-     * @return string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         $actions = $this->getColumn()->getActions();
         if (empty($actions) || !is_array($actions)) {

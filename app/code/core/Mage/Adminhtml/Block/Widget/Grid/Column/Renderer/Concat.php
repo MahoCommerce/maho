@@ -12,11 +12,9 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Concat extends Mage_Admin
 {
     /**
      * Renders grid column
-     *
-     * @return  string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         return $this->escapeHtml($this->_concat($row));
     }

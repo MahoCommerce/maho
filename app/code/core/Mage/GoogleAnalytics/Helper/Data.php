@@ -123,7 +123,7 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
      *
      * @return bool
      */
-    public function isDebugModeEnabled($store = null)
+    public function isDebugModeEnabled(Mage_Core_Model_Store|int|string|null $store = null)
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_DEBUG, $store) && Mage::helper('core')->isDevAllowed();
     }
@@ -144,7 +144,7 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
      *
      * @return bool
      */
-    public function isUserIdEnabled($store = null)
+    public function isUserIdEnabled(Mage_Core_Model_Store|int|string|null $store = null)
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_USERID, $store);
     }

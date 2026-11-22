@@ -12,11 +12,9 @@ class Mage_Adminhtml_Block_Customer_Grid_Renderer_Multiaction extends Mage_Admin
 {
     /**
      * Renders column
-     *
-     * @return string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         $html = '';
         $actions = $this->getColumn()->getActions();

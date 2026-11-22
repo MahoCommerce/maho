@@ -86,12 +86,14 @@ class Mage_Newsletter_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Retrieve Template processor for Newsletter template
-     *
-     * @return false|Mage_Core_Model_Abstract|\Maho\Filter\Template
      */
-    public function getTemplateProcessor()
+    public function getTemplateProcessor(): Mage_Core_Model_Email_Template_Filter
     {
         $model = (string) Mage::getConfig()->getNode(self::XML_PATH_TEMPLATE_FILTER);
-        return Mage::getModel($model);
+        $processor = Mage::getModel($model);
+        if (!$processor instanceof Mage_Core_Model_Email_Template_Filter) {
+            throw new \RuntimeException("The model {$model} is not an email template filter.");
+        }
+        return $processor;
     }
 }

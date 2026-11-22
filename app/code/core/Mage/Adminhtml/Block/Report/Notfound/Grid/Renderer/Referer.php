@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_Adminhtml_Block_Report_Notfound_Grid_Renderer_Referer extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         $referer = (string) $row->getData($this->getColumn()->getIndex());
         if ($referer === '') {

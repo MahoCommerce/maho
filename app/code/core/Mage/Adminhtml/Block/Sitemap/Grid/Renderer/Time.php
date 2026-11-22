@@ -12,11 +12,9 @@ class Mage_Adminhtml_Block_Sitemap_Grid_Renderer_Time extends Mage_Adminhtml_Blo
 {
     /**
      * Prepare link to display in grid
-     *
-     * @return string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         return Mage::app()->getLocale()->utcToStore(null, $row->getSitemapTime())->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
     }

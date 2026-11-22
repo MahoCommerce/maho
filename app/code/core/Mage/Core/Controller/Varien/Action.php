@@ -500,10 +500,10 @@ abstract class Mage_Core_Controller_Varien_Action
     /**
      * Dispatches event after action
      */
-    public function postDispatch()
+    public function postDispatch(): static
     {
         if ($this->getFlag('', self::FLAG_NO_POST_DISPATCH)) {
-            return;
+            return $this;
         }
 
         Mage::dispatchEvent(
@@ -519,6 +519,7 @@ abstract class Mage_Core_Controller_Varien_Action
             ['controller_action' => $this],
         );
         Mage::dispatchEvent('controller_action_postdispatch', ['controller_action' => $this]);
+        return $this;
     }
 
     /**

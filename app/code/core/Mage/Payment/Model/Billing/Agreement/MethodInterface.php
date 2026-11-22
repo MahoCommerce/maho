@@ -20,7 +20,7 @@ interface Mage_Payment_Model_Billing_Agreement_MethodInterface
     /**
      * Retrieve billing agreement details
      */
-    public function getBillingAgreementTokenInfo(Mage_Payment_Model_Billing_AgreementAbstract $agreement);
+    public function getBillingAgreementTokenInfo(Mage_Payment_Model_Billing_AgreementAbstract $agreement): array;
 
     /**
      * Create billing agreement

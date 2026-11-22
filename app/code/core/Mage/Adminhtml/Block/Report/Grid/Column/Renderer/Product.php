@@ -12,11 +12,9 @@ class Mage_Adminhtml_Block_Report_Grid_Column_Renderer_Product extends Mage_Admi
 {
     /**
      * Renders grid column
-     *
-     * @return  string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         $id   = $row->getId();
 

@@ -139,7 +139,7 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
      * @return $this
      */
     #[\Override]
-    public function postDispatch()
+    public function postDispatch(): static
     {
         parent::postDispatch();
         if (!$this->getFlag('', self::FLAG_NO_START_SESSION)) {

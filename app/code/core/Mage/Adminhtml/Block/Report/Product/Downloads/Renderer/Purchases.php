@@ -12,11 +12,9 @@ class Mage_Adminhtml_Block_Report_Product_Downloads_Renderer_Purchases extends M
 {
     /**
      * Renders Purchases value
-     *
-     * @return  string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): mixed
     {
         if (($value = $row->getData($this->getColumn()->getIndex())) > 0) {
             return $value;

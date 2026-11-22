@@ -26,11 +26,9 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Checkbox extends Mage_Adm
     }
     /**
      * Renders grid column
-     *
-     * @return  string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         $values = $this->getColumn()->getValues();
         $value  = $row->getData($this->getColumn()->getIndex());

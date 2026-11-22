@@ -14,10 +14,9 @@ class Mage_Adminhtml_Block_Newsletter_Template_Grid_Renderer_Action extends Mage
      * Renderer for "Action" column in Newsletter templates grid
      *
      * @param Mage_Newsletter_Model_Template $row
-     * @return string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         if ($row->isValidForSend()) {
             $actions[] = [

@@ -17,7 +17,7 @@
 class Mage_Catalog_Block_Seo_Sitemap_Tree_Pager extends Mage_Page_Block_Html_Pager
 {
     #[\Override]
-    protected $_showPerPage     = false;
+    protected bool $_showPerPage     = false;
     protected int $_lastPageNumber  = 1;
     protected int $_totalNum        = 0;
     protected int|float $_firstNum        = 0;

@@ -18,7 +18,7 @@ class Mage_Adminhtml_Block_Sales_Reorder_Renderer_Action extends Mage_Adminhtml_
     protected $_actions = [];
 
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         $this->_actions = [];
         if (Mage::helper('sales/reorder')->canReorder($row)) {

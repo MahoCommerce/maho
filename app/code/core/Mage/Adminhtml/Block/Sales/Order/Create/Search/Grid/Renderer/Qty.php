@@ -23,11 +23,9 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Search_Grid_Renderer_Qty extends M
 
     /**
      * Render product qty field
-     *
-     * @return  string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         // Prepare values
         $isInactive = $this->_isInactive($row);

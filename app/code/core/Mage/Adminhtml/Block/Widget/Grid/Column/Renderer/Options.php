@@ -12,11 +12,9 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Options extends Mage_Admi
 {
     /**
      * Render a grid cell as options
-     *
-     * @return string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): ?string
     {
         $options = $this->getColumn()->getOptions();
         $showMissingOptionValues = (bool) $this->getColumn()->getShowMissingOptionValues();

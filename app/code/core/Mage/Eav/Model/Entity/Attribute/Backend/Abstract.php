@@ -98,7 +98,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @return string
      */
     #[\Override]
-    public function getTable()
+    public function getTable(): ?string
     {
         if (empty($this->_table)) {
             if ($this->isStatic()) {
@@ -150,10 +150,9 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      *
      * @param \Maho\DataObject $entity
      * @param int $valueId
-     * @return $this
      */
     #[\Override]
-    public function setEntityValueId($entity, $valueId)
+    public function setEntityValueId($entity, $valueId): static
     {
         if (!$entity || !$entity->getId()) {
             return $this->setValueId($valueId);
@@ -169,7 +168,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @return int
      */
     #[\Override]
-    public function getValueId()
+    public function getValueId(): int|string|null
     {
         return $this->_valueId;
     }
@@ -181,7 +180,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @return int
      */
     #[\Override]
-    public function getEntityValueId($entity)
+    public function getEntityValueId($entity): int|string|null
     {
         if (!$entity || !$entity->getId() || !array_key_exists((string) $entity->getId(), $this->_valueIds)) {
             return $this->getValueId();

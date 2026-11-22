@@ -46,8 +46,8 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
     protected ?array $_regions = null;
     protected ?array $_websites = null;
 
-    protected $_customer = null;
-    protected $_address = null;
+    protected ?Mage_Customer_Model_Customer $_customer = null;
+    protected ?Mage_Customer_Model_Address $_address = null;
 
     protected string $_customerId = '';
 

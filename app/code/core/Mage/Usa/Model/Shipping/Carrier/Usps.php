@@ -1939,13 +1939,13 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     }
 
     #[\Deprecated]
-    protected function _methodsMapper($method, $valuesToLabels = true)
+    protected function _methodsMapper(string $method, bool $valuesToLabels = true): string
     {
         return $method;
     }
 
     #[\Deprecated]
-    public function getMethodLabel($value)
+    public function getMethodLabel(string $value): string
     {
         return $this->_methodsMapper($value, true);
     }
@@ -1954,13 +1954,13 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      * Get value of method by its label
      */
     #[\Deprecated]
-    public function getMethodValue($label)
+    public function getMethodValue(string $label): string
     {
         return $this->_methodsMapper($label, false);
     }
 
     #[\Deprecated]
-    protected function setTrackingReqeust()
+    protected function setTrackingReqeust(): void
     {
         $this->setTrackingRequest();
     }

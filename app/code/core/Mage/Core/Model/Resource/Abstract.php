@@ -169,7 +169,7 @@ abstract class Mage_Core_Model_Resource_Abstract
      * @param string $field
      * @param mixed $defaultValue
      */
-    protected function _unserializeField(\Maho\DataObject $object, $field, $defaultValue = null)
+    protected function _unserializeField(\Maho\DataObject $object, $field, $defaultValue = null): void
     {
         $value = $object->getData($field);
         if (empty($value)) {

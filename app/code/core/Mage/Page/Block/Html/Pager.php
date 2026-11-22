@@ -10,14 +10,14 @@
 
 class Mage_Page_Block_Html_Pager extends Mage_Core_Block_Template
 {
-    protected $_collection = null;
+    protected ?\Maho\Data\Collection $_collection = null;
     protected string $_pageVarName    = 'p';
     protected string $_limitVarName   = 'limit';
     protected array $_availableLimit = [10 => 10,20 => 20,50 => 50];
     protected int $_dispersion     = 3;
     protected int $_displayPages   = 5;
-    protected $_showPerPage    = true;
-    protected $_limit          = null;
+    protected bool $_showPerPage    = true;
+    protected ?int $_limit          = null;
     protected bool $_outputRequired = true;
 
     /**
@@ -100,7 +100,7 @@ class Mage_Page_Block_Html_Pager extends Mage_Core_Block_Template
      */
     public function setLimit($limit)
     {
-        $this->_limit = $limit;
+        $this->_limit = $limit === null ? null : (int) $limit;
         return $this;
     }
 
@@ -124,10 +124,7 @@ class Mage_Page_Block_Html_Pager extends Mage_Core_Block_Template
         return $this;
     }
 
-    /**
-     * @return Mage_Core_Model_Resource_Db_Collection_Abstract
-     */
-    public function getCollection()
+    public function getCollection(): ?\Maho\Data\Collection
     {
         return $this->_collection;
     }

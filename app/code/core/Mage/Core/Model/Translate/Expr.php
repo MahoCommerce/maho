@@ -11,8 +11,8 @@ declare(strict_types=1);
 
 class Mage_Core_Model_Translate_Expr
 {
-    protected $_text;
-    protected $_module;
+    protected string $_text;
+    protected string $_module;
 
     /**
      * @param string $text
@@ -20,7 +20,7 @@ class Mage_Core_Model_Translate_Expr
      */
     public function __construct($text = '', $module = '')
     {
-        $this->_text    = $text;
+        $this->_text    = (string) $text;
         $this->_module  = $module;
     }
 
@@ -30,7 +30,7 @@ class Mage_Core_Model_Translate_Expr
      */
     public function setText($text)
     {
-        $this->_text = $text;
+        $this->_text = (string) $text;
         return $this;
     }
 

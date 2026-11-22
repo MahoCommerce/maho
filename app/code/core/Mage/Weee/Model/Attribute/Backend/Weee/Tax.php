@@ -154,11 +154,8 @@ class Mage_Weee_Model_Attribute_Backend_Weee_Tax extends Mage_Catalog_Model_Prod
         return $this;
     }
 
-    /**
-     * @return string
-     */
     #[\Override]
-    public function getTable()
+    public function getTable(): string
     {
         return $this->_getResource()->getTable('weee/tax');
     }

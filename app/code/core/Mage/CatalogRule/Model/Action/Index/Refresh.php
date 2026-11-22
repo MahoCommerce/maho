@@ -558,7 +558,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     /**
      * Return data for affected product
      */
-    protected function _getProduct()
+    protected function _getProduct(): int|string|null
     {
         return null;
     }

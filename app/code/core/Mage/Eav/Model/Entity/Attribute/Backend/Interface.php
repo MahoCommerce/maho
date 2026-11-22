@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 interface Mage_Eav_Model_Entity_Attribute_Backend_Interface
 {
-    public function getTable();
+    public function getTable(): ?string;
     public function isStatic(): bool;
     public function getType(): ?string;
     public function getEntityIdField(): ?string;
@@ -29,7 +29,7 @@ interface Mage_Eav_Model_Entity_Attribute_Backend_Interface
      */
     public function setValueId($valueId);
 
-    public function getValueId();
+    public function getValueId(): int|string|null;
 
     /**
      * @param object $object
@@ -66,7 +66,7 @@ interface Mage_Eav_Model_Entity_Attribute_Backend_Interface
      *
      * @param \Maho\DataObject $entity
      */
-    public function getEntityValueId($entity);
+    public function getEntityValueId($entity): int|string|null;
 
     /**
      * Set entity value id
@@ -74,5 +74,5 @@ interface Mage_Eav_Model_Entity_Attribute_Backend_Interface
      * @param \Maho\DataObject $entity
      * @param int $valueId
      */
-    public function setEntityValueId($entity, $valueId);
+    public function setEntityValueId($entity, $valueId): static;
 }

@@ -38,7 +38,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     public const XML_PATH_SENDING_SET_RETURN_PATH      = 'system/smtp/set_return_path';
     public const XML_PATH_SENDING_RETURN_PATH_EMAIL    = 'system/smtp/return_path_email';
 
-    protected $_templateFilter;
+    protected ?Mage_Core_Model_Email_Template_Filter $_templateFilter = null;
     protected bool $_preprocessFlag = false;
     protected array $_bccEmails = [];
     protected ?string $_replyToEmail = null;
@@ -60,7 +60,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      *
      * @return  $this
      */
-    public function setTemplateFilter(\Maho\Filter\Template $filter)
+    public function setTemplateFilter(Mage_Core_Model_Email_Template_Filter $filter)
     {
         $this->_templateFilter = $filter;
         return $this;

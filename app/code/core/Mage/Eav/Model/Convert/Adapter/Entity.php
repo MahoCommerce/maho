@@ -19,9 +19,9 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
 
     protected array $_filter = [];
     protected array $_joinFilter = [];
-    protected $_joinAttr = [];
+    protected array $_joinAttr = [];
     protected ?array $_attrToDb = null;
-    protected $_joinField = [];
+    protected array $_joinField = [];
 
     /**
      * Retrieve store Id
@@ -251,17 +251,15 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
         try {
             $collection = $this->_getCollectionForLoad($entityType);
 
-            if (isset($this->_joinAttr) && is_array($this->_joinAttr)) {
-                foreach ($this->_joinAttr as $val) {
-                    $collection->joinAttribute(
-                        $val['alias'],
-                        $val['attribute'],
-                        $val['bind'],
-                        null,
-                        strtolower($val['joinType']),
-                        $val['storeId'],
-                    );
-                }
+            foreach ($this->_joinAttr as $val) {
+                $collection->joinAttribute(
+                    $val['alias'],
+                    $val['attribute'],
+                    $val['bind'],
+                    null,
+                    strtolower($val['joinType']),
+                    $val['storeId'],
+                );
             }
 
             $filterQuery = $this->getFilter();
@@ -271,18 +269,15 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
                 }
             }
 
-            $joinFields = $this->_joinField;
-            if (isset($joinFields) && is_array($joinFields)) {
-                foreach ($joinFields as $field) {
-                    $collection->joinField(
-                        $field['alias'],
-                        $field['attribute'],
-                        $field['field'],
-                        $field['bind'],
-                        $field['cond'],
-                        $field['joinType'],
-                    );
-                }
+            foreach ($this->_joinField as $field) {
+                $collection->joinField(
+                    $field['alias'],
+                    $field['attribute'],
+                    $field['field'],
+                    $field['bind'],
+                    $field['cond'],
+                    $field['joinType'],
+                );
             }
 
             /**

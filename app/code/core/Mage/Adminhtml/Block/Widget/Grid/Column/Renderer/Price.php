@@ -19,11 +19,9 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Price extends Mage_Adminh
 
     /**
      * Renders grid column
-     *
-     * @return  string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): mixed
     {
         if ($data = $row->getData($this->getColumn()->getIndex())) {
             $currencyCode = $this->_getCurrencyCode($row);

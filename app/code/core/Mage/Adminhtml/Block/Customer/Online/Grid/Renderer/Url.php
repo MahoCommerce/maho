@@ -12,11 +12,9 @@ class Mage_Adminhtml_Block_Customer_Online_Grid_Renderer_Url extends Mage_Adminh
 {
     /**
      * Renders grid column
-     *
-     * @return  string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         $value = $row->getData($this->getColumn()->getIndex());
         return empty($value) ? '' : htmlspecialchars($value);

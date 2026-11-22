@@ -12,7 +12,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
 {
     public const MULTI_DELIMITER = ' , ';
 
-    protected $_resource;
+    protected ?Mage_Customer_Model_Resource_Customer $_resource = null;
 
     /**
      * Product collections per store
@@ -38,7 +38,8 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
 
     protected array $_attributes = [];
 
-    protected $_fields;
+    /** @var Mage_Core_Model_Config_Element[]|SimpleXMLElement|null */
+    protected ?SimpleXMLElement $_fields = null;
 
     /**
      * Array to contain customer groups

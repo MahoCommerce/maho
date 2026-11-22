@@ -623,7 +623,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      * @param   string $name
      * @param   Mage_Core_Block_Abstract $child
      */
-    protected function _beforeChildToHtml($name, $child) {}
+    protected function _beforeChildToHtml($name, $child): void {}
 
     /**
      * Retrieve block html

@@ -75,7 +75,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh_Row extends Mage_CatalogRule_M
      * @return int
      */
     #[\Override]
-    protected function _getProduct()
+    protected function _getProduct(): int|string|null
     {
         return $this->_productId;
     }
