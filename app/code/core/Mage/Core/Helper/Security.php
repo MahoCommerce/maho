@@ -8,6 +8,8 @@
  * @package Mage_Core
  */
 
+declare(strict_types=1);
+
 class Mage_Core_Helper_Security extends Mage_Core_Helper_Abstract
 {
     /** @var array<int, array{block: class-string<Mage_Core_Block_Abstract>, method: string}> */
