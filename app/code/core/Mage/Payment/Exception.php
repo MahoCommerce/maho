@@ -7,6 +7,8 @@
  * @package Mage_Payment
  */
 
+declare(strict_types=1);
+
 class Mage_Payment_Exception extends Exception
 {
     /**
@@ -14,12 +16,9 @@ class Mage_Payment_Exception extends Exception
      */
     protected ?string $_code = null;
 
-    /**
-     * @param int|string $code Comma-separated names of the fields with an error. Mage::exception() passes 0 when there are none.
-     */
-    public function __construct(?string $message = null, int|string $code = 0)
+    public function __construct(?string $message = null, ?string $fields = null)
     {
-        $this->_code = is_string($code) && $code !== '' ? $code : null;
+        $this->_code = $fields === '' ? null : $fields;
         parent::__construct($message ?? '', 0);
     }
 

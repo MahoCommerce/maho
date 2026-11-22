@@ -141,7 +141,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
     #[\Override]
     public function setValueId($valueId)
     {
-        $this->_valueId = $valueId;
+        $this->_valueId = $valueId === null ? null : (int) $valueId;
         return $this;
     }
 
@@ -158,7 +158,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
             return $this->setValueId($valueId);
         }
 
-        $this->_valueIds[$entity->getId()] = $valueId;
+        $this->_valueIds[$entity->getId()] = $valueId === null ? null : (int) $valueId;
         return $this;
     }
 
@@ -168,7 +168,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @return int
      */
     #[\Override]
-    public function getValueId(): int|string|null
+    public function getValueId(): ?int
     {
         return $this->_valueId;
     }
@@ -180,7 +180,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @return int
      */
     #[\Override]
-    public function getEntityValueId($entity): int|string|null
+    public function getEntityValueId($entity): ?int
     {
         if (!$entity || !$entity->getId() || !array_key_exists((string) $entity->getId(), $this->_valueIds)) {
             return $this->getValueId();

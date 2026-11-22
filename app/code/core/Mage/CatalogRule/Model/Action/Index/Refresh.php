@@ -556,9 +556,9 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     }
 
     /**
-     * Return data for affected product
+     * ID of the one product that the refresh covers, or null when it covers the whole catalog
      */
-    protected function _getProduct(): int|string|null
+    protected function _getProductId(): ?int
     {
         return null;
     }
@@ -576,7 +576,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
         $this->_app->dispatchEvent(
             'catalogrule_after_apply',
             [
-                'product' => $this->_getProduct(),
+                'product' => $this->_getProductId(),
                 'product_condition' => $productCondition,
             ],
         );

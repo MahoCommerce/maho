@@ -12,10 +12,8 @@ class Mage_CatalogRule_Model_Action_Index_Refresh_Row extends Mage_CatalogRule_M
 {
     /**
      * Product Id
-     *
-     * @var int
      */
-    protected $_productId;
+    protected ?int $_productId = null;
 
     /**
      * Constructor with parameters
@@ -29,9 +27,10 @@ class Mage_CatalogRule_Model_Action_Index_Refresh_Row extends Mage_CatalogRule_M
     public function __construct(array $args)
     {
         parent::__construct($args);
-        $this->_productId = $args['value'] instanceof Mage_Catalog_Model_Product
+        $productId = $args['value'] instanceof Mage_Catalog_Model_Product
             ? $args['value']->getId()
             : $args['value'];
+        $this->_productId = $productId === null ? null : (int) $productId;
     }
 
     /**
@@ -69,13 +68,8 @@ class Mage_CatalogRule_Model_Action_Index_Refresh_Row extends Mage_CatalogRule_M
         );
     }
 
-    /**
-     * Return data for affected product
-     *
-     * @return int
-     */
     #[\Override]
-    protected function _getProduct(): int|string|null
+    protected function _getProductId(): ?int
     {
         return $this->_productId;
     }

@@ -162,7 +162,7 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
     /**
      * Retrieve file size in bytes
      */
-    public function getFilesize(): int|string|null
+    public function getFilesize(): ?int
     {
         $this->_prepareResource();
         if ($this->_linkType == self::LINK_TYPE_FILE) {
@@ -170,7 +170,7 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
         }
         if ($this->_linkType == self::LINK_TYPE_URL) {
             if (isset($this->_urlHeaders['content-length'])) {
-                return $this->_urlHeaders['content-length'];
+                return (int) $this->_urlHeaders['content-length'];
             }
         }
         return null;

@@ -438,7 +438,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
         $isFiled = false;
         foreach ($cardsStorage->getCards() as $card) {
             if ($requestedAmount > 0) {
-                $cardAmountForRefund = $this->_formatAmount($card->getCapturedAmount() - $card->getRefundedAmount());
+                $cardAmountForRefund = $this->_formatAmount($card->getCapturedAmount() - $card->getRefundedAmount(), true);
                 if ($cardAmountForRefund <= 0) {
                     continue;
                 }
@@ -924,7 +924,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param \Maho\DataObject $card
      * @return Mage_Sales_Model_Order_Payment_Transaction
      */
-    protected function _refundCardTransaction($payment, float|string $amount, $card)
+    protected function _refundCardTransaction($payment, float $amount, $card)
     {
         /**
          * Card has last transaction with type "refund" when all captured amount is refunded.

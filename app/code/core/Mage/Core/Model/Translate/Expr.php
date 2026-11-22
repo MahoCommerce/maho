@@ -14,63 +14,35 @@ class Mage_Core_Model_Translate_Expr
     protected string $_text;
     protected string $_module;
 
-    /**
-     * @param string $text
-     * @param string $module
-     */
-    public function __construct($text = '', $module = '')
+    public function __construct(string $text = '', string $module = '')
     {
-        $this->_text    = (string) $text;
-        $this->_module  = $module;
+        $this->_text = $text;
+        $this->_module = $module;
     }
 
-    /**
-     * @param string $text
-     * @return $this
-     */
-    public function setText($text)
+    public function setText(string $text): static
     {
-        $this->_text = (string) $text;
+        $this->_text = $text;
         return $this;
     }
 
-    /**
-     * @param string $module
-     * @return $this
-     */
-    public function setModule($module)
+    public function setModule(string $module): static
     {
         $this->_module = $module;
         return $this;
     }
 
-    /**
-     * Retrieve expression text
-     *
-     * @return string
-     */
-    public function getText()
+    public function getText(): string
     {
         return $this->_text;
     }
 
-    /**
-     * Retrieve expression module
-     *
-     * @return string
-     */
-    public function getModule()
+    public function getModule(): string
     {
         return $this->_module;
     }
 
-    /**
-     * Retrieve expression code
-     *
-     * @param   string $separator
-     * @return  string
-     */
-    public function getCode($separator = '::')
+    public function getCode(string $separator = '::'): string
     {
         return $this->getModule() . $separator . $this->getText();
     }

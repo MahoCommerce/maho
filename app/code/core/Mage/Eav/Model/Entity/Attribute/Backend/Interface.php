@@ -29,7 +29,7 @@ interface Mage_Eav_Model_Entity_Attribute_Backend_Interface
      */
     public function setValueId($valueId);
 
-    public function getValueId(): int|string|null;
+    public function getValueId(): ?int;
 
     /**
      * @param object $object
@@ -66,7 +66,7 @@ interface Mage_Eav_Model_Entity_Attribute_Backend_Interface
      *
      * @param \Maho\DataObject $entity
      */
-    public function getEntityValueId($entity): int|string|null;
+    public function getEntityValueId($entity): ?int;
 
     /**
      * Set entity value id

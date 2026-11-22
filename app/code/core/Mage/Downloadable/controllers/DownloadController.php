@@ -59,7 +59,7 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
 
         if ($fileSize = $helper->getFilesize()) {
             $this->getResponse()
-                ->setHeader('Content-Length', $fileSize);
+                ->setHeader('Content-Length', (string) $fileSize);
         }
 
         if ($contentDisposition = $helper->getContentDisposition()) {

@@ -19,7 +19,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
 
     protected array $_filter = [];
     protected array $_joinFilter = [];
-    /** @var list<array{attribute: ?string, alias: ?string, bind: ?string, joinType: ?string, storeId: int|string|null}> */
+    /** @var list<array{attribute: ?string, alias: ?string, bind: ?string, joinType: ?string, storeId: ?int}> */
     protected array $_joinAttr = [];
     protected ?array $_attrToDb = null;
     /** @var list<array{alias: string, attribute: string, field: ?string, bind: string, cond: ?string, joinType: ?string}> */
@@ -207,7 +207,8 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
             $joinArrAttr['alias'] = isset($joinAttr['attribute']) ? str_replace('/', '_', $joinAttr['attribute']) : null;
             $joinArrAttr['bind'] = $joinAttr['bind'] ?? null;
             $joinArrAttr['joinType'] = $joinAttr['joinType'] ?? null;
-            $joinArrAttr['storeId'] = $joinAttr['storeId'] ?? $this->getStoreId();
+            $storeId = $joinAttr['storeId'] ?? $this->getStoreId();
+            $joinArrAttr['storeId'] = $storeId === null ? null : (int) $storeId;
             $this->_joinAttr[] = $joinArrAttr;
         }
     }
