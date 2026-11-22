@@ -557,7 +557,7 @@ class MahoReportExplorer {
             if (!dimension) {
                 return;
             }
-            const chip = this.element('span', 'd-badge d-badge-lg h-auto gap-1 whitespace-nowrap');
+            const chip = this.element('span', 'd-badge d-badge-lg h-auto gap-1 whitespace-nowrap text-xs');
             chip.append(this.element('span', '', dimension.label));
             if (dimension.granularities) {
                 const select = this.element('select', 'd-select d-select-xs');
@@ -611,7 +611,7 @@ class MahoReportExplorer {
         const filters = this.state.filters ?? [];
         filters.forEach((filter, index) => {
             const field = dataset.fields.find((f) => f.code === filter.field);
-            const chip = this.element('span', 'd-badge d-badge-lg h-auto gap-1 whitespace-nowrap');
+            const chip = this.element('span', 'd-badge d-badge-lg h-auto gap-1 whitespace-nowrap text-xs');
             chip.append(this.element('span', '', `${field?.label ?? filter.field} ${this.t(filter.operator)} ${this.filterValueLabel(field, filter.value)}`));
             chip.append(this.removeButton(field?.label ?? filter.field, () => this.setState({ filters: filters.filter((_, i) => i !== index) }, { keepDrill: true })));
             row.append(chip);
