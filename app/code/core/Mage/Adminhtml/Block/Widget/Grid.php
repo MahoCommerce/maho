@@ -1260,6 +1260,18 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     }
 
     /**
+     * Load every row for an export. A collection method can put a LIMIT on the select, which a page size of 0 does not remove.
+     */
+    private function removeExportLimit(): void
+    {
+        $collection = $this->getCollection();
+        if ($collection instanceof \Maho\Data\Collection\Db) {
+            $collection->getSelect()->limit();
+        }
+        $collection?->setPageSize(0);
+    }
+
+    /**
      * Retrieve Grid data as CSV
      *
      * @throws Exception
@@ -1269,7 +1281,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
         $csv = '';
         $this->_isExport = true;
         $this->_prepareGrid();
-        $this->getCollection()->setPageSize(0);
+        $this->removeExportLimit();
         $this->_beforeLoadCollection();
         $this->getCollection()->load();
         $this->_afterLoadCollection();
@@ -1327,7 +1339,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     {
         $this->_isExport = true;
         $this->_prepareGrid();
-        $this->getCollection()->setPageSize(0);
+        $this->removeExportLimit();
         $this->_beforeLoadCollection();
         $this->getCollection()->load();
         $this->_afterLoadCollection();
@@ -1434,7 +1446,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     {
         $this->_isExport = true;
         $this->_prepareGrid();
-        $this->getCollection()->setPageSize(0);
+        $this->removeExportLimit();
         $this->_beforeLoadCollection();
         $this->getCollection()->load();
         $this->_afterLoadCollection();
