@@ -43,7 +43,6 @@ return function (SchemaEditor $schema): void {
         'sales_flat_quote',
         'sales_flat_quote_address',
         'sales_flat_quote_item',
-        'sales_flat_quote_address_item',
         'sales_flat_order',
         'sales_flat_order_item',
     ] as $tableName) {

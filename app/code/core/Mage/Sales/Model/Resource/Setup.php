@@ -19,7 +19,6 @@ class Mage_Sales_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
         'quote'             => 'sales/quote',
         'quote_item'        => 'sales/quote_item',
         'quote_address'     => 'sales/quote_address',
-        'quote_address_item' => 'sales/quote_address_item',
         'quote_address_rate' => 'sales/quote_shipping_rate',
         'quote_payment'     => 'sales/quote_payment',
         'order'             => 'sales/order',
@@ -73,6 +72,10 @@ class Mage_Sales_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
     #[\Override]
     public function addAttribute($entityTypeId, $code, array $attr)
     {
+        // The table of this entity is gone, but the install script of Mage_GiftMessage still adds a column to it
+        if ($entityTypeId === 'quote_address_item') {
+            return $this;
+        }
         if (isset($this->_flatEntityTables[$entityTypeId])
             && $this->_flatTableExist($this->_flatEntityTables[$entityTypeId])
         ) {
@@ -312,43 +315,6 @@ class Mage_Sales_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
 
                     'customer_notes'            => ['type' => 'static'],
                     'applied_taxes'             => ['type' => 'text'],
-                ],
-            ],
-            'quote_address_item' => [
-                'entity_model'  => 'sales/quote_address_item',
-                'table'         => 'sales/quote_entity',
-                'attributes'            => [
-                    'quote_item_id'             => ['type' => 'int'],
-                    'product_id'                => ['type' => 'int'],
-                    'super_product_id'          => ['type' => 'int'],
-                    'parent_product_id'         => ['type' => 'int'],
-                    'sku'                       => [],
-                    'image'                     => [],
-                    'name'                      => [],
-                    'description'               => ['type' => 'text'],
-
-                    'weight'                    => ['type' => 'decimal'],
-                    'free_shipping'             => ['type' => 'int'],
-                    'qty'                       => ['type' => 'decimal'],
-                    'is_qty_decimal'            => ['type' => 'int'],
-
-                    'price'                     => ['type' => 'decimal'],
-                    'discount_percent'          => ['type' => 'decimal'],
-                    'discount_amount'           => ['type' => 'decimal'],
-                    'no_discount'               => ['type' => 'int'],
-                    'tax_percent'               => ['type' => 'decimal'],
-                    'tax_amount'                => ['type' => 'decimal'],
-                    'row_total'                 => ['type' => 'decimal'],
-                    'row_total_with_discount'   => ['type' => 'decimal'],
-
-                    'base_price'                => ['type' => 'decimal'],
-                    'base_discount_amount'      => ['type' => 'decimal'],
-                    'base_tax_amount'           => ['type' => 'decimal'],
-                    'base_row_total'            => ['type' => 'decimal'],
-
-                    'row_weight'                => ['type' => 'decimal'],
-                    'applied_rule_ids'          => [],
-                    'additional_data'           => ['type' => 'text'],
                 ],
             ],
             'quote_address_rate' => [
