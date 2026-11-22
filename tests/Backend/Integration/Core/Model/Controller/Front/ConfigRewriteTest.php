@@ -121,7 +121,7 @@ describe('Mage_Core_Model_Controller_Front_Observer::rewriteConfig guards', func
         expect($request->getPathInfo())->toBe('/rewritten-target');
     });
 
-    // TODO: cover the !Mage::isInstalled() branch. Toggling install state at
+    // No test covers the !Mage::isInstalled() branch. Toggling install state at
     // runtime requires tearing down local.xml or stubbing Mage::isInstalled(),
     // which isn't cleanly expressible in an integration test against the
     // already-installed fixture DB. The guard's boolean shape is symmetric

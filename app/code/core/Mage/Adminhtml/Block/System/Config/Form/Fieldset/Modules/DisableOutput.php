@@ -71,7 +71,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput ext
     protected function _getFieldHtml(\Maho\Data\Form\Element\AbstractElement $fieldset, string $moduleName): string
     {
         $configData = $this->getConfigData();
-        $path = 'advanced/modules_disable_output/' . $moduleName; //TODO: move as property of form
+        $path = 'advanced/modules_disable_output/' . $moduleName;
         if (isset($configData[$path])) {
             $data = $configData[$path];
             $inherit = false;

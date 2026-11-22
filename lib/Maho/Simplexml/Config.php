@@ -393,7 +393,6 @@ class Config
     }
 
     /**
-     * @todo check this, as there are no caches that implement remove() method
      * @param string $id
      * @return mixed
      */
