@@ -34,5 +34,5 @@ it('gives the report collection with its date range and no page size', function 
 
 it('refuses a report collection that has no date range filter', function () {
     expect(fn() => Mage::getModel('reports/report')->initCollection('reports/event_collection'))
-        ->toThrow(UnexpectedValueException::class, 'Invalid report collection: reports/event_collection');
+        ->toThrow(RuntimeException::class, 'Collection reports/event_collection is not a report collection with a date range.');
 });

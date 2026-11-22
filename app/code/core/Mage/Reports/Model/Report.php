@@ -29,7 +29,7 @@ class Mage_Reports_Model_Report extends Mage_Core_Model_Abstract
         if (!$collection instanceof \Maho\Data\Collection\Db
             || !$collection instanceof Mage_Reports_Model_Resource_DateRangeInterface
         ) {
-            throw new \UnexpectedValueException("Invalid report collection: {$modelClass}");
+            throw new \RuntimeException("Collection {$modelClass} is not a report collection with a date range.");
         }
         $this->_reportModel = $collection;
 

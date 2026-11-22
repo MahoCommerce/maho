@@ -412,7 +412,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
             }
             $frontend = Mage::getModel($this->getFrontendModel());
             if (!$frontend instanceof Mage_Eav_Model_Entity_Attribute_Frontend_Abstract) {
-                throw Mage::exception('Mage_Eav', 'Invalid frontend model specified: ' . $this->getFrontendModel());
+                throw new \RuntimeException("Model {$this->getFrontendModel()} is not an attribute frontend model.");
             }
             $this->_frontend = $frontend->setAttribute($this);
         }

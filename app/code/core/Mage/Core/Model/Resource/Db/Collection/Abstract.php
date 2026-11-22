@@ -445,7 +445,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
         if (empty($this->_resource)) {
             $resource = Mage::getResourceModel($this->getResourceModelName());
             if (!$resource instanceof Mage_Core_Model_Resource_Db_Abstract) {
-                throw new \UnexpectedValueException("Invalid resource model: {$this->getResourceModelName()}");
+                throw new \RuntimeException("Resource model {$this->getResourceModelName()} is not a database resource model.");
             }
             $this->_resource = $resource;
         }

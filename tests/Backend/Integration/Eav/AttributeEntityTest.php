@@ -28,7 +28,7 @@ it('refuses a frontend model that is not an attribute frontend', function () {
     $attribute = newCustomerAttribute()->setFrontendModel('core/store');
 
     expect(fn() => $attribute->getFrontend())
-        ->toThrow(Mage_Eav_Exception::class, 'Invalid frontend model specified: core/store');
+        ->toThrow(RuntimeException::class, 'Model core/store is not an attribute frontend model.');
 });
 
 it('refuses a backend model that is not an attribute backend', function () {
