@@ -1460,7 +1460,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
         $transactionType,
         array $transactionDetails = [],
         array $transactionAdditionalInfo = [],
-        string|false $message = false,
+        ?string $message = null,
     ) {
         $payment->setTransactionId($transactionId);
         $payment->resetTransactionAdditionalInfo();

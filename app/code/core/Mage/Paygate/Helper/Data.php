@@ -53,7 +53,6 @@ class Mage_Paygate_Helper_Data extends Mage_Core_Helper_Abstract
      * @param \Maho\DataObject $card
      * @param float|false $amount
      * @param string|false $exception
-     * @return bool|string
      */
     public function getTransactionMessage(
         $payment,
@@ -62,7 +61,7 @@ class Mage_Paygate_Helper_Data extends Mage_Core_Helper_Abstract
         $card,
         $amount = false,
         $exception = false,
-    ) {
+    ): ?string {
         return $this->getExtendedTransactionMessage(
             $payment,
             $requestType,
@@ -83,7 +82,6 @@ class Mage_Paygate_Helper_Data extends Mage_Core_Helper_Abstract
      * @param float|false $amount
      * @param string|false $exception
      * @param string|false $additionalMessage Custom message, which will be added to the end of generated message
-     * @return bool|string
      */
     public function getExtendedTransactionMessage(
         $payment,
@@ -93,11 +91,11 @@ class Mage_Paygate_Helper_Data extends Mage_Core_Helper_Abstract
         $amount = false,
         $exception = false,
         $additionalMessage = false,
-    ) {
+    ): ?string {
         $operation = $this->_getOperation($requestType);
 
         if (!$operation) {
-            return false;
+            return null;
         }
 
         if ($amount) {

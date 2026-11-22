@@ -9,23 +9,21 @@
 
 class Mage_Payment_Exception extends Exception
 {
-    protected int|string|null $_code = null;
+    /**
+     * Comma-separated names of the fields with an error
+     */
+    protected ?string $_code = null;
 
     /**
-     * Mage_Payment_Exception constructor.
-     * @param string|null $message
-     * @param int|string $code
+     * @param int|string $code Comma-separated names of the fields with an error. Mage::exception() passes 0 when there are none.
      */
-    public function __construct($message = null, $code = 0)
+    public function __construct(?string $message = null, int|string $code = 0)
     {
-        $this->_code = $code;
-        parent::__construct($message, 0);
+        $this->_code = is_string($code) && $code !== '' ? $code : null;
+        parent::__construct($message ?? '', 0);
     }
 
-    /**
-     * @return int|string|null
-     */
-    public function getFields()
+    public function getFields(): ?string
     {
         return $this->_code;
     }
