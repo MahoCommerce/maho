@@ -24,7 +24,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  */
 final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
 {
-    private const MAX_OPTIONS = 50;
+    private const int MAX_OPTIONS = 50;
 
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object

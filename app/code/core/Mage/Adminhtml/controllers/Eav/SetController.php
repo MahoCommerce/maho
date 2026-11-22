@@ -18,7 +18,7 @@ class Mage_Adminhtml_Eav_SetController extends Mage_Adminhtml_Controller_Eav_Set
      * The parent of the ACL resource of each entity type
      * @see Mage_Adminhtml_Controller_Eav_EntityTypeTrait::_isAllowed()
      */
-    public const ADMIN_RESOURCE = 'system/attributes';
+    public const string ADMIN_RESOURCE = 'system/attributes';
 
     #[\Override]
     protected function _isAllowed()

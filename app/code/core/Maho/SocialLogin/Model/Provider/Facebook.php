@@ -13,7 +13,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class Maho_SocialLogin_Model_Provider_Facebook implements Maho_SocialLogin_Model_Provider_ProviderInterface
 {
-    private const GRAPH_API_URL = 'https://graph.facebook.com/v23.0';
+    private const string GRAPH_API_URL = 'https://graph.facebook.com/v23.0';
 
     private ?HttpClientInterface $httpClient = null;
 

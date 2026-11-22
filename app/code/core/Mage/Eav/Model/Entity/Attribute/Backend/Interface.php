@@ -18,18 +18,14 @@ declare(strict_types=1);
 
 interface Mage_Eav_Model_Entity_Attribute_Backend_Interface
 {
-    public function getTable();
+    public function getTable(): ?string;
     public function isStatic(): bool;
     public function getType(): ?string;
     public function getEntityIdField(): ?string;
 
-    /**
-     * @param int $valueId
-     * @return $this
-     */
-    public function setValueId($valueId);
+    public function setValueId(?int $valueId): static;
 
-    public function getValueId();
+    public function getValueId(): ?int;
 
     /**
      * @param object $object
@@ -61,18 +57,7 @@ interface Mage_Eav_Model_Entity_Attribute_Backend_Interface
      */
     public function afterDelete($object);
 
-    /**
-     * Get entity value id
-     *
-     * @param \Maho\DataObject $entity
-     */
-    public function getEntityValueId($entity);
+    public function getEntityValueId(?\Maho\DataObject $entity): ?int;
 
-    /**
-     * Set entity value id
-     *
-     * @param \Maho\DataObject $entity
-     * @param int $valueId
-     */
-    public function setEntityValueId($entity, $valueId);
+    public function setEntityValueId(?\Maho\DataObject $entity, ?int $valueId): static;
 }

@@ -17,27 +17,27 @@ declare(strict_types=1);
  */
 class Mage_Catalog_Block_Product_View_Media extends Mage_Catalog_Block_Product_View_Abstract
 {
-    public const XML_PATH_GALLERY_LAYOUT = 'design/product_gallery/layout';
-    public const XML_PATH_GALLERY_GRID_COLUMNS = 'design/product_gallery/grid_columns';
-    public const XML_PATH_GALLERY_PHONE_LAYOUT = 'design/product_gallery/phone_layout';
+    public const string XML_PATH_GALLERY_LAYOUT = 'design/product_gallery/layout';
+    public const string XML_PATH_GALLERY_GRID_COLUMNS = 'design/product_gallery/grid_columns';
+    public const string XML_PATH_GALLERY_PHONE_LAYOUT = 'design/product_gallery/phone_layout';
 
-    public const GALLERY_LAYOUT_BELOW = 'below';
-    public const GALLERY_LAYOUT_LEFT = 'left';
-    public const GALLERY_LAYOUT_RIGHT = 'right';
-    public const GALLERY_LAYOUT_GRID = 'grid';
+    public const string GALLERY_LAYOUT_BELOW = 'below';
+    public const string GALLERY_LAYOUT_LEFT = 'left';
+    public const string GALLERY_LAYOUT_RIGHT = 'right';
+    public const string GALLERY_LAYOUT_GRID = 'grid';
 
-    public const GALLERY_LAYOUTS = [
+    public const array GALLERY_LAYOUTS = [
         self::GALLERY_LAYOUT_BELOW,
         self::GALLERY_LAYOUT_LEFT,
         self::GALLERY_LAYOUT_RIGHT,
         self::GALLERY_LAYOUT_GRID,
     ];
 
-    public const GALLERY_PHONE_LAYOUT_BELOW = 'below';
-    public const GALLERY_PHONE_LAYOUT_CAROUSEL = 'carousel';
+    public const string GALLERY_PHONE_LAYOUT_BELOW = 'below';
+    public const string GALLERY_PHONE_LAYOUT_CAROUSEL = 'carousel';
 
-    public const GALLERY_GRID_COLUMNS_DEFAULT = 2;
-    public const GALLERY_GRID_COLUMNS_MAX = 3;
+    public const int GALLERY_GRID_COLUMNS_DEFAULT = 2;
+    public const int GALLERY_GRID_COLUMNS_MAX = 3;
 
     /**
      * Flag, that defines whether gallery is disabled

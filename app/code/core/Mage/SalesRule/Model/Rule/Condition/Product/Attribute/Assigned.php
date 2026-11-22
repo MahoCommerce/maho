@@ -13,17 +13,14 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Attribute_Assigned extends Mag
     /**
      * The operator type which indicates whether the attribute was assigned
      */
-    public const OPERATOR_ATTRIBUTE_IS_ASSIGNED = 'is_assigned';
+    public const string OPERATOR_ATTRIBUTE_IS_ASSIGNED = 'is_assigned';
 
     /**
      * The operator type which indicates whether the attribute was not assigned
      */
-    public const OPERATOR_ATTRIBUTE_IS_NOT_ASSIGNED = 'is_not_assigned';
+    public const string OPERATOR_ATTRIBUTE_IS_NOT_ASSIGNED = 'is_not_assigned';
 
-    /**
-     * A default operator code
-     */
-    public const DEFAULT_OPERATOR = self::OPERATOR_ATTRIBUTE_IS_ASSIGNED;
+    public const string DEFAULT_OPERATOR = self::OPERATOR_ATTRIBUTE_IS_ASSIGNED;
 
     /**
      * Operator select options hash

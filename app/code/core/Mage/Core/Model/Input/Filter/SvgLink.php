@@ -21,18 +21,18 @@ use Uri\WhatWg\Url;
 class Mage_Core_Model_Input_Filter_SvgLink implements AttributeSanitizerInterface
 {
     /** Mage_Core_Helper_Purifier passes this list to allowLinkSchemes(), so both paths read one list. */
-    public const SCHEMES = ['http', 'https', 'mailto', 'tel'];
+    public const array SCHEMES = ['http', 'https', 'mailto', 'tel'];
 
-    public const ELEMENTS = ['a'];
+    public const array ELEMENTS = ['a'];
 
-    public const ATTRIBUTES = ['href'];
+    public const array ATTRIBUTES = ['href'];
 
     /**
      * A value with no scheme is relative, and the store resolves it against itself. The store
      * answers over http or https, and this list allows both, so a base on either one gives the
      * same verdict.
      */
-    private const BASE = 'https://store.invalid/';
+    private const string BASE = 'https://store.invalid/';
 
     private static ?Url $base = null;
 

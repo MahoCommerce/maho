@@ -21,9 +21,9 @@ declare(strict_types=1);
 
 class Mage_Core_Model_Image_Config
 {
-    public const XML_PATH_ENTITIES = 'global/images/entities';
+    public const string XML_PATH_ENTITIES = 'global/images/entities';
 
-    public const CACHE_TAG = 'image_settings';
+    public const string CACHE_TAG = 'image_settings';
 
     /** @var array<string, Mage_Core_Model_Image_Settings> */
     protected array $settings = [];

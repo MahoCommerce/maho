@@ -12,18 +12,18 @@ declare(strict_types=1);
 
 class Maho_ApiPlatform_Model_Oauth_Exception extends Mage_Core_Exception
 {
-    public const ERROR_INVALID_REQUEST = 'invalid_request';
-    public const ERROR_INVALID_CLIENT = 'invalid_client';
-    public const ERROR_INVALID_GRANT = 'invalid_grant';
-    public const ERROR_UNAUTHORIZED_CLIENT = 'unauthorized_client';
-    public const ERROR_UNSUPPORTED_GRANT_TYPE = 'unsupported_grant_type';
-    public const ERROR_UNSUPPORTED_RESPONSE_TYPE = 'unsupported_response_type';
-    public const ERROR_INVALID_SCOPE = 'invalid_scope';
-    public const ERROR_INVALID_TARGET = 'invalid_target';
-    public const ERROR_ACCESS_DENIED = 'access_denied';
-    public const ERROR_INVALID_REDIRECT_URI = 'invalid_redirect_uri';
-    public const ERROR_INVALID_CLIENT_METADATA = 'invalid_client_metadata';
-    public const ERROR_SERVER_ERROR = 'server_error';
+    public const string ERROR_INVALID_REQUEST = 'invalid_request';
+    public const string ERROR_INVALID_CLIENT = 'invalid_client';
+    public const string ERROR_INVALID_GRANT = 'invalid_grant';
+    public const string ERROR_UNAUTHORIZED_CLIENT = 'unauthorized_client';
+    public const string ERROR_UNSUPPORTED_GRANT_TYPE = 'unsupported_grant_type';
+    public const string ERROR_UNSUPPORTED_RESPONSE_TYPE = 'unsupported_response_type';
+    public const string ERROR_INVALID_SCOPE = 'invalid_scope';
+    public const string ERROR_INVALID_TARGET = 'invalid_target';
+    public const string ERROR_ACCESS_DENIED = 'access_denied';
+    public const string ERROR_INVALID_REDIRECT_URI = 'invalid_redirect_uri';
+    public const string ERROR_INVALID_CLIENT_METADATA = 'invalid_client_metadata';
+    public const string ERROR_SERVER_ERROR = 'server_error';
 
     /**
      * @param bool $redirectable Whether the error may be reported to the client's

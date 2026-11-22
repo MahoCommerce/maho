@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -11,66 +12,38 @@ declare(strict_types=1);
 
 class Mage_Core_Model_Translate_Expr
 {
-    protected $_text;
-    protected $_module;
+    protected string $_text;
+    protected string $_module;
 
-    /**
-     * @param string $text
-     * @param string $module
-     */
-    public function __construct($text = '', $module = '')
+    public function __construct(string $text = '', string $module = '')
     {
-        $this->_text    = $text;
-        $this->_module  = $module;
+        $this->_text = $text;
+        $this->_module = $module;
     }
 
-    /**
-     * @param string $text
-     * @return $this
-     */
-    public function setText($text)
+    public function setText(string $text): static
     {
         $this->_text = $text;
         return $this;
     }
 
-    /**
-     * @param string $module
-     * @return $this
-     */
-    public function setModule($module)
+    public function setModule(string $module): static
     {
         $this->_module = $module;
         return $this;
     }
 
-    /**
-     * Retrieve expression text
-     *
-     * @return string
-     */
-    public function getText()
+    public function getText(): string
     {
         return $this->_text;
     }
 
-    /**
-     * Retrieve expression module
-     *
-     * @return string
-     */
-    public function getModule()
+    public function getModule(): string
     {
         return $this->_module;
     }
 
-    /**
-     * Retrieve expression code
-     *
-     * @param   string $separator
-     * @return  string
-     */
-    public function getCode($separator = '::')
+    public function getCode(string $separator = '::'): string
     {
         return $this->getModule() . $separator . $this->getText();
     }

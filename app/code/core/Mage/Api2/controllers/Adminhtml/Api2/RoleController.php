@@ -13,7 +13,7 @@
  */
 class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'system/api/rest_roles';
+    public const string ADMIN_RESOURCE = 'system/api/rest_roles';
 
     #[\Override]
     protected function _isAllowed(): bool

@@ -18,20 +18,20 @@ class Table
     /**
      * Types of columns
      */
-    public const TYPE_BOOLEAN          = 'boolean';
+    public const string TYPE_BOOLEAN          = 'boolean';
     /**
      * 1-byte signed integer (-128/127) on MySQL. PgSQL has no native equivalent —
      * downgrades to `smallint` (2 bytes); SQLite uses INTEGER affinity. The 1-byte
      * width is a MySQL-specific storage win for status enums and small flags;
      * cross-engine code that doesn't care about the byte should use TYPE_SMALLINT.
      */
-    public const TYPE_TINYINT          = 'tinyint';
-    public const TYPE_SMALLINT         = 'smallint';
-    public const TYPE_INTEGER          = 'integer';
-    public const TYPE_BIGINT           = 'bigint';
-    public const TYPE_FLOAT            = 'float';
-    public const TYPE_DECIMAL          = 'decimal';
-    public const TYPE_DATE             = 'date';
+    public const string TYPE_TINYINT          = 'tinyint';
+    public const string TYPE_SMALLINT         = 'smallint';
+    public const string TYPE_INTEGER          = 'integer';
+    public const string TYPE_BIGINT           = 'bigint';
+    public const string TYPE_FLOAT            = 'float';
+    public const string TYPE_DECIMAL          = 'decimal';
+    public const string TYPE_DATE             = 'date';
     /**
      * Time-of-day, no date, no timezone. Stored as `HH:MM:SS` on MySQL and
      * `TIME WITHOUT TIME ZONE` on PgSQL; SQLite has no native type and stores as TEXT.
@@ -40,8 +40,8 @@ class Table
      * clock); there is no UTC convention because a time without a date can't be
      * unambiguously converted across timezones (DST boundaries shift).
      */
-    public const TYPE_TIME             = 'time';
-    public const TYPE_DATETIME         = 'datetime';
+    public const string TYPE_TIME             = 'time';
+    public const string TYPE_DATETIME         = 'datetime';
     /**
      * Value-equal alias for TYPE_DATETIME — both physically create a MySQL `datetime`
      * column. Doctrine DBAL's column model conflates TIMESTAMP and DATETIME and
@@ -54,19 +54,19 @@ class Table
      * Varien_Db_* class aliases.
      */
     #[\Deprecated(message: 'since 26.9 Use TYPE_DATETIME instead.')]
-    public const TYPE_TIMESTAMP        = self::TYPE_DATETIME;
-    public const TYPE_TEXT             = 'text';
-    public const TYPE_BLOB             = 'blob'; // Used for back compatibility, when query param can't use statement options
-    public const TYPE_VARBINARY        = 'varbinary'; // A real blob, stored as binary inside DB
+    public const string TYPE_TIMESTAMP        = self::TYPE_DATETIME;
+    public const string TYPE_TEXT             = 'text';
+    public const string TYPE_BLOB             = 'blob'; // Used for back compatibility, when query param can't use statement options
+    public const string TYPE_VARBINARY        = 'varbinary'; // A real blob, stored as binary inside DB
 
-    public const TYPE_VARCHAR          = 'varchar';
+    public const string TYPE_VARCHAR          = 'varchar';
 
     /**
      * Default and maximal TEXT and BLOB columns sizes we can support for different DB systems.
      */
-    public const DEFAULT_TEXT_SIZE     = 1024;
-    public const MAX_TEXT_SIZE         = 2147483648;
-    public const MAX_VARBINARY_SIZE    = 2147483648;
+    public const int DEFAULT_TEXT_SIZE     = 1024;
+    public const int MAX_TEXT_SIZE         = 2147483648;
+    public const int MAX_VARBINARY_SIZE    = 2147483648;
 
     /**
      * Default values for timestamp columns: fill with current timestamp on insert, on update, or both.
@@ -79,23 +79,23 @@ class Table
      explicit _beforeSave() that calls setUpdatedAt(Mage::app()->getLocale()->formatDateForDb('now'))
      for cross-engine parity.
     TXT)]
-    public const TIMESTAMP_INIT_UPDATE = 'TIMESTAMP_INIT_UPDATE';
-    public const TIMESTAMP_INIT        = 'TIMESTAMP_INIT';
+    public const string TIMESTAMP_INIT_UPDATE = 'TIMESTAMP_INIT_UPDATE';
+    public const string TIMESTAMP_INIT        = 'TIMESTAMP_INIT';
     /**
      * MySQL emits `0 ON UPDATE CURRENT_TIMESTAMP`. PgSQL and SQLite have no equivalent
      * on-update syntax — both fall back to a literal `0` default with no auto-bump.
      * For cross-engine parity, application code must update the column via _beforeSave().
      */
-    public const TIMESTAMP_UPDATE      = 'TIMESTAMP_UPDATE';
+    public const string TIMESTAMP_UPDATE      = 'TIMESTAMP_UPDATE';
 
     /**
      * Actions used for foreign keys
      */
-    public const ACTION_CASCADE        = 'CASCADE';
-    public const ACTION_SET_NULL       = 'SET NULL';
-    public const ACTION_NO_ACTION      = 'NO ACTION';
-    public const ACTION_RESTRICT       = 'RESTRICT';
-    public const ACTION_SET_DEFAULT    = 'SET DEFAULT';
+    public const string ACTION_CASCADE        = 'CASCADE';
+    public const string ACTION_SET_NULL       = 'SET NULL';
+    public const string ACTION_NO_ACTION      = 'NO ACTION';
+    public const string ACTION_RESTRICT       = 'RESTRICT';
+    public const string ACTION_SET_DEFAULT    = 'SET DEFAULT';
 
     /**
      * Name of table

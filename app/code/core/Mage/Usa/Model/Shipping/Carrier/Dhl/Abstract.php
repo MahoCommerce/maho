@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -12,17 +13,14 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Dhl_Abstract extends Mage_Usa_Mod
     /**
      * Response condition code for service is unavailable at the requested date
      */
-    public const CONDITION_CODE_SERVICE_DATE_UNAVAILABLE = 1003;
+    public const int CONDITION_CODE_SERVICE_DATE_UNAVAILABLE = 1003;
 
     /**
      * Count of days to look forward if day is not unavailable
      */
-    public const UNAVAILABLE_DATE_LOOK_FORWARD = 5;
+    public const int UNAVAILABLE_DATE_LOOK_FORWARD = 5;
 
-    /**
-     * Date format for request
-     */
-    public const REQUEST_DATE_FORMAT = 'Y-m-d';
+    public const string REQUEST_DATE_FORMAT = 'Y-m-d';
 
     /**
      * Get shipping date

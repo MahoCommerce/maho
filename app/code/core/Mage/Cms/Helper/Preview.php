@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_Cms_Helper_Preview extends Mage_Core_Helper_Abstract
 {
     /** The pages that "Show on" lists for a block. */
-    public const USAGE_LIMIT = 20;
+    public const int USAGE_LIMIT = 20;
 
     #[\Override]
     protected $_moduleName = 'Mage_Cms';

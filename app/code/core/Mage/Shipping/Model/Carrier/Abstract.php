@@ -61,15 +61,15 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
      */
     protected $_customizableContainerTypes = [];
 
-    public const USA_COUNTRY_ID = 'US';
-    public const CANADA_COUNTRY_ID = 'CA';
-    public const MEXICO_COUNTRY_ID = 'MX';
+    public const string USA_COUNTRY_ID = 'US';
+    public const string CANADA_COUNTRY_ID = 'CA';
+    public const string MEXICO_COUNTRY_ID = 'MX';
 
-    public const HANDLING_TYPE_PERCENT = 'P';
-    public const HANDLING_TYPE_FIXED = 'F';
+    public const string HANDLING_TYPE_PERCENT = 'P';
+    public const string HANDLING_TYPE_FIXED = 'F';
 
-    public const HANDLING_ACTION_PERPACKAGE = 'P';
-    public const HANDLING_ACTION_PERORDER = 'O';
+    public const string HANDLING_ACTION_PERPACKAGE = 'P';
+    public const string HANDLING_ACTION_PERORDER = 'O';
 
     /**
      * Fields that should be replaced in debug with '***'

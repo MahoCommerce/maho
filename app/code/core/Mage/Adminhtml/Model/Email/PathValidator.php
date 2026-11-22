@@ -16,7 +16,7 @@ class Mage_Adminhtml_Model_Email_PathValidator
      * A plain config path: segments of letters, digits, underscore, dot and hyphen.
      * Maho\Simplexml\Element::descend() reads other syntax, such as a `node@attribute=value` segment, as a node selector.
      */
-    public const PLAIN_PATH_PATTERN = '#^[A-Za-z0-9_.\-]+(?:/[A-Za-z0-9_.\-]+)*$#';
+    public const string PLAIN_PATH_PATTERN = '#^[A-Za-z0-9_.\-]+(?:/[A-Za-z0-9_.\-]+)*$#';
 
     public function isValid(mixed $value): bool
     {

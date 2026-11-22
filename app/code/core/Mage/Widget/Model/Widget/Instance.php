@@ -17,25 +17,25 @@ declare(strict_types=1);
  */
 class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
 {
-    public const SPECIFIC_ENTITIES = 'specific';
-    public const ALL_ENTITIES      = 'all';
+    public const string SPECIFIC_ENTITIES = 'specific';
+    public const string ALL_ENTITIES      = 'all';
 
-    public const DEFAULT_LAYOUT_HANDLE            = 'default';
-    public const PRODUCT_LAYOUT_HANDLE            = 'catalog_product_view';
-    public const SINGLE_PRODUCT_LAYOUT_HANLDE     = 'PRODUCT_{{ID}}';
-    public const PRODUCT_TYPE_LAYOUT_HANDLE       = 'PRODUCT_TYPE_{{TYPE}}';
-    public const ANCHOR_CATEGORY_LAYOUT_HANDLE    = 'catalog_category_layered';
-    public const NOTANCHOR_CATEGORY_LAYOUT_HANDLE = 'catalog_category_default';
-    public const SINGLE_CATEGORY_LAYOUT_HANDLE    = 'CATEGORY_{{ID}}';
+    public const string DEFAULT_LAYOUT_HANDLE            = 'default';
+    public const string PRODUCT_LAYOUT_HANDLE            = 'catalog_product_view';
+    public const string SINGLE_PRODUCT_LAYOUT_HANLDE     = 'PRODUCT_{{ID}}';
+    public const string PRODUCT_TYPE_LAYOUT_HANDLE       = 'PRODUCT_TYPE_{{TYPE}}';
+    public const string ANCHOR_CATEGORY_LAYOUT_HANDLE    = 'catalog_category_layered';
+    public const string NOTANCHOR_CATEGORY_LAYOUT_HANDLE = 'catalog_category_default';
+    public const string SINGLE_CATEGORY_LAYOUT_HANDLE    = 'CATEGORY_{{ID}}';
 
-    public const XML_NODE_RELATED_CACHE = 'global/widget/related_cache_types';
+    public const string XML_NODE_RELATED_CACHE = 'global/widget/related_cache_types';
 
     /**
      * Reasons to remove a stored layout update, see getLayoutUpdateRemovalReason()
      */
-    public const LAYOUT_UPDATE_UNDECLARED_TYPE = 'undeclared widget type';
+    public const string LAYOUT_UPDATE_UNDECLARED_TYPE = 'undeclared widget type';
 
-    public const LAYOUT_UPDATE_UNEXPECTED_XML = 'unexpected layout update XML';
+    public const string LAYOUT_UPDATE_UNEXPECTED_XML = 'unexpected layout update XML';
 
     protected array $_layoutHandles = [];
 

@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 class Mage_Core_Model_Image_Set
 {
-    public const CACHE_FOLDER = 'cache';
+    public const string CACHE_FOLDER = 'cache';
 
     protected readonly string $source;
 

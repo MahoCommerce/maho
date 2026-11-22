@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_Giftcard_Adminhtml_Giftcard_HistoryController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'sales/giftcard/history';
+    public const string ADMIN_RESOURCE = 'sales/giftcard/history';
 
     /**
      * @return $this

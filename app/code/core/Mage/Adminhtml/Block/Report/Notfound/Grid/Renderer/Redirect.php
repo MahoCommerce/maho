@@ -14,7 +14,7 @@ declare(strict_types=1);
 class Mage_Adminhtml_Block_Report_Notfound_Grid_Renderer_Redirect extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         if ($row->getData('redirect_target') !== null
             || $row->getData('url_rewrite_id') !== null

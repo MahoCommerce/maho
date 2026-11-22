@@ -23,12 +23,12 @@ final class Migrator
      * Folders that Maho creates again on demand, by mount. They are not copied unless asked.
      * The resized images are not in the list: on a bucket, only a CDN rule sends a missing file to Maho.
      */
-    public const REGENERATED = [
+    public const array REGENERATED = [
         'media' => ['catalog/swatches', 'tmp'],
     ];
 
     /** Mounts whose local folder holds more than their files, with the step that fills the target. */
-    public const NOT_COPIED = [
+    public const array NOT_COPIED = [
         'sitemaps' => 'Its local folder is public/. Generate the sitemaps again after the switch, then delete the old sitemap files from public/.',
     ];
 

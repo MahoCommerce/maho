@@ -23,13 +23,13 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 )]
 class HealthCheck extends BaseMahoCommand
 {
-    public const LEGACY_CORE_FILES = [
+    public const array LEGACY_CORE_FILES = [
         'app/bootstrap.php',
         'app/Mage.php',
         'app/code/core',
     ];
 
-    public const DEPRECATED_FOLDERS = [
+    public const array DEPRECATED_FOLDERS = [
         'app/code/core/Zend',
         'lib/Cm',
         'lib/Credis',
@@ -40,31 +40,31 @@ class HealthCheck extends BaseMahoCommand
         'skin',
     ];
 
-    public const LEGACY_XML_SCAN_DIRS = [
+    public const array LEGACY_XML_SCAN_DIRS = [
         'app/code/local',
         'app/code/community',
     ];
 
-    private const DESIGN_PATH = 'app/design/frontend';
-    private const SKIN_PATH = 'public/skin/frontend';
+    private const string DESIGN_PATH = 'app/design/frontend';
+    private const string SKIN_PATH = 'public/skin/frontend';
 
-    private const UNDECRYPTABLE_ADVICE = 'They read as empty at runtime. This usually means the database was '
+    private const string UNDECRYPTABLE_ADVICE = 'They read as empty at runtime. This usually means the database was '
         . 'encrypted under a different key (a Magento/OpenMage import, or a copy from another install): restore '
         . 'the key those values were encrypted with in app/etc/local.xml, then run '
         . '"./maho sys:encryptionkey:regenerate". Otherwise, if they were stored unencrypted, re-enter them.';
 
-    private const LEGACY_ENCRYPTOR_ADVICE = 'This store runs on the legacy mcrypt encryptor '
+    private const string LEGACY_ENCRYPTOR_ADVICE = 'This store runs on the legacy mcrypt encryptor '
         . '(mahocommerce/module-mcrypt-compat), so its key is an mcrypt one and libsodium key rules do not apply. '
         . 'Encryption works, but that module is a migration aid: run "./maho sys:encryptionkey:regenerate" to '
         . 'move to a libsodium key, then remove it.';
 
     /** Blowfish, the cipher module-mcrypt-compat defaults to, takes no longer key. */
-    private const MCRYPT_MAX_KEY_LENGTH = 56;
+    private const int MCRYPT_MAX_KEY_LENGTH = 56;
 
     /**
      * Mapping of deprecated Varien_ classes to their Maho\ replacements
      */
-    private const VARIEN_TO_MAHO_MAP = [
+    private const array VARIEN_TO_MAHO_MAP = [
         'Varien_Convert' => \Maho\Convert::class,
         'Varien_Convert_Action_Abstract' => \Maho\Convert\Action\AbstractAction::class,
         'Varien_Convert_Action_Interface' => \Maho\Convert\Action\ActionInterface::class,

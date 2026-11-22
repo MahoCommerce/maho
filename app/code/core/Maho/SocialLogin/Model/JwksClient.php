@@ -14,9 +14,9 @@ use Symfony\Component\HttpClient\HttpClient;
 
 class Maho_SocialLogin_Model_JwksClient
 {
-    public const CACHE_TAG = 'SOCIALLOGIN_JWKS';
-    public const CACHE_LIFETIME = 21600;
-    public const REFRESH_COOLDOWN = 60;
+    public const string CACHE_TAG = 'SOCIALLOGIN_JWKS';
+    public const int CACHE_LIFETIME = 21600;
+    public const int REFRESH_COOLDOWN = 60;
 
     /**
      * @param bool $forceRefresh Bypass the cache (rate-limited to one refetch

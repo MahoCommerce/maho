@@ -14,7 +14,7 @@ use Maho\Storage\Mount;
 class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
 {
     /** A scan never lists a file below a folder with one of these names. */
-    public const EXCLUDED_NAMES = ['cache', 'watermark', 'optimized', '.thumbs'];
+    public const array EXCLUDED_NAMES = ['cache', 'watermark', 'optimized', '.thumbs'];
 
     /** The directory on the media mount that holds the files of a scan type, or null for an unknown type. */
     public function getStorageDirByType(string $type): ?string

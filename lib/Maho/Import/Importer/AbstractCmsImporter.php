@@ -17,9 +17,9 @@ use Maho\Import\CsvFile;
 
 abstract class AbstractCmsImporter extends AbstractImporter
 {
-    public const OPTION_CONTENT_DIR = 'content_dir';
+    public const string OPTION_CONTENT_DIR = 'content_dir';
     /** Leave a macro that does not resolve yet in place, for a first pass before the categories exist. */
-    public const OPTION_LENIENT_MACROS = 'lenient_macros';
+    public const string OPTION_LENIENT_MACROS = 'lenient_macros';
 
     /**
      * Reads `content_file` (relative to the content dir, default `content/` next to the CSV) or `content`.

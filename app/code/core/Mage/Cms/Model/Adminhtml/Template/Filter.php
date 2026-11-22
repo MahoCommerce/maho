@@ -11,7 +11,7 @@
 class Mage_Cms_Model_Adminhtml_Template_Filter extends Mage_Cms_Model_Template_Filter
 {
     /** Marks a path that filter() returns for {{media}}: a path on the media mount, not on disk. */
-    public const MEDIA_PREFIX = 'media://';
+    public const string MEDIA_PREFIX = 'media://';
 
     /**
      * Decode the image that the one {{media}} or {{skin}} directive of the editor preview names,

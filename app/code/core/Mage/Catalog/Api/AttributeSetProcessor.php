@@ -20,10 +20,10 @@ use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 
 final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
 {
-    private const IGNORED_FIELDS = ['extensions', '@context', '@id', '@type'];
+    private const array IGNORED_FIELDS = ['extensions', '@context', '@id', '@type'];
 
     /** The request body sends the name of a set or of a group as "name", so an error of that name gives this field */
-    private const ERROR_FIELDS = ['attribute_set_name' => 'name', 'attribute_group_name' => 'name'];
+    private const array ERROR_FIELDS = ['attribute_set_name' => 'name', 'attribute_group_name' => 'name'];
 
     public function __construct(
         Security $security,

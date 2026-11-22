@@ -13,14 +13,14 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
     /**
      * Giftmessages allow section in configuration
      */
-    public const XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ITEMS = 'sales/gift_options/allow_items';
-    public const XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ORDER = 'sales/gift_options/allow_order';
+    public const string XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ITEMS = 'sales/gift_options/allow_items';
+    public const string XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ORDER = 'sales/gift_options/allow_order';
 
-    public const TYPE_CONFIG        = 'config';
-    public const TYPE_ITEM          = 'item';
-    public const TYPE_ITEMS         = 'items';
-    public const TYPE_ORDER         = 'order';
-    public const TYPE_ORDER_ITEM    = 'order_item';
+    public const string TYPE_CONFIG        = 'config';
+    public const string TYPE_ITEM          = 'item';
+    public const string TYPE_ITEMS         = 'items';
+    public const string TYPE_ORDER         = 'order';
+    public const string TYPE_ORDER_ITEM    = 'order_item';
 
     #[\Override]
     protected $_moduleName = 'Mage_GiftMessage';

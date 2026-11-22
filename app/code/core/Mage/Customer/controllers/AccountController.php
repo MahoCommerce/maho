@@ -10,8 +10,8 @@
 
 class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 {
-    public const CUSTOMER_ID_SESSION_NAME = 'customerId';
-    public const TOKEN_SESSION_NAME = 'token';
+    public const string CUSTOMER_ID_SESSION_NAME = 'customerId';
+    public const string TOKEN_SESSION_NAME = 'token';
 
     /**
      * Retrieve customer session model object
@@ -82,7 +82,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      * Remove No-referer flag from customer session after each action
      */
     #[\Override]
-    public function postDispatch()
+    public function postDispatch(): static
     {
         parent::postDispatch();
         $this->_getSession()->unsNoReferer(false);

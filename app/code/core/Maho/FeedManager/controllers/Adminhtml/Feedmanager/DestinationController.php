@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'catalog/feedmanager/destinations';
+    public const string ADMIN_RESOURCE = 'catalog/feedmanager/destinations';
 
     protected function _initAction(): self
     {
@@ -161,7 +161,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
     /**
      * Sensitive config fields that should preserve old values when submitted empty
      */
-    private const SENSITIVE_CONFIG_FIELDS = [
+    private const array SENSITIVE_CONFIG_FIELDS = [
         'password',
         'private_key',
         'service_account_json',

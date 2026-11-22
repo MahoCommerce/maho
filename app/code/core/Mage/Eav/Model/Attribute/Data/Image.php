@@ -10,7 +10,7 @@
 
 class Mage_Eav_Model_Attribute_Data_Image extends Mage_Eav_Model_Attribute_Data_File
 {
-    private const ALLOWED_IMAGE_TYPES = [
+    private const array ALLOWED_IMAGE_TYPES = [
         IMAGETYPE_GIF  => 'gif',
         IMAGETYPE_JPEG => 'jpg',
         IMAGETYPE_PNG  => 'png',

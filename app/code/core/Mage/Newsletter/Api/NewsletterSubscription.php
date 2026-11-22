@@ -84,10 +84,10 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 )]
 class NewsletterSubscription extends CrudResource
 {
-    public const MODEL = 'newsletter/subscriber';
+    public const string MODEL = 'newsletter/subscriber';
 
     /** Admin ACL gate. Mirrors backend Mage_Adminhtml_Newsletter_SubscriberController. */
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_Newsletter_SubscriberController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_Newsletter_SubscriberController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $subscriberId = null;

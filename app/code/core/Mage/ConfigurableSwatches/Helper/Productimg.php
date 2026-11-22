@@ -32,18 +32,18 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
     /** @var array<string, string>|null the color of each swatch, by the file name without its extension */
     protected ?array $swatchColors = null;
 
-    public const SWATCH_LABEL_SUFFIX = '-swatch';
-    public const SWATCH_FALLBACK_MEDIA_DIR = 'wysiwyg/swatches';
-    public const SWATCH_CACHE_DIR = 'catalog/swatches';
+    public const string SWATCH_LABEL_SUFFIX = '-swatch';
+    public const string SWATCH_FALLBACK_MEDIA_DIR = 'wysiwyg/swatches';
+    public const string SWATCH_CACHE_DIR = 'catalog/swatches';
 
     /** Cache tag of the file checks on a remote media mount. */
-    public const CACHE_TAG = 'configurableswatches_image';
+    public const string CACHE_TAG = 'configurableswatches_image';
 
     /** Seconds that a remote file check which found no file stays in the cache. */
-    public const MISSING_FILE_CACHE_LIFETIME = 3600;
+    public const int MISSING_FILE_CACHE_LIFETIME = 3600;
 
     #[\Deprecated(message: 'since 26.3 — use {@see getSwatchFileExt()} instead')]
-    public const SWATCH_FILE_EXT = '.png';
+    public const string SWATCH_FILE_EXT = '.png';
 
     /**
      * Get the configured swatch file extension based on system image type setting
@@ -53,11 +53,11 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
         return Maho::getConfiguredImageExtension();
     }
 
-    public const MEDIA_IMAGE_TYPE_BASE = 'base_image';
-    public const MEDIA_IMAGE_TYPE_SMALL = 'small_image';
+    public const string MEDIA_IMAGE_TYPE_BASE = 'base_image';
+    public const string MEDIA_IMAGE_TYPE_SMALL = 'small_image';
 
-    public const SWATCH_DEFAULT_WIDTH = 21;
-    public const SWATCH_DEFAULT_HEIGHT = 21;
+    public const int SWATCH_DEFAULT_WIDTH = 21;
+    public const int SWATCH_DEFAULT_HEIGHT = 21;
 
     /**
      * Determine if the passed text matches the label of any of the passed product's images

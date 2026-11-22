@@ -16,8 +16,8 @@ declare(strict_types=1);
  */
 class Mage_Catalog_Model_Product_Status extends Mage_Core_Model_Abstract
 {
-    public const STATUS_ENABLED    = 1;
-    public const STATUS_DISABLED   = 2;
+    public const int STATUS_ENABLED    = 1;
+    public const int STATUS_DISABLED   = 2;
 
     /**
      * Reference to the attribute instance

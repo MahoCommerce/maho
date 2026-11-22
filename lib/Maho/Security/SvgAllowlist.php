@@ -24,10 +24,10 @@ final class SvgAllowlist
      * every element outside a graphic. A `data-*` name cannot be listed, so each path tests that
      * prefix instead.
      */
-    public const GLOBAL_ATTRIBUTES = ['class', 'style', 'aria-label', 'aria-current', 'aria-hidden'];
+    public const array GLOBAL_ATTRIBUTES = ['class', 'style', 'aria-label', 'aria-current', 'aria-hidden'];
 
     /** Allowed on every element below. */
-    public const COMMON_ATTRIBUTES = [
+    public const array COMMON_ATTRIBUTES = [
         'transform', 'opacity', 'fill', 'fill-opacity', 'fill-rule', 'clip-rule', 'clip-path',
         'stroke', 'stroke-width', 'stroke-opacity', 'stroke-linecap', 'stroke-linejoin',
         'stroke-miterlimit', 'stroke-dasharray', 'stroke-dashoffset', 'id',
@@ -44,7 +44,7 @@ final class SvgAllowlist
      *
      * @var array<string, list<string>>
      */
-    public const ELEMENTS = [
+    public const array ELEMENTS = [
         'svg'            => ['viewBox', 'xmlns', 'version', 'width', 'height', 'x', 'y', 'preserveAspectRatio', 'role'],
         'g'              => [],
         'defs'           => [],
@@ -75,7 +75,7 @@ final class SvgAllowlist
      *
      * @var array<string, list<string>>
      */
-    public const FILE_ONLY_ELEMENTS = [
+    public const array FILE_ONLY_ELEMENTS = [
         'title'    => [],
         'metadata' => [],
         // A browser reads the content of <desc> as HTML, not as SVG. The editor cannot.
@@ -91,7 +91,7 @@ final class SvgAllowlist
      *
      * @var array<string, list<string>>
      */
-    public const BASELINE_ELEMENTS = [
+    public const array BASELINE_ELEMENTS = [
         'a' => [
             'href', 'target', 'rel', 'title', 'download', 'hreflang', 'type',
             // The baseline grants a link 182 attributes. These are the ones an author writes, and
@@ -108,21 +108,21 @@ final class SvgAllowlist
      * script, style and handler run code. foreignObject puts HTML inside SVG. use, image and mpath
      * read a different document. animateMotion needs mpath to find its path.
      */
-    public const NEVER_ALLOWED = [
+    public const array NEVER_ALLOWED = [
         'script', 'style', 'foreignObject', 'use', 'image', 'mpath', 'animateMotion', 'handler',
     ];
 
     /** Safe only with the value rules of Mage_Core_Model_Input_Filter_SvgAnimation. */
-    public const ANIMATION_ATTRIBUTES = [
+    public const array ANIMATION_ATTRIBUTES = [
         'attributeName', 'attributeType', 'from', 'to', 'by', 'values',
         'dur', 'begin', 'end', 'repeatCount', 'repeatDur', 'restart',
         'calcMode', 'keyTimes', 'keySplines', 'additive', 'accumulate', 'fill',
     ];
 
-    public const ANIMATION_ELEMENTS = ['animate', 'animateTransform', 'set'];
+    public const array ANIMATION_ELEMENTS = ['animate', 'animateTransform', 'set'];
 
     /** An animation element uses `fill` for a different purpose, so the two value filters differ. */
-    public const PAINT_ATTRIBUTES = ['fill', 'stroke', 'clip-path'];
+    public const array PAINT_ATTRIBUTES = ['fill', 'stroke', 'clip-path'];
 
     /**
      * Every element, keyed by lower case name, with the standard spelling of every name kept.

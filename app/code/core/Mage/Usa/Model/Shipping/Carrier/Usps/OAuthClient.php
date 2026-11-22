@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Mage_Usa_Model_Shipping_Carrier_Usps_OAuthClient
 {
-    private const TOKEN_CACHE_KEY_PREFIX = 'usps_oauth_token_';
+    private const string TOKEN_CACHE_KEY_PREFIX = 'usps_oauth_token_';
     private string $tokenEndpoint;
     private Mage_Core_Model_Cache $cache;
 

@@ -16,9 +16,9 @@ declare(strict_types=1);
  */
 class Maho_Intelligence_Model_Lsp_Handler_Diagnostic
 {
-    private const SEVERITY_WARNING = 2;
+    private const int SEVERITY_WARNING = 2;
 
-    private const PHP_ALIAS_PATTERNS = [
+    private const array PHP_ALIAS_PATTERNS = [
         'model' => [
             '/Mage::getModel\(\s*[\'"]([^\'"]+)[\'"]\)/',
             '/Mage::getSingleton\(\s*[\'"]([^\'"]+)[\'"]\)/',
@@ -36,7 +36,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Diagnostic
         ],
     ];
 
-    private const XML_ALIAS_TAG_PATTERNS = [
+    private const array XML_ALIAS_TAG_PATTERNS = [
         'model' => [
             '/<class>([a-z][a-z0-9]*\/[a-z][a-z0-9_]*)<\/class>/i',
             '/<source_model>([a-z][a-z0-9]*\/[a-z][a-z0-9_]*)<\/source_model>/i',

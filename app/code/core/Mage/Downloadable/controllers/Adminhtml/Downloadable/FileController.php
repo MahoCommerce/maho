@@ -10,11 +10,7 @@
 
 class Mage_Downloadable_Adminhtml_Downloadable_FileController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'catalog/products';
+    public const string ADMIN_RESOURCE = 'catalog/products';
 
     /**
      * Upload file controller action

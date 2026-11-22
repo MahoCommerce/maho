@@ -17,7 +17,7 @@ declare(strict_types=1);
  */
 abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_Abstract implements Mage_Eav_Model_Entity_Attribute_Interface
 {
-    public const TYPE_STATIC = 'static';
+    public const string TYPE_STATIC = 'static';
 
     /**
      * Attribute name

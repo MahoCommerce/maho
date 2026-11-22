@@ -12,10 +12,10 @@ declare(strict_types=1);
 
 class Mage_Customer_Model_Config_Forgotpassword
 {
-    public const FLOW_DISABLED = 0;
-    public const FLOW_IP_EMAIL = 1;
-    public const FLOW_IP = 2;
-    public const FLOW_EMAIL = 3;
+    public const int FLOW_DISABLED = 0;
+    public const int FLOW_IP_EMAIL = 1;
+    public const int FLOW_IP = 2;
+    public const int FLOW_EMAIL = 3;
 
     /**
      * @return list<array{value: int, label: string}>

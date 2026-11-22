@@ -10,13 +10,8 @@
 
 class Mage_Adminhtml_Block_Report_Grid_Column_Renderer_Customer extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
-    /**
-     * Renders grid column
-     *
-     * @return  string
-     */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         $id   = $row->getCustomerId();
 

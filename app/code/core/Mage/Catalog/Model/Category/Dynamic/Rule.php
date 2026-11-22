@@ -12,13 +12,13 @@ declare(strict_types=1);
 class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 {
     /** Matched products go into the category as they are. */
-    public const PARENT_RESOLUTION_NONE = 'none';
+    public const string PARENT_RESOLUTION_NONE = 'none';
 
     /** Matched products are swapped for their parents; matched products without a parent stay. */
-    public const PARENT_RESOLUTION_KEEP_ORPHANS = 'keep_orphans';
+    public const string PARENT_RESOLUTION_KEEP_ORPHANS = 'keep_orphans';
 
     /** Matched products are swapped for their parents; matched simples without a parent are dropped. */
-    public const PARENT_RESOLUTION_DISCARD_ORPHANS = 'discard_orphans';
+    public const string PARENT_RESOLUTION_DISCARD_ORPHANS = 'discard_orphans';
 
     protected ?array $_productIds = null;
     protected int|array|null $_productsFilter = null;

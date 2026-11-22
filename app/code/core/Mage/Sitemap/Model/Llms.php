@@ -12,14 +12,14 @@ declare(strict_types=1);
 
 class Mage_Sitemap_Model_Llms
 {
-    public const XML_PATH_ENABLED = 'crawlers/llms/enabled';
-    public const XML_PATH_DESCRIPTION = 'crawlers/llms/description';
-    public const XML_PATH_FULL_ENABLED = 'crawlers/llms/full_enabled';
-    public const XML_PATH_CUSTOM = 'crawlers/llms/custom';
+    public const string XML_PATH_ENABLED = 'crawlers/llms/enabled';
+    public const string XML_PATH_DESCRIPTION = 'crawlers/llms/description';
+    public const string XML_PATH_FULL_ENABLED = 'crawlers/llms/full_enabled';
+    public const string XML_PATH_CUSTOM = 'crawlers/llms/custom';
 
-    protected const PAGES_LIMIT = 100;
-    protected const CATEGORIES_LIMIT = 50;
-    protected const FULL_BYTES_LIMIT = 512000;
+    protected const int PAGES_LIMIT = 100;
+    protected const int CATEGORIES_LIMIT = 50;
+    protected const int FULL_BYTES_LIMIT = 512000;
 
     public function isEnabled(?Mage_Core_Model_Store $store = null): bool
     {

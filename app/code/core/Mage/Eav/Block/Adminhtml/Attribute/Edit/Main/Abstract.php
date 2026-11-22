@@ -10,7 +10,7 @@
 
 abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mage_Adminhtml_Block_Widget_Form
 {
-    protected $_attribute = null;
+    protected ?Mage_Eav_Model_Entity_Attribute_Abstract $_attribute = null;
 
     /**
      * @param Mage_Catalog_Model_Resource_Eav_Attribute $attribute

@@ -16,10 +16,10 @@ use Maho\Queue\Transport\DbTransport;
  */
 class Maho_Queue_Model_Message extends Mage_Core_Model_Abstract
 {
-    public const STATUS_PENDING = DbTransport::STATUS_PENDING;
-    public const STATUS_PROCESSING = DbTransport::STATUS_PROCESSING;
-    public const STATUS_FAILED = DbTransport::STATUS_FAILED;
-    public const STATUS_COMPLETED = DbTransport::STATUS_COMPLETED;
+    public const string STATUS_PENDING = DbTransport::STATUS_PENDING;
+    public const string STATUS_PROCESSING = DbTransport::STATUS_PROCESSING;
+    public const string STATUS_FAILED = DbTransport::STATUS_FAILED;
+    public const string STATUS_COMPLETED = DbTransport::STATUS_COMPLETED;
 
     #[\Override]
     protected function _construct(): void

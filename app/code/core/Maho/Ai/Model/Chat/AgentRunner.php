@@ -22,11 +22,11 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class Maho_Ai_Model_Chat_AgentRunner
 {
-    public const ATTRIBUTE = 'maho_ai_background';
+    public const string ATTRIBUTE = 'maho_ai_background';
 
-    public const STATE_COMPLETE = 'complete';
-    public const STATE_AWAITING_CONFIRMATION = 'awaiting_confirmation';
-    public const STATE_ERROR = 'error';
+    public const string STATE_COMPLETE = 'complete';
+    public const string STATE_AWAITING_CONFIRMATION = 'awaiting_confirmation';
+    public const string STATE_ERROR = 'error';
 
     /**
      * Store the instruction as the first message of the conversation and queue the run. The

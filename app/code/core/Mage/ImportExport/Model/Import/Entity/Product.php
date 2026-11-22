@@ -13,42 +13,30 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     /**
      * Configuration key for product type
      */
-    public const CONFIG_KEY_PRODUCT_TYPES = 'global/importexport/import_product_types';
+    public const string CONFIG_KEY_PRODUCT_TYPES = 'global/importexport/import_product_types';
 
     /**
      * Allowed column name format
      */
-    private const COL_NAME_FORMAT = '/[\x00-\x1F\x7F]/';
+    private const string COL_NAME_FORMAT = '/[\x00-\x1F\x7F]/';
 
     /**
      * Size of bunch - part of products to save in one step.
      */
-    public const BUNCH_SIZE = 20;
+    public const int BUNCH_SIZE = 20;
 
     /**
      * Value that means all entities (e.g. websites, groups etc.)
      */
-    public const VALUE_ALL = 'all';
+    public const string VALUE_ALL = 'all';
 
-    /**
-     * Default Scope
-     */
-    public const SCOPE_DEFAULT = 1;
+    public const int SCOPE_DEFAULT = 1;
 
-    /**
-     * Website Scope
-     */
-    public const SCOPE_WEBSITE = 2;
+    public const int SCOPE_WEBSITE = 2;
 
-    /**
-     * Store Scope
-     */
-    public const SCOPE_STORE   = 0;
+    public const int SCOPE_STORE   = 0;
 
-    /**
-     * Null Scope
-     */
-    public const SCOPE_NULL    = -1;
+    public const int SCOPE_NULL    = -1;
 
     /**
      * Permanent column names.
@@ -56,172 +44,82 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      * Names that begins with underscore is not an attribute. This name convention is for
      * to avoid interference with same attribute name.
      */
-    public const COL_STORE    = '_store';
+    public const string COL_STORE    = '_store';
 
-    /**
-     * Col Attr Set
-     */
-    public const COL_ATTR_SET = '_attribute_set';
+    public const string COL_ATTR_SET = '_attribute_set';
 
-    /**
-     * Col Type
-     */
-    public const COL_TYPE     = '_type';
+    public const string COL_TYPE     = '_type';
 
-    /**
-     * Col Category
-     */
-    public const COL_CATEGORY = '_category';
+    public const string COL_CATEGORY = '_category';
 
-    /**
-     * Col Root Category
-     */
-    public const COL_ROOT_CATEGORY = '_root_category';
+    public const string COL_ROOT_CATEGORY = '_root_category';
 
-    /**
-     * Col Sku
-     */
-    public const COL_SKU      = 'sku';
+    public const string COL_SKU      = 'sku';
 
-    /**
-     * Col Name
-     */
-    public const COL_NAME = 'name';
+    public const string COL_NAME = 'name';
 
     /**
      * Error codes.
      */
-    public const ERROR_INVALID_SCOPE                = 'invalidScope';
+    public const string ERROR_INVALID_SCOPE                = 'invalidScope';
 
-    /**
-     * Error - invalid website
-     */
-    public const ERROR_INVALID_WEBSITE              = 'invalidWebsite';
+    public const string ERROR_INVALID_WEBSITE              = 'invalidWebsite';
 
-    /**
-     * Error - invalid store
-     */
-    public const ERROR_INVALID_STORE                = 'invalidStore';
+    public const string ERROR_INVALID_STORE                = 'invalidStore';
 
-    /**
-     * Error - invalid attr set
-     */
-    public const ERROR_INVALID_ATTR_SET             = 'invalidAttrSet';
+    public const string ERROR_INVALID_ATTR_SET             = 'invalidAttrSet';
 
-    /**
-     * Error - invalid type
-     */
-    public const ERROR_INVALID_TYPE                 = 'invalidType';
+    public const string ERROR_INVALID_TYPE                 = 'invalidType';
 
-    /**
-     * Error - invalid category
-     */
-    public const ERROR_INVALID_CATEGORY             = 'invalidCategory';
+    public const string ERROR_INVALID_CATEGORY             = 'invalidCategory';
 
-    /**
-     * Error - value is required
-     */
-    public const ERROR_VALUE_IS_REQUIRED            = 'isRequired';
+    public const string ERROR_VALUE_IS_REQUIRED            = 'isRequired';
 
-    /**
-     * Error - type changed
-     */
-    public const ERROR_TYPE_CHANGED                 = 'typeChanged';
+    public const string ERROR_TYPE_CHANGED                 = 'typeChanged';
 
-    /**
-     * Error - sku is empty
-     */
-    public const ERROR_SKU_IS_EMPTY                 = 'skuEmpty';
+    public const string ERROR_SKU_IS_EMPTY                 = 'skuEmpty';
 
-    /**
-     * Error - no default row
-     */
-    public const ERROR_NO_DEFAULT_ROW               = 'noDefaultRow';
+    public const string ERROR_NO_DEFAULT_ROW               = 'noDefaultRow';
 
-    /**
-     * Error - change type
-     */
-    public const ERROR_CHANGE_TYPE                  = 'changeProductType';
+    public const string ERROR_CHANGE_TYPE                  = 'changeProductType';
 
-    /**
-     * Error - duplicate scope
-     */
-    public const ERROR_DUPLICATE_SCOPE              = 'duplicateScope';
+    public const string ERROR_DUPLICATE_SCOPE              = 'duplicateScope';
 
-    /**
-     * Error - duplicate sku
-     */
-    public const ERROR_DUPLICATE_SKU                = 'duplicateSKU';
+    public const string ERROR_DUPLICATE_SKU                = 'duplicateSKU';
 
-    /**
-     * Error - change attr set
-     */
-    public const ERROR_CHANGE_ATTR_SET              = 'changeAttrSet';
+    public const string ERROR_CHANGE_ATTR_SET              = 'changeAttrSet';
 
-    /**
-     * Error - type unsupported
-     */
-    public const ERROR_TYPE_UNSUPPORTED             = 'productTypeUnsupported';
+    public const string ERROR_TYPE_UNSUPPORTED             = 'productTypeUnsupported';
 
-    /**
-     * Error - row is orphan
-     */
-    public const ERROR_ROW_IS_ORPHAN                = 'rowIsOrphan';
+    public const string ERROR_ROW_IS_ORPHAN                = 'rowIsOrphan';
 
-    /**
-     * Error - invalid tier price qty
-     */
-    public const ERROR_INVALID_TIER_PRICE_QTY       = 'invalidTierPriceOrQty';
+    public const string ERROR_INVALID_TIER_PRICE_QTY       = 'invalidTierPriceOrQty';
 
-    /**
-     * Error - invalid tier price site
-     */
-    public const ERROR_INVALID_TIER_PRICE_SITE      = 'tierPriceWebsiteInvalid';
+    public const string ERROR_INVALID_TIER_PRICE_SITE      = 'tierPriceWebsiteInvalid';
 
-    /**
-     * Error - invalid tier price group
-     */
-    public const ERROR_INVALID_TIER_PRICE_GROUP     = 'tierPriceGroupInvalid';
+    public const string ERROR_INVALID_TIER_PRICE_GROUP     = 'tierPriceGroupInvalid';
 
-    /**
-     * Error - tier data incomplete
-     */
-    public const ERROR_TIER_DATA_INCOMPLETE         = 'tierPriceDataIsIncomplete';
+    public const string ERROR_TIER_DATA_INCOMPLETE         = 'tierPriceDataIsIncomplete';
 
-    /**
-     * Error - invalid group price site
-     */
-    public const ERROR_INVALID_GROUP_PRICE_SITE     = 'groupPriceWebsiteInvalid';
+    public const string ERROR_INVALID_GROUP_PRICE_SITE     = 'groupPriceWebsiteInvalid';
 
-    /**
-     * Error - invalid group price group
-     */
-    public const ERROR_INVALID_GROUP_PRICE_GROUP    = 'groupPriceGroupInvalid';
+    public const string ERROR_INVALID_GROUP_PRICE_GROUP    = 'groupPriceGroupInvalid';
 
     /**
      * Error - group price data incompelte
      */
-    public const ERROR_GROUP_PRICE_DATA_INCOMPLETE  = 'groupPriceDataIsIncomplete';
+    public const string ERROR_GROUP_PRICE_DATA_INCOMPLETE  = 'groupPriceDataIsIncomplete';
 
-    /**
-     * Error - sku not found for delete
-     */
-    public const ERROR_SKU_NOT_FOUND_FOR_DELETE     = 'skuNotFoundToDelete';
+    public const string ERROR_SKU_NOT_FOUND_FOR_DELETE     = 'skuNotFoundToDelete';
 
-    /**
-     * Error - super products sku not found
-     */
-    public const ERROR_SUPER_PRODUCTS_SKU_NOT_FOUND = 'superProductsSkuNotFound';
+    public const string ERROR_SUPER_PRODUCTS_SKU_NOT_FOUND = 'superProductsSkuNotFound';
 
-    /**
-     * Error - invalid product sku
-     */
-    public const ERROR_INVALID_PRODUCT_SKU          = 'invalidSku';
+    public const string ERROR_INVALID_PRODUCT_SKU          = 'invalidSku';
 
     /**
      * A stock value or a date range that the stock service or the product model refuses
      */
-    public const ERROR_INVALID_VALUE                = 'invalidValue';
+    public const string ERROR_INVALID_VALUE                = 'invalidValue';
 
     /**
      * Pairs of attribute set ID-to-name.
@@ -373,7 +271,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     ];
 
     /** Image columns of files from before 26.11. Their file goes to the image column when it is empty. */
-    protected const DEPRECATED_IMAGE_COLUMNS = ['small_image', 'thumbnail'];
+    protected const array DEPRECATED_IMAGE_COLUMNS = ['small_image', 'thumbnail'];
 
     /**
      * Permanent entity columns.

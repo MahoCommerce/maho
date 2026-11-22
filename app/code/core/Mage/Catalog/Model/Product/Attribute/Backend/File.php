@@ -11,7 +11,7 @@ declare(strict_types=1);
 class Mage_Catalog_Model_Product_Attribute_Backend_File extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
     /** Directory of product attribute files on the media mount. */
-    public const STORAGE_PATH = 'catalog/files';
+    public const string STORAGE_PATH = 'catalog/files';
 
     /**
      * Get file extension validator

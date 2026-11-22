@@ -15,39 +15,36 @@
  */
 class Mage_Core_Model_App
 {
-    public const XML_PATH_INSTALL_DATE = 'global/install/date';
+    public const string XML_PATH_INSTALL_DATE = 'global/install/date';
 
-    public const XML_PATH_SKIP_PROCESS_MODULES_UPDATES = 'global/skip_process_modules_updates';
+    public const string XML_PATH_SKIP_PROCESS_MODULES_UPDATES = 'global/skip_process_modules_updates';
 
     /**
      * if this node set to true, we will ignore Developer Mode for applying updates
      */
-    public const XML_PATH_IGNORE_DEV_MODE = 'global/skip_process_modules_updates_ignore_dev_mode';
+    public const string XML_PATH_IGNORE_DEV_MODE = 'global/skip_process_modules_updates_ignore_dev_mode';
 
-    public const DEFAULT_ERROR_HANDLER = 'mageCoreErrorHandler';
+    public const string DEFAULT_ERROR_HANDLER = 'mageCoreErrorHandler';
 
     /**
      * Cached verdict of the declarative schema check, tagged with the
      * fingerprint it was computed for
      */
-    public const CACHE_ID_SCHEMA_STATE = 'declarative_schema_state';
+    public const string CACHE_ID_SCHEMA_STATE = 'declarative_schema_state';
 
-    public const DISTRO_LOCALE_CODE = 'en_US';
+    public const string DISTRO_LOCALE_CODE = 'en_US';
 
     /**
      * Default store Id (for install)
      */
-    public const DISTRO_STORE_ID       = 1;
+    public const int DISTRO_STORE_ID       = 1;
 
     /**
      * Default store code (for install)
      */
-    public const DISTRO_STORE_CODE     = 'default';
+    public const string DISTRO_STORE_CODE     = 'default';
 
-    /**
-     * Admin store Id
-     */
-    public const ADMIN_STORE_ID = 0;
+    public const int ADMIN_STORE_ID = 0;
 
     /**
      * The absolute minimum of password length for all types of passwords
@@ -63,7 +60,7 @@ class Mage_Core_Model_App
      * 4. maybe, the value of deprecated `const MIN_PASSWORD_LENGTH` in `app/code/core/Mage/Admin/Model/User.php`,
      *    (if the absolute minimum of password length is higher then this value).
      */
-    public const ABSOLUTE_MIN_PASSWORD_LENGTH = 7;
+    public const int ABSOLUTE_MIN_PASSWORD_LENGTH = 7;
 
     /**
      * Application loaded areas array

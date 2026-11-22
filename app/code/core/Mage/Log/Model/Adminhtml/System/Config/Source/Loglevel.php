@@ -13,18 +13,18 @@ class Mage_Log_Model_Adminhtml_System_Config_Source_Loglevel
     /**
      * Don't log anything
      */
-    public const LOG_LEVEL_NONE = 0;
+    public const int LOG_LEVEL_NONE = 0;
 
     /**
      * All possible logs enabled
      */
-    public const LOG_LEVEL_ALL = 1;
+    public const int LOG_LEVEL_ALL = 1;
 
     /**
      * Logs only visitors, needs for working compare products and customer segment's related functionality
      * (eg. shopping cart discount for segments with not logged in customers)
      */
-    public const LOG_LEVEL_VISITORS = 2;
+    public const int LOG_LEVEL_VISITORS = 2;
 
     /**
      * @var Mage_Log_Helper_Data

@@ -10,7 +10,7 @@
 
 class Mage_Tag_Block_Product_List extends Mage_Core_Block_Template
 {
-    protected $_collection;
+    protected ?Mage_Tag_Model_Resource_Tag_Collection $_collection = null;
 
     /**
      * Unique Html Id

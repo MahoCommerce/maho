@@ -17,10 +17,10 @@ use Symfony\Component\Process\Process;
 abstract class BaseMahoCommand extends Command
 {
     /** A job of runJobs() prints this line after each item, so the progress bar advances. */
-    protected const JOB_ITEM_LINE = 'file';
+    protected const string JOB_ITEM_LINE = 'file';
 
     /** A job of runJobs() prints its result as JSON on one line that starts with this. */
-    protected const JOB_RESULT_PREFIX = 'result ';
+    protected const string JOB_RESULT_PREFIX = 'result ';
 
     /**
      * Whether to point out pending schema updates on boot. Off for the

@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 abstract class Mage_Adminhtml_Block_Uploader_Abstract extends Mage_Adminhtml_Block_Widget
 {
-    public const DEFAULT_BROWSE_BUTTON_ID_SUFFIX = 'browse';
-    public const DROP_ZONE_ID_SUFFIX = 'dropzone';
+    public const string DEFAULT_BROWSE_BUTTON_ID_SUFFIX = 'browse';
+    public const string DROP_ZONE_ID_SUFFIX = 'dropzone';
 
     #[\Override]
     protected $_template = 'media/uploader.phtml';

@@ -8,7 +8,7 @@
 
 class Mage_Sales_Block_Order_Pdf_Creditmemo extends Mage_Sales_Block_Order_Pdf_Abstract
 {
-    protected const ITEM_RENDERER_SECTION = 'creditmemo';
+    protected const string ITEM_RENDERER_SECTION = 'creditmemo';
 
     protected ?Mage_Sales_Model_Order_Creditmemo $_creditmemo = null;
 

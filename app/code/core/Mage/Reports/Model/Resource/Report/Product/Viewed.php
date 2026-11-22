@@ -10,9 +10,9 @@
 
 class Mage_Reports_Model_Resource_Report_Product_Viewed extends Mage_Sales_Model_Resource_Report_Abstract
 {
-    public const AGGREGATION_DAILY   = 'reports/viewed_aggregated_daily';
-    public const AGGREGATION_MONTHLY = 'reports/viewed_aggregated_monthly';
-    public const AGGREGATION_YEARLY  = 'reports/viewed_aggregated_yearly';
+    public const string AGGREGATION_DAILY   = 'reports/viewed_aggregated_daily';
+    public const string AGGREGATION_MONTHLY = 'reports/viewed_aggregated_monthly';
+    public const string AGGREGATION_YEARLY  = 'reports/viewed_aggregated_yearly';
 
     #[\Override]
     protected function _construct(): void

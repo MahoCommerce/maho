@@ -389,8 +389,9 @@ All Zend Framework and Varien components have been deleted:
 
 - Use `declare(strict_types=1)` (placed *after* the file-level docblock), PHP 8.5+ features,
   and the `#[\Override]` attribute on overridden methods
-- Type everything that can be typed: parameter, return, and property types (including `void`,
-  `never`, nullable, union, and intersection types). Reserve docblock `@param`/`@return` for what
+- Type everything that can be typed: parameter, return, property, and class constant types
+  (including `void`, `never`, nullable, union, and intersection types). A class constant takes the
+  one type of its value (`public const string XML_PATH_ENABLED = '...'`), never a union. Reserve docblock `@param`/`@return` for what
   the type system can't express (array shapes, generics, `@throws`); don't restate a native type
 - Default to **no comments**. Add one only when the code can't carry the information itself: a
   non-obvious *why*, a workaround, a subtle invariant. Keep it to one line where possible. Never

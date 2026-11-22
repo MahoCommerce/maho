@@ -21,19 +21,13 @@ declare(strict_types=1);
  */
 abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
 {
-    /**
-     * Prefix for cache key
-     */
-    public const CACHE_KEY_PREFIX = 'BLOCK_';
+    public const string CACHE_KEY_PREFIX = 'BLOCK_';
     /**
      * Cache group Tag
      */
-    public const CACHE_GROUP = 'block_html';
+    public const string CACHE_GROUP = 'block_html';
 
-    /**
-     * Cache tags data key
-     */
-    public const CACHE_TAGS_DATA_KEY = 'cache_tags';
+    public const string CACHE_TAGS_DATA_KEY = 'cache_tags';
 
     /**
      * Block name in layout
@@ -623,7 +617,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      * @param   string $name
      * @param   Mage_Core_Block_Abstract $child
      */
-    protected function _beforeChildToHtml($name, $child) {}
+    protected function _beforeChildToHtml($name, $child): void {}
 
     /**
      * Retrieve block html
@@ -1182,7 +1176,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
         if ($this->_translationHelper instanceof Mage_Core_Helper_Abstract) {
             return $this->_translationHelper->__(...$args);
         }
-        $expr = new Mage_Core_Model_Translate_Expr(array_shift($args), $this->getModuleName());
+        $expr = new Mage_Core_Model_Translate_Expr((string) array_shift($args), $this->getModuleName());
         array_unshift($args, $expr);
         return $this->_getApp()->getTranslator()->translate($args);
     }

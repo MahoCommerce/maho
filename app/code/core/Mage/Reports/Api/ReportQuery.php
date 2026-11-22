@@ -22,15 +22,15 @@ final class ReportQuery
     use FilterValueTrait;
     use StoreRestrictionTrait;
 
-    public const PERIOD_DAY = 'day';
-    public const PERIOD_MONTH = 'month';
-    public const PERIOD_YEAR = 'year';
-    public const PERIOD_TYPES = [self::PERIOD_DAY, self::PERIOD_MONTH, self::PERIOD_YEAR];
+    public const string PERIOD_DAY = 'day';
+    public const string PERIOD_MONTH = 'month';
+    public const string PERIOD_YEAR = 'year';
+    public const array PERIOD_TYPES = [self::PERIOD_DAY, self::PERIOD_MONTH, self::PERIOD_YEAR];
 
     /**
      * A response has at most this number of periods, so a day report covers about 2.7 years.
      */
-    public const MAX_PERIODS = 1000;
+    public const int MAX_PERIODS = 1000;
 
     public string $from = '';
     public string $to = '';

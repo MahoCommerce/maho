@@ -58,7 +58,7 @@ class Mage_Downloadable_Adminhtml_Downloadable_Product_EditController extends Ma
 
         if ($fileSize = $helper->getFilesize()) {
             $this->getResponse()
-                ->setHeader('Content-Length', $fileSize);
+                ->setHeader('Content-Length', (string) $fileSize);
         }
 
         if ($contentDisposition = $helper->getContentDisposition()) {

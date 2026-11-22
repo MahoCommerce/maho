@@ -119,8 +119,8 @@ and place the following code inside
 ```php
 class Mahotutorial_Configviewer_Model_Observer
 {
-    const FLAG_SHOW_CONFIG = 'showConfig';
-    const FLAG_SHOW_CONFIG_FORMAT = 'showConfigFormat';
+    const string FLAG_SHOW_CONFIG = 'showConfig';
+    const string FLAG_SHOW_CONFIG_FORMAT = 'showConfigFormat';
 
     private $request;
 

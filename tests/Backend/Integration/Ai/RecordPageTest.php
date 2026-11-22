@@ -18,9 +18,9 @@ it('gives each admin ACL resource at most one API resource with a record page', 
     $groups = [];
     foreach (glob(Mage::getBaseDir() . '/app/code/core/*/*/Api/*.php') as $file) {
         $source = (string) file_get_contents($file);
-        if (!preg_match('/const ADMIN_RESOURCE = ([^;]+);/', $source, $acl)
+        if (!preg_match('/const string ADMIN_RESOURCE = ([^;]+);/', $source, $acl)
             || !preg_match("~uriTemplate: '/[a-z0-9-]+/\\{\\w+\\}'~", $source)
-            || preg_match('/const ADMIN_RECORD_PAGE = false;/', $source)
+            || preg_match('/const bool ADMIN_RECORD_PAGE = false;/', $source)
         ) {
             continue;
         }

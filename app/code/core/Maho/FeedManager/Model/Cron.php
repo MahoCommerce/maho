@@ -22,7 +22,7 @@ class Maho_FeedManager_Model_Cron
     /**
      * Max time in minutes before a "running" feed is considered hung
      */
-    public const HUNG_FEED_TIMEOUT_MINUTES = 30;
+    public const int HUNG_FEED_TIMEOUT_MINUTES = 30;
 
     /**
      * Generate all scheduled feeds

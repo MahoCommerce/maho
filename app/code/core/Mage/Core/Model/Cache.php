@@ -13,10 +13,10 @@ class Mage_Core_Model_Cache
     /**
      * Cache settings
      */
-    public const DEFAULT_LIFETIME  = 7200;
-    public const OPTIONS_CACHE_ID  = 'core_cache_options';
-    public const INVALIDATED_TYPES = 'core_cache_invalidate';
-    public const XML_PATH_TYPES    = 'global/cache/types';
+    public const int DEFAULT_LIFETIME  = 7200;
+    public const string OPTIONS_CACHE_ID  = 'core_cache_options';
+    public const string INVALIDATED_TYPES = 'core_cache_invalidate';
+    public const string XML_PATH_TYPES    = 'global/cache/types';
 
     protected string $_idPrefix    = '';
 

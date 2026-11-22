@@ -24,9 +24,9 @@ class Mage_Rating_Model_Rating extends Mage_Core_Model_Abstract
     /**
      * rating entity codes
      */
-    public const ENTITY_PRODUCT_CODE           = 'product';
-    public const ENTITY_PRODUCT_REVIEW_CODE    = 'product_review';
-    public const ENTITY_REVIEW_CODE            = 'review';
+    public const string ENTITY_PRODUCT_CODE           = 'product';
+    public const string ENTITY_PRODUCT_REVIEW_CODE    = 'product_review';
+    public const string ENTITY_REVIEW_CODE            = 'review';
 
     /**
      * Define resource model

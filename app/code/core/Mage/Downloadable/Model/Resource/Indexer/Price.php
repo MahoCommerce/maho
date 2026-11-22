@@ -12,11 +12,9 @@ class Mage_Downloadable_Model_Resource_Indexer_Price extends Mage_Catalog_Model_
 {
     /**
      * Reindex temporary (price result data) for all products
-     *
-     * @return $this
      */
     #[\Override]
-    public function reindexAll()
+    public function reindexAll(): static
     {
         $this->useIdxTable(true);
         $this->beginTransaction();
@@ -37,10 +35,9 @@ class Mage_Downloadable_Model_Resource_Indexer_Price extends Mage_Catalog_Model_
      * Reindex temporary (price result data) for defined product(s)
      *
      * @param int|array $entityIds
-     * @return $this
      */
     #[\Override]
-    public function reindexEntity($entityIds)
+    public function reindexEntity($entityIds): static
     {
         $this->_prepareFinalPriceData($entityIds);
         $this->_applyCustomOption();

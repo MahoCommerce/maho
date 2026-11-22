@@ -12,18 +12,14 @@ use Mage_Newsletter_Model_Queue as Queue;
 
 class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'newsletter/queue';
+    public const string ADMIN_RESOURCE = 'newsletter/queue';
 
     /**
      * Content and audience are frozen once a campaign starts, so the edit form disables
      * these inputs and a browser posts none of them: applying the empties would blank
      * the campaign, and a request that carries them anyway is refused.
      */
-    protected const FROZEN_AFTER_START = [
+    protected const array FROZEN_AFTER_START = [
         'start_at', 'stores', 'customer_segments',
         'subject', 'sender_name', 'sender_email', 'text', 'styles',
     ];

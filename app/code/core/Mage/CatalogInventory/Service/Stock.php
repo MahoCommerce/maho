@@ -15,10 +15,10 @@ use Mage_CatalogInventory_Model_Stock_Item as StockItem;
 class Mage_CatalogInventory_Service_Stock
 {
     /** The greatest value that the DECIMAL(12,4) column qty holds. */
-    public const MAX_QTY = 99999999.9999;
+    public const float MAX_QTY = 99999999.9999;
 
     /** The columns of a stock change, with the type of each value. */
-    public const COLUMNS = [
+    public const array COLUMNS = [
         'qty' => 'float',
         'is_in_stock' => 'bool',
         'manage_stock' => 'bool',
@@ -41,7 +41,7 @@ class Mage_CatalogInventory_Service_Stock
     ];
 
     /** Each value that can take the configuration, with the flag that tells it to. */
-    public const USE_CONFIG_FLAGS = [
+    public const array USE_CONFIG_FLAGS = [
         'min_qty' => 'use_config_min_qty',
         'min_sale_qty' => 'use_config_min_sale_qty',
         'max_sale_qty' => 'use_config_max_sale_qty',
@@ -52,7 +52,7 @@ class Mage_CatalogInventory_Service_Stock
         'manage_stock' => 'use_config_manage_stock',
     ];
 
-    private const NON_NEGATIVE_COLUMNS = ['min_qty', 'min_sale_qty', 'max_sale_qty', 'notify_stock_qty', 'qty_increments'];
+    private const array NON_NEGATIVE_COLUMNS = ['min_qty', 'min_sale_qty', 'max_sale_qty', 'notify_stock_qty', 'qty_increments'];
 
     /**
      * Return the column of COLUMNS that the key $key names, in snake case or in camel case, or null for another key.

@@ -19,9 +19,9 @@ use Mage_Catalog_Model_Product as Product;
  */
 class Mage_Bundle_Service_Option
 {
-    private const OPTION_FIELDS = ['title', 'type', 'required', 'position'];
+    private const array OPTION_FIELDS = ['title', 'type', 'required', 'position'];
 
-    private const SELECTION_FIELDS = [
+    private const array SELECTION_FIELDS = [
         'selection_id', 'product_id', 'position', 'is_default', 'selection_price_type',
         'selection_price_value', 'selection_qty', 'selection_can_change_qty',
     ];

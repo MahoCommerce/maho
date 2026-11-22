@@ -25,14 +25,14 @@ trait DatabaseDumpTrait
     use DatabaseCliTrait;
 
     /** Values accepted by --compression. */
-    public const COMPRESSIONS = ['gzip', 'zstd', 'none'];
+    public const array COMPRESSIONS = ['gzip', 'zstd', 'none'];
 
     /** Engines the dump pipelines can drive. */
-    public const DUMP_ENGINES = ['mysql', 'pgsql', 'sqlite'];
+    public const array DUMP_ENGINES = ['mysql', 'pgsql', 'sqlite'];
 
     /** First bytes of a gzip and of a zstd stream. */
-    private const MAGIC_GZIP = "\x1f\x8b";
-    private const MAGIC_ZSTD = "\x28\xb5\x2f\xfd";
+    private const string MAGIC_GZIP = "\x1f\x8b";
+    private const string MAGIC_ZSTD = "\x28\xb5\x2f\xfd";
 
     /**
      * Dump tool and default port for each engine.

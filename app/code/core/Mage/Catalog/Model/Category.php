@@ -28,32 +28,32 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
      * Entity code.
      * Can be used as part of method name for entity processing
      */
-    public const ENTITY                = 'catalog_category';
+    public const string ENTITY                = 'catalog_category';
     /**
      * Category display modes
      */
-    public const DM_PRODUCT            = 'PRODUCTS';
-    public const DM_PAGE               = 'PAGE';
-    public const DM_MIXED              = 'PRODUCTS_AND_PAGE';
-    public const TREE_ROOT_ID          = 1;
+    public const string DM_PRODUCT            = 'PRODUCTS';
+    public const string DM_PAGE               = 'PAGE';
+    public const string DM_MIXED              = 'PRODUCTS_AND_PAGE';
+    public const int TREE_ROOT_ID          = 1;
 
-    public const CACHE_TAG             = 'catalog_category';
+    public const string CACHE_TAG             = 'catalog_category';
 
     /**
      * Where a product that enters the category goes in the manual order
      */
-    public const PLACEMENT_TOP         = 'top';
-    public const PLACEMENT_BOTTOM      = 'bottom';
+    public const string PLACEMENT_TOP         = 'top';
+    public const string PLACEMENT_BOTTOM      = 'bottom';
 
     /**
      * Store config flag enabling the product-derived category image fallback
      */
-    public const XML_PATH_IMAGE_FALLBACK = 'catalog/frontend/category_image_fallback';
+    public const string XML_PATH_IMAGE_FALLBACK = 'catalog/frontend/category_image_fallback';
 
     /**
      * Product attribute the fallback category image is taken from
      */
-    public const IMAGE_FALLBACK_ATTRIBUTE = 'image';
+    public const string IMAGE_FALLBACK_ATTRIBUTE = 'image';
 
     /**
      * Prefix of model events names

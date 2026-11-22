@@ -71,10 +71,10 @@ use Maho\ApiPlatform\CrudResource;
 )]
 class CmsBlock extends CrudResource
 {
-    public const MODEL = 'cms/block';
+    public const string MODEL = 'cms/block';
 
     /** Admin ACL gate. Mirrors backend Mage_Adminhtml_Cms_BlockController. */
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_Cms_BlockController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_Cms_BlockController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

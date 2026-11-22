@@ -8,10 +8,10 @@
 
 class Mage_Payment_Model_Restriction_Rule extends Mage_Rule_Model_Abstract
 {
-    public const STATUS_ENABLED = 1;
-    public const STATUS_DISABLED = 0;
+    public const int STATUS_ENABLED = 1;
+    public const int STATUS_DISABLED = 0;
 
-    public const TYPE_DENYLIST = 'denylist';
+    public const string TYPE_DENYLIST = 'denylist';
 
     #[\Override]
     protected function _construct(): void

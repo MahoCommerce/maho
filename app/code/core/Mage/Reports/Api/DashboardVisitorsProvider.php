@@ -15,16 +15,16 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class DashboardVisitorsProvider extends ReportProviderBase
 {
-    public const SECTIONS = [
+    public const array SECTIONS = [
         'summary', 'trend', 'devices', 'engagement', 'entryPages', 'exitPages', 'languages', 'topPages', 'trafficSources',
     ];
 
     /**
      * The trend has the visitors of each of this number of days, the same as the admin chart.
      */
-    public const TREND_DAYS = 30;
+    public const int TREND_DAYS = 30;
 
-    public const MAX_DAYS = 90;
+    public const int MAX_DAYS = 90;
 
     #[\Override]
     protected function buildReport(array $filters, ApiUser $user): array

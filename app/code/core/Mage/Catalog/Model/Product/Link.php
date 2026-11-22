@@ -20,12 +20,13 @@ declare(strict_types=1);
  */
 class Mage_Catalog_Model_Product_Link extends Mage_Core_Model_Abstract
 {
-    public const LINK_TYPE_RELATED     = 1;
-    public const LINK_TYPE_GROUPED     = 3;
-    public const LINK_TYPE_UPSELL      = 4;
-    public const LINK_TYPE_CROSSSELL   = 5;
+    public const int LINK_TYPE_RELATED     = 1;
+    public const int LINK_TYPE_GROUPED     = 3;
+    public const int LINK_TYPE_UPSELL      = 4;
+    public const int LINK_TYPE_CROSSSELL   = 5;
 
-    protected $_attributeCollection = null;
+    /** @var list<array{id: int, code: string, type: string}>|null */
+    protected ?array $_attributeCollection = null;
 
     /**
      * Initialize resource

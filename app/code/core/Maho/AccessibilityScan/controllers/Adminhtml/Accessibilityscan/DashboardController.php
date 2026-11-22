@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_DashboardController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'system/tools/accessibilityscan';
+    public const string ADMIN_RESOURCE = 'system/tools/accessibilityscan';
 
     #[Maho\Config\Route('/admin/accessibilityscan_dashboard/index')]
     public function indexAction(): void

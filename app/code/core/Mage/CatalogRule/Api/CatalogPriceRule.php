@@ -99,13 +99,13 @@ use Maho\ApiPlatform\Metadata\ListFilter;
 )]
 class CatalogPriceRule extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_Promo_CatalogController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_Promo_CatalogController::ADMIN_RESOURCE;
 
-    public const ROOT_CONDITIONS = 'catalogrule/rule_condition_combine';
+    public const string ROOT_CONDITIONS = 'catalogrule/rule_condition_combine';
 
-    public const SIMPLE_ACTIONS = \Mage_CatalogRule_Model_Rule::SIMPLE_ACTIONS;
+    public const array SIMPLE_ACTIONS = \Mage_CatalogRule_Model_Rule::SIMPLE_ACTIONS;
 
-    private const TREE_SCHEMA = [
+    private const array TREE_SCHEMA = [
         'type' => 'object',
         'description' => 'Condition tree. A node has the keys type, attribute, operator, value, aggregator and conditions (the list of child nodes, never "children"), and the read-only key label. '
             . 'The root has the type catalogrule/rule_condition_combine. A leaf has the type catalogrule/rule_condition_product and the attribute code of a product attribute with isUsedForPriceRules true; '

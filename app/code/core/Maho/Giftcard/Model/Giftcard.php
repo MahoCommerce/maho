@@ -13,20 +13,20 @@ declare(strict_types=1);
  */
 class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 {
-    public const STATUS_ACTIVE = 'active';
-    public const STATUS_USED = 'used';
-    public const STATUS_EXPIRED = 'expired';
-    public const STATUS_DISABLED = 'disabled';
+    public const string STATUS_ACTIVE = 'active';
+    public const string STATUS_USED = 'used';
+    public const string STATUS_EXPIRED = 'expired';
+    public const string STATUS_DISABLED = 'disabled';
 
-    public const STATUSES = [self::STATUS_ACTIVE, self::STATUS_USED, self::STATUS_EXPIRED, self::STATUS_DISABLED];
+    public const array STATUSES = [self::STATUS_ACTIVE, self::STATUS_USED, self::STATUS_EXPIRED, self::STATUS_DISABLED];
 
-    public const ACTION_CREATED = 'created';
-    public const ACTION_USED = 'used';
-    public const ACTION_REFUNDED = 'refunded';
-    public const ACTION_ADJUSTED = 'adjusted';
-    public const ACTION_EXPIRED = 'expired';
+    public const string ACTION_CREATED = 'created';
+    public const string ACTION_USED = 'used';
+    public const string ACTION_REFUNDED = 'refunded';
+    public const string ACTION_ADJUSTED = 'adjusted';
+    public const string ACTION_EXPIRED = 'expired';
 
-    public const XML_PATH_MAX_BALANCE = 'giftcard/general/max_balance';
+    public const string XML_PATH_MAX_BALANCE = 'giftcard/general/max_balance';
 
     /** True while refund() saves the card: a refund gives back money that the card held, so the cap does not apply. */
     private bool $isRefund = false;

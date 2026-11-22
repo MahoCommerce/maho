@@ -10,9 +10,9 @@ declare(strict_types=1);
 
 class Maho_Blog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_Attribute
 {
-    public const SCOPE_STORE   = 0;
-    public const SCOPE_GLOBAL  = 1;
-    public const SCOPE_WEBSITE = 2;
+    public const int SCOPE_STORE   = 0;
+    public const int SCOPE_GLOBAL  = 1;
+    public const int SCOPE_WEBSITE = 2;
 
     /**
      * Event prefix

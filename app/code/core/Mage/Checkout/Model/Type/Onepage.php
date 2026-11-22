@@ -13,9 +13,9 @@ class Mage_Checkout_Model_Type_Onepage
     /**
      * Checkout types: Checkout as Guest, Register, Logged In Customer
      */
-    public const METHOD_GUEST    = 'guest';
-    public const METHOD_REGISTER = 'register';
-    public const METHOD_CUSTOMER = 'customer';
+    public const string METHOD_GUEST    = 'guest';
+    public const string METHOD_REGISTER = 'register';
+    public const string METHOD_CUSTOMER = 'customer';
 
     /**
      * Error message of "customer already exists"

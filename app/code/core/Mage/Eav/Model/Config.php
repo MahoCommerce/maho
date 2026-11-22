@@ -16,11 +16,11 @@ class Mage_Eav_Model_Config
      * - EAV attributes
      * - EAV attribute extension table data
      */
-    public const EAV_DATA_CACHE = 'EAV_DATA_CACHE';
+    public const string EAV_DATA_CACHE = 'EAV_DATA_CACHE';
 
-    public const ENTITIES_CACHE_ID = 'EAV_ENTITY_TYPES';
+    public const string ENTITIES_CACHE_ID = 'EAV_ENTITY_TYPES';
 
-    public const NUMERIC_ATTRIBUTE_COLUMNS = [
+    public const array NUMERIC_ATTRIBUTE_COLUMNS = [
         // from table eav_attribute
         'attribute_id',
         'entity_type_id',

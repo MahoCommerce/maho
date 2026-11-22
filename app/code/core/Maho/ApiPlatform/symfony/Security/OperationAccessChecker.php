@@ -29,13 +29,13 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
  */
 final class OperationAccessChecker
 {
-    public const RESOURCE_CONSTANT = 'ADMIN_RESOURCE';
+    public const string RESOURCE_CONSTANT = 'ADMIN_RESOURCE';
 
     /**
      * Key of an operation's `extraProperties` that names an ACL path that an admin needs in addition
      * to the ADMIN_RESOURCE of the class, such as `sales/order/actions/capture` for an invoice capture.
      */
-    public const OPERATION_RESOURCE_KEY = 'mahoAdminResource';
+    public const string OPERATION_RESOURCE_KEY = 'mahoAdminResource';
 
     public function __construct(
         private readonly TokenStorageInterface $tokenStorage,

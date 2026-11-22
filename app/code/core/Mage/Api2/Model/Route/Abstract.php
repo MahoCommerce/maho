@@ -16,9 +16,9 @@ abstract class Mage_Api2_Model_Route_Abstract extends Mage_Api2_Model_Route_Base
     /**
      * Names for parent::__construct params
      */
-    public const PARAM_ROUTE      = 'route';
-    public const PARAM_DEFAULTS   = 'defaults';
-    public const PARAM_REQS       = 'reqs';
+    public const string PARAM_ROUTE      = 'route';
+    public const string PARAM_DEFAULTS   = 'defaults';
+    public const string PARAM_REQS       = 'reqs';
 
     /**
      * Default values of parent::__construct() params

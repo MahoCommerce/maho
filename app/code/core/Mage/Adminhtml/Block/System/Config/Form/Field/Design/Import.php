@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Block_System_Config_Form_Field_Design_Import extends Mage_Adminhtml_Block_System_Config_Form_Field
 {
-    private const GENERATOR_URL = 'https://daisyui.com/theme-generator/';
+    private const string GENERATOR_URL = 'https://daisyui.com/theme-generator/';
 
     /**
      * Renders no input of its own, so nothing is posted and nothing is stored.

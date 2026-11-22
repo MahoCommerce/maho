@@ -19,8 +19,8 @@ use Maho\Db\Helper;
 class Pgsql extends AbstractPdoAdapter
 {
     // PostgreSQL-specific constants
-    public const DDL_CACHE_PREFIX = 'DB_PDO_PGSQL_DDL';
-    public const DDL_CACHE_TAG = 'DB_PDO_PGSQL_DDL';
+    public const string DDL_CACHE_PREFIX = 'DB_PDO_PGSQL_DDL';
+    public const string DDL_CACHE_TAG = 'DB_PDO_PGSQL_DDL';
 
     /**
      * Default class name for a DB statement.

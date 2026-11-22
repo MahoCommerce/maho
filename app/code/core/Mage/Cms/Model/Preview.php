@@ -23,19 +23,19 @@ declare(strict_types=1);
  */
 class Mage_Cms_Model_Preview
 {
-    public const CACHE_TAG = 'CMS_PREVIEW';
+    public const string CACHE_TAG = 'CMS_PREVIEW';
 
     /** A draft lives this long after the last change in the editor. */
-    public const LIFETIME = 1800;
+    public const int LIFETIME = 1800;
 
-    public const XML_PATH_PROVIDERS = 'global/cms/preview/providers';
+    public const string XML_PATH_PROVIDERS = 'global/cms/preview/providers';
 
     /** The registry key of the draft that the current storefront request shows. */
-    public const REGISTRY_KEY = 'cms_preview';
+    public const string REGISTRY_KEY = 'cms_preview';
 
     /** The comments around the previewed content. The frame script measures the content between them. */
-    public const MARKER_START = '<!--cms-preview-start-->';
-    public const MARKER_END = '<!--cms-preview-end-->';
+    public const string MARKER_START = '<!--cms-preview-start-->';
+    public const string MARKER_END = '<!--cms-preview-end-->';
 
     /**
      * Store $draft and return its id. The id is random and is the only key to the draft.

@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 class Mage_SalesRule_Model_Rule_Condition_Metadata extends Mage_Rule_Model_Condition_Metadata
 {
-    public const ROOT_CONDITIONS = 'salesrule/rule_condition_combine';
-    public const ROOT_ACTIONS = 'salesrule/rule_condition_product_combine';
+    public const string ROOT_CONDITIONS = 'salesrule/rule_condition_combine';
+    public const string ROOT_ACTIONS = 'salesrule/rule_condition_product_combine';
 
     /**
      * @param array{inline_option_limit?: int} $args

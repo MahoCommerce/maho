@@ -22,9 +22,9 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 final class ImageUpload
 {
     /** The largest decoded image that an upload accepts, in bytes. */
-    public const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+    public const int MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
-    private const IMAGE_TYPES = [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF, IMAGETYPE_WEBP, IMAGETYPE_AVIF];
+    private const array IMAGE_TYPES = [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF, IMAGETYPE_WEBP, IMAGETYPE_AVIF];
 
     /**
      * Check the request body, write the image to a temporary file and give an uploader

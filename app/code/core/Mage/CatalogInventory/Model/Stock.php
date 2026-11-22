@@ -20,14 +20,14 @@ declare(strict_types=1);
  */
 class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
 {
-    public const BACKORDERS_NO             = 0;
-    public const BACKORDERS_YES_NONOTIFY   = 1;
-    public const BACKORDERS_YES_NOTIFY     = 2;
+    public const int BACKORDERS_NO             = 0;
+    public const int BACKORDERS_YES_NONOTIFY   = 1;
+    public const int BACKORDERS_YES_NOTIFY     = 2;
 
-    public const STOCK_OUT_OF_STOCK        = 0;
-    public const STOCK_IN_STOCK            = 1;
+    public const int STOCK_OUT_OF_STOCK        = 0;
+    public const int STOCK_IN_STOCK            = 1;
 
-    public const DEFAULT_STOCK_ID          = 1;
+    public const int DEFAULT_STOCK_ID          = 1;
 
     #[\Override]
     protected function _construct()

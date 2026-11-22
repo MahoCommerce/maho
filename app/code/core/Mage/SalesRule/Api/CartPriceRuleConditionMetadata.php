@@ -37,7 +37,7 @@ use Maho\ApiPlatform\Metadata\McpToolResourceMetadataCollectionFactory;
 )]
 class CartPriceRuleConditionMetadata extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_Promo_QuoteController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_Promo_QuoteController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, description: 'Hash of the document without the scope part')]
     public string $version = '';

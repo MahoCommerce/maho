@@ -10,7 +10,7 @@
 
 class Mage_Sales_Block_Order_Invoice_Totals extends Mage_Sales_Block_Order_Totals
 {
-    protected $_invoice = null;
+    protected ?Mage_Sales_Model_Order_Invoice $_invoice = null;
 
     /**
      * @return mixed|null

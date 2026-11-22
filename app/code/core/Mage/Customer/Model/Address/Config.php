@@ -10,9 +10,9 @@
 
 class Mage_Customer_Model_Address_Config extends Mage_Core_Model_Config_Base
 {
-    public const DEFAULT_ADDRESS_RENDERER  = 'customer/address_renderer_default';
-    public const XML_PATH_ADDRESS_TEMPLATE = 'customer/address_templates/';
-    public const DEFAULT_ADDRESS_FORMAT    = 'oneline';
+    public const string DEFAULT_ADDRESS_RENDERER  = 'customer/address_renderer_default';
+    public const string XML_PATH_ADDRESS_TEMPLATE = 'customer/address_templates/';
+    public const string DEFAULT_ADDRESS_FORMAT    = 'oneline';
 
     /**
      * Customer Address Templates per store

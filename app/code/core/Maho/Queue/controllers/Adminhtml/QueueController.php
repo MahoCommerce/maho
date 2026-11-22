@@ -12,9 +12,9 @@ use Maho\Queue\QueueManager;
 
 class Maho_Queue_Adminhtml_QueueController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'system/tools/maho_queue';
+    public const string ADMIN_RESOURCE = 'system/tools/maho_queue';
 
-    private const ACTION_RESOURCES = [
+    private const array ACTION_RESOURCES = [
         'index'       => 'system/tools/maho_queue/view',
         'grid'        => 'system/tools/maho_queue/view',
         'view'        => 'system/tools/maho_queue/view',

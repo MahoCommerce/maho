@@ -18,7 +18,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      * is_active, page...) collide with its fields and overwrite them on save. Orphaning them is
      * safe because grids serialise their own filters and pager.
      */
-    public const UNBOUND_FORM_ID = 'maho-grid-unbound';
+    public const string UNBOUND_FORM_ID = 'maho-grid-unbound';
 
     /**
      * Columns array

@@ -12,9 +12,9 @@ declare(strict_types=1);
 
 class Maho_CustomerSegmentation_Service_Segment
 {
-    public const REFRESH_WAIT_SECONDS = 3600;
+    public const int REFRESH_WAIT_SECONDS = 3600;
 
-    public const REFRESH_MODES = [
+    public const array REFRESH_MODES = [
         Maho_CustomerSegmentation_Model_Segment::MODE_AUTO,
         Maho_CustomerSegmentation_Model_Segment::MODE_MANUAL,
     ];

@@ -179,7 +179,7 @@ abstract class Mage_Sales_Model_Quote_Address_Total_Abstract
     }
 
     /**
-     * @return Mage_Sales_Model_Quote_Address_Item[]
+     * @return Mage_Sales_Model_Quote_Item[]
      */
     protected function _getAddressItems(Mage_Sales_Model_Quote_Address $address)
     {

@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_System_Email_LogController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'system/tools/email_log';
+    public const string ADMIN_RESOURCE = 'system/tools/email_log';
 
     #[Maho\Config\Route('/admin/system_email_log/index')]
     public function indexAction(): void

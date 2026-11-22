@@ -16,14 +16,14 @@ class Mage_Api2_Model_Response extends Mage_Core_Controller_Response_Http
     /**
      * Character set which must be used in response
      */
-    public const RESPONSE_CHARSET = 'utf-8';
+    public const string RESPONSE_CHARSET = 'utf-8';
 
     /**
      * Default message types
      */
-    public const MESSAGE_TYPE_SUCCESS = 'success';
-    public const MESSAGE_TYPE_ERROR   = 'error';
-    public const MESSAGE_TYPE_WARNING = 'warning';
+    public const string MESSAGE_TYPE_SUCCESS = 'success';
+    public const string MESSAGE_TYPE_ERROR   = 'error';
+    public const string MESSAGE_TYPE_WARNING = 'warning';
 
     /**
      * Messages

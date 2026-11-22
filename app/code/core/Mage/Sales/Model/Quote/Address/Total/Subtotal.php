@@ -56,18 +56,13 @@ class Mage_Sales_Model_Quote_Address_Total_Subtotal extends Mage_Sales_Model_Quo
      * Address item initialization
      *
      * @param Mage_Sales_Model_Quote_Address $address
-     * @param Mage_Sales_Model_Quote_Address_Item|Mage_Sales_Model_Quote_Item $item
+     * @param Mage_Sales_Model_Quote_Item $item
      * @return bool
      */
     protected function _initItem($address, $item)
     {
-        if ($item instanceof Mage_Sales_Model_Quote_Address_Item) {
-            $quoteItem = $item->getAddress()->getQuote()->getItemById($item->getQuoteItemId());
-        } else {
-            $quoteItem = $item;
-        }
-        $product = $quoteItem->getProduct();
-        $product->setCustomerGroupId($quoteItem->getQuote()->getCustomerGroupId());
+        $product = $item->getProduct();
+        $product->setCustomerGroupId($item->getQuote()->getCustomerGroupId());
 
         /**
          * Quote super mode flag mean what we work with quote without restriction
@@ -82,18 +77,18 @@ class Mage_Sales_Model_Quote_Address_Total_Subtotal extends Mage_Sales_Model_Quo
             }
         }
 
-        if ($quoteItem->getParentItem() && $quoteItem->isChildrenCalculated()) {
-            $finalPrice = $quoteItem->getParentItem()->getProduct()->getPriceModel()->getChildFinalPrice(
-                $quoteItem->getParentItem()->getProduct(),
-                $quoteItem->getParentItem()->getQty(),
-                $quoteItem->getProduct(),
-                $quoteItem->getQty(),
+        if ($item->getParentItem() && $item->isChildrenCalculated()) {
+            $finalPrice = $item->getParentItem()->getProduct()->getPriceModel()->getChildFinalPrice(
+                $item->getParentItem()->getProduct(),
+                $item->getParentItem()->getQty(),
+                $item->getProduct(),
+                $item->getQty(),
             );
             $item->setPrice($finalPrice)
                 ->setBaseOriginalPrice($finalPrice);
             $item->calcRowTotal();
-        } elseif (!$quoteItem->getParentItem()) {
-            $finalPrice = $product->getFinalPrice($quoteItem->getQty());
+        } elseif (!$item->getParentItem()) {
+            $finalPrice = $product->getFinalPrice($item->getQty());
             $item->setPrice($finalPrice)
                 ->setBaseOriginalPrice($finalPrice);
             $item->calcRowTotal();
@@ -114,16 +109,8 @@ class Mage_Sales_Model_Quote_Address_Total_Subtotal extends Mage_Sales_Model_Quo
      */
     protected function _removeItem($address, $item)
     {
-        if ($item instanceof Mage_Sales_Model_Quote_Item) {
-            $address->removeItem($item->getId());
-            if ($address->getQuote()) {
-                $address->getQuote()->removeItem($item->getId());
-            }
-        } elseif ($item instanceof Mage_Sales_Model_Quote_Address_Item) {
-            $address->removeItem($item->getId());
-            if ($address->getQuote()) {
-                $address->getQuote()->removeItem($item->getQuoteItemId());
-            }
+        if ($item instanceof Mage_Sales_Model_Quote_Item && $address->getQuote()) {
+            $address->getQuote()->removeItem($item->getId());
         }
 
         return $this;

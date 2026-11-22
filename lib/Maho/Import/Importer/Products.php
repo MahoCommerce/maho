@@ -17,11 +17,11 @@ use Maho\Import\CsvFile;
 
 class Products extends AbstractImportExportImporter
 {
-    public const OPTION_MEDIA_DIR = 'media_dir';
+    public const string OPTION_MEDIA_DIR = 'media_dir';
     /** Skips the security re-encode of the pictures; set only when the media folder is the operator's own. */
-    public const OPTION_TRUSTED_MEDIA = 'trusted_media';
+    public const string OPTION_TRUSTED_MEDIA = 'trusted_media';
 
-    private const IMAGE_COLUMNS = ['_media_image', 'image', 'small_image', 'thumbnail'];
+    private const array IMAGE_COLUMNS = ['_media_image', 'image', 'small_image', 'thumbnail'];
 
     #[\Override]
     protected function entityCode(): string

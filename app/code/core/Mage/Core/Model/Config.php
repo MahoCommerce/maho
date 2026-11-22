@@ -10,7 +10,7 @@
 
 class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 {
-    public const MAGE_MODULES = [
+    public const array MAGE_MODULES = [
         'Mage_Core' => 0,
         'Mage_Eav' => 1,
         'Mage_Page' => 2,
@@ -67,10 +67,10 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         'Mage_CurrencySymbol' => 62,
     ];
 
-    public const CACHE_TAG         = 'CONFIG';
+    public const string CACHE_TAG         = 'CONFIG';
 
     /** Stored for a cache section that the merged config does not contain at all. */
-    protected const ABSENT_SECTION_CACHE_VALUE = '<!-- absent -->';
+    protected const string ABSENT_SECTION_CACHE_VALUE = '<!-- absent -->';
 
     /**
      * Flag which allow use cache logic
@@ -755,7 +755,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * @return Mage_Core_Model_Config_Element|false
      */
     #[\Override]
-    public function getNode($path = null, $scope = '', $scopeCode = null)
+    public function getNode($path = null, ?string $scope = '', int|string|null $scopeCode = null)
     {
         if ($scope !== '') {
             if (($scope === 'store') || ($scope === 'website')) {

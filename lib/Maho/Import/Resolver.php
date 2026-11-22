@@ -153,7 +153,7 @@ final class Resolver
         return $this->cache[$kind][$key];
     }
 
-    public const MACRO = '/\{\{(attribute_id|attribute_ids|category_id|cms_block_id|store_id|website_id|store_url):([^}]*)\}\}/';
+    public const string MACRO = '/\{\{(attribute_id|attribute_ids|category_id|cms_block_id|store_id|website_id|store_url):([^}]*)\}\}/';
 
     /**
      * Expands {{attribute_id:code}}, {{attribute_ids:a,b}}, {{category_id:Root/url-key/...}}, {{cms_block_id:identifier}},

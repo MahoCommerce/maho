@@ -26,13 +26,13 @@ use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 
 final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
 {
-    private const SCOPES = [
+    private const array SCOPES = [
         'store' => Attribute::SCOPE_STORE,
         'global' => Attribute::SCOPE_GLOBAL,
         'website' => Attribute::SCOPE_WEBSITE,
     ];
 
-    private const BOOLEAN_FIELDS = [
+    private const array BOOLEAN_FIELDS = [
         'isRequired' => 'is_required',
         'isUnique' => 'is_unique',
         'isSearchable' => 'is_searchable',
@@ -48,25 +48,25 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
         'isConfigurable' => 'is_configurable',
     ];
 
-    private const TEXT_FIELDS = [
+    private const array TEXT_FIELDS = [
         'attributeCode' => 'attribute_code',
         'frontendInput' => 'frontend_input',
         'frontendLabel' => 'frontend_label',
     ];
 
-    private const INTEGER_FIELDS = [
+    private const array INTEGER_FIELDS = [
         'isFilterable' => 'is_filterable',
         'position' => 'position',
     ];
 
-    private const WRITABLE_FIELDS = ['scope', 'isGlobal', 'defaultValue', 'applyTo', 'frontendClass', 'note'];
+    private const array WRITABLE_FIELDS = ['scope', 'isGlobal', 'defaultValue', 'applyTo', 'frontendClass', 'note'];
 
     /**
      * A client can send back an attribute that it read, so these keys do not cause an error.
      */
-    private const READ_ONLY_FIELDS = ['id', 'backendType', 'isUserDefined', 'options', 'extensions', '@context', '@id', '@type'];
+    private const array READ_ONLY_FIELDS = ['id', 'backendType', 'isUserDefined', 'options', 'extensions', '@context', '@id', '@type'];
 
-    private const OPTION_FIELDS = ['label', 'sortOrder', 'isDefault', 'storeLabels'];
+    private const array OPTION_FIELDS = ['label', 'sortOrder', 'isDefault', 'storeLabels'];
 
     public function __construct(
         Security $security,

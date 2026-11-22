@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'cms/blog/categories';
+    public const string ADMIN_RESOURCE = 'cms/blog/categories';
 
     protected function _initAction(): self
     {

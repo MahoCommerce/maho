@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'cms';
+    public const string ADMIN_RESOURCE = 'cms';
 
     /**
      * Replace template directives with a non-empty placeholder before HTML validation.

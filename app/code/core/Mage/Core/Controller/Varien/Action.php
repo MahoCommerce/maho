@@ -13,20 +13,20 @@
  */
 abstract class Mage_Core_Controller_Varien_Action
 {
-    public const FLAG_NO_CHECK_INSTALLATION    = 'no-install-check';
-    public const FLAG_NO_DISPATCH              = 'no-dispatch';
-    public const FLAG_NO_PRE_DISPATCH          = 'no-preDispatch';
-    public const FLAG_NO_POST_DISPATCH         = 'no-postDispatch';
-    public const FLAG_NO_START_SESSION         = 'no-startSession';
-    public const FLAG_NO_DISPATCH_BLOCK_EVENT  = 'no-beforeGenerateLayoutBlocksDispatch';
+    public const string FLAG_NO_CHECK_INSTALLATION    = 'no-install-check';
+    public const string FLAG_NO_DISPATCH              = 'no-dispatch';
+    public const string FLAG_NO_PRE_DISPATCH          = 'no-preDispatch';
+    public const string FLAG_NO_POST_DISPATCH         = 'no-postDispatch';
+    public const string FLAG_NO_START_SESSION         = 'no-startSession';
+    public const string FLAG_NO_DISPATCH_BLOCK_EVENT  = 'no-beforeGenerateLayoutBlocksDispatch';
 
-    public const PARAM_NAME_SUCCESS_URL        = 'success_url';
-    public const PARAM_NAME_ERROR_URL          = 'error_url';
-    public const PARAM_NAME_REFERER_URL        = 'referer_url';
-    public const PARAM_NAME_BASE64_URL         = 'r64';
-    public const PARAM_NAME_URL_ENCODED        = 'uenc';
+    public const string PARAM_NAME_SUCCESS_URL        = 'success_url';
+    public const string PARAM_NAME_ERROR_URL          = 'error_url';
+    public const string PARAM_NAME_REFERER_URL        = 'referer_url';
+    public const string PARAM_NAME_BASE64_URL         = 'r64';
+    public const string PARAM_NAME_URL_ENCODED        = 'uenc';
 
-    public const PROFILER_KEY                  = 'dispatch.controller.action';
+    public const string PROFILER_KEY                  = 'dispatch.controller.action';
 
     /**
      * Request object
@@ -500,10 +500,10 @@ abstract class Mage_Core_Controller_Varien_Action
     /**
      * Dispatches event after action
      */
-    public function postDispatch()
+    public function postDispatch(): static
     {
         if ($this->getFlag('', self::FLAG_NO_POST_DISPATCH)) {
-            return;
+            return $this;
         }
 
         Mage::dispatchEvent(
@@ -519,6 +519,7 @@ abstract class Mage_Core_Controller_Varien_Action
             ['controller_action' => $this],
         );
         Mage::dispatchEvent('controller_action_postdispatch', ['controller_action' => $this]);
+        return $this;
     }
 
     /**

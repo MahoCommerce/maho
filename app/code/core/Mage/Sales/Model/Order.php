@@ -37,71 +37,71 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     /**
      * Identifier for history item
      */
-    public const ENTITY                                = 'order';
+    public const string ENTITY                                = 'order';
 
     /**
      * Event type names for order emails
      */
-    public const EMAIL_EVENT_NAME_NEW_ORDER    = 'new_order';
-    public const EMAIL_EVENT_NAME_UPDATE_ORDER = 'update_order';
+    public const string EMAIL_EVENT_NAME_NEW_ORDER    = 'new_order';
+    public const string EMAIL_EVENT_NAME_UPDATE_ORDER = 'update_order';
 
     /**
      * XML configuration paths
      */
-    public const XML_PATH_EMAIL_TEMPLATE               = 'sales_email/order/template';
-    public const XML_PATH_EMAIL_GUEST_TEMPLATE         = 'sales_email/order/guest_template';
-    public const XML_PATH_EMAIL_IDENTITY               = 'sales_email/order/identity';
-    public const XML_PATH_EMAIL_COPY_TO                = 'sales_email/order/copy_to';
-    public const XML_PATH_EMAIL_COPY_METHOD            = 'sales_email/order/copy_method';
-    public const XML_PATH_EMAIL_ENABLED                = 'sales_email/order/enabled';
+    public const string XML_PATH_EMAIL_TEMPLATE               = 'sales_email/order/template';
+    public const string XML_PATH_EMAIL_GUEST_TEMPLATE         = 'sales_email/order/guest_template';
+    public const string XML_PATH_EMAIL_IDENTITY               = 'sales_email/order/identity';
+    public const string XML_PATH_EMAIL_COPY_TO                = 'sales_email/order/copy_to';
+    public const string XML_PATH_EMAIL_COPY_METHOD            = 'sales_email/order/copy_method';
+    public const string XML_PATH_EMAIL_ENABLED                = 'sales_email/order/enabled';
 
-    public const XML_PATH_UPDATE_EMAIL_TEMPLATE        = 'sales_email/order_comment/template';
-    public const XML_PATH_UPDATE_EMAIL_GUEST_TEMPLATE  = 'sales_email/order_comment/guest_template';
-    public const XML_PATH_UPDATE_EMAIL_IDENTITY        = 'sales_email/order_comment/identity';
-    public const XML_PATH_UPDATE_EMAIL_COPY_TO         = 'sales_email/order_comment/copy_to';
-    public const XML_PATH_UPDATE_EMAIL_COPY_METHOD     = 'sales_email/order_comment/copy_method';
-    public const XML_PATH_UPDATE_EMAIL_ENABLED         = 'sales_email/order_comment/enabled';
+    public const string XML_PATH_UPDATE_EMAIL_TEMPLATE        = 'sales_email/order_comment/template';
+    public const string XML_PATH_UPDATE_EMAIL_GUEST_TEMPLATE  = 'sales_email/order_comment/guest_template';
+    public const string XML_PATH_UPDATE_EMAIL_IDENTITY        = 'sales_email/order_comment/identity';
+    public const string XML_PATH_UPDATE_EMAIL_COPY_TO         = 'sales_email/order_comment/copy_to';
+    public const string XML_PATH_UPDATE_EMAIL_COPY_METHOD     = 'sales_email/order_comment/copy_method';
+    public const string XML_PATH_UPDATE_EMAIL_ENABLED         = 'sales_email/order_comment/enabled';
 
     /**
      * Order states
      */
-    public const STATE_NEW             = 'new';
-    public const STATE_PENDING_PAYMENT = 'pending_payment';
-    public const STATE_PROCESSING      = 'processing';
-    public const STATE_COMPLETE        = 'complete';
-    public const STATE_CLOSED          = 'closed';
-    public const STATE_CANCELED        = 'canceled';
-    public const STATE_HOLDED          = 'holded';
-    public const STATE_PAYMENT_REVIEW  = 'payment_review';
+    public const string STATE_NEW             = 'new';
+    public const string STATE_PENDING_PAYMENT = 'pending_payment';
+    public const string STATE_PROCESSING      = 'processing';
+    public const string STATE_COMPLETE        = 'complete';
+    public const string STATE_CLOSED          = 'closed';
+    public const string STATE_CANCELED        = 'canceled';
+    public const string STATE_HOLDED          = 'holded';
+    public const string STATE_PAYMENT_REVIEW  = 'payment_review';
 
     /**
      * Order statuses
      */
-    public const STATUS_FRAUD  = 'fraud';
+    public const string STATUS_FRAUD  = 'fraud';
 
     /**
      * Order flags
      */
-    public const ACTION_FLAG_CANCEL                    = 'cancel';
-    public const ACTION_FLAG_HOLD                      = 'hold';
-    public const ACTION_FLAG_UNHOLD                    = 'unhold';
-    public const ACTION_FLAG_EDIT                      = 'edit';
-    public const ACTION_FLAG_CREDITMEMO                = 'creditmemo';
-    public const ACTION_FLAG_INVOICE                   = 'invoice';
-    public const ACTION_FLAG_REORDER                   = 'reorder';
-    public const ACTION_FLAG_SHIP                      = 'ship';
-    public const ACTION_FLAG_COMMENT                   = 'comment';
-    public const ACTION_FLAG_PRODUCTS_PERMISSION_DENIED = 'product_permission_denied';
+    public const string ACTION_FLAG_CANCEL                    = 'cancel';
+    public const string ACTION_FLAG_HOLD                      = 'hold';
+    public const string ACTION_FLAG_UNHOLD                    = 'unhold';
+    public const string ACTION_FLAG_EDIT                      = 'edit';
+    public const string ACTION_FLAG_CREDITMEMO                = 'creditmemo';
+    public const string ACTION_FLAG_INVOICE                   = 'invoice';
+    public const string ACTION_FLAG_REORDER                   = 'reorder';
+    public const string ACTION_FLAG_SHIP                      = 'ship';
+    public const string ACTION_FLAG_COMMENT                   = 'comment';
+    public const string ACTION_FLAG_PRODUCTS_PERMISSION_DENIED = 'product_permission_denied';
 
     /**
      * Report date types
      */
-    public const REPORT_DATE_TYPE_CREATED = 'created';
-    public const REPORT_DATE_TYPE_UPDATED = 'updated';
+    public const string REPORT_DATE_TYPE_CREATED = 'created';
+    public const string REPORT_DATE_TYPE_UPDATED = 'updated';
     /**
      * Identifier for history item
      */
-    public const HISTORY_ENTITY_NAME = 'order';
+    public const string HISTORY_ENTITY_NAME = 'order';
 
     #[\Override]
     protected $_eventPrefix = 'sales_order';

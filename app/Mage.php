@@ -18,26 +18,26 @@ final class Mage
     /**
      * Log level constants
      */
-    public const LOG_EMERGENCY = Level::Emergency;
-    public const LOG_ALERT     = Level::Alert;
-    public const LOG_CRITICAL  = Level::Critical;
-    public const LOG_ERROR     = Level::Error;
-    public const LOG_WARNING   = Level::Warning;
-    public const LOG_NOTICE    = Level::Notice;
-    public const LOG_INFO      = Level::Info;
-    public const LOG_DEBUG     = Level::Debug;
+    public const Level LOG_EMERGENCY = Level::Emergency;
+    public const Level LOG_ALERT     = Level::Alert;
+    public const Level LOG_CRITICAL  = Level::Critical;
+    public const Level LOG_ERROR     = Level::Error;
+    public const Level LOG_WARNING   = Level::Warning;
+    public const Level LOG_NOTICE    = Level::Notice;
+    public const Level LOG_INFO      = Level::Info;
+    public const Level LOG_DEBUG     = Level::Debug;
 
     #[\Deprecated(message: 'Use LOG_EMERGENCY instead')]
-    public const LOG_EMERG = self::LOG_EMERGENCY;
+    public const Level LOG_EMERG = self::LOG_EMERGENCY;
 
     #[\Deprecated(message: 'Use LOG_CRITICAL instead')]
-    public const LOG_CRIT = self::LOG_CRITICAL;
+    public const Level LOG_CRIT = self::LOG_CRITICAL;
 
     #[\Deprecated(message: 'Use LOG_ERROR instead')]
-    public const LOG_ERR = self::LOG_ERROR;
+    public const Level LOG_ERR = self::LOG_ERROR;
 
     #[\Deprecated(message: 'Use LOG_WARNING instead')]
-    public const LOG_WARN = self::LOG_WARNING;
+    public const Level LOG_WARN = self::LOG_WARNING;
 
     /**
      * Registry collection

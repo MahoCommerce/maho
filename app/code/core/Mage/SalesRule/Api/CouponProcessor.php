@@ -21,7 +21,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 {
     use PriceRuleFieldsTrait;
 
-    private const DISCOUNT_TYPE_MAP = [
+    private const array DISCOUNT_TYPE_MAP = [
         'percent' => 'by_percent',
         'fixed' => 'by_fixed',
         'cart_fixed' => 'cart_fixed',
@@ -29,7 +29,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
     ];
 
     /** The rule column and the type of each field */
-    private const RULE_FIELDS = [
+    private const array RULE_FIELDS = [
         'isActive' => ['is_active', 'bool'],
         'usageLimit' => ['uses_per_coupon', 'int'],
         'usagePerCustomer' => ['uses_per_customer', 'int'],

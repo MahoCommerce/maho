@@ -16,7 +16,7 @@ final class ProductsViewedReportProvider extends ReportProviderBase
 {
     use RankedProductsTrait;
 
-    public const TABLES = [
+    public const array TABLES = [
         ReportQuery::PERIOD_DAY => 'reports/viewed_aggregated_daily',
         ReportQuery::PERIOD_MONTH => 'reports/viewed_aggregated_monthly',
         ReportQuery::PERIOD_YEAR => 'reports/viewed_aggregated_yearly',

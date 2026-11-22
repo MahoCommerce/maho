@@ -48,24 +48,24 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
      */
     protected $_stores = null;
 
-    public const STATUS_NEVER = 0;
-    public const STATUS_SENDING = 1;
-    public const STATUS_CANCEL = 2;
-    public const STATUS_SENT = 3;
-    public const STATUS_PAUSE = 4;
+    public const int STATUS_NEVER = 0;
+    public const int STATUS_SENDING = 1;
+    public const int STATUS_CANCEL = 2;
+    public const int STATUS_SENT = 3;
+    public const int STATUS_PAUSE = 4;
 
     /**
      * Logical queue carrying both the campaign batches and the newsletters
      * themselves, so a blast can be consumed by a worker of its own
      * (`queue:work --queue=newsletter`) instead of delaying transactional mail.
      */
-    public const QUEUE_NAME = 'newsletter';
+    public const string QUEUE_NAME = 'newsletter';
 
     /**
      * Frozen once a campaign has started: later batches must send exactly
      * what the first one did. Status and schedule stay writable.
      */
-    public const FROZEN_AFTER_START = [
+    public const array FROZEN_AFTER_START = [
         'template_id', 'newsletter_type', 'newsletter_subject', 'newsletter_sender_name',
         'newsletter_sender_email', 'newsletter_text', 'newsletter_styles', 'customer_segment_ids',
     ];

@@ -31,7 +31,7 @@ use Maho\ApiPlatform\CrudResource;
 )]
 class Currency extends CrudResource
 {
-    public const MODEL = 'directory/currency';
+    public const string MODEL = 'directory/currency';
 
     #[ApiProperty(identifier: true, writable: false, extraProperties: ['modelField' => 'currency_code'])]
     public string $code = '';

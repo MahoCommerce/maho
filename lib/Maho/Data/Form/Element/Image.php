@@ -16,7 +16,7 @@ use Maho\Data\Form\Element\AbstractElement;
 class Image extends AbstractElement
 {
     /** The preview shows at 4rem, so 128 pixels cover a screen with a pixel ratio of 2 */
-    public const PREVIEW_WIDTH = 128;
+    public const int PREVIEW_WIDTH = 128;
 
     /**
      * Constructor

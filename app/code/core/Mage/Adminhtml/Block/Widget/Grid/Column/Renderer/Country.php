@@ -10,13 +10,8 @@
 
 class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Country extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
-    /**
-     * Render country grid column
-     *
-     * @return  string|null
-     */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         if ($data = $row->getData($this->getColumn()->getIndex())) {
             $name = Mage::app()->getLocale()->getCountryTranslation($data);
@@ -25,6 +20,6 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Country extends Mage_Admi
             }
             return $name;
         }
-        return null;
+        return '';
     }
 }

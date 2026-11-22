@@ -47,7 +47,7 @@ uses(MahoBackendTestCase::class);
  */
 final class PropertyAuthzKernel extends Kernel
 {
-    private const EXPOSE = [
+    private const array EXPOSE = [
         'api_platform.serializer',
         'api_platform.security.resource_access_checker',
         'security.token_storage',

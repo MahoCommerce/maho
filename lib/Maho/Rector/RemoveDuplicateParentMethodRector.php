@@ -49,7 +49,7 @@ final class RemoveDuplicateParentMethodRector extends AbstractRector
      * A docblock tag in this list refines the parent contract.
      * @var string[]
      */
-    private const REFINING_TAGS = [
+    private const array REFINING_TAGS = [
         '@param', '@phpstan-param', '@psalm-param',
         '@return', '@phpstan-return', '@psalm-return',
         '@throws', '@deprecated', '@var', '@template',

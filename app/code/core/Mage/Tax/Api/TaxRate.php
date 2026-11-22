@@ -78,16 +78,16 @@ use Maho\ApiPlatform\CrudResource;
 )]
 class TaxRate extends CrudResource
 {
-    public const MODEL = 'tax/calculation_rate';
+    public const string MODEL = 'tax/calculation_rate';
 
-    public const PRIMARY_KEY = 'tax_calculation_rate_id';
+    public const string PRIMARY_KEY = 'tax_calculation_rate_id';
 
     /**
      * Admin ACL gate. Mirrors the backend tax rate page (sales/tax/rates).
      * Mage_Adminhtml_Tax_RateController declares no ADMIN_RESOURCE of its own,
      * so the ACL node from app/code/core/Mage/Tax/etc/adminhtml.xml is used.
      */
-    public const ADMIN_RESOURCE = 'sales/tax/rates';
+    public const string ADMIN_RESOURCE = 'sales/tax/rates';
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

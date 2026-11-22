@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_RatingController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'catalog/reviews_ratings/ratings';
+    public const string ADMIN_RESOURCE = 'catalog/reviews_ratings/ratings';
 
     #[Maho\Config\Route('/admin/rating/index')]
     public function indexAction(): void

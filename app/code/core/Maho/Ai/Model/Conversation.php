@@ -12,16 +12,16 @@ declare(strict_types=1);
 
 class Maho_Ai_Model_Conversation extends Mage_Core_Model_Abstract
 {
-    public const STATUS_ACTIVE = 'active';
-    public const STATUS_ARCHIVED = 'archived';
+    public const string STATUS_ACTIVE = 'active';
+    public const string STATUS_ARCHIVED = 'archived';
     /** A background run of the assistant works in it; the panel polls it until it is active again. */
-    public const STATUS_RUNNING = 'running';
+    public const string STATUS_RUNNING = 'running';
 
     /** The consumer that the usage records and the tasks of the assistant carry. */
-    public const USAGE_CONSUMER = 'ai_chat';
+    public const string USAGE_CONSUMER = 'ai_chat';
 
     /** Seconds one chat turn may hold the conversation before another request may take it. */
-    public const LOCK_SECONDS = 300;
+    public const int LOCK_SECONDS = 300;
 
     #[\Override]
     protected function _construct(): void

@@ -12,9 +12,9 @@ declare(strict_types=1);
 
 class Mage_Sitemap_Model_Source_Signal_Usage
 {
-    public const IMMEDIATE = 'immediate';
-    public const REFERENCE = 'reference';
-    public const FULL = 'full';
+    public const string IMMEDIATE = 'immediate';
+    public const string REFERENCE = 'reference';
+    public const string FULL = 'full';
 
     /**
      * @return array<int, array{value: string, label: string}>

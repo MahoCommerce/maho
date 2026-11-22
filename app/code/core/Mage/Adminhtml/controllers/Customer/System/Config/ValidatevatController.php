@@ -19,11 +19,7 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Customer_System_Config_ValidatevatController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'system/config';
+    public const string ADMIN_RESOURCE = 'system/config';
 
     /**
      * Perform customer VAT ID validation with caching

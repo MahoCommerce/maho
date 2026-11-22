@@ -39,14 +39,14 @@ use Symfony\Component\Messenger\Transport\Sender\SendersLocator;
 final class QueueManager
 {
     /** The name this transport is registered under with Messenger. */
-    public const TRANSPORT_DB = 'db';
+    public const string TRANSPORT_DB = 'db';
 
-    public const XML_PATH_MAX_RETRIES = 'system/queue/max_retries';
-    public const XML_PATH_RETRY_DELAY = 'system/queue/retry_delay';
-    public const XML_PATH_RETRY_MULTIPLIER = 'system/queue/retry_multiplier';
-    public const XML_PATH_RETRY_MAX_DELAY = 'system/queue/retry_max_delay';
-    public const XML_PATH_COMPLETED_RETENTION = 'system/queue/completed_retention';
-    public const XML_PATH_FAILED_RETENTION = 'system/queue/failed_retention';
+    public const string XML_PATH_MAX_RETRIES = 'system/queue/max_retries';
+    public const string XML_PATH_RETRY_DELAY = 'system/queue/retry_delay';
+    public const string XML_PATH_RETRY_MULTIPLIER = 'system/queue/retry_multiplier';
+    public const string XML_PATH_RETRY_MAX_DELAY = 'system/queue/retry_max_delay';
+    public const string XML_PATH_COMPLETED_RETENTION = 'system/queue/completed_retention';
+    public const string XML_PATH_FAILED_RETENTION = 'system/queue/failed_retention';
 
     private static ?MessageBus $bus = null;
     private static ?DbTransport $dbTransport = null;

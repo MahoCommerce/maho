@@ -15,19 +15,19 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Config paths for using throughout the code
      */
-    public const XML_PATH_ACTIVE        = 'google/analytics/active';
-    public const XML_PATH_TYPE          = 'google/analytics/type';
-    public const XML_PATH_ACCOUNT       = 'google/analytics/account';
-    public const XML_PATH_DEBUG         = 'google/analytics/debug';
-    public const XML_PATH_USERID        = 'google/analytics/user_id';
+    public const string XML_PATH_ACTIVE        = 'google/analytics/active';
+    public const string XML_PATH_TYPE          = 'google/analytics/type';
+    public const string XML_PATH_ACCOUNT       = 'google/analytics/account';
+    public const string XML_PATH_DEBUG         = 'google/analytics/debug';
+    public const string XML_PATH_USERID        = 'google/analytics/user_id';
 
-    public const XML_PATH_GTM_ACTIVE    = 'google/gtm/active';
-    public const XML_PATH_GTM_CONTAINER_ID   = 'google/gtm/container_id';
+    public const string XML_PATH_GTM_ACTIVE    = 'google/gtm/active';
+    public const string XML_PATH_GTM_CONTAINER_ID   = 'google/gtm/container_id';
 
     /**
      * @var string google analytics 4
      */
-    public const TYPE_ANALYTICS4 = 'analytics4';
+    public const string TYPE_ANALYTICS4 = 'analytics4';
 
     /**
      * @var string
@@ -123,7 +123,7 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
      *
      * @return bool
      */
-    public function isDebugModeEnabled($store = null)
+    public function isDebugModeEnabled(Mage_Core_Model_Store|int|null $store = null)
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_DEBUG, $store) && Mage::helper('core')->isDevAllowed();
     }
@@ -144,7 +144,7 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
      *
      * @return bool
      */
-    public function isUserIdEnabled($store = null)
+    public function isUserIdEnabled(Mage_Core_Model_Store|int|null $store = null)
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_USERID, $store);
     }

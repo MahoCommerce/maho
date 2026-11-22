@@ -36,13 +36,13 @@ final class AdminPageTool
         private readonly ResourceMetadataCollectionFactoryInterface $resourceMetadataCollectionFactory,
     ) {}
 
-    public const NAME = 'admin_open_page';
-    public const FILL_NAME = 'admin_fill_form';
-    public const ACTION_NAME = 'admin_page_action';
-    public const NAMES = [self::NAME, self::FILL_NAME, self::ACTION_NAME];
-    public const ACTIONS = ['click', 'open_tab', 'set_field', 'open_row'];
+    public const string NAME = 'admin_open_page';
+    public const string FILL_NAME = 'admin_fill_form';
+    public const string ACTION_NAME = 'admin_page_action';
+    public const array NAMES = [self::NAME, self::FILL_NAME, self::ACTION_NAME];
+    public const array ACTIONS = ['click', 'open_tab', 'set_field', 'open_row'];
     /** Enough for a comment form: the text, two checkboxes and the submit button. */
-    public const MAX_STEPS = 5;
+    public const int MAX_STEPS = 5;
 
     /**
      * Whether the steps of a page action click a button. Opening a tab or a grid row and setting a field save nothing.

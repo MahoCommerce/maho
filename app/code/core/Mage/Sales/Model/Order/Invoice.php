@@ -19,36 +19,36 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
     /**
      * Invoice states
      */
-    public const STATE_OPEN       = 1;
-    public const STATE_PAID       = 2;
-    public const STATE_CANCELED   = 3;
+    public const int STATE_OPEN       = 1;
+    public const int STATE_PAID       = 2;
+    public const int STATE_CANCELED   = 3;
 
-    public const CAPTURE_ONLINE   = 'online';
-    public const CAPTURE_OFFLINE  = 'offline';
-    public const NOT_CAPTURE      = 'not_capture';
+    public const string CAPTURE_ONLINE   = 'online';
+    public const string CAPTURE_OFFLINE  = 'offline';
+    public const string NOT_CAPTURE      = 'not_capture';
 
-    public const XML_PATH_EMAIL_TEMPLATE               = 'sales_email/invoice/template';
-    public const XML_PATH_EMAIL_GUEST_TEMPLATE         = 'sales_email/invoice/guest_template';
-    public const XML_PATH_EMAIL_IDENTITY               = 'sales_email/invoice/identity';
-    public const XML_PATH_EMAIL_COPY_TO                = 'sales_email/invoice/copy_to';
-    public const XML_PATH_EMAIL_COPY_METHOD            = 'sales_email/invoice/copy_method';
-    public const XML_PATH_EMAIL_ENABLED                = 'sales_email/invoice/enabled';
-    public const XML_PATH_EMAIL_ATTACH_PDF             = 'sales_email/invoice/attach_pdf';
+    public const string XML_PATH_EMAIL_TEMPLATE               = 'sales_email/invoice/template';
+    public const string XML_PATH_EMAIL_GUEST_TEMPLATE         = 'sales_email/invoice/guest_template';
+    public const string XML_PATH_EMAIL_IDENTITY               = 'sales_email/invoice/identity';
+    public const string XML_PATH_EMAIL_COPY_TO                = 'sales_email/invoice/copy_to';
+    public const string XML_PATH_EMAIL_COPY_METHOD            = 'sales_email/invoice/copy_method';
+    public const string XML_PATH_EMAIL_ENABLED                = 'sales_email/invoice/enabled';
+    public const string XML_PATH_EMAIL_ATTACH_PDF             = 'sales_email/invoice/attach_pdf';
 
-    public const XML_PATH_UPDATE_EMAIL_TEMPLATE        = 'sales_email/invoice_comment/template';
-    public const XML_PATH_UPDATE_EMAIL_GUEST_TEMPLATE  = 'sales_email/invoice_comment/guest_template';
-    public const XML_PATH_UPDATE_EMAIL_IDENTITY        = 'sales_email/invoice_comment/identity';
-    public const XML_PATH_UPDATE_EMAIL_COPY_TO         = 'sales_email/invoice_comment/copy_to';
-    public const XML_PATH_UPDATE_EMAIL_COPY_METHOD     = 'sales_email/invoice_comment/copy_method';
-    public const XML_PATH_UPDATE_EMAIL_ENABLED         = 'sales_email/invoice_comment/enabled';
+    public const string XML_PATH_UPDATE_EMAIL_TEMPLATE        = 'sales_email/invoice_comment/template';
+    public const string XML_PATH_UPDATE_EMAIL_GUEST_TEMPLATE  = 'sales_email/invoice_comment/guest_template';
+    public const string XML_PATH_UPDATE_EMAIL_IDENTITY        = 'sales_email/invoice_comment/identity';
+    public const string XML_PATH_UPDATE_EMAIL_COPY_TO         = 'sales_email/invoice_comment/copy_to';
+    public const string XML_PATH_UPDATE_EMAIL_COPY_METHOD     = 'sales_email/invoice_comment/copy_method';
+    public const string XML_PATH_UPDATE_EMAIL_ENABLED         = 'sales_email/invoice_comment/enabled';
 
-    public const REPORT_DATE_TYPE_ORDER_CREATED        = 'order_created';
-    public const REPORT_DATE_TYPE_INVOICE_CREATED      = 'invoice_created';
+    public const string REPORT_DATE_TYPE_ORDER_CREATED        = 'order_created';
+    public const string REPORT_DATE_TYPE_INVOICE_CREATED      = 'invoice_created';
 
     /**
      * Identifier for order history item
      */
-    public const HISTORY_ENTITY_NAME = 'invoice';
+    public const string HISTORY_ENTITY_NAME = 'invoice';
 
     protected static ?array $_states = null;
 

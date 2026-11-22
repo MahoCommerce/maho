@@ -16,7 +16,7 @@ class Mage_Api2_Model_Request_Interpreter_Xml implements Mage_Api2_Model_Request
     /**
      * Default name for item of non-associative array
      */
-    public const ARRAY_NON_ASSOC_ITEM_NAME = 'data_item';
+    public const string ARRAY_NON_ASSOC_ITEM_NAME = 'data_item';
 
     /**
      * Load error string.

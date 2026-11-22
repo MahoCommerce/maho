@@ -21,16 +21,16 @@ declare(strict_types=1);
  */
 class Maho_FeedManager_Model_Mapper
 {
-    public const SOURCE_TYPE_ATTRIBUTE = 'attribute';
-    public const SOURCE_TYPE_STATIC = 'static';
-    public const SOURCE_TYPE_RULE = 'rule';
-    public const SOURCE_TYPE_COMBINED = 'combined';
-    public const SOURCE_TYPE_TAXONOMY = 'taxonomy';
+    public const string SOURCE_TYPE_ATTRIBUTE = 'attribute';
+    public const string SOURCE_TYPE_STATIC = 'static';
+    public const string SOURCE_TYPE_RULE = 'rule';
+    public const string SOURCE_TYPE_COMBINED = 'combined';
+    public const string SOURCE_TYPE_TAXONOMY = 'taxonomy';
 
-    public const UNIT_TYPE_WEIGHT = 'weight';
+    public const string UNIT_TYPE_WEIGHT = 'weight';
 
     /** The weight units Google and the platforms that copy its specification accept. */
-    public const SUPPORTED_WEIGHT_UNITS = [
+    public const array SUPPORTED_WEIGHT_UNITS = [
         Mage_Core_Model_Locale::WEIGHT_POUND,
         Mage_Core_Model_Locale::WEIGHT_OUNCE,
         Mage_Core_Model_Locale::WEIGHT_GRAM,
@@ -40,7 +40,7 @@ class Maho_FeedManager_Model_Mapper
     /**
      * Known price fields that should be auto-formatted
      */
-    protected const PRICE_FIELDS = [
+    protected const array PRICE_FIELDS = [
         'price',
         'special_price',
         'regular_price',
@@ -55,7 +55,7 @@ class Maho_FeedManager_Model_Mapper
     ];
 
     /** Fields of the row of a configurable child that come from the parent, as checkout charges them. */
-    protected const VARIANT_PRICE_FIELDS = [
+    protected const array VARIANT_PRICE_FIELDS = [
         'price',
         'final_price',
         'regular_price',
@@ -66,7 +66,7 @@ class Maho_FeedManager_Model_Mapper
     ];
 
     /** Image fields that use the feed placeholder URL when no value resolves. */
-    protected const IMAGE_FIELDS = [
+    protected const array IMAGE_FIELDS = [
         'image',
         'small_image',
         'thumbnail',
@@ -77,7 +77,7 @@ class Maho_FeedManager_Model_Mapper
      * Prices that a customer pays. They follow the feed tax mode.
      * The 'cost' field is a supplier cost, so it is not in this list.
      */
-    protected const TAXED_PRICE_FIELDS = [
+    protected const array TAXED_PRICE_FIELDS = [
         'price',
         'regular_price',
         'special_price',

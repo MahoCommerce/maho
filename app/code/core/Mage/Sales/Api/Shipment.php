@@ -223,10 +223,10 @@ use Maho\ApiPlatform\Metadata\ListFilter;
 )]
 class Shipment extends CrudResource
 {
-    public const MODEL = 'sales/order_shipment';
+    public const string MODEL = 'sales/order_shipment';
 
     /** Admin ACL gate. References backend abstract controller's constant. */
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_Controller_Sales_Shipment::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_Controller_Sales_Shipment::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

@@ -10,9 +10,9 @@
 
 class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Resource_Report_Abstract
 {
-    public const AGGREGATION_DAILY   = 'daily';
-    public const AGGREGATION_MONTHLY = 'monthly';
-    public const AGGREGATION_YEARLY  = 'yearly';
+    public const string AGGREGATION_DAILY   = 'daily';
+    public const string AGGREGATION_MONTHLY = 'monthly';
+    public const string AGGREGATION_YEARLY  = 'yearly';
 
     #[\Override]
     protected function _construct(): void

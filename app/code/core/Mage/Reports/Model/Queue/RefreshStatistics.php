@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 final class Mage_Reports_Model_Queue_RefreshStatistics
 {
-    public const QUEUE_NAME = 'reports';
+    public const string QUEUE_NAME = 'reports';
 
     /**
      * @param ?int $adminUserId the administrator who gets the result in the inbox, or null for no message

@@ -22,7 +22,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class Uploader
 {
-    public const UPLOAD_ERRORS = [
+    public const array UPLOAD_ERRORS = [
         UPLOAD_ERR_INI_SIZE => 'The uploaded file exceeds the upload_max_filesize directive in php.ini',
         UPLOAD_ERR_FORM_SIZE => 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form',
         UPLOAD_ERR_PARTIAL => 'The uploaded file was only partially uploaded',
@@ -134,8 +134,8 @@ class Uploader
      */
     protected $_validateCallbacks = [];
 
-    public const SINGLE_STYLE = 0;
-    public const MULTIPLE_STYLE = 1;
+    public const int SINGLE_STYLE = 0;
+    public const int MULTIPLE_STYLE = 1;
 
     /**
      * Resulting of uploaded file

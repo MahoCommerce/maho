@@ -13,12 +13,12 @@ class Mage_Customer_Model_Observer
     /**
      * VAT ID validation processed flag code
      */
-    public const VIV_PROCESSED_FLAG = 'viv_after_address_save_processed';
+    public const string VIV_PROCESSED_FLAG = 'viv_after_address_save_processed';
 
     /**
      * VAT ID validation currently saved address flag
      */
-    public const VIV_CURRENTLY_SAVED_ADDRESS = 'currently_saved_address';
+    public const string VIV_CURRENTLY_SAVED_ADDRESS = 'currently_saved_address';
 
     /**
      * Check whether specified billing address is default for its customer

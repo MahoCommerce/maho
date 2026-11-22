@@ -26,12 +26,12 @@ use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
  */
 class JwtService
 {
-    private const CONFIG_PATH_SECRET = 'apiplatform/oauth2/secret';
-    private const CONFIG_PATH_TOKEN_LIFETIME = 'apiplatform/oauth2/token_lifetime';
+    private const string CONFIG_PATH_SECRET = 'apiplatform/oauth2/secret';
+    private const string CONFIG_PATH_TOKEN_LIFETIME = 'apiplatform/oauth2/token_lifetime';
     // Matches Helper_Data::DEFAULT_TOKEN_LIFETIME and the shipped config default
     // (apiplatform/oauth2/token_lifetime). A blank config must not silently issue
     // longer-lived tokens than the documented 1h default.
-    private const DEFAULT_TOKEN_EXPIRY_SECONDS = 3600; // 1 hour
+    private const int DEFAULT_TOKEN_EXPIRY_SECONDS = 3600; // 1 hour
 
     private ?string $cachedSecret = null;
     private ?Configuration $config = null;

@@ -19,9 +19,11 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
 
     protected array $_filter = [];
     protected array $_joinFilter = [];
-    protected $_joinAttr = [];
+    /** @var list<array{attribute: ?string, alias: ?string, bind: ?string, joinType: ?string, storeId: ?int}> */
+    protected array $_joinAttr = [];
     protected ?array $_attrToDb = null;
-    protected $_joinField = [];
+    /** @var list<array{alias: string, attribute: string, field: ?string, bind: string, cond: ?string, joinType: ?string}> */
+    protected array $_joinField = [];
 
     /**
      * Retrieve store Id
@@ -205,7 +207,8 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
             $joinArrAttr['alias'] = isset($joinAttr['attribute']) ? str_replace('/', '_', $joinAttr['attribute']) : null;
             $joinArrAttr['bind'] = $joinAttr['bind'] ?? null;
             $joinArrAttr['joinType'] = $joinAttr['joinType'] ?? null;
-            $joinArrAttr['storeId'] = $joinAttr['storeId'] ?? $this->getStoreId();
+            $storeId = $joinAttr['storeId'] ?? $this->getStoreId();
+            $joinArrAttr['storeId'] = $storeId === null ? null : (int) $storeId;
             $this->_joinAttr[] = $joinArrAttr;
         }
     }
@@ -213,7 +216,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
     /**
      * Add join field
      *
-     * @param array $joinField   Variable should be have view:
+     * @param array{alias: string, attribute: string, field: ?string, bind: string, cond: ?string, joinType: ?string} $joinField   Variable should be have view:
      *     Example:
      *         [
      *            'alias'     => 'alias_table',
@@ -251,17 +254,15 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
         try {
             $collection = $this->_getCollectionForLoad($entityType);
 
-            if (isset($this->_joinAttr) && is_array($this->_joinAttr)) {
-                foreach ($this->_joinAttr as $val) {
-                    $collection->joinAttribute(
-                        $val['alias'],
-                        $val['attribute'],
-                        $val['bind'],
-                        null,
-                        strtolower($val['joinType']),
-                        $val['storeId'],
-                    );
-                }
+            foreach ($this->_joinAttr as $val) {
+                $collection->joinAttribute(
+                    $val['alias'],
+                    $val['attribute'],
+                    $val['bind'],
+                    null,
+                    strtolower($val['joinType']),
+                    $val['storeId'],
+                );
             }
 
             $filterQuery = $this->getFilter();
@@ -271,18 +272,15 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
                 }
             }
 
-            $joinFields = $this->_joinField;
-            if (isset($joinFields) && is_array($joinFields)) {
-                foreach ($joinFields as $field) {
-                    $collection->joinField(
-                        $field['alias'],
-                        $field['attribute'],
-                        $field['field'],
-                        $field['bind'],
-                        $field['cond'],
-                        $field['joinType'],
-                    );
-                }
+            foreach ($this->_joinField as $field) {
+                $collection->joinField(
+                    $field['alias'],
+                    $field['attribute'],
+                    $field['field'],
+                    $field['bind'],
+                    $field['cond'],
+                    $field['joinType'],
+                );
             }
 
             /**

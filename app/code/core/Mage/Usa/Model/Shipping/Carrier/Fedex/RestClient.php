@@ -10,15 +10,15 @@ declare(strict_types=1);
 
 class Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient
 {
-    public const BASE_URL_PRODUCTION = 'https://apis.fedex.com';
-    public const BASE_URL_SANDBOX = 'https://apis-sandbox.fedex.com';
+    public const string BASE_URL_PRODUCTION = 'https://apis.fedex.com';
+    public const string BASE_URL_SANDBOX = 'https://apis-sandbox.fedex.com';
 
-    public const ENDPOINT_RATES = '/rate/v1/rates/quotes';
-    public const ENDPOINT_RATES_COMPREHENSIVE = '/rate/v1/comprehensiverates/quotes';
+    public const string ENDPOINT_RATES = '/rate/v1/rates/quotes';
+    public const string ENDPOINT_RATES_COMPREHENSIVE = '/rate/v1/comprehensiverates/quotes';
 
-    private const ENDPOINT_TRACK = '/track/v1/trackingnumbers';
-    private const ENDPOINT_SHIP = '/ship/v1/shipments';
-    private const ENDPOINT_SHIP_CANCEL = '/ship/v1/shipments/cancel';
+    private const string ENDPOINT_TRACK = '/track/v1/trackingnumbers';
+    private const string ENDPOINT_SHIP = '/ship/v1/shipments';
+    private const string ENDPOINT_SHIP_CANCEL = '/ship/v1/shipments/cancel';
     private string $baseUrl;
     private string $rateEndpoint;
     private \Symfony\Contracts\HttpClient\HttpClientInterface $client;

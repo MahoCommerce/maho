@@ -17,7 +17,7 @@ class Mage_Sales_Block_Order_Totals extends Mage_Core_Block_Template
      * @var array
      */
     protected $_totals;
-    protected $_order = null;
+    protected ?Mage_Sales_Model_Order $_order = null;
 
     /**
      * Initialize self totals and children blocks totals before html building

@@ -37,7 +37,7 @@ use ApiPlatform\Metadata\Get;
 )]
 class SearchTermsReport extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = 'report/search';
+    public const string ADMIN_RESOURCE = 'report/search';
 
     #[ApiProperty(identifier: true, description: 'Report code')]
     public string $report = 'search-terms';

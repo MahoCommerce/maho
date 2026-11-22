@@ -397,7 +397,6 @@ Allows you to retrieve full information about the shopping cart (quote).
 | int    | quote_id                          | Quote ID                                     |
 | int    | is_active                         | Active flag                                  |
 | int    | is_virtual                        | Defines whether the product is a virtual one |
-| int    | is_multi_shipping                 | Defines whether multi shipping is available  |
 | double | items_count                       | Items quantity                               |
 | double | items_qty                         | Total items quantity                         |
 | string | orig_order_id                     | Original order ID                            |

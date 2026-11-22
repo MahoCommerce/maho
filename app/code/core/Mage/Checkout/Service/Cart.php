@@ -16,26 +16,26 @@ use Maho\Security\RateLimitScope;
 class Mage_Checkout_Service_Cart
 {
     /** The address fields that a client can write. */
-    private const ADDRESS_FIELDS = [
+    private const array ADDRESS_FIELDS = [
         'prefix', 'firstname', 'middlename', 'lastname', 'suffix', 'company', 'street', 'city',
         'region', 'region_id', 'postcode', 'country_id',
         'telephone', 'fax', 'email', 'vat_id',
     ];
 
     /** The keys of a payment form that assignData() puts on the quote payment as they are, with no check. */
-    private const PAYMENT_RESERVED_KEYS = [
+    private const array PAYMENT_RESERVED_KEYS = [
         'additional_data', 'additional_information', 'method_instance',
         'payment_id', 'quote_id', 'parent_id', 'created_at', 'updated_at',
     ];
 
     /** The shape of a masked cart id, bare of delimiters so a route requirement can reuse it. */
-    public const MASKED_ID_PATTERN = '[a-f0-9]{32}';
+    public const string MASKED_ID_PATTERN = '[a-f0-9]{32}';
 
     /** The additional_information key that holds the payment data of the client that setPaymentMethod() accepted. */
-    public const PAYMENT_ADDITIONAL_DATA_KEY = 'api_additional_data';
+    public const string PAYMENT_ADDITIONAL_DATA_KEY = 'api_additional_data';
 
     /** The coupon codes that one shopper can try in this number of seconds have a limit. */
-    public const CODE_RATE_LIMIT_WINDOW = 60;
+    public const int CODE_RATE_LIMIT_WINDOW = 60;
 
     /**
      * @phpstan-assert-if-true non-empty-string $maskedId

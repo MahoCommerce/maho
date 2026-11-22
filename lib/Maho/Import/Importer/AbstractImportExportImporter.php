@@ -22,7 +22,7 @@ use Maho\Import\RowException;
 
 abstract class AbstractImportExportImporter extends AbstractImporter
 {
-    public const OPTION_BEHAVIOR = 'behavior';
+    public const string OPTION_BEHAVIOR = 'behavior';
 
     abstract protected function entityCode(): string;
 

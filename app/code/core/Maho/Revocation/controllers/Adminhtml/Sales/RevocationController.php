@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_Revocation_Adminhtml_Sales_RevocationController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'sales/revocation';
+    public const string ADMIN_RESOURCE = 'sales/revocation';
 
     protected function _initAction(): self
     {

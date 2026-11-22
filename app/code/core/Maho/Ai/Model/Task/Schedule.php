@@ -19,15 +19,15 @@ declare(strict_types=1);
 class Maho_Ai_Model_Task_Schedule extends Mage_Core_Model_Abstract
 {
     /** Only the administrator who created the schedule sees its notifications. */
-    public const NOTIFY_SELF = 'self';
+    public const string NOTIFY_SELF = 'self';
     /** Every administrator sees its notifications. */
-    public const NOTIFY_EVERYONE = 'everyone';
+    public const string NOTIFY_EVERYONE = 'everyone';
 
     /** Schedules per administrator: each run costs model calls. */
-    public const MAX_PER_ADMIN = 20;
+    public const int MAX_PER_ADMIN = 20;
 
     /** Days ahead that the next run is searched in: a yearly schedule still finds its day. */
-    private const SEARCH_DAYS = 400;
+    private const int SEARCH_DAYS = 400;
 
     #[\Override]
     protected function _construct(): void

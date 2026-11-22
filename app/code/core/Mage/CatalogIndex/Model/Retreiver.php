@@ -20,9 +20,9 @@ declare(strict_types=1);
  */
 class Mage_CatalogIndex_Model_Retreiver extends Mage_Core_Model_Abstract
 {
-    public const CHILDREN_FOR_TIERS = 1;
-    public const CHILDREN_FOR_PRICES = 2;
-    public const CHILDREN_FOR_ATTRIBUTES = 3;
+    public const int CHILDREN_FOR_TIERS = 1;
+    public const int CHILDREN_FOR_PRICES = 2;
+    public const int CHILDREN_FOR_ATTRIBUTES = 3;
 
     protected array $_attributeIdCache = [];
 

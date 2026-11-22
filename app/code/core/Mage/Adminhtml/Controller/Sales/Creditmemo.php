@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_Controller_Sales_Creditmemo extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'sales/creditmemo';
+    public const string ADMIN_RESOURCE = 'sales/creditmemo';
 
     /**
      * Additional initialization

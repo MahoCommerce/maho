@@ -19,17 +19,17 @@ use Symfony\Component\Process\Process;
 final class Runtime
 {
     /** Minimum Node.js major version required by Playwright */
-    public const MIN_NODE_MAJOR = 20;
+    public const int MIN_NODE_MAJOR = 20;
 
-    public const RUNTIME_DIR_ENV = 'MAHO_BROWSER_RUNTIME_DIR';
-    public const BROWSERS_PATH_ENV = 'PLAYWRIGHT_BROWSERS_PATH';
+    public const string RUNTIME_DIR_ENV = 'MAHO_BROWSER_RUNTIME_DIR';
+    public const string BROWSERS_PATH_ENV = 'PLAYWRIGHT_BROWSERS_PATH';
 
-    public const INSTALL_LOCK = 'browser_runtime_install';
+    public const string INSTALL_LOCK = 'browser_runtime_install';
 
     /** Seconds allowed for npm install / browser download */
-    public const INSTALL_TIMEOUT = 900;
+    public const int INSTALL_TIMEOUT = 900;
 
-    private const MANIFEST_NAME = 'maho-browser-runtime';
+    private const string MANIFEST_NAME = 'maho-browser-runtime';
 
     /** @var string|false|null false once probed with no result */
     private static string|false|null $globalNodeModules = null;

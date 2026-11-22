@@ -13,7 +13,7 @@ use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 
 class Mage_Core_Model_File_Validator_Svg
 {
-    public const NAME = 'isSvg';
+    public const string NAME = 'isSvg';
 
     protected ?HtmlSanitizerInterface $sanitizer = null;
 

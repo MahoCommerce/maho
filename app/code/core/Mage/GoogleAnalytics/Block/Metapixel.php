@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
 {
-    protected const CHECKOUT_MODULE_NAME = 'checkout';
-    protected const CHECKOUT_CONTROLLER_NAME = 'onepage';
+    protected const string CHECKOUT_MODULE_NAME = 'checkout';
+    protected const string CHECKOUT_CONTROLLER_NAME = 'onepage';
 
     protected function _isAvailable(): bool
     {
@@ -484,7 +484,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
     /**
      * ITU-T E.164 country calling codes by ISO 3166-1 alpha-2 country.
      */
-    private const COUNTRY_CALLING_CODES = [
+    private const array COUNTRY_CALLING_CODES = [
         'AD' => '376', 'AE' => '971', 'AF' => '93', 'AG' => '1', 'AI' => '1', 'AL' => '355', 'AM' => '374',
         'AO' => '244', 'AR' => '54', 'AS' => '1', 'AT' => '43', 'AU' => '61', 'AW' => '297', 'AX' => '358',
         'AZ' => '994', 'BA' => '387', 'BB' => '1', 'BD' => '880', 'BE' => '32', 'BF' => '226', 'BG' => '359',

@@ -13,87 +13,84 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Query param name for last url visited
      */
-    public const REFERER_QUERY_PARAM_NAME = 'referer';
+    public const string REFERER_QUERY_PARAM_NAME = 'referer';
 
     /**
      * Route for customer account login page
      */
-    public const ROUTE_ACCOUNT_LOGIN = 'customer/account/login';
+    public const string ROUTE_ACCOUNT_LOGIN = 'customer/account/login';
 
     /**
      * Config name for Redirect Customer to Account Dashboard after Logging in setting
      */
-    public const XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD = 'customer/login/redirect_dashboard';
+    public const string XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD = 'customer/login/redirect_dashboard';
 
     #[\Deprecated(message: 'Since 26.1.0. Use XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD instead')]
-    public const XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD = self::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD;
+    public const string XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD = self::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD;
 
     /**
      * Config paths to VAT related customer groups
      */
-    public const XML_PATH_CUSTOMER_VIV_INTRA_UNION_GROUP = 'customer/create_account/viv_intra_union_group';
-    public const XML_PATH_CUSTOMER_VIV_DOMESTIC_GROUP = 'customer/create_account/viv_domestic_group';
-    public const XML_PATH_CUSTOMER_VIV_INVALID_GROUP = 'customer/create_account/viv_invalid_group';
-    public const XML_PATH_CUSTOMER_VIV_ERROR_GROUP = 'customer/create_account/viv_error_group';
+    public const string XML_PATH_CUSTOMER_VIV_INTRA_UNION_GROUP = 'customer/create_account/viv_intra_union_group';
+    public const string XML_PATH_CUSTOMER_VIV_DOMESTIC_GROUP = 'customer/create_account/viv_domestic_group';
+    public const string XML_PATH_CUSTOMER_VIV_INVALID_GROUP = 'customer/create_account/viv_invalid_group';
+    public const string XML_PATH_CUSTOMER_VIV_ERROR_GROUP = 'customer/create_account/viv_error_group';
 
     /**
      * Config path to option that enables/disables automatic group assignment based on VAT
      */
-    public const XML_PATH_CUSTOMER_VIV_GROUP_AUTO_ASSIGN = 'customer/create_account/viv_disable_auto_group_assign_default';
+    public const string XML_PATH_CUSTOMER_VIV_GROUP_AUTO_ASSIGN = 'customer/create_account/viv_disable_auto_group_assign_default';
 
-    /**
-     * Config path to support email
-     */
-    public const XML_PATH_SUPPORT_EMAIL = 'trans_email/ident_support/email';
+    public const string XML_PATH_SUPPORT_EMAIL = 'trans_email/ident_support/email';
 
     /**
      * WSDL of VAT validation service
      */
-    public const VAT_VALIDATION_WSDL_URL = 'https://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl';
+    public const string VAT_VALIDATION_WSDL_URL = 'https://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl';
 
     /**
      * Configuration path to expiration period of reset password link
      */
-    public const XML_PATH_CUSTOMER_RESET_PASSWORD_LINK_EXPIRATION_PERIOD
+    public const string XML_PATH_CUSTOMER_RESET_PASSWORD_LINK_EXPIRATION_PERIOD
         = 'default/customer/password/reset_link_expiration_period';
 
     /**
      * Configuration path to require admin password on customer password change
      */
-    public const XML_PATH_CUSTOMER_REQUIRE_ADMIN_USER_TO_CHANGE_USER_PASSWORD
+    public const string XML_PATH_CUSTOMER_REQUIRE_ADMIN_USER_TO_CHANGE_USER_PASSWORD
         = 'customer/password/require_admin_user_to_change_user_password';
 
     /**
      * Configuration path to password forgotten flow change
      */
-    public const XML_PATH_CUSTOMER_FORGOT_PASSWORD_FLOW_SECURE = 'admin/security/forgot_password_flow_secure';
-    public const XML_PATH_CUSTOMER_FORGOT_PASSWORD_EMAIL_TIMES = 'admin/security/forgot_password_email_times';
-    public const XML_PATH_CUSTOMER_FORGOT_PASSWORD_IP_TIMES    = 'admin/security/forgot_password_ip_times';
+    public const string XML_PATH_CUSTOMER_FORGOT_PASSWORD_FLOW_SECURE = 'admin/security/forgot_password_flow_secure';
+    public const string XML_PATH_CUSTOMER_FORGOT_PASSWORD_EMAIL_TIMES = 'admin/security/forgot_password_email_times';
+    public const string XML_PATH_CUSTOMER_FORGOT_PASSWORD_IP_TIMES    = 'admin/security/forgot_password_ip_times';
 
     /**
      * VAT class constants
      */
-    public const VAT_CLASS_DOMESTIC    = 'domestic';
-    public const VAT_CLASS_INTRA_UNION = 'intra_union';
-    public const VAT_CLASS_INVALID     = 'invalid';
-    public const VAT_CLASS_ERROR       = 'error';
+    public const string VAT_CLASS_DOMESTIC    = 'domestic';
+    public const string VAT_CLASS_INTRA_UNION = 'intra_union';
+    public const string VAT_CLASS_INVALID     = 'invalid';
+    public const string VAT_CLASS_ERROR       = 'error';
 
     /**
      * VAT validation cache tag
      */
-    public const VAT_CACHE_TAG = 'vat_validation';
+    public const string VAT_CACHE_TAG = 'vat_validation';
 
     /**
      * Default VAT cache lifetime in seconds (24 hours)
      */
-    public const VAT_DEFAULT_CACHE_LIFETIME = 86400;
+    public const int VAT_DEFAULT_CACHE_LIFETIME = 86400;
 
     /**
      * Config paths for VAT validation
      */
-    public const XML_PATH_VAT_VALIDATION_ENABLED = 'customer/vat_validation/enabled';
-    public const XML_PATH_VAT_CACHE_LIFETIME = 'customer/vat_validation/cache_lifetime';
-    public const XML_PATH_VAT_OFFLINE_FALLBACK = 'customer/vat_validation/offline_fallback';
+    public const string XML_PATH_VAT_VALIDATION_ENABLED = 'customer/vat_validation/enabled';
+    public const string XML_PATH_VAT_CACHE_LIFETIME = 'customer/vat_validation/cache_lifetime';
+    public const string XML_PATH_VAT_OFFLINE_FALLBACK = 'customer/vat_validation/offline_fallback';
 
     #[\Override]
     protected $_moduleName = 'Mage_Customer';

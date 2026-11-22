@@ -10,10 +10,7 @@
 
 class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Action
 {
-    /**
-     * Name of "is URLs checked" flag
-     */
-    public const FLAG_IS_URLS_CHECKED = 'check_url_settings';
+    public const string FLAG_IS_URLS_CHECKED = 'check_url_settings';
 
     /**
      * Session constants to refer in other places
@@ -21,16 +18,12 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
      * Max lifetime is set to 400 days, as chromium based browsers will not allow anything higher
      * https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-cookie-lifetime-limits
      */
-    public const SESSION_NAMESPACE = 'maho_admin_session';
-    public const SESSION_MIN_LIFETIME = 60;
-    public const SESSION_DEFAULT_LIFETIME = 60 * 60;
-    public const SESSION_MAX_LIFETIME = 60 * 60 * 24 * 400;
+    public const string SESSION_NAMESPACE = 'maho_admin_session';
+    public const int SESSION_MIN_LIFETIME = 60;
+    public const int SESSION_DEFAULT_LIFETIME = 60 * 60;
+    public const int SESSION_MAX_LIFETIME = 60 * 60 * 24 * 400;
 
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'admin';
+    public const string ADMIN_RESOURCE = 'admin';
 
     /**
      * Array of actions which can be processed without secret key validation
@@ -256,7 +249,7 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
     public function __()
     {
         $args = func_get_args();
-        $expr = new Mage_Core_Model_Translate_Expr(array_shift($args), $this->getUsedModuleName());
+        $expr = new Mage_Core_Model_Translate_Expr((string) array_shift($args), $this->getUsedModuleName());
         array_unshift($args, $expr);
         return Mage::app()->getTranslator()->translate($args);
     }

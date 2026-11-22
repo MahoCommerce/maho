@@ -19,7 +19,7 @@ class Maho_ApiPlatform_Model_Observer
     /**
      * Legacy API path prefixes to match
      */
-    private const LEGACY_API_PATHS = [
+    private const array LEGACY_API_PATHS = [
         '/api/soap',
         '/api/v2_soap',
         '/api/rest',

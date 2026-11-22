@@ -29,54 +29,54 @@ abstract class Mage_Api2_Model_Resource
     /**
      *  Action types
      */
-    public const ACTION_TYPE_ENTITY = 'entity';
-    public const ACTION_TYPE_COLLECTION  = 'collection';
+    public const string ACTION_TYPE_ENTITY = 'entity';
+    public const string ACTION_TYPE_COLLECTION  = 'collection';
 
     /**
      * Operations. Resource method names
      */
-    public const OPERATION_CREATE   = 'create';
-    public const OPERATION_RETRIEVE = 'retrieve';
-    public const OPERATION_UPDATE   = 'update';
-    public const OPERATION_DELETE   = 'delete';
+    public const string OPERATION_CREATE   = 'create';
+    public const string OPERATION_RETRIEVE = 'retrieve';
+    public const string OPERATION_UPDATE   = 'update';
+    public const string OPERATION_DELETE   = 'delete';
 
     /**
      * Common operations for attributes
      */
-    public const OPERATION_ATTRIBUTE_READ  = 'read';
-    public const OPERATION_ATTRIBUTE_WRITE = 'write';
+    public const string OPERATION_ATTRIBUTE_READ  = 'read';
+    public const string OPERATION_ATTRIBUTE_WRITE = 'write';
 
     /**
      *  Default error messages
      */
-    public const RESOURCE_NOT_FOUND = 'Resource not found.';
-    public const RESOURCE_METHOD_NOT_ALLOWED = 'Resource does not support method.';
-    public const RESOURCE_METHOD_NOT_IMPLEMENTED = 'Resource method not implemented yet.';
-    public const RESOURCE_INTERNAL_ERROR = 'Resource internal error.';
-    public const RESOURCE_DATA_PRE_VALIDATION_ERROR = 'Resource data pre-validation error.';
-    public const RESOURCE_DATA_INVALID = 'Resource data invalid.'; //error while checking data inside method
-    public const RESOURCE_UNKNOWN_ERROR = 'Resource unknown error.';
-    public const RESOURCE_REQUEST_DATA_INVALID = 'The request data is invalid.';
+    public const string RESOURCE_NOT_FOUND = 'Resource not found.';
+    public const string RESOURCE_METHOD_NOT_ALLOWED = 'Resource does not support method.';
+    public const string RESOURCE_METHOD_NOT_IMPLEMENTED = 'Resource method not implemented yet.';
+    public const string RESOURCE_INTERNAL_ERROR = 'Resource internal error.';
+    public const string RESOURCE_DATA_PRE_VALIDATION_ERROR = 'Resource data pre-validation error.';
+    public const string RESOURCE_DATA_INVALID = 'Resource data invalid.'; //error while checking data inside method
+    public const string RESOURCE_UNKNOWN_ERROR = 'Resource unknown error.';
+    public const string RESOURCE_REQUEST_DATA_INVALID = 'The request data is invalid.';
 
     /**
      *  Default collection resources error messages
      */
-    public const RESOURCE_COLLECTION_PAGING_ERROR       = 'Resource collection paging error.';
-    public const RESOURCE_COLLECTION_PAGING_LIMIT_ERROR = 'The paging limit exceeds the allowed number.';
-    public const RESOURCE_COLLECTION_ORDERING_ERROR     = 'Resource collection ordering error.';
-    public const RESOURCE_COLLECTION_FILTERING_ERROR    = 'Resource collection filtering error.';
-    public const RESOURCE_COLLECTION_ATTRIBUTES_ERROR   = 'Resource collection including additional attributes error.';
+    public const string RESOURCE_COLLECTION_PAGING_ERROR       = 'Resource collection paging error.';
+    public const string RESOURCE_COLLECTION_PAGING_LIMIT_ERROR = 'The paging limit exceeds the allowed number.';
+    public const string RESOURCE_COLLECTION_ORDERING_ERROR     = 'Resource collection ordering error.';
+    public const string RESOURCE_COLLECTION_FILTERING_ERROR    = 'Resource collection filtering error.';
+    public const string RESOURCE_COLLECTION_ATTRIBUTES_ERROR   = 'Resource collection including additional attributes error.';
 
     /**
      *  Default success messages
      */
-    public const RESOURCE_UPDATED_SUCCESSFUL = 'Resource updated successful.';
+    public const string RESOURCE_UPDATED_SUCCESSFUL = 'Resource updated successful.';
 
     /**
      * Collection page sizes
      */
-    public const PAGE_SIZE_DEFAULT = 10;
-    public const PAGE_SIZE_MAX     = 100;
+    public const int PAGE_SIZE_DEFAULT = 10;
+    public const int PAGE_SIZE_MAX     = 100;
 
     /**
      * Request

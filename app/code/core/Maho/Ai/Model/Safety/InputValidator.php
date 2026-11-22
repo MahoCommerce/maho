@@ -13,7 +13,7 @@ class Maho_Ai_Model_Safety_InputValidator
     /**
      * Patterns that indicate prompt injection attempts
      */
-    private const INJECTION_PATTERNS = [
+    private const array INJECTION_PATTERNS = [
         '/ignore\s+(all\s+)?(previous|prior|above|earlier)\s+instructions?/i',
         '/disregard\s+(all\s+)?(previous|prior|above|earlier)\s+instructions?/i',
         '/forget\s+(all\s+)?(previous|prior|above|earlier)\s+instructions?/i',
@@ -35,7 +35,7 @@ class Maho_Ai_Model_Safety_InputValidator
      * "Ignore the previous instructions" in other languages: a verb, then the instructions, in the
      * order of the language. A message that only names the previous instructions passes.
      */
-    private const IGNORE_INSTRUCTIONS_PATTERNS = [
+    private const array IGNORE_INSTRUCTIONS_PATTERNS = [
         'it' => '/(ignora|ignorate|ignori|dimentica|dimenticate|dimentichi|trascura|trascurate).{0,40}((istruzioni|indicazioni)\s+(precedenti|di\s+prima|sopra)|precedenti\s+(istruzioni|indicazioni))/iu',
         'fr' => '/(ignore[rz]?|oublie[rz]?|ne\s+tiens\s+pas\s+compte|ne\s+tenez\s+pas\s+compte).{0,40}((instructions|consignes)\s+(pr[ée]c[ée]dentes|ant[ée]rieures|ci-dessus)|pr[ée]c[ée]dentes\s+(instructions|consignes))/iu',
         'de' => '/(ignorier|vergiss|vergesst|vergessen\s+sie|missachte).{0,40}(vorherigen|bisherigen|obigen|vorigen|früheren)\s+(anweisungen|instruktionen|befehle)|(vorherigen|bisherigen|obigen|vorigen|früheren)\s+(anweisungen|instruktionen|befehle).{0,20}(ignorieren|vergessen|missachten)/iu',

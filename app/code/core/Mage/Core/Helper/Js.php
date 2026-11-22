@@ -13,12 +13,12 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
     /**
      * Key for cache
      */
-    public const JAVASCRIPT_TRANSLATE_CONFIG_KEY = 'javascript_translate_config';
+    public const string JAVASCRIPT_TRANSLATE_CONFIG_KEY = 'javascript_translate_config';
 
     /**
      * Translate file name
      */
-    public const JAVASCRIPT_TRANSLATE_CONFIG_FILENAME = 'jstranslator.xml';
+    public const string JAVASCRIPT_TRANSLATE_CONFIG_FILENAME = 'jstranslator.xml';
 
     #[\Override]
     protected $_moduleName = 'Mage_Core';

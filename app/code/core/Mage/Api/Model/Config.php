@@ -13,7 +13,7 @@
  */
 class Mage_Api_Model_Config extends \Maho\Simplexml\Config
 {
-    public const CACHE_TAG         = 'config_api';
+    public const string CACHE_TAG         = 'config_api';
 
     public function __construct($sourceData = null)
     {

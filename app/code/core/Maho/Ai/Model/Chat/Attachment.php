@@ -21,13 +21,13 @@ use Maho\Storage\Mount;
  */
 final class Maho_Ai_Model_Chat_Attachment
 {
-    public const MAX_BYTES = 5 * 1024 * 1024;
-    public const MAX_PER_MESSAGE = 5;
-    public const KEEP_DAYS = 30;
+    public const int MAX_BYTES = 5 * 1024 * 1024;
+    public const int MAX_PER_MESSAGE = 5;
+    public const int KEEP_DAYS = 30;
     /** What the tool reads as text, with its MIME type as the panel sends it. */
-    public const TEXT_EXTENSIONS = ['csv' => 'text/csv', 'txt' => 'text/plain', 'md' => 'text/markdown', 'json' => 'application/json', 'xml' => 'application/xml', 'html' => 'text/html', 'tsv' => 'text/tab-separated-values'];
-    public const IMAGE_EXTENSIONS = ['png' => 'image/png', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'gif' => 'image/gif', 'webp' => 'image/webp'];
-    public const READ_CHARS = 12000;
+    public const array TEXT_EXTENSIONS = ['csv' => 'text/csv', 'txt' => 'text/plain', 'md' => 'text/markdown', 'json' => 'application/json', 'xml' => 'application/xml', 'html' => 'text/html', 'tsv' => 'text/tab-separated-values'];
+    public const array IMAGE_EXTENSIONS = ['png' => 'image/png', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'gif' => 'image/gif', 'webp' => 'image/webp'];
+    public const int READ_CHARS = 12000;
 
     /**
      * @return array{id: string, name: string, mime: string, size: int}

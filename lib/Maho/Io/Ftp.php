@@ -13,13 +13,13 @@ use FTP\Connection;
 
 class Ftp extends \Maho\Io
 {
-    public const ERROR_EMPTY_HOST = 1;
-    public const ERROR_INVALID_CONNECTION = 2;
-    public const ERROR_INVALID_LOGIN = 3;
-    public const ERROR_INVALID_PATH = 4;
-    public const ERROR_INVALID_MODE = 5;
-    public const ERROR_INVALID_DESTINATION = 6;
-    public const ERROR_INVALID_SOURCE = 7;
+    public const int ERROR_EMPTY_HOST = 1;
+    public const int ERROR_INVALID_CONNECTION = 2;
+    public const int ERROR_INVALID_LOGIN = 3;
+    public const int ERROR_INVALID_PATH = 4;
+    public const int ERROR_INVALID_MODE = 5;
+    public const int ERROR_INVALID_DESTINATION = 6;
+    public const int ERROR_INVALID_SOURCE = 7;
 
     /**
      * Connection config

@@ -8,7 +8,7 @@
 
 class Mage_Sales_Block_Order_Pdf_Invoice extends Mage_Sales_Block_Order_Pdf_Abstract
 {
-    protected const ITEM_RENDERER_SECTION = 'invoice';
+    protected const string ITEM_RENDERER_SECTION = 'invoice';
 
     protected ?Mage_Sales_Model_Order_Invoice $_invoice = null;
 

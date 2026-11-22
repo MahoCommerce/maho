@@ -10,8 +10,8 @@
 
 class Mage_Newsletter_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public const XML_PATH_TEMPLATE_FILTER = 'global/newsletter/tempate_filter';
-    public const XML_PATH_SEND_BATCH_SIZE = 'newsletter/sending/batch_size';
+    public const string XML_PATH_TEMPLATE_FILTER = 'global/newsletter/tempate_filter';
+    public const string XML_PATH_SEND_BATCH_SIZE = 'newsletter/sending/batch_size';
 
     #[\Override]
     protected $_moduleName = 'Mage_Newsletter';
@@ -87,7 +87,7 @@ class Mage_Newsletter_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Retrieve Template processor for Newsletter template
      *
-     * @return false|Mage_Core_Model_Abstract|\Maho\Filter\Template
+     * @return Mage_Core_Model_Email_Template_Filter|false
      */
     public function getTemplateProcessor()
     {

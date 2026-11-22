@@ -35,16 +35,16 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 final class McpToolCatalog
 {
     /** OpenAI refuses a tool name longer than this. */
-    private const MAX_NAME_LENGTH = 64;
+    private const int MAX_NAME_LENGTH = 64;
 
     /** @var array<string, McpTool>|null keyed by MCP tool name */
     private ?array $tools = null;
 
     /** JSON Schema keywords every chat provider accepts in a tool parameter. */
-    private const SCHEMA_KEYWORDS = ['type', 'description', 'enum', 'properties', 'required', 'items', 'anyOf', 'oneOf', 'minimum', 'maximum', 'minLength', 'maxLength', 'minItems', 'maxItems'];
+    private const array SCHEMA_KEYWORDS = ['type', 'description', 'enum', 'properties', 'required', 'items', 'anyOf', 'oneOf', 'minimum', 'maximum', 'minLength', 'maxLength', 'minItems', 'maxItems'];
 
     /** Argument every MCP tool takes: the store view code, since an in-process call has no request to carry ?store=. */
-    public const STORE_ARGUMENT = 'store';
+    public const string STORE_ARGUMENT = 'store';
 
     /** @var array<string, string> alias => MCP tool name */
     private array $aliases = [];

@@ -22,13 +22,8 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Datetime extends Mage_Adm
         );
     }
 
-    /**
-     * Renders grid column
-     *
-     * @return  string
-     */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         if ($data = $this->_getValue($row)) {
             try {
@@ -46,10 +41,10 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Datetime extends Mage_Adm
                     $dateObj = Mage::app()->getLocale()->utcToStore(null, $data);
                     return $dateObj->format('M j, Y, g:i:s A');
                 } catch (Exception) {
-                    return $data;
+                    return (string) $data;
                 }
             }
         }
-        return $this->getColumn()->getDefault();
+        return (string) $this->getColumn()->getDefault();
     }
 }

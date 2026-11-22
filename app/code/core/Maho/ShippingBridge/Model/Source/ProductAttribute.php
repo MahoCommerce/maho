@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_ShippingBridge_Model_Source_ProductAttribute
 {
-    protected const EXCLUDED_CODES = ['sku', 'name', 'price', 'weight'];
+    protected const array EXCLUDED_CODES = ['sku', 'name', 'price', 'weight'];
 
     public function toOptionArray(): array
     {

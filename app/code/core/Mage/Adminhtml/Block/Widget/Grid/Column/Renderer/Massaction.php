@@ -38,13 +38,8 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Massaction extends Mage_A
         return $out;
     }
 
-    /**
-     * Returns HTML of the object
-     *
-     * @return string
-     */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         if ($this->getColumn()->getGrid()->getMassactionIdFieldOnlyIndexValue()) {
             $this->setNoObjectId(true);

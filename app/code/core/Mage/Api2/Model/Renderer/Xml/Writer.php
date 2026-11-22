@@ -16,7 +16,7 @@ class Mage_Api2_Model_Renderer_Xml_Writer
     /**
      * Root node in XML output
      */
-    public const XML_ROOT_NODE = 'magento_api';
+    public const string XML_ROOT_NODE = 'magento_api';
 
     /**
      * Configuration data

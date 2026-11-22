@@ -37,7 +37,7 @@ use ApiPlatform\Metadata\Get;
 )]
 class ProductsLowStockReport extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = 'report/products/lowstock';
+    public const string ADMIN_RESOURCE = 'report/products/lowstock';
 
     #[ApiProperty(identifier: true, description: 'Report code')]
     public string $report = 'products-low-stock';

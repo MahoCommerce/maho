@@ -10,14 +10,10 @@
 
 class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'system/store';
+    public const string ADMIN_RESOURCE = 'system/store';
 
     /** The model alias of each value of the store_type parameter. */
-    private const MODELS = ['website' => 'core/website', 'group' => 'core/store_group', 'store' => 'core/store'];
+    private const array MODELS = ['website' => 'core/website', 'group' => 'core/store_group', 'store' => 'core/store'];
 
     /**
      * Init actions

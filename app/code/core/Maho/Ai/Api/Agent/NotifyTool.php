@@ -22,10 +22,10 @@ use Symfony\AI\Platform\Tool\ToolEffectHints;
  */
 final class NotifyTool
 {
-    public const NAME = 'notify';
+    public const string NAME = 'notify';
 
     /** Messages one run may send, so a confused run cannot flood the inbox. */
-    public const MAX_PER_RUN = 3;
+    public const int MAX_PER_RUN = 3;
 
     private ?\Maho_Ai_Model_Conversation $conversation = null;
     private ?\Maho_Ai_Model_Task_Schedule $schedule = null;

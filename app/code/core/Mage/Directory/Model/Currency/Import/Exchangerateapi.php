@@ -10,7 +10,7 @@
 
 class Mage_Directory_Model_Currency_Import_Exchangerateapi extends Mage_Directory_Model_Currency_Import_Eurbased
 {
-    public const XML_PATH_EXCHANGERATEAPI_TIMEOUT = 'currency/exchangerateapi/timeout';
+    public const string XML_PATH_EXCHANGERATEAPI_TIMEOUT = 'currency/exchangerateapi/timeout';
 
     /**
      * URL for currency rates import (the open endpoint needs no credentials and always

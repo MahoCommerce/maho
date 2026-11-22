@@ -12,18 +12,14 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
 {
     /**
      * Code of the carrier
-     *
-     * @var string
      */
-    public const CODE = 'ups';
+    public const string CODE = 'ups';
 
     /**
      * Delivery Confirmation level based on origin/destination
-     *
-     * @var int
      */
-    public const DELIVERY_CONFIRMATION_SHIPMENT = 1;
-    public const DELIVERY_CONFIRMATION_PACKAGE = 2;
+    public const int DELIVERY_CONFIRMATION_SHIPMENT = 1;
+    public const int DELIVERY_CONFIRMATION_PACKAGE = 2;
 
     /**
      * Code of the carrier

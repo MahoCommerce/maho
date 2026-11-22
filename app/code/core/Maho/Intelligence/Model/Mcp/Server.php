@@ -13,8 +13,8 @@ use React\EventLoop\LoopInterface;
 
 class Maho_Intelligence_Model_Mcp_Server
 {
-    private const PROTOCOL_VERSION = '2024-11-05';
-    private const JSONRPC_VERSION = '2.0';
+    private const string PROTOCOL_VERSION = '2024-11-05';
+    private const string JSONRPC_VERSION = '2.0';
 
     private LoopInterface $loop;
     private Maho_Intelligence_Model_Mcp_Transport $transport;

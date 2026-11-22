@@ -15,11 +15,9 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Longtext extends Mage_Adm
      *
      * Text will be truncated as specified in string_limit, truncate or 250 by default
      * Also it can be html-escaped and nl2br()
-     *
-     * @return string
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         $truncateLength = 250;
         // stringLength() is for legacy purposes

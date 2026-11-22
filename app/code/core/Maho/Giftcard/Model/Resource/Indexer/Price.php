@@ -20,7 +20,7 @@ class Maho_Giftcard_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Reso
      * Reindex temporary (price result data) for all products
      */
     #[\Override]
-    public function reindexAll()
+    public function reindexAll(): static
     {
         $this->useIdxTable(true);
         $this->beginTransaction();
@@ -42,7 +42,7 @@ class Maho_Giftcard_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Reso
      * @param int|array $entityIds
      */
     #[\Override]
-    public function reindexEntity($entityIds)
+    public function reindexEntity($entityIds): static
     {
         $this->_prepareGiftcardPriceData($entityIds);
         $this->_applyCustomOption();

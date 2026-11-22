@@ -81,12 +81,12 @@ use Maho\ApiPlatform\CrudResource;
 )]
 class CustomerGroup extends CrudResource
 {
-    public const MODEL = 'customer/group';
+    public const string MODEL = 'customer/group';
 
-    public const PRIMARY_KEY = 'customer_group_id';
+    public const string PRIMARY_KEY = 'customer_group_id';
 
     /** Admin ACL gate. Mirrors backend Mage_Adminhtml_Customer_GroupController. */
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_Customer_GroupController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_Customer_GroupController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

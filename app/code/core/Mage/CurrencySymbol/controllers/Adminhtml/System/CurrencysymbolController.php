@@ -10,11 +10,7 @@
 
 class Mage_CurrencySymbol_Adminhtml_System_CurrencysymbolController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'system/currency/symbols';
+    public const string ADMIN_RESOURCE = 'system/currency/symbols';
 
     /**
      * Show Currency Symbols Management dialog

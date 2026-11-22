@@ -10,15 +10,15 @@
 
 class Mage_Core_Model_App_Area
 {
-    public const AREA_GLOBAL   = 'global';
-    public const AREA_FRONTEND = 'frontend';
-    public const AREA_ADMINHTML = 'adminhtml';
-    public const AREA_API      = 'api';
+    public const string AREA_GLOBAL   = 'global';
+    public const string AREA_FRONTEND = 'frontend';
+    public const string AREA_ADMINHTML = 'adminhtml';
+    public const string AREA_API      = 'api';
 
-    public const PART_CONFIG   = 'config';
-    public const PART_EVENTS   = 'events';
-    public const PART_TRANSLATE = 'translate';
-    public const PART_DESIGN   = 'design';
+    public const string PART_CONFIG   = 'config';
+    public const string PART_EVENTS   = 'events';
+    public const string PART_TRANSLATE = 'translate';
+    public const string PART_DESIGN   = 'design';
 
     /**
      * Array of area loaded parts

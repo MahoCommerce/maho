@@ -10,10 +10,10 @@ declare(strict_types=1);
 
 class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public const WCAG_LEVELS = ['A', 'AA', 'AAA'];
+    public const array WCAG_LEVELS = ['A', 'AA', 'AAA'];
 
-    public const VIEWPORT_DESKTOP = 'desktop';
-    public const VIEWPORT_MOBILE = 'mobile';
+    public const string VIEWPORT_DESKTOP = 'desktop';
+    public const string VIEWPORT_MOBILE = 'mobile';
 
     public function getDefaultWcagLevel(): string
     {

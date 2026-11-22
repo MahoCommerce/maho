@@ -10,7 +10,7 @@
 
 class Mage_Rating_Model_Resource_Rating extends Mage_Core_Model_Resource_Db_Abstract
 {
-    public const RATING_STATUS_APPROVED = 'Approved';
+    public const string RATING_STATUS_APPROVED = 'Approved';
 
     #[\Override]
     protected function _construct(): void

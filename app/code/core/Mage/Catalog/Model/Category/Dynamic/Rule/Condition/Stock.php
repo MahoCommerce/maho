@@ -16,16 +16,16 @@ declare(strict_types=1);
 
 class Mage_Catalog_Model_Category_Dynamic_Rule_Condition_Stock extends Mage_Rule_Model_Condition_Abstract
 {
-    public const ATTRIBUTE_IS_SALABLE   = 'is_salable';
-    public const ATTRIBUTE_IS_IN_STOCK  = 'is_in_stock';
-    public const ATTRIBUTE_QTY          = 'qty';
-    public const ATTRIBUTE_CHILDREN_QTY = 'children_qty';
+    public const string ATTRIBUTE_IS_SALABLE   = 'is_salable';
+    public const string ATTRIBUTE_IS_IN_STOCK  = 'is_in_stock';
+    public const string ATTRIBUTE_QTY          = 'qty';
+    public const string ATTRIBUTE_CHILDREN_QTY = 'children_qty';
 
     /**
      * Row keys are namespaced so a joined inventory column can never collide with an EAV attribute
      * of the same name already selected on the collection (qty and is_in_stock are common codes).
      */
-    public const COLUMN_PREFIX = 'dyncat_stock_';
+    public const string COLUMN_PREFIX = 'dyncat_stock_';
 
     public function __construct()
     {

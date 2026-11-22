@@ -12,15 +12,15 @@ declare(strict_types=1);
 
 class Maho_ApiPlatform_Model_Oauth_Token extends Mage_Core_Model_Abstract
 {
-    public const TYPE_PENDING = 'pending';
-    public const TYPE_CODE = 'code';
-    public const TYPE_REFRESH = 'refresh';
-    public const TYPE_CONSENT = 'consent';
+    public const string TYPE_PENDING = 'pending';
+    public const string TYPE_CODE = 'code';
+    public const string TYPE_REFRESH = 'refresh';
+    public const string TYPE_CONSENT = 'consent';
 
-    public const CHALLENGE_METHOD_S256 = 'S256';
+    public const string CHALLENGE_METHOD_S256 = 'S256';
 
     /** 32 random bytes, base64url encoded. Long enough that guessing is not a threat model. */
-    protected const SECRET_BYTES = 32;
+    protected const int SECRET_BYTES = 32;
 
     /**
      * The clear-text secret, available only on the request that created the row.

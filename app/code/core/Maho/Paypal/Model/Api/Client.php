@@ -21,10 +21,10 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 class Maho_Paypal_Model_Api_Client
 {
     /** Seconds before a token request gives up. The token endpoint answers in less than one second. */
-    public const TOKEN_REQUEST_TIMEOUT = 8;
+    public const int TOKEN_REQUEST_TIMEOUT = 8;
 
     /** Seconds that a cached client token must still be valid when checkout receives it. */
-    public const CLIENT_TOKEN_MIN_LIFETIME = 600;
+    public const int CLIENT_TOKEN_MIN_LIFETIME = 600;
 
     protected ?PaypalServerSdkClient $_client = null;
     protected ?Maho_Paypal_Model_Config $_config = null;

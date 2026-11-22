@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Model_System_Config_Source_Design_Package
 {
-    public const CONFIG_PATH = 'design/package/name';
+    public const string CONFIG_PATH = 'design/package/name';
 
     public function toOptionArray(): array
     {

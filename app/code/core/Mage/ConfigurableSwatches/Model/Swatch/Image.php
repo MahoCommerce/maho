@@ -14,10 +14,10 @@ declare(strict_types=1);
 
 class Mage_ConfigurableSwatches_Model_Swatch_Image implements Mage_Core_Model_Image_ProviderInterface
 {
-    public const ENTITY = 'swatch';
+    public const string ENTITY = 'swatch';
 
     /** The slot of the swatches in the theme. */
-    public const SLOT = 'listing';
+    public const string SLOT = 'listing';
 
     /**
      * Every swatch image in wysiwyg/swatches, for storage:image:resize.

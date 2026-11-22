@@ -21,7 +21,7 @@ final class Status
      * A pseudo-resource: no module owns it, so it never collides with the
      * per-module setup versions stored alongside it.
      */
-    public const RESOURCE_CODE = 'declarative_schema';
+    public const string RESOURCE_CODE = 'declarative_schema';
 
     /**
      * Files that shape the target schema and the plan derived from it. They
@@ -29,7 +29,7 @@ final class Status
      * table default, a different canonicalization rule), so they count
      * towards the fingerprint like the declarations themselves.
      */
-    private const PIPELINE_FILES = ['../Schema.php', 'Collector.php', 'Canonicalizer.php', 'Applier.php', 'Renamer.php'];
+    private const array PIPELINE_FILES = ['../Schema.php', 'Collector.php', 'Canonicalizer.php', 'Applier.php', 'Renamer.php'];
 
     /**
      * Fingerprint of the declared schema: the contents of every active

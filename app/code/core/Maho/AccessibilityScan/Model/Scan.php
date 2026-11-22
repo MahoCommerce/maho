@@ -10,14 +10,14 @@ declare(strict_types=1);
 
 class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
 {
-    public const STATUS_PENDING  = 'pending';
-    public const STATUS_RUNNING  = 'running';
-    public const STATUS_COMPLETE = 'complete';
-    public const STATUS_FAILED   = 'failed';
+    public const string STATUS_PENDING  = 'pending';
+    public const string STATUS_RUNNING  = 'running';
+    public const string STATUS_COMPLETE = 'complete';
+    public const string STATUS_FAILED   = 'failed';
 
-    public const TRIGGER_MANUAL   = 'manual';
-    public const TRIGGER_CLI      = 'cli';
-    public const TRIGGER_SCHEDULE = 'schedule';
+    public const string TRIGGER_MANUAL   = 'manual';
+    public const string TRIGGER_CLI      = 'cli';
+    public const string TRIGGER_SCHEDULE = 'schedule';
 
     /** @var array<string, list<Maho_AccessibilityScan_Model_Violation>>|null */
     protected ?array $violationsGroupedByImpact = null;

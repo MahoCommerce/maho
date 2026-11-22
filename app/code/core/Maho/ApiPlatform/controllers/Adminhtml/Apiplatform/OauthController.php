@@ -17,13 +17,13 @@ declare(strict_types=1);
 
 class Maho_ApiPlatform_Adminhtml_Apiplatform_OauthController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'system/api/oauth_clients';
+    public const string ADMIN_RESOURCE = 'system/api/oauth_clients';
 
     /**
      * The ACL resource that lets an admin approve a connection to their own account.
      * ADMIN_RESOURCE manages the connections of all admins.
      */
-    public const CONNECT_RESOURCE = 'api_connect';
+    public const string CONNECT_RESOURCE = 'api_connect';
 
     /**
      * The consent screen is reached from an external client, which cannot know

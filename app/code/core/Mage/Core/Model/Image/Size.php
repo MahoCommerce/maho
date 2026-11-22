@@ -22,10 +22,10 @@ use Maho\Storage\MountRegistry;
 class Mage_Core_Model_Image_Size
 {
     /** Paths in one queue message. */
-    public const BATCH_SIZE = 100;
+    public const int BATCH_SIZE = 100;
 
     /** Rows that one query reads when all rows are read. */
-    public const READ_BATCH_SIZE = 5000;
+    public const int READ_BATCH_SIZE = 5000;
 
     /** @var array<string, array{0: int, 1: int}|false> the sizes that this request knows, by hash. False: no size */
     protected array $sizes = [];

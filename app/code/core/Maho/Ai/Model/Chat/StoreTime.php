@@ -17,7 +17,7 @@ declare(strict_types=1);
  */
 final class Maho_Ai_Model_Chat_StoreTime
 {
-    private const PATTERN = '/\b(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})(?::\d{2})? ?UTC\b/';
+    private const string PATTERN = '/\b(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})(?::\d{2})? ?UTC\b/';
 
     /** Write each UTC time of $text in store time: "2026-10-19 06:21 UTC" becomes "2026-10-19 07:21". */
     public static function toStore(string $text, ?int $storeId): string

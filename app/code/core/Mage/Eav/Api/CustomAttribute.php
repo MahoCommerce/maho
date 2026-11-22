@@ -62,7 +62,7 @@ use Maho\Config\ApiResource;
 )]
 class CustomAttribute extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = 'system/attributes';
+    public const string ADMIN_RESOURCE = 'system/attributes';
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

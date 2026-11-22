@@ -12,21 +12,21 @@ declare(strict_types=1);
 
 class Mage_Core_Model_Design_Tokens
 {
-    public const CONFIG_NODE = 'global/design/tokens';
-    public const DARK_MODE_PATH = 'design/tokens/dark_mode';
+    public const string CONFIG_NODE = 'global/design/tokens';
+    public const string DARK_MODE_PATH = 'design/tokens/dark_mode';
     /** The dark blocks of the compiled default and of every theme.css hang on the same selector. */
-    public const DARK_ROOT_SELECTOR = ':root:where(:not([data-color-scheme="light"]))';
-    public const CUSTOM_CSS_PATH = 'design/tokens/custom_css';
-    public const FONT_STYLESHEET_PATH = 'design/tokens/font_stylesheet';
+    public const string DARK_ROOT_SELECTOR = ':root:where(:not([data-color-scheme="light"]))';
+    public const string CUSTOM_CSS_PATH = 'design/tokens/custom_css';
+    public const string FONT_STYLESHEET_PATH = 'design/tokens/font_stylesheet';
 
-    private const VAR_PATTERN = '/^--[a-z0-9-]+$/';
-    private const FONT_STACK_PATTERN = '/^\s*("[^"]+"|\'[^\']+\'|[\w\- ]+)(\s*,\s*("[^"]+"|\'[^\']+\'|[\w\- ]+))*\s*$/u';
-    private const LENGTH_PATTERN = '/^-?(0|(\d+|\d*\.\d+)(px|rem|em|%|vw|vh|vmin|vmax|ch|ex|pt|pc|cm|mm|in|q))$/i';
-    private const VALUE_FORBIDDEN = '/[;{}<>\\\\]|\/\*|\*\//';
-    public const VALUE_MAX_LENGTH = 512;
+    private const string VAR_PATTERN = '/^--[a-z0-9-]+$/';
+    private const string FONT_STACK_PATTERN = '/^\s*("[^"]+"|\'[^\']+\'|[\w\- ]+)(\s*,\s*("[^"]+"|\'[^\']+\'|[\w\- ]+))*\s*$/u';
+    private const string LENGTH_PATTERN = '/^-?(0|(\d+|\d*\.\d+)(px|rem|em|%|vw|vh|vmin|vmax|ch|ex|pt|pc|cm|mm|in|q))$/i';
+    private const string VALUE_FORBIDDEN = '/[;{}<>\\\\]|\/\*|\*\//';
+    public const int VALUE_MAX_LENGTH = 512;
 
-    private const INK_DARK = '#101418';
-    private const INK_LIGHT = '#ffffff';
+    private const string INK_DARK = '#101418';
+    private const string INK_LIGHT = '#ffffff';
 
     /**
      * An empty field contributes nothing, so the theme's own value stands.
@@ -82,7 +82,7 @@ class Mage_Core_Model_Design_Tokens
     }
 
     /** The variables the editor previews: the backgrounds, the button colors and their inks. */
-    public const PALETTE_VARS = [
+    public const array PALETTE_VARS = [
         '--color-base-200', '--color-base-content',
         '--color-primary', '--color-primary-content',
         '--color-secondary', '--color-secondary-content',

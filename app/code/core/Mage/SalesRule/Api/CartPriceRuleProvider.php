@@ -18,7 +18,7 @@ final class CartPriceRuleProvider extends \Maho\ApiPlatform\Provider
 {
     use ConditionMetadataTrait;
 
-    private const SORT_COLUMNS = [
+    private const array SORT_COLUMNS = [
         'id' => 'main_table.rule_id',
         'name' => 'main_table.name',
         'sortOrder' => 'main_table.sort_order',

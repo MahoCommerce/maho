@@ -19,13 +19,13 @@ declare(strict_types=1);
  */
 class Mage_Core_Model_Url_Rewrite extends Mage_Core_Model_Abstract implements Mage_Core_Model_Url_Rewrite_Interface
 {
-    public const TYPE_CATEGORY = 1;
-    public const TYPE_PRODUCT  = 2;
-    public const TYPE_CUSTOM   = 3;
-    public const REWRITE_REQUEST_PATH_ALIAS = 'rewrite_request_path';
+    public const int TYPE_CATEGORY = 1;
+    public const int TYPE_PRODUCT  = 2;
+    public const int TYPE_CUSTOM   = 3;
+    public const string REWRITE_REQUEST_PATH_ALIAS = 'rewrite_request_path';
 
     /** The redirect types: none (an internal rewrite), a 302 redirect, a 301 redirect. */
-    public const OPTIONS = ['', 'R', 'RP'];
+    public const array OPTIONS = ['', 'R', 'RP'];
 
     /**
      * Cache tag for clear cache in after save and after delete

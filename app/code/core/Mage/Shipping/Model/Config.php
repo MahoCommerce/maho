@@ -13,10 +13,10 @@ class Mage_Shipping_Model_Config extends \Maho\DataObject
     /**
      * Shipping origin settings
      */
-    public const XML_PATH_ORIGIN_COUNTRY_ID = 'shipping/origin/country_id';
-    public const XML_PATH_ORIGIN_REGION_ID  = 'shipping/origin/region_id';
-    public const XML_PATH_ORIGIN_CITY       = 'shipping/origin/city';
-    public const XML_PATH_ORIGIN_POSTCODE   = 'shipping/origin/postcode';
+    public const string XML_PATH_ORIGIN_COUNTRY_ID = 'shipping/origin/country_id';
+    public const string XML_PATH_ORIGIN_REGION_ID  = 'shipping/origin/region_id';
+    public const string XML_PATH_ORIGIN_CITY       = 'shipping/origin/city';
+    public const string XML_PATH_ORIGIN_POSTCODE   = 'shipping/origin/postcode';
 
     protected static array $_carriers = [];
 

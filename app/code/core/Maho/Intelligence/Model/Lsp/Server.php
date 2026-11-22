@@ -24,7 +24,7 @@ use React\EventLoop\TimerInterface;
  */
 class Maho_Intelligence_Model_Lsp_Server
 {
-    private const DIAGNOSTICS_DEBOUNCE_SECONDS = 0.3;
+    private const float DIAGNOSTICS_DEBOUNCE_SECONDS = 0.3;
 
     private LoopInterface $loop;
     private Maho_Intelligence_Model_Lsp_Transport $transport;

@@ -29,15 +29,15 @@ use Symfony\AI\Platform\Result\ToolCall;
 final class McpToolbox implements ToolboxInterface
 {
     /** A failed call is reported to the model as text that starts with this. */
-    public const ERROR_PREFIX = 'Tool error: ';
+    public const string ERROR_PREFIX = 'Tool error: ';
 
-    public const ENABLE_NAME = 'enable_tools';
+    public const string ENABLE_NAME = 'enable_tools';
 
     /** The most tools one model request carries, under the 128 that OpenAI-compatible endpoints accept. */
-    public const MAX_TOOLS = 120;
+    public const int MAX_TOOLS = 120;
 
     /** The path of the REST API, which the @id of every record starts with. */
-    private const API_PATH = '/api/rest/v2';
+    private const string API_PATH = '/api/rest/v2';
 
     public static function isErrorText(string $text): bool
     {
@@ -363,7 +363,7 @@ final class McpToolbox implements ToolboxInterface
     }
 
     /** Labels an administrator knows a record by, in the order a preview tries them. */
-    private const RECORD_LABELS = ['name', 'title', 'incrementId', 'sku', 'email', 'code', 'identifier', 'label', 'templateCode', 'username'];
+    private const array RECORD_LABELS = ['name', 'title', 'incrementId', 'sku', 'email', 'code', 'identifier', 'label', 'templateCode', 'username'];
 
     /**
      * What a write will do, for the confirmation card: the record it touches, the scope it

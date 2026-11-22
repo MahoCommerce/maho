@@ -16,9 +16,9 @@ class Mage_ImportExport_Model_Export_Entity_Customer extends Mage_ImportExport_M
      * Names that begins with underscore is not an attribute. This name convention is for
      * to avoid interference with same attribute name.
      */
-    public const COL_EMAIL   = 'email';
-    public const COL_WEBSITE = '_website';
-    public const COL_STORE   = '_store';
+    public const string COL_EMAIL   = 'email';
+    public const string COL_WEBSITE = '_website';
+    public const string COL_STORE   = '_store';
 
     /**
      * Overridden attributes parameters.

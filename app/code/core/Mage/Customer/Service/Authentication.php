@@ -22,23 +22,23 @@ use Mage_Customer_Model_Customer as Customer;
  */
 class Mage_Customer_Service_Authentication
 {
-    public const XML_PATH_LOGIN_IP_RATE_LIMIT = 'system/rate_limit/auth_token_ip';
-    public const XML_PATH_LOGIN_RATE_LIMIT = 'system/rate_limit/customer_login';
-    public const XML_PATH_MAGIC_LINK_EMAIL_RATE_LIMIT = 'system/rate_limit/magic_link_email';
-    public const XML_PATH_MAGIC_LINK_IP_RATE_LIMIT = 'system/rate_limit/magic_link_ip';
+    public const string XML_PATH_LOGIN_IP_RATE_LIMIT = 'system/rate_limit/auth_token_ip';
+    public const string XML_PATH_LOGIN_RATE_LIMIT = 'system/rate_limit/customer_login';
+    public const string XML_PATH_MAGIC_LINK_EMAIL_RATE_LIMIT = 'system/rate_limit/magic_link_email';
+    public const string XML_PATH_MAGIC_LINK_IP_RATE_LIMIT = 'system/rate_limit/magic_link_ip';
     /** Counts only a rejected token: a password reset link, an account confirmation key or a magic login link */
-    public const XML_PATH_TOKEN_RATE_LIMIT = 'system/rate_limit/reset_password';
-    public const XML_PATH_CONFIRMATION_LINK_RATE_LIMIT = 'system/rate_limit/confirmation_link';
+    public const string XML_PATH_TOKEN_RATE_LIMIT = 'system/rate_limit/reset_password';
+    public const string XML_PATH_CONFIRMATION_LINK_RATE_LIMIT = 'system/rate_limit/confirmation_link';
 
-    public const XML_PATH_ALLOW_2FA = 'customer/password/allow_2fa';
-    public const XML_PATH_REQUIRE_2FA = 'customer/password/require_2fa';
+    public const string XML_PATH_ALLOW_2FA = 'customer/password/allow_2fa';
+    public const string XML_PATH_REQUIRE_2FA = 'customer/password/require_2fa';
 
-    public const RATE_LIMIT_WINDOW = 3600;
-    public const LOGIN_RATE_LIMIT_WINDOW = 60;
+    public const int RATE_LIMIT_WINDOW = 3600;
+    public const int LOGIN_RATE_LIMIT_WINDOW = 60;
 
-    public const ERROR_INVALID_CREDENTIALS = 'invalid_credentials';
-    public const ERROR_TWOFA_REQUIRED = SecondFactorRequired::ERROR_CODE;
-    public const ERROR_TWOFA_INVALID = 'twofa_invalid';
+    public const string ERROR_INVALID_CREDENTIALS = 'invalid_credentials';
+    public const string ERROR_TWOFA_REQUIRED = SecondFactorRequired::ERROR_CODE;
+    public const string ERROR_TWOFA_INVALID = 'twofa_invalid';
 
     /**
      * Check the email and the password of a customer of the website $websiteId, with the 2FA code when the customer

@@ -10,9 +10,9 @@
 
 class Mage_Install_Model_Config extends Maho\Simplexml\Config
 {
-    public const XML_PATH_WIZARD_STEPS     = 'wizard/steps';
-    public const XML_PATH_CHECK_WRITEABLE  = 'check/filesystem/writeable';
-    public const XML_PATH_CHECK_EXTENSIONS = 'check/php/extensions';
+    public const string XML_PATH_WIZARD_STEPS     = 'wizard/steps';
+    public const string XML_PATH_CHECK_WRITEABLE  = 'check/filesystem/writeable';
+    public const string XML_PATH_CHECK_EXTENSIONS = 'check/php/extensions';
 
     /** @var array<string, array<string, string>> */
     protected array $_optionsMapping = [self::XML_PATH_CHECK_WRITEABLE => [

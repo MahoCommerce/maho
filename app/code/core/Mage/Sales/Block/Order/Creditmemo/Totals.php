@@ -10,7 +10,7 @@
 
 class Mage_Sales_Block_Order_Creditmemo_Totals extends Mage_Sales_Block_Order_Totals
 {
-    protected $_creditmemo = null;
+    protected ?Mage_Sales_Model_Order_Creditmemo $_creditmemo = null;
 
     /**
      * @return mixed|null

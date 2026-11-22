@@ -27,18 +27,18 @@ declare(strict_types=1);
  */
 class Mage_Core_Model_Lock
 {
-    public const XML_PATH_BACKEND = 'global/lock/backend';
+    public const string XML_PATH_BACKEND = 'global/lock/backend';
 
     /**
      * Seconds per acquisition attempt when blocking on the db backend
      */
-    public const DB_LOCK_TIMEOUT = 5;
+    public const int DB_LOCK_TIMEOUT = 5;
 
     /**
      * "e" adds O_CLOEXEC: an flock belongs to the open file description, so a
      * child inheriting the descriptor would outlive the holder still holding it
      */
-    public const FILE_OPEN_MODE = 'ce';
+    public const string FILE_OPEN_MODE = 'ce';
 
     /**
      * Held locks (SplFileObject for the file backend, true for the db backend);

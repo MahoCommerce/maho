@@ -13,8 +13,8 @@ class Mage_Eav_Model_Entity_Attribute_Source_Boolean extends Mage_Eav_Model_Enti
     /**
      * Option values
      */
-    public const VALUE_YES = 1;
-    public const VALUE_NO = 0;
+    public const int VALUE_YES = 1;
+    public const int VALUE_NO = 0;
 
     #[\Override]
     public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array

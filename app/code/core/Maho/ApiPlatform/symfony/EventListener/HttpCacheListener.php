@@ -28,10 +28,10 @@ use Symfony\Component\HttpKernel\KernelEvents;
 class HttpCacheListener
 {
     /** Everything a cached representation is keyed on, in one place: the 304 branch is easy to forget. */
-    private const VARY = 'Authorization, Accept, ' . StoreContextListener::HEADER . ', ' . CurrencyContextListener::HEADER;
+    private const string VARY = 'Authorization, Accept, ' . StoreContextListener::HEADER . ', ' . CurrencyContextListener::HEADER;
 
     /** Public endpoints that can be cached by CDN/proxies */
-    private const PUBLIC_PATHS = [
+    private const array PUBLIC_PATHS = [
         '/api/rest/v2/store-config',
         '/api/rest/v2/countries',
         '/api/rest/v2/categories',

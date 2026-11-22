@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_Page_Block_Html extends Mage_Core_Block_Template
 {
     protected array $_urls = [];
-    protected $_title = '';
+    protected string $_title = '';
 
     public function __construct()
     {
@@ -105,7 +105,7 @@ class Mage_Page_Block_Html extends Mage_Core_Block_Template
      */
     public function setHeaderTitle($title)
     {
-        $this->_title = $title;
+        $this->_title = (string) $title;
         return $this;
     }
 

@@ -82,13 +82,13 @@ use Maho\ApiPlatform\Metadata\ListFilter;
 )]
 class CartPriceRule extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_Promo_QuoteController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_Promo_QuoteController::ADMIN_RESOURCE;
 
-    public const COUPON_TYPE_NONE = 'none';
-    public const COUPON_TYPE_SPECIFIC = 'specific';
-    public const COUPON_TYPE_AUTO = 'auto';
+    public const string COUPON_TYPE_NONE = 'none';
+    public const string COUPON_TYPE_SPECIFIC = 'specific';
+    public const string COUPON_TYPE_AUTO = 'auto';
 
-    private const TREE_SCHEMA = [
+    private const array TREE_SCHEMA = [
         'type' => 'object',
         'description' => 'Condition tree. A node has the keys type, attribute, operator, value, aggregator and conditions (the list of child nodes, never "children"), and the read-only key label. GET /cart-price-rules/condition-metadata describes the allowed types, attributes, operators and values.',
         'properties' => [

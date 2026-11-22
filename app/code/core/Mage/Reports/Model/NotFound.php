@@ -12,21 +12,21 @@ declare(strict_types=1);
 
 class Mage_Reports_Model_NotFound extends Mage_Core_Model_Abstract
 {
-    public const XML_PATH_ENABLED = 'reports/not_found/enabled';
-    public const XML_PATH_LOG_RATE_LIMIT = 'reports/not_found/log_rate_limit';
-    public const XML_PATH_DAYS_TO_KEEP = 'reports/not_found/days_to_keep';
-    public const XML_PATH_MAX_ROWS = 'reports/not_found/max_rows';
+    public const string XML_PATH_ENABLED = 'reports/not_found/enabled';
+    public const string XML_PATH_LOG_RATE_LIMIT = 'reports/not_found/log_rate_limit';
+    public const string XML_PATH_DAYS_TO_KEEP = 'reports/not_found/days_to_keep';
+    public const string XML_PATH_MAX_ROWS = 'reports/not_found/max_rows';
 
-    public const RATE_LIMIT_NAMESPACE = 'report_not_found';
-    public const RATE_LIMIT_WINDOW = 3600;
+    public const string RATE_LIMIT_NAMESPACE = 'report_not_found';
+    public const int RATE_LIMIT_WINDOW = 3600;
 
     /** The length of core_url_rewrite.request_path. A longer path cannot get a redirect. */
-    public const MAX_PATH_LENGTH = 255;
+    public const int MAX_PATH_LENGTH = 255;
 
-    public const MAX_REFERER_LENGTH = 2048;
+    public const int MAX_REFERER_LENGTH = 2048;
 
     /** Paths that are not storefront pages. */
-    private const IGNORED_PREFIXES = ['api/', '.well-known/'];
+    private const array IGNORED_PREFIXES = ['api/', '.well-known/'];
 
     #[\Override]
     protected function _construct(): void

@@ -18,11 +18,11 @@ declare(strict_types=1);
  */
 class Mage_Cron_Model_Schedule extends Mage_Core_Model_Abstract
 {
-    public const STATUS_PENDING = 'pending';
-    public const STATUS_RUNNING = 'running';
-    public const STATUS_SUCCESS = 'success';
-    public const STATUS_MISSED = 'missed';
-    public const STATUS_ERROR = 'error';
+    public const string STATUS_PENDING = 'pending';
+    public const string STATUS_RUNNING = 'running';
+    public const string STATUS_SUCCESS = 'success';
+    public const string STATUS_MISSED = 'missed';
+    public const string STATUS_ERROR = 'error';
 
     #[\Override]
     protected function _construct()

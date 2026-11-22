@@ -23,7 +23,7 @@ use Maho\Storage\Url\StoreBaseUrlGenerator;
  */
 final class MountRegistry
 {
-    public const XML_PATH_MOUNTS = 'global/storage/mounts';
+    public const string XML_PATH_MOUNTS = 'global/storage/mounts';
 
     /** @var array<string, MountDefinition> */
     private static array $definitions = [];

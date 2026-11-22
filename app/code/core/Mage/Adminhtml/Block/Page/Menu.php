@@ -17,7 +17,7 @@ declare(strict_types=1);
  */
 class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
 {
-    public const CACHE_TAGS = 'BACKEND_MAINMENU';
+    public const string CACHE_TAGS = 'BACKEND_MAINMENU';
 
     /**
      * Adminhtml URL instance

@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_ApiPlatform_Adminhtml_Apiplatform_UserController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'system/api/api2_users';
+    public const string ADMIN_RESOURCE = 'system/api/api2_users';
 
     protected function _initAction(): static
     {

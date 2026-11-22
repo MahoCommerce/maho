@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'catalog/linkrules';
+    public const string ADMIN_RESOURCE = 'catalog/linkrules';
 
     /** The link of a notice from the message queue has no secret key: the grid only reads. */
     #[\Override]

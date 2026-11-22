@@ -26,7 +26,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     use DateRangeFilterTrait;
 
     /** Whitelist of fields the client may sort by; everything else is rejected to keep ORDER BY injection-safe. */
-    private const SORTABLE_FIELDS = ['name', 'price', 'special_price', 'created_at', 'updated_at', 'position', 'sku', 'entity_id'];
+    private const array SORTABLE_FIELDS = ['name', 'price', 'special_price', 'created_at', 'updated_at', 'position', 'sku', 'entity_id'];
 
     private ?\Mage_Catalog_Model_Product_Media_Config $mediaConfig = null;
 

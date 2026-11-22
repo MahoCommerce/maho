@@ -25,11 +25,11 @@ class Mage_Core_Model_Email_Queue extends \Maho\DataObject
     /**
      * Email types
      */
-    public const EMAIL_TYPE_TO  = 0;
-    public const EMAIL_TYPE_CC  = 1;
-    public const EMAIL_TYPE_BCC = 2;
+    public const int EMAIL_TYPE_TO  = 0;
+    public const int EMAIL_TYPE_CC  = 1;
+    public const int EMAIL_TYPE_BCC = 2;
 
-    public const QUEUE_NAME = 'email';
+    public const string QUEUE_NAME = 'email';
 
     /**
      * Store message recipients list

@@ -13,24 +13,24 @@ class Mage_Catalog_Model_Layer_Filter_Price_Algorithm
     /**
      * Rounding factor coefficient
      */
-    public const TEN_POWER_ROUNDING_FACTOR = 4;
+    public const int TEN_POWER_ROUNDING_FACTOR = 4;
 
     /**
      * Interval deflection coefficient
      */
-    public const INTERVAL_DEFLECTION_LIMIT = .3;
+    public const float INTERVAL_DEFLECTION_LIMIT = .3;
 
     /**
      * Standard normal distribution's  a/2 quantile
      * Depends on predefined a. In case of a=0.05
      */
-    public const STANDARD_NORMAL_DISTRIBUTION = 1.96;
+    public const float STANDARD_NORMAL_DISTRIBUTION = 1.96;
 
     /**
      * Min and Max number of intervals
      */
-    public const MIN_INTERVALS_NUMBER = 2;
-    public const MAX_INTERVALS_NUMBER = 10;
+    public const int MIN_INTERVALS_NUMBER = 2;
+    public const int MAX_INTERVALS_NUMBER = 10;
 
     /**
      * Upper prices limit

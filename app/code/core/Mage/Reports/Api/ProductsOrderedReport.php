@@ -37,7 +37,7 @@ use ApiPlatform\Metadata\Get;
 )]
 class ProductsOrderedReport extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = 'report/products/sold';
+    public const string ADMIN_RESOURCE = 'report/products/sold';
 
     #[ApiProperty(identifier: true, description: 'Report code')]
     public string $report = 'products-ordered';

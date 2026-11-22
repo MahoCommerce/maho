@@ -12,10 +12,10 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Model_Transformer_CurrentPrice extends Maho_FeedManager_Model_Transformer_AbstractTransformer
 {
-    public const PART_PRICE = 'price';
-    public const PART_SALE_PRICE = 'sale_price';
-    public const PART_CURRENT = 'current';
-    public const PART_ORIGINAL_PRICE = 'original_price';
+    public const string PART_PRICE = 'price';
+    public const string PART_SALE_PRICE = 'sale_price';
+    public const string PART_CURRENT = 'current';
+    public const string PART_ORIGINAL_PRICE = 'original_price';
 
     #[\Override]
     protected string $_code = 'current_price';

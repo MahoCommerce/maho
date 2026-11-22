@@ -17,8 +17,8 @@ declare(strict_types=1);
  */
 class Maho_ApiPlatform_Model_User extends Mage_Core_Model_Abstract
 {
-    public const ROLE_TYPE_GROUP = 'G';
-    public const ROLE_TYPE_USER = 'U';
+    public const string ROLE_TYPE_GROUP = 'G';
+    public const string ROLE_TYPE_USER = 'U';
 
     #[\Override]
     protected $_eventPrefix = 'api_user';

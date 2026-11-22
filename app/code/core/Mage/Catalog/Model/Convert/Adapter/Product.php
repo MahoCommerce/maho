@@ -10,8 +10,8 @@
 
 class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_Adapter_Entity
 {
-    public const MULTI_DELIMITER   = ' , ';
-    public const ENTITY            = 'catalog_product_import';
+    public const string MULTI_DELIMITER   = ' , ';
+    public const string ENTITY            = 'catalog_product_import';
 
     protected string $_eventPrefix = 'catalog_product_import';
 

@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 class Mage_Sitemap_Model_Source_Signal
 {
-    public const YES = 'yes';
-    public const NO = 'no';
+    public const string YES = 'yes';
+    public const string NO = 'no';
 
     /**
      * @return array<int, array{value: string, label: string}>

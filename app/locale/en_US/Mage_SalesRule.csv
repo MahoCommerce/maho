@@ -94,6 +94,7 @@
 "Per IP address and per customer. Default 60 per minute. 0 to disable.","Per IP address and per customer. Default 60 per minute. 0 to disable."
 "Price in cart","Price in cart"
 "Priority","Priority"
+"Product Attribute Assigned","Product Attribute Assigned"
 "Product attribute combination","Product attribute combination"
 "Products subselection","Products subselection"
 "Promotions","Promotions"

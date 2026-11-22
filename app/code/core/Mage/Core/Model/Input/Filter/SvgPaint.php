@@ -28,15 +28,15 @@ use Symfony\Component\HtmlSanitizer\Visitor\AttributeSanitizer\AttributeSanitize
 class Mage_Core_Model_Input_Filter_SvgPaint implements AttributeSanitizerInterface
 {
     /** SVG allows a color after the reference, for a browser that cannot resolve it. */
-    public const LOCAL_REFERENCE_PATTERN = '/^url\(\s*[\'"]?#[A-Za-z0-9_.:-]+[\'"]?\s*\)(?<fallback>.*)$/';
+    public const string LOCAL_REFERENCE_PATTERN = '/^url\(\s*[\'"]?#[A-Za-z0-9_.:-]+[\'"]?\s*\)(?<fallback>.*)$/';
 
-    public const KEYWORDS = ['none', 'currentcolor', 'transparent', 'inherit', 'context-fill', 'context-stroke'];
+    public const array KEYWORDS = ['none', 'currentcolor', 'transparent', 'inherit', 'context-fill', 'context-stroke'];
 
-    public const HEX_COLOR_PATTERN = '/^#[0-9A-Fa-f]{3,8}$/';
+    public const string HEX_COLOR_PATTERN = '/^#[0-9A-Fa-f]{3,8}$/';
 
-    public const FUNCTIONAL_COLOR_PATTERN = '/^(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\([0-9A-Za-z%.,\/\s+-]*\)$/';
+    public const string FUNCTIONAL_COLOR_PATTERN = '/^(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\([0-9A-Za-z%.,\/\s+-]*\)$/';
 
-    public const NAMED_COLOR_PATTERN = '/^[A-Za-z]{3,20}$/';
+    public const string NAMED_COLOR_PATTERN = '/^[A-Za-z]{3,20}$/';
 
     #[\Override]
     public function getSupportedElements(): ?array

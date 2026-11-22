@@ -13,8 +13,8 @@ declare(strict_types=1);
 class Maho_Ai_Model_Memory extends Mage_Core_Model_Abstract
 {
     /** Notes per administrator; the prompt lists them all, so the list stays short. */
-    public const MAX_NOTES = 20;
-    public const MAX_LENGTH = 200;
+    public const int MAX_NOTES = 20;
+    public const int MAX_LENGTH = 200;
 
     #[\Override]
     protected function _construct(): void

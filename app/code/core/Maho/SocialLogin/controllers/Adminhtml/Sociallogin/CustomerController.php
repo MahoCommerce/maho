@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_SocialLogin_Adminhtml_Sociallogin_CustomerController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'customer/manage';
+    public const string ADMIN_RESOURCE = 'customer/manage';
 
     #[Maho\Config\Route('/admin/sociallogin_customer/unlink', methods: ['POST'])]
     public function unlinkAction(): void
