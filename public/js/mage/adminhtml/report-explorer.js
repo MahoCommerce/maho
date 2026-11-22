@@ -169,7 +169,7 @@ class MahoReportExplorer {
     }
 
     initialView() {
-        const view = { chartMetric: null, chartType: 'auto', matrixShare: false, panel: null, drill: [], valueLabels: {} };
+        const view = { chartMetric: null, chartType: 'auto', matrixShare: false, matrixCumulative: false, panel: null, drill: [], valueLabels: {} };
         const encoded = new URL(window.location.href).searchParams.get('view');
         if (encoded) {
             try {
@@ -1320,6 +1320,12 @@ class MahoReportExplorer {
         group.setAttribute('role', 'group');
         group.setAttribute('aria-label', this.t('chartType'));
         if (shape === 'matrix') {
+            const cumulative = this.button(this.t('matrixCumulative'), `d-btn d-btn-xs ${this.view.matrixCumulative ? 'd-btn-active' : ''}`, () => {
+                this.setView({ matrixCumulative: !this.view.matrixCumulative });
+                this.renderChart(this.runToken);
+            });
+            cumulative.setAttribute('aria-pressed', String(Boolean(this.view.matrixCumulative)));
+            header.append(cumulative);
             const share = this.button(this.t('matrixShare'), `d-btn d-btn-xs ${this.view.matrixShare ? 'd-btn-active' : ''}`, () => {
                 this.setView({ matrixShare: !this.view.matrixShare });
                 this.renderChart(this.runToken);
@@ -1444,8 +1450,9 @@ class MahoReportExplorer {
 
     /**
      * A table of the values of the first grouping by the values of the second one, such as the month of the first
-     * order by the months after it. The color of a cell grows with its value. The share shows each cell against the
-     * first cell of its row, such as the customers of a cohort who order again.
+     * order by the months after it. The color of a cell grows with its value. The cumulative view adds each cell to
+     * the cells before it in its row, such as the net sales of a cohort up to a month. The share shows each cell
+     * against the first cell of its row, such as the customers of a cohort who order again.
      */
     renderMatrix(rows, metric) {
         const holder = this.parts.matrix;
@@ -1463,6 +1470,25 @@ class MahoReportExplorer {
         }
         const rowKeys = [...rowLabels.keys()].sort(order);
         const columnKeys = [...columnLabels.keys()].sort(order);
+        if (this.view.matrixCumulative) {
+            // A cohort row ends at the month of the end of the period, any other row at its last value
+            const end = /^(\d{4})-(\d{2})/.exec(this.result?.period?.to ?? '');
+            const months = (key) => {
+                const match = /^(\d{4})-(\d{2})$/.exec(key);
+                return match ? Number(match[1]) * 12 + Number(match[2]) : null;
+            };
+            for (const rowKey of rowKeys) {
+                const age = end && months(rowKey) !== null ? Number(end[1]) * 12 + Number(end[2]) - months(rowKey) : null;
+                const last = age !== null && columnKeys.every((key) => !Number.isNaN(Number(key)))
+                    ? columnKeys.findLastIndex((columnKey) => Number(columnKey) <= age)
+                    : columnKeys.findLastIndex((columnKey) => cells.get(`${rowKey}\u0000${columnKey}`) !== undefined);
+                let sum = 0;
+                columnKeys.slice(0, last + 1).forEach((columnKey) => {
+                    sum += Number(cells.get(`${rowKey}\u0000${columnKey}`) ?? 0);
+                    cells.set(`${rowKey}\u0000${columnKey}`, sum);
+                });
+            }
+        }
         const share = Boolean(this.view.matrixShare);
         const value = (rowKey, columnKey) => {
             const cell = cells.get(`${rowKey}\u0000${columnKey}`);

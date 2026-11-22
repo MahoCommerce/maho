@@ -66,8 +66,8 @@ The chart shows one metric. Its type follows the first grouping:
 The buttons **Auto**, **Line**, **Bar** and **Table** on the chart change its type. **Table** hides
 the chart. A report with two groupings also has **Matrix**: a table with one row for each value of
 the first grouping and one column for each value of the second grouping. The color of a cell grows
-with its value. **Share of the first column** shows each cell as a percent of the first cell of its
-row.
+with its value. **Cumulative** adds each cell to the cells before it in its row. **Share of the first
+column** shows each cell as a percent of the first cell of its row.
 
 ## Customer cohorts
 
@@ -84,6 +84,22 @@ again, for example 25 % in column 3.
 - The report keeps only the customers whose first order is in the period, with the filter **First
   order in the period**. Remove the filter to also see the later orders of older customers.
 - Change the metric of the chart to **Net sales** or **Orders** to see the amounts of each cohort.
+- Click **Cumulative** with **Net sales** to see the lifetime value of each cohort: the net sales of
+  its customers up to each month. Add **Share of the first column** to see this value as a multiple
+  of the first month. A row stops at the month of the end of the period.
+- Filter by **Customer segment** to see the cohorts of one segment only.
+
+## Customer segments
+
+When the store has active customer segments, the Orders and Customers data have the grouping and
+the filter **Customer segment**. For example, group the net sales by segment, or filter the sales
+overview to one segment.
+
+- A segment holds the customers that match its conditions at its last refresh, not on the date of
+  an order. An order counts in the segments of its customer now.
+- A customer can be in several segments, so an order counts once in each segment of its customer.
+  The rows then do not add up to the total, and the report shows a warning.
+- Guest orders and the customers in no segment show as **(none)**.
 
 When the period changes, a date grouping changes its step: hours for one or two days, days up to
 two months, weeks up to six months, then months.
