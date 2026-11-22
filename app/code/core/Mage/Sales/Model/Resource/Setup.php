@@ -72,10 +72,6 @@ class Mage_Sales_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
     #[\Override]
     public function addAttribute($entityTypeId, $code, array $attr)
     {
-        // The table of this entity is gone, but the install script of Mage_GiftMessage still adds a column to it
-        if ($entityTypeId === 'quote_address_item') {
-            return $this;
-        }
         if (isset($this->_flatEntityTables[$entityTypeId])
             && $this->_flatTableExist($this->_flatEntityTables[$entityTypeId])
         ) {
