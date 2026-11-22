@@ -26,25 +26,25 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     /**
      * Configuration paths for email templates and identities
      */
-    public const XML_PATH_FORGOT_EMAIL_TEMPLATE    = 'admin/emails/forgot_email_template';
-    public const XML_PATH_FORGOT_EMAIL_IDENTITY    = 'admin/emails/forgot_email_identity';
-    public const XML_PATH_STARTUP_PAGE             = 'admin/startup/page';
+    public const string XML_PATH_FORGOT_EMAIL_TEMPLATE    = 'admin/emails/forgot_email_template';
+    public const string XML_PATH_FORGOT_EMAIL_IDENTITY    = 'admin/emails/forgot_email_identity';
+    public const string XML_PATH_STARTUP_PAGE             = 'admin/startup/page';
 
     /** Configuration paths for notifications */
-    public const XML_PATH_ADDITIONAL_EMAILS             = 'general/additional_notification_emails/admin_user_create';
-    public const XML_PATH_NOTIFICATION_EMAILS_TEMPLATE  = 'admin/emails/admin_notification_email_template';
+    public const string XML_PATH_ADDITIONAL_EMAILS             = 'general/additional_notification_emails/admin_user_create';
+    public const string XML_PATH_NOTIFICATION_EMAILS_TEMPLATE  = 'admin/emails/admin_notification_email_template';
 
     /**
      * Configuration path for minimum length of admin password
      */
-    public const XML_PATH_MIN_ADMIN_PASSWORD_LENGTH = 'admin/security/min_admin_password_length';
+    public const string XML_PATH_MIN_ADMIN_PASSWORD_LENGTH = 'admin/security/min_admin_password_length';
 
     /**
      * Authentication error codes
      */
-    public const AUTH_ERR_ACCOUNT_INACTIVE = 1;
-    public const AUTH_ERR_ACCESS_DENIED = 2;
-    public const AUTH_ERR_2FA_INVALID = 3;
+    public const int AUTH_ERR_ACCOUNT_INACTIVE = 1;
+    public const int AUTH_ERR_ACCESS_DENIED = 2;
+    public const int AUTH_ERR_2FA_INVALID = 3;
 
     /**
      * Model event prefix

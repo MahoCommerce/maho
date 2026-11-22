@@ -13,7 +13,7 @@ use MatthiasMullie\Minify\JS as JSMinifier;
 
 class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
 {
-    private const CACHE_DIR = 'public/media/mahominify';
+    private const string CACHE_DIR = 'public/media/mahominify';
 
     /**
      * Runtime cache to avoid processing the same file multiple times

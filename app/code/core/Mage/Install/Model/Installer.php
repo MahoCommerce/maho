@@ -13,7 +13,7 @@ class Mage_Install_Model_Installer extends Maho\DataObject
     /**
      * Installer host response used to check urls
      */
-    public const INSTALLER_HOST_RESPONSE   = 'MAGENTO';
+    public const string INSTALLER_HOST_RESPONSE   = 'MAGENTO';
 
     /**
      * Installer data model used to store data between installation steps

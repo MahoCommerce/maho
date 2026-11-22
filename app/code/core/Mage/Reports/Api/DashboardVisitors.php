@@ -42,7 +42,7 @@ use ApiPlatform\Metadata\Get;
 )]
 class DashboardVisitors extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_DashboardController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_DashboardController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, description: 'Number of days of the breakdowns')]
     public int $days = 7;

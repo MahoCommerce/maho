@@ -21,11 +21,11 @@ use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
 {
     /** One request generates at most this many coupons */
-    public const MAX_GENERATE_QTY = 1000;
-    public const MAX_CODE_LENGTH = \Mage_SalesRule_Service_Rule::MAX_CODE_LENGTH;
-    public const MAX_DELETE_IDS = 1000;
+    public const int MAX_GENERATE_QTY = 1000;
+    public const int MAX_CODE_LENGTH = \Mage_SalesRule_Service_Rule::MAX_CODE_LENGTH;
+    public const int MAX_DELETE_IDS = 1000;
 
-    private const GENERATE_FIELDS = ['qty', 'length', 'format', 'prefix', 'suffix', 'dash'];
+    private const array GENERATE_FIELDS = ['qty', 'length', 'format', 'prefix', 'suffix', 'dash'];
 
     public function __construct(
         Security $security,

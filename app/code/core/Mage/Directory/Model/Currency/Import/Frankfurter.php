@@ -10,7 +10,7 @@
 
 class Mage_Directory_Model_Currency_Import_Frankfurter extends Mage_Directory_Model_Currency_Import_Eurbased
 {
-    public const XML_PATH_FRANKFURTER_TIMEOUT = 'currency/frankfurter/timeout';
+    public const string XML_PATH_FRANKFURTER_TIMEOUT = 'currency/frankfurter/timeout';
 
     /**
      * URL template for currency rates import (the service needs no credentials)

@@ -20,7 +20,7 @@ declare(strict_types=1);
  */
 class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
 {
-    public const CHECKOUT_STATE_BEGIN = 'begin';
+    public const string CHECKOUT_STATE_BEGIN = 'begin';
 
     /**
      * Quote instance

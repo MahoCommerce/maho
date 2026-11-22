@@ -20,15 +20,12 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     /**
      * CONFIG path constant: ALLOW
      */
-    public const XML_PATH_CURRENCY_ALLOW   = 'currency/options/allow';
-    /**
-     * CONFIG path constant: DEFAULT
-     */
-    public const XML_PATH_CURRENCY_DEFAULT = 'currency/options/default';
+    public const string XML_PATH_CURRENCY_ALLOW   = 'currency/options/allow';
+    public const string XML_PATH_CURRENCY_DEFAULT = 'currency/options/default';
     /**
      * CONFIG path constant: BASE
      */
-    public const XML_PATH_CURRENCY_BASE    = 'currency/options/base';
+    public const string XML_PATH_CURRENCY_BASE    = 'currency/options/base';
 
     /**
      * @var Mage_Directory_Model_Currency_Filter - currency filter

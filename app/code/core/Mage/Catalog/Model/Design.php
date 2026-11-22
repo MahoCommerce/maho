@@ -10,8 +10,8 @@
 
 class Mage_Catalog_Model_Design extends Mage_Core_Model_Abstract
 {
-    public const APPLY_FOR_PRODUCT     = 1;
-    public const APPLY_FOR_CATEGORY    = 2;
+    public const int APPLY_FOR_PRODUCT     = 1;
+    public const int APPLY_FOR_CATEGORY    = 2;
 
     /**
      * Apply package and theme

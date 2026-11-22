@@ -10,13 +10,13 @@
 
 class Mage_Admin_Model_Observer
 {
-    public const FLAG_NO_LOGIN = 'no-login';
+    public const string FLAG_NO_LOGIN = 'no-login';
 
     /**
      * Reachable while mandatory 2FA blocks the rest of the backend: the enrollment page,
      * its POST handler, the passkey registration calls it makes, and logging out.
      */
-    private const TWOFA_ALLOWED_ACTIONS = [
+    private const array TWOFA_ALLOWED_ACTIONS = [
         'system_account/index',
         'system_account/save',
         'index/passkeyregisterstart',

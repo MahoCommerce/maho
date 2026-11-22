@@ -10,17 +10,17 @@
 
 class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
 {
-    public const LINK_TYPE_URL         = 'url';
-    public const LINK_TYPE_FILE        = 'file';
+    public const string LINK_TYPE_URL         = 'url';
+    public const string LINK_TYPE_FILE        = 'file';
 
-    public const XML_PATH_CONTENT_DISPOSITION  = 'catalog/downloadable/content_disposition';
-    public const XML_PATH_LINK_URL_ALLOWED_PREFIXES = 'catalog/downloadable/link_url_allowed_prefixes';
+    public const string XML_PATH_CONTENT_DISPOSITION  = 'catalog/downloadable/content_disposition';
+    public const string XML_PATH_LINK_URL_ALLOWED_PREFIXES = 'catalog/downloadable/link_url_allowed_prefixes';
 
     /**
      * Seconds that a signed URL of a remote downloadable mount stays valid. Any client can use the URL
      * until then, with no download limit, so the lifetime only gives the transfer time to start.
      */
-    public const TEMPORARY_URL_LIFETIME = 60;
+    public const int TEMPORARY_URL_LIFETIME = 60;
 
     #[\Override]
     protected $_moduleName = 'Mage_Downloadable';

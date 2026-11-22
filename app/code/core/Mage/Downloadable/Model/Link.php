@@ -21,14 +21,14 @@ declare(strict_types=1);
  */
 class Mage_Downloadable_Model_Link extends Mage_Core_Model_Abstract
 {
-    public const XML_PATH_LINKS_TITLE              = 'catalog/downloadable/links_title';
-    public const XML_PATH_DEFAULT_DOWNLOADS_NUMBER = 'catalog/downloadable/downloads_number';
-    public const XML_PATH_TARGET_NEW_WINDOW        = 'catalog/downloadable/links_target_new_window';
-    public const XML_PATH_CONFIG_IS_SHAREABLE      = 'catalog/downloadable/shareable';
+    public const string XML_PATH_LINKS_TITLE              = 'catalog/downloadable/links_title';
+    public const string XML_PATH_DEFAULT_DOWNLOADS_NUMBER = 'catalog/downloadable/downloads_number';
+    public const string XML_PATH_TARGET_NEW_WINDOW        = 'catalog/downloadable/links_target_new_window';
+    public const string XML_PATH_CONFIG_IS_SHAREABLE      = 'catalog/downloadable/shareable';
 
-    public const LINK_SHAREABLE_YES    = 1;
-    public const LINK_SHAREABLE_NO     = 0;
-    public const LINK_SHAREABLE_CONFIG = 2;
+    public const int LINK_SHAREABLE_YES    = 1;
+    public const int LINK_SHAREABLE_NO     = 0;
+    public const int LINK_SHAREABLE_CONFIG = 2;
 
     #[\Override]
     protected function _construct()

@@ -30,11 +30,11 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
  */
 class IdempotencyListener
 {
-    private const HEADER_KEY = 'X-Idempotency-Key';
-    private const HEADER_REPLAYED = 'X-Idempotency-Replayed';
-    public const TABLE = 'api_idempotency_key';
-    private const MAX_KEY_LENGTH = 255;
-    public const TTL_HOURS = 24;
+    private const string HEADER_KEY = 'X-Idempotency-Key';
+    private const string HEADER_REPLAYED = 'X-Idempotency-Replayed';
+    public const string TABLE = 'api_idempotency_key';
+    private const int MAX_KEY_LENGTH = 255;
+    public const int TTL_HOURS = 24;
 
     /**
      * Sentinel stored in response_code while the operation is still running.
@@ -42,7 +42,7 @@ class IdempotencyListener
      * key right now" — concurrent callers get a 409 instead of re-executing.
      * Real HTTP status codes are always >= 100, so 0 can never collide.
      */
-    private const STATUS_IN_PROGRESS = 0;
+    private const int STATUS_IN_PROGRESS = 0;
 
     /**
      * How long an in-progress reservation may sit before a retry can take it
@@ -52,7 +52,7 @@ class IdempotencyListener
      * exceed the longest legitimate request runtime so a retry never runs the
      * same operation in parallel with a slow-but-alive original.
      */
-    private const IN_PROGRESS_RECLAIM_MINUTES = 10;
+    private const int IN_PROGRESS_RECLAIM_MINUTES = 10;
 
     /**
      * Cap stored response bodies to keep `api_idempotency_key` from
@@ -61,7 +61,7 @@ class IdempotencyListener
      * keys are advisory and the underlying writes are themselves idempotent
      * (same payload + caller scope), that's the safe failure mode.
      */
-    private const MAX_STORED_BODY_BYTES = 65536;
+    private const int MAX_STORED_BODY_BYTES = 65536;
 
     public function __construct(
         private readonly TokenStorageInterface $tokenStorage,

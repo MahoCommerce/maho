@@ -83,7 +83,7 @@ use Maho\ApiPlatform\Metadata\ListFilter;
 )]
 class CartPriceRuleCoupon extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_Promo_QuoteController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_Promo_QuoteController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

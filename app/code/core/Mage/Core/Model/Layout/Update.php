@@ -13,12 +13,12 @@ class Mage_Core_Model_Layout_Update
     /**
      * Additional tag for cleaning layout cache convenience
      */
-    public const LAYOUT_GENERAL_CACHE_TAG = 'LAYOUT_GENERAL_CACHE_TAG';
+    public const string LAYOUT_GENERAL_CACHE_TAG = 'LAYOUT_GENERAL_CACHE_TAG';
 
     /**
      * Prefix used for actual XML storage (unprefixed is just the sha1 hash)
      */
-    public const XML_KEY_PREFIX = 'XML_';
+    public const string XML_KEY_PREFIX = 'XML_';
 
     /**
      * Layout Update Simplexml Element Class Name

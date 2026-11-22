@@ -14,10 +14,10 @@ use Maho\Job\StepState;
 
 class Maho_MediaCleaner_Model_Progress extends Mage_Index_Model_Progress
 {
-    public const VAR_SUBDIR = 'mediacleaner_progress';
+    public const string VAR_SUBDIR = 'mediacleaner_progress';
 
     /** A record that a running job did not write for this long belongs to a job that stopped. */
-    public const STALE_AFTER = 900;
+    public const int STALE_AFTER = 900;
 
     /**
      * Show that $done of $total items of the step $code are done, with $message.

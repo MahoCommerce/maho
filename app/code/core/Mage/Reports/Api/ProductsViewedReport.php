@@ -38,7 +38,7 @@ use ApiPlatform\Metadata\Get;
 )]
 class ProductsViewedReport extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = 'report/products/viewed';
+    public const string ADMIN_RESOURCE = 'report/products/viewed';
 
     #[ApiProperty(identifier: true, description: 'Report code')]
     public string $report = 'products-viewed';

@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Report_NotfoundController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'report/notfound';
+    public const string ADMIN_RESOURCE = 'report/notfound';
 
     #[Maho\Config\Route('/admin/report_notfound/index')]
     public function indexAction(): void

@@ -13,11 +13,11 @@ class Mage_Rss_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Config path to RSS field
      */
-    public const XML_PATH_RSS_ACTIVE                    = 'rss/config/active';
-    public const XML_PATH_RSS_ADMIN_CATALOG_NOTIFYSTOCK = 'rss/admin_catalog/notifystock';
-    public const XML_PATH_RSS_ADMIN_CATALOG_REVIEW      = 'rss/admin_catalog/review';
-    public const XML_PATH_RSS_ADMIN_ORDER_NEW           = 'rss/admin_order/new';
-    public const XML_PATH_RSS_ADMIN_ORDER_NEW_PERIOD    = 'rss/admin_order/new_period';
+    public const string XML_PATH_RSS_ACTIVE                    = 'rss/config/active';
+    public const string XML_PATH_RSS_ADMIN_CATALOG_NOTIFYSTOCK = 'rss/admin_catalog/notifystock';
+    public const string XML_PATH_RSS_ADMIN_CATALOG_REVIEW      = 'rss/admin_catalog/review';
+    public const string XML_PATH_RSS_ADMIN_ORDER_NEW           = 'rss/admin_order/new';
+    public const string XML_PATH_RSS_ADMIN_ORDER_NEW_PERIOD    = 'rss/admin_order/new_period';
 
     #[\Override]
     protected $_moduleName = 'Mage_Rss';

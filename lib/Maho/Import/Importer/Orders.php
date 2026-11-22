@@ -24,13 +24,13 @@ use Maho\Import\Result;
 class Orders extends AbstractImporter
 {
     /** Skip the refresh of the report statistics, for a caller that refreshes them once after several files. */
-    public const OPTION_SKIP_STATISTICS = 'skip_statistics';
+    public const string OPTION_SKIP_STATISTICS = 'skip_statistics';
 
     /** The report statistics that read the orders and their documents. */
-    public const STATISTICS = ['sales', 'tax', 'shipping', 'invoiced', 'refunded', 'coupons', 'bestsellers'];
+    public const array STATISTICS = ['sales', 'tax', 'shipping', 'invoiced', 'refunded', 'coupons', 'bestsellers'];
 
     /** What each status of the file does to the order after it is placed. */
-    private const STATUSES = ['pending', 'processing', 'complete', 'closed', 'canceled'];
+    private const array STATUSES = ['pending', 'processing', 'complete', 'closed', 'canceled'];
 
     /** @var array<string, array{id: int, parent_id: int|null, website_ids: list<int>}> */
     private array $products = [];

@@ -31,7 +31,7 @@ namespace Maho\ApiPlatform\Metadata;
  */
 final class EnumSource
 {
-    public const KEY = 'enumSource';
+    public const string KEY = 'enumSource';
 
     /**
      * @return list<int|string>

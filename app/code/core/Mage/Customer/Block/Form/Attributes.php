@@ -20,8 +20,8 @@ declare(strict_types=1);
  */
 class Mage_Customer_Block_Form_Attributes extends Mage_Core_Block_Template
 {
-    public const PLACEMENT_TOP = 'top';
-    public const PLACEMENT_BOTTOM = 'bottom';
+    public const string PLACEMENT_TOP = 'top';
+    public const string PLACEMENT_BOTTOM = 'bottom';
 
     protected ?Mage_Customer_Model_Form $form = null;
 

@@ -13,7 +13,7 @@ class Maho_Revocation_Block_Adminhtml_Request_Grid extends Mage_Adminhtml_Block_
     /**
      * Grid parameter of the suppression chip: "1" shows only the requests with a suppressed receipt email.
      */
-    public const VAR_NAME_SUPPRESSED = 'suppressed';
+    public const string VAR_NAME_SUPPRESSED = 'suppressed';
 
     public function __construct()
     {

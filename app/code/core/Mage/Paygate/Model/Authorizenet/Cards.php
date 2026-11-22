@@ -10,11 +10,11 @@
 
 class Mage_Paygate_Model_Authorizenet_Cards
 {
-    public const CARDS_NAMESPACE = 'authorize_cards';
-    public const CARD_ID_KEY = 'id';
-    public const CARD_PROCESSED_AMOUNT_KEY = 'processed_amount';
-    public const CARD_CAPTURED_AMOUNT_KEY = 'captured_amount';
-    public const CARD_REFUNDED_AMOUNT_KEY = 'refunded_amount';
+    public const string CARDS_NAMESPACE = 'authorize_cards';
+    public const string CARD_ID_KEY = 'id';
+    public const string CARD_PROCESSED_AMOUNT_KEY = 'processed_amount';
+    public const string CARD_CAPTURED_AMOUNT_KEY = 'captured_amount';
+    public const string CARD_REFUNDED_AMOUNT_KEY = 'refunded_amount';
 
     /**
      * Cards information

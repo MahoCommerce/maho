@@ -13,16 +13,16 @@ declare(strict_types=1);
 class Mage_Core_Model_Design_Breakpoints
 {
     /** The code and the label of each preset, from the narrowest to the widest. */
-    public const PRESETS = [
+    public const array PRESETS = [
         'mobile' => 'Mobile',
         'tablet' => 'Tablet',
     ];
 
-    public const MIN_WIDTH = 1;
-    public const MAX_WIDTH = 9999;
+    public const int MIN_WIDTH = 1;
+    public const int MAX_WIDTH = 9999;
 
     /** A media query that matches no device. */
-    public const NO_MATCH = 'not all';
+    public const string NO_MATCH = 'not all';
 
     /** @var array<string, array<string, int|null>> the widths by store view and skin theme */
     protected array $widths = [];

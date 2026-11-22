@@ -18,13 +18,13 @@ use Mage_Catalog_Model_Product as Product;
  */
 class Mage_Catalog_Service_Product_Link
 {
-    public const TYPE_RELATED = 'related';
-    public const TYPE_UP_SELL = 'up_sell';
-    public const TYPE_CROSS_SELL = 'cross_sell';
-    public const TYPE_GROUPED = 'grouped';
+    public const string TYPE_RELATED = 'related';
+    public const string TYPE_UP_SELL = 'up_sell';
+    public const string TYPE_CROSS_SELL = 'cross_sell';
+    public const string TYPE_GROUPED = 'grouped';
 
     /** The setter of the product for the link data of each link type. */
-    private const SETTERS = [
+    private const array SETTERS = [
         self::TYPE_RELATED => 'setRelatedLinkData',
         self::TYPE_UP_SELL => 'setUpSellLinkData',
         self::TYPE_CROSS_SELL => 'setCrossSellLinkData',

@@ -12,11 +12,11 @@ declare(strict_types=1);
 
 class Mage_Core_Block_Template extends Mage_Core_Block_Abstract
 {
-    public const XML_PATH_DEBUG_TEMPLATE_HINTS_ADMIN        = 'dev/debug/template_hints_admin';
-    public const XML_PATH_DEBUG_TEMPLATE_HINTS_BLOCKS_ADMIN = 'dev/debug/template_hints_blocks_admin';
-    public const XML_PATH_DEBUG_TEMPLATE_HINTS              = 'dev/debug/template_hints';
-    public const XML_PATH_DEBUG_TEMPLATE_HINTS_BLOCKS       = 'dev/debug/template_hints_blocks';
-    public const XML_PATH_TEMPLATE_ALLOW_SYMLINK            = 'dev/template/allow_symlink';
+    public const string XML_PATH_DEBUG_TEMPLATE_HINTS_ADMIN        = 'dev/debug/template_hints_admin';
+    public const string XML_PATH_DEBUG_TEMPLATE_HINTS_BLOCKS_ADMIN = 'dev/debug/template_hints_blocks_admin';
+    public const string XML_PATH_DEBUG_TEMPLATE_HINTS              = 'dev/debug/template_hints';
+    public const string XML_PATH_DEBUG_TEMPLATE_HINTS_BLOCKS       = 'dev/debug/template_hints_blocks';
+    public const string XML_PATH_TEMPLATE_ALLOW_SYMLINK            = 'dev/template/allow_symlink';
 
     /**
      * View scripts directory

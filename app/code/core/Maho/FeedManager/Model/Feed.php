@@ -22,12 +22,12 @@ declare(strict_types=1);
  */
 class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 {
-    public const CONFIGURABLE_MODE_SIMPLE_ONLY = 'simple_only';
-    public const CONFIGURABLE_MODE_CHILDREN_ONLY = 'children_only';
-    public const CONFIGURABLE_MODE_BOTH = 'both';
+    public const string CONFIGURABLE_MODE_SIMPLE_ONLY = 'simple_only';
+    public const string CONFIGURABLE_MODE_CHILDREN_ONLY = 'children_only';
+    public const string CONFIGURABLE_MODE_BOTH = 'both';
 
-    public const STATUS_ENABLED = 1;
-    public const STATUS_DISABLED = 0;
+    public const int STATUS_ENABLED = 1;
+    public const int STATUS_DISABLED = 0;
 
     #[\Override]
     protected $_eventPrefix = 'feedmanager_feed';

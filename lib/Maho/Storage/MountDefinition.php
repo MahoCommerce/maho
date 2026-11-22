@@ -32,9 +32,9 @@ use Symfony\Component\Filesystem\Path;
  */
 final readonly class MountDefinition
 {
-    public const ADAPTER_LOCAL = 'local';
+    public const string ADAPTER_LOCAL = 'local';
 
-    private const URL_TYPES = [\Mage_Core_Model_Store::URL_TYPE_MEDIA, \Mage_Core_Model_Store::URL_TYPE_WEB];
+    private const array URL_TYPES = [\Mage_Core_Model_Store::URL_TYPE_MEDIA, \Mage_Core_Model_Store::URL_TYPE_WEB];
 
     /**
      * @param array<string, mixed> $adapterOptions every child of <adapter> except <type>

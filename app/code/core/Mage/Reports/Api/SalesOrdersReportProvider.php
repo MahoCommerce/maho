@@ -17,7 +17,7 @@ final class SalesOrdersReportProvider extends ReportProviderBase
     /**
      * Value key => column of the aggregated order tables.
      */
-    public const VALUES = [
+    public const array VALUES = [
         'ordersCount' => 'orders_count',
         'qtyOrdered' => 'total_qty_ordered',
         'qtyInvoiced' => 'total_qty_invoiced',

@@ -18,10 +18,10 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class ReportStatisticsProcessor extends \Maho\ApiPlatform\Processor
 {
-    public const MODE_RECENT = 'recent';
-    public const MODE_LIFETIME = 'lifetime';
+    public const string MODE_RECENT = 'recent';
+    public const string MODE_LIFETIME = 'lifetime';
 
-    public const RATE_LIMIT_WINDOW = \Mage_Reports_Service_Statistics::RATE_LIMIT_WINDOW;
+    public const int RATE_LIMIT_WINDOW = \Mage_Reports_Service_Statistics::RATE_LIMIT_WINDOW;
 
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): JsonResponse

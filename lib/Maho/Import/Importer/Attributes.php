@@ -23,20 +23,20 @@ use Maho\Import\Result;
 
 class Attributes extends AbstractImporter
 {
-    public const OPTION_OPTIONS_CSV = 'options';
+    public const string OPTION_OPTIONS_CSV = 'options';
 
-    private const SWATCH_CONFIG_PATH = 'configswatches/general/swatch_attributes';
+    private const string SWATCH_CONFIG_PATH = 'configswatches/general/swatch_attributes';
 
-    private const ENTITY_TYPE = 'catalog_product';
+    private const string ENTITY_TYPE = 'catalog_product';
 
-    private const FLAGS = [
+    private const array FLAGS = [
         'required', 'filterable', 'filterable_in_search', 'searchable', 'comparable', 'visible_on_front',
         'used_in_product_listing', 'used_for_sort_by', 'is_configurable', 'is_html_allowed_on_front',
         'visible_in_advanced_search',
     ];
 
     /** The eav_attribute / catalog_eav_attribute column behind each flag whose name differs. */
-    private const FLAG_COLUMNS = [
+    private const array FLAG_COLUMNS = [
         'required' => 'is_required',
         'filterable' => 'is_filterable',
         'filterable_in_search' => 'is_filterable_in_search',
@@ -46,7 +46,7 @@ class Attributes extends AbstractImporter
         'visible_in_advanced_search' => 'is_visible_in_advanced_search',
     ];
 
-    private const SCOPES = [
+    private const array SCOPES = [
         'global' => \Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL,
         'website' => \Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_WEBSITE,
         'store' => \Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_STORE,

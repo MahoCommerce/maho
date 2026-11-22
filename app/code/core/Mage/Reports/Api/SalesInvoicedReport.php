@@ -38,7 +38,7 @@ use ApiPlatform\Metadata\Get;
 )]
 class SalesInvoicedReport extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = 'report/salesroot/invoiced';
+    public const string ADMIN_RESOURCE = 'report/salesroot/invoiced';
 
     #[ApiProperty(identifier: true, description: 'Report code')]
     public string $report = 'sales-invoiced';

@@ -28,34 +28,34 @@ use Maho\Db\Statement\Pdo\Mysql as Statement;
 abstract class AbstractPdoAdapter implements AdapterInterface
 {
     // Numeric data type constants
-    public const INT_TYPE = 0;
-    public const BIGINT_TYPE = 5;
-    public const FLOAT_TYPE = 2;
+    public const int INT_TYPE = 0;
+    public const int BIGINT_TYPE = 5;
+    public const int FLOAT_TYPE = 2;
 
-    public const DEBUG_CONNECT         = 0;
-    public const DEBUG_TRANSACTION     = 1;
-    public const DEBUG_QUERY           = 2;
+    public const int DEBUG_CONNECT         = 0;
+    public const int DEBUG_TRANSACTION     = 1;
+    public const int DEBUG_QUERY           = 2;
 
-    public const TIMESTAMP_FORMAT      = 'Y-m-d H:i:s';
-    public const DATETIME_FORMAT       = 'Y-m-d H:i:s';
-    public const DATE_FORMAT           = 'Y-m-d';
+    public const string TIMESTAMP_FORMAT      = 'Y-m-d H:i:s';
+    public const string DATETIME_FORMAT       = 'Y-m-d H:i:s';
+    public const string DATE_FORMAT           = 'Y-m-d';
 
-    public const DDL_DESCRIBE          = 1;
-    public const DDL_CREATE            = 2;
-    public const DDL_INDEX             = 3;
-    public const DDL_FOREIGN_KEY       = 4;
+    public const int DDL_DESCRIBE          = 1;
+    public const int DDL_CREATE            = 2;
+    public const int DDL_INDEX             = 3;
+    public const int DDL_FOREIGN_KEY       = 4;
 
-    public const LENGTH_TABLE_NAME     = 64;
-    public const LENGTH_INDEX_NAME     = 64;
-    public const LENGTH_FOREIGN_NAME   = 64;
+    public const int LENGTH_TABLE_NAME     = 64;
+    public const int LENGTH_INDEX_NAME     = 64;
+    public const int LENGTH_FOREIGN_NAME   = 64;
 
     /**
      * Address type constants for host parsing
      */
-    public const ADDRESS_TYPE_HOSTNAME     = 'hostname';
-    public const ADDRESS_TYPE_UNIX_SOCKET  = 'unix_socket';
-    public const ADDRESS_TYPE_IPV4_ADDRESS = 'ipv4';
-    public const ADDRESS_TYPE_IPV6_ADDRESS = 'ipv6';
+    public const string ADDRESS_TYPE_HOSTNAME     = 'hostname';
+    public const string ADDRESS_TYPE_UNIX_SOCKET  = 'unix_socket';
+    public const string ADDRESS_TYPE_IPV4_ADDRESS = 'ipv4';
+    public const string ADDRESS_TYPE_IPV6_ADDRESS = 'ipv6';
 
     /**
      * Doctrine DBAL Connection

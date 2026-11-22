@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Mage_Sitemap_LlmsController extends Mage_Core_Controller_Front_Action
 {
-    public const CACHE_LIFETIME = 3600;
+    public const int CACHE_LIFETIME = 3600;
 
     /**
      * Agents fetch this file constantly, so it must not create a session per request.

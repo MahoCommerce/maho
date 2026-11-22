@@ -16,9 +16,9 @@ use Mage_SalesRule_Model_Rule as Rule;
 
 class Mage_SalesRule_Service_Rule
 {
-    public const MAX_CODE_LENGTH = Mage_Checkout_Helper_Cart::COUPON_CODE_MAX_LENGTH;
-    public const XML_PATH_CHECK_RATE_LIMIT = 'system/rate_limit/coupon_validate';
-    public const CHECK_RATE_LIMIT_WINDOW = 60;
+    public const int MAX_CODE_LENGTH = Mage_Checkout_Helper_Cart::COUPON_CODE_MAX_LENGTH;
+    public const string XML_PATH_CHECK_RATE_LIMIT = 'system/rate_limit/coupon_validate';
+    public const int CHECK_RATE_LIMIT_WINDOW = 60;
 
     /**
      * Return an unsaved rule with the default values of a new rule. A new rule is inactive, so that it does not

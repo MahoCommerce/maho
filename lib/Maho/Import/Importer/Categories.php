@@ -16,7 +16,7 @@ use Maho\Import\CsvFile;
 
 class Categories extends AbstractImportExportImporter
 {
-    public const OPTION_MEDIA_DIR = \Mage_ImportExport_Model_Import_Entity_Category::PARAM_MEDIA_DIR;
+    public const string OPTION_MEDIA_DIR = \Mage_ImportExport_Model_Import_Entity_Category::PARAM_MEDIA_DIR;
 
     #[\Override]
     protected function entityCode(): string

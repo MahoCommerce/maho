@@ -15,8 +15,8 @@ declare(strict_types=1);
  */
 class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Attributes_Extend extends Mage_Adminhtml_Block_Catalog_Form_Renderer_Fieldset_Element
 {
-    public const DYNAMIC = 0;
-    public const FIXED = 1;
+    public const int DYNAMIC = 0;
+    public const int FIXED = 1;
 
     /**
      * Class constructor

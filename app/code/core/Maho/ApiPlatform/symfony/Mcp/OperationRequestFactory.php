@@ -38,7 +38,7 @@ use Symfony\Component\HttpFoundation\Request;
 final class OperationRequestFactory
 {
     /** Prefix the REST routes carry, so a substituted path matches what a provider expects. */
-    private const ROUTE_PREFIX = '/api/rest/v2';
+    private const string ROUTE_PREFIX = '/api/rest/v2';
 
     /**
      * @param array<string, mixed> $uriVariables

@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 class Mage_Catalog_Model_Product_Image_Provider implements Mage_Core_Model_Image_ProviderInterface
 {
-    public const ENTITY = 'product';
+    public const string ENTITY = 'product';
 
     /**
      * Queue the creation of the files of the images of the products.

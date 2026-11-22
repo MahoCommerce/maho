@@ -26,7 +26,7 @@ use Maho\ApiPlatform\Service\CustomAttributes;
  */
 final class CustomAttributeSchema
 {
-    public const KEY = 'customAttributeSource';
+    public const string KEY = 'customAttributeSource';
 
     /**
      * @return array<string, mixed>|null null when the source gives no attribute

@@ -17,12 +17,12 @@ use Maho\Browser\ScannerInterface;
 
 class Maho_AccessibilityScan_Model_Runner implements ScannerInterface
 {
-    public const COOKIE_NAME = 'maho_a11y_scan';
-    public const CACHE_KEY_PREFIX = 'accessibilityscan_token_';
-    public const SCRIPT_NAME = 'accessibility-scan.mjs';
+    public const string COOKIE_NAME = 'maho_a11y_scan';
+    public const string CACHE_KEY_PREFIX = 'accessibilityscan_token_';
+    public const string SCRIPT_NAME = 'accessibility-scan.mjs';
 
     /** Seconds a scan token stays valid after the scan starts */
-    protected const TOKEN_LIFETIME = 600;
+    protected const int TOKEN_LIFETIME = 600;
 
     protected Maho_AccessibilityScan_Helper_Data $helper;
     protected Runtime $runtime;

@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_Permissions_BlockController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'system/acl/blocks';
+    public const string ADMIN_RESOURCE = 'system/acl/blocks';
 
     /**
      * @return $this

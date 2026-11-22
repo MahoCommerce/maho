@@ -31,7 +31,7 @@ use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInter
  */
 final class SourceOperationResolver
 {
-    public const SOURCE_OPERATION = 'maho_mcp_source_operation';
+    public const string SOURCE_OPERATION = 'maho_mcp_source_operation';
 
     public function __construct(
         private readonly ResourceMetadataCollectionFactoryInterface $resourceMetadataFactory,

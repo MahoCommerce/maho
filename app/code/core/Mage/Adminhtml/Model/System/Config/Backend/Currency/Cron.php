@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Model_System_Config_Backend_Currency_Cron extends Mage_Core_Model_Config_Data
 {
-    public const CRON_STRING_PATH = 'crontab/jobs/currency_rates_update/schedule/cron_expr';
+    public const string CRON_STRING_PATH = 'crontab/jobs/currency_rates_update/schedule/cron_expr';
 
     #[\Override]
     protected function _afterSave()

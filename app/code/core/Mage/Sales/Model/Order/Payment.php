@@ -27,17 +27,17 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
      *
      * Accept action
      */
-    public const REVIEW_ACTION_ACCEPT = 'accept';
+    public const string REVIEW_ACTION_ACCEPT = 'accept';
 
     /**
      * Deny action
      */
-    public const REVIEW_ACTION_DENY   = 'deny';
+    public const string REVIEW_ACTION_DENY   = 'deny';
 
     /**
      * Update action
      */
-    public const REVIEW_ACTION_UPDATE = 'update';
+    public const string REVIEW_ACTION_UPDATE = 'update';
 
     /**
      * Order model object

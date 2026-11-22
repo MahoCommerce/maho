@@ -10,14 +10,14 @@
 
 class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
 {
-    public const XML_PATH_ENABLED                    = Mage_Contacts_Helper_Data::XML_PATH_ENABLED;
-    public const XML_PATH_EMAIL_SENDER               = Mage_Contacts_Service_Message::XML_PATH_EMAIL_SENDER;
-    public const XML_PATH_EMAIL_RECIPIENT            = Mage_Contacts_Service_Message::XML_PATH_EMAIL_RECIPIENT;
-    public const XML_PATH_EMAIL_TEMPLATE             = Mage_Contacts_Service_Message::XML_PATH_EMAIL_TEMPLATE;
-    public const XML_PATH_AUTO_REPLY_ENABLED         = Mage_Contacts_Service_Message::XML_PATH_AUTO_REPLY_ENABLED;
-    public const XML_PATH_AUTO_REPLY_EMAIL_TEMPLATE  = Mage_Contacts_Service_Message::XML_PATH_AUTO_REPLY_EMAIL_TEMPLATE;
-    public const XML_PATH_HONEYPOT_ENABLED           = Mage_Contacts_Service_Message::XML_PATH_HONEYPOT_ENABLED;
-    public const XML_PATH_RECIPIENT_RATE_LIMIT       = Mage_Contacts_Service_Message::XML_PATH_RECIPIENT_RATE_LIMIT;
+    public const string XML_PATH_ENABLED                    = Mage_Contacts_Helper_Data::XML_PATH_ENABLED;
+    public const string XML_PATH_EMAIL_SENDER               = Mage_Contacts_Service_Message::XML_PATH_EMAIL_SENDER;
+    public const string XML_PATH_EMAIL_RECIPIENT            = Mage_Contacts_Service_Message::XML_PATH_EMAIL_RECIPIENT;
+    public const string XML_PATH_EMAIL_TEMPLATE             = Mage_Contacts_Service_Message::XML_PATH_EMAIL_TEMPLATE;
+    public const string XML_PATH_AUTO_REPLY_ENABLED         = Mage_Contacts_Service_Message::XML_PATH_AUTO_REPLY_ENABLED;
+    public const string XML_PATH_AUTO_REPLY_EMAIL_TEMPLATE  = Mage_Contacts_Service_Message::XML_PATH_AUTO_REPLY_EMAIL_TEMPLATE;
+    public const string XML_PATH_HONEYPOT_ENABLED           = Mage_Contacts_Service_Message::XML_PATH_HONEYPOT_ENABLED;
+    public const string XML_PATH_RECIPIENT_RATE_LIMIT       = Mage_Contacts_Service_Message::XML_PATH_RECIPIENT_RATE_LIMIT;
 
     /**
      * @return $this

@@ -13,13 +13,13 @@ declare(strict_types=1);
 class Maho_FeedManager_Model_Feed_Fields
 {
     /** The value of one template parameter. A quote closes it, always. */
-    private const VALUE = '"([^"]*)"';
+    private const string VALUE = '"([^"]*)"';
 
     /** One field of an item template: {type="..." name="value" ...} */
-    public const TEMPLATE_FIELD_PATTERN = '/\{(type=' . self::VALUE . '(?:\s+\w+=' . self::VALUE . ')*)\}/';
+    public const string TEMPLATE_FIELD_PATTERN = '/\{(type=' . self::VALUE . '(?:\s+\w+=' . self::VALUE . ')*)\}/';
 
     /** One placeholder of the older item template syntax: {{name}} */
-    public const TEMPLATE_PLACEHOLDER_PATTERN = '/\{\{([^}]+)\}\}/';
+    public const string TEMPLATE_PLACEHOLDER_PATTERN = '/\{\{([^}]+)\}\}/';
 
     /**
      * The parameters of one item template field, as name to value.

@@ -37,10 +37,10 @@ use Maho\Import\Result;
 final class Installer
 {
     /** Files of one pack in import order; blocks run twice, since blocks and categories point at each other. */
-    private const PACK_FILES = ['cms_blocks.csv', 'categories.csv', 'products.csv', 'reviews.csv', 'cms_blocks.csv', 'cms_pages.csv', 'blog_posts.csv'];
+    private const array PACK_FILES = ['cms_blocks.csv', 'categories.csv', 'products.csv', 'reviews.csv', 'cms_blocks.csv', 'cms_pages.csv', 'blog_posts.csv'];
 
     /** Files of one pack that record store activity; they run after the customers, since an order names its customer. */
-    private const ACTIVITY_FILES = ['orders.csv', 'product_views.csv', 'search_terms.csv'];
+    private const array ACTIVITY_FILES = ['orders.csv', 'product_views.csv', 'search_terms.csv'];
 
     private readonly Reporter $reporter;
 

@@ -18,14 +18,14 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 final class GlobalSearchProvider extends \Maho\ApiPlatform\Provider
 {
-    public const MIN_QUERY_LENGTH = \Mage_Adminhtml_Service_GlobalSearch::MIN_QUERY_LENGTH;
-    public const DEFAULT_LIMIT = \Mage_Adminhtml_Service_GlobalSearch::DEFAULT_LIMIT;
-    public const MAX_LIMIT = \Mage_Adminhtml_Service_GlobalSearch::MAX_LIMIT;
+    public const int MIN_QUERY_LENGTH = \Mage_Adminhtml_Service_GlobalSearch::MIN_QUERY_LENGTH;
+    public const int DEFAULT_LIMIT = \Mage_Adminhtml_Service_GlobalSearch::DEFAULT_LIMIT;
+    public const int MAX_LIMIT = \Mage_Adminhtml_Service_GlobalSearch::MAX_LIMIT;
 
     /**
      * The API resource that an API user needs for the results of each core search source, by entity.
      */
-    private const API_RESOURCES = ['order' => 'orders', 'customer' => 'customers', 'product' => 'products'];
+    private const array API_RESOURCES = ['order' => 'orders', 'customer' => 'customers', 'product' => 'products'];
 
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): JsonResponse

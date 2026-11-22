@@ -22,10 +22,7 @@ declare(strict_types=1);
 
 class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
 {
-    /**
-     * Name of the module
-     */
-    public const MODULE_NAME = 'Mage_Customer';
+    public const string MODULE_NAME = 'Mage_Customer';
 
     /**
      * Prefix of model events names

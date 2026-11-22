@@ -57,14 +57,14 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      */
     protected $_fileQueue       = [];
 
-    public const CALCULATE_CHILD = 0;
-    public const CALCULATE_PARENT = 1;
+    public const int CALCULATE_CHILD = 0;
+    public const int CALCULATE_PARENT = 1;
 
     /**
      * values for shipment type (invoice etc)
      */
-    public const SHIPMENT_SEPARATELY = 1;
-    public const SHIPMENT_TOGETHER = 0;
+    public const int SHIPMENT_SEPARATELY = 1;
+    public const int SHIPMENT_TOGETHER = 0;
 
     /**
      * Process modes
@@ -72,19 +72,19 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * Full validation - all required options must be set, whole configuration
      * must be valid
      */
-    public const PROCESS_MODE_FULL = 'full';
+    public const string PROCESS_MODE_FULL = 'full';
 
     /**
      * Process modes
      *
      * Lite validation - only received options are validated
      */
-    public const PROCESS_MODE_LITE = 'lite';
+    public const string PROCESS_MODE_LITE = 'lite';
 
     /**
      * Item options prefix
      */
-    public const OPTION_PREFIX = 'option_';
+    public const string OPTION_PREFIX = 'option_';
 
     /**
      * Specify type instance product, if not used as a singleton

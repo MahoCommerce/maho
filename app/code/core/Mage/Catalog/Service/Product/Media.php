@@ -16,7 +16,7 @@ use Mage_Catalog_Model_Product_Attribute_Backend_Media as MediaBackend;
 class Mage_Catalog_Service_Product_Media
 {
     /** The extensions that a temporary image file can take. Another extension becomes jpg. */
-    private const TEMP_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'];
+    private const array TEMP_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'];
 
     /**
      * Check that the file $path is an image that the gallery accepts: a known image type, no side longer than the

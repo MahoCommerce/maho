@@ -13,7 +13,7 @@ declare(strict_types=1);
  */
 class Mage_Reports_Block_Product_Widget_Bestsellers extends Mage_Catalog_Block_Product_Widget_Abstract
 {
-    public const DEFAULT_PERIOD = 'all_time';
+    public const string DEFAULT_PERIOD = 'all_time';
 
     #[\Override]
     protected $_pageVarName = 'bs';

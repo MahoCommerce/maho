@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'catalog/feedmanager/category_mapping';
+    public const string ADMIN_RESOURCE = 'catalog/feedmanager/category_mapping';
 
     protected function _initAction(): self
     {

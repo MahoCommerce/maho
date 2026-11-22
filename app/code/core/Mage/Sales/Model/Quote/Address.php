@@ -27,13 +27,13 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     /**
      * Default value for Destination street
      */
-    public const DEFAULT_DEST_STREET = -1;
+    public const int DEFAULT_DEST_STREET = -1;
 
     /**
      * The text fields that sanitizeText() cleans, with the maximum length of each. Each line of the street has the
      * length of the street.
      */
-    public const TEXT_FIELD_LENGTHS = [
+    public const array TEXT_FIELD_LENGTHS = [
         'firstname' => 255, 'middlename' => 40, 'lastname' => 255, 'prefix' => 40, 'suffix' => 40,
         'company' => 255, 'street' => 255, 'city' => 255, 'region' => 255, 'postcode' => 20,
         'telephone' => 50, 'fax' => 50, 'email' => 255, 'vat_id' => 50,

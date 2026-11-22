@@ -22,14 +22,14 @@ declare(strict_types=1);
  */
 class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 {
-    public const STATUS_RUNNING = 'running';
-    public const STATUS_COMPLETED = 'completed';
-    public const STATUS_FAILED = 'failed';
+    public const string STATUS_RUNNING = 'running';
+    public const string STATUS_COMPLETED = 'completed';
+    public const string STATUS_FAILED = 'failed';
 
-    public const UPLOAD_STATUS_PENDING = 'pending';
-    public const UPLOAD_STATUS_SUCCESS = 'success';
-    public const UPLOAD_STATUS_FAILED = 'failed';
-    public const UPLOAD_STATUS_SKIPPED = 'skipped';
+    public const string UPLOAD_STATUS_PENDING = 'pending';
+    public const string UPLOAD_STATUS_SUCCESS = 'success';
+    public const string UPLOAD_STATUS_FAILED = 'failed';
+    public const string UPLOAD_STATUS_SKIPPED = 'skipped';
 
     #[\Override]
     protected $_eventPrefix = 'feedmanager_log';

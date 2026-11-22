@@ -1107,17 +1107,17 @@ public function startEmailSequence(int $customerId, string $triggerType): void
 public function getEmailSequences(): Maho_CustomerSegmentation_Model_Resource_EmailSequence_Collection
 
 // Status & modes
-public const STATUS_PENDING    = 'pending'
-public const STATUS_PROCESSING = 'processing'
-public const STATUS_COMPLETED  = 'completed'
-public const STATUS_ERROR      = 'error'
+public const string STATUS_PENDING    = 'pending'
+public const string STATUS_PROCESSING = 'processing'
+public const string STATUS_COMPLETED  = 'completed'
+public const string STATUS_ERROR      = 'error'
 
-public const MODE_AUTO   = 'auto'
-public const MODE_MANUAL = 'manual'
+public const string MODE_AUTO   = 'auto'
+public const string MODE_MANUAL = 'manual'
 
-public const EMAIL_TRIGGER_NONE  = 'none'
-public const EMAIL_TRIGGER_ENTER = 'enter'
-public const EMAIL_TRIGGER_EXIT  = 'exit'
+public const string EMAIL_TRIGGER_NONE  = 'none'
+public const string EMAIL_TRIGGER_ENTER = 'enter'
+public const string EMAIL_TRIGGER_EXIT  = 'exit'
 ```
 
 #### Maho_CustomerSegmentation_Model_Resource_Segment

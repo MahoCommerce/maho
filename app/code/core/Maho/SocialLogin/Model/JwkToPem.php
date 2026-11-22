@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Maho_SocialLogin_Model_JwkToPem
 {
-    private const RSA_ENCRYPTION_OID = "\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01";
+    private const string RSA_ENCRYPTION_OID = "\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01";
 
     /**
      * @param array<string, mixed> $jwk

@@ -20,12 +20,12 @@ class Mage_Admin_Model_Rules extends Mage_Core_Model_Abstract
     /**
      * Allowed permission code
      */
-    public const RULE_PERMISSION_ALLOWED = 'allow';
+    public const string RULE_PERMISSION_ALLOWED = 'allow';
 
     /**
      * Denied permission code
      */
-    public const RULE_PERMISSION_DENIED = 'deny';
+    public const string RULE_PERMISSION_DENIED = 'deny';
 
     #[\Override]
     protected function _construct()

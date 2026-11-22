@@ -13,14 +13,14 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Carrier Product indicator
      */
-    public const DHL_CONTENT_TYPE_DOC        = 'D';
-    public const DHL_CONTENT_TYPE_NON_DOC    = 'N';
+    public const string DHL_CONTENT_TYPE_DOC        = 'D';
+    public const string DHL_CONTENT_TYPE_NON_DOC    = 'N';
 
     /**
      * Minimum allowed values for shipping package dimensions
      */
-    public const DIMENSION_MIN_CM = 3;
-    public const DIMENSION_MIN_IN = 1;
+    public const int DIMENSION_MIN_CM = 3;
+    public const int DIMENSION_MIN_IN = 1;
 
     /**
      * Container types that could be customized
@@ -33,7 +33,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Code of the carrier
      */
-    public const CODE = 'dhlint';
+    public const string CODE = 'dhlint';
 
     /**
      * Rate request data

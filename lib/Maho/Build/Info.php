@@ -17,8 +17,8 @@ namespace Maho\Build;
  */
 final class Info
 {
-    private const PACKAGE_NAME = 'mahocommerce/maho';
-    private const SHORT_COMMIT_LENGTH = 8;
+    private const string PACKAGE_NAME = 'mahocommerce/maho';
+    private const int SHORT_COMMIT_LENGTH = 8;
 
     private static ?self $instance = null;
 

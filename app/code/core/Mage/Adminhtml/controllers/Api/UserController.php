@@ -13,11 +13,7 @@
  */
 class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'system/api/users';
+    public const string ADMIN_RESOURCE = 'system/api/users';
 
     protected function _initAction()
     {

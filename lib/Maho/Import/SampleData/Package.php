@@ -17,9 +17,9 @@ use Maho\Exception;
 
 final class Package
 {
-    public const ARCHIVE_URL = 'https://github.com/MahoCommerce/maho-sample-data/archive/refs/heads/%s.tar.gz';
-    public const BRANCH_ENV = 'MAHO_SAMPLE_DATA_BRANCH';
-    public const SHARED_PACK = '_shared';
+    public const string ARCHIVE_URL = 'https://github.com/MahoCommerce/maho-sample-data/archive/refs/heads/%s.tar.gz';
+    public const string BRANCH_ENV = 'MAHO_SAMPLE_DATA_BRANCH';
+    public const string SHARED_PACK = '_shared';
 
     private function __construct(
         private readonly string $root,

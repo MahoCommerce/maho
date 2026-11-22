@@ -23,8 +23,8 @@ use Symfony\AI\Platform\Tool\ToolEffectHints;
  */
 final class ContentGuideTool
 {
-    public const NAME = 'admin_content_guide';
-    public const TITLE = 'Content editor guide';
+    public const string NAME = 'admin_content_guide';
+    public const string TITLE = 'Content editor guide';
 
     private ?string $guide = null;
 

@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Maho_Blog_Model_Post_Image implements Mage_Core_Model_Image_ProviderInterface
 {
-    public const ENTITY = 'blog';
+    public const string ENTITY = 'blog';
 
     /**
      * The image of every post in every store, for storage:image:resize.

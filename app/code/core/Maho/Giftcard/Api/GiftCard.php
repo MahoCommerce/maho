@@ -114,10 +114,10 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 )]
 class GiftCard extends CrudResource
 {
-    public const MODEL = 'giftcard/giftcard';
+    public const string MODEL = 'giftcard/giftcard';
 
     /** Admin ACL gate. Mirrors backend Maho_Giftcard_Adminhtml_GiftcardController. */
-    public const ADMIN_RESOURCE = \Maho_Giftcard_Adminhtml_GiftcardController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Maho_Giftcard_Adminhtml_GiftcardController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

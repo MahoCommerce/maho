@@ -12,11 +12,11 @@ declare(strict_types=1);
 
 abstract class Mage_Core_Model_Email_Template_Abstract extends Mage_Core_Model_Template
 {
-    public const XML_PATH_DESIGN_EMAIL_LOGO            = 'design/email/logo';
-    public const XML_PATH_DESIGN_EMAIL_LOGO_ALT        = 'design/email/logo_alt';
-    public const XML_PATH_DESIGN_EMAIL_LOGO_WIDTH      = 'design/email/logo_width';
-    public const XML_PATH_DESIGN_EMAIL_LOGO_HEIGHT     = 'design/email/logo_height';
-    public const XML_PATH_CSS_NON_INLINE_FILES         = 'design/email/css_non_inline';
+    public const string XML_PATH_DESIGN_EMAIL_LOGO            = 'design/email/logo';
+    public const string XML_PATH_DESIGN_EMAIL_LOGO_ALT        = 'design/email/logo_alt';
+    public const string XML_PATH_DESIGN_EMAIL_LOGO_WIDTH      = 'design/email/logo_width';
+    public const string XML_PATH_DESIGN_EMAIL_LOGO_HEIGHT     = 'design/email/logo_height';
+    public const string XML_PATH_CSS_NON_INLINE_FILES         = 'design/email/css_non_inline';
 
     protected array $_cssFileCache = [];
 

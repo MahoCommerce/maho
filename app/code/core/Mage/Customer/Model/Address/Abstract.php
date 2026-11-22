@@ -22,11 +22,11 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
     /**
      * Possible customer address types
      */
-    public const TYPE_BILLING  = 'billing';
-    public const TYPE_SHIPPING = 'shipping';
+    public const string TYPE_BILLING  = 'billing';
+    public const string TYPE_SHIPPING = 'shipping';
 
     /** The prefix of a customer field that the condition of an address attribute reads, as in customer.group_id. */
-    public const CUSTOMER_FIELD_PREFIX = 'customer.';
+    public const string CUSTOMER_FIELD_PREFIX = 'customer.';
 
     /**
      * Prefix of model events

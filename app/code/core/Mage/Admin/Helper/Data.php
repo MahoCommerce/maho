@@ -16,16 +16,16 @@ class Mage_Admin_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Configuration path to expiration period of reset password link
      */
-    public const XML_PATH_ADMIN_RESET_PASSWORD_LINK_EXPIRATION_PERIOD
+    public const string XML_PATH_ADMIN_RESET_PASSWORD_LINK_EXPIRATION_PERIOD
         = 'default/admin/emails/password_reset_link_expiration_period';
 
-    public const XML_PATH_TWOFA_REQUIRED = 'admin/security/twofa_required';
-    public const XML_PATH_TWOFA_REQUIRED_FROM = 'admin/security/twofa_required_from';
+    public const string XML_PATH_TWOFA_REQUIRED = 'admin/security/twofa_required';
+    public const string XML_PATH_TWOFA_REQUIRED_FROM = 'admin/security/twofa_required_from';
 
-    public const TWOFA_STATE_OFF = 'off';
-    public const TWOFA_STATE_COMPLIANT = 'compliant';
-    public const TWOFA_STATE_WARN = 'warn';
-    public const TWOFA_STATE_BLOCK = 'block';
+    public const string TWOFA_STATE_OFF = 'off';
+    public const string TWOFA_STATE_COMPLIANT = 'compliant';
+    public const string TWOFA_STATE_WARN = 'warn';
+    public const string TWOFA_STATE_BLOCK = 'block';
 
     /**
      * Generate unique token for reset password confirmation link

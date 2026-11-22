@@ -14,7 +14,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
      * Gift card display options configuration
      * Maps buyRequest field names to display labels
      */
-    public const DISPLAY_OPTIONS = [
+    public const array DISPLAY_OPTIONS = [
         'giftcard_recipient_name' => 'Recipient Name',
         'giftcard_recipient_email' => 'Recipient Email',
         'giftcard_sender_name' => 'Sender Name',

@@ -14,7 +14,7 @@ declare(strict_types=1);
  */
 class Mage_CatalogRule_Block_Product_Widget_Onsale extends Mage_Catalog_Block_Product_Widget_Abstract
 {
-    public const DEFAULT_ORDER = 'newest';
+    public const string DEFAULT_ORDER = 'newest';
 
     #[\Override]
     protected $_pageVarName = 'os';

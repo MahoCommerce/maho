@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_System_ConfigController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'system/config';
+    public const string ADMIN_RESOURCE = 'system/config';
 
     /**
      * Whether current section is allowed

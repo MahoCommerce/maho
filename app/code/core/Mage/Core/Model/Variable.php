@@ -16,14 +16,14 @@ declare(strict_types=1);
  */
 class Mage_Core_Model_Variable extends Mage_Core_Model_Abstract
 {
-    public const TYPE_TEXT = 'text';
-    public const TYPE_HTML = 'html';
+    public const string TYPE_TEXT = 'text';
+    public const string TYPE_HTML = 'html';
 
     /**
      * A variable code starts with a letter and holds only letters, digits, underscores, hyphens and slashes.
      * The admin form checks the same rule with validate-xml-identifier.
      */
-    public const CODE_PATTERN = '/^[a-z][a-z0-9_\/-]*$/iD';
+    public const string CODE_PATTERN = '/^[a-z][a-z0-9_\/-]*$/iD';
 
     protected ?int $_storeId = 0;
 

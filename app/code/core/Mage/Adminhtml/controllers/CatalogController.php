@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_CatalogController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'catalog';
+    public const string ADMIN_RESOURCE = 'catalog';
 
     #[Maho\Config\Route('/admin/catalog/index')]
     public function indexAction(): void

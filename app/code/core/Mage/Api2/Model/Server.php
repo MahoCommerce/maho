@@ -16,21 +16,21 @@ class Mage_Api2_Model_Server
     /**
      * Api2 REST type
      */
-    public const API_TYPE_REST = 'rest';
+    public const string API_TYPE_REST = 'rest';
 
     /**
      * HTTP Response Codes
      */
-    public const HTTP_OK                 = 200;
-    public const HTTP_CREATED            = 201;
-    public const HTTP_MULTI_STATUS       = 207;
-    public const HTTP_BAD_REQUEST        = 400;
-    public const HTTP_UNAUTHORIZED       = 401;
-    public const HTTP_FORBIDDEN          = 403;
-    public const HTTP_NOT_FOUND          = 404;
-    public const HTTP_METHOD_NOT_ALLOWED = 405;
-    public const HTTP_NOT_ACCEPTABLE     = 406;
-    public const HTTP_INTERNAL_ERROR     = 500;
+    public const int HTTP_OK                 = 200;
+    public const int HTTP_CREATED            = 201;
+    public const int HTTP_MULTI_STATUS       = 207;
+    public const int HTTP_BAD_REQUEST        = 400;
+    public const int HTTP_UNAUTHORIZED       = 401;
+    public const int HTTP_FORBIDDEN          = 403;
+    public const int HTTP_NOT_FOUND          = 404;
+    public const int HTTP_METHOD_NOT_ALLOWED = 405;
+    public const int HTTP_NOT_ACCEPTABLE     = 406;
+    public const int HTTP_INTERNAL_ERROR     = 500;
 
     /**
      * List of api types

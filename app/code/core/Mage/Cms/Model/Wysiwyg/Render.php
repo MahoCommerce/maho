@@ -19,14 +19,14 @@ class Mage_Cms_Model_Wysiwyg_Render
      *
      * @var array<string, ?string>
      */
-    public const TYPES = [
+    public const array TYPES = [
         'widget' => 'cms/widget_instance',
         'block' => 'cms/block',
         'icon' => null,
     ];
 
-    public const MAX_DIRECTIVES = 50;
-    public const MAX_LENGTH = 4096;
+    public const int MAX_DIRECTIVES = 50;
+    public const int MAX_LENGTH = 4096;
 
     /**
      * The type of $directive when it is one directive of a type in TYPES and nothing more,

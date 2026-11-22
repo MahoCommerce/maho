@@ -16,7 +16,7 @@ class Maho_ContentNegotiation_Model_Resolver
      * One child per renderer, with a <route> prefix and a <model> alias. The first prefix that
      * matches wins, so a module registers a more specific route before a general one.
      */
-    public const XML_PATH_RENDERERS = 'global/contentnegotiation/renderers';
+    public const string XML_PATH_RENDERERS = 'global/contentnegotiation/renderers';
 
     /** @var array<string, string>|null route prefix => model alias */
     private ?array $renderers = null;

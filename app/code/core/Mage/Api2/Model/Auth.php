@@ -16,7 +16,7 @@ class Mage_Api2_Model_Auth
     /**
      * Use this type if no authentication adapter is applied
      */
-    public const DEFAULT_USER_TYPE = 'guest';
+    public const string DEFAULT_USER_TYPE = 'guest';
 
     /**
      * Figure out API user type and create user model instance

@@ -20,7 +20,7 @@ use Maho\Import\Result;
 
 class CmsPages extends AbstractCmsImporter
 {
-    private const TEXT_COLUMNS = ['title', 'root_template', 'content_heading', 'meta_keywords', 'meta_description', 'layout_update_xml'];
+    private const array TEXT_COLUMNS = ['title', 'root_template', 'content_heading', 'meta_keywords', 'meta_description', 'layout_update_xml'];
 
     #[\Override]
     protected function requiredColumns(): array

@@ -13,7 +13,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
     use Maho_FeedManager_Block_Adminhtml_Feed_Edit_FeedRegistryTrait;
 
     /** One-shot session flag armed by the save/generate actions: ['id' => feed id, 'ts' => armed at] */
-    public const AUTO_GENERATE_FLAG = 'feed_generate_after_save';
+    public const string AUTO_GENERATE_FLAG = 'feed_generate_after_save';
 
     public function __construct()
     {

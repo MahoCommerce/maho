@@ -18,10 +18,10 @@ namespace Maho\Db\Statement;
 interface StatementInterface
 {
     // Fetch mode constants
-    public const FETCH_ASSOC = 2;       // PDO::FETCH_ASSOC
-    public const FETCH_NUM = 3;         // PDO::FETCH_NUM
-    public const FETCH_COLUMN = 7;      // PDO::FETCH_COLUMN
-    public const FETCH_KEY_PAIR = 12;   // PDO::FETCH_KEY_PAIR
+    public const int FETCH_ASSOC = 2;       // PDO::FETCH_ASSOC
+    public const int FETCH_NUM = 3;         // PDO::FETCH_NUM
+    public const int FETCH_COLUMN = 7;      // PDO::FETCH_COLUMN
+    public const int FETCH_KEY_PAIR = 12;   // PDO::FETCH_KEY_PAIR
 
     /**
      * Fetch a row from the result set

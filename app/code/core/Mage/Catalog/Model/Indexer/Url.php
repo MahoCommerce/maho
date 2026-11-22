@@ -24,7 +24,7 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
     /**
      * Data key for matching result to be saved in
      */
-    public const EVENT_MATCH_RESULT_KEY = 'catalog_url_match_result';
+    public const string EVENT_MATCH_RESULT_KEY = 'catalog_url_match_result';
 
     /**
      * Index math: product save, category save, store save

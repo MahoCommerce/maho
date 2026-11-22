@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'catalog/update_attributes';
+    public const string ADMIN_RESOURCE = 'catalog/update_attributes';
 
     #[\Override]
     protected function _construct()

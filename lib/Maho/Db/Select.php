@@ -14,44 +14,44 @@ namespace Maho\Db;
 class Select implements \Stringable
 {
     // Query part constants
-    public const DISTINCT       = 'distinct';
-    public const COLUMNS        = 'columns';
-    public const FROM           = 'from';
-    public const UNION          = 'union';
-    public const WHERE          = 'where';
-    public const GROUP          = 'group';
-    public const HAVING         = 'having';
-    public const ORDER          = 'order';
-    public const LIMIT_COUNT    = 'limitcount';
-    public const LIMIT_OFFSET   = 'limitoffset';
-    public const FOR_UPDATE     = 'forupdate';
-    public const STRAIGHT_JOIN  = 'straightjoin';
+    public const string DISTINCT       = 'distinct';
+    public const string COLUMNS        = 'columns';
+    public const string FROM           = 'from';
+    public const string UNION          = 'union';
+    public const string WHERE          = 'where';
+    public const string GROUP          = 'group';
+    public const string HAVING         = 'having';
+    public const string ORDER          = 'order';
+    public const string LIMIT_COUNT    = 'limitcount';
+    public const string LIMIT_OFFSET   = 'limitoffset';
+    public const string FOR_UPDATE     = 'forupdate';
+    public const string STRAIGHT_JOIN  = 'straightjoin';
 
     // Join type constants
-    public const INNER_JOIN     = 'inner join';
-    public const LEFT_JOIN      = 'left join';
-    public const RIGHT_JOIN     = 'right join';
+    public const string INNER_JOIN     = 'inner join';
+    public const string LEFT_JOIN      = 'left join';
+    public const string RIGHT_JOIN     = 'right join';
 
-    public const SQL_WILDCARD   = '*';
-    public const SQL_SELECT     = 'SELECT';
-    public const SQL_FROM       = 'FROM';
-    public const SQL_WHERE      = 'WHERE';
-    public const SQL_DISTINCT   = 'DISTINCT';
-    public const SQL_GROUP_BY   = 'GROUP BY';
-    public const SQL_ORDER_BY   = 'ORDER BY';
-    public const SQL_HAVING     = 'HAVING';
-    public const SQL_FOR_UPDATE = 'FOR UPDATE';
-    public const SQL_AND        = 'AND';
-    public const SQL_AS         = 'AS';
-    public const SQL_OR         = 'OR';
-    public const SQL_ON         = 'ON';
-    public const SQL_ASC        = 'ASC';
-    public const SQL_DESC       = 'DESC';
+    public const string SQL_WILDCARD   = '*';
+    public const string SQL_SELECT     = 'SELECT';
+    public const string SQL_FROM       = 'FROM';
+    public const string SQL_WHERE      = 'WHERE';
+    public const string SQL_DISTINCT   = 'DISTINCT';
+    public const string SQL_GROUP_BY   = 'GROUP BY';
+    public const string SQL_ORDER_BY   = 'ORDER BY';
+    public const string SQL_HAVING     = 'HAVING';
+    public const string SQL_FOR_UPDATE = 'FOR UPDATE';
+    public const string SQL_AND        = 'AND';
+    public const string SQL_AS         = 'AS';
+    public const string SQL_OR         = 'OR';
+    public const string SQL_ON         = 'ON';
+    public const string SQL_ASC        = 'ASC';
+    public const string SQL_DESC       = 'DESC';
 
-    public const SQL_STRAIGHT_JOIN = 'STRAIGHT_JOIN';
-    public const SQL_UNION_ALL = 'ALL';
+    public const string SQL_STRAIGHT_JOIN = 'STRAIGHT_JOIN';
+    public const string SQL_UNION_ALL = 'ALL';
 
-    public const TYPE_CONDITION = 'TYPE_CONDITION';
+    public const string TYPE_CONDITION = 'TYPE_CONDITION';
 
     protected Adapter\AdapterInterface $_adapter;
 

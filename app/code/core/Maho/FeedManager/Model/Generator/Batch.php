@@ -23,19 +23,19 @@ class Maho_FeedManager_Model_Generator_Batch
 {
     use Maho_FeedManager_Model_Generator_ProductWriterTrait;
 
-    public const STATUS_INITIALIZING = 'initializing';
-    public const STATUS_PROCESSING = 'processing';
-    public const STATUS_FINALIZING = 'finalizing';
-    public const STATUS_COMPLETED = 'completed';
-    public const STATUS_FAILED = 'failed';
+    public const string STATUS_INITIALIZING = 'initializing';
+    public const string STATUS_PROCESSING = 'processing';
+    public const string STATUS_FINALIZING = 'finalizing';
+    public const string STATUS_COMPLETED = 'completed';
+    public const string STATUS_FAILED = 'failed';
 
-    public const STATE_FILE = 'state.json';
+    public const string STATE_FILE = 'state.json';
 
     /** A job ID is feed_{feed ID}_{uniqid()}. It names a folder, so a request can give no other value. */
-    public const JOB_ID_PATTERN = '/^feed_\d+_[0-9a-f]+$/';
+    public const string JOB_ID_PATTERN = '/^feed_\d+_[0-9a-f]+$/';
 
     /** Seconds without progress after which the files of a job are removed when a new job of the feed starts */
-    public const STALE_JOB_SECONDS = 300;
+    public const int STALE_JOB_SECONDS = 300;
 
     protected Maho_FeedManager_Model_Feed $_feed;
     protected ?Maho_FeedManager_Model_Log $_log = null;

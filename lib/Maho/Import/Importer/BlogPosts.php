@@ -19,7 +19,7 @@ use Maho\Import\Result;
 
 class BlogPosts extends AbstractCmsImporter
 {
-    private const TEXT_COLUMNS = ['title', 'image', 'meta_title', 'meta_keywords', 'meta_description', 'short_content'];
+    private const array TEXT_COLUMNS = ['title', 'image', 'meta_title', 'meta_keywords', 'meta_description', 'short_content'];
 
     /** @var array<string, \Mage_Eav_Model_Entity_Attribute_Abstract>|null */
     private ?array $customAttributes = null;

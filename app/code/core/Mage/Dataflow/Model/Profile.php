@@ -20,13 +20,13 @@ declare(strict_types=1);
  */
 class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
 {
-    public const DEFAULT_EXPORT_PATH = 'var/export';
-    public const DEFAULT_EXPORT_FILENAME = 'export_';
+    public const string DEFAULT_EXPORT_PATH = 'var/export';
+    public const string DEFAULT_EXPORT_FILENAME = 'export_';
 
     /**
      * The entity types of the profile wizard, with the adapter of each.
      */
-    public const GUI_ADAPTERS = [
+    public const array GUI_ADAPTERS = [
         'product' => 'catalog/convert_adapter_product',
         'customer' => 'customer/convert_adapter_customer',
     ];

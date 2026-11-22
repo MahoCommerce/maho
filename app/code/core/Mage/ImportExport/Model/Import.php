@@ -10,34 +10,31 @@
 
 class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
 {
-    /**
-     * Key in config with entities.
-     */
-    public const CONFIG_KEY_ENTITIES  = 'global/importexport/import_entities';
+    public const string CONFIG_KEY_ENTITIES  = 'global/importexport/import_entities';
 
     /**
      * Import behavior.
      */
-    public const BEHAVIOR_APPEND  = 'append';
-    public const BEHAVIOR_REPLACE = 'replace';
-    public const BEHAVIOR_DELETE  = 'delete';
+    public const string BEHAVIOR_APPEND  = 'append';
+    public const string BEHAVIOR_REPLACE = 'replace';
+    public const string BEHAVIOR_DELETE  = 'delete';
 
     /**
      * Form field names (and IDs)
      */
-    public const FIELD_NAME_SOURCE_FILE = 'import_file';
-    public const FIELD_NAME_IMG_ARCHIVE_FILE = 'import_image_archive';
+    public const string FIELD_NAME_SOURCE_FILE = 'import_file';
+    public const string FIELD_NAME_IMG_ARCHIVE_FILE = 'import_image_archive';
 
     /**
      * Import constants
      */
-    public const DEFAULT_SIZE      = 50;
-    public const MAX_IMPORT_CHUNKS = 4;
+    public const int DEFAULT_SIZE      = 50;
+    public const int MAX_IMPORT_CHUNKS = 4;
 
     /**
      * The lock that validateSource() and importSource() hold while they use the import data table
      */
-    public const IMPORT_LOCK = 'importexport_import';
+    public const string IMPORT_LOCK = 'importexport_import';
 
     /**
      * Entity adapter.

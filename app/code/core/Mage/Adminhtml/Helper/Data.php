@@ -10,10 +10,10 @@
 
 class Mage_Adminhtml_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public const XML_PATH_ADMINHTML_ROUTER_FRONTNAME   = 'admin/base_path';
-    public const XML_PATH_USE_CUSTOM_ADMIN_URL         = 'default/admin/url/use_custom';
-    public const XML_PATH_USE_CUSTOM_ADMIN_PATH        = 'default/admin/url/use_custom_path';
-    public const XML_PATH_CUSTOM_ADMIN_PATH            = 'default/admin/url/custom_path';
+    public const string XML_PATH_ADMINHTML_ROUTER_FRONTNAME   = 'admin/base_path';
+    public const string XML_PATH_USE_CUSTOM_ADMIN_URL         = 'default/admin/url/use_custom';
+    public const string XML_PATH_USE_CUSTOM_ADMIN_PATH        = 'default/admin/url/use_custom_path';
+    public const string XML_PATH_CUSTOM_ADMIN_PATH            = 'default/admin/url/custom_path';
 
     #[\Override]
     protected $_moduleName = 'Mage_Adminhtml';

@@ -21,12 +21,12 @@ use Symfony\Bundle\SecurityBundle\Security;
  */
 final class OrderProvider extends \Maho\ApiPlatform\Provider
 {
-    private const STRING_FILTERS = [
+    private const array STRING_FILTERS = [
         'status', 'state', 'email', 'emailLike', 'incrementId', 'search',
         'createdFrom', 'createdTo', 'updatedSince', 'since',
     ];
 
-    private const INT_FILTERS = ['customerId', 'storeId'];
+    private const array INT_FILTERS = ['customerId', 'storeId'];
 
     private \Mage_Sales_Service_Order $orderService;
 

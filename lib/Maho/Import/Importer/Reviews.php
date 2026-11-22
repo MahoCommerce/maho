@@ -20,7 +20,7 @@ use Maho\Import\Result;
 
 class Reviews extends AbstractImporter
 {
-    private const STATUSES = [
+    private const array STATUSES = [
         'approved' => \Mage_Review_Model_Review::STATUS_APPROVED,
         'pending' => \Mage_Review_Model_Review::STATUS_PENDING,
         'not_approved' => \Mage_Review_Model_Review::STATUS_NOT_APPROVED,

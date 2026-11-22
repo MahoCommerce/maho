@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'report/statistics';
+    public const string ADMIN_RESOURCE = 'report/statistics';
 
     /** The link of a notice from the message queue has no secret key: the grid only reads. */
     #[\Override]

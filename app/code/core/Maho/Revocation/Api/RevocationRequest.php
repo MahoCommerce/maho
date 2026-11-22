@@ -110,7 +110,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 class RevocationRequest extends Resource
 {
     /** Admin ACL gate. Mirrors Maho_Revocation_Adminhtml_Sales_RevocationController. */
-    public const ADMIN_RESOURCE = 'sales/revocation';
+    public const string ADMIN_RESOURCE = 'sales/revocation';
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

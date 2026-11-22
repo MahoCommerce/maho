@@ -44,21 +44,18 @@ class Mage_CurrencySymbol_Model_System_Currencysymbol
         'layout',
     ];
 
-    /**
-     * Config path to custom currency symbol value
-     */
-    public const XML_PATH_CUSTOM_CURRENCY_SYMBOL = 'currency/options/customsymbol';
-    public const XML_PATH_ALLOWED_CURRENCIES     = 'currency/options/allow';
+    public const string XML_PATH_CUSTOM_CURRENCY_SYMBOL = 'currency/options/customsymbol';
+    public const string XML_PATH_ALLOWED_CURRENCIES     = 'currency/options/allow';
 
     /**
      * Separator used in config in allowed currencies list
      */
-    public const ALLOWED_CURRENCIES_CONFIG_SEPARATOR = ',';
+    public const string ALLOWED_CURRENCIES_CONFIG_SEPARATOR = ',';
 
     /**
      * Config currency section
      */
-    public const CONFIG_SECTION = 'currency';
+    public const string CONFIG_SECTION = 'currency';
 
     /**
      * Sets store Id

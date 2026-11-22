@@ -19,36 +19,36 @@ use Symfony\Component\Cache\Adapter\RedisAdapter;
 
 class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
 {
-    public const REGISTRY_KEY                          = 'symfony_session';
+    public const string REGISTRY_KEY                          = 'symfony_session';
 
-    public const VALIDATOR_KEY                         = '_session_validator_data';
-    public const VALIDATOR_HTTP_USER_AGENT_KEY         = 'http_user_agent';
-    public const VALIDATOR_HTTP_X_FORVARDED_FOR_KEY    = 'http_x_forwarded_for';
-    public const VALIDATOR_HTTP_VIA_KEY                = 'http_via';
-    public const VALIDATOR_REMOTE_ADDR_KEY             = 'remote_addr';
-    public const VALIDATOR_PASSWORD_CREATE_TIMESTAMP   = 'password_create_timestamp';
-    public const SECURE_COOKIE_CHECK_KEY               = '_secure_cookie_check';
+    public const string VALIDATOR_KEY                         = '_session_validator_data';
+    public const string VALIDATOR_HTTP_USER_AGENT_KEY         = 'http_user_agent';
+    public const string VALIDATOR_HTTP_X_FORVARDED_FOR_KEY    = 'http_x_forwarded_for';
+    public const string VALIDATOR_HTTP_VIA_KEY                = 'http_via';
+    public const string VALIDATOR_REMOTE_ADDR_KEY             = 'remote_addr';
+    public const string VALIDATOR_PASSWORD_CREATE_TIMESTAMP   = 'password_create_timestamp';
+    public const string SECURE_COOKIE_CHECK_KEY               = '_secure_cookie_check';
 
-    public const XML_PATH_COOKIE_DOMAIN        = 'web/cookie/cookie_domain';
-    public const XML_PATH_COOKIE_PATH          = 'web/cookie/cookie_path';
-    public const XML_PATH_COOKIE_LIFETIME      = 'web/cookie/cookie_lifetime';
-    public const XML_PATH_REMEMBER_ENABLED     = 'web/cookie/remember_enabled';
-    public const XML_PATH_REMEMBER_LIFETIME    = 'web/cookie/remember_cookie_lifetime';
-    public const XML_PATH_ADMIN_LIFETIME       = 'admin/security/session_cookie_lifetime';
-    public const XML_NODE_SESSION_SAVE         = 'global/session_save';
-    public const XML_NODE_SESSION_SAVE_PATH    = 'global/session_save_path';
+    public const string XML_PATH_COOKIE_DOMAIN        = 'web/cookie/cookie_domain';
+    public const string XML_PATH_COOKIE_PATH          = 'web/cookie/cookie_path';
+    public const string XML_PATH_COOKIE_LIFETIME      = 'web/cookie/cookie_lifetime';
+    public const string XML_PATH_REMEMBER_ENABLED     = 'web/cookie/remember_enabled';
+    public const string XML_PATH_REMEMBER_LIFETIME    = 'web/cookie/remember_cookie_lifetime';
+    public const string XML_PATH_ADMIN_LIFETIME       = 'admin/security/session_cookie_lifetime';
+    public const string XML_NODE_SESSION_SAVE         = 'global/session_save';
+    public const string XML_NODE_SESSION_SAVE_PATH    = 'global/session_save_path';
 
-    public const XML_PATH_USE_REMOTE_ADDR      = 'web/session/use_remote_addr';
-    public const XML_PATH_USE_HTTP_VIA         = 'web/session/use_http_via';
-    public const XML_PATH_USE_X_FORWARDED      = 'web/session/use_http_x_forwarded_for';
-    public const XML_PATH_USE_USER_AGENT       = 'web/session/use_http_user_agent';
+    public const string XML_PATH_USE_REMOTE_ADDR      = 'web/session/use_remote_addr';
+    public const string XML_PATH_USE_HTTP_VIA         = 'web/session/use_http_via';
+    public const string XML_PATH_USE_X_FORWARDED      = 'web/session/use_http_x_forwarded_for';
+    public const string XML_PATH_USE_USER_AGENT       = 'web/session/use_http_user_agent';
 
-    public const XML_NODE_USET_AGENT_SKIP      = 'global/session/validation/http_user_agent_skip';
+    public const string XML_NODE_USET_AGENT_SKIP      = 'global/session/validation/http_user_agent_skip';
 
-    public const XML_PATH_LAZY                 = 'web/session/lazy';
+    public const string XML_PATH_LAZY                 = 'web/session/lazy';
 
     /** Top-level keys that Symfony and Maho write for their own use */
-    private const BOOKKEEPING_KEYS = [
+    private const array BOOKKEEPING_KEYS = [
         '_sf2_attributes',
         '_symfony_flashes',
         '_sf2_meta',
@@ -57,7 +57,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     ];
 
     /** Lifetime floor, in seconds, wherever no area policy narrows it */
-    private const DEFAULT_SESSION_LIFETIME = 86400;
+    private const int DEFAULT_SESSION_LIFETIME = 86400;
 
     /** @var bool Flag true if session validator data has already been evaluated */
     protected static bool $isValidated = false;

@@ -125,10 +125,10 @@ use Maho\ApiPlatform\CrudResource;
 )]
 class Review extends CrudResource
 {
-    public const MODEL = 'review/review';
+    public const string MODEL = 'review/review';
 
     /** Admin ACL gate. No backend ReviewController declares ADMIN_RESOURCE; use the standard reviews path. */
-    public const ADMIN_RESOURCE = 'catalog/reviews_ratings/reviews';
+    public const string ADMIN_RESOURCE = 'catalog/reviews_ratings/reviews';
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

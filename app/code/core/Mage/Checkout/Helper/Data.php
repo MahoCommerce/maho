@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public const XML_PATH_GUEST_CHECKOUT = 'checkout/options/guest_checkout';
+    public const string XML_PATH_GUEST_CHECKOUT = 'checkout/options/guest_checkout';
 
     #[\Override]
     protected $_moduleName = 'Mage_Checkout';

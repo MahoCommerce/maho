@@ -21,19 +21,13 @@ declare(strict_types=1);
  */
 abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
 {
-    /**
-     * Prefix for cache key
-     */
-    public const CACHE_KEY_PREFIX = 'BLOCK_';
+    public const string CACHE_KEY_PREFIX = 'BLOCK_';
     /**
      * Cache group Tag
      */
-    public const CACHE_GROUP = 'block_html';
+    public const string CACHE_GROUP = 'block_html';
 
-    /**
-     * Cache tags data key
-     */
-    public const CACHE_TAGS_DATA_KEY = 'cache_tags';
+    public const string CACHE_TAGS_DATA_KEY = 'cache_tags';
 
     /**
      * Block name in layout

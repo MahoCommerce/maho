@@ -10,25 +10,22 @@
 
 class Mage_Core_Model_Encryption
 {
-    public const HASH_VERSION_MD5    = 0;
-    public const HASH_VERSION_SHA256 = 1;
-    public const HASH_VERSION_SHA512 = 2;
+    public const int HASH_VERSION_MD5    = 0;
+    public const int HASH_VERSION_SHA256 = 1;
+    public const int HASH_VERSION_SHA512 = 2;
 
     /**
      * Encryption method bcrypt
      */
-    public const HASH_VERSION_LATEST = 3;
+    public const int HASH_VERSION_LATEST = 3;
 
-    /**
-     * Maximum Password Length
-     */
-    public const MAXIMUM_PASSWORD_LENGTH = 256;
+    public const int MAXIMUM_PASSWORD_LENGTH = 256;
 
     /**
      * Encryption key length, as stored in app/etc/local.xml (hex) and as used by libsodium (binary)
      */
-    public const KEY_LENGTH_BINARY = SODIUM_CRYPTO_SECRETBOX_KEYBYTES;
-    public const KEY_LENGTH_HEX = self::KEY_LENGTH_BINARY * 2;
+    public const int KEY_LENGTH_BINARY = SODIUM_CRYPTO_SECRETBOX_KEYBYTES;
+    public const int KEY_LENGTH_HEX = self::KEY_LENGTH_BINARY * 2;
 
     /**
      * @var Mage_Core_Helper_Data

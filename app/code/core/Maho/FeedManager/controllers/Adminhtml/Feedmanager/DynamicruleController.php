@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'catalog/feedmanager/dynamicrules';
+    public const string ADMIN_RESOURCE = 'catalog/feedmanager/dynamicrules';
 
     protected function _initAction(): self
     {

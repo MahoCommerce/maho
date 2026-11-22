@@ -10,24 +10,24 @@
 
 class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public const PRICE_SCOPE_GLOBAL               = 0;
-    public const PRICE_SCOPE_WEBSITE              = 1;
-    public const XML_PATH_PRICE_SCOPE             = 'catalog/price/scope';
-    public const WEBSITE_PRICE_ATTRIBUTES         = ['price', 'special_price', 'cost', 'msrp'];
-    public const XML_PATH_SEO_SAVE_HISTORY        = 'catalog/seo/save_rewrites_history';
-    public const CONFIG_USE_STATIC_URLS           = 'cms/wysiwyg/use_static_urls_in_catalog';
-    public const CONFIG_PARSE_URL_DIRECTIVES      = 'catalog/frontend/parse_url_directives';
-    public const XML_PATH_CONTENT_TEMPLATE_FILTER = 'global/catalog/content/tempate_filter';
-    public const XML_PATH_DISPLAY_PRODUCT_COUNT   = 'catalog/layered_navigation/display_product_count';
+    public const int PRICE_SCOPE_GLOBAL               = 0;
+    public const int PRICE_SCOPE_WEBSITE              = 1;
+    public const string XML_PATH_PRICE_SCOPE             = 'catalog/price/scope';
+    public const array WEBSITE_PRICE_ATTRIBUTES         = ['price', 'special_price', 'cost', 'msrp'];
+    public const string XML_PATH_SEO_SAVE_HISTORY        = 'catalog/seo/save_rewrites_history';
+    public const string CONFIG_USE_STATIC_URLS           = 'cms/wysiwyg/use_static_urls_in_catalog';
+    public const string CONFIG_PARSE_URL_DIRECTIVES      = 'catalog/frontend/parse_url_directives';
+    public const string XML_PATH_CONTENT_TEMPLATE_FILTER = 'global/catalog/content/tempate_filter';
+    public const string XML_PATH_DISPLAY_PRODUCT_COUNT   = 'catalog/layered_navigation/display_product_count';
 
     /**
      * Minimum advertise price constants
      */
-    public const XML_PATH_MSRP_ENABLED = 'sales/msrp/enabled';
-    public const XML_PATH_MSRP_DISPLAY_ACTUAL_PRICE_TYPE = 'sales/msrp/display_price_type';
-    public const XML_PATH_MSRP_APPLY_TO_ALL = 'sales/msrp/apply_for_all';
-    public const XML_PATH_MSRP_EXPLANATION_MESSAGE = 'sales/msrp/explanation_message';
-    public const XML_PATH_MSRP_EXPLANATION_MESSAGE_WHATS_THIS = 'sales/msrp/explanation_message_whats_this';
+    public const string XML_PATH_MSRP_ENABLED = 'sales/msrp/enabled';
+    public const string XML_PATH_MSRP_DISPLAY_ACTUAL_PRICE_TYPE = 'sales/msrp/display_price_type';
+    public const string XML_PATH_MSRP_APPLY_TO_ALL = 'sales/msrp/apply_for_all';
+    public const string XML_PATH_MSRP_EXPLANATION_MESSAGE = 'sales/msrp/explanation_message';
+    public const string XML_PATH_MSRP_EXPLANATION_MESSAGE_WHATS_THIS = 'sales/msrp/explanation_message_whats_this';
 
     #[\Override]
     protected $_moduleName = 'Mage_Catalog';

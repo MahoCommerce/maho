@@ -15,10 +15,10 @@
  */
 class Mage_Adminhtml_Model_LayoutUpdate_Validator
 {
-    public const XML_INVALID                             = 'invalidXml';
-    public const INVALID_TEMPLATE_PATH                   = 'invalidTemplatePath';
-    public const INVALID_BLOCK_NAME                      = 'invalidBlockName';
-    public const PROTECTED_ATTR_HELPER_IN_TAG_ACTION_VAR = 'protectedAttrHelperInActionVar';
+    public const string XML_INVALID                             = 'invalidXml';
+    public const string INVALID_TEMPLATE_PATH                   = 'invalidTemplatePath';
+    public const string INVALID_BLOCK_NAME                      = 'invalidBlockName';
+    public const string PROTECTED_ATTR_HELPER_IN_TAG_ACTION_VAR = 'protectedAttrHelperInActionVar';
 
     /**
      * The Varien SimpleXml object

@@ -10,13 +10,13 @@ declare(strict_types=1);
 
 class Maho_SpeculationRules_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public const XML_PATH_ENABLED = 'dev/speculation_rules/enabled';
-    public const XML_PATH_EAGER_PREFETCH_SELECTORS = 'dev/speculation_rules/eager_prefetch_selectors';
-    public const XML_PATH_EAGER_PRERENDER_SELECTORS = 'dev/speculation_rules/eager_prerender_selectors';
-    public const XML_PATH_MODERATE_PREFETCH_SELECTORS = 'dev/speculation_rules/moderate_prefetch_selectors';
-    public const XML_PATH_MODERATE_PRERENDER_SELECTORS = 'dev/speculation_rules/moderate_prerender_selectors';
-    public const XML_PATH_CONSERVATIVE_PREFETCH_SELECTORS = 'dev/speculation_rules/conservative_prefetch_selectors';
-    public const XML_PATH_CONSERVATIVE_PRERENDER_SELECTORS = 'dev/speculation_rules/conservative_prerender_selectors';
+    public const string XML_PATH_ENABLED = 'dev/speculation_rules/enabled';
+    public const string XML_PATH_EAGER_PREFETCH_SELECTORS = 'dev/speculation_rules/eager_prefetch_selectors';
+    public const string XML_PATH_EAGER_PRERENDER_SELECTORS = 'dev/speculation_rules/eager_prerender_selectors';
+    public const string XML_PATH_MODERATE_PREFETCH_SELECTORS = 'dev/speculation_rules/moderate_prefetch_selectors';
+    public const string XML_PATH_MODERATE_PRERENDER_SELECTORS = 'dev/speculation_rules/moderate_prerender_selectors';
+    public const string XML_PATH_CONSERVATIVE_PREFETCH_SELECTORS = 'dev/speculation_rules/conservative_prefetch_selectors';
+    public const string XML_PATH_CONSERVATIVE_PRERENDER_SELECTORS = 'dev/speculation_rules/conservative_prerender_selectors';
 
     /**
      * Check if speculation rules are enabled

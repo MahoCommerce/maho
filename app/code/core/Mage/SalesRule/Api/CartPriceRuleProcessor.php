@@ -23,7 +23,7 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
     use ConditionMetadataTrait;
     use PriceRuleFieldsTrait;
 
-    private const FIELDS = [
+    private const array FIELDS = [
         'name' => ['name', 'text'],
         'description' => ['description', 'text?'],
         'isActive' => ['is_active', 'bool'],
@@ -47,7 +47,7 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
     /**
      * The keys that process() reads itself, and the read-only keys that a client can send back from a rule it read.
      */
-    private const OTHER_FIELDS = ['couponType', 'couponCode', 'storeLabels', 'conditions', 'actions', 'id', 'timesUsed', 'couponCount', 'primaryCouponId'];
+    private const array OTHER_FIELDS = ['couponType', 'couponCode', 'storeLabels', 'conditions', 'actions', 'id', 'timesUsed', 'couponCount', 'primaryCouponId'];
 
     public function __construct(
         Security $security,

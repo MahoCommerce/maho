@@ -10,7 +10,7 @@
 
 class Mage_Admin_Model_Resource_Acl extends Mage_Core_Model_Resource_Db_Abstract
 {
-    public const ACL_ALL_RULES = 'all';
+    public const string ACL_ALL_RULES = 'all';
 
     #[\Override]
     protected function _construct(): void

@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_Catalog_Model_Category_Attribute_Backend_Image extends Mage_Eav_Model_Entity_Attribute_Backend_Image
 {
     /** Directory of category images on the media mount. */
-    public const STORAGE_PATH = 'catalog/category';
+    public const string STORAGE_PATH = 'catalog/category';
 
     #[\Override]
     public function getImageEntity(): string

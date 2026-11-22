@@ -10,21 +10,21 @@
 
 class Mage_Cron_Model_Observer
 {
-    public const CACHE_KEY_LAST_SCHEDULE_GENERATE_AT   = 'cron_last_schedule_generate_at';
-    public const CACHE_KEY_LAST_HISTORY_CLEANUP_AT     = 'cron_last_history_cleanup_at';
-    public const CACHE_KEY_LAST_CRON_STATUS_CHECK      = 'cron_last_status_check';
-    public const CRON_STATUS_CHECK_INTERVAL            = 3600; // 1 hour
-    public const CRON_NOT_RUNNING_THRESHOLD            = 3600; // 1 hour
+    public const string CACHE_KEY_LAST_SCHEDULE_GENERATE_AT   = 'cron_last_schedule_generate_at';
+    public const string CACHE_KEY_LAST_HISTORY_CLEANUP_AT     = 'cron_last_history_cleanup_at';
+    public const string CACHE_KEY_LAST_CRON_STATUS_CHECK      = 'cron_last_status_check';
+    public const int CRON_STATUS_CHECK_INTERVAL            = 3600; // 1 hour
+    public const int CRON_NOT_RUNNING_THRESHOLD            = 3600; // 1 hour
 
-    public const XML_PATH_SCHEDULE_GENERATE_EVERY  = 'system/cron/schedule_generate_every';
-    public const XML_PATH_SCHEDULE_AHEAD_FOR       = 'system/cron/schedule_ahead_for';
-    public const XML_PATH_SCHEDULE_LIFETIME        = 'system/cron/schedule_lifetime';
-    public const XML_PATH_MAX_RUNNING_TIME         = 'system/cron/max_running_time';
-    public const XML_PATH_HISTORY_CLEANUP_EVERY    = 'system/cron/history_cleanup_every';
-    public const XML_PATH_HISTORY_SUCCESS          = 'system/cron/history_success_lifetime';
-    public const XML_PATH_HISTORY_FAILURE          = 'system/cron/history_failure_lifetime';
+    public const string XML_PATH_SCHEDULE_GENERATE_EVERY  = 'system/cron/schedule_generate_every';
+    public const string XML_PATH_SCHEDULE_AHEAD_FOR       = 'system/cron/schedule_ahead_for';
+    public const string XML_PATH_SCHEDULE_LIFETIME        = 'system/cron/schedule_lifetime';
+    public const string XML_PATH_MAX_RUNNING_TIME         = 'system/cron/max_running_time';
+    public const string XML_PATH_HISTORY_CLEANUP_EVERY    = 'system/cron/history_cleanup_every';
+    public const string XML_PATH_HISTORY_SUCCESS          = 'system/cron/history_success_lifetime';
+    public const string XML_PATH_HISTORY_FAILURE          = 'system/cron/history_failure_lifetime';
 
-    public const REGEX_RUN_MODEL = '#^([a-z0-9_]+/[a-z0-9_]+)::([a-z0-9_]+)$#i';
+    public const string REGEX_RUN_MODEL = '#^([a-z0-9_]+/[a-z0-9_]+)::([a-z0-9_]+)$#i';
 
     protected ?Mage_Cron_Model_Resource_Schedule_Collection $_pendingSchedules = null;
 

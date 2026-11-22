@@ -10,17 +10,17 @@
 
 class Mage_Core_Model_Resource_Setup
 {
-    public const DEFAULT_SETUP_CONNECTION  = 'core_setup';
-    public const VERSION_COMPARE_EQUAL     = 0;
-    public const VERSION_COMPARE_LOWER     = -1;
-    public const VERSION_COMPARE_GREATER   = 1;
+    public const string DEFAULT_SETUP_CONNECTION  = 'core_setup';
+    public const int VERSION_COMPARE_EQUAL     = 0;
+    public const int VERSION_COMPARE_LOWER     = -1;
+    public const int VERSION_COMPARE_GREATER   = 1;
 
-    public const TYPE_DB_INSTALL           = 'install';
-    public const TYPE_DB_UPGRADE           = 'upgrade';
-    public const TYPE_DB_ROLLBACK          = 'rollback';
-    public const TYPE_DB_UNINSTALL         = 'uninstall';
-    public const TYPE_DATA_INSTALL         = 'data-install';
-    public const TYPE_DATA_UPGRADE         = 'data-upgrade';
+    public const string TYPE_DB_INSTALL           = 'install';
+    public const string TYPE_DB_UPGRADE           = 'upgrade';
+    public const string TYPE_DB_ROLLBACK          = 'rollback';
+    public const string TYPE_DB_UNINSTALL         = 'uninstall';
+    public const string TYPE_DATA_INSTALL         = 'data-install';
+    public const string TYPE_DATA_UPGRADE         = 'data-upgrade';
 
     /**
      * Setup resource name

@@ -10,13 +10,13 @@
 
 class Mage_Core_Model_Cookie
 {
-    public const XML_PATH_COOKIE_DOMAIN    = 'web/cookie/cookie_domain';
-    public const XML_PATH_COOKIE_PATH      = 'web/cookie/cookie_path';
-    public const XML_PATH_COOKIE_LIFETIME  = 'web/cookie/cookie_lifetime';
-    public const XML_PATH_COOKIE_HTTPONLY  = 'web/cookie/cookie_httponly';
-    public const XML_PATH_COOKIE_SAMESITE  = 'web/cookie/cookie_samesite';
+    public const string XML_PATH_COOKIE_DOMAIN    = 'web/cookie/cookie_domain';
+    public const string XML_PATH_COOKIE_PATH      = 'web/cookie/cookie_path';
+    public const string XML_PATH_COOKIE_LIFETIME  = 'web/cookie/cookie_lifetime';
+    public const string XML_PATH_COOKIE_HTTPONLY  = 'web/cookie/cookie_httponly';
+    public const string XML_PATH_COOKIE_SAMESITE  = 'web/cookie/cookie_samesite';
 
-    public const DEFAULT_COOKIE_LIFETIME   = 60 * 60 * 24 * 365;
+    public const int DEFAULT_COOKIE_LIFETIME   = 60 * 60 * 24 * 365;
 
     protected ?int $_lifetime = null;
 

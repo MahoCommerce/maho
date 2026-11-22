@@ -26,35 +26,35 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     /**
      * Free Shipping option "For matching items only"
      */
-    public const FREE_SHIPPING_ITEM    = 1;
+    public const int FREE_SHIPPING_ITEM    = 1;
 
     /**
      * Free Shipping option "For shipment with matching items"
      */
-    public const FREE_SHIPPING_ADDRESS = 2;
+    public const int FREE_SHIPPING_ADDRESS = 2;
 
     /**
      * Coupon types
      */
-    public const COUPON_TYPE_NO_COUPON = 1;
-    public const COUPON_TYPE_SPECIFIC  = 2;
-    public const COUPON_TYPE_AUTO      = 3;
+    public const int COUPON_TYPE_NO_COUPON = 1;
+    public const int COUPON_TYPE_SPECIFIC  = 2;
+    public const int COUPON_TYPE_AUTO      = 3;
 
     /**
      * Rule type actions
      */
-    public const TO_PERCENT_ACTION = 'to_percent';
-    public const BY_PERCENT_ACTION = 'by_percent';
-    public const TO_FIXED_ACTION   = 'to_fixed';
-    public const BY_FIXED_ACTION   = 'by_fixed';
-    public const CART_FIXED_ACTION = 'cart_fixed';
-    public const BUY_X_GET_Y_ACTION = 'buy_x_get_y';
+    public const string TO_PERCENT_ACTION = 'to_percent';
+    public const string BY_PERCENT_ACTION = 'by_percent';
+    public const string TO_FIXED_ACTION   = 'to_fixed';
+    public const string BY_FIXED_ACTION   = 'by_fixed';
+    public const string CART_FIXED_ACTION = 'cart_fixed';
+    public const string BUY_X_GET_Y_ACTION = 'buy_x_get_y';
 
     /** The core actions of a cart price rule. getSimpleActions() returns the list that a store accepts. */
-    public const SIMPLE_ACTIONS = [self::BY_PERCENT_ACTION, self::BY_FIXED_ACTION, self::CART_FIXED_ACTION, self::BUY_X_GET_Y_ACTION];
+    public const array SIMPLE_ACTIONS = [self::BY_PERCENT_ACTION, self::BY_FIXED_ACTION, self::CART_FIXED_ACTION, self::BUY_X_GET_Y_ACTION];
 
     /** Each child node is the code of an action that a rule accepts. A module adds a node for its action. */
-    public const XML_PATH_SIMPLE_ACTIONS = 'global/salesrule/rule/simple_actions';
+    public const string XML_PATH_SIMPLE_ACTIONS = 'global/salesrule/rule/simple_actions';
 
     /**
      * Store coupon code generator instance

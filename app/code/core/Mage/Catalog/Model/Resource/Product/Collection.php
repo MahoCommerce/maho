@@ -14,15 +14,9 @@
  */
 class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_Resource_Collection_Abstract
 {
-    /**
-     * Alias for index table
-     */
-    public const INDEX_TABLE_ALIAS = 'price_index';
+    public const string INDEX_TABLE_ALIAS = 'price_index';
 
-    /**
-     * Alias for main table
-     */
-    public const MAIN_TABLE_ALIAS = 'e';
+    public const string MAIN_TABLE_ALIAS = 'e';
 
     /**
      * Product websites table name

@@ -21,13 +21,13 @@ declare(strict_types=1);
  */
 class Mage_Downloadable_Model_Link_Purchased_Item extends Mage_Core_Model_Abstract
 {
-    public const XML_PATH_ORDER_ITEM_STATUS = 'catalog/downloadable/order_item_status';
+    public const string XML_PATH_ORDER_ITEM_STATUS = 'catalog/downloadable/order_item_status';
 
-    public const LINK_STATUS_PENDING   = 'pending';
-    public const LINK_STATUS_AVAILABLE = 'available';
-    public const LINK_STATUS_EXPIRED   = 'expired';
-    public const LINK_STATUS_PENDING_PAYMENT = 'pending_payment';
-    public const LINK_STATUS_PAYMENT_REVIEW = 'payment_review';
+    public const string LINK_STATUS_PENDING   = 'pending';
+    public const string LINK_STATUS_AVAILABLE = 'available';
+    public const string LINK_STATUS_EXPIRED   = 'expired';
+    public const string LINK_STATUS_PENDING_PAYMENT = 'pending_payment';
+    public const string LINK_STATUS_PAYMENT_REVIEW = 'payment_review';
 
     #[\Override]
     protected function _construct()

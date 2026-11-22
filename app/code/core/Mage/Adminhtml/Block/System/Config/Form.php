@@ -10,9 +10,9 @@
 
 class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widget_Form
 {
-    public const SCOPE_DEFAULT = 'default';
-    public const SCOPE_WEBSITES = 'websites';
-    public const SCOPE_STORES   = 'stores';
+    public const string SCOPE_DEFAULT = 'default';
+    public const string SCOPE_WEBSITES = 'websites';
+    public const string SCOPE_STORES   = 'stores';
 
     /**
      * Config data array

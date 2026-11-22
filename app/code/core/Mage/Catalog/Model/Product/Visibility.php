@@ -10,10 +10,10 @@
 
 class Mage_Catalog_Model_Product_Visibility extends \Maho\DataObject
 {
-    public const VISIBILITY_NOT_VISIBLE    = 1;
-    public const VISIBILITY_IN_CATALOG     = 2;
-    public const VISIBILITY_IN_SEARCH      = 3;
-    public const VISIBILITY_BOTH           = 4;
+    public const int VISIBILITY_NOT_VISIBLE    = 1;
+    public const int VISIBILITY_IN_CATALOG     = 2;
+    public const int VISIBILITY_IN_SEARCH      = 3;
+    public const int VISIBILITY_BOTH           = 4;
 
     /**
      * Reference to the attribute instance

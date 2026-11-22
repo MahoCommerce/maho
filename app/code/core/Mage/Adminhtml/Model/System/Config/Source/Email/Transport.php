@@ -8,7 +8,7 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Email_Transport
 {
-    private const SCHEME_TO_PACKAGE_MAP = [
+    private const array SCHEME_TO_PACKAGE_MAP = [
         'azure' => 'symfony/azure-mailer',
         'brevo' => 'symfony/brevo-mailer',
         'gmail' => 'symfony/google-mailer',

@@ -13,12 +13,12 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Config key 'Display Wishlist Summary'
      */
-    public const XML_PATH_WISHLIST_LINK_USE_QTY = 'wishlist/wishlist_link/use_qty';
+    public const string XML_PATH_WISHLIST_LINK_USE_QTY = 'wishlist/wishlist_link/use_qty';
 
     /**
      * Config key 'Display Out of Stock Products'
      */
-    public const XML_PATH_CATALOGINVENTORY_SHOW_OUT_OF_STOCK = 'cataloginventory/options/show_out_of_stock';
+    public const string XML_PATH_CATALOGINVENTORY_SHOW_OUT_OF_STOCK = 'cataloginventory/options/show_out_of_stock';
 
     #[\Override]
     protected $_moduleName = 'Mage_Wishlist';

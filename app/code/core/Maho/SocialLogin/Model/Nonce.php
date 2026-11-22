@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 class Maho_SocialLogin_Model_Nonce
 {
-    private const SESSION_KEY = 'sociallogin_nonces';
-    private const MAX_PENDING = 5;
+    private const string SESSION_KEY = 'sociallogin_nonces';
+    private const int MAX_PENDING = 5;
 
     public function issue(): string
     {

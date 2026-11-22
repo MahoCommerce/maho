@@ -21,10 +21,10 @@ use Maho\Import\Result;
 class ProductViews extends AbstractImporter
 {
     /** Skip the refresh of the report statistics, for a caller that refreshes them once after several files. */
-    public const OPTION_SKIP_STATISTICS = 'skip_statistics';
+    public const string OPTION_SKIP_STATISTICS = 'skip_statistics';
 
     /** The report statistics that read the view events. */
-    public const STATISTICS = ['viewed'];
+    public const array STATISTICS = ['viewed'];
 
     #[\Override]
     protected function requiredColumns(): array

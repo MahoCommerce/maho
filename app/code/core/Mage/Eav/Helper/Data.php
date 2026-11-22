@@ -12,10 +12,7 @@ declare(strict_types=1);
 
 class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    /**
-     * XML path to input types validator data in config
-     */
-    public const XML_PATH_VALIDATOR_DATA_INPUT_TYPES = 'general/validator_data/input_types';
+    public const string XML_PATH_VALIDATOR_DATA_INPUT_TYPES = 'general/validator_data/input_types';
 
     #[\Override]
     protected $_moduleName = 'Mage_Eav';

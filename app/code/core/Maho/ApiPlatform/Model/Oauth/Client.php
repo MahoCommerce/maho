@@ -12,15 +12,15 @@ declare(strict_types=1);
 
 class Maho_ApiPlatform_Model_Oauth_Client extends Mage_Core_Model_Abstract
 {
-    public const AUTH_METHOD_NONE = 'none';
-    public const AUTH_METHOD_CLIENT_SECRET_POST = 'client_secret_post';
-    public const AUTH_METHOD_CLIENT_SECRET_BASIC = 'client_secret_basic';
+    public const string AUTH_METHOD_NONE = 'none';
+    public const string AUTH_METHOD_CLIENT_SECRET_POST = 'client_secret_post';
+    public const string AUTH_METHOD_CLIENT_SECRET_BASIC = 'client_secret_basic';
 
-    public const GRANT_AUTHORIZATION_CODE = 'authorization_code';
-    public const GRANT_REFRESH_TOKEN = 'refresh_token';
+    public const string GRANT_AUTHORIZATION_CODE = 'authorization_code';
+    public const string GRANT_REFRESH_TOKEN = 'refresh_token';
 
     /** RFC 8252: a native client redirects to loopback on a port it picks at runtime. */
-    protected const LOOPBACK_HOSTS = ['127.0.0.1', '[::1]', 'localhost'];
+    protected const array LOOPBACK_HOSTS = ['127.0.0.1', '[::1]', 'localhost'];
 
     #[\Override]
     protected function _construct(): void

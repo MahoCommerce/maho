@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 class Mage_Core_Model_Design_Content_PreviewCss
 {
-    public const SCRIPT = 'tailwindcss-browser.js';
+    public const string SCRIPT = 'tailwindcss-browser.js';
 
     /**
      * The text/tailwindcss source for the theme of $stylesFile, or null when no Tailwind theme

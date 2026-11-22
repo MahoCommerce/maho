@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Block_Uploader_Multiple extends Mage_Adminhtml_Block_Uploader_Abstract
 {
-    public const DEFAULT_UPLOAD_BUTTON_ID_SUFFIX = 'upload';
+    public const string DEFAULT_UPLOAD_BUTTON_ID_SUFFIX = 'upload';
 
     #[\Override]
     protected function _prepareLayout()

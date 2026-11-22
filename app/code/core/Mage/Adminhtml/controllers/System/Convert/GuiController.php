@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_Convert_ProfileController
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'admin/system/convert/gui';
+    public const string ADMIN_RESOURCE = 'admin/system/convert/gui';
 
     /**
      * Profiles list action

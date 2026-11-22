@@ -13,7 +13,7 @@ class Mage_Sales_Model_Quote_Address_Total_Collector extends Mage_Sales_Model_Co
     /**
      * Path to sort order values of checkout totals
      */
-    public const XML_PATH_SALES_TOTALS_SORT = 'sales/totals_sort';
+    public const string XML_PATH_SALES_TOTALS_SORT = 'sales/totals_sort';
 
     /**
      * Total models array ordered for right display sequence

@@ -16,12 +16,12 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
      * Max lifetime is set to 400 days, as chromium based browsers will not allow anything higher
      * https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-cookie-lifetime-limits
      */
-    public const SESSION_NAMESPACE = 'maho_session';
-    public const SESSION_LEGACY_NAMESPACES = ['om_frontend', 'frontend'];
-    public const SESSION_MIN_LIFETIME = 60 * 60;
-    public const SESSION_DEFAULT_LIFETIME = 60 * 60 * 24 * 7;
-    public const SESSION_REMEMBER_DEFAULT_LIFETIME = 60 * 60 * 24 * 30;
-    public const SESSION_MAX_LIFETIME = 60 * 60 * 24 * 400;
+    public const string SESSION_NAMESPACE = 'maho_session';
+    public const array SESSION_LEGACY_NAMESPACES = ['om_frontend', 'frontend'];
+    public const int SESSION_MIN_LIFETIME = 60 * 60;
+    public const int SESSION_DEFAULT_LIFETIME = 60 * 60 * 24 * 7;
+    public const int SESSION_REMEMBER_DEFAULT_LIFETIME = 60 * 60 * 24 * 30;
+    public const int SESSION_MAX_LIFETIME = 60 * 60 * 24 * 400;
 
     /**
      * Actions of this controller that run without a form key check.

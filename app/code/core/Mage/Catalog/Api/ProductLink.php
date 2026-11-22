@@ -154,7 +154,7 @@ use ApiPlatform\Metadata\Put;
 class ProductLink extends \Maho\ApiPlatform\Resource
 {
     /** Admin ACL gate. Gated under product management. */
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_Catalog_ProductController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_Catalog_ProductController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, description: 'Composite identifier')]
     public ?string $id = null;

@@ -11,13 +11,13 @@ declare(strict_types=1);
 class Maho_Ai_Model_Platform
 {
     // Backward-compatible constants for built-in providers
-    public const OPENAI     = 'openai';
-    public const ANTHROPIC  = 'anthropic';
-    public const GOOGLE     = 'google';
-    public const MISTRAL    = 'mistral';
-    public const OPENROUTER = 'openrouter';
-    public const OLLAMA     = 'ollama';
-    public const GENERIC    = 'generic';
+    public const string OPENAI     = 'openai';
+    public const string ANTHROPIC  = 'anthropic';
+    public const string GOOGLE     = 'google';
+    public const string MISTRAL    = 'mistral';
+    public const string OPENROUTER = 'openrouter';
+    public const string OLLAMA     = 'ollama';
+    public const string GENERIC    = 'generic';
 
     /**
      * Map of provider code to the Composer package that ships its Symfony AI
@@ -25,7 +25,7 @@ class Maho_Ai_Model_Platform
      * dependencies. Mirrors SCHEME_TO_PACKAGE_MAP in
      * Mage_Adminhtml_Model_System_Config_Source_Email_Transport.
      */
-    public const PACKAGES = [
+    public const array PACKAGES = [
         self::OPENAI     => 'symfony/ai-open-ai-platform',
         self::ANTHROPIC  => 'symfony/ai-anthropic-platform',
         self::GOOGLE     => 'symfony/ai-gemini-platform',

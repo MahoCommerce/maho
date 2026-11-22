@@ -24,19 +24,18 @@ class Mage_Sales_Model_Order_Payment_Transaction extends Mage_Core_Model_Abstrac
 {
     /**
      * Supported transaction types
-     * @var string
      */
-    public const TYPE_PAYMENT = 'payment';
-    public const TYPE_ORDER   = 'order';
-    public const TYPE_AUTH    = 'authorization';
-    public const TYPE_CAPTURE = 'capture';
-    public const TYPE_VOID    = 'void';
-    public const TYPE_REFUND  = 'refund';
+    public const string TYPE_PAYMENT = 'payment';
+    public const string TYPE_ORDER   = 'order';
+    public const string TYPE_AUTH    = 'authorization';
+    public const string TYPE_CAPTURE = 'capture';
+    public const string TYPE_VOID    = 'void';
+    public const string TYPE_REFUND  = 'refund';
 
     /**
      * Raw details key in additional info
      */
-    public const RAW_DETAILS = 'raw_details_info';
+    public const string RAW_DETAILS = 'raw_details_info';
 
     /**
      * Payment instance. Required for most transaction writing and search operations

@@ -36,7 +36,7 @@ class ApiPermissionRegistry
     /**
      * Path to the compiled permissions file, relative to the Maho project root.
      */
-    private const COMPILED_FILE = '/vendor/composer/maho_api_permissions.php';
+    private const string COMPILED_FILE = '/vendor/composer/maho_api_permissions.php';
 
     /**
      * Cached compiled data. `null` until first `load()`.

@@ -10,11 +10,7 @@
 
 class Mage_Paygate_Adminhtml_Paygate_Authorizenet_PaymentController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'sales/order/actions/review_payment';
+    public const string ADMIN_RESOURCE = 'sales/order/actions/review_payment';
 
     /**
      * Cancel active partail authorizations

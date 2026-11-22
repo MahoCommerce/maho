@@ -20,7 +20,7 @@ declare(strict_types=1);
  */
 class Maho_Intelligence_Model_Lsp_XmlStructureIndex
 {
-    private const FILE_TYPES = ['config.xml', 'system.xml', 'adminhtml.xml'];
+    private const array FILE_TYPES = ['config.xml', 'system.xml', 'adminhtml.xml'];
 
     /**
      * Merged children map per file type.

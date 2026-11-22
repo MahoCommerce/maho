@@ -10,11 +10,11 @@
 
 class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
 {
-    public const XML_PATH_PRODUCT_URL_SUFFIX           = 'catalog/seo/product_url_suffix';
-    public const XML_PATH_PRODUCT_URL_USE_CATEGORY     = 'catalog/seo/product_use_categories';
-    public const XML_PATH_USE_PRODUCT_CANONICAL_TAG    = 'catalog/seo/product_canonical_tag';
+    public const string XML_PATH_PRODUCT_URL_SUFFIX           = 'catalog/seo/product_url_suffix';
+    public const string XML_PATH_PRODUCT_URL_USE_CATEGORY     = 'catalog/seo/product_use_categories';
+    public const string XML_PATH_USE_PRODUCT_CANONICAL_TAG    = 'catalog/seo/product_canonical_tag';
 
-    public const DEFAULT_QTY                           = 1;
+    public const int DEFAULT_QTY                           = 1;
 
     #[\Override]
     protected $_moduleName = 'Mage_Catalog';

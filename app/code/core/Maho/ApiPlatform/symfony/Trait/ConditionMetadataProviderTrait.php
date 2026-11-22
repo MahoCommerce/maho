@@ -19,7 +19,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 trait ConditionMetadataProviderTrait
 {
-    public const MAX_VALUES = 1000;
+    public const int MAX_VALUES = 1000;
 
     /**
      * Return the document and the scope of the token.

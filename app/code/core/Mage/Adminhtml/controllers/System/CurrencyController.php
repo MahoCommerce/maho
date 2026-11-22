@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_System_CurrencyController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'system/currency/rates';
+    public const string ADMIN_RESOURCE = 'system/currency/rates';
 
     /**
      * Init currency by currency code from request

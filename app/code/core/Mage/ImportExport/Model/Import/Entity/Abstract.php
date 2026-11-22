@@ -13,15 +13,15 @@ abstract class Mage_ImportExport_Model_Import_Entity_Abstract
     /**
      * Separates the values of one multiselect cell, so a product needs no extra row per value.
      */
-    public const MULTI_VALUE_SEPARATOR = '|';
+    public const string MULTI_VALUE_SEPARATOR = '|';
 
     /**
      * Database constants
      */
-    public const DB_MAX_PACKET_COEFFICIENT = 900000;
-    public const DB_MAX_PACKET_DATA        = 1048576;
-    public const DB_MAX_VARCHAR_LENGTH     = 256;
-    public const DB_MAX_TEXT_LENGTH        = 65536;
+    public const int DB_MAX_PACKET_COEFFICIENT = 900000;
+    public const int DB_MAX_PACKET_DATA        = 1048576;
+    public const int DB_MAX_VARCHAR_LENGTH     = 256;
+    public const int DB_MAX_TEXT_LENGTH        = 65536;
 
     /**
      * DB connection.

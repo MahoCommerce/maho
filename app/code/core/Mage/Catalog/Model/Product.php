@@ -42,7 +42,7 @@ declare(strict_types=1);
 class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 {
     /** The attributes that start a date range, with the attribute that ends it. */
-    public const DATE_RANGES = [
+    public const array DATE_RANGES = [
         'special_from_date' => 'special_to_date',
         'news_from_date' => 'news_to_date',
         'custom_design_from' => 'custom_design_to',
@@ -52,8 +52,8 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      * Entity code.
      * Can be used as part of method name for entity processing
      */
-    public const ENTITY          = 'catalog_product';
-    public const CACHE_TAG       = 'catalog_product';
+    public const string ENTITY          = 'catalog_product';
+    public const string CACHE_TAG       = 'catalog_product';
     #[\Override]
     protected $_cacheTag         = 'catalog_product';
     #[\Override]

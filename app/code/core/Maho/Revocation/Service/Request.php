@@ -22,7 +22,7 @@ declare(strict_types=1);
  */
 class Maho_Revocation_Service_Request
 {
-    public const RATE_LIMIT_WINDOW = 3600;
+    public const int RATE_LIMIT_WINDOW = 3600;
 
     /**
      * @throws Mage_Core_Exception_NoSuchEntity

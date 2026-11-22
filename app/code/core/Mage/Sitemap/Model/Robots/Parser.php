@@ -12,12 +12,12 @@ declare(strict_types=1);
 
 class Mage_Sitemap_Model_Robots_Parser
 {
-    public const AGENT_FIELD = 'user-agent';
+    public const string AGENT_FIELD = 'user-agent';
 
     /** Fields that apply to the whole file instead of to the group they sit in. */
-    public const NON_GROUP_FIELDS = ['sitemap', 'host'];
+    public const array NON_GROUP_FIELDS = ['sitemap', 'host'];
 
-    protected const CANONICAL_FIELDS = [
+    protected const array CANONICAL_FIELDS = [
         'user-agent' => 'User-agent',
         'disallow' => 'Disallow',
         'allow' => 'Allow',

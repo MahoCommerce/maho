@@ -125,10 +125,10 @@ class AdminGraphQlController
     }
 
     /** Maximum nesting depth allowed in queries */
-    private const MAX_QUERY_DEPTH = 10;
+    private const int MAX_QUERY_DEPTH = 10;
 
     /** Maximum query length in bytes */
-    private const MAX_QUERY_LENGTH = 10000;
+    private const int MAX_QUERY_LENGTH = 10000;
 
     private function executeQuery(string $query, ?array $variables, array $context, ?string $operationName = null): array
     {

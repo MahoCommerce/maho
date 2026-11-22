@@ -15,7 +15,7 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Maho_CatalogLinkRul
      * value. A condition using one of these makes the whole rule source-dependent, so
      * Maho_CatalogLinkRule_Model_Rule reads this list too: keep it the single source of truth.
      */
-    public const SOURCE_MATCH_OPERATORS = ['~=', '~!'];
+    public const array SOURCE_MATCH_OPERATORS = ['~=', '~!'];
 
     public function __construct()
     {

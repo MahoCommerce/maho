@@ -10,31 +10,28 @@
 
 class Mage_Core_Model_Locale extends \Maho\DataObject
 {
-    /**
-     * Default locale name
-     */
-    public const DEFAULT_LOCALE    = 'en_US';
-    public const DEFAULT_TIMEZONE  = 'UTC';
-    public const DEFAULT_CURRENCY  = 'USD';
+    public const string DEFAULT_LOCALE    = 'en_US';
+    public const string DEFAULT_TIMEZONE  = 'UTC';
+    public const string DEFAULT_CURRENCY  = 'USD';
 
     /**
      * Date format constants
      */
-    public const DATETIME_FORMAT = 'Y-m-d H:i:s';
-    public const DATE_FORMAT = 'Y-m-d';
-    public const HTML5_DATETIME_FORMAT = 'Y-m-d\TH:i';
+    public const string DATETIME_FORMAT = 'Y-m-d H:i:s';
+    public const string DATE_FORMAT = 'Y-m-d';
+    public const string HTML5_DATETIME_FORMAT = 'Y-m-d\TH:i';
 
     /**
      * Weight unit constants
      */
-    public const WEIGHT_KILOGRAM = 'kg';
-    public const WEIGHT_POUND = 'lb';
-    public const WEIGHT_OUNCE = 'oz';
-    public const WEIGHT_GRAM = 'g';
-    public const WEIGHT_TON = 't';
+    public const string WEIGHT_KILOGRAM = 'kg';
+    public const string WEIGHT_POUND = 'lb';
+    public const string WEIGHT_OUNCE = 'oz';
+    public const string WEIGHT_GRAM = 'g';
+    public const string WEIGHT_TON = 't';
 
     /** Merchant-facing weight unit spellings, mapped to the WEIGHT_* aliases the converters expect. */
-    protected const WEIGHT_UNIT_ALIASES = [
+    protected const array WEIGHT_UNIT_ALIASES = [
         'lbs' => self::WEIGHT_POUND,
         'lb' => self::WEIGHT_POUND,
         'kgs' => self::WEIGHT_KILOGRAM,
@@ -47,32 +44,32 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     /**
      * Length unit constants
      */
-    public const LENGTH_METER = 'm';
-    public const LENGTH_CENTIMETER = 'cm';
-    public const LENGTH_MILLIMETER = 'mm';
-    public const LENGTH_INCH = 'in';
-    public const LENGTH_FOOT = 'ft';
-    public const LENGTH_YARD = 'yd';
-    public const LENGTH_MILE = 'mi';
-    public const LENGTH_KILOMETER = 'km';
+    public const string LENGTH_METER = 'm';
+    public const string LENGTH_CENTIMETER = 'cm';
+    public const string LENGTH_MILLIMETER = 'mm';
+    public const string LENGTH_INCH = 'in';
+    public const string LENGTH_FOOT = 'ft';
+    public const string LENGTH_YARD = 'yd';
+    public const string LENGTH_MILE = 'mi';
+    public const string LENGTH_KILOMETER = 'km';
 
     /**
      * XML path constants
      */
-    public const XML_PATH_DEFAULT_LOCALE   = 'general/locale/code';
-    public const XML_PATH_DEFAULT_TIMEZONE = 'general/locale/timezone';
-    public const XML_PATH_WEIGHT_UNIT      = 'general/locale/weight_unit';
-    public const XML_PATH_ALLOW_CODES      = 'global/locale/allow/codes';
-    public const XML_PATH_ALLOW_CURRENCIES = 'global/locale/allow/currencies';
-    public const XML_PATH_ALLOW_CURRENCIES_INSTALLED = 'system/currency/installed';
+    public const string XML_PATH_DEFAULT_LOCALE   = 'general/locale/code';
+    public const string XML_PATH_DEFAULT_TIMEZONE = 'general/locale/timezone';
+    public const string XML_PATH_WEIGHT_UNIT      = 'general/locale/weight_unit';
+    public const string XML_PATH_ALLOW_CODES      = 'global/locale/allow/codes';
+    public const string XML_PATH_ALLOW_CURRENCIES = 'global/locale/allow/currencies';
+    public const string XML_PATH_ALLOW_CURRENCIES_INSTALLED = 'system/currency/installed';
 
     /**
      * Date and time format codes
      */
-    public const FORMAT_TYPE_FULL  = 'full';
-    public const FORMAT_TYPE_LONG  = 'long';
-    public const FORMAT_TYPE_MEDIUM = 'medium';
-    public const FORMAT_TYPE_SHORT = 'short';
+    public const string FORMAT_TYPE_FULL  = 'full';
+    public const string FORMAT_TYPE_LONG  = 'long';
+    public const string FORMAT_TYPE_MEDIUM = 'medium';
+    public const string FORMAT_TYPE_SHORT = 'short';
 
     /**
      * Default locale code

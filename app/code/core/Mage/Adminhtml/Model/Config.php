@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Model_Config extends \Maho\Simplexml\Config
 {
-    public const ENCRYPTED_BACKEND_MODEL = 'adminhtml/system_config_backend_encrypted';
+    public const string ENCRYPTED_BACKEND_MODEL = 'adminhtml/system_config_backend_encrypted';
 
     /**
      * @var string

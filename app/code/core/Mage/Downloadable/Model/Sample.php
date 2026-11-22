@@ -21,7 +21,7 @@ declare(strict_types=1);
  */
 class Mage_Downloadable_Model_Sample extends Mage_Core_Model_Abstract
 {
-    public const XML_PATH_SAMPLES_TITLE = 'catalog/downloadable/samples_title';
+    public const string XML_PATH_SAMPLES_TITLE = 'catalog/downloadable/samples_title';
 
     /**
      * Initialize resource

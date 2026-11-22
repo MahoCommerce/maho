@@ -59,11 +59,11 @@ use Maho\Config\ApiResource;
 )]
 class AdminUser extends CrudResource
 {
-    public const MODEL = 'admin/user';
-    public const PRIMARY_KEY = 'user_id';
+    public const string MODEL = 'admin/user';
+    public const string PRIMARY_KEY = 'user_id';
 
     /** Admin ACL gate. Mirrors backend Mage_Adminhtml_Permissions_UserController. */
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_Permissions_UserController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_Permissions_UserController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

@@ -12,10 +12,8 @@ class Mage_Rss_Block_Catalog_Review extends Mage_Rss_Block_Abstract
 {
     /**
      * Cache tag constant for feed reviews
-     *
-     * @var string
      */
-    public const CACHE_TAG = 'block_html_rss_catalog_review';
+    public const string CACHE_TAG = 'block_html_rss_catalog_review';
 
     /**
      * Initialize cache

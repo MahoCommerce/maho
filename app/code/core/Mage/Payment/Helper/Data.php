@@ -10,8 +10,8 @@
 
 class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public const XML_PATH_PAYMENT_METHODS = 'payment';
-    public const XML_PATH_PAYMENT_GROUPS = 'global/payment/groups';
+    public const string XML_PATH_PAYMENT_METHODS = 'payment';
+    public const string XML_PATH_PAYMENT_GROUPS = 'global/payment/groups';
 
     #[\Override]
     protected $_moduleName = 'Mage_Payment';

@@ -38,7 +38,7 @@ use ApiPlatform\Metadata\Get;
 )]
 class SalesShippingReport extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = 'report/salesroot/shipping';
+    public const string ADMIN_RESOURCE = 'report/salesroot/shipping';
 
     #[ApiProperty(identifier: true, description: 'Report code')]
     public string $report = 'sales-shipping';

@@ -13,22 +13,16 @@ class Mage_Core_Helper_Cookie extends Mage_Core_Helper_Abstract
     /**
      * Cookie name for users who allowed cookie save
      */
-    public const IS_USER_ALLOWED_SAVE_COOKIE  = 'user_allowed_save_cookie';
+    public const string IS_USER_ALLOWED_SAVE_COOKIE  = 'user_allowed_save_cookie';
 
     /**
      * Path to configuration, check is enable cookie restriction mode
      */
-    public const XML_PATH_COOKIE_RESTRICTION  = 'web/cookie/cookie_restriction';
+    public const string XML_PATH_COOKIE_RESTRICTION  = 'web/cookie/cookie_restriction';
 
-    /**
-     * Cookie restriction lifetime configuration path
-     */
-    public const XML_PATH_COOKIE_RESTRICTION_LIFETIME = 'web/cookie/cookie_restriction_lifetime';
+    public const string XML_PATH_COOKIE_RESTRICTION_LIFETIME = 'web/cookie/cookie_restriction_lifetime';
 
-    /**
-     * Cookie restriction notice cms block identifier
-     */
-    public const COOKIE_RESTRICTION_NOTICE_CMS_BLOCK_IDENTIFIER = 'cookie_restriction_notice_block';
+    public const string COOKIE_RESTRICTION_NOTICE_CMS_BLOCK_IDENTIFIER = 'cookie_restriction_notice_block';
 
     #[\Override]
     protected $_moduleName = 'Mage_Core';

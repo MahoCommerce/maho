@@ -23,10 +23,10 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
     /**
      * Predefined event types
      */
-    public const TYPE_SAVE        = 'save';
-    public const TYPE_DELETE      = 'delete';
-    public const TYPE_MASS_ACTION = 'mass_action';
-    public const TYPE_REINDEX     = 'reindex';
+    public const string TYPE_SAVE        = 'save';
+    public const string TYPE_DELETE      = 'delete';
+    public const string TYPE_MASS_ACTION = 'mass_action';
+    public const string TYPE_REINDEX     = 'reindex';
 
     /**
      * Array of related processes ids

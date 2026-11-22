@@ -13,9 +13,9 @@ declare(strict_types=1);
  */
 class Mage_Core_Model_Url_Gone extends Mage_Core_Model_Abstract
 {
-    public const ENTITY_TYPE_PRODUCT = 'product';
+    public const string ENTITY_TYPE_PRODUCT = 'product';
 
-    public const XML_PATH_PURGE_AFTER_DAYS = 'catalog/seo/gone_purge_after_days';
+    public const string XML_PATH_PURGE_AFTER_DAYS = 'catalog/seo/gone_purge_after_days';
 
     #[\Override]
     protected function _construct(): void

@@ -38,7 +38,7 @@ use ApiPlatform\Metadata\Get;
 )]
 class SalesCouponsReport extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = 'report/salesroot/coupons';
+    public const string ADMIN_RESOURCE = 'report/salesroot/coupons';
 
     #[ApiProperty(identifier: true, description: 'Report code')]
     public string $report = 'sales-coupons';

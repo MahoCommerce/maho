@@ -20,7 +20,7 @@ use Mage_Downloadable_Model_Link as Link;
  */
 class Mage_Downloadable_Service_Link
 {
-    private const FIELDS = ['title', 'price', 'number_of_downloads', 'is_shareable', 'sort_order', 'link_url', 'sample_type', 'sample_url'];
+    private const array FIELDS = ['title', 'price', 'number_of_downloads', 'is_shareable', 'sort_order', 'link_url', 'sample_type', 'sample_url'];
 
     /**
      * @throws Mage_Core_Exception_Input when $linkId is not a positive ID

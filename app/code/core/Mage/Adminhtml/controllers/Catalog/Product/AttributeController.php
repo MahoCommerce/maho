@@ -12,16 +12,12 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_Controller_Eav_Attribute
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'catalog/attributes/attributes';
+    public const string ADMIN_RESOURCE = 'catalog/attributes/attributes';
 
     /**
      * List of tags from setting
      */
-    public const XML_PATH_ALLOWED_TAGS = Mage_Catalog_Model_Resource_Eav_Attribute::XML_PATH_ALLOWED_HTML_TAGS;
+    public const string XML_PATH_ALLOWED_TAGS = Mage_Catalog_Model_Resource_Eav_Attribute::XML_PATH_ALLOWED_HTML_TAGS;
 
     #[\Override]
     protected string $gridContainerBlock = 'adminhtml/catalog_product_attribute';

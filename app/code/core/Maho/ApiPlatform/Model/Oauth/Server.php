@@ -16,21 +16,21 @@ declare(strict_types=1);
 
 class Maho_ApiPlatform_Model_Oauth_Server
 {
-    public const RESPONSE_TYPE_CODE = 'code';
-    public const SCOPE_MCP = 'mcp';
+    public const string RESPONSE_TYPE_CODE = 'code';
+    public const string SCOPE_MCP = 'mcp';
 
     /** The scopes a client may ask for. The admin ACL decides what a token can reach. */
-    public const SUPPORTED_SCOPES = [self::SCOPE_MCP];
+    public const array SUPPORTED_SCOPES = [self::SCOPE_MCP];
 
     /** The cookie naming the authorization request that waits for approval. */
-    public const PENDING_REQUEST_COOKIE = 'maho_oauth_request';
+    public const string PENDING_REQUEST_COOKIE = 'maho_oauth_request';
 
     /** Long enough to log in and read the screen, short enough to not linger. */
-    protected const PENDING_REQUEST_TTL = 900;
+    protected const int PENDING_REQUEST_TTL = 900;
 
     /** RFC 7591 caps nothing, so cap it here: a name is shown on the consent screen. */
-    protected const CLIENT_NAME_LIMIT = 120;
-    protected const MAX_REDIRECT_URIS = 10;
+    protected const int CLIENT_NAME_LIMIT = 120;
+    protected const int MAX_REDIRECT_URIS = 10;
 
     protected ?\Maho\ApiPlatform\Service\JwtService $jwtService = null;
 

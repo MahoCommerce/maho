@@ -15,23 +15,20 @@ class Mage_Catalog_Block_Product_Widget_New extends Mage_Catalog_Block_Product_N
     /**
      * Display products type
      */
-    public const DISPLAY_TYPE_ALL_PRODUCTS         = 'all_products';
-    public const DISPLAY_TYPE_NEW_PRODUCTS         = 'new_products';
+    public const string DISPLAY_TYPE_ALL_PRODUCTS         = 'all_products';
+    public const string DISPLAY_TYPE_NEW_PRODUCTS         = 'new_products';
 
     /**
      * Default value whether show pager or not
      */
-    public const DEFAULT_SHOW_PAGER                = false;
+    public const bool DEFAULT_SHOW_PAGER                = false;
 
-    /**
-     * Default value for products per page
-     */
-    public const DEFAULT_PRODUCTS_PER_PAGE         = 5;
+    public const int DEFAULT_PRODUCTS_PER_PAGE         = 5;
 
     /**
      * Name of request parameter for page number value
      */
-    public const PAGE_VAR_NAME                     = 'np';
+    public const string PAGE_VAR_NAME                     = 'np';
 
     /**
      * Instance of pager block

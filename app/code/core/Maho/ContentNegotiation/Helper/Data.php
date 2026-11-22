@@ -14,15 +14,15 @@ use Symfony\Component\HttpFoundation\AcceptHeader;
 
 class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public const XML_PATH_ENABLED = 'crawlers/markdown/enabled';
-    public const XML_PATH_ALLOWED_ROUTES = 'crawlers/markdown/allowed_routes';
-    public const XML_PATH_CACHE_LIFETIME = 'crawlers/markdown/cache_lifetime';
+    public const string XML_PATH_ENABLED = 'crawlers/markdown/enabled';
+    public const string XML_PATH_ALLOWED_ROUTES = 'crawlers/markdown/allowed_routes';
+    public const string XML_PATH_CACHE_LIFETIME = 'crawlers/markdown/cache_lifetime';
 
-    public const MIME_TYPE = 'text/markdown';
-    public const SUFFIX = '.md';
+    public const string MIME_TYPE = 'text/markdown';
+    public const string SUFFIX = '.md';
 
     /** The root page cannot take the suffix: the web server rejects "/.md" as a hidden file */
-    public const ROOT_FILE = 'index.md';
+    public const string ROOT_FILE = 'index.md';
 
     #[\Override]
     protected $_moduleName = 'Maho_ContentNegotiation';

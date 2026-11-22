@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Maho_Ai_Model_Chat_Notifier
 {
     /** The severity names the model uses, as inbox severities. */
-    public const SEVERITIES = [
+    public const array SEVERITIES = [
         'critical' => Mage_AdminNotification_Model_Inbox::SEVERITY_CRITICAL,
         'major' => Mage_AdminNotification_Model_Inbox::SEVERITY_MAJOR,
         'minor' => Mage_AdminNotification_Model_Inbox::SEVERITY_MINOR,

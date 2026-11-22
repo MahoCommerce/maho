@@ -20,24 +20,24 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
     /**
      * XML configuration paths for Price Layered Navigation
      */
-    public const XML_PATH_RANGE_CALCULATION       = 'catalog/layered_navigation/price_range_calculation';
-    public const XML_PATH_RANGE_STEP              = 'catalog/layered_navigation/price_range_step';
-    public const XML_PATH_RANGE_MAX_INTERVALS     = 'catalog/layered_navigation/price_range_max_intervals';
-    public const XML_PATH_ONE_PRICE_INTERVAL      = 'catalog/layered_navigation/one_price_interval';
-    public const XML_PATH_INTERVAL_DIVISION_LIMIT = 'catalog/layered_navigation/interval_division_limit';
+    public const string XML_PATH_RANGE_CALCULATION       = 'catalog/layered_navigation/price_range_calculation';
+    public const string XML_PATH_RANGE_STEP              = 'catalog/layered_navigation/price_range_step';
+    public const string XML_PATH_RANGE_MAX_INTERVALS     = 'catalog/layered_navigation/price_range_max_intervals';
+    public const string XML_PATH_ONE_PRICE_INTERVAL      = 'catalog/layered_navigation/one_price_interval';
+    public const string XML_PATH_INTERVAL_DIVISION_LIMIT = 'catalog/layered_navigation/interval_division_limit';
 
     /**
      * Price layered navigation modes: Automatic (equalize price ranges), Automatic (equalize product counts), Manual, Input
      */
-    public const RANGE_CALCULATION_AUTO     = 'auto'; // equalize price ranges
-    public const RANGE_CALCULATION_IMPROVED = 'improved'; // equalize product counts
-    public const RANGE_CALCULATION_MANUAL   = 'manual';
-    public const RANGE_CALCULATION_INPUT    = 'input'; // from-to input fields
+    public const string RANGE_CALCULATION_AUTO     = 'auto'; // equalize price ranges
+    public const string RANGE_CALCULATION_IMPROVED = 'improved'; // equalize product counts
+    public const string RANGE_CALCULATION_MANUAL   = 'manual';
+    public const string RANGE_CALCULATION_INPUT    = 'input'; // from-to input fields
 
     /**
      * Minimal size of the range
      */
-    public const MIN_RANGE_POWER = 10;
+    public const int MIN_RANGE_POWER = 10;
 
     /**
      * Resource instance

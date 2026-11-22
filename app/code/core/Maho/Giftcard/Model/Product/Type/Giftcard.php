@@ -13,7 +13,7 @@ declare(strict_types=1);
  */
 class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Product_Type_Virtual
 {
-    public const TYPE_CODE = 'giftcard';
+    public const string TYPE_CODE = 'giftcard';
 
     /**
      * Check if product can be configured

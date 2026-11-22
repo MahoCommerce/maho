@@ -10,7 +10,7 @@
 
 class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert_Parser_Abstract
 {
-    public const MULTI_DELIMITER = ' , ';
+    public const string MULTI_DELIMITER = ' , ';
 
     protected ?Mage_Customer_Model_Resource_Customer $_resource = null;
 

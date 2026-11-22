@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 class Mage_Catalog_Model_Category_Merchandiser
 {
-    public const POSITION_SORT = 'position';
+    public const string POSITION_SORT = 'position';
 
     /**
      * Retrieve the sort that the storefront uses for the category in the store of the category.

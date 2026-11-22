@@ -72,7 +72,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 )]
 class ReportStatistic extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_Report_StatisticsController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_Report_StatisticsController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, description: 'Report code: sales, tax, shipping, invoiced, refunded, coupons, bestsellers or viewed')]
     public string $code = '';

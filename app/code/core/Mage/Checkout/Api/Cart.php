@@ -521,7 +521,7 @@ use Mage\Customer\Api\Address;
 class Cart extends \Maho\ApiPlatform\Resource
 {
     /** Admin ACL gate. Admin cart operations mirror the backend "Create Order" flow. */
-    public const ADMIN_RESOURCE = 'sales/order/actions/create';
+    public const string ADMIN_RESOURCE = 'sales/order/actions/create';
 
     #[ApiProperty(description: 'Cart/quote entity ID', writable: false)]
     public ?int $id = null;

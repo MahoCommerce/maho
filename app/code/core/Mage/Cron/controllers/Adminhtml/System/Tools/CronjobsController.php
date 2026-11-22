@@ -10,7 +10,7 @@ use Maho\Job\StepState;
 
 class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'system/tools/cronjobs';
+    public const string ADMIN_RESOURCE = 'system/tools/cronjobs';
 
     #[Maho\Config\Route('/admin/system_tools_cronjobs/index')]
     public function indexAction(): void

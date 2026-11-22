@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Maho_ApiPlatform_WellKnownController extends Mage_Core_Controller_Front_Action
 {
-    public const CACHE_LIFETIME = 3600;
+    public const int CACHE_LIFETIME = 3600;
 
     /**
      * Agents poll these files, and none of them depends on who is asking.

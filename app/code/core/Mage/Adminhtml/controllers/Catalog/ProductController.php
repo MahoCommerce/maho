@@ -10,16 +10,12 @@
 
 class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'catalog/products';
+    public const string ADMIN_RESOURCE = 'catalog/products';
 
     /**
      * The greatest value which could be stored in CatalogInventory Qty field
      */
-    public const MAX_QTY_VALUE = Mage_CatalogInventory_Service_Stock::MAX_QTY;
+    public const float MAX_QTY_VALUE = Mage_CatalogInventory_Service_Stock::MAX_QTY;
 
     /**
      * Array of actions which can be processed without secret key validation

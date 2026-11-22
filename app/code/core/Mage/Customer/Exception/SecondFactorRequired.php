@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Customer_Exception_SecondFactorRequired extends Mage_Core_Exception_Unauthorized
 {
-    public const ERROR_CODE = 'twofa_required';
+    public const string ERROR_CODE = 'twofa_required';
 
     public function __construct(string $message, private readonly int $customerId)
     {

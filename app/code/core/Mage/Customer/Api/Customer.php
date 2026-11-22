@@ -250,10 +250,10 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 )]
 class Customer extends CrudResource
 {
-    public const MODEL = 'customer/customer';
+    public const string MODEL = 'customer/customer';
 
     /** Admin ACL gate. Mirrors backend Mage_Adminhtml_CustomerController. */
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_CustomerController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_CustomerController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

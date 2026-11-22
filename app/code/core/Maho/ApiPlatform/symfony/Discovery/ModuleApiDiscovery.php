@@ -21,10 +21,10 @@ use Maho\ComposerPlugin\AutoloadRuntime;
  */
 final class ModuleApiDiscovery
 {
-    private const CACHE_ID = 'maho_api_platform_discovery';
+    private const string CACHE_ID = 'maho_api_platform_discovery';
     // Part of the "api_data" cache type (see etc/config.xml), so flushing the
     // API Data cache in admin clears the module discovery map too.
-    private const CACHE_TAG = 'API_DISCOVERY';
+    private const string CACHE_TAG = 'API_DISCOVERY';
 
     /** @var array{paths: string[], namespaces: array<string, string>}|null */
     private static ?array $cache = null;

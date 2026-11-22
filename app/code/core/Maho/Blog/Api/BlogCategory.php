@@ -80,10 +80,10 @@ use Maho\ApiPlatform\CrudResource;
 )]
 class BlogCategory extends CrudResource
 {
-    public const MODEL = 'blog/category';
+    public const string MODEL = 'blog/category';
 
     /** Admin ACL gate. Mirrors backend Maho_Blog_Adminhtml_Blog_CategoryController. */
-    public const ADMIN_RESOURCE = \Maho_Blog_Adminhtml_Blog_CategoryController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Maho_Blog_Adminhtml_Blog_CategoryController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

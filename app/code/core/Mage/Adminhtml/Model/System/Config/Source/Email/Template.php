@@ -20,7 +20,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Email_Template extends \Maho\Dat
     /**
      * Config xpath to email template node
      */
-    public const XML_PATH_TEMPLATE_EMAIL = 'global/template/email/';
+    public const string XML_PATH_TEMPLATE_EMAIL = 'global/template/email/';
 
     public function toOptionArray(): array
     {

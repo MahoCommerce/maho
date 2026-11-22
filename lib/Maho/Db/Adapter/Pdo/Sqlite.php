@@ -16,8 +16,8 @@ use Maho\Db\Helper;
 class Sqlite extends AbstractPdoAdapter
 {
     // SQLite-specific constants
-    public const DDL_CACHE_PREFIX = 'DB_PDO_SQLITE_DDL';
-    public const DDL_CACHE_TAG = 'DB_PDO_SQLITE_DDL';
+    public const string DDL_CACHE_PREFIX = 'DB_PDO_SQLITE_DDL';
+    public const string DDL_CACHE_TAG = 'DB_PDO_SQLITE_DDL';
 
     /**
      * Default class name for a DB statement.

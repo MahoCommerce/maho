@@ -10,8 +10,8 @@
 
 class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_Abstract
 {
-    public const TMP_INSTALL_DATE_VALUE = 'd-d-d-d-d';
-    public const TMP_ENCRYPT_KEY_VALUE = 'k-k-k-k-k';
+    public const string TMP_INSTALL_DATE_VALUE = 'd-d-d-d-d';
+    public const string TMP_ENCRYPT_KEY_VALUE = 'k-k-k-k-k';
 
     /**
      * Path to local configuration file

@@ -10,13 +10,13 @@
 
 abstract class Mage_Index_Model_Resource_Abstract extends Mage_Core_Model_Resource_Db_Abstract
 {
-    public const IDX_SUFFIX = '_idx';
-    public const TMP_SUFFIX = '_tmp';
+    public const string IDX_SUFFIX = '_idx';
+    public const string TMP_SUFFIX = '_tmp';
 
     /**
      * Name of the lock that a partial reindex holds while it uses the _tmp tables
      */
-    public const TMP_TABLE_LOCK = 'index_tmp_table';
+    public const string TMP_TABLE_LOCK = 'index_tmp_table';
 
     protected static bool $_holdsTmpTableLock = false;
 

@@ -13,13 +13,13 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
     /**
      * Types of template
      */
-    public const TYPE_TEXT = 1;
-    public const TYPE_HTML = 2;
+    public const int TYPE_TEXT = 1;
+    public const int TYPE_HTML = 2;
 
     /**
      * Default design area for emulation
      */
-    public const DEFAULT_DESIGN_AREA = Mage_Core_Model_App_Area::AREA_FRONTEND;
+    public const string DEFAULT_DESIGN_AREA = Mage_Core_Model_App_Area::AREA_FRONTEND;
 
     /**
      * Configuration of design package for template

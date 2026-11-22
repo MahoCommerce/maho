@@ -10,7 +10,7 @@
 
 abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Data\Collection\Db
 {
-    public const CACHE_TAG = 'COLLECTION_DATA';
+    public const string CACHE_TAG = 'COLLECTION_DATA';
 
     /**
      * Model name

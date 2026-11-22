@@ -124,7 +124,7 @@ use Maho\ApiPlatform\CrudResource;
 )]
 class WishlistItem extends CrudResource
 {
-    public const MODEL = 'wishlist/item';
+    public const string MODEL = 'wishlist/item';
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

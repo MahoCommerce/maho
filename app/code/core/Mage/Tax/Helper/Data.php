@@ -13,12 +13,12 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Price conversion constant for positive
      */
-    public const PRICE_CONVERSION_PLUS = 1;
+    public const int PRICE_CONVERSION_PLUS = 1;
 
     /**
      * Price conversion constant for negative
      */
-    public const PRICE_CONVERSION_MINUS = 2;
+    public const int PRICE_CONVERSION_MINUS = 2;
 
     #[\Override]
     protected $_moduleName = 'Mage_Tax';

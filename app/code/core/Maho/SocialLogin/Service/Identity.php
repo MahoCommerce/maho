@@ -13,14 +13,14 @@ declare(strict_types=1);
 
 class Maho_SocialLogin_Service_Identity
 {
-    public const SUPPORTED_PROVIDERS = ['google', 'apple', 'facebook'];
+    public const array SUPPORTED_PROVIDERS = ['google', 'apple', 'facebook'];
 
-    public const LOG_FILE = 'social_login.log';
+    public const string LOG_FILE = 'social_login.log';
 
     /** The storefront and the API share the limit of the token endpoint, and each sign-in attempt counts. */
-    public const XML_PATH_RATE_LIMIT = 'system/rate_limit/auth_token_ip';
+    public const string XML_PATH_RATE_LIMIT = 'system/rate_limit/auth_token_ip';
 
-    public const RATE_LIMIT_WINDOW = 60;
+    public const int RATE_LIMIT_WINDOW = 60;
 
     /** Whether the client has no sign-in attempt left. This reads the counter and changes nothing. */
     public function isRateLimited(int $storeId): bool

@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'admin/system/convert/profiles';
+    public const string ADMIN_RESOURCE = 'admin/system/convert/profiles';
 
     protected function _initProfile(string $idFieldName = 'id'): static|false
     {

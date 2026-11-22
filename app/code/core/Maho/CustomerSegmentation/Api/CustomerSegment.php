@@ -93,17 +93,17 @@ use Symfony\Component\ObjectMapper\Condition\TargetClass;
 #[Map(target: \Maho_CustomerSegmentation_Model_Segment::class)]
 class CustomerSegment extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = 'customer/customersegmentation';
+    public const string ADMIN_RESOURCE = 'customer/customersegmentation';
 
     /** The ACL resources that the segment admin pages check for each action. */
-    public const ACL_MANAGE = 'customer/customersegmentation/manage';
-    public const ACL_SAVE = 'customer/customersegmentation/save';
-    public const ACL_DELETE = 'customer/customersegmentation/delete';
-    public const ACL_REFRESH = 'customer/customersegmentation/refresh';
+    public const string ACL_MANAGE = 'customer/customersegmentation/manage';
+    public const string ACL_SAVE = 'customer/customersegmentation/save';
+    public const string ACL_DELETE = 'customer/customersegmentation/delete';
+    public const string ACL_REFRESH = 'customer/customersegmentation/refresh';
 
-    public const ROOT_CONDITIONS = 'customersegmentation/segment_condition_combine';
+    public const string ROOT_CONDITIONS = 'customersegmentation/segment_condition_combine';
 
-    private const TREE_SCHEMA = [
+    private const array TREE_SCHEMA = [
         'type' => 'object',
         'description' => 'Condition tree. A node has the keys type, attribute, operator, value, aggregator and conditions (the list of child nodes, never "children"), and the read-only key label. '
             . 'The root has the type customersegmentation/segment_condition_combine, the aggregator all or any, and the value true (the conditions are true) or false (they are false). '
@@ -122,7 +122,7 @@ class CustomerSegment extends \Maho\ApiPlatform\Resource
         ],
     ];
 
-    private const TREE_EXAMPLE = [
+    private const array TREE_EXAMPLE = [
         'type' => self::ROOT_CONDITIONS,
         'aggregator' => 'all',
         'value' => true,

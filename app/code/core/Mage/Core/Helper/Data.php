@@ -17,44 +17,44 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public const XML_PATH_DEFAULT_COUNTRY              = 'general/country/default';
-    public const XML_PATH_PROTECTED_FILE_EXTENSIONS    = 'general/file/protected_extensions';
-    public const XML_PATH_ENCRYPTION_MODEL             = 'global/helpers/core/encryption_model';
-    public const XML_PATH_DEV_ALLOW_IPS                = 'dev/restrict/allow_ips';
-    public const XML_PATH_CACHE_BETA_TYPES             = 'global/cache/betatypes';
-    public const XML_PATH_MIME_TYPES                   = 'global/mime/types';
+    public const string XML_PATH_DEFAULT_COUNTRY              = 'general/country/default';
+    public const string XML_PATH_PROTECTED_FILE_EXTENSIONS    = 'general/file/protected_extensions';
+    public const string XML_PATH_ENCRYPTION_MODEL             = 'global/helpers/core/encryption_model';
+    public const string XML_PATH_DEV_ALLOW_IPS                = 'dev/restrict/allow_ips';
+    public const string XML_PATH_CACHE_BETA_TYPES             = 'global/cache/betatypes';
+    public const string XML_PATH_MIME_TYPES                   = 'global/mime/types';
 
     /**
      * Extensions that stay protected when a saved general/file/protected_extensions value leaves them out.
      */
-    public const PROTECTED_FILE_EXTENSIONS_MINIMUM = [
+    public const array PROTECTED_FILE_EXTENSIONS_MINIMUM = [
         'php', 'php3', 'php4', 'php5', 'php7', 'php8', 'phtml', 'pht', 'phar', 'phps',
         'pl', 'py', 'cgi', 'sh', 'asp', 'aspx', 'jsp', 'htaccess', 'shtml',
     ];
 
     #[\Deprecated(message: 'only ipRateLimiter() uses it', since: '26.9')]
-    public const RATE_LIMIT_TIMEFRAME                  = 30;
+    public const int RATE_LIMIT_TIMEFRAME                  = 30;
 
-    public const CHARS_LOWERS                          = 'abcdefghijklmnopqrstuvwxyz';
-    public const CHARS_UPPERS                          = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    public const CHARS_DIGITS                          = '0123456789';
-    public const CHARS_SPECIALS                        = '!$*+-.=?@^_|~';
-    public const CHARS_PASSWORD_LOWERS                 = 'abcdefghjkmnpqrstuvwxyz';
-    public const CHARS_PASSWORD_UPPERS                 = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-    public const CHARS_PASSWORD_DIGITS                 = '23456789';
-    public const CHARS_PASSWORD_SPECIALS               = '!$*-.=?@_';
+    public const string CHARS_LOWERS                          = 'abcdefghijklmnopqrstuvwxyz';
+    public const string CHARS_UPPERS                          = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    public const string CHARS_DIGITS                          = '0123456789';
+    public const string CHARS_SPECIALS                        = '!$*+-.=?@^_|~';
+    public const string CHARS_PASSWORD_LOWERS                 = 'abcdefghjkmnpqrstuvwxyz';
+    public const string CHARS_PASSWORD_UPPERS                 = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    public const string CHARS_PASSWORD_DIGITS                 = '23456789';
+    public const string CHARS_PASSWORD_SPECIALS               = '!$*-.=?@_';
 
     /**
      * Config paths to merchant country code and merchant VAT number
      */
-    public const XML_PATH_MERCHANT_COUNTRY_CODE = 'general/store_information/merchant_country';
-    public const XML_PATH_MERCHANT_VAT_NUMBER = 'general/store_information/merchant_vat_number';
-    public const XML_PATH_EU_COUNTRIES_LIST = 'general/country/eu_countries';
+    public const string XML_PATH_MERCHANT_COUNTRY_CODE = 'general/store_information/merchant_country';
+    public const string XML_PATH_MERCHANT_VAT_NUMBER = 'general/store_information/merchant_vat_number';
+    public const string XML_PATH_EU_COUNTRIES_LIST = 'general/country/eu_countries';
 
     /**
      * Const for correct dividing decimal values
      */
-    public const DIVIDE_EPSILON = 10000;
+    public const int DIVIDE_EPSILON = 10000;
 
     #[\Override]
     protected $_moduleName = 'Mage_Core';
