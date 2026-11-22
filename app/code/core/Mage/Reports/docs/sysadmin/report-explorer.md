@@ -81,7 +81,7 @@ Maho adds two indexes for the Explorer:
 
 These are the times of a test store on PostgreSQL 18 with 1.2 million orders over two years
 (about 1,650 orders a day), 2.2 million order lines and 280,000 customer emails, on a laptop, with
-no cache:
+no cache, and with **Daily Totals from (days)** set to 7:
 
 | Report | Last 30 days | Last 12 months |
 |--------|--------------|----------------|
@@ -100,8 +100,10 @@ store of this size, keep the cache on, and use a read replica for long periods.
 ### Daily totals of the orders
 
 The table `report_order_daily` holds the totals of the orders for each local day, store view,
-order state, status, customer group, customer type and new or returning customer. An order report
-on a period of at least **Daily Totals from (days)** (7 by default) reads this table instead of
+order state, status, customer group, customer type and new or returning customer. The totals are
+off by default, so every report reads each order. Turn them on when the reports of a large store
+take seconds: set **Daily Totals from (days)** to the shortest period that reads them, for example
+7. Then an order report on a period of at least that number of days reads this table instead of
 each order, when it uses only these groupings and filters, and only metrics that add up. For
 example, **Sales overview** on the last 12 months reads about 365 rows for each combination of
 these fields, not every order. **Customers**, **First order**, **Last order**, a grouping such as
@@ -109,17 +111,21 @@ these fields, not every order. **Customers**, **First order**, **Last order**, a
 
 The numbers stay the same as the live numbers:
 
-- An order save marks its day as changed. Before a report reads the table, it calculates the
-  changed days of its period again from the orders.
-- The cron job `reports_update_daily_totals` runs every 5 minutes. It marks the days of the orders
-  whose last change is after its previous run, also when a script changed them without a save.
-- After an upgrade, the same cron job builds the history, 92 days at each run, newest first. A
-  period that starts before the built days reads each order until the history is complete.
+- An order save marks its day as changed.
+- Before a report reads the table, it marks the days of the orders whose `updated_at` is after the
+  previous check, so a script or an importer that changed an order without a save is included too.
+  Then it calculates the changed days of its period again from the orders.
+- After the totals are turned on, the cron job `reports_update_daily_totals` builds the history, 92
+  days at each run, newest first. It runs every 5 minutes. A period that starts before the built
+  days reads each order until the history is complete.
+- When the totals are turned off, the same cron job deletes them, because order saves no longer
+  mark their days. Turning them on again builds them anew.
 - A change of the default time zone starts the build again, because the days change.
 
 A new or returning customer depends on the earlier orders of the same email. When an old order
 changes its state to or from "new" or "pending payment", the days of the later orders of that email
-are not marked. Set **Daily Totals from (days)** to 0 to read each order always.
+are not marked. A script that changes an order without a save and without `updated_at` is not seen
+either. Set **Daily Totals from (days)** to 0 to read each order always.
 
 ## Cache
 

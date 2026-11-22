@@ -86,20 +86,16 @@ function explorerExpectSameResult(array $both): void
 beforeEach(function () {
     Mage::app()->getCacheInstance()->banUse(Mage_Reports_Model_Explorer_Runner::CACHE_TYPE);
     explorerDailyOrders();
+    // The totals are off by default
+    Mage::app()->getStore(Mage_Core_Model_App::ADMIN_STORE_ID)->setConfig(Mage_Reports_Model_Explorer_DailyTotals::XML_PATH_MIN_DAYS, '7');
     $this->daily = Mage::getSingleton('reports/explorer_dailyTotals');
     $this->daily->rebuild(EXPLORER_DAILY_FROM, EXPLORER_DAILY_TO);
-    $this->daily->saveState(['timezone' => Mage_Reports_Model_Explorer_Runner::timezone(), 'from' => EXPLORER_DAILY_FROM, 'complete' => false, 'checked_at' => null]);
+    $this->daily->saveState(['timezone' => Mage_Reports_Model_Explorer_Runner::timezone(), 'from' => EXPLORER_DAILY_FROM, 'complete' => false]);
 });
 
 afterEach(function () {
     // Another test must not read a table that holds only these days
-    $flag = Mage::getModel('core/flag', ['flag_code' => Mage_Reports_Model_Explorer_DailyTotals::FLAG_CODE])->loadSelf();
-    if ($flag->getId()) {
-        $flag->delete();
-    }
-    $adapter = ReportFixture::adapter();
-    $adapter->delete(ReportFixture::table('reports/order_daily'));
-    $adapter->delete(ReportFixture::table('reports/order_daily_change'));
+    Mage::getSingleton('reports/explorer_dailyTotals')->reset();
 });
 
 afterAll(function () {
@@ -165,4 +161,25 @@ it('builds a range with more rows than one insert of the database takes', functi
         ->where('day >= ?', EXPLORER_DAILY_FROM)->where('day <= ?', EXPLORER_DAILY_TO));
     expect($rows)->toBeGreaterThan(1);
     explorerExpectSameResult(explorerDailyBoth(explorerDailyRequest()));
+});
+
+it('calculates a day again after a script changes an order of that day without a save', function () {
+    $this->daily->markUpdatedOrders(new DateTimeImmutable('-1 minute', new DateTimeZone('UTC')));
+    ReportFixture::adapter()->update(
+        ReportFixture::table('sales/order'),
+        ['customer_group_id' => 2, 'updated_at' => Mage_Core_Model_Locale::nowUtc()],
+        ['entity_id = ?' => (int) explorerDailyOrders()['refunded']->getId()],
+    );
+
+    $both = explorerDailyBoth(explorerDailyRequest(['dimensions' => ['customer_group_id'], 'scope' => 'all']));
+    expect(array_column(array_column($both['live']['rows'], 'dimensions'), 'customer_group_id'))->toContain(2);
+    explorerExpectSameResult($both);
+});
+
+it('deletes the totals when they are turned off, so that turning them on builds them anew', function () {
+    Mage::app()->getStore(Mage_Core_Model_App::ADMIN_STORE_ID)->setConfig(Mage_Reports_Model_Explorer_DailyTotals::XML_PATH_MIN_DAYS, '0');
+    $this->daily->update(new DateTimeImmutable('now', new DateTimeZone('UTC')));
+
+    expect((int) ReportFixture::adapter()->fetchOne('SELECT COUNT(*) FROM ' . ReportFixture::table('reports/order_daily')))->toBe(0)
+        ->and($this->daily->state()['timezone'])->toBeNull();
 });

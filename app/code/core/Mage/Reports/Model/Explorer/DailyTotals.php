@@ -6,8 +6,9 @@
  * instead of every order.
  *
  * The explorer engine fills the table from the Orders dataset, so a total has the same rules as the live report. An
- * order save marks its day as changed, and a report calculates the changed days again before it reads the table. A
- * cron job builds the history after an upgrade, and marks the days of the orders that changed without a save.
+ * order save marks its day as changed. Before a report reads the table, it marks the days of the orders that a script
+ * changed without a save, and calculates the changed days again. A cron job builds the history after the totals are
+ * turned on, and deletes them when they are turned off.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -33,6 +34,8 @@ class Mage_Reports_Model_Explorer_DailyTotals
     public const string DATE_FIELD = 'created_at';
     public const string XML_PATH_MIN_DAYS = 'reports/explorer/daily_totals_min_days';
     public const string FLAG_CODE = 'report_order_daily';
+    /** The UTC time of the last check of the orders that changed, apart from the build state that only cron writes. */
+    public const string CHECK_FLAG_CODE = 'report_order_daily_checked';
     public const string LOCK = 'report_order_daily';
 
     /** The fields that a row of the table keeps. A report can group and filter by these only. */
@@ -88,6 +91,7 @@ class Mage_Reports_Model_Explorer_DailyTotals
             return null;
         }
 
+        $this->markUpdatedOrders($now);
         $bounds = array_filter([$plan->localBounds(), $plan->localBounds(true)]);
         $this->refresh(min(array_column($bounds, 0)), max(array_column($bounds, 1)));
         return new Planner()->plan($daily, $request, $now, $plan->timezone, $plan->firstDayOfWeek);
@@ -215,27 +219,20 @@ class Mage_Reports_Model_Explorer_DailyTotals
      */
     public function update(DateTimeImmutable $now): void
     {
+        $state = $this->state();
         if (self::minDays() === 0) {
+            // Order saves do not mark their days while the totals are off, so turning them on again builds them anew
+            if ($state['timezone'] !== null) {
+                $this->reset();
+            }
             return;
         }
-        $adapter = $this->adapter();
         $timezone = Mage_Reports_Model_Explorer_Runner::timezone();
-        $state = $this->state();
         if ($state['timezone'] !== $timezone) {
-            $adapter->delete($this->table());
-            $adapter->delete($this->changeTable());
-            $state = ['timezone' => $timezone, 'from' => null, 'complete' => false, 'checked_at' => null];
+            $this->reset();
+            $state = ['timezone' => $timezone, 'from' => null, 'complete' => false];
         }
-
-        $scanStart = $now->setTimezone(new DateTimeZone('UTC'))->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
-        if ($state['checked_at'] !== null) {
-            $orderTable = Mage::getSingleton('core/resource')->getTableName('sales/order');
-            $created = $adapter->fetchCol($adapter->select()->distinct()->from($orderTable, ['created_at'])->where('updated_at >= ?', $state['checked_at']));
-            foreach (array_unique(array_map(fn($date): string => $this->localDay((string) $date, $timezone), $created)) as $day) {
-                $adapter->insertOnDuplicate($this->changeTable(), ['day' => $day, 'changed_at' => $scanStart], ['changed_at']);
-            }
-        }
-        $state['checked_at'] = $scanStart;
+        $this->markUpdatedOrders($now);
 
         if (!$state['complete']) {
             $today = $now->setTimezone(new DateTimeZone($timezone))->format('Y-m-d');
@@ -253,10 +250,46 @@ class Mage_Reports_Model_Explorer_DailyTotals
     }
 
     /**
-     * The state of the build: the time zone of its days, the first day that it holds, whether it holds every day of
-     * the orders, and the UTC time of the last check of the changed orders.
+     * Mark the days of the orders whose last change is after the previous check, also when a script changed them
+     * without a save, as long as it set updated_at. The first check only records its time: the build reads the orders
+     * after it.
+     */
+    public function markUpdatedOrders(DateTimeImmutable $now): void
+    {
+        $flag = Mage::getModel('core/flag', ['flag_code' => self::CHECK_FLAG_CODE])->loadSelf();
+        $checkedAt = $flag->getFlagData();
+        $scanStart = $now->setTimezone(new DateTimeZone('UTC'))->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+        if (is_string($checkedAt)) {
+            $adapter = $this->adapter();
+            $timezone = Mage_Reports_Model_Explorer_Runner::timezone();
+            $orderTable = Mage::getSingleton('core/resource')->getTableName('sales/order');
+            $created = $adapter->fetchCol($adapter->select()->distinct()->from($orderTable, ['created_at'])->where('updated_at >= ?', $checkedAt));
+            foreach (array_unique(array_map(fn($date): string => $this->localDay((string) $date, $timezone), $created)) as $day) {
+                $adapter->insertOnDuplicate($this->changeTable(), ['day' => $day, 'changed_at' => $scanStart], ['changed_at']);
+            }
+        }
+        $flag->setFlagData($scanStart)->save();
+    }
+
+    /** Delete the totals, the changed days and the state, so that the next cron run builds them anew. */
+    public function reset(): void
+    {
+        $adapter = $this->adapter();
+        $adapter->delete($this->table());
+        $adapter->delete($this->changeTable());
+        foreach ([self::FLAG_CODE, self::CHECK_FLAG_CODE] as $code) {
+            $flag = Mage::getModel('core/flag', ['flag_code' => $code])->loadSelf();
+            if ($flag->getId()) {
+                $flag->delete();
+            }
+        }
+    }
+
+    /**
+     * The state of the build: the time zone of its days, the first day that it holds, and whether it holds every day
+     * of the orders.
      *
-     * @return array{timezone: ?string, from: ?string, complete: bool, checked_at: ?string}
+     * @return array{timezone: ?string, from: ?string, complete: bool}
      */
     public function state(): array
     {
@@ -266,17 +299,16 @@ class Mage_Reports_Model_Explorer_DailyTotals
             'timezone' => isset($data['timezone']) ? (string) $data['timezone'] : null,
             'from' => isset($data['from']) ? (string) $data['from'] : null,
             'complete' => (bool) ($data['complete'] ?? false),
-            'checked_at' => isset($data['checked_at']) ? (string) $data['checked_at'] : null,
         ];
     }
 
-    /** @param array{timezone: ?string, from: ?string, complete: bool, checked_at: ?string} $state */
+    /** @param array{timezone: ?string, from: ?string, complete: bool} $state */
     public function saveState(array $state): void
     {
         Mage::getModel('core/flag', ['flag_code' => self::FLAG_CODE])->loadSelf()->setFlagData($state)->save();
     }
 
-    /** @param array{timezone: ?string, from: ?string, complete: bool, checked_at: ?string} $state */
+    /** @param array{timezone: ?string, from: ?string, complete: bool} $state */
     private function covers(array $state, Plan $plan): bool
     {
         if ($state['complete']) {

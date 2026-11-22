@@ -265,7 +265,7 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment>An order report on a period of at least this number of days reads the daily totals of the orders instead of each order, when its metrics, groupings and filters allow it. The numbers are the same, and a long period reads far fewer rows. Enter "0" to read each order always.</comment>
+                            <comment>An order report on a period of at least this number of days reads the daily totals of the orders instead of each order, when its metrics, groupings and filters allow it. The numbers are the same, and a long period reads far fewer rows. "0" reads each order always. Enter a value, such as 7, when the reports of a store with many orders take seconds. Cron then builds the totals.</comment>
                         </daily_totals_min_days>
                         <email_hour translate="label comment">
                             <label>Hour of the Report Emails</label>
