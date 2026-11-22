@@ -19,33 +19,34 @@ class Mage_Sales_Model_Order_Invoice_Total_Discount extends Mage_Sales_Model_Ord
         $invoice->setDiscountAmount(0);
         $invoice->setBaseDiscountAmount(0);
 
-        $totalDiscountAmount     = 0;
-        $baseTotalDiscountAmount = 0;
-
         $order = $invoice->getOrder();
-        $addShippingDiscount = true;
+        $shippingDiscount = (float) $order->getShippingDiscountAmount();
         $baseShippingDiscount = (float) $order->getBaseShippingDiscountAmount();
-        $checkLegacyShippingDiscount = !$order->getShippingAmount() && (float) $order->getBaseShippingAmount() > 0.0;
+        $checkBaseShippingDiscount = !$order->getShippingAmount() && (float) $order->getBaseShippingAmount() > 0.0;
         foreach ($order->getInvoiceCollection() as $previousInvoice) {
             if ($previousInvoice->isCanceled()) {
                 continue;
             }
-            if ($previousInvoice->getShippingAmount() || $previousInvoice->getBaseShippingAmount()) {
-                $addShippingDiscount = false;
-                break;
-            }
-            // Older invoices could apply the base discount while omitting the shipping charge.
-            if ($checkLegacyShippingDiscount && $baseShippingDiscount > 0.0
-                && $this->hasLegacyBaseShippingDiscount($previousInvoice, $baseShippingDiscount)
+            $hasShipping = $previousInvoice->getShippingAmount() || $previousInvoice->getBaseShippingAmount();
+            // Base-only shipping and its discount can be on different invoices after an upgrade.
+            $discountOutsideItems = $checkBaseShippingDiscount && $baseShippingDiscount > 0.0
+                ? $this->getBaseDiscountOutsideItems($previousInvoice)
+                : null;
+            if ($hasShipping) {
+                $shippingDiscount = 0.0;
+                if ($discountOutsideItems !== 0.0) {
+                    $baseShippingDiscount = 0.0;
+                    break;
+                }
+            } elseif ($discountOutsideItems > 0.0
+                && $discountOutsideItems === round($baseShippingDiscount, 4)
             ) {
                 $baseShippingDiscount = 0.0;
             }
         }
 
-        if ($addShippingDiscount) {
-            $totalDiscountAmount     = $totalDiscountAmount + $order->getShippingDiscountAmount();
-            $baseTotalDiscountAmount = $baseTotalDiscountAmount + $baseShippingDiscount;
-        }
+        $totalDiscountAmount = $shippingDiscount;
+        $baseTotalDiscountAmount = $baseShippingDiscount;
 
         foreach ($invoice->getAllItems() as $item) {
             $orderItem = $item->getOrderItem();
@@ -92,17 +93,16 @@ class Mage_Sales_Model_Order_Invoice_Total_Discount extends Mage_Sales_Model_Ord
         return $this;
     }
 
-    private function hasLegacyBaseShippingDiscount(Mage_Sales_Model_Order_Invoice $invoice, float $baseShippingDiscount): bool
+    private function getBaseDiscountOutsideItems(Mage_Sales_Model_Order_Invoice $invoice): ?float
     {
         $items = $invoice->getAllItems();
         if ($items === []) {
-            return false;
+            return null;
         }
         $baseItemDiscounts = array_sum(array_map(
             static fn(Mage_Sales_Model_Order_Invoice_Item $item): float => (float) $item->getBaseDiscountAmount(),
             $items,
         ));
-        $remainder = round(-(float) $invoice->getBaseDiscountAmount() - $baseItemDiscounts, 4);
-        return $remainder > 0.0 && $remainder === round($baseShippingDiscount, 4);
+        return round(-(float) $invoice->getBaseDiscountAmount() - $baseItemDiscounts, 4);
     }
 }

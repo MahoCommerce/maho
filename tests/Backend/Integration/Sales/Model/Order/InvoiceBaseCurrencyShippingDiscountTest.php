@@ -17,6 +17,7 @@ it('invoices shipping and its discount once in each currency', function (
     bool $discountItems = false,
     bool $taxShipping = false,
     bool $legacyFirst = false,
+    bool $cancelFirstAfterSecond = false,
 ): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
@@ -125,7 +126,8 @@ it('invoices shipping and its discount once in each currency', function (
         $shippingOnSecondInvoice = $legacyFirst && !$cancelFirst;
         $invoices = [];
         if ($cancelFirst || $legacyFirst) {
-            if ($cancelFirst) {
+            $leaveFirstOpen = $cancelFirst || $cancelFirstAfterSecond;
+            if ($leaveFirstOpen) {
                 $order->getPayment()->setIsTransactionPending(true);
             }
             $first = $documents->prepareInvoice($order, [(int) $storedItems[0]->getId() => 1]);
@@ -136,7 +138,7 @@ it('invoices shipping and its discount once in each currency', function (
                     ->setBaseShippingAmount(0.0)->setBaseShippingInclTax(0.0);
             }
             $first->setRequestedCaptureCase(
-                $cancelFirst ? Mage_Sales_Model_Order_Invoice::NOT_CAPTURE : Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE,
+                $leaveFirstOpen ? Mage_Sales_Model_Order_Invoice::NOT_CAPTURE : Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE,
             )->register();
             Mage::getModel('core/resource_transaction')->addObject($first)->addObject($order)->save();
             if ($cancelFirst) {
@@ -153,9 +155,16 @@ it('invoices shipping and its discount once in each currency', function (
                 $invoices[] = $first;
             }
         }
-        foreach ($storedItems as $index => $item) {
+        $itemsToInvoice = $cancelFirstAfterSecond ? array_reverse($storedItems, true) : $storedItems;
+        foreach ($itemsToInvoice as $index => $item) {
             if ($shippingOnSecondInvoice && $index === 0) {
-                continue;
+                if (!$cancelFirstAfterSecond) {
+                    continue;
+                }
+                Mage::getModel('sales/order_invoice_api')->cancel($invoices[0]->getIncrementId());
+                $canceled = Mage::getModel('sales/order_invoice')->load((int) $invoices[0]->getId());
+                expect($canceled->isCanceled())->toBeTrue();
+                $order = Mage::getModel('sales/order')->load((int) $placed->getId());
             }
             $invoice = $documents->invoice(
                 $order,
@@ -168,6 +177,11 @@ it('invoices shipping and its discount once in each currency', function (
             $order = Mage::getModel('sales/order')->load((int) $placed->getId());
         }
         $baseItemTotal = 10.0 - $itemDiscount[1];
+        if ($cancelFirstAfterSecond) {
+            expect($amounts($invoices[2], 'shipping_amount'))->toBe([0.0, 0.0])
+                ->and($amounts($invoices[2], 'discount_amount'))->toBe($firstDocumentDiscount)
+                ->and($amounts($invoices[2], 'grand_total')[1])->toBe(round($baseItemTotal - $shippingDiscount, 2));
+        }
         $shippingAmounts = $amounts($order, 'shipping_amount');
         $firstShipping = $shippingOnSecondInvoice ? [0.0, 0.0] : $shippingAmounts;
         $secondShipping = $shippingOnSecondInvoice ? $shippingAmounts : [0.0, 0.0];
@@ -213,6 +227,7 @@ it('invoices shipping and its discount once in each currency', function (
     'replacement for a canceled invoice with base currency shipping' => [0.004, 1.0, true, true],
     'base currency shipping after an older invoice that already discounted it' => [0.004, 1.0, false, true, false, true],
     'base currency shipping after a canceled older invoice' => [0.004, 1.0, true, true, false, true],
+    'replacement for an older invoice canceled after base currency shipping was invoiced' => [0.004, 1.0, false, true, false, true, true],
     'shipping tax stored only in the base currency' => [0.004, 1.0, false, false, true],
     'replacement for a canceled invoice' => [0.004, 5.0, true],
     'ordinary shipping discount in both currencies' => [1.0, 5.0],
