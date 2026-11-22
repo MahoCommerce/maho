@@ -56,21 +56,21 @@ it('quotes the actual package weights for decimal quantities', function (
     bool $divisible,
     ?float $increment,
     array $expected,
-    int $maxWeight = 70,
+    float $maxWeight = 70,
 ): void {
     $request = decimalPackageRequest($weight, $qty, $divisible, $increment);
     $carrier = new class ($maxWeight) extends Mage_Shipping_Model_Carrier_Abstract {
         /** @var ArrayObject<int, float> */
         public ArrayObject $weights;
 
-        public function __construct(private readonly int $maxWeight)
+        public function __construct(private readonly float $maxWeight)
         {
             parent::__construct();
             $this->weights = new ArrayObject();
         }
 
         #[\Override]
-        public function getConfigData($field): int
+        public function getConfigData($field): float|int
         {
             return match ($field) {
                 'shipment_requesttype' => 1,
@@ -123,6 +123,7 @@ it('quotes the actual package weights for decimal quantities', function (
 })->with([
     ...$decimalPackageCases,
     'no package weight limit' => [8.0, 1.5, true, null, [12.0], 0],
+    'decimal package limit with no remainder' => [140.8, 1.75, true, null, array_fill(0, 11, 22.4), 22.4],
 ]);
 
 it('writes the actual package weights into the DHL quote XML', function (

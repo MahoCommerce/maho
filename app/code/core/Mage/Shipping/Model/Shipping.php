@@ -185,28 +185,28 @@ class Mage_Shipping_Model_Shipping
         $packageRequest = clone $request;
         foreach ($packages as $weight => $packageCount) {
             $packageRequest->setPackageWeight($weight);
-            $quote = (clone $carrier)->collectRates($packageRequest);
-            if ($quote instanceof Mage_Shipping_Model_Rate_Result_Error) {
-                $quote = Mage::getModel('shipping/rate_result')->append($quote);
+            $packageResult = (clone $carrier)->collectRates($packageRequest);
+            if ($packageResult instanceof Mage_Shipping_Model_Rate_Result_Error) {
+                $packageResult = Mage::getModel('shipping/rate_result')->append($packageResult);
             }
-            if (!$quote instanceof Mage_Shipping_Model_Rate_Result) {
+            if (!$packageResult instanceof Mage_Shipping_Model_Rate_Result) {
                 return null;
             }
             if ($singlePackage && $packageCount === 1) {
-                $quote->updateRatePrice(1);
-                return $quote;
+                $packageResult->updateRatePrice(1);
+                return $packageResult;
             }
 
-            if ($quote->getError()) {
+            if ($packageResult->getError()) {
                 $result->setError(true);
             }
-            foreach ($quote->getAllRates() as $rate) {
+            foreach ($packageResult->getAllRates() as $rate) {
                 if ($rate instanceof Mage_Shipping_Model_Rate_Result_Error) {
                     $errors[serialize([$rate->getCarrier(), $rate->getErrorMessage()])] ??= $rate;
                 }
             }
 
-            $packageRates = $this->pricePackageMethods($quote, $packageCount);
+            $packageRates = $this->pricePackageMethods($packageResult, $packageCount);
             if ($rates === null) {
                 $rates = $packageRates;
                 continue;
@@ -230,12 +230,12 @@ class Mage_Shipping_Model_Shipping
     }
 
     /** @return array<string, Mage_Shipping_Model_Rate_Result_Method> */
-    private function pricePackageMethods(Mage_Shipping_Model_Rate_Result $quote, int $packageCount): array
+    private function pricePackageMethods(Mage_Shipping_Model_Rate_Result $packageResult, int $packageCount): array
     {
-        $methods = clone $quote;
+        $methods = clone $packageResult;
         $methods->reset();
         $unitCosts = [];
-        foreach ($quote->getAllRates() as $rate) {
+        foreach ($packageResult->getAllRates() as $rate) {
             if ($rate instanceof Mage_Shipping_Model_Rate_Result_Method && $rate->getPrice() !== null) {
                 $code = serialize([$rate->getCarrier(), $rate->getMethod()]);
                 $unitCosts[$code] = $rate->getCost();
@@ -253,6 +253,7 @@ class Mage_Shipping_Model_Shipping
             $unitCost = $unitCosts[$code] ?? null;
             $quotedCost = $rate->getCost();
             $cost = is_numeric($quotedCost) ? (float) $quotedCost : null;
+            // A result class can override updateRatePrice() to scale the cost, so scale it here only when it did not
             if ($cost !== null && is_numeric($unitCost) && $cost === (float) $unitCost) {
                 $cost *= $packageCount;
             }
@@ -311,8 +312,8 @@ class Mage_Shipping_Model_Shipping
                         if ($maxWeight > 0 && $itemWeight > $maxWeight) {
                             $qtyItem = floor($itemWeight / $maxWeight);
                             $decimalItems[] = ['weight' => $maxWeight, 'qty' => $qtyItem];
-                            $weightItem = $itemWeight - $qtyItem * $maxWeight;
-                            if ($weightItem > $itemWeight * PHP_FLOAT_EPSILON) {
+                            $weightItem = round($itemWeight - $qtyItem * $maxWeight, 4);
+                            if ($weightItem > 0) {
                                 $decimalItems[] = ['weight' => $weightItem, 'qty' => 1];
                             }
                             $checkWeight = false;
