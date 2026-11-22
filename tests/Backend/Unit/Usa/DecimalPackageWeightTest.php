@@ -19,8 +19,22 @@ function decimalPackageRequest(
     bool $divisible,
     ?float $increment,
     array $extraWeights = [],
+    ?float $bundleQty = null,
 ): Mage_Shipping_Model_Rate_Request {
-    $items = [decimalPackageItem($weight, $qty, $divisible, $increment)];
+    $item = decimalPackageItem($weight, $qty, $divisible, $increment);
+    $items = [$item];
+    if ($bundleQty !== null) {
+        $parent = new Mage_Sales_Model_Quote_Item([
+            'product' => new Mage_Catalog_Model_Product()
+                ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_BUNDLE)
+                ->setShipmentType(Mage_Catalog_Model_Product_Type_Abstract::SHIPMENT_SEPARATELY),
+            'product_type' => Mage_Catalog_Model_Product_Type::TYPE_BUNDLE,
+            'qty' => $bundleQty,
+            'weight' => $weight * $qty,
+        ]);
+        $item->setParentItem($parent);
+        $items = [$parent, $item];
+    }
     foreach ($extraWeights as $extraWeight) {
         $items[] = new Mage_Sales_Model_Quote_Item([
             'product' => new Mage_Catalog_Model_Product()->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE),
@@ -31,7 +45,7 @@ function decimalPackageRequest(
     }
     return new Mage_Shipping_Model_Rate_Request()
         ->setAllItems($items)
-        ->setPackageWeight($weight * $qty + array_sum($extraWeights));
+        ->setPackageWeight($weight * $item->getTotalQty() + array_sum($extraWeights));
 }
 
 function decimalPackageItem(float $weight, float $qty, bool $divisible, ?float $increment): Mage_Sales_Model_Quote_Item
@@ -76,8 +90,9 @@ it('quotes the actual package weights for decimal quantities', function (
     array $expected,
     float $maxWeight = 70,
     array $extraWeights = [],
+    ?float $bundleQty = null,
 ): void {
-    $request = decimalPackageRequest($weight, $qty, $divisible, $increment, $extraWeights);
+    $request = decimalPackageRequest($weight, $qty, $divisible, $increment, $extraWeights, $bundleQty);
     $carrier = new PackageCarrierStub(
         fn(float $packageWeight) => new Mage_Shipping_Model_Rate_Result()->append(
             new Mage_Shipping_Model_Rate_Result_Method(['method' => 'test', 'price' => $packageWeight]),
@@ -103,19 +118,30 @@ it('quotes the actual package weights for decimal quantities', function (
     'indivisible decimal quantity at the limit' => [0.1, 3.0, false, null, [0.3], 0.3],
     'two quantity increments at the limit' => [0.1, 6.0, true, 3.0, [0.3, 0.3], 0.3],
     'a weightless line with quantity increments ships with a weighted item' => [0.0, 1.5, true, 0.5, [6.0], 70, [6.0]],
+    'bundle selection increments include the selected quantity and the bundle quantity' => [8.0, 1.5, true, 0.5, [20.0, 4.0], 20, [], 2.0],
+    'bundle selection quantities can reach a whole increment across bundles' => [8.0, 0.75, true, 0.5, [12.0], 70, [], 2.0],
+    'bundle selection quantities outside the product increment keep their weight' => [8.0, 0.67, true, 0.5, [10.72], 70, [], 2.0],
 ]);
 
-it('leaves items that really exceed the carrier limit unsplit', function (bool $divisible, ?float $increment): void {
-    $request = decimalPackageRequest(0.1001, 3.0, $divisible, $increment);
-    $carrier = new PackageCarrierStub(fn() => new Mage_Shipping_Model_Rate_Result(), maxWeight: 0.3);
+it('leaves items that really exceed the carrier limit unsplit', function (
+    float $weight,
+    float $qty,
+    bool $divisible,
+    ?float $increment,
+    float $maxWeight,
+    ?float $bundleQty = null,
+): void {
+    $request = decimalPackageRequest($weight, $qty, $divisible, $increment, bundleQty: $bundleQty);
+    $carrier = new PackageCarrierStub(fn() => new Mage_Shipping_Model_Rate_Result(), $maxWeight);
     $shipping = new ShippingStub(['test' => $carrier]);
 
     expect($shipping->composePackagesForCarrier($carrier, $request))->toBe([]);
     $shipping->collectCarrierRates('test', $request);
     expect($carrier->getRequestedWeights())->toBe([$request->getPackageWeight()]);
 })->with([
-    'indivisible decimal quantity' => [false, null],
-    'divisible decimal quantity with an increment' => [true, 3.0],
+    'indivisible decimal quantity' => [0.1001, 3.0, false, null, 0.3],
+    'divisible decimal quantity with an increment' => [0.1001, 3.0, true, 3.0, 0.3],
+    'bundle selection increment above the carrier limit' => [50.0, 1.5, true, 1.5, 70.0, 2.0],
 ]);
 
 it('quotes real package weights and charges once for each package at the carrier limit', function (
@@ -168,8 +194,9 @@ it('writes the actual package weights into the DHL quote XML', function (
     string $originCountry = 'IT',
     string $expectedUnit = 'KG',
     array $extraWeights = [],
+    ?float $bundleQty = null,
 ): void {
-    $request = decimalPackageRequest($weight, $qty, $divisible, $increment, $extraWeights)
+    $request = decimalPackageRequest($weight, $qty, $divisible, $increment, $extraWeights, $bundleQty)
         ->setOrigCountryId($originCountry)
         ->setOrigCity('Rome')
         ->setOrigPostcode('00100')
@@ -230,4 +257,8 @@ it('writes the actual package weights into the DHL quote XML', function (
     'one hundred lines fill one package' => [0.7, 1.0, true, null, [70.0], 'K', 'IT', 'KG', array_fill(0, 99, 0.7)],
     'one thousand lines fill one package' => [0.07, 1.0, true, null, [70.0], 'K', 'IT', 'KG', array_fill(0, 999, 0.07)],
     'a weightless line with quantity increments ships with a weighted item' => [0.0, 1.5, true, 0.5, [6.0], 'K', 'IT', 'KG', [6.0]],
+    'bundle selection increments include the selected quantity and the bundle quantity' => [8.0, 1.5, true, 0.5, [24.0], 'K', 'IT', 'KG', [], 2.0],
+    'bundle selection quantities can reach a whole increment across bundles' => [8.0, 0.75, true, 0.5, [12.0], 'K', 'IT', 'KG', [], 2.0],
+    'bundle selection quantities outside the product increment keep their weight' => [8.0, 0.67, true, 0.5, [10.72], 'K', 'IT', 'KG', [], 2.0],
+    'a bundle selection increment above the carrier limit uses the whole request' => [50.0, 1.5, true, 1.5, [150.0], 'K', 'IT', 'KG', [], 2.0],
 ]);

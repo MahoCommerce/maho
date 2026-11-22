@@ -285,9 +285,17 @@ class Mage_Shipping_Model_Shipping
             if ($item->getIsQtyDecimal() && $item->getProductType() != Mage_Catalog_Model_Product_Type::TYPE_BUNDLE) {
                 $stockItem = $item->getProduct()->getStockItem();
                 if ($stockItem->getIsDecimalDivided()) {
-                    if ($stockItem->getEnableQtyIncrements() && ($qtyIncrement = $stockItem->getQtyIncrements())) {
+                    $qtyIncrement = $stockItem->getEnableQtyIncrements() ? $stockItem->getQtyIncrements() : false;
+                    $parent = $item->getParentItem();
+                    $orderedQty = $parent ? $item->getTotalQty() : $qty;
+                    $incrementCount = $qtyIncrement ? $orderedQty / $qtyIncrement : 0.0;
+                    $wholeIncrements = round($incrementCount);
+                    // Bundle selections can be ordered outside the product's quantity increments.
+                    if ($qtyIncrement && (!$parent
+                        || abs($incrementCount - $wholeIncrements) <= 2 * PHP_FLOAT_EPSILON * abs($incrementCount))
+                    ) {
                         $itemWeight *= $qtyIncrement;
-                        $qty        = round($qty / $qtyIncrement);
+                        $qty        = $wholeIncrements;
                         $changeQty  = false;
                     } else {
                         $itemWeight = $itemWeight * $item->getQty();
