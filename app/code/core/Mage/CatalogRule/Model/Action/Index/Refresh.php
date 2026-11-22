@@ -357,7 +357,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
         $table = $this->_resource->getTable('catalogrule/rule_product_price');
         $websiteId = (int) $website->getId();
         $dates = $this->_getRuleDates($time);
-        [$civilStarts, $civilEnds] = $this->getCivilRuleBounds($dates);
+        [$civilStarts, $civilEnds] = $this->getCivilRuleBounds($dates, $website);
 
         $statement = $this->_connection->query(
             $this->_connection->select()
@@ -450,9 +450,15 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
      * @param array<string, int> $dates
      * @return array{array<string, array<int, int>>, array<string, array<int, int>>}
      */
-    private function getCivilRuleBounds(array $dates): array
+    private function getCivilRuleBounds(array $dates, Mage_Core_Model_Website $website): array
     {
-        $locale = $this->_app->getLocale();
+        $timezonePath = Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE;
+        $utc = Mage_Core_Model_Locale::DEFAULT_TIMEZONE;
+        // Also recognize rows written before the site timezone was used.
+        $timezones = array_unique([
+            $website->getConfig($timezonePath) ?: $utc,
+            $this->_app->getStore(Mage_Core_Model_App::ADMIN_STORE_ID)->getConfig($timezonePath) ?: $utc,
+        ]);
         $days = [];
         foreach ($dates as $timestamp) {
             foreach ([-86400, 0, 86400] as $offset) {
@@ -460,18 +466,21 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
             }
         }
 
-        $utc = new DateTimeZone(Mage_Core_Model_Locale::DEFAULT_TIMEZONE);
+        $utcZone = new DateTimeZone($utc);
+        $zones = array_map(static fn(string $timezone): DateTimeZone => new DateTimeZone($timezone), $timezones);
         $starts = $ends = [];
         foreach (array_keys($days) as $date) {
-            $start = $locale->storeToUtc(null, $date)->getTimestamp();
-            $end = $locale->storeToUtc(null, $date . ' 23:59:59')->getTimestamp();
-            $midnight = new DateTimeImmutable($date, $utc)->getTimestamp();
+            $midnight = new DateTimeImmutable($date, $utcZone)->getTimestamp();
             $endOfDay = $midnight + 86399;
-            if ($start !== $midnight) {
-                $starts[$date][$start] = $midnight;
-            }
-            if ($end !== 0 && $end !== $endOfDay) {
-                $ends[$date][$end] = $endOfDay;
+            foreach ($zones as $zone) {
+                $start = new DateTimeImmutable($date, $zone)->getTimestamp();
+                $end = new DateTimeImmutable($date . ' 23:59:59', $zone)->getTimestamp();
+                if ($start !== $midnight) {
+                    $starts[$date][$start] = $midnight;
+                }
+                if ($end !== 0 && $end !== $endOfDay) {
+                    $ends[$date][$end] = $endOfDay;
+                }
             }
         }
 
