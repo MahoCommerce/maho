@@ -489,6 +489,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
         $calc = $this->_calculator;
         $request->setProductClassId($item->getProduct()->getTaxClassId());
         $rate = $calc->getRate($request);
+        $rateKey = (string) $rate;
         $qty = $item->getTotalQty();
 
         $price = $this->_calculator->round($item->getCalculationPriceOriginal());
@@ -515,9 +516,9 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
                     $baseTaxable = $baseSubtotal;
                 }
                 $rowTaxExact     = $calc->calcTaxAmount($taxable, $rate, true, false);
-                $rowTax          = $this->_deltaRound($rowTaxExact, $rate, true);
+                $rowTax          = $this->_deltaRound($rowTaxExact, $rateKey, true);
                 $baseRowTaxExact = $calc->calcTaxAmount($baseTaxable, $rate, true, false);
-                $baseRowTax      = $this->_deltaRound($baseRowTaxExact, $rate, true, 'base');
+                $baseRowTax      = $this->_deltaRound($baseRowTaxExact, $rateKey, true, 'base');
 
                 $taxPrice        = $price;
                 $baseTaxPrice    = $basePrice;
@@ -564,9 +565,9 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
                 $taxSubtotal     = $taxPrice * $qty;
                 $baseTaxSubtotal = $baseTaxPrice * $qty;
                 $rowTax
-                    = $this->_deltaRound($calc->calcTaxAmount($taxable, $rate, true, false), $rate, true);
+                    = $this->_deltaRound($calc->calcTaxAmount($taxable, $rate, true, false), $rateKey, true);
                 $baseRowTax
-                    = $this->_deltaRound($calc->calcTaxAmount($baseTaxable, $rate, true, false), $rate, true, 'base');
+                    = $this->_deltaRound($calc->calcTaxAmount($baseTaxable, $rate, true, false), $rateKey, true, 'base');
                 $subtotal = $taxSubtotal - $rowTax;
                 $baseSubtotal = $baseTaxSubtotal - $baseRowTax;
                 $isPriceInclTax  = true;
@@ -681,22 +682,16 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
     /**
      * Round price based on previous rounding operation delta
      *
-     * @param float $price
-     * @param string $rate
-     * @param bool $direction
-     * @param string $type
-     *
-     * @return float
+     * $rateKey is the tax rate as a string, or the ID of the applied rates.
      */
-    protected function _deltaRound($price, $rate, $direction, $type = 'regular')
+    protected function _deltaRound(float $price, string $rateKey, bool $direction, string $type = 'regular'): float
     {
         if ($price) {
-            $rate = (string) $rate;
             $type = $type . $direction;
             // initialize the delta to a small number to avoid non-deterministic behavior with rounding of 0.5
-            $delta = $this->_roundingDeltas[$type][$rate] ?? 0.000001;
+            $delta = $this->_roundingDeltas[$type][$rateKey] ?? 0.000001;
             $price += $delta;
-            $this->_roundingDeltas[$type][$rate] = $price - $this->_calculator->round($price);
+            $this->_roundingDeltas[$type][$rateKey] = $price - $this->_calculator->round($price);
             $price = $this->_calculator->round($price);
         }
         return $price;
