@@ -162,9 +162,9 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
      */
     public function addItem($type, $name, $params = null, $cond = null, $referenceName = '*', $before = false)
     {
-        // Layout XML skips a parameter with an empty element, which arrives as an object, not as ''
-        $params = $params === null || (string) $params === '' ? null : (string) $params;
-        $cond = $cond === null || (string) $cond === '' ? null : (string) $cond;
+        // An empty element in layout XML skips a parameter. It arrives as an object, not as ''
+        $params = (string) $params ?: null;
+        $cond = (string) $cond ?: null;
 
         if ($type === 'skin_css' && empty($params)) {
             $params = 'media="all"';
