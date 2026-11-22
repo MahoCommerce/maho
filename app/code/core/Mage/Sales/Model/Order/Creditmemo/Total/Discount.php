@@ -220,6 +220,14 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         if ($total <= 0.0) {
             return null;
         }
+        if (array_all(
+            $invoiced,
+            static fn(array $amount, int $id): bool
+            => round($refunded[$id]['net'] ?? 0.0, 4) >= $amount['net']
+            && round($refunded[$id]['qty'] ?? 0.0, 4) >= round($amount['qty'], 4),
+        )) {
+            return round($discount - $used, 4);
+        }
         $store = $memo->getStore();
         $lineDiscounts = $this->getWholeUnitDiscounts($order, $store, $invoiced, $total, $discount);
         $net = $target = $capacity = 0.0;

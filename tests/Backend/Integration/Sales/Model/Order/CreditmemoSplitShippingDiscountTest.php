@@ -267,6 +267,75 @@ it('limits online refunds to each invoice in a recognized split shipping pair', 
     'explicitly requested shipping on an ordinary order' => 'ordinary port',
 ]);
 
+it('completes the shipping discount when the last items are returned together', function (): void {
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $connection->beginTransaction();
+    try {
+        [$order, $items, $invoices] = createSplitShippingRefundOrder(
+            ['shipping' => 1000.0, 'large' => 0.06, 'small' => 0.02],
+            0.00004,
+            1.0,
+            0.02,
+            ['shipping' => 2, 'small' => 3],
+        );
+        $documents = Mage::getService('sales/order_document');
+        $large = ['qtys' => [(int) $items['large']->getId() => 1]];
+        $shipping = ['qtys' => [(int) $items['shipping']->getId() => 1]];
+        $small = ['qtys' => [(int) $items['small']->getId() => 3]];
+        $old = $documents->refund($order, $large, invoice: $invoices['discount'], beforeRegister: static function ($memo): void {
+            $memo->setBaseDiscountAmount(-0.03)->setBaseGrandTotal(0.03);
+        });
+        $port = $documents->refund($order, $shipping, invoice: $invoices['shipping']);
+        expect($old->getBaseGrandTotal())->toBe(0.03)->and($port->getBaseGrandTotal())->toBe(501.0);
+
+        $group = $documents->refund($order, $small, invoice: $invoices['discount']);
+        $group->load($group->getId());
+        expect($group->getBaseGrandTotal())->toBe(0.01)->and($group->getBaseDiscountAmount())->toBe(-0.05);
+        $last = $documents->refund($order, $shipping, invoice: $invoices['shipping']);
+        expect($last->getBaseGrandTotal())->toBe(500.0);
+        $order = Mage::getModel('sales/order')->load($order->getId());
+        expect($order->getBaseTotalRefunded())->toBe(1001.04)
+            ->and($order->getBaseDiscountRefunded())->toBe($order->getBaseDiscountAmount());
+        $source = Mage::getModel('sales/order_invoice')->load($invoices['discount']->getId());
+        expect($source->getBaseTotalRefunded())->toBe($source->getBaseGrandTotal());
+    } finally {
+        $connection->rollBack();
+    }
+});
+
+it('does not refund a final item when the historical refund already covered the invoice', function (): void {
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $connection->beginTransaction();
+    try {
+        [$order, $items, $invoices] = createSplitShippingRefundOrder(
+            ['shipping' => 1000.0, 'large' => 0.04, 'small' => 0.02],
+            0.00004,
+            1.0,
+            0.01,
+        );
+        $documents = Mage::getService('sales/order_document');
+        $source = $invoices['discount'];
+        $documents->refund(
+            $order,
+            ['qtys' => [(int) $items['large']->getId() => 1]],
+            invoice: $source,
+            beforeRegister: static function ($memo): void {
+                $memo->setBaseDiscountAmount(-0.02)->setBaseGrandTotal(0.02);
+            },
+        );
+        $source->load($source->getId());
+        expect($source->getBaseTotalRefunded())->toBe($source->getBaseGrandTotal());
+        $small = ['qtys' => [(int) $items['small']->getId() => 1]];
+        expect(fn() => $documents->refund($order, $small, invoice: $source))
+            ->toThrow(Mage_Core_Exception::class, 'Credit memo total must be greater than zero');
+        $order = Mage::getModel('sales/order')->load($order->getId());
+        expect($order->getCreditmemosCollection()->getSize())->toBe(1)
+            ->and($order->getBaseTotalRefunded())->toBe(0.02);
+    } finally {
+        $connection->rollBack();
+    }
+});
+
 it('uses the order shipping discount after the other invoice was already over-refunded', function (bool $refundShippingOffline): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
