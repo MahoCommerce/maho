@@ -49,16 +49,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         return $this->_isLive;
     }
 
-    /**
-     * Prepare report summary
-     *
-     * @param string $range
-     * @param mixed $customStart
-     * @param mixed $customEnd
-     * @param int $isFilter
-     * @return $this
-     */
-    public function prepareSummary($range, $customStart, $customEnd, $isFilter = 0)
+    public function prepareSummary(?string $range, ?DateTime $customStart, ?DateTime $customEnd, int $isFilter = 0): static
     {
         $this->checkIsLive($range);
         if ($this->_isLive) {
@@ -104,16 +95,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         return $this->_salesAmountExpression;
     }
 
-    /**
-     * Prepare report summary from live data
-     *
-     * @param string $range
-     * @param mixed $customStart
-     * @param mixed $customEnd
-     * @param int $isFilter
-     * @return $this
-     */
-    protected function _prepareSummaryLive($range, $customStart, $customEnd, $isFilter = 0)
+    protected function _prepareSummaryLive(?string $range, ?DateTime $customStart, ?DateTime $customEnd, int $isFilter = 0): static
     {
         $this->setMainTable('sales/order');
         $adapter = $this->getConnection();
@@ -165,15 +147,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         return $this;
     }
 
-    /**
-     * Prepare report summary from aggregated data
-     *
-     * @param string $range
-     * @param mixed $customStart
-     * @param mixed $customEnd
-     * @return $this
-     */
-    protected function _prepareSummaryAggregated($range, $customStart, $customEnd)
+    protected function _prepareSummaryAggregated(?string $range, ?DateTime $customStart, ?DateTime $customEnd): static
     {
         $this->setMainTable('sales/order_aggregated_created');
         /**
@@ -282,15 +256,9 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
     }
 
     /**
-     * Calculate From and To dates (or times) by given period
-     *
-     * @param string $range
-     * @param string $customStart
-     * @param string $customEnd
-     * @param bool $returnObjects
      * @return ($returnObjects is true ? array{0: DateTime, 1: DateTime} : array{from: DateTime, to: DateTime, datetime: true})
      */
-    public function getDateRange($range, $customStart, $customEnd, $returnObjects = false)
+    public function getDateRange(?string $range, ?DateTime $customStart, ?DateTime $customEnd, bool $returnObjects = false): array
     {
         $baseDate = Mage::app()->getLocale()->utcToStore();
         $dateStart = DateTime::createFromImmutable($baseDate);
@@ -818,15 +786,9 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         return $this;
     }
 
-    /**
-     * Add period filter by created_at attribute
-     *
-     * @param string $period
-     * @return $this
-     */
-    public function addCreateAtPeriodFilter($period)
+    public function addCreateAtPeriodFilter(?string $period): static
     {
-        [$from, $to] = $this->getDateRange($period, 0, 0, true);
+        [$from, $to] = $this->getDateRange($period, null, null, true);
 
         $this->checkIsLive($period);
 

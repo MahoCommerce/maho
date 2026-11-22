@@ -7,18 +7,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Cache/Grid.php
 
 		-
-			rawMessage: 'Parameter #1 $entityId of method Mage_Catalog_Model_Resource_Abstract::getAttributeRawValue() expects int, string given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Widget/Chooser.php
-
-		-
-			rawMessage: 'Property Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales::$_collection (Mage_Sales_Model_Resource_Sale_Collection) does not accept Maho\Data\Collection\Db.'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Sales.php
-
-		-
 			rawMessage: Access to an undefined property Mage_Adminhtml_Block_Notification_Window::$_aclResourcePath.
 			identifier: property.notFound
 			count: 1
@@ -53,12 +41,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Report/Refresh/Statistics/Grid.php
-
-		-
-			rawMessage: 'Parameter #1 $statusCode of method Mage_Tag_Model_Resource_Popular_Collection::addStatusFilter() expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Tag/Popular/Grid.php
 
 		-
 			rawMessage: 'Parameter #1 $entityType of method Mage_Eav_Model_Config::getEntityAttributeCodes() expects Mage_Eav_Model_Entity_Type, string given.'
@@ -193,12 +175,6 @@ parameters:
 			path: app/code/core/Mage/Bundle/Model/Resource/Option/Collection.php
 
 		-
-			rawMessage: 'Property Mage_Catalog_Block_Product_List_Toolbar::$_collection (Mage_Core_Model_Resource_Db_Collection_Abstract) does not accept Maho\Data\Collection.'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/List/Toolbar.php
-
-		-
 			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getPriceHtml() expects int|string|null, Mage_Catalog_Model_Product given.'
 			identifier: argument.type
 			count: 1
@@ -209,12 +185,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Product/View/Attributes.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Core_Block_Html_Select::addOption() expects string, int|null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/View/Options/Type/Select.php
 
 		-
 			rawMessage: Invalid array key type array.
@@ -233,30 +203,6 @@ parameters:
 			identifier: method.childParameterType
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Seo/Sitemap/Product.php
-
-		-
-			rawMessage: 'Parameter #1 $entityId of method Mage_Catalog_Model_Resource_Abstract::getAttributeRawValue() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Widget/Link.php
-
-		-
-			rawMessage: 'Parameter #1 $productId of method Mage_Catalog_Helper_Product::getFullProductUrl() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Widget/Link.php
-
-		-
-			rawMessage: 'Parameter #2 $categoryId of method Mage_Catalog_Helper_Product::getFullProductUrl() expects int|null, string|null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Widget/Link.php
-
-		-
-			rawMessage: 'Parameter #1 $categoryId of method Mage_Catalog_Helper_Data::_isCategoryLink() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Helper/Data.php
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Catalog_Model_Product_Option_Type_Default::setConfigurationItemOption() expects Maho\DataObject|null, Mage_Catalog_Model_Product_Configuration_Item_Option_Interface given.'
@@ -287,48 +233,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Layer.php
-
-		-
-			rawMessage: 'Parameter #2 $filterBlock (Maho\DataObject) of method Mage_Catalog_Model_Layer_Filter_Attribute::apply() should be compatible with parameter $filterBlock (null) of method Mage_Catalog_Model_Layer_Filter_Abstract::apply()'
-			identifier: method.childParameterType
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Layer/Filter/Attribute.php
-
-		-
-			rawMessage: 'Parameter #1 $range of method Mage_Catalog_Model_Layer_Filter_Decimal::_renderItemLabel() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Layer/Filter/Decimal.php
-
-		-
-			rawMessage: 'Parameter #2 $filterBlock (Mage_Catalog_Block_Layer_Filter_Decimal) of method Mage_Catalog_Model_Layer_Filter_Decimal::apply() should be compatible with parameter $filterBlock (null) of method Mage_Catalog_Model_Layer_Filter_Abstract::apply()'
-			identifier: method.childParameterType
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Layer/Filter/Decimal.php
-
-		-
-			rawMessage: 'Parameter #2 $filterBlock of method Mage_Catalog_Model_Layer_Filter_Abstract::apply() expects null, Mage_Catalog_Block_Layer_Filter_Decimal given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Layer/Filter/Decimal.php
-
-		-
-			rawMessage: 'Parameter #2 $range of method Mage_Catalog_Model_Resource_Layer_Filter_Decimal::applyFilterToCollection() expects float, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Layer/Filter/Decimal.php
-
-		-
-			rawMessage: 'Parameter #2 $value of method Mage_Catalog_Model_Layer_Filter_Decimal::_renderItemLabel() expects float, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Layer/Filter/Decimal.php
-
-		-
-			rawMessage: 'Parameter #3 $index of method Mage_Catalog_Model_Resource_Layer_Filter_Decimal::applyFilterToCollection() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Layer/Filter/Decimal.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Product::getPriceModel() should return Mage_Bundle_Model_Product_Price but returns Mage_Catalog_Model_Product_Type_Price.'
@@ -403,18 +307,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Status.php
 
 		-
-			rawMessage: 'Parameter #2 $attributeSetId of method Mage_Eav_Model_Entity_Setup::getDefaultAttributeGroupId() expects int|null, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/data/catalog_setup/data-install-1.6.0.0.php
-
-		-
-			rawMessage: 'Parameter #2 $setId of method Mage_Eav_Model_Entity_Setup::getAttributeGroupId() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/data/catalog_setup/data-install-1.6.0.0.php
-
-		-
 			rawMessage: 'Parameter #8 $productId of method Mage_Catalog_Model_Product_Type_Price::calculatePrice() expects int|null, array given.'
 			identifier: argument.type
 			count: 1
@@ -425,12 +317,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/CatalogIndex/Model/Resource/Setup.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Core_Block_Html_Select::addOption() expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Block/Adminhtml/Form/Field/Customergroup.php
 
 		-
 			rawMessage: 'Parameter #1 $products of method Mage_CatalogInventory_Model_Resource_Stock_Item_Collection::addProductsFilter() expects array<Mage_Catalog_Model_Product>, Mage_Catalog_Model_Resource_Product_Collection given.'
@@ -445,25 +331,13 @@ parameters:
 			path: app/code/core/Mage/CatalogRule/Model/Observer.php
 
 		-
-			rawMessage: 'Property Mage_CatalogSearch_Helper_Data::$_engine (Mage_CatalogSearch_Model_Resource_Fulltext_Engine) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract.'
+			rawMessage: 'Property Mage_CatalogSearch_Helper_Data::$_engine (Mage_CatalogSearch_Model_Resource_Fulltext_Engine|null) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract.'
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/CatalogSearch/Helper/Data.php
 
 		-
 			rawMessage: 'Parameter #1 $product of method Mage_Catalog_Model_Product_Type_Abstract::getSearchableData() expects Mage_Catalog_Model_Product|null, Maho\DataObject given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Model/Resource/Fulltext.php
-
-		-
-			rawMessage: 'Parameter #1 $typeId of method Mage_CatalogSearch_Model_Resource_Fulltext::_getProductTypeInstance() expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Model/Resource/Fulltext.php
-
-		-
-			rawMessage: 'Parameter #2 $typeId of method Mage_CatalogSearch_Model_Resource_Fulltext::_getProductChildrenIds() expects int, string given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/CatalogSearch/Model/Resource/Fulltext.php
@@ -485,12 +359,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Core/Model/Abstract.php
-
-		-
-			rawMessage: 'Parameter #1 $group of method Mage_Core_Model_App::_getStoreByGroup() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/App.php
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Core_Model_Email_Template::setId() expects int, string given.'
@@ -517,22 +385,10 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Db/Collection/Abstract.php
 
 		-
-			rawMessage: 'Property Mage_Core_Model_Resource_Setup::$_resourceConfig (Mage_Core_Model_Config_Element) does not accept SimpleXMLElement.'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Setup.php
-
-		-
 			rawMessage: 'Parameter #2 $scope of method Mage_Core_Model_Translate::_addData() expects string, false given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Core/Model/Translate.php
-
-		-
-			rawMessage: 'Parameter #2 $value of method Mage_Core_Model_Resource_Setup::setConfigData() expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/sql/core_setup/upgrade-1.6.0.7-1.6.0.8.php
 
 		-
 			rawMessage: 'Return type (string) of method Mage_Customer_Block_Newsletter::getAction() should be compatible with return type (Mage_Core_Controller_Varien_Action) of method Mage_Core_Block_Abstract::getAction()'
@@ -565,18 +421,6 @@ parameters:
 			path: app/code/core/Mage/Customer/controllers/AccountController.php
 
 		-
-			rawMessage: 'Parameter #2 $code of class Exception constructor expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Downloadable/Model/Link/Api/Uploader.php
-
-		-
-			rawMessage: 'Property Mage_Eav_Model_Attribute_Data_Abstract::$_attribite (Mage_Eav_Model_Attribute) does not accept Mage_Eav_Model_Entity_Attribute_Abstract.'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Attribute/Data/Abstract.php
-
-		-
 			rawMessage: 'Parameter #2 $string of function explode expects string, array given.'
 			identifier: argument.type
 			count: 1
@@ -590,12 +434,6 @@ parameters:
 
 		-
 			rawMessage: 'Property Mage_Eav_Model_Entity_Attribute_Abstract::$_backend (Mage_Eav_Model_Entity_Attribute_Backend_Abstract|null) does not accept Mage_Core_Model_Abstract.'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
-
-		-
-			rawMessage: 'Property Mage_Eav_Model_Entity_Attribute_Abstract::$_entity (Mage_Eav_Model_Entity_Abstract) does not accept Mage_Eav_Model_Entity_Type.'
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
@@ -641,18 +479,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Collection/Abstract.php
-
-		-
-			rawMessage: 'Parameter #1 $code of method Mage_Eav_Model_Entity_Setup::updateEntityType() expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Setup.php
-
-		-
-			rawMessage: 'Parameter #3 $value of method Mage_Eav_Model_Entity_Setup::updateEntityType() expects string|null, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Setup.php
 
 		-
 			rawMessage: 'Parameter #1 $attribute of static method Mage_Eav_Model_Attribute_Data::factory() expects Mage_Eav_Model_Attribute, Mage_Eav_Model_Entity_Attribute given.'
@@ -751,36 +577,6 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Report.php
 
 		-
-			rawMessage: 'Parameter #2 $customStart of method Mage_Reports_Model_Resource_Order_Collection::getDateRange() expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Order/Collection.php
-
-		-
-			rawMessage: 'Parameter #3 $customEnd of method Mage_Reports_Model_Resource_Order_Collection::getDateRange() expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Order/Collection.php
-
-		-
-			rawMessage: 'Parameter #1 $entityId of method Mage_Reports_Model_Resource_Product_Collection::setProductEntityId() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Product/Collection.php
-
-		-
-			rawMessage: 'Parameter #1 $from of method Mage_Reports_Model_Resource_Product_Ordered_Collection::_joinFields() expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Product/Ordered/Collection.php
-
-		-
-			rawMessage: 'Parameter #2 $to of method Mage_Reports_Model_Resource_Product_Ordered_Collection::_joinFields() expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Product/Ordered/Collection.php
-
-		-
 			rawMessage: 'Return type (string) of method Mage_Review_Block_Form::getAction() should be compatible with return type (Mage_Core_Controller_Varien_Action) of method Mage_Core_Block_Abstract::getAction()'
 			identifier: method.childReturnType
 			count: 1
@@ -823,12 +619,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Order/Payment/Transaction.php
 
 		-
-			rawMessage: 'Parameter #1 $txnId of method Mage_Sales_Model_Order_Payment_Transaction::_beforeLoadByTxnId() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Payment/Transaction.php
-
-		-
 			rawMessage: 'Parameter #1 $item of method Mage_Sales_Model_Quote::addItem() expects Mage_Sales_Model_Quote_Item, Mage_Sales_Model_Quote_Item_Abstract given.'
 			identifier: argument.type
 			count: 1
@@ -851,12 +641,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Resource/Order/Tax/Collection.php
-
-		-
-			rawMessage: 'Property Mage_Shipping_Model_Carrier_Abstract::$_numBoxes (int) does not accept float.'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Carrier/Abstract.php
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Shipping_Model_Rate_Result_Method::setCost() expects float|null, string given.'
@@ -915,12 +699,6 @@ parameters:
 		-
 			rawMessage: 'Parameter #1 $request of method Mage_Tax_Model_Resource_Calculation::getCalculationProcess() expects Maho\DataObject, null given.'
 			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Calculation.php
-
-		-
-			rawMessage: 'Property Mage_Tax_Model_Calculation::$_defaultCustomerTaxClass (string) does not accept int.'
-			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Tax/Model/Calculation.php
 
