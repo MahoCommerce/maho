@@ -146,8 +146,13 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                     continue;
                 }
                 if (!$memo->getInvoiceId()) {
-                    // An order-level refund cannot be assigned to one invoice.
-                    return $this->getSignedItemTaxLeft($creditmemo, null);
+                    // An order-level refund of items or their tax cannot be assigned to one invoice.
+                    if ((float) $memo->getTaxAmount() !== (float) $memo->getShippingTaxAmount()
+                        || (float) $memo->getBaseTaxAmount() !== (float) $memo->getBaseShippingTaxAmount()
+                        || array_any($memo->getAllItems(), static fn($item): bool => $item->getQty() > 0)) {
+                        return $this->getSignedItemTaxLeft($creditmemo, null);
+                    }
+                    continue;
                 }
                 if ($memo->getInvoiceId() != $invoice->getId()) {
                     continue;

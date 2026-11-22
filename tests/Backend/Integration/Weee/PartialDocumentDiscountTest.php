@@ -616,7 +616,7 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
     'gross discounts on taxable fees after a partial invoice' => [[[0, 1], [2]], false, false, true, true],
 ]);
 
-it('refunds the signed item tax charged on each invoice of a historic order', function (bool $reverse): void {
+it('refunds the signed item tax charged on each invoice of a historic order', function (bool $reverse, ?string $unlinkedRefund = null, array $expectedRefunds = [0.18, 0.20]): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
     try {
@@ -656,15 +656,28 @@ it('refunds the signed item tax charged on each invoice of a historic order', fu
             $invoices[$index] = (int) $invoice->getId();
             expect(Mage::getModel('sales/order_invoice')->load($invoice->getId())->getBaseGrandTotal())->toBe([0.18, 0.20][$index]);
         }
+        if ($unlinkedRefund === 'adjustment') {
+            $order = Mage::getModel('sales/order')->load($orderId);
+            $memo = $service->refund($order, ['qtys' => [], 'adjustment_positive' => 0.01], offlineRefund: true, sendEmail: false);
+            expect($memo->getInvoiceId())->toBeNull()->and($memo->getAllItems())->toBeEmpty()
+                ->and($memo->getBaseGrandTotal())->toBe(0.01);
+        }
         foreach ($reverse ? array_reverse($groups, true) : $groups as $index => $group) {
             $refunded = 0.0;
             foreach ($reverse ? array_reverse($group) : $group as $id) {
                 $order = Mage::getModel('sales/order')->load($orderId);
                 $invoice = Mage::getModel('sales/order_invoice')->load($invoices[$index]);
-                $memo = $service->refund($order, ['qtys' => [$id => 1]], invoice: $invoice, sendEmail: false);
+                $data = ['qtys' => [$id => 1]];
+                if ($unlinkedRefund === 'adjustment' && $id === $groups[0][0]) {
+                    $data['adjustment_negative'] = 0.01;
+                }
+                if ($unlinkedRefund === 'item' && $index === 1) {
+                    $invoice = null;
+                }
+                $memo = $service->refund($order, $data, invoice: $invoice, sendEmail: false);
                 $refunded += Mage::getModel('sales/order_creditmemo')->load($memo->getId())->getBaseGrandTotal();
             }
-            expect(round($refunded, 2))->toBe([0.18, 0.20][$index]);
+            expect(round($refunded, 2))->toBe($expectedRefunds[$index]);
         }
         $order = Mage::getModel('sales/order')->load($orderId);
         expect($order->getBaseTotalPaid())->toBe(0.38)->and($order->getBaseTotalRefunded())->toBe(0.38);
@@ -672,7 +685,12 @@ it('refunds the signed item tax charged on each invoice of a historic order', fu
         $connection->rollBack();
         resetCurrencyState();
     }
-})->with([false, true]);
+})->with([
+    'invoice order' => [false],
+    'reverse invoice order' => [true],
+    'order adjustment before invoice refunds' => [true, 'adjustment', [0.17, 0.20]],
+    'order item refund before invoice refunds' => [true, 'item', [0.25, 0.13]],
+]);
 
 function partialFptProduct(
     Mage_Core_Model_Store $store,
