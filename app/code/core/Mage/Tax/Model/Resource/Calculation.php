@@ -12,35 +12,35 @@
  * @phpstan-type TaxRateRow array{
  *     code: string,
  *     title: string,
- *     position: int|string,
- *     priority: int|string,
- *     value?: float|string,
- *     percent?: float|string,
- *     tax_calculation_rule_id?: int|string,
- *     process?: int|string,
- *     calculate_subtotal?: bool|int|string,
- *     hidden?: bool|int|string,
- *     amount?: float|string,
- *     base_amount?: float|string,
- *     base_real_amount?: float|string,
+ *     position: int,
+ *     priority: int,
+ *     value?: string,
+ *     percent?: string,
+ *     tax_calculation_rule_id?: int,
+ *     process?: int,
+ *     calculate_subtotal?: int,
+ *     hidden?: int,
+ *     amount?: string,
+ *     base_amount?: string,
+ *     base_real_amount?: string,
  *     ...
  * }
  * @phpstan-type AppliedRate array{
  *     code: string,
  *     title: string,
  *     percent: float,
- *     position: int|string,
- *     priority: int|string,
- *     rule_id?: int|string,
+ *     position: int,
+ *     priority: int,
+ *     rule_id?: int,
  * }
  * @phpstan-type CalculationStep array{
  *     rates: list<AppliedRate>,
  *     percent: float,
  *     id: string,
- *     hidden?: bool|int|string,
- *     amount?: float|string,
- *     base_amount?: float|string,
- *     base_real_amount?: float|string,
+ *     hidden?: int,
+ *     amount?: string,
+ *     base_amount?: string,
+ *     base_real_amount?: string,
  * }
  */
 class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Abstract
