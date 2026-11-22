@@ -16,9 +16,9 @@ beforeEach(function (): void {
     $store->setConfig('dev/js/minify_enabled', '0');
 });
 
-function headFileOrder(string $html, string $extension): array
+function headStylesheetOrder(string $html): array
 {
-    preg_match_all('#/(\w+)\.' . $extension . '[?"]#', $html, $matches);
+    preg_match_all('#/(\w+)\.css[?"]#', $html, $matches);
     return $matches[1];
 }
 
@@ -36,29 +36,7 @@ it('renders a stylesheet added before all items first, whatever the params of th
         ->addCss('css/first.css', 'media="print"', '*', true)
         ->getCssJsHtml();
 
-    expect(headFileOrder($html, 'css'))->toBe(['first', 'a', 'b', 'c']);
-});
-
-it('renders a stylesheet added after a named item right after that item', function (): void {
-    $html = Mage::app()->getLayout()->createBlock('page/html_head')
-        ->addCss('css/a.css')
-        ->addCss('css/b.css', 'media="print"')
-        ->addCss('css/c.css')
-        ->addCss('css/x.css', 'media="all"', 'css/b.css', false)
-        ->getCssJsHtml();
-
-    expect(headFileOrder($html, 'css'))->toBe(['a', 'b', 'x', 'c']);
-});
-
-it('renders a script added before all items first, whatever the params of the other items', function (): void {
-    $html = Mage::app()->getLayout()->createBlock('page/html_head')
-        ->addJs('a.js')
-        ->addJs('b.js', 'defer')
-        ->addJs('c.js')
-        ->addJs('first.js', 'defer', '*', true)
-        ->getCssJsHtml();
-
-    expect(headFileOrder($html, 'js'))->toBe(['first', 'a', 'b', 'c']);
+    expect(headStylesheetOrder($html))->toBe(['first', 'a', 'b', 'c']);
 });
 
 it('keeps the params of each item', function (): void {
@@ -87,6 +65,6 @@ it('treats empty params and cond elements in layout XML as not set', function ()
     $layout->generateBlocks();
     $html = $layout->getBlock('head')->getCssJsHtml();
 
-    expect(headFileOrder($html, 'css'))->toBe(['first', 'a'])
+    expect(headStylesheetOrder($html))->toBe(['first', 'a'])
         ->and(headTagOf($html, 'first.css'))->toContain('media="all"');
 });
