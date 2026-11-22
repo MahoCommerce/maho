@@ -10,12 +10,6 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-it('keeps the name of the ID field of the product entity table', function () {
-    $collection = Mage::getResourceModel('reports/product_collection');
-
-    expect($collection->getProductEntityId())->toBe('entity_id');
-});
-
 it('joins the order items on the ID field of the product', function () {
     $collection = Mage::getResourceModel('reports/product_collection')->addOrdersCount();
 

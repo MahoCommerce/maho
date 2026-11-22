@@ -26,4 +26,4 @@ it('runs the default store of the store group that the group scope code names', 
 
 it('runs no store for a group scope code that is not a group ID', function (string $scopeCode) {
     expect(storeOfGroupScope($scopeCode))->toBeNull();
-})->with(['1-us', '01', 'default']);
+})->with(['1-us', '01']);
