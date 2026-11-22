@@ -20,6 +20,8 @@ uses(Tests\MahoBackendTestCase::class);
  */
 
 const EXPLORER_COHORT_EMAILS = ['cohort-a@example.test', 'cohort-b@example.test'];
+// Its first order is late on a winter evening in Rome, and its next order in summer
+const EXPLORER_COHORT_NIGHT_EMAIL = 'cohort-night@example.test';
 
 function explorerCohortOrders(): void
 {
@@ -34,6 +36,8 @@ function explorerCohortOrders(): void
         ['2003-01-15 12:00:00', EXPLORER_COHORT_EMAILS[0], 'GBP'],
         ['2003-03-10 12:00:00', EXPLORER_COHORT_EMAILS[0], null],
         ['2003-03-20 12:00:00', EXPLORER_COHORT_EMAILS[1], null],
+        ['2003-01-31 22:30:00', EXPLORER_COHORT_NIGHT_EMAIL, null],
+        ['2003-06-15 12:00:00', EXPLORER_COHORT_NIGHT_EMAIL, null],
     ] as [$createdAt, $email, $currency]) {
         $order = ReportFixture::placeOrder($product, 1, $createdAt);
         ReportFixture::adapter()->update(
@@ -182,4 +186,26 @@ it('leaves the cohort groupings out of the explanation of a change, and keeps ne
 
     expect($codes)->toContain('customer_kind')
         ->and(array_intersect($codes, ['first_order_month', 'months_since_first_order', 'first_order_week', 'weeks_since_first_order']))->toBe([]);
+});
+
+it('puts a first order in its local month with the clock of its own season, also when the period has another one', function () {
+    $admin = Mage::app()->getStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+    $timezone = $admin->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
+    $admin->setConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE, 'Europe/Rome');
+    try {
+        $rows = Mage::getService('reports/explorer')->run(Request::fromArray([
+            'dataset' => 'sales_orders',
+            'metrics' => ['orders'],
+            'dimensions' => ['first_order_month', 'months_since_first_order'],
+            'from' => '2003-06-01',
+            'to' => '2003-06-30',
+            'scope' => 'all',
+            'filters' => [['field' => 'customer_email', 'operator' => 'eq', 'value' => EXPLORER_COHORT_NIGHT_EMAIL]],
+        ]), Mage_Reports_Model_Explorer_Access::full())['rows'];
+
+        // 22:30 UTC on 31 January is 23:30 in Rome in winter, and 00:30 on 1 February with the summer clock of June
+        expect(array_column($rows, 'dimensions'))->toBe([['first_order_month' => '2003-01', 'months_since_first_order' => 5]]);
+    } finally {
+        $admin->setConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE, (string) $timezone);
+    }
 });

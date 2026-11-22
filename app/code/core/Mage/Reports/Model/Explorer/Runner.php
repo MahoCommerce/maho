@@ -328,13 +328,22 @@ class Mage_Reports_Model_Explorer_Runner
             Mage_Core_Model_App::ADMIN_STORE_ID,
             true,
         );
+        // The clock changes of every year since 2000, for a date that a report reads outside its period
+        $localTimeOfAnyDate = static fn(string $column): string => (string) $resource->getStoreTZOffsetQuery(
+            $plan->dataset->table,
+            $column,
+            '2000-01-01 00:00:00',
+            $now->format('Y-m-d H:i:s'),
+            Mage_Core_Model_App::ADMIN_STORE_ID,
+            true,
+        );
 
         $settings = [];
         foreach (['dead_stock_days', 'abandoned_after_hours', 'recent_cart_hours'] as $key) {
             $settings[$key] = max(1, (int) Mage::getStoreConfig(self::XML_PATH . $key));
         }
 
-        return new Context($adapter, $localTime, $now, $plan->timezone, $plan->firstDayOfWeek, null, null, $settings, $plan->dateField?->code, $plan->request->storeIds);
+        return new Context($adapter, $localTime, $now, $plan->timezone, $plan->firstDayOfWeek, null, null, $settings, $plan->dateField?->code, $plan->request->storeIds, $localTimeOfAnyDate);
     }
 
     /**

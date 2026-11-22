@@ -88,8 +88,8 @@ no cache, and with **Daily Totals from (days)** set to 7:
 | Sales overview | 0.14 s (daily totals) | 0.07 s (daily totals) |
 | New and returning customers | under 0.1 s (daily totals) | 0.03 s (daily totals) |
 | Product performance | 1.7 s | 3.3 s |
-| Customer cohorts (12 months) | | 5.9 s |
-| Weekly customer cohorts (90 days) | 5.9 s | |
+| Customer cohorts (12 months) | | 6.9 s |
+| Weekly customer cohorts (90 days) | 6.3 s | |
 | Explain the change on Sales overview | 2.6 s | 4.9 s |
 
 A report that cannot read the daily totals reads every record of its period, so its time grows

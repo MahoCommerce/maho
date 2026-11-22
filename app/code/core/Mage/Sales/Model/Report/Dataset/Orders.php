@@ -107,7 +107,7 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
             },
             'first_order.customer_email = main.customer_email',
         ));
-        $firstOrder = static fn(Context $context): string => $context->localTime('first_order.first_at');
+        $firstOrder = static fn(Context $context): string => $context->localTimeOfAnyDate('first_order.first_at');
         $monthNumber = static fn(string $date): string => '(' . $adapter->getDateExtractSql($date, AdapterInterface::INTERVAL_YEAR)
             . ' * 12 + ' . $adapter->getDateExtractSql($date, AdapterInterface::INTERVAL_MONTH) . ')';
         // The first day of the week of a local date, as days after the reference day of the period grouping by week

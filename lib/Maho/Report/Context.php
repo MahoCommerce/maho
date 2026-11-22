@@ -24,6 +24,8 @@ final class Context
      * @param array<string, mixed> $settings values from the configuration, such as the days of dead stock
      * @param string|null $dateField the code of the date field of the request, for a derived join that filters on it
      * @param list<int>|null $storeIds the store views of the request, for a derived join that reads data of a store
+     * @param (\Closure(string): string)|null $localTimeOfAnyDate like $localTime, for a date that can be outside the
+     *                                                           queried range, such as the first order of a customer
      */
     public function __construct(
         public readonly AdapterInterface $adapter,
@@ -36,16 +38,24 @@ final class Context
         public readonly array $settings = [],
         public readonly ?string $dateField = null,
         public readonly ?array $storeIds = null,
+        private readonly ?\Closure $localTimeOfAnyDate = null,
     ) {}
 
+    /** The local time of a column whose dates are in the queried range. It knows the clock changes of that range only. */
     public function localTime(string $column): string
     {
         return ($this->localTime)($column);
     }
 
+    /** The local time of a column whose dates can be in any year, with the clock changes of every year. */
+    public function localTimeOfAnyDate(string $column): string
+    {
+        return ($this->localTimeOfAnyDate ?? $this->localTime)($column);
+    }
+
     public function withRange(?string $utcFrom, ?string $utcTo): self
     {
-        return new self($this->adapter, $this->localTime, $this->now, $this->timezone, $this->firstDayOfWeek, $utcFrom, $utcTo, $this->settings, $this->dateField, $this->storeIds);
+        return new self($this->adapter, $this->localTime, $this->now, $this->timezone, $this->firstDayOfWeek, $utcFrom, $utcTo, $this->settings, $this->dateField, $this->storeIds, $this->localTimeOfAnyDate);
     }
 
     public function setting(string $key, mixed $default = null): mixed
