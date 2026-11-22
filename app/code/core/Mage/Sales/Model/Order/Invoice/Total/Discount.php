@@ -95,17 +95,4 @@ class Mage_Sales_Model_Order_Invoice_Total_Discount extends Mage_Sales_Model_Ord
         $invoice->setBaseGrandTotal($invoice->getBaseGrandTotal() - $baseTotalDiscountAmount);
         return $this;
     }
-
-    private function getBaseDiscountOutsideItems(Mage_Sales_Model_Order_Invoice $invoice): ?float
-    {
-        $items = $invoice->getAllItems();
-        if ($items === []) {
-            return null;
-        }
-        $baseItemDiscounts = array_sum(array_map(
-            static fn(Mage_Sales_Model_Order_Invoice_Item $item): float => (float) $item->getBaseDiscountAmount(),
-            $items,
-        ));
-        return round(-(float) $invoice->getBaseDiscountAmount() - $baseItemDiscounts, 4);
-    }
 }
