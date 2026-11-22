@@ -48,7 +48,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset_Order_Statuses extends Ma
     protected function _getFieldHtml(\Maho\Data\Form\Element\AbstractElement $fieldset, string $id, ?string $status): string
     {
         $configData = $this->getConfigData();
-        $path = 'sales/order_statuses/status_' . $id; //TODO: move as property of form
+        $path = 'sales/order_statuses/status_' . $id;
         $data = $configData[$path] ?? [];
 
         $e = $this->_getDummyElement();

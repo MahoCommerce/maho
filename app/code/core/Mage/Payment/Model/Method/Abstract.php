@@ -124,7 +124,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
     protected $_canCreateBillingAgreement   = false;
 
     /**
-     * TODO: whether a captured transaction may be voided by this gateway
+     * Whether a captured transaction may be voided by this gateway
      * This may happen when amount is captured, but not settled
      * @var bool
      */
@@ -631,8 +631,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
 
     /**
      * Check whether payment method can be used
-     *
-     * TODO: payment method instance is not supposed to know about quote
      *
      * @param Mage_Sales_Model_Quote|null $quote
      *

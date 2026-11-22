@@ -18,8 +18,6 @@ class Element extends SimpleXMLElement
      *
      * If SimpleXMLElement would support complicated attributes
      *
-     * @todo make use of spl_object_hash to keep global array of simplexml elements
-     *       to emulate complicated attributes
      * @var Element
      */
     protected $_parent = null;
@@ -75,9 +73,6 @@ class Element extends SimpleXMLElement
     /**
      * Find a descendant of a node by path
      *
-     * @todo    Do we need to make it xpath look-a-like?
-     * @todo    Check if we still need all this and revert to plain XPath if this makes any sense
-     * @todo    param string $path Subset of xpath. Example: "child/grand[@attrName='attrValue']/subGrand"
      * @param   array|string $path Example: "child/grand@attrName=attrValue/subGrand" (to make it faster without regex)
      * @return  Element|false
      */

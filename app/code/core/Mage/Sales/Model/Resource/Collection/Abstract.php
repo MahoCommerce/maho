@@ -126,8 +126,6 @@ abstract class Mage_Sales_Model_Resource_Collection_Abstract extends Mage_Core_M
     /**
      * Backward compatibility with EAV collection
      *
-     * @todo implement join functionality if necessary
-     *
      * @param string $alias
      * @param string $attribute
      * @param string $bind

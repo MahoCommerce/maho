@@ -599,26 +599,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         }
 
         if (!empty($products)) {
-            /*
-             * @TODO ACPAOC: Use product collection here, but ensure that product
-             * is loaded with order store id, otherwise there'll be problems with isSalable()
-             * for configurables, bundles and other composites
-             *
-             */
-            /*
-            $productsCollection = Mage::getModel('catalog/product')->getCollection()
-                ->setStoreId($this->getStoreId())
-                ->addIdFilter($products)
-                ->addAttributeToSelect('status')
-                ->load();
-
-            foreach ($productsCollection as $product) {
-                if (!$product->isSalable()) {
-                    return false;
-                }
-            }
-            */
-
             foreach ($products as $productId) {
                 $product = Mage::getModel('catalog/product')
                     ->setStoreId($this->getStoreId())

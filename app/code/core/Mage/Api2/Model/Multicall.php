@@ -118,10 +118,8 @@ class Mage_Api2_Model_Multicall
             $internalResponse = Mage::getModel('api2/response');
             $server->internalCall($internalRequest, $internalResponse);
         } catch (Exception $e) {
-            // TODO: implement strict mode
             Mage::logException($e);
             $this->_getResponse()->setException($e);
-            // TODO: Refactor partial success idintification process
             $this->_getResponse()->setHttpResponseCode(Mage_Api2_Model_Server::HTTP_CREATED);
         }
 
@@ -227,7 +225,6 @@ class Mage_Api2_Model_Multicall
     {
         if ($response->isException()) {
             $errors = $response->getException();
-            // @TODO: add subresource prefix to error messages
             foreach ($errors as $error) {
                 $this->_getResponse()->setException($error);
             }

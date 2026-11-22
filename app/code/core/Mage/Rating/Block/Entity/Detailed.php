@@ -39,7 +39,7 @@ class Mage_Rating_Block_Entity_Detailed extends Mage_Core_Block_Template
 
         $ratingCollection = Mage::getModel('rating/rating')
             ->getResourceCollection()
-            ->addEntityFilter('product') # @todo TOFIX
+            ->addEntityFilter('product')
             ->setPositionOrder()
             ->setStoreFilter(Mage::app()->getStore()->getId())
             ->addRatingPerStoreName(Mage::app()->getStore()->getId())

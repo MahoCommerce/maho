@@ -624,9 +624,6 @@ class Mage_Core_Model_App
             return $this;
         }
 
-        /**
-         * @todo check XML_PATH_STORE_IN_URL
-         */
         if (!isset($_GET['___store'])) {
             return $this;
         }

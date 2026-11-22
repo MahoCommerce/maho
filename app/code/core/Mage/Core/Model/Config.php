@@ -1168,7 +1168,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      *
      * If $moduleName is specified retrieves specific value for the module.
      *
-     * @todo get global dir config
      * @param string $type
      * @return string
      * @throws Mage_Core_Exception

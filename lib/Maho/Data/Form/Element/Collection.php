@@ -110,7 +110,6 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
     /**
      * Add element to collection
      *
-     * @todo get it straight with $after
      * @param string|false $after
      * @return AbstractElement
      */
