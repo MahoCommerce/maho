@@ -561,11 +561,25 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
         if ($cartFixedAllocation !== null) {
             [$budget, $baseBudget] = $this->getCartFixedBudget($rule, $address);
             $store = $quote->getStore();
-            $discountAmount = max(0.0, min($store->roundPrice($discountAmount), $cartFixedAllocation['capacity'], $budget));
-            $baseDiscountAmount = max(0.0, min($store->roundPrice($baseDiscountAmount), $cartFixedAllocation['base_capacity'], $baseBudget));
+            $itemDiscount = $item->getDiscountAmount();
+            $itemBaseDiscount = $item->getBaseDiscountAmount();
+            $capacity = $cartFixedAllocation['capacity'];
+            $baseCapacity = $cartFixedAllocation['base_capacity'];
+            [$rowTotal, $baseRowTotal] = $this->getCartFixedRowTotals($item);
+            // An observer can consume part of the line capacity by changing the item itself.
+            if ($itemDiscount !== $previousDiscountAmount) {
+                $itemDiscount = min($itemDiscount, $rowTotal ?? $itemPrice * $totalQty);
+                $capacity = $this->cartFixedCapacity($store, $itemPrice, $totalQty, $qty, (float) $itemDiscount, $rowTotal);
+            }
+            if ($itemBaseDiscount !== $previousBaseDiscountAmount) {
+                $itemBaseDiscount = min($itemBaseDiscount, $baseRowTotal ?? $baseItemPrice * $totalQty);
+                $baseCapacity = $this->cartFixedCapacity($store, $baseItemPrice, $totalQty, $qty, (float) $itemBaseDiscount, $baseRowTotal);
+            }
+            $discountAmount = max(0.0, min($store->roundPrice($discountAmount), $capacity, $budget));
+            $baseDiscountAmount = max(0.0, min($store->roundPrice($baseDiscountAmount), $baseCapacity, $baseBudget));
             $this->deductCartFixedDiscount($rule, $address, $discountAmount, $baseDiscountAmount);
-            $item->setDiscountAmount($item->getDiscountAmount() + $discountAmount);
-            $item->setBaseDiscountAmount($item->getBaseDiscountAmount() + $baseDiscountAmount);
+            $item->setDiscountAmount($itemDiscount + $discountAmount);
+            $item->setBaseDiscountAmount($itemBaseDiscount + $baseDiscountAmount);
             $item->setOriginalDiscountAmount(min($this->floorDiscountCapacity($store, $itemOriginalPrice * $qty), $discountAmount));
             $item->setBaseOriginalDiscountAmount(min($this->floorDiscountCapacity($store, $baseItemOriginalPrice * $qty), $baseDiscountAmount));
             if ($item->getDiscountAmount() === $previousDiscountAmount

@@ -117,14 +117,21 @@ it('uses the fixed cart budget within the remaining capacity of every eligible l
             $cart->addProduct($quote, $product, new Maho\DataObject(['qty' => $qty]), save: false);
         }
 
-        if (isset($expectedPersisted['callback'])) {
-            $observer = new readonly class ($expectedPersisted['callback']) {
-                public function __construct(private array $amounts) {}
+        if (isset($expectedPersisted['callback']) || isset($expectedPersisted['item_callback'])) {
+            $observer = new readonly class ($expectedPersisted['callback'] ?? null, $expectedPersisted['item_callback'] ?? null) {
+                public function __construct(private ?array $resultAmounts, private ?array $itemAmounts) {}
 
                 public function record(Maho\Event\Observer $observer): void
                 {
                     if ($observer->getRule()->getSimpleAction() === Rule::CART_FIXED_ACTION) {
-                        $observer->getResult()->setBaseDiscountAmount($this->amounts[0])->setDiscountAmount($this->amounts[1]);
+                        if ($this->resultAmounts !== null) {
+                            $observer->getResult()->setBaseDiscountAmount($this->resultAmounts[0])->setDiscountAmount($this->resultAmounts[1]);
+                        }
+                        if ($this->itemAmounts !== null) {
+                            $item = $observer->getItem();
+                            $item->setBaseDiscountAmount($item->getBaseDiscountAmount() + $this->itemAmounts[0])
+                                ->setDiscountAmount($item->getDiscountAmount() + $this->itemAmounts[1]);
+                        }
                     }
                 }
             };
@@ -253,6 +260,26 @@ it('uses the fixed cart budget within the remaining capacity of every eligible l
         [[0.03, 3], [0.03, 3]], [[Rule::BY_PERCENT_ACTION, 80.0, null], [Rule::CART_FIXED_ACTION, 0.01, 1.0]],
         0.04, 0.04, 'USD', null, [0.07, 0.07],
         ['rate' => 0.73, 'remaining' => [0.01, 0.01], 'lines' => [0.07, 0.07]],
+    ],
+    'fixed budget deducts only the share left after an observer discounts the item' => [
+        [[10.0, 1]], [[Rule::CART_FIXED_ACTION, 6.0, null]],
+        0.0, 0.0, 'USD', null, [10.0],
+        ['remaining' => [4.0, 4.0], 'lines' => [10.0], 'item_callback' => [8.0, 8.0]],
+    ],
+    'an observer discount preserves the rounded billable fractional row cap' => [
+        [[11.99, 1.5]], [[Rule::CART_FIXED_ACTION, 6.0, null]],
+        0.0, 0.0, 'USD', null, [17.99],
+        ['remaining' => [3.01, 3.01], 'lines' => [17.99], 'item_callback' => [15.0, 15.0]],
+    ],
+    'an observer discount leaves separate fixed budgets in each currency' => [
+        [[10.0, 1]], [[Rule::CART_FIXED_ACTION, 6.0, null]],
+        0.0, 0.0, 'EUR', null, [10.0],
+        ['rate' => 0.73, 'remaining' => [4.0, 3.08], 'lines' => [7.30], 'item_callback' => [8.0, 6.0]],
+    ],
+    'fixed budget is untouched when an observer discounts more than the whole item' => [
+        [[10.0, 1]], [[Rule::CART_FIXED_ACTION, 6.0, null]],
+        0.0, 0.0, 'USD', null, [10.0],
+        ['remaining' => [6.0, 6.0], 'lines' => [10.0], 'item_callback' => [12.0, 12.0]],
     ],
     'fractional amounts returned by a fixed discount observer are rounded once' => [
         [[10.0, 1]], [[Rule::CART_FIXED_ACTION, 2.0, null]],
