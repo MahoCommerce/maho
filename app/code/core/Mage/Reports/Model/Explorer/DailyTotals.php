@@ -41,6 +41,9 @@ class Mage_Reports_Model_Explorer_DailyTotals
     /** The days that one query of the build reads. */
     public const int CHUNK_DAYS = 31;
 
+    /** The values of one insert: SQLite takes at most 32,766 parameters in a statement, MySQL and PostgreSQL 65,535. */
+    public const int MAX_INSERT_VALUES = 30000;
+
     /** The days of history that one cron run builds. */
     public const int HISTORY_DAYS = 92;
 
@@ -327,8 +330,10 @@ class Mage_Reports_Model_Explorer_DailyTotals
             $adapter->beginTransaction();
             try {
                 $adapter->delete($this->table(), ['day >= ?' => $start, 'day <= ?' => $end]);
-                if ($insert !== []) {
-                    $adapter->insertMultiple($this->table(), $insert);
+                // A large store has more values in one range than a statement of the database takes
+                $rowsPerInsert = $insert === [] ? 1 : max(1, intdiv(static::MAX_INSERT_VALUES, count($insert[0])));
+                foreach (array_chunk($insert, $rowsPerInsert) as $rows) {
+                    $adapter->insertMultiple($this->table(), $rows);
                 }
                 $adapter->commit();
             } catch (Throwable $e) {

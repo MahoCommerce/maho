@@ -153,3 +153,16 @@ it('reads the orders when the request does not fit the daily totals', function (
     'the date of the last change' => [['dateField' => 'updated_at']],
     'a period before the built history' => [['from' => '2004-09-01']],
 ]);
+
+it('builds a range with more rows than one insert of the database takes', function () {
+    $daily = new class extends Mage_Reports_Model_Explorer_DailyTotals {
+        public const int MAX_INSERT_VALUES = 1;
+    };
+    $daily->rebuild(EXPLORER_DAILY_FROM, EXPLORER_DAILY_TO);
+
+    $rows = (int) ReportFixture::adapter()->fetchOne(ReportFixture::adapter()->select()
+        ->from(ReportFixture::table('reports/order_daily'), [new Maho\Db\Expr('COUNT(*)')])
+        ->where('day >= ?', EXPLORER_DAILY_FROM)->where('day <= ?', EXPLORER_DAILY_TO));
+    expect($rows)->toBeGreaterThan(1);
+    explorerExpectSameResult(explorerDailyBoth(explorerDailyRequest()));
+});
