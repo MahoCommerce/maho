@@ -10,7 +10,7 @@
 
 class Mage_Dataflow_Model_Convert
 {
-    public static function convert(string|Mage_Dataflow_Model_Convert_Container_Interface $class, string $method, mixed $data, array $vars = []): mixed
+    public static function convert(string $class, string $method, mixed $data, array $vars = []): mixed
     {
         $action = new Mage_Dataflow_Model_Convert_Action();
         $action->setParam('method', $method)->setParam('class', $class);
