@@ -390,7 +390,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
                 $this->setBackendModel($this->_getDefaultBackendModel());
             }
             $backend = Mage::getModel($this->getBackendModel());
-            if (!$backend instanceof Mage_Eav_Model_Entity_Attribute_Backend_Abstract) {
+            if (!$backend) {
                 throw Mage::exception('Mage_Eav', 'Invalid backend model specified: ' . $this->getBackendModel());
             }
             $this->_backend = $backend->setAttribute($this);
@@ -410,11 +410,8 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
             if (!$this->getFrontendModel()) {
                 $this->setFrontendModel($this->_getDefaultFrontendModel());
             }
-            $frontend = Mage::getModel($this->getFrontendModel());
-            if (!$frontend instanceof Mage_Eav_Model_Entity_Attribute_Frontend_Abstract) {
-                throw new \RuntimeException("Model {$this->getFrontendModel()} is not an attribute frontend model.");
-            }
-            $this->_frontend = $frontend->setAttribute($this);
+            $this->_frontend = Mage::getModel($this->getFrontendModel())
+                ->setAttribute($this);
         }
 
         return $this->_frontend;
@@ -432,7 +429,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
                 $this->setSourceModel($this->getDefaultSourceModel());
             }
             $source = Mage::getModel($this->getSourceModel());
-            if (!$source instanceof Mage_Eav_Model_Entity_Attribute_Source_Abstract) {
+            if (!$source) {
                 throw Mage::exception(
                     'Mage_Eav',
                     Mage::helper('eav')->__(

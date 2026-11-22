@@ -25,13 +25,7 @@ class Mage_Reports_Model_Report extends Mage_Core_Model_Abstract
      */
     public function initCollection($modelClass)
     {
-        $collection = Mage::getResourceModel($modelClass);
-        if (!$collection instanceof \Maho\Data\Collection\Db
-            || !$collection instanceof Mage_Reports_Model_Resource_DateRangeInterface
-        ) {
-            throw new \RuntimeException("Collection {$modelClass} is not a report collection with a date range.");
-        }
-        $this->_reportModel = $collection;
+        $this->_reportModel = Mage::getResourceModel($modelClass);
 
         return $this;
     }

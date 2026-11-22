@@ -217,6 +217,12 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Abstract.php
 
 		-
+			rawMessage: 'Property Mage_Catalog_Model_Convert_Adapter_Product::$_galleryBackendModel (Mage_Catalog_Model_Product_Attribute_Backend_Media) does not accept Mage_Eav_Model_Entity_Attribute_Backend_Abstract.'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
+
+		-
 			rawMessage: 'Parameter #1 $attribute of method Mage_Catalog_Model_Layer::_filterFilterableAttributes() expects Mage_Catalog_Model_Resource_Eav_Attribute, Mage_Eav_Model_Entity_Attribute_Abstract|false given.'
 			identifier: argument.type
 			count: 1
@@ -379,6 +385,12 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Layout.php
 
 		-
+			rawMessage: 'Property Mage_Core_Model_Resource_Db_Collection_Abstract::$_resource (Mage_Core_Model_Resource_Db_Abstract|null) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/Core/Model/Resource/Db/Collection/Abstract.php
+
+		-
 			rawMessage: 'Parameter #2 $scope of method Mage_Core_Model_Translate::_addData() expects string, false given.'
 			identifier: argument.type
 			count: 1
@@ -425,6 +437,24 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
+
+		-
+			rawMessage: 'Property Mage_Eav_Model_Entity_Attribute_Abstract::$_backend (Mage_Eav_Model_Entity_Attribute_Backend_Abstract|null) does not accept Mage_Core_Model_Abstract.'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
+
+		-
+			rawMessage: 'Property Mage_Eav_Model_Entity_Attribute_Abstract::$_frontend (Mage_Eav_Model_Entity_Attribute_Frontend_Abstract|null) does not accept Mage_Core_Model_Abstract.'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
+
+		-
+			rawMessage: 'Property Mage_Eav_Model_Entity_Attribute_Abstract::$_source (Mage_Eav_Model_Entity_Attribute_Source_Abstract|null) does not accept Mage_Core_Model_Abstract.'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
 
 		-
 			rawMessage: 'Parameter #2 $attribute of method Mage_Eav_Model_Resource_Entity_Attribute_Option::addOptionValueToCollection() expects Mage_Eav_Model_Entity_Attribute, Mage_Eav_Model_Entity_Attribute_Abstract given.'
@@ -527,6 +557,12 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option/Collection.php
+
+		-
+			rawMessage: 'Property Mage_Reports_Model_Report::$_reportModel ((Mage_Reports_Model_Resource_DateRangeInterface&Maho\Data\Collection\Db)|null) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/Reports/Model/Report.php
 
 		-
 			rawMessage: 'Return type (string) of method Mage_Review_Block_Form::getAction() should be compatible with return type (Mage_Core_Controller_Varien_Action) of method Mage_Core_Block_Abstract::getAction()'

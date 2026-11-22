@@ -384,11 +384,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
             $this->setStockItem(Mage::getModel('cataloginventory/stock_item'));
         }
 
-        $galleryBackend = $this->getAttribute('media_gallery')->getBackend();
-        if (!$galleryBackend instanceof Mage_Catalog_Model_Product_Attribute_Backend_Media) {
-            throw new \RuntimeException('The backend of the media_gallery attribute is not a media gallery backend.');
-        }
-        $this->_galleryBackendModel = $galleryBackend;
+        $this->_galleryBackendModel = $this->getAttribute('media_gallery')->getBackend();
     }
 
     /**
