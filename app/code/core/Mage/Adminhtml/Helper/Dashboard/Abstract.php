@@ -14,12 +14,8 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
 {
     protected ?\Maho\Data\Collection $_collection = null;
 
-    /**
-     * Parameters for helper
-     *
-     * @var array
-     */
-    protected $_params = [];
+    /** @var array<string, ?string> */
+    protected array $_params = [];
 
     public function getCollection(): \Maho\Data\Collection
     {
@@ -60,7 +56,7 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
         return $result;
     }
 
-    public function setParam(string $name, mixed $value): void
+    public function setParam(string $name, ?string $value): void
     {
         $this->_params[$name] = $value;
     }
@@ -70,7 +66,7 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
         $this->_params = $params;
     }
 
-    public function getParam(string $name): mixed
+    public function getParam(string $name): ?string
     {
         return $this->_params[$name] ?? null;
     }

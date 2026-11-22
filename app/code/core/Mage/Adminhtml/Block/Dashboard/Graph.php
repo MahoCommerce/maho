@@ -293,6 +293,11 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
     #[\Override]
     protected function _prepareData(): void
     {
+        foreach (['store', 'website', 'group'] as $name) {
+            $value = $this->getRequest()->getParam($name);
+            $this->getDataHelper()->setParam($name, is_string($value) ? $value : null);
+        }
+
         /** @var Mage_Adminhtml_Helper_Dashboard_Data $helper */
         $helper = $this->helper('adminhtml/dashboard_data');
         $availablePeriods = array_keys($helper->getDatePeriods());
