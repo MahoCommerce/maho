@@ -172,6 +172,8 @@ final class ReportFixture
         self::$customerIds[] = (int) $customer->getId();
         if ($createdAt !== null) {
             self::adapter()->update(self::table('customer/entity'), ['created_at' => $createdAt, 'updated_at' => $createdAt], ['entity_id = ?' => $customer->getId()]);
+            // Placing an order saves the customer again, which must keep the moved dates
+            $customer->setData('created_at', $createdAt)->setData('updated_at', $createdAt);
         }
         return $customer;
     }
