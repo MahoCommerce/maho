@@ -44,27 +44,9 @@ class Mage_Tax_Block_Checkout_Tax extends Mage_Checkout_Block_Total_Default
      */
     public function getAllWeee()
     {
-        $allWeee = [];
-        $store = $this->getTotal()->getAddress()->getQuote()->getStore();
+        $address = $this->getTotal()->getAddress();
         /** @var Mage_Weee_Helper_Data $helper */
         $helper = $this->_factory->getHelper('weee');
-
-        if (!$helper->includeInSubtotal($store)) {
-            foreach ($this->getTotal()->getAddress()->getCachedItemsAll() as $item) {
-                foreach ($helper->getApplied($item) as $tax) {
-                    $weeeDiscount = $tax['weee_discount'] ?? 0;
-                    $title = $tax['title'];
-                    $rowAmount = $tax['row_amount'] ?? 0;
-                    $rowAmountInclTax = $tax['row_amount_incl_tax'] ?? 0;
-                    $amountDisplayed = ($helper->isTaxIncluded()) ? $rowAmountInclTax : $rowAmount;
-                    if (array_key_exists((string) $title, $allWeee)) {
-                        $allWeee[$title] = $allWeee[$title] + $amountDisplayed - $weeeDiscount;
-                    } else {
-                        $allWeee[$title] = $amountDisplayed - $weeeDiscount;
-                    }
-                }
-            }
-        }
-        return $allWeee;
+        return $helper->getDiscountedAmountsByTitle($address->getAllItems(), $address->getQuote()->getStore());
     }
 }
