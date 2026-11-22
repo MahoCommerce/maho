@@ -199,17 +199,11 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
     }
 
     /**
-     * Set the item class of the collection from an item or from a model alias
+     * Use the class of $object as the item class of the collection
      */
-    public function setObject(\Maho\DataObject|string $object): static
+    public function setObject(\Maho\DataObject $object): static
     {
-        if (is_object($object)) {
-            $this->setItemObjectClass($object::class);
-        } else {
-            $this->setItemObjectClass($object);
-        }
-
-        return $this;
+        return $this->setItemObjectClass($object::class);
     }
 
     /**
