@@ -85,7 +85,7 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
             default => [array_sum($invoiceParts)],
         };
         foreach ($quantities as $index => $qty) {
-            $product = partialFptProduct($store, $cappedInvoice && $index === 3 ? [] : $fees);
+            $product = partialFptProduct($store, $cappedInvoice && $index === 2 ? [] : $fees);
             $cart->addProduct($quote, $product, new Maho\DataObject(['qty' => $qty]), save: false);
         }
         $quote->getPayment()->importData(['method' => 'checkmo']);
@@ -93,6 +93,12 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
         $saved = Mage::getModel('sales/service_quote', $quote)->submitOrder();
         $order = Mage::getModel('sales/order')->load((int) $saved->getId());
         $orderItems = $order->getAllVisibleItems();
+        if ($cappedInvoice) {
+            // Follow the allocator's item ID order for the fee items and invoice the item without a fee last.
+            usort($orderItems, static fn(Mage_Sales_Model_Order_Item $left, Mage_Sales_Model_Order_Item $right): int
+                => (($right->getBaseWeeeTaxAppliedRowAmnt() > 0) <=> ($left->getBaseWeeeTaxAppliedRowAmnt() > 0))
+                    ?: ($left->getId() <=> $right->getId()));
+        }
         $orderItem = $orderItems[0];
         if ($variant === 'missing fee fields') {
             $helper = Mage::helper('weee');
@@ -144,6 +150,8 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
             $totalModels->setValue($config, $originalModels);
         }
         if ($cappedInvoice) {
+            expect(round($invoices[0]->getBaseTaxAmount(), 3))->toBe(0.008)
+                ->and(round($invoices[1]->getBaseTaxAmount(), 3))->toBe(0.008);
             $invoice = $invoices[2];
             $creditmemo = $documents->refund(
                 $order,
