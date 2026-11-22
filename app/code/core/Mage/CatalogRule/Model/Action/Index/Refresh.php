@@ -357,6 +357,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
         $table = $this->_resource->getTable('catalogrule/rule_product_price');
         $websiteId = (int) $website->getId();
         $dates = $this->_getRuleDates($time);
+        [$civilStarts, $civilEnds] = $this->getCivilRuleBounds($dates);
 
         $statement = $this->_connection->query(
             $this->_connection->select()
@@ -381,8 +382,18 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
                     $chains = [];
                 }
 
+                $activeRow = $row;
+                $start = $civilStarts[(string) $row['from_date']][(int) $row['from_time']] ?? null;
+                if ($start !== null) {
+                    $activeRow['civil_from_time'] = $start;
+                }
+                $end = $civilEnds[(string) $row['to_date']][(int) $row['to_time']] ?? null;
+                if ($end !== null) {
+                    $activeRow['civil_to_time'] = $end;
+                }
+
                 foreach ($dates as $date => $timestamp) {
-                    if (!$this->_isRuleActiveAt($row, $timestamp)) {
+                    if (!$this->_isRuleActiveAt($activeRow, $timestamp)) {
                         continue;
                     }
 
@@ -433,12 +444,47 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     }
 
     /**
+     * Match native association timestamps to their civil date on the UTC index calendar.
+     * Only dates within one day of a sample can cross its UTC date boundary.
+     *
+     * @param array<string, int> $dates
+     * @return array{array<string, array<int, int>>, array<string, array<int, int>>}
+     */
+    private function getCivilRuleBounds(array $dates): array
+    {
+        $locale = $this->_app->getLocale();
+        $days = [];
+        foreach ($dates as $timestamp) {
+            foreach ([-86400, 0, 86400] as $offset) {
+                $days[gmdate('Y-m-d', $timestamp + $offset)] = true;
+            }
+        }
+
+        $utc = new DateTimeZone(Mage_Core_Model_Locale::DEFAULT_TIMEZONE);
+        $starts = $ends = [];
+        foreach (array_keys($days) as $date) {
+            $start = $locale->storeToUtc(null, $date)->getTimestamp();
+            $end = $locale->storeToUtc(null, $date . ' 23:59:59')->getTimestamp();
+            $midnight = new DateTimeImmutable($date, $utc)->getTimestamp();
+            $endOfDay = $midnight + 86399;
+            if ($start !== $midnight) {
+                $starts[$date][$start] = $midnight;
+            }
+            if ($end !== 0 && $end !== $endOfDay) {
+                $ends[$date][$end] = $endOfDay;
+            }
+        }
+
+        return [$starts, $ends];
+    }
+
+    /**
      * @param array<string, mixed> $row
      */
     protected function _isRuleActiveAt(array $row, int $timestamp): bool
     {
-        $toTime = (int) $row['to_time'];
-        return $timestamp >= (int) $row['from_time'] && ($toTime === 0 || $timestamp <= $toTime);
+        $toTime = (int) ($row['civil_to_time'] ?? $row['to_time']);
+        return $timestamp >= (int) ($row['civil_from_time'] ?? $row['from_time']) && ($toTime === 0 || $timestamp <= $toTime);
     }
 
     /**

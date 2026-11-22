@@ -45,15 +45,20 @@ function chainProduct(): Mage_Catalog_Model_Product
  *
  * @param array<int, array<string, mixed>> $steps
  */
-function seedRuleChain(int $productId, int $websiteId, array $steps): int
-{
+function seedRuleChain(
+    int $productId,
+    int $websiteId,
+    array $steps,
+    string $fromDate = '2026-01-01',
+    string $toDate = '2026-12-31',
+): int {
     $write = chainWrite();
 
     $write->insert(chainTable('catalogrule/rule'), [
         'name' => CHAIN_RULE_NAME,
         'is_active' => 1,
-        'from_date' => '2026-01-01',
-        'to_date' => '2026-12-31',
+        'from_date' => $fromDate,
+        'to_date' => $toDate,
         'sort_order' => 0,
         'simple_action' => 'by_percent',
         'discount_amount' => 0,
@@ -254,4 +259,95 @@ it('serves the price for the rules active on the store date', function (
     'expired discount' => [false, 'today 23:59:59', '-1 day', [85.5, 85.5, 95.0]],
     'expired discount that stops the chain' => [true, 'today 23:59:59', '-1 day', [90.0, 90.0, 95.0]],
     'inclusive start and end at the index time' => [false, '+0 seconds', '+0 seconds', [90.0, 85.5, 95.0]],
+]);
+
+it('uses the store calendar for native date bounds and timestamps for custom bounds', function (
+    string $promotionDay,
+    string $nextDay,
+    string $startUtc,
+    string $endUtc,
+    array $overrides,
+    array $expectedPrices,
+): void {
+    $app = Mage::app();
+    $store = $app->getDefaultStoreView();
+    $previousStore = $app->getStore();
+    $timezonePath = Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE;
+    $previousTimezone = $store->getConfig($timezonePath);
+    $storeId = (int) $store->getId();
+    $websiteId = (int) $store->getWebsiteId();
+    $product = Mage::getModel('catalog/product')->setStoreId(0);
+    $product->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+        ->setAttributeSetId($product->getDefaultAttributeSetId())
+        ->setSku('catalog-rule-store-date-' . uniqid())
+        ->setName('Catalog promotion')
+        ->setPrice(100.0)
+        ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+        ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
+        ->setWebsiteIds([$websiteId])
+        ->save();
+    $productId = (int) $product->getId();
+    $locale = $app->getLocale();
+    $localeProperty = new ReflectionProperty($app, '_locale');
+
+    try {
+        $store->setConfig($timezonePath, 'America/Los_Angeles');
+        $app->setCurrentStore($store);
+        $app->loadAreaPart(Mage_Core_Model_App_Area::AREA_FRONTEND, Mage_Core_Model_App_Area::PART_EVENTS);
+
+        $start = $locale->storeToUtc($store, $promotionDay);
+        $end = $locale->storeToUtc($store, $promotionDay . ' 23:59:59');
+        expect($start->format('Y-m-d H:i:s'))->toBe($startUtc)
+            ->and($end->format('Y-m-d H:i:s'))->toBe($endUtc);
+
+        $promotion = [
+            'sort_order' => 0, 'action_operator' => 'by_percent', 'action_amount' => 10, 'action_stop' => 0,
+            'from_time' => $start->getTimestamp(),
+            'to_time' => $end->getTimestamp(),
+        ];
+        foreach ($overrides as $bound => $date) {
+            $promotion[$bound] = (new DateTimeImmutable($date))->getTimestamp();
+        }
+        seedRuleChain($productId, $websiteId, [$promotion], $promotionDay, $promotionDay);
+        seedRuleChain($productId, $websiteId, [
+            ['sort_order' => 1, 'action_operator' => 'by_percent', 'action_amount' => 5, 'action_stop' => 0],
+        ]);
+        runCatalogRuleIndexer((new DateTimeImmutable($nextDay . ' 01:00:00 UTC'))->getTimestamp(), $productId);
+
+        foreach ([$promotionDay, $nextDay] as $i => $day) {
+            $readAt = $locale->storeToUtc($store, $day . ($i === 0 ? ' 23:59:59' : ' 00:00:01'));
+            $fixedLocale = $this->createPartialMock(Mage_Core_Model_Locale::class, ['utcToStore']);
+            $fixedLocale->method('utcToStore')->willReturnCallback(
+                static fn(mixed $store = null, string|int|DateTimeInterface|null $date = null): DateTimeImmutable
+                    => $locale->utcToStore($store, $date ?? $readAt),
+            );
+            $localeProperty->setValue($app, $fixedLocale);
+            $storeProduct = Mage::getModel('catalog/product')->setStoreId($storeId)->load($productId)->setCustomerGroupId(0);
+            expect((float) $storeProduct->getFinalPrice(1))->toBe($expectedPrices[$i]);
+        }
+    } finally {
+        $localeProperty->setValue($app, $locale);
+        $store->setConfig($timezonePath, $previousTimezone);
+        $app->setCurrentStore($previousStore);
+        $product->delete();
+    }
+})->with([
+    'Los Angeles midnight' => [
+        '2026-11-22', '2026-11-23', '2026-11-22 08:00:00', '2026-11-23 07:59:59', [], [85.5, 95.0],
+    ],
+    'Los Angeles spring DST transition' => [
+        '2026-03-08', '2026-03-09', '2026-03-08 08:00:00', '2026-03-09 06:59:59', [], [85.5, 95.0],
+    ],
+    'custom start keeps native end' => [
+        '2026-11-22', '2026-11-23', '2026-11-22 08:00:00', '2026-11-23 07:59:59',
+        ['from_time' => '2026-11-22 00:00:00 UTC'], [85.5, 95.0],
+    ],
+    'custom end keeps native start' => [
+        '2026-11-22', '2026-11-23', '2026-11-22 08:00:00', '2026-11-23 07:59:59',
+        ['to_time' => '2026-11-23 09:59:59 UTC'], [85.5, 85.5],
+    ],
+    'custom start follows the index timestamp' => [
+        '2026-11-22', '2026-11-23', '2026-11-22 08:00:00', '2026-11-23 07:59:59',
+        ['from_time' => '2026-11-22 03:00:00 UTC'], [95.0, 95.0],
+    ],
 ]);
