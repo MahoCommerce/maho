@@ -106,10 +106,8 @@ class Db extends Collection
 
     /**
      * Initialize collection cache
-     *
-     * @return $this
      */
-    public function initCache(Mage_Core_Model_Cache $object, string $idPrefix, array $tags)
+    public function initCache(Mage_Core_Model_Cache $object, string $idPrefix, array $tags): static
     {
         $this->_cacheConf = [
             'object'    => $object,

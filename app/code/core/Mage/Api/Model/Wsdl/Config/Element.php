@@ -234,12 +234,9 @@ class Mage_Api_Model_Wsdl_Config_Element extends \Maho\Simplexml\Element
 
     /**
      * Returns attribute value by attribute name
-     *
-     * @param string $namespace
-     * @return string|null
      */
     #[\Override]
-    public function getAttribute(string $name, $namespace = '')
+    public function getAttribute(string $name, string $namespace = ''): ?string
     {
         $attrs = $this->attributes($namespace);
         return isset($attrs[$name]) ? (string) $attrs[$name] : null;

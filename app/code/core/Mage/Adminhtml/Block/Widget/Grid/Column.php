@@ -223,10 +223,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
         return $value;
     }
 
-    /**
-     * @return $this
-     */
-    public function setRenderer(Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract $renderer)
+    public function setRenderer(Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract $renderer): static
     {
         $this->_renderer = $renderer;
         return $this;
@@ -280,10 +277,8 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
             if (!$rendererClass) {
                 $rendererClass = $this->_getRendererByType();
             }
+            /** @var Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract $renderer */
             $renderer = $this->getLayout()->createBlock($rendererClass);
-            if (!$renderer instanceof Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract) {
-                throw new \UnexpectedValueException("The grid column renderer {$rendererClass} must extend Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract.");
-            }
             $this->_renderer = $renderer->setColumn($this);
         }
         return $this->_renderer;
@@ -295,9 +290,10 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
      */
     public function setFilter($filterClass)
     {
+        /** @var Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract|false $filter */
         $filter = $this->getLayout()->createBlock($filterClass);
-        if (!$filter instanceof Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract) {
-            throw new \UnexpectedValueException("The grid column filter {$filterClass} must extend Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract.");
+        if ($filter === false) {
+            return;
         }
         $this->_filter = $filter->setColumn($this);
     }
@@ -346,17 +342,10 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
                     return false;
                 }
             }
-            $filter = $this->getLayout()->createBlock($filterClass);
-            if ($filter === false) {
-                return false;
-            }
-            if (!$filter instanceof Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract) {
-                throw new \UnexpectedValueException("The grid column filter {$filterClass} must extend Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract.");
-            }
-            $this->_filter = $filter->setColumn($this);
+            $this->setFilter($filterClass);
         }
 
-        return $this->_filter;
+        return $this->_filter ?? false;
     }
 
     /**

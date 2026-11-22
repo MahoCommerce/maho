@@ -8,6 +8,8 @@
  * @package Mage_Adminhtml
  */
 
+declare(strict_types=1);
+
 class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
 {
     protected ?array $_currencyList = null;
@@ -108,7 +110,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
     {
         $value = $this->getValue();
 
-        if (isset($value['currency']) && $this->getCurrencyAffect()) {
+        if (is_string($value['currency'] ?? null) && $this->getCurrencyAffect()) {
             $displayCurrency = $value['currency'];
         } else {
             $displayCurrency = $this->getColumn()->getCurrencyCode();

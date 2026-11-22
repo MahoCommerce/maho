@@ -56,13 +56,7 @@ class Mage_Reports_Model_Resource_Report_Collection
 
     protected function _construct(): void {}
 
-    /**
-     * Set period
-     *
-     * @param string $period
-     * @return $this
-     */
-    public function setPeriod($period)
+    public function setPeriod(string $period): static
     {
         $this->_period = $period;
         return $this;

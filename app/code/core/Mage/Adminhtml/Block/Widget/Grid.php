@@ -671,18 +671,6 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
         return $this;
     }
 
-    /**
-     * Decode URL encoded filter value recursive callback method
-     *
-     * @param string $value
-     */
-    protected function _decodeFilter(&$value): void
-    {
-        /** @var Mage_Adminhtml_Helper_Data $helper */
-        $helper = $this->helper('adminhtml');
-        $helper->decodeFilter($value);
-    }
-
     protected function _preparePage(): void
     {
         $this->getCollection()->setPageSize((int) $this->getParam($this->getVarNameLimit(), $this->_defaultLimit));
