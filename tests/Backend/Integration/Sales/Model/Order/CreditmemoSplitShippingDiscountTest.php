@@ -16,12 +16,17 @@ it('refunds the shipping discount that was charged to another invoice', function
     float $shipping,
     float $shippingDiscount,
     array $refunds,
+    array $quantities = [],
 ): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
     try {
-        $subtotal = array_sum(array_map(static fn(float $price): float => round($price * $rate, 2), $prices));
-        $baseSubtotal = array_sum($prices);
+        $subtotal = $baseSubtotal = 0.0;
+        foreach ($prices as $sku => $price) {
+            $qty = $quantities[$sku] ?? 1;
+            $subtotal += round($price * $rate, 2) * $qty;
+            $baseSubtotal += $price * $qty;
+        }
         $baseTotal = round($baseSubtotal / 2 + $shipping - $shippingDiscount, 2);
         $saleTotal = round($subtotal / 2, 2);
         $order = Mage::getModel('sales/order')
@@ -42,15 +47,18 @@ it('refunds the shipping discount that was charged to another invoice', function
         $order->setPayment(Mage::getModel('sales/order_payment')->setMethod('checkmo')
             ->setAmountPaid($saleTotal)->setBaseAmountPaid($baseTotal));
         foreach ($prices as $sku => $price) {
+            $qty = $quantities[$sku] ?? 1;
             $salePrice = round($price * $rate, 2);
+            $rowTotal = $salePrice * $qty;
+            $baseRowTotal = $price * $qty;
             $order->addItem(Mage::getModel('sales/order_item')->setData([
                 'name' => $sku, 'sku' => $sku, 'product_type' => 'simple',
-                'qty_ordered' => 1, 'qty_invoiced' => 1,
+                'qty_ordered' => $qty, 'qty_invoiced' => $qty,
                 'price' => $salePrice, 'base_price' => $price,
-                'row_total' => $salePrice, 'base_row_total' => $price,
-                'row_invoiced' => $salePrice, 'base_row_invoiced' => $price,
-                'discount_amount' => $salePrice / 2, 'base_discount_amount' => $price / 2,
-                'discount_invoiced' => $salePrice / 2, 'base_discount_invoiced' => $price / 2,
+                'row_total' => $rowTotal, 'base_row_total' => $baseRowTotal,
+                'row_invoiced' => $rowTotal, 'base_row_invoiced' => $baseRowTotal,
+                'discount_amount' => $rowTotal / 2, 'base_discount_amount' => $baseRowTotal / 2,
+                'discount_invoiced' => $rowTotal / 2, 'base_discount_invoiced' => $baseRowTotal / 2,
             ]));
         }
         $order->save();
@@ -68,7 +76,7 @@ it('refunds the shipping discount that was charged to another invoice', function
             $baseInvoiceShipping = $name === 'shipping' ? $shipping : 0.0;
             $invoiceSubtotal = $baseInvoiceSubtotal = 0.0;
             foreach ($invoiceItems as $item) {
-                $invoice->addItem($converter->itemToInvoiceItem($item)->setData('qty', 1)
+                $invoice->addItem($converter->itemToInvoiceItem($item)->setData('qty', $item->getQtyInvoiced())
                     ->setRowTotal($item->getRowTotal())->setBaseRowTotal($item->getBaseRowTotal())
                     ->setDiscountAmount($item->getDiscountAmount())->setBaseDiscountAmount($item->getBaseDiscountAmount()));
                 $invoiceSubtotal += $item->getRowTotal();
@@ -82,9 +90,10 @@ it('refunds the shipping discount that was charged to another invoice', function
             $invoices[$name] = $invoice;
         }
         $documents = Mage::getService('sales/order_document');
-        foreach ($refunds as [$sku, $expectedSale, $expectedBase, $expectedBaseDiscount]) {
+        foreach ($refunds as $refund) {
+            [$sku, $expectedSale, $expectedBase, $expectedBaseDiscount] = $refund;
             $invoice = $invoices[$sku === 'shipping' ? 'shipping' : 'discount'];
-            $data = ['qtys' => [(int) $items[$sku]->getId() => 1]];
+            $data = ['qtys' => [(int) $items[$sku]->getId() => $refund[4] ?? 1]];
             $firstPreview = $documents->prepareCreditmemo($order, $data, [], $invoice);
             $secondPreview = $documents->prepareCreditmemo($order, $data, [], $invoice);
             expect((float) $firstPreview->getBaseGrandTotal())->toBe((float) $secondPreview->getBaseGrandTotal());
@@ -135,5 +144,20 @@ it('refunds the shipping discount that was charged to another invoice', function
     'the two smallest lines refunded first' => [
         ['shipping' => 1000.0, 'large' => 0.06, 'small' => 0.02, 'other' => 0.02], 0.00004, 1.0, 0.02,
         [['other', 0.0, 0.01, -0.01], ['small', 0.0, 0.01, -0.01], ['large', 0.0, 0.01, -0.05], ['shipping', 0.02, 501.0, -500.0]],
+    ],
+    'two units on the same line refunded separately after a larger line' => [
+        ['shipping' => 1000.0, 'large' => 0.06, 'small' => 0.02], 0.00004, 1.0, 0.02,
+        [['large', 0.0, 0.01, -0.05], ['small', 0.0, 0.01, -0.01], ['small', 0.0, 0.01, -0.01], ['shipping', 0.02, 501.0, -500.0]],
+        ['small' => 2],
+    ],
+    'two units on the same line refunded separately before a larger line' => [
+        ['shipping' => 1000.0, 'large' => 0.06, 'small' => 0.02], 0.00004, 1.0, 0.02,
+        [['small', 0.0, 0.01, -0.01], ['small', 0.0, 0.01, -0.01], ['large', 0.0, 0.01, -0.05], ['shipping', 0.02, 501.0, -500.0]],
+        ['small' => 2],
+    ],
+    'two units on the same line refunded together' => [
+        ['shipping' => 1000.0, 'large' => 0.06, 'small' => 0.02], 0.00004, 1.0, 0.02,
+        [['small', 0.0, 0.02, -0.02, 2], ['large', 0.0, 0.01, -0.05], ['shipping', 0.02, 501.0, -500.0]],
+        ['small' => 2],
     ],
 ]);

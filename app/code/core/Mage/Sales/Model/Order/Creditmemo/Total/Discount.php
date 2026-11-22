@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_Order_Creditmemo_Total_Abstract
 {
+    private const float MINOR_UNIT = 0.01;
+
     /**
      * @return $this
      */
@@ -175,14 +177,14 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         float $used,
     ): ?float {
         $order = $memo->getOrder();
-        $invoiced = $this->getItemNetAmounts($source, $order);
-        $current = $refunded = $this->getItemNetAmounts($memo, $order);
+        $invoiced = $this->getItemAmounts($source, $order);
+        $current = $refunded = $this->getItemAmounts($memo, $order);
         $otherItems = null;
         foreach ($previous as $row) {
             if ($row->getInvoiceId() && $row->getInvoiceId() !== (int) $source->getId()) {
                 continue;
             }
-            $amounts = array_intersect_key($this->getItemNetAmounts($row, $order), $invoiced);
+            $amounts = array_intersect_key($this->getItemAmounts($row, $order), $invoiced);
             if (!$row->getInvoiceId() && $amounts) {
                 $otherItems ??= $this->getItemsOnOtherInvoices($order, $source);
                 if (array_intersect_key($amounts, $otherItems)) {
@@ -190,22 +192,30 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
                 }
             }
             foreach ($amounts as $id => $amount) {
-                $refunded[$id] = ($refunded[$id] ?? 0.0) + $amount;
+                $refunded[$id] = [
+                    'net' => ($refunded[$id]['net'] ?? 0.0) + $amount['net'],
+                    'qty' => ($refunded[$id]['qty'] ?? 0.0) + $amount['qty'],
+                ];
             }
         }
-        $total = round(array_sum($invoiced), 4);
+        $total = round(array_sum(array_column($invoiced, 'net')), 4);
         if ($total <= 0.0) {
             return null;
         }
         $store = $memo->getStore();
-        $lineDiscounts = $this->getIndivisibleItemDiscounts($source, $order, $store, $invoiced, $total, $discount);
+        $lineDiscounts = $this->getWholeUnitDiscounts($order, $store, $invoiced, $total, $discount);
         $net = $target = $capacity = 0.0;
         foreach ($invoiced as $id => $amount) {
-            $refundedNet = min($amount, $refunded[$id] ?? 0.0);
+            $refundedNet = min($amount['net'], $refunded[$id]['net'] ?? 0.0);
             $net += $refundedNet;
             if (isset($lineDiscounts[$id])) {
-                $target += $store->roundPrice($lineDiscounts[$id] * $refundedNet / $amount);
-                $capacity += max(0.0, min($amount, $current[$id] ?? 0.0) - 0.01);
+                $refundedQty = min($amount['qty'], $refunded[$id]['qty'] ?? 0.0);
+                $available = $amount['net'] - $amount['qty'] * self::MINOR_UNIT;
+                if ($available > 0.0) {
+                    $refundedCapacity = max(0.0, $refundedNet - $refundedQty * self::MINOR_UNIT);
+                    $target += $store->roundPrice($lineDiscounts[$id] * min(1.0, $refundedCapacity / $available));
+                }
+                $capacity += max(0.0, ($current[$id]['net'] ?? 0.0) - ($current[$id]['qty'] ?? 0.0) * self::MINOR_UNIT);
             }
         }
         if ($lineDiscounts === []) {
@@ -217,39 +227,37 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
     }
 
     /**
-     * @param array<int, float> $invoiced
+     * @param array<int, array{net: float, qty: float}> $invoiced
      * @return array<int, float>
      */
-    private function getIndivisibleItemDiscounts(
-        Mage_Sales_Model_Order_Invoice $source,
+    private function getWholeUnitDiscounts(
         Mage_Sales_Model_Order $order,
         Mage_Core_Model_Store $store,
         array $invoiced,
         float $total,
         float $discount,
     ): array {
-        $positive = array_filter($invoiced, static fn(float $amount): bool => $amount > 0.0);
-        if (!array_any($positive, static fn(float $amount): bool => $amount * (1 - $discount / $total) < 0.01)) {
+        $positive = array_filter($invoiced, static fn(array $amount): bool => $amount['net'] > 0.0);
+        if (!array_any($positive, static fn(array $amount): bool =>
+            $amount['net'] * (1 - $discount / $total) < $amount['qty'] * self::MINOR_UNIT
+        )) {
             return [];
         }
         $capacity = [];
-        foreach ($source->getAllItems() as $item) {
-            $id = $item->getOrderItemId();
-            if (!isset($positive[$id])) {
-                continue;
-            }
-            if (isset($capacity[$id]) || (float) $item->getQty() !== 1.0 || $order->getItemById($id)->getIsQtyDecimal()
-                || $store->roundPrice($positive[$id]) !== $positive[$id]
+        foreach ($positive as $id => $amount) {
+            $reserve = $store->roundPrice($amount['qty'] * self::MINOR_UNIT);
+            if (floor($amount['qty']) !== $amount['qty'] || $order->getItemById($id)->getIsQtyDecimal()
+                || $store->roundPrice($amount['net']) !== $amount['net'] || $amount['net'] < $reserve
             ) {
                 return [];
             }
-            $capacity[$id] = $store->roundPrice($positive[$id] - 0.01);
+            $capacity[$id] = $store->roundPrice($amount['net'] - $reserve);
         }
         $available = $store->roundPrice(array_sum($capacity));
         if ($available < $discount) {
             return [];
         }
-        // Keep one minor unit on each indivisible line when the invoice has enough to do so.
+        // Keep one minor unit per whole item when the invoice has enough to do so.
         ksort($capacity);
         $running = $allocated = 0.0;
         $shares = [];
@@ -262,8 +270,8 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         return $shares;
     }
 
-    /** @return array<int, float> */
-    private function getItemNetAmounts(
+    /** @return array<int, array{net: float, qty: float}> */
+    private function getItemAmounts(
         Mage_Sales_Model_Order_Invoice|Mage_Sales_Model_Order_Creditmemo $document,
         Mage_Sales_Model_Order $order,
     ): array {
@@ -275,7 +283,10 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
                 continue;
             }
             $net = max(0.0, (float) $item->getBaseRowTotal() - (float) $item->getBaseDiscountAmount());
-            $amounts[$id] = round(($amounts[$id] ?? 0.0) + $net, 4);
+            $amounts[$id] = [
+                'net' => round(($amounts[$id]['net'] ?? 0.0) + $net, 4),
+                'qty' => (float) $item->getQty() + ($amounts[$id]['qty'] ?? 0.0),
+            ];
         }
         return $amounts;
     }
