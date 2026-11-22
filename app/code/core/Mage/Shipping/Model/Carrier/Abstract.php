@@ -506,7 +506,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
     /**
      * Set the number of boxes for the weight, and return the weight of one box in pounds.
      */
-    public function getTotalNumOfBoxes(float|int|string|null $weight): float
+    public function getTotalNumOfBoxes(?float $weight): float
     {
         /*
         reset num box first before retrieve again

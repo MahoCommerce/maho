@@ -915,7 +915,7 @@ class Mage_Core_Model_Resource_Setup
         return $this->getConnection()->isTableExists($table);
     }
 
-    public function setConfigData(string $path, string|int|float|null $value, string $scope = 'default', int $scopeId = 0, int $inherit = 0): static
+    public function setConfigData(string $path, string|int|null $value, string $scope = 'default', int $scopeId = 0, int $inherit = 0): static
     {
         $table = $this->getTable('core/config_data');
         // this is a fix for mysql 4.1
