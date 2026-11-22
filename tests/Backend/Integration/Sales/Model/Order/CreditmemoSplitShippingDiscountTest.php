@@ -139,7 +139,7 @@ it('refunds the shipping discount that was charged to another invoice', function
     ],
 ]);
 
-it('limits online refunds to the invoice that carries the split shipping discount', function (string $gatewayScenario): void {
+it('limits online refunds to each invoice in a recognized split shipping pair', function (string $gatewayScenario): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
     $store = Mage::app()->getStore();
@@ -158,13 +158,32 @@ it('limits online refunds to the invoice that carries the split shipping discoun
         $store->setConfig($paymentPath, SplitShippingRefundPaymentDouble::class);
         $calls = new Maho\DataObject();
         Mage::register('split_shipping_refund_payment_calls', $calls);
-        $invoice = $invoices['discount'];
+        $invoice = $invoices[$gatewayScenario === 'port adjustment' ? 'shipping' : 'discount'];
         $captureId = 'split-shipping-capture-' . uniqid();
         $invoice->setTransactionId($captureId)->save();
         Mage::getModel('sales/order_payment_transaction')->setOrderPaymentObject($order->getPayment())
             ->setTxnId($captureId)->setTxnType(Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE)->save();
         $data = ['qtys' => [(int) $items['replacement']->getId() => 1]];
-        if (in_array($gatewayScenario, ['historical', 'unlinked historical'], true)) {
+        if ($gatewayScenario === 'port adjustment') {
+            $first = $documents->refund(
+                $order,
+                ['qtys' => [(int) $items['shipping']->getId() => 1], 'shipping_amount' => 0.50],
+                offlineRefund: false,
+                invoice: $invoice,
+            );
+            expect($first->getBaseGrandTotal())->toBe(5.50)->and($calls->getData('amount'))->toBe(5.50);
+            $calls->unsetData('amount');
+            $order = Mage::getModel('sales/order')->load($order->getId());
+            $invoice = Mage::getModel('sales/order_invoice')->load($invoice->getId());
+            $portOnly = ['qtys' => [], 'shipping_amount' => 0.50];
+            expect(fn() => $documents->refund($order, $portOnly + ['adjustment_positive' => 0.01], offlineRefund: false, invoice: $invoice))
+                ->toThrow(Mage_Core_Exception::class, 'The refund amount exceeds the refundable balance of this invoice.');
+            $invoice = Mage::getModel('sales/order_invoice')->load($invoice->getId());
+            expect($invoice->getBaseTotalRefunded())->toBe(5.50)->and($calls->getData('amount'))->toBeNull();
+            $order = Mage::getModel('sales/order')->load($order->getId());
+            $documents->refund($order, $portOnly, offlineRefund: false, invoice: $invoice);
+            expect($calls->getData('amount'))->toBe(0.50);
+        } elseif (in_array($gatewayScenario, ['historical', 'unlinked historical'], true)) {
             $first = $documents->refund(
                 $order,
                 ['qtys' => [(int) $items['shipping']->getId() => 1], 'shipping_amount' => 1.0],
@@ -214,6 +233,7 @@ it('limits online refunds to the invoice that carries the split shipping discoun
 })->with([
     'discount already used on the historic port invoice' => 'historical',
     'discount already used on an unlinked historic port refund' => 'unlinked historical',
+    'remaining port balance with a positive adjustment' => 'port adjustment',
     'balance after a linked partial refund and an adjustment' => 'partial balance',
     'no prior memo moved the discount' => 'matching',
     'explicitly requested shipping on an ordinary order' => 'ordinary port',

@@ -101,7 +101,9 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
             return $default;
         }
         $invoice = $memo->getInvoice();
-        if ($invoice && $invoice->getId() === $source->getId()) {
+        if ($invoice && !$invoice->isCanceled()
+            && ($invoice->getId() === $source->getId() || (float) $invoice->getBaseShippingAmount() === $shipping)
+        ) {
             $memo->setData('is_split_shipping_discount_invoice_refund', true);
         }
         $previous = [];
