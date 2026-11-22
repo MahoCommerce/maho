@@ -62,28 +62,34 @@ function seedRuleChain(int $productId, int $websiteId, array $steps): int
     $ruleId = (int) $write->lastInsertId(chainTable('catalogrule/rule'));
 
     foreach ($steps as $step) {
-        $write->insert(chainTable('catalogrule/rule_product'), array_merge($step, [
+        $write->insert(chainTable('catalogrule/rule_product'), array_merge([
             'rule_id' => $ruleId,
             'from_time' => strtotime('2026-01-01 00:00:00 UTC'),
             'to_time' => strtotime('2026-12-31 00:00:00 UTC'),
             'customer_group_id' => 0,
             'product_id' => $productId,
             'website_id' => $websiteId,
-        ]));
+        ], $step));
     }
 
     return $ruleId;
 }
 
-function runCatalogRuleIndexer(): void
+function runCatalogRuleIndexer(?int $time = null, ?int $productId = null): void
 {
-    Mage::getModel('catalogrule/action_index_refresh', [
+    $indexer = Mage::getModel($productId === null ? 'catalogrule/action_index_refresh' : 'catalogrule/action_index_refresh_row', [
         'connection' => chainWrite(),
         'factory'    => Mage::getModel('core/factory'),
         'resource'   => Mage::getResourceSingleton('catalogrule/rule'),
         'app'        => Mage::app(),
-        'value'      => null,
-    ])->execute();
+        'value'      => $productId,
+    ]);
+    if ($time === null) {
+        $indexer->execute();
+        return;
+    }
+
+    (new ReflectionMethod($indexer, '_reindex'))->invoke($indexer, Mage::app()->getWebsite(true), $time);
 }
 
 /**
@@ -176,3 +182,71 @@ it('indexes nothing for a rule whose window has passed', function () {
 
     expect(indexedPrices($productId))->toBeEmpty();
 });
+
+it('serves the price for the rules active on the store date', function (
+    bool $stop,
+    bool $rowRefresh,
+    string $firstEnd,
+    string $secondStart,
+    array $expectedPrices,
+): void {
+    $app = Mage::app();
+    $store = $app->getDefaultStoreView();
+    $storeId = (int) $store->getId();
+    $websiteId = (int) $store->getWebsiteId();
+    $time = new DateTimeImmutable('2026-11-22 12:00:00 UTC');
+    $product = Mage::getModel('catalog/product')->setStoreId(0);
+    $product->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+        ->setAttributeSetId($product->getDefaultAttributeSetId())
+        ->setSku('catalog-rule-expiration-' . uniqid())
+        ->setName('Catalog promotion')
+        ->setPrice(100.0)
+        ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+        ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
+        ->setWebsiteIds([$websiteId])
+        ->save();
+    $productId = (int) $product->getId();
+    $locale = $app->getLocale();
+    $localeProperty = new ReflectionProperty($app, '_locale');
+
+    try {
+        seedRuleChain($productId, $websiteId, [
+            [
+                'sort_order' => 0, 'action_operator' => 'by_percent', 'action_amount' => 10, 'action_stop' => (int) $stop,
+                'from_time' => $time->modify('-2 days')->getTimestamp(),
+                'to_time' => $time->modify($firstEnd)->getTimestamp(),
+            ],
+            [
+                'sort_order' => 1, 'action_operator' => 'by_percent', 'action_amount' => 5, 'action_stop' => 0,
+                'from_time' => $time->modify($secondStart)->getTimestamp(),
+                'to_time' => $time->modify('+1 day')->getTimestamp(),
+            ],
+        ]);
+        runCatalogRuleIndexer($time->getTimestamp(), $rowRefresh ? $productId : null);
+        $prices = array_map(static fn(array $row): float => (float) $row['rule_price'], indexedPrices($productId));
+
+        $store->setConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE, 'Pacific/Kiritimati');
+        $app->setCurrentStore($store);
+        $app->loadAreaPart(Mage_Core_Model_App_Area::AREA_FRONTEND, Mage_Core_Model_App_Area::PART_EVENTS);
+        $fixedLocale = $this->createPartialMock(Mage_Core_Model_Locale::class, ['utcToStore']);
+        $fixedLocale->method('utcToStore')->willReturnCallback(
+            static fn(mixed $store = null, string|int|DateTimeInterface|null $date = null): DateTimeImmutable
+                => $locale->utcToStore($store, $date ?? $time),
+        );
+        $localeProperty->setValue($app, $fixedLocale);
+        $storeProduct = Mage::getModel('catalog/product')->setStoreId($storeId)->load($productId)->setCustomerGroupId(0);
+        $finalPrice = (float) $storeProduct->getFinalPrice(1);
+
+        expect($fixedLocale->utcToStore($store)->format('Y-m-d'))->toBe('2026-11-23')
+            ->and($finalPrice)->toBe(95.0)
+            ->and($prices)->toBe($expectedPrices);
+    } finally {
+        $localeProperty->setValue($app, $locale);
+        $product->delete();
+    }
+})->with([
+    'expired discount' => [false, false, 'today 23:59:59', '-1 day', [85.5, 85.5, 95.0]],
+    'expired discount that stops the chain' => [true, false, 'today 23:59:59', '-1 day', [90.0, 90.0, 95.0]],
+    'product-specific refresh' => [false, true, 'today 23:59:59', '-1 day', [85.5, 85.5, 95.0]],
+    'inclusive start and end at the index time' => [false, false, '+0 seconds', '+0 seconds', [90.0, 85.5, 95.0]],
+]);

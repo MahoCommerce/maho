@@ -350,12 +350,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     }
 
     /**
-     * Fill Index Data
-     *
-     * Rules chain: within one product/customer group, each rule applies to the price the previous
-     * one produced, until a rule with action_stop breaks the chain. That is a running calculation
-     * over ordered rows, which used to be done with MySQL user variables (SET @price := ...) and
-     * so only ever worked on MySQL. It is done here instead, once per row, in the same order.
+     * Keep the running price and rule stop separate for each indexed date.
      */
     protected function _fillIndexData(Mage_Core_Model_Website $website, int $time): void
     {
@@ -370,8 +365,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
         );
 
         $groupedId = null;
-        $price = 0.0;
-        $actionStop = 0;
+        $chains = [];
         $group = [];
         $pending = [];
 
@@ -384,19 +378,20 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
                     }
                     $group = [];
                     $groupedId = (string) $row['grouped_id'];
-                    $price = $this->_applyRuleAction((float) $row['price'], $row);
-                    $actionStop = (int) $row['action_stop'];
-                } else {
-                    if ($actionStop === 0) {
-                        $price = $this->_applyRuleAction($price, $row);
-                    }
-                    $actionStop += (int) $row['action_stop'];
+                    $chains = [];
                 }
 
                 foreach ($dates as $date => $timestamp) {
-                    if ($this->_isRuleActiveAt($row, $timestamp)) {
-                        $this->_collectRulePrice($group, $date, $row, $price, $websiteId);
+                    if (!$this->_isRuleActiveAt($row, $timestamp)) {
+                        continue;
                     }
+
+                    [$price, $actionStop] = $chains[$date] ?? [(float) $row['price'], 0];
+                    if ($actionStop === 0) {
+                        $price = $this->_applyRuleAction($price, $row);
+                    }
+                    $chains[$date] = [$price, $actionStop + (int) $row['action_stop']];
+                    $this->_collectRulePrice($group, $date, $row, $price, $websiteId);
                 }
 
                 if (count($pending) >= self::INDEX_INSERT_BATCH) {
