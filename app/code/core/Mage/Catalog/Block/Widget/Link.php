@@ -39,7 +39,7 @@ class Mage_Catalog_Block_Widget_Link extends Mage_Core_Block_Html_Link implement
      */
     protected $_anchorText;
 
-    public function getHref(): ?string
+    public function getHref(): string
     {
         if ($this->hasStoreId()) {
             $store = Mage::app()->getStore($this->getStoreId());
@@ -74,7 +74,7 @@ class Mage_Catalog_Block_Widget_Link extends Mage_Core_Block_Html_Link implement
                 $this->_href = $this->_href . $symbol . '___store=' . $store->getCode();
             }
         } else {
-            return null;
+            return '';
         }
 
         return $this->_href;
