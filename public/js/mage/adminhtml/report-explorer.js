@@ -1091,6 +1091,18 @@ class MahoReportExplorer {
                 const share = (this.result.totals.values[column.key] ?? 0) / target.total * 100;
                 body.append(this.element('span', 'text-xs opacity-80', this.t('ofTarget', this.number.format(share), this.format(column, target.total))));
             }
+            const forecast = this.result.forecasts?.[column.key];
+            if (forecast) {
+                const label = this.result.request?.range === 'this_year' ? 'forecastYear' : 'forecastMonth';
+                // A forecast of a count, such as orders, is a whole number
+                const value = column.format === 'number' ? Math.round(forecast.value) : forecast.value;
+                const line = this.element('span', 'text-xs opacity-80', this.t(label, this.format(column, value)));
+                if (forecast.target) {
+                    line.append(` (${this.t('forecastOfTarget', this.number.format(forecast.value / forecast.target * 100))})`);
+                }
+                line.title = this.t('forecastHelp');
+                body.append(line);
+            }
             const spark = this.sparkline(this.series(column.key));
             if (spark) {
                 body.append(spark);
@@ -1469,18 +1481,31 @@ class MahoReportExplorer {
             cells.set(`${key(row, first)}\u0000${key(row, second)}`, row.values[metric.key]);
         }
         const rowKeys = [...rowLabels.keys()].sort(order);
-        const columnKeys = [...columnLabels.keys()].sort(order);
+        let columnKeys = [...columnLabels.keys()].sort(order);
+        // A column of whole numbers, such as the months after the first order, shows each number between its ends
+        if (columnKeys.length > 1 && columnKeys.every((key) => /^-?\d+$/.test(key))) {
+            const firstColumn = Number(columnKeys[0]);
+            const lastColumn = Number(columnKeys[columnKeys.length - 1]);
+            if (lastColumn - firstColumn < 400) {
+                columnKeys = Array.from({ length: lastColumn - firstColumn + 1 }, (_, index) => String(firstColumn + index));
+                columnKeys.forEach((columnKey) => columnLabels.has(columnKey) || columnLabels.set(columnKey, columnKey));
+            }
+        }
         if (this.view.matrixCumulative) {
-            // A cohort row ends at the month of the end of the period, any other row at its last value
-            const end = /^(\d{4})-(\d{2})/.exec(this.result?.period?.to ?? '');
-            const months = (key) => {
-                const match = /^(\d{4})-(\d{2})$/.exec(key);
-                return match ? Number(match[1]) * 12 + Number(match[2]) : null;
+            // A cohort row ends at the month or the week of the end of the period, any other row at its last value
+            const end = /^(\d{4})-(\d{2})-(\d{2})/.exec(this.result?.period?.to ?? '');
+            const age = (rowKey) => {
+                const month = /^(\d{4})-(\d{2})$/.exec(rowKey);
+                if (end && month) {
+                    return (Number(end[1]) - Number(month[1])) * 12 + Number(end[2]) - Number(month[2]);
+                }
+                const week = /^\d{4}-\d{2}-\d{2}$/.exec(String(rowLabels.get(rowKey) ?? ''));
+                return end && week ? Math.floor((Date.parse(end[0]) - Date.parse(week[0])) / 604800000) : null;
             };
             for (const rowKey of rowKeys) {
-                const age = end && months(rowKey) !== null ? Number(end[1]) * 12 + Number(end[2]) - months(rowKey) : null;
-                const last = age !== null && columnKeys.every((key) => !Number.isNaN(Number(key)))
-                    ? columnKeys.findLastIndex((columnKey) => Number(columnKey) <= age)
+                const rowAge = age(rowKey);
+                const last = rowAge !== null && columnKeys.every((key) => !Number.isNaN(Number(key)))
+                    ? columnKeys.findLastIndex((columnKey) => Number(columnKey) <= rowAge)
                     : columnKeys.findLastIndex((columnKey) => cells.get(`${rowKey}\u0000${columnKey}`) !== undefined);
                 let sum = 0;
                 columnKeys.slice(0, last + 1).forEach((columnKey) => {

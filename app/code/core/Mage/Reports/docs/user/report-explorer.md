@@ -1,5 +1,5 @@
 ---
-description: The Reports > Explorer page runs ready-made reports and reports that you build, on live order, cart, customer and stock data, with a chart, a comparison with an earlier period, the records behind a number, an explanation of a change, notes, monthly targets, saved reports pinned to the admin dashboard or sent by email, alerts when a metric changes, and CSV export.
+description: The Reports > Explorer page runs ready-made reports and reports that you build, on live order, cart, customer and stock data, with a chart, a comparison with an earlier period, the records behind a number, an explanation of a change, notes, monthly targets and forecasts, saved reports pinned to the admin dashboard or sent by email, alerts when a metric changes, and CSV export.
 admin_pages: [report_explorer]
 ---
 
@@ -43,7 +43,8 @@ administrator.
 
 The days of a period are days in the time zone of the default configuration (**System >
 Configuration > General > Locale Options > Timezone**). The week starts on the day that
-**First Day of Week** sets. Amounts are in the global currency.
+**First Day of Week** sets. Amounts are in the global currency. Group the orders by **Order
+currency** to see how much the customers buy in each currency, still in the global currency.
 
 A report with only a date grouping shows the newest date first. Click a column title to sort the
 rows by that column. A change shows in green when it is good and
@@ -88,6 +89,10 @@ again, for example 25 % in column 3.
   its customers up to each month. Add **Share of the first column** to see this value as a multiple
   of the first month. A row stops at the month of the end of the period.
 - Filter by **Customer segment** to see the cohorts of one segment only.
+
+The ready-made report **Weekly customer cohorts** does the same by week, on the last 90 days. A row
+is the week of the first order, with the first day of the week as its name. The first row can be a
+part of a week, because the period starts on any day.
 
 ## Customer segments
 
@@ -161,6 +166,19 @@ and as a percent on the card of the metric. For a day or a week, the target is t
 divided by the days of the month. A target set while one store view is selected applies to that
 store view. Otherwise, the target applies to the report of all the store views.
 Only a metric that adds up, such as **Net sales** or **Units**, can have a target.
+
+## Forecast
+
+With the period **This month** or **This year**, the card of each metric that adds up also shows a
+forecast: the total at the end of the month or the year, if the rest of the period has the same
+pace as the days so far. For example, net sales of 10,000 on the morning of 16 November give a
+forecast of about 20,000 for November. When the metric has targets, the card also shows the
+forecast as a percent of the target of the whole month or year.
+
+- The forecast starts after a tenth of the period: on the 4th day of a month, or in the second
+  half of January.
+- It does not know about seasons, campaigns or holidays. Compare it with the same month of the
+  last year before you act on it.
 
 ## Pinned reports on the dashboard
 

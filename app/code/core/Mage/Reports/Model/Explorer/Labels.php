@@ -10,6 +10,8 @@
 
 declare(strict_types=1);
 
+use Maho\Report\Buckets;
+
 class Mage_Reports_Model_Explorer_Labels
 {
     /**
@@ -38,6 +40,7 @@ class Mage_Reports_Model_Explorer_Labels
             'customer' => $this->customerNames($values),
             'attribute_option' => $this->attributeOptions($values),
             'weekday' => $this->weekdays($values),
+            'week' => $this->weeks($values),
             default => [],
         };
     }
@@ -185,6 +188,22 @@ class Mage_Reports_Model_Explorer_Labels
      *
      * @param list<string|int> $values
      * @return array<int, string>
+     */
+    private function weeks(array $values): array
+    {
+        $reference = new DateTimeImmutable(Buckets::weekReference(Mage_Reports_Model_Explorer_Runner::firstDayOfWeek()), new DateTimeZone('UTC'));
+        $labels = [];
+        foreach ($values as $value) {
+            if (is_numeric($value)) {
+                $labels[$value] = $reference->modify('+' . (int) $value . ' days')->format('Y-m-d');
+            }
+        }
+        return $labels;
+    }
+
+    /**
+     * @param list<string|int> $values
+     * @return array<string|int, string>
      */
     private function weekdays(array $values): array
     {

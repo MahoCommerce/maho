@@ -36,7 +36,52 @@ class Mage_Reports_Service_Explorer
     public function run(Request $request, Mage_Reports_Model_Explorer_Access $access): array
     {
         $result = Mage::getSingleton('reports/explorer_runner')->run($request, $access);
-        return $this->addTimeContext($result, Request::fromArray($result['request']), $access);
+        $request = Request::fromArray($result['request']);
+        $result = $this->addTimeContext($result, $request, $access);
+        return $this->addForecasts($result, $request);
+    }
+
+    /**
+     * Add the forecast of each metric that adds up, for a range that ends after today, such as this month: its total
+     * at the end of the calendar period at the pace so far. When the metric has a target for the report, the forecast
+     * also has the target of the whole calendar period.
+     *
+     * @param array<string, mixed> $result
+     * @return array<string, mixed>
+     */
+    private function addForecasts(array $result, Request $request): array
+    {
+        $result['forecasts'] = [];
+        $period = $result['period'] ?? null;
+        $dataset = Mage::getSingleton('reports/explorer_registry')->getDataset($request->dataset);
+        $now = new DateTimeImmutable('now', new DateTimeZone($period['timezone'] ?? 'UTC'));
+        $calendar = \Maho\Report\Forecast::calendarPeriod($request->range, $now);
+        if ($period === null || $dataset === null || $calendar === null) {
+            return $result;
+        }
+        [$start, $end] = $calendar;
+        foreach ($request->metrics as $metric) {
+            $value = $result['totals']['values'][$metric] ?? null;
+            if (!is_numeric($value) || !$dataset->isAdditive($metric)) {
+                continue;
+            }
+            $forecast = \Maho\Report\Forecast::atPace((float) $value, $start, $end, $now);
+            if ($forecast === null) {
+                continue;
+            }
+            $target = null;
+            if (isset($result['targets'][$metric])) {
+                $storeId = $request->storeIds[0] ?? 0;
+                $target = \Maho\Report\Targets::spread(
+                    Mage::getService('reports/target')->monthly($dataset->code, $metric, $storeId),
+                    \Maho\Report\Definition\Granularity::Day,
+                    $start,
+                    $end->modify('-1 day'),
+                )['total'] ?? null;
+            }
+            $result['forecasts'][$metric] = ['value' => $forecast, 'to' => $end->modify('-1 day')->format('Y-m-d'), 'target' => $target];
+        }
+        return $result;
     }
 
     /**

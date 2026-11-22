@@ -113,6 +113,11 @@ For a report that groups by the date only, with no filter, the answer also has:
   `total` (the target of the period). For a day or a week, the target is the monthly target
   divided by the days of the month.
 
+With the range `this_month` or `this_year`, the answer also has `forecasts`: for each metric that
+adds up, `value` (the total at the end of the month or the year at the pace so far), `to` (the last
+day of the month or the year) and `target` (the target of the whole month or year, or null). The
+forecast starts after a tenth of the period.
+
 ## Records
 
 `GET /reports/explore/records` takes the parameters of the report, and lists the records that the

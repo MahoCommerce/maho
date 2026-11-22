@@ -13,6 +13,7 @@ namespace Maho\Report;
 
 use Maho\Report\Definition\Aggregate;
 use Maho\Report\Definition\Dataset;
+use Maho\Report\Definition\FieldType;
 use Maho\Report\Definition\Metric;
 use Maho\Report\Definition\MetricFormat;
 
@@ -141,7 +142,10 @@ final class PostProcessor
             $dimensions = [];
             foreach ($plan->dimensions as $dimension) {
                 $raw = $row[$dimension->alias] ?? null;
-                if ($dimension->granularity !== null) {
+                if ($dimension->granularity === null && $dimension->field->type === FieldType::Integer && is_numeric($raw)) {
+                    // A database can return a whole number as a decimal, such as "3.0000", and the key must be one value
+                    $raw = (int) round((float) $raw);
+                } elseif ($dimension->granularity !== null) {
                     $raw = Buckets::normalize($dimension->granularity, $raw);
                     if ($periodMap !== null && $raw !== null) {
                         $raw = $periodMap[$raw] ?? null;

@@ -32,7 +32,8 @@ use Maho\ApiPlatform\Metadata\ListFilter;
             description: 'Run a report: one dataset, its metrics, grouped by up to 3 dimensions, for a period, optionally compared with an earlier period. '
                 . 'List the datasets, metrics, dimensions, filter fields and presets first with the datasets tool. '
                 . 'Either name a preset, or give a dataset and its metrics. Amounts are in the global currency. Dates are local days of the default time zone. '
-                . 'The answer has columns, rows (dimensions with raw values, labels, values, and compare and change when compared), totals and totalRows.',
+                . 'The answer has columns, rows (dimensions with raw values, labels, values, and compare and change when compared), totals and totalRows. '
+                . 'For this_month and this_year, forecasts gives the total of each metric that adds up at the end of the month or year, at the pace so far, with the target of the whole period when one exists.',
             parameters: [
                 'preset' => new ListFilter('The code of a ready-made report, such as sales_overview or sales_by_payment_method. The other parameters change it'),
                 'dataset' => new ListFilter('The code of the dataset, such as sales_orders, sales_items, carts or catalog_stock'),

@@ -11,6 +11,7 @@
 declare(strict_types=1);
 
 use Maho\Db\Adapter\AdapterInterface;
+use Maho\Report\Buckets;
 use Maho\Report\Context;
 use Maho\Report\DatasetProvider;
 use Maho\Report\Definition\Aggregate;
@@ -89,6 +90,11 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
         $firstOrder = $firstOrderOf('first_order.created_at');
         $monthNumber = static fn(string $date): string => '(' . $adapter->getDateExtractSql($date, AdapterInterface::INTERVAL_YEAR)
             . ' * 12 + ' . $adapter->getDateExtractSql($date, AdapterInterface::INTERVAL_MONTH) . ')';
+        // The first day of the week of a local date, as days after the reference day of the period grouping by week
+        $weekStart = static function (string $date, Context $context) use ($adapter): string {
+            $days = (string) $adapter->getDateDiffSql($date, $adapter->quote(Buckets::weekReference($context->firstDayOfWeek)));
+            return "(({$days}) - (({$days}) % 7))";
+        };
 
         foreach ([
             new Field(
@@ -105,6 +111,20 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
                     . ' - ' . $monthNumber($firstOrderOf($context->localTime('first_order.created_at'))) . ')',
             ),
             new Field(
+                'first_order_week',
+                $helper->__('Week of the first order'),
+                FieldType::Integer,
+                static fn(Context $context): string => $weekStart($firstOrderOf($context->localTime('first_order.created_at')), $context),
+                labels: 'week',
+            ),
+            new Field(
+                'weeks_since_first_order',
+                $helper->__('Weeks after the first order'),
+                FieldType::Integer,
+                static fn(Context $context): string => '((' . $weekStart($context->localTime('main.created_at'), $context)
+                    . ' - ' . $weekStart($firstOrderOf($context->localTime('first_order.created_at')), $context) . ') / 7)',
+            ),
+            new Field(
                 'first_order_in_period',
                 $helper->__('First order in the period'),
                 FieldType::Boolean,
@@ -117,6 +137,7 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
             new Field('created_at', $helper->__('Order date'), FieldType::Date, 'main.created_at'),
             new Field('updated_at', $helper->__('Last update of the order'), FieldType::Date, 'main.updated_at'),
             new Field('store_id', $helper->__('Store view'), FieldType::Id, 'main.store_id', labels: 'store'),
+            new Field('order_currency', $helper->__('Order currency'), FieldType::String, 'main.order_currency_code'),
             new Field('status', $helper->__('Order status'), FieldType::String, 'main.status', labels: 'order_status'),
             new Field('state', $helper->__('Order state'), FieldType::String, 'main.state', labels: 'order_state'),
             new Field('customer_group_id', $helper->__('Customer group'), FieldType::Id, 'main.customer_group_id', labels: 'customer_group'),
@@ -253,6 +274,9 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
             ['customer_kind', $helper->__('New or returning')],
             ['first_order_month', $helper->__('Month of the first order')],
             ['months_since_first_order', $helper->__('Months after the first order')],
+            ['first_order_week', $helper->__('Week of the first order')],
+            ['weeks_since_first_order', $helper->__('Weeks after the first order')],
+            ['order_currency', $helper->__('Order currency')],
             ['payment_method', $helper->__('Payment method')],
             ['shipping_method', $helper->__('Shipping carrier')],
             ['shipping_description', $helper->__('Shipping method')],
@@ -357,6 +381,13 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
                 'sort' => 'first_order_month',
                 'range' => 'last_12_months',
             ], ChartType::Matrix, $helper->__('The customers of each month of their first order, and how many of them order again in each month after it.')),
+            new Preset('customer_cohorts_weekly', $helper->__('Weekly customer cohorts'), $customers, [
+                'metrics' => ['unique_customers', 'orders', 'net_sales'],
+                'dimensions' => ['first_order_week', 'weeks_since_first_order'],
+                'filters' => [['field' => 'first_order_in_period', 'operator' => 'eq', 'value' => 1]],
+                'sort' => 'first_order_week',
+                'range' => 'last_90_days',
+            ], ChartType::Matrix, $helper->__('The customers of each week of their first order, and how many of them order again in each week after it.')),
         ] as $preset) {
             $dataset->addPreset($preset);
         }
