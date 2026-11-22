@@ -8,7 +8,7 @@
  * @package Mage_Reports
  */
 
-class Mage_Reports_Model_Resource_Customer_Totals_Collection extends Mage_Reports_Model_Resource_Order_Collection implements Mage_Reports_Model_Resource_DateRangeInterface
+class Mage_Reports_Model_Resource_Customer_Totals_Collection extends Mage_Reports_Model_Resource_Order_Collection
 {
     #[\Override]
     protected function _construct()

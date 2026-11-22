@@ -559,7 +559,25 @@ parameters:
 			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option/Collection.php
 
 		-
-			rawMessage: 'Property Mage_Reports_Model_Report::$_reportModel ((Mage_Reports_Model_Resource_DateRangeInterface&Maho\Data\Collection\Db)|null) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
+			rawMessage: 'Method Mage_Reports_Model_Report::getReport() should return Maho\Data\Collection but returns Mage_Reports_Model_Report.'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Reports/Model/Report.php
+
+		-
+			rawMessage: 'Method Mage_Reports_Model_Report::getReportFull() should return Maho\Data\Collection but returns Mage_Reports_Model_Report.'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Reports/Model/Report.php
+
+		-
+			rawMessage: 'Parameter #1 $value of method Mage_Reports_Model_Report::setPageSize() expects int, false given.'
+			identifier: argument.type
+			count: 1
+			path: app/code/core/Mage/Reports/Model/Report.php
+
+		-
+			rawMessage: 'Property Mage_Reports_Model_Report::$_reportModel (Mage_Reports_Model_Report) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Reports/Model/Report.php

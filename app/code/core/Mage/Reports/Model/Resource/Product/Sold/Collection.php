@@ -8,7 +8,7 @@
  * @package Mage_Reports
  */
 
-class Mage_Reports_Model_Resource_Product_Sold_Collection extends Mage_Reports_Model_Resource_Product_Collection implements Mage_Reports_Model_Resource_DateRangeInterface
+class Mage_Reports_Model_Resource_Product_Sold_Collection extends Mage_Reports_Model_Resource_Product_Collection
 {
     #[\Override]
     protected function _construct(): void
@@ -25,7 +25,6 @@ class Mage_Reports_Model_Resource_Product_Sold_Collection extends Mage_Reports_M
      * @param string $to
      * @return $this
      */
-    #[\Override]
     public function setDateRange($from, $to)
     {
         $this->_reset()
@@ -40,7 +39,6 @@ class Mage_Reports_Model_Resource_Product_Sold_Collection extends Mage_Reports_M
      * @param array $storeIds
      * @return $this
      */
-    #[\Override]
     public function setStoreIds($storeIds)
     {
         if ($storeIds) {

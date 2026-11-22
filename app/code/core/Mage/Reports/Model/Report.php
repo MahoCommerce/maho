@@ -17,7 +17,10 @@
  */
 class Mage_Reports_Model_Report extends Mage_Core_Model_Abstract
 {
-    protected (\Maho\Data\Collection\Db&Mage_Reports_Model_Resource_DateRangeInterface)|null $_reportModel = null;
+    /**
+     * @var Mage_Reports_Model_Report
+     */
+    protected $_reportModel;
 
     /**
      * @param string $modelClass
@@ -39,7 +42,7 @@ class Mage_Reports_Model_Report extends Mage_Core_Model_Abstract
     {
         return $this->_reportModel
             ->setDateRange($from, $to)
-            ->setPageSize(null)
+            ->setPageSize(false)
             ->setStoreIds($this->getStoreIds());
     }
 
