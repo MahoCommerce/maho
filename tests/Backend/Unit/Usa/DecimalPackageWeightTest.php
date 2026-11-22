@@ -3,6 +3,7 @@
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Usa
  */
 
 declare(strict_types=1);
@@ -42,6 +43,7 @@ $decimalPackageCases = [
     'fractional quantity above one' => [8.0, 1.5, true, null, [12.0]],
     'weight at the package limit' => [40.0, 1.75, true, null, [70.0]],
     'weight above the package limit' => [50.0, 1.5, true, null, [70.0, 5.0]],
+    'two packages of the same weight' => [80.0, 1.75, true, null, [70.0, 70.0]],
     'quantity increments' => [8.0, 1.5, true, 0.5, [12.0]],
     'indivisible quantity' => [8.0, 0.5, false, null, [4.0]],
 ];
@@ -86,6 +88,7 @@ it('quotes the actual package weights for decimal quantities', function (
             return true;
         }
 
+        #[\Override]
         public function collectRates(Mage_Shipping_Model_Rate_Request $request): Mage_Shipping_Model_Rate_Result
         {
             $weight = (float) $request->getPackageWeight();
@@ -109,8 +112,9 @@ it('quotes the actual package weights for decimal quantities', function (
     $shipping->collectCarrierRates('test', $request);
 
     $packages = $shipping->composePackagesForCarrier($carrier, $request);
-    expect(array_map(floatval(...), array_keys($packages)))->toBe($expected)
-        ->and($carrier->weights->getArrayCopy())->toBe($expected)
+    $uniqueWeights = array_values(array_unique($expected, SORT_NUMERIC));
+    expect(array_map(floatval(...), array_keys($packages)))->toBe($uniqueWeights)
+        ->and($carrier->weights->getArrayCopy())->toBe($uniqueWeights)
         ->and($shipping->getResult()->getCheapestRate()?->getPrice())->toBe(array_sum($expected));
 })->with($decimalPackageCases);
 
@@ -125,16 +129,24 @@ it('writes the actual package weights into the DHL quote XML', function (
     $request = decimalPackageRequest($weight, $qty, $divisible, $increment);
     $request->setOrigCountryId('IT')
         ->setOrigCity('Rome')
+        ->setOrigPostcode('00100')
         ->setDestCountryId('IT')
         ->setDestPostcode('20121')
         ->setDestCity('Milan')
         ->setDestStreet('1 Example Street')
-        ->setPackageValue(10.0)
-        ->setData('orig_postal', '00100');
+        ->setPackageValue(10.0);
     $carrier = new class ($storeUnit) extends Mage_Usa_Model_Shipping_Carrier_Dhl_International {
+        public ?string $quoteRequest = null;
+
         public function __construct(private readonly string $storeUnit)
         {
             parent::__construct();
+        }
+
+        #[\Override]
+        public function getConfigFlag(mixed $field): bool
+        {
+            return $field === 'active';
         }
 
         #[\Override]
@@ -147,22 +159,26 @@ it('writes the actual package weights into the DHL quote XML', function (
             };
         }
 
-        /** @return list<float> */
-        public function packageWeights(Mage_Shipping_Model_Rate_Request $request): array
+        #[\Override]
+        protected function _getQuotesFromServer(mixed $request): string
         {
-            $this->setRequest($request);
-            $quote = $this->_buildQuotesRequestXml();
-
-            $weights = [];
-            foreach ($quote->GetQuote->BkgDetails->Pieces->Piece as $piece) {
-                $weights[] = (float) $piece->Weight;
-            }
-            return $weights;
+            $this->quoteRequest = $request;
+            return '<r/>';
         }
     };
 
-    expect($carrier->packageWeights($request))->toBe($expected);
+    $carrier->collectRates($request);
+
+    expect($carrier->quoteRequest)->not->toBeNull();
+    $details = new SimpleXMLElement($carrier->quoteRequest)->GetQuote->BkgDetails;
+    $weights = [];
+    foreach ($details->Pieces->Piece as $piece) {
+        $weights[] = (float) $piece->Weight;
+    }
+    expect((string) $details->WeightUnit)->toBe('KG')
+        ->and($weights)->toBe($expected);
 })->with([
     ...$decimalPackageCases,
     'pounds converted to kilograms once' => [5.0, 0.5, true, null, [1.134], 'L'],
+    'pounds converted to kilograms across the package limit' => [100.0, 2.0, true, null, [70.0, 20.718], 'L'],
 ]);
