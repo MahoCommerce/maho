@@ -20,6 +20,8 @@ final class Dimension
      * @param string $field the code of the field to group by; empty for the period dimension
      * @param string|null $labels the code of the label resolver; null takes the one of the field
      * @param bool $nonAdditive a row can appear under several values, so the rows do not add up to the total
+     * @param bool $explain "Explain the change" reads this grouping when the caller names no grouping. A grouping that
+     *                      describes the customers, such as a cohort, does not explain why a number changed
      */
     public function __construct(
         public readonly string $code,
@@ -27,6 +29,7 @@ final class Dimension
         public readonly string $field,
         public readonly ?string $labels = null,
         public readonly bool $nonAdditive = false,
+        public readonly bool $explain = true,
     ) {}
 
     public function isPeriod(): bool

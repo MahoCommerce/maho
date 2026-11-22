@@ -79,17 +79,23 @@ Maho adds two indexes for the Explorer:
 
 ## Speed on a large store
 
-These are the times of a test store on MySQL with 1.2 million orders over two years (about 1,700
-orders a day), with no cache and before the daily totals (see below):
+These are the times of a test store on PostgreSQL 18 with 1.2 million orders over two years
+(about 1,650 orders a day), 2.2 million order lines and 280,000 customer emails, on a laptop, with
+no cache:
 
 | Report | Last 30 days | Last 12 months |
 |--------|--------------|----------------|
-| Sales overview | 1.2 s | 14 s |
-| Product performance | 8 s | 36 s |
-| Explain the change on Sales overview | 6 s | 61 s |
+| Sales overview | 1.7 s | 0.05 s (daily totals) |
+| New and returning customers | 3.2 s | 0.03 s (daily totals) |
+| Product performance | 1.6 s | 3.2 s |
+| Customer cohorts (12 months) | | 5.9 s |
+| Weekly customer cohorts (90 days) | 5.8 s | |
+| Explain the change on Sales overview | 7.2 s | 4.8 s (daily totals) |
 
-A report reads every record of its period, so the time grows with the number of orders in the
-period. On a store of this size, keep the cache on, and use a read replica for long periods.
+A report that cannot read the daily totals reads every record of its period, so its time grows
+with the number of orders in the period. A report on the period that includes today first
+calculates today again from its orders, which took 1.6 s on this store. On a store of this size,
+keep the cache on, and use a read replica for long periods.
 
 ### Daily totals of the orders
 

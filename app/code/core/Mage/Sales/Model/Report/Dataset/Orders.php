@@ -79,15 +79,20 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
 
         $customerTypes = ['guest' => $helper->__('Guest'), 'registered' => $helper->__('Registered')];
         $customerKinds = ['new' => $helper->__('New customer'), 'returning' => $helper->__('Returning customer')];
-        $returning = 'EXISTS (SELECT 1 FROM ' . $adapter->quoteIdentifier($orderTable) . ' earlier'
-            . ' WHERE earlier.customer_email = main.customer_email AND earlier.created_at < main.created_at'
-            . ' AND earlier.state NOT IN (' . $adapter->quote(self::NOT_PLACED_STATES) . '))';
+        // An order is of a returning customer when the first placed order of its email is earlier
+        $returning = 'first_order.first_at < main.created_at';
 
-        // The first placed order of the customer email of the order, for the customer cohorts
-        $firstOrderOf = static fn(string $date): string => '(SELECT MIN(' . $date . ') FROM ' . $adapter->quoteIdentifier($orderTable) . ' first_order'
-            . ' WHERE first_order.customer_email = main.customer_email'
-            . ' AND first_order.state NOT IN (' . $adapter->quote(self::NOT_PLACED_STATES) . '))';
-        $firstOrder = $firstOrderOf('first_order.created_at');
+        // The first placed order of each customer email, for the customer cohorts. One grouped read of the orders is
+        // much faster than a subquery for each order of the period
+        $dataset->addJoin(new Join(
+            'first_order',
+            static fn(Context $context): \Maho\Db\Select => $context->adapter->select()
+                ->from(['placed' => $orderTable], ['customer_email', 'first_at' => new \Maho\Db\Expr('MIN(placed.created_at)')])
+                ->where('placed.state NOT IN (' . $adapter->quote(self::NOT_PLACED_STATES) . ')')
+                ->group('placed.customer_email'),
+            'first_order.customer_email = main.customer_email',
+        ));
+        $firstOrder = static fn(Context $context): string => $context->localTime('first_order.first_at');
         $monthNumber = static fn(string $date): string => '(' . $adapter->getDateExtractSql($date, AdapterInterface::INTERVAL_YEAR)
             . ' * 12 + ' . $adapter->getDateExtractSql($date, AdapterInterface::INTERVAL_MONTH) . ')';
         // The first day of the week of a local date, as days after the reference day of the period grouping by week
@@ -101,20 +106,23 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
                 'first_order_month',
                 $helper->__('Month of the first order'),
                 FieldType::String,
-                static fn(Context $context): string => (string) $adapter->getDateFormatSql($firstOrderOf($context->localTime('first_order.created_at')), '%Y-%m'),
+                static fn(Context $context): string => (string) $adapter->getDateFormatSql($firstOrder($context), '%Y-%m'),
+                ['first_order'],
             ),
             new Field(
                 'months_since_first_order',
                 $helper->__('Months after the first order'),
                 FieldType::Integer,
                 static fn(Context $context): string => '(' . $monthNumber($context->localTime('main.created_at'))
-                    . ' - ' . $monthNumber($firstOrderOf($context->localTime('first_order.created_at'))) . ')',
+                    . ' - ' . $monthNumber($firstOrder($context)) . ')',
+                ['first_order'],
             ),
             new Field(
                 'first_order_week',
                 $helper->__('Week of the first order'),
                 FieldType::Integer,
-                static fn(Context $context): string => $weekStart($firstOrderOf($context->localTime('first_order.created_at')), $context),
+                static fn(Context $context): string => $weekStart($firstOrder($context), $context),
+                ['first_order'],
                 labels: 'week',
             ),
             new Field(
@@ -122,7 +130,8 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
                 $helper->__('Weeks after the first order'),
                 FieldType::Integer,
                 static fn(Context $context): string => '((' . $weekStart($context->localTime('main.created_at'), $context)
-                    . ' - ' . $weekStart($firstOrderOf($context->localTime('first_order.created_at')), $context) . ') / 7)',
+                    . ' - ' . $weekStart($firstOrder($context), $context) . ') / 7)',
+                ['first_order'],
             ),
             new Field(
                 'first_order_in_period',
@@ -130,7 +139,8 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
                 FieldType::Boolean,
                 static fn(Context $context): string => $context->utcFrom === null
                     ? '1'
-                    : "CASE WHEN {$firstOrder} >= " . $context->quote($context->utcFrom) . ' THEN 1 ELSE 0 END',
+                    : 'CASE WHEN first_order.first_at >= ' . $context->quote($context->utcFrom) . ' THEN 1 ELSE 0 END',
+                ['first_order'],
             ),
             new Field('order_id', $helper->__('Order ID'), FieldType::Id, 'main.entity_id', filterable: false),
             new Field('increment_id', $helper->__('Order #'), FieldType::String, 'main.increment_id'),
@@ -153,10 +163,11 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
                 $helper->__('New or returning'),
                 FieldType::String,
                 "CASE WHEN {$returning} THEN 'returning' ELSE 'new' END",
+                ['first_order'],
                 options: $customerKinds,
             ),
-            new Field('is_returning', $helper->__('Returning customer'), FieldType::Boolean, "CASE WHEN {$returning} THEN 1 ELSE 0 END"),
-            new Field('is_new_customer', $helper->__('New customer'), FieldType::Boolean, "CASE WHEN {$returning} THEN 0 ELSE 1 END"),
+            new Field('is_returning', $helper->__('Returning customer'), FieldType::Boolean, "CASE WHEN {$returning} THEN 1 ELSE 0 END", ['first_order']),
+            new Field('is_new_customer', $helper->__('New customer'), FieldType::Boolean, "CASE WHEN {$returning} THEN 0 ELSE 1 END", ['first_order']),
             new Field('customer_id', $helper->__('Customer'), FieldType::Id, 'main.customer_id', personal: true, labels: 'customer'),
             new Field('customer_email', $helper->__('Customer email'), FieldType::String, 'LOWER(TRIM(main.customer_email))', personal: true),
             new Field('customer_key', $helper->__('Customer'), FieldType::String, 'LOWER(TRIM(main.customer_email))', filterable: false),
@@ -272,11 +283,10 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
             ['customer_group_id', $helper->__('Customer group')],
             ['customer_type', $helper->__('Customer type')],
             ['customer_kind', $helper->__('New or returning')],
-            ['first_order_month', $helper->__('Month of the first order')],
-            ['months_since_first_order', $helper->__('Months after the first order')],
-            ['first_order_week', $helper->__('Week of the first order')],
-            ['weeks_since_first_order', $helper->__('Weeks after the first order')],
-            ['order_currency', $helper->__('Order currency')],
+            ['first_order_month', $helper->__('Month of the first order'), false],
+            ['months_since_first_order', $helper->__('Months after the first order'), false],
+            ['first_order_week', $helper->__('Week of the first order'), false],
+            ['weeks_since_first_order', $helper->__('Weeks after the first order'), false],
             ['payment_method', $helper->__('Payment method')],
             ['shipping_method', $helper->__('Shipping carrier')],
             ['shipping_description', $helper->__('Shipping method')],
@@ -284,11 +294,13 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
             ['billing_country', $helper->__('Billing country')],
             ['tax_country', $helper->__('Tax country')],
             ['coupon_code', $helper->__('Coupon code')],
+            ['order_currency', $helper->__('Order currency')],
             ['customer_id', $helper->__('Customer')],
             ['customer_email', $helper->__('Customer email')],
             ['billing_postcode', $helper->__('Billing postcode')],
-        ] as [$code, $label]) {
-            $dataset->addDimension(new Dimension($code, $label, $code));
+        ] as $dimension) {
+            [$code, $label] = $dimension;
+            $dataset->addDimension(new Dimension($code, $label, $code, explain: $dimension[2] ?? true));
         }
 
         $this->addPresets($dataset);

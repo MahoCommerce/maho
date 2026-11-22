@@ -167,3 +167,19 @@ it('groups the orders by the currency of the order', function () {
         ->and(array_sum($orders))->toBe(3)
         ->and($orders)->toHaveCount(2);
 });
+
+it('leaves the cohort groupings out of the explanation of a change, and keeps new or returning', function () {
+    $result = Mage::getService('reports/explorer')->explain(Request::fromArray([
+        'dataset' => 'sales_orders',
+        'metrics' => ['orders'],
+        'from' => '2003-03-01',
+        'to' => '2003-03-31',
+        'compare' => 'previous_period',
+        'scope' => 'all',
+        'filters' => [['field' => 'customer_email', 'operator' => 'in', 'value' => EXPLORER_COHORT_EMAILS]],
+    ]), Mage_Reports_Model_Explorer_Access::full(), 'orders');
+    $codes = array_column($result['dimensions'], 'code');
+
+    expect($codes)->toContain('customer_kind')
+        ->and(array_intersect($codes, ['first_order_month', 'months_since_first_order', 'first_order_week', 'weeks_since_first_order']))->toBe([]);
+});

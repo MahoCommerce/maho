@@ -134,6 +134,8 @@ Orders > Actions > View**.
 Click **Explain the change** on the chart. The page compares the metric of the chart with the
 earlier period, or with the period before when the report has no comparison. For each grouping,
 it lists the values with the biggest change, for example the payment methods or the countries.
+The cohort groupings, such as **Month of the first order**, are not in this list: they describe
+the customers, not the cause of a change.
 
 Each value shows its change and its change in percent. A value that was small in the earlier
 period, under 5% of the earlier total of its grouping, shows no percent, because a change from 1 to 9

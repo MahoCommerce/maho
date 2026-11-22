@@ -190,7 +190,7 @@ class Mage_Reports_Service_Explorer
             }
             $field = $dataset->getField($dimension->field);
             $chosen = $dimensions === null
-                ? !$field->personal && $field->code !== $records?->idField && !isset($filtered[$field->code])
+                ? $dimension->explain && !$field->personal && $field->code !== $records?->idField && !isset($filtered[$field->code])
                 : in_array($dimension->code, $dimensions, true);
             if ($chosen && ($access->personalData || !$field->personal)) {
                 $candidates[] = $dimension;
