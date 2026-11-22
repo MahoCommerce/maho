@@ -646,7 +646,7 @@ final class Mage
         if (!class_exists($className)) {
             $className = 'Mage_Core_Exception';
         }
-        return $code === 0 ? new $className($message) : new $className($message, $code);
+        return new $className($message, $code);
     }
 
     /**
