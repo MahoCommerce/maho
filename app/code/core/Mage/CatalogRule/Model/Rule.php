@@ -463,7 +463,6 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      */
     public function calcProductPriceRule(Mage_Catalog_Model_Product $product, $price)
     {
-        $priceRules = null;
         $productId  = $product->getId();
         $storeId    = $product->getStoreId();
         $websiteId  = Mage::app()->getStore($storeId)->getWebsiteId();
@@ -472,44 +471,44 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
         } else {
             $customerGroupId = Mage::helper('customer')->getCurrentGroupId();
         }
-        $storeNow   = Mage::app()->getLocale()->utcToStore();
-        $cacheKey   = $storeNow->format(Mage_Core_Model_Locale::DATE_FORMAT) . "|$websiteId|$customerGroupId|$productId|$price";
+        $timestamp = Mage::app()->getLocale()->utcToStore($storeId)->getTimestamp();
+        $isConfigurableOption = (bool) $product->getParentId();
+        $cacheKey = "$websiteId|$customerGroupId|$productId|$price|" . (int) $isConfigurableOption;
 
-        if (!array_key_exists($cacheKey, self::$_priceRulesData)) {
-            $rulesData = $this->_getResource()->getRulesFromProduct($storeNow->getTimestamp(), $websiteId, $customerGroupId, $productId);
+        if ((self::$_priceRulesData[$cacheKey][0] ?? null) !== $timestamp) {
+            $priceRules = null;
+            $rulesData = $this->_getResource()->getRulesFromProduct($timestamp, $websiteId, $customerGroupId, $productId);
             if ($rulesData) {
+                $priceRules = $price;
                 foreach ($rulesData as $ruleData) {
-                    if ($product->getParentId()) {
+                    if ($isConfigurableOption) {
                         if (!empty($ruleData['sub_simple_action'])) {
                             $priceRules = Mage::helper('catalogrule')->calcPriceRule(
                                 $ruleData['sub_simple_action'],
                                 $ruleData['sub_discount_amount'],
-                                $priceRules ?: $price,
+                                $priceRules,
                             );
-                        } else {
-                            $priceRules = ($priceRules ?: $price);
-                        }
-                        if ($ruleData['action_stop']) {
-                            break;
                         }
                     } else {
                         $priceRules = Mage::helper('catalogrule')->calcPriceRule(
                             $ruleData['action_operator'],
                             $ruleData['action_amount'],
-                            $priceRules ?: $price,
+                            $priceRules,
                         );
-                        if ($ruleData['action_stop']) {
-                            break;
-                        }
+                    }
+                    if ($ruleData['action_stop']) {
+                        break;
                     }
                 }
-                return self::$_priceRulesData[$cacheKey] = $priceRules;
             }
-            self::$_priceRulesData[$cacheKey] = null;
-        } else {
-            return self::$_priceRulesData[$cacheKey];
+            self::$_priceRulesData[$cacheKey] = [$timestamp, $priceRules];
         }
-        return null;
+        return self::$_priceRulesData[$cacheKey][1];
+    }
+
+    public static function clearProductPriceRuleCache(): void
+    {
+        self::$_priceRulesData = [];
     }
 
     /**

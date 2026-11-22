@@ -49,18 +49,26 @@ class Mage_ConfigurableSwatches_Helper_List_Price extends Mage_Core_Helper_Abstr
                 }
 
                 foreach ($attribute->getPrices() as $attributePrice) {
-                    $product->setConfigurablePrice(
-                        (float) $this->_getHelper()->preparePrice(
-                            $product,
-                            $attributePrice['pricing_value'],
-                            $attributePrice['is_percent'],
-                            $storeId,
-                        ),
-                    );
-                    Mage::dispatchEvent(
-                        'catalog_product_type_configurable_price',
-                        ['product' => $product],
-                    );
+                    $hasParentId = $product->hasData('parent_id');
+                    $parentId = $product->getParentId();
+                    try {
+                        $product->setConfigurablePrice(
+                            (float) $this->_getHelper()->preparePrice(
+                                $product,
+                                $attributePrice['pricing_value'],
+                                $attributePrice['is_percent'],
+                                $storeId,
+                            ),
+                        );
+                        $product->setParentId($parentId ?: true);
+                        Mage::dispatchEvent('catalog_product_type_configurable_price', ['product' => $product]);
+                    } finally {
+                        if ($hasParentId) {
+                            $product->setParentId($parentId);
+                        } else {
+                            $product->unsetData('parent_id');
+                        }
+                    }
                     $configurablePrice = $product->getConfigurablePrice();
                     $cofigurableSwatchesHelper = Mage::helper('configurableswatches');
                     $result[$cofigurableSwatchesHelper::normalizeKey($attributePrice['store_label'])] = [

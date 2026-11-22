@@ -545,6 +545,61 @@ it('uses the store calendar for native date bounds and timestamps for custom bou
     ],
 ]);
 
+it('prices a configurable option at the exact active rule boundaries', function (): void {
+    $connection = chainWrite();
+    $connection->beginTransaction();
+    $app = Mage::app();
+    $previousStore = $app->getStore();
+    $store = $app->getDefaultStoreView();
+    $locale = $app->getLocale();
+    $localeProperty = new ReflectionProperty($app, '_locale');
+    $cache = new ReflectionProperty(Mage_CatalogRule_Model_Rule::class, '_priceRulesData');
+    $previousCache = $cache->getValue();
+    try {
+        $app->setCurrentStore($store);
+        $websiteId = (int) $store->getWebsiteId();
+        $product = createPriceWebsiteProduct('catalog-rule-boundary', 100.0)
+            ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE)
+            ->setStoreId((int) $store->getId())
+            ->setCustomerGroupId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
+        $otherGroup = Mage::getModel('customer/group')->getCollection()
+            ->addFieldToFilter('customer_group_id', ['gt' => 0])->getFirstItem();
+        $from = $locale->storeToUtc($store, '2026-06-01 12:00:00');
+        $to = $locale->storeToUtc($store, '2026-06-01 15:00:00');
+        $rule = ['sort_order' => 1, 'action_operator' => 'by_percent', 'action_amount' => 10,
+            'action_stop' => 0, 'sub_simple_action' => 'by_percent', 'sub_discount_amount' => 10];
+        $otherRule = ['sort_order' => 0, 'action_stop' => 1, 'sub_discount_amount' => 100] + $rule;
+        seedRuleChain((int) $product->getId(), $websiteId, [
+            ['website_id' => Mage_Core_Model_App::ADMIN_STORE_ID] + $otherRule,
+            ['customer_group_id' => (int) $otherGroup->getId()] + $otherRule,
+            ['from_time' => $from->getTimestamp(), 'to_time' => $to->getTimestamp()] + $rule,
+        ]);
+
+        $clock = $this->createPartialMock(Mage_Core_Model_Locale::class, ['utcToStore']);
+        $time = $from;
+        $clock->method('utcToStore')->willReturnCallback(
+            static function ($store = null, $date = null) use ($locale, &$time): DateTimeImmutable {
+                return $locale->utcToStore($store, $date ?? $time);
+            },
+        );
+        $localeProperty->setValue($app, $clock);
+        $app->loadAreaPart(Mage_Core_Model_App_Area::AREA_FRONTEND, Mage_Core_Model_App_Area::PART_EVENTS);
+        $prices = [];
+        $cache->setValue(null, []);
+        foreach ([$from->modify('-1 second'), $from, $to, $to->modify('+1 second')] as $time) {
+            $prices[] = Mage::getModel('catalog/product_type_configurable_price')->getVariantPriceDeltas([
+                ['attribute_code' => 'color', 'values' => [['value_index' => 1, 'pricing_value' => 20.0, 'is_percent' => false]]],
+            ], 100.0, $product)['color'][1];
+        }
+        expect($prices)->toBe([20.0, 18.0, 18.0, 20.0]);
+    } finally {
+        $cache->setValue(null, $previousCache);
+        $localeProperty->setValue($app, $locale);
+        $app->setCurrentStore($previousStore);
+        $connection->rollBack();
+    }
+});
+
 it('indexes native and older rule windows on the civil date for each website', function (): void {
     $app = Mage::app();
     $previousStore = $app->getStore()->getCode();

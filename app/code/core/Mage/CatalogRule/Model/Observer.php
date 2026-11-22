@@ -291,6 +291,7 @@ class Mage_CatalogRule_Model_Observer
     public function flushPriceCache(): void
     {
         $this->_rulePrices = [];
+        Mage_CatalogRule_Model_Rule::clearProductPriceRuleCache();
     }
 
     /**
