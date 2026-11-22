@@ -276,17 +276,17 @@ it('uses the fixed cart budget within the remaining capacity of every eligible l
     'whole cent credit on units priced to four decimals' => [
         [[39.995, 2]], [[Rule::CART_FIXED_ACTION, 79.99, null]], 0.01, 0.01, 'USD', null, [79.99],
     ],
-    'genuine fractional capacity of 0.009 in a standard store' => [
-        [[0.03, 0.3]], [[Rule::CART_FIXED_ACTION, 0.01, null]], 0.01, 0.01, 'USD', null, [0.0],
+    'the credit covers a fractional quantity that bills at one cent' => [
+        [[0.03, 0.3]], [[Rule::CART_FIXED_ACTION, 0.01, null]], 0.0, 0.0, 'USD', null, [0.01],
     ],
-    'genuine fractional capacity independent in the base and store currencies' => [
-        [[0.03, 0.3]], [[Rule::CART_FIXED_ACTION, 0.01, null]], 0.01, 0.01, 'EUR', null, [0.0],
-        ['rate' => 2.0, 'remaining' => [0.01, 0.01], 'lines' => [0.01]],
+    'the credit covers the billed fractional quantity in each currency' => [
+        [[0.03, 0.3]], [[Rule::CART_FIXED_ACTION, 0.01, null]], 0.0, 0.0, 'EUR', null, [0.01],
+        ['rate' => 2.0, 'remaining' => [0.0, 0.0], 'lines' => [0.02]],
     ],
     'whole mill capacity from a three decimal store' => [
         [[19.999, 1]], [[Rule::CART_FIXED_ACTION, 19.999, null]], 0.0, 0.0, 'USD', null, [19.999], null, 3,
     ],
-    'genuine fractional capacity in a three decimal store' => [
-        [[0.03, 0.66]], [[Rule::CART_FIXED_ACTION, 0.02, null]], 0.001, 0.001, 'USD', null, [0.019], null, 3,
+    'the credit covers a rounded fractional quantity in a three decimal store' => [
+        [[0.03, 0.66]], [[Rule::CART_FIXED_ACTION, 0.02, null]], 0.0, 0.0, 'USD', null, [0.02], null, 3,
     ],
 ]);

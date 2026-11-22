@@ -900,8 +900,9 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
         }
         $store = $address->getQuote()->getStore();
         [$budget, $baseBudget] = $this->getCartFixedBudget($rule, $address);
-        $capacity = $this->cartFixedCapacity($store, $price, $totalQty, $qty, (float) $item->getDiscountAmount());
-        $baseCapacity = $this->cartFixedCapacity($store, $basePrice, $totalQty, $qty, (float) $item->getBaseDiscountAmount());
+        [$rowTotal, $baseRowTotal] = $this->getCartFixedRowTotals($item);
+        $capacity = $this->cartFixedCapacity($store, $price, $totalQty, $qty, (float) $item->getDiscountAmount(), $rowTotal);
+        $baseCapacity = $this->cartFixedCapacity($store, $basePrice, $totalQty, $qty, (float) $item->getBaseDiscountAmount(), $baseRowTotal);
         $amount = $budget;
         $baseAmount = $baseBudget;
         $reserved = $this->reservedForLaterItems[$ruleId] ??= $this->reserveCartFixedShares($totals['lines'] ?? [], [$budget, $baseBudget], $store);
@@ -925,7 +926,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param array<int, array{float, float, float, float}> $lines
+     * @param array<int, array{float, float, float, float, ?float, ?float}> $lines
      * @param array{float, float} $budgets
      * @return array<int, array{float, float}>
      */
@@ -938,10 +939,17 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
         foreach ($budgets as $currency => $budget) {
             $rows = [];
             foreach ($lines as $key => $line) {
-                [$price, $totalQty, $qty] = [$line[$currency], $line[2], $line[3]];
+                [$price, $totalQty, $qty, $rowTotal] = [$line[$currency], $line[2], $line[3], $line[$currency + 4]];
                 $rows[$key] = [
                     'gross' => max(0.0, $price * $qty),
-                    'capacity' => $this->cartFixedCapacity($store, $price, $totalQty, $qty, $this->projectedDiscounts[$key][$currency]),
+                    'capacity' => $this->cartFixedCapacity(
+                        $store,
+                        $price,
+                        $totalQty,
+                        $qty,
+                        $this->projectedDiscounts[$key][$currency],
+                        $rowTotal,
+                    ),
                 ];
             }
             $later = 0.0;
@@ -955,8 +963,29 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
         return $reserved;
     }
 
-    private function cartFixedCapacity(Mage_Core_Model_Store $store, float $price, float $totalQty, float $qty, float $discount): float
+    /** @return array{?float, ?float} */
+    private function getCartFixedRowTotals(Mage_Sales_Model_Quote_Item_Abstract $item): array
     {
+        // Only use the collected row totals when the discount uses the regular calculation price.
+        if (static::class !== self::class || $item::class !== Mage_Sales_Model_Quote_Item::class
+            || $item->getDiscountCalculationPrice() !== null
+        ) {
+            return [null, null];
+        }
+        return [$item->getRowTotal(), $item->getBaseRowTotal()];
+    }
+
+    private function cartFixedCapacity(
+        Mage_Core_Model_Store $store,
+        float $price,
+        float $totalQty,
+        float $qty,
+        float $discount,
+        ?float $rowTotal,
+    ): float {
+        if ($totalQty > 0 && $qty >= $totalQty && $rowTotal !== null) {
+            return $this->floorDiscountCapacity($store, $rowTotal - $discount, $rowTotal);
+        }
         $fraction = $totalQty > 0 ? $qty / $totalQty : 0.0;
         return $this->floorDiscountCapacity($store, ($price * $totalQty - $discount) * $fraction, $price * $qty);
     }
@@ -1229,7 +1258,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                     $price = $this->_getItemPrice($item);
                     $basePrice = $this->_getItemBasePrice($item);
                     if ($totalQty !== null) {
-                        $lines[spl_object_id($item)] = [$price, $basePrice, $totalQty, $qty];
+                        $lines[spl_object_id($item)] = [$price, $basePrice, $totalQty, $qty, ...$this->getCartFixedRowTotals($item)];
                     }
                     $ruleTotalItemsPrice += $price * $qty;
                     $ruleTotalBaseItemsPrice += $basePrice * $qty;
