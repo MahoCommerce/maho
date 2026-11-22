@@ -103,6 +103,8 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      */
     protected $_maxWeight = 70;
 
+    private bool $roundWeights = true;
+
     /**
      * Flag if response is for shipping label creating
      *
@@ -533,11 +535,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      */
     protected function _getWeight($weight, $maxWeight = false, $configWeightUnit = false)
     {
-        return round($this->convertWeight(round((float) $weight, 3), $maxWeight, $configWeightUnit), 3);
-    }
-
-    private function convertWeight(float $weight, bool $maxWeight = false, string|bool $configWeightUnit = false): float
-    {
         if ($maxWeight) {
             $configWeightUnit = Mage_Core_Model_Locale::WEIGHT_KILOGRAM;
         } elseif ($configWeightUnit) {
@@ -548,15 +545,27 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
 
         $countryWeightUnit = $this->getCode('dimensions_variables', $this->_getWeightUnit());
 
+        $weight = (float) $weight;
         if ($configWeightUnit != $countryWeightUnit) {
-            return (float) Mage::helper('usa')->convertMeasureWeight(
-                $weight,
+            $weight = (float) Mage::helper('usa')->convertMeasureWeight(
+                $this->roundWeights ? round($weight, 3) : $weight,
                 $configWeightUnit,
                 $countryWeightUnit,
             );
         }
 
-        return $weight;
+        return $this->roundWeights ? round($weight, 3) : $weight;
+    }
+
+    private function getUnroundedWeight(float $weight, bool $maxWeight = false): float
+    {
+        $roundWeights = $this->roundWeights;
+        $this->roundWeights = false;
+        try {
+            return (float) $this->_getWeight($weight, $maxWeight);
+        } finally {
+            $this->roundWeights = $roundWeights;
+        }
     }
 
     /**
@@ -568,7 +577,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     {
         $allItems   = $this->_request->getAllItems();
         $fullItems  = [];
-        $maxWeight = $this->convertWeight($this->_maxWeight, true);
+        $maxWeight = $this->getUnroundedWeight($this->_maxWeight, true);
         $roundingTolerance = 2 * PHP_FLOAT_EPSILON * $maxWeight;
 
         foreach ($allItems as $item) {
@@ -609,7 +618,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
                         $changeQty  = false;
                     } else {
                         $itemWeight = $itemWeight * $item->getQty();
-                        $convertedWeight = $this->convertWeight($itemWeight);
+                        $convertedWeight = $this->getUnroundedWeight($itemWeight);
                         if ($convertedWeight - $maxWeight > $roundingTolerance) {
                             $qtyItem = floor($convertedWeight / $maxWeight);
                             $decimalItems[] = ['weight' => $maxWeight, 'qty' => $qtyItem];
@@ -638,7 +647,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
                     );
                 }
             } else {
-                $convertedWeight = $this->convertWeight($itemWeight);
+                $convertedWeight = $this->getUnroundedWeight($itemWeight);
                 if ($convertedWeight - $maxWeight > $roundingTolerance) {
                     return [];
                 }
@@ -661,7 +670,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         $pieceWeights = [];
 
         if ($divideOrderWeight) {
-            $maxWeight = $this->convertWeight($this->_maxWeight, true);
+            $maxWeight = $this->getUnroundedWeight($this->_maxWeight, true);
             $sumWeight = 0;
             $roundingTolerance = 2 * PHP_FLOAT_EPSILON * $maxWeight;
 

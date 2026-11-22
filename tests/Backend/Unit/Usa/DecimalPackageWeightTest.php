@@ -195,6 +195,7 @@ it('writes the actual package weights into the DHL quote XML', function (
     string $expectedUnit = 'KG',
     array $extraWeights = [],
     ?float $bundleQty = null,
+    float $weightMultiplier = 1.0,
 ): void {
     $request = decimalPackageRequest($weight, $qty, $divisible, $increment, $extraWeights, $bundleQty)
         ->setOrigCountryId($originCountry)
@@ -205,12 +206,21 @@ it('writes the actual package weights into the DHL quote XML', function (
         ->setDestCity('Milan')
         ->setDestStreet('1 Example Street')
         ->setPackageValue(10.0);
-    $carrier = new class ($storeUnit) extends Mage_Usa_Model_Shipping_Carrier_Dhl_International {
+    $carrier = new class ($storeUnit, $weightMultiplier) extends Mage_Usa_Model_Shipping_Carrier_Dhl_International {
         public ?string $quoteRequest = null;
 
-        public function __construct(private readonly string $storeUnit)
-        {
+        public function __construct(
+            private readonly string $storeUnit,
+            private readonly float $weightMultiplier,
+        ) {
             parent::__construct();
+        }
+
+        #[\Override]
+        protected function _getWeight($weight, $maxWeight = false, $configWeightUnit = false): float
+        {
+            $convertedWeight = parent::_getWeight($weight, $maxWeight, $configWeightUnit);
+            return $maxWeight ? $convertedWeight : $convertedWeight * $this->weightMultiplier;
         }
 
         #[\Override]
@@ -266,6 +276,7 @@ it('writes the actual package weights into the DHL quote XML', function (
     'bundle selection quantities can reach a whole increment across bundles' => [8.0, 0.75, true, 0.5, [12.0], 'K', 'IT', 'KG', [], 2.0],
     'bundle selection quantities outside the product increment keep their weight' => [8.0, 0.67, true, 0.5, [10.72], 'K', 'IT', 'KG', [], 2.0],
     'a bundle selection increment above the carrier limit uses the whole request' => [50.0, 1.5, true, 1.5, [150.0], 'K', 'IT', 'KG', [], 2.0],
+    'a carrier conversion override applies before packing' => [30.0, 1.0, false, null, [60.0, 60.0], 'K', 'IT', 'KG', [30.0], null, 2.0],
 ]);
 
 it('quotes USPS packages using the same unit for validation and packing', function (
