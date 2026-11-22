@@ -132,7 +132,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
     /**
      * @param string|int $code The code or the ID of the entity type
      */
-    public function updateEntityType(string|int $code, array|string $field, mixed $value = null): static
+    public function updateEntityType(string|int $code, array|string $field, string|int|null $value = null): static
     {
         $this->updateTableRow(
             'eav/entity_type',
