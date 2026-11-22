@@ -376,12 +376,8 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
 
     /**
      * Standard resource collection initialization
-     *
-     * @param string $model
-     * @param Mage_Core_Model_Resource_Db_Abstract $resourceModel
-     * @return $this
      */
-    protected function _init($model, $resourceModel = null)
+    protected function _init(string $model, ?string $resourceModel = null): static
     {
         $this->setModel($model);
         $resourceModel ??= $model;

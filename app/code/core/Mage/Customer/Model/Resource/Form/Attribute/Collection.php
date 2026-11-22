@@ -8,6 +8,8 @@
  * @package Mage_Customer
  */
 
+declare(strict_types=1);
+
 class Mage_Customer_Model_Resource_Form_Attribute_Collection extends Mage_Eav_Model_Resource_Form_Attribute_Collection
 {
     /**

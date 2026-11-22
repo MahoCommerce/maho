@@ -18,14 +18,12 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Option extends Mage_Core_Model_Re
 
     /**
      * Add Join with option value for collection select
-     *
-     * @param Mage_Catalog_Model_Resource_Collection_Abstract $collection
-     * @param Mage_Eav_Model_Entity_Attribute $attribute
-     * @param Maho\Db\Expr $valueExpr
-     * @return $this
      */
-    public function addOptionValueToCollection($collection, $attribute, $valueExpr)
-    {
+    public function addOptionValueToCollection(
+        Mage_Catalog_Model_Resource_Collection_Abstract $collection,
+        Mage_Eav_Model_Entity_Attribute_Abstract $attribute,
+        \Maho\Db\Expr $valueExpr,
+    ): static {
         $adapter        = $this->_getReadAdapter();
         $attributeCode  = $attribute->getAttributeCode();
         $optionTable1   = $attributeCode . '_option_value_t1';

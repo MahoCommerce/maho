@@ -166,12 +166,8 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Users extends Mage_Adminhtml_Block_Wid
         return '';
     }
 
-    /**
-     * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
-     * @return $this
-     */
     #[\Override]
-    protected function _addColumnFilterToCollection($column)
+    protected function _addColumnFilterToCollection(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
         if ($column->getId() == 'filter_in_role_users') {
             $inRoleIds = $this->getUsers();

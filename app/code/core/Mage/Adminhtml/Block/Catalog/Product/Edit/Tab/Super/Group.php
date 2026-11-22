@@ -58,12 +58,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Group extends Mage_Adm
         return Mage::registry('current_product');
     }
 
-    /**
-     * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
-     * @return $this
-     */
     #[\Override]
-    protected function _addColumnFilterToCollection($column)
+    protected function _addColumnFilterToCollection(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
         // Set custom filter for in product flag
         if ($column->getId() === 'in_products') {

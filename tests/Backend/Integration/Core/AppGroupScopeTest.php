@@ -12,10 +12,13 @@ uses(Tests\MahoBackendTestCase::class);
 
 function storeOfGroupScope(string $scopeCode): ?string
 {
-    $app = clone Mage::app();
-    new ReflectionMethod($app, '_initCurrentStore')->invoke($app, $scopeCode, 'group');
+    // A new app loads the stores through its cache, so it gets the configuration and the cache of the running app
+    $app = new Mage_Core_Model_App();
+    (new ReflectionProperty($app, '_config'))->setValue($app, Mage::getConfig());
+    (new ReflectionProperty($app, '_cache'))->setValue($app, Mage::app()->getCache());
+    (new ReflectionMethod($app, '_initCurrentStore'))->invoke($app, $scopeCode, 'group');
 
-    return new ReflectionProperty($app, '_currentStore')->getValue($app);
+    return (new ReflectionProperty($app, '_currentStore'))->getValue($app);
 }
 
 it('runs the default store of the store group that the group scope code names', function () {

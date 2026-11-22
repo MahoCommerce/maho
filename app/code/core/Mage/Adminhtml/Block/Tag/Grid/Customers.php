@@ -85,12 +85,8 @@ class Mage_Adminhtml_Block_Tag_Grid_Customers extends Mage_Adminhtml_Block_Widge
         return parent::_prepareColumns();
     }
 
-    /**
-     * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
-     * @return $this
-     */
     #[\Override]
-    protected function _addColumnFilterToCollection($column)
+    protected function _addColumnFilterToCollection(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
         if ($this->getCollection() && $column->getFilter()->getValue()) {
             $this->getCollection()->addAttributeToFilter($column->getIndex(), $column->getFilter()->getCondition());

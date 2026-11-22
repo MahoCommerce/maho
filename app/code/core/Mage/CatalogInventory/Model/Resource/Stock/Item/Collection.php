@@ -35,10 +35,9 @@ class Mage_CatalogInventory_Model_Resource_Stock_Item_Collection extends Mage_Co
     /**
      * Add product filter to collection
      *
-     * @param array|Mage_Catalog_Model_Product[] $products
-     * @return $this
+     * @param iterable<Mage_Catalog_Model_Product|int> $products
      */
-    public function addProductsFilter($products)
+    public function addProductsFilter(iterable $products): static
     {
         $productIds = [];
         foreach ($products as $product) {

@@ -1,12 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			rawMessage: 'Parameter #1 $collection of method Mage_Adminhtml_Block_Widget_Grid::setCollection() expects Maho\Data\Collection\Db, Maho\Data\Collection given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Cache/Grid.php
-
-		-
 			rawMessage: Access to an undefined property Mage_Adminhtml_Block_Notification_Window::$_aclResourcePath.
 			identifier: property.notFound
 			count: 1
@@ -19,30 +13,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Promo/Quote/Edit/Tab/Main.php
 
 		-
-			rawMessage: 'Parameter #1 $collection of method Mage_Adminhtml_Block_Widget_Grid::setCollection() expects Maho\Data\Collection\Db, Mage_Reports_Model_Resource_Report_Collection given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Grid.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Report_Grid_Abstract::getCollection() should return Mage_Core_Model_Resource_Db_Collection_Abstract|Mage_Reports_Model_Grouped_Collection but returns Maho\Data\Collection\Db|null.'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Grid/Abstract.php
-
-		-
-			rawMessage: 'Parameter #1 $collection of method Mage_Adminhtml_Block_Widget_Grid::setCollection() expects Maho\Data\Collection\Db, Mage_Reports_Model_Grouped_Collection given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Grid/Abstract.php
-
-		-
-			rawMessage: 'Parameter #1 $collection of method Mage_Adminhtml_Block_Widget_Grid::setCollection() expects Maho\Data\Collection\Db, Maho\Data\Collection given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Refresh/Statistics/Grid.php
-
-		-
 			rawMessage: 'Parameter #1 $entityType of method Mage_Eav_Model_Config::getEntityAttributeCodes() expects Mage_Eav_Model_Entity_Type, string given.'
 			identifier: argument.type
 			count: 1
@@ -53,12 +23,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Reorder/Renderer/Action.php
-
-		-
-			rawMessage: 'Parameter #1 $collection of method Mage_Adminhtml_Block_Widget_Grid::setCollection() expects Maho\Data\Collection\Db, Maho\Data\Collection given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Transactions/Detail/Grid.php
 
 		-
 			rawMessage: 'Parameter #2 $onclick of method Mage_Adminhtml_Block_Widget::getButtonHtml() expects string, null given.'
@@ -211,12 +175,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Helper/Product/Configuration.php
 
 		-
-			rawMessage: 'Return type (Mage_Catalog_Model_Resource_Collection_Abstract) of method Mage_Catalog_Model_Abstract::getResourceCollection() should be compatible with return type (Mage_Core_Model_Resource_Db_Collection_Abstract) of method Mage_Core_Model_Abstract::getResourceCollection()'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Abstract.php
-
-		-
 			rawMessage: 'Property Mage_Catalog_Model_Convert_Adapter_Product::$_galleryBackendModel (Mage_Catalog_Model_Product_Attribute_Backend_Media) does not accept Mage_Eav_Model_Entity_Attribute_Backend_Abstract.'
 			identifier: assign.propertyType
 			count: 1
@@ -277,24 +235,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Attribute.php
 
 		-
-			rawMessage: 'Parameter #3 $exclude of method Mage_Catalog_Model_Resource_Category_Tree::addCollectionData() expects array, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Category.php
-
-		-
-			rawMessage: 'Parameter #2 $resourceModel of method Mage_Core_Model_Resource_Db_Collection_Abstract::_init() expects Mage_Core_Model_Resource_Db_Abstract|null, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Attribute/Collection.php
-
-		-
-			rawMessage: 'Parameter #1 $object of method Mage_Eav_Model_Entity_Collection_Abstract::setObject() expects Maho\DataObject|null, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Compare/Item/Collection.php
-
-		-
 			rawMessage: 'Parameter #1 $store of method Mage_Catalog_Model_Resource_Product::refreshEnabledIndex() expects Mage_Core_Model_Store|null, int<min, -1>|int<1, max> given.'
 			identifier: argument.type
 			count: 1
@@ -319,22 +259,10 @@ parameters:
 			path: app/code/core/Mage/CatalogIndex/Model/Resource/Setup.php
 
 		-
-			rawMessage: 'Parameter #1 $products of method Mage_CatalogInventory_Model_Resource_Stock_Item_Collection::addProductsFilter() expects array<Mage_Catalog_Model_Product>, Mage_Catalog_Model_Resource_Product_Collection given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Model/Stock.php
-
-		-
 			rawMessage: 'Parameter #1 $combine of method Mage_CatalogRule_Model_Observer::_removeAttributeFromConditions() expects Mage_CatalogRule_Model_Rule_Condition_Combine, Mage_Rule_Model_Condition_Combine given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/CatalogRule/Model/Observer.php
-
-		-
-			rawMessage: 'Property Mage_CatalogSearch_Helper_Data::$_engine (Mage_CatalogSearch_Model_Resource_Fulltext_Engine|null) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract.'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Helper/Data.php
 
 		-
 			rawMessage: 'Parameter #1 $product of method Mage_Catalog_Model_Product_Type_Abstract::getSearchableData() expects Mage_Catalog_Model_Product|null, Maho\DataObject given.'
@@ -409,12 +337,6 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Resource/Customer.php
 
 		-
-			rawMessage: 'Parameter #2 $resourceModel of method Mage_Core_Model_Resource_Db_Collection_Abstract::_init() expects Mage_Core_Model_Resource_Db_Abstract|null, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Resource/Form/Attribute/Collection.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Customer_Model_Customer::setIsSubscribed() expects bool|null, int given.'
 			identifier: argument.type
 			count: 1
@@ -449,30 +371,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
-
-		-
-			rawMessage: 'Parameter #2 $attribute of method Mage_Eav_Model_Resource_Entity_Attribute_Option::addOptionValueToCollection() expects Mage_Eav_Model_Entity_Attribute, Mage_Eav_Model_Entity_Attribute_Abstract given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Source/Table.php
-
-		-
-			rawMessage: 'Parameter #1 $resource of method Mage_Eav_Model_Entity_Collection_Abstract::__construct() expects Mage_Core_Model_Resource_Abstract|null, Maho\Db\Adapter\AdapterInterface|false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Collection.php
-
-		-
-			rawMessage: Constructor of class Mage_Eav_Model_Entity_Collection_Abstract has an unused parameter $resource.
-			identifier: constructor.unusedParameter
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Collection/Abstract.php
-
-		-
-			rawMessage: 'Parameter #1 $className of method Maho\Data\Collection::setItemObjectClass() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Collection/Abstract.php
 
 		-
 			rawMessage: 'Parameter #1 $entity of method Mage_Eav_Model_Entity_Collection_Abstract::setEntity() expects Mage_Eav_Model_Entity_Abstract, Mage_Core_Model_Resource_Db_Collection_Abstract|false given.'
@@ -547,12 +445,6 @@ parameters:
 			path: app/code/core/Mage/ProductAlert/Helper/Data.php
 
 		-
-			rawMessage: 'Parameter #2 $value of method Maho\Data\Collection::addFilter() expects array|string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option/Collection.php
-
-		-
 			rawMessage: 'Method Mage_Reports_Model_Report::getReport() should return Maho\Data\Collection but returns Mage_Reports_Model_Report.'
 			identifier: return.type
 			count: 1
@@ -625,22 +517,10 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote.php
 
 		-
-			rawMessage: 'Parameter #1 $attribute of method Mage_Sales_Model_Resource_Collection_Abstract::addAttributeToFilter() expects Mage_Eav_Model_Entity_Attribute|string, array given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Collection.php
-
-		-
 			rawMessage: 'Parameter #3 $object of method Mage_Core_Model_Resource_Db_Abstract::_getLoadSelect() expects Mage_Core_Model_Abstract, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Resource/Order/Status.php
-
-		-
-			rawMessage: 'Parameter #2 $resourceModel of method Mage_Core_Model_Resource_Db_Collection_Abstract::_init() expects Mage_Core_Model_Resource_Db_Abstract|null, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Tax/Collection.php
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Shipping_Model_Rate_Result_Method::setCost() expects float|null, string given.'
@@ -655,22 +535,10 @@ parameters:
 			path: app/code/core/Mage/Shipping/Model/Info.php
 
 		-
-			rawMessage: Access to an undefined property Mage_Tag_Model_Entity_Customer_Collection::$_read.
-			identifier: property.notFound
-			count: 1
-			path: app/code/core/Mage/Tag/Model/Entity/Customer/Collection.php
-
-		-
 			rawMessage: 'Parameter #1 $model of method Mage_Tag_Model_Resource_Tag::loadByName() expects Mage_Tag_Model_Tag, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Tag/Model/Resource/Tag.php
-
-		-
-			rawMessage: 'Parameter #2 $condition of method Mage_Tag_Model_Resource_Tag_Collection::addFieldToFilter() expects array|null, int given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Tag/Model/Resource/Tag/Collection.php
 
 		-
 			rawMessage: 'Parameter #1 $store of method Mage_Weee_Helper_Data::validateCatalogPricesAndFptConfiguration() expects Mage_Core_Model_Store|null, int given.'
@@ -707,12 +575,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Tax/Model/Config/Price/Include.php
-
-		-
-			rawMessage: 'Parameter #2 $resourceModel of method Mage_Core_Model_Resource_Db_Collection_Abstract::_init() expects Mage_Core_Model_Resource_Db_Abstract|null, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Resource/Calculation/Rate/Title/Collection.php
 
 		-
 			rawMessage: 'Parameter #2 $rate of method Mage_Tax_Model_Sales_Total_Quote_Shipping::_round() expects string, float given.'
@@ -931,12 +793,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/api2/role/users_grid_js.phtml
 
 		-
-			rawMessage: Cannot access property $_items on array.
-			identifier: property.nonObject
-			count: 2
-			path: lib/Maho/Data/Collection.php
-
-		-
 			rawMessage: 'Class Maho\Data\Collection implements generic interface IteratorAggregate but does not specify its types: TKey, TValue'
 			identifier: missingType.generics
 			count: 1
@@ -953,18 +809,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: lib/Maho/Data/Form/Element/Multiline.php
-
-		-
-			rawMessage: 'Class Maho\Data\Tree\Node\Collection implements generic interface ArrayAccess but does not specify its types: TKey, TValue'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Maho/Data/Tree/Node/Collection.php
-
-		-
-			rawMessage: 'Class Maho\Data\Tree\Node\Collection implements generic interface IteratorAggregate but does not specify its types: TKey, TValue'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Maho/Data/Tree/Node/Collection.php
 
 		-
 			rawMessage: 'Parameter #1 $parent of method Maho\Data\Tree\Node::setParent() expects Maho\Data\Tree\Node, Maho\Data\Tree given.'
