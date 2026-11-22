@@ -90,10 +90,10 @@ use Symfony\Component\ObjectMapper\Condition\TargetClass;
 #[Map(target: \Mage_Reports_Model_SavedReport::class)]
 class SavedReport extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = 'report/explorer';
+    public const string ADMIN_RESOURCE = 'report/explorer';
 
-    public const OPERATION_PIN = 'saved_report_pin';
-    public const OPERATION_UNPIN = 'saved_report_unpin';
+    public const string OPERATION_PIN = 'saved_report_pin';
+    public const string OPERATION_UNPIN = 'saved_report_unpin';
 
     #[ApiProperty(identifier: true, writable: false, example: 3)]
     #[Map(if: new TargetClass(self::class))]

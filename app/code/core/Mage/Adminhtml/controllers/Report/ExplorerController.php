@@ -14,7 +14,7 @@ use Maho\Report\Request;
 
 class Mage_Adminhtml_Report_ExplorerController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'report/explorer';
+    public const string ADMIN_RESOURCE = 'report/explorer';
 
     /** The link of the export notice has no secret key. The action checks that the file belongs to the administrator. */
     #[\Override]

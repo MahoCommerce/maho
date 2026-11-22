@@ -61,7 +61,7 @@ use Maho\ApiPlatform\Metadata\ListFilter;
 )]
 class ExplorerReport extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = 'report/explorer';
+    public const string ADMIN_RESOURCE = 'report/explorer';
 
     #[ApiProperty(identifier: true, description: 'Dataset code')]
     public string $dataset = '';

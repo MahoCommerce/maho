@@ -26,7 +26,7 @@ use Maho\Report\Definition\Records;
 
 class Mage_Review_Model_Report_Dataset_Reviews implements DatasetProvider
 {
-    public const CODE = 'reviews';
+    public const string CODE = 'reviews';
 
     #[\Override]
     public function build(AdapterInterface $adapter): Dataset

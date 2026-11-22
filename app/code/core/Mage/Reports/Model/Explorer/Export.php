@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 class Mage_Reports_Model_Explorer_Export
 {
-    public const STORAGE_MOUNT = 'reports_exports';
-    public const FILE_LIFETIME_DAYS = 7;
+    public const string STORAGE_MOUNT = 'reports_exports';
+    public const int FILE_LIFETIME_DAYS = 7;
 
     public function getStorage(): \Maho\Storage\Mount
     {

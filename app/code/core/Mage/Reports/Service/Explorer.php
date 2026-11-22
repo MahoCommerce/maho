@@ -16,10 +16,10 @@ use Maho\Report\Request;
 
 class Mage_Reports_Service_Explorer
 {
-    public const XML_PATH_EXPORT_MAX_ROWS = 'reports/explorer/export_max_rows';
+    public const string XML_PATH_EXPORT_MAX_ROWS = 'reports/explorer/export_max_rows';
 
     /** The most dimensions that one explanation reads: each one costs two queries. */
-    public const EXPLAIN_MAX_DIMENSIONS = 12;
+    public const int EXPLAIN_MAX_DIMENSIONS = 12;
 
     /**
      * @return list<array<string, mixed>>

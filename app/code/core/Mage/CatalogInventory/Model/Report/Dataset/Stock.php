@@ -28,8 +28,8 @@ use Maho\Report\Definition\Records;
 
 class Mage_CatalogInventory_Model_Report_Dataset_Stock implements DatasetProvider
 {
-    public const CODE = 'catalog_stock';
-    public const SALES_DAYS = 30;
+    public const string CODE = 'catalog_stock';
+    public const int SALES_DAYS = 30;
 
     #[\Override]
     public function build(AdapterInterface $adapter): Dataset

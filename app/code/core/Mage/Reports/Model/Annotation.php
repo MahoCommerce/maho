@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Reports_Model_Annotation extends Mage_Core_Model_Abstract
 {
-    public const TITLE_MAX_LENGTH = 255;
+    public const int TITLE_MAX_LENGTH = 255;
 
     #[\Override]
     protected function _construct(): void

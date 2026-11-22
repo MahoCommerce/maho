@@ -26,7 +26,7 @@ use Maho\Report\Definition\Preset;
 
 class Mage_Tax_Model_Report_Dataset_Taxes implements DatasetProvider
 {
-    public const CODE = 'sales_taxes';
+    public const string CODE = 'sales_taxes';
 
     #[\Override]
     public function build(AdapterInterface $adapter): Dataset

@@ -27,7 +27,7 @@ use Maho\Report\Definition\Records;
 
 class Mage_CatalogSearch_Model_Report_Dataset_SearchTerms implements DatasetProvider
 {
-    public const CODE = 'search_terms';
+    public const string CODE = 'search_terms';
 
     #[\Override]
     public function build(AdapterInterface $adapter): Dataset

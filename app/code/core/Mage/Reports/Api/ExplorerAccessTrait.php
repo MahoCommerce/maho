@@ -49,7 +49,7 @@ trait ExplorerAccessTrait
     }
 
     /** The keys of a request that change a preset. */
-    private const PRESET_OVERRIDES = ['range', 'from', 'to', 'compare', 'storeIds', 'scope', 'dateField', 'limit', 'offset', 'sort'];
+    private const array PRESET_OVERRIDES = ['range', 'from', 'to', 'compare', 'storeIds', 'scope', 'dateField', 'limit', 'offset', 'sort'];
 
     /**
      * The input of an explorer operation: the query string of a GET, or the body of a QUERY.

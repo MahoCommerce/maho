@@ -15,7 +15,7 @@ use Maho\Report\Definition\Granularity;
 
 final class Request
 {
-    public const DEFAULT_LIMIT = 100;
+    public const int DEFAULT_LIMIT = 100;
 
     /**
      * @param list<string> $metrics

@@ -19,7 +19,7 @@ use Maho\Report\Request;
 
 class Mage_Reports_Model_Explorer_Validator
 {
-    public const MAX_DIMENSIONS = 3;
+    public const int MAX_DIMENSIONS = 3;
 
     /**
      * Return the request with the stores that the caller may read, or throw every problem at once.

@@ -16,8 +16,8 @@ use Maho\Report\Definition\Dataset;
 
 class Mage_Reports_Model_Explorer_Registry
 {
-    public const CONNECTION = 'report_read';
-    public const EVENT_BUILD = 'report_dataset_build';
+    public const string CONNECTION = 'report_read';
+    public const string EVENT_BUILD = 'report_dataset_build';
 
     /** @var array<string, Dataset>|null */
     private ?array $datasets = null;

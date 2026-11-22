@@ -26,7 +26,7 @@ use Maho\Report\Definition\Preset;
 
 class Mage_Reports_Model_Report_Dataset_ProductViews implements DatasetProvider
 {
-    public const CODE = 'product_views';
+    public const string CODE = 'product_views';
 
     #[\Override]
     public function build(AdapterInterface $adapter): Dataset

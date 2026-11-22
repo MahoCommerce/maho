@@ -25,7 +25,7 @@ use Maho\Report\Definition\Preset;
 
 class Mage_Downloadable_Model_Report_Dataset_Downloads implements DatasetProvider
 {
-    public const CODE = 'downloads';
+    public const string CODE = 'downloads';
 
     #[\Override]
     public function build(AdapterInterface $adapter): Dataset

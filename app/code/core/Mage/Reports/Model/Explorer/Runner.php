@@ -22,10 +22,10 @@ use Maho\Report\SqlBuilder;
 
 class Mage_Reports_Model_Explorer_Runner
 {
-    public const CACHE_TYPE = 'reports_explorer';
-    public const CACHE_TAG = 'REPORTS_EXPLORER';
-    public const XML_PATH = 'reports/explorer/';
-    public const EXPORT_PAGE_SIZE = 5000;
+    public const string CACHE_TYPE = 'reports_explorer';
+    public const string CACHE_TAG = 'REPORTS_EXPLORER';
+    public const string XML_PATH = 'reports/explorer/';
+    public const int EXPORT_PAGE_SIZE = 5000;
 
     /**
      * Run a request and return the result envelope. Without $withTotals, the result has no totals, and the runner
@@ -58,7 +58,7 @@ class Mage_Reports_Model_Explorer_Runner
         });
     }
 
-    public const RECORDS_LIMIT = 50;
+    public const int RECORDS_LIMIT = 50;
 
     /**
      * List the rows behind the numbers of a request: the orders, items, customers or carts that the report counts.

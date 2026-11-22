@@ -78,7 +78,7 @@ use Symfony\Component\ObjectMapper\Condition\TargetClass;
 #[Map(target: \Mage_Reports_Model_Annotation::class)]
 class ReportAnnotation extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = 'report/explorer';
+    public const string ADMIN_RESOURCE = 'report/explorer';
 
     #[ApiProperty(identifier: true, writable: false, example: 4)]
     #[Map(if: new TargetClass(self::class))]

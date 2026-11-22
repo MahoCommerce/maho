@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 final readonly class Mage_Reports_Model_Queue_ExplorerExport
 {
-    public const QUEUE_NAME = 'reports';
+    public const string QUEUE_NAME = 'reports';
 
     /**
      * @param array<string, mixed> $request the shape of {@see \Maho\Report\Request::toArray()}

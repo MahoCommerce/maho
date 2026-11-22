@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Reports_Model_SavedReport extends Mage_Core_Model_Abstract
 {
-    public const NAME_MAX_LENGTH = 255;
+    public const int NAME_MAX_LENGTH = 255;
 
     #[\Override]
     protected function _construct(): void

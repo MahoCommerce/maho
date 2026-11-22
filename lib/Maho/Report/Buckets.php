@@ -16,7 +16,7 @@ use Maho\Report\Definition\Granularity;
 final class Buckets
 {
     /** 1970-01-04 was a Sunday. A week key counts the days from this date plus the first day of the week. */
-    public const SUNDAY = '1970-01-04';
+    public const string SUNDAY = '1970-01-04';
 
     /** The reference date of the week keys, a day that falls on $firstDayOfWeek. */
     public static function weekReference(int $firstDayOfWeek): string

@@ -14,7 +14,7 @@ namespace Maho\Report\Definition;
 final class Dimension
 {
     /** The code of the date dimension of a dated dataset. It reads the date field of the request. */
-    public const PERIOD = 'period';
+    public const string PERIOD = 'period';
 
     /**
      * @param string $field the code of the field to group by; empty for the period dimension

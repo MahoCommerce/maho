@@ -18,7 +18,7 @@ use Maho\Report\Definition\MetricFormat;
 
 final class PostProcessor
 {
-    public const WARNING_NON_ADDITIVE = 'non_additive';
+    public const string WARNING_NON_ADDITIVE = 'non_additive';
 
     /**
      * @param list<array<string, mixed>> $rows the rows of {@see SqlBuilder::rows()}

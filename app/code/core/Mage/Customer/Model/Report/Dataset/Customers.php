@@ -27,7 +27,7 @@ use Maho\Report\Definition\Records;
 
 class Mage_Customer_Model_Report_Dataset_Customers implements DatasetProvider
 {
-    public const CODE = 'customers';
+    public const string CODE = 'customers';
 
     #[\Override]
     public function build(AdapterInterface $adapter): Dataset

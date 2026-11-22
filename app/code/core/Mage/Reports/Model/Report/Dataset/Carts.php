@@ -28,7 +28,7 @@ use Maho\Report\Definition\Records;
 
 class Mage_Reports_Model_Report_Dataset_Carts implements DatasetProvider
 {
-    public const CODE = 'carts';
+    public const string CODE = 'carts';
 
     #[\Override]
     public function build(AdapterInterface $adapter): Dataset

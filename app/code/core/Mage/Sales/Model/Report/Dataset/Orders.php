@@ -27,10 +27,10 @@ use Maho\Report\Definition\Scope;
 
 class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
 {
-    public const CODE = 'sales_orders';
+    public const string CODE = 'sales_orders';
 
     /** The order states that the classic Orders, Tax and Shipping reports leave out. */
-    public const NOT_PLACED_STATES = [Mage_Sales_Model_Order::STATE_NEW, Mage_Sales_Model_Order::STATE_PENDING_PAYMENT];
+    public const array NOT_PLACED_STATES = [Mage_Sales_Model_Order::STATE_NEW, Mage_Sales_Model_Order::STATE_PENDING_PAYMENT];
 
     #[\Override]
     public function build(AdapterInterface $adapter): Dataset

@@ -16,7 +16,7 @@ use Maho\Report\Definition\Granularity;
 
 final class Planner
 {
-    public const DEFAULT_RANGE = DateRange::Last30Days;
+    public const DateRange DEFAULT_RANGE = DateRange::Last30Days;
 
     /**
      * The codes in the request must exist in the dataset: the validator checks them before.

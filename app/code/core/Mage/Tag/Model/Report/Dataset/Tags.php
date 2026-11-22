@@ -25,7 +25,7 @@ use Maho\Report\Definition\Preset;
 
 class Mage_Tag_Model_Report_Dataset_Tags implements DatasetProvider
 {
-    public const CODE = 'tags';
+    public const string CODE = 'tags';
 
     #[\Override]
     public function build(AdapterInterface $adapter): Dataset

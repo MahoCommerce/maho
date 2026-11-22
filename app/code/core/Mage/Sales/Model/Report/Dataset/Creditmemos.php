@@ -27,7 +27,7 @@ use Maho\Report\Definition\Records;
 
 class Mage_Sales_Model_Report_Dataset_Creditmemos implements DatasetProvider
 {
-    public const CODE = 'sales_creditmemos';
+    public const string CODE = 'sales_creditmemos';
 
     #[\Override]
     public function build(AdapterInterface $adapter): Dataset
