@@ -482,6 +482,8 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
         $groupId = Mage_Customer_Model_Group::NOT_LOGGED_IN_ID;
         $productTaxClassId = 0;
         if ($taxOnGross) {
+            // This tax setting changes the collector order cached by the other tests.
+            Mage::app()->removeCache('sorted_quote_collectors');
             $name = 'Fixed product tax VAT ' . uniqid();
             $productTaxClassId = (int) Mage::getModel('tax/class')->setClassType('PRODUCT')->setClassName($name)->save()->getId();
             $customerTaxClassId = (int) Mage::getModel('customer/group')->getTaxClassId($groupId);
@@ -595,6 +597,9 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
             ->and($order->getTotalRefunded())->toBe($expectedTotal)
             ->and($order->getBaseTotalRefunded())->toBe($expectedBaseTotal);
     } finally {
+        if ($taxOnGross) {
+            Mage::app()->removeCache('sorted_quote_collectors');
+        }
         $connection->rollBack();
         resetCurrencyState();
     }
