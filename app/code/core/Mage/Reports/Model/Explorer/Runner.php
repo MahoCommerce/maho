@@ -14,6 +14,7 @@ use Maho\Report\Context;
 use Maho\Report\Definition\Dataset;
 use Maho\Report\Definition\FieldType;
 use Maho\Report\Definition\Granularity;
+use Maho\Report\Definition\Records;
 use Maho\Report\Plan;
 use Maho\Report\Planner;
 use Maho\Report\PostProcessor;
@@ -133,7 +134,11 @@ class Mage_Reports_Model_Explorer_Runner
                         $rowLabels[$code] = $labels[$code][$value];
                     }
                 }
-                $rows[] = ['id' => $row['record_id'], 'values' => $values, 'labels' => $rowLabels];
+                $entry = ['id' => $row['record_id'], 'values' => $values, 'labels' => $rowLabels];
+                if ($records->routeQuery !== []) {
+                    $entry['routeQuery'] = $this->routeQuery($dataset, $records, $row, $access);
+                }
+                $rows[] = $entry;
             }
 
             $local = $plan->localBounds();
@@ -146,10 +151,34 @@ class Mage_Reports_Model_Explorer_Runner
                 'limit' => $limit,
                 'route' => $records->route,
                 'routeParam' => $records->routeParam,
+                'routeAclResource' => $records->routeAclResource,
+                'routeTitle' => $records->routeTitle,
                 'period' => $local === null ? null : ['from' => $local[0], 'to' => $local[1], 'timezone' => $plan->timezone],
                 'currency' => (string) Mage::app()->getBaseCurrencyCode(),
             ];
         });
+    }
+
+    /**
+     * The query parameters of the link of one record row. Null when a value is missing, or when a value is personal
+     * data that the caller may not read: the row then has no link.
+     *
+     * @param array<string, mixed> $row
+     * @return array<string, int|string>|null
+     */
+    private function routeQuery(Dataset $dataset, Records $records, array $row, Mage_Reports_Model_Explorer_Access $access): ?array
+    {
+        $query = [];
+        foreach (array_keys($records->routeQuery) as $index => $param) {
+            $value = $row["q{$index}"] ?? null;
+            if (!is_int($value) && !is_string($value)
+                || (!$access->personalData && $dataset->getField($records->routeQuery[$param])->personal)
+            ) {
+                return null;
+            }
+            $query[$param] = $value;
+        }
+        return $query;
     }
 
     /**

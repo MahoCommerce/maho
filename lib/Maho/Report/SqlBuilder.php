@@ -132,10 +132,14 @@ final class SqlBuilder
     {
         $records = $plan->dataset->getRecords() ?? throw new \LogicException("The dataset {$plan->dataset->code} has no records");
         $context = $this->contextFor($plan, $context, false);
-        $select = $this->base($plan, $context, false, false, [...$records->fields, $records->idField]);
+        $linkFields = array_values($records->routeQuery);
+        $select = $this->base($plan, $context, false, false, [...$records->fields, ...$linkFields, $records->idField]);
         $select->columns(['record_id' => new Expr($plan->dataset->getField($records->idField)->sql($context))]);
         foreach ($records->fields as $index => $code) {
             $select->columns(["r{$index}" => new Expr($plan->dataset->getField($code)->sql($context))]);
+        }
+        foreach ($linkFields as $index => $code) {
+            $select->columns(["q{$index}" => new Expr($plan->dataset->getField($code)->sql($context))]);
         }
         $sortSql = $sortField !== null
             ? $plan->dataset->getField($sortField)->sql($context)

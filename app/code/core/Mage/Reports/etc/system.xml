@@ -145,7 +145,7 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment>Count each storefront address that answers 404 in Reports > 404 Errors.</comment>
+                            <comment>Count each storefront address that answers 404 in the 404 errors reports of Reports > Explorer.</comment>
                         </enabled>
                         <log_rate_limit translate="label comment">
                             <label>Pages Recorded per Hour per Visitor</label>

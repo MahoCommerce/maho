@@ -31,7 +31,7 @@ administrator.
 | Control | What it does |
 |---------|--------------|
 | Report | A ready-made report or a saved report. It sets all the other controls |
-| Data | The data of the report: orders, order items, invoices, credit memos, taxes, customers, carts, cart items, stock, product views, search terms, reviews, tags or downloads. A change keeps the period, the store view and the metrics, groupings and filters that the new data also has |
+| Data | The data of the report: orders, order items, invoices, credit memos, taxes, customers, carts, cart items, stock, product views, search terms, 404 errors, reviews, tags or downloads. A change keeps the period, the store view and the metrics, groupings and filters that the new data also has |
 | Period | The days of the report, for example **Last 30 days**. **Custom** shows a **From** and a **To** day |
 | Compare with | **The period before** has the same number of days and ends the day before the period. **The year before** has the same days one year earlier |
 | Date | The date that puts an order in the period: the order date, or the date of its last change |

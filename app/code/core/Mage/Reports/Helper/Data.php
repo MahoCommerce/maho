@@ -117,6 +117,34 @@ class Mage_Reports_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Give each row of a records result of the report explorer the admin URL of its link, as url, and remove the route
+     * data. A row has no link when the admin user may not open the route, or when a value of its link is missing.
+     *
+     * @param array<string, mixed> $result the result of Mage_Reports_Model_Explorer_Runner::records()
+     * @return array<string, mixed>
+     */
+    public function addRecordUrls(array $result): array
+    {
+        $route = $result['route'] ?? null;
+        $aclResource = $result['routeAclResource'] ?? null;
+        $allowed = is_string($route)
+            && ($aclResource === null || Mage::getSingleton('admin/session')->isAllowed($aclResource));
+        foreach ($result['rows'] as $index => $row) {
+            unset($result['rows'][$index]['routeQuery']);
+            if (!$allowed || (array_key_exists('routeQuery', $row) && $row['routeQuery'] === null)) {
+                continue;
+            }
+            $params = $result['routeParam'] === null ? [] : [$result['routeParam'] => $row['id']];
+            if (isset($row['routeQuery'])) {
+                $params['_query'] = $row['routeQuery'];
+            }
+            $result['rows'][$index]['url'] = Mage::helper('adminhtml')->getUrl($route, $params);
+        }
+        unset($result['route'], $result['routeParam'], $result['routeAclResource']);
+        return $result;
+    }
+
+    /**
      * The shape of a saved report for the Explorer page.
      *
      * @return array{id: int, name: string, shared: bool, mine: bool, request: array<string, mixed>, updatedAt: ?string}

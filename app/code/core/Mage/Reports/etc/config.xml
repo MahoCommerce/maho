@@ -108,6 +108,9 @@ SPDX-License-Identifier: AFL-3.0
                 <product_views>
                     <class>reports/report_dataset_productViews</class>
                 </product_views>
+                <not_found>
+                    <class>reports/report_dataset_notFound</class>
+                </not_found>
             </datasets>
         </reports>
         <docs>

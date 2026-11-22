@@ -1669,7 +1669,7 @@ class MahoReportExplorer {
                     link.href = row.url;
                     link.target = '_blank';
                     link.rel = 'noopener';
-                    link.title = this.t('open');
+                    link.title = result.routeTitle ?? this.t('open');
                     td.append(link);
                 } else {
                     td.textContent = value;

@@ -75,6 +75,11 @@ describe('the records behind a report', function () {
             ->and(array_column($result['rows'], 'id'))->toBe([(int) $orders[1]->getId(), (int) $orders[0]->getId()])
             ->and(array_column(array_column($result['rows'], 'values'), 'increment_id'))->toBe([$orders[1]->getIncrementId(), $orders[0]->getIncrementId()])
             ->and($result['route'])->toBe('adminhtml/sales_order/view');
+
+        Mage::app()->getRequest()->setRouteName('adminhtml');
+        $linked = Mage::helper('reports')->addRecordUrls($result);
+        expect($linked['rows'][0]['url'])->toContain('/order_id/' . $orders[1]->getId() . '/')
+            ->and($linked)->not->toHaveKey('route');
     });
 
     it('keeps the filters of the report and hides the personal fields without the permission', function () {

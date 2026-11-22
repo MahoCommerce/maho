@@ -42,20 +42,13 @@ class Mage_Adminhtml_Report_ExplorerController extends Mage_Adminhtml_Controller
     {
         $this->respond(function (): array {
             $params = $this->getRequest();
-            $result = Mage::getService('reports/explorer')->records(
+            return Mage::helper('reports')->addRecordUrls(Mage::getService('reports/explorer')->records(
                 $this->readRequest(),
                 $this->access(),
                 ($sort = (string) $params->getParam('sort')) === '' ? null : $sort,
                 Mage_Reports_Model_Explorer_Runner::RECORDS_LIMIT,
                 max(0, (int) $params->getParam('offset')),
-            );
-            if ($result['route'] !== null) {
-                foreach ($result['rows'] as $index => $row) {
-                    $result['rows'][$index]['url'] = $this->getUrl($result['route'], [$result['routeParam'] => $row['id']]);
-                }
-            }
-            unset($result['route'], $result['routeParam']);
-            return $result;
+            ));
         });
     }
 
