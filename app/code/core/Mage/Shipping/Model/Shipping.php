@@ -152,11 +152,12 @@ class Mage_Shipping_Model_Shipping
                     $packages = $this->composePackagesForCarrier($carrier, $request);
                     if (!empty($packages)) {
                         $sumResults = [];
+                        $packageRequest = clone $request;
                         foreach ($packages as $weight => $packageCount) {
                             //clone carrier for multi-requests
                             $carrierObj = clone $carrier;
-                            $request->setPackageWeight($weight);
-                            $result = $carrierObj->collectRates($request);
+                            $packageRequest->setPackageWeight($weight);
+                            $result = $carrierObj->collectRates($packageRequest);
                             if (!$result) {
                                 return $this;
                             }
@@ -256,8 +257,6 @@ class Mage_Shipping_Model_Shipping
                                 $decimalItems[] = ['weight' => $weightItem, 'qty' => 1];
                             }
                             $checkWeight = false;
-                        } else {
-                            $itemWeight = $itemWeight * $item->getQty();
                         }
                     }
                 } else {

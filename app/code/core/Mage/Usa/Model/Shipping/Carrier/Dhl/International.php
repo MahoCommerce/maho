@@ -594,18 +594,17 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
                         $qty        = round(($item->getWeight() / $itemWeight) * $qty);
                         $changeQty  = false;
                     } else {
-                        $itemWeight = $this->_getWeight($itemWeight * $item->getQty());
-                        $maxWeight  = $this->_getWeight($this->_maxWeight, true);
-                        if ($itemWeight > $maxWeight) {
-                            $qtyItem = floor($itemWeight / $maxWeight);
+                        $itemWeight = $itemWeight * $item->getQty();
+                        $convertedWeight = $this->_getWeight($itemWeight);
+                        $maxWeight = $this->_getWeight($this->_maxWeight, true);
+                        if ($convertedWeight > $maxWeight) {
+                            $qtyItem = floor($convertedWeight / $maxWeight);
                             $decimalItems[] = ['weight' => $maxWeight, 'qty' => $qtyItem];
-                            $weightItem = Mage::helper('core')->getExactDivision($itemWeight, $maxWeight);
+                            $weightItem = Mage::helper('core')->getExactDivision($convertedWeight, $maxWeight);
                             if ($weightItem) {
                                 $decimalItems[] = ['weight' => $weightItem, 'qty' => 1];
                             }
                             $checkWeight = false;
-                        } else {
-                            $itemWeight = $itemWeight * $item->getQty();
                         }
                     }
                 } else {
