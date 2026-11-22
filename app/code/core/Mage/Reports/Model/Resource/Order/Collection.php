@@ -53,12 +53,10 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
      * Prepare report summary
      *
      * @param string $range
-     * @param mixed $customStart
-     * @param mixed $customEnd
      * @param int $isFilter
      * @return $this
      */
-    public function prepareSummary($range, $customStart, $customEnd, $isFilter = 0)
+    public function prepareSummary($range, ?DateTime $customStart, ?DateTime $customEnd, $isFilter = 0)
     {
         $this->checkIsLive($range);
         if ($this->_isLive) {
@@ -108,12 +106,10 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
      * Prepare report summary from live data
      *
      * @param string $range
-     * @param mixed $customStart
-     * @param mixed $customEnd
      * @param int $isFilter
      * @return $this
      */
-    protected function _prepareSummaryLive($range, $customStart, $customEnd, $isFilter = 0)
+    protected function _prepareSummaryLive($range, ?DateTime $customStart, ?DateTime $customEnd, $isFilter = 0)
     {
         $this->setMainTable('sales/order');
         $adapter = $this->getConnection();
@@ -169,11 +165,9 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
      * Prepare report summary from aggregated data
      *
      * @param string $range
-     * @param mixed $customStart
-     * @param mixed $customEnd
      * @return $this
      */
-    protected function _prepareSummaryAggregated($range, $customStart, $customEnd)
+    protected function _prepareSummaryAggregated($range, ?DateTime $customStart, ?DateTime $customEnd)
     {
         $this->setMainTable('sales/order_aggregated_created');
         /**
@@ -285,12 +279,10 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
      * Calculate From and To dates (or times) by given period
      *
      * @param string $range
-     * @param string|null $customStart
-     * @param string|null $customEnd
      * @param bool $returnObjects
      * @return ($returnObjects is true ? array{0: DateTime, 1: DateTime} : array{from: DateTime, to: DateTime, datetime: true})
      */
-    public function getDateRange($range, $customStart, $customEnd, $returnObjects = false)
+    public function getDateRange($range, ?DateTime $customStart, ?DateTime $customEnd, $returnObjects = false)
     {
         $baseDate = Mage::app()->getLocale()->utcToStore();
         $dateStart = DateTime::createFromImmutable($baseDate);

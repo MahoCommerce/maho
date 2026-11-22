@@ -133,7 +133,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
 
         $period = $this->getDataHelper()->getParam('period');
         $dateRange = Mage::getResourceModel('reports/order_collection')
-            ->getDateRange($period, '', '', true);
+            ->getDateRange($period, null, null, true);
         [$dateStart, $dateEnd] = $dateRange;
 
         // Convert to DateTimeImmutable to prevent mutation of original objects
