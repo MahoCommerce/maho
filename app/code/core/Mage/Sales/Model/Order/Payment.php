@@ -273,8 +273,6 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
      * Updates transactions hierarchy, if required
      * Updates payment totals, updates order status and adds proper comments
      *
-     * TODO: eliminate logic duplication with registerCaptureNotification()
-     *
      * @param Mage_Sales_Model_Order_Invoice|null $invoice
      * @return $this
      * @throws Mage_Core_Exception
@@ -364,8 +362,6 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
      * Updates transactions hierarchy, if required
      * Prevents transaction double processing
      * Updates payment totals, updates order status and adds proper comments
-     *
-     * TODO: eliminate logic duplication with capture()
      *
      * @param float $amount
      * @param bool $skipFraudDetection
@@ -631,9 +627,6 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
      * Updates transactions hierarchy, if required
      * Prevents transaction double processing
      * Updates payment totals, updates order status and adds proper comments
-     * TODO: potentially a full capture can be refunded. In this case if there was only one invoice for that transaction
-     *       then we should create a creditmemo from invoice and also refund it offline
-     * TODO: implement logic of chargebacks reimbursements (via negative amount)
      *
      * @param float $amount
      * @return $this
@@ -1092,15 +1085,6 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         return $this;
     }
 
-    //    /**
-    //     * TODO: implement this
-    //     * @param Mage_Sales_Model_Order_Invoice $invoice
-    //     * @return $this
-    //     */
-    //    public function cancelCapture($invoice = null)
-    //    {
-    //    }
-
     /**
      * Create transaction,
      * prepare its insertion into hierarchy and add its information to payment and comments
@@ -1163,7 +1147,6 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
             $this->getOrder()->addRelatedObject($transaction);
             if ($salesDocument && $salesDocument instanceof Mage_Sales_Model_Abstract) {
                 $salesDocument->setTransactionId($transactionId);
-                // TODO: linking transaction with the sales document
             }
 
             // link with parent transaction

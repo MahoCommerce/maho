@@ -115,7 +115,6 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
     /**
      * Retrieve stock identifier
      *
-     * @todo multi stock
      * @return int
      */
     public function getStockId()

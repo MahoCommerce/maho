@@ -135,7 +135,6 @@ class Mage_Catalog_Model_Product_Url extends \Maho\DataObject
     {
         $path = $product->getData('url_path');
         if (is_null($category)) {
-            /** @todo get default category */
             return $path;
         }
 

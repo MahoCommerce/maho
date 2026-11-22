@@ -89,7 +89,6 @@ class Mage_Shipping_Model_Shipping
      * Retrieve all methods for supplied shipping data
      *
      * @return $this
-     * @todo make it ordered
      */
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
     {

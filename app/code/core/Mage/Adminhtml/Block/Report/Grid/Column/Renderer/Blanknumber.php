@@ -17,9 +17,6 @@ class Mage_Adminhtml_Block_Report_Grid_Column_Renderer_Blanknumber extends Mage_
         if (!is_null($data)) {
             $value = $data * 1;
             return $value ?: ''; // fixed for showing blank cell in grid
-            /**
-             * @todo may be bug in i.e. needs to be fixed
-             */
         }
         return $this->getColumn()->getDefault();
     }
