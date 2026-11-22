@@ -1260,18 +1260,6 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     }
 
     /**
-     * Load every row of the collection for an export, not one page
-     */
-    protected function _removeCollectionLimit(): void
-    {
-        $collection = $this->getCollection();
-        if ($collection instanceof \Maho\Data\Collection\Db) {
-            $collection->getSelect()->limit();
-        }
-        $collection?->setPageSize(0);
-    }
-
-    /**
      * Retrieve Grid data as CSV
      *
      * @throws Exception
@@ -1281,7 +1269,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
         $csv = '';
         $this->_isExport = true;
         $this->_prepareGrid();
-        $this->_removeCollectionLimit();
+        $this->getCollection()->setPageSize(0);
         $this->_beforeLoadCollection();
         $this->getCollection()->load();
         $this->_afterLoadCollection();
@@ -1339,7 +1327,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     {
         $this->_isExport = true;
         $this->_prepareGrid();
-        $this->_removeCollectionLimit();
+        $this->getCollection()->setPageSize(0);
         $this->_beforeLoadCollection();
         $this->getCollection()->load();
         $this->_afterLoadCollection();
@@ -1446,7 +1434,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     {
         $this->_isExport = true;
         $this->_prepareGrid();
-        $this->_removeCollectionLimit();
+        $this->getCollection()->setPageSize(0);
         $this->_beforeLoadCollection();
         $this->getCollection()->load();
         $this->_afterLoadCollection();
