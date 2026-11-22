@@ -11,7 +11,7 @@
 class Mage_Adminhtml_Block_System_Convert_Profile_Edit_Renderer_Action extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     #[\Override]
-    public function render(\Maho\DataObject $row): ?string
+    public function render(\Maho\DataObject $row): string
     {
         $values = [
             'create' => Mage::helper('adminhtml')->__('Create'),
@@ -19,6 +19,6 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Edit_Renderer_Action extends M
             'update' => Mage::helper('adminhtml')->__('Update'),
         ];
         $value = $row->getData($this->getColumn()->getIndex());
-        return $values[$value];
+        return $values[$value] ?? '';
     }
 }

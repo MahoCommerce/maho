@@ -1950,9 +1950,6 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         return $this->_methodsMapper($value, true);
     }
 
-    /**
-     * Get value of method by its label
-     */
     #[\Deprecated]
     public function getMethodValue(string $label): string
     {

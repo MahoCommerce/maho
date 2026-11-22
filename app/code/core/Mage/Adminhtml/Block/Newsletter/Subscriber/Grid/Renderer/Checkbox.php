@@ -10,9 +10,6 @@
 
 class Mage_Adminhtml_Block_Newsletter_Subscriber_Grid_Renderer_Checkbox extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
-    /**
-     * Renders grid column
-     */
     #[\Override]
     public function render(\Maho\DataObject $row): string
     {

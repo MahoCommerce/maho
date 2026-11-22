@@ -11,7 +11,7 @@
 class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Iconoptions extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Options
 {
     #[\Override]
-    public function render(\Maho\DataObject $row): ?string
+    public function render(\Maho\DataObject $row): string
     {
         $value = $row->getData($this->getColumn()->getIndex());
         $icons = $this->getColumn()->getIcons();

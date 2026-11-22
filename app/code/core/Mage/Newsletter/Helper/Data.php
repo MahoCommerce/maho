@@ -84,9 +84,6 @@ class Mage_Newsletter_Helper_Data extends Mage_Core_Helper_Abstract
             ]);
     }
 
-    /**
-     * Retrieve Template processor for Newsletter template
-     */
     public function getTemplateProcessor(): Mage_Core_Model_Email_Template_Filter
     {
         $model = (string) Mage::getConfig()->getNode(self::XML_PATH_TEMPLATE_FILTER);

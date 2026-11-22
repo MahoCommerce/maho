@@ -14,7 +14,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Search_Grid_Renderer_Price extends
      * Render minimal price for downloadable products
      */
     #[\Override]
-    public function render(\Maho\DataObject $row): mixed
+    public function render(\Maho\DataObject $row): string
     {
         if ($row->getTypeId() == 'downloadable') {
             $row->setPrice($row->getPrice());

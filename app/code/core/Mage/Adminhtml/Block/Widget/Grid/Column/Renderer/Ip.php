@@ -10,16 +10,10 @@
 
 class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Ip extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
-    /**
-     * Render the grid cell value
-     */
     #[\Override]
-    public function render(\Maho\DataObject $row): string|false
+    public function render(\Maho\DataObject $row): string
     {
-        /**
-         * The output of the "inet_ntop" function was disabled to prevent an error throwing
-         * in case when the database value is not an ipv6 or an ipv4 binary representation (ex. NULL).
-         */
-        return @inet_ntop($row->getData($this->getColumn()->getIndex()));
+        $value = $row->getData($this->getColumn()->getIndex());
+        return is_string($value) ? (inet_ntop($value) ?: '') : '';
     }
 }

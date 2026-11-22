@@ -43,9 +43,6 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Store extends Mage_Adminh
         return $this->getColumn()->getData('skipEmptyStoresLabel') ?: $this->_skipEmptyStoresLabel;
     }
 
-    /**
-     * Render row store views
-     */
     #[\Override]
     public function render(\Maho\DataObject $row): string
     {

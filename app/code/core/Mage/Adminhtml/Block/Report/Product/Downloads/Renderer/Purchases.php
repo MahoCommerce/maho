@@ -10,14 +10,11 @@
 
 class Mage_Adminhtml_Block_Report_Product_Downloads_Renderer_Purchases extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
-    /**
-     * Renders Purchases value
-     */
     #[\Override]
-    public function render(\Maho\DataObject $row): mixed
+    public function render(\Maho\DataObject $row): string
     {
         if (($value = $row->getData($this->getColumn()->getIndex())) > 0) {
-            return $value;
+            return (string) $value;
         }
         return $this->__('Unlimited');
     }

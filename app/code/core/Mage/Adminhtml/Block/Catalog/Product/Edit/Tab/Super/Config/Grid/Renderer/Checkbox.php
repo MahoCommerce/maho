@@ -12,9 +12,6 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid_Renderer_Checkbox extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Checkbox
 {
-    /**
-     * Renders grid column
-     */
     #[\Override]
     public function render(\Maho\DataObject $row): string
     {

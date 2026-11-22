@@ -10,9 +10,6 @@
 
 class Mage_Adminhtml_Block_Sitemap_Grid_Renderer_Time extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
-    /**
-     * Prepare link to display in grid
-     */
     #[\Override]
     public function render(\Maho\DataObject $row): string
     {

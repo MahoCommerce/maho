@@ -17,9 +17,6 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Wrapline extends Mage_Adm
      */
     protected $_defaultMaxLineLength = 60;
 
-    /**
-     * Renders grid column
-     */
     #[\Override]
     public function render(\Maho\DataObject $row): string
     {

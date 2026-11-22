@@ -10,17 +10,14 @@
 
 class Mage_Adminhtml_Block_Report_Grid_Column_Renderer_Currency extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Currency
 {
-    /**
-     * Renders grid column
-     */
     #[\Override]
-    public function render(\Maho\DataObject $row): mixed
+    public function render(\Maho\DataObject $row): string
     {
         $data = $row->getData($this->getColumn()->getIndex());
         $currencyCode = $this->_getCurrencyCode($row);
 
         if (!$currencyCode) {
-            return $data;
+            return (string) $data;
         }
 
         $data = (float) $data * $this->_getRate($row);

@@ -38,9 +38,6 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Massaction extends Mage_A
         return $out;
     }
 
-    /**
-     * Returns HTML of the object
-     */
     #[\Override]
     public function render(\Maho\DataObject $row): string
     {

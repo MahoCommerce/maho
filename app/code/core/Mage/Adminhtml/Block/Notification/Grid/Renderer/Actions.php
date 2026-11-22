@@ -10,9 +10,6 @@
 
 class Mage_Adminhtml_Block_Notification_Grid_Renderer_Actions extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
-    /**
-     * Renders grid column
-     */
     #[\Override]
     public function render(\Maho\DataObject $row): string
     {
