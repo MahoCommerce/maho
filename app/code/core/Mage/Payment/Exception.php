@@ -14,16 +14,16 @@ class Mage_Payment_Exception extends Exception
     /**
      * Comma-separated names of the fields with an error
      */
-    protected ?string $_code = null;
+    protected ?string $_fields = null;
 
-    public function __construct(?string $message = null, ?string $fields = null)
+    public function __construct(string $message = '', int $code = 0, ?string $fields = null)
     {
-        $this->_code = $fields === '' ? null : $fields;
-        parent::__construct($message ?? '', 0);
+        parent::__construct($message, $code);
+        $this->_fields = $fields;
     }
 
     public function getFields(): ?string
     {
-        return $this->_code;
+        return $this->_fields;
     }
 }
