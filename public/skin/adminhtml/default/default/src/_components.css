@@ -1379,6 +1379,11 @@
 
 /* The d-btn and d-input rules sit in the utilities layer, so the pressed button of the view switch, the pin, the position of the checkbox and the hover states are here */
 @layer utilities {
+    /* daisyUI shows 24rem of an open list, which cuts the twelfth option of an admin select, such as Custom in a period list */
+    ::picker(select) {
+        max-height: min(30rem, 80dvh);
+    }
+
     .merchandiser-select {
         position: absolute;
     }
