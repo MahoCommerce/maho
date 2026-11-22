@@ -19,6 +19,9 @@ declare(strict_types=1);
  * @method $this unsEventModuleId()
  * @method bool hasRateValue()
  * @method $this unsRateValue()
+ *
+ * @phpstan-import-type TaxRateRow from Mage_Tax_Model_Resource_Calculation
+ * @phpstan-import-type CalculationStep from Mage_Tax_Model_Resource_Calculation
  */
 class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
 {
@@ -315,11 +318,11 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
     /**
      * Return the default rate request. It can be either based on store address or customer address
      */
-    public function getDefaultRateRequest(Mage_Core_Model_Store|int|string|null $store = null): \Maho\DataObject
+    public function getDefaultRateRequest(?Mage_Core_Model_Store $store = null): \Maho\DataObject
     {
         if ($this->_taxHelper->isCrossBorderTradeEnabled($store)) {
             //If cross border trade is enabled, we will use customer tax rate as store tax rate
-            return $this->getRateRequest(null, null, null, $store === null ? null : Mage::app()->getStore($store));
+            return $this->getRateRequest(null, null, null, $store);
         }
         return $this->getRateOriginRequest($store);
     }
@@ -334,11 +337,10 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
      *  store (->getStore())
      *
      * For a null address, the request uses the default address of the customer.
-     * For a false address, it uses the default tax destination of the store.
      */
     public function getRateRequest(
-        Mage_Customer_Model_Address_Abstract|false|null $shippingAddress = null,
-        Mage_Customer_Model_Address_Abstract|false|null $billingAddress = null,
+        ?Mage_Customer_Model_Address_Abstract $shippingAddress = null,
+        ?Mage_Customer_Model_Address_Abstract $billingAddress = null,
         ?int $customerTaxClass = null,
         ?Mage_Core_Model_Store $store = null,
     ): \Maho\DataObject {
@@ -346,30 +348,22 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
         $customer = $this->getCustomer();
         $basedOn = Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_BASED_ON, $store);
 
-        if (($shippingAddress === false && $basedOn == 'shipping')
-            || ($billingAddress === false && $basedOn == 'billing')
+        if ((!$billingAddress?->getCountryId() && $basedOn == 'billing')
+            || (!$shippingAddress?->getCountryId() && $basedOn == 'shipping')
         ) {
-            $basedOn = 'default';
-        } else {
-            if ((($billingAddress === false || is_null($billingAddress) || !$billingAddress->getCountryId())
-                && $basedOn == 'billing')
-                || (($shippingAddress === false || is_null($shippingAddress) || !$shippingAddress->getCountryId())
-                    && $basedOn == 'shipping')
-            ) {
-                if ($customer) {
-                    $defBilling = $customer->getDefaultBillingAddress();
-                    $defShipping = $customer->getDefaultShippingAddress();
+            if ($customer) {
+                $defBilling = $customer->getDefaultBillingAddress();
+                $defShipping = $customer->getDefaultShippingAddress();
 
-                    if ($basedOn == 'billing' && $defBilling && $defBilling->getCountryId()) {
-                        $billingAddress = $defBilling;
-                    } elseif ($basedOn == 'shipping' && $defShipping && $defShipping->getCountryId()) {
-                        $shippingAddress = $defShipping;
-                    } else {
-                        $basedOn = 'default';
-                    }
+                if ($basedOn == 'billing' && $defBilling && $defBilling->getCountryId()) {
+                    $billingAddress = $defBilling;
+                } elseif ($basedOn == 'shipping' && $defShipping && $defShipping->getCountryId()) {
+                    $shippingAddress = $defShipping;
                 } else {
                     $basedOn = 'default';
                 }
+            } else {
+                $basedOn = 'default';
             }
         }
 
@@ -551,6 +545,9 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
 
     /**
      * Get the calculation process
+     *
+     * @param list<TaxRateRow> $rates
+     * @return list<CalculationStep>
      */
     public function reproduceProcess(array $rates): array
     {

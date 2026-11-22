@@ -752,10 +752,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
         $pseudoProduct = new \Maho\DataObject();
         $pseudoProduct->setTaxClassId($this->getShippingTaxClass($store));
 
-        $billingAddress = false;
-        if ($shippingAddress && $shippingAddress->getQuote() && $shippingAddress->getQuote()->getBillingAddress()) {
-            $billingAddress = $shippingAddress->getQuote()->getBillingAddress();
-        }
+        $billingAddress = $shippingAddress?->getQuote()?->getBillingAddress();
 
         $price = $this->getPrice(
             $pseudoProduct,

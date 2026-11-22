@@ -8,6 +8,41 @@
  * @package Mage_Tax
  */
 
+/**
+ * @phpstan-type TaxRateRow array{
+ *     code: string,
+ *     title: string,
+ *     position: int|string,
+ *     priority: int|string,
+ *     value?: float|string,
+ *     percent?: float|string,
+ *     tax_calculation_rule_id?: int|string,
+ *     process?: int|string,
+ *     calculate_subtotal?: bool|int|string,
+ *     hidden?: bool|int|string,
+ *     amount?: float|string,
+ *     base_amount?: float|string,
+ *     base_real_amount?: float|string,
+ *     ...
+ * }
+ * @phpstan-type AppliedRate array{
+ *     code: string,
+ *     title: string,
+ *     percent: float,
+ *     position: int|string,
+ *     priority: int|string,
+ *     rule_id?: int|string,
+ * }
+ * @phpstan-type CalculationStep array{
+ *     rates: list<AppliedRate>,
+ *     percent: float,
+ *     id: string,
+ *     hidden?: bool|int|string,
+ *     amount?: float|string,
+ *     base_amount?: float|string,
+ *     base_real_amount?: float|string,
+ * }
+ */
 class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**
@@ -90,6 +125,8 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
 
     /**
      * Retrieve Calculation Process
+     *
+     * @return list<CalculationStep>
      */
     public function getCalculationProcess(\Maho\DataObject $request): array
     {
@@ -98,6 +135,9 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
 
     /**
      * Group the rates by priority into the steps of the calculation process
+     *
+     * @param list<TaxRateRow> $rates
+     * @return list<CalculationStep>
      */
     public function buildCalculationProcess(array $rates): array
     {
@@ -109,7 +149,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
         $countedRates = count($rates);
         for ($i = 0; $i < $countedRates; $i++) {
             $rate = $rates[$i];
-            $value = ($rate['value'] ?? $rate['percent']) * 1;
+            $value = (float) ($rate['value'] ?? $rate['percent']);
 
             $oneRate = [
                 'code' => $rate['code'],
