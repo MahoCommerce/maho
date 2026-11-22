@@ -23,7 +23,7 @@ class Exception extends MahoException
 
     protected ?ContainerInterface $_container = null;
 
-    protected string|int|null $_level = null;
+    protected ?string $_level = null;
 
     protected ?string $_position = null;
 
@@ -38,12 +38,12 @@ class Exception extends MahoException
         return $this->_container;
     }
 
-    public function getLevel(): string|int|null
+    public function getLevel(): ?string
     {
         return $this->_level;
     }
 
-    public function setLevel(string|int $level): static
+    public function setLevel(string $level): static
     {
         $this->_level = $level;
         return $this;

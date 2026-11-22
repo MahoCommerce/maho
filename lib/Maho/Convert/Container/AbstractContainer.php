@@ -127,7 +127,7 @@ abstract class AbstractContainer implements ContainerInterface
     }
 
     #[\Override]
-    public function addException(string $error, string|int|null $level = null): Exception
+    public function addException(string $error, ?string $level = null): Exception
     {
         $e = new Exception($error);
         $e->setLevel($level ?? Exception::NOTICE);

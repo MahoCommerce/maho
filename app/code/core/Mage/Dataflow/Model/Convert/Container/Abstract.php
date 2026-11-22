@@ -171,7 +171,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
     }
 
     #[\Override]
-    public function addException(string $error, string|int|null $level = null): Mage_Dataflow_Model_Convert_Exception
+    public function addException(string $error, ?string $level = null): Mage_Dataflow_Model_Convert_Exception
     {
         $e = new Mage_Dataflow_Model_Convert_Exception($error);
         $e->setLevel($level ?? Mage_Dataflow_Model_Convert_Exception::NOTICE);

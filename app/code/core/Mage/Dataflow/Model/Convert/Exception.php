@@ -19,7 +19,7 @@ class Mage_Dataflow_Model_Convert_Exception extends \Maho\Exception
 
     protected ?Mage_Dataflow_Model_Convert_Container_Interface $_container = null;
 
-    protected string|int|null $_level = null;
+    protected ?string $_level = null;
 
     protected ?string $_position = null;
 
@@ -34,12 +34,12 @@ class Mage_Dataflow_Model_Convert_Exception extends \Maho\Exception
         return $this->_container;
     }
 
-    public function getLevel(): string|int|null
+    public function getLevel(): ?string
     {
         return $this->_level;
     }
 
-    public function setLevel(string|int $level): static
+    public function setLevel(string $level): static
     {
         $this->_level = $level;
         return $this;
