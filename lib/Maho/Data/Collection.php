@@ -432,7 +432,7 @@ class Collection implements IteratorAggregate, Countable
      */
     public function each(callable $callback): void
     {
-        foreach ($this->_items as $key => $item) {
+        foreach ($this->getItems() as $key => $item) {
             $this->_items[$key] = $callback($item);
         }
     }
