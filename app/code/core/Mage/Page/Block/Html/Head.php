@@ -162,13 +162,9 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
      */
     public function addItem($type, $name, $params = null, $cond = null, $referenceName = '*', $before = false)
     {
-        // allow skipping of parameters in the layout XML files via empty-string
-        if ($params === '') {
-            $params = null;
-        }
-        if ($cond === '') {
-            $cond = null;
-        }
+        // An empty element in layout XML skips a parameter. It arrives as an object, not as ''
+        $params = (string) $params ?: null;
+        $cond = (string) $cond ?: null;
 
         if ($type === 'skin_css' && empty($params)) {
             $params = 'media="all"';
@@ -265,7 +261,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
     }
 
     /**
-     * The items of this head whose condition is true, grouped by type and then by params.
+     * The items of this head whose condition is true, grouped by type, in the order of the items.
      * Types other than the CSS and JS files go to the 'other' group as HTML.
      */
     protected function _groupItems(): array
@@ -281,7 +277,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
                 case 'skin_js':   // skin/*/*.js
                 case 'js_css':    // js/*.css
                 case 'skin_css':  // skin/*/*.css
-                    $items[$item['type']][$params][$item['name']] = $item;
+                    $items[$item['type']][$item['name']] = $item;
                     break;
                 default:
                     $this->_separateOtherHtmlHeadElements($items, $item['type'], $params, $item['name'], $item);
@@ -292,15 +288,11 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
     }
 
     /**
-     * Merge static and skin files of the same format into 1 set of HEAD directives or even into 1 directive
-     *
-     * Will attempt to merge into 1 directive, if merging callback is provided. In this case it will generate
-     * filenames, rather than render urls.
-     * The merger callback is responsible for checking whether files exist, merging them and giving result URL
+     * Render one HTML element for each static item, then one for each skin item, in the order of the items.
      *
      * @param string $format - HTML element format for sprintf('<element src="%s"%s>', $src, $params)
-     * @param array $staticItems - array of relative names of static items to be grabbed from js/ folder
-     * @param array $skinItems - array of relative names of skin items to be found in skins according to design config
+     * @param array $staticItems - items of files in the js/ folder, keyed by name
+     * @param array $skinItems - items of files in the skin of the design, keyed by name
      * @return string
      */
     protected function &_prepareStaticAndSkinElements(
@@ -315,59 +307,52 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
         $minifyHelper = Mage::helper('core/minify');
 
         // get static files from the js folder, no need in lookups
-        foreach ($staticItems as $params => $rows) {
-            foreach ($rows as $name => $itemData) {
-                $url = $baseJsUrl . $name;
+        foreach ($staticItems as $name => $itemData) {
+            $url = $baseJsUrl . $name;
 
-                // Apply minification if needed
-                if (is_array($itemData) && !empty($itemData['should_minify'])) {
-                    $type = $itemData['type'];
-                    if ($type === 'js' && $minifyHelper->isJsMinificationEnabled()) {
-                        $url = $minifyHelper->minifyJs($url);
-                    } elseif ($type === 'js_css' && $minifyHelper->isCssMinificationEnabled()) {
-                        $url = $minifyHelper->minifyCss($url);
-                    }
+            // Apply minification if needed
+            if (!empty($itemData['should_minify'])) {
+                $type = $itemData['type'];
+                if ($type === 'js' && $minifyHelper->isJsMinificationEnabled()) {
+                    $url = $minifyHelper->minifyJs($url);
+                } elseif ($type === 'js_css' && $minifyHelper->isCssMinificationEnabled()) {
+                    $url = $minifyHelper->minifyCss($url);
                 }
-                if ($url === $baseJsUrl . $name) {
-                    $url = $this->_versionedUrl($url, Mage::getBaseDir('public') . DS . 'js' . DS . $name);
-                }
-
-                $items[$params][] = $url;
             }
+            if ($url === $baseJsUrl . $name) {
+                $url = $this->_versionedUrl($url, Mage::getBaseDir('public') . DS . 'js' . DS . $name);
+            }
+
+            $items[] = [$url, $itemData['params'] ?? ''];
         }
 
         // lookup each file basing on current theme configuration
-        foreach ($skinItems as $params => $rows) {
-            foreach ($rows as $name => $itemData) {
-                $contentUrl = $name === Mage_Core_Model_Design_Content_Bundle::STYLES_FILE
-                    ? Mage::getSingleton('core/design_content_bundle')->getUrl((string) $designPackage->getFilename($name, ['_type' => 'skin']))
-                    : null;
-                $url = $skinUrl = $contentUrl ?? $designPackage->getSkinUrl($name, []);
+        foreach ($skinItems as $name => $itemData) {
+            $contentUrl = $name === Mage_Core_Model_Design_Content_Bundle::STYLES_FILE
+                ? Mage::getSingleton('core/design_content_bundle')->getUrl((string) $designPackage->getFilename($name, ['_type' => 'skin']))
+                : null;
+            $url = $skinUrl = $contentUrl ?? $designPackage->getSkinUrl($name, []);
 
-                // Apply minification if needed
-                if (is_array($itemData) && !empty($itemData['should_minify'])) {
-                    $type = $itemData['type'];
-                    if ($type === 'skin_css' && $minifyHelper->isCssMinificationEnabled()) {
-                        $url = $minifyHelper->minifyCss($url);
-                    } elseif ($type === 'skin_js' && $minifyHelper->isJsMinificationEnabled()) {
-                        $url = $minifyHelper->minifyJs($url);
-                    }
+            // Apply minification if needed
+            if (!empty($itemData['should_minify'])) {
+                $type = $itemData['type'];
+                if ($type === 'skin_css' && $minifyHelper->isCssMinificationEnabled()) {
+                    $url = $minifyHelper->minifyCss($url);
+                } elseif ($type === 'skin_js' && $minifyHelper->isJsMinificationEnabled()) {
+                    $url = $minifyHelper->minifyJs($url);
                 }
-                if ($url === $skinUrl && $contentUrl === null) {
-                    $url = $this->_versionedUrl($url, (string) $designPackage->getFilename($name, ['_type' => 'skin']));
-                }
-
-                $items[$params][] = $url;
             }
+            if ($url === $skinUrl && $contentUrl === null) {
+                $url = $this->_versionedUrl($url, (string) $designPackage->getFilename($name, ['_type' => 'skin']));
+            }
+
+            $items[] = [$url, $itemData['params'] ?? ''];
         }
 
         $html = '';
-        foreach ($items as $params => $rows) {
-            $params = trim($params);
-            $params = $params ? ' ' . $params : '';
-            foreach ($rows as $src) {
-                $html .= sprintf($format, $src, $params);
-            }
+        foreach ($items as [$src, $params]) {
+            $params = trim((string) $params);
+            $html .= sprintf($format, $src, $params === '' ? '' : ' ' . $params);
         }
         return $html;
     }
