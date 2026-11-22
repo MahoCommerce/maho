@@ -307,6 +307,12 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Layout.php
 
 		-
+			rawMessage: 'Property Mage_Core_Model_Resource_Db_Collection_Abstract::$_resource (Mage_Core_Model_Resource_Db_Abstract|null) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/Core/Model/Resource/Db/Collection/Abstract.php
+
+		-
 			rawMessage: 'Parameter #2 $scope of method Mage_Core_Model_Translate::_addData() expects string, false given.'
 			identifier: argument.type
 			count: 1
@@ -365,6 +371,12 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
+
+		-
+			rawMessage: 'Parameter #1 $entity of method Mage_Eav_Model_Entity_Collection_Abstract::setEntity() expects Mage_Eav_Model_Entity_Abstract, Mage_Core_Model_Resource_Db_Collection_Abstract|false given.'
+			identifier: argument.type
+			count: 1
+			path: app/code/core/Mage/Eav/Model/Entity/Collection/Abstract.php
 
 		-
 			rawMessage: 'Parameter #1 $attribute of static method Mage_Eav_Model_Attribute_Data::factory() expects Mage_Eav_Model_Attribute, Mage_Eav_Model_Entity_Attribute given.'

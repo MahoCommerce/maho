@@ -150,9 +150,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
         $this->setItemObjectClass(Mage::getConfig()->getModelClassName($model));
         $entityModel ??= $model;
         $entity = Mage::getResourceSingleton($entityModel);
-        if (!$entity instanceof Mage_Eav_Model_Entity_Abstract) {
-            throw new \RuntimeException("Resource model {$entityModel} is not an EAV entity.");
-        }
         $this->setEntity($entity);
 
         return $this;

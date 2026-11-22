@@ -431,14 +431,15 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
         return $this->_resourceModel;
     }
 
-    public function getResource(): Mage_Core_Model_Resource_Db_Abstract
+    /**
+     * Get resource instance
+     *
+     * @return Mage_Core_Model_Resource_Db_Abstract
+     */
+    public function getResource()
     {
-        if (!$this->_resource instanceof Mage_Core_Model_Resource_Db_Abstract) {
-            $resource = Mage::getResourceModel($this->getResourceModelName());
-            if (!$resource instanceof Mage_Core_Model_Resource_Db_Abstract) {
-                throw new \RuntimeException("Resource model {$this->getResourceModelName()} is not a database resource model.");
-            }
-            $this->_resource = $resource;
+        if (empty($this->_resource)) {
+            $this->_resource = Mage::getResourceModel($this->getResourceModelName());
         }
         return $this->_resource;
     }

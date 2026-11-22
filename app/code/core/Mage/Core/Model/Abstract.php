@@ -243,7 +243,7 @@ abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
         }
 
         $collection = Mage::getResourceModel($this->_resourceCollectionName, $this->_getResource());
-        if (!$collection instanceof \Maho\Data\Collection\Db) {
+        if (!$collection) {
             Mage::throwException(Mage::helper('core')->__('Resource "%s" is not found.', $this->_resourceCollectionName));
         }
         return $collection;

@@ -61,13 +61,9 @@ class Mage_Adminhtml_Block_Report_Grid_Abstract extends Mage_Adminhtml_Block_Wid
     }
 
     #[\Override]
-    public function getCollection(): Mage_Reports_Model_Grouped_Collection
+    public function getCollection(): \Maho\Data\Collection
     {
-        $this->_collection ??= Mage::getModel('reports/grouped_collection');
-        if (!$this->_collection instanceof Mage_Reports_Model_Grouped_Collection) {
-            throw new \RuntimeException('The collection of a report grid must be a grouped collection.');
-        }
-        return $this->_collection;
+        return $this->_collection ??= Mage::getModel('reports/grouped_collection');
     }
 
     /**
@@ -153,7 +149,7 @@ class Mage_Adminhtml_Block_Report_Grid_Abstract extends Mage_Adminhtml_Block_Wid
     }
 
     #[\Override]
-    protected function _prepareCollection()
+    protected function _prepareCollection(): static
     {
         $filterData = $this->getFilterData();
 
@@ -181,9 +177,12 @@ class Mage_Adminhtml_Block_Report_Grid_Abstract extends Mage_Adminhtml_Block_Wid
             return $this;
         }
 
+        $groupedCollection = Mage::getModel('reports/grouped_collection');
+        $this->setCollection($groupedCollection);
+
         if ($filterData->getData('show_empty_rows', false)) {
             Mage::helper('reports')->prepareIntervalsCollection(
-                $this->getCollection(),
+                $groupedCollection,
                 $filterData->getData('from', null),
                 $filterData->getData('to', null),
                 $filterData->getData('period_type'),
@@ -213,8 +212,8 @@ class Mage_Adminhtml_Block_Report_Grid_Abstract extends Mage_Adminhtml_Block_Wid
             }
         }
 
-        $this->getCollection()->setColumnGroupBy($this->_columnGroupBy);
-        $this->getCollection()->setResourceCollection($resourceCollection);
+        $groupedCollection->setColumnGroupBy($this->_columnGroupBy);
+        $groupedCollection->setResourceCollection($resourceCollection);
 
         return parent::_prepareCollection();
     }
