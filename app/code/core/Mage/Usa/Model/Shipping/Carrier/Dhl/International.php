@@ -533,6 +533,11 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      */
     protected function _getWeight($weight, $maxWeight = false, $configWeightUnit = false)
     {
+        return round($this->convertWeight(round((float) $weight, 3), $maxWeight, $configWeightUnit), 3);
+    }
+
+    private function convertWeight(float $weight, bool $maxWeight = false, string|bool $configWeightUnit = false): float
+    {
         if ($maxWeight) {
             $configWeightUnit = Mage_Core_Model_Locale::WEIGHT_KILOGRAM;
         } elseif ($configWeightUnit) {
@@ -544,14 +549,14 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         $countryWeightUnit = $this->getCode('dimensions_variables', $this->_getWeightUnit());
 
         if ($configWeightUnit != $countryWeightUnit) {
-            $weight = Mage::helper('usa')->convertMeasureWeight(
-                round((float) $weight, 3),
+            return (float) Mage::helper('usa')->convertMeasureWeight(
+                $weight,
                 $configWeightUnit,
                 $countryWeightUnit,
             );
         }
 
-        return round((float) $weight, 3);
+        return $weight;
     }
 
     /**
@@ -563,6 +568,8 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     {
         $allItems   = $this->_request->getAllItems();
         $fullItems  = [];
+        $maxWeight = $this->convertWeight($this->_maxWeight, true);
+        $roundingTolerance = 2 * PHP_FLOAT_EPSILON * $maxWeight;
 
         foreach ($allItems as $item) {
             if ($item->getProductType() == Mage_Catalog_Model_Product_Type::TYPE_BUNDLE
@@ -573,7 +580,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
 
             $qty            = $item->getQty();
             $changeQty      = true;
-            $checkWeight    = true;
             $decimalItems   = [];
 
             if ($item->getParentItem()) {
@@ -603,25 +609,19 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
                         $changeQty  = false;
                     } else {
                         $itemWeight = $itemWeight * $item->getQty();
-                        $convertedWeight = $this->_getWeight($itemWeight);
-                        $maxWeight = $this->_getWeight($this->_maxWeight, true);
-                        if ($convertedWeight > $maxWeight) {
+                        $convertedWeight = $this->convertWeight($itemWeight);
+                        if ($convertedWeight - $maxWeight > $roundingTolerance) {
                             $qtyItem = floor($convertedWeight / $maxWeight);
                             $decimalItems[] = ['weight' => $maxWeight, 'qty' => $qtyItem];
-                            $weightItem = round($convertedWeight - $qtyItem * $maxWeight, 3);
-                            if ($weightItem > 0) {
+                            $weightItem = $convertedWeight - $qtyItem * $maxWeight;
+                            if ($weightItem > 2 * PHP_FLOAT_EPSILON * $convertedWeight) {
                                 $decimalItems[] = ['weight' => $weightItem, 'qty' => 1];
                             }
-                            $checkWeight = false;
                         }
                     }
                 } else {
                     $itemWeight = $itemWeight * $item->getQty();
                 }
-            }
-
-            if ($checkWeight && $this->_getWeight($itemWeight) > $this->_getWeight($this->_maxWeight, true)) {
-                return [];
             }
 
             if ($changeQty && !$item->getParentItem() && $item->getIsQtyDecimal()
@@ -638,7 +638,11 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
                     );
                 }
             } else {
-                $fullItems = array_merge($fullItems, array_fill(0, $qty, $this->_getWeight($itemWeight)));
+                $convertedWeight = $this->convertWeight($itemWeight);
+                if ($convertedWeight - $maxWeight > $roundingTolerance) {
+                    return [];
+                }
+                $fullItems = array_merge($fullItems, array_fill(0, $qty, min($convertedWeight, $maxWeight)));
             }
         }
         sort($fullItems);
@@ -651,13 +655,13 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      */
     protected function _makePieces(SimpleXMLElement $nodeBkgDetails): void
     {
-        $divideOrderWeight = (string) $this->getConfigData('divide_order_weight');
         $nodePieces = $nodeBkgDetails->addChild('Pieces', '', '');
         $items = $this->_getAllItems();
-        $numberOfPieces = 0;
+        $divideOrderWeight = (bool) $this->getConfigData('divide_order_weight') && $items !== [];
+        $pieceWeights = [];
 
-        if ($divideOrderWeight && !empty($items)) {
-            $maxWeight = $this->_getWeight($this->_maxWeight, true);
+        if ($divideOrderWeight) {
+            $maxWeight = $this->convertWeight($this->_maxWeight, true);
             $sumWeight = 0;
             $roundingTolerance = 2 * PHP_FLOAT_EPSILON * $maxWeight;
 
@@ -680,36 +684,39 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
                         $weightCorrection = ($weightWithItem - $sumWeight) - $weightToAdd;
                         $sumWeight = $weightWithItem;
                     } elseif ($weightWithItem > $maxWeight + $roundingTolerance) {
-                        $numberOfPieces++;
-                        $nodePiece = $nodePieces->addChild('Piece', '', '');
-                        $nodePiece->addChild('PieceID', (string) $numberOfPieces);
-                        $this->_addDimension($nodePiece);
-                        $nodePiece->addChild('Weight', (string) $sumWeight);
+                        $pieceWeights[] = $sumWeight;
                         break;
                     } else {
                         unset($items[$keyItem]);
-                        $numberOfPieces++;
-                        $nodePiece = $nodePieces->addChild('Piece', '', '');
-                        $nodePiece->addChild('PieceID', (string) $numberOfPieces);
-                        $this->_addDimension($nodePiece);
-                        $nodePiece->addChild('Weight', (string) $maxWeight);
+                        $pieceWeights[] = $maxWeight;
                         $sumWeight = 0;
                         break;
                     }
                 }
             }
             if ($sumWeight > 0) {
-                $numberOfPieces++;
-                $nodePiece = $nodePieces->addChild('Piece', '', '');
-                $nodePiece->addChild('PieceID', (string) $numberOfPieces);
-                $this->_addDimension($nodePiece);
-                $nodePiece->addChild('Weight', (string) $sumWeight);
+                $pieceWeights[] = $sumWeight;
             }
         } else {
+            $pieceWeights[] = $this->_getWeight($this->_rawRequest->getWeight());
+        }
+
+        $totalWeight = 0.0;
+        $previousRoundedWeight = 0;
+        $numberOfPieces = 0;
+        foreach ($pieceWeights as $pieceWeight) {
+            // The rounded piece weights must add up to the rounded weight of the shipment.
+            $totalWeight += $pieceWeight;
+            $roundedWeight = (int) round($totalWeight * 1000);
+            $weight = ($roundedWeight - $previousRoundedWeight) / 1000;
+            $previousRoundedWeight = $roundedWeight;
+            if ($divideOrderWeight && $weight <= 0) {
+                continue;
+            }
             $nodePiece = $nodePieces->addChild('Piece', '', '');
-            $nodePiece->addChild('PieceID', '1');
+            $nodePiece->addChild('PieceID', (string) ++$numberOfPieces);
             $this->_addDimension($nodePiece);
-            $nodePiece->addChild('Weight', (string) $this->_getWeight($this->_rawRequest->getWeight()));
+            $nodePiece->addChild('Weight', (string) $weight);
         }
 
         $handlingAction = $this->getConfigData('handling_action');

@@ -250,7 +250,12 @@ it('writes the actual package weights into the DHL quote XML', function (
 })->with([
     ...$decimalPackageCases,
     'US origin converts 140 kilograms across two pieces' => [80.0, 1.75, true, null, [154.324, 154.323], 'K', 'US', 'LB'],
+    'converted item weights fill the US package limit' => [0.07, 1.0, false, null, [154.324], 'K', 'US', 'LB', array_fill(0, 999, 0.07)],
+    'converted item weights exceed the US package limit' => [0.07, 1.0, false, null, [154.324, 0.154], 'K', 'US', 'LB', array_fill(0, 1000, 0.07)],
+    'converted quantity increments exceed the US package limit' => [0.14, 500.5, true, 0.5, [154.324, 0.154], 'K', 'US', 'LB'],
+    'indivisible product over the limit remains one piece' => [70.07, 1.0, false, null, [154.478], 'K', 'US', 'LB'],
     'pounds converted to kilograms once' => [5.0, 0.5, true, null, [1.134], 'L'],
+    'small converted item weights add up to a nonzero piece' => [0.001, 1.0, false, null, [0.454], 'L', 'IT', 'KG', array_fill(0, 999, 0.001)],
     'pounds converted to kilograms across the package limit' => [100.0, 2.0, true, null, [70.0, 20.718], 'L'],
     'combined lines at the limit' => [139.996, 0.5, true, null, [70.0], 'K', 'IT', 'KG', [0.001, 0.001]],
     'combined lines exceeding the limit' => [139.998, 0.5, true, null, [70.0, 0.001], 'K', 'IT', 'KG', [0.001, 0.001]],
