@@ -37,14 +37,9 @@ class Mage_Core_Block_Html_Select extends Mage_Core_Block_Abstract
     }
 
     /**
-     * Add an option to HTML select
-     *
-     * @param string $value  HTML value
-     * @param string $label  HTML label
-     * @param array  $params HTML attributes
-     * @return $this
+     * @param array<string, string|int|float|array<string, string|int|float>> $params HTML attributes
      */
-    public function addOption($value, $label, $params = [])
+    public function addOption(string|int $value, string $label, array $params = []): static
     {
         $this->_options[] = ['value' => $value, 'label' => $label, 'params' => $params];
         return $this;

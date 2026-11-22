@@ -130,14 +130,10 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
     }
 
     /**
-     * Update entity row
-     *
-     * @param string $code
-     * @param array|string $field
-     * @param string $value
-     * @return $this
+     * @param string|int $code The code or the ID of the entity type
+     * @param array<string, string|int|null>|string $field A column name, or the values by column name
      */
-    public function updateEntityType($code, $field, $value = null)
+    public function updateEntityType(string|int $code, array|string $field, string|int|null $value = null): static
     {
         $this->updateTableRow(
             'eav/entity_type',
@@ -366,13 +362,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
         return $this->_conn->fetchCol($select, $bind);
     }
 
-    /**
-     * Retrieve Default Attribute Set for Entity Type
-     *
-     * @param string|int $entityType
-     * @return string
-     */
-    public function getDefaultAttributeSetId($entityType)
+    public function getDefaultAttributeSetId(string|int $entityType): int
     {
         $bind = ['entity_type' => $entityType];
         if (is_numeric($entityType)) {
@@ -384,7 +374,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
             ->from($this->getTable('eav/entity_type'), 'default_attribute_set_id')
             ->where($where);
 
-        return $this->getConnection()->fetchOne($select, $bind);
+        return (int) $this->getConnection()->fetchOne($select, $bind);
     }
 
     /******************* ATTRIBUTE GROUPS *****************/
