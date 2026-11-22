@@ -624,8 +624,15 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
         $itemBaseDiscountAmount = $item->getBaseDiscountAmount();
 
         if ($partialPercentCapacity === null) {
-            $discountAmount = min($itemDiscountAmount + $discountAmount, $itemPrice * $qty);
-            $baseDiscountAmount = min($itemBaseDiscountAmount + $baseDiscountAmount, $baseItemPrice * $qty);
+            $discountLimit = $itemPrice * $qty;
+            $baseDiscountLimit = $baseItemPrice * $qty;
+            if ($rule->getSimpleAction() === Mage_SalesRule_Model_Rule::BY_FIXED_ACTION) {
+                // This rule's quantity limit cannot reduce discounts already applied to the line.
+                $discountLimit = max($discountLimit, $itemDiscountAmount);
+                $baseDiscountLimit = max($baseDiscountLimit, $itemBaseDiscountAmount);
+            }
+            $discountAmount = min($itemDiscountAmount + $discountAmount, $discountLimit);
+            $baseDiscountAmount = min($itemBaseDiscountAmount + $baseDiscountAmount, $baseDiscountLimit);
         } else {
             $discountAmount = $itemDiscountAmount + max(0.0, min(
                 $discountAmount,

@@ -65,7 +65,8 @@ it('uses the fixed cart budget within the remaining capacity of every eligible l
             ->setCode('Fixed allocation ' . uniqid())
             ->setTaxClassId((int) Mage::getModel('customer/group')->getTaxClassId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID))
             ->save();
-        foreach ($rules as $priority => [$action, $discount, $maxQty]) {
+        foreach ($rules as $priority => $rule) {
+            [$action, $discount, $maxQty] = $rule;
             Mage::getModel('salesrule/rule')
                 ->setName('Fixed allocation ' . uniqid())
                 ->setIsActive(true)
@@ -75,6 +76,7 @@ it('uses the fixed cart budget within the remaining capacity of every eligible l
                 ->setSimpleAction($action)
                 ->setDiscountAmount($discount)
                 ->setDiscountQty($maxQty)
+                ->setDiscountStep($rule[3] ?? null)
                 ->setSortOrder($priority)
                 ->setApplyToShipping($shippingPrice !== null && $action === Rule::CART_FIXED_ACTION)
                 ->setStopRulesProcessing(false)
@@ -305,6 +307,20 @@ it('uses the fixed cart budget within the remaining capacity of every eligible l
     ],
     'the credit covers a fractional quantity that bills at one cent' => [
         [[0.03, 0.3]], [[Rule::CART_FIXED_ACTION, 0.01, null]], 0.0, 0.0, 'USD', null, [0.01],
+    ],
+    'an item discount does not apply below its quantity step' => [
+        [[0.03, 0.3]], [[Rule::BY_FIXED_ACTION, 0.10, null, 1]], 1.01, 1.01, 'USD', 1.00, [0.0],
+    ],
+    'an item discount preserves cart credit below its quantity step' => [
+        [[0.03, 0.3]], [[Rule::CART_FIXED_ACTION, 0.01, null], [Rule::BY_FIXED_ACTION, 0.10, null, 1]],
+        1.00, 1.00, 'USD', 1.00, [0.01],
+    ],
+    'a stepped item discount only covers eligible units' => [
+        [[0.04, 1.3]], [[Rule::BY_FIXED_ACTION, 0.10, null, 1]], 1.01, 1.01, 'USD', 1.00, [0.04],
+    ],
+    'a stepped item discount preserves cart credit applied to the whole line' => [
+        [[0.04, 1.3]], [[Rule::CART_FIXED_ACTION, 0.05, null], [Rule::BY_FIXED_ACTION, 0.10, null, 1]],
+        1.00, 1.00, 'USD', 1.00, [0.05],
     ],
     'the credit covers the billed fractional quantity in each currency' => [
         [[0.03, 0.3]], [[Rule::CART_FIXED_ACTION, 0.01, null]], 0.0, 0.0, 'EUR', null, [0.01],
