@@ -20,7 +20,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
 
     protected mixed $_data = null;
 
-    protected mixed $_position = null;
+    protected ?string $_position = null;
 
     /**
      * Detect serialization of data
@@ -185,12 +185,12 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
         return $e;
     }
 
-    public function getPosition(): mixed
+    public function getPosition(): ?string
     {
         return $this->_position;
     }
 
-    public function setPosition(mixed $position): static
+    public function setPosition(?string $position): static
     {
         $this->_position = $position;
         return $this;

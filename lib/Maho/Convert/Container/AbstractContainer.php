@@ -19,7 +19,7 @@ abstract class AbstractContainer implements ContainerInterface
     protected ?array $_vars = null;
     protected ?\Maho\Convert\Profile\AbstractProfile $_profile = null;
     protected mixed $_data = null;
-    protected mixed $_position = null;
+    protected ?string $_position = null;
 
     public function getVar(string $key, mixed $default = null): mixed
     {
@@ -141,12 +141,12 @@ abstract class AbstractContainer implements ContainerInterface
         return $e;
     }
 
-    public function getPosition(): mixed
+    public function getPosition(): ?string
     {
         return $this->_position;
     }
 
-    public function setPosition(mixed $position): static
+    public function setPosition(?string $position): static
     {
         $this->_position = $position;
         return $this;
