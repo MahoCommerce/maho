@@ -258,10 +258,19 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>0</show_in_store>
                             <comment>Each attribute gets a grouping and a report "Sales by" in the order items data.</comment>
                         </report_attributes>
+                        <daily_totals_min_days translate="label comment">
+                            <label>Daily Totals from (days)</label>
+                            <validate>validate-digits</validate>
+                            <sort_order>9</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>An order report on a period of at least this number of days reads the daily totals of the orders instead of each order, when its metrics, groupings and filters allow it. The numbers are the same, and a long period reads far fewer rows. Enter "0" to read each order always.</comment>
+                        </daily_totals_min_days>
                         <email_hour translate="label comment">
                             <label>Hour of the Report Emails</label>
                             <validate>validate-digits validate-digits-range digits-range-0-23</validate>
-                            <sort_order>9</sort_order>
+                            <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -271,7 +280,7 @@ SPDX-License-Identifier: AFL-3.0
                             <label>Sender of the Report Emails</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_email_identity</source_model>
-                            <sort_order>10</sort_order>
+                            <sort_order>11</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -280,7 +289,7 @@ SPDX-License-Identifier: AFL-3.0
                             <label>Template of the Report Emails</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_email_template</source_model>
-                            <sort_order>11</sort_order>
+                            <sort_order>12</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>

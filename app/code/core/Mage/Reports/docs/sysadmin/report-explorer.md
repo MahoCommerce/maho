@@ -80,7 +80,7 @@ Maho adds two indexes for the Explorer:
 ## Speed on a large store
 
 These are the times of a test store on MySQL with 1.2 million orders over two years (about 1,700
-orders a day), with no cache:
+orders a day), with no cache and before the daily totals (see below):
 
 | Report | Last 30 days | Last 12 months |
 |--------|--------------|----------------|
@@ -90,6 +90,30 @@ orders a day), with no cache:
 
 A report reads every record of its period, so the time grows with the number of orders in the
 period. On a store of this size, keep the cache on, and use a read replica for long periods.
+
+### Daily totals of the orders
+
+The table `report_order_daily` holds the totals of the orders for each local day, store view,
+order state, status, customer group, customer type and new or returning customer. An order report
+on a period of at least **Daily Totals from (days)** (32 by default) reads this table instead of
+each order, when it uses only these groupings and filters, and only metrics that add up. For
+example, **Sales overview** on the last 12 months reads about 365 rows for each combination of
+these fields, not every order. **Customers**, **First order**, **Last order**, a grouping such as
+**Payment method**, and the date of the last change still read each order.
+
+The numbers stay the same as the live numbers:
+
+- An order save marks its day as changed. Before a report reads the table, it calculates the
+  changed days of its period again from the orders.
+- The cron job `reports_update_daily_totals` runs every 5 minutes. It marks the days of the orders
+  whose last change is after its previous run, also when a script changed them without a save.
+- After an upgrade, the same cron job builds the history, 92 days at each run, newest first. A
+  period that starts before the built days reads each order until the history is complete.
+- A change of the default time zone starts the build again, because the days change.
+
+A new or returning customer depends on the earlier orders of the same email. When an old order
+changes its state to or from "new" or "pending payment", the days of the later orders of that email
+are not marked. Set **Daily Totals from (days)** to 0 to read each order always.
 
 ## Cache
 

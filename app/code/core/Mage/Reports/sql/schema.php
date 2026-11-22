@@ -368,6 +368,54 @@ return function (SchemaEditor $schema): void {
 
     $schema->addTable(
         Table::editor()
+            ->setUnquotedName('report_order_daily')
+            ->addColumn(Schema::column('row_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('day', Types::DATE_IMMUTABLE))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('state', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('status', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('customer_group_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('customer_type', Types::STRING, length: 16, notNull: false))
+            ->addColumn(Schema::column('customer_kind', Types::STRING, length: 16, notNull: false))
+            ->addColumn(Schema::column('m_orders', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('m_new_customer_orders', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('m_returning_customer_orders', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('m_units', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('m_units_invoiced', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('m_sales_total', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('m_revenue', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('m_profit', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('m_invoiced', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('m_paid', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('m_refunded', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('m_canceled', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('m_tax', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('m_tax_actual', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('m_shipping', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('m_shipping_actual', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('m_discount', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('m_discount_actual', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('m_gross_sales', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('m_returns', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('m_cost', Types::DECIMAL, precision: 20, scale: 4, default: '0.0000'))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('row_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('day', 'store_id'))
+            ->setComment('Daily Totals of the Orders for the Report Explorer')
+            ->create(),
+    );
+
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('report_order_daily_change')
+            ->addColumn(Schema::column('day', Types::DATE_IMMUTABLE))
+            ->addColumn(Schema::column('changed_at', Types::DATETIME_IMMUTABLE))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('day')->create())
+            ->setComment('Days of the Daily Order Totals that an Order Change Made Stale')
+            ->create(),
+    );
+
+    $schema->addTable(
+        Table::editor()
             ->setUnquotedName('report_annotation')
             ->addColumn(Schema::column('annotation_id', Types::INTEGER, unsigned: true, autoincrement: true))
             ->addColumn(Schema::column('admin_user_id', Types::INTEGER, unsigned: true, notNull: false))

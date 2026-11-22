@@ -38,7 +38,7 @@ class Mage_Reports_Model_Explorer_Runner
     public function run(Request $request, Mage_Reports_Model_Explorer_Access $access, bool $withTotals = true): array
     {
         return Mage::app()->withStore(Mage_Core_Model_App::ADMIN_STORE_ID, function () use ($request, $access, $withTotals): array {
-            [$plan, $context] = $this->prepare($request, $access, self::maxRows());
+            [$plan, $context] = $this->prepare($request, $access, self::maxRows(), true);
 
             $cacheKey = $this->cacheKey($plan, $access, $withTotals);
             $useCache = Mage::app()->useCache(self::CACHE_TYPE);
@@ -195,7 +195,7 @@ class Mage_Reports_Model_Explorer_Runner
             $compareRows = null;
             do {
                 $page = $request->with(['limit' => min(self::EXPORT_PAGE_SIZE, $maxRows - $count), 'offset' => $offset]);
-                [$plan, $context] = $this->prepare($page, $access, max($maxRows, self::EXPORT_PAGE_SIZE));
+                [$plan, $context] = $this->prepare($page, $access, max($maxRows, self::EXPORT_PAGE_SIZE), true);
                 if ($plan->hasComparison()) {
                     $compareRows ??= $context->adapter->fetchAll(new SqlBuilder()->rows($plan, $context, true));
                 }
@@ -219,7 +219,7 @@ class Mage_Reports_Model_Explorer_Runner
     public function explain(Request $request, Mage_Reports_Model_Explorer_Access $access): array
     {
         return Mage::app()->withStore(Mage_Core_Model_App::ADMIN_STORE_ID, function () use ($request, $access): array {
-            [$plan, $context] = $this->prepare($request, $access, self::maxRows());
+            [$plan, $context] = $this->prepare($request, $access, self::maxRows(), true);
             $builder = new SqlBuilder();
             $explained = [];
             $run = static function (string $label, \Maho\Db\Select $select) use ($context, &$explained): array {
@@ -254,10 +254,41 @@ class Mage_Reports_Model_Explorer_Runner
     }
 
     /**
+     * The rows of a request with any number of groupings, with no cache, no access check and no limit, as each
+     * grouping code and each metric code. The daily totals of the orders read them, because they group by more fields
+     * than a report may.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function groupedRows(Request $request): array
+    {
+        return Mage::app()->withStore(Mage_Core_Model_App::ADMIN_STORE_ID, function () use ($request): array {
+            $registry = Mage::getSingleton('reports/explorer_registry');
+            $dataset = $registry->getDataset($request->dataset) ?? throw new LogicException("Unknown dataset {$request->dataset}");
+            $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
+            $plan = new Planner()->plan($dataset, $request, $now, self::timezone(), self::firstDayOfWeek());
+            $context = $this->context($plan, $registry->getAdapter(), $now);
+            $rows = [];
+            foreach ($context->adapter->fetchAll(new SqlBuilder()->rows($plan, $context)) as $raw) {
+                $row = [];
+                foreach ($plan->dimensions as $dimension) {
+                    $row[$dimension->dimension->code] = $raw[$dimension->alias] ?? null;
+                }
+                foreach ($plan->metrics as $metric) {
+                    $row[$metric->code] = $raw['m_' . $metric->code] ?? null;
+                }
+                $rows[] = $row;
+            }
+            return $rows;
+        });
+    }
+
+    /**
+     * @param bool $dailyTotals read the daily totals of the orders instead of the orders, when the request fits them
      * @return array{0: Plan, 1: Context}
      * @throws Mage_Core_Exception_Input
      */
-    private function prepare(Request $request, Mage_Reports_Model_Explorer_Access $access, int $maxRows): array
+    private function prepare(Request $request, Mage_Reports_Model_Explorer_Access $access, int $maxRows, bool $dailyTotals = false): array
     {
         $registry = Mage::getSingleton('reports/explorer_registry');
         $dataset = $registry->getDataset($request->dataset);
@@ -275,6 +306,9 @@ class Mage_Reports_Model_Explorer_Runner
             if ($request->limit < $buckets || $request->offset !== 0) {
                 $plan = new Planner()->plan($dataset, $request->with(['limit' => $buckets, 'offset' => 0]), $now, self::timezone(), self::firstDayOfWeek());
             }
+        }
+        if ($dailyTotals) {
+            $plan = Mage::getSingleton('reports/explorer_dailyTotals')->planFor($plan, $now) ?? $plan;
         }
 
         return [$plan, $this->context($plan, $registry->getAdapter(), $now)];

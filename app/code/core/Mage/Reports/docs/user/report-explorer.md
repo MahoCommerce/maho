@@ -239,6 +239,7 @@ Each data set needs the permission of its classic report. For example, the order
 | Abandoned After (hours) | An active cart with an email and no order is abandoned after this time without activity |
 | Recent Carts (hours) | An active cart is recent when its last activity is within this time |
 | Attributes for Sales by Attribute | Each attribute gets a grouping and a "Sales by" report in the order items |
+| Daily Totals from (days) | An order report on a period of at least this number of days reads the daily totals of the orders, when it can. The numbers are the same. 0 reads each order always |
 | Hour of the Report Emails | The hour, from 0 to 23 in the default time zone, when the store emails the saved reports |
 | Sender of the Report Emails | The store email address that sends the report emails |
 | Template of the Report Emails | The email template of a report email |

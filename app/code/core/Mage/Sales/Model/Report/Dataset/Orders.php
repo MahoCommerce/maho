@@ -247,6 +247,7 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
         foreach ([
             ['store_id', $helper->__('Store view')],
             ['status', $helper->__('Order status')],
+            ['state', $helper->__('Order state')],
             ['customer_group_id', $helper->__('Customer group')],
             ['customer_type', $helper->__('Customer type')],
             ['customer_kind', $helper->__('New or returning')],
