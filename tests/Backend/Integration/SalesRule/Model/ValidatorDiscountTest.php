@@ -120,14 +120,19 @@ it('keeps the same cart discount and total after a storefront currency change', 
     }
 });
 
-it('carries rounding between lines during each totals collection', function (): void {
+it('carries rounding between lines during each totals collection', function (
+    float $price,
+    float $percent,
+    array $expectedDiscounts,
+    float $expectedTotal,
+): void {
     $groupId = (int) $this->group->getId();
-    validatorDiscountRule($groupId);
+    validatorDiscountRule($groupId, amount: $percent);
     $store = Mage::app()->getStore(1);
     $cart = Mage::getService('checkout/cart');
     $quote = $cart->create(null, (int) $store->getId())->setCustomerGroupId($groupId);
-    for ($line = 0; $line < 3; $line++) {
-        $product = validatorDiscountProduct(0.12, $store);
+    foreach ($expectedDiscounts as $discount) {
+        $product = validatorDiscountProduct($price, $store);
         $cart->addProduct($quote, $product, new Maho\DataObject(['qty' => 1]), save: false);
     }
 
@@ -138,11 +143,63 @@ it('carries rounding between lines during each totals collection', function (): 
             $quote->getAllVisibleItems(),
         );
         sort($discounts);
-        expect($discounts)->toBe([[0.01, 0.01], [0.01, 0.01], [0.02, 0.02]])
-            ->and($quote->getBillingAddress()->getDiscountAmount())->toEqualWithDelta(-0.04, 0.0001)
-            ->and($quote->getGrandTotal())->toEqualWithDelta(0.32, 0.0001);
+        expect($discounts)->toBe($expectedDiscounts)
+            ->and($quote->getBillingAddress()->getDiscountAmount())->toEqualWithDelta(-array_sum(array_column($expectedDiscounts, 0)), 0.0001)
+            ->and($quote->getGrandTotal())->toEqualWithDelta($expectedTotal, 0.0001);
     }
-});
+})->with([
+    'three lines' => [0.12, 10.0, [[0.01, 0.01], [0.01, 0.01], [0.02, 0.02]], 0.32],
+    'just below half a cent' => [0.03, 24.9999, [[0.0, 0.0], [0.01, 0.01]], 0.05],
+    'exactly half a cent' => [0.03, 25.0, [[0.01, 0.01], [0.01, 0.01]], 0.04],
+    'just above half a cent' => [0.03, 25.0001, [[0.01, 0.01], [0.01, 0.01]], 0.04],
+]);
+
+it('carries a half-cent remainder past a free item without charging for it', function (
+    string $currency,
+    bool $hasThirdItem,
+    array $expectedPaidDiscounts,
+    float $expectedTotal,
+): void {
+    $groupId = (int) $this->group->getId();
+    validatorDiscountRule($groupId, amount: 50.0);
+    Mage::getModel('directory/currency')->saveRates(['USD' => ['EUR' => 2.0]]);
+    $store = setStoreDisplayCurrency($currency, 'USD,EUR');
+    $storeId = (int) $store->getId();
+    $cart = Mage::getService('checkout/cart');
+    $quote = $cart->create(null, $storeId)->setCustomerGroupId($groupId);
+    $freeProduct = validatorDiscountProduct(0.0, $store);
+    $products = [validatorDiscountProduct(0.01, $store), $freeProduct];
+    if ($hasThirdItem) {
+        $products[] = validatorDiscountProduct(0.01, $store);
+    }
+    foreach ($products as $product) {
+        $cart->addProduct($quote, $product, new Maho\DataObject(['qty' => 1]), save: false);
+    }
+
+    for ($pass = 0; $pass < 2; $pass++) {
+        if ($pass > 0) {
+            $quote = $cart->getById((int) $quote->getId());
+        }
+        $cart->collectAndSave($quote);
+        $freeItem = $quote->getItemByProduct($freeProduct);
+        $paidDiscounts = [];
+        foreach ($quote->getAllVisibleItems() as $item) {
+            if ($item !== $freeItem) {
+                $paidDiscounts[] = [$item->getDiscountAmount(), $item->getBaseDiscountAmount()];
+            }
+        }
+        sort($paidDiscounts);
+
+        expect($quote->getGrandTotal())->toEqualWithDelta($expectedTotal, 0.0001)
+            ->and($quote->getBaseGrandTotal())->toEqualWithDelta($hasThirdItem ? 0.01 : 0.0, 0.0001)
+            ->and([$freeItem->getDiscountAmount(), $freeItem->getBaseDiscountAmount()])->toBe([0.0, 0.0])
+            ->and($paidDiscounts)->toBe($expectedPaidDiscounts);
+    }
+})->with([
+    'sale and base remainder' => ['USD', false, [[0.01, 0.01]], 0.0],
+    'sale and base remainder reach the next paid item' => ['USD', true, [[0.0, 0.0], [0.01, 0.01]], 0.01],
+    'base remainder only' => ['EUR', true, [[0.01, 0.0], [0.01, 0.01]], 0.02],
+]);
 
 it('keeps stacked percentage and fixed cart discounts stable on a mixed admin order', function (): void {
     $groupId = (int) $this->group->getId();

@@ -431,17 +431,19 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
              */
             $percentKey = (string) $item->getDiscountPercent();
             if ($percentKey) {
-                $delta      = $this->_roundingDeltas[$percentKey] ?? 0;
-                $baseDelta  = $this->_baseRoundingDeltas[$percentKey] ?? 0;
-                $discountAmount += $delta;
-                $baseDiscountAmount += $baseDelta;
-
-                $this->_roundingDeltas[$percentKey]     = $discountAmount
-                    - $quote->getStore()->roundPrice($discountAmount);
-                $this->_baseRoundingDeltas[$percentKey] = $baseDiscountAmount
-                    - $quote->getStore()->roundPrice($baseDiscountAmount);
-                $discountAmount = $quote->getStore()->roundPrice($discountAmount);
-                $baseDiscountAmount = $quote->getStore()->roundPrice($baseDiscountAmount);
+                $store = $quote->getStore();
+                $discountAmount = $this->roundDiscountWithDelta(
+                    (float) $discountAmount,
+                    $percentKey,
+                    $store,
+                    $this->_roundingDeltas,
+                );
+                $baseDiscountAmount = $this->roundDiscountWithDelta(
+                    (float) $baseDiscountAmount,
+                    $percentKey,
+                    $store,
+                    $this->_baseRoundingDeltas,
+                );
             } else {
                 $discountAmount     = $quote->getStore()->roundPrice($discountAmount);
                 $baseDiscountAmount = $quote->getStore()->roundPrice($baseDiscountAmount);
@@ -677,10 +679,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
      */
     protected function _roundWithDeltas($key, $amount, $store)
     {
-        $delta = $this->_roundingDeltas[$key] ?? 0;
-        $this->_roundingDeltas[$key] = $store->roundPrice($amount + $delta)
-            - $amount;
-        return $store->roundPrice($amount + $delta);
+        return $this->roundDiscountWithDelta((float) $amount, (string) $key, $store, $this->_roundingDeltas);
     }
 
     /**
@@ -693,11 +692,19 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
      */
     protected function _roundWithDeltasForBase($key, $amount, $store)
     {
-        $delta = isset($this->_baseRoundingDeltas[$key])
-            ? $this->_roundingDeltas[$key] : 0;
-        $this->_baseRoundingDeltas[$key] = $store->roundPrice($amount + $delta)
-            - $amount;
-        return $store->roundPrice($amount + $delta);
+        return $this->roundDiscountWithDelta((float) $amount, (string) $key, $store, $this->_baseRoundingDeltas);
+    }
+
+    private function roundDiscountWithDelta(float $amount, string $key, Mage_Core_Model_Store $store, array &$deltas): float
+    {
+        if ($amount === 0.0) {
+            return 0.0;
+        }
+
+        $amount = round($amount + ($deltas[$key] ?? 0), 14);
+        $roundedAmount = $store->roundPrice($amount);
+        $deltas[$key] = round($amount - $roundedAmount, 14);
+        return $roundedAmount;
     }
 
     /**

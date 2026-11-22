@@ -44,6 +44,7 @@ final class WeeeDiscountFixture
         array $websiteIds = [1],
         float $price = 80.0,
         ?float $priceRange = null,
+        float $feeAmount = 10.0,
     ): array {
         $store = Mage::app()->getStore(1);
         $root = Mage::getModel('catalog/category')->setStoreId(0)->load($store->getRootCategoryId());
@@ -69,7 +70,7 @@ final class WeeeDiscountFixture
         $country = (string) Mage::getModel('tax/calculation')->getRateRequest()->getCountryId();
         $fees = [];
         foreach ($websiteIds as $websiteId) {
-            $fees[] = ['website_id' => $websiteId, 'country' => $country, 'state' => '*', 'price' => 10.0];
+            $fees[] = ['website_id' => $websiteId, 'country' => $country, 'state' => '*', 'price' => $feeAmount];
         }
         $product->setData($attributeCode, $fees);
         $product->save();
