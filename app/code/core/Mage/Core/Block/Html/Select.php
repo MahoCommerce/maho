@@ -37,7 +37,7 @@ class Mage_Core_Block_Html_Select extends Mage_Core_Block_Abstract
     }
 
     /**
-     * @param array $params HTML attributes
+     * @param array<string, string|int|float|array<string, string|int|float>> $params HTML attributes
      */
     public function addOption(string|int $value, string $label, array $params = []): static
     {

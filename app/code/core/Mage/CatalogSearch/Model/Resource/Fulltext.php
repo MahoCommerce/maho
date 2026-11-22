@@ -663,6 +663,9 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
         return $this->_productTypes[$typeId];
     }
 
+    /**
+     * @return list<int|string>|null
+     */
     protected function _getProductChildrenIds(int $productId, string $typeId, ?int $websiteId = null): ?array
     {
         $typeInstance = $this->_getProductTypeInstance($typeId);

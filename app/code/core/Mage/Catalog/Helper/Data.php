@@ -35,7 +35,7 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Breadcrumb Path cache
      *
-     * @var array<string, array<string, string|null>>
+     * @var array<string, array{label: ?string, link?: string}>|null
      */
     protected $_categoryPath;
 
@@ -65,6 +65,9 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
         return $this;
     }
 
+    /**
+     * @return array<string, array{label: ?string, link?: string}>
+     */
     public function getBreadcrumbPath(): array
     {
         if (!$this->_categoryPath) {

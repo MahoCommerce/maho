@@ -131,6 +131,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
 
     /**
      * @param string|int $code The code or the ID of the entity type
+     * @param array<string, string|int|null>|string $field A column name, or the values by column name
      */
     public function updateEntityType(string|int $code, array|string $field, string|int|null $value = null): static
     {
