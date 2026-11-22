@@ -12,7 +12,7 @@ use Tests\Helpers\WeeeDiscountFixture;
 
 uses(Tests\MahoBackendTestCase::class);
 
-it('charges and discounts fixed product tax once on the priced cart lines', function (
+it('charges and refunds fixed product tax once on the priced lines', function (
     ?int $bundlePriceType,
     bool $includeInSubtotal,
     float $childFee,
@@ -30,13 +30,25 @@ it('charges and discounts fixed product tax once on the priced cart lines', func
         $storeId = (int) $store->getId();
         $websiteId = (int) $store->getWebsiteId();
         Mage::app()->setCurrentStore($storeId);
-        $store->setConfig(Mage_Weee_Helper_Data::XML_PATH_FPT_ENABLED, '1');
-        $store->setConfig('tax/weee/discount', '1');
-        $store->setConfig('tax/weee/apply_vat', '0');
-        $store->setConfig('tax/weee/include_in_subtotal', (string) (int) $includeInSubtotal);
-        $store->setConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_DEFAULT_COUNTRY, 'US');
-        $store->setConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_PRICE_INCLUDES_TAX, '0');
-        $store->setConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_APPLY_AFTER_DISCOUNT, '1');
+        foreach ([
+            Mage_Weee_Helper_Data::XML_PATH_FPT_ENABLED => '1',
+            'tax/weee/discount' => '1',
+            'tax/weee/apply_vat' => '0',
+            'tax/weee/include_in_subtotal' => (string) (int) $includeInSubtotal,
+            Mage_Tax_Model_Config::CONFIG_XML_PATH_DEFAULT_COUNTRY => 'US',
+            Mage_Tax_Model_Config::CONFIG_XML_PATH_PRICE_INCLUDES_TAX => '0',
+            Mage_Tax_Model_Config::CONFIG_XML_PATH_APPLY_AFTER_DISCOUNT => '1',
+            'carriers/flatrate/active' => '1',
+            'carriers/flatrate/price' => '0',
+            'carriers/flatrate/sallowspecific' => '0',
+            'payment/checkmo/active' => '1',
+            'payment/checkmo/allowspecific' => '0',
+            'sales_email/order/enabled' => '0',
+            'sales_email/invoice/enabled' => '0',
+            'sales_email/creditmemo/enabled' => '0',
+        ] as $path => $value) {
+            $store->setConfig($path, $value);
+        }
 
         $attribute = 'composite_fee_' . uniqid();
         WeeeDiscountFixture::createFeeAttribute($attribute);
@@ -130,8 +142,13 @@ it('charges and discounts fixed product tax once on the priced cart lines', func
             ->setStopRulesProcessing(false)->save();
 
         $cart = Mage::getService('checkout/cart');
-        $quote = $cart->create(null, $storeId)->setCustomerGroupId($groupId);
-        $address = ['country_id' => 'US', 'region_id' => 12, 'postcode' => '90210'];
+        $quote = $cart->create(null, $storeId)->setCustomerGroupId($groupId)->setCustomerIsGuest(true)
+            ->setCustomerFirstname('Sample')->setCustomerLastname('Customer')->setCustomerEmail('sample@example.test');
+        $address = [
+            'country_id' => 'US', 'region_id' => 12, 'postcode' => '90210',
+            'firstname' => 'Sample', 'lastname' => 'Customer', 'email' => 'sample@example.test',
+            'street' => '1 Example Street', 'city' => 'Los Angeles', 'telephone' => '5550100000',
+        ];
         $quote->getBillingAddress()->addData($address);
         $quote->getShippingAddress()->addData($address);
         $product = Mage::getModel('catalog/product')->setStoreId($storeId)->load($product->getId());
@@ -172,6 +189,75 @@ it('charges and discounts fixed product tax once on the priced cart lines', func
                 ->and($actualFeeDiscounts)->toBe($feeDiscounts)
                 ->and($taxTitles)->toBe(array_map(static fn(float $fee): array => $fee > 0.0 ? ['Test fixed tax'] : [], $baseFees))
                 ->and($taxRowAmounts)->toBe(array_map(static fn(float $fee): array => $fee > 0.0 ? [$fee] : [], $baseFees));
+        }
+
+        $expectedFees = [];
+        foreach ($items as $index => $item) {
+            if ($baseFees[$index] > 0.0) {
+                $expectedFees[(int) $item->getId()] = [
+                    'quantity' => $expectedQuantities[$index],
+                    'title' => 'Test fixed tax',
+                    'base_fee' => $baseFees[$index],
+                    'base_discount' => $includeInSubtotal ? 0.0 : $baseFeeDiscounts[$index],
+                    'discount' => $includeInSubtotal ? 0.0 : $feeDiscounts[$index],
+                    'allocated' => true,
+                ];
+            }
+        }
+        ksort($expectedFees);
+
+        $quote->getShippingAddress()->setCollectShippingRates(true)->setShippingMethod('flatrate_flatrate');
+        $quote->getPayment()->importData(['method' => 'checkmo']);
+        $cart->collectAndSave($quote);
+        $order = Mage::getModel('sales/service_quote', $quote)->submitOrder();
+        $orderId = (int) $order->getId();
+        $order = Mage::getModel('sales/order')->load($orderId);
+        expect((float) $order->getTotalPaid())->toBe(0.0)
+            ->and((float) $order->getBaseTotalPaid())->toBe(0.0);
+
+        $documents = Mage::getService('sales/order_document');
+        $invoice = $documents->invoice($order, captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE, sendEmail: false);
+        $order = Mage::getModel('sales/order')->load($orderId);
+        expect($order->getGrandTotal())->toBe($total)
+            ->and($order->getBaseGrandTotal())->toBe($baseTotal)
+            ->and($order->getTotalPaid())->toBe($total)
+            ->and($order->getBaseTotalPaid())->toBe($baseTotal)
+            ->and((float) $order->getTotalRefunded())->toBe(0.0)
+            ->and((float) $order->getBaseTotalRefunded())->toBe(0.0);
+
+        $creditmemo = $documents->refund($order, [], offlineRefund: true, sendEmail: false, invoice: $invoice);
+        $order = Mage::getModel('sales/order')->load($orderId);
+        expect($order->getTotalRefunded())->toBe($total)
+            ->and($order->getBaseTotalRefunded())->toBe($baseTotal);
+
+        $invoice = Mage::getModel('sales/order_invoice')->load((int) $invoice->getId());
+        $creditmemo = Mage::getModel('sales/order_creditmemo')->load((int) $creditmemo->getId());
+        expect((int) $creditmemo->getInvoiceId())->toBe((int) $invoice->getId());
+
+        $weee = Mage::helper('weee');
+        foreach ([$invoice, $creditmemo] as $document) {
+            expect(round($document->getGrandTotal(), 2))->toBe($total)
+                ->and(round($document->getBaseGrandTotal(), 2))->toBe($baseTotal);
+
+            $actualFees = [];
+            foreach ($document->getAllItems() as $item) {
+                $applied = $weee->getAppliedToItem($item);
+                if (!$applied) {
+                    continue;
+                }
+                expect($applied)->toHaveCount(1);
+                $fee = reset($applied);
+                $actualFees[(int) $item->getOrderItem()->getQuoteItemId()] = [
+                    'quantity' => (float) $item->getQty(),
+                    'title' => $fee['title'],
+                    'base_fee' => (float) $fee['base_row_amount'],
+                    'base_discount' => (float) $fee['base_weee_discount'],
+                    'discount' => (float) $fee['weee_discount'],
+                    'allocated' => $fee['weee_discount_allocated'] ?? null,
+                ];
+            }
+            ksort($actualFees);
+            expect($actualFees)->toBe($expectedFees);
         }
     } finally {
         $connection->rollBack();
