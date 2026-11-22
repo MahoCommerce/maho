@@ -549,6 +549,7 @@ class Mage_Sales_Service_Order_Document
             }
         }
         $creditmemo = $this->withOrderLock((int) $order->getId(), function () use ($order, $data, $comment, $offlineRefund, $backToStockItemIds, $notifyCustomer, $visibleOnFront, $sendEmail, $invoice, $beforeRegister): Creditmemo {
+            $order->clearRefundDocumentCollections();
             // Re-read under the lock so canCreditmemo() sees the live
             // total_refunded, not a value another request changed while we waited.
             $order->load((int) $order->getId());

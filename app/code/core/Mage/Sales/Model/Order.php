@@ -1751,6 +1751,12 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return parent::getData($key, $index);
     }
 
+    public function clearRefundDocumentCollections(): void
+    {
+        $this->_invoices = null;
+        $this->_creditmemos = null;
+    }
+
     /**
      * Retrieve order invoices collection
      *
@@ -2133,10 +2139,9 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         $this->_items = null;
         $this->_payments = null;
         $this->_statusHistory = null;
-        $this->_invoices = null;
+        $this->clearRefundDocumentCollections();
         $this->_tracks = null;
         $this->_shipments = null;
-        $this->_creditmemos = null;
         $this->_relatedObjects = [];
         $this->_orderCurrency = null;
         $this->_baseCurrency = null;

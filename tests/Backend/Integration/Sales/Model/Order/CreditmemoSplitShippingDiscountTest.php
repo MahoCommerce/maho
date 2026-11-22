@@ -139,6 +139,34 @@ it('refunds the shipping discount that was charged to another invoice', function
     ],
 ]);
 
+it('uses the registered shipping discount on a previously loaded order', function (bool $preloadInvoices): void {
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $connection->beginTransaction();
+    try {
+        [$order, $items, $invoices] = createSplitShippingRefundOrder(
+            ['shipping' => 10.0, 'replacement' => 10.0],
+            0.004,
+            1.0,
+            0.01,
+            decimalQuantities: true,
+            preloadInvoices: $preloadInvoices,
+        );
+        $documents = Mage::getService('sales/order_document');
+        $half = ['qtys' => [(int) $items['replacement']->getId() => 0.5]];
+        $invoice = $invoices['discount'];
+        $payment = $order->getPayment();
+        $order->setActionFlag(Mage_Sales_Model_Order::ACTION_FLAG_HOLD, false);
+        $first = $documents->refund($order, $half, invoice: $invoice);
+        $second = $documents->refund($order, $half, invoice: $invoice);
+        $stored = Mage::getModel('sales/order_invoice')->load((int) $invoice->getId());
+        expect([$first->getBaseGrandTotal(), $second->getBaseGrandTotal(), $stored->getBaseTotalRefunded()])->toBe([2.49, 2.50, 4.99])
+            ->and($order->getPayment())->toBe($payment)
+            ->and($order->getActionFlag(Mage_Sales_Model_Order::ACTION_FLAG_HOLD))->toBeFalse();
+    } finally {
+        $connection->rollBack();
+    }
+})->with(['after the first refund' => false, 'before the second invoice was saved' => true]);
+
 it('limits online refunds to each invoice in a recognized split shipping pair', function (string $gatewayScenario): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
@@ -307,6 +335,7 @@ function createSplitShippingRefundOrder(
     array $quantities = [],
     bool $split = true,
     bool $decimalQuantities = false,
+    bool $preloadInvoices = false,
 ): array {
     $subtotal = $baseSubtotal = 0.0;
     foreach ($prices as $sku => $price) {
@@ -375,6 +404,9 @@ function createSplitShippingRefundOrder(
             ->setGrandTotal($invoiceSubtotal / 2)->setBaseGrandTotal($baseInvoiceSubtotal / 2 + $baseInvoiceShipping - $discount)
             ->save();
         $invoices[$name] = $invoice;
+        if ($name === 'shipping' && $preloadInvoices) {
+            $order->getInvoiceCollection();
+        }
     }
     return [$order, $items, $invoices];
 }
