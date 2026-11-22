@@ -45,9 +45,10 @@ class Mage_Adminhtml_Block_Customer_Edit extends Mage_Adminhtml_Block_Widget_For
         return $this->getUrl('*/sales_order_create/start', ['customer_id' => $this->getCustomerId()]);
     }
 
-    public function getCustomerId()
+    public function getCustomerId(): ?int
     {
-        return Mage::registry('current_customer')->getId();
+        $id = Mage::registry('current_customer')->getId();
+        return $id === null ? null : (int) $id;
     }
 
     /**

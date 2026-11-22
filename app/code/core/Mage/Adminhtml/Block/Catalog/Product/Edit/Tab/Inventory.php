@@ -66,7 +66,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Inventory extends Mage_Admin
         return $this->getProduct()->isConfigurable();
     }
 
-    public function getFieldValue($field)
+    public function getFieldValue(string $field): string|int|float|bool|null
     {
         if ($this->getStockItem()) {
             return $this->getStockItem()->getDataUsingMethod($field);
@@ -80,7 +80,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Inventory extends Mage_Admin
         return (float) $this->getFieldValue($field);
     }
 
-    public function getConfigFieldValue($field)
+    public function getConfigFieldValue(string $field): string|int|float|bool|null
     {
         if (!$this->getStockItem()) {
             return Mage::getStoreConfig(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_ITEM . $field);
@@ -93,7 +93,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Inventory extends Mage_Admin
         return Mage::getStoreConfig(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_ITEM . $field);
     }
 
-    public function getDefaultConfigValue($field)
+    public function getDefaultConfigValue(string $field): ?string
     {
         return Mage::getStoreConfig(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_ITEM . $field);
     }

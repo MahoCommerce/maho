@@ -190,15 +190,17 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit extends Mage_Adminhtml_Block_Wid
         ]);
     }
 
-    public function getProductId()
+    public function getProductId(): ?int
     {
-        return $this->getProduct()->getId();
+        $id = $this->getProduct()->getId();
+        return $id === null ? null : (int) $id;
     }
 
-    public function getProductSetId()
+    public function getProductSetId(): ?int
     {
-        if (!($setId = $this->getProduct()->getAttributeSetId()) && $this->getRequest()) {
-            $setId = $this->getRequest()->getParam('set');
+        $setId = $this->getProduct()->getAttributeSetId();
+        if (!$setId && $this->getRequest()) {
+            $setId = (int) $this->getRequest()->getParam('set') ?: null;
         }
         return $setId;
     }

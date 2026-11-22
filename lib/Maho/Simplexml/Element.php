@@ -65,10 +65,8 @@ class Element extends SimpleXMLElement
 
     /**
      * Returns attribute value by attribute name
-     *
-     * @return string
      */
-    public function getAttribute($name)
+    public function getAttribute(string $name): ?string
     {
         $attrs = $this->attributes();
         return isset($attrs[$name]) ? (string) $attrs[$name] : null;

@@ -131,7 +131,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
 
             /** @var Mage_Adminhtml_Block_Sales_Order_Creditmemo_View $block */
             $block = $this->getLayout()->getBlock('sales_creditmemo_view');
-            $block->updateBackButtonUrl($this->getRequest()->getParam('come_from'));
+            $block->updateBackButtonUrl((bool) $this->getRequest()->getParam('come_from'));
 
             $this->_setActiveMenu('sales/creditmemo')
                 ->renderLayout();

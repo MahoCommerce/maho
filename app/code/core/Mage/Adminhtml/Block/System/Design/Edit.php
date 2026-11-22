@@ -53,9 +53,10 @@ class Mage_Adminhtml_Block_System_Design_Edit extends Mage_Adminhtml_Block_Widge
         return parent::_prepareLayout();
     }
 
-    public function getDesignChangeId()
+    public function getDesignChangeId(): ?int
     {
-        return Mage::registry('design')->getId();
+        $id = Mage::registry('design')->getId();
+        return $id === null ? null : (int) $id;
     }
 
     /**

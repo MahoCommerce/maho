@@ -22,5 +22,5 @@ interface Mage_Dataflow_Model_Convert_Container_Interface
 
     public function setVar(array|string $key, mixed $value = null): static;
 
-    public function addException(string $error, string|int|null $level = null): Mage_Dataflow_Model_Convert_Exception;
+    public function addException(string $error, ?string $level = null): Mage_Dataflow_Model_Convert_Exception;
 }

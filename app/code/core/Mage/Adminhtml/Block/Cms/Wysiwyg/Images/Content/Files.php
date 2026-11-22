@@ -101,14 +101,14 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content_Files extends Mage_Adminht
         return $file->getShortName();
     }
 
-    public function getImagesWidth()
+    public function getImagesWidth(): int
     {
-        return Mage::getSingleton('cms/wysiwyg_images_storage')->getConfigData('resize_width');
+        return (int) Mage::getSingleton('cms/wysiwyg_images_storage')->getConfigData('resize_width');
     }
 
-    public function getImagesHeight()
+    public function getImagesHeight(): int
     {
-        return Mage::getSingleton('cms/wysiwyg_images_storage')->getConfigData('resize_height');
+        return (int) Mage::getSingleton('cms/wysiwyg_images_storage')->getConfigData('resize_height');
     }
 
     /**

@@ -114,17 +114,6 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     }
 
     /**
-     * Init mapping array of short fields to its full names
-     *
-     * @return $this
-     */
-    #[\Override]
-    protected function _initOldFieldsMap()
-    {
-        return $this;
-    }
-
-    /**
      * Initialize Quote identifier before save
      *
      * @return $this

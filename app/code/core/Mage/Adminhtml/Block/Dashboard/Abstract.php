@@ -10,9 +10,9 @@
 
 abstract class Mage_Adminhtml_Block_Dashboard_Abstract extends Mage_Adminhtml_Block_Widget
 {
-    protected ?string $_dataHelperName = null;
+    protected ?Mage_Adminhtml_Helper_Dashboard_Abstract $_dataHelper = null;
 
-    public function getCollection()
+    public function getCollection(): \Maho\Data\Collection
     {
         return $this->getDataHelper()->getCollection();
     }
@@ -22,19 +22,14 @@ abstract class Mage_Adminhtml_Block_Dashboard_Abstract extends Mage_Adminhtml_Bl
         return $this->getDataHelper()->getCount();
     }
 
-    public function getDataHelper()
+    public function getDataHelper(): ?Mage_Adminhtml_Helper_Dashboard_Abstract
     {
-        return $this->helper($this->getDataHelperName());
+        return $this->_dataHelper;
     }
 
-    public function getDataHelperName(): ?string
+    public function setDataHelper(Mage_Adminhtml_Helper_Dashboard_Abstract $dataHelper): static
     {
-        return $this->_dataHelperName;
-    }
-
-    public function setDataHelperName(string $dataHelperName): static
-    {
-        $this->_dataHelperName = $dataHelperName;
+        $this->_dataHelper = $dataHelper;
         return $this;
     }
 

@@ -492,12 +492,8 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
 
     /**
      * Support models "getCommentText" method for field note generation
-     *
-     * @param Mage_Core_Model_Config_Element $element
-     * @param string $helper
-     * @return string
      */
-    protected function _prepareFieldComment($element, $helper, $currentValue)
+    protected function _prepareFieldComment(Mage_Core_Model_Config_Element $element, string $helper, mixed $currentValue): string
     {
         $comment = '';
         if ($element->comment) {

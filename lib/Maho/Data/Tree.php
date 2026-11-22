@@ -38,12 +38,18 @@ class Tree
      * @param Node $parentNode
      * @param int $recursionLevel
      */
-    public function load($parentNode = null, $recursionLevel = 0) {}
+    public function load($parentNode = null, $recursionLevel = 0): static
+    {
+        return $this;
+    }
 
     /**
      * @param int $nodeId
      */
-    public function loadNode($nodeId) {}
+    public function loadNode($nodeId): ?Node
+    {
+        return null;
+    }
 
     /**
      * @param Node $parentNode
@@ -118,7 +124,10 @@ class Tree
     /**
      * @param Node $node
      */
-    public function getChildren($node) {}
+    public function getChildren($node): array
+    {
+        return [];
+    }
 
     /**
      * @return NodeCollection

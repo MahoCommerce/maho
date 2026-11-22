@@ -20,7 +20,7 @@ class Mage_Adminhtml_Block_Review_Rating_Detailed extends Mage_Adminhtml_Block_T
         }
     }
 
-    public function getRating()
+    public function getRating(): Mage_Rating_Model_Resource_Rating_Collection|false
     {
         if (!$this->getRatingCollection()) {
             if (Mage::registry('review_data')) {

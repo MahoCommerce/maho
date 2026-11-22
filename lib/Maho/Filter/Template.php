@@ -146,7 +146,7 @@ class Template
         return $result ?? $value;
     }
 
-    public function varDirective($construction)
+    public function varDirective(array $construction): string
     {
         if (count($this->_templateVars) == 0) {
             // If template preprocessing
@@ -160,7 +160,7 @@ class Template
         return (string) $replacedValue;
     }
 
-    public function includeDirective($construction)
+    public function includeDirective(array $construction): string
     {
         // Processing of {include template=... [...]} statement
         $includeParameters = $this->_getIncludeParameters($construction[2]);
@@ -184,10 +184,9 @@ class Template
      * Mage_Sales_Model_Order::sales_email/order/template. This directive is useful to include things like a global
      * header/footer.
      *
-     * @param $construction
      * @return mixed|string
      */
-    public function templateDirective($construction)
+    public function templateDirective(array $construction)
     {
         // Processing of {template config_path=... [...]} statement
         $templateParameters = $this->_getIncludeParameters($construction[2]);

@@ -44,44 +44,40 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
      * Get weee amount display type on product view page
      *
      * @param   bool|int|Mage_Core_Model_Store|null|string $store
-     * @return  int
      */
-    public function getPriceDisplayType($store = null)
+    public function getPriceDisplayType($store = null): int
     {
-        return Mage::getStoreConfig('tax/weee/display', $store);
+        return (int) Mage::getStoreConfig('tax/weee/display', $store);
     }
 
     /**
      * Get weee amount display type on product list page
      *
      * @param   bool|int|Mage_Core_Model_Store|null|string $store
-     * @return  int
      */
-    public function getListPriceDisplayType($store = null)
+    public function getListPriceDisplayType($store = null): int
     {
-        return Mage::getStoreConfig('tax/weee/display_list', $store);
+        return (int) Mage::getStoreConfig('tax/weee/display_list', $store);
     }
 
     /**
      * Get weee amount display type in sales modules
      *
      * @param   bool|int|Mage_Core_Model_Store|null|string $store
-     * @return  int
      */
-    public function getSalesPriceDisplayType($store = null)
+    public function getSalesPriceDisplayType($store = null): int
     {
-        return Mage::getStoreConfig('tax/weee/display_sales', $store);
+        return (int) Mage::getStoreConfig('tax/weee/display_sales', $store);
     }
 
     /**
      * Get weee amount display type in email templates
      *
      * @param   bool|int|Mage_Core_Model_Store|null|string $store
-     * @return  int
      */
-    public function getEmailPriceDisplayType($store = null)
+    public function getEmailPriceDisplayType($store = null): int
     {
-        return Mage::getStoreConfig('tax/weee/display_email', $store);
+        return (int) Mage::getStoreConfig('tax/weee/display_email', $store);
     }
 
     /**
@@ -160,15 +156,11 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Returns display type for price accordingly to current zone
+     * Return the display type of the zone, or whether it matches $compareTo when $compareTo is set
      *
-     * @param mixed                      $product
-     * @param array|int|null             $compareTo
-     * @param string                     $zone
-     * @param Mage_Core_Model_Store      $store
-     * @return bool|int
+     * @param int|list<int>|null $compareTo
      */
-    public function typeOfDisplay($product, $compareTo = null, $zone = null, $store = null)
+    public function typeOfDisplay(?\Maho\DataObject $product, array|int|null $compareTo = null, ?string $zone = null, Mage_Core_Model_Store|int|null $store = null): bool|int
     {
         $store ??= $this->getStoreIdOfItem($product);
         if (!$this->isEnabled($store)) {

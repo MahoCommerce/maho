@@ -138,18 +138,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     }
 
     /**
-     * Init mapping array of short fields to
-     * its full names
-     *
-     * @return \Maho\DataObject
-     */
-    #[\Override]
-    protected function _initOldFieldsMap()
-    {
-        return $this;
-    }
-
-    /**
      * Retrieve Store Id
      *
      * @return int

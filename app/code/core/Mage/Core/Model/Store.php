@@ -898,7 +898,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      * @param   float $price
      * @param   bool $format             Format price to currency format
      * @param   bool $includeContainer   Enclose into <span class="price"><span>
-     * @return  float
+     * @return  float|string The formatted string when $format is true
      */
     public function convertPrice($price, $format = false, $includeContainer = true)
     {

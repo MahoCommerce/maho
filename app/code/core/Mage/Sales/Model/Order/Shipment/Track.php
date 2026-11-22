@@ -37,11 +37,9 @@ class Mage_Sales_Model_Order_Shipment_Track extends Mage_Sales_Model_Abstract
     /**
      * Init mapping array of short fields to
      * its full names
-     *
-     * @return void
      */
     #[\Override]
-    protected function _initOldFieldsMap()
+    protected function _initOldFieldsMap(): void
     {
         $this->_oldFieldsMap = [
             'number' => 'track_number',

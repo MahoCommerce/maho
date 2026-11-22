@@ -81,13 +81,8 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract extends Mage_Admin
         return ['like' => $likeExpression];
     }
 
-    /**
-     * Retrieve filter html
-     *
-     * @return string
-     */
     #[\Override]
-    public function getHtml()
+    public function getHtml(): string
     {
         return '';
     }

@@ -139,7 +139,7 @@ class Mage_Cms_Model_Resource_Page_Collection extends Mage_Core_Model_Resource_D
      * Join store relation table if there is store filter
      */
     #[\Override]
-    protected function _renderFiltersBefore()
+    protected function _renderFiltersBefore(): void
     {
         if ($this->getFilter('store')) {
             $this->getSelect()->join(
@@ -153,7 +153,7 @@ class Mage_Cms_Model_Resource_Page_Collection extends Mage_Core_Model_Resource_D
              */
             $this->_useAnalyticFunction = true;
         }
-        return parent::_renderFiltersBefore();
+        parent::_renderFiltersBefore();
     }
 
     /**

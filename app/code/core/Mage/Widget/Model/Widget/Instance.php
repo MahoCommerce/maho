@@ -84,16 +84,13 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
     /**
      * Init mapping array of short fields to
      * its full names
-     *
-     * @return \Maho\DataObject
      */
     #[\Override]
-    protected function _initOldFieldsMap()
+    protected function _initOldFieldsMap(): void
     {
         $this->_oldFieldsMap = [
             'type' => 'instance_type',
         ];
-        return $this;
     }
 
     #[\Override]

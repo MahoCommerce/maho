@@ -50,7 +50,7 @@ abstract class Mage_Dataflow_Model_Convert_Parser_Abstract extends Mage_Dataflow
     }
 
     #[\Deprecated(message: 'the uploaded files are on the imports mount, use Mage_Dataflow_Helper_Data::copyToBatchFile()', since: '26.11')]
-    protected function _copy($file)
+    protected function _copy(string $file): bool
     {
         $ioAdapter = new \Maho\Io\File();
         if (!$ioAdapter->fileExists($file)) {

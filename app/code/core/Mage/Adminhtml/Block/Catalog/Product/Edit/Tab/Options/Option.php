@@ -8,6 +8,8 @@
  * @package Mage_Adminhtml
  */
 
+declare(strict_types=1);
+
 class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_Adminhtml_Block_Widget
 {
     protected ?Mage_Catalog_Model_Product $_product = null;
@@ -115,7 +117,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
         return parent::_prepareLayout();
     }
 
-    public function getAddButtonId()
+    public function getAddButtonId(): string
     {
         return $this->getLayout()
                 ->getBlock('admin.product.options')
@@ -127,7 +129,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
         return $this->getChildHtml('delete_button');
     }
 
-    public function getTypeSelectHtml()
+    public function getTypeSelectHtml(): string
     {
         $select = $this->getLayout()->createBlock('adminhtml/html_select')
             ->setData([
@@ -140,7 +142,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
         return $select->getHtml();
     }
 
-    public function getRequireSelectHtml()
+    public function getRequireSelectHtml(): string
     {
         $select = $this->getLayout()->createBlock('adminhtml/html_select')
             ->setData([
@@ -305,10 +307,11 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
         return $checkbox;
     }
 
-    public function getPriceValue($value, $type)
+    public function getPriceValue(?float $value, ?string $type): ?string
     {
-        if ($type == 'percent' || $type == 'fixed') {
+        if ($value !== null && ($type == 'percent' || $type == 'fixed')) {
             return Mage::helper('adminhtml')->formatPriceForInput($value);
         }
+        return null;
     }
 }

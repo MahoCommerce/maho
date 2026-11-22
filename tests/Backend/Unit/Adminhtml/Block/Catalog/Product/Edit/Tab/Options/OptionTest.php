@@ -16,15 +16,21 @@ describe('Custom option price precision in the admin form', function () {
     it('renders fixed prices with the full stored 4-decimal precision', function () {
         $block = new Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option();
 
-        expect($block->getPriceValue('10.6557', 'fixed'))->toBe('10.6557');
-        expect($block->getPriceValue('10.6600', 'fixed'))->toBe('10.66');
-        expect($block->getPriceValue('10.5', 'fixed'))->toBe('10.50');
+        expect($block->getPriceValue(10.6557, 'fixed'))->toBe('10.6557');
+        expect($block->getPriceValue(10.6600, 'fixed'))->toBe('10.66');
+        expect($block->getPriceValue(10.5, 'fixed'))->toBe('10.50');
     });
 
     it('renders percent prices with the full stored 4-decimal precision', function () {
         $block = new Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option();
 
-        expect($block->getPriceValue('12.3456', 'percent'))->toBe('12.3456');
-        expect($block->getPriceValue('12.3400', 'percent'))->toBe('12.34');
+        expect($block->getPriceValue(12.3456, 'percent'))->toBe('12.3456');
+        expect($block->getPriceValue(12.3400, 'percent'))->toBe('12.34');
+    });
+
+    it('renders an empty field when no price is known for the website', function () {
+        $block = new Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option();
+
+        expect($block->getPriceValue(null, 'fixed'))->toBeNull();
     });
 });

@@ -10,11 +10,8 @@
 
 class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Checkbox extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Select
 {
-    /**
-     * @return string
-     */
     #[\Override]
-    public function getHtml()
+    public function getHtml(): string
     {
         return '<span class="head-massaction">' . parent::getHtml() . '</span>';
     }

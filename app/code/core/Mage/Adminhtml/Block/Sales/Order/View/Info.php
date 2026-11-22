@@ -66,7 +66,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Info extends Mage_Adminhtml_Block_Sa
         return $this->getUrl('*/customer/edit', ['id' => $this->getOrder()->getCustomerId()]);
     }
 
-    public function getViewUrl($orderId)
+    public function getViewUrl(int $orderId): string
     {
         return $this->getUrl('*/sales_order/view', ['order_id' => $orderId]);
     }

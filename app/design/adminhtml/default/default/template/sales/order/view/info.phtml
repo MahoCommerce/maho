@@ -26,7 +26,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
         <?php if ($this->getNoUseOrderLink()): ?>
             <h4><span data-copy-text="<?= $this->escapeHtml($_order->getRealOrderId()) ?>"><?= Mage::helper('sales')->__('Order # %s', $this->escapeHtml($_order->getRealOrderId())) ?> (<?= $_email ?>)</span></h4>
         <?php else: ?>
-            <a href="<?= $this->getViewUrl($_order->getId()) ?>"><?= Mage::helper('sales')->__('Order # %s', $this->escapeHtml($_order->getRealOrderId())) ?></a>
+            <a href="<?= $this->getViewUrl((int) $_order->getId()) ?>"><?= Mage::helper('sales')->__('Order # %s', $this->escapeHtml($_order->getRealOrderId())) ?></a>
             <strong>(<?= $_email ?>)</strong>
         <?php endif ?>
         </div>
@@ -53,7 +53,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
             <?php if ($_order->getRelationChildId()): ?>
             <tr>
                 <td class="label"><label><?= Mage::helper('sales')->__('Link to the New Order') ?></label></td>
-                <td class="value"><a href="<?= $this->getViewUrl($_order->getRelationChildId()) ?>">
+                <td class="value"><a href="<?= $this->getViewUrl((int) $_order->getRelationChildId()) ?>">
                     <?= $this->escapeHtml($_order->getRelationChildRealId()) ?>
                 </a></td>
             </tr>
@@ -61,7 +61,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
             <?php if ($_order->getRelationParentId()): ?>
             <tr>
                 <td class="label"><label><?= Mage::helper('sales')->__('Link to the Previous Order') ?></label></td>
-                <td class="value"><a href="<?= $this->getViewUrl($_order->getRelationParentId()) ?>">
+                <td class="value"><a href="<?= $this->getViewUrl((int) $_order->getRelationParentId()) ?>">
                     <?= $this->escapeHtml($_order->getRelationParentRealId()) ?>
                 </a></td>
             </tr>

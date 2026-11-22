@@ -20,7 +20,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
 
     protected mixed $_data = null;
 
-    protected mixed $_position = null;
+    protected ?string $_position = null;
 
     /**
      * Detect serialization of data
@@ -171,7 +171,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
     }
 
     #[\Override]
-    public function addException(string $error, string|int|null $level = null): Mage_Dataflow_Model_Convert_Exception
+    public function addException(string $error, ?string $level = null): Mage_Dataflow_Model_Convert_Exception
     {
         $e = new Mage_Dataflow_Model_Convert_Exception($error);
         $e->setLevel($level ?? Mage_Dataflow_Model_Convert_Exception::NOTICE);
@@ -185,12 +185,12 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
         return $e;
     }
 
-    public function getPosition(): mixed
+    public function getPosition(): ?string
     {
         return $this->_position;
     }
 
-    public function setPosition(mixed $position): static
+    public function setPosition(?string $position): static
     {
         $this->_position = $position;
         return $this;

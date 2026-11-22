@@ -60,14 +60,8 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_Create_Items extends Mage_Adminh
         return parent::_beforeToHtml();
     }
 
-    /**
-     * Format given price
-     *
-     * @param float $price
-     * @return string
-     */
     #[\Override]
-    public function formatPrice($price)
+    public function formatPrice(?float $price): string
     {
         return $this->getShipment()->getOrder()->formatPrice($price);
     }

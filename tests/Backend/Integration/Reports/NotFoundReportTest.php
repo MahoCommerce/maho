@@ -331,7 +331,7 @@ describe('404 Errors report grid renderers', function () {
     it('shows a referer as escaped text, and as a link only for http and https', function () {
         $render = fn(string $referer) => Mage::app()->getLayout()
             ->createBlock('adminhtml/report_notfound_grid_renderer_referer')
-            ->setColumn(new \Maho\DataObject(['index' => 'referer']))
+            ->setColumn(new Mage_Adminhtml_Block_Widget_Grid_Column(['index' => 'referer']))
             ->render(new \Maho\DataObject(['referer' => $referer]));
 
         expect($render(''))->toBe('');

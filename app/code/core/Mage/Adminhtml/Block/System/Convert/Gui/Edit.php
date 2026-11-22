@@ -24,9 +24,10 @@ class Mage_Adminhtml_Block_System_Convert_Gui_Edit extends Mage_Adminhtml_Block_
         ], -100);
     }
 
-    public function getProfileId()
+    public function getProfileId(): ?int
     {
-        return Mage::registry('current_convert_profile')->getId();
+        $id = Mage::registry('current_convert_profile')->getId();
+        return $id === null ? null : (int) $id;
     }
 
     /**

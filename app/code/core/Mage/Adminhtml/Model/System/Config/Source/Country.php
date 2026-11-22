@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -9,9 +10,9 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Country
 {
-    protected $_options;
+    protected ?array $_options = null;
 
-    public function toOptionArray($isMultiselect = false)
+    public function toOptionArray(bool $isMultiselect = false): array
     {
         if (!$this->_options) {
             $this->_options = Mage::getResourceModel('directory/country_collection')->loadData()->toOptionArray(false);

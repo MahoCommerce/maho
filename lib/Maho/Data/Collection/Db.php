@@ -83,7 +83,7 @@ class Db extends Collection
      */
     protected $_isOrdersRendered = false;
 
-    public function __construct($conn = null)
+    public function __construct(?AdapterInterface $conn = null)
     {
         parent::__construct();
         if (!is_null($conn)) {
@@ -106,13 +106,8 @@ class Db extends Collection
 
     /**
      * Initialize collection cache
-     *
-     * @param $object
-     * @param string $idPrefix
-     * @param array $tags
-     * @return $this
      */
-    public function initCache($object, $idPrefix, $tags)
+    public function initCache(Mage_Core_Model_Cache $object, string $idPrefix, array $tags): static
     {
         $this->_cacheConf = [
             'object'    => $object,
@@ -387,7 +382,7 @@ class Db extends Collection
     /**
      * Hook for operations before rendering filters
      */
-    protected function _renderFiltersBefore() {}
+    protected function _renderFiltersBefore(): void {}
 
     /**
      * Add field filter to collection

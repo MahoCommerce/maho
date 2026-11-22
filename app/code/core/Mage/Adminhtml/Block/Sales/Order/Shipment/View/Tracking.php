@@ -98,10 +98,9 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_View_Tracking extends Mage_Admin
     }
 
     /**
-     * @param $code
      * @return false|string
      */
-    public function getCarrierTitle($code)
+    public function getCarrierTitle(?string $code)
     {
         if ($carrier = Mage::getSingleton('shipping/config')->getCarrierInstance($code)) {
             return $carrier->getConfigData('title');

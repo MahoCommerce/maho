@@ -19,7 +19,7 @@ class Mage_Adminhtml_Block_Newsletter_Problem_Grid_Filter_Checkbox extends Mage_
     }
 
     #[\Override]
-    public function getHtml()
+    public function getHtml(): string
     {
         return '<input type="checkbox" onclick="problemController.checkCheckboxes(this)">';
     }

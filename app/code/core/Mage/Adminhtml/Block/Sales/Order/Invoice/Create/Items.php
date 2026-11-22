@@ -109,7 +109,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items extends Mage_Adminht
     }
 
     #[\Override]
-    public function formatPrice($price)
+    public function formatPrice(?float $price): string
     {
         return $this->getInvoice()->getOrder()->formatPrice($price);
     }

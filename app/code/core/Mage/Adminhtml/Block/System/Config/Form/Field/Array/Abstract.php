@@ -96,7 +96,7 @@ abstract class Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract exte
     /**
      * Prepare existing row data object
      */
-    protected function _prepareArrayRow(\Maho\DataObject $row)
+    protected function _prepareArrayRow(\Maho\DataObject $row): void
     {
         // override in descendants
     }
@@ -173,7 +173,7 @@ abstract class Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract exte
     /**
      * Prepare to render
      */
-    protected function _prepareToRender()
+    protected function _prepareToRender(): void
     {
         // Override in descendants to add columns, change add button label etc
     }

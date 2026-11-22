@@ -14,14 +14,17 @@ class TaxRateTitleStub extends Mage_Adminhtml_Block_Tax_Rate_Title
     #[\Override]
     public function getTitles(): array
     {
-        return [0 => 'VAT" autofocus onfocus="alert(1)'];
+        $titles = [];
+        foreach ($this->getStores() as $store) {
+            $titles[$store->getId()] = 'VAT" autofocus onfocus="alert(1)';
+        }
+        return $titles;
     }
 }
 
 it('escapes the tax rate title inside the input value attribute', function () {
     Mage::getDesign()->setArea('adminhtml')->setPackageName('default')->setTheme('default');
-    $block = Mage::app()->getLayout()->createBlock(TaxRateTitleStub::class)
-        ->setData('stores', [Mage::getModel('core/store')->setId(0)->setName('Admin')]);
+    $block = Mage::app()->getLayout()->createBlock(TaxRateTitleStub::class);
 
     $html = $block->toHtml();
 

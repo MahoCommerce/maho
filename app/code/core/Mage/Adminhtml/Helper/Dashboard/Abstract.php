@@ -12,21 +12,12 @@ declare(strict_types=1);
 
 abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper_Data
 {
-    /**
-     * Helper collection
-     *
-     * @var Mage_Core_Model_Resource_Db_Collection_Abstract|Mage_Eav_Model_Entity_Collection_Abstract|array|null
-     */
-    protected $_collection;
+    protected ?\Maho\Data\Collection $_collection = null;
 
-    /**
-     * Parameters for helper
-     *
-     * @var array
-     */
-    protected $_params = [];
+    /** @var array<string, ?string> */
+    protected array $_params = [];
 
-    public function getCollection(): \Maho\Data\Collection|array
+    public function getCollection(): \Maho\Data\Collection
     {
         if (is_null($this->_collection)) {
             $this->_initCollection();
@@ -36,14 +27,9 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
 
     abstract protected function _initCollection(): void;
 
-    /**
-     * Returns collection items
-     *
-     * @return array
-     */
-    public function getItems()
+    public function getItems(): array
     {
-        return is_array($this->getCollection()) ? $this->getCollection() : $this->getCollection()->getItems();
+        return $this->getCollection()->getItems();
     }
 
     public function getCount(): int
@@ -70,7 +56,7 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
         return $result;
     }
 
-    public function setParam(string $name, mixed $value): void
+    public function setParam(string $name, ?string $value): void
     {
         $this->_params[$name] = $value;
     }
@@ -80,7 +66,7 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
         $this->_params = $params;
     }
 
-    public function getParam($name)
+    public function getParam(string $name): ?string
     {
         return $this->_params[$name] ?? null;
     }

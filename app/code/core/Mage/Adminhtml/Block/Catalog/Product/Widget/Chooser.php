@@ -17,7 +17,7 @@
  */
 class Mage_Adminhtml_Block_Catalog_Product_Widget_Chooser extends Mage_Adminhtml_Block_Widget_Grid
 {
-    protected $_selectedProducts = [];
+    protected array $_selectedProducts = [];
 
     /**
      * Block construction, prepare grid params
@@ -254,26 +254,16 @@ class Mage_Adminhtml_Block_Catalog_Product_Widget_Chooser extends Mage_Adminhtml
         ]);
     }
 
-    /**
-     * Setter
-     *
-     * @param array $selectedProducts
-     * @return $this
-     */
-    public function setSelectedProducts($selectedProducts)
+    public function setSelectedProducts(array $selectedProducts): static
     {
         $this->_selectedProducts = $selectedProducts;
         return $this;
     }
 
-    /**
-     * Getter
-     *
-     * @return array
-     */
-    public function getSelectedProducts()
+    public function getSelectedProducts(): array
     {
-        if ($selectedProducts = $this->getRequest()->getParam('selected_products')) {
+        $selectedProducts = $this->getRequest()->getParam('selected_products');
+        if (is_array($selectedProducts) && $selectedProducts) {
             $this->setSelectedProducts($selectedProducts);
         }
         return $this->_selectedProducts;

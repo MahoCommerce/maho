@@ -22,7 +22,7 @@ interface ContainerInterface
 
     public function setProfile(AbstractProfile $profile): self;
 
-    public function addException(string $error, string|int|null $level = null): Exception;
+    public function addException(string $error, ?string $level = null): Exception;
 
     public function setVars(array $vars): self;
 

@@ -76,7 +76,7 @@ class Mage_Adminhtml_Helper_Data extends Mage_Core_Helper_Abstract
      *
      * @param string $value
      */
-    public function decodeFilter(&$value)
+    public function decodeFilter(&$value): void
     {
         $value = trim(rawurldecode($value));
     }

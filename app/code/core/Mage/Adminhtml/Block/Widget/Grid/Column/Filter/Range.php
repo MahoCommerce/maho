@@ -8,10 +8,12 @@
  * @package Mage_Adminhtml
  */
 
+declare(strict_types=1);
+
 class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Range extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
 {
     #[\Override]
-    public function getHtml()
+    public function getHtml(): string
     {
         $fromLabel = Mage::helper('adminhtml')->__('From');
         $toLabel = Mage::helper('adminhtml')->__('To');
@@ -32,7 +34,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Range extends Mage_Adminhtm
         return $html;
     }
 
-    public function getValue($index = null)
+    public function getValue(?string $index = null): array|string|null
     {
         if ($index) {
             return $this->getData('value', $index);

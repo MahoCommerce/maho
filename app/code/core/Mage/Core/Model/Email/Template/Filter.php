@@ -386,12 +386,10 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
     /**
      * Var directive with modifiers support
      *
-     * @param array $construction
-     * @return string
      * @throws Mage_Core_Exception
      */
     #[\Override]
-    public function varDirective($construction)
+    public function varDirective(array $construction): string
     {
         if (count($this->_templateVars) == 0) {
             // If template preprocessing
@@ -401,9 +399,9 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
         $parts = explode('|', $construction[2], 2);
         if (count($parts) === 2) {
             [$variableName, $modifiersString] = $parts;
-            return $this->_amplifyModifiers($this->_getVariable($variableName, ''), $modifiersString);
+            return (string) $this->_amplifyModifiers($this->_getVariable($variableName, ''), $modifiersString);
         }
-        return $this->_getVariable($construction[2], '');
+        return (string) $this->_getVariable($construction[2], '');
     }
 
     /**
