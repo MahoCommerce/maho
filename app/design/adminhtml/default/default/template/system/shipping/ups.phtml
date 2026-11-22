@@ -11,8 +11,8 @@
 $_coreHelper = Mage::helper('core');
 /** @var Mage_Usa_Model_Shipping_Carrier_Ups $upsModel */
 $upsModel = Mage::getSingleton('usa/shipping_carrier_ups');
-$orShipArr = $upsModel->getCode('originShipment');
-$defShipArr = $upsModel->getCode('method');
+$orShipArr = $upsModel->getCodes('originShipment');
+$defShipArr = $upsModel->getCodes('method');
 $allMethodsCodes = [];
 foreach (Mage::getModel('usa/shipping_carrier_ups_source_method')->toOptionArray() as $method) {
     $allMethodsCodes[] = $method['value'];

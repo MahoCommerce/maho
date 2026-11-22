@@ -16,7 +16,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups_Source_Method
         $arr = [];
 
         // necessary after the add of Rest API
-        $origins = $ups->getCode('originShipment');
+        $origins = $ups->getCodes('originShipment');
         foreach ($origins as $origin) {
             foreach ($origin as $k => $v) {
                 $arr[] = ['value' => $k, 'label' => Mage::helper('usa')->__($v)];
@@ -24,7 +24,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups_Source_Method
         }
 
         // old XML API codes
-        foreach ($ups->getCode('method') as $k => $v) {
+        foreach ($ups->getCodes('method') as $k => $v) {
             $arr[] = ['value' => $k, 'label' => Mage::helper('usa')->__($v)];
         }
 

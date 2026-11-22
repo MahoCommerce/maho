@@ -393,14 +393,8 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         return $methods;
     }
 
-    /**
-     * Get configuration data of carrier
-     *
-     * @param string $type
-     * @param string $code
-     * @return array|string|false
-     */
-    public function getCode($type, $code = '')
+    #[\Override]
+    public function getCodes(string $type): array
     {
         $codes = [
             'unit_of_measure'   => [
@@ -440,16 +434,13 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
 
             ],
         ];
-        if (!isset($codes[$type])) {
-            return false;
-        }
+        return $codes[$type] ?? [];
+    }
 
-        if ($code === '') {
-            return $codes[$type];
-        }
-
-        $code = strtoupper($code);
-        return $codes[$type][$code] ?? false;
+    #[\Override]
+    public function getCodeValue(string $type, string $code): ?string
+    {
+        return parent::getCodeValue($type, strtoupper($code));
     }
 
     /**
@@ -536,12 +527,12 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         if ($maxWeight) {
             $configWeightUnit = Mage_Core_Model_Locale::WEIGHT_KILOGRAM;
         } elseif ($configWeightUnit) {
-            $configWeightUnit = $this->getCode('dimensions_variables', $configWeightUnit);
+            $configWeightUnit = $this->getCodeValue('dimensions_variables', $configWeightUnit);
         } else {
-            $configWeightUnit = $this->getCode('dimensions_variables', (string) $this->getConfigData('unit_of_measure'));
+            $configWeightUnit = $this->getCodeValue('dimensions_variables', (string) $this->getConfigData('unit_of_measure'));
         }
 
-        $countryWeightUnit = $this->getCode('dimensions_variables', $this->_getWeightUnit());
+        $countryWeightUnit = $this->getCodeValue('dimensions_variables', $this->_getWeightUnit());
 
         if ($configWeightUnit != $countryWeightUnit) {
             $weight = Mage::helper('usa')->convertMeasureWeight(
@@ -717,9 +708,9 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     protected function _getDimension($dimension, $configWeightUnit = false)
     {
         if (!$configWeightUnit) {
-            $configWeightUnit = $this->getCode('dimensions_variables', (string) $this->getConfigData('unit_of_measure'));
+            $configWeightUnit = $this->getCodeValue('dimensions_variables', (string) $this->getConfigData('unit_of_measure'));
         } else {
-            $configWeightUnit = $this->getCode('dimensions_variables', $configWeightUnit);
+            $configWeightUnit = $this->getCodeValue('dimensions_variables', $configWeightUnit);
         }
 
         if ($configWeightUnit == Mage_Core_Model_Locale::WEIGHT_POUND) {
@@ -728,7 +719,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
             $configDimensionUnit = Mage_Core_Model_Locale::LENGTH_CENTIMETER;
         }
 
-        $countryDimensionUnit = $this->getCode('dimensions_variables', $this->_getDimensionUnit());
+        $countryDimensionUnit = $this->getCodeValue('dimensions_variables', $this->_getDimensionUnit());
 
         if ($configDimensionUnit != $countryDimensionUnit) {
             $dimension = (float) Mage::helper('usa')->convertMeasureDimension(

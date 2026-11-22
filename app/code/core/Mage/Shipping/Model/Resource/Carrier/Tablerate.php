@@ -291,15 +291,12 @@ class Mage_Shipping_Model_Resource_Carrier_Tablerate extends Mage_Core_Model_Res
 
     /**
      * Return import condition full name by condition name code
-     *
-     * @param string $conditionName
-     * @return string
      */
-    protected function _getConditionFullName($conditionName)
+    protected function _getConditionFullName(string $conditionName): string
     {
         if (!isset($this->_conditionFullNames[$conditionName])) {
-            $name = Mage::getSingleton('shipping/carrier_tablerate')->getCode('condition_name_short', $conditionName);
-            $this->_conditionFullNames[$conditionName] = $name;
+            $this->_conditionFullNames[$conditionName] = Mage::getSingleton('shipping/carrier_tablerate')
+                ->getCodeValue('condition_name_short', $conditionName) ?? $conditionName;
         }
 
         return $this->_conditionFullNames[$conditionName];
