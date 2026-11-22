@@ -57,12 +57,9 @@ class Mage_Adminhtml_Block_Tag_Assigned_Grid extends Mage_Adminhtml_Block_Widget
 
     /**
      * Add filter to grid columns
-     *
-     * @param mixed $column
-     * @return $this
      */
     #[\Override]
-    protected function _addColumnFilterToCollection($column)
+    protected function _addColumnFilterToCollection(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
         // Set custom filter for in product flag
         if ($column->getId() === 'in_products') {

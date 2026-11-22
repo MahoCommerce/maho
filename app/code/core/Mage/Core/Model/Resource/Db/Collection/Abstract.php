@@ -376,12 +376,8 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
 
     /**
      * Standard resource collection initialization
-     *
-     * @param string $model
-     * @param Mage_Core_Model_Resource_Db_Abstract $resourceModel
-     * @return $this
      */
-    protected function _init($model, $resourceModel = null)
+    protected function _init(string $model, ?string $resourceModel = null): static
     {
         $this->setModel($model);
         $resourceModel ??= $model;
@@ -435,15 +431,14 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
         return $this->_resourceModel;
     }
 
-    /**
-     * Get resource instance
-     *
-     * @return Mage_Core_Model_Resource_Db_Abstract
-     */
-    public function getResource()
+    public function getResource(): Mage_Core_Model_Resource_Db_Abstract
     {
-        if (empty($this->_resource)) {
-            $this->_resource = Mage::getResourceModel($this->getResourceModelName());
+        if (!$this->_resource instanceof Mage_Core_Model_Resource_Db_Abstract) {
+            $resource = Mage::getResourceModel($this->getResourceModelName());
+            if (!$resource instanceof Mage_Core_Model_Resource_Db_Abstract) {
+                throw new \RuntimeException("Resource model {$this->getResourceModelName()} is not a database resource model.");
+            }
+            $this->_resource = $resource;
         }
         return $this->_resource;
     }

@@ -46,12 +46,9 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Upsell extends Mage_Adminhtm
 
     /**
      * Add filter
-     *
-     * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
-     * @return $this
      */
     #[\Override]
-    protected function _addColumnFilterToCollection($column)
+    protected function _addColumnFilterToCollection(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
         // Set custom filter for in product flag
         if ($column->getId() === 'in_products') {

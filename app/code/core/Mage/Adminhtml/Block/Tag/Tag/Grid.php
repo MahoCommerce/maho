@@ -29,12 +29,8 @@ class Mage_Adminhtml_Block_Tag_Tag_Grid extends Mage_Adminhtml_Block_Widget_Grid
              ->setSaveParametersInSession(true);
     }
 
-    /**
-     * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
-     * @return $this
-     */
     #[\Override]
-    protected function _addColumnFilterToCollection($column)
+    protected function _addColumnFilterToCollection(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
         if ($column->getIndex() === 'stores') {
             $this->getCollection()->addStoreFilter($column->getFilter()->getCondition(), false);

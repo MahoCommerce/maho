@@ -90,12 +90,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
         'validate-digits',
     ];
 
-    /**
-     * Collection constructor
-     *
-     * @param Mage_Core_Model_Resource_Abstract $resource
-     */
-    public function __construct($resource = null)
+    public function __construct()
     {
         parent::__construct();
         $this->_construct();
@@ -149,16 +144,15 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
 
     /**
      * Standard resource collection initialization
-     *
-     * @param string $model
-     * @param null|string $entityModel
-     * @return $this
      */
-    protected function _init($model, $entityModel = null)
+    protected function _init(string $model, ?string $entityModel = null): static
     {
         $this->setItemObjectClass(Mage::getConfig()->getModelClassName($model));
         $entityModel ??= $model;
         $entity = Mage::getResourceSingleton($entityModel);
+        if (!$entity instanceof Mage_Eav_Model_Entity_Abstract) {
+            throw new \RuntimeException("Resource model {$entityModel} is not an EAV entity.");
+        }
         $this->setEntity($entity);
 
         return $this;
@@ -208,12 +202,9 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
     }
 
     /**
-     * Set template object for the collection
-     *
-     * @param \Maho\DataObject $object
-     * @return  $this
+     * Set the item class of the collection from an item or from a model alias
      */
-    public function setObject($object = null)
+    public function setObject(\Maho\DataObject|string $object): static
     {
         if (is_object($object)) {
             $this->setItemObjectClass($object::class);

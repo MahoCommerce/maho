@@ -33,12 +33,8 @@ class Mage_Admin_Model_Rules extends Mage_Core_Model_Abstract
         $this->_init('admin/rules');
     }
 
-    /**
-     * Initialize and retrieve permissions collection
-     * @return Object
-     */
     #[\Override]
-    public function getCollection()
+    public function getCollection(): Mage_Admin_Model_Resource_Permissions_Collection
     {
         return Mage::getResourceModel('admin/permissions_collection');
     }

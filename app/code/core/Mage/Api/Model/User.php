@@ -161,13 +161,8 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
         return is_array($result) && count($result) > 0;
     }
 
-    /**
-     * Get collection of users
-     *
-     * @return Object|Mage_Api_Model_Resource_User_Collection
-     */
     #[\Override]
-    public function getCollection()
+    public function getCollection(): Mage_Api_Model_Resource_User_Collection
     {
         return Mage::getResourceModel('api/user_collection');
     }

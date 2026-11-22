@@ -22,18 +22,19 @@ class Mage_Adminhtml_Block_Permissions_User_Edit_Tab_Roles extends Mage_Adminhtm
     }
 
     #[\Override]
-    protected function _addColumnFilterToCollection($column)
+    protected function _addColumnFilterToCollection(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
-        if ($column->getId() == 'assigned_user_role') {
+        $collection = $this->getCollection();
+        if ($column->getId() == 'assigned_user_role' && $collection instanceof \Maho\Data\Collection\Db) {
             $userRoles = $this->_getSelectedRoles();
             if (empty($userRoles)) {
                 $userRoles = 0;
             }
             if ($column->getFilter()->getValue()) {
-                $this->getCollection()->addFieldToFilter('role_id', ['in' => $userRoles]);
+                $collection->addFieldToFilter('role_id', ['in' => $userRoles]);
             } else {
                 if ($userRoles) {
-                    $this->getCollection()->addFieldToFilter('role_id', ['nin' => $userRoles]);
+                    $collection->addFieldToFilter('role_id', ['nin' => $userRoles]);
                 }
             }
         } else {

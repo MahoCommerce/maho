@@ -243,13 +243,8 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         return is_array($result) && count($result) > 0;
     }
 
-    /**
-     * Retrieve admin user collection
-     *
-     * @return Mage_Admin_Model_Resource_User_Collection
-     */
     #[\Override]
-    public function getCollection()
+    public function getCollection(): Mage_Admin_Model_Resource_User_Collection
     {
         return Mage::getResourceModel('admin/user_collection');
     }

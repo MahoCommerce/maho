@@ -234,27 +234,25 @@ abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
     /**
      * Get collection instance
      *
-     * @return Mage_Core_Model_Resource_Db_Collection_Abstract
      * @throws Mage_Core_Exception
      */
-    public function getResourceCollection()
+    public function getResourceCollection(): \Maho\Data\Collection\Db
     {
         if (empty($this->_resourceCollectionName)) {
             Mage::throwException(Mage::helper('core')->__('Model collection resource name is not defined.'));
         }
 
-        $resource = Mage::getResourceModel($this->_resourceCollectionName, $this->_getResource());
-        if (!$resource) {
+        $collection = Mage::getResourceModel($this->_resourceCollectionName, $this->_getResource());
+        if (!$collection instanceof \Maho\Data\Collection\Db) {
             Mage::throwException(Mage::helper('core')->__('Resource "%s" is not found.', $this->_resourceCollectionName));
         }
-        return $resource;
+        return $collection;
     }
 
     /**
-     * @return Mage_Core_Model_Resource_Db_Collection_Abstract|false
      * @throws Mage_Core_Exception
      */
-    public function getCollection()
+    public function getCollection(): \Maho\Data\Collection\Db
     {
         return $this->getResourceCollection();
     }

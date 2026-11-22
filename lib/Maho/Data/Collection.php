@@ -103,12 +103,9 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Add collection filter
      *
-     * @param string $field
-     * @param string|array $value
-     * @param string $type and|or|string
-     * @return $this
+     * @param string $type and|or|string|public
      */
-    public function addFilter($field, $value, $type = 'and')
+    public function addFilter(string $field, int|string|array $value, string $type = 'and'): static
     {
         $filter = new DataObject(); // implements ArrayAccess
         $filter['field']   = $field;
@@ -429,13 +426,14 @@ class Collection implements IteratorAggregate, Countable
     }
 
     /**
-     * @param callable $obj_method
-     * @param array $args
+     * Replace each item with the result of $callback for that item
+     *
+     * @param callable(DataObject): DataObject $callback
      */
-    public function each($obj_method, $args = []): void
+    public function each(callable $callback): void
     {
-        foreach ($args->_items as $k => $item) {
-            $args->_items[$k] = $obj_method($item);
+        foreach ($this->_items as $key => $item) {
+            $this->_items[$key] = $callback($item);
         }
     }
 

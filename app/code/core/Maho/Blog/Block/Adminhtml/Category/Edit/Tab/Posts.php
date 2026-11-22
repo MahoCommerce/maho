@@ -26,17 +26,18 @@ class Maho_Blog_Block_Adminhtml_Category_Edit_Tab_Posts extends Mage_Adminhtml_B
     }
 
     #[\Override]
-    protected function _addColumnFilterToCollection($column)
+    protected function _addColumnFilterToCollection(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
-        if ($column->getId() === 'in_category') {
+        $collection = $this->getCollection();
+        if ($column->getId() === 'in_category' && $collection instanceof \Maho\Data\Collection\Db) {
             $postIds = $this->_getSelectedPostIds();
             if (empty($postIds)) {
                 $postIds = [0];
             }
             if ($column->getFilter()->getValue()) {
-                $this->getCollection()->addFieldToFilter('entity_id', ['in' => $postIds]);
+                $collection->addFieldToFilter('entity_id', ['in' => $postIds]);
             } elseif ($column->getFilter()->getValue() === '0') {
-                $this->getCollection()->addFieldToFilter('entity_id', ['nin' => $postIds]);
+                $collection->addFieldToFilter('entity_id', ['nin' => $postIds]);
             }
         } else {
             parent::_addColumnFilterToCollection($column);

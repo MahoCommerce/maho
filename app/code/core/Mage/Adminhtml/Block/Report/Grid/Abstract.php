@@ -60,15 +60,12 @@ class Mage_Adminhtml_Block_Report_Grid_Abstract extends Mage_Adminhtml_Block_Wid
         return $this->_resourceCollectionName;
     }
 
-    /**
-     * @return Mage_Core_Model_Resource_Db_Collection_Abstract|Mage_Reports_Model_Grouped_Collection
-     */
     #[\Override]
-    public function getCollection()
+    public function getCollection(): Mage_Reports_Model_Grouped_Collection
     {
-        if (is_null($this->_collection)) {
-            $collection = Mage::getModel('reports/grouped_collection');
-            $this->setCollection($collection);
+        $this->_collection ??= Mage::getModel('reports/grouped_collection');
+        if (!$this->_collection instanceof Mage_Reports_Model_Grouped_Collection) {
+            throw new \RuntimeException('The collection of a report grid must be a grouped collection.');
         }
         return $this->_collection;
     }
