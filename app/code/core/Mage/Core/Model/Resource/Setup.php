@@ -915,17 +915,7 @@ class Mage_Core_Model_Resource_Setup
         return $this->getConnection()->isTableExists($table);
     }
 
-    /**
-     * Save configuration data
-     *
-     * @param string $path
-     * @param string $value
-     * @param int|string $scope
-     * @param int $scopeId
-     * @param int $inherit
-     * @return $this
-     */
-    public function setConfigData($path, $value, $scope = 'default', $scopeId = 0, $inherit = 0)
+    public function setConfigData(string $path, string|int|null $value, string $scope = 'default', int $scopeId = 0, int $inherit = 0): static
     {
         $table = $this->getTable('core/config_data');
         // this is a fix for mysql 4.1

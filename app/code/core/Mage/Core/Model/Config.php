@@ -1520,13 +1520,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         return $obj;
     }
 
-    /**
-     * Get resource configuration for resource name
-     *
-     * @param string $name
-     * @return Mage_Core_Model_Config_Element|SimpleXMLElement
-     */
-    public function getResourceConfig($name)
+    public function getResourceConfig(string $name): Mage_Core_Model_Config_Element
     {
         return $this->_xml->global->resources->{$name};
     }

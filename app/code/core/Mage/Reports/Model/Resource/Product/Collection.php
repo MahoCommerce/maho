@@ -13,11 +13,9 @@ class Mage_Reports_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     public const int SELECT_COUNT_SQL_TYPE_CART           = 1;
 
     /**
-     * Product entity identifier
-     *
-     * @var int
+     * Name of the ID field of the product entity table
      */
-    protected $_productEntityId;
+    protected ?string $_productEntityId = null;
 
     /**
      * Product entity table name
@@ -65,23 +63,18 @@ class Mage_Reports_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     }
 
     /**
-     * Set product entity id
-     *
-     * @param int $entityId
-     * @return $this
+     * Set the name of the ID field of the product entity table
      */
-    public function setProductEntityId($entityId)
+    public function setProductEntityId(string $entityId): static
     {
-        $this->_productEntityId = (int) $entityId;
+        $this->_productEntityId = $entityId;
         return $this;
     }
 
     /**
-     * Get product entity id
-     *
-     * @return int
+     * Get the name of the ID field of the product entity table
      */
-    public function getProductEntityId()
+    public function getProductEntityId(): ?string
     {
         return $this->_productEntityId;
     }

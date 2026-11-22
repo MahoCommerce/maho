@@ -123,7 +123,7 @@ final class DashboardProvider extends ReportProviderBase
         // The buckets of the admin chart: from the start of the range, one step at a time, while before its end
         /** @var \Mage_Reports_Model_Resource_Order_Collection $collection */
         $collection = \Mage::getResourceModel('reports/order_collection');
-        [$rangeStart, $rangeEnd] = $collection->getDateRange($period, '', '', true);
+        [$rangeStart, $rangeEnd] = $collection->getDateRange($period, null, null, true);
         $timezone = new \DateTimeZone(self::timezone());
         $cursor = \DateTimeImmutable::createFromInterface($rangeStart)->setTimezone($timezone);
         $end = \DateTimeImmutable::createFromInterface($rangeEnd)->setTimezone($timezone);
@@ -221,7 +221,7 @@ final class DashboardProvider extends ReportProviderBase
     {
         /** @var \Mage_Reports_Model_Resource_Order_Collection $collection */
         $collection = \Mage::getResourceModel('reports/order_collection');
-        $collection->prepareSummary($period, 0, 0, 0);
+        $collection->prepareSummary($period, null, null, 0);
         $this->applyOrderScope($collection, $query, false);
 
         $length = strlen(new \DateTimeImmutable('2000-01-01')->format($keyFormat));

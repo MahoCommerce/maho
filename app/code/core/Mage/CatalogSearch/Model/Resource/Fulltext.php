@@ -664,14 +664,9 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
     }
 
     /**
-     * Return all product children ids
-     *
-     * @param int $productId
-     * @param int $typeId
-     * @param null|int $websiteId
-     * @return array|null
+     * @return list<int|string>|null
      */
-    protected function _getProductChildrenIds($productId, $typeId, $websiteId = null)
+    protected function _getProductChildrenIds(int $productId, string $typeId, ?int $websiteId = null): ?array
     {
         $typeInstance = $this->_getProductTypeInstance($typeId);
         $relation = $typeInstance->isComposite()

@@ -56,12 +56,7 @@ class Mage_CatalogSearch_Helper_Data extends Mage_Core_Helper_Abstract
      */
     protected ?bool $_canLogQuery = null;
 
-    /**
-     * Search engine model
-     *
-     * @var Mage_CatalogSearch_Model_Resource_Fulltext_Engine
-     */
-    protected $_engine;
+    protected ?Mage_CatalogSearch_Model_Resource_Fulltext_Engine $_engine = null;
 
     /**
      * Retrieve search query parameter name
@@ -358,12 +353,7 @@ class Mage_CatalogSearch_Helper_Data extends Mage_Core_Helper_Abstract
         return implode($separator, $_index);
     }
 
-    /**
-     * Get current search engine resource model
-     *
-     * @return object
-     */
-    public function getEngine()
+    public function getEngine(): Mage_CatalogSearch_Model_Resource_Fulltext_Engine
     {
         if (!$this->_engine) {
             $engine = Mage::getStoreConfig('catalog/search/engine');

@@ -83,12 +83,7 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
      */
     protected $_customer = null;
 
-    /**
-     * Customer group
-     *
-     * @var string
-     */
-    protected $_defaultCustomerTaxClass = null;
+    protected ?int $_defaultCustomerTaxClass = null;
 
     /**
      * Tax helper
@@ -123,17 +118,11 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    /**
-     * Get the customer default customer class
-     *
-     * @param null|Mage_Core_Model_Store $store
-     * @return string
-     */
-    public function getDefaultCustomerTaxClass($store = null)
+    public function getDefaultCustomerTaxClass(?Mage_Core_Model_Store $store = null): int
     {
         if ($this->_defaultCustomerTaxClass === null) {
             $defaultCustomerGroup = Mage::helper('customer')->getDefaultCustomerGroupId($store);
-            $this->_defaultCustomerTaxClass = Mage::getModel('customer/group')->getTaxClassId($defaultCustomerGroup);
+            $this->_defaultCustomerTaxClass = (int) Mage::getModel('customer/group')->getTaxClassId($defaultCustomerGroup);
         }
         return $this->_defaultCustomerTaxClass;
     }

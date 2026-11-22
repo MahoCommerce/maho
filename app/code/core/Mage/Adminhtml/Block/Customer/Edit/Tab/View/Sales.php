@@ -10,12 +10,7 @@
 
 class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales extends Mage_Adminhtml_Block_Template
 {
-    /**
-     * Sales entity collection
-     *
-     * @var Mage_Sales_Model_Resource_Sale_Collection
-     */
-    protected $_collection;
+    protected ?Mage_Sales_Model_Resource_Sale_Collection $_collection = null;
 
     protected ?array $_groupedCollection = null;
     protected array $_websiteCounts = [];
@@ -34,15 +29,15 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales extends Mage_Adminhtml_B
     }
 
     #[\Override]
-    protected function _beforeToHtml()
+    protected function _beforeToHtml(): static
     {
         $this->_currency = Mage::getModel('directory/currency')
             ->load(Mage_Directory_Helper_Data::getConfigCurrencyBase());
 
         $this->_collection = Mage::getResourceModel('sales/sale_collection')
             ->setCustomerFilter(Mage::registry('current_customer'))
-            ->setOrderStateFilter(Mage_Sales_Model_Order::STATE_CANCELED, true)
-            ->load();
+            ->setOrderStateFilter(Mage_Sales_Model_Order::STATE_CANCELED, true);
+        $this->_collection->load();
 
         $this->_groupedCollection = [];
 

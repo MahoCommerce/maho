@@ -46,17 +46,9 @@ class Mage_Catalog_Model_Layer_Filter_Decimal extends Mage_Catalog_Model_Layer_F
         return $this->_resource;
     }
 
-    /**
-     * Apply decimal range filter to product collection
-     *
-     * @param Mage_Catalog_Block_Layer_Filter_Decimal $filterBlock
-     * @return $this
-     */
     #[\Override]
-    public function apply(Mage_Core_Controller_Request_Http $request, $filterBlock)
+    public function apply(Mage_Core_Controller_Request_Http $request, ?Mage_Catalog_Block_Layer_Filter_Abstract $filterBlock): static
     {
-        parent::apply($request, $filterBlock);
-
         /**
          * Filter must be string: $index, $range
          */
@@ -70,9 +62,9 @@ class Mage_Catalog_Model_Layer_Filter_Decimal extends Mage_Catalog_Model_Layer_F
             return $this;
         }
 
-        [$index, $range] = $filter;
-        if ((int) $index && (int) $range) {
-            $this->setRange((int) $range);
+        [$index, $range] = array_map(intval(...), $filter);
+        if ($index && $range) {
+            $this->setRange($range);
 
             $this->_getResource()->applyFilterToCollection($this, $range, $index);
             $this->getLayer()->getState()->addFilter(

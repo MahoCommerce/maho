@@ -355,15 +355,10 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
         return $this;
     }
 
-    /**
-     * Retrieve entity instance
-     *
-     * @return Mage_Eav_Model_Entity_Abstract
-     */
-    public function getEntity()
+    public function getEntity(): Mage_Eav_Model_Entity_Abstract
     {
         if (!$this->_entity) {
-            $this->_entity = $this->getEntityType();
+            $this->_entity = $this->getEntityType()->getEntity();
         }
         return $this->_entity;
     }
@@ -478,12 +473,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
         if ($this->getFrontendInput() === 'boolean') {
             return 'eav/entity_attribute_source_boolean';
         }
-        // getEntity() gives the entity type, which names no default, when no entity model loaded this attribute
-        $entity = $this->getEntity();
-
-        return $entity instanceof Mage_Eav_Model_Entity_Abstract
-            ? (string) $entity->getDefaultAttributeSourceModel()
-            : Mage_Eav_Model_Entity::DEFAULT_SOURCE_MODEL;
+        return (string) $this->getEntity()->getDefaultAttributeSourceModel();
     }
 
     /**
