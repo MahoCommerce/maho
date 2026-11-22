@@ -259,6 +259,8 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
             $this->_isFirstTimeResetRun = false;
         }
         $this->_address = $address;
+        $this->_roundingDeltas = [];
+        $this->_baseRoundingDeltas = [];
 
         return $this;
     }
