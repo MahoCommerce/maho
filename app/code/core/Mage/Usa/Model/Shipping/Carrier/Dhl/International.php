@@ -1229,16 +1229,14 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
 
     /**
      * Do rate request and handle errors
-     *
-     * @return Mage_Shipping_Model_Rate_Result|\Maho\DataObject
      */
-    protected function _doRequest()
+    protected function _doRequest(): Mage_Shipping_Model_Rate_Result|\Maho\DataObject
     {
         $rawRequest = $this->_request;
 
         $originRegion = (string) $this->getCountryParams(
             Mage::getStoreConfig(Mage_Shipping_Model_Shipping::XML_PATH_STORE_COUNTRY_ID, $this->getStore()),
-        )->region;
+        )->getRegion();
 
         if (!$originRegion) {
             Mage::throwException(Mage::helper('usa')->__('Wrong Region.'));
@@ -1309,7 +1307,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         $nodeConsignee->addChild('CountryCode', $rawRequest->getRecipientAddressCountryCode());
         $nodeConsignee->addChild(
             'CountryName',
-            (string) $this->getCountryParams($rawRequest->getRecipientAddressCountryCode())->name,
+            (string) $this->getCountryParams($rawRequest->getRecipientAddressCountryCode())->getName(),
         );
         $nodeContact = $nodeConsignee->addChild('Contact');
         $nodeContact->addChild('PersonName', mb_substr((string) $rawRequest->getRecipientContactPersonName(), 0, 34));
@@ -1371,7 +1369,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         $nodeShipper->addChild('CountryCode', $rawRequest->getShipperAddressCountryCode());
         $nodeShipper->addChild(
             'CountryName',
-            (string) $this->getCountryParams($rawRequest->getShipperAddressCountryCode())->name,
+            (string) $this->getCountryParams($rawRequest->getShipperAddressCountryCode())->getName(),
         );
         $nodeContact = $nodeShipper->addChild('Contact', '', '');
         $nodeContact->addChild('PersonName', mb_substr((string) $rawRequest->getShipperContactPersonName(), 0, 34));
@@ -1744,18 +1742,14 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
 
     /**
      * Check if shipping is domestic
-     *
-     * @param string $origCountryCode
-     * @param string $destCountryCode
-     * @return bool
      */
-    protected function _checkDomesticStatus($origCountryCode, $destCountryCode)
+    protected function _checkDomesticStatus(string $origCountryCode, string $destCountryCode): bool
     {
         $this->_isDomestic = false;
 
-        $origCountry = (string) $this->getCountryParams($origCountryCode)->name;
-        $destCountry = (string) $this->getCountryParams($destCountryCode)->name;
-        $isDomestic = (string) $this->getCountryParams($destCountryCode)->domestic;
+        $origCountry = (string) $this->getCountryParams($origCountryCode)->getName();
+        $destCountry = (string) $this->getCountryParams($destCountryCode)->getName();
+        $isDomestic = (string) $this->getCountryParams($destCountryCode)->getDomestic();
 
         if ($origCountry == $destCountry && $isDomestic) {
             $this->_isDomestic = true;

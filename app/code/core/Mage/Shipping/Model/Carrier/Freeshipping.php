@@ -28,11 +28,9 @@ class Mage_Shipping_Model_Carrier_Freeshipping extends Mage_Shipping_Model_Carri
 
     /**
      * FreeShipping Rates Collector
-     *
-     * @return Mage_Shipping_Model_Rate_Result|false
      */
     #[\Override]
-    public function collectRates(Mage_Shipping_Model_Rate_Request $request)
+    public function collectRates(Mage_Shipping_Model_Rate_Request $request): Mage_Shipping_Model_Rate_Result|false
     {
         if (!$this->getConfigFlag('active')) {
             return false;
@@ -54,8 +52,8 @@ class Mage_Shipping_Model_Carrier_Freeshipping extends Mage_Shipping_Model_Carri
             $method->setMethod('freeshipping');
             $method->setMethodTitle($this->getConfigData('name'));
 
-            $method->setPrice('0.00');
-            $method->setCost('0.00');
+            $method->setPrice(0.0);
+            $method->setCost(0.0);
 
             $result->append($method);
         }

@@ -297,17 +297,13 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     }
 
     /**
-     * Get shipment by code
-     *
-     * @param string $code
-     * @param string $origin
-     * @return array|false
+     * Get the label of a shipment method, or null when the origin has no such method
      */
-    public function getShipmentByCode($code, $origin = null)
+    public function getShipmentByCode(string $code, ?string $origin = null): ?string
     {
         $origin ??= $this->getConfigData('origin_shipment');
         $arr = $this->getCode('originShipment', $origin);
-        return $arr[$code] ?? false;
+        return $arr[$code] ?? null;
     }
 
     /**
@@ -1346,10 +1342,8 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
 
     /**
      * Get REST rates
-     *
-     * @return Mage_Shipping_Model_Rate_Result
      */
-    protected function _getRestQuotes()
+    protected function _getRestQuotes(): Mage_Shipping_Model_Rate_Result
     {
         $url = $this->getConfigData('gateway_rest_url');
         if (!$url) {
@@ -1360,7 +1354,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         } catch (Exception $e) {
             Mage::logException($e);
             $result = Mage::getModel('shipping/rate_result');
-            $result->setError('Authentication error');
+            $result->setError(true);
             return $result;
         }
         $rowRequest = $this->_rawRequest;
@@ -1478,9 +1472,9 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url . $version . '/' . $requestOption);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $ratePayload);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
@@ -1565,8 +1559,9 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         }
 
         foreach ($priceArr as $method => $price) {
-            $shipmentDescription = $this->getShipmentByCode($method);
-            if (!strlen($shipmentDescription)) {
+            // PHP turns a numeric key such as '11' into an int
+            $shipmentDescription = $this->getShipmentByCode((string) $method);
+            if ($shipmentDescription === null) {
                 continue;
             }
 
@@ -1707,7 +1702,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
             $params['10_action'] = 'Rate';
             $params['serviceCode'] = $rowRequest->getProduct() ?: null;
         }
-        $params['serviceDescription'] = $params['serviceCode'] ? $this->getShipmentByCode($params['serviceCode']) : '';
+        $params['serviceDescription'] = $params['serviceCode'] ? $this->getShipmentByCode($params['serviceCode']) ?? '' : '';
         return $params;
     }
 

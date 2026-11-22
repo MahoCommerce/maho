@@ -26,11 +26,8 @@ class Mage_Shipping_Model_Info extends \Maho\DataObject
 
     /**
      * Generating tracking info
-     *
-     * @param array $hash
-     * @return $this
      */
-    public function loadByHash($hash)
+    public function loadByHash(string $hash): static
     {
         /** @var Mage_Shipping_Helper_Data $helper */
         $helper = Mage::helper('shipping');
