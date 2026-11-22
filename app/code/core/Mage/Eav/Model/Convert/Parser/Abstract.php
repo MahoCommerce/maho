@@ -10,6 +10,7 @@
 
 abstract class Mage_Eav_Model_Convert_Parser_Abstract extends Mage_Dataflow_Model_Convert_Parser_Abstract
 {
+    /** @var array<int, Mage_Core_Model_Store>|null */
     protected ?array $_storesById = null;
     protected ?array $_attributeSetsById = null;
     protected ?array $_attributeSetsByName = null;

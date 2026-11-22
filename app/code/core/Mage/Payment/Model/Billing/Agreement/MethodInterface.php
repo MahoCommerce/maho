@@ -19,6 +19,8 @@ interface Mage_Payment_Model_Billing_Agreement_MethodInterface
 
     /**
      * Retrieve billing agreement details
+     *
+     * @return array<string, mixed>
      */
     public function getBillingAgreementTokenInfo(Mage_Payment_Model_Billing_AgreementAbstract $agreement): array;
 

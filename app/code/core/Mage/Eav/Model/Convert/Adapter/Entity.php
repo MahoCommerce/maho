@@ -19,8 +19,10 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
 
     protected array $_filter = [];
     protected array $_joinFilter = [];
+    /** @var list<array{attribute: ?string, alias: ?string, bind: ?string, joinType: ?string, storeId: int|string|null}> */
     protected array $_joinAttr = [];
     protected ?array $_attrToDb = null;
+    /** @var list<array{alias: string, attribute: string, field: ?string, bind: string, cond: ?string, joinType: ?string}> */
     protected array $_joinField = [];
 
     /**
@@ -213,7 +215,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
     /**
      * Add join field
      *
-     * @param array $joinField   Variable should be have view:
+     * @param array{alias: string, attribute: string, field: ?string, bind: string, cond: ?string, joinType: ?string} $joinField   Variable should be have view:
      *     Example:
      *         [
      *            'alias'     => 'alias_table',
