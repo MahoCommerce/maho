@@ -585,16 +585,44 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      */
     public function getActiveRuleProductPrices($date, $websiteId, $customerGroupId, ?array $productIds = null)
     {
-        $adapter = $this->_getReadAdapter();
-        $select  = $adapter->select()
+        $select = $this->activeRulePriceSelect($date, $websiteId, $customerGroupId);
+        if ($productIds !== null) {
+            $select->where('product_id IN (?)', $productIds);
+        }
+        return $this->_getReadAdapter()->fetchPairs($select);
+    }
+
+    /** @return array<int, float> */
+    public function getActiveRuleProductPricesForRule(
+        int $ruleId,
+        int $websiteId,
+        int $customerGroupId,
+        DateTimeInterface $now,
+    ): array {
+        $read = $this->_getReadAdapter();
+        $timestamp = $now->getTimestamp();
+        $membership = $read->select()->from($this->getTable('catalogrule/rule_product'), 'product_id')
+            ->where('rule_id = ?', $ruleId)
+            ->where('website_id = ?', $websiteId)
+            ->where('customer_group_id = ?', $customerGroupId)
+            ->where('from_time <= ?', $timestamp)
+            ->where('to_time = 0 OR to_time >= ?', $timestamp);
+        $select = $this->activeRulePriceSelect($now, $websiteId, $customerGroupId)
+            ->where('product_id IN (?)', new Maho\Db\Expr($membership->assemble()));
+
+        return $read->fetchPairs($select);
+    }
+
+    private function activeRulePriceSelect(
+        string|int|DateTimeInterface|null $date,
+        int|string|null $websiteId,
+        int|string|null $customerGroupId,
+    ): Maho\Db\Select {
+        return $this->_getReadAdapter()->select()
             ->from($this->getTable('catalogrule/rule_product_price'), ['product_id', 'rule_price'])
             ->where('rule_date = ?', Mage::app()->getLocale()->formatDateForDb($date, withTime: false))
             ->where('website_id = ?', $websiteId)
             ->where('customer_group_id = ?', $customerGroupId);
-        if ($productIds !== null) {
-            $select->where('product_id IN (?)', $productIds);
-        }
-        return $adapter->fetchPairs($select);
     }
 
     /**
