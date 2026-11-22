@@ -64,15 +64,17 @@ class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_
         $this->_store = $address->getQuote()->getStore();
         $this->_helper->setStore($this->_store);
 
+        foreach ($items as $item) {
+            $this->_resetItemData($item);
+        }
+
         $isTaxAffected = false;
         foreach ($items as $item) {
-            if ($item->getParentItemId()) {
+            if ($item->getParentItem() || $item->getParentItemId()) {
                 continue;
             }
-            $this->_resetItemData($item);
             if ($item->getHasChildren() && $item->isChildrenCalculated()) {
                 foreach ($item->getChildren() as $child) {
-                    $this->_resetItemData($child);
                     $isTaxAffected = $this->_process($address, $child) || $isTaxAffected;
                 }
                 $this->_recalculateParent($item);
@@ -284,6 +286,9 @@ class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_
     protected function _resetItemData($item): void
     {
         $this->_helper->setApplied($item, []);
+
+        $item->setWeeeDiscount(0);
+        $item->setBaseWeeeDiscount(0);
 
         $item->setBaseWeeeTaxDisposition(0);
         $item->setWeeeTaxDisposition(0);

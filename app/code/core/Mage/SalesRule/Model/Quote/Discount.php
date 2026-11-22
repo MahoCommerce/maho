@@ -64,7 +64,7 @@ class Mage_SalesRule_Model_Quote_Discount extends Mage_Sales_Model_Quote_Address
                 /**
                  * Child item discount we calculate for parent
                  */
-                if ($item->getParentItemId()) {
+                if ($item->getParentItem() || $item->getParentItemId()) {
                     continue;
                 }
 
