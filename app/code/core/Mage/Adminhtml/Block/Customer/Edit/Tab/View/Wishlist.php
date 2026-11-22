@@ -108,14 +108,8 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Wishlist extends Mage_Adminhtm
         return ($this->getCollection()->getSize() > 0);
     }
 
-    /**
-     * Get row url
-     *
-     * @param Mage_Wishlist_Model_Item $row
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/catalog_product/edit', ['id' => $row->getProductId()]);
     }

@@ -128,15 +128,8 @@ class Mage_Adminhtml_Block_Promo_Quote_Grid extends Mage_Adminhtml_Block_Widget_
         return $this;
     }
 
-    /**
-     * Retrieve row click URL
-     *
-     * @param \Maho\DataObject $row
-     *
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getRuleId()]);
     }

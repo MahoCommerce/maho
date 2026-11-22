@@ -55,12 +55,8 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Grid extends Mage_Adminhtml_Block_W
         return $this;
     }
 
-    /**
-     * @param \Maho\DataObject $row
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getAttributeSetId()]);
     }

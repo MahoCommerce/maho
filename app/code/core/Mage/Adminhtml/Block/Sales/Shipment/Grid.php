@@ -120,20 +120,14 @@ class Mage_Adminhtml_Block_Sales_Shipment_Grid extends Mage_Adminhtml_Block_Widg
         return parent::_prepareColumns();
     }
 
-    /**
-     * Get url for row
-     *
-     * @param Mage_Sales_Model_Order_Shipment $row
-     * @return string|false
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         if ($this->isAllowed('sales/order/shipment')) {
             return $this->getUrl('*/sales_shipment/view', ['shipment_id' => $row->getId()]);
         }
 
-        return false;
+        return '';
     }
 
     /**

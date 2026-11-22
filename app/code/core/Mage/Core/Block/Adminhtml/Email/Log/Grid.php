@@ -106,7 +106,7 @@ class Mage_Core_Block_Adminhtml_Email_Log_Grid extends Mage_Adminhtml_Block_Widg
     }
 
     #[\Override]
-    public function getRowUrl($row): string
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/view', ['id' => $row->getId()]);
     }

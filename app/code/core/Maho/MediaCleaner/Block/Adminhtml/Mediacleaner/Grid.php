@@ -95,7 +95,7 @@ class Maho_MediaCleaner_Block_Adminhtml_Mediacleaner_Grid extends Mage_Adminhtml
     }
 
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return '';
     }

@@ -167,7 +167,7 @@ class Maho_Ai_Block_Adminhtml_Schedule_Grid extends Mage_Adminhtml_Block_Widget_
     }
 
     #[\Override]
-    public function getRowUrl($row): string
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);
     }

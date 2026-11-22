@@ -1947,15 +1947,12 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     }
 
     /**
-     * Return row url for js event handlers
-     *
-     * @param \Maho\DataObject $row
-     * @return string
+     * Return the URL that a click on the row opens, or an empty string for no URL.
+     * The default '#' highlights the row on hover, but a click on it does not navigate.
      */
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
-        $res = parent::getRowUrl($row);
-        return $res ?: '#';
+        return '#';
     }
 
     /**

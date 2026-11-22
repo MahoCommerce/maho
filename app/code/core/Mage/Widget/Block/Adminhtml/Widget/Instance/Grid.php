@@ -109,14 +109,8 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Grid extends Mage_Adminhtml_Bl
         return $packageThemeArray;
     }
 
-    /**
-     * Row click url
-     *
-     * @param Mage_Widget_Model_Widget_Instance $row
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['instance_id' => $row->getId()]);
     }

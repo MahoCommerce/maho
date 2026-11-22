@@ -91,12 +91,8 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Orders extends Mage_Adminhtml_
         return parent::_prepareColumns();
     }
 
-    /**
-     * @param \Maho\DataObject $row
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/sales_order/view', ['order_id' => $row->getId()]);
     }
