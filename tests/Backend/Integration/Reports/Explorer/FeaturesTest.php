@@ -158,8 +158,8 @@ describe('the explanation of a change', function () {
 
 describe('the dashboard, the notes and the targets', function () {
     beforeEach(function () {
-        $this->owner = AdminRoleFixture::login(['report']);
-        $this->other = AdminRoleFixture::login(['report']);
+        $this->owner = AdminRoleFixture::login(['admin/report']);
+        $this->other = AdminRoleFixture::login(['admin/report']);
     });
 
     afterEach(function () {

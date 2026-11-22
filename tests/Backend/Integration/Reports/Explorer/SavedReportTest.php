@@ -16,8 +16,8 @@ uses(Tests\MahoBackendTestCase::class);
  */
 
 beforeEach(function () {
-    $this->owner = AdminRoleFixture::login(['report']);
-    $this->other = AdminRoleFixture::login(['report']);
+    $this->owner = AdminRoleFixture::login(['admin/report']);
+    $this->other = AdminRoleFixture::login(['admin/report']);
     $this->service = Mage::getService('reports/savedReport');
     $this->access = Mage_Reports_Model_Explorer_Access::full();
 });
@@ -87,7 +87,7 @@ it('refuses a report without a name or with an unknown metric', function () {
 it('deletes the reports of an administrator with the administrator', function () {
     $report = savedReportFor((int) $this->other->getId(), true);
     AdminRoleFixture::delete($this->other);
-    $this->other = AdminRoleFixture::login(['report']);
+    $this->other = AdminRoleFixture::login(['admin/report']);
 
     expect(Mage::getModel('reports/savedReport')->load($report->getId())->getId())->toBeNull();
 });

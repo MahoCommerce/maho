@@ -17,8 +17,8 @@ uses(Tests\MahoBackendTestCase::class);
 
 beforeEach(function () {
     Mage::app()->getCacheInstance()->banUse(Mage_Reports_Model_Explorer_Runner::CACHE_TYPE);
-    $this->owner = AdminRoleFixture::login(['report']);
-    $this->other = AdminRoleFixture::login(['report']);
+    $this->owner = AdminRoleFixture::login(['admin/report', 'admin/report/salesroot']);
+    $this->other = AdminRoleFixture::login(['admin/report', 'admin/report/salesroot']);
     $this->service = Mage::getService('reports/subscription');
     $this->access = Mage_Reports_Model_Explorer_Access::full();
     $this->admin = Mage::app()->getStore(Mage_Core_Model_App::ADMIN_STORE_ID);
@@ -245,6 +245,21 @@ describe('sending', function () {
         expect($this->service->send($subscription))->toBeFalse()
             ->and($emails->emails)->toBe([])
             ->and($subscription->getSentAt())->toBeNull();
+    });
+
+    it('sends nothing when the role of the administrator does not allow the data of the report', function () {
+        $narrow = AdminRoleFixture::login(['admin/report']);
+        try {
+            $id = (int) $narrow->getId();
+            $report = subscriptionReport($id, false);
+            $subscription = $this->service->save($this->service->getFor((int) $report->getId(), $id)->setFrequency('daily'), $id, $this->access);
+            $emails = catchReportEmails();
+
+            expect($this->service->send($subscription))->toBeFalse()
+                ->and($emails->emails)->toBe([]);
+        } finally {
+            AdminRoleFixture::delete($narrow);
+        }
     });
 
     it('sends nothing when the administrator no longer sees the report', function () {

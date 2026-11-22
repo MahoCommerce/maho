@@ -16,7 +16,7 @@ use Tests\Helpers\AdminRoleFixture;
 uses(Tests\MahoBackendTestCase::class);
 
 it('runs a private saved report of any administrator', function () {
-    $admin = AdminRoleFixture::login(['report']);
+    $admin = AdminRoleFixture::login(['admin/report']);
     $service = Mage::getService('reports/savedReport');
     $report = $service->save($service->newReport()->setName('Private')->setIsShared(false)
         ->setRequestData(['dataset' => 'sales_orders', 'metrics' => ['orders']]), (int) $admin->getId(), Mage_Reports_Model_Explorer_Access::full());
