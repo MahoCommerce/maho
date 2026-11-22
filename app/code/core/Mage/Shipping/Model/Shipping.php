@@ -355,10 +355,14 @@ class Mage_Shipping_Model_Shipping
                 }
                 unset($items[$key]);
                 $sumWeight = $weight;
+                $weightCorrection = 0.0;
                 foreach ($items as $keyItem => $weightItem) {
-                    $weightWithItem = $sumWeight + $weightItem;
+                    $weightToAdd = $weightItem - $weightCorrection;
+                    $weightWithItem = $sumWeight + $weightToAdd;
                     if ($weightWithItem < $maxWeight - $roundingTolerance) {
                         unset($items[$keyItem]);
+                        // Compensate for rounding when adding the next item.
+                        $weightCorrection = ($weightWithItem - $sumWeight) - $weightToAdd;
                         $sumWeight = $weightWithItem;
                     } elseif ($weightWithItem > $maxWeight + $roundingTolerance) {
                         $pieces[] = (string) (float) $sumWeight;

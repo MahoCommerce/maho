@@ -117,6 +117,13 @@ it('quotes real package weights and charges once for each package at the carrier
     'the sum of two decimal lines exceeds the limit' => [[[0.2, 0.5], [0.4002, 0.5]], 0.3, [0.2001, 0.1]],
     'a remainder stays below the configured limit' => [[[0.3, 1.0005]], 0.15009, [0.15009, 0.15006]],
     'a real remainder smaller than 0.0001 is quoted' => [[[0.1, 1.0004]], 0.1, [0.1, 0.00004]],
+    'one hundred hundredths fill one package' => [array_fill(0, 100, [0.01, 1.0]), 1.0, [1.0]],
+    'one hundred tenths fill one package' => [array_fill(0, 100, [0.1, 1.0]), 10.0, [10.0]],
+    'a small real excess after one hundred lines still needs another package' => [
+        [...array_fill(0, 99, [0.01, 1.0]), [0.01, 1.0001]],
+        1.0,
+        [0.990001, 0.01],
+    ],
 ]);
 
 it('writes the actual package weights into the DHL quote XML', function (
@@ -196,4 +203,6 @@ it('writes the actual package weights into the DHL quote XML', function (
     'pounds converted to kilograms across the package limit' => [100.0, 2.0, true, null, [70.0, 20.718], 'L'],
     'combined lines at the limit' => [139.996, 0.5, true, null, [70.0], 'K', 'IT', 'KG', [0.001, 0.001]],
     'combined lines exceeding the limit' => [139.998, 0.5, true, null, [70.0, 0.001], 'K', 'IT', 'KG', [0.001, 0.001]],
+    'one hundred lines fill one package' => [0.7, 1.0, true, null, [70.0], 'K', 'IT', 'KG', array_fill(0, 99, 0.7)],
+    'one thousand lines fill one package' => [0.07, 1.0, true, null, [70.0], 'K', 'IT', 'KG', array_fill(0, 999, 0.07)],
 ]);
