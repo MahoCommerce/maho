@@ -3,6 +3,7 @@
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Weee
  */
 
 declare(strict_types=1);
@@ -57,23 +58,41 @@ class Mage_Weee_Model_DocumentAllocation
     {
         $amounts = [];
         $gross = ['gross' => 0.0, 'base_gross' => 0.0];
+        $signedItems = ['gross' => [], 'base_gross' => []];
         $store = $order->getStore();
+        $helper = Mage::helper('weee');
         $items = $order->getAllItems();
         usort($items, static fn(Mage_Sales_Model_Order_Item $a, Mage_Sales_Model_Order_Item $b): int => $a->getId() <=> $b->getId());
         foreach ($items as $item) {
             if ($item->isDummy() || !$item->getQtyOrdered() || !$this->hasFee($item)) {
                 continue;
             }
-            $amount = $this->orderItemAmounts($item, $store);
-            foreach (['gross', 'base_gross'] as $key) {
+            $id = (int) $item->getId();
+            $fees = $helper->getAppliedToItem($item);
+            $amount = $this->orderItemAmounts($item, $fees, $store);
+            foreach ([
+                'gross' => ['discount', 'row_amount'],
+                'base_gross' => ['base_discount', 'base_row_amount'],
+            ] as $key => [$discountKey, $rowKey]) {
+                $discount = $amount[$discountKey];
+                $grossInclTax = array_sum(array_column($fees, $rowKey . '_incl_tax'));
+                // A discount on the tax-inclusive fee can leave a signed net amount.
+                if ($discount > $store->roundPrice($amount[$key]) && $discount <= $store->roundPrice($grossInclTax)) {
+                    $signedItems[$key][$id] = true;
+                }
                 $amount[$key] = $this->roundGross($gross, $key, $amount[$key], $store);
             }
-            $amounts[(int) $item->getId()] = $amount;
+            $amounts[$id] = $amount;
         }
         foreach (['gross' => 'discount', 'base_gross' => 'base_discount'] as $key => $discountKey) {
             $grossByItem = array_map(static fn(array $amount): float => $amount[$key], $amounts);
             $discounts = array_map(static fn(array $amount): float => $amount[$discountKey], $amounts);
-            foreach ($this->balanceGross($grossByItem, $discounts, $store) as $id => $amount) {
+            $balanced = $this->balanceGross(
+                array_diff_key($grossByItem, $signedItems[$key]),
+                array_diff_key($discounts, $signedItems[$key]),
+                $store,
+            );
+            foreach ($balanced + $grossByItem as $id => $amount) {
                 $amounts[$id][$key] = $amount;
                 $this->allocateTitleGross($amounts[$id]['fees'], $key, $amount, $store);
             }
@@ -81,14 +100,19 @@ class Mage_Weee_Model_DocumentAllocation
         return $amounts;
     }
 
-    /** @return Amounts */
-    private function orderItemAmounts(Mage_Sales_Model_Order_Item $item, Mage_Core_Model_Store $store): array
-    {
+    /**
+     * @param array<array-key, array<string, mixed>> $fees
+     * @return Amounts
+     */
+    private function orderItemAmounts(
+        Mage_Sales_Model_Order_Item $item,
+        array $fees,
+        Mage_Core_Model_Store $store,
+    ): array {
         $qty = (float) $item->getQtyOrdered();
         $discount = (float) $item->getDiscountAppliedForWeeeTax();
         $baseDiscount = (float) $item->getBaseDiscountAppliedForWeeeTax();
         $helper = Mage::helper('weee');
-        $fees = $helper->getAppliedToItem($item);
         return [
             'qty' => $qty,
             'gross' => (float) ($item->getWeeeTaxAppliedRowAmount() ?: $item->getWeeeTaxAppliedAmount() * $qty ?: array_sum(array_column($fees, 'row_amount'))),
