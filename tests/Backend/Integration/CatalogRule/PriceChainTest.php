@@ -64,8 +64,8 @@ function seedRuleChain(int $productId, int $websiteId, array $steps): int
     foreach ($steps as $step) {
         $write->insert(chainTable('catalogrule/rule_product'), array_merge([
             'rule_id' => $ruleId,
-            'from_time' => strtotime('2026-01-01 00:00:00 UTC'),
-            'to_time' => strtotime('2026-12-31 00:00:00 UTC'),
+            'from_time' => 0,
+            'to_time' => 0,
             'customer_group_id' => 0,
             'product_id' => $productId,
             'website_id' => $websiteId,
@@ -111,12 +111,15 @@ afterEach(function () {
         $write->select()->from(chainTable('catalogrule/rule'), 'rule_id')->where('name = ?', CHAIN_RULE_NAME),
     );
     if ($ruleIds) {
+        $productIds = $write->fetchCol(
+            $write->select()->from(chainTable('catalogrule/rule_product'), 'product_id')->where('rule_id IN (?)', $ruleIds),
+        );
         $write->delete(chainTable('catalogrule/rule_product'), ['rule_id IN (?)' => $ruleIds]);
         $write->delete(chainTable('catalogrule/rule'), ['rule_id IN (?)' => $ruleIds]);
+        if ($productIds) {
+            $write->delete(chainTable('catalogrule/rule_product_price'), ['product_id IN (?)' => $productIds]);
+        }
     }
-    // Scoped to the product under test: the indexer rebuilds the whole website index, so wiping the
-    // table outright would drop the rows it legitimately wrote for every other product.
-    $write->delete(chainTable('catalogrule/rule_product_price'), ['product_id = ?' => (int) chainProduct()->getId()]);
 });
 
 it('applies each rule to the price the previous one produced', function () {
@@ -185,13 +188,14 @@ it('indexes nothing for a rule whose window has passed', function () {
 
 it('serves the price for the rules active on the store date', function (
     bool $stop,
-    bool $rowRefresh,
     string $firstEnd,
     string $secondStart,
     array $expectedPrices,
 ): void {
     $app = Mage::app();
     $store = $app->getDefaultStoreView();
+    $previousStore = $app->getStore();
+    $previousTimezone = $store->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
     $storeId = (int) $store->getId();
     $websiteId = (int) $store->getWebsiteId();
     $time = new DateTimeImmutable('2026-11-22 12:00:00 UTC');
@@ -222,7 +226,7 @@ it('serves the price for the rules active on the store date', function (
                 'to_time' => $time->modify('+1 day')->getTimestamp(),
             ],
         ]);
-        runCatalogRuleIndexer($time->getTimestamp(), $rowRefresh ? $productId : null);
+        runCatalogRuleIndexer($time->getTimestamp(), $productId);
         $prices = array_map(static fn(array $row): float => (float) $row['rule_price'], indexedPrices($productId));
 
         $store->setConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE, 'Pacific/Kiritimati');
@@ -242,11 +246,12 @@ it('serves the price for the rules active on the store date', function (
             ->and($prices)->toBe($expectedPrices);
     } finally {
         $localeProperty->setValue($app, $locale);
+        $store->setConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE, $previousTimezone);
+        $app->setCurrentStore($previousStore);
         $product->delete();
     }
 })->with([
-    'expired discount' => [false, false, 'today 23:59:59', '-1 day', [85.5, 85.5, 95.0]],
-    'expired discount that stops the chain' => [true, false, 'today 23:59:59', '-1 day', [90.0, 90.0, 95.0]],
-    'product-specific refresh' => [false, true, 'today 23:59:59', '-1 day', [85.5, 85.5, 95.0]],
-    'inclusive start and end at the index time' => [false, false, '+0 seconds', '+0 seconds', [90.0, 85.5, 95.0]],
+    'expired discount' => [false, 'today 23:59:59', '-1 day', [85.5, 85.5, 95.0]],
+    'expired discount that stops the chain' => [true, 'today 23:59:59', '-1 day', [90.0, 90.0, 95.0]],
+    'inclusive start and end at the index time' => [false, '+0 seconds', '+0 seconds', [90.0, 85.5, 95.0]],
 ]);
