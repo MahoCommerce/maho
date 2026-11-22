@@ -118,7 +118,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
             $used += $discount;
         }
         $remaining = max(0.0, round($shippingDiscount - $used, 4));
-        $default = min($default, $remaining);
+        $default = $invoice && $invoice->getBaseShippingAmount() ? 0.0 : min($default, $remaining);
         if ($remaining === 0.0) {
             return 0.0;
         }
@@ -250,8 +250,10 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         float $discount,
     ): array {
         $positive = array_filter($invoiced, static fn(array $amount): bool => $amount['net'] > 0.0);
-        if (!array_any($positive, static fn(array $amount): bool =>
-            $amount['net'] * (1 - $discount / $total) < $amount['qty'] * self::MINOR_UNIT
+        if (!array_any(
+            $positive,
+            static fn(array $amount): bool
+            => $amount['net'] * (1 - $discount / $total) < $amount['qty'] * self::MINOR_UNIT,
         )) {
             return [];
         }

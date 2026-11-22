@@ -31,9 +31,11 @@ it('refunds the shipping discount that was charged to another invoice', function
             [$sku, $expectedSale, $expectedBase, $expectedBaseDiscount] = $refund;
             $name = $sku === 'shipping' ? 'shipping' : 'discount';
             $invoice = ($refund[5] ?? true) ? $invoices[$name] : null;
-            $data = ['qtys' => [(int) $items[$sku]->getId() => $refund[4] ?? 1]];
-            $firstPreview = $documents->prepareCreditmemo($order, $data, [], $invoice);
-            $secondPreview = $documents->prepareCreditmemo($order, $data, [], $invoice);
+            $data = ['qtys' => [(int) $items[$sku]->getId() => $refund[4] ?? 1]] + ($refund['options'] ?? []);
+            // refund() discards zero quantities before calling prepareCreditmemo().
+            $dataForPreview = ($refund[4] ?? 1) === 0 ? ['qtys' => [0 => 0]] + $data : $data;
+            $firstPreview = $documents->prepareCreditmemo($order, $dataForPreview, [], $invoice);
+            $secondPreview = $documents->prepareCreditmemo($order, $dataForPreview, [], $invoice);
             expect((float) $firstPreview->getBaseGrandTotal())->toBe((float) $secondPreview->getBaseGrandTotal());
             $saved = $documents->refund($order, $data, offlineRefund: true, backToStockItemIds: [], invoice: $invoice);
             $memo = Mage::getModel('sales/order_creditmemo')->load((int) $saved->getId());
@@ -67,6 +69,29 @@ it('refunds the shipping discount that was charged to another invoice', function
     'invoice with the discount first' => [
         ['shipping' => 10.0, 'replacement' => 10.0], 0.004, 1.0, 0.01,
         [['replacement', 0.02, 4.99, -5.01], ['shipping', 0.02, 6.0, -5.0]],
+    ],
+    'two partial shipping refunds on the invoice that charged it' => [
+        ['shipping' => 10.0, 'replacement' => 10.0], 0.004, 1.0, 0.01,
+        [
+            ['shipping', 0.02, 5.50, -5.0, 'options' => ['shipping_amount' => 0.50]],
+            ['shipping', 0.0, 0.50, 0.0, 0, 'options' => ['shipping_amount' => 0.50]],
+            ['replacement', 0.02, 4.99, -5.01],
+        ],
+    ],
+    'adjustments on two partial shipping refunds' => [
+        ['shipping' => 10.0, 'replacement' => 10.0], 0.004, 1.0, 0.01,
+        [
+            ['shipping', 0.02, 5.60, -5.0, 'options' => ['shipping_amount' => 0.40, 'adjustment_positive' => 0.20]],
+            ['shipping', 0.0, 0.40, 0.0, 0, 'options' => ['shipping_amount' => 0.60, 'adjustment_negative' => 0.20]],
+            ['replacement', 0.02, 4.99, -5.01],
+        ],
+    ],
+    'custom shipping on the other invoice during an offline refund' => [
+        ['shipping' => 10.0, 'replacement' => 10.0], 0.004, 1.0, 0.01,
+        [
+            ['replacement', 0.02, 4.99, -5.01, 'options' => ['shipping_amount' => 0.50, 'adjustment_negative' => 0.50]],
+            ['shipping', 0.02, 6.00, -5.0, 'options' => ['shipping_amount' => 0.50, 'adjustment_positive' => 0.50]],
+        ],
     ],
     'small part first' => [
         ['shipping' => 1000.0, 'small' => 0.10, 'large' => 1000.0], 0.00004, 10.0, 1.0,
