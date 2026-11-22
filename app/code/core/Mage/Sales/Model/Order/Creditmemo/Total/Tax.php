@@ -91,6 +91,20 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
         $allowedTax = $order->getTaxInvoiced() - $order->getTaxRefunded() - $creditmemo->getTaxAmount();
         $allowedBaseTax = $order->getBaseTaxInvoiced() - $order->getBaseTaxRefunded()
                 - $creditmemo->getBaseTaxAmount();
+        $signedTax = (float) $order->getTaxAmount() < (float) $order->getShippingTaxAmount();
+        $signedBaseTax = (float) $order->getBaseTaxAmount() < (float) $order->getBaseShippingTaxAmount();
+        if ($signedTax || $signedBaseTax) {
+            // A signed item tax can reach zero before all invoice quantities have been returned.
+            [$taxLeft, $baseTaxLeft, $last] = $this->getSignedItemTaxLeft($creditmemo, $invoice);
+            if ($signedTax) {
+                $allowedTax = $taxLeft + $shippingTaxAmount - $creditmemo->getTaxAmount();
+                $totalTax = $last ? $allowedTax : $totalTax;
+            }
+            if ($signedBaseTax) {
+                $allowedBaseTax = $baseTaxLeft + $baseShippingTaxAmount - $creditmemo->getBaseTaxAmount();
+                $baseTotalTax = $last ? $allowedBaseTax : $baseTotalTax;
+            }
+        }
         // The invoiced and refunded hidden tax of the order both include the shipping hidden tax.
         $allowedHiddenTax = $order->getHiddenTaxInvoiced() - $order->getHiddenTaxRefunded();
         $allowedBaseHiddenTax = $order->getBaseHiddenTaxInvoiced() - $order->getBaseHiddenTaxRefunded();
@@ -111,5 +125,63 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
         $creditmemo->setGrandTotal($creditmemo->getGrandTotal() + $totalTax + $totalHiddenTax);
         $creditmemo->setBaseGrandTotal($creditmemo->getBaseGrandTotal() + $baseTotalTax + $baseTotalHiddenTax);
         return $this;
+    }
+
+    /** @return array{float, float, bool} */
+    private function getSignedItemTaxLeft(Mage_Sales_Model_Order_Creditmemo $creditmemo, ?Mage_Sales_Model_Order_Invoice $invoice): array
+    {
+        $quantities = [];
+        $order = $creditmemo->getOrder();
+        if ($invoice) {
+            foreach ($invoice->getAllItems() as $item) {
+                if (!$item->getOrderItem()->isDummy()) {
+                    $quantities[$item->getOrderItemId()] = (float) $item->getQty();
+                }
+            }
+            $tax = $invoice->getTaxAmount() - $invoice->getShippingTaxAmount();
+            $baseTax = $invoice->getBaseTaxAmount() - $invoice->getBaseShippingTaxAmount();
+            $previous = Mage::getResourceModel('sales/order_creditmemo_collection')->setOrderFilter($order);
+            foreach ($previous as $memo) {
+                if ($memo->getState() == Mage_Sales_Model_Order_Creditmemo::STATE_CANCELED || $memo->getId() == $creditmemo->getId()) {
+                    continue;
+                }
+                if (!$memo->getInvoiceId()) {
+                    // An order-level refund cannot be assigned to one invoice.
+                    return $this->getSignedItemTaxLeft($creditmemo, null);
+                }
+                if ($memo->getInvoiceId() != $invoice->getId()) {
+                    continue;
+                }
+                $tax -= $memo->getTaxAmount() - $memo->getShippingTaxAmount();
+                $baseTax -= $memo->getBaseTaxAmount() - $memo->getBaseShippingTaxAmount();
+                foreach ($memo->getAllItems() as $item) {
+                    if (isset($quantities[$item->getOrderItemId()])) {
+                        $quantities[$item->getOrderItemId()] -= $item->getQty();
+                    }
+                }
+            }
+        } else {
+            $tax = $order->getTaxInvoiced() - $order->getTaxRefunded() + $order->getShippingTaxRefunded();
+            $baseTax = $order->getBaseTaxInvoiced() - $order->getBaseTaxRefunded() + $order->getBaseShippingTaxRefunded();
+            foreach ($order->getInvoiceCollection() as $document) {
+                if (!$document->isCanceled()) {
+                    $tax -= $document->getShippingTaxAmount();
+                    $baseTax -= $document->getBaseShippingTaxAmount();
+                }
+            }
+            foreach ($order->getAllItems() as $item) {
+                if (!$item->isDummy()) {
+                    $quantities[$item->getId()] = $item->getQtyToRefund();
+                }
+            }
+        }
+        $hasItems = false;
+        foreach ($creditmemo->getAllItems() as $item) {
+            if ($item->getQty() > 0 && isset($quantities[$item->getOrderItemId()])) {
+                $quantities[$item->getOrderItemId()] -= $item->getQty();
+                $hasItems = true;
+            }
+        }
+        return $hasItems ? [$tax, $baseTax, round(max($quantities), 4) <= 0.0] : [0.0, 0.0, true];
     }
 }

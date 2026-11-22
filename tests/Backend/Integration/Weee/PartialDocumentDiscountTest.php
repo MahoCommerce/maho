@@ -616,6 +616,64 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
     'gross discounts on taxable fees after a partial invoice' => [[[0, 1], [2]], false, false, true, true],
 ]);
 
+it('refunds the signed item tax charged on each invoice of a historic order', function (bool $reverse): void {
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $connection->beginTransaction();
+    try {
+        $store = setStoreDisplayCurrency('USD', 'USD');
+        $store->setConfig('tax/weee/include_in_subtotal', '0');
+        $order = Mage::getModel('sales/order')->setStoreId((int) $store->getId())
+            ->setIncrementId('signed-fee-' . uniqid())->setState(Mage_Sales_Model_Order::STATE_PROCESSING)
+            ->setIsVirtual(true)->setBaseCurrencyCode('USD')->setOrderCurrencyCode('USD')->setBaseToOrderRate(1.0)
+            ->setSubtotal(3.0)->setBaseSubtotal(3.0)->setDiscountAmount(-2.55)->setBaseDiscountAmount(-2.55)
+            ->setTaxAmount(-0.07)->setBaseTaxAmount(-0.07)->setGrandTotal(0.38)->setBaseGrandTotal(0.38);
+        $order->setPayment(Mage::getModel('sales/order_payment')->setMethod('checkmo'));
+        // Older orders saved the rounded line discount and the unrounded fee separately.
+        $fee = ['title' => 'Fixed tax', 'amount' => 0.008, 'base_amount' => 0.008,
+            'row_amount' => 0.008, 'base_row_amount' => 0.008,
+            'total_weee_discount' => 0.01, 'total_base_weee_discount' => 0.01];
+        foreach ([0.90, 0.85, 0.80] as $index => $discount) {
+            $item = Mage::getModel('sales/order_item')->setSku('signed-fee-' . $index)->setProductType('virtual')
+                ->setQtyOrdered(1)->setPrice(1.0)->setBasePrice(1.0)->setRowTotal(1.0)->setBaseRowTotal(1.0)
+                ->setDiscountAmount($discount)->setBaseDiscountAmount($discount)
+                ->setWeeeTaxAppliedAmount(0.008)->setBaseWeeeTaxAppliedAmount(0.008)
+                ->setWeeeTaxAppliedRowAmount(0.008)->setBaseWeeeTaxAppliedRowAmnt(0.008);
+            Mage::helper('weee')->setApplied($item, [$fee]);
+            $order->addItem($item);
+        }
+        $order->save();
+        $orderId = (int) $order->getId();
+        $ids = [];
+        foreach ($order->getAllVisibleItems() as $item) {
+            $ids[$item->getSku()] = (int) $item->getId();
+        }
+        $groups = [[$ids['signed-fee-0'], $ids['signed-fee-1']], [$ids['signed-fee-2']]];
+        $service = Mage::getService('sales/order_document');
+        $invoices = [];
+        foreach ($groups as $index => $group) {
+            $order = Mage::getModel('sales/order')->load($orderId);
+            $invoice = $service->invoice($order, array_fill_keys($group, 1), captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE, sendEmail: false);
+            $invoices[$index] = (int) $invoice->getId();
+            expect(Mage::getModel('sales/order_invoice')->load($invoice->getId())->getBaseGrandTotal())->toBe([0.18, 0.20][$index]);
+        }
+        foreach ($reverse ? array_reverse($groups, true) : $groups as $index => $group) {
+            $refunded = 0.0;
+            foreach ($reverse ? array_reverse($group) : $group as $id) {
+                $order = Mage::getModel('sales/order')->load($orderId);
+                $invoice = Mage::getModel('sales/order_invoice')->load($invoices[$index]);
+                $memo = $service->refund($order, ['qtys' => [$id => 1]], invoice: $invoice, sendEmail: false);
+                $refunded += Mage::getModel('sales/order_creditmemo')->load($memo->getId())->getBaseGrandTotal();
+            }
+            expect(round($refunded, 2))->toBe([0.18, 0.20][$index]);
+        }
+        $order = Mage::getModel('sales/order')->load($orderId);
+        expect($order->getBaseTotalPaid())->toBe(0.38)->and($order->getBaseTotalRefunded())->toBe(0.38);
+    } finally {
+        $connection->rollBack();
+        resetCurrencyState();
+    }
+})->with([false, true]);
+
 function partialFptProduct(
     Mage_Core_Model_Store $store,
     array $fees,
