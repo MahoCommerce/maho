@@ -267,3 +267,87 @@ it('writes the actual package weights into the DHL quote XML', function (
     'bundle selection quantities outside the product increment keep their weight' => [8.0, 0.67, true, 0.5, [10.72], 'K', 'IT', 'KG', [], 2.0],
     'a bundle selection increment above the carrier limit uses the whole request' => [50.0, 1.5, true, 1.5, [150.0], 'K', 'IT', 'KG', [], 2.0],
 ]);
+
+it('quotes USPS packages using the same unit for validation and packing', function (
+    string $unit, float $itemWeight, array $otherWeights, ?array $expectedWeights,
+): void {
+    $store = Mage::app()->getStore(1);
+    $previousWeightUnit = $store->getConfig(Mage_Core_Model_Locale::XML_PATH_WEIGHT_UNIT);
+    $store->setConfig(Mage_Core_Model_Locale::XML_PATH_WEIGHT_UNIT, $unit);
+
+    try {
+        $request = decimalPackageRequest($itemWeight, 1.0, false, null, $otherWeights)
+            ->setStoreId($store->getId())->setOrigCountryId('US')->setOrigPostcode('90210')
+            ->setDestCountryId('US')->setDestPostcode('98101');
+        foreach ($request->getAllItems() as $index => $item) {
+            $product = $item->getProduct()->setId($index + 1)->setWeight($item->getWeight());
+            if (!$item->getIsQtyDecimal()) {
+                $product->setStockItem(new Mage_CatalogInventory_Model_Stock_Item());
+            }
+        }
+        $carrier = new class extends Mage_Usa_Model_Shipping_Carrier_Usps {
+            public readonly ArrayObject $weights;
+
+            public function __construct()
+            {
+                parent::__construct();
+                $this->weights = new ArrayObject();
+            }
+
+            #[\Override]
+            public function getConfigFlag(mixed $field): bool
+            {
+                return $field === 'active';
+            }
+
+            #[\Override]
+            public function getConfigData(mixed $field): int|string|null
+            {
+                return match ($field) {
+                    'shipment_requesttype', 'size', 'showmethod' => 1,
+                    'max_package_weight' => 70,
+                    'allowed_methods' => '1',
+                    default => null,
+                };
+            }
+
+            #[\Override]
+            protected function _getQuotes(): Mage_Shipping_Model_Rate_Result
+            {
+                $weight = $this->buildShippingOptionsRequest($this->_rawRequest)['packageDescription']['weight'];
+                $this->weights->append($weight);
+
+                return $this->_parseRestResponse([
+                    'pricingOptions' => [
+                        ['shippingOptions' => [
+                            ['rateOptions' => [
+                                [
+                                    'totalBasePrice' => $weight >= 60.0 ? 30.0 : 10.0,
+                                    'rates' => [['description' => 'Priority Mail']],
+                                ],
+                            ]],
+                        ]],
+                    ],
+                ]);
+            }
+        };
+        $carrier->setStore($store);
+        $shipping = new ShippingStub(['usps' => $carrier]);
+        $shipping->collectCarrierRates('usps', $request);
+
+        if ($expectedWeights === null) {
+            expect($carrier->weights)->toHaveCount(0)
+                ->and($shipping->getResult()->getAllRates()[0])->toBeInstanceOf(Mage_Shipping_Model_Rate_Result_Error::class);
+            return;
+        }
+        expect($carrier->weights->getArrayCopy())->toBe($expectedWeights)
+            ->and($shipping->getResult()->getCheapestRate()?->getPrice())->toBe(count($expectedWeights) === 1 ? 30.0 : 40.0);
+    } finally {
+        $store->setConfig(Mage_Core_Model_Locale::XML_PATH_WEIGHT_UNIT, $previousWeightUnit);
+    }
+})->with([
+    'unequal metric items' => ['kgs', 30.0, [10.0], [66.1375, 22.04375]],
+    'unequal imperial items' => ['lbs', 66.1387, [22.0462], [66.1375, 22.04375]],
+    'indivisible item under the limit' => ['kgs', 30.0, [], [66.1375]],
+    'indivisible item over the limit' => ['kgs', 40.0, [], null],
+]);

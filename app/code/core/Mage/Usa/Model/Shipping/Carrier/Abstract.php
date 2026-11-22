@@ -194,7 +194,9 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
                     $weight = $weight * $item->getQty();
                 }
 
-                if ($doValidation && $maxAllowedWeight !== 0.0 && $weight - $maxAllowedWeight > $roundingTolerance) {
+                if ($doValidation && $maxAllowedWeight !== 0.0
+                    && (float) $this->convertWeightToLbs($weight) - $maxAllowedWeight > $roundingTolerance
+                ) {
                     $errorMsg = $configErrorMsg ?: $defaultErrorMsg;
                     break;
                 }

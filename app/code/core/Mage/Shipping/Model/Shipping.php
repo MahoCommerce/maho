@@ -258,6 +258,10 @@ class Mage_Shipping_Model_Shipping
         $fullItems  = [];
 
         $maxWeight  = (float) $carrier->getConfigData('max_package_weight');
+        $carrierUnitsPerStoreUnit = (float) $carrier->convertWeightToLbs(1.0);
+        if ($carrierUnitsPerStoreUnit > 0.0) {
+            $maxWeight /= $carrierUnitsPerStoreUnit;
+        }
         $roundingTolerance = 2 * PHP_FLOAT_EPSILON * abs($maxWeight);
 
         foreach ($allItems as $item) {
