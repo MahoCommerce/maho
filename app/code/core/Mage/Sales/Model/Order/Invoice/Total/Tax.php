@@ -29,7 +29,9 @@ class Mage_Sales_Model_Order_Invoice_Total_Tax extends Mage_Sales_Model_Order_In
             $orderItem = $item->getOrderItem();
             $orderItemQty = $orderItem->getQtyOrdered();
 
-            if (($orderItem->getTaxAmount() || $orderItem->getHiddenTaxAmount()) && $orderItemQty) {
+            if ($orderItemQty && ($orderItem->getTaxAmount() || $orderItem->getBaseTaxAmount()
+                || $orderItem->getHiddenTaxAmount() || $orderItem->getBaseHiddenTaxAmount())
+            ) {
                 if ($item->getOrderItem()->isDummy()) {
                     continue;
                 }

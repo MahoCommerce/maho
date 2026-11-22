@@ -38,7 +38,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
             $baseOrderItemHiddenTax = $orderItem->getBaseHiddenTaxInvoiced();
             $orderItemQty     = $orderItem->getQtyInvoiced();
 
-            if (($orderItemTax || $orderItemHiddenTax) && $orderItemQty) {
+            if ($orderItemQty && ($orderItemTax || $baseOrderItemTax || $orderItemHiddenTax || $baseOrderItemHiddenTax)) {
                 /**
                  * Check item tax amount
                  */
