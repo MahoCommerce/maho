@@ -116,9 +116,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
      */
     protected function _getAddress(Mage_Sales_Model_Quote_Item_Abstract $item)
     {
-        if ($item instanceof Mage_Sales_Model_Quote_Address_Item) {
-            $address = $item->getAddress();
-        } elseif ($this->_address) {
+        if ($this->_address) {
             $address = $this->_address;
         } elseif ($item->getQuote()->getItemVirtualQty() > 0) {
             $address = $item->getQuote()->getBillingAddress();

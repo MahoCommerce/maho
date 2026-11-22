@@ -595,12 +595,6 @@ parameters:
 			path: app/code/core/Mage/CatalogSearch/Model/Resource/Fulltext.php
 
 		-
-			rawMessage: Property Mage_Checkout_Block_Cart_Item_Renderer::$_item has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Checkout/Block/Cart/Item/Renderer.php
-
-		-
 			rawMessage: Property Mage_Checkout_Block_Cart_Totals::$_totalRenderers has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -1223,18 +1217,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Quote.php
-
-		-
-			rawMessage: 'Parameter #1 $parentItem of method Mage_Sales_Model_Quote_Item_Abstract::setParentItem() expects Mage_Sales_Model_Quote_Item, Mage_Sales_Model_Quote_Address_Item given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address.php
-
-		-
-			rawMessage: 'Parameter #1 $quoteItem of method Mage_Sales_Model_Quote_Address_Item::importQuoteItem() expects Mage_Sales_Model_Quote_Item, Mage_Sales_Model_Quote_Item_Abstract given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address.php
 
 		-
 			rawMessage: 'Parameter #1 $attribute of method Mage_Sales_Model_Resource_Collection_Abstract::addAttributeToFilter() expects Mage_Eav_Model_Entity_Attribute|string, array given.'

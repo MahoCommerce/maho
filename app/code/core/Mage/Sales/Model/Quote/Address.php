@@ -58,13 +58,6 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     /**
      * Quote object
      *
-     * @var Mage_Sales_Model_Resource_Quote_Address_Item_Collection|Mage_Sales_Model_Quote_Address_Item[]|null
-     */
-    protected $_items = null;
-
-    /**
-     * Quote object
-     *
      * @var Mage_Sales_Model_Quote
      */
     protected $_quote = null;
@@ -224,9 +217,6 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     protected function _afterSave()
     {
         parent::_afterSave();
-        if ($this->_items !== null) {
-            $this->getItemsCollection()->save();
-        }
         if ($this->_rates !== null) {
             $this->getShippingRatesCollection()->save();
         }
@@ -319,7 +309,6 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     {
         $arr = parent::toArray($arrAttributes);
         $arr['rates'] = $this->getShippingRatesCollection()->toArray($arrAttributes);
-        $arr['items'] = $this->getItemsCollection()->toArray($arrAttributes);
         foreach ($this->getTotals() as $k => $total) {
             $arr['totals'][$k] = $total->toArray();
         }
@@ -327,29 +316,9 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     }
 
     /**
-     * Retrieve address items collection
-     *
-     * @return Mage_Sales_Model_Resource_Quote_Address_Item_Collection
-     */
-    public function getItemsCollection()
-    {
-        if (is_null($this->_items)) {
-            $this->_items = Mage::getModel('sales/quote_address_item')->getCollection()
-                ->setAddressFilter($this->getId());
-
-            if ($this->getId()) {
-                foreach ($this->_items as $item) {
-                    $item->setAddress($this);
-                }
-            }
-        }
-        return $this->_items;
-    }
-
-    /**
      * Get all available address items
      *
-     * @return Mage_Sales_Model_Quote_Address_Item[]
+     * @return Mage_Sales_Model_Quote_Item[]
      */
     public function getAllItems()
     {
@@ -377,7 +346,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     }
 
     /**
-     * @return Mage_Sales_Model_Quote_Address_Item[]
+     * @return Mage_Sales_Model_Quote_Item[]
      */
     #[\Deprecated(message: 'there are no nominal items, use getAllItems()', since: '26.11')]
     public function getAllNonNominalItems()
@@ -388,7 +357,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     /**
      * Retrieve all visible items
      *
-     * @return Mage_Sales_Model_Quote_Address_Item[]
+     * @return Mage_Sales_Model_Quote_Item[]
      */
     public function getAllVisibleItems()
     {
@@ -419,7 +388,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
                 $qty += $item->getQty();
             }
         } else {
-            $item = $this->getItemById($itemId);
+            $item = $this->getValidItemById($itemId);
             if ($item) {
                 $qty = $item->getQty();
             }
@@ -438,26 +407,10 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     }
 
     /**
-     * Get address item object by id without
-     *
-     * @param int $itemId
-     * @return Mage_Sales_Model_Quote_Address_Item|false
-     */
-    public function getItemById($itemId)
-    {
-        foreach ($this->getItemsCollection() as $item) {
-            if ($item->getId() == $itemId) {
-                return $item;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Get prepared not deleted item
      *
      * @param int $itemId
-     * @return Mage_Sales_Model_Quote_Address_Item|false
+     * @return Mage_Sales_Model_Quote_Item|false
      */
     public function getValidItemById($itemId)
     {
@@ -467,77 +420,6 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
             }
         }
         return false;
-    }
-
-    /**
-     * Retrieve item object by quote item Id
-     *
-     * @param int $itemId
-     * @return Mage_Sales_Model_Quote_Address_Item|false
-     */
-    public function getItemByQuoteItemId($itemId)
-    {
-        foreach ($this->getItemsCollection() as $item) {
-            if ($item->getQuoteItemId() == $itemId) {
-                return $item;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Remove item from collection
-     *
-     * @param int $itemId
-     * @return $this
-     */
-    public function removeItem($itemId)
-    {
-        $item = $this->getItemById($itemId);
-        if ($item) {
-            $item->isDeleted(true);
-        }
-        return $this;
-    }
-
-    /**
-     * Add item to address
-     *
-     * @param   int $qty
-     * @return  $this
-     */
-    public function addItem(Mage_Sales_Model_Quote_Item_Abstract $item, $qty = null)
-    {
-        if ($item instanceof Mage_Sales_Model_Quote_Item) {
-            if ($item->getParentItemId()) {
-                return $this;
-            }
-            $addressItem = Mage::getModel('sales/quote_address_item')
-                ->setAddress($this)
-                ->importQuoteItem($item);
-            $this->getItemsCollection()->addItem($addressItem);
-
-            if ($item->getHasChildren()) {
-                foreach ($item->getChildren() as $child) {
-                    $addressChildItem = Mage::getModel('sales/quote_address_item')
-                        ->setAddress($this)
-                        ->importQuoteItem($child)
-                        ->setParentItem($addressItem);
-                    $this->getItemsCollection()->addItem($addressChildItem);
-                }
-            }
-        } else {
-            $addressItem = $item;
-            $addressItem->setAddress($this);
-            if (!$addressItem->getId()) {
-                $this->getItemsCollection()->addItem($addressItem);
-            }
-        }
-
-        if ($qty) {
-            $addressItem->setQty($qty);
-        }
-        return $this;
     }
 
     /**
@@ -794,7 +676,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     }
 
     /**
-     * Request shipping rates for entire address or specified address item
+     * Request shipping rates for entire address or specified item
      * Returns true if current selected shipping method code corresponds to one of the found rates
      *
      * @return bool

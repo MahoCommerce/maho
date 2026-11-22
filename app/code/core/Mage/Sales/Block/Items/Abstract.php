@@ -87,8 +87,6 @@ class Mage_Sales_Block_Items_Abstract extends Mage_Core_Block_Template
     {
         if ($item->getOrderItem()) {
             $type = $item->getOrderItem()->getProductType();
-        } elseif ($item instanceof Mage_Sales_Model_Quote_Address_Item) {
-            $type = $item->getQuoteItem()->getProductType();
         } else {
             $type = $item->getProductType();
         }
