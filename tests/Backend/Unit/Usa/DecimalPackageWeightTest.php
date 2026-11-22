@@ -280,7 +280,10 @@ it('writes the actual package weights into the DHL quote XML', function (
 ]);
 
 it('quotes USPS packages using the same unit for validation and packing', function (
-    string $unit, float $itemWeight, array $otherWeights, ?array $expectedWeights,
+    string $unit,
+    float $itemWeight,
+    array $otherWeights,
+    ?array $expectedWeights,
 ): void {
     $store = Mage::app()->getStore(1);
     $previousWeightUnit = $store->getConfig(Mage_Core_Model_Locale::XML_PATH_WEIGHT_UNIT);
