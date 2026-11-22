@@ -44,7 +44,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
             $baseOrderItemDiscount  = (float) $orderItem->getBaseDiscountInvoiced();
             $orderItemQty           = $orderItem->getQtyInvoiced();
 
-            if ($orderItemDiscount && $orderItemQty) {
+            if ($orderItemQty && ($orderItemDiscount || $baseOrderItemDiscount)) {
                 $discount = $orderItemDiscount - $orderItem->getDiscountRefunded();
                 $baseDiscount = $baseOrderItemDiscount - $orderItem->getBaseDiscountRefunded();
                 if (!$item->isLast()) {

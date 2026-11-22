@@ -10,7 +10,10 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-it('keeps tax in the base currency when the order currency tax rounds to zero', function (): void {
+it('keeps document amounts in the base currency after the order currency amount rounds to zero', function (
+    bool $useCoupon,
+    array $expected,
+): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
     try {
@@ -32,16 +35,20 @@ it('keeps tax in the base currency when the order currency tax rounds to zero', 
         }
 
         $connection->update(Mage::getSingleton('core/resource')->getTableName('salesrule/rule'), ['is_active' => 0]);
-        $fixture = 'Document tax ' . uniqid();
+        $fixture = 'Document currency ' . uniqid();
         $groupId = Mage_Customer_Model_Group::NOT_LOGGED_IN_ID;
-        $customerClassId = (int) Mage::getModel('customer/group')->getTaxClassId($groupId);
-        $productClass = Mage::getModel('tax/class')->setClassType(Mage_Tax_Model_Class::TAX_CLASS_TYPE_PRODUCT)
-            ->setClassName($fixture)->save();
-        $rate = Mage::getService('tax/rate')->save(Mage::getModel('tax/calculation_rate')
-            ->setCode($fixture)->setTaxCountryId('US')->setTaxPostcode('*')->setRate(20.0));
-        Mage::getService('tax/rule')->save(Mage::getModel('tax/calculation_rule')
-            ->setCode($fixture)->setPriority(0)->setPosition(0)->setTaxCustomerClass([$customerClassId])
-            ->setTaxProductClass([(int) $productClass->getId()])->setTaxRate([(int) $rate->getId()]));
+        $taxClassId = 0;
+        if (!$useCoupon) {
+            $customerClassId = (int) Mage::getModel('customer/group')->getTaxClassId($groupId);
+            $productClass = Mage::getModel('tax/class')->setClassType(Mage_Tax_Model_Class::TAX_CLASS_TYPE_PRODUCT)
+                ->setClassName($fixture)->save();
+            $taxClassId = (int) $productClass->getId();
+            $rate = Mage::getService('tax/rate')->save(Mage::getModel('tax/calculation_rate')
+                ->setCode($fixture)->setTaxCountryId('US')->setTaxPostcode('*')->setRate(20.0));
+            Mage::getService('tax/rule')->save(Mage::getModel('tax/calculation_rule')
+                ->setCode($fixture)->setPriority(0)->setPosition(0)->setTaxCustomerClass([$customerClassId])
+                ->setTaxProductClass([$taxClassId])->setTaxRate([(int) $rate->getId()]));
+        }
 
         $cart = Mage::getService('checkout/cart');
         $quote = $cart->create(null, (int) $store->getId())->setCustomerIsGuest(true)
@@ -53,11 +60,12 @@ it('keeps tax in the base currency when the order currency tax rounds to zero', 
             'postcode' => '90210', 'country_id' => 'US', 'telephone' => '5550100000',
         ]);
 
-        foreach ([[0.10, 2, (int) $productClass->getId()], [1.00, 1, 0]] as [$price, $qty, $classId]) {
+        $firstSku = 'document-currency-' . uniqid();
+        foreach ([[0.10, 2, $taxClassId, $firstSku], [1.00, 1, 0, 'document-currency-' . uniqid()]] as [$price, $qty, $classId, $sku]) {
             $product = Mage::getModel('catalog/product')->setStoreId(0);
             $product->setAttributeSetId($product->getDefaultAttributeSetId())
                 ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_VIRTUAL)
-                ->setSku('document-tax-' . uniqid())->setName($fixture)->setPrice($price)
+                ->setSku($sku)->setName($fixture)->setPrice($price)
                 ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
                 ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
                 ->setTaxClassId($classId)->setWebsiteIds([(int) $store->getWebsiteId()])
@@ -67,6 +75,18 @@ it('keeps tax in the base currency when the order currency tax rounds to zero', 
             $cart->addProduct($quote, $product, new Maho\DataObject(['qty' => $qty]), save: false);
         }
 
+        if ($useCoupon) {
+            $coupon = 'BASE-ONLY-' . uniqid();
+            $rule = Mage::getModel('salesrule/rule')->setName($fixture)->setIsActive(true)
+                ->setWebsiteIds([(int) $store->getWebsiteId()])->setCustomerGroupIds([$groupId])
+                ->setCouponType(Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC)->setCouponCode($coupon)
+                ->setSimpleAction(Mage_SalesRule_Model_Rule::BY_FIXED_ACTION)->setDiscountAmount(0.01);
+            $rule->loadPost(['actions' => [
+                '1' => ['type' => 'salesrule/rule_condition_product_combine', 'aggregator' => 'all', 'value' => '1'],
+                '1--1' => ['type' => 'salesrule/rule_condition_product', 'attribute' => 'sku', 'operator' => '==', 'value' => $firstSku],
+            ]])->save();
+            $quote->setCouponCode($coupon);
+        }
         $quote->getPayment()->importData(['method' => 'checkmo']);
         $cart->collectAndSave($quote);
         $placed = Mage::getModel('sales/service_quote', $quote)->submitOrder();
@@ -87,27 +107,43 @@ it('keeps tax in the base currency when the order currency tax rounds to zero', 
         $updatedOrder = Mage::getModel('sales/order')->load((int) $order->getId());
         $updatedItem = $updatedOrder->getItemById($itemId);
 
-        $taxes = static fn($row): array => [(float) $row->getTaxAmount(), (float) $row->getBaseTaxAmount()];
-        $amounts = static fn($row): array => [(float) $row->getGrandTotal(), (float) $row->getBaseGrandTotal()];
-        $snapshot = [
-            'currency' => [$order->getOrderCurrencyCode(), $order->getBaseCurrencyCode(), $order->getBaseToOrderRate()],
-            'order' => [$taxes($order), $taxes($orderItem), $amounts($order)],
-            'invoice' => [$taxes($invoice), $taxes($invoiceItem), $amounts($invoice)],
-            'invoiced' => [$order->getTaxInvoiced(), $order->getBaseTaxInvoiced(), $orderItem->getTaxInvoiced(), $orderItem->getBaseTaxInvoiced()],
-            'refund' => [$taxes($memo), $taxes($memoItem), $amounts($memo)],
-            'refunded' => [$updatedOrder->getTaxRefunded(), $updatedOrder->getBaseTaxRefunded(), $updatedItem->getTaxRefunded(), $updatedItem->getBaseTaxRefunded()],
+        if ($useCoupon) {
+            expect($order->getCouponCode())->toBe($coupon);
+        }
+        expect([$order->getOrderCurrencyCode(), $order->getBaseCurrencyCode(), $order->getBaseToOrderRate()])
+            ->toBe(['EUR', 'USD', 0.1]);
+        $prefix = $useCoupon ? 'discount' : 'tax';
+        $amounts = static fn(Maho\DataObject $row, string $field): array => [
+            (float) $row->getData($field),
+            (float) $row->getData('base_' . $field),
         ];
-
-        expect($snapshot)->toBe([
-            'currency' => ['EUR', 'USD', 0.1],
-            'order' => [[0.0, 0.04], [0.0, 0.04], [0.12, 1.24]],
-            'invoice' => [[0.0, 0.04], [0.0, 0.04], [0.02, 0.24]],
-            'invoiced' => [0.0, 0.04, 0.0, 0.04],
-            'refund' => [[0.0, 0.02], [0.0, 0.02], [0.01, 0.12]],
-            'refunded' => [0.0, 0.02, 0.0, 0.02],
-        ]);
+        $amountField = $prefix . '_amount';
+        $invoicedField = $prefix . '_invoiced';
+        $refundedField = $prefix . '_refunded';
+        expect([
+            'order' => [$amounts($order, $amountField), $amounts($orderItem, $amountField), $amounts($order, 'grand_total')],
+            'invoice' => [$amounts($invoice, $amountField), $amounts($invoiceItem, $amountField), $amounts($invoice, 'grand_total')],
+            'invoiced' => [$amounts($order, $invoicedField), $amounts($orderItem, $invoicedField)],
+            'refund' => [$amounts($memo, $amountField), $amounts($memoItem, $amountField), $amounts($memo, 'grand_total')],
+            'refunded' => [$amounts($updatedOrder, $refundedField), $amounts($updatedItem, $refundedField)],
+        ])->toBe($expected);
     } finally {
         $connection->rollBack();
         resetCurrencyState();
     }
-});
+})->with([
+    'tax' => [false, [
+        'order' => [[0.0, 0.04], [0.0, 0.04], [0.12, 1.24]],
+        'invoice' => [[0.0, 0.04], [0.0, 0.04], [0.02, 0.24]],
+        'invoiced' => [[0.0, 0.04], [0.0, 0.04]],
+        'refund' => [[0.0, 0.02], [0.0, 0.02], [0.01, 0.12]],
+        'refunded' => [[0.0, 0.02], [0.0, 0.02]],
+    ]],
+    'fixed coupon' => [true, [
+        'order' => [[0.0, -0.02], [0.0, 0.02], [0.12, 1.18]],
+        'invoice' => [[0.0, -0.02], [0.0, 0.02], [0.02, 0.18]],
+        'invoiced' => [[0.0, -0.02], [0.0, 0.02]],
+        'refund' => [[0.0, -0.01], [0.0, 0.01], [0.01, 0.09]],
+        'refunded' => [[0.0, -0.01], [0.0, 0.01]],
+    ]],
+]);

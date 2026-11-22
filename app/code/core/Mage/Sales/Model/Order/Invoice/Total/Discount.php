@@ -49,7 +49,7 @@ class Mage_Sales_Model_Order_Invoice_Total_Discount extends Mage_Sales_Model_Ord
             $baseOrderItemDiscount  = (float) $orderItem->getBaseDiscountAmount();
             $orderItemQty       = $orderItem->getQtyOrdered();
 
-            if ($orderItemDiscount && $orderItemQty) {
+            if ($orderItemQty && ($orderItemDiscount || $baseOrderItemDiscount)) {
                 /**
                  * Resolve rounding problems
                  *
