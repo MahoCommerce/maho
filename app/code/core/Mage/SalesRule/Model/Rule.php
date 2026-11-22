@@ -23,6 +23,14 @@ declare(strict_types=1);
  */
 class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
 {
+    public function hasLoadedUnconditionalDiscount(): bool
+    {
+        return $this->_conditions !== null && $this->_conditions::class === Mage_SalesRule_Model_Rule_Condition_Combine::class
+            && !$this->_conditions->getConditions() && !$this->hasConditionsSerialized()
+            && $this->_actions !== null && $this->_actions::class === Mage_SalesRule_Model_Rule_Condition_Product_Combine::class
+            && !$this->_actions->getConditions() && !$this->hasActionsSerialized();
+    }
+
     /**
      * Free Shipping option "For matching items only"
      */

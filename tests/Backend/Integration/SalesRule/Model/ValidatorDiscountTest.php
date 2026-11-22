@@ -31,6 +31,7 @@ function validatorDiscountRule(
     float $amount = 10.0,
     int $sortOrder = 0,
     ?string $couponCode = null,
+    ?float $maxQty = null,
 ): void {
     Mage::getModel('salesrule/rule')
         ->setName('Discount test ' . uniqid())
@@ -41,6 +42,7 @@ function validatorDiscountRule(
         ->setCouponCode($couponCode)
         ->setSimpleAction($action)
         ->setDiscountAmount($amount)
+        ->setDiscountQty($maxQty)
         ->setSortOrder($sortOrder)
         ->setStopRulesProcessing(false)
         ->save();
@@ -66,6 +68,26 @@ function validatorDiscountProduct(
         ->save();
 
     return Mage::getModel('catalog/product')->setStoreId($store->getId())->load($product->getId());
+}
+
+function validatorDiscountObserve(string $eventName, Closure $observer, Closure $collect): void
+{
+    $app = Mage::app();
+    $property = new ReflectionProperty($app, '_events');
+    $originalEvents = $property->getValue($app);
+    $events = $originalEvents;
+    $alias = 'validator_discount_test/observer';
+    $events['global'][$eventName] = ['observers' => [
+        'discount_test' => ['type' => 'singleton', 'model' => $alias, 'method' => '__invoke'],
+    ]];
+    Mage::register('_singleton/' . $alias, $observer);
+    $property->setValue($app, $events);
+    try {
+        $collect();
+    } finally {
+        $property->setValue($app, $originalEvents);
+        Mage::unregister('_singleton/' . $alias);
+    }
 }
 
 it('keeps a percentage discount the same when the cart recalculates its totals', function (): void {
@@ -250,4 +272,208 @@ it('restores the automatic discount after removing a coupon', function (): void 
     expect($item->getDiscountAmount())->toBe(0.01)
         ->and($item->getBaseDiscountAmount())->toBe(0.01)
         ->and($quote->getGrandTotal())->toEqualWithDelta(0.11, 0.0001);
+});
+
+it('lets a discount observer exclude the next line in a cart with a fixed discount', function (string $eventName): void {
+    $groupId = (int) $this->group->getId();
+    validatorDiscountRule($groupId, Mage_SalesRule_Model_Rule::CART_FIXED_ACTION, 6.0);
+    validatorDiscountRule($groupId, Mage_SalesRule_Model_Rule::BY_PERCENT_ACTION, 50.0, 1);
+    $store = Mage::app()->getStore(1);
+    $quote = Mage::getModel('sales/quote')->setStoreId(1)->setCustomerGroupId($groupId);
+    $first = validatorDiscountProduct(10.0, $store);
+    $second = validatorDiscountProduct(10.0, $store);
+    $quote->addProduct($first, 1);
+    $quote->addProduct($second, 1);
+    $quote->getBillingAddress();
+
+    $calls = [];
+    $excluded = $quote->getItemByProduct($second);
+    $observer = static function (Maho\Event\Observer $event) use (&$calls, $excluded): void {
+        $calls[] = [(int) $event->getItem()->getProductId(), $event->getRule()?->getSimpleAction()];
+        $excluded->setNoDiscount(true);
+    };
+    validatorDiscountObserve($eventName, $observer, $quote->collectTotals(...));
+
+    $firstId = (int) $first->getId();
+    expect($calls)->toBe($eventName === 'salesrule_validator_process'
+        ? [[$firstId, Mage_SalesRule_Model_Rule::CART_FIXED_ACTION], [$firstId, Mage_SalesRule_Model_Rule::BY_PERCENT_ACTION]]
+        : [[$firstId, null]])
+        ->and($quote->getItemByProduct($first)->getBaseDiscountAmount())->toBe(6.5)
+        ->and($quote->getItemByProduct($second)->getBaseDiscountAmount())->toBe(0.0);
+})->with(['salesrule_validator_process', 'sales_quote_address_discount_item']);
+
+it('uses the same fixed cart allocation with either discount observer and counts only participating lines', function (
+    string $eventName,
+    bool $excludeSecond,
+    array $expectedDiscounts,
+    float $expectedTotal,
+): void {
+    $groupId = (int) $this->group->getId();
+    $service = Mage::getService('salesrule/rule');
+    foreach ([Mage_SalesRule_Model_Rule::BY_PERCENT_ACTION, Mage_SalesRule_Model_Rule::CART_FIXED_ACTION] as $priority => $action) {
+        $rule = Mage::getModel('salesrule/rule')->loadPost([
+            'name' => 'Discount test ' . uniqid(),
+            'is_active' => 1,
+            'website_ids' => [1],
+            'customer_group_ids' => [$groupId],
+            'coupon_type' => Mage_SalesRule_Model_Rule::COUPON_TYPE_NO_COUPON,
+            'simple_action' => $action,
+            'discount_amount' => $priority === 0 ? 100 : 6,
+            'discount_qty' => $priority === 0 ? 1 : 0,
+            'sort_order' => $priority,
+            'stop_rules_processing' => $priority,
+            'conditions' => [1 => ['type' => 'salesrule/rule_condition_combine', 'aggregator' => 'all', 'value' => '1']],
+            'actions' => [1 => ['type' => 'salesrule/rule_condition_product_combine', 'aggregator' => 'any', 'value' => '0']],
+        ]);
+        $service->save($rule);
+    }
+    $store = Mage::app()->getStore(1);
+    $quote = Mage::getModel('sales/quote')->setStoreId(1)->setCustomerGroupId($groupId);
+    $quote->addProduct(validatorDiscountProduct(10.0, $store), 2);
+    $second = validatorDiscountProduct(10.0, $store);
+    $quote->addProduct($second, 1);
+    $quote->getItemByProduct($second)->setNoDiscount($excludeSecond);
+    $quote->getBillingAddress();
+
+    $discounts = [];
+    $observer = static function (Maho\Event\Observer $event) use (&$discounts): void {
+        $discounts[] = $event->getResult()?->getBaseDiscountAmount() ?? $event->getItem()->getBaseDiscountAmount();
+    };
+    validatorDiscountObserve($eventName, $observer, $quote->collectTotals(...));
+    expect($discounts)->toBe($expectedDiscounts)
+        ->and($quote->getBaseGrandTotal())->toBe($expectedTotal);
+})->with([
+    'unrelated observer' => ['unrelated_discount_event', false, [], 4.0],
+    'observer reads the proposed rule amounts' => ['salesrule_validator_process', false, [10.0, 6.0, 10.0, 0.0], 4.0],
+    'observer reads both line discounts in order' => ['sales_quote_address_discount_item', false, [16.0, 10.0], 4.0],
+    'second line excluded before collection' => ['sales_quote_address_discount_item', true, [16.0], 14.0],
+]);
+
+it('offers credit left by a discount observer to the next line', function (): void {
+    $groupId = (int) $this->group->getId();
+    validatorDiscountRule($groupId, Mage_SalesRule_Model_Rule::CART_FIXED_ACTION, 6.0);
+    $store = Mage::app()->getStore(1);
+    $quote = Mage::getModel('sales/quote')->setStoreId(1)->setCustomerGroupId($groupId);
+    $quote->addProduct(validatorDiscountProduct(10.0, $store), 1);
+    $quote->addProduct(validatorDiscountProduct(10.0, $store), 1);
+    $quote->getBillingAddress();
+    $proposals = [];
+    validatorDiscountObserve('salesrule_validator_process', static function (Maho\Event\Observer $event) use (&$proposals): void {
+        $result = $event->getResult();
+        $proposals[] = $result->getBaseDiscountAmount();
+        if (count($proposals) === 1) {
+            $result->setBaseDiscountAmount(1.0)->setDiscountAmount(1.0);
+        }
+    }, $quote->collectTotals(...));
+    expect($proposals)->toBe([3.0, 5.0])
+        ->and($quote->getBaseGrandTotal())->toBe(14.0);
+});
+
+it('preserves the percentage rounding carry across a fixed cart rule in item order', function (
+    float $firstCredit,
+    float $expectedSecondPercentage,
+    float $expectedBalance,
+): void {
+    $groupId = (int) $this->group->getId();
+    validatorDiscountRule($groupId);
+    validatorDiscountRule($groupId, Mage_SalesRule_Model_Rule::CART_FIXED_ACTION, 0.03, 1);
+    validatorDiscountRule($groupId, sortOrder: 2, maxQty: 1);
+    $store = Mage::app()->getStore(1);
+    $quote = Mage::getModel('sales/quote')->setStoreId(1)->setCustomerGroupId($groupId);
+    $first = validatorDiscountProduct(0.03, $store);
+    $quote->addProduct($first, 1);
+    $quote->addProduct(validatorDiscountProduct(0.01, $store), 1);
+    $address = $quote->getBillingAddress();
+    $discountBeforeCredit = [];
+    validatorDiscountObserve('salesrule_validator_process', static function (Maho\Event\Observer $event) use (&$discountBeforeCredit, $firstCredit): void {
+        if ($event->getRule()->getSimpleAction() === Mage_SalesRule_Model_Rule::CART_FIXED_ACTION) {
+            $discountBeforeCredit[] = $event->getItem()->getBaseDiscountAmount();
+            if (count($discountBeforeCredit) === 1) {
+                $event->getResult()->setDiscountAmount($firstCredit)->setBaseDiscountAmount($firstCredit);
+            }
+        }
+    }, $quote->collectTotals(...));
+    expect($discountBeforeCredit)->toBe([0.0, $expectedSecondPercentage])
+        ->and($quote->getItemByProduct($first)->getBaseDiscountAmount())->toBe($firstCredit)
+        ->and(array_sum($address->getCartFixedRules()))->toEqualWithDelta($expectedBalance, 0.00001);
+})->with([
+    'proportional first credit makes the second line free' => [0.02, 0.01, 0.01],
+    'full first credit leaves one cent payable on the second line before the fixed rule' => [0.03, 0.0, 0.0],
+]);
+
+it('excludes a child or its parent from a fixed cart discount on recollection', function (string $eventName): void {
+    $groupId = (int) $this->group->getId();
+    validatorDiscountRule($groupId, Mage_SalesRule_Model_Rule::CART_FIXED_ACTION, 6.01);
+    $store = Mage::app()->getStore(1);
+    $quote = Mage::getModel('sales/quote')->setStoreId(1)->setCustomerGroupId($groupId);
+    $address = $quote->getBillingAddress();
+    $parent = Mage::getModel('sales/quote_item')->setQuote($quote)
+        ->setProduct(validatorDiscountProduct(0.0, $store))->setQty(1);
+    $parent->getProduct()->setPriceType(Mage_Catalog_Model_Product_Type_Abstract::CALCULATE_CHILD);
+    $children = [];
+    for ($i = 0; $i < 3; $i++) {
+        $children[] = Mage::getModel('sales/quote_item')->setQuote($quote)
+            ->setProduct(validatorDiscountProduct(10.0, $store))->setQty(1)->setParentItem($parent)
+            ->setDiscountCalculationPrice(10.0)->setBaseDiscountCalculationPrice(10.0);
+    }
+
+    $collector = new class ([$parent, ...$children]) extends Mage_SalesRule_Model_Quote_Discount {
+        public function __construct(private readonly array $items)
+        {
+            parent::__construct();
+        }
+
+        #[\Override]
+        protected function _getAddressItems(Mage_Sales_Model_Quote_Address $address): array
+        {
+            return $this->items;
+        }
+    };
+    $collect = static fn() => validatorDiscountObserve(
+        $eventName,
+        static function (): void {},
+        static fn() => $collector->collect($address),
+    );
+    $collect();
+    expect($children[0]->getBaseDiscountAmount())->toBe(2.0)
+        ->and($children[1]->getBaseDiscountAmount())->toBe(2.0)
+        ->and($children[2]->getBaseDiscountAmount())->toBe(2.01);
+
+    $children[0]->setNoDiscount(true);
+    $collect();
+    expect($children[0]->getBaseDiscountAmount())->toBe(0.0)
+        ->and($children[1]->getBaseDiscountAmount())->toBe(3.01)
+        ->and($children[2]->getBaseDiscountAmount())->toBe(3.0)
+        ->and($address->getBaseTotalAmount('discount'))->toBe(-6.01);
+
+    $parent->setNoDiscount(true);
+    $collect();
+    expect($children[0]->getBaseDiscountAmount())->toBe(0.0)
+        ->and($children[1]->getBaseDiscountAmount())->toBe(0.0)
+        ->and($children[2]->getBaseDiscountAmount())->toBe(0.0)
+        ->and($address->getBaseTotalAmount('discount'))->toEqual(0.0);
+})->with(['unrelated_discount_event', 'sales_quote_address_discount_item']);
+
+it('calls an overridden item processor for a fixed cart discount', function (): void {
+    $groupId = (int) $this->group->getId();
+    validatorDiscountRule($groupId, Mage_SalesRule_Model_Rule::CART_FIXED_ACTION, 3.0);
+    $store = Mage::app()->getStore(1);
+    $quote = Mage::getModel('sales/quote')->setStoreId(1)->setCustomerGroupId($groupId);
+    $quote->addProduct(validatorDiscountProduct(10.0, $store), 1);
+    $items = $quote->getAllVisibleItems();
+    $address = $quote->getBillingAddress();
+    $calculator = new class extends Mage_SalesRule_Model_Validator {
+        public array $processed = [];
+
+        #[\Override]
+        public function process(Mage_Sales_Model_Quote_Item_Abstract $item): static
+        {
+            $this->processed[] = $item;
+            return $this;
+        }
+    };
+    $calculator->reset($address)->init((int) $store->getWebsiteId(), $groupId, '')->initTotals($items, $address);
+
+    expect(iterator_to_array($calculator->processItems($items), false))->toBe($items)
+        ->and($calculator->processed)->toBe($items);
 });

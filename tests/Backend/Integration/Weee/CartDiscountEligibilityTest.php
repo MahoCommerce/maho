@@ -58,7 +58,7 @@ function cartFeeEligibilityRule(
     ?float $maximumQty = null,
     ?int $step = null,
     bool $stop = false,
-): void {
+): Mage_SalesRule_Model_Rule {
     $rule = Mage::getModel('salesrule/rule')
         ->setName('Cart fee rule ' . uniqid())
         ->setIsActive(true)
@@ -83,20 +83,21 @@ function cartFeeEligibilityRule(
             '1--1' => ['type' => 'salesrule/rule_condition_address', 'attribute' => 'country_id', 'operator' => '==', 'value' => $country],
         ]]);
     }
-    $rule->save();
+    return $rule->save();
 }
 
 function addCartFeeEligibilityProduct(
     Mage_Sales_Model_Quote $quote,
     string $feeAttribute,
     float $qty,
+    float $price = 100.0,
 ): Mage_Sales_Model_Quote_Item {
     $store = $quote->getStore();
     $fixture = WeeeDiscountFixture::createProduct(
         'eligible-fee-' . uniqid(),
         $feeAttribute,
         [(int) $store->getWebsiteId()],
-        price: 100.0,
+        price: $price,
     );
     $product = Mage::getModel('catalog/product')->setStoreId((int) $store->getId())->load($fixture['product']->getId());
     Mage::getService('checkout/cart')->addProduct($quote, $product, new Maho\DataObject(['qty' => $qty]), save: false);
@@ -166,15 +167,224 @@ it('applies the quantity limit and step before discounting the fixed product tax
     'no full step' => [1.0, 0.0, 110.0],
 ]);
 
-it('compounds a percentage capped to part of the line with a full-line discount', function (): void {
-    $item = addCartFeeEligibilityProduct($this->quote, $this->feeAttribute, 5.0);
-    cartFeeEligibilityRule($this->websiteId, $this->groupId, 50.0, 0, maximumQty: 3.0, step: 2);
-    cartFeeEligibilityRule($this->websiteId, $this->groupId, 20.0, 1);
+it('applies stacked percentages to the remaining price of the eligible units', function (
+    float $qty,
+    array $rules,
+    float $feeDiscount,
+    float $total,
+): void {
+    $item = addCartFeeEligibilityProduct($this->quote, $this->feeAttribute, $qty);
+    foreach ($rules as $priority => [$rate, $maximumQty, $step]) {
+        cartFeeEligibilityRule($this->websiteId, $this->groupId, $rate, $priority, maximumQty: $maximumQty, step: $step);
+    }
 
     $this->cart->collectAndSave($this->quote);
 
-    expect($item->getDiscountAmount())->toEqualWithDelta(180.0, 0.0001)
-        ->and($item->getWeeeDiscount())->toEqualWithDelta(18.0, 0.0001)
-        ->and($item->getBaseWeeeDiscount())->toEqualWithDelta(18.0, 0.0001)
-        ->and($this->quote->getGrandTotal())->toEqualWithDelta(352.0, 0.0001);
+    expect($item->getDiscountAmount())->toEqualWithDelta($feeDiscount * 10.0, 0.0001)
+        ->and($item->getBaseDiscountAmount())->toEqualWithDelta($feeDiscount * 10.0, 0.0001)
+        ->and($item->getWeeeDiscount())->toEqualWithDelta($feeDiscount, 0.0001)
+        ->and($item->getBaseWeeeDiscount())->toEqualWithDelta($feeDiscount, 0.0001)
+        ->and($this->quote->getGrandTotal())->toEqualWithDelta($total, 0.0001);
+})->with([
+    'limited discount first' => [5.0, [[50.0, 3.0, 2], [20.0, null, null]], 18.0, 352.0],
+    'full-line discount first' => [5.0, [[20.0, null, null], [50.0, 3.0, 2]], 18.0, 352.0],
+    'previous discount exceeds the eligible units gross price' => [5.0, [[60.0, null, null], [50.0, 3.0, 2]], 34.0, 176.0],
+    'later discount covers a wider subset' => [5.0, [[20.0, null, null], [50.0, 2.0, null], [25.0, 3.0, null]], 22.0, 308.0],
+    'no complete step for the later rule' => [1.0, [[20.0, null, null], [50.0, null, 2]], 2.0, 88.0],
+]);
+
+it('uses the discount rate of a registered to-percent rule for both merchandise and fixed product taxes', function (): void {
+    Mage::getConfig()->setNode(Mage_SalesRule_Model_Rule::XML_PATH_SIMPLE_ACTIONS . '/to_percent', '1');
+    $item = addCartFeeEligibilityProduct($this->quote, $this->feeAttribute, 5.0);
+    cartFeeEligibilityRule($this->websiteId, $this->groupId, 20.0, 0);
+    cartFeeEligibilityRule($this->websiteId, $this->groupId, 75.0, 1, Mage_SalesRule_Model_Rule::TO_PERCENT_ACTION, maximumQty: 2.0);
+
+    $this->cart->collectAndSave($this->quote);
+
+    expect($item->getDiscountAmount())->toEqualWithDelta(140.0, 0.0001)
+        ->and($item->getWeeeDiscount())->toEqualWithDelta(14.0, 0.0001)
+        ->and($this->quote->getGrandTotal())->toEqualWithDelta(396.0, 0.0001);
 });
+
+it('prorates a prior fixed item discount over the units eligible for a capped percentage', function (): void {
+    $item = addCartFeeEligibilityProduct($this->quote, $this->feeAttribute, 5.0);
+    cartFeeEligibilityRule($this->websiteId, $this->groupId, 10.0, 0, Mage_SalesRule_Model_Rule::BY_FIXED_ACTION);
+    cartFeeEligibilityRule($this->websiteId, $this->groupId, 20.0, 1, maximumQty: 2.0);
+
+    $this->cart->collectAndSave($this->quote);
+
+    expect($item->getDiscountAmount())->toEqualWithDelta(86.0, 0.0001)
+        ->and($item->getWeeeDiscount())->toEqualWithDelta(4.0, 0.0001)
+        ->and($this->quote->getGrandTotal())->toEqualWithDelta(460.0, 0.0001);
+});
+
+it('keeps the capped percentage discount in whole cents when the eligible capacity includes a fraction of a cent', function (): void {
+    $item = addCartFeeEligibilityProduct($this->quote, $this->feeAttribute, 3.0, price: 1.0);
+    cartFeeEligibilityRule($this->websiteId, $this->groupId, 0.01, 0, Mage_SalesRule_Model_Rule::CART_FIXED_ACTION);
+    cartFeeEligibilityRule($this->websiteId, $this->groupId, 100.0, 1, maximumQty: 1.0);
+
+    $this->cart->collectAndSave($this->quote);
+    $reloaded = $this->cart->getById((int) $this->quote->getId());
+    $savedItem = $reloaded->getAllVisibleItems()[0];
+
+    expect($item->getDiscountAmount())->toBe(1.0)
+        ->and($item->getBaseDiscountAmount())->toBe(1.0)
+        ->and($savedItem->getDiscountAmount())->toBe(1.0)
+        ->and($savedItem->getBaseDiscountAmount())->toBe(1.0)
+        ->and($item->getWeeeDiscount())->toBe(10.0)
+        ->and($reloaded->getGrandTotal())->toBe(22.0);
+});
+
+it('keeps fixed product tax on the units of a buy X get Y item rule', function (float $freeQty, ?int $step, float $discount): void {
+    $item = addCartFeeEligibilityProduct($this->quote, $this->feeAttribute, 5.0);
+    cartFeeEligibilityRule($this->websiteId, $this->groupId, $freeQty, 0, Mage_SalesRule_Model_Rule::BUY_X_GET_Y_ACTION, step: $step, stop: true);
+    cartFeeEligibilityRule($this->websiteId, $this->groupId, 50.0, 1);
+
+    $this->cart->collectAndSave($this->quote);
+
+    expect($item->getDiscountAmount())->toEqualWithDelta($discount, 0.0001)
+        ->and($item->getWeeeDiscount())->toEqualWithDelta(0.0, 0.0001)
+        ->and($this->quote->getGrandTotal())->toEqualWithDelta(550.0 - $discount, 0.0001);
+})->with([
+    'one free unit' => [1.0, 2, 100.0],
+    'no buy step' => [1.0, null, 0.0],
+    'free quantity exceeds the buy step' => [3.0, 2, 0.0],
+]);
+
+it('retains the earlier discount when its coverage on the eligible units cannot be proven', function (
+    string $action,
+    float $qty,
+    float $amount,
+    ?float $maximumQty,
+    ?int $step,
+    float $expected,
+): void {
+    $item = addCartFeeEligibilityProduct($this->quote, $this->feeAttribute, $qty, price: 10.0);
+    cartFeeEligibilityRule($this->websiteId, $this->groupId, $amount, 0, $action, maximumQty: $maximumQty, step: $step);
+    cartFeeEligibilityRule($this->websiteId, $this->groupId, 100.0, 1, maximumQty: 1.0);
+
+    $this->cart->collectAndSave($this->quote);
+
+    expect($item->getDiscountAmount())->toBe($expected)
+        ->and($item->getBaseDiscountAmount())->toBe($expected)
+        ->and($item->getWeeeDiscount())->toBe(10.0)
+        ->and($this->quote->getGrandTotal())->toBe($qty * 20.0 - $expected - 10.0);
+})->with([
+    'one unit already receives a fixed discount' => [Mage_SalesRule_Model_Rule::BY_FIXED_ACTION, 2.0, 10.0, 1.0, null, 10.0],
+    'the prior fixed discount exceeds the eligible price' => [Mage_SalesRule_Model_Rule::BY_FIXED_ACTION, 4.0, 6.0, 2.0, null, 12.0],
+    'one unit is free under buy X get Y' => [Mage_SalesRule_Model_Rule::BUY_X_GET_Y_ACTION, 3.0, 1.0, null, 2, 10.0],
+]);
+
+it('uses the existing amount when a discount observer replaces a rule result', function (): void {
+    $item = addCartFeeEligibilityProduct($this->quote, $this->feeAttribute, 2.0, price: 10.0);
+    cartFeeEligibilityRule($this->websiteId, $this->groupId, 0.0, 0);
+    cartFeeEligibilityRule($this->websiteId, $this->groupId, 100.0, 1, maximumQty: 1.0);
+
+    $observer = new class {
+        public function adjust(Maho\Event\Observer $observer): void
+        {
+            if ($observer->getRule()->getDiscountAmount() === 0.0) {
+                $observer->getResult()->setDiscountAmount(10.0)->setBaseDiscountAmount(10.0);
+            }
+        }
+    };
+    $alias = 'cart_fee_eligibility_test/observer';
+    $events = new ReflectionProperty(Mage::app(), '_events');
+    $originalEvents = $events->getValue(Mage::app());
+    $config = $originalEvents;
+    $config['global']['salesrule_validator_process'] = ['observers' => [
+        'cart_fee_eligibility_test' => ['type' => 'singleton', 'model' => $alias, 'method' => 'adjust'],
+    ]];
+    Mage::register('_singleton/' . $alias, $observer);
+    $events->setValue(Mage::app(), $config);
+    try {
+        $this->cart->collectAndSave($this->quote);
+    } finally {
+        $events->setValue(Mage::app(), $originalEvents);
+        Mage::unregister('_singleton/' . $alias);
+    }
+
+    expect($item->getDiscountAmount())->toBe(10.0)
+        ->and($item->getBaseDiscountAmount())->toBe(10.0)
+        ->and($this->quote->getGrandTotal())->toBe(20.0);
+});
+
+it('discounts fixed product taxes for only the current rule ids recorded by a rewritten process', function (bool $callParent): void {
+    $rule = cartFeeEligibilityRule(
+        $this->websiteId,
+        $this->groupId,
+        50.0,
+        0,
+        sku: 'rewrite-only-item',
+        maximumQty: 3.0,
+        step: 2,
+    );
+    $foreignRule = cartFeeEligibilityRule($this->websiteId, Mage_Customer_Model_Group::NOT_LOGGED_IN_ID, 50.0, 1);
+    $validator = new class ((string) $rule->getId(), (string) $foreignRule->getId(), $callParent) extends Mage_SalesRule_Model_Validator {
+        public ?string $sku = null;
+        public bool $recordRules = true;
+
+        public function __construct(
+            private readonly string $ruleId,
+            private readonly string $foreignRuleId,
+            private readonly bool $callParent,
+        ) {}
+
+        #[\Override]
+        public function process(Mage_Sales_Model_Quote_Item_Abstract $item): static
+        {
+            if ($this->callParent) {
+                parent::process($item);
+            }
+            $applied = $this->recordRules && $item->getSku() === $this->sku;
+            $discount = $applied && !$this->callParent ? 100.0 : 0.0;
+            $item->setDiscountAmount($discount)->setBaseDiscountAmount($discount);
+            if ($applied) {
+                $item->setAppliedRuleIds($this->ruleId . ',' . $this->foreignRuleId);
+            }
+            return $this;
+        }
+
+        #[\Override]
+        protected function _getItemQty($item, $rule)
+        {
+            if (!$this->callParent) {
+                throw new RuntimeException('The fixed tax calculation must not call the rewrite again.');
+            }
+            return parent::_getItemQty($item, $rule);
+        }
+    };
+    $key = '_singleton/salesrule/validator';
+    $originalValidator = Mage::registry($key);
+    Mage::unregister($key);
+    Mage::register($key, $validator);
+    try {
+        $eligible = addCartFeeEligibilityProduct($this->quote, $this->feeAttribute, 5.0);
+        $other = addCartFeeEligibilityProduct($this->quote, $this->feeAttribute, 2.0);
+        $validator->sku = $eligible->getSku();
+        $other->setAppliedRuleIds((string) $rule->getId());
+
+        $this->cart->collectAndSave($this->quote);
+
+        expect($eligible->getDiscountAmount())->toBe($callParent ? 0.0 : 100.0)
+            ->and($eligible->getWeeeDiscount())->toBe($callParent ? 0.0 : 10.0)
+            ->and($eligible->getBaseWeeeDiscount())->toBe($callParent ? 0.0 : 10.0)
+            ->and($other->getWeeeDiscount())->toBe(0.0)
+            ->and($this->quote->getGrandTotal())->toBe($callParent ? 770.0 : 660.0);
+
+        $validator->recordRules = false;
+        $this->cart->collectAndSave($this->quote);
+
+        expect($eligible->getWeeeDiscount())->toBe(0.0)
+            ->and($other->getWeeeDiscount())->toBe(0.0)
+            ->and($this->quote->getGrandTotal())->toBe(770.0);
+    } finally {
+        Mage::unregister($key);
+        if ($originalValidator !== null) {
+            Mage::register($key, $originalValidator);
+        }
+    }
+})->with([
+    'rewrite declares currently applied rules without invoking the parent' => [false],
+    'rewrite calls the parent, which checks and rejects the percentage rule' => [true],
+]);

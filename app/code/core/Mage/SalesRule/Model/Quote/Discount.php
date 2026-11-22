@@ -56,41 +56,13 @@ class Mage_SalesRule_Model_Quote_Discount extends Mage_Sales_Model_Quote_Address
         $address->setDiscountDescription('');
         /** @var Mage_Sales_Model_Quote_Item[] $items */
         $items = $this->_calculator->sortItemsByPriority($items);
-        foreach ($items as $item) {
-            if ($item->getNoDiscount()) {
-                $item->setDiscountAmount(0);
-                $item->setBaseDiscountAmount(0);
-            } else {
-                /**
-                 * Child item discount we calculate for parent
-                 */
-                if ($item->getParentItem() || $item->getParentItemId()) {
-                    continue;
-                }
-
-                if ($item->getHasChildren() && $item->isChildrenCalculated()) {
-                    foreach ($item->getChildren() as $child) {
-                        $this->_calculator->process($child);
-                        $eventArgs['item'] = $child;
-                        Mage::dispatchEvent('sales_quote_address_discount_item', $eventArgs);
-
-                        $this->_aggregateItemDiscount($child);
-                    }
-                } else {
-                    $this->_calculator->process($item);
-                    $eventArgs['item'] = $item;
-                    Mage::dispatchEvent('sales_quote_address_discount_item', $eventArgs);
-                    $this->_aggregateItemDiscount($item);
-                }
-            }
+        foreach ($this->_calculator->processItems($items) as $item) {
+            $eventArgs['item'] = $item;
+            Mage::dispatchEvent('sales_quote_address_discount_item', $eventArgs);
+            $this->_aggregateItemDiscount($item);
         }
 
-        /**
-         * process weee amount
-         */
-        if (Mage::helper('weee')->isEnabled() && Mage::helper('weee')->isDiscounted($store)) {
-            $this->_calculator->processWeeeAmount($address, $items);
-        }
+        $this->_calculator->processWeeeAmount($address, $items);
 
         /**
          * Process shipping amount discount
