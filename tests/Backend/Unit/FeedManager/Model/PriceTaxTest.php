@@ -129,12 +129,13 @@ describe('Feed tax destination', function () {
             ->setRate(50)
             ->save();
 
+        $store = Mage::app()->getStore(1);
         Mage::getModel('tax/calculation_rule')
             ->setCode('feedmanager-test-rule')
             ->setPriority(0)
             ->setPosition(0)
             ->setTaxRate([$rate->getId()])
-            ->setTaxCustomerClass([Mage::getSingleton('tax/calculation')->getDefaultCustomerTaxClass(1)])
+            ->setTaxCustomerClass([Mage::getSingleton('tax/calculation')->getDefaultCustomerTaxClass($store)])
             ->setTaxProductClass([2])
             ->save();
     });
