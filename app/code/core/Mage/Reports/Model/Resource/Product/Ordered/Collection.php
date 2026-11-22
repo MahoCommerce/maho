@@ -27,12 +27,7 @@ class Mage_Reports_Model_Resource_Product_Ordered_Collection extends Mage_Report
         return $this;
     }
 
-    /**
-     * @param string $from
-     * @param string $to
-     * @return $this
-     */
-    public function setDateRange($from, $to)
+    public function setDateRange(string $from, string $to): static
     {
         $this->_reset()
             ->_joinFields($from, $to);

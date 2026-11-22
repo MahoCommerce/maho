@@ -505,17 +505,14 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
 
     /**
      * set the number of boxes for shipping
-     *
-     * @param float|null $weight
-     * @return float
      */
-    public function getTotalNumOfBoxes($weight)
+    public function getTotalNumOfBoxes(float|int|string|null $weight): float
     {
         /*
         reset num box first before retrieve again
         */
         $this->_numBoxes = 1;
-        $weight = $this->convertWeightToLbs($weight);
+        $weight = (float) $this->convertWeightToLbs($weight);
         $maxPackageWeight = (float) $this->getConfigData('max_package_weight');
         if ($weight > $maxPackageWeight && $maxPackageWeight != 0) {
             $this->_numBoxes = (int) ceil($weight / $maxPackageWeight);

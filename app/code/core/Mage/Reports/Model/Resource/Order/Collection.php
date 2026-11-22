@@ -799,11 +799,8 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
 
     /**
      * Add period filter by created_at attribute
-     *
-     * @param string $period
-     * @return $this
      */
-    public function addCreateAtPeriodFilter($period)
+    public function addCreateAtPeriodFilter(?string $period): static
     {
         [$from, $to] = $this->getDateRange($period, null, null, true);
 

@@ -33,11 +33,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Widget_Chooser extends Mage_Adminhtml
 
     /**
      * Prepare chooser element HTML
-     *
-     * @param \Maho\Data\Form\Element\AbstractElement $element Form Element
-     * @return \Maho\Data\Form\Element\AbstractElement
      */
-    public function prepareElementHtml(\Maho\Data\Form\Element\AbstractElement $element)
+    public function prepareElementHtml(\Maho\Data\Form\Element\AbstractElement $element): \Maho\Data\Form\Element\AbstractElement
     {
         $uniqId = Mage::helper('core')->uniqHash($element->getId());
         $sourceUrl = $this->getUrl('*/catalog_product_widget/chooser', [

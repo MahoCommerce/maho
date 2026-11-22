@@ -20,15 +20,10 @@ class Mage_Downloadable_Model_Link_Api_Uploader extends \Maho\ApiPlatform\Servic
     public const string DEFAULT_FILE_TYPE = 'application/octet-stream';
 
     /**
-     * @param array $file The file name, type and base64 content of the API request
-     * @throws Exception
+     * @param array{name: string, base64_content: string, type?: string} $file The file of the API request
      */
-    public function __construct($file)
+    public function __construct(array $file)
     {
-        if (!is_array($file)) {
-            throw new Exception('The file data is not correct.');
-        }
-
         $tmpFileName = tempnam(sys_get_temp_dir(), $this->_filePrefix);
         $io = new \Maho\Io\File();
         $io->open(['path' => sys_get_temp_dir()]);

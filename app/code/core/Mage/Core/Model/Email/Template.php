@@ -191,7 +191,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
 
     /**
      * Set id of template
-     * @param int|string|null $value
+     * @param int $value
      * @return static
      */
     #[\Override]

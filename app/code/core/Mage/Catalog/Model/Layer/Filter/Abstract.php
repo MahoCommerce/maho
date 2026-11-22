@@ -90,11 +90,8 @@ abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends \Maho\DataObject
 
     /**
      * Apply filter to collection
-     *
-     * @param null $filterBlock deprecated
-     * @return $this
      */
-    public function apply(Mage_Core_Controller_Request_Http $request, $filterBlock)
+    public function apply(Mage_Core_Controller_Request_Http $request, ?Mage_Catalog_Block_Layer_Filter_Abstract $filterBlock): static
     {
         return $this;
     }

@@ -59,12 +59,9 @@ class Mage_Catalog_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer
 
     /**
      * Apply attribute option filter to product collection
-     *
-     * @param \Maho\DataObject $filterBlock
-     * @return  Mage_Catalog_Model_Layer_Filter_Attribute
      */
     #[\Override]
-    public function apply(Mage_Core_Controller_Request_Http $request, $filterBlock)
+    public function apply(Mage_Core_Controller_Request_Http $request, ?Mage_Catalog_Block_Layer_Filter_Abstract $filterBlock): static
     {
         $filter = $request->getParam($this->_requestVar);
 

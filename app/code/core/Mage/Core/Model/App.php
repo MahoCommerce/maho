@@ -564,11 +564,10 @@ class Mage_Core_Model_App
     /**
      * Initialize currently ran store
      *
-     * @param string $scopeCode code of default scope (website/store_group/store code)
-     * @param string $scopeType type of default scope (website/group/store)
-     * @return $this
+     * @param string|int|null $scopeCode code of default scope (website/store_group/store code)
+     * @param string|null $scopeType type of default scope (website/group/store)
      */
-    protected function _initCurrentStore($scopeCode, $scopeType)
+    protected function _initCurrentStore(string|int|null $scopeCode, ?string $scopeType): static
     {
         \Maho\Profiler::start('mage::app::init::stores');
         $this->_initStores();

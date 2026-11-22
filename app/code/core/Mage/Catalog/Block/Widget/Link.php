@@ -42,10 +42,8 @@ class Mage_Catalog_Block_Widget_Link extends Mage_Core_Block_Html_Link implement
     /**
      * Prepare url using passed id and return it
      * or return false if path was not found.
-     *
-     * @return string|false
      */
-    public function getHref()
+    public function getHref(): string|false
     {
         if ($this->hasStoreId()) {
             $store = Mage::app()->getStore($this->getStoreId());
@@ -89,10 +87,8 @@ class Mage_Catalog_Block_Widget_Link extends Mage_Core_Block_Html_Link implement
     /**
      * Prepare anchor text using passed text as parameter.
      * If anchor text was not specified get entity name from DB.
-     *
-     * @return string
      */
-    public function getAnchorText()
+    public function getAnchorText(): string
     {
         if ($this->hasStoreId()) {
             $store = Mage::app()->getStore($this->getStoreId());
@@ -115,7 +111,7 @@ class Mage_Catalog_Block_Widget_Link extends Mage_Core_Block_Html_Link implement
             }
         }
 
-        return $this->_anchorText;
+        return (string) $this->_anchorText;
     }
 
     /**

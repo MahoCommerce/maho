@@ -371,10 +371,8 @@ class Mage_Sales_Model_Order_Payment_Transaction extends Mage_Core_Model_Abstrac
 
     /**
      * Check object before loading by by specified transaction ID
-     * @param string $txnId
-     * @return $this
      */
-    protected function _beforeLoadByTxnId($txnId)
+    protected function _beforeLoadByTxnId(string|int $txnId): static
     {
         $this->_verifyPaymentObject();
         Mage::dispatchEvent(

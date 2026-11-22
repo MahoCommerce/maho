@@ -68,10 +68,8 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Return current category path or get it from current category
      * and creating array of categories|product paths for breadcrumbs
-     *
-     * @return array
      */
-    public function getBreadcrumbPath()
+    public function getBreadcrumbPath(): array
     {
         if (!$this->_categoryPath) {
             $path = [];

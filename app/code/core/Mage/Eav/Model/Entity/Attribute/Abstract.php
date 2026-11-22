@@ -357,10 +357,8 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
 
     /**
      * Retrieve entity instance
-     *
-     * @return Mage_Eav_Model_Entity_Abstract
      */
-    public function getEntity()
+    public function getEntity(): Mage_Eav_Model_Entity_Abstract
     {
         if (!$this->_entity) {
             $this->_entity = $this->getEntityType()->getEntity();
