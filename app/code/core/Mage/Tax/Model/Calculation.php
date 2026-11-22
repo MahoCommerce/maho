@@ -314,15 +314,12 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
 
     /**
      * Return the default rate request. It can be either based on store address or customer address
-     *
-     * @param null|string|bool|int|Mage_Core_Model_Store $store
-     * @return \Maho\DataObject
      */
-    public function getDefaultRateRequest($store = null)
+    public function getDefaultRateRequest(Mage_Core_Model_Store|int|string|null $store = null): \Maho\DataObject
     {
         if ($this->_taxHelper->isCrossBorderTradeEnabled($store)) {
             //If cross border trade is enabled, we will use customer tax rate as store tax rate
-            return $this->getRateRequest(null, null, null, $store);
+            return $this->getRateRequest(null, null, null, $store === null ? null : Mage::app()->getStore($store));
         }
         return $this->getRateOriginRequest($store);
     }
