@@ -16,10 +16,11 @@ abstract class Mage_Eav_Model_Convert_Parser_Abstract extends Mage_Dataflow_Mode
     protected ?array $_attributeSetsByName = null;
 
     /**
-     * @param array $stores
-     * @return array|false
+     * Return the IDs of a comma separated list of store IDs and codes, or false for an unknown code
+     *
+     * @return list<int|string>|false
      */
-    public function getStoreIds($stores)
+    public function getStoreIds(?string $stores): array|false
     {
         if (empty($stores)) {
             $storeIds = [0];
