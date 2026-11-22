@@ -664,17 +664,22 @@ it('refunds the signed item tax charged on each invoice of a historic order', fu
         }
         foreach ($reverse ? array_reverse($groups, true) : $groups as $index => $group) {
             $refunded = 0.0;
-            foreach ($reverse ? array_reverse($group) : $group as $id) {
+            $lines = $reverse ? array_reverse($group) : $group;
+            $refunds = $unlinkedRefund === 'group' && $index === 0 ? [$lines] : array_chunk($lines, 1);
+            foreach ($refunds as $items) {
                 $order = Mage::getModel('sales/order')->load($orderId);
                 $invoice = Mage::getModel('sales/order_invoice')->load($invoices[$index]);
-                $data = ['qtys' => [$id => 1]];
-                if ($unlinkedRefund === 'adjustment' && $id === $groups[0][0]) {
+                $data = ['qtys' => array_fill_keys($items, 1)];
+                if ($unlinkedRefund === 'adjustment' && $items === [$groups[0][0]]) {
                     $data['adjustment_negative'] = 0.01;
                 }
-                if ($unlinkedRefund === 'item' && $index === 1) {
+                if (($unlinkedRefund === 'item' && $index === 1) || ($unlinkedRefund === 'group' && $index === 0)) {
                     $invoice = null;
                 }
                 $memo = $service->refund($order, $data, invoice: $invoice, sendEmail: false);
+                if (!$invoice) {
+                    expect($memo->getInvoiceId())->toBeNull();
+                }
                 $refunded += Mage::getModel('sales/order_creditmemo')->load($memo->getId())->getBaseGrandTotal();
             }
             expect(round($refunded, 2))->toBe($expectedRefunds[$index]);
@@ -689,8 +694,93 @@ it('refunds the signed item tax charged on each invoice of a historic order', fu
     'invoice order' => [false],
     'reverse invoice order' => [true],
     'order adjustment before invoice refunds' => [true, 'adjustment', [0.17, 0.20]],
-    'order item refund before invoice refunds' => [true, 'item', [0.25, 0.13]],
+    'order item refund belongs to the complete second invoice' => [true, 'item'],
+    'order refund covers both items on the first invoice' => [false, 'group'],
 ]);
+
+it('preserves the order balance for an adjusted refund without an invoice link', function (
+    ?float $priorShippingTax,
+    float $adjustment,
+    float $expectedTotal,
+    float $expectedBaseTotal,
+): void {
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $connection->beginTransaction();
+    try {
+        $store = setStoreDisplayCurrency('EUR', 'USD,EUR');
+        $store->setConfig('tax/weee/include_in_subtotal', '0');
+        $store->setConfig('tax/sales_display/shipping', Mage_Tax_Model_Config::DISPLAY_TYPE_EXCLUDING_TAX);
+        $order = Mage::getModel('sales/order')->setStoreId((int) $store->getId())
+            ->setIncrementId('signed-shipping-fee-' . uniqid())->setState(Mage_Sales_Model_Order::STATE_PROCESSING)
+            ->setBaseCurrencyCode('USD')->setOrderCurrencyCode('EUR')->setBaseToOrderRate(0.72)->setStoreToOrderRate(0.72)
+            ->setSubtotal(2.16)->setBaseSubtotal(3.0)->setDiscountAmount(-1.84)->setBaseDiscountAmount(-2.55)
+            ->setShippingAmount(2.88)->setBaseShippingAmount(4.0)->setShippingInclTax(3.6)->setBaseShippingInclTax(5.0)
+            ->setShippingTaxAmount(0.72)->setBaseShippingTaxAmount(1.0)
+            ->setTaxAmount(0.73)->setBaseTaxAmount(0.99)->setGrandTotal(3.93)->setBaseGrandTotal(5.44);
+        $order->setPayment(Mage::getModel('sales/order_payment')->setMethod('checkmo'));
+        foreach ([[0.65, 0.90, 0.0], [0.61, 0.85, 0.01], [0.58, 0.80, 0.0]] as $index => [$discount, $baseDiscount, $feeDiscount]) {
+            $item = Mage::getModel('sales/order_item')->setSku('signed-shipping-fee-' . $index)->setProductType('simple')
+                ->setQtyOrdered(1)->setPrice(0.72)->setBasePrice(1.0)->setRowTotal(0.72)->setBaseRowTotal(1.0)
+                ->setDiscountAmount($discount)->setBaseDiscountAmount($baseDiscount)
+                ->setWeeeTaxAppliedAmount(0.00576)->setBaseWeeeTaxAppliedAmount(0.008)
+                ->setWeeeTaxAppliedRowAmount(0.00576)->setBaseWeeeTaxAppliedRowAmnt(0.008);
+            Mage::helper('weee')->setApplied($item, [[
+                'title' => 'Fixed tax', 'amount' => 0.00576, 'base_amount' => 0.008,
+                'row_amount' => 0.00576, 'base_row_amount' => 0.008,
+                'total_weee_discount' => $feeDiscount, 'total_base_weee_discount' => 0.01,
+            ]]);
+            $order->addItem($item);
+        }
+        $order->save();
+        $orderId = (int) $order->getId();
+        $loadOrder = static fn(): Mage_Sales_Model_Order => Mage::getModel('sales/order')->load($orderId);
+        $ids = array_map(static fn(Mage_Sales_Model_Order_Item $item): int => (int) $item->getId(), $order->getAllVisibleItems());
+        $groups = [[$ids[0], $ids[1]], [$ids[2]]];
+        $service = Mage::getService('sales/order_document');
+        $invoices = [];
+        // Keep the signed taxes and totals charged by the older invoice collector.
+        foreach ([[0.72, 0.99, 3.78, 5.24], [0.01, -0.01, 0.15, 0.19]] as $index => [$tax, $baseTax, $total, $baseTotal]) {
+            $invoice = $service->prepareInvoice($loadOrder(), array_fill_keys($groups[$index], 1));
+            $invoice->setTaxAmount($tax)->setBaseTaxAmount($baseTax)->setGrandTotal($total)->setBaseGrandTotal($baseTotal)
+                ->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE)->register();
+            Mage::getModel('core/resource_transaction')->addObject($invoice)->addObject($invoice->getOrder())->save();
+            $invoices[] = $invoice;
+        }
+        $order = $loadOrder();
+        expect($order->getTotalPaid())->toBe(3.93)->and($order->getBaseTotalPaid())->toBe(5.43);
+        if ($priorShippingTax !== null) {
+            $prior = $service->refund($order, ['qtys' => [], 'shipping_amount' => 4.0], invoice: $invoices[0], beforeRegister: static function (
+                Mage_Sales_Model_Order_Creditmemo $memo,
+            ) use ($priorShippingTax): void {
+                // An earlier collector used the signed order tax cap for a shipping-only credit.
+                $memo->setBaseTaxAmount($priorShippingTax)->setBaseGrandTotal(4.0 + $priorShippingTax);
+            });
+            expect($prior->getAllItems())->toBeEmpty()
+                ->and($prior->getBaseShippingTaxAmount())->toBe(1.0)
+                ->and($prior->getBaseGrandTotal())->toBe(4.98);
+        }
+        $items = $priorShippingTax === null ? $groups[1] : $groups[0];
+        $shipping = $priorShippingTax === null && $adjustment > 0 ? 4.0 : 0.0;
+        $data = ['qtys' => array_fill_keys($items, 1), 'shipping_amount' => $shipping];
+        $data[$adjustment > 0 ? 'adjustment_positive' : 'adjustment_negative'] = abs($adjustment);
+        $order = $loadOrder();
+        $memo = $service->refund($order, $data, offlineRefund: true, sendEmail: false);
+        $memo = Mage::getModel('sales/order_creditmemo')->load((int) $memo->getId());
+        expect($memo->getInvoiceId())->toBeNull()
+            ->and($memo->getGrandTotal())->toBe($expectedTotal)
+            ->and($memo->getBaseGrandTotal())->toBe($expectedBaseTotal)
+            ->and($memo->getBaseShippingAmount())->toBe($shipping)
+            ->and($loadOrder()->getBaseTotalRefunded())->toBe(round($expectedBaseTotal + ($priorShippingTax === null ? 0.0 : 4.98), 2));
+    } finally {
+        $connection->rollBack();
+        resetCurrencyState();
+    }
+})->with([
+    'shipping and a positive adjustment use the available balance' => [null, 0.25, 3.93, 5.43],
+    'positive adjustment after an earlier signed shipping credit' => [0.98, 0.20, 0.32, 0.45],
+    'a negative adjustment keeps the order tax cap' => [null, -0.01, 0.14, 0.17],
+]);
+
 
 function partialFptProduct(
     Mage_Core_Model_Store $store,

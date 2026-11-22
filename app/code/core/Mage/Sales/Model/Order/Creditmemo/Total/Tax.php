@@ -95,7 +95,8 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
         $signedBaseTax = (float) $order->getBaseTaxAmount() < (float) $order->getBaseShippingTaxAmount();
         if ($signedTax || $signedBaseTax) {
             // A signed item tax can reach zero before all invoice quantities have been returned.
-            [$taxLeft, $baseTaxLeft, $last] = $this->getSignedItemTaxLeft($creditmemo, $invoice);
+            $itemInvoice = $invoice ?: $this->getWholeItemInvoice($creditmemo, $order);
+            [$taxLeft, $baseTaxLeft, $last] = $this->getSignedItemTaxLeft($creditmemo, $itemInvoice);
             if ($signedTax) {
                 $allowedTax = $taxLeft + $shippingTaxAmount - $creditmemo->getTaxAmount();
                 $totalTax = $last ? $allowedTax : $totalTax;
@@ -145,16 +146,23 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                 if ($memo->getState() == Mage_Sales_Model_Order_Creditmemo::STATE_CANCELED || $memo->getId() == $creditmemo->getId()) {
                     continue;
                 }
-                if (!$memo->getInvoiceId()) {
-                    // An order-level refund of items or their tax cannot be assigned to one invoice.
-                    if ((float) $memo->getTaxAmount() !== (float) $memo->getShippingTaxAmount()
-                        || (float) $memo->getBaseTaxAmount() !== (float) $memo->getBaseShippingTaxAmount()
-                        || array_any($memo->getAllItems(), static fn($item): bool => $item->getQty() > 0)) {
+                $invoiceId = $memo->getInvoiceId();
+                if (!$invoiceId) {
+                    $itemTax = $memo->getTaxAmount() - $memo->getShippingTaxAmount();
+                    $baseItemTax = $memo->getBaseTaxAmount() - $memo->getBaseShippingTaxAmount();
+                    if ($itemTax == 0 && $baseItemTax == 0 && !array_any($memo->getAllItems(), static fn($item): bool => $item->getQty() > 0)) {
+                        continue;
+                    }
+                    $memo->setOrder($order);
+                    $source = $this->getWholeItemInvoice($memo, $order);
+                    // An older refund may have charged another invoice's outstanding tax.
+                    if (!$source || round($source->getTaxAmount() - $source->getShippingTaxAmount() - $itemTax, 4) != 0
+                        || round($source->getBaseTaxAmount() - $source->getBaseShippingTaxAmount() - $baseItemTax, 4) != 0) {
                         return $this->getSignedItemTaxLeft($creditmemo, null);
                     }
-                    continue;
+                    $invoiceId = $source->getId();
                 }
-                if ($memo->getInvoiceId() != $invoice->getId()) {
+                if ($invoiceId != $invoice->getId()) {
                     continue;
                 }
                 $tax -= $memo->getTaxAmount() - $memo->getShippingTaxAmount();
@@ -188,5 +196,47 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
             }
         }
         return $hasItems ? [$tax, $baseTax, round(max($quantities), 4) <= 0.0] : [0.0, 0.0, true];
+    }
+
+    private function getWholeItemInvoice(Mage_Sales_Model_Order_Creditmemo $memo, Mage_Sales_Model_Order $order): ?Mage_Sales_Model_Order_Invoice
+    {
+        // Keep an unlinked refund with an adjustment on the order balance.
+        if ($memo->getBaseAdjustmentPositive() || $memo->getBaseAdjustmentNegative()
+            || $memo->getAdjustmentPositive() || $memo->getAdjustmentNegative()) {
+            return null;
+        }
+
+        $quantities = $this->getItemQuantities($memo);
+        if (!$quantities) {
+            return null;
+        }
+        $source = null;
+        foreach ($order->getInvoiceCollection() as $invoice) {
+            if ($invoice->isCanceled()) {
+                continue;
+            }
+            $invoiced = $this->getItemQuantities($invoice);
+            if (!array_intersect_key($quantities, $invoiced)) {
+                continue;
+            }
+            if ($source || $invoice->getState() !== Mage_Sales_Model_Order_Invoice::STATE_PAID || $quantities != $invoiced) {
+                return null;
+            }
+            $source = $invoice;
+        }
+        return $source;
+    }
+
+    /** @return array<int, float> */
+    private function getItemQuantities(Mage_Sales_Model_Order_Creditmemo|Mage_Sales_Model_Order_Invoice $document): array
+    {
+        $quantities = [];
+        foreach ($document->getAllItems() as $item) {
+            if ($item->getQty() > 0 && !$item->getOrderItem()?->isDummy()) {
+                $id = $item->getOrderItemId();
+                $quantities[$id] = ($quantities[$id] ?? 0.0) + $item->getQty();
+            }
+        }
+        return $quantities;
     }
 }
