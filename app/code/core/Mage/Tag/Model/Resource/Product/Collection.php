@@ -364,11 +364,9 @@ class Mage_Tag_Model_Resource_Product_Collection extends Mage_Catalog_Model_Reso
 
     /**
      * Render SQL for retrieve product count
-     *
-     * @return Maho\Db\Select
      */
     #[\Override]
-    public function getSelectCountSql()
+    public function getSelectCountSql(): Maho\Db\Select
     {
         $countSelect = clone $this->getSelect();
 

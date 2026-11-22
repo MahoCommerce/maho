@@ -208,10 +208,8 @@ class Db extends Collection
 
     /**
      * Get SQL for get record count
-     *
-     * @return Select
      */
-    public function getSelectCountSql()
+    public function getSelectCountSql(): Select
     {
         $this->_renderFilters();
 
@@ -239,12 +237,12 @@ class Db extends Collection
                 $mainTable = array_key_first(array_filter($leftJoins, fn($table) => $table['joinType'] == Select::FROM));
                 $mainTable = preg_quote($mainTable, '/');
                 $pattern = "/^$mainTable\\.\\w+/";
-                $whereUsingJoin = array_filter($countSelect->getPart(Select::WHERE), function ($clause) use ($pattern) {
+                $whereUsingJoin = array_filter($countSelect->getPart(Select::WHERE), function ($clause) use ($pattern): bool {
                     $clauses = preg_split('/(^|\s+)(AND|OR)\s+/', $clause, -1, PREG_SPLIT_NO_EMPTY);
-                    return array_filter($clauses, function ($clause) use ($pattern) {
+                    return array_filter($clauses, function ($clause) use ($pattern): bool {
                         $clause = preg_replace('/[()`\s]+/', '', $clause);
                         return !preg_match($pattern, $clause);
-                    });
+                    }) !== [];
                 });
                 if ($this->_bindParams) {
                     $bindParams = array_map(fn($placeholder) => ltrim($placeholder, ':'), array_keys($this->_bindParams));

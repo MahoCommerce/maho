@@ -106,11 +106,9 @@ class Mage_Reports_Model_Resource_Review_Customer_Collection extends Mage_Review
 
     /**
      * Get select count sql
-     *
-     * @return Maho\Db\Select
      */
     #[\Override]
-    public function getSelectCountSql()
+    public function getSelectCountSql(): Maho\Db\Select
     {
         $countSelect = clone $this->_select;
         $countSelect->reset(Maho\Db\Select::ORDER);
