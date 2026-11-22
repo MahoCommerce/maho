@@ -23,6 +23,7 @@ class Mage_Sales_Model_Order_Invoice_Total_Discount extends Mage_Sales_Model_Ord
         $shippingDiscount = (float) $order->getShippingDiscountAmount();
         $baseShippingDiscount = (float) $order->getBaseShippingDiscountAmount();
         $checkBaseShippingDiscount = !$order->getShippingAmount() && (float) $order->getBaseShippingAmount() > 0.0;
+        $baseShippingInvoicedWithoutDiscount = false;
         foreach ($order->getInvoiceCollection() as $previousInvoice) {
             if ($previousInvoice->isCanceled()) {
                 continue;
@@ -38,6 +39,7 @@ class Mage_Sales_Model_Order_Invoice_Total_Discount extends Mage_Sales_Model_Ord
                     $baseShippingDiscount = 0.0;
                     break;
                 }
+                $baseShippingInvoicedWithoutDiscount = true;
             } elseif ($discountOutsideItems > 0.0
                 && $discountOutsideItems === round($baseShippingDiscount, 4)
             ) {
@@ -45,6 +47,7 @@ class Mage_Sales_Model_Order_Invoice_Total_Discount extends Mage_Sales_Model_Ord
             }
         }
 
+        $invoice->setData('has_remaining_base_shipping_discount', $baseShippingInvoicedWithoutDiscount && $baseShippingDiscount > 0.0);
         $totalDiscountAmount = $shippingDiscount;
         $baseTotalDiscountAmount = $baseShippingDiscount;
 

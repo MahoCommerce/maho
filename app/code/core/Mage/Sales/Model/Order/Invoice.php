@@ -532,6 +532,13 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
             Mage::throwException(Mage::helper('sales')->__('Cannot register existing invoice'));
         }
 
+        // Check the finalized totals before registering items or attempting capture.
+        if ($this->getData('has_remaining_base_shipping_discount')
+            && $this->getStore()->roundPrice((float) $this->getBaseGrandTotal()) < 0.0
+        ) {
+            Mage::throwException(Mage::helper('sales')->__('The remaining shipping discount exceeds the amount of this invoice.'));
+        }
+
         foreach ($this->getAllItems() as $item) {
             if ($item->getQty() > 0) {
                 $item->register();
