@@ -523,18 +523,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Resource/Order/Status.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Shipping_Model_Rate_Result_Method::setCost() expects float|null, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Carrier/Freeshipping.php
-
-		-
-			rawMessage: 'Parameter #1 $hash of method Mage_Shipping_Helper_Data::decodeTrackingHash() expects string, array given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Info.php
-
-		-
 			rawMessage: 'Parameter #1 $model of method Mage_Tag_Model_Resource_Tag::loadByName() expects Mage_Tag_Model_Tag, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
@@ -595,64 +583,10 @@ parameters:
 			path: app/code/core/Mage/Tax/data/tax_setup/data-install-1.6.0.0.php
 
 		-
-			rawMessage: 'Parameter #1 $shippingDays of method Mage_Usa_Model_Shipping_Carrier_Dhl_Abstract::_determineShippingDay() expects array, string|false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Abstract.php
-
-		-
-			rawMessage: 'Parameter #2 $string of function explode expects string, array given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Abstract.php
-
-		-
-			rawMessage: Access to an undefined property Maho\DataObject::$domestic.
-			identifier: property.notFound
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
-
-		-
-			rawMessage: Access to an undefined property Maho\DataObject::$name.
-			identifier: property.notFound
-			count: 4
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
-
-		-
-			rawMessage: Access to an undefined property Maho\DataObject::$region.
-			identifier: property.notFound
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Shipping_Model_Rate_Result_Method::setMethodTitle() expects string|null, array|bool given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
-
-		-
-			rawMessage: 'Parameter #1 $error of method Mage_Shipping_Model_Rate_Result::setError() expects bool, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups.php
-
-		-
-			rawMessage: 'Parameter #1 $string of function strlen expects string, array|false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Shipping_Model_Rate_Result_Method::setMethodTitle() expects string|null, array|false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups.php
-
-		-
-			rawMessage: 'Parameter #3 $value of function curl_setopt expects bool, int given.'
-			identifier: argument.type
-			count: 3
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups.php
 
 		-
 			rawMessage: 'Parameter #1 $array of function usort contains unresolvable type.'
