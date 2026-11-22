@@ -253,7 +253,8 @@ class Mage_Shipping_Model_Shipping
             $unitCost = $unitCosts[$code] ?? null;
             $quotedCost = $rate->getCost();
             $cost = is_numeric($quotedCost) ? (float) $quotedCost : null;
-            // A result class can override updateRatePrice() to scale the cost, so scale it here only when it did not
+            // A result class can override updateRatePrice() to scale the cost.
+            // Scale the cost here only when updateRatePrice() left it unchanged.
             if ($cost !== null && is_numeric($unitCost) && $cost === (float) $unitCost) {
                 $cost *= $packageCount;
             }
