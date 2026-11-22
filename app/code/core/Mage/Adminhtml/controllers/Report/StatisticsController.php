@@ -36,34 +36,6 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
         return $this;
     }
 
-    #[Maho\Config\Route('/admin/report_statistics/_initReport')]
-    public function _initReportAction(array|Mage_Core_Block_Abstract|false $blocks): static
-    {
-        if (!is_array($blocks)) {
-            $blocks = [$blocks];
-        }
-
-        $requestData = Mage::helper('adminhtml')->prepareFilterString($this->getRequest()->getParam('filter', ''));
-        $requestData = $this->_filterDates($requestData, ['from', 'to']);
-        $requestData['store_ids'] = $this->getRequest()->getParam('store_ids');
-        $params = new \Maho\DataObject();
-
-        foreach ($requestData as $key => $value) {
-            if (!empty($value)) {
-                $params->setData($key, $value);
-            }
-        }
-
-        foreach ($blocks as $block) {
-            if ($block) {
-                $block->setPeriodType($params->getData('period_type'));
-                $block->setFilterData($params);
-            }
-        }
-
-        return $this;
-    }
-
     /**
      * Retrieve the report codes specified in the request
      *
