@@ -141,3 +141,24 @@ it('offers only the methods of every package, at the price and cost of all packa
         [70 => 1], [70 => ['ground' => [4.0, 3.0], 'error' => 'Package unavailable']], false, [],
     ],
 ]);
+
+it('does not reuse a package service restriction for a different weight', function (): void {
+    $carrier = new PackageCarrierStub(static function (
+        float $weight,
+        Mage_Shipping_Model_Rate_Request $request,
+    ): Mage_Shipping_Model_Rate_Result|Mage_Shipping_Model_Rate_Result_Error|false {
+        if ($weight === 70.0) {
+            $request->setLimitMethod('freight');
+        }
+        return $request->getLimitMethod() === 'freight' ? packageAnswer(['freight' => [15.0, 15.0]]) : false;
+    });
+    $shipping = new ShippingStub(['test' => $carrier], [70 => 1, 5 => 1]);
+    $request = new Mage_Shipping_Model_Rate_Request()->setPackageWeight(75.0);
+
+    $shipping->collectCarrierRates('test', $request);
+
+    expect($carrier->getRequestedWeights())->toBe([70.0, 5.0])
+        ->and($shipping->getResult()->getAllRates())->toBe([])
+        ->and($request->getLimitMethod())->toBeNull()
+        ->and($request->getPackageWeight())->toBe(75.0);
+});

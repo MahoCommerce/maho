@@ -22,7 +22,7 @@ final class PackageCarrierStub extends \Mage_Shipping_Model_Carrier_Abstract
     private readonly \ArrayObject $weights;
 
     /**
-     * @param \Closure(float): (\Mage_Shipping_Model_Rate_Result|\Mage_Shipping_Model_Rate_Result_Error|false|null) $quote
+     * @param \Closure(float, \Mage_Shipping_Model_Rate_Request): (\Mage_Shipping_Model_Rate_Result|\Mage_Shipping_Model_Rate_Result_Error|false|null) $quote
      */
     public function __construct(
         private readonly \Closure $quote,
@@ -67,6 +67,6 @@ final class PackageCarrierStub extends \Mage_Shipping_Model_Carrier_Abstract
     {
         $weight = (float) $request->getPackageWeight();
         $this->weights->append($weight);
-        return ($this->quote)($weight);
+        return ($this->quote)($weight, $request);
     }
 }

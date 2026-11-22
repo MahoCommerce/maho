@@ -182,8 +182,8 @@ class Mage_Shipping_Model_Shipping
         $rates = null;
         $errors = [];
         $singlePackage = count($packages) === 1;
-        $packageRequest = clone $request;
         foreach ($packages as $weight => $packageCount) {
+            $packageRequest = clone $request;
             $packageRequest->setPackageWeight($weight);
             $packageResult = (clone $carrier)->collectRates($packageRequest);
             if ($packageResult instanceof Mage_Shipping_Model_Rate_Result_Error) {

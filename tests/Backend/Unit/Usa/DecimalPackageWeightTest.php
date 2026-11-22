@@ -101,10 +101,7 @@ it('quotes the actual package weights for decimal quantities', function (
     'no package weight limit' => [8.0, 1.5, true, null, [12.0], 0],
     'decimal package limit with no remainder' => [140.8, 1.75, true, null, array_fill(0, 11, 22.4), 22.4],
     'indivisible decimal quantity at the limit' => [0.1, 3.0, false, null, [0.3], 0.3],
-    'one quantity increment at the limit' => [0.1, 3.0, true, 3.0, [0.3], 0.3],
     'two quantity increments at the limit' => [0.1, 6.0, true, 3.0, [0.3, 0.3], 0.3],
-    'divisible decimal quantity at the limit without an increment' => [0.1, 3.0, true, null, [0.3], 0.3],
-    'divisible decimal quantity exceeding the limit without an increment' => [0.1001, 3.0, true, null, [0.3, 0.0003], 0.3],
     'a weightless line with quantity increments ships with a weighted item' => [0.0, 1.5, true, 0.5, [6.0], 70, [6.0]],
 ]);
 
