@@ -413,7 +413,7 @@ use Maho\Config\ApiResource;
 )]
 class {{SHORT_NAME}} extends CrudResource
 {
-    public const MODEL = '{{MODEL}}';
+    public const string MODEL = '{{MODEL}}';
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

@@ -89,7 +89,7 @@ abstract class CrudResource extends Resource
         if (!$model) {
             throw new \LogicException(
                 "{$class} extends CrudResource but has no model. "
-                . "Add: public const MODEL = 'module/model';",
+                . "Add: public const string MODEL = 'module/model';",
             );
         }
 
