@@ -26,26 +26,6 @@ class Maho_Blog_Block_Adminhtml_Category_Edit_Tab_Posts extends Mage_Adminhtml_B
     }
 
     #[\Override]
-    protected function _addColumnFilterToCollection(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
-    {
-        $collection = $this->getCollection();
-        if ($column->getId() === 'in_category' && $collection instanceof \Maho\Data\Collection\Db) {
-            $postIds = $this->_getSelectedPostIds();
-            if (empty($postIds)) {
-                $postIds = [0];
-            }
-            if ($column->getFilter()->getValue()) {
-                $collection->addFieldToFilter('entity_id', ['in' => $postIds]);
-            } elseif ($column->getFilter()->getValue() === '0') {
-                $collection->addFieldToFilter('entity_id', ['nin' => $postIds]);
-            }
-        } else {
-            parent::_addColumnFilterToCollection($column);
-        }
-        return $this;
-    }
-
-    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel('blog/post_collection');
@@ -66,6 +46,7 @@ class Maho_Blog_Block_Adminhtml_Category_Edit_Tab_Posts extends Mage_Adminhtml_B
             'values' => $this->_getSelectedPostIds(),
             'align' => 'center',
             'index' => 'entity_id',
+            'filter_condition_callback' => $this->filterInCategory(...),
         ]);
 
         $this->addColumn('entity_id', [
@@ -146,5 +127,18 @@ class Maho_Blog_Block_Adminhtml_Category_Edit_Tab_Posts extends Mage_Adminhtml_B
     public function isHidden()
     {
         return false;
+    }
+
+    private function filterInCategory(Maho_Blog_Model_Resource_Post_Collection $collection, Mage_Adminhtml_Block_Widget_Grid_Column $column): void
+    {
+        $postIds = $this->_getSelectedPostIds();
+        if (empty($postIds)) {
+            $postIds = [0];
+        }
+        if ($column->getFilter()->getValue()) {
+            $collection->addFieldToFilter('entity_id', ['in' => $postIds]);
+        } elseif ($column->getFilter()->getValue() === '0') {
+            $collection->addFieldToFilter('entity_id', ['nin' => $postIds]);
+        }
     }
 }

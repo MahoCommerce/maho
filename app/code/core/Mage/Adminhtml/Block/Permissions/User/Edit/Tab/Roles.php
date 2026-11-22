@@ -22,28 +22,6 @@ class Mage_Adminhtml_Block_Permissions_User_Edit_Tab_Roles extends Mage_Adminhtm
     }
 
     #[\Override]
-    protected function _addColumnFilterToCollection(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
-    {
-        $collection = $this->getCollection();
-        if ($column->getId() == 'assigned_user_role' && $collection instanceof \Maho\Data\Collection\Db) {
-            $userRoles = $this->_getSelectedRoles();
-            if (empty($userRoles)) {
-                $userRoles = 0;
-            }
-            if ($column->getFilter()->getValue()) {
-                $collection->addFieldToFilter('role_id', ['in' => $userRoles]);
-            } else {
-                if ($userRoles) {
-                    $collection->addFieldToFilter('role_id', ['nin' => $userRoles]);
-                }
-            }
-        } else {
-            parent::_addColumnFilterToCollection($column);
-        }
-        return $this;
-    }
-
-    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel('admin/role_collection');
@@ -63,6 +41,7 @@ class Mage_Adminhtml_Block_Permissions_User_Edit_Tab_Roles extends Mage_Adminhtm
             'values'    => $this->_getSelectedRoles(),
             'align'     => 'center',
             'index'     => 'role_id',
+            'filter_condition_callback' => $this->filterAssignedRoles(...),
         ]);
 
         /*$this->addColumn('role_id', array(
@@ -107,5 +86,18 @@ class Mage_Adminhtml_Block_Permissions_User_Edit_Tab_Roles extends Mage_Adminhtm
     public function getSelectedRolesAsJson(): string
     {
         return Mage::helper('core')->jsonEncode((object) array_fill_keys($this->_getSelectedRoles(), 0));
+    }
+
+    private function filterAssignedRoles(Mage_Admin_Model_Resource_Role_Collection $collection, Mage_Adminhtml_Block_Widget_Grid_Column $column): void
+    {
+        $userRoles = $this->_getSelectedRoles();
+        if (empty($userRoles)) {
+            $userRoles = 0;
+        }
+        if ($column->getFilter()->getValue()) {
+            $collection->addFieldToFilter('role_id', ['in' => $userRoles]);
+        } elseif ($userRoles) {
+            $collection->addFieldToFilter('role_id', ['nin' => $userRoles]);
+        }
     }
 }

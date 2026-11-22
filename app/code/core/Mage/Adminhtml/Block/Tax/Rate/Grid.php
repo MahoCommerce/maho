@@ -37,8 +37,8 @@ class Mage_Adminhtml_Block_Tax_Rate_Grid extends Mage_Adminhtml_Block_Widget_Gri
             $columnIndex = $column->getFilterIndex() ?: $column->getIndex();
             $collection->setOrder($columnIndex, strtoupper($column->getDir()));
 
-            if ($columnIndex === 'region_table.code' && $collection instanceof \Maho\Data\Collection\Db) {
-                $collection->addOrder('code', strtoupper($column->getDir()));
+            if ($columnIndex === 'region_table.code') {
+                $collection->setOrder('code', strtoupper($column->getDir()));
             }
         }
         return $this;
