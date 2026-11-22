@@ -453,6 +453,7 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
     bool $reverse,
     bool $convert = false,
     bool $allDiscounted = false,
+    bool $taxOnGross = false,
 ): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
@@ -466,7 +467,9 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
             'tax/weee/enable' => '1',
             'tax/weee/discount' => '1',
             'tax/weee/include_in_subtotal' => '0',
-            'tax/weee/apply_vat' => '0',
+            'tax/weee/apply_vat' => $taxOnGross ? '1' : '0',
+            Mage_Tax_Model_Config::CONFIG_XML_PATH_APPLY_AFTER_DISCOUNT => $taxOnGross ? '0' : '1',
+            Mage_Tax_Model_Config::CONFIG_XML_PATH_DISCOUNT_TAX => $taxOnGross ? '1' : '0',
             'payment/checkmo/active' => '1',
             'payment/checkmo/allowspecific' => '0',
             'sales_email/invoice/enabled' => '0',
@@ -477,6 +480,17 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
 
         $connection->update(Mage::getSingleton('core/resource')->getTableName('salesrule/rule'), ['is_active' => 0]);
         $groupId = Mage_Customer_Model_Group::NOT_LOGGED_IN_ID;
+        $productTaxClassId = 0;
+        if ($taxOnGross) {
+            $name = 'Fixed product tax VAT ' . uniqid();
+            $productTaxClassId = (int) Mage::getModel('tax/class')->setClassType('PRODUCT')->setClassName($name)->save()->getId();
+            $customerTaxClassId = (int) Mage::getModel('customer/group')->getTaxClassId($groupId);
+            $rate = Mage::getService('tax/rate')->save(Mage::getModel('tax/calculation_rate')
+                ->setCode($name)->setTaxCountryId('US')->setTaxPostcode('*')->setRate(25.0));
+            Mage::getService('tax/rule')->save(Mage::getModel('tax/calculation_rule')->setCode($name)
+                ->setPriority(0)->setPosition(0)->setTaxCustomerClass([$customerTaxClassId])
+                ->setTaxProductClass([$productTaxClassId])->setTaxRate([(int) $rate->getId()]));
+        }
         $attribute = 'fpt_cap_' . uniqid();
         WeeeDiscountFixture::createFeeAttribute($attribute);
         $cart = Mage::getService('checkout/cart');
@@ -489,8 +503,9 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
             'postcode' => '90210', 'country_id' => 'US', 'telephone' => '5550100000',
         ]);
         $skus = [];
-        foreach ([90.0, $allDiscounted ? 85.0 : 0.0, 80.0] as $priority => $percent) {
-            $product = partialFptProduct($store, [$attribute => 0.008]);
+        $percentages = $taxOnGross ? [88.0, 84.0, 80.0] : [90.0, $allDiscounted ? 85.0 : 0.0, 80.0];
+        foreach ($percentages as $priority => $percent) {
+            $product = partialFptProduct($store, [$attribute => 0.008], taxClassId: $productTaxClassId);
             $skus[] = $product->getSku();
             if ($percent > 0.0) {
                 Mage::getModel('salesrule/rule')->setName('Fixed product tax discount ' . uniqid())
@@ -510,13 +525,18 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
         $orderId = (int) $saved->getId();
         $order = Mage::getModel('sales/order')->load($orderId);
         $baseAmounts = $allDiscounted ? [0.10, 0.15, 0.20] : [0.10, 1.00, 0.20];
+        $baseTaxes = [0.0, 0.0, 0.0];
+        if ($taxOnGross) {
+            $baseAmounts = [0.15, 0.20, 0.24];
+            $baseTaxes = [0.25, 0.25, 0.24];
+        }
         $amounts = $convert ? ($allDiscounted ? [0.07, 0.11, 0.15] : [0.05, 0.51, 0.10]) : $baseAmounts;
-        $taxes = $convert ? ($allDiscounted ? [0.0, 0.0, 0.01] : [0.0, 0.01, 0.0]) : [0.0, 0.0, 0.0];
+        $taxes = $convert ? ($allDiscounted ? [0.0, 0.0, 0.01] : [0.0, 0.01, 0.0]) : $baseTaxes;
         $expectedTotal = round(array_sum($amounts), 2);
         $expectedBaseTotal = round(array_sum($baseAmounts), 2);
         expect($order->getGrandTotal())->toBe($expectedTotal)
             ->and($order->getBaseGrandTotal())->toBe($expectedBaseTotal)
-            ->and($order->getBaseTaxAmount())->toBe(0.0);
+            ->and($order->getBaseTaxAmount())->toBe(round(array_sum($baseTaxes), 2));
         $idsBySku = [];
         foreach ($order->getAllVisibleItems() as $item) {
             $idsBySku[$item->getSku()] = (int) $item->getId();
@@ -524,9 +544,14 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
         $itemIds = array_map(static fn(string $sku): int => $idsBySku[$sku], $skus);
         $documents = Mage::getService('sales/order_document');
         $feeHelper = Mage::helper('weee');
-        $checkFees = static function (array $items) use ($feeHelper): void {
+        $checkFees = static function (array $items) use ($feeHelper, $taxOnGross): void {
             foreach ($items as $item) {
                 foreach ($feeHelper->getAppliedToItem($item) as $fee) {
+                    if ($taxOnGross) {
+                        expect((float) $fee['weee_discount'])->toBe(0.01)
+                            ->and((float) $fee['base_weee_discount'])->toBe(0.01);
+                        continue;
+                    }
                     expect((float) $fee['weee_discount'])->toBeGreaterThanOrEqual(0.0)
                         ->toBeLessThanOrEqual((float) $fee['row_amount'])
                         ->and((float) $fee['base_weee_discount'])->toBeGreaterThanOrEqual(0.0)
@@ -544,7 +569,7 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
             expect($invoice->getGrandTotal())->toBe($sumLines($amounts, $lines))
                 ->and($invoice->getBaseGrandTotal())->toBe($sumLines($baseAmounts, $lines))
                 ->and($invoice->getTaxAmount())->toBe($sumLines($taxes, $lines))
-                ->and($invoice->getBaseTaxAmount())->toBe(0.0);
+                ->and($invoice->getBaseTaxAmount())->toBe($sumLines($baseTaxes, $lines));
             $checkFees($invoice->getAllItems());
             $invoices[] = (int) $invoice->getId();
         }
@@ -559,7 +584,7 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
                 expect($creditmemo->getGrandTotal())->toBe($amounts[$line])
                     ->and($creditmemo->getBaseGrandTotal())->toBe($baseAmounts[$line])
                     ->and($creditmemo->getTaxAmount())->toBe($taxes[$line])
-                    ->and($creditmemo->getBaseTaxAmount())->toBe(0.0);
+                    ->and($creditmemo->getBaseTaxAmount())->toBe($baseTaxes[$line]);
                 $checkFees($creditmemo->getAllItems());
             }
         }
@@ -582,17 +607,23 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
     'tax cents differ between EUR sale and USD base' => [[[0, 1], [2]], true, true],
     'three separate rules discount fractional taxes' => [[[0, 1], [2]], false, false, true],
     'three separate rules discount fractional taxes in EUR' => [[[0, 1, 2]], false, true, true],
+    'gross discounts on taxable fees in one invoice' => [[[0, 1, 2]], false, false, true, true],
+    'gross discounts on taxable fees after a partial invoice' => [[[0, 1], [2]], false, false, true, true],
 ]);
 
-function partialFptProduct(Mage_Core_Model_Store $store, array $fees, bool $fractionalQty = false): Mage_Catalog_Model_Product
-{
+function partialFptProduct(
+    Mage_Core_Model_Store $store,
+    array $fees,
+    bool $fractionalQty = false,
+    int $taxClassId = 0,
+): Mage_Catalog_Model_Product {
     $product = Mage::getModel('catalog/product')->setStoreId(0);
     $product->setAttributeSetId($product->getDefaultAttributeSetId())
         ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_VIRTUAL)
         ->setSku('partial-fpt-' . uniqid())->setName('Partial FPT item')->setPrice(1.0)
         ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
         ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
-        ->setTaxClassId(0)->setWebsiteIds([(int) $store->getWebsiteId()])
+        ->setTaxClassId($taxClassId)->setWebsiteIds([(int) $store->getWebsiteId()])
         ->setStockData(['use_config_manage_stock' => 0, 'manage_stock' => 0, 'is_in_stock' => 1, 'qty' => 20, 'is_qty_decimal' => $fractionalQty]);
     foreach ($fees as $attribute => $price) {
         $product->setData($attribute, [['website_id' => (int) $store->getWebsiteId(), 'country' => 'US', 'state' => '*', 'price' => $price]]);

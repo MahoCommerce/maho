@@ -53,18 +53,15 @@ class Mage_Weee_Model_Total_Invoice_Weee extends Mage_Sales_Model_Order_Invoice_
             $baseTotalTax += $share['base_gross'] - $share['base_discount'];
         }
 
-        /*
-         * Add FPT to totals
-         * Notice that we check restriction on allowed tax, because
-         * a) for last invoice we don't need to collect FPT - it is automatically collected by subtotal/tax collector,
-         * that adds whole remaining (not invoiced) subtotal/tax value, so fpt is automatically included into it
-         * b) FPT tax is included into order subtotal/tax value, so after multiple invoices with partial item quantities
-         * it can happen that other collector will take some FPT value from shared subtotal/tax order value
-         */
+        $last = $invoice->isLast();
         $requestedTax = $totalTax;
         $requestedBaseTax = $baseTotalTax;
         $included = $source === null ? null : $allocation->feeWasIncludedInSubtotal($order);
-        if ($included ?? $helper->includeInSubtotal($store)) {
+        if ($last) {
+            // The subtotal and tax collectors have already booked the signed remainder.
+            $totalTax = 0.0;
+            $baseTotalTax = 0.0;
+        } elseif ($included ?? $helper->includeInSubtotal($store)) {
             $allowedSubtotal = $order->getSubtotal() - $order->getSubtotalInvoiced() - $invoice->getSubtotal();
             $allowedBaseSubtotal = $order->getBaseSubtotal() - $order->getBaseSubtotalInvoiced()
                 - $invoice->getBaseSubtotal();
@@ -83,8 +80,6 @@ class Mage_Weee_Model_Total_Invoice_Weee extends Mage_Sales_Model_Order_Invoice_
             $invoice->setBaseTaxAmount($invoice->getBaseTaxAmount() + $baseTotalTax);
         }
 
-        $last = $invoice->isLast();
-        // On the last invoice the subtotal or tax collector has already booked the remainder.
         $excess = $last ? 0.0 : $store->roundPrice($requestedTax - $store->roundPrice($totalTax));
         $baseExcess = $last ? 0.0 : $store->roundPrice($requestedBaseTax - $store->roundPrice($baseTotalTax));
         foreach ($itemShares as [$item, $share]) {
