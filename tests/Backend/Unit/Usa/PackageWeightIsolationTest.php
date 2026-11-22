@@ -8,6 +8,9 @@
 
 declare(strict_types=1);
 
+use Tests\Helpers\PackageCarrierStub;
+use Tests\Helpers\ShippingStub;
+
 uses(Tests\MahoBackendTestCase::class);
 
 it('keeps the full order weight for a carrier after a carrier that quotes per package', function (bool $declines): void {
@@ -38,51 +41,9 @@ it('keeps the full order weight for a carrier after a carrier that quotes per pa
         ->setDestPostcode('20121')
         ->setDestStreet('1 Example Street')
         ->setLimitCarrier(['fedex', 'dhlint']);
-    $splitCarrier = new class ($declines) extends Mage_Shipping_Model_Carrier_Abstract {
-        /** @var ArrayObject<int, float> */
-        public ArrayObject $weights;
-
-        public function __construct(private readonly bool $declines)
-        {
-            parent::__construct();
-            $this->weights = new ArrayObject();
-        }
-
-        #[\Override]
-        public function getConfigData($field): int
-        {
-            return match ($field) {
-                'shipment_requesttype' => 1,
-                'max_package_weight' => 70,
-                default => 0,
-            };
-        }
-
-        #[\Override]
-        public function checkAvailableShipCountries(Mage_Shipping_Model_Rate_Request $request): true
-        {
-            return true;
-        }
-
-        #[\Override]
-        public function proccessAdditionalValidation(Mage_Shipping_Model_Rate_Request $request): true
-        {
-            return true;
-        }
-
-        #[\Override]
-        public function collectRates(Mage_Shipping_Model_Rate_Request $request): Mage_Shipping_Model_Rate_Result|false
-        {
-            $this->weights->append((float) $request->getPackageWeight());
-            if ($this->declines) {
-                return false;
-            }
-
-            return new Mage_Shipping_Model_Rate_Result()->append(
-                new Mage_Shipping_Model_Rate_Result_Method(['method' => 'test', 'price' => 5.0]),
-            );
-        }
-    };
+    $splitCarrier = new PackageCarrierStub(fn() => $declines ? false : new Mage_Shipping_Model_Rate_Result()->append(
+        new Mage_Shipping_Model_Rate_Result_Method(['method' => 'test', 'price' => 5.0]),
+    ));
     $dhl = new class extends Mage_Usa_Model_Shipping_Carrier_Dhl_International {
         public ?float $quotedWeight = null;
 
@@ -118,25 +79,11 @@ it('keeps the full order weight for a carrier after a carrier that quotes per pa
             return new Mage_Shipping_Model_Rate_Result();
         }
     };
-    $shipping = new class ($splitCarrier, $dhl) extends Mage_Shipping_Model_Shipping {
-        public function __construct(
-            private readonly Mage_Shipping_Model_Carrier_Abstract $splitCarrier,
-            private readonly Mage_Usa_Model_Shipping_Carrier_Dhl_International $dhl,
-        ) {}
-
-        #[\Override]
-        public function getCarrierByCode($carrierCode, $storeId = null): Mage_Shipping_Model_Carrier_Abstract
-        {
-            return match ($carrierCode) {
-                'fedex' => $this->splitCarrier,
-                'dhlint' => $this->dhl,
-            };
-        }
-    };
+    $shipping = new ShippingStub(['fedex' => $splitCarrier, 'dhlint' => $dhl]);
 
     $shipping->collectRates($request);
 
-    expect($splitCarrier->weights->getArrayCopy())->toBe($declines ? [70.0] : [70.0, 5.0])
+    expect($splitCarrier->getRequestedWeights())->toBe($declines ? [70.0] : [70.0, 5.0])
         ->and($dhl->quotedWeight)->toBe(75.0)
         ->and($request->getPackageWeight())->toBe(75.0);
 })->with(['the split carrier returned rates' => false, 'the split carrier declined the first package' => true]);

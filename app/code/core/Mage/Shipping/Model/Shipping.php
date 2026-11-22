@@ -193,7 +193,6 @@ class Mage_Shipping_Model_Shipping
                 return null;
             }
             if ($singlePackage && $packageCount === 1) {
-                $packageResult->updateRatePrice(1);
                 return $packageResult;
             }
 
@@ -202,7 +201,7 @@ class Mage_Shipping_Model_Shipping
             }
             foreach ($packageResult->getAllRates() as $rate) {
                 if ($rate instanceof Mage_Shipping_Model_Rate_Result_Error) {
-                    $errors[serialize([$rate->getCarrier(), $rate->getErrorMessage()])] ??= $rate;
+                    $errors[$rate->getCarrier() . '_' . $rate->getErrorMessage()] ??= $rate;
                 }
             }
 
@@ -232,34 +231,15 @@ class Mage_Shipping_Model_Shipping
     /** @return array<string, Mage_Shipping_Model_Rate_Result_Method> */
     private function pricePackageMethods(Mage_Shipping_Model_Rate_Result $packageResult, int $packageCount): array
     {
-        $methods = clone $packageResult;
-        $methods->reset();
-        $unitCosts = [];
-        foreach ($packageResult->getAllRates() as $rate) {
-            if ($rate instanceof Mage_Shipping_Model_Rate_Result_Method && $rate->getPrice() !== null) {
-                $code = serialize([$rate->getCarrier(), $rate->getMethod()]);
-                $unitCosts[$code] = $rate->getCost();
-                $methods->append(clone $rate);
-            }
-        }
-        $methods->updateRatePrice($packageCount);
-
         $rates = [];
-        foreach ($methods->getAllRates() as $rate) {
-            if ($rate->getPrice() === null) {
+        foreach ($packageResult->getAllRates() as $rate) {
+            if (!$rate instanceof Mage_Shipping_Model_Rate_Result_Method || $rate->getPrice() === null) {
                 continue;
             }
-            $code = serialize([$rate->getCarrier(), $rate->getMethod()]);
-            $unitCost = $unitCosts[$code] ?? null;
-            $quotedCost = $rate->getCost();
-            $cost = is_numeric($quotedCost) ? (float) $quotedCost : null;
-            // A result class can override updateRatePrice() to scale the cost.
-            // Scale the cost here only when updateRatePrice() left it unchanged.
-            if ($cost !== null && is_numeric($unitCost) && $cost === (float) $unitCost) {
-                $cost *= $packageCount;
-            }
-            $rate->setCost($cost);
-            $rates[$code] = $rate;
+            $cost = $rate->getCost();
+            $rates[$rate->getCarrier() . '_' . $rate->getMethod()] = (clone $rate)
+                ->setPrice($rate->getPrice() * $packageCount)
+                ->setCost(is_numeric($cost) ? (float) $cost * $packageCount : null);
         }
         return $rates;
     }

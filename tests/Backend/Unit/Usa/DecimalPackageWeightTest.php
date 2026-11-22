@@ -8,6 +8,9 @@
 
 declare(strict_types=1);
 
+use Tests\Helpers\PackageCarrierStub;
+use Tests\Helpers\ShippingStub;
+
 uses(Tests\MahoBackendTestCase::class);
 
 function decimalPackageRequest(
@@ -59,66 +62,20 @@ it('quotes the actual package weights for decimal quantities', function (
     float $maxWeight = 70,
 ): void {
     $request = decimalPackageRequest($weight, $qty, $divisible, $increment);
-    $carrier = new class ($maxWeight) extends Mage_Shipping_Model_Carrier_Abstract {
-        /** @var ArrayObject<int, float> */
-        public ArrayObject $weights;
-
-        public function __construct(private readonly float $maxWeight)
-        {
-            parent::__construct();
-            $this->weights = new ArrayObject();
-        }
-
-        #[\Override]
-        public function getConfigData($field): float|int
-        {
-            return match ($field) {
-                'shipment_requesttype' => 1,
-                'max_package_weight' => $this->maxWeight,
-                default => 0,
-            };
-        }
-
-        #[\Override]
-        public function checkAvailableShipCountries(Mage_Shipping_Model_Rate_Request $request): true
-        {
-            return true;
-        }
-
-        #[\Override]
-        public function proccessAdditionalValidation(Mage_Shipping_Model_Rate_Request $request): true
-        {
-            return true;
-        }
-
-        #[\Override]
-        public function collectRates(Mage_Shipping_Model_Rate_Request $request): Mage_Shipping_Model_Rate_Result
-        {
-            $weight = (float) $request->getPackageWeight();
-            $this->weights->append($weight);
-
-            return new Mage_Shipping_Model_Rate_Result()->append(
-                new Mage_Shipping_Model_Rate_Result_Method(['method' => 'test', 'price' => $weight]),
-            );
-        }
-    };
-
-    $shipping = new class ($carrier) extends Mage_Shipping_Model_Shipping {
-        public function __construct(private readonly Mage_Shipping_Model_Carrier_Abstract $carrier) {}
-
-        #[\Override]
-        public function getCarrierByCode($carrierCode, $storeId = null): Mage_Shipping_Model_Carrier_Abstract
-        {
-            return $this->carrier;
-        }
-    };
+    $carrier = new PackageCarrierStub(
+        fn(float $packageWeight) => new Mage_Shipping_Model_Rate_Result()->append(
+            new Mage_Shipping_Model_Rate_Result_Method(['method' => 'test', 'price' => $packageWeight]),
+        ),
+        $maxWeight,
+    );
+    $shipping = new ShippingStub(['test' => $carrier]);
     $shipping->collectCarrierRates('test', $request);
 
     $packages = $shipping->composePackagesForCarrier($carrier, $request);
     $uniqueWeights = array_values(array_unique($expected, SORT_NUMERIC));
     $roundWeight = static fn(float|int|string $weight): float => round((float) $weight, 3);
     expect(array_map($roundWeight, array_keys($packages)))->toBe($uniqueWeights)
-        ->and(array_map($roundWeight, $carrier->weights->getArrayCopy()))->toBe($uniqueWeights)
+        ->and(array_map($roundWeight, $carrier->getRequestedWeights()))->toBe($uniqueWeights)
         ->and($shipping->getResult()->getCheapestRate()?->getPrice())->toBe(round(array_sum($expected), 2));
 })->with([
     ...$decimalPackageCases,

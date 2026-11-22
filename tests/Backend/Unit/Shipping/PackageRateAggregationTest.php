@@ -8,122 +8,53 @@
 
 declare(strict_types=1);
 
+use Tests\Helpers\PackageCarrierStub;
+use Tests\Helpers\ShippingStub;
+
 uses(Tests\MahoBackendTestCase::class);
 
-it('quotes only methods available for every package at their combined price and cost', function (
+/**
+ * Build the answer of the carrier for one package.
+ * false: the carrier declines. A string: the carrier returns only this error.
+ * An array: 'ground' => [price, cost] or [price, cost, carrier] adds a method,
+ * 'error' => 'message' adds an error, 'error:one' => 'message' adds an error of carrier 'one',
+ * and 'error' => true sets only the error flag.
+ */
+function packageAnswer(array|string|false $answer): Mage_Shipping_Model_Rate_Result|Mage_Shipping_Model_Rate_Result_Error|false
+{
+    if ($answer === false) {
+        return false;
+    }
+    if (is_string($answer)) {
+        return new Mage_Shipping_Model_Rate_Result_Error()->setCarrier('test')->setErrorMessage($answer);
+    }
+    $result = new Mage_Shipping_Model_Rate_Result();
+    foreach ($answer as $code => $value) {
+        if (str_starts_with($code, 'error')) {
+            $carrier = explode(':', $code)[1] ?? 'test';
+            $value === true
+                ? $result->setError(true)
+                : $result->append(new Mage_Shipping_Model_Rate_Result_Error()->setCarrier($carrier)->setErrorMessage($value));
+            continue;
+        }
+        [$price, $cost, $carrier] = $value + [2 => 'test'];
+        $method = new Mage_Shipping_Model_Rate_Result_Method()->setCarrier($carrier)->setMethod($code)->setData('cost', $cost);
+        if ($price !== null) {
+            $method->setPrice($price);
+        }
+        $result->append($method);
+    }
+    return $result;
+}
+
+it('offers only the methods of every package, at the price and cost of all packages', function (
     array $packages,
-    array $responses,
+    array $answers,
     bool $showErrors,
     array $expected,
-    bool $customCostMultiplier = false,
 ): void {
-    $carrier = new class ($responses, $showErrors, $customCostMultiplier) extends Mage_Shipping_Model_Carrier_Abstract {
-        /** @var ArrayObject<int, float> */
-        public ArrayObject $weights;
-
-        public function __construct(
-            private readonly array $responses,
-            private readonly bool $showErrors,
-            private readonly bool $customCostMultiplier,
-        ) {
-            parent::__construct();
-            $this->weights = new ArrayObject();
-        }
-
-        #[\Override]
-        public function getConfigData(mixed $field): int
-        {
-            return match ($field) {
-                'shipment_requesttype' => 1,
-                'showmethod' => (int) $this->showErrors,
-                default => 0,
-            };
-        }
-
-        #[\Override]
-        public function checkAvailableShipCountries(Mage_Shipping_Model_Rate_Request $request): true
-        {
-            return true;
-        }
-
-        #[\Override]
-        public function proccessAdditionalValidation(Mage_Shipping_Model_Rate_Request $request): true
-        {
-            return true;
-        }
-
-        #[\Override]
-        public function collectRates(Mage_Shipping_Model_Rate_Request $request): Mage_Shipping_Model_Rate_Result|Mage_Shipping_Model_Rate_Result_Error|false|null
-        {
-            $weight = $request->getPackageWeight();
-            $this->weights->append($weight);
-            $response = $this->responses[(int) $weight];
-            if ($response === false || $response === null) {
-                return $response;
-            }
-
-            $result = new class ($this->customCostMultiplier) extends Mage_Shipping_Model_Rate_Result {
-                public function __construct(private readonly bool $customCostMultiplier) {}
-
-                #[\Override]
-                public function updateRatePrice(mixed $packageCount): static
-                {
-                    if ($this->customCostMultiplier) {
-                        foreach ($this->getAllRates() as $rate) {
-                            $cost = $rate->getCost();
-                            if (is_numeric($cost)) {
-                                $rate->setCost((float) $cost * $packageCount);
-                            }
-                        }
-                    }
-                    parent::updateRatePrice($packageCount);
-                    return $this;
-                }
-            };
-            $error = new Mage_Shipping_Model_Rate_Result_Error()->setErrorMessage('Package unavailable');
-            if (is_string($response)) {
-                return $response === 'error' ? $error : $result->append($error);
-            }
-            foreach ($response as $code => $quote) {
-                if ($quote === true) {
-                    $result->setError(true);
-                    continue;
-                }
-                if (is_string($quote)) {
-                    $result->append(new Mage_Shipping_Model_Rate_Result_Error()->setCarrier($code)->setErrorMessage($quote));
-                    continue;
-                }
-                if ($quote === null) {
-                    $result->append($error);
-                    continue;
-                }
-                $method = new Mage_Shipping_Model_Rate_Result_Method()
-                    ->setCarrier($quote[2] ?? null)
-                    ->setMethod($code)
-                    ->setData('cost', $quote[1]);
-                if ($quote[0] !== null) {
-                    $method->setPrice($quote[0]);
-                }
-                $result->append($method);
-            }
-            return $result;
-        }
-    };
-    $shipping = new class ($carrier, $packages) extends Mage_Shipping_Model_Shipping {
-        public function __construct(private readonly Mage_Shipping_Model_Carrier_Abstract $carrier, private readonly array $packages) {}
-
-        #[\Override]
-        public function getCarrierByCode(mixed $carrierCode, mixed $storeId = null): Mage_Shipping_Model_Carrier_Abstract
-        {
-            return $this->carrier;
-        }
-
-        #[\Override]
-        public function composePackagesForCarrier(mixed $carrier, mixed $request): array
-        {
-            return $this->packages;
-        }
-    };
+    $carrier = new PackageCarrierStub(fn(float $weight) => packageAnswer($answers[(int) $weight]), showErrors: $showErrors);
+    $shipping = new ShippingStub(['test' => $carrier], $packages);
 
     $shipping->collectCarrierRates('test', new Mage_Shipping_Model_Rate_Request());
 
@@ -133,10 +64,10 @@ it('quotes only methods available for every package at their combined price and 
             ? $rate->getErrorMessage()
             : [$rate->getMethod(), $rate->getPrice(), $rate->getCost()];
     }
-    expect($carrier->weights->getArrayCopy())->toBe(array_map(floatval(...), array_keys($responses)))
+    expect($carrier->getRequestedWeights())->toBe(array_map(floatval(...), array_keys($answers)))
         ->and($rates)->toBe($expected);
 })->with([
-    'common methods in price order and first-package order on ties' => [
+    'adds the packages and drops a method that one package lacks' => [
         [70 => 2, 5 => 1],
         [
             70 => ['ground' => [4.0, 3.0], 'free' => [0.0, 1.0], 'express' => [3.0, 2.0], 'freight' => [1.0, 1.0]],
@@ -145,141 +76,68 @@ it('quotes only methods available for every package at their combined price and 
         false,
         [['free', 0.0, 4.0], ['ground', 10.0, 7.0], ['express', 10.0, 9.0]],
     ],
-    'identical packages share a single request' => [[70 => 2], [70 => ['ground' => [4.0, 3.0]]], false, [['ground', 8.0, 6.0]]],
-    'no common method' => [[70 => 1, 5 => 1], [70 => ['ground' => [4.0, 3.0]], 5 => ['letter' => [1.0, 1.0]]], false, []],
-    'empty package response' => [[70 => 1, 5 => 1], [70 => ['ground' => [4.0, 3.0]], 5 => []], true, []],
-    'carrier declined a package' => [[70 => 1, 5 => 1], [70 => ['ground' => [4.0, 3.0]], 5 => false], true, []],
-    'missing package response' => [[70 => 1, 5 => 1], [70 => ['ground' => [4.0, 3.0]], 5 => null], true, []],
-    'method codes from different carriers do not match' => [
-        [70 => 1, 5 => 1],
-        [70 => ['ground' => [4.0, 3.0, 'one']], 5 => ['ground' => [2.0, 1.0, 'two']]],
-        false,
-        [],
+    'identical packages share one request, and their price and cost are multiplied' => [
+        [70 => 2], [70 => ['ground' => [4.0, 3.0]]], false, [['ground', 8.0, 6.0]],
     ],
-    'combined cost is unknown if either package cost is missing' => [
-        [70 => 1, 5 => 1],
-        [70 => ['ground' => [4.0, 3.0], 'express' => [5.0, null]], 5 => ['ground' => [2.0, null], 'express' => [3.0, 2.0]]],
-        false,
-        [['ground', 6.0, null], ['express', 8.0, null]],
+    'identical packages keep their error' => [
+        [70 => 2], [70 => ['ground' => [4.0, 0.0], 'error' => 'Package unavailable']], true, ['Package unavailable', ['ground', 8.0, 0.0]],
     ],
-    'a mixed response is hidden when configured' => [
-        [70 => 1, 5 => 1],
-        [70 => ['ground' => [4.0, 3.0]], 5 => ['ground' => [2.0, 1.0], 'express' => null]],
-        false,
-        [],
+    'no method is common to every package, and the error stays' => [
+        [70 => 1, 5 => 1], [70 => ['ground' => [4.0, 3.0], 'error' => 'Package unavailable'], 5 => ['letter' => [1.0, 1.0]]], true, ['Package unavailable'],
     ],
-    'a mixed response shows the common method and the error' => [
-        [70 => 1, 5 => 1],
-        [70 => ['ground' => [4.0, 3.0]], 5 => ['ground' => [2.0, 1.0], 'express' => null]],
+    'a package with no method removes every method' => [[70 => 1, 5 => 1], [70 => ['ground' => [4.0, 3.0]], 5 => []], true, []],
+    'the same method code of another carrier does not match' => [
+        [70 => 1, 5 => 1], [70 => ['ground' => [4.0, 3.0, 'one']], 5 => ['ground' => [2.0, 1.0, 'two']]], false, [],
+    ],
+    'the cost is unknown when one package has no numeric cost' => [
+        [70 => 2, 5 => 1],
+        [
+            70 => ['ground' => [4.0, '3.5'], 'express' => [5.0, ''], 'priority' => [7.0, 1.0]],
+            5 => ['ground' => [2.0, '1.5'], 'express' => [3.0, 2.0], 'priority' => [1.0, null]],
+        ],
+        false,
+        [['ground', 10.0, 8.5], ['express', 13.0, null], ['priority', 15.0, null]],
+    ],
+    'a method without a price on one package is dropped, a free method stays' => [
+        [70 => 1, 5 => 2],
+        [70 => ['ground' => [4.0, 3.0], 'free' => [0.0, 0.0]], 5 => ['ground' => [null, 1.0], 'free' => [0.0, 0.0]]],
+        false,
+        [['free', 0.0, 0.0]],
+    ],
+    'the carrier declines a later package' => [[70 => 1, 5 => 1], [70 => ['ground' => [4.0, 3.0]], 5 => false], true, []],
+    'the carrier declines the first package and gets no more requests' => [[5 => 1, 70 => 1], [5 => false], true, []],
+    'an error of one package is shown with the common methods' => [
+        [5 => 1, 70 => 1],
+        [5 => ['ground' => [2.0, 1.0], 'error' => 'Package unavailable'], 70 => ['ground' => [4.0, 3.0]]],
         true,
         ['Package unavailable', ['ground', 6.0, 4.0]],
     ],
-    'a mixed response is hidden when it arrives first' => [
-        [5 => 1, 70 => 1],
-        [5 => ['ground' => [2.0, 1.0], 'express' => null], 70 => ['ground' => [4.0, 3.0]]],
-        false,
-        [],
+    'an error of one package hides the carrier when errors are hidden' => [
+        [70 => 1, 5 => 1], [70 => ['ground' => [4.0, 3.0]], 5 => ['ground' => [2.0, 1.0], 'error' => 'Package unavailable']], false, [],
     ],
-    'a mixed response shows the common method and the error when it arrives first' => [
-        [5 => 1, 70 => 1],
-        [5 => ['ground' => [2.0, 1.0], 'express' => null], 70 => ['ground' => [4.0, 3.0]]],
-        true,
-        ['Package unavailable', ['ground', 6.0, 4.0]],
-    ],
-    'mixed response for identical packages is hidden when configured' => [
-        [70 => 2], [70 => ['ground' => [4.0, 0.0], 'express' => null]], false, [],
-    ],
-    'mixed response for identical packages shows methods and errors' => [
-        [70 => 2], [70 => ['ground' => [4.0, 0.0], 'express' => null]], true, ['Package unavailable', ['ground', 8.0, 0.0]],
-    ],
-    'an error flag without a message hides mixed rates when configured' => [
+    'an error flag of one package hides the carrier when errors are hidden' => [
         [70 => 1, 5 => 1], [70 => ['ground' => [4.0, 3.0]], 5 => ['ground' => [2.0, 1.0], 'error' => true]], false, [],
     ],
-    'an error flag without a message does not create a diagnostic' => [
+    'an error flag without a message adds no error to the list' => [
         [70 => 1, 5 => 1], [70 => ['ground' => [4.0, 3.0]], 5 => ['ground' => [2.0, 1.0], 'error' => true]], true, [['ground', 6.0, 4.0]],
     ],
-    'errors deduplicate by carrier and message' => [
+    'a package that returns only an error is shown' => [
+        [70 => 1, 5 => 2], [70 => ['ground' => [4.0, 3.0]], 5 => 'Package unavailable'], true, ['Package unavailable'],
+    ],
+    'a package that returns only an error is hidden' => [
+        [70 => 1, 5 => 2], [70 => ['ground' => [4.0, 3.0]], 5 => 'Package unavailable'], false, [],
+    ],
+    'the same error of several packages is shown once for each carrier' => [
         [70 => 1, 20 => 1, 5 => 1],
-        [70 => ['one' => 'Limit applies', 'two' => 'Limit applies'], 20 => ['one' => 'Limit applies'], 5 => ['one' => 'Address unavailable']],
+        [70 => ['error:one' => 'Limit applies', 'error:two' => 'Limit applies'], 20 => ['error:one' => 'Limit applies'], 5 => ['error:one' => 'Address unavailable']],
         true,
         ['Limit applies', 'Limit applies', 'Address unavailable'],
     ],
-    'a later silent refusal discards the mixed quote' => [
-        [70 => 1, 5 => 1], [70 => ['ground' => [4.0, 3.0], 'express' => null], 5 => false], true, [],
+    'a single package keeps the result of the carrier unchanged' => [[70 => 1], [70 => ['ground' => [null, 3.0]]], false, [['ground', null, 3.0]]],
+    'a single package keeps its error' => [
+        [70 => 1], [70 => ['ground' => [4.0, 3.0], 'error' => 'Package unavailable']], true, ['Package unavailable', ['ground', 4.0, 3.0]],
     ],
-    'a first silent refusal stops the package requests' => [[5 => 1, 70 => 1], [5 => false], true, []],
-    'maintains the package cost already scaled by a result override' => [
-        [70 => 2], [70 => ['ground' => [4.0, 3.5]]], false, [['ground', 8.0, 7.0]], true,
+    'a single package with an error is hidden when errors are hidden' => [
+        [70 => 1], [70 => ['ground' => [4.0, 3.0], 'error' => 'Package unavailable']], false, [],
     ],
-    'maintains free and unknown costs alongside custom totals' => [
-        [70 => 2],
-        [70 => ['free' => [0.0, 0.0], 'ground' => [4.0, '3.5'], 'express' => [5.0, ''], 'priority' => [6.0, null]]],
-        false,
-        [['free', 0.0, 0.0], ['ground', 8.0, 7.0], ['express', 10.0, null], ['priority', 12.0, null]],
-        true,
-    ],
-    'scales numeric strings and treats non-numeric costs as unknown' => [
-        [70 => 2, 5 => 1],
-        [70 => ['ground' => [4.0, '3.5'], 'express' => [5.0, '']], 5 => ['ground' => [2.0, '1.5'], 'express' => [3.0, 2.0]]],
-        false,
-        [['ground', 10.0, 8.5], ['express', 13.0, null]],
-    ],
-    'shows an existing error when package methods do not overlap' => [
-        [70 => 1, 5 => 1],
-        [70 => ['ground' => [4.0, 3.0], 'error' => null], 5 => ['express' => [2.0, 1.0]]],
-        true,
-        ['Package unavailable'],
-    ],
-    'shows the same error when the mixed quote arrives last' => [
-        [5 => 1, 70 => 1],
-        [5 => ['express' => [2.0, 1.0]], 70 => ['ground' => [4.0, 3.0], 'error' => null]],
-        true,
-        ['Package unavailable'],
-    ],
-    'hides the error for disjoint methods when configured' => [
-        [70 => 1, 5 => 1],
-        [70 => ['ground' => [4.0, 3.0], 'error' => null], 5 => ['express' => [2.0, 1.0]]],
-        false,
-        [],
-    ],
-    'missing final package price leaves only the explicitly free method' => [
-        [70 => 1, 5 => 2],
-        [70 => ['ground' => [4.0, 3.0], 'free' => [0.0, 0.0]], 5 => ['ground' => [null, 1.0], 'free' => [0.0, 0.0]]],
-        true,
-        [['free', 0.0, 0.0]],
-    ],
-    'missing first package price leaves only the explicitly free method' => [
-        [5 => 2, 70 => 1],
-        [5 => ['ground' => [null, 1.0], 'free' => [0.0, 0.0]], 70 => ['ground' => [4.0, 3.0], 'free' => [0.0, 0.0]]],
-        true,
-        [['free', 0.0, 0.0]],
-    ],
-    'only displays the error when the quote has no priced method' => [
-        [70 => 1, 5 => 1],
-        [70 => ['ground' => [4.0, 3.0]], 5 => ['ground' => [null, 1.0], 'error' => null]],
-        true,
-        ['Package unavailable'],
-    ],
-    'single package keeps the original method with a missing price' => [
-        [70 => 1],
-        [70 => ['ground' => [null, 3.0]]],
-        false,
-        [['ground', null, 3.0]],
-    ],
-    'single package preserves the carrier result when errors are shown' => [
-        [70 => 1],
-        [70 => ['ground' => [4.0, 3.0], 'express' => null]],
-        true,
-        ['Package unavailable', ['ground', 4.0, 3.0]],
-    ],
-    'single package keeps the configured handling of mixed results' => [
-        [70 => 1],
-        [70 => ['ground' => [4.0, 3.0], 'express' => null]],
-        false,
-        [],
-    ],
-    'package error displayed' => [[70 => 1, 5 => 2], [70 => ['ground' => [4.0, 3.0]], 5 => 'error result'], true, ['Package unavailable']],
-    'package error hidden' => [[70 => 1, 5 => 2], [70 => ['ground' => [4.0, 3.0]], 5 => 'error result'], false, []],
-    'direct package error displayed' => [[70 => 2], [70 => 'error'], true, ['Package unavailable']],
-    'direct package error hidden' => [[70 => 2], [70 => 'error'], false, []],
 ]);
