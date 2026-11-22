@@ -175,7 +175,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     #[Maho\Config\Route('/admin/index/deniedJson')]
     public function deniedJsonAction(): void
     {
-        $this->getResponse()->setBody($this->_getDeniedJson());
+        $this->getResponse()->setBodyJson($this->_getDeniedJson());
     }
 
     /**
