@@ -66,12 +66,9 @@ class Mage_Api2_Block_Adminhtml_Permissions_User_Edit_Tab_Roles extends Mage_Adm
 
     /**
      * Add custom column filter to collection
-     *
-     * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
-     * @return $this
      */
     #[\Override]
-    protected function _addColumnFilterToCollection($column)
+    protected function _addColumnFilterToCollection(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
         if ($column->getId() == 'assigned_user_role') {
             $userRoles = $this->_getSelectedRoles();

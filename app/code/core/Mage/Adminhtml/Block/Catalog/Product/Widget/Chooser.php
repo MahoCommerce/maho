@@ -136,12 +136,9 @@ class Mage_Adminhtml_Block_Catalog_Product_Widget_Chooser extends Mage_Adminhtml
 
     /**
      * Filter checked/unchecked rows in grid
-     *
-     * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
-     * @return $this
      */
     #[\Override]
-    protected function _addColumnFilterToCollection($column)
+    protected function _addColumnFilterToCollection(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
         if ($column->getId() === 'in_products') {
             $selected = $this->getSelectedProducts();

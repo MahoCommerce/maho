@@ -113,7 +113,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
     }
 
     #[\Override]
-    protected function _addColumnFilterToCollection($column)
+    protected function _addColumnFilterToCollection(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
         if ($this->getCollection()) {
             if ($column->getId() === 'websites') {

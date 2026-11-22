@@ -181,15 +181,10 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      */
     protected $_factory;
 
-    /**
-     * Initialize factory
-     *
-     * @param Mage_Core_Model_Resource_Abstract $resource
-     */
-    public function __construct($resource = null, array $args = [])
+    public function __construct()
     {
-        parent::__construct($resource);
-        $this->_factory = empty($args['factory']) ? Mage::getSingleton('catalog/factory') : $args['factory'];
+        parent::__construct();
+        $this->_factory = Mage::getSingleton('catalog/factory');
     }
 
     /**

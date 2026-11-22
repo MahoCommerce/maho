@@ -16,6 +16,10 @@ use IteratorAggregate;
 use Maho\Data\Tree;
 use Maho\Data\Tree\Node;
 
+/**
+ * @implements ArrayAccess<array-key, Node>
+ * @implements IteratorAggregate<array-key, Node>
+ */
 class Collection implements ArrayAccess, IteratorAggregate, Countable
 {
     /**
@@ -53,11 +57,12 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
 
     /**
      * Implementation of ArrayAccess:offsetSet()
-     * @param string $key
-     * @param string $value
+     *
+     * @param array-key $key
+     * @param Node $value
      */
     #[\Override]
-    public function offsetSet($key, $value): void
+    public function offsetSet(mixed $key, mixed $value): void
     {
         $this->_nodes[$key] = $value;
     }

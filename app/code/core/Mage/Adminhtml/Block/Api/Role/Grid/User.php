@@ -29,12 +29,10 @@ class Mage_Adminhtml_Block_Api_Role_Grid_User extends Mage_Adminhtml_Block_Widge
     }
 
     /**
-     * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
-     * @return $this
      * @throws Exception
      */
     #[\Override]
-    protected function _addColumnFilterToCollection($column)
+    protected function _addColumnFilterToCollection(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
         if ($column->getId() === 'in_role_users') {
             $inRoleIds = $this->_getUsers();
