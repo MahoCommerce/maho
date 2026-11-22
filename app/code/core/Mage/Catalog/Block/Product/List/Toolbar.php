@@ -190,9 +190,6 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
         return $this;
     }
 
-    /**
-     * Set collection to pager
-     */
     public function setCollection(\Maho\Data\Collection $collection): static
     {
         $this->_collection = $collection;
@@ -210,9 +207,6 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
         return $this;
     }
 
-    /**
-     * Return products collection instance
-     */
     public function getCollection(): ?\Maho\Data\Collection
     {
         return $this->_collection;

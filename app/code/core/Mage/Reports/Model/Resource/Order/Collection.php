@@ -49,9 +49,6 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         return $this->_isLive;
     }
 
-    /**
-     * Prepare report summary
-     */
     public function prepareSummary(?string $range, ?DateTime $customStart, ?DateTime $customEnd, int $isFilter = 0): static
     {
         $this->checkIsLive($range);
@@ -98,9 +95,6 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         return $this->_salesAmountExpression;
     }
 
-    /**
-     * Prepare report summary from live data
-     */
     protected function _prepareSummaryLive(?string $range, ?DateTime $customStart, ?DateTime $customEnd, int $isFilter = 0): static
     {
         $this->setMainTable('sales/order');
@@ -153,9 +147,6 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         return $this;
     }
 
-    /**
-     * Prepare report summary from aggregated data
-     */
     protected function _prepareSummaryAggregated(?string $range, ?DateTime $customStart, ?DateTime $customEnd): static
     {
         $this->setMainTable('sales/order_aggregated_created');
@@ -265,8 +256,6 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
     }
 
     /**
-     * Calculate From and To dates (or times) by given period
-     *
      * @return ($returnObjects is true ? array{0: DateTime, 1: DateTime} : array{from: DateTime, to: DateTime, datetime: true})
      */
     public function getDateRange(?string $range, ?DateTime $customStart, ?DateTime $customEnd, bool $returnObjects = false): array
@@ -797,9 +786,6 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         return $this;
     }
 
-    /**
-     * Add period filter by created_at attribute
-     */
     public function addCreateAtPeriodFilter(?string $period): static
     {
         [$from, $to] = $this->getDateRange($period, null, null, true);

@@ -118,9 +118,6 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    /**
-     * Get the customer default customer class
-     */
     public function getDefaultCustomerTaxClass(Mage_Core_Model_Store|string|int|bool|null $store = null): int
     {
         if ($this->_defaultCustomerTaxClass === null) {

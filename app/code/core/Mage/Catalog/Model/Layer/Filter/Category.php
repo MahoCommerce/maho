@@ -54,9 +54,6 @@ class Mage_Catalog_Model_Layer_Filter_Category extends Mage_Catalog_Model_Layer_
         return null;
     }
 
-    /**
-     * Apply category filter to layer
-     */
     #[\Override]
     public function apply(Mage_Core_Controller_Request_Http $request, ?Mage_Catalog_Block_Layer_Filter_Abstract $filterBlock): static
     {

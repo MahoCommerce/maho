@@ -337,9 +337,6 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
         return 1;
     }
 
-    /**
-     * Apply price range filter
-     */
     #[\Override]
     public function apply(Mage_Core_Controller_Request_Http $request, ?Mage_Catalog_Block_Layer_Filter_Abstract $filterBlock): static
     {

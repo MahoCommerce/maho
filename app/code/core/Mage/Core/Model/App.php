@@ -562,8 +562,6 @@ class Mage_Core_Model_App
     }
 
     /**
-     * Initialize currently ran store
-     *
      * @param string|int|null $scopeCode code of default scope (website/store_group/store code)
      * @param string|null $scopeType type of default scope (website/group/store)
      */

@@ -44,9 +44,6 @@ class Mage_Tag_Model_Resource_Popular_Collection extends Mage_Core_Model_Resourc
         return $this;
     }
 
-    /**
-     * Add filter by specified tag status
-     */
     public function addStatusFilter(int $statusCode): static
     {
         $this->getSelect()->where('main_table.status = ?', $statusCode);

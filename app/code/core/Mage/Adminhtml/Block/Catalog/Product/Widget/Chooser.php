@@ -31,9 +31,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Widget_Chooser extends Mage_Adminhtml
         $this->setUseAjax();
     }
 
-    /**
-     * Prepare chooser element HTML
-     */
     public function prepareElementHtml(\Maho\Data\Form\Element\AbstractElement $element): \Maho\Data\Form\Element\AbstractElement
     {
         $uniqId = Mage::helper('core')->uniqHash($element->getId());

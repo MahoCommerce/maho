@@ -130,8 +130,6 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
     }
 
     /**
-     * Update entity row
-     *
      * @param string|int $code The code or the ID of the entity type
      */
     public function updateEntityType(string|int $code, array|string $field, mixed $value = null): static
@@ -363,9 +361,6 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
         return $this->_conn->fetchCol($select, $bind);
     }
 
-    /**
-     * Retrieve Default Attribute Set for Entity Type
-     */
     public function getDefaultAttributeSetId(string|int $entityType): int
     {
         $bind = ['entity_type' => $entityType];

@@ -60,9 +60,6 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
      */
     protected $_dateFilterFormat;
 
-    /**
-     * Set attribute instance
-     */
     public function setAttribute(Mage_Eav_Model_Attribute $attribute): static
     {
         $this->_attribite = $attribute;

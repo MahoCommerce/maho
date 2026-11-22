@@ -57,7 +57,7 @@ class Mage_CatalogSearch_Helper_Data extends Mage_Core_Helper_Abstract
     protected ?bool $_canLogQuery = null;
 
     /**
-     * Search engine model. A custom engine is any resource model with a test() method.
+     * A custom engine is any resource model with a test() method.
      */
     protected ?object $_engine = null;
 
@@ -356,9 +356,6 @@ class Mage_CatalogSearch_Helper_Data extends Mage_Core_Helper_Abstract
         return implode($separator, $_index);
     }
 
-    /**
-     * Get current search engine resource model
-     */
     public function getEngine(): object
     {
         if (!$this->_engine) {

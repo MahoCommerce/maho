@@ -46,9 +46,6 @@ class Mage_Catalog_Model_Layer_Filter_Decimal extends Mage_Catalog_Model_Layer_F
         return $this->_resource;
     }
 
-    /**
-     * Apply decimal range filter to product collection
-     */
     #[\Override]
     public function apply(Mage_Core_Controller_Request_Http $request, ?Mage_Catalog_Block_Layer_Filter_Abstract $filterBlock): static
     {

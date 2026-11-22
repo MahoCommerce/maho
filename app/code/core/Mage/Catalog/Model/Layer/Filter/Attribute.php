@@ -57,9 +57,6 @@ class Mage_Catalog_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer
         return $this->getAttributeModel()->getFrontend()->getOption($optionId);
     }
 
-    /**
-     * Apply attribute option filter to product collection
-     */
     #[\Override]
     public function apply(Mage_Core_Controller_Request_Http $request, ?Mage_Catalog_Block_Layer_Filter_Abstract $filterBlock): static
     {
