@@ -213,11 +213,13 @@ class Mage_Weee_Model_DocumentAllocation
      * @param array<array-key, FeeAmounts> $fees
      * @param 'gross'|'base_gross' $key
      */
-    private function allocateTitleGross(array &$fees, string $key, float $amount, Mage_Core_Model_Store $store): void
+    private function allocateTitleGross(array &$fees, string $key, float $amount, Mage_Core_Model_Store $store, bool $balanceAgainstDiscounts = true): void
     {
         $gross = $this->allocateGross(array_map(static fn(array $fee): float => $fee[$key], $fees), $amount, $store);
-        $discount = $key === 'gross' ? 'discount' : 'base_discount';
-        $gross = $this->balanceGross($gross, array_map(static fn(array $fee): float => $fee[$discount], $fees), $store);
+        if ($balanceAgainstDiscounts) {
+            $discount = $key === 'gross' ? 'discount' : 'base_discount';
+            $gross = $this->balanceGross($gross, array_map(static fn(array $fee): float => $fee[$discount], $fees), $store);
+        }
         foreach ($fees as $index => &$fee) {
             $fee[$key] = $gross[$index];
         }
@@ -392,7 +394,7 @@ class Mage_Weee_Model_DocumentAllocation
                 foreach ($fields as $key => $field) {
                     $gross = $this->roundGross($running, $key, (float) $item[$field] * $scales[$key], $store);
                     $amounts[$id][$key] += $gross;
-                    $this->allocateTitleGross($item['fees'], $key, $gross, $store);
+                    $this->allocateTitleGross($item['fees'], $key, $gross, $store, balanceAgainstDiscounts: false);
                 }
                 foreach ($item['fees'] as $title => $fees) {
                     $amounts[$id]['fees'][$title] ??= ['gross' => 0.0, 'base_gross' => 0.0, 'discount' => 0.0, 'base_discount' => 0.0];

@@ -21,8 +21,11 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
     try {
+        $threeFees = in_array($variant, ['distinct small fees', 'same-title small fees'], true);
+        $discountedCap = $variant === 'discounted cap';
+        $fractionalQty = $variant === 'fractional quantity';
         Mage::getModel('directory/currency')->saveRates(['USD' => ['EUR' => 0.72]]);
-        $store = setStoreDisplayCurrency('EUR', 'USD,EUR');
+        $store = setStoreDisplayCurrency($threeFees || $discountedCap ? 'USD' : 'EUR', 'USD,EUR');
         Mage::app()->setCurrentStore($store);
         $includedBefore = in_array($variant, ['subtotal', 'historic subcent to tax', 'invoice switch to tax'], true);
         $invoiceModeChanged = in_array($variant, ['invoice switch to tax', 'invoice switch to subtotal'], true);
@@ -42,10 +45,19 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
 
         $connection->update(Mage::getSingleton('core/resource')->getTableName('salesrule/rule'), ['is_active' => 0]);
         $groupId = Mage_Customer_Model_Group::NOT_LOGGED_IN_ID;
-        Mage::getModel('salesrule/rule')->setName('Partial FPT discount')->setIsActive(true)
+        $rule = Mage::getModel('salesrule/rule')->setName('Partial FPT discount')->setIsActive(true)
             ->setWebsiteIds([(int) $store->getWebsiteId()])->setCustomerGroupIds([$groupId])
             ->setCouponType(Mage_SalesRule_Model_Rule::COUPON_TYPE_NO_COUPON)
-            ->setSimpleAction(Mage_SalesRule_Model_Rule::BY_PERCENT_ACTION)->setDiscountAmount(10.0)->save();
+            ->setSimpleAction(Mage_SalesRule_Model_Rule::BY_PERCENT_ACTION)
+            ->setDiscountAmount(match (true) {
+                $threeFees => 55.0,
+                $fractionalQty => 67.0,
+                $discountedCap => 90.0,
+                default => 10.0,
+            });
+        if (!$discountedCap) {
+            $rule->save();
+        }
         $attribute = 'partial_fpt_' . uniqid();
         WeeeDiscountFixture::createFeeAttribute($attribute);
         $secondAttribute = $attribute . '_other';
@@ -66,10 +78,12 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
             'street' => '1 Sample Street', 'city' => 'Los Angeles', 'region_id' => 12,
             'postcode' => '90210', 'country_id' => 'US', 'telephone' => '5550100000',
         ]);
-        $cappedInvoice = $variant === 'capped invoice';
+        $cappedInvoice = $variant === 'capped invoice' || $discountedCap;
         $subcent = in_array($variant, ['subcent', 'subcent historic invoices', 'historic subcent to subtotal', 'historic subcent to tax'], true);
         $fees = $variant === 'no fees' ? [] : [$attribute => match (true) {
             $cappedInvoice => 0.008,
+            $threeFees => 0.006,
+            $fractionalQty => 0.015,
             $subcent => 0.004,
             $variant === 'gross per title' => 0.005,
             $variant === 'historic mode changed' => 3.50,
@@ -78,14 +92,32 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
         if ($twoFees) {
             $fees[$secondAttribute] = $variant === 'gross per title' ? 0.005 : 0.07;
         }
+        if ($threeFees) {
+            foreach ([$secondAttribute, $attribute . '_third'] as $code) {
+                WeeeDiscountFixture::createFeeAttribute($code);
+                if ($variant === 'distinct small fees') {
+                    Mage::getModel('catalog/resource_eav_attribute')->loadByCode('catalog_product', $code)
+                        ->setFrontendLabel($code)->save();
+                }
+                $fees[$code] = 0.006;
+            }
+        }
         $quantities = match (true) {
+            $discountedCap => [1, 1, 1, 1, 1],
             $cappedInvoice => [1, 1, 1, 1],
             $invoiceModeChanged => [1, 1],
             $subcent => [1, 1],
             default => [array_sum($invoiceParts)],
         };
         foreach ($quantities as $index => $qty) {
-            $product = partialFptProduct($store, $cappedInvoice && $index === 2 ? [] : $fees);
+            $withoutFee = $cappedInvoice && $index === ($discountedCap ? 4 : 2);
+            $product = partialFptProduct($store, $withoutFee ? [] : $fees, $fractionalQty);
+            if ($discountedCap && $index === 2) {
+                $rule->loadPost(['actions' => [
+                    '1' => ['type' => 'salesrule/rule_condition_product_combine', 'aggregator' => 'all', 'value' => '1'],
+                    '1--1' => ['type' => 'salesrule/rule_condition_product', 'attribute' => 'sku', 'operator' => '==', 'value' => $product->getSku()],
+                ]])->save();
+            }
             $cart->addProduct($quote, $product, new Maho\DataObject(['qty' => $qty]), save: false);
         }
         $quote->getPayment()->importData(['method' => 'checkmo']);
@@ -160,6 +192,19 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
                 sendEmail: false,
                 invoice: $invoice,
             );
+            if ($discountedCap) {
+                $discountedItem = array_find($invoice->getAllItems(), static fn($item): bool => (int) $item->getOrderItemId() === $itemIds[2]);
+                expect($discountedItem)->toBeInstanceOf(Mage_Sales_Model_Order_Invoice_Item::class);
+                $fee = Mage::helper('weee')->getAppliedToItem($discountedItem)[0];
+                $creditmemo = Mage::getModel('sales/order_creditmemo')->load((int) $creditmemo->getId());
+                expect(round($invoice->getBaseTaxAmount(), 3))->toBe(0.004)
+                    ->and(round($invoice->getBaseGrandTotal(), 2))->toBe(1.10)
+                    ->and((float) $fee['base_row_amount'])->toBe(0.01)
+                    ->and((float) $fee['base_weee_discount'])->toBe(0.01)
+                    ->and($creditmemo->getBaseTaxAmount())->toBe(0.0)
+                    ->and(round($creditmemo->getBaseGrandTotal(), 2))->toBe(0.10);
+                return;
+            }
             expect(round($invoice->getBaseTaxAmount(), 3))->toBe(0.004)
                 ->and(round($invoice->getBaseGrandTotal(), 2))->toBe(0.90)
                 ->and((float) $invoice->getAllItems()[0]->getBaseWeeeTaxAppliedRowAmnt())->toBe(0.0)
@@ -249,6 +294,14 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
             $grossByTitle = [];
             foreach ($records as $index => $record) {
                 $storedFees = Mage::helper('weee')->getApplied($record->getAllItems()[0]);
+                if ($threeFees || $fractionalQty) {
+                    expect($storedFees)->toHaveCount($threeFees ? 3 : 1)
+                        ->and(array_unique(array_column($storedFees, 'title')))->toHaveCount($variant === 'distinct small fees' ? 3 : 1);
+                    foreach ($storedFees as $fee) {
+                        expect((float) $fee['base_weee_discount'])->toBeLessThanOrEqual((float) $fee['base_row_amount'])
+                            ->and((float) $fee['weee_discount'])->toBeLessThanOrEqual((float) $fee['row_amount']);
+                    }
+                }
                 if ($variant === 'duplicated historic fees' && $index === 0) {
                     $first = reset($storedFees);
                     $allocated += $cents((float) $first['weee_discount']);
@@ -354,6 +407,15 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
         [[1, 0], [0, 1]], [[1, 0], [0, 1]], true, 'invoice switch to subtotal',
     ],
     'ordinary invoice and credit memo without fixed taxes' => [[1], [1], true, 'no fees'],
+    'three small fee titles' => [[1, 2], [1, 2], true, 'distinct small fees'],
+    'three small fees under one title' => [[1], [1], true, 'same-title small fees'],
+    'partial invoices with fractional units' => [[1, 0.5, 0.5], [1, 0.5, 0.5], true, 'fractional quantity'],
+    'capped invoice with a discounted fee after historic invoices' => [
+        [[1, 0, 0, 0, 0], [0, 1, 0, 0, 0], [0, 0, 1, 1, 0], [0, 0, 0, 0, 1]],
+        [[0, 0, 1, 0, 0]],
+        true,
+        'discounted cap',
+    ],
 ]);
 
 class PartialFptHistoricInvoiceCollector extends Mage_Sales_Model_Order_Invoice_Total_Abstract
@@ -522,7 +584,7 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
     'three separate rules discount fractional taxes in EUR' => [[[0, 1, 2]], false, true, true],
 ]);
 
-function partialFptProduct(Mage_Core_Model_Store $store, array $fees): Mage_Catalog_Model_Product
+function partialFptProduct(Mage_Core_Model_Store $store, array $fees, bool $fractionalQty = false): Mage_Catalog_Model_Product
 {
     $product = Mage::getModel('catalog/product')->setStoreId(0);
     $product->setAttributeSetId($product->getDefaultAttributeSetId())
@@ -531,7 +593,7 @@ function partialFptProduct(Mage_Core_Model_Store $store, array $fees): Mage_Cata
         ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
         ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
         ->setTaxClassId(0)->setWebsiteIds([(int) $store->getWebsiteId()])
-        ->setStockData(['use_config_manage_stock' => 0, 'manage_stock' => 0, 'is_in_stock' => 1, 'qty' => 20]);
+        ->setStockData(['use_config_manage_stock' => 0, 'manage_stock' => 0, 'is_in_stock' => 1, 'qty' => 20, 'is_qty_decimal' => $fractionalQty]);
     foreach ($fees as $attribute => $price) {
         $product->setData($attribute, [['website_id' => (int) $store->getWebsiteId(), 'country' => 'US', 'state' => '*', 'price' => $price]]);
     }
