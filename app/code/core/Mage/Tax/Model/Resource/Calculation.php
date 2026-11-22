@@ -72,7 +72,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
     {
         $rates = $this->_getRates($request);
         return [
-            'process' => $this->getCalculationProcess($request, $rates),
+            'process' => $this->buildCalculationProcess($rates),
             'value'   => $this->_calculateRate($rates),
         ];
     }
@@ -90,15 +90,17 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
 
     /**
      * Retrieve Calculation Process
-     *
-     * @param \Maho\DataObject $request
-     * @param array $rates
-     * @return array
      */
-    public function getCalculationProcess($request, $rates = null)
+    public function getCalculationProcess(\Maho\DataObject $request): array
     {
-        $rates ??= $this->_getRates($request);
+        return $this->buildCalculationProcess($this->_getRates($request));
+    }
 
+    /**
+     * Group the rates by priority into the steps of the calculation process
+     */
+    public function buildCalculationProcess(array $rates): array
+    {
         $result = [];
         $row = [];
         $ids = [];

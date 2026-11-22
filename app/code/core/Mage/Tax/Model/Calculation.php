@@ -336,21 +336,15 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
      *  customer_class_id (->getCustomerClassId())
      *  store (->getStore())
      *
-     * @param   null|false|Mage_Sales_Model_Quote_Address $shippingAddress
-     * @param   null|false|Mage_Sales_Model_Quote_Address $billingAddress
-     * @param   null|int $customerTaxClass
-     * @param   null|string|bool|int|Mage_Core_Model_Store $store
-     * @return \Maho\DataObject
+     * For a null address, the request uses the default address of the customer.
+     * For a false address, it uses the default tax destination of the store.
      */
     public function getRateRequest(
-        $shippingAddress = null,
-        $billingAddress = null,
-        $customerTaxClass = null,
-        $store = null,
-    ) {
-        if ($shippingAddress === false && $billingAddress === false && $customerTaxClass === false) {
-            return $this->getRateOriginRequest($store);
-        }
+        Mage_Customer_Model_Address_Abstract|false|null $shippingAddress = null,
+        Mage_Customer_Model_Address_Abstract|false|null $billingAddress = null,
+        ?int $customerTaxClass = null,
+        ?Mage_Core_Model_Store $store = null,
+    ): \Maho\DataObject {
         $address = new \Maho\DataObject();
         $customer = $this->getCustomer();
         $basedOn = Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_BASED_ON, $store);
@@ -409,7 +403,7 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
 
         if (is_null($customerTaxClass) && $customer) {
             $customerTaxClass = $customer->getTaxClassId();
-        } elseif (($customerTaxClass === false) || !$customer) {
+        } elseif (!$customer) {
             $customerTaxClass = Mage::getModel('customer/group')
                     ->getTaxClassId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
         }
@@ -560,13 +554,10 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
 
     /**
      * Get the calculation process
-     *
-     * @param array $rates
-     * @return array
      */
-    public function reproduceProcess($rates)
+    public function reproduceProcess(array $rates): array
     {
-        return $this->getResource()->getCalculationProcess(null, $rates);
+        return $this->getResource()->buildCalculationProcess($rates);
     }
 
     /**
