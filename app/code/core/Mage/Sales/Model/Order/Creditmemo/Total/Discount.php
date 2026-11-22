@@ -132,7 +132,9 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         }
 
         $capacity = max(0.0, round((float) $memo->getBaseGrandTotal() - $itemDiscount, 4));
-        if ($invoice && $invoice->getId() === $source->getId()) {
+        if (($invoice && $invoice->getId() === $source->getId())
+            || (!$invoice && $refundedShipping === 0.0 && $shippingLeft === 0.0)
+        ) {
             $share = $this->getRefundedItemDiscount($memo, $source, $previous, $shippingDiscount, $used);
             if ($share !== null) {
                 return max(0.0, min($share, $remaining, $capacity));
@@ -184,6 +186,12 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         $invoiced = $this->getItemAmounts($source, $order);
         $current = $refunded = $this->getItemAmounts($memo, $order);
         $otherItems = null;
+        if (!$memo->getInvoice()) {
+            $otherItems = $this->getItemsOnOtherInvoices($order, $source);
+            if (!$current || array_diff_key($current, $invoiced) || array_intersect_key($current, $otherItems)) {
+                return null;
+            }
+        }
         foreach ($previous as $row) {
             if ($row->getInvoiceId() && $row->getInvoiceId() !== (int) $source->getId()) {
                 continue;

@@ -17,6 +17,7 @@ it('refunds the shipping discount that was charged to another invoice', function
     float $shippingDiscount,
     array $refunds,
     array $quantities = [],
+    float $baseBalance = 0.0,
 ): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
@@ -25,29 +26,36 @@ it('refunds the shipping discount that was charged to another invoice', function
         $baseTotal = (float) $order->getBaseTotalPaid();
         $saleTotal = (float) $order->getTotalPaid();
         $documents = Mage::getService('sales/order_document');
+        $linkedTotals = [];
         foreach ($refunds as $refund) {
             [$sku, $expectedSale, $expectedBase, $expectedBaseDiscount] = $refund;
-            $invoice = $invoices[$sku === 'shipping' ? 'shipping' : 'discount'];
+            $name = $sku === 'shipping' ? 'shipping' : 'discount';
+            $invoice = ($refund[5] ?? true) ? $invoices[$name] : null;
             $data = ['qtys' => [(int) $items[$sku]->getId() => $refund[4] ?? 1]];
             $firstPreview = $documents->prepareCreditmemo($order, $data, [], $invoice);
             $secondPreview = $documents->prepareCreditmemo($order, $data, [], $invoice);
             expect((float) $firstPreview->getBaseGrandTotal())->toBe((float) $secondPreview->getBaseGrandTotal());
             $saved = $documents->refund($order, $data, offlineRefund: true, backToStockItemIds: [], invoice: $invoice);
             $memo = Mage::getModel('sales/order_creditmemo')->load((int) $saved->getId());
-            expect($memo->getInvoiceId())->toBe((int) $invoice->getId())
+            expect($memo->getInvoiceId())->toBe($invoice ? (int) $invoice->getId() : null)
                 ->and((float) $memo->getGrandTotal())->toBe($expectedSale)
                 ->and((float) $memo->getBaseGrandTotal())->toBe($expectedBase)
                 ->and((float) $memo->getBaseDiscountAmount())->toBe($expectedBaseDiscount);
+            if ($invoice) {
+                $linkedTotals[$name] = round(($linkedTotals[$name] ?? 0.0) + $expectedBase, 2);
+            }
             $order = Mage::getModel('sales/order')->load((int) $order->getId());
         }
-        foreach ($invoices as $invoice) {
+        foreach ($invoices as $name => $invoice) {
             $stored = Mage::getModel('sales/order_invoice')->load((int) $invoice->getId());
-            expect((float) $stored->getBaseTotalRefunded())->toBe((float) $stored->getBaseGrandTotal());
+            expect((float) $stored->getBaseTotalRefunded())->toBe($linkedTotals[$name] ?? 0.0);
         }
-        expect((float) $order->getBaseTotalRefunded())->toBe($baseTotal)
+        expect((float) $order->getBaseTotalRefunded())->toBe(round($baseTotal - $baseBalance, 2))
             ->and((float) $order->getTotalRefunded())->toBe($saleTotal)
-            ->and((float) $order->getBaseShippingRefunded())->toBe($shipping)
-            ->and($order->getBaseDiscountRefunded())->toBe($order->getBaseDiscountAmount());
+            ->and((float) $order->getBaseShippingRefunded())->toBe($shipping);
+        if ($baseBalance === 0.0) {
+            expect($order->getBaseDiscountRefunded())->toBe($order->getBaseDiscountAmount());
+        }
     } finally {
         $connection->rollBack();
     }
@@ -94,6 +102,15 @@ it('refunds the shipping discount that was charged to another invoice', function
         ['shipping' => 1000.0, 'large' => 0.06, 'small' => 0.02], 0.00004, 1.0, 0.02,
         [['small', 0.0, 0.02, -0.02, 2], ['large', 0.0, 0.01, -0.05], ['shipping', 0.02, 501.0, -500.0]],
         ['small' => 2],
+    ],
+    'unlinked partial refund after the shipping invoice is fully refunded' => [
+        ['shipping' => 1000.0, 'small' => 0.10, 'large' => 1000.0], 0.00004, 10.0, 1.0,
+        [['shipping', 0.02, 510.0, -500.0], ['large', 0.02, 499.0, -501.0, 1, false]],
+        [], 0.05,
+    ],
+    'two unlinked refunds of the invoice without shipping' => [
+        ['shipping' => 1000.0, 'small' => 0.10, 'large' => 1000.0], 0.00004, 10.0, 1.0,
+        [['shipping', 0.02, 510.0, -500.0], ['small', 0.0, 0.05, -0.05, 1, false], ['large', 0.02, 499.0, -501.0, 1, false]],
     ],
 ]);
 
