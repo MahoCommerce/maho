@@ -258,6 +258,7 @@ class Mage_Shipping_Model_Shipping
         $fullItems  = [];
 
         $maxWeight  = (float) $carrier->getConfigData('max_package_weight');
+        $roundingTolerance = 2 * PHP_FLOAT_EPSILON * abs($maxWeight);
 
         foreach ($allItems as $item) {
             if ($item->getProductType() == Mage_Catalog_Model_Product_Type::TYPE_BUNDLE
@@ -284,9 +285,9 @@ class Mage_Shipping_Model_Shipping
             if ($item->getIsQtyDecimal() && $item->getProductType() != Mage_Catalog_Model_Product_Type::TYPE_BUNDLE) {
                 $stockItem = $item->getProduct()->getStockItem();
                 if ($stockItem->getIsDecimalDivided()) {
-                    if ($stockItem->getEnableQtyIncrements() && $stockItem->getQtyIncrements()) {
-                        $itemWeight = $itemWeight * $stockItem->getQtyIncrements();
-                        $qty        = round(($item->getWeight() / $itemWeight) * $qty);
+                    if ($stockItem->getEnableQtyIncrements() && ($qtyIncrement = $stockItem->getQtyIncrements())) {
+                        $itemWeight *= $qtyIncrement;
+                        $qty        = round($qty / $qtyIncrement);
                         $changeQty  = false;
                     } else {
                         $itemWeight = $itemWeight * $item->getQty();
@@ -306,7 +307,10 @@ class Mage_Shipping_Model_Shipping
             }
 
             if ($checkWeight && $maxWeight && $itemWeight > $maxWeight) {
-                return [];
+                if ($itemWeight - $maxWeight > $roundingTolerance) {
+                    return [];
+                }
+                $itemWeight = $maxWeight;
             }
 
             if ($changeQty && !$item->getParentItem() && $item->getIsQtyDecimal()

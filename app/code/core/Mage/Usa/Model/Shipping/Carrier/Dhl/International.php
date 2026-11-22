@@ -589,9 +589,9 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
             if ($item->getIsQtyDecimal() && $item->getProductType() != Mage_Catalog_Model_Product_Type::TYPE_BUNDLE) {
                 $stockItem = $item->getProduct()->getStockItem();
                 if ($stockItem->getIsDecimalDivided()) {
-                    if ($stockItem->getEnableQtyIncrements() && $stockItem->getQtyIncrements()) {
-                        $itemWeight = $itemWeight * $stockItem->getQtyIncrements();
-                        $qty        = round(($item->getWeight() / $itemWeight) * $qty);
+                    if ($stockItem->getEnableQtyIncrements() && ($qtyIncrement = $stockItem->getQtyIncrements())) {
+                        $itemWeight *= $qtyIncrement;
+                        $qty        = round($qty / $qtyIncrement);
                         $changeQty  = false;
                     } else {
                         $itemWeight = $itemWeight * $item->getQty();

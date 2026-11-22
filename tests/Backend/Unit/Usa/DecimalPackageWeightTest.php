@@ -18,10 +18,20 @@ function decimalPackageRequest(
     float $qty,
     bool $divisible,
     ?float $increment,
+    array $extraWeights = [],
 ): Mage_Shipping_Model_Rate_Request {
+    $items = [decimalPackageItem($weight, $qty, $divisible, $increment)];
+    foreach ($extraWeights as $extraWeight) {
+        $items[] = new Mage_Sales_Model_Quote_Item([
+            'product' => new Mage_Catalog_Model_Product()->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE),
+            'product_type' => Mage_Catalog_Model_Product_Type::TYPE_SIMPLE,
+            'qty' => 1,
+            'weight' => $extraWeight,
+        ]);
+    }
     return new Mage_Shipping_Model_Rate_Request()
-        ->setAllItems([decimalPackageItem($weight, $qty, $divisible, $increment)])
-        ->setPackageWeight($weight * $qty);
+        ->setAllItems($items)
+        ->setPackageWeight($weight * $qty + array_sum($extraWeights));
 }
 
 function decimalPackageItem(float $weight, float $qty, bool $divisible, ?float $increment): Mage_Sales_Model_Quote_Item
@@ -53,6 +63,8 @@ $decimalPackageCases = [
     'two packages of the same weight' => [80.0, 1.75, true, null, [70.0, 70.0]],
     'weight just above two package limits' => [93.334, 1.5, true, null, [70.0, 70.0, 0.001]],
     'quantity increments' => [8.0, 1.5, true, 0.5, [12.0]],
+    'quantity increments in tenths' => [20.0, 0.3, true, 0.1, [6.0]],
+    'quantity increments over one fill several packages' => [30.0, 4.5, true, 1.5, [45.0, 45.0, 45.0]],
     'indivisible quantity' => [8.0, 0.5, false, null, [4.0]],
 ];
 
@@ -63,8 +75,9 @@ it('quotes the actual package weights for decimal quantities', function (
     ?float $increment,
     array $expected,
     float $maxWeight = 70,
+    array $extraWeights = [],
 ): void {
-    $request = decimalPackageRequest($weight, $qty, $divisible, $increment);
+    $request = decimalPackageRequest($weight, $qty, $divisible, $increment, $extraWeights);
     $carrier = new PackageCarrierStub(
         fn(float $packageWeight) => new Mage_Shipping_Model_Rate_Result()->append(
             new Mage_Shipping_Model_Rate_Result_Method(['method' => 'test', 'price' => $packageWeight]),
@@ -76,14 +89,36 @@ it('quotes the actual package weights for decimal quantities', function (
 
     $packages = $shipping->composePackagesForCarrier($carrier, $request);
     $uniqueWeights = array_values(array_unique($expected, SORT_NUMERIC));
-    $roundWeight = static fn(float|int|string $weight): float => round((float) $weight, 3);
+    $roundWeight = static fn(float|int|string $weight): float => round((float) $weight, 8);
     expect(array_map($roundWeight, array_keys($packages)))->toBe($uniqueWeights)
         ->and(array_map($roundWeight, $carrier->getRequestedWeights()))->toBe($uniqueWeights)
         ->and($shipping->getResult()->getCheapestRate()?->getPrice())->toBe(round(array_sum($expected), 2));
+    if ($maxWeight > 0) {
+        expect(max($carrier->getRequestedWeights()))->toBeLessThanOrEqual($maxWeight);
+    }
 })->with([
     ...$decimalPackageCases,
     'no package weight limit' => [8.0, 1.5, true, null, [12.0], 0],
     'decimal package limit with no remainder' => [140.8, 1.75, true, null, array_fill(0, 11, 22.4), 22.4],
+    'indivisible decimal quantity at the limit' => [0.1, 3.0, false, null, [0.3], 0.3],
+    'one quantity increment at the limit' => [0.1, 3.0, true, 3.0, [0.3], 0.3],
+    'two quantity increments at the limit' => [0.1, 6.0, true, 3.0, [0.3, 0.3], 0.3],
+    'divisible decimal quantity at the limit without an increment' => [0.1, 3.0, true, null, [0.3], 0.3],
+    'divisible decimal quantity exceeding the limit without an increment' => [0.1001, 3.0, true, null, [0.3, 0.0003], 0.3],
+    'a weightless line with quantity increments ships with a weighted item' => [0.0, 1.5, true, 0.5, [6.0], 70, [6.0]],
+]);
+
+it('leaves items that really exceed the carrier limit unsplit', function (bool $divisible, ?float $increment): void {
+    $request = decimalPackageRequest(0.1001, 3.0, $divisible, $increment);
+    $carrier = new PackageCarrierStub(fn() => new Mage_Shipping_Model_Rate_Result(), maxWeight: 0.3);
+    $shipping = new ShippingStub(['test' => $carrier]);
+
+    expect($shipping->composePackagesForCarrier($carrier, $request))->toBe([]);
+    $shipping->collectCarrierRates('test', $request);
+    expect($carrier->getRequestedWeights())->toBe([$request->getPackageWeight()]);
+})->with([
+    'indivisible decimal quantity' => [false, null],
+    'divisible decimal quantity with an increment' => [true, 3.0],
 ]);
 
 it('quotes real package weights and charges once for each package at the carrier limit', function (
@@ -137,15 +172,7 @@ it('writes the actual package weights into the DHL quote XML', function (
     string $expectedUnit = 'KG',
     array $extraWeights = [],
 ): void {
-    $request = decimalPackageRequest($weight, $qty, $divisible, $increment);
-    $items = $request->getAllItems();
-    foreach ($extraWeights as $extraWeight) {
-        $items[] = new Mage_Sales_Model_Quote_Item([
-            'product' => new Mage_Catalog_Model_Product()->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE),
-            'product_type' => Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, 'qty' => 1, 'weight' => $extraWeight,
-        ]);
-    }
-    $request->setAllItems($items)->setPackageWeight($weight * $qty + array_sum($extraWeights))
+    $request = decimalPackageRequest($weight, $qty, $divisible, $increment, $extraWeights)
         ->setOrigCountryId($originCountry)
         ->setOrigCity('Rome')
         ->setOrigPostcode('00100')
@@ -205,4 +232,5 @@ it('writes the actual package weights into the DHL quote XML', function (
     'combined lines exceeding the limit' => [139.998, 0.5, true, null, [70.0, 0.001], 'K', 'IT', 'KG', [0.001, 0.001]],
     'one hundred lines fill one package' => [0.7, 1.0, true, null, [70.0], 'K', 'IT', 'KG', array_fill(0, 99, 0.7)],
     'one thousand lines fill one package' => [0.07, 1.0, true, null, [70.0], 'K', 'IT', 'KG', array_fill(0, 999, 0.07)],
+    'a weightless line with quantity increments ships with a weighted item' => [0.0, 1.5, true, 0.5, [6.0], 'K', 'IT', 'KG', [6.0]],
 ]);
