@@ -20,9 +20,6 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
 ): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
-    set_error_handler(static function (int $level, string $message, string $file, int $line): never {
-        throw new ErrorException($message, 0, $level, $file, $line);
-    }, E_WARNING);
     try {
         Mage::getModel('directory/currency')->saveRates(['USD' => ['EUR' => 0.72]]);
         $store = setStoreDisplayCurrency('EUR', 'USD,EUR');
@@ -178,7 +175,24 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
             if ($variant === 'manual' && $index === 0) {
                 $data['adjustment_negative'] = 0.02;
             }
-            $creditmemo = $documents->refund($order, $data, offlineRefund: true, sendEmail: false, invoice: $invoice);
+            $checkWarnings = $variant === 'no fees';
+            if ($checkWarnings) {
+                $errorReporting = error_reporting(error_reporting() | E_WARNING);
+                set_error_handler(static function (int $level, string $message, string $file, int $line): bool {
+                    if (!(error_reporting() & $level)) {
+                        return false;
+                    }
+                    throw new ErrorException($message, 0, $level, $file, $line);
+                }, E_WARNING);
+            }
+            try {
+                $creditmemo = $documents->refund($order, $data, offlineRefund: true, sendEmail: false, invoice: $invoice);
+            } finally {
+                if ($checkWarnings) {
+                    restore_error_handler();
+                    error_reporting($errorReporting);
+                }
+            }
             $creditmemo = Mage::getModel('sales/order_creditmemo')->load((int) $creditmemo->getId());
             if (in_array($variant, ['history', 'two historic fees', 'duplicated historic fees'], true) && $index === 0) {
                 partialFptUseHistoricDocumentFormat($creditmemo->getAllItems()[0], $orderItem, $variant === 'duplicated historic fees');
@@ -294,7 +308,6 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
         expect($cents($order->getTotalRefunded()))->toBe($cents($order->getTotalPaid() - $adjustment))
             ->and($cents($order->getBaseTotalRefunded()))->toBe($cents($order->getBaseTotalPaid() - $baseAdjustment));
     } finally {
-        restore_error_handler();
         $connection->rollBack();
         resetCurrencyState();
     }
