@@ -826,12 +826,13 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
             /** @var Mage_Page_Block_Html_Pager $pagerBlock */
             $pagerBlock->setAvailableLimit($this->getAvailableLimit());
 
+            $limit = $this->getLimit();
             $pagerBlock->setUseContainer(false)
                 ->setShowPerPage(false)
                 ->setShowAmounts(false)
                 ->setLimitVarName($this->getLimitVarName())
                 ->setPageVarName($this->getPageVarName())
-                ->setLimit($this->getLimit())
+                ->setLimit($limit === 'all' ? 0 : (int) $limit)
                 ->setFrameLength(Mage::getStoreConfig('design/pagination/pagination_frame'))
                 ->setJump(Mage::getStoreConfig('design/pagination/pagination_frame_skip'))
                 ->setCollection($this->getCollection());

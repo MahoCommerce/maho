@@ -603,10 +603,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
         return $product->getTypeId() != Mage_Catalog_Model_Product_Type_Grouped::TYPE_CODE;
     }
 
-    /**
-     * Get current custom option download url
-     */
-    public function getCustomDownloadUrl()
+    public function getCustomDownloadUrl(): string
     {
         return $this->_customOptionDownloadUrl;
     }

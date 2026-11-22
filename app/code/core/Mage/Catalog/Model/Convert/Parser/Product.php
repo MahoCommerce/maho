@@ -12,7 +12,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
 {
     public const MULTI_DELIMITER = ' , ';
 
-    protected $_resource;
+    protected ?Mage_Catalog_Model_Resource_Product $_resource = null;
 
     /**
      * Product collections per store

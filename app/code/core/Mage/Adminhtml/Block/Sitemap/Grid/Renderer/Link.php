@@ -13,11 +13,10 @@ class Mage_Adminhtml_Block_Sitemap_Grid_Renderer_Link extends Mage_Adminhtml_Blo
     /**
      * Prepare link to display in grid
      *
-     * @return string
      * @throws Mage_Core_Model_Store_Exception|Mage_Core_Exception
      */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         $fileName = preg_replace('/^\//', '', $row->getSitemapPath() . $row->getSitemapFilename());
         $url = $this->escapeHtml(

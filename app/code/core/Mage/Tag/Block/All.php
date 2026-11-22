@@ -11,8 +11,8 @@
 class Mage_Tag_Block_All extends Mage_Core_Block_Template
 {
     protected ?array $_tags = null;
-    protected $_minPopularity;
-    protected $_maxPopularity;
+    protected ?int $_minPopularity = null;
+    protected ?int $_maxPopularity = null;
 
     /**
      * @return $this

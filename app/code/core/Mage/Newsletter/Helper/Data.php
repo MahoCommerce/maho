@@ -87,7 +87,7 @@ class Mage_Newsletter_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Retrieve Template processor for Newsletter template
      *
-     * @return false|Mage_Core_Model_Abstract|\Maho\Filter\Template
+     * @return Mage_Core_Model_Email_Template_Filter|false
      */
     public function getTemplateProcessor()
     {

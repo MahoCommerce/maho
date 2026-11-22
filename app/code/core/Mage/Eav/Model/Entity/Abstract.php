@@ -1052,7 +1052,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
         if ($attribute) {
             $attributeCode = $attribute->getAttributeCode();
             $object->setData($attributeCode, $valueRow['value']);
-            $attribute->getBackend()->setEntityValueId($object, $valueRow['value_id']);
+            $attribute->getBackend()->setEntityValueId($object, (int) $valueRow['value_id']);
         }
 
         return $this;

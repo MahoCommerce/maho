@@ -755,7 +755,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * @return Mage_Core_Model_Config_Element|false
      */
     #[\Override]
-    public function getNode($path = null, $scope = '', $scopeCode = null)
+    public function getNode($path = null, ?string $scope = '', int|string|null $scopeCode = null)
     {
         if ($scope !== '') {
             if (($scope === 'store') || ($scope === 'website')) {

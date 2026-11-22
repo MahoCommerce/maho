@@ -59,7 +59,7 @@ class Mage_Catalog_Model_Config extends Mage_Eav_Model_Config
      */
     protected $_usedForSortBy;
 
-    protected $_storeId = null;
+    protected ?int $_storeId = null;
 
     public const XML_PATH_PRODUCT_COLLECTION_ATTRIBUTES = 'frontend/product/collection/attributes';
 

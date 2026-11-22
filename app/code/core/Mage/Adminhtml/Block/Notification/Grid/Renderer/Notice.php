@@ -10,13 +10,8 @@
 
 class Mage_Adminhtml_Block_Notification_Grid_Renderer_Notice extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
-    /**
-     * Renders grid column
-     *
-     * @return  string
-     */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         return '<span class="grid-row-title">' . $this->escapeHtml($row->getTitle()) . '</span>'
             . ($row->getDescription() ? '<br>' . $this->escapeHtml($row->getDescription()) : '');

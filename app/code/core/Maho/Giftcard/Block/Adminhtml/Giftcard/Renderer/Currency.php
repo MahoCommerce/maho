@@ -18,7 +18,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Renderer_Currency extends Mage_Admi
      * Render the currency amount with the gift card's currency
      */
     #[\Override]
-    public function render(Maho\DataObject $row)
+    public function render(Maho\DataObject $row): string
     {
         $index = $this->getColumn()->getIndex();
         $value = $row->getData($index);

@@ -10,13 +10,8 @@
 
 class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Theme extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
-    /**
-     * Renders grid column
-     *
-     * @return  string
-     */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         $options = $this->getOptions();
         $value   = $this->_getValue($row);
@@ -24,7 +19,8 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Theme extends Mage_Adminh
             $value = 'all';
         }
 
-        return $this->escapeHtml($this->_getValueLabel($options, $value));
+        $label = $this->_getValueLabel($options, $value);
+        return $label === false ? '' : $this->escapeHtml($label);
     }
 
     /**

@@ -35,7 +35,7 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
 
     protected ?array $_statuses = null;
 
-    protected $_priceBlock;
+    protected ?Mage_Core_Block_Abstract $_priceBlock = null;
 
     /**
      * Retrieve product view page url

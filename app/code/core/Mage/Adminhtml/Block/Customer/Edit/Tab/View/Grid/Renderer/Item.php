@@ -95,11 +95,9 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Grid_Renderer_Item extends Mag
 
     /**
      * Renders item product name and its configuration
-     *
-     * @return string
      */
     #[\Override]
-    public function render(\Maho\DataObject $item)
+    public function render(\Maho\DataObject $item): string
     {
         $this->setItem($item);
         return $this->toHtml();

@@ -82,7 +82,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      * Remove No-referer flag from customer session after each action
      */
     #[\Override]
-    public function postDispatch()
+    public function postDispatch(): static
     {
         parent::postDispatch();
         $this->_getSession()->unsNoReferer(false);

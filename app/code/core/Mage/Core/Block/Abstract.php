@@ -623,7 +623,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      * @param   string $name
      * @param   Mage_Core_Block_Abstract $child
      */
-    protected function _beforeChildToHtml($name, $child) {}
+    protected function _beforeChildToHtml($name, $child): void {}
 
     /**
      * Retrieve block html
@@ -1182,7 +1182,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
         if ($this->_translationHelper instanceof Mage_Core_Helper_Abstract) {
             return $this->_translationHelper->__(...$args);
         }
-        $expr = new Mage_Core_Model_Translate_Expr(array_shift($args), $this->getModuleName());
+        $expr = new Mage_Core_Model_Translate_Expr((string) array_shift($args), $this->getModuleName());
         array_unshift($args, $expr);
         return $this->_getApp()->getTranslator()->translate($args);
     }

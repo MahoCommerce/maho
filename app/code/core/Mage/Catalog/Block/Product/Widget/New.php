@@ -8,6 +8,8 @@
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 class Mage_Catalog_Block_Product_Widget_New extends Mage_Catalog_Block_Product_New implements Mage_Widget_Block_Interface
 {
     /**
@@ -135,15 +137,13 @@ class Mage_Catalog_Block_Product_Widget_New extends Mage_Catalog_Block_Product_N
 
     /**
      * Retrieve how much products should be displayed
-     *
-     * @return int
      */
-    public function getProductsPerPage()
+    public function getProductsPerPage(): int
     {
         if (!$this->hasData('products_per_page')) {
             $this->setData('products_per_page', self::DEFAULT_PRODUCTS_PER_PAGE);
         }
-        return $this->getData('products_per_page');
+        return (int) $this->getData('products_per_page');
     }
 
     /**

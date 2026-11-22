@@ -15,7 +15,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Renderer_Websites extends Mage_Admi
      * orphaned card (NULL alias) renders as a dash rather than being hidden.
      */
     #[\Override]
-    public function render(Maho\DataObject $row)
+    public function render(Maho\DataObject $row): string
     {
         $raw = (string) $row->getData('website_ids');
         if ($raw === '') {

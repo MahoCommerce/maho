@@ -469,9 +469,11 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
     /**
      * Validate and set new passkey data
+     *
+     * @param array{attestationObject: string, clientDataJSON: string} $data
      * @throws Mage_Core_Exception
      */
-    public function setPasskeyData($data): void
+    public function setPasskeyData(array $data): void
     {
         $challenge = $this->getSession()->getPasskeyChallenge();
         $attestationObject = base64_decode($data['attestationObject']);

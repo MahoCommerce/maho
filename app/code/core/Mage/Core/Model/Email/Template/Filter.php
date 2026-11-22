@@ -27,7 +27,7 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
      */
     protected $_modifiers = ['nl2br'  => ''];
 
-    protected $_storeId = null;
+    protected ?int $_storeId = null;
 
     protected bool $_plainTemplateMode = false;
 
@@ -86,29 +86,20 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
         return $this->_plainTemplateMode;
     }
 
-    /**
-     * Setter
-     *
-     * @param Mage_Core_Model_Store|int $storeId
-     * @return $this
-     */
-    public function setStoreId($storeId)
+    public function setStoreId(?int $storeId): static
     {
         $this->_storeId = $storeId;
         return $this;
     }
 
     /**
-     * Getter
-     * if $_storeId is null return Design store id
+     * The store set with setStoreId(), or the current store
      *
-     * @return int
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function getStoreId()
+    public function getStoreId(): int
     {
-        $this->_storeId ??= Mage::app()->getStore()->getId();
-        return $this->_storeId;
+        return $this->_storeId ??= (int) Mage::app()->getStore()->getId();
     }
 
     /**

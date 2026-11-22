@@ -95,8 +95,8 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      */
     protected $_urlModel = null;
 
-    protected static $_url;
-    protected static $_urlRewrite;
+    protected static ?Mage_Core_Model_Url $_url = null;
+    protected static ?Mage_Core_Model_Url_Rewrite $_urlRewrite = null;
 
     protected array $_errors = [];
 

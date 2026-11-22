@@ -56,7 +56,7 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
         return Mage::app()->emulate($storeId, $callback);
     }
 
-    private function getDesignConfigStoreId(): ?int
+    protected function getDesignConfigStoreId(): ?int
     {
         $store = $this->getDesignConfig()->getStore();
         return $store === null || $store === '' ? null : (int) Mage::app()->getStore($store)->getId();

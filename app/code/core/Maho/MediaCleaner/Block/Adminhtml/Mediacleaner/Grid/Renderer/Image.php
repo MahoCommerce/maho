@@ -13,7 +13,7 @@ use League\Flysystem\FilesystemException;
 class Maho_MediaCleaner_Block_Adminhtml_Mediacleaner_Grid_Renderer_Image extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         $mount = Mage::getStorage('media');
         $file = Mage::helper('mediacleaner')->getImageStoragePath($mount, (string) $row->getType(), (string) $row->getPath());

@@ -29,8 +29,5 @@ interface Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Interface
      */
     public function getColumn();
 
-    /**
-     * Renders grid column
-     */
-    public function render(\Maho\DataObject $row);
+    public function render(\Maho\DataObject $row): string;
 }

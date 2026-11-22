@@ -45,7 +45,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
         return $this->_code;
     }
 
-    public function getTrackingInfo($tracking)
+    public function getTrackingInfo(?string $tracking): Mage_Shipping_Model_Tracking_Result_Abstract|string|false
     {
         $result = $this->getTracking($tracking);
 
