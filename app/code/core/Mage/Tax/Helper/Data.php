@@ -1105,7 +1105,11 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
             return [];
         }
 
-        return Mage::helper('weee')->getDiscountedAmountsByTitle($source->getAllItems(), $source->getStore() ?? $this->_app->getStore());
+        $store = is_callable([$source, 'getStore']) ? $source->getStore() : null;
+        return Mage::helper('weee')->getDiscountedAmountsByTitle(
+            $source->getAllItems(),
+            $store instanceof Mage_Core_Model_Store ? $store : $this->_app->getStore(),
+        );
     }
 
     /**

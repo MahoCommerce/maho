@@ -388,3 +388,49 @@ it('discounts fixed product taxes for only the current rule ids recorded by a re
     'rewrite declares currently applied rules without invoking the parent' => [false],
     'rewrite calls the parent, which checks and rejects the percentage rule' => [true],
 ]);
+
+it('consults the fixed tax helper rewrite when applying a cart rule', function (): void {
+    $item = addCartFeeEligibilityProduct($this->quote, $this->feeAttribute, 1.0);
+    cartFeeEligibilityRule($this->websiteId, $this->groupId, 20.0, 0);
+    Mage::unregister('_helper/weee');
+    Mage::register('_helper/weee', new class extends Mage_Weee_Helper_Data {
+        #[\Override]
+        public function getApplied($item): array
+        {
+            return $item instanceof Mage_Sales_Model_Quote_Item_Abstract ? [] : parent::getApplied($item);
+        }
+    });
+
+    $this->cart->collectAndSave($this->quote);
+
+    expect($item->getDiscountAmount())->toBe(20.0)
+        ->and($item->getWeeeTaxAppliedRowAmount())->toEqualWithDelta(10.0, 0.00001)
+        ->and($item->getWeeeDiscount())->toBe(0.0);
+});
+
+it('calls a rewritten fixed tax processor only when tax discounts are enabled', function (bool $enabled, bool $discounted): void {
+    $store = $this->quote->getStore();
+    $store->setConfig(Mage_Weee_Helper_Data::XML_PATH_FPT_ENABLED, $enabled ? '1' : '0');
+    $store->setConfig('tax/weee/discount', $discounted ? '1' : '0');
+    $validator = new class extends Mage_SalesRule_Model_Validator {
+        public int $calls = 0;
+
+        #[\Override]
+        public function processWeeeAmount(Mage_Sales_Model_Quote_Address $address, $items): static
+        {
+            $this->calls++;
+            return $this;
+        }
+    };
+    Mage::unregister('_singleton/salesrule/validator');
+    Mage::register('_singleton/salesrule/validator', $validator);
+    addCartFeeEligibilityProduct($this->quote, $this->feeAttribute, 1.0);
+
+    $this->quote->collectTotals();
+
+    expect($validator->calls)->toBe($enabled && $discounted ? 1 : 0);
+})->with([
+    'fixed product taxes disabled' => [false, true],
+    'fixed product tax discounts disabled' => [true, false],
+    'fixed product taxes and discounts enabled' => [true, true],
+]);

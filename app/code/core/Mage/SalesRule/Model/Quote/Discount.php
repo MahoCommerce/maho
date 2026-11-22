@@ -62,7 +62,10 @@ class Mage_SalesRule_Model_Quote_Discount extends Mage_Sales_Model_Quote_Address
             $this->_aggregateItemDiscount($item);
         }
 
-        $this->_calculator->processWeeeAmount($address, $items);
+        $weee = Mage::helper('weee');
+        if ($weee->isEnabled($store) && $weee->isDiscounted($store)) {
+            $this->_calculator->processWeeeAmount($address, $items);
+        }
 
         /**
          * Process shipping amount discount

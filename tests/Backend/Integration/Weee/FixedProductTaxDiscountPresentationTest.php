@@ -219,3 +219,70 @@ it('uses the document store rounding to allocate each fixed tax discount', funct
         ->and(array_column($allocated, 'total_weee_discount'))->toBe([0.137, 0.137])
         ->and(array_column($allocated, 'total_base_weee_discount'))->toBe([0.263, 0.263]);
 });
+
+it('shows the fixed tax title and amount supplied by the helper rewrite', function (string $sourceModel): void {
+    $store = Mage::app()->getStore(1);
+    Mage::app()->setCurrentStore($store);
+    $store->setConfig('tax/weee/include_in_subtotal', '0');
+    $store->setConfig('tax/weee/apply_vat', '0');
+    Mage::unregister('_helper/weee');
+    $helper = new class extends Mage_Weee_Helper_Data {
+        #[\Override]
+        public function getApplied($item): array
+        {
+            $fees = parent::getApplied($item);
+            foreach ($fees as &$fee) {
+                $fee['title'] = 'Published fee';
+                $fee['weee_discount'] = 1.0;
+                $fee['base_weee_discount'] = 1.0;
+            }
+            return $fees;
+        }
+    };
+    Mage::register('_helper/weee', $helper);
+
+    $item = Mage::getModel($sourceModel . '_item');
+    if ($sourceModel === 'sales/quote') {
+        $quote = Mage::getModel('sales/quote')->setStoreId((int) $store->getId());
+        $item->setQuote($quote);
+        $address = $quote->getShippingAddress();
+        $address->setData('cached_items_all', [$item]);
+        $total = Mage::getModel('sales/quote_address_total')->setAddress($address);
+        $block = new Mage_Tax_Block_Checkout_Tax()->setTotal($total);
+        $getAll = $block->getAllWeee(...);
+    } else {
+        $order = Mage::getModel('sales/order')->setStoreId((int) $store->getId());
+        $source = $sourceModel === 'sales/order' ? $order : Mage::getModel($sourceModel)->setOrder($order);
+        $source->addItem($item);
+        $getAll = static fn(): array => Mage::helper('tax')->getAllWeee($source);
+    }
+    $helper->setApplied($item, [['title' => 'Stored fee', 'row_amount' => 10.0, 'base_row_amount' => 10.0]]);
+
+    expect($getAll())->toBe(['Published fee' => 9.0])
+        ->and($helper->getRowWeeeAmountAfterDiscount($item))->toBe(9.0)
+        ->and($helper->getBaseRowWeeeAmountAfterDiscount($item))->toBe(9.0);
+})->with(['cart' => 'sales/quote', 'order' => 'sales/order', 'invoice' => 'sales/order_invoice', 'credit memo' => 'sales/order_creditmemo']);
+
+it('uses the store of an extension source when available', function (bool $hasStore): void {
+    $store = Mage::app()->getStore(1);
+    $store->setConfig('tax/weee/include_in_subtotal', '0');
+    $store->setConfig('tax/weee/apply_vat', '0');
+    $currentStore = Mage::app()->getStore(Mage_Core_Model_Store::ADMIN_CODE);
+    $currentStore->setConfig('tax/weee/include_in_subtotal', $hasStore ? '1' : '0');
+    $currentStore->setConfig('tax/weee/apply_vat', '0');
+    Mage::app()->setCurrentStore($currentStore);
+    $item = Mage::getModel('sales/order_item');
+    Mage::helper('weee')->setApplied($item, [['title' => 'Fixed tax', 'row_amount' => 10.0]]);
+    $source = $hasStore
+        ? new Maho\DataObject(['all_items' => [$item], 'store' => $store])
+        : new class ($item) {
+            public function __construct(private readonly Mage_Sales_Model_Order_Item $item) {}
+
+            public function getAllItems(): array
+            {
+                return [$this->item];
+            }
+        };
+
+    expect(Mage::helper('tax')->getAllWeee($source))->toBe(['Fixed tax' => 10.0]);
+})->with(['items only' => false, 'items and store from data object getters' => true]);

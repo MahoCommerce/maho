@@ -332,7 +332,10 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
         $amountKey = $this->isTaxIncluded($store) ? 'row_amount_incl_tax' : 'row_amount';
         $totals = [];
         foreach ($items as $item) {
-            foreach ($this->getAppliedForDisplay($this->getAppliedToItem($item), $item, $store) as $tax) {
+            if ($item instanceof Mage_Sales_Model_Quote_Item_Abstract && $item->getHasChildren() && $item->isChildrenCalculated()) {
+                continue;
+            }
+            foreach ($this->getAppliedForDisplay($this->getApplied($item), $item, $store) as $tax) {
                 $title = (string) ($tax['title'] ?? '');
                 if ($title === '') {
                     $title = $this->__('Fixed Product Tax');
@@ -812,7 +815,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
                 $item->getChildren(),
             ));
         }
-        $applied = $this->getAppliedToItem($item);
+        $applied = $this->getApplied($item);
         if (!$applied) {
             return 0.0;
         }

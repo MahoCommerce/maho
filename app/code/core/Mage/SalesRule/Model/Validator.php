@@ -704,7 +704,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                 continue;
             }
 
-            $applied = $helper->getAppliedToItem($item);
+            $applied = $helper->getApplied($item);
             if (!$applied) {
                 continue;
             }
