@@ -99,7 +99,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Grid extends Mage_Adminhtml_Block_Widget_
         ]);
 
         $this->addColumn('times_used', [
-            'header'    => Mage::helper('salesrule')->__('Times used'),
+            'header'    => Mage::helper('salesrule')->__('Times Used'),
             'align'     => 'left',
             'index'     => 'times_used',
             'type'      => 'number',
