@@ -239,6 +239,61 @@ it('limits online refunds to each invoice in a recognized split shipping pair', 
     'explicitly requested shipping on an ordinary order' => 'ordinary port',
 ]);
 
+it('uses the order shipping discount after the other invoice was already over-refunded', function (bool $refundShippingOffline): void {
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $connection->beginTransaction();
+    $store = Mage::app()->getStore();
+    $paymentPath = 'payment/checkmo/model';
+    $previousPaymentModel = $store->getConfig($paymentPath);
+    try {
+        [$order, $items, $invoices] = createSplitShippingRefundOrder(
+            ['shipping' => 1000.0, 'small' => 0.10, 'large' => 1000.0],
+            0.00004,
+            10.0,
+            1.0,
+        );
+        $documents = Mage::getService('sales/order_document');
+        $pastCreditmemo = $documents->refund(
+            $order,
+            ['qtys' => [(int) $items['large']->getId() => 1]],
+            invoice: $invoices['discount'],
+            beforeRegister: static function (Mage_Sales_Model_Order_Creditmemo $memo): void {
+                $memo->setBaseDiscountAmount(-500.0)->setBaseGrandTotal(500.0);
+            },
+        );
+        expect($pastCreditmemo->getBaseGrandTotal())->toBe(500.0);
+
+        $store->setConfig($paymentPath, SplitShippingRefundPaymentDouble::class);
+        $calls = new Maho\DataObject();
+        Mage::register('split_shipping_refund_payment_calls', $calls);
+        $order = Mage::getModel('sales/order')->load($order->getId());
+        foreach ($invoices as $name => $invoice) {
+            $invoice->load($invoice->getId());
+            $captureId = 'historical-split-shipping-' . $name . '-' . uniqid();
+            $invoice->setTransactionId($captureId)->save();
+            Mage::getModel('sales/order_payment_transaction')->setOrderPaymentObject($order->getPayment())
+                ->setTxnId($captureId)->setTxnType(Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE)->save();
+        }
+        $small = ['qtys' => [(int) $items['small']->getId() => 1]];
+        expect(fn() => $documents->refund($order, $small, offlineRefund: false, invoice: $invoices['discount']))
+            ->toThrow(Mage_Core_Exception::class, 'The refund amount exceeds the refundable balance of this invoice.')
+            ->and($calls->getData('amount'))->toBeNull();
+        $offline = $documents->refund($order, $small, invoice: $invoices['discount']);
+        expect($offline->getBaseGrandTotal())->toBe(0.05);
+        $shipping = ['qtys' => [(int) $items['shipping']->getId() => 1]];
+        $remainder = $documents->refund($order, $shipping, offlineRefund: $refundShippingOffline, invoice: $invoices['shipping']);
+        $order = Mage::getModel('sales/order')->load($order->getId());
+        expect($remainder->getBaseGrandTotal())->toBe(509.0)
+            ->and($calls->getData('amount'))->toBe($refundShippingOffline ? null : 509.0)
+            ->and($order->getBaseTotalRefunded())->toBe(1009.05)
+            ->and($order->getTotalRefunded())->toBe(0.04);
+    } finally {
+        Mage::unregister('split_shipping_refund_payment_calls');
+        $store->setConfig($paymentPath, $previousPaymentModel);
+        $connection->rollBack();
+    }
+})->with([true, false]);
+
 /**
  * @param array<string, float> $prices
  * @param array<string, int> $quantities

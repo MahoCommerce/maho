@@ -120,6 +120,10 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
             $used += $discount;
         }
         $remaining = max(0.0, round($shippingDiscount - $used, 4));
+        $store = $memo->getStore();
+        if ($store->roundPrice($source->getBaseTotalRefunded()) > $store->roundPrice($source->getBaseGrandTotal())) {
+            return min($default, $remaining);
+        }
         $default = $invoice && $invoice->getBaseShippingAmount() ? 0.0 : min($default, $remaining);
         if ($remaining === 0.0) {
             return 0.0;
