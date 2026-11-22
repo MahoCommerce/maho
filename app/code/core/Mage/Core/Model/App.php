@@ -583,7 +583,10 @@ class Mage_Core_Model_App
                 $this->_currentStore = $scopeCode;
                 break;
             case 'group':
-                $this->_currentStore = $this->_getStoreByGroup((int) $scopeCode);
+                $groupId = (int) $scopeCode;
+                $this->_currentStore = (string) $groupId === (string) $scopeCode
+                    ? $this->_getStoreByGroup($groupId)
+                    : null;
                 break;
             case 'website':
                 $this->_currentStore = $this->_getStoreByWebsite($scopeCode);
