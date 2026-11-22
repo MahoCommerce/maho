@@ -324,7 +324,6 @@ class Mage_Oauth_Model_Server
                 if ($this->_token->getConsumerId() != $this->_consumer->getId()) {
                     $this->_throwException('', self::ERR_TOKEN_REJECTED);
                 }
-                //TODO: Implement check for expiration (after it implemented in token model)
             }
         } else {
             $this->_validateCallbackUrlParam();

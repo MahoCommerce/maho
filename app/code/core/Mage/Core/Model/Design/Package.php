@@ -78,7 +78,6 @@ class Mage_Core_Model_Design_Package
 
     /**
      * Whether theme/skin hierarchy should be checked via fallback mechanism
-     * @TODO: implement setter for this value
      * @var bool
      */
     protected $_shouldFallback = true;

@@ -159,8 +159,6 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
     }
 
     /**
-     * TODO: unify _saveRelations() and add() methods, they make same things
-     *
      * @return $this|Mage_Core_Model_Abstract
      */
     public function _saveRelations(Mage_Core_Model_Abstract $user)

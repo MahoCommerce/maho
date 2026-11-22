@@ -8,9 +8,6 @@
  * @package Mage_Core
  */
 
-/**
- * @todo need collect connection by name
- */
 class Mage_Core_Model_Resource_Transaction
 {
     /**

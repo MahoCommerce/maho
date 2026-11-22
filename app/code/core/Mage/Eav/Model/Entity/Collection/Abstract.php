@@ -569,7 +569,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      * @return $this
      * @throws Mage_Core_Exception
      * @throws Mage_Eav_Exception
-     * @todo connect between joined attributes of same entity
      */
     public function joinAttribute($alias, $attribute, $bind, $filter = null, $joinType = 'inner', $storeId = null)
     {
@@ -892,8 +891,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
 
     /**
      * Save all the entities in the collection
-     *
-     * @todo make batch save directly from collection
      */
     public function save(): static
     {
@@ -905,8 +902,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
 
     /**
      * Delete all the entities in the collection
-     *
-     * @todo make batch delete directly from collection
      */
     public function delete(): static
     {

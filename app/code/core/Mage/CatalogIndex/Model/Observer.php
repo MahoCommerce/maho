@@ -146,9 +146,6 @@ class Mage_CatalogIndex_Model_Observer extends Mage_Core_Model_Abstract
      */
     public function processAttributeChangeEvent(\Maho\Event\Observer $observer)
     {
-        /**
-         * @todo add flag to attribute model which will notify what options was changed
-         */
         $attribute = $observer->getEvent()->getAttribute();
         $tags = [
             Mage_Eav_Model_Entity_Attribute::CACHE_TAG . ':' . $attribute->getId(),

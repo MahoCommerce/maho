@@ -146,9 +146,6 @@ function toggleValueElements(checkbox, container, excludedElements, checked){
     }
 }
 
-/**
- * @todo add validation for fields
- */
 function submitAndReloadArea(area, url) {
     const areaElement = typeof area === 'string' ? document.getElementById(area) : area;
     if(areaElement) {

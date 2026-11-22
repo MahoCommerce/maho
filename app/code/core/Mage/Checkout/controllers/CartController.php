@@ -195,9 +195,6 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
 
             $this->_getSession()->setCartWasUpdated();
 
-            /**
-             * @todo remove wishlist observer processAddToCart
-             */
             Mage::dispatchEvent(
                 'checkout_cart_add_product_complete',
                 ['product' => $product, 'request' => $this->getRequest(), 'response' => $this->getResponse()],

@@ -234,8 +234,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      * Validate Product Data
      *
-     * @todo implement full validation process with errors returning which are ignoring now
-     *
      * @return $this
      * @throws Mage_Eav_Model_Entity_Attribute_Exception when the backend of an attribute refuses its value
      * @throws Mage_Core_Exception_Input when a date range starts after it ends
@@ -1315,19 +1313,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         $this->getOptionInstance()->duplicate($this->getId(), $newProduct->getId());
         $this->getResource()->duplicate($this->getId(), $newProduct->getId());
 
-        // TODO - duplicate product on all stores of the websites it is associated with
-        /*if ($storeIds = $this->getWebsiteIds()) {
-            foreach ($storeIds as $storeId) {
-                $this->setStoreId($storeId)
-                   ->load($this->getId());
-
-                $newProduct->setData($this->getData())
-                    ->setSku(null)
-                    ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_DISABLED)
-                    ->setId($newId)
-                    ->save();
-            }
-        }*/
         return $newProduct;
     }
 

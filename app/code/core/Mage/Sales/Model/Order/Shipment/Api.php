@@ -30,7 +30,6 @@ class Mage_Sales_Model_Order_Shipment_Api extends Mage_Sales_Model_Api_Resource
     public function items($filters = null)
     {
         $shipments = [];
-        //TODO: add full name logic
         $shipmentCollection = Mage::getResourceModel('sales/order_shipment_collection')
             ->addAttributeToSelect('increment_id')
             ->addAttributeToSelect('created_at')
