@@ -148,6 +148,30 @@ it('reads legacy order fees with missing discount details', function (): void {
         ->and($helper->getBaseRowWeeeAmountAfterDiscount($item))->toBe(1.5);
 });
 
+it('uses the item store to display fixed tax when an extension supplies no quote', function (): void {
+    $store = Mage::app()->getStore(1);
+    $store->setConfig('tax/weee/include_in_subtotal', '0');
+    $admin = Mage::app()->getStore(Mage_Core_Model_Store::ADMIN_CODE);
+    $admin->setConfig('tax/weee/include_in_subtotal', '1');
+    Mage::app()->setCurrentStore($admin);
+
+    $item = new class extends Mage_Sales_Model_Quote_Item {
+        #[\Override]
+        public function getQuote(): ?Mage_Sales_Model_Quote
+        {
+            return null;
+        }
+    };
+    $item->setStoreId((int) $store->getId());
+    $helper = Mage::helper('weee');
+    $helper->setApplied($item, [
+        ['title' => 'Fixed Product Tax', 'row_amount' => 0.12, 'base_row_amount' => 0.15, 'weee_discount' => 0.01, 'base_weee_discount' => 0.02],
+    ]);
+
+    expect($helper->getRowWeeeAmountAfterDiscount($item))->toEqualWithDelta(0.11, 0.0001)
+        ->and($helper->getBaseRowWeeeAmountAfterDiscount($item))->toEqualWithDelta(0.13, 0.0001);
+});
+
 it('carries rounding between displayed fixed tax titles when the fees include tax', function (): void {
     $store = Mage::app()->getStore(1);
     Mage::app()->setCurrentStore($store);

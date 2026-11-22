@@ -818,7 +818,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         $storeId = match (true) {
-            $item instanceof Mage_Sales_Model_Quote_Item_Abstract => $item->getQuote()->getStoreId() ?? $item->getStoreId(),
+            $item instanceof Mage_Sales_Model_Quote_Item_Abstract => $item->getQuote()?->getStoreId() ?? $item->getStoreId(),
             $item instanceof Mage_Sales_Model_Order_Item => $item->getStoreId() ?? $item->getOrder()?->getStoreId(),
             $item instanceof Mage_Sales_Model_Order_Invoice_Item => $item->getInvoice()?->getStoreId() ?? $item->getStoreId(),
             $item instanceof Mage_Sales_Model_Order_Creditmemo_Item => $item->getCreditmemo()?->getStoreId() ?? $item->getStoreId(),
