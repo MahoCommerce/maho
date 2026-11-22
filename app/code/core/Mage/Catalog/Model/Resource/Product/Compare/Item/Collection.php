@@ -243,12 +243,10 @@ class Mage_Catalog_Model_Resource_Product_Compare_Item_Collection extends Mage_C
 
     /**
      * Use product as collection item
-     *
-     * @return $this
      */
-    public function useProductItem()
+    public function useProductItem(): static
     {
-        $this->setObject('catalog/product');
+        $this->setItemObjectClass('catalog/product');
 
         $this->setFlag('url_data_object', true);
         $this->setFlag('do_not_use_category_id', true);

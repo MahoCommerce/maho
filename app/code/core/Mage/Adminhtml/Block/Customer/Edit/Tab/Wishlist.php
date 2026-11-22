@@ -166,12 +166,9 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Wishlist extends Mage_Adminhtml_Blo
 
     /**
      * Add column filter to collection
-     *
-     * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
-     * @return $this
      */
     #[\Override]
-    protected function _addColumnFilterToCollection($column)
+    protected function _addColumnFilterToCollection(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
         $collection = $this->getCollection();
         $value = $column->getFilter()->getValue();
@@ -188,12 +185,9 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Wishlist extends Mage_Adminhtml_Blo
 
     /**
      * Sets sorting order by some column
-     *
-     * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
-     * @return $this
      */
     #[\Override]
-    protected function _setCollectionOrder($column)
+    protected function _setCollectionOrder(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
         $collection = $this->getCollection();
         if ($collection) {

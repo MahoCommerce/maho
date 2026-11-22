@@ -662,7 +662,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
             ->loadChildren($recursionLevel)
             ->getChildren();
 
-        $tree->addCollectionData(null, $sorted, $parent, $toLoad, true);
+        $tree->addCollectionData(null, $sorted, [$parent], $toLoad, true);
 
         if ($asCollection) {
             return $tree->getCollection();

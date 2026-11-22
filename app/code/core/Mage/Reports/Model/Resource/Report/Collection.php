@@ -8,7 +8,7 @@
  * @package Mage_Reports
  */
 
-class Mage_Reports_Model_Resource_Report_Collection
+class Mage_Reports_Model_Resource_Report_Collection extends \Maho\Data\Collection
 {
     /**
      * From value
@@ -39,13 +39,6 @@ class Mage_Reports_Model_Resource_Report_Collection
      * @var array
      */
     protected $_intervals;
-
-    /**
-     * Page size
-     *
-     * @var int
-     */
-    protected $_pageSize;
 
     /**
      * Array of store ids
@@ -182,36 +175,10 @@ class Mage_Reports_Model_Resource_Report_Collection
         return $this->_storeIds;
     }
 
-    /**
-     * Get size
-     *
-     * @return int
-     */
-    public function getSize()
+    #[\Override]
+    public function getSize(): int
     {
         return count($this->getIntervals());
-    }
-
-    /**
-     * Set page size
-     *
-     * @param int $size
-     * @return $this
-     */
-    public function setPageSize($size)
-    {
-        $this->_pageSize = $size;
-        return $this;
-    }
-
-    /**
-     * Get page size
-     *
-     * @return int
-     */
-    public function getPageSize()
-    {
-        return $this->_pageSize;
     }
 
     /**
