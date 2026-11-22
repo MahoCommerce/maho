@@ -134,7 +134,7 @@ describe('Feed tax destination', function () {
             ->setPriority(0)
             ->setPosition(0)
             ->setTaxRate([$rate->getId()])
-            ->setTaxCustomerClass([Mage::getSingleton('tax/calculation')->getDefaultCustomerTaxClass(1)])
+            ->setTaxCustomerClass([Mage::getSingleton('tax/calculation')->getDefaultCustomerTaxClass(Mage::app()->getStore(1))])
             ->setTaxProductClass([2])
             ->save();
     });
