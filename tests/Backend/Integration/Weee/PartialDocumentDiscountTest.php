@@ -386,12 +386,17 @@ class PartialFptHistoricInvoiceCollector extends Mage_Sales_Model_Order_Invoice_
     }
 }
 
-it('preserves payment and refunds when fixed taxes round across invoice lines', function (array $batches, bool $reverse, bool $convert = false): void {
+it('preserves payment and refunds when fixed taxes round across invoice lines', function (
+    array $batches,
+    bool $reverse,
+    bool $convert = false,
+    bool $allDiscounted = false,
+): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
     try {
         if ($convert) {
-            Mage::getModel('directory/currency')->saveRates(['USD' => ['EUR' => 0.50]]);
+            Mage::getModel('directory/currency')->saveRates(['USD' => ['EUR' => $allDiscounted ? 0.72 : 0.50]]);
         }
         $store = setStoreDisplayCurrency($convert ? 'EUR' : 'USD', $convert ? 'USD,EUR' : 'USD');
         Mage::app()->setCurrentStore($store);
@@ -422,7 +427,7 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
             'postcode' => '90210', 'country_id' => 'US', 'telephone' => '5550100000',
         ]);
         $skus = [];
-        foreach ([90.0, 0.0, 80.0] as $priority => $percent) {
+        foreach ([90.0, $allDiscounted ? 85.0 : 0.0, 80.0] as $priority => $percent) {
             $product = partialFptProduct($store, [$attribute => 0.008]);
             $skus[] = $product->getSku();
             if ($percent > 0.0) {
@@ -442,6 +447,14 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
         $saved = Mage::getModel('sales/service_quote', $quote)->submitOrder();
         $orderId = (int) $saved->getId();
         $order = Mage::getModel('sales/order')->load($orderId);
+        $baseAmounts = $allDiscounted ? [0.10, 0.15, 0.20] : [0.10, 1.00, 0.20];
+        $amounts = $convert ? ($allDiscounted ? [0.07, 0.11, 0.15] : [0.05, 0.51, 0.10]) : $baseAmounts;
+        $taxes = $convert ? ($allDiscounted ? [0.0, 0.0, 0.01] : [0.0, 0.01, 0.0]) : [0.0, 0.0, 0.0];
+        $expectedTotal = round(array_sum($amounts), 2);
+        $expectedBaseTotal = round(array_sum($baseAmounts), 2);
+        expect($order->getGrandTotal())->toBe($expectedTotal)
+            ->and($order->getBaseGrandTotal())->toBe($expectedBaseTotal)
+            ->and($order->getBaseTaxAmount())->toBe(0.0);
         $idsBySku = [];
         foreach ($order->getAllVisibleItems() as $item) {
             $idsBySku[$item->getSku()] = (int) $item->getId();
@@ -459,9 +472,6 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
                 }
             }
         };
-        $baseAmounts = [0.10, 1.00, 0.20];
-        $amounts = $convert ? [0.05, 0.51, 0.10] : $baseAmounts;
-        $taxes = $convert ? [0.0, 0.01, 0.0] : [0.0, 0.0, 0.0];
         $sumLines = static fn(array $amounts, array $lines): float => round(array_sum(array_intersect_key($amounts, array_fill_keys($lines, true))), 2);
         $invoices = [];
         foreach ($batches as $lines) {
@@ -493,10 +503,10 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
         }
 
         $order = Mage::getModel('sales/order')->load($orderId);
-        expect($order->getTotalPaid())->toBe($convert ? 0.66 : 1.30)
-            ->and($order->getBaseTotalPaid())->toBe(1.30)
-            ->and($order->getTotalRefunded())->toBe($convert ? 0.66 : 1.30)
-            ->and($order->getBaseTotalRefunded())->toBe(1.30);
+        expect($order->getTotalPaid())->toBe($expectedTotal)
+            ->and($order->getBaseTotalPaid())->toBe($expectedBaseTotal)
+            ->and($order->getTotalRefunded())->toBe($expectedTotal)
+            ->and($order->getBaseTotalRefunded())->toBe($expectedBaseTotal);
     } finally {
         $connection->rollBack();
         resetCurrencyState();
@@ -508,6 +518,8 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
     'both discounted lines in one invoice' => [[[0, 2], [1]], false],
     'each line in a separate invoice' => [[[1], [0], [2]], false],
     'tax cents differ between EUR sale and USD base' => [[[0, 1], [2]], true, true],
+    'three separate rules discount fractional taxes' => [[[0, 1], [2]], false, false, true],
+    'three separate rules discount fractional taxes in EUR' => [[[0, 1, 2]], false, true, true],
 ]);
 
 function partialFptProduct(Mage_Core_Model_Store $store, array $fees): Mage_Catalog_Model_Product

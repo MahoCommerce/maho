@@ -694,6 +694,9 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
         $applyTaxAfterDiscount = $config->applyTaxAfterDiscount($store);
         $includeInSubtotal = $helper->includeInSubtotal($store);
 
+        $discounts = [];
+        $discountableTax = 0.0;
+        $baseDiscountableTax = 0.0;
         foreach ($items as $item) {
             $rules = $this->appliedPercentageRules[spl_object_id($item)] ?? [];
             $qty = $item->getTotalQty();
@@ -706,11 +709,13 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                 continue;
             }
 
-            $rate = $this->getDiscountedQuantity($rules, $qty) / $qty;
+            $taxFactor = 1.0;
             if ($request !== null) {
                 $request->setProductClassId($item->getProduct()->getTaxClassId());
-                $rate *= 1 + $calculator->getRate($request) / 100;
+                $taxFactor += $calculator->getRate($request) / 100;
             }
+            $rate = $this->getDiscountedQuantity($rules, $qty) / $qty * $taxFactor;
+            $discountableFraction = min($qty, max(array_column($rules, 'qty'))) / $qty;
 
             $totalDiscount = 0.0;
             $totalBaseDiscount = 0.0;
@@ -721,15 +726,26 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                 $applied[$index]['base_weee_discount'] = $baseDiscount;
                 $totalDiscount += $discount;
                 $totalBaseDiscount += $baseDiscount;
+                $discountableTax += $fee['row_amount'] * $discountableFraction * $taxFactor;
+                $baseDiscountableTax += $fee['base_row_amount'] * $discountableFraction * $taxFactor;
             }
 
             if (!$totalDiscount && !$totalBaseDiscount) {
                 continue;
             }
 
+            $discounts[] = [$item, $applied, $totalDiscount, $totalBaseDiscount];
+        }
+
+        // Separate percentage rounding carries must not discount more than the eligible fees.
+        $remaining = max(0.0, $store->roundPrice($discountableTax));
+        $baseRemaining = max(0.0, $store->roundPrice($baseDiscountableTax));
+        foreach ($discounts as [$item, $applied, $totalDiscount, $totalBaseDiscount]) {
             $percentage = (string) $item->getDiscountPercent();
-            $totalDiscount = $this->_roundWithDeltas($percentage, $totalDiscount, $store);
-            $totalBaseDiscount = $this->_roundWithDeltasForBase($percentage, $totalBaseDiscount, $store);
+            $totalDiscount = min($this->_roundWithDeltas($percentage, $totalDiscount, $store), $remaining);
+            $totalBaseDiscount = min($this->_roundWithDeltasForBase($percentage, $totalBaseDiscount, $store), $baseRemaining);
+            $remaining = $store->roundPrice($remaining - $totalDiscount);
+            $baseRemaining = $store->roundPrice($baseRemaining - $totalBaseDiscount);
 
             $item->setWeeeDiscount($totalDiscount);
             $item->setBaseWeeeDiscount($totalBaseDiscount);
