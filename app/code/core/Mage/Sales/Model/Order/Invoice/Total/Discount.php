@@ -22,17 +22,29 @@ class Mage_Sales_Model_Order_Invoice_Total_Discount extends Mage_Sales_Model_Ord
         $totalDiscountAmount     = 0;
         $baseTotalDiscountAmount = 0;
 
+        $order = $invoice->getOrder();
         $addShippingDiscount = true;
-        foreach ($invoice->getOrder()->getInvoiceCollection() as $previousInvoice) {
-            if (!$previousInvoice->isCanceled() && ($previousInvoice->getShippingAmount() || $previousInvoice->getBaseShippingAmount())) {
+        $baseShippingDiscount = (float) $order->getBaseShippingDiscountAmount();
+        $checkLegacyShippingDiscount = !$order->getShippingAmount() && (float) $order->getBaseShippingAmount() > 0.0;
+        foreach ($order->getInvoiceCollection() as $previousInvoice) {
+            if ($previousInvoice->isCanceled()) {
+                continue;
+            }
+            if ($previousInvoice->getShippingAmount() || $previousInvoice->getBaseShippingAmount()) {
                 $addShippingDiscount = false;
                 break;
+            }
+            // Older invoices could apply the base discount while omitting the shipping charge.
+            if ($checkLegacyShippingDiscount && $baseShippingDiscount > 0.0
+                && $this->hasLegacyBaseShippingDiscount($previousInvoice, $baseShippingDiscount)
+            ) {
+                $baseShippingDiscount = 0.0;
             }
         }
 
         if ($addShippingDiscount) {
-            $totalDiscountAmount     = $totalDiscountAmount + $invoice->getOrder()->getShippingDiscountAmount();
-            $baseTotalDiscountAmount = $baseTotalDiscountAmount + $invoice->getOrder()->getBaseShippingDiscountAmount();
+            $totalDiscountAmount     = $totalDiscountAmount + $order->getShippingDiscountAmount();
+            $baseTotalDiscountAmount = $baseTotalDiscountAmount + $baseShippingDiscount;
         }
 
         foreach ($invoice->getAllItems() as $item) {
@@ -78,5 +90,19 @@ class Mage_Sales_Model_Order_Invoice_Total_Discount extends Mage_Sales_Model_Ord
         $invoice->setGrandTotal($invoice->getGrandTotal() - $totalDiscountAmount);
         $invoice->setBaseGrandTotal($invoice->getBaseGrandTotal() - $baseTotalDiscountAmount);
         return $this;
+    }
+
+    private function hasLegacyBaseShippingDiscount(Mage_Sales_Model_Order_Invoice $invoice, float $baseShippingDiscount): bool
+    {
+        $items = $invoice->getAllItems();
+        if ($items === []) {
+            return false;
+        }
+        $baseItemDiscounts = array_sum(array_map(
+            static fn(Mage_Sales_Model_Order_Invoice_Item $item): float => (float) $item->getBaseDiscountAmount(),
+            $items,
+        ));
+        $remainder = round(-(float) $invoice->getBaseDiscountAmount() - $baseItemDiscounts, 4);
+        return $remainder > 0.0 && $remainder === round($baseShippingDiscount, 4);
     }
 }

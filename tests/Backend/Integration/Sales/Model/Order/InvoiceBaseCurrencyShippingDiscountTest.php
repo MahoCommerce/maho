@@ -10,12 +10,13 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-it('keeps the shipping coupon on the invoice that charges shipping', function (
+it('invoices shipping and its discount once in each currency', function (
     float $rate,
     float $shipping,
     bool $cancelFirst = false,
     bool $discountItems = false,
     bool $taxShipping = false,
+    bool $legacyFirst = false,
 ): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
@@ -121,21 +122,41 @@ it('keeps the shipping coupon on the invoice that charges shipping', function (
         }
 
         $documents = Mage::getService('sales/order_document');
-        if ($cancelFirst) {
-            $order->getPayment()->setIsTransactionPending(true);
-            $pending = $documents->prepareInvoice($order, [(int) $storedItems[0]->getId() => 1]);
-            $pending->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::NOT_CAPTURE)->register();
-            Mage::getModel('core/resource_transaction')->addObject($pending)->addObject($order)->save();
-            Mage::getModel('sales/order_invoice_api')->cancel($pending->getIncrementId());
-            $canceled = Mage::getModel('sales/order_invoice')->load((int) $pending->getId());
-            expect($canceled->isCanceled())->toBeTrue()
-                ->and($amounts($canceled, 'shipping_amount')[1])->toBe($shipping)
-                ->and($amounts($canceled, 'discount_amount'))->toBe($firstDocumentDiscount);
-            $order = Mage::getModel('sales/order')->load((int) $placed->getId());
-            expect($amounts($order, 'shipping_invoiced'))->toBe([0.0, 0.0]);
-        }
+        $shippingOnSecondInvoice = $legacyFirst && !$cancelFirst;
         $invoices = [];
-        foreach ($storedItems as $item) {
+        if ($cancelFirst || $legacyFirst) {
+            if ($cancelFirst) {
+                $order->getPayment()->setIsTransactionPending(true);
+            }
+            $first = $documents->prepareInvoice($order, [(int) $storedItems[0]->getId() => 1]);
+            if ($legacyFirst) {
+                // Older invoices omitted the base shipping charge and still applied its discount.
+                expect($first->getShippingAmount())->toBe(0.0);
+                $first->setBaseGrandTotal($first->getBaseGrandTotal() - $first->getBaseShippingAmount())
+                    ->setBaseShippingAmount(0.0)->setBaseShippingInclTax(0.0);
+            }
+            $first->setRequestedCaptureCase(
+                $cancelFirst ? Mage_Sales_Model_Order_Invoice::NOT_CAPTURE : Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE,
+            )->register();
+            Mage::getModel('core/resource_transaction')->addObject($first)->addObject($order)->save();
+            if ($cancelFirst) {
+                Mage::getModel('sales/order_invoice_api')->cancel($first->getIncrementId());
+            }
+            $first = Mage::getModel('sales/order_invoice')->load((int) $first->getId());
+            expect($first->isCanceled())->toBe($cancelFirst)
+                ->and($amounts($first, 'shipping_amount')[1])->toBe($legacyFirst ? 0.0 : $shipping)
+                ->and($amounts($first, 'discount_amount'))->toBe($firstDocumentDiscount);
+            $order = Mage::getModel('sales/order')->load((int) $placed->getId());
+            if ($cancelFirst) {
+                expect($amounts($order, 'shipping_invoiced'))->toBe([0.0, 0.0]);
+            } else {
+                $invoices[] = $first;
+            }
+        }
+        foreach ($storedItems as $index => $item) {
+            if ($shippingOnSecondInvoice && $index === 0) {
+                continue;
+            }
             $invoice = $documents->invoice(
                 $order,
                 [(int) $item->getId() => 1],
@@ -147,18 +168,24 @@ it('keeps the shipping coupon on the invoice that charges shipping', function (
             $order = Mage::getModel('sales/order')->load((int) $placed->getId());
         }
         $baseItemTotal = 10.0 - $itemDiscount[1];
-        expect($amounts($invoices[0], 'shipping_amount'))->toBe($amounts($order, 'shipping_amount'))
+        $shippingAmounts = $amounts($order, 'shipping_amount');
+        $firstShipping = $shippingOnSecondInvoice ? [0.0, 0.0] : $shippingAmounts;
+        $secondShipping = $shippingOnSecondInvoice ? $shippingAmounts : [0.0, 0.0];
+        expect($amounts($invoices[0], 'shipping_amount'))->toBe($firstShipping)
             ->and($amounts($invoices[0], 'discount_amount'))->toBe($firstDocumentDiscount)
             ->and($amounts($invoices[0], 'shipping_tax_amount'))->toBe($shippingTax)
-            ->and($amounts($invoices[0], 'grand_total')[1])->toBe(round($baseItemTotal + $shipping - $shippingDiscount + $shippingTax[1], 2))
-            ->and($amounts($invoices[1], 'shipping_amount'))->toBe([0.0, 0.0])
+            ->and($amounts($invoices[0], 'grand_total')[1])->toBe(round($baseItemTotal + $firstShipping[1] - $shippingDiscount + $shippingTax[1], 2))
+            ->and($amounts($invoices[1], 'shipping_amount'))->toBe($secondShipping)
             ->and($amounts($invoices[1], 'discount_amount'))->toBe($secondDocumentDiscount)
             ->and($amounts($invoices[1], 'shipping_tax_amount'))->toBe([0.0, 0.0])
-            ->and($amounts($invoices[1], 'grand_total')[1])->toBe($baseItemTotal)
+            ->and($amounts($invoices[1], 'grand_total')[1])->toBe(round($baseItemTotal + $secondShipping[1], 2))
             ->and($amounts($order, 'shipping_invoiced'))->toBe($amounts($order, 'shipping_amount'))
             ->and($amounts($order, 'discount_invoiced')[1])->toBe($amounts($order, 'discount_amount')[1])
             ->and($amounts($order, 'total_invoiced'))->toBe($amounts($order, 'grand_total'));
 
+        if ($shippingOnSecondInvoice) {
+            return;
+        }
         foreach ($invoices as $index => $invoice) {
             $memo = $documents->refund(
                 $order,
@@ -184,6 +211,8 @@ it('keeps the shipping coupon on the invoice that charges shipping', function (
     'shipping discount stored only in the base currency' => [0.004, 5.0],
     'shipping and its discount stored only in the base currency' => [0.004, 1.0, false, true],
     'replacement for a canceled invoice with base currency shipping' => [0.004, 1.0, true, true],
+    'base currency shipping after an older invoice that already discounted it' => [0.004, 1.0, false, true, false, true],
+    'base currency shipping after a canceled older invoice' => [0.004, 1.0, true, true, false, true],
     'shipping tax stored only in the base currency' => [0.004, 1.0, false, false, true],
     'replacement for a canceled invoice' => [0.004, 5.0, true],
     'ordinary shipping discount in both currencies' => [1.0, 5.0],
