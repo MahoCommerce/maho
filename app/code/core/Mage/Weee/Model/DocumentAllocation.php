@@ -58,16 +58,25 @@ class Mage_Weee_Model_DocumentAllocation
         $amounts = [];
         $gross = ['gross' => 0.0, 'base_gross' => 0.0];
         $store = $order->getStore();
-        foreach ($order->getAllItems() as $item) {
+        $items = $order->getAllItems();
+        usort($items, static fn(Mage_Sales_Model_Order_Item $a, Mage_Sales_Model_Order_Item $b): int => $a->getId() <=> $b->getId());
+        foreach ($items as $item) {
             if ($item->isDummy() || !$item->getQtyOrdered() || !$this->hasFee($item)) {
                 continue;
             }
             $amount = $this->orderItemAmounts($item, $store);
             foreach (['gross', 'base_gross'] as $key) {
                 $amount[$key] = $this->roundGross($gross, $key, $amount[$key], $store);
-                $this->allocateTitleGross($amount['fees'], $key, $amount[$key], $store);
             }
             $amounts[(int) $item->getId()] = $amount;
+        }
+        foreach (['gross' => 'discount', 'base_gross' => 'base_discount'] as $key => $discountKey) {
+            $grossByItem = array_map(static fn(array $amount): float => $amount[$key], $amounts);
+            $discounts = array_map(static fn(array $amount): float => $amount[$discountKey], $amounts);
+            foreach ($this->balanceGross($grossByItem, $discounts, $store) as $id => $amount) {
+                $amounts[$id][$key] = $amount;
+                $this->allocateTitleGross($amounts[$id]['fees'], $key, $amount, $store);
+            }
         }
         return $amounts;
     }
@@ -124,6 +133,14 @@ class Mage_Weee_Model_DocumentAllocation
                 $store->roundPrice($source[$key] * $fraction) - ($previous[$key] ?? 0.0),
             ));
         }
+        foreach (['gross' => 'discount', 'base_gross' => 'base_discount'] as $gross => $discount) {
+            $net = $source[$gross] - $source[$discount];
+            if ($net >= 0.0 && $source[$discount] >= 0.0) {
+                $remainingNet = $store->roundPrice($net - ($previous[$gross] ?? 0.0) + ($previous[$discount] ?? 0.0));
+                $netShare = max(0.0, min($remainingNet, $share[$gross] - $share[$discount]));
+                $share[$gross] = $store->roundPrice($share[$discount] + $netShare);
+            }
+        }
         foreach ($source['fees'] as $title => $fee) {
             foreach (self::AMOUNTS as $key) {
                 $share['fees'][$title][$key] = max(0.0, $fee[$key] - ($previous['fees'][$title][$key] ?? 0.0));
@@ -174,8 +191,13 @@ class Mage_Weee_Model_DocumentAllocation
             unset($fee);
         }
         $applied = $helper->allocateTaxDiscounts($applied, $share['discount'], $share['base_discount'], $store);
-        foreach (['gross' => 'row_amount', 'base_gross' => 'base_row_amount'] as $key => $amountKey) {
+        $discountsByTitle = $this->feeAmounts($applied);
+        foreach (['gross' => ['row_amount', 'discount'], 'base_gross' => ['base_row_amount', 'base_discount']] as $key => [$amountKey, $discountKey]) {
             $weights = $share['fees'] ?: $originalAmounts;
+            foreach ($weights as $title => &$weight) {
+                $weight[$discountKey] = $discountsByTitle[$title][$discountKey] ?? 0.0;
+            }
+            unset($weight);
             $this->allocateTitleGross($weights, $key, $share[$key], $store);
             $this->writeTitleGross($applied, $weights, $key, $amountKey, $store);
         }
@@ -194,6 +216,8 @@ class Mage_Weee_Model_DocumentAllocation
     private function allocateTitleGross(array &$fees, string $key, float $amount, Mage_Core_Model_Store $store): void
     {
         $gross = $this->allocateGross(array_map(static fn(array $fee): float => $fee[$key], $fees), $amount, $store);
+        $discount = $key === 'gross' ? 'discount' : 'base_discount';
+        $gross = $this->balanceGross($gross, array_map(static fn(array $fee): float => $fee[$discount], $fees), $store);
         foreach ($fees as $index => &$fee) {
             $fee[$key] = $gross[$index];
         }
@@ -221,6 +245,33 @@ class Mage_Weee_Model_DocumentAllocation
     }
 
     /**
+     * @param array<array-key, float> $gross
+     * @param array<array-key, float> $discounts
+     * @return array<array-key, float>
+     */
+    private function balanceGross(array $gross, array $discounts, Mage_Core_Model_Store $store): array
+    {
+        $shortage = 0.0;
+        foreach ($gross as $key => $amount) {
+            $shortage += max(0.0, $discounts[$key] - $amount);
+        }
+        $shortage = $store->roundPrice($shortage);
+        // Keep signed amounts when redistributing gross cannot represent them.
+        if ($shortage <= 0.0 || min($gross) < 0.0 || min($discounts) < 0.0
+            || $store->roundPrice(array_sum($gross) - array_sum($discounts)) < 0.0
+        ) {
+            return $gross;
+        }
+        foreach ($gross as $key => $amount) {
+            $discount = $discounts[$key];
+            $use = min($shortage, max(0.0, $amount - $discount));
+            $gross[$key] = $store->roundPrice(max($amount, $discount) - $use);
+            $shortage = $store->roundPrice($shortage - $use);
+        }
+        return $gross;
+    }
+
+    /**
      * @param array<array-key, array<string, mixed>> $applied
      * @param array<array-key, FeeAmounts> $amounts
      * @param 'gross'|'base_gross' $key
@@ -233,11 +284,14 @@ class Mage_Weee_Model_DocumentAllocation
         Mage_Core_Model_Store $store,
     ): void {
         $entriesByTitle = [];
+        $discountKey = $key === 'gross' ? 'weee_discount' : 'base_weee_discount';
+        $discounts = array_map(static fn(array $fee): float => (float) $fee[$discountKey], $applied);
         foreach ($applied as $index => $fee) {
             $entriesByTitle[$fee['title']][$index] = (float) $fee[$amountKey];
         }
         foreach ($entriesByTitle as $title => $entries) {
-            foreach ($this->allocateGross($entries, $amounts[$title][$key] ?? 0.0, $store) as $index => $amount) {
+            $gross = $this->allocateGross($entries, $amounts[$title][$key] ?? 0.0, $store);
+            foreach ($this->balanceGross($gross, array_intersect_key($discounts, $entries), $store) as $index => $amount) {
                 $applied[$index][$amountKey . '_incl_tax'] += $amount - $applied[$index][$amountKey];
                 $applied[$index][$amountKey] = $amount;
             }

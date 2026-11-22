@@ -88,8 +88,8 @@ class Mage_Weee_Model_Total_Invoice_Weee extends Mage_Sales_Model_Order_Invoice_
         $excess = $last ? 0.0 : $store->roundPrice($requestedTax - $store->roundPrice($totalTax));
         $baseExcess = $last ? 0.0 : $store->roundPrice($requestedBaseTax - $store->roundPrice($baseTotalTax));
         foreach ($itemShares as [$item, $share]) {
-            $reduction = min($share['gross'], max(0.0, $excess));
-            $baseReduction = min($share['base_gross'], max(0.0, $baseExcess));
+            $reduction = min(max(0.0, $share['gross'] - $share['discount']), max(0.0, $excess));
+            $baseReduction = min(max(0.0, $share['base_gross'] - $share['base_discount']), max(0.0, $baseExcess));
             $share['gross'] = $store->roundPrice($share['gross'] - $reduction);
             $share['base_gross'] = $store->roundPrice($share['base_gross'] - $baseReduction);
             $excess = $store->roundPrice($excess - $reduction);

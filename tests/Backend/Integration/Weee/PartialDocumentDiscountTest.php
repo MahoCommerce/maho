@@ -386,6 +386,130 @@ class PartialFptHistoricInvoiceCollector extends Mage_Sales_Model_Order_Invoice_
     }
 }
 
+it('preserves payment and refunds when fixed taxes round across invoice lines', function (array $batches, bool $reverse, bool $convert = false): void {
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $connection->beginTransaction();
+    try {
+        if ($convert) {
+            Mage::getModel('directory/currency')->saveRates(['USD' => ['EUR' => 0.50]]);
+        }
+        $store = setStoreDisplayCurrency($convert ? 'EUR' : 'USD', $convert ? 'USD,EUR' : 'USD');
+        Mage::app()->setCurrentStore($store);
+        foreach ([
+            'tax/weee/enable' => '1',
+            'tax/weee/discount' => '1',
+            'tax/weee/include_in_subtotal' => '0',
+            'tax/weee/apply_vat' => '0',
+            'payment/checkmo/active' => '1',
+            'payment/checkmo/allowspecific' => '0',
+            'sales_email/invoice/enabled' => '0',
+            'sales_email/creditmemo/enabled' => '0',
+        ] as $path => $value) {
+            $store->setConfig($path, $value);
+        }
+
+        $connection->update(Mage::getSingleton('core/resource')->getTableName('salesrule/rule'), ['is_active' => 0]);
+        $groupId = Mage_Customer_Model_Group::NOT_LOGGED_IN_ID;
+        $attribute = 'fpt_cap_' . uniqid();
+        WeeeDiscountFixture::createFeeAttribute($attribute);
+        $cart = Mage::getService('checkout/cart');
+        $quote = $cart->create(null, (int) $store->getId())->setCustomerIsGuest(true)
+            ->setCustomerEmail('customer@example.test')->setCustomerFirstname('Sample')->setCustomerLastname('Customer')
+            ->setCustomerGroupId($groupId);
+        $quote->getBillingAddress()->addData([
+            'firstname' => 'Sample', 'lastname' => 'Customer', 'email' => 'customer@example.test',
+            'street' => '1 Sample Street', 'city' => 'Los Angeles', 'region_id' => 12,
+            'postcode' => '90210', 'country_id' => 'US', 'telephone' => '5550100000',
+        ]);
+        $skus = [];
+        foreach ([90.0, 0.0, 80.0] as $priority => $percent) {
+            $product = partialFptProduct($store, [$attribute => 0.008]);
+            $skus[] = $product->getSku();
+            if ($percent > 0.0) {
+                Mage::getModel('salesrule/rule')->setName('Fixed product tax discount ' . uniqid())
+                    ->setIsActive(true)->setWebsiteIds([(int) $store->getWebsiteId()])->setCustomerGroupIds([$groupId])
+                    ->setCouponType(Mage_SalesRule_Model_Rule::COUPON_TYPE_NO_COUPON)
+                    ->setSimpleAction(Mage_SalesRule_Model_Rule::BY_PERCENT_ACTION)->setDiscountAmount($percent)
+                    ->setSortOrder($priority)->loadPost(['actions' => [
+                        '1' => ['type' => 'salesrule/rule_condition_product_combine', 'aggregator' => 'all', 'value' => '1'],
+                        '1--1' => ['type' => 'salesrule/rule_condition_product', 'attribute' => 'sku', 'operator' => '==', 'value' => $product->getSku()],
+                    ]])->save();
+            }
+            $cart->addProduct($quote, $product, new Maho\DataObject(['qty' => 1]), save: false);
+        }
+        $quote->getPayment()->importData(['method' => 'checkmo']);
+        $cart->collectAndSave($quote);
+        $saved = Mage::getModel('sales/service_quote', $quote)->submitOrder();
+        $orderId = (int) $saved->getId();
+        $order = Mage::getModel('sales/order')->load($orderId);
+        $idsBySku = [];
+        foreach ($order->getAllVisibleItems() as $item) {
+            $idsBySku[$item->getSku()] = (int) $item->getId();
+        }
+        $itemIds = array_map(static fn(string $sku): int => $idsBySku[$sku], $skus);
+        $documents = Mage::getService('sales/order_document');
+        $feeHelper = Mage::helper('weee');
+        $checkFees = static function (array $items) use ($feeHelper): void {
+            foreach ($items as $item) {
+                foreach ($feeHelper->getAppliedToItem($item) as $fee) {
+                    expect((float) $fee['weee_discount'])->toBeGreaterThanOrEqual(0.0)
+                        ->toBeLessThanOrEqual((float) $fee['row_amount'])
+                        ->and((float) $fee['base_weee_discount'])->toBeGreaterThanOrEqual(0.0)
+                        ->toBeLessThanOrEqual((float) $fee['base_row_amount']);
+                }
+            }
+        };
+        $baseAmounts = [0.10, 1.00, 0.20];
+        $amounts = $convert ? [0.05, 0.51, 0.10] : $baseAmounts;
+        $taxes = $convert ? [0.0, 0.01, 0.0] : [0.0, 0.0, 0.0];
+        $sumLines = static fn(array $amounts, array $lines): float => round(array_sum(array_intersect_key($amounts, array_fill_keys($lines, true))), 2);
+        $invoices = [];
+        foreach ($batches as $lines) {
+            $quantities = array_fill_keys(array_map(static fn(int $line): int => $itemIds[$line], $lines), 1);
+            $order = Mage::getModel('sales/order')->load($orderId);
+            $invoice = $documents->invoice($order, $quantities, captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE, sendEmail: false);
+            $invoice = Mage::getModel('sales/order_invoice')->load((int) $invoice->getId());
+            expect($invoice->getGrandTotal())->toBe($sumLines($amounts, $lines))
+                ->and($invoice->getBaseGrandTotal())->toBe($sumLines($baseAmounts, $lines))
+                ->and($invoice->getTaxAmount())->toBe($sumLines($taxes, $lines))
+                ->and($invoice->getBaseTaxAmount())->toBe(0.0);
+            $checkFees($invoice->getAllItems());
+            $invoices[] = (int) $invoice->getId();
+        }
+
+        foreach ($invoices as $index => $invoiceId) {
+            $lines = $reverse ? array_reverse($batches[$index]) : $batches[$index];
+            foreach ($lines as $line) {
+                $order = Mage::getModel('sales/order')->load($orderId);
+                $invoice = Mage::getModel('sales/order_invoice')->load($invoiceId);
+                $creditmemo = $documents->refund($order, ['qtys' => [$itemIds[$line] => 1]], offlineRefund: true, sendEmail: false, invoice: $invoice);
+                $creditmemo = Mage::getModel('sales/order_creditmemo')->load((int) $creditmemo->getId());
+                expect($creditmemo->getGrandTotal())->toBe($amounts[$line])
+                    ->and($creditmemo->getBaseGrandTotal())->toBe($baseAmounts[$line])
+                    ->and($creditmemo->getTaxAmount())->toBe($taxes[$line])
+                    ->and($creditmemo->getBaseTaxAmount())->toBe(0.0);
+                $checkFees($creditmemo->getAllItems());
+            }
+        }
+
+        $order = Mage::getModel('sales/order')->load($orderId);
+        expect($order->getTotalPaid())->toBe($convert ? 0.66 : 1.30)
+            ->and($order->getBaseTotalPaid())->toBe(1.30)
+            ->and($order->getTotalRefunded())->toBe($convert ? 0.66 : 1.30)
+            ->and($order->getBaseTotalRefunded())->toBe(1.30);
+    } finally {
+        $connection->rollBack();
+        resetCurrencyState();
+    }
+})->with([
+    'first discounted and full-price lines in one invoice' => [[[0, 1], [2]], false],
+    'refund full-price line before discounted line' => [[[0, 1], [2]], true],
+    'later discounted and full-price lines in one invoice' => [[[2, 1], [0]], false],
+    'both discounted lines in one invoice' => [[[0, 2], [1]], false],
+    'each line in a separate invoice' => [[[1], [0], [2]], false],
+    'tax cents differ between EUR sale and USD base' => [[[0, 1], [2]], true, true],
+]);
+
 function partialFptProduct(Mage_Core_Model_Store $store, array $fees): Mage_Catalog_Model_Product
 {
     $product = Mage::getModel('catalog/product')->setStoreId(0);
