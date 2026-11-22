@@ -190,7 +190,7 @@ it('asks a customer who uses 2FA for the code on the storefront and the customer
     $apiNoCode = tokenLoginApi($email, TOKEN_LOGIN_PASSWORD);
     $isLoggedInWithoutCode = Mage::getSingleton('customer/session')->isLoggedIn();
     // The three requests for the code did not count. The two logins with the code are the limit of the email
-    $totp = \OTPHP\TOTP::createFromSecret($secret);
+    $totp = \OTPHP\TOTP::createFromSecret($secret, new \Maho\UtcClock());
     // The code must stay valid through the password check, so it must not come from the end of a period
     if ($totp->expiresIn() < 5) {
         sleep($totp->expiresIn() + 1);
@@ -198,7 +198,7 @@ it('asks a customer who uses 2FA for the code on the storefront and the customer
     $web = tokenLoginWeb($email, TOKEN_LOGIN_PASSWORD, $totp->now());
     $isLoggedIn = Mage::getSingleton('customer/session')->isLoggedIn();
     $apiWrongCode = tokenLoginApi($email, TOKEN_LOGIN_PASSWORD, '000000x');
-    $apiOverLimit = tokenLoginApi($email, TOKEN_LOGIN_PASSWORD, \OTPHP\TOTP::createFromSecret($secret)->now());
+    $apiOverLimit = tokenLoginApi($email, TOKEN_LOGIN_PASSWORD, \OTPHP\TOTP::createFromSecret($secret, new \Maho\UtcClock())->now());
 
     expect($prelogin)->toBeTrue()
         ->and($webNoCode['errors'])->toBe([Mage::helper('customer')->__('Two-factor authentication code is required.')])

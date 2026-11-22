@@ -26,7 +26,7 @@ function makeTwofaAdminUser(bool $enabled = false): Mage_Admin_Model_User
 
 function currentTotpCode(Mage_Admin_Model_User $user): string
 {
-    return \OTPHP\TOTP::createFromSecret($user->getTwofaSecret())->now();
+    return \OTPHP\TOTP::createFromSecret($user->getTwofaSecret(), new \Maho\UtcClock())->now();
 }
 
 it('refuses to turn 2FA on without a verification code', function () {
