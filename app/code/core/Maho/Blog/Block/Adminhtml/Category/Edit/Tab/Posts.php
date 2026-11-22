@@ -46,7 +46,7 @@ class Maho_Blog_Block_Adminhtml_Category_Edit_Tab_Posts extends Mage_Adminhtml_B
             'values' => $this->_getSelectedPostIds(),
             'align' => 'center',
             'index' => 'entity_id',
-            'filter_condition_callback' => $this->filterInCategory(...),
+            'filter_condition_callback' => $this->filterByCategoryMembership(...),
         ]);
 
         $this->addColumn('entity_id', [
@@ -129,7 +129,7 @@ class Maho_Blog_Block_Adminhtml_Category_Edit_Tab_Posts extends Mage_Adminhtml_B
         return false;
     }
 
-    private function filterInCategory(Maho_Blog_Model_Resource_Post_Collection $collection, Mage_Adminhtml_Block_Widget_Grid_Column $column): void
+    private function filterByCategoryMembership(Maho_Blog_Model_Resource_Post_Collection $collection, Mage_Adminhtml_Block_Widget_Grid_Column $column): void
     {
         $postIds = $this->_getSelectedPostIds();
         if (empty($postIds)) {

@@ -40,7 +40,7 @@ class Mage_Adminhtml_Block_Permissions_Role_Grid_User extends Mage_Adminhtml_Blo
             'values'    => $this->_getUsers(),
             'align'     => 'center',
             'index'     => 'user_id',
-            'filter_condition_callback' => $this->filterInRoleUsers(...),
+            'filter_condition_callback' => $this->filterByRoleMembership(...),
         ]);
 
         $this->addColumn('role_user_id', [
@@ -128,7 +128,7 @@ class Mage_Adminhtml_Block_Permissions_Role_Grid_User extends Mage_Adminhtml_Blo
         return Mage::helper('core')->jsonEncode((object) array_fill_keys($this->_getUsers(), 0));
     }
 
-    private function filterInRoleUsers(Mage_Admin_Model_Resource_Roles_User_Collection $collection, Mage_Adminhtml_Block_Widget_Grid_Column $column): void
+    private function filterByRoleMembership(Mage_Admin_Model_Resource_Roles_User_Collection $collection, Mage_Adminhtml_Block_Widget_Grid_Column $column): void
     {
         $inRoleIds = $this->_getUsers();
         if (empty($inRoleIds)) {
