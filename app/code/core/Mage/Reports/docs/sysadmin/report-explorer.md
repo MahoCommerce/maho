@@ -85,23 +85,23 @@ no cache:
 
 | Report | Last 30 days | Last 12 months |
 |--------|--------------|----------------|
-| Sales overview | 1.7 s | 0.05 s (daily totals) |
-| New and returning customers | 3.2 s | 0.03 s (daily totals) |
-| Product performance | 1.6 s | 3.2 s |
+| Sales overview | 0.14 s (daily totals) | 0.07 s (daily totals) |
+| New and returning customers | under 0.1 s (daily totals) | 0.03 s (daily totals) |
+| Product performance | 1.7 s | 3.3 s |
 | Customer cohorts (12 months) | | 5.9 s |
-| Weekly customer cohorts (90 days) | 5.8 s | |
-| Explain the change on Sales overview | 7.2 s | 4.8 s (daily totals) |
+| Weekly customer cohorts (90 days) | 5.9 s | |
+| Explain the change on Sales overview | 2.6 s | 4.9 s |
 
 A report that cannot read the daily totals reads every record of its period, so its time grows
-with the number of orders in the period. A report on the period that includes today first
-calculates today again from its orders, which took 1.6 s on this store. On a store of this size,
-keep the cache on, and use a read replica for long periods.
+with the number of orders in the period. A report that reads the daily totals first calculates
+again the days that changed since the last report, which took 0.75 s for today on this store. On a
+store of this size, keep the cache on, and use a read replica for long periods.
 
 ### Daily totals of the orders
 
 The table `report_order_daily` holds the totals of the orders for each local day, store view,
 order state, status, customer group, customer type and new or returning customer. An order report
-on a period of at least **Daily Totals from (days)** (32 by default) reads this table instead of
+on a period of at least **Daily Totals from (days)** (7 by default) reads this table instead of
 each order, when it uses only these groupings and filters, and only metrics that add up. For
 example, **Sales overview** on the last 12 months reads about 365 rows for each combination of
 these fields, not every order. **Customers**, **First order**, **Last order**, a grouping such as

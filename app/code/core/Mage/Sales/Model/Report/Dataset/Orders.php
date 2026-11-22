@@ -34,6 +34,9 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
     /** The order states that the classic Orders, Tax and Shipping reports leave out. */
     public const array NOT_PLACED_STATES = [Mage_Sales_Model_Order::STATE_NEW, Mage_Sales_Model_Order::STATE_PENDING_PAYMENT];
 
+    /** The longest range, in days, whose first orders are read only for the emails of the range. */
+    public const int FIRST_ORDER_SHORT_RANGE_DAYS = 40;
+
     #[\Override]
     public function build(AdapterInterface $adapter): Dataset
     {
@@ -86,10 +89,22 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
         // much faster than a subquery for each order of the period
         $dataset->addJoin(new Join(
             'first_order',
-            static fn(Context $context): \Maho\Db\Select => $context->adapter->select()
-                ->from(['placed' => $orderTable], ['customer_email', 'first_at' => new \Maho\Db\Expr('MIN(placed.created_at)')])
-                ->where('placed.state NOT IN (' . $adapter->quote(self::NOT_PLACED_STATES) . ')')
-                ->group('placed.customer_email'),
+            static function (Context $context) use ($adapter, $orderTable): \Maho\Db\Select {
+                $select = $context->adapter->select()
+                    ->from(['placed' => $orderTable], ['customer_email', 'first_at' => new \Maho\Db\Expr('MIN(placed.created_at)')])
+                    ->where('placed.state NOT IN (' . $adapter->quote(self::NOT_PLACED_STATES) . ')')
+                    ->group('placed.customer_email');
+                // A short range has few emails, so it reads only their orders. A long range is faster with all of them
+                if ($context->utcFrom !== null && $context->utcTo !== null && $context->dateField === 'created_at'
+                    && strtotime($context->utcTo) - strtotime($context->utcFrom) <= self::FIRST_ORDER_SHORT_RANGE_DAYS * 86400
+                ) {
+                    $select->where(
+                        'placed.customer_email IN (SELECT in_range.customer_email FROM ' . $adapter->quoteIdentifier($orderTable) . ' in_range'
+                        . ' WHERE in_range.created_at BETWEEN ' . $context->quote($context->utcFrom) . ' AND ' . $context->quote($context->utcTo) . ')',
+                    );
+                }
+                return $select;
+            },
             'first_order.customer_email = main.customer_email',
         ));
         $firstOrder = static fn(Context $context): string => $context->localTime('first_order.first_at');

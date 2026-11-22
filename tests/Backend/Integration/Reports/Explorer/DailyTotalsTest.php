@@ -147,7 +147,7 @@ it('reads the orders when the request does not fit the daily totals', function (
 
     expect($plan->dataset->table)->toBe(ReportFixture::table('sales/order'));
 })->with([
-    'a short period' => [['from' => '2004-10-01', 'to' => '2004-10-20']],
+    'a short period' => [['from' => '2004-10-01', 'to' => '2004-10-05']],
     'a grouping that the table does not keep' => [['dimensions' => ['payment_method']]],
     'a metric that does not add up' => [['metrics' => ['unique_customers']]],
     'the date of the last change' => [['dateField' => 'updated_at']],
