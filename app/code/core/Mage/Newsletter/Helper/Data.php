@@ -84,13 +84,14 @@ class Mage_Newsletter_Helper_Data extends Mage_Core_Helper_Abstract
             ]);
     }
 
-    public function getTemplateProcessor(): Mage_Core_Model_Email_Template_Filter
+    /**
+     * Retrieve Template processor for Newsletter template
+     *
+     * @return Mage_Core_Model_Email_Template_Filter|false
+     */
+    public function getTemplateProcessor()
     {
         $model = (string) Mage::getConfig()->getNode(self::XML_PATH_TEMPLATE_FILTER);
-        $processor = Mage::getModel($model);
-        if (!$processor instanceof Mage_Core_Model_Email_Template_Filter) {
-            throw new \RuntimeException("The model {$model} is not an email template filter.");
-        }
-        return $processor;
+        return Mage::getModel($model);
     }
 }

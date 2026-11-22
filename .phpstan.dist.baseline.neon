@@ -193,12 +193,6 @@ parameters:
 			path: app/code/core/Mage/Bundle/Model/Resource/Option/Collection.php
 
 		-
-			rawMessage: 'Parameter #1 $limit of method Mage_Page_Block_Html_Pager::setLimit() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/List/Toolbar.php
-
-		-
 			rawMessage: 'Property Mage_Catalog_Block_Product_List_Toolbar::$_collection (Mage_Core_Model_Resource_Db_Collection_Abstract) does not accept Maho\Data\Collection.'
 			identifier: assign.propertyType
 			count: 1

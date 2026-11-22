@@ -19,17 +19,15 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
 
     /**
      * PK value_id for loaded entity (for faster updates)
-     *
-     * @var int
      */
-    protected $_valueId;
+    protected ?int $_valueId = null;
 
     /**
-     * PK value_ids for each loaded entity
+     * PK value_ids for each loaded entity, by entity ID
      *
-     * @var array
+     * @var array<int, ?int>
      */
-    protected $_valueIds = [];
+    protected array $_valueIds = [];
 
     /**
      * Table name for this attribute
@@ -132,55 +130,32 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
         return $this->_entityIdField;
     }
 
-    /**
-     * Set value id
-     *
-     * @param int $valueId
-     * @return $this
-     */
     #[\Override]
-    public function setValueId($valueId)
+    public function setValueId(?int $valueId): static
     {
-        $this->_valueId = $valueId === null ? null : (int) $valueId;
+        $this->_valueId = $valueId;
         return $this;
     }
 
-    /**
-     * Set entity value id
-     *
-     * @param \Maho\DataObject $entity
-     * @param int $valueId
-     */
     #[\Override]
-    public function setEntityValueId($entity, $valueId): static
+    public function setEntityValueId(?\Maho\DataObject $entity, ?int $valueId): static
     {
         if (!$entity || !$entity->getId()) {
             return $this->setValueId($valueId);
         }
 
-        $this->_valueIds[$entity->getId()] = $valueId === null ? null : (int) $valueId;
+        $this->_valueIds[$entity->getId()] = $valueId;
         return $this;
     }
 
-    /**
-     * Retrieve value id
-     *
-     * @return int
-     */
     #[\Override]
     public function getValueId(): ?int
     {
         return $this->_valueId;
     }
 
-    /**
-     * Get entity value id
-     *
-     * @param \Maho\DataObject $entity
-     * @return int
-     */
     #[\Override]
-    public function getEntityValueId($entity): ?int
+    public function getEntityValueId(?\Maho\DataObject $entity): ?int
     {
         if (!$entity || !$entity->getId() || !array_key_exists((string) $entity->getId(), $this->_valueIds)) {
             return $this->getValueId();

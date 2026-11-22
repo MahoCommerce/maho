@@ -93,14 +93,11 @@ class Mage_Page_Block_Html_Pager extends Mage_Core_Block_Template
     }
 
     /**
-     * Setter for limit items per page
-     *
-     * @param int $limit
-     * @return $this
+     * Set the number of items per page. 0 shows all the items on one page.
      */
-    public function setLimit($limit)
+    public function setLimit(?int $limit): static
     {
-        $this->_limit = $limit === null ? null : (int) $limit;
+        $this->_limit = $limit;
         return $this;
     }
 
