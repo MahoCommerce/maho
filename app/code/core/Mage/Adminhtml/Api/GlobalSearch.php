@@ -42,7 +42,7 @@ use Maho\Config\ApiResource;
 )]
 class GlobalSearch extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = 'global_search';
+    public const string ADMIN_RESOURCE = 'global_search';
 
     #[ApiProperty(identifier: true, description: 'Search text')]
     public string $query = '';

@@ -32,7 +32,7 @@ use Symfony\Component\Serializer\Exception\UnexpectedValueException as Serialize
 #[AsEventListener(event: ErrorEvent::class)]
 final class McpErrorSanitizerListener
 {
-    private const CALLER_FACING = [
+    private const array CALLER_FACING = [
         ApiException::class,
         AuthenticationException::class,
         AccessDeniedException::class,

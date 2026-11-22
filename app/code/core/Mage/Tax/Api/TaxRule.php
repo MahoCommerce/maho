@@ -78,12 +78,12 @@ use Maho\ApiPlatform\CrudResource;
 )]
 class TaxRule extends CrudResource
 {
-    public const MODEL = 'tax/calculation_rule';
+    public const string MODEL = 'tax/calculation_rule';
 
-    public const PRIMARY_KEY = 'tax_calculation_rule_id';
+    public const string PRIMARY_KEY = 'tax_calculation_rule_id';
 
     /** Admin ACL gate. Mirrors backend Mage_Adminhtml_Tax_RuleController. */
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_Tax_RuleController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_Tax_RuleController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

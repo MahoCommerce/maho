@@ -10,12 +10,7 @@
 
 class Mage_Core_Model_Config_Options extends \Maho\DataObject
 {
-    /**
-     * Var directory
-     *
-     * @var string
-     */
-    public const VAR_DIRECTORY = 'var';
+    public const string VAR_DIRECTORY = 'var';
     /**
      * Flag cache for existing or already created directories
      *

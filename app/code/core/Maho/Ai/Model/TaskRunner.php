@@ -14,7 +14,7 @@ use Symfony\AI\Platform\Exception\RetryableExceptionInterface;
 class Maho_Ai_Model_TaskRunner
 {
     /** Pending tasks the cron job sends to the queue again in one run. */
-    private const REQUEUE_BATCH = 100;
+    private const int REQUEUE_BATCH = 100;
 
     /**
      * Cron entry point. Workers run the tasks, and this job only queues the pending ones again:

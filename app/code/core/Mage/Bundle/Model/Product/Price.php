@@ -10,15 +10,9 @@
 
 class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Price
 {
-    /**
-     * Fixed price type
-     */
-    public const PRICE_TYPE_FIXED = 1;
+    public const int PRICE_TYPE_FIXED = 1;
 
-    /**
-     * Dynamic price type
-     */
-    public const PRICE_TYPE_DYNAMIC = 0;
+    public const int PRICE_TYPE_DYNAMIC = 0;
 
     /**
      * Flag which indicates - is min/max prices have been calculated by index
@@ -338,9 +332,6 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
 
         foreach ($selections as $selection) {
             if (!$selection->isSalable()) {
-                /**
-                 * @todo CatalogInventory Show out of stock Products
-                 */
                 continue;
             }
 

@@ -46,7 +46,7 @@ use Maho\ApiPlatform\CrudResource;
 )]
 class Country extends CrudResource
 {
-    public const MODEL = 'directory/country';
+    public const string MODEL = 'directory/country';
 
     #[ApiProperty(identifier: true, writable: false, extraProperties: ['modelField' => 'country_id'])]
     public ?string $id = null;

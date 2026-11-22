@@ -12,10 +12,8 @@ class Mage_Rss_Block_Order_New extends Mage_Core_Block_Template
 {
     /**
      * Cache tag constant for feed new orders
-     *
-     * @var string
      */
-    public const CACHE_TAG = 'block_html_rss_order_new';
+    public const string CACHE_TAG = 'block_html_rss_order_new';
 
     #[\Override]
     protected function _construct()

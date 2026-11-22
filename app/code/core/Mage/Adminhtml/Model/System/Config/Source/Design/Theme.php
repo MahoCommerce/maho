@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Model_System_Config_Source_Design_Theme
 {
-    public const CONFIG_PATHS = [
+    public const array CONFIG_PATHS = [
         'design/theme/locale',
         'design/theme/template',
         'design/theme/skin',

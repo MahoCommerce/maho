@@ -19,7 +19,7 @@ class Mage_Cms_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
     /**
      * Data keys of a page that are not columns of cms_page, and the request keys of the admin page form.
      */
-    public const RESERVED_CODES = ['stores', 'store_id', 'form_key', 'back'];
+    public const array RESERVED_CODES = ['stores', 'store_id', 'form_key', 'back'];
 
     #[\Override]
     protected $_eventPrefix = 'cms_page_attribute';

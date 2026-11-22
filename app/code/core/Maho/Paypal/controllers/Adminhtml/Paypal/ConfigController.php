@@ -10,9 +10,9 @@ declare(strict_types=1);
 
 class Maho_Paypal_Adminhtml_Paypal_ConfigController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'system/config/payment';
+    public const string ADMIN_RESOURCE = 'system/config/payment';
 
-    public const WEBHOOK_EVENT_TYPES = [
+    public const array WEBHOOK_EVENT_TYPES = [
         'CHECKOUT.ORDER.APPROVED',
         'CHECKOUT.ORDER.COMPLETED',
         'PAYMENT.AUTHORIZATION.CREATED',

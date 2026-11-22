@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'promo/catalog';
+    public const string ADMIN_RESOURCE = 'promo/catalog';
 
     /** The link of a notice from the message queue has no secret key: the grid only reads. */
     #[\Override]

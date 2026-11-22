@@ -30,7 +30,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class StorageMigrate extends BaseMahoCommand
 {
     /** A bucket answers each put in about 250 ms, so the copy to a bucket runs this many jobs. */
-    public const DEFAULT_REMOTE_JOBS = 16;
+    public const int DEFAULT_REMOTE_JOBS = 16;
 
     /**
      * @param list<string> $mounts

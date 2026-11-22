@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_Customer_OnlineController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'customer/online';
+    public const string ADMIN_RESOURCE = 'customer/online';
 
     #[Maho\Config\Route('/admin/customer_online/index')]
     public function indexAction(): void

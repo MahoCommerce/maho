@@ -27,7 +27,7 @@ class LegacyMigrateRoutes extends BaseMahoCommand
 {
     use LegacyMigrateTrait;
 
-    private const SCOPE_TO_AREA = [
+    private const array SCOPE_TO_AREA = [
         'frontend' => ['use' => 'standard', 'area' => 'frontend', 'pathPrefix' => ''],
         'admin' => ['use' => 'admin', 'area' => 'adminhtml', 'pathPrefix' => '/admin'],
         'install' => ['use' => 'install', 'area' => 'install', 'pathPrefix' => ''],

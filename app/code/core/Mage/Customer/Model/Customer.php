@@ -30,50 +30,47 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     /**
      * Configuration paths for email templates and identities
      */
-    public const XML_PATH_REGISTER_EMAIL_TEMPLATE = 'customer/create_account/email_template';
-    public const XML_PATH_REGISTER_EMAIL_IDENTITY = 'customer/create_account/email_identity';
-    public const XML_PATH_REMIND_EMAIL_TEMPLATE = 'customer/password/remind_email_template';
-    public const XML_PATH_FORGOT_EMAIL_TEMPLATE = 'customer/password/forgot_email_template';
-    public const XML_PATH_FORGOT_EMAIL_IDENTITY = 'customer/password/forgot_email_identity';
-    public const XML_PATH_DEFAULT_EMAIL_DOMAIN         = 'customer/create_account/email_domain';
-    public const XML_PATH_IS_CONFIRM                   = 'customer/create_account/confirm';
-    public const XML_PATH_CONFIRM_EMAIL_TEMPLATE       = 'customer/create_account/email_confirmation_template';
-    public const XML_PATH_CONFIRMED_EMAIL_TEMPLATE     = 'customer/create_account/email_confirmed_template';
-    public const XML_PATH_GENERATE_HUMAN_FRIENDLY_ID   = 'customer/create_account/generate_human_friendly_id';
-    public const XML_PATH_CHANGED_PASSWORD_OR_EMAIL_TEMPLATE = 'customer/changed_account/password_or_email_template';
-    public const XML_PATH_CHANGED_PASSWORD_OR_EMAIL_IDENTITY = 'customer/changed_account/password_or_email_identity';
-    public const XML_PATH_PASSWORD_LINK_ACCOUNT_NEW_EMAIL_TEMPLATE = 'customer/password_link/account_new_email_template';
-    public const XML_PATH_PASSWORD_LINK_EMAIL_TEMPLATE = 'customer/password_link/email_template';
-    public const XML_PATH_PASSWORD_LINK_EMAIL_IDENTITY = 'customer/password_link/email_identity';
-    public const XML_PATH_MAGIC_LINK_EMAIL_TEMPLATE = 'customer/login/magic_link_email_template';
-    public const XML_PATH_MAGIC_LINK_EMAIL_IDENTITY = 'customer/login/magic_link_email_identity';
+    public const string XML_PATH_REGISTER_EMAIL_TEMPLATE = 'customer/create_account/email_template';
+    public const string XML_PATH_REGISTER_EMAIL_IDENTITY = 'customer/create_account/email_identity';
+    public const string XML_PATH_REMIND_EMAIL_TEMPLATE = 'customer/password/remind_email_template';
+    public const string XML_PATH_FORGOT_EMAIL_TEMPLATE = 'customer/password/forgot_email_template';
+    public const string XML_PATH_FORGOT_EMAIL_IDENTITY = 'customer/password/forgot_email_identity';
+    public const string XML_PATH_DEFAULT_EMAIL_DOMAIN         = 'customer/create_account/email_domain';
+    public const string XML_PATH_IS_CONFIRM                   = 'customer/create_account/confirm';
+    public const string XML_PATH_CONFIRM_EMAIL_TEMPLATE       = 'customer/create_account/email_confirmation_template';
+    public const string XML_PATH_CONFIRMED_EMAIL_TEMPLATE     = 'customer/create_account/email_confirmed_template';
+    public const string XML_PATH_GENERATE_HUMAN_FRIENDLY_ID   = 'customer/create_account/generate_human_friendly_id';
+    public const string XML_PATH_CHANGED_PASSWORD_OR_EMAIL_TEMPLATE = 'customer/changed_account/password_or_email_template';
+    public const string XML_PATH_CHANGED_PASSWORD_OR_EMAIL_IDENTITY = 'customer/changed_account/password_or_email_identity';
+    public const string XML_PATH_PASSWORD_LINK_ACCOUNT_NEW_EMAIL_TEMPLATE = 'customer/password_link/account_new_email_template';
+    public const string XML_PATH_PASSWORD_LINK_EMAIL_TEMPLATE = 'customer/password_link/email_template';
+    public const string XML_PATH_PASSWORD_LINK_EMAIL_IDENTITY = 'customer/password_link/email_identity';
+    public const string XML_PATH_MAGIC_LINK_EMAIL_TEMPLATE = 'customer/login/magic_link_email_template';
+    public const string XML_PATH_MAGIC_LINK_EMAIL_IDENTITY = 'customer/login/magic_link_email_identity';
     /**
      * Codes of exceptions related to customer model
      */
-    public const EXCEPTION_EMAIL_NOT_CONFIRMED       = 1;
-    public const EXCEPTION_INVALID_EMAIL_OR_PASSWORD = 2;
-    public const EXCEPTION_EMAIL_EXISTS              = 3;
-    public const EXCEPTION_INVALID_RESET_PASSWORD_LINK_TOKEN = 4;
-    public const EXCEPTION_INVALID_RESET_PASSWORD_LINK_CUSTOMER_ID = 5;
-    public const EXCEPTION_2FA_INVALID = 6;
+    public const int EXCEPTION_EMAIL_NOT_CONFIRMED       = 1;
+    public const int EXCEPTION_INVALID_EMAIL_OR_PASSWORD = 2;
+    public const int EXCEPTION_EMAIL_EXISTS              = 3;
+    public const int EXCEPTION_INVALID_RESET_PASSWORD_LINK_TOKEN = 4;
+    public const int EXCEPTION_INVALID_RESET_PASSWORD_LINK_CUSTOMER_ID = 5;
+    public const int EXCEPTION_2FA_INVALID = 6;
 
     /**
      * Subscriptions
      */
-    public const SUBSCRIBED_YES = 'yes';
-    public const SUBSCRIBED_NO  = 'no';
+    public const string SUBSCRIBED_YES = 'yes';
+    public const string SUBSCRIBED_NO  = 'no';
 
-    public const CACHE_TAG = 'customer';
+    public const string CACHE_TAG = 'customer';
 
     /**
      * Configuration path for minimum length of password
      */
-    public const XML_PATH_MIN_PASSWORD_LENGTH = 'customer/password/min_password_length';
+    public const string XML_PATH_MIN_PASSWORD_LENGTH = 'customer/password/min_password_length';
 
-    /**
-     * Maximum Password Length
-     */
-    public const MAXIMUM_PASSWORD_LENGTH = 256;
+    public const int MAXIMUM_PASSWORD_LENGTH = 256;
 
     /**
      * Model event prefix

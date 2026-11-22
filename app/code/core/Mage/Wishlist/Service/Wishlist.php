@@ -16,11 +16,11 @@ use Mage_Wishlist_Model_Wishlist as Wishlist;
 
 class Mage_Wishlist_Service_Wishlist
 {
-    public const XML_PATH_ENABLED = 'wishlist/general/active';
-    public const XML_PATH_SHARE_RATE_LIMIT = 'system/rate_limit/wishlist_share';
+    public const string XML_PATH_ENABLED = 'wishlist/general/active';
+    public const string XML_PATH_SHARE_RATE_LIMIT = 'system/rate_limit/wishlist_share';
 
-    public const SHARE_RATE_LIMIT_WINDOW = 3600;
-    public const SHARE_MAX_RECIPIENTS = 5;
+    public const int SHARE_RATE_LIMIT_WINDOW = 3600;
+    public const int SHARE_MAX_RECIPIENTS = 5;
 
     public function isEnabled(int $storeId): bool
     {

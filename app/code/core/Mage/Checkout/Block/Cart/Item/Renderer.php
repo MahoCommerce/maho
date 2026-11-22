@@ -22,7 +22,7 @@ class Mage_Checkout_Block_Cart_Item_Renderer extends Mage_Core_Block_Template
 {
     /** @var Mage_Checkout_Model_Session */
     protected $_checkoutSession;
-    protected $_item;
+    protected ?Mage_Sales_Model_Quote_Item $_item = null;
     protected ?string $_productUrl = null;
     protected ?Mage_Catalog_Helper_Image $_productThumbnail = null;
 
@@ -45,7 +45,7 @@ class Mage_Checkout_Block_Cart_Item_Renderer extends Mage_Core_Block_Template
      *
      * @return  $this
      */
-    public function setItem(Mage_Sales_Model_Quote_Item_Abstract $item)
+    public function setItem(Mage_Sales_Model_Quote_Item $item)
     {
         $this->_item = $item;
         return $this;

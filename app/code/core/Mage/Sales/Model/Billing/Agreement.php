@@ -17,8 +17,8 @@ declare(strict_types=1);
  */
 class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_AgreementAbstract
 {
-    public const STATUS_ACTIVE     = 'active';
-    public const STATUS_CANCELED   = 'canceled';
+    public const string STATUS_ACTIVE     = 'active';
+    public const string STATUS_CANCELED   = 'canceled';
 
     /**
      * Related agreement orders

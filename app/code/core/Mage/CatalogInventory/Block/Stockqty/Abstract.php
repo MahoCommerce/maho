@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 abstract class Mage_CatalogInventory_Block_Stockqty_Abstract extends Mage_Core_Block_Template
 {
-    public const XML_PATH_STOCK_THRESHOLD_QTY = Mage_CatalogInventory_Helper_Data::XML_PATH_STOCK_THRESHOLD_QTY;
+    public const string XML_PATH_STOCK_THRESHOLD_QTY = Mage_CatalogInventory_Helper_Data::XML_PATH_STOCK_THRESHOLD_QTY;
 
     /**
      * Retrieve current product object

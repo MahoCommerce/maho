@@ -37,7 +37,7 @@ use ApiPlatform\Metadata\Get;
 )]
 class CartsProductsReport extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = 'report/shopcart/product';
+    public const string ADMIN_RESOURCE = 'report/shopcart/product';
 
     #[ApiProperty(identifier: true, description: 'Report code')]
     public string $report = 'carts-products';

@@ -10,9 +10,9 @@
 
 class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widget_Form
 {
-    public const SCOPE_DEFAULT = 'default';
-    public const SCOPE_WEBSITES = 'websites';
-    public const SCOPE_STORES   = 'stores';
+    public const string SCOPE_DEFAULT = 'default';
+    public const string SCOPE_WEBSITES = 'websites';
+    public const string SCOPE_STORES   = 'stores';
 
     /**
      * Config data array
@@ -727,11 +727,6 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     }
 
     /**
-     * Temporary moved those $this->getRequest()->getParam('blabla') from the code across this block
-     * to getBlala() methods to be later set from controller with setters
-     */
-    /**
-     * @TODO delete this methods when {^see above^} is done
      * @return string
      */
     public function getSectionCode()
@@ -740,7 +735,6 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     }
 
     /**
-     * @TODO delete this methods when {^see above^} is done
      * @return string
      */
     public function getWebsiteCode()
@@ -749,7 +743,6 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     }
 
     /**
-     * @TODO delete this methods when {^see above^} is done
      * @return string
      */
     public function getStoreCode()

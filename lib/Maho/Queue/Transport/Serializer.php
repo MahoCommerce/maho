@@ -24,7 +24,7 @@ use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 final class Serializer implements SerializerInterface
 {
     /** Storage limit of the trace_context column; an oversized carrier is dropped, not truncated */
-    public const TRACE_CONTEXT_MAX_LENGTH = 1024;
+    public const int TRACE_CONTEXT_MAX_LENGTH = 1024;
 
     /**
      * @return array{body: string, headers: array<string, string>}

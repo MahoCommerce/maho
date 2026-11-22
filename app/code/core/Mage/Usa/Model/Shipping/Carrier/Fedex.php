@@ -12,30 +12,24 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
 {
     /**
      * Code of the carrier
-     *
-     * @var string
      */
-    public const CODE = 'fedex';
+    public const string CODE = 'fedex';
 
     /**
      * Purpose of rate request
-     *
-     * @var string
      */
-    public const RATE_REQUEST_GENERAL = 'general';
+    public const string RATE_REQUEST_GENERAL = 'general';
 
     /**
      * Purpose of rate request
-     *
-     * @var string
      */
-    public const RATE_REQUEST_SMARTPOST = 'SMART_POST';
+    public const string RATE_REQUEST_SMARTPOST = 'SMART_POST';
 
     /**
      * REST renamed this SOAP service code; pre-migration orders still hold the
      * old one in shipping_method, and order rows are never rewritten.
      */
-    protected const SERVICE_TYPE_ALIASES = [
+    protected const array SERVICE_TYPE_ALIASES = [
         'INTERNATIONAL_PRIORITY' => 'FEDEX_INTERNATIONAL_PRIORITY',
     ];
 
@@ -44,14 +38,14 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      * registered Integrator Providers to use the comprehensive one instead, and answers
      * 403 on the other. Both take the same payload and return the same response shape.
      */
-    public const RATE_ENDPOINT_STANDARD = 'standard';
-    public const RATE_ENDPOINT_COMPREHENSIVE = 'comprehensive';
+    public const string RATE_ENDPOINT_STANDARD = 'standard';
+    public const string RATE_ENDPOINT_COMPREHENSIVE = 'comprehensive';
 
     /**
      * Preference order for the rate flavours FedEx returns per service, best first.
      * ACCOUNT is the negotiated rate, LIST the published one.
      */
-    protected const RATE_TYPE_PREFERENCE = ['ACCOUNT', 'PREFERRED', 'INCENTIVE', 'LIST'];
+    protected const array RATE_TYPE_PREFERENCE = ['ACCOUNT', 'PREFERRED', 'INCENTIVE', 'LIST'];
 
     /**
      * Code of the carrier

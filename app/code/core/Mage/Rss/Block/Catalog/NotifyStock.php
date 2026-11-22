@@ -12,10 +12,8 @@ class Mage_Rss_Block_Catalog_NotifyStock extends Mage_Rss_Block_Abstract
 {
     /**
      * Cache tag constant for feed notify stock
-     *
-     * @var string
      */
-    public const CACHE_TAG = 'block_html_rss_catalog_notifystock';
+    public const string CACHE_TAG = 'block_html_rss_catalog_notifystock';
 
     #[\Override]
     protected function _construct()

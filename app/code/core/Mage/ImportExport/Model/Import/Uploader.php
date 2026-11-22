@@ -22,7 +22,7 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
         'gif' => 'image/gif',
         'png' => 'image/png',
     ];
-    public const DEFAULT_FILE_TYPE = 'application/octet-stream';
+    public const string DEFAULT_FILE_TYPE = 'application/octet-stream';
 
     /**
      * Mage_ImportExport_Model_Import_Uploader constructor.

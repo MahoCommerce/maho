@@ -46,7 +46,7 @@ it('scaffolds a CRUD resource from a flat-table model with introspected properti
     expect($out)->toContain('SPDX-FileCopyrightText: ' . date('Y') . ' Maho <https://mahocommerce.com>')
         ->and($out)->toContain('SPDX-License-Identifier: OSL-3.0')
         ->and($out)->toContain('class Sample extends CrudResource')
-        ->and($out)->toContain("public const MODEL = 'cms/page';")
+        ->and($out)->toContain("public const string MODEL = 'cms/page';")
         ->and($out)->toContain("uriTemplate: '/samples',")
         ->and($out)->toContain("uriTemplate: '/samples/{id}',")
         ->and($out)->toContain("is_granted('samples/read')")

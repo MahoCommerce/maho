@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'promo/quote';
+    public const string ADMIN_RESOURCE = 'promo/quote';
 
     protected function _initRule(): static
     {

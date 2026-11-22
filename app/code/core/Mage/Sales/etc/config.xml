@@ -907,9 +907,6 @@ SPDX-License-Identifier: AFL-3.0
                     <quote_address>
                         <table>sales_flat_quote_address</table>
                     </quote_address>
-                    <quote_address_item>
-                        <table>sales_flat_quote_address_item</table>
-                    </quote_address_item>
                     <quote_item_option>
                         <table>sales_flat_quote_item_option</table>
                     </quote_item_option>

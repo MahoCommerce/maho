@@ -14,10 +14,10 @@
  */
 class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml_Block_Abstract
 {
-    public const MODE_NOT = \Maho\Data\Form\Condition::MODE_NOT;
-    public const MODE_AND = \Maho\Data\Form\Condition::MODE_AND;
-    public const MODE_OR  = \Maho\Data\Form\Condition::MODE_OR;
-    public const MODE_XOR = \Maho\Data\Form\Condition::MODE_XOR;
+    public const string MODE_NOT = \Maho\Data\Form\Condition::MODE_NOT;
+    public const string MODE_AND = \Maho\Data\Form\Condition::MODE_AND;
+    public const string MODE_OR  = \Maho\Data\Form\Condition::MODE_OR;
+    public const string MODE_XOR = \Maho\Data\Form\Condition::MODE_XOR;
 
     /**
      * Optional field alias to ID map

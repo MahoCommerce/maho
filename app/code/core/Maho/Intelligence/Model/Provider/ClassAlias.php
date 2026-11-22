@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_Intelligence_Model_Provider_ClassAlias
 {
-    private const TYPES = ['model', 'block', 'helper'];
+    private const array TYPES = ['model', 'block', 'helper'];
 
     /** @var array<string, array> */
     private array $cachedAliases = [];

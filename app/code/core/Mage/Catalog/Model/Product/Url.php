@@ -10,7 +10,7 @@
 
 class Mage_Catalog_Model_Product_Url extends \Maho\DataObject
 {
-    public const CACHE_TAG = 'url_rewrite';
+    public const string CACHE_TAG = 'url_rewrite';
 
     /**
      * URL instance
@@ -135,7 +135,6 @@ class Mage_Catalog_Model_Product_Url extends \Maho\DataObject
     {
         $path = $product->getData('url_path');
         if (is_null($category)) {
-            /** @todo get default category */
             return $path;
         }
 

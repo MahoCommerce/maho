@@ -22,8 +22,8 @@ class Mage_SalesRule_Model_Coupon_Massgenerator extends Mage_Core_Model_Abstract
     /**
      * Maximum probability of guessing the coupon on the first attempt
      */
-    public const MAX_PROBABILITY_OF_GUESSING = 0.25;
-    public const MAX_GENERATE_ATTEMPTS = 10;
+    public const float MAX_PROBABILITY_OF_GUESSING = 0.25;
+    public const int MAX_GENERATE_ATTEMPTS = 10;
 
     /**
      * Count of generated Coupons

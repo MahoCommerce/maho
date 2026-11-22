@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Catalog_Model_Category_Image implements Mage_Core_Model_Image_ProviderInterface
 {
-    public const ENTITY = 'category';
+    public const string ENTITY = 'category';
 
     /**
      * The image of every category in every store, for storage:image:resize.

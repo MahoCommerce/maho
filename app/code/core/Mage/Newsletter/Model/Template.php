@@ -161,9 +161,10 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
         }
 
         if (Mage::app()->isSingleStoreMode()) {
-            $processor->setStoreId(Mage::app()->getStore());
+            $processor->setStoreId((int) Mage::app()->getStore()->getId());
         } else {
-            $processor->setStoreId(Mage::app()->getRequest()->getParam('store_id'));
+            $storeId = Mage::app()->getRequest()->getParam('store_id');
+            $processor->setStoreId($storeId === null || $storeId === '' ? null : (int) $storeId);
         }
 
         // Populate the variables array with store, store info, logo, etc. variables

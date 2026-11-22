@@ -10,20 +10,13 @@
 
 class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'catalog/sitemap';
+    public const string ADMIN_RESOURCE = 'catalog/sitemap';
 
     /** The link of a notice from the message queue has no secret key: the grid only reads. */
     #[\Override]
     protected $_publicActions = ['index'];
 
-    /**
-     * Maximum sitemap name length
-     */
-    public const MAXIMUM_SITEMAP_NAME_LENGTH = 32;
+    public const int MAXIMUM_SITEMAP_NAME_LENGTH = 32;
 
     /**
      * Init actions

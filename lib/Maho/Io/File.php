@@ -30,14 +30,14 @@ class File extends \Maho\Io
      *
      * @const
      */
-    public const GREP_FILES = 'files_only';
+    public const string GREP_FILES = 'files_only';
 
     /**
      * Used to grep ls() output
      *
      * @const
      */
-    public const GREP_DIRS = 'dirs_only';
+    public const string GREP_DIRS = 'dirs_only';
 
     /**
      * If this variable is set to TRUE, our library will be able to automatically create
@@ -85,7 +85,7 @@ class File extends \Maho\Io
     /**
      * @var string[]
      */
-    public const ALLOWED_IMAGES_EXTENSIONS = ['webp', 'avif', 'jpg', 'jpeg', 'png', 'gif', 'bmp'];
+    public const array ALLOWED_IMAGES_EXTENSIONS = ['webp', 'avif', 'jpg', 'jpeg', 'png', 'gif', 'bmp'];
 
     public function __destruct()
     {

@@ -10,7 +10,7 @@
 
 class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Abstract
 {
-    public const MEDIA_GALLERY_ATTRIBUTE_CODE = 'media_gallery';
+    public const string MEDIA_GALLERY_ATTRIBUTE_CODE = 'media_gallery';
 
     #[\Override]
     protected $_moduleName = 'Mage_ConfigurableSwatches';

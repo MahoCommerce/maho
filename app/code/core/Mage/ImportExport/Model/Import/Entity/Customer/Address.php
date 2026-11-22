@@ -13,18 +13,18 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
     /**
      * Prefix for source file column name, which displays that column contains address data.
      */
-    public const COL_NAME_PREFIX = '_address_';
+    public const string COL_NAME_PREFIX = '_address_';
 
     /**
      * Particular columns that contains of customer default addresses.
      */
-    public const COL_NAME_DEFAULT_BILLING  = '_address_default_billing_';
-    public const COL_NAME_DEFAULT_SHIPPING = '_address_default_shipping_';
+    public const string COL_NAME_DEFAULT_BILLING  = '_address_default_billing_';
+    public const string COL_NAME_DEFAULT_SHIPPING = '_address_default_shipping_';
 
     /**
      * Error codes.
      */
-    public const ERROR_INVALID_REGION = 'invalidRegion';
+    public const string ERROR_INVALID_REGION = 'invalidRegion';
 
     /**
      * Customer address attributes parameters.

@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Maho_Ai_Adminhtml_Ai_ScheduleController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'system/ai/schedules';
+    public const string ADMIN_RESOURCE = 'system/ai/schedules';
 
     #[Maho\Config\Route('/admin/ai_schedule/index')]
     public function indexAction(): void

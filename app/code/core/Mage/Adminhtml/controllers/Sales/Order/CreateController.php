@@ -14,7 +14,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
      * The actions that build and submit the quote of a new order, a reorder or an order edit.
      * The edit page calls some of them on this controller.
      */
-    protected const QUOTE_ACTIONS = [
+    protected const array QUOTE_ACTIONS = [
         'index', 'save', 'loadblock', 'processdata', 'addconfigured',
         'configureproducttoadd', 'configurequoteitems',
     ];

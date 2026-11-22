@@ -17,10 +17,10 @@ namespace Tests\Helpers;
 
 class CaptchaStub
 {
-    public const SOLVED = 'solved';
-    public const ERROR = 'Incorrect CAPTCHA.';
+    public const string SOLVED = 'solved';
+    public const string ERROR = 'Incorrect CAPTCHA.';
 
-    private const SINGLETON = 'tests_captcha_stub';
+    private const string SINGLETON = 'tests_captcha_stub';
 
     /** @var list<array<array-key, mixed>> */
     public array $checks = [];

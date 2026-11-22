@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'dashboard';
+    public const string ADMIN_RESOURCE = 'dashboard';
 
     #[Maho\Config\Route('/admin/dashboard/index')]
     public function indexAction(): void

@@ -30,8 +30,8 @@ use Symfony\Component\Routing\RequestContext;
  */
 class RouteCollectionBuilder
 {
-    public const ADMIN_SENTINEL = '__admin__';
-    public const INSTALL_SENTINEL = '__install__';
+    public const string ADMIN_SENTINEL = '__admin__';
+    public const string INSTALL_SENTINEL = '__install__';
 
     private static ?string $adminFrontName = null;
 

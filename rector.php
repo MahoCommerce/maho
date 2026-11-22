@@ -30,9 +30,6 @@ return RectorConfig::configure()
         // property cannot be written from one. Maho classes exist to be extended.
         Rector\Php81\Rector\Property\ReadOnlyPropertyRector::class,
         Rector\Php82\Rector\Class_\ReadOnlyClassRector::class,
-        // `const string FOO` is new syntax, and a child class cannot redeclare
-        // the constant with another type.
-        Rector\Php83\Rector\ClassConst\AddTypeToConstRector::class,
         // Judges "extra" from the core signature alone, but a third-party
         // subclass may well declare the parameter the caller is passing.
         Rector\Php71\Rector\FuncCall\RemoveExtraParametersRector::class,

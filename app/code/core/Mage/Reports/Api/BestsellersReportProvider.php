@@ -16,7 +16,7 @@ final class BestsellersReportProvider extends ReportProviderBase
 {
     use RankedProductsTrait;
 
-    public const TABLES = [
+    public const array TABLES = [
         ReportQuery::PERIOD_DAY => 'sales/bestsellers_aggregated_daily',
         ReportQuery::PERIOD_MONTH => 'sales/bestsellers_aggregated_monthly',
         ReportQuery::PERIOD_YEAR => 'sales/bestsellers_aggregated_yearly',

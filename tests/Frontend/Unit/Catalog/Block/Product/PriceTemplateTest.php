@@ -474,8 +474,8 @@ $bothPricesStore = static function (): Mage_Core_Model_Store {
 /** Stands in for a store with one 2.00 fixed product tax, taxed at 22%, printed inside the price. */
 class PriceTemplateTest_WeeeHelper extends Mage_Weee_Helper_Data
 {
-    public const AMOUNT = 2.00;
-    public const TAX_AMOUNT = 0.44;
+    public const float AMOUNT = 2.00;
+    public const float TAX_AMOUNT = 0.44;
 
     #[\Override]
     public function isEnabled($store = null): bool

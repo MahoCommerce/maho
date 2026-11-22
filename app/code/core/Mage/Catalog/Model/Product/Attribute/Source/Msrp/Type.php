@@ -13,17 +13,17 @@ class Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type extends Mage_Eav_Mod
     /**
      * Display Product Price on gesture
      */
-    public const TYPE_ON_GESTURE = '1';
+    public const string TYPE_ON_GESTURE = '1';
 
     /**
      * Display Product Price in cart
      */
-    public const TYPE_IN_CART    = '2';
+    public const string TYPE_IN_CART    = '2';
 
     /**
      * Display Product Price before order confirmation
      */
-    public const TYPE_BEFORE_ORDER_CONFIRM = '3';
+    public const string TYPE_BEFORE_ORDER_CONFIRM = '3';
 
     #[\Override]
     public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array

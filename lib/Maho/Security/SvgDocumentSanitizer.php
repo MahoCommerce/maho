@@ -41,9 +41,9 @@ use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 
 class SvgDocumentSanitizer implements HtmlSanitizerInterface
 {
-    public const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+    public const string SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 
-    public const XMLNS_NAMESPACE = 'http://www.w3.org/2000/xmlns/';
+    public const string XMLNS_NAMESPACE = 'http://www.w3.org/2000/xmlns/';
 
     protected ?HtmlSanitizerConfig $config = null;
 

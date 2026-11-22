@@ -27,7 +27,7 @@ use Maho\ApiPlatform\Service\StoreContext;
 class CustomerQueryHandler
 {
     /** The address fields that the input of an operation can hold: the field of the model => the key of the input. */
-    private const ADDRESS_FIELDS = [
+    private const array ADDRESS_FIELDS = [
         'street' => 'street', 'city' => 'city', 'region' => 'region', 'region_id' => 'regionId',
         'postcode' => 'postcode', 'country_id' => 'countryId', 'telephone' => 'telephone',
     ];

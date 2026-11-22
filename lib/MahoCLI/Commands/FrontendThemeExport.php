@@ -25,7 +25,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class FrontendThemeExport extends BaseMahoCommand
 {
-    private const SKIN_PATH = 'public/skin/frontend';
+    private const string SKIN_PATH = 'public/skin/frontend';
 
     public function __invoke(
         OutputInterface $output,

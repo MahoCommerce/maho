@@ -13,13 +13,13 @@ declare(strict_types=1);
  */
 class Maho_CustomerSegmentation_Model_SequenceProgress extends Mage_Core_Model_Abstract
 {
-    public const STATUS_SCHEDULED = 'scheduled';
-    public const STATUS_SENT = 'sent';
-    public const STATUS_FAILED = 'failed';
-    public const STATUS_SKIPPED = 'skipped';
+    public const string STATUS_SCHEDULED = 'scheduled';
+    public const string STATUS_SENT = 'sent';
+    public const string STATUS_FAILED = 'failed';
+    public const string STATUS_SKIPPED = 'skipped';
 
-    public const TRIGGER_ENTER = 'enter';
-    public const TRIGGER_EXIT = 'exit';
+    public const string TRIGGER_ENTER = 'enter';
+    public const string TRIGGER_EXIT = 'exit';
 
     #[\Override]
     protected function _construct(): void

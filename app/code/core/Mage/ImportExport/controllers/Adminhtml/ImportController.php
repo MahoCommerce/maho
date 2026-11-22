@@ -10,11 +10,7 @@
 
 class Mage_ImportExport_Adminhtml_ImportController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'system/convert/import';
+    public const string ADMIN_RESOURCE = 'system/convert/import';
 
     /** The link of a notice from the message queue has no secret key: the page only reads. */
     #[\Override]

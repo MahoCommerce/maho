@@ -15,8 +15,8 @@ declare(strict_types=1);
  */
 class Mage_Core_Model_File_Validator_Extension
 {
-    public const FORBIDDEN_EXTENSION = 'forbiddenExtension';
-    public const NOT_ALLOWED_EXTENSION = 'notAllowedExtension';
+    public const string FORBIDDEN_EXTENSION = 'forbiddenExtension';
+    public const string NOT_ALLOWED_EXTENSION = 'notAllowedExtension';
 
     /**
      * Forbidden file extensions (from configuration)

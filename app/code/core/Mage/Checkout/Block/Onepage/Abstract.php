@@ -20,7 +20,7 @@ abstract class Mage_Checkout_Block_Onepage_Abstract extends Mage_Core_Block_Temp
     protected ?Mage_Sales_Model_Quote $_quote = null;
     protected ?Mage_Directory_Model_Resource_Country_Collection $_countryCollection = null;
     protected ?Mage_Directory_Model_Resource_Region_Collection $_regionCollection = null;
-    protected $_addressesCollection;
+    protected ?Mage_Customer_Model_Resource_Address_Collection $_addressesCollection = null;
 
     /**
      * Get logged in customer

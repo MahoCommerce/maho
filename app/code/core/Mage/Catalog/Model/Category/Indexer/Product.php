@@ -28,7 +28,7 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
     /**
      * Data key for matching result to be saved in
      */
-    public const EVENT_MATCH_RESULT_KEY = 'catalog_category_product_match_result';
+    public const string EVENT_MATCH_RESULT_KEY = 'catalog_category_product_match_result';
 
     /**
      * @var array

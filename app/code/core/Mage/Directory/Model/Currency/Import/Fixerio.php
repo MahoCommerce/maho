@@ -13,12 +13,12 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
     /**
      * XML path to Fixer.IO timeout setting
      */
-    public const XML_PATH_FIXERIO_TIMEOUT = 'currency/fixerio/timeout';
+    public const string XML_PATH_FIXERIO_TIMEOUT = 'currency/fixerio/timeout';
 
     /**
      * XML path to Fixer.IO API key setting
      */
-    public const XML_PATH_FIXERIO_API_KEY = 'currency/fixerio/api_key';
+    public const string XML_PATH_FIXERIO_API_KEY = 'currency/fixerio/api_key';
 
     /**
      * URL template for currency rates import (always uses EUR as base for free tier compatibility)

@@ -10,30 +10,30 @@ declare(strict_types=1);
 
 class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public const XML_PATH_PROTOCOL_PREFIX = 'apiplatform/protocols/';
-    public const XML_PATH_TOKEN_LIFETIME = 'apiplatform/oauth2/token_lifetime';
-    public const XML_PATH_REFRESH_TOKEN_LIFETIME = 'apiplatform/oauth2/refresh_token_lifetime';
-    public const XML_PATH_AUTHORIZATION_ENABLED = 'apiplatform/oauth2/authorization_enabled';
-    public const XML_PATH_DYNAMIC_REGISTRATION = 'apiplatform/oauth2/dynamic_registration_enabled';
-    public const XML_PATH_CODE_LIFETIME = 'apiplatform/oauth2/authorization_code_lifetime';
-    public const XML_PATH_MCP_REQUIRE_AUTH = 'apiplatform/oauth2/mcp_require_auth';
-    public const XML_PATH_ALLOWED_REDIRECT_HOSTS = 'apiplatform/oauth2/allowed_redirect_hosts';
-    public const DEFAULT_TOKEN_LIFETIME = 3600;
-    public const DEFAULT_REFRESH_TOKEN_LIFETIME = 86400;
-    public const DEFAULT_CODE_LIFETIME = 60;
+    public const string XML_PATH_PROTOCOL_PREFIX = 'apiplatform/protocols/';
+    public const string XML_PATH_TOKEN_LIFETIME = 'apiplatform/oauth2/token_lifetime';
+    public const string XML_PATH_REFRESH_TOKEN_LIFETIME = 'apiplatform/oauth2/refresh_token_lifetime';
+    public const string XML_PATH_AUTHORIZATION_ENABLED = 'apiplatform/oauth2/authorization_enabled';
+    public const string XML_PATH_DYNAMIC_REGISTRATION = 'apiplatform/oauth2/dynamic_registration_enabled';
+    public const string XML_PATH_CODE_LIFETIME = 'apiplatform/oauth2/authorization_code_lifetime';
+    public const string XML_PATH_MCP_REQUIRE_AUTH = 'apiplatform/oauth2/mcp_require_auth';
+    public const string XML_PATH_ALLOWED_REDIRECT_HOSTS = 'apiplatform/oauth2/allowed_redirect_hosts';
+    public const int DEFAULT_TOKEN_LIFETIME = 3600;
+    public const int DEFAULT_REFRESH_TOKEN_LIFETIME = 86400;
+    public const int DEFAULT_CODE_LIFETIME = 60;
 
-    public const PROTOCOL_REST_V2 = 'rest_v2';
-    public const PROTOCOL_GRAPHQL = 'graphql';
-    public const PROTOCOL_ADMIN_GRAPHQL = 'admin_graphql';
-    public const PROTOCOL_MCP = 'mcp';
-    public const PROTOCOL_LEGACY_REST = 'legacy_rest';
-    public const PROTOCOL_SOAP = 'soap';
-    public const PROTOCOL_V2_SOAP = 'v2_soap';
-    public const PROTOCOL_XMLRPC = 'xmlrpc';
-    public const PROTOCOL_JSONRPC = 'jsonrpc';
+    public const string PROTOCOL_REST_V2 = 'rest_v2';
+    public const string PROTOCOL_GRAPHQL = 'graphql';
+    public const string PROTOCOL_ADMIN_GRAPHQL = 'admin_graphql';
+    public const string PROTOCOL_MCP = 'mcp';
+    public const string PROTOCOL_LEGACY_REST = 'legacy_rest';
+    public const string PROTOCOL_SOAP = 'soap';
+    public const string PROTOCOL_V2_SOAP = 'v2_soap';
+    public const string PROTOCOL_XMLRPC = 'xmlrpc';
+    public const string PROTOCOL_JSONRPC = 'jsonrpc';
 
     /** Path of the MCP endpoint, below the host root. It names a resource of its own. */
-    public const MCP_PATH = '/api/mcp';
+    public const string MCP_PATH = '/api/mcp';
 
     /**
      * Check whether a specific API protocol is enabled.

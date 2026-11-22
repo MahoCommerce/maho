@@ -17,8 +17,8 @@ declare(strict_types=1);
  */
 class Mage_Checkout_Block_Cart_Item_Renderer_Grouped extends Mage_Checkout_Block_Cart_Item_Renderer
 {
-    public const GROUPED_PRODUCT_IMAGE = 'checkout/cart/grouped_product_image';
-    public const USE_PARENT_IMAGE      = 'parent';
+    public const string GROUPED_PRODUCT_IMAGE = 'checkout/cart/grouped_product_image';
+    public const string USE_PARENT_IMAGE      = 'parent';
 
     /**
      * Get item grouped product

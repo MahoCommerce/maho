@@ -253,7 +253,7 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
      * @param string $block
      * @param string $template
      */
-    public function addPriceBlockType($type, $block = '', $template = '')
+    public function addPriceBlockType($type, $block = '', $template = ''): void
     {
         if ($type) {
             $this->_priceBlockTypes[$type] = [

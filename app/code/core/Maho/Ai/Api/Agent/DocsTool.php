@@ -24,9 +24,9 @@ use Symfony\AI\Platform\Tool\ToolEffectHints;
  */
 final class DocsTool
 {
-    public const NAME = 'docs_read';
-    public const TITLE = 'Read the user guide';
-    public const AUDIENCES = [Library::AUDIENCE_USER, Library::AUDIENCE_SYSADMIN];
+    public const string NAME = 'docs_read';
+    public const string TITLE = 'Read the user guide';
+    public const array AUDIENCES = [Library::AUDIENCE_USER, Library::AUDIENCE_SYSADMIN];
 
     public function __construct(private ?Library $library = null) {}
 

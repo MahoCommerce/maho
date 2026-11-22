@@ -15,9 +15,9 @@ declare(strict_types=1);
  */
 class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
 {
-    public const DEFAULT_ONLINE_MINUTES_INTERVAL = 15;
-    public const VISITOR_TYPE_CUSTOMER = 'c';
-    public const VISITOR_TYPE_VISITOR  = 'v';
+    public const int DEFAULT_ONLINE_MINUTES_INTERVAL = 15;
+    public const string VISITOR_TYPE_CUSTOMER = 'c';
+    public const string VISITOR_TYPE_VISITOR  = 'v';
 
     protected bool $_skipRequestLogging = false;
 

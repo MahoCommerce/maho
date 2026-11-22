@@ -19,7 +19,7 @@ use Maho\Db\Schema\Collector;
 class UnclaimedTableScanner
 {
     /** The SQLite adapter creates this table at runtime, so no schema declares it. */
-    private const PLATFORM_TABLES = ['core_advisory_lock'];
+    private const array PLATFORM_TABLES = ['core_advisory_lock'];
 
     /**
      * Tables that neither a sql/schema.php nor a resource entity claims. Advisory only,

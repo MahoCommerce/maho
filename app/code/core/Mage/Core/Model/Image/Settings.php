@@ -16,11 +16,11 @@ declare(strict_types=1);
 
 final readonly class Mage_Core_Model_Image_Settings
 {
-    public const FIT_CONTAIN = 'contain';
-    public const FIT_COVER = 'cover';
+    public const string FIT_CONTAIN = 'contain';
+    public const string FIT_COVER = 'cover';
 
     /** Output formats that can keep the transparent areas of the source. */
-    private const ALPHA_EXTENSIONS = ['.png', '.webp', '.avif', '.gif'];
+    private const array ALPHA_EXTENSIONS = ['.png', '.webp', '.avif', '.gif'];
 
     /**
      * @param list<int> $widths in ascending order

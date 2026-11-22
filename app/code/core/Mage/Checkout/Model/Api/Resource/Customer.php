@@ -16,15 +16,15 @@ class Mage_Checkout_Model_Api_Resource_Customer extends Mage_Checkout_Model_Api_
     /**
      * Customer address types
      */
-    public const ADDRESS_BILLING    = Mage_Sales_Model_Quote_Address::TYPE_BILLING;
-    public const ADDRESS_SHIPPING   = Mage_Sales_Model_Quote_Address::TYPE_SHIPPING;
+    public const string ADDRESS_BILLING    = Mage_Sales_Model_Quote_Address::TYPE_BILLING;
+    public const string ADDRESS_SHIPPING   = Mage_Sales_Model_Quote_Address::TYPE_SHIPPING;
 
     /**
      * Customer checkout types
      */
-    public const MODE_CUSTOMER = Mage_Checkout_Model_Type_Onepage::METHOD_CUSTOMER;
-    public const MODE_REGISTER = Mage_Checkout_Model_Type_Onepage::METHOD_REGISTER;
-    public const MODE_GUEST    = Mage_Checkout_Model_Type_Onepage::METHOD_GUEST;
+    public const string MODE_CUSTOMER = Mage_Checkout_Model_Type_Onepage::METHOD_CUSTOMER;
+    public const string MODE_REGISTER = Mage_Checkout_Model_Type_Onepage::METHOD_REGISTER;
+    public const string MODE_GUEST    = Mage_Checkout_Model_Type_Onepage::METHOD_GUEST;
 
     /**
      * @param int $customerId

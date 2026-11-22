@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_Paypal_Model_Webhook_Processor
 {
-    protected const HANDLER_MAP = [
+    protected const array HANDLER_MAP = [
         'CHECKOUT.ORDER.APPROVED'        => 'paypal/webhook_handler_orderApproved',
         'CHECKOUT.ORDER.COMPLETED'       => 'paypal/webhook_handler_orderCompleted',
         'PAYMENT.CAPTURE.COMPLETED'      => 'paypal/webhook_handler_captureCompleted',

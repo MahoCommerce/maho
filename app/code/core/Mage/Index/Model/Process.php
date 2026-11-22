@@ -16,30 +16,30 @@ declare(strict_types=1);
  */
 class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
 {
-    public const XML_PATH_INDEXER_DATA     = 'global/index/indexer';
+    public const string XML_PATH_INDEXER_DATA     = 'global/index/indexer';
 
     /**
      * Process statuses
      */
-    public const STATUS_RUNNING            = 'working';
-    public const STATUS_PENDING            = 'pending';
-    public const STATUS_REQUIRE_REINDEX    = 'require_reindex';
+    public const string STATUS_RUNNING            = 'working';
+    public const string STATUS_PENDING            = 'pending';
+    public const string STATUS_REQUIRE_REINDEX    = 'require_reindex';
 
     /**
      * Process event statuses
      */
-    public const EVENT_STATUS_NEW          = 'new';
-    public const EVENT_STATUS_DONE         = 'done';
-    public const EVENT_STATUS_ERROR        = 'error';
-    public const EVENT_STATUS_WORKING      = 'working';
+    public const string EVENT_STATUS_NEW          = 'new';
+    public const string EVENT_STATUS_DONE         = 'done';
+    public const string EVENT_STATUS_ERROR        = 'error';
+    public const string EVENT_STATUS_WORKING      = 'working';
 
     /**
      * Process modes
      * Process mode allow disable automatic process events processing
      */
-    public const MODE_MANUAL              = 'manual';
-    public const MODE_REAL_TIME           = 'real_time';
-    public const MODE_SCHEDULE            = 'schedule';
+    public const string MODE_MANUAL              = 'manual';
+    public const string MODE_REAL_TIME           = 'real_time';
+    public const string MODE_SCHEDULE            = 'schedule';
 
     /**
      * Indexer stategy object
@@ -129,8 +129,10 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
 
     /**
      * Reindex all data what this process responsible is
+     *
+     * @return $this
      */
-    public function reindexAll()
+    public function reindexAll(): static
     {
         if ($this->isLocked()) {
             Mage::throwException(Mage::helper('index')->__('%s Index process is working now. Please try run this process later.', $this->getIndexer()->getName()));

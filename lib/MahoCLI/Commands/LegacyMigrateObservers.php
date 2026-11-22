@@ -24,7 +24,7 @@ class LegacyMigrateObservers extends BaseMahoCommand
 {
     use LegacyMigrateTrait;
 
-    private const SCOPE_TO_AREA = [
+    private const array SCOPE_TO_AREA = [
         'global' => null,
         'frontend' => 'frontend',
         'adminhtml' => 'adminhtml',

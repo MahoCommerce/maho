@@ -17,7 +17,7 @@ final class SearchTermsReportProvider extends ReportProviderBase
     /**
      * Sort value => column and direction of the search terms.
      */
-    public const SORTS = [
+    public const array SORTS = [
         'popularity' => ['popularity', 'DESC'],
         'results' => ['num_results', 'DESC'],
         'updatedAt' => ['updated_at', 'DESC'],

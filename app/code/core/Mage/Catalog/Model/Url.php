@@ -12,18 +12,14 @@ class Mage_Catalog_Model_Url
 {
     /**
      * Number of characters allowed to be in URL path
-     *
-     * @var int
      */
-    public const MAX_REQUEST_PATH_LENGTH = 240;
+    public const int MAX_REQUEST_PATH_LENGTH = 240;
 
     /**
      * Number of characters allowed to be in URL path
      * after MAX_REQUEST_PATH_LENGTH number of characters
-     *
-     * @var int
      */
-    public const ALLOWED_REQUEST_PATH_OVERFLOW = 10;
+    public const int ALLOWED_REQUEST_PATH_OVERFLOW = 10;
 
     /**
      * Resource model

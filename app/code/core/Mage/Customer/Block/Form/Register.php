@@ -17,7 +17,7 @@ declare(strict_types=1);
  */
 class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
 {
-    public const XML_PATH_SHOW_ADDRESS_FIELDS = 'customer/create_account/show_address_fields';
+    public const string XML_PATH_SHOW_ADDRESS_FIELDS = 'customer/create_account/show_address_fields';
 
     /**
      * Address instance with data

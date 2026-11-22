@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Install_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public const AVAILABLE_LANGUAGE_PACKS = [
+    public const array AVAILABLE_LANGUAGE_PACKS = [
         'de_DE', 'el_GR', 'es_ES', 'fr_FR', 'it_IT', 'nl_NL', 'pt_BR', 'pt_PT', 'ro_RO',
     ];
 

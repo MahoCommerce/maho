@@ -135,10 +135,10 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 )]
 class BlogPost extends CrudResource
 {
-    public const MODEL = 'blog/post';
+    public const string MODEL = 'blog/post';
 
     /** Admin ACL gate. Mirrors backend Maho_Blog_Adminhtml_Blog_PostController. */
-    public const ADMIN_RESOURCE = \Maho_Blog_Adminhtml_Blog_PostController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Maho_Blog_Adminhtml_Blog_PostController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

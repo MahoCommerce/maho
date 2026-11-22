@@ -182,7 +182,6 @@ Product.ConfigurableSwatches = class {
         var optionSelect = document.getElementById('attribute' + attr.id);
         // Flags
         attr._f = {};
-        // FIXME for Custom Option Support
         attr._f.isCustomOption = false;
         attr._f.isSwatch = optionSelect.classList.contains('swatch-select');
         // Elements

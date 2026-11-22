@@ -22,12 +22,12 @@ class Mage_Oauth_Model_Consumer extends Mage_Core_Model_Abstract
     /**
      * Key hash length
      */
-    public const KEY_LENGTH = 32;
+    public const int KEY_LENGTH = 32;
 
     /**
      * Secret hash length
      */
-    public const SECRET_LENGTH = 32;
+    public const int SECRET_LENGTH = 32;
 
     #[\Override]
     protected function _construct()

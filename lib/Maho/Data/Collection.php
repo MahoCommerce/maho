@@ -17,8 +17,8 @@ use Maho\DataObject;
 
 class Collection implements IteratorAggregate, Countable
 {
-    public const SORT_ORDER_ASC    = 'ASC';
-    public const SORT_ORDER_DESC   = 'DESC';
+    public const string SORT_ORDER_ASC    = 'ASC';
+    public const string SORT_ORDER_DESC   = 'DESC';
 
     /**
      * Collection items

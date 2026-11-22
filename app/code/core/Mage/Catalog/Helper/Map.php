@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Catalog_Helper_Map extends Mage_Core_Helper_Abstract
 {
-    public const XML_PATH_USE_TREE_MODE = 'catalog/sitemap/tree_mode';
+    public const string XML_PATH_USE_TREE_MODE = 'catalog/sitemap/tree_mode';
 
     #[\Override]
     protected $_moduleName = 'Mage_Catalog';

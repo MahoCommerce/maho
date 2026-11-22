@@ -42,7 +42,7 @@ declare(strict_types=1);
 class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 {
     /** The attributes that start a date range, with the attribute that ends it. */
-    public const DATE_RANGES = [
+    public const array DATE_RANGES = [
         'special_from_date' => 'special_to_date',
         'news_from_date' => 'news_to_date',
         'custom_design_from' => 'custom_design_to',
@@ -52,8 +52,8 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      * Entity code.
      * Can be used as part of method name for entity processing
      */
-    public const ENTITY          = 'catalog_product';
-    public const CACHE_TAG       = 'catalog_product';
+    public const string ENTITY          = 'catalog_product';
+    public const string CACHE_TAG       = 'catalog_product';
     #[\Override]
     protected $_cacheTag         = 'catalog_product';
     #[\Override]
@@ -95,8 +95,8 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      */
     protected $_urlModel = null;
 
-    protected static $_url;
-    protected static $_urlRewrite;
+    protected static ?Mage_Core_Model_Url $_url = null;
+    protected static ?Mage_Core_Model_Url_Rewrite $_urlRewrite = null;
 
     protected array $_errors = [];
 
@@ -233,8 +233,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
     /**
      * Validate Product Data
-     *
-     * @todo implement full validation process with errors returning which are ignoring now
      *
      * @return $this
      * @throws Mage_Eav_Model_Entity_Attribute_Exception when the backend of an attribute refuses its value
@@ -1315,19 +1313,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         $this->getOptionInstance()->duplicate($this->getId(), $newProduct->getId());
         $this->getResource()->duplicate($this->getId(), $newProduct->getId());
 
-        // TODO - duplicate product on all stores of the websites it is associated with
-        /*if ($storeIds = $this->getWebsiteIds()) {
-            foreach ($storeIds as $storeId) {
-                $this->setStoreId($storeId)
-                   ->load($this->getId());
-
-                $newProduct->setData($this->getData())
-                    ->setSku(null)
-                    ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_DISABLED)
-                    ->setId($newId)
-                    ->save();
-            }
-        }*/
         return $newProduct;
     }
 

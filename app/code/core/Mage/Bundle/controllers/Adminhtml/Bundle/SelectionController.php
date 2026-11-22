@@ -10,11 +10,7 @@
 
 class Mage_Bundle_Adminhtml_Bundle_SelectionController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'catalog/products';
+    public const string ADMIN_RESOURCE = 'catalog/products';
 
     #[\Override]
     protected function _construct()

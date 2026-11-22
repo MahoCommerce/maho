@@ -35,7 +35,7 @@ use Maho\ApiPlatform\Metadata\McpToolResourceMetadataCollectionFactory;
 )]
 class CustomerSegmentConditionValueOption extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = CustomerSegment::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = CustomerSegment::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, description: 'Condition type')]
     public string $type = '';

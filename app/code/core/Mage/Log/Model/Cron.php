@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -9,10 +10,10 @@
 
 class Mage_Log_Model_Cron extends Mage_Core_Model_Abstract
 {
-    public const XML_PATH_EMAIL_LOG_CLEAN_TEMPLATE     = 'system/log/error_email_template';
-    public const XML_PATH_EMAIL_LOG_CLEAN_IDENTITY     = 'system/log/error_email_identity';
-    public const XML_PATH_EMAIL_LOG_CLEAN_RECIPIENT    = 'system/log/error_email';
-    public const XML_PATH_LOG_CLEAN_ENABLED            = 'system/log/enabled';
+    public const string XML_PATH_EMAIL_LOG_CLEAN_TEMPLATE     = 'system/log/error_email_template';
+    public const string XML_PATH_EMAIL_LOG_CLEAN_IDENTITY     = 'system/log/error_email_identity';
+    public const string XML_PATH_EMAIL_LOG_CLEAN_RECIPIENT    = 'system/log/error_email';
+    public const string XML_PATH_LOG_CLEAN_ENABLED            = 'system/log/enabled';
 
     /**
      * Error messages

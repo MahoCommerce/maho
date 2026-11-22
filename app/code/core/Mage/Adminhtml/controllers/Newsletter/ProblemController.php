@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_Newsletter_ProblemController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'newsletter/problem';
+    public const string ADMIN_RESOURCE = 'newsletter/problem';
 
     #[Maho\Config\Route('/admin/newsletter_problem/index')]
     public function indexAction(): void

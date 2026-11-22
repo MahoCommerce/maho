@@ -10,7 +10,7 @@
 
 class Mage_Adminhtml_Block_Catalog_Product_Frontend_Product_Watermark extends Mage_Adminhtml_Block_Abstract implements \Maho\Data\Form\Element\Renderer\RendererInterface
 {
-    public const XML_PATH_IMAGE_TYPES = 'global/catalog/product/media/image_types';
+    public const string XML_PATH_IMAGE_TYPES = 'global/catalog/product/media/image_types';
 
     #[\Override]
     public function render(\Maho\Data\Form\Element\AbstractElement $element)

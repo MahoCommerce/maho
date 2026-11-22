@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Payment_Model_Method_Banktransfer extends Mage_Payment_Model_Method_Abstract
 {
-    public const PAYMENT_METHOD_BANKTRANSFER_CODE = 'banktransfer';
+    public const string PAYMENT_METHOD_BANKTRANSFER_CODE = 'banktransfer';
 
     /**
      * Payment method code

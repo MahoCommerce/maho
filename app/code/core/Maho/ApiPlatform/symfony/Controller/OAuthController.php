@@ -32,15 +32,15 @@ use Symfony\Component\Routing\Attribute\Route;
 class OAuthController
 {
     /** Registration is unauthenticated by design, so it needs its own ceiling. */
-    private const REGISTER_MAX_ATTEMPTS = 20;
-    private const REGISTER_WINDOW = 3600;
+    private const int REGISTER_MAX_ATTEMPTS = 20;
+    private const int REGISTER_WINDOW = 3600;
 
-    private const TOKEN_MAX_ATTEMPTS = 60;
-    private const TOKEN_WINDOW = 60;
+    private const int TOKEN_MAX_ATTEMPTS = 60;
+    private const int TOKEN_WINDOW = 60;
 
     /** Each call from a signed-in admin parks a row, and any caller can reach the sign-in page. */
-    private const AUTHORIZE_MAX_ATTEMPTS = 30;
-    private const AUTHORIZE_WINDOW = 300;
+    private const int AUTHORIZE_MAX_ATTEMPTS = 30;
+    private const int AUTHORIZE_WINDOW = 300;
 
     /**
      * The public face of the authorization endpoint. It validates what it can

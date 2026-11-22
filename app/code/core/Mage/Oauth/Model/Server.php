@@ -16,57 +16,57 @@ class Mage_Oauth_Model_Server
     /**
      * OAuth result statuses
      */
-    public const ERR_OK                        = 0;
-    public const ERR_VERSION_REJECTED          = 1;
-    public const ERR_PARAMETER_ABSENT          = 2;
-    public const ERR_PARAMETER_REJECTED        = 3;
-    public const ERR_TIMESTAMP_REFUSED         = 4;
-    public const ERR_NONCE_USED                = 5;
-    public const ERR_SIGNATURE_METHOD_REJECTED = 6;
-    public const ERR_SIGNATURE_INVALID         = 7;
-    public const ERR_CONSUMER_KEY_REJECTED     = 8;
-    public const ERR_TOKEN_USED                = 9;
-    public const ERR_TOKEN_EXPIRED             = 10;
-    public const ERR_TOKEN_REVOKED             = 11;
-    public const ERR_TOKEN_REJECTED            = 12;
-    public const ERR_VERIFIER_INVALID          = 13;
-    public const ERR_PERMISSION_UNKNOWN        = 14;
-    public const ERR_PERMISSION_DENIED         = 15;
+    public const int ERR_OK                        = 0;
+    public const int ERR_VERSION_REJECTED          = 1;
+    public const int ERR_PARAMETER_ABSENT          = 2;
+    public const int ERR_PARAMETER_REJECTED        = 3;
+    public const int ERR_TIMESTAMP_REFUSED         = 4;
+    public const int ERR_NONCE_USED                = 5;
+    public const int ERR_SIGNATURE_METHOD_REJECTED = 6;
+    public const int ERR_SIGNATURE_INVALID         = 7;
+    public const int ERR_CONSUMER_KEY_REJECTED     = 8;
+    public const int ERR_TOKEN_USED                = 9;
+    public const int ERR_TOKEN_EXPIRED             = 10;
+    public const int ERR_TOKEN_REVOKED             = 11;
+    public const int ERR_TOKEN_REJECTED            = 12;
+    public const int ERR_VERIFIER_INVALID          = 13;
+    public const int ERR_PERMISSION_UNKNOWN        = 14;
+    public const int ERR_PERMISSION_DENIED         = 15;
 
     /**
      * Signature Methods
      */
-    public const SIGNATURE_HMAC  = 'HMAC-SHA1';
-    public const SIGNATURE_RSA   = 'RSA-SHA1';
-    public const SIGNATURE_PLAIN = 'PLAINTEXT';
+    public const string SIGNATURE_HMAC  = 'HMAC-SHA1';
+    public const string SIGNATURE_RSA   = 'RSA-SHA1';
+    public const string SIGNATURE_PLAIN = 'PLAINTEXT';
 
     /**
      * Request Types
      */
-    public const REQUEST_INITIATE  = 'initiate';  // ask for temporary credentials
-    public const REQUEST_AUTHORIZE = 'authorize'; // display authorize form
-    public const REQUEST_TOKEN     = 'token';     // ask for permanent credentials
-    public const REQUEST_RESOURCE  = 'resource';  // ask for protected resource using permanent credentials
+    public const string REQUEST_INITIATE  = 'initiate';  // ask for temporary credentials
+    public const string REQUEST_AUTHORIZE = 'authorize'; // display authorize form
+    public const string REQUEST_TOKEN     = 'token';     // ask for permanent credentials
+    public const string REQUEST_RESOURCE  = 'resource';  // ask for protected resource using permanent credentials
 
     /**
      * HTTP Response Codes
      */
-    public const HTTP_OK             = 200;
-    public const HTTP_BAD_REQUEST    = 400;
-    public const HTTP_UNAUTHORIZED   = 401;
-    public const HTTP_INTERNAL_ERROR = 500;
+    public const int HTTP_OK             = 200;
+    public const int HTTP_BAD_REQUEST    = 400;
+    public const int HTTP_UNAUTHORIZED   = 401;
+    public const int HTTP_INTERNAL_ERROR = 500;
 
     /**
      * Possible time deviation for timestamp validation in sec.
      */
-    public const TIME_DEVIATION = 600;
+    public const int TIME_DEVIATION = 600;
 
     /**
      * Value of callback URL when it is established or if cliaent is unable to receive callbacks
      *
      * @link http://tools.ietf.org/html/rfc5849#section-2.1     Requirement in RFC-5849
      */
-    public const CALLBACK_ESTABLISHED = 'oob';
+    public const string CALLBACK_ESTABLISHED = 'oob';
 
     /**
      * Consumer object
@@ -324,7 +324,6 @@ class Mage_Oauth_Model_Server
                 if ($this->_token->getConsumerId() != $this->_consumer->getId()) {
                     $this->_throwException('', self::ERR_TOKEN_REJECTED);
                 }
-                //TODO: Implement check for expiration (after it implemented in token model)
             }
         } else {
             $this->_validateCallbackUrlParam();

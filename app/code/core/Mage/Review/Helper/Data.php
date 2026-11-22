@@ -10,7 +10,7 @@
 
 class Mage_Review_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public const XML_REVIEW_GUETS_ALLOW = Mage_Review_Service_Review::XML_PATH_GUEST_ALLOWED;
+    public const string XML_REVIEW_GUETS_ALLOW = Mage_Review_Service_Review::XML_PATH_GUEST_ALLOWED;
 
     #[\Override]
     protected $_moduleName = 'Mage_Review';

@@ -41,7 +41,7 @@ class Mage_Wishlist_Block_Customer_Wishlist_Item_Column extends Mage_Wishlist_Bl
      * @param Mage_Core_Block_Abstract $child
      */
     #[\Override]
-    protected function _beforeChildToHtml($name, $child)
+    protected function _beforeChildToHtml($name, $child): void
     {
         $child->setItem($this->getItem());
     }

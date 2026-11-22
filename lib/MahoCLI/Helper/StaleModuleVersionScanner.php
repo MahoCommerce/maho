@@ -19,7 +19,7 @@ use Maho\Db\Schema\Status;
 class StaleModuleVersionScanner
 {
     /** The migration layer owns this row, so no module declares it. */
-    private const PLATFORM_RESOURCES = [Status::RESOURCE_CODE];
+    private const array PLATFORM_RESOURCES = [Status::RESOURCE_CODE];
 
     /**
      * core_resource rows naming a setup resource that no installed module ships.

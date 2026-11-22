@@ -13,17 +13,17 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Combine extends Mage_Rule_Mode
     /**
      * Quote item conditions group
      */
-    public const PRODUCT_ATTRIBUTES_TYPE_QUOTE_ITEM = 'quote_item';
+    public const string PRODUCT_ATTRIBUTES_TYPE_QUOTE_ITEM = 'quote_item';
 
     /**
      * "Product attribute match a value" conditions group
      */
-    public const PRODUCT_ATTRIBUTES_TYPE_PRODUCT = 'product_attribute_match';
+    public const string PRODUCT_ATTRIBUTES_TYPE_PRODUCT = 'product_attribute_match';
 
     /**
      * "Product attribute is set" conditions group
      */
-    public const PRODUCT_ATTRIBUTES_TYPE_ISSET = 'product_attribute_isset';
+    public const string PRODUCT_ATTRIBUTES_TYPE_ISSET = 'product_attribute_isset';
 
     /**
      * Products attributes info

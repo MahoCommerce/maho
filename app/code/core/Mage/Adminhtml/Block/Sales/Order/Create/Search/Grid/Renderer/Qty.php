@@ -21,13 +21,8 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Search_Grid_Renderer_Qty extends M
         return $row->getTypeId() == Mage_Catalog_Model_Product_Type_Grouped::TYPE_CODE;
     }
 
-    /**
-     * Render product qty field
-     *
-     * @return  string
-     */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         // Prepare values
         $isInactive = $this->_isInactive($row);

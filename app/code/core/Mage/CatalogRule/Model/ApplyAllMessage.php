@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 final readonly class Mage_CatalogRule_Model_ApplyAllMessage
 {
-    public const QUEUE_NAME = 'catalogrule';
+    public const string QUEUE_NAME = 'catalogrule';
 
-    public const DEDUPE_KEY = 'catalogrule_apply_all';
+    public const string DEDUPE_KEY = 'catalogrule_apply_all';
 
     public function __construct(
         public ?int $adminUserId = null,

@@ -10,13 +10,13 @@
 
 class Mage_Catalog_Helper_Category extends Mage_Core_Helper_Abstract
 {
-    public const XML_PATH_CATEGORY_URL_SUFFIX          = 'catalog/seo/category_url_suffix';
-    public const XML_PATH_USE_CATEGORY_CANONICAL_TAG   = 'catalog/seo/category_canonical_tag';
-    public const XML_PATH_CATEGORY_ROOT_ID             = 'catalog/category/root_id';
-    public const XML_PATH_LN_NOINDEX_FILTERED          = 'catalog/seo/layered_navigation_noindex_filtered';
-    public const XML_PATH_LN_NOINDEX_PAGINATED         = 'catalog/seo/layered_navigation_noindex_paginated';
-    public const XML_PATH_LN_NOFOLLOW_FILTER_LINKS     = 'catalog/seo/layered_navigation_nofollow_filter_links';
-    public const REGISTRY_LN_LANDING_PAGE              = 'layered_navigation_landing_page';
+    public const string XML_PATH_CATEGORY_URL_SUFFIX          = 'catalog/seo/category_url_suffix';
+    public const string XML_PATH_USE_CATEGORY_CANONICAL_TAG   = 'catalog/seo/category_canonical_tag';
+    public const string XML_PATH_CATEGORY_ROOT_ID             = 'catalog/category/root_id';
+    public const string XML_PATH_LN_NOINDEX_FILTERED          = 'catalog/seo/layered_navigation_noindex_filtered';
+    public const string XML_PATH_LN_NOINDEX_PAGINATED         = 'catalog/seo/layered_navigation_noindex_paginated';
+    public const string XML_PATH_LN_NOFOLLOW_FILTER_LINKS     = 'catalog/seo/layered_navigation_nofollow_filter_links';
+    public const string REGISTRY_LN_LANDING_PAGE              = 'layered_navigation_landing_page';
 
     #[\Override]
     protected $_moduleName = 'Mage_Catalog';

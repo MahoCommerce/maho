@@ -24,8 +24,8 @@ use Symfony\AI\Platform\Tool\ToolEffectHints;
  */
 final class BackgroundTaskTool
 {
-    public const NAME = 'run_in_background';
-    public const TITLE = 'Run in the background';
+    public const string NAME = 'run_in_background';
+    public const string TITLE = 'Run in the background';
 
     /** The tool starts a job that runs the store tools. */
     public static function effectHints(): ToolEffectHints

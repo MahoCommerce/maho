@@ -17,13 +17,13 @@ use Mage;
 class PhantomMethodScanner
 {
     /** Both sections share the "group with a model node" shape. */
-    public const SECTIONS = [
+    public const array SECTIONS = [
         'payment' => 'payment method',
         'carriers' => 'shipping carrier',
     ];
 
     /** Scope nodes keyed by store or website code, so a section sits one level deeper. */
-    private const CODE_KEYED_SCOPE_NODES = ['stores', 'websites'];
+    private const array CODE_KEYED_SCOPE_NODES = ['stores', 'websites'];
 
     /**
      * Methods and carriers the store still offers with no model behind them. An

@@ -10,9 +10,9 @@ declare(strict_types=1);
 
 class Mage_Usa_Model_Shipping_Carrier_Fedex_OAuthClient
 {
-    private const TOKEN_CACHE_KEY_PREFIX = 'fedex_oauth_token_';
+    private const string TOKEN_CACHE_KEY_PREFIX = 'fedex_oauth_token_';
 
-    public const CACHE_TAG = 'fedex_oauth';
+    public const string CACHE_TAG = 'fedex_oauth';
     private string $tokenEndpoint;
     private Mage_Core_Model_Cache $cache;
 

@@ -13,31 +13,31 @@ class Mage_Core_Model_Domainpolicy
     /**
      * X-Frame-Options allow (header is absent)
      */
-    public const FRAME_POLICY_ALLOW = 1;
+    public const int FRAME_POLICY_ALLOW = 1;
 
     /**
      * X-Frame-Options SAMEORIGIN
      */
-    public const FRAME_POLICY_ORIGIN = 2;
+    public const int FRAME_POLICY_ORIGIN = 2;
 
     /**
      * Path to backend domain policy settings
      */
-    public const XML_DOMAIN_POLICY_BACKEND = 'admin/security/domain_policy_backend';
+    public const string XML_DOMAIN_POLICY_BACKEND = 'admin/security/domain_policy_backend';
 
     /**
      * Path to frontend domain policy settings
      */
-    public const XML_DOMAIN_POLICY_FRONTEND = 'admin/security/domain_policy_frontend';
+    public const string XML_DOMAIN_POLICY_FRONTEND = 'admin/security/domain_policy_frontend';
 
     /**
      * Security header configuration paths
      */
-    public const XML_HSTS_ENABLED = 'admin/security/hsts_enabled';
-    public const XML_HSTS_MAX_AGE = 'admin/security/hsts_max_age';
-    public const XML_CONTENT_TYPE_OPTIONS = 'admin/security/content_type_options_enabled';
-    public const XML_XSS_PROTECTION = 'admin/security/xss_protection_enabled';
-    public const XML_REFERRER_POLICY = 'admin/security/referrer_policy';
+    public const string XML_HSTS_ENABLED = 'admin/security/hsts_enabled';
+    public const string XML_HSTS_MAX_AGE = 'admin/security/hsts_max_age';
+    public const string XML_CONTENT_TYPE_OPTIONS = 'admin/security/content_type_options_enabled';
+    public const string XML_XSS_PROTECTION = 'admin/security/xss_protection_enabled';
+    public const string XML_REFERRER_POLICY = 'admin/security/referrer_policy';
 
     /**
      * Current store

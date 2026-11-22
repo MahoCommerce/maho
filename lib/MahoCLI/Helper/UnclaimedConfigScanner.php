@@ -22,18 +22,18 @@ class UnclaimedConfigScanner
      * level deeper. <frontend> and <adminhtml> are areas, not scopes, and their children
      * (layout, translate, events, routers) are not sections.
      */
-    private const SCOPE_NODES = ['default'];
-    private const CODE_KEYED_SCOPE_NODES = ['stores', 'websites'];
+    private const array SCOPE_NODES = ['default'];
+    private const array CODE_KEYED_SCOPE_NODES = ['stores', 'websites'];
 
     /**
      * Sections a config.xml also declares at the top level, outside any scope node. The
      * runtime reads both crontab/jobs and default/crontab/jobs, so a legacy
      * <crontab><jobs> declaration claims the section that a cron backend model writes to.
      */
-    private const GLOBAL_SCOPE_SECTIONS = ['crontab'];
+    private const array GLOBAL_SCOPE_SECTIONS = ['crontab'];
 
     /** The section a #[CronJob] attribute claims, the modern form of the node above. */
-    private const CRON_ATTRIBUTE_SECTION = 'crontab';
+    private const string CRON_ATTRIBUTE_SECTION = 'crontab';
 
     /**
      * core_config_data sections with no owner in code. Advisory only: an operator can

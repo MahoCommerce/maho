@@ -12,11 +12,7 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Controller_Eav_Set
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'catalog/attributes/sets';
+    public const string ADMIN_RESOURCE = 'catalog/attributes/sets';
 
     #[\Override]
     protected string $toolbarBlock = 'adminhtml/catalog_product_attribute_set_toolbar_main';

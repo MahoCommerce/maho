@@ -10,10 +10,7 @@
 
 class Mage_Adminhtml_Block_Notification_Curl extends Mage_Adminhtml_Block_Template
 {
-    /**
-     * Required version of cURL.
-     */
-    public const REQUIRED_CURL_VERSION = '7.34.0';
+    public const string REQUIRED_CURL_VERSION = '7.34.0';
 
     /**
      * Information about cURL version.

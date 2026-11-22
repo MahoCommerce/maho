@@ -8,28 +8,27 @@
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 class Mage_Catalog_Block_Product_Widget_New extends Mage_Catalog_Block_Product_New implements Mage_Widget_Block_Interface
 {
     /**
      * Display products type
      */
-    public const DISPLAY_TYPE_ALL_PRODUCTS         = 'all_products';
-    public const DISPLAY_TYPE_NEW_PRODUCTS         = 'new_products';
+    public const string DISPLAY_TYPE_ALL_PRODUCTS         = 'all_products';
+    public const string DISPLAY_TYPE_NEW_PRODUCTS         = 'new_products';
 
     /**
      * Default value whether show pager or not
      */
-    public const DEFAULT_SHOW_PAGER                = false;
+    public const bool DEFAULT_SHOW_PAGER                = false;
 
-    /**
-     * Default value for products per page
-     */
-    public const DEFAULT_PRODUCTS_PER_PAGE         = 5;
+    public const int DEFAULT_PRODUCTS_PER_PAGE         = 5;
 
     /**
      * Name of request parameter for page number value
      */
-    public const PAGE_VAR_NAME                     = 'np';
+    public const string PAGE_VAR_NAME                     = 'np';
 
     /**
      * Instance of pager block
@@ -135,15 +134,13 @@ class Mage_Catalog_Block_Product_Widget_New extends Mage_Catalog_Block_Product_N
 
     /**
      * Retrieve how much products should be displayed
-     *
-     * @return int
      */
-    public function getProductsPerPage()
+    public function getProductsPerPage(): int
     {
         if (!$this->hasData('products_per_page')) {
             $this->setData('products_per_page', self::DEFAULT_PRODUCTS_PER_PAGE);
         }
-        return $this->getData('products_per_page');
+        return (int) $this->getData('products_per_page');
     }
 
     /**

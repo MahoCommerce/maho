@@ -21,10 +21,10 @@ use Maho\Db\Statement\StatementInterface;
 class Sqlite implements StatementInterface
 {
     // Fetch mode constants for backward compatibility with Zend_Db_Statement
-    public const FETCH_ASSOC = StatementInterface::FETCH_ASSOC;
-    public const FETCH_NUM = StatementInterface::FETCH_NUM;
-    public const FETCH_COLUMN = StatementInterface::FETCH_COLUMN;
-    public const FETCH_KEY_PAIR = StatementInterface::FETCH_KEY_PAIR;
+    public const int FETCH_ASSOC = StatementInterface::FETCH_ASSOC;
+    public const int FETCH_NUM = StatementInterface::FETCH_NUM;
+    public const int FETCH_COLUMN = StatementInterface::FETCH_COLUMN;
+    public const int FETCH_KEY_PAIR = StatementInterface::FETCH_KEY_PAIR;
 
     /**
      * Doctrine DBAL Result object

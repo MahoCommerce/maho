@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'system/directory/regions';
+    public const string ADMIN_RESOURCE = 'system/directory/regions';
 
     protected function _initRegion(): Mage_Directory_Model_Region|false
     {

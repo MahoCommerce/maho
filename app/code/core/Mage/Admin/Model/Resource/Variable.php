@@ -10,7 +10,7 @@
 
 class Mage_Admin_Model_Resource_Variable extends Mage_Core_Model_Resource_Db_Abstract
 {
-    public const CACHE_ID = 'permission_variable_allowlist';
+    public const string CACHE_ID = 'permission_variable_allowlist';
 
     #[\Override]
     protected function _construct(): void
@@ -34,8 +34,10 @@ class Mage_Admin_Model_Resource_Variable extends Mage_Core_Model_Resource_Db_Abs
 
     /**
      * Get allowed types
+     *
+     * @return array<string, int>|false
      */
-    public function getAllowedPaths()
+    public function getAllowedPaths(): array|false
     {
         $data = Mage::app()->getCache()->load(self::CACHE_ID);
         if ($data === false) {

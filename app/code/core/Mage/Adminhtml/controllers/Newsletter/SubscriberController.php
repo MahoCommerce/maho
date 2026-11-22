@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'newsletter/subscriber';
+    public const string ADMIN_RESOURCE = 'newsletter/subscriber';
 
     #[Maho\Config\Route('/admin/newsletter_subscriber/index')]
     public function indexAction(): void

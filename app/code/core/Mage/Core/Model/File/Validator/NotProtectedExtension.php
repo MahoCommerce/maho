@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Core_Model_File_Validator_NotProtectedExtension
 {
-    public const PROTECTED_EXTENSION = 'protectedExtension';
+    public const string PROTECTED_EXTENSION = 'protectedExtension';
 
     /**
      * Protected file types

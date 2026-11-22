@@ -204,7 +204,7 @@ class Mage_Rss_Block_Wishlist extends Mage_Wishlist_Block_Abstract
      * @param string $template Template
      */
     #[\Override]
-    public function addPriceBlockType($type, $block = '', $template = '')
+    public function addPriceBlockType($type, $block = '', $template = ''): void
     {
         if ($type) {
             $this->_priceBlockTypes[$type] = [

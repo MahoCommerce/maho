@@ -25,7 +25,7 @@ declare(strict_types=1);
 trait Maho_FeedManager_Model_Generator_ProductWriterTrait
 {
     /** Row key that holds the raw product value of a custom_field template field */
-    protected const CUSTOM_FIELD_KEY = '_custom_field';
+    protected const string CUSTOM_FIELD_KEY = '_custom_field';
 
     // ──────────────────────────────────────────────────────────────────────
     // Output engine properties

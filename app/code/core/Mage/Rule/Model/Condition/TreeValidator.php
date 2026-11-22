@@ -13,20 +13,20 @@ declare(strict_types=1);
 
 class Mage_Rule_Model_Condition_TreeValidator
 {
-    public const MAX_DEPTH = 10;
-    public const MAX_NODES = 250;
-    public const MAX_LIST_ITEMS = 1000;
-    public const MAX_TEXT_LENGTH = 255;
+    public const int MAX_DEPTH = 10;
+    public const int MAX_NODES = 250;
+    public const int MAX_LIST_ITEMS = 1000;
+    public const int MAX_TEXT_LENGTH = 255;
 
     /**
      * "label" is read-only. A client can send back a tree that it read, so the validator ignores it.
      */
-    protected const NODE_KEYS = ['type', 'attribute', 'operator', 'value', 'aggregator', 'conditions', 'label'];
+    protected const array NODE_KEYS = ['type', 'attribute', 'operator', 'value', 'aggregator', 'conditions', 'label'];
 
     /**
      * Input types whose list values Maho stores as arrays. Maho stores other lists as text with commas.
      */
-    protected const ARRAY_INPUT_TYPES = ['multiselect', 'grid'];
+    protected const array ARRAY_INPUT_TYPES = ['multiselect', 'grid'];
 
     /** @var list<array{field: string, message: string}> */
     protected array $errors = [];

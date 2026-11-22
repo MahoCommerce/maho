@@ -14,10 +14,10 @@ use Mage_Review_Model_Review as Review;
 
 class Mage_Review_Service_Review
 {
-    public const XML_PATH_GUEST_ALLOWED = 'catalog/review/allow_guest';
-    public const XML_PATH_RATE_LIMIT = 'system/rate_limit/review_submit';
+    public const string XML_PATH_GUEST_ALLOWED = 'catalog/review/allow_guest';
+    public const string XML_PATH_RATE_LIMIT = 'system/rate_limit/review_submit';
 
-    public const RATE_LIMIT_WINDOW = 3600;
+    public const int RATE_LIMIT_WINDOW = 3600;
 
     /**
      * @throws Mage_Core_Exception_NoSuchEntity

@@ -13,7 +13,7 @@
  */
 class Mage_Catalog_Model_Product_Attribute_Tierprice_Api extends Mage_Catalog_Model_Api_Resource
 {
-    public const ATTRIBUTE_CODE = 'tier_price';
+    public const string ATTRIBUTE_CODE = 'tier_price';
 
     public function __construct()
     {
@@ -74,10 +74,6 @@ class Mage_Catalog_Model_Product_Attribute_Tierprice_Api extends Mage_Catalog_Mo
 
         $product->setData(self::ATTRIBUTE_CODE, $updatedTierPrices);
         try {
-            /**
-             * @todo implement full validation process with errors returning which are ignoring now
-             * @todo see Mage_Catalog_Model_Product::validate()
-             */
             if (is_array($errors = $product->validate())) {
                 $strErrors = [];
                 foreach ($errors as $code => $error) {

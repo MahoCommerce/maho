@@ -20,13 +20,13 @@ declare(strict_types=1);
 class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \Stringable
 {
     #[\Deprecated(message: 'the slots of the theme set the widths', since: '26.11')]
-    public const XML_NODE_PRODUCT_BASE_IMAGE_WIDTH = 'catalog/product_image/base_width';
+    public const string XML_NODE_PRODUCT_BASE_IMAGE_WIDTH = 'catalog/product_image/base_width';
     #[\Deprecated(message: 'the listing slot of the theme sets the width', since: '26.11')]
-    public const XML_NODE_PRODUCT_SMALL_IMAGE_WIDTH = 'catalog/product_image/small_width';
-    public const XML_NODE_PRODUCT_MAX_DIMENSION = 'catalog/product_image/max_dimension';
+    public const string XML_NODE_PRODUCT_SMALL_IMAGE_WIDTH = 'catalog/product_image/small_width';
+    public const string XML_NODE_PRODUCT_MAX_DIMENSION = 'catalog/product_image/max_dimension';
 
     /** The size of the original when it cannot be read. */
-    public const FALLBACK_SIZE = 1800;
+    public const int FALLBACK_SIZE = 1800;
 
     /**
      * @deprecated since 26.11 image URLs no longer depend on a cache file, so they are always
@@ -50,10 +50,10 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
     protected ?string $placeholder = null;
 
     /** The image attributes that a product had before 26.11. They now give the image attribute. */
-    public const DEPRECATED_ROLES = ['small_image', 'thumbnail'];
+    public const array DEPRECATED_ROLES = ['small_image', 'thumbnail'];
 
     /** The product attributes that 26.11 removed, and the attribute that replaces each one. */
-    public const DEPRECATED_ATTRIBUTES = [
+    public const array DEPRECATED_ATTRIBUTES = [
         'small_image' => 'image',
         'thumbnail' => 'image',
         'small_image_label' => 'image_label',

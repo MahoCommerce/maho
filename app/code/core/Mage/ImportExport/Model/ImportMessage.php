@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 final readonly class Mage_ImportExport_Model_ImportMessage
 {
-    public const QUEUE_NAME = 'importexport';
+    public const string QUEUE_NAME = 'importexport';
 
-    public const DEDUPE_KEY = 'importexport_import';
+    public const string DEDUPE_KEY = 'importexport_import';
 
     public function __construct(
         public ?int $adminUserId = null,

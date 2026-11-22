@@ -10,7 +10,7 @@
 
 class Mage_Catalog_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer_Filter_Abstract
 {
-    public const OPTIONS_ONLY_WITH_RESULTS = 1;
+    public const int OPTIONS_ONLY_WITH_RESULTS = 1;
 
     /**
      * Resource instance

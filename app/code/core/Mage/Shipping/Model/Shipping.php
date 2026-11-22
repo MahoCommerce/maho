@@ -13,12 +13,12 @@ class Mage_Shipping_Model_Shipping
     /**
      * Store address
      */
-    public const XML_PATH_STORE_ADDRESS1     = 'shipping/origin/street_line1';
-    public const XML_PATH_STORE_ADDRESS2     = 'shipping/origin/street_line2';
-    public const XML_PATH_STORE_CITY         = 'shipping/origin/city';
-    public const XML_PATH_STORE_REGION_ID    = 'shipping/origin/region_id';
-    public const XML_PATH_STORE_ZIP          = 'shipping/origin/postcode';
-    public const XML_PATH_STORE_COUNTRY_ID   = 'shipping/origin/country_id';
+    public const string XML_PATH_STORE_ADDRESS1     = 'shipping/origin/street_line1';
+    public const string XML_PATH_STORE_ADDRESS2     = 'shipping/origin/street_line2';
+    public const string XML_PATH_STORE_CITY         = 'shipping/origin/city';
+    public const string XML_PATH_STORE_REGION_ID    = 'shipping/origin/region_id';
+    public const string XML_PATH_STORE_ZIP          = 'shipping/origin/postcode';
+    public const string XML_PATH_STORE_COUNTRY_ID   = 'shipping/origin/country_id';
 
     /**
      * Default shipping orig for requests
@@ -89,7 +89,6 @@ class Mage_Shipping_Model_Shipping
      * Retrieve all methods for supplied shipping data
      *
      * @return $this
-     * @todo make it ordered
      */
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
     {

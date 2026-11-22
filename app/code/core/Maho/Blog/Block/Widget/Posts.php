@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Maho_Blog_Block_Widget_Posts extends Mage_Core_Block_Template implements Mage_Widget_Block_Interface
 {
-    public const DEFAULT_POSTS_COUNT = 3;
+    public const int DEFAULT_POSTS_COUNT = 3;
 
     protected ?Maho_Blog_Model_Resource_Post_Collection $_posts = null;
 

@@ -48,7 +48,7 @@ describe('Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract::render', fu
         $html = makePositionColumnRenderer([])
             ->render(new Maho\DataObject(['position' => 7]));
 
-        expect($html)->toBe(7);
+        expect($html)->toBe('7');
     });
 });
 

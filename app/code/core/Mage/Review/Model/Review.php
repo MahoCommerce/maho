@@ -28,18 +28,18 @@ class Mage_Review_Model_Review extends Mage_Core_Model_Abstract
     /**
      * Review entity codes
      */
-    public const ENTITY_PRODUCT_CODE   = 'product';
-    public const ENTITY_CUSTOMER_CODE  = 'customer';
-    public const ENTITY_CATEGORY_CODE  = 'category';
+    public const string ENTITY_PRODUCT_CODE   = 'product';
+    public const string ENTITY_CUSTOMER_CODE  = 'customer';
+    public const string ENTITY_CATEGORY_CODE  = 'category';
 
-    public const STATUS_APPROVED       = 1;
-    public const STATUS_PENDING        = 2;
-    public const STATUS_NOT_APPROVED   = 3;
+    public const int STATUS_APPROVED       = 1;
+    public const int STATUS_PENDING        = 2;
+    public const int STATUS_NOT_APPROVED   = 3;
 
     /** The longest values that the columns of review_detail hold. */
-    public const MAX_TITLE_LENGTH = 255;
-    public const MAX_NICKNAME_LENGTH = 128;
-    public const MAX_DETAIL_LENGTH = 65535;
+    public const int MAX_TITLE_LENGTH = 255;
+    public const int MAX_NICKNAME_LENGTH = 128;
+    public const int MAX_DETAIL_LENGTH = 65535;
 
     #[\Override]
     protected function _construct()

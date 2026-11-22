@@ -10,13 +10,8 @@
 
 class Mage_Adminhtml_Block_Customer_Grid_Renderer_Multiaction extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Action
 {
-    /**
-     * Renders column
-     *
-     * @return string
-     */
     #[\Override]
-    public function render(\Maho\DataObject $row)
+    public function render(\Maho\DataObject $row): string
     {
         $html = '';
         $actions = $this->getColumn()->getActions();

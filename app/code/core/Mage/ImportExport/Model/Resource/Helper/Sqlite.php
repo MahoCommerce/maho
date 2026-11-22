@@ -12,8 +12,8 @@ class Mage_ImportExport_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Res
      * Constants to be used for DB
      * SQLite has a default page size of 4096 bytes and doesn't have the same packet limitations as MySQL
      */
-    public const DB_MAX_PACKET_SIZE        = 1048576;
-    public const DB_MAX_PACKET_COEFFICIENT = 0.85;
+    public const int DB_MAX_PACKET_SIZE        = 1048576;
+    public const float DB_MAX_PACKET_COEFFICIENT = 0.85;
 
     /**
      * Returns maximum size of packet, that we can send to DB

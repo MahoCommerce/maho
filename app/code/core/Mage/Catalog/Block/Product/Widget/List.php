@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Mage_Catalog_Block_Product_Widget_List extends Mage_Catalog_Block_Product_Widget_Abstract
 {
-    public const DEFAULT_SORT = 'position';
+    public const string DEFAULT_SORT = 'position';
 
     #[\Override]
     protected $_pageVarName = 'pl';

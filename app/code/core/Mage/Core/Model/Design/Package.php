@@ -10,16 +10,16 @@
 
 class Mage_Core_Model_Design_Package
 {
-    public const DEFAULT_AREA    = Mage_Core_Model_App_Area::AREA_FRONTEND;
-    public const DEFAULT_PACKAGE = 'default';
-    public const DEFAULT_THEME   = 'default';
-    public const BASE_PACKAGE    = 'base';
+    public const string DEFAULT_AREA    = Mage_Core_Model_App_Area::AREA_FRONTEND;
+    public const string DEFAULT_PACKAGE = 'default';
+    public const string DEFAULT_THEME   = 'default';
+    public const string BASE_PACKAGE    = 'base';
     /** The stylesheets base shipped before the Tailwind skin; kept for themes built on them. */
-    public const LEGACY_PACKAGE  = 'legacy';
+    public const string LEGACY_PACKAGE  = 'legacy';
 
     /** Storefront query parameters the admin theme preview renders another design with. */
-    public const PREVIEW_PACKAGE_PARAM = '___package';
-    public const PREVIEW_SKIN_PARAM = '___skin';
+    public const string PREVIEW_PACKAGE_PARAM = '___package';
+    public const string PREVIEW_SKIN_PARAM = '___skin';
 
     private static array $_regexMatchCache      = [];
     private static array $_customThemeTypeCache = [];
@@ -78,7 +78,6 @@ class Mage_Core_Model_Design_Package
 
     /**
      * Whether theme/skin hierarchy should be checked via fallback mechanism
-     * @TODO: implement setter for this value
      * @var bool
      */
     protected $_shouldFallback = true;

@@ -16,12 +16,12 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
      * Names that begins with underscore is not an attribute. This name convention is for
      * to avoid interference with same attribute name.
      */
-    public const COL_STORE = '_store';
-    public const COL_ROOT = '_root';
-    public const COL_PATH = '_path';
-    public const COL_CATEGORY_ID = 'category_id';
-    public const COL_PARENT_ID = 'parent_id';
-    public const COL_ATTRIBUTE_SET = '_attribute_set';
+    public const string COL_STORE = '_store';
+    public const string COL_ROOT = '_root';
+    public const string COL_PATH = '_path';
+    public const string COL_CATEGORY_ID = 'category_id';
+    public const string COL_PARENT_ID = 'parent_id';
+    public const string COL_ATTRIBUTE_SET = '_attribute_set';
 
     /**
      * Category parent relationships cache.

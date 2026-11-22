@@ -53,14 +53,14 @@ class Mage_Customer_Service_Customer
         return $customer->getId() ? $customer : null;
     }
 
-    public const MAX_PAGE_SIZE = 100;
+    public const int MAX_PAGE_SIZE = 100;
 
-    public const XML_PATH_REGISTER_RATE_LIMIT = 'system/rate_limit/customer_register';
-    public const XML_PATH_CHANGE_PASSWORD_RATE_LIMIT = 'system/rate_limit/change_password';
+    public const string XML_PATH_REGISTER_RATE_LIMIT = 'system/rate_limit/customer_register';
+    public const string XML_PATH_CHANGE_PASSWORD_RATE_LIMIT = 'system/rate_limit/change_password';
 
-    public const XML_PATH_ACCOUNTS_ENABLED = 'customer/account/enabled_in_frontend';
+    public const string XML_PATH_ACCOUNTS_ENABLED = 'customer/account/enabled_in_frontend';
 
-    public const RATE_LIMIT_WINDOW = 3600;
+    public const int RATE_LIMIT_WINDOW = 3600;
 
     /**
      * Return the customer $id for a client that already has a login, such as a token to refresh.

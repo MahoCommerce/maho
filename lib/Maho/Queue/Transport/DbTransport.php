@@ -42,22 +42,22 @@ use Symfony\Component\Messenger\Transport\TransportInterface;
  */
 final class DbTransport implements TransportInterface, QueueReceiverInterface, ListableReceiverInterface, MessageCountAwareInterface, KeepaliveReceiverInterface
 {
-    public const STATUS_PENDING = 'pending';
-    public const STATUS_PROCESSING = 'processing';
-    public const STATUS_FAILED = 'failed';
-    public const STATUS_COMPLETED = 'completed';
+    public const string STATUS_PENDING = 'pending';
+    public const string STATUS_PROCESSING = 'processing';
+    public const string STATUS_FAILED = 'failed';
+    public const string STATUS_COMPLETED = 'completed';
 
-    public const DEFAULT_QUEUE = 'default';
+    public const string DEFAULT_QUEUE = 'default';
 
     /** How often a worker refreshes the claim of the message it is handling. */
-    public const KEEPALIVE_INTERVAL_SECONDS = 5;
+    public const int KEEPALIVE_INTERVAL_SECONDS = 5;
 
     /**
      * Sixty missed refreshes: a claim this stale belongs to a worker that died.
      * Gates the admin notice, the admin retry and the dedupe check; nothing
      * redelivers on it.
      */
-    public const ABANDONED_AFTER_SECONDS = 300;
+    public const int ABANDONED_AFTER_SECONDS = 300;
 
     /**
      * @param list<string> $excludedQueues Queues this instance never consumes, so a pool worker can be "everything but"

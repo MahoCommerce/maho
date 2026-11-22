@@ -12,15 +12,15 @@ declare(strict_types=1);
 
 class Maho_Ai_Model_Conversation_Message extends Mage_Core_Model_Abstract
 {
-    public const ROLE_USER = 'user';
-    public const ROLE_ASSISTANT = 'assistant';
-    public const ROLE_TOOL = 'tool';
+    public const string ROLE_USER = 'user';
+    public const string ROLE_ASSISTANT = 'assistant';
+    public const string ROLE_TOOL = 'tool';
 
-    public const TOOL_DONE = 'done';
-    public const TOOL_PENDING = 'pending';
-    public const TOOL_DENIED = 'denied';
-    public const TOOL_CANCELLED = 'cancelled';
-    public const TOOL_ERROR = 'error';
+    public const string TOOL_DONE = 'done';
+    public const string TOOL_PENDING = 'pending';
+    public const string TOOL_DENIED = 'denied';
+    public const string TOOL_CANCELLED = 'cancelled';
+    public const string TOOL_ERROR = 'error';
 
     #[\Override]
     protected function _construct(): void

@@ -21,13 +21,13 @@ declare(strict_types=1);
  */
 class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
 {
-    public const TYPE_SFTP = 'sftp';
-    public const TYPE_FTP = 'ftp';
-    public const TYPE_GOOGLE_API = 'google_api';
-    public const TYPE_FACEBOOK_API = 'facebook_api';
+    public const string TYPE_SFTP = 'sftp';
+    public const string TYPE_FTP = 'ftp';
+    public const string TYPE_GOOGLE_API = 'google_api';
+    public const string TYPE_FACEBOOK_API = 'facebook_api';
 
-    public const STATUS_SUCCESS = 'success';
-    public const STATUS_FAILED = 'failed';
+    public const string STATUS_SUCCESS = 'success';
+    public const string STATUS_FAILED = 'failed';
 
     #[\Override]
     protected $_eventPrefix = 'feedmanager_destination';

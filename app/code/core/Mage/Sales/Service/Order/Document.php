@@ -20,13 +20,13 @@ use Mage_Sales_Model_Order_Shipment as Shipment;
  */
 class Mage_Sales_Service_Order_Document
 {
-    public const CAPTURE_CASES = [Invoice::CAPTURE_ONLINE, Invoice::CAPTURE_OFFLINE, Invoice::NOT_CAPTURE];
+    public const array CAPTURE_CASES = [Invoice::CAPTURE_ONLINE, Invoice::CAPTURE_OFFLINE, Invoice::NOT_CAPTURE];
 
     /** The field of a new document that tells that its email was not sent. */
-    public const EMAIL_FAILED = 'email_failed';
+    public const string EMAIL_FAILED = 'email_failed';
 
     /** The field of a new invoice that tells that the email of its shipment was not sent. */
-    public const SHIPMENT_EMAIL_FAILED = 'shipment_email_failed';
+    public const string SHIPMENT_EMAIL_FAILED = 'shipment_email_failed';
 
     /**
      * Load the invoice $invoiceId. With $orderId, only an invoice of that order exists.

@@ -16,14 +16,14 @@ declare(strict_types=1);
 class Mage_Adminhtml_Model_System_Config_Source_Customer_Forgotpassword extends Mage_Customer_Model_Config_Forgotpassword
 {
     #[\Deprecated('Use Mage_Customer_Model_Config_Forgotpassword::FLOW_DISABLED.', since: '27.1')]
-    public const FORGOTPASS_FLOW_DISABLED = self::FLOW_DISABLED;
+    public const int FORGOTPASS_FLOW_DISABLED = self::FLOW_DISABLED;
 
     #[\Deprecated('Use Mage_Customer_Model_Config_Forgotpassword::FLOW_IP_EMAIL.', since: '27.1')]
-    public const FORGOTPASS_FLOW_IP_EMAIL = self::FLOW_IP_EMAIL;
+    public const int FORGOTPASS_FLOW_IP_EMAIL = self::FLOW_IP_EMAIL;
 
     #[\Deprecated('Use Mage_Customer_Model_Config_Forgotpassword::FLOW_IP.', since: '27.1')]
-    public const FORGOTPASS_FLOW_IP = self::FLOW_IP;
+    public const int FORGOTPASS_FLOW_IP = self::FLOW_IP;
 
     #[\Deprecated('Use Mage_Customer_Model_Config_Forgotpassword::FLOW_EMAIL.', since: '27.1')]
-    public const FORGOTPASS_FLOW_EMAIL = self::FLOW_EMAIL;
+    public const int FORGOTPASS_FLOW_EMAIL = self::FLOW_EMAIL;
 }

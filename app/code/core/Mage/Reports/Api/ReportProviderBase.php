@@ -22,7 +22,7 @@ abstract class ReportProviderBase extends \Maho\ApiPlatform\Provider
     /**
      * A report with rows per period has at most this number of rows in total.
      */
-    public const MAX_ROWS = 5000;
+    public const int MAX_ROWS = 5000;
 
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): JsonResponse

@@ -90,10 +90,10 @@ use Maho\Config\ApiResource;
 )]
 class IndexProcess extends CrudResource
 {
-    public const MODEL = 'index/process';
+    public const string MODEL = 'index/process';
 
     /** Admin ACL gate. Mirrors backend Mage_Index_Adminhtml_ProcessController. */
-    public const ADMIN_RESOURCE = \Mage_Index_Adminhtml_ProcessController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Index_Adminhtml_ProcessController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

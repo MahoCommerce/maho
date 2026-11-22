@@ -21,7 +21,7 @@ declare(strict_types=1);
  */
 class Mage_Core_Model_Config_Data extends Mage_Core_Model_Abstract
 {
-    public const ENTITY = 'core_config_data';
+    public const string ENTITY = 'core_config_data';
     /**
      * Prefix of model events names
      *

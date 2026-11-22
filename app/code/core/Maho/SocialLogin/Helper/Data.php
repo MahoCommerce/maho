@@ -10,16 +10,16 @@ declare(strict_types=1);
 
 class Maho_SocialLogin_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public const XML_PATH_GOOGLE_ENABLED = 'customer/social_login/google_enabled';
-    public const XML_PATH_GOOGLE_CLIENT_ID = 'customer/social_login/google_client_id';
-    public const XML_PATH_GOOGLE_ONE_TAP_ENABLED = 'customer/social_login/google_one_tap_enabled';
-    public const XML_PATH_APPLE_ENABLED = 'customer/social_login/apple_enabled';
-    public const XML_PATH_APPLE_SERVICE_ID = 'customer/social_login/apple_service_id';
-    public const XML_PATH_FACEBOOK_ENABLED = 'customer/social_login/facebook_enabled';
-    public const XML_PATH_FACEBOOK_APP_ID = 'customer/social_login/facebook_app_id';
-    public const XML_PATH_FACEBOOK_APP_SECRET = 'customer/social_login/facebook_app_secret';
-    public const XML_PATH_ALLOW_REGISTRATION = 'customer/social_login/allow_registration';
-    public const XML_PATH_NONCE_TTL = 'customer/social_login/nonce_ttl';
+    public const string XML_PATH_GOOGLE_ENABLED = 'customer/social_login/google_enabled';
+    public const string XML_PATH_GOOGLE_CLIENT_ID = 'customer/social_login/google_client_id';
+    public const string XML_PATH_GOOGLE_ONE_TAP_ENABLED = 'customer/social_login/google_one_tap_enabled';
+    public const string XML_PATH_APPLE_ENABLED = 'customer/social_login/apple_enabled';
+    public const string XML_PATH_APPLE_SERVICE_ID = 'customer/social_login/apple_service_id';
+    public const string XML_PATH_FACEBOOK_ENABLED = 'customer/social_login/facebook_enabled';
+    public const string XML_PATH_FACEBOOK_APP_ID = 'customer/social_login/facebook_app_id';
+    public const string XML_PATH_FACEBOOK_APP_SECRET = 'customer/social_login/facebook_app_secret';
+    public const string XML_PATH_ALLOW_REGISTRATION = 'customer/social_login/allow_registration';
+    public const string XML_PATH_NONCE_TTL = 'customer/social_login/nonce_ttl';
 
     #[\Override]
     protected $_moduleName = 'Maho_SocialLogin';

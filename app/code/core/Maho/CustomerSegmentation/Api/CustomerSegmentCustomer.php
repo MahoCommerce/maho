@@ -40,7 +40,7 @@ use Maho\ApiPlatform\Metadata\McpToolResourceMetadataCollectionFactory;
 )]
 class CustomerSegmentCustomer extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = CustomerSegment::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = CustomerSegment::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false, description: 'Customer ID', example: 136)]
     public int $id = 0;

@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Maho_Ai_Adminhtml_Ai_ChatController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'system/ai/chat';
+    public const string ADMIN_RESOURCE = 'system/ai/chat';
 
     /** A notification link comes from cron, which has no session to sign it with: open only redirects. */
     #[\Override]

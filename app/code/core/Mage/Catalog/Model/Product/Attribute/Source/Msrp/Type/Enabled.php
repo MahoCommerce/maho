@@ -13,17 +13,17 @@ class Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type_Enabled extends Mage
     /**
      * Enable MAP
      */
-    public const MSRP_ENABLE_YES = 1;
+    public const int MSRP_ENABLE_YES = 1;
 
     /**
      * Disable MAP
      */
-    public const MSRP_ENABLE_NO = 0;
+    public const int MSRP_ENABLE_NO = 0;
 
     /**
      * Get value from the store configuration settings
      */
-    public const MSRP_ENABLE_USE_CONFIG = 2;
+    public const int MSRP_ENABLE_USE_CONFIG = 2;
 
     #[\Override]
     public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array

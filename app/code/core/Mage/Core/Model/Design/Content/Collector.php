@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 class Mage_Core_Model_Design_Content_Collector
 {
-    public const MAX_TOKEN_LENGTH = 200;
+    public const int MAX_TOKEN_LENGTH = 200;
 
     /** @var array<string, array{module: string, class: string, alias: string, method: string, model: ?string, fields: list<string>}>|null */
     protected ?array $sources = null;

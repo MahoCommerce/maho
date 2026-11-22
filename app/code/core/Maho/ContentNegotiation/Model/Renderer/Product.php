@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 class Maho_ContentNegotiation_Model_Renderer_Product extends Maho_ContentNegotiation_Model_Renderer_AbstractRenderer
 {
-    public const VARIANTS_LIMIT = 200;
-    public const IMAGES_LIMIT = 10;
+    public const int VARIANTS_LIMIT = 200;
+    public const int IMAGES_LIMIT = 10;
 
     #[\Override]
     public function render(): ?string

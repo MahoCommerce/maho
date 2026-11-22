@@ -17,7 +17,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable ex
      */
     protected $_product = null;
 
-    protected $_config = null;
+    protected ?\Maho\DataObject $_config = null;
 
     /**
      * Class constructor

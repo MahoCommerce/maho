@@ -24,19 +24,18 @@ class Mage_Sales_Model_Order_Payment_Transaction extends Mage_Core_Model_Abstrac
 {
     /**
      * Supported transaction types
-     * @var string
      */
-    public const TYPE_PAYMENT = 'payment';
-    public const TYPE_ORDER   = 'order';
-    public const TYPE_AUTH    = 'authorization';
-    public const TYPE_CAPTURE = 'capture';
-    public const TYPE_VOID    = 'void';
-    public const TYPE_REFUND  = 'refund';
+    public const string TYPE_PAYMENT = 'payment';
+    public const string TYPE_ORDER   = 'order';
+    public const string TYPE_AUTH    = 'authorization';
+    public const string TYPE_CAPTURE = 'capture';
+    public const string TYPE_VOID    = 'void';
+    public const string TYPE_REFUND  = 'refund';
 
     /**
      * Raw details key in additional info
      */
-    public const RAW_DETAILS = 'raw_details_info';
+    public const string RAW_DETAILS = 'raw_details_info';
 
     /**
      * Payment instance. Required for most transaction writing and search operations
@@ -210,7 +209,7 @@ class Mage_Sales_Model_Order_Payment_Transaction extends Mage_Core_Model_Abstrac
      * Will attempt to load them first
      * Can be filtered by types and/or transaction_id
      * Returns transaction object if transaction_id is specified, otherwise - array
-     * TODO: $recursive is not implemented
+     * The method ignores $recursive
      *
      * @param array|string $types
      * @param string $txnId
@@ -670,7 +669,6 @@ class Mage_Sales_Model_Order_Payment_Transaction extends Mage_Core_Model_Abstrac
 
     /**
      * Check whether this transaction is voided
-     * TODO: implement that there should be only one void per authorization
      * @return bool
      */
     protected function _isVoided()
@@ -768,7 +766,6 @@ class Mage_Sales_Model_Order_Payment_Transaction extends Mage_Core_Model_Abstrac
 
     /**
      * Make sure this object is a valid transaction
-     * TODO for more restriction we can check for data consistency
      * @throws Mage_Core_Exception
      */
     protected function _verifyThisTransactionExists(): void

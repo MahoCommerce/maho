@@ -14,7 +14,7 @@ class Maho_ContentVersion_Model_Observer
      * Registry key for API callers to set editor attribution.
      * Set via Mage::register() before save to attribute the version.
      */
-    public const REGISTRY_EDITOR = 'contentversion_editor';
+    public const string REGISTRY_EDITOR = 'contentversion_editor';
 
     #[Maho\Config\Observer('cms_page_save_before')]
     public function beforeCmsPageSave(Maho\Event\Observer $observer): void

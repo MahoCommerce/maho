@@ -17,38 +17,38 @@ declare(strict_types=1);
  */
 abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
 {
-    public const ACTION_ORDER             = 'order';
-    public const ACTION_AUTHORIZE         = 'authorize';
-    public const ACTION_AUTHORIZE_CAPTURE = 'authorize_capture';
+    public const string ACTION_ORDER             = 'order';
+    public const string ACTION_AUTHORIZE         = 'authorize';
+    public const string ACTION_AUTHORIZE_CAPTURE = 'authorize_capture';
 
-    public const STATUS_UNKNOWN    = 'UNKNOWN';
-    public const STATUS_APPROVED   = 'APPROVED';
-    public const STATUS_ERROR      = 'ERROR';
-    public const STATUS_DECLINED   = 'DECLINED';
-    public const STATUS_VOID       = 'VOID';
-    public const STATUS_SUCCESS    = 'SUCCESS';
+    public const string STATUS_UNKNOWN    = 'UNKNOWN';
+    public const string STATUS_APPROVED   = 'APPROVED';
+    public const string STATUS_ERROR      = 'ERROR';
+    public const string STATUS_DECLINED   = 'DECLINED';
+    public const string STATUS_VOID       = 'VOID';
+    public const string STATUS_SUCCESS    = 'SUCCESS';
 
     /**
      * Bit masks to specify different payment method checks.
      * @see Mage_Payment_Model_Method_Abstract::isApplicableToQuote
      */
-    public const CHECK_USE_FOR_COUNTRY       = 1;
-    public const CHECK_USE_FOR_CURRENCY      = 2;
-    public const CHECK_USE_CHECKOUT          = 4;
+    public const int CHECK_USE_FOR_COUNTRY       = 1;
+    public const int CHECK_USE_FOR_CURRENCY      = 2;
+    public const int CHECK_USE_CHECKOUT          = 4;
 
-    public const CHECK_USE_INTERNAL          = 16;
-    public const CHECK_ORDER_TOTAL_MIN_MAX   = 32;
-    public const CHECK_ZERO_TOTAL            = 128;
+    public const int CHECK_USE_INTERNAL          = 16;
+    public const int CHECK_ORDER_TOTAL_MIN_MAX   = 32;
+    public const int CHECK_ZERO_TOTAL            = 128;
 
     /** Standard applicability checks for storefront checkout flows */
-    public const CHECKS_CHECKOUT = self::CHECK_USE_CHECKOUT
+    public const int CHECKS_CHECKOUT = self::CHECK_USE_CHECKOUT
         | self::CHECK_USE_FOR_COUNTRY
         | self::CHECK_USE_FOR_CURRENCY
         | self::CHECK_ORDER_TOTAL_MIN_MAX
         | self::CHECK_ZERO_TOTAL;
 
     /** Standard applicability checks for admin order creation */
-    public const CHECKS_INTERNAL = self::CHECK_USE_INTERNAL
+    public const int CHECKS_INTERNAL = self::CHECK_USE_INTERNAL
         | self::CHECK_USE_FOR_COUNTRY
         | self::CHECK_USE_FOR_CURRENCY
         | self::CHECK_ORDER_TOTAL_MIN_MAX
@@ -124,7 +124,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
     protected $_canCreateBillingAgreement   = false;
 
     /**
-     * TODO: whether a captured transaction may be voided by this gateway
+     * Whether a captured transaction may be voided by this gateway
      * This may happen when amount is captured, but not settled
      * @var bool
      */
@@ -631,8 +631,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
 
     /**
      * Check whether payment method can be used
-     *
-     * TODO: payment method instance is not supposed to know about quote
      *
      * @param Mage_Sales_Model_Quote|null $quote
      *

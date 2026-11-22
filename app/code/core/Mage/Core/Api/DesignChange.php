@@ -82,11 +82,11 @@ use Maho\Config\ApiResource;
 )]
 class DesignChange extends CrudResource
 {
-    public const MODEL = 'core/design';
-    public const PRIMARY_KEY = 'design_change_id';
+    public const string MODEL = 'core/design';
+    public const string PRIMARY_KEY = 'design_change_id';
 
     /** Admin ACL gate. Mirrors backend Mage_Adminhtml_System_DesignController. */
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_System_DesignController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_System_DesignController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

@@ -13,7 +13,7 @@ class Mage_Catalog_Block_Product_New extends Mage_Catalog_Block_Product_Abstract
     /**
      * Default value for products count that will be shown
      */
-    public const DEFAULT_PRODUCTS_COUNT = 10;
+    public const int DEFAULT_PRODUCTS_COUNT = 10;
 
     /**
      * @var int

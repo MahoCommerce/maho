@@ -51,8 +51,6 @@ class Mage_Install_Model_Installer_Db extends Mage_Install_Model_Installer_Abstr
                     Mage::helper('install')->__('Database server does not support the InnoDB storage engine.'),
                 );
             }
-
-            // TODO: check user roles
         } catch (Mage_Core_Exception $e) {
             Mage::logException($e);
             Mage::throwException(Mage::helper('install')->__($e->getMessage()));

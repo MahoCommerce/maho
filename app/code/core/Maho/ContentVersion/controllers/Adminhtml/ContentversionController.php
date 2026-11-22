@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_ContentVersion_Adminhtml_ContentversionController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'cms/contentversion';
+    public const string ADMIN_RESOURCE = 'cms/contentversion';
 
     #[Maho\Config\Route('/admin/contentversion/restore')]
     public function restoreAction(): void

@@ -13,13 +13,13 @@ declare(strict_types=1);
 class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block_Jsonld_Abstract
 {
     /** Cap the number of individual Review nodes emitted, newest first, to bound page weight. */
-    protected const REVIEWS_LIMIT = 10;
+    protected const int REVIEWS_LIMIT = 10;
 
     /** Configurable attribute codes that map directly to schema.org variant properties. */
-    protected const VARIANT_PROPERTIES = ['color', 'size', 'material', 'pattern'];
+    protected const array VARIANT_PROPERTIES = ['color', 'size', 'material', 'pattern'];
 
     /** Cap the number of hasVariant nodes emitted, mirroring REVIEWS_LIMIT, to bound page weight. */
-    protected const VARIANTS_LIMIT = 100;
+    protected const int VARIANTS_LIMIT = 100;
 
     /** @var array<string, array<string, float>> the shipping rates for each product weight and final price */
     protected array $_shippingRates = [];

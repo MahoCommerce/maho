@@ -11,7 +11,7 @@
 class Mage_Shipping_Model_Tracking_Result
 {
     protected array $_trackings = [];
-    protected $_error = null;
+    protected ?string $_error = null;
 
     /**
      * Reset tracking

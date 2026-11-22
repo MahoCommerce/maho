@@ -14,7 +14,7 @@ use Maho\ApiPlatform\Security\ApiUser;
 
 final class SalesRefundedReportProvider extends ReportProviderBase
 {
-    public const VALUES = [
+    public const array VALUES = [
         'ordersCount' => 'orders_count',
         'refunded' => 'refunded',
         'onlineRefunded' => 'online_refunded',

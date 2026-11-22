@@ -20,7 +20,7 @@ final class CustomAttributes
      * The storefront forms of each entity type. A customer or a guest reads and writes only the
      * attributes that these forms show.
      */
-    public const STOREFRONT_FORMS = [
+    public const array STOREFRONT_FORMS = [
         'customer' => ['customer_account_create', 'customer_account_edit', 'checkout_register'],
         'customer_address' => ['customer_address_edit', 'customer_register_address'],
     ];

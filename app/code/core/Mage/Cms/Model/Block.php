@@ -17,7 +17,7 @@ declare(strict_types=1);
  */
 class Mage_Cms_Model_Block extends Mage_Core_Model_Abstract
 {
-    public const CACHE_TAG     = 'cms_block';
+    public const string CACHE_TAG     = 'cms_block';
     #[\Override]
     protected $_cacheTag = 'cms_block';
     #[\Override]

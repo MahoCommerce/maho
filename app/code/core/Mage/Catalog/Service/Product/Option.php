@@ -20,12 +20,12 @@ use Mage_Catalog_Model_Product_Option as Option;
  */
 class Mage_Catalog_Service_Product_Option
 {
-    private const FIELDS = [
+    private const array FIELDS = [
         'title', 'type', 'is_require', 'sort_order', 'price', 'price_type', 'sku',
         'max_characters', 'file_extension', 'image_size_x', 'image_size_y',
     ];
 
-    private const VALUE_FIELDS = ['title', 'price', 'price_type', 'sku', 'sort_order'];
+    private const array VALUE_FIELDS = ['title', 'price', 'price_type', 'sku', 'sort_order'];
 
     /**
      * @throws Mage_Core_Exception_NoSuchEntity when $product has no option $optionId

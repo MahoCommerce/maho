@@ -51,7 +51,7 @@ use Doctrine\DBAL\Schema\Table;
  */
 final class Renamer
 {
-    public const OPTION = 'maho_previous_names';
+    public const string OPTION = 'maho_previous_names';
 
     /**
      * @return list<string> newest-first

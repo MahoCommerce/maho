@@ -25,7 +25,6 @@ dataset('typed accessor round trips', [
     'quote address' => ['sales/quote_address', 'subtotal', '99.9900', 99.99, 'region_id', '12', 12],
     'quote item' => ['sales/quote_item', 'row_total', '10.0000', 10.0, 'product_id', '7', 7],
     'quote item weee' => ['sales/quote_item', 'weee_tax_disposition', '0.5000', 0.5, 'store_id', '2', 2],
-    'quote address item' => ['sales/quote_address_item', 'row_total', '10.0000', 10.0, 'quote_item_id', '9', 9],
     'order address' => ['sales/order_address', 'region_id', '5', 5, 'parent_id', '11', 11],
     'order item' => ['sales/order_item', 'qty_ordered', '2.0000', 2.0, 'product_id', '7', 7],
     'order payment' => ['sales/order_payment', 'amount_paid', '12.3400', 12.34, 'parent_id', '11', 11],

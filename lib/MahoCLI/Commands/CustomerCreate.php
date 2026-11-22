@@ -27,7 +27,7 @@ class CustomerCreate extends BaseMahoCommand
 {
     use CustomerFormTrait;
 
-    private const FORM_CODE = 'adminhtml_customer';
+    private const string FORM_CODE = 'adminhtml_customer';
 
     /**
      * @param list<string> $attribute

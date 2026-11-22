@@ -18,7 +18,7 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
      * assigned (which is exactly the CMS/catalog case), so masking them would put their quotes in
      * front of the browser unfiltered.
      */
-    public const DIRECTIVE_KEYWORDS = [
+    public const array DIRECTIVE_KEYWORDS = [
         'media', 'skin', 'store', 'widget', 'config', 'block',
         'layout', 'template', 'protocol', 'htmlescape', 'customvar', 'inlinecss', 'include', 'icon',
         'breakpoint',
@@ -28,7 +28,7 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
      * Matches any template construction, used to strip directives that will not be resolved.
      * Mirrors \Maho\Filter\Template::CONSTRUCTION_PATTERN.
      */
-    public const ANY_DIRECTIVE_PATTERN = '/\{\{[a-z]{0,10}.*?\}\}/si';
+    public const string ANY_DIRECTIVE_PATTERN = '/\{\{[a-z]{0,10}.*?\}\}/si';
 
     /**
      * A single directive parameter: name="value", name='value' or an unquoted token.
@@ -57,7 +57,7 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
      * or removed by stripDirectives(). Preserve that invariant on new render paths rather than
      * growing this list.
      */
-    private const DIRECTIVE_PARAM = '(?:\s+(?!on[a-z]+\s*=)[a-z0-9_:.\/-]+\s*=\s*(?:"[^"\'<>{}]*"|\'[^"\'<>{}]*\'|[^\s"\'<>{}]+))';
+    private const string DIRECTIVE_PARAM = '(?:\s+(?!on[a-z]+\s*=)[a-z0-9_:.\/-]+\s*=\s*(?:"[^"\'<>{}]*"|\'[^"\'<>{}]*\'|[^\s"\'<>{}]+))';
 
     /**
      * Matches a template directive ({{media url="..."}}, {{widget ...}}, {{store ...}}, …) so it

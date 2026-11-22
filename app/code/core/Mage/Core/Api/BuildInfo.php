@@ -37,7 +37,7 @@ use Maho\Config\ApiResource;
 )]
 class BuildInfo extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_System_Tools_HealthcheckController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_System_Tools_HealthcheckController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, description: 'Version of the installation')]
     public string $version = '';

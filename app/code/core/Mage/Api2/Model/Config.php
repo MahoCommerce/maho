@@ -13,20 +13,11 @@
  */
 class Mage_Api2_Model_Config extends \Maho\Simplexml\Config
 {
-    /**
-     * Node name of resource groups
-     */
-    public const NODE_RESOURCE_GROUPS = 'resource_groups';
+    public const string NODE_RESOURCE_GROUPS = 'resource_groups';
 
-    /**
-     * Id for config cache
-     */
-    public const CACHE_ID  = 'config_api2';
+    public const string CACHE_ID  = 'config_api2';
 
-    /**
-     * Tag name for config cache
-     */
-    public const CACHE_TAG = 'CONFIG_API2';
+    public const string CACHE_TAG = 'CONFIG_API2';
 
     /**
      * Is resources added to group

@@ -13,7 +13,7 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
     /**
      * Data key for matching result to be saved in
      */
-    public const EVENT_MATCH_RESULT_KEY = 'catalogsearch_fulltext_match_result';
+    public const string EVENT_MATCH_RESULT_KEY = 'catalogsearch_fulltext_match_result';
 
     /**
      * List of searchable attributes

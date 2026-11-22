@@ -10,10 +10,10 @@
 
 abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Model_Carrier_Abstract
 {
-    public const USA_COUNTRY_ID = 'US';
-    public const PUERTORICO_COUNTRY_ID = 'PR';
-    public const GUAM_COUNTRY_ID = 'GU';
-    public const GUAM_REGION_CODE = 'GU';
+    public const string USA_COUNTRY_ID = 'US';
+    public const string PUERTORICO_COUNTRY_ID = 'PR';
+    public const string GUAM_COUNTRY_ID = 'GU';
+    public const string GUAM_REGION_CODE = 'GU';
 
     protected static array $_quotesCache = [];
 
@@ -45,7 +45,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
         return $this->_code;
     }
 
-    public function getTrackingInfo($tracking)
+    public function getTrackingInfo(?string $tracking): Mage_Shipping_Model_Tracking_Result_Abstract|string|false
     {
         $result = $this->getTracking($tracking);
 

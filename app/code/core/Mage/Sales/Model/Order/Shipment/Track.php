@@ -17,7 +17,7 @@ declare(strict_types=1);
  */
 class Mage_Sales_Model_Order_Shipment_Track extends Mage_Sales_Model_Abstract
 {
-    public const CUSTOM_CARRIER_CODE   = 'custom';
+    public const string CUSTOM_CARRIER_CODE   = 'custom';
     protected ?Mage_Sales_Model_Order_Shipment $_shipment = null;
 
     #[\Override]

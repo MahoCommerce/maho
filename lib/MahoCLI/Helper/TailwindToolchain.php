@@ -20,10 +20,10 @@ use Symfony\Component\Process\Process;
 class TailwindToolchain
 {
     /** The majors of the package.json of Maho, so a new major cannot break the build of its sources. */
-    public const NPM_PACKAGES = ['tailwindcss@^4', '@tailwindcss/cli@^4', 'daisyui@^5'];
+    public const array NPM_PACKAGES = ['tailwindcss@^4', '@tailwindcss/cli@^4', 'daisyui@^5'];
 
     /** Supported package managers in preference order, with the arguments that add a dev dependency. */
-    public const PACKAGE_MANAGERS = [
+    public const array PACKAGE_MANAGERS = [
         'npm' => ['install', '--save-dev'],
         'bun' => ['add', '--dev'],
         'pnpm' => ['add', '-D'],
@@ -31,13 +31,13 @@ class TailwindToolchain
     ];
 
     /** @var array<string, list<string>> */
-    private const LOCK_FILES = [
+    private const array LOCK_FILES = [
         'npm' => ['package-lock.json'],
         'bun' => ['bun.lock', 'bun.lockb'],
         'pnpm' => ['pnpm-lock.yaml'],
         'yarn' => ['yarn.lock'],
     ];
-    private const INSTALL_TIMEOUT = 600;
+    private const int INSTALL_TIMEOUT = 600;
 
     /**
      * The path of the Tailwind CLI. When it is missing, install the toolchain when $force is

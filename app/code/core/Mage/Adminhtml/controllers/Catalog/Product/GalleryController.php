@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_Catalog_Product_GalleryController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'catalog/products';
+    public const string ADMIN_RESOURCE = 'catalog/products';
 
     #[Maho\Config\Route('/admin/catalog_product_gallery/upload')]
     public function uploadAction(): void

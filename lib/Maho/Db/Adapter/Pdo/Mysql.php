@@ -20,15 +20,15 @@ use Maho\Db\Helper;
 class Mysql extends AbstractPdoAdapter
 {
     // MySQL-specific constants
-    public const DDL_CACHE_PREFIX      = 'DB_PDO_MYSQL_DDL';
-    public const DDL_CACHE_TAG         = 'DB_PDO_MYSQL_DDL';
+    public const string DDL_CACHE_PREFIX      = 'DB_PDO_MYSQL_DDL';
+    public const string DDL_CACHE_TAG         = 'DB_PDO_MYSQL_DDL';
     /**
      * The charset and collation of every connection and every table. The legacy
      * and declarative table defaults must stay equal, or MySQL refuses a VARCHAR
      * foreign key between the two kinds of table.
      */
-    public const DEFAULT_CHARSET       = 'utf8mb4';
-    public const DEFAULT_COLLATION     = 'utf8mb4_general_ci';
+    public const string DEFAULT_CHARSET       = 'utf8mb4';
+    public const string DEFAULT_COLLATION     = 'utf8mb4_general_ci';
 
     /**
      * Default class name for a DB statement.

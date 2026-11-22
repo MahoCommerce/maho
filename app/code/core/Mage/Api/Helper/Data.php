@@ -13,7 +13,7 @@
  */
 class Mage_Api_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public const XML_PATH_API_WSI = 'api/config/compliance_wsi';
+    public const string XML_PATH_API_WSI = 'api/config/compliance_wsi';
 
     #[\Override]
     protected $_moduleName = 'Mage_Api';

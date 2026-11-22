@@ -23,7 +23,7 @@ use Maho\ApiPlatform\Http\RequestInput;
  */
 final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
 {
-    private const MAX_BULK_ITEMS = 100;
+    private const int MAX_BULK_ITEMS = 100;
 
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): StockUpdate

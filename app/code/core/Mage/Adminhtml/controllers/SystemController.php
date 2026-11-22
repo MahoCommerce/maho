@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_SystemController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'system';
+    public const string ADMIN_RESOURCE = 'system';
 
     #[Maho\Config\Route('/admin/system/index')]
     public function indexAction(): void

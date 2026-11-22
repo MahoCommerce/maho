@@ -10,15 +10,12 @@
 
 class Mage_Sales_Helper_Data extends Mage_Core_Helper_Data
 {
-    /**
-     * Maximum available number
-     */
-    public const MAXIMUM_AVAILABLE_NUMBER = 99999999;
+    public const int MAXIMUM_AVAILABLE_NUMBER = 99999999;
 
     /**
      * Default precision for price calculations
      */
-    public const PRECISION_VALUE = 0.0001;
+    public const float PRECISION_VALUE = 0.0001;
 
     #[\Override]
     protected $_moduleName = 'Mage_Sales';

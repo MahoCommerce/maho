@@ -32,7 +32,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 #[AsEventListener(event: KernelEvents::REQUEST, priority: 109)]
 class CurrencyContextListener
 {
-    public const HEADER = 'X-Currency-Code';
+    public const string HEADER = 'X-Currency-Code';
 
     public function __invoke(RequestEvent $event): void
     {

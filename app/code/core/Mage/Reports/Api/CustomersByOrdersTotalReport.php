@@ -37,7 +37,7 @@ use ApiPlatform\Metadata\Get;
 )]
 class CustomersByOrdersTotalReport extends \Maho\ApiPlatform\Resource
 {
-    public const ADMIN_RESOURCE = 'report/customers/totals';
+    public const string ADMIN_RESOURCE = 'report/customers/totals';
 
     #[ApiProperty(identifier: true, description: 'Report code')]
     public string $report = 'customers-by-orders-total';

@@ -21,9 +21,9 @@ use Maho\Storage\Mount;
  */
 class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
 {
-    public const DIRECTORY_NAME_REGEXP = '/^[a-z0-9\-\_]+$/si';
-    public const THUMBS_DIRECTORY_NAME = '.thumbs';
-    public const THUMB_PLACEHOLDER_PATH_SUFFIX = 'images/wysiwyg/placeholder-image.svg';
+    public const string DIRECTORY_NAME_REGEXP = '/^[a-z0-9\-\_]+$/si';
+    public const string THUMBS_DIRECTORY_NAME = '.thumbs';
+    public const string THUMB_PLACEHOLDER_PATH_SUFFIX = 'images/wysiwyg/placeholder-image.svg';
 
     /**
      * Config object

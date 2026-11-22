@@ -33,10 +33,10 @@ use Mage_Adminhtml_Model_Config_Data as ConfigData;
  */
 class Mage_Core_Service_Config
 {
-    public const ACL_RESOURCE_PREFIX = 'admin/system/config/';
+    public const string ACL_RESOURCE_PREFIX = 'admin/system/config/';
 
-    private const SENSITIVE_NAME_PATTERN = '/key|secret|password|token|salt/i';
-    private const SENSITIVE_FRONTEND_TYPES = ['obscure', 'password'];
+    private const string SENSITIVE_NAME_PATTERN = '/key|secret|password|token|salt/i';
+    private const array SENSITIVE_FRONTEND_TYPES = ['obscure', 'password'];
 
     /**
      * Every labelled field of system.xml, by its configuration path.

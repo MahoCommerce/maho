@@ -29,7 +29,7 @@ final class CustomAttributesNormalizer implements NormalizerInterface, Normalize
 {
     use NormalizerAwareTrait;
 
-    private const NORMALIZED = 'maho_customer_custom_attributes';
+    private const string NORMALIZED = 'maho_customer_custom_attributes';
 
     public function __construct(private readonly Security $security) {}
 

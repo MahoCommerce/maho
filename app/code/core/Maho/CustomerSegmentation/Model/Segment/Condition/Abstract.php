@@ -136,7 +136,7 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
     /**
      * Input types of user-defined attributes that hold no value to compare.
      */
-    protected const SKIPPED_CUSTOM_INPUTS = ['file', 'image', 'multiline'];
+    protected const array SKIPPED_CUSTOM_INPUTS = ['file', 'image', 'multiline'];
 
     /**
      * @var array<string, array<string, Mage_Eav_Model_Entity_Attribute_Abstract>>

@@ -31,14 +31,11 @@ declare(strict_types=1);
  */
 class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abstract
 {
-    /**
-     * Configuration path for default email templates
-     */
-    public const XML_PATH_TEMPLATE_EMAIL               = 'global/template/email';
-    public const XML_PATH_SENDING_SET_RETURN_PATH      = 'system/smtp/set_return_path';
-    public const XML_PATH_SENDING_RETURN_PATH_EMAIL    = 'system/smtp/return_path_email';
+    public const string XML_PATH_TEMPLATE_EMAIL               = 'global/template/email';
+    public const string XML_PATH_SENDING_SET_RETURN_PATH      = 'system/smtp/set_return_path';
+    public const string XML_PATH_SENDING_RETURN_PATH_EMAIL    = 'system/smtp/return_path_email';
 
-    protected $_templateFilter;
+    protected ?Mage_Core_Model_Email_Template_Filter $_templateFilter = null;
     protected bool $_preprocessFlag = false;
     protected array $_bccEmails = [];
     protected ?string $_replyToEmail = null;
@@ -60,7 +57,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      *
      * @return  $this
      */
-    public function setTemplateFilter(\Maho\Filter\Template $filter)
+    public function setTemplateFilter(Mage_Core_Model_Email_Template_Filter $filter)
     {
         $this->_templateFilter = $filter;
         return $this;
@@ -76,7 +73,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         if (empty($this->_templateFilter)) {
             $this->_templateFilter = Mage::getModel('core/email_template_filter');
             $this->_templateFilter->setUseAbsoluteLinks($this->getUseAbsoluteLinks())
-                ->setStoreId($this->getDesignConfig()->getStore());
+                ->setStoreId($this->getDesignConfigStoreId());
         }
         return $this->_templateFilter;
     }

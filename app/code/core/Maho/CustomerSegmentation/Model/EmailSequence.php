@@ -18,8 +18,8 @@ declare(strict_types=1);
  */
 class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abstract
 {
-    public const TRIGGER_ENTER = 'enter';
-    public const TRIGGER_EXIT = 'exit';
+    public const string TRIGGER_ENTER = 'enter';
+    public const string TRIGGER_EXIT = 'exit';
 
     #[\Override]
     protected function _construct(): void

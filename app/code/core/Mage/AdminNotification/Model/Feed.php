@@ -10,8 +10,8 @@
 
 class Mage_AdminNotification_Model_Feed extends Mage_Core_Model_Abstract
 {
-    public const XML_FEED_URL_PATH     = 'system/adminnotification/feed_url';
-    public const XML_FREQUENCY_PATH    = 'system/adminnotification/frequency';
+    public const string XML_FEED_URL_PATH     = 'system/adminnotification/feed_url';
+    public const string XML_FREQUENCY_PATH    = 'system/adminnotification/frequency';
 
     /**
      * Feed url

@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'customer/manage';
+    public const string ADMIN_RESOURCE = 'customer/manage';
 
     /**
      * @param string $idFieldName

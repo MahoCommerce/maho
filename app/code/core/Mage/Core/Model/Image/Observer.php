@@ -17,7 +17,7 @@ declare(strict_types=1);
 class Mage_Core_Model_Image_Observer
 {
     /** How long a queued creation blocks the next one for the same settings, in seconds. */
-    public const QUEUED_LIFETIME = 86400;
+    public const int QUEUED_LIFETIME = 86400;
 
     #[Maho\Config\Observer('admin_system_config_changed_section_catalog', id: 'image_settings_check_catalog')]
     #[Maho\Config\Observer('admin_system_config_changed_section_design', id: 'image_settings_check_design')]

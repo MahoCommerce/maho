@@ -20,18 +20,18 @@ declare(strict_types=1);
  */
 class Mage_Cms_Model_Page extends Mage_Core_Model_Abstract
 {
-    public const NOROUTE_PAGE_ID = 'no-route';
+    public const string NOROUTE_PAGE_ID = 'no-route';
 
     /** The EAV entity type that holds the custom attributes of CMS pages. */
-    public const ENTITY = 'cms_page';
+    public const string ENTITY = 'cms_page';
 
     /**
      * Page's Statuses
      */
-    public const STATUS_ENABLED = 1;
-    public const STATUS_DISABLED = 0;
+    public const int STATUS_ENABLED = 1;
+    public const int STATUS_DISABLED = 0;
 
-    public const CACHE_TAG              = 'cms_page';
+    public const string CACHE_TAG              = 'cms_page';
     #[\Override]
     protected $_cacheTag         = 'cms_page';
 

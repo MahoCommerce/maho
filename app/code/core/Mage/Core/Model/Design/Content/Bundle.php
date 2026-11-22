@@ -22,27 +22,27 @@ use Symfony\Component\Process\Process;
 
 class Mage_Core_Model_Design_Content_Bundle
 {
-    public const FLAG_MANIFEST = 'theme_content_css';
-    public const FLAG_REQUEST = 'theme_content_request';
-    public const CACHE_ID = 'theme_content_css';
-    public const LOCK_NAME = 'theme_content_build';
-    public const QUEUE_NAME = 'theme_content';
-    public const MOUNT = 'media';
-    public const FOLDER = 'theme';
-    public const STYLES_FILE = 'css/styles.css';
-    public const ENTRY_FILE = 'src/tailwind.css';
+    public const string FLAG_MANIFEST = 'theme_content_css';
+    public const string FLAG_REQUEST = 'theme_content_request';
+    public const string CACHE_ID = 'theme_content_css';
+    public const string LOCK_NAME = 'theme_content_build';
+    public const string QUEUE_NAME = 'theme_content';
+    public const string MOUNT = 'media';
+    public const string FOLDER = 'theme';
+    public const string STYLES_FILE = 'css/styles.css';
+    public const string ENTRY_FILE = 'src/tailwind.css';
     /** The Tailwind CLI, relative to the project root. */
-    public const TAILWIND_BINARY = 'node_modules/.bin/tailwindcss';
+    public const string TAILWIND_BINARY = 'node_modules/.bin/tailwindcss';
     /** Seconds before a queued build runs, so the saves of an import give one build. */
-    public const BUILD_DELAY = 60;
+    public const int BUILD_DELAY = 60;
     /** Seconds before the build that a save of content queues runs. */
-    public const SAVE_DELAY = 10;
-    public const BUILD_TIMEOUT = 600;
+    public const int SAVE_DELAY = 10;
+    public const int BUILD_TIMEOUT = 600;
 
-    public const STATUS_BUILT = 'built';
-    public const STATUS_UNCHANGED = 'unchanged';
-    public const STATUS_EMPTY = 'empty';
-    public const STATUS_FAILED = 'failed';
+    public const string STATUS_BUILT = 'built';
+    public const string STATUS_UNCHANGED = 'unchanged';
+    public const string STATUS_EMPTY = 'empty';
+    public const string STATUS_FAILED = 'failed';
 
     /** @var array<string, array{file: ?string, tokens: string, styles: string, failed?: string, stat?: ?string}>|null */
     protected ?array $manifest = null;

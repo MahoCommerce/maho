@@ -15,12 +15,12 @@ declare(strict_types=1);
  */
 class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
 {
-    public const OUTPUT_TYPE_STATIC = 'static';
-    public const OUTPUT_TYPE_ATTRIBUTE = 'attribute';
-    public const OUTPUT_TYPE_COMBINED = 'combined';
+    public const string OUTPUT_TYPE_STATIC = 'static';
+    public const string OUTPUT_TYPE_ATTRIBUTE = 'attribute';
+    public const string OUTPUT_TYPE_COMBINED = 'combined';
 
-    public const COMBINED_POSITION_PREFIX = 'prefix';
-    public const COMBINED_POSITION_SUFFIX = 'suffix';
+    public const string COMBINED_POSITION_PREFIX = 'prefix';
+    public const string COMBINED_POSITION_SUFFIX = 'suffix';
 
     /**
      * Cached cases array

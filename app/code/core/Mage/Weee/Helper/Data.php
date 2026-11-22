@@ -13,17 +13,17 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Config Path for FPT
      */
-    public const XML_PATH_FPT_ENABLED = 'tax/weee/enable';
+    public const string XML_PATH_FPT_ENABLED = 'tax/weee/enable';
 
     /**
      *'FPT Tax Configuration' for TAXED
      */
-    public const TAXED = '1';
+    public const string TAXED = '1';
 
     /**
      *'FPT Tax Configuration' for LOADED_AND_DISPLAY_WITH_TAX
      */
-    public const LOADED_AND_DISPLAY_WITH_TAX = '2';
+    public const string LOADED_AND_DISPLAY_WITH_TAX = '2';
 
     #[\Override]
     protected $_moduleName = 'Mage_Weee';

@@ -10,14 +10,14 @@ declare(strict_types=1);
 
 class Mage_Usa_Model_Shipping_Carrier_Usps_RestClient
 {
-    private const BASE_URL_PRODUCTION = 'https://apis.usps.com';
-    private const BASE_URL_TEST = 'https://apis-tem.usps.com';
+    private const string BASE_URL_PRODUCTION = 'https://apis.usps.com';
+    private const string BASE_URL_TEST = 'https://apis-tem.usps.com';
 
-    private const ENDPOINT_SHIPPING_OPTIONS = '/shipments/v3/options/search';
-    private const ENDPOINT_TRACKING = '/tracking/v3/tracking';
-    private const ENDPOINT_DOMESTIC_LABEL = '/labels/v3/label';
-    private const ENDPOINT_INTERNATIONAL_LABEL = '/international-labels/v3/label';
-    private const ENDPOINT_PAYMENT_AUTH = '/payments/v3/payment-authorization';
+    private const string ENDPOINT_SHIPPING_OPTIONS = '/shipments/v3/options/search';
+    private const string ENDPOINT_TRACKING = '/tracking/v3/tracking';
+    private const string ENDPOINT_DOMESTIC_LABEL = '/labels/v3/label';
+    private const string ENDPOINT_INTERNATIONAL_LABEL = '/international-labels/v3/label';
+    private const string ENDPOINT_PAYMENT_AUTH = '/payments/v3/payment-authorization';
     private string $baseUrl;
     private ?string $paymentAuthToken = null;
 

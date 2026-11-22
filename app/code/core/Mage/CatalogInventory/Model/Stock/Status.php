@@ -20,8 +20,8 @@ declare(strict_types=1);
  */
 class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
 {
-    public const STATUS_OUT_OF_STOCK       = 0;
-    public const STATUS_IN_STOCK           = 1;
+    public const int STATUS_OUT_OF_STOCK       = 0;
+    public const int STATUS_IN_STOCK           = 1;
 
     /**
      * Product Type Instances cache

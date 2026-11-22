@@ -23,7 +23,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 final class OrderProcessor extends \Maho\ApiPlatform\Processor
 {
     /** The fields of guestCustomer in a place-order body, each with its cart column. */
-    private const GUEST_CUSTOMER_FIELDS = [
+    private const array GUEST_CUSTOMER_FIELDS = [
         'prefix' => 'customer_prefix',
         'firstname' => 'customer_firstname',
         'middlename' => 'customer_middlename',

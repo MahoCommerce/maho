@@ -10,10 +10,7 @@
 
 class Mage_CatalogSearch_Model_Resource_Fulltext_Collection extends Mage_Catalog_Model_Resource_Product_Collection
 {
-    /**
-     * Name for relevance order
-     */
-    public const RELEVANCE_ORDER_NAME = 'relevance';
+    public const string RELEVANCE_ORDER_NAME = 'relevance';
 
     /**
      * Found data

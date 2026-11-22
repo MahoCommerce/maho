@@ -14,8 +14,8 @@ use Maho\ApiPlatform\Security\ApiUser;
 
 final class ProductsOrderedReportProvider extends ReportProviderBase
 {
-    public const DEFAULT_LIMIT = 20;
-    public const MAX_LIMIT = 100;
+    public const int DEFAULT_LIMIT = 20;
+    public const int MAX_LIMIT = 100;
 
     #[\Override]
     protected function buildReport(array $filters, ApiUser $user): array

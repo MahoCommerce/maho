@@ -29,7 +29,7 @@ class CustomerAddressCreate extends BaseMahoCommand
     use CustomerFormTrait;
     use CustomerLookupTrait;
 
-    private const FORM_CODE = 'adminhtml_customer_address';
+    private const string FORM_CODE = 'adminhtml_customer_address';
 
     /**
      * @param list<string> $attribute

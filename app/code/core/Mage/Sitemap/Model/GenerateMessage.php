@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 final readonly class Mage_Sitemap_Model_GenerateMessage
 {
-    public const QUEUE_NAME = 'sitemap';
+    public const string QUEUE_NAME = 'sitemap';
 
     public function __construct(
         public int $sitemapId,

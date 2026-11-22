@@ -13,8 +13,8 @@ class Mage_ImportExport_Model_Resource_Helper_Mysql extends Mage_Core_Model_Reso
     /**
      * Constants to be used for DB
      */
-    public const DB_MAX_PACKET_SIZE        = 1048576; // Maximal packet length by default in MySQL
-    public const DB_MAX_PACKET_COEFFICIENT = 0.85; // The coefficient of useful data from maximum packet length
+    public const int DB_MAX_PACKET_SIZE        = 1048576; // Maximal packet length by default in MySQL
+    public const float DB_MAX_PACKET_COEFFICIENT = 0.85; // The coefficient of useful data from maximum packet length
 
     /**
      * Semaphore to disable schema stats only once

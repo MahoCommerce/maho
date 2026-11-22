@@ -25,9 +25,9 @@ use Symfony\Component\Process\Process;
 )]
 class FrontendThemeCreate extends BaseMahoCommand
 {
-    private const BASE_DESIGN_PATH = 'app/design/frontend';
-    private const BASE_SKIN_PATH = 'public/skin/frontend';
-    private const DEFAULT_PARENT = 'base/default';
+    private const string BASE_DESIGN_PATH = 'app/design/frontend';
+    private const string BASE_SKIN_PATH = 'public/skin/frontend';
+    private const string DEFAULT_PARENT = 'base/default';
 
     public function __invoke(
         InputInterface $input,

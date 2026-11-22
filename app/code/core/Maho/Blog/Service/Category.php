@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Maho_Blog_Service_Category
 {
-    public const XML_PATH_ENABLE_CATEGORIES = 'blog/general/enable_categories';
+    public const string XML_PATH_ENABLE_CATEGORIES = 'blog/general/enable_categories';
 
     /**
      * Return an unsaved category that is active on all store views.

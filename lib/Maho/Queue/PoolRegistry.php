@@ -21,7 +21,7 @@ namespace Maho\Queue;
  */
 final class PoolRegistry
 {
-    public const FALLBACK_POOL = 'default';
+    public const string FALLBACK_POOL = 'default';
 
     /** @var array<string, Pool>|null */
     private static ?array $pools = null;

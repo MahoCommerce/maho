@@ -10,11 +10,7 @@
 
 class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'catalog/urlrewrite';
+    public const string ADMIN_RESOURCE = 'catalog/urlrewrite';
 
     /**
      * Instantiate urlrewrite, product and category

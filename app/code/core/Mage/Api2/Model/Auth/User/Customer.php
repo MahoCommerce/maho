@@ -13,10 +13,7 @@
  */
 class Mage_Api2_Model_Auth_User_Customer extends Mage_Api2_Model_Auth_User_Abstract
 {
-    /**
-     * User type
-     */
-    public const USER_TYPE = 'customer';
+    public const string USER_TYPE = 'customer';
 
     /**
      * Retrieve user human-readable label

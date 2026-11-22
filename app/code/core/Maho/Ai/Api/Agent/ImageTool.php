@@ -24,9 +24,9 @@ use Symfony\AI\Platform\Tool\ToolEffectHints;
  */
 final class ImageTool
 {
-    public const NAME = 'generate_image';
-    public const TITLE = 'Generate an image';
-    private const FOLDER = 'ai';
+    public const string NAME = 'generate_image';
+    public const string TITLE = 'Generate an image';
+    private const string FOLDER = 'ai';
 
     public function isAvailable(): bool
     {

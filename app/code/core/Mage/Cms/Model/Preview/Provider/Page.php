@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_Cms_Model_Preview_Provider_Page extends Mage_Cms_Model_Preview_Provider_Abstract
 {
     /** The fields of the page form that change what the storefront shows. */
-    public const FIELDS = [
+    public const array FIELDS = [
         'title', 'identifier', 'content_heading', 'content',
         'root_template', 'layout_update_xml',
         'custom_theme', 'custom_theme_from', 'custom_theme_to',

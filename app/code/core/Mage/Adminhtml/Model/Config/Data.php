@@ -17,9 +17,9 @@ declare(strict_types=1);
  */
 class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
 {
-    public const SCOPE_DEFAULT  = 'default';
-    public const SCOPE_WEBSITES = 'websites';
-    public const SCOPE_STORES   = 'stores';
+    public const string SCOPE_DEFAULT  = 'default';
+    public const string SCOPE_WEBSITES = 'websites';
+    public const string SCOPE_STORES   = 'stores';
 
     /**
      * Config data for sections

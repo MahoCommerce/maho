@@ -21,75 +21,36 @@ declare(strict_types=1);
  */
 class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
 {
-    /**
-     * Option group text
-     */
-    public const OPTION_GROUP_TEXT   = 'text';
+    public const string OPTION_GROUP_TEXT   = 'text';
+
+    public const string OPTION_GROUP_FILE   = 'file';
+
+    public const string OPTION_GROUP_SELECT = 'select';
+
+    public const string OPTION_GROUP_DATE   = 'date';
+
+    public const string OPTION_TYPE_FIELD     = 'field';
+
+    public const string OPTION_TYPE_AREA      = 'area';
 
     /**
      * Option group file
      */
-    public const OPTION_GROUP_FILE   = 'file';
+    public const string OPTION_TYPE_FILE      = 'file';
 
-    /**
-     * Option group select
-     */
-    public const OPTION_GROUP_SELECT = 'select';
+    public const string OPTION_TYPE_DROP_DOWN = 'drop_down';
 
-    /**
-     * Option group date
-     */
-    public const OPTION_GROUP_DATE   = 'date';
+    public const string OPTION_TYPE_RADIO     = 'radio';
 
-    /**
-     * Option type field
-     */
-    public const OPTION_TYPE_FIELD     = 'field';
+    public const string OPTION_TYPE_CHECKBOX  = 'checkbox';
 
-    /**
-     * Option type area
-     */
-    public const OPTION_TYPE_AREA      = 'area';
+    public const string OPTION_TYPE_MULTIPLE  = 'multiple';
 
-    /**
-     * Option group file
-     */
-    public const OPTION_TYPE_FILE      = 'file';
+    public const string OPTION_TYPE_DATE      = 'date';
 
-    /**
-     * Option type drop down
-     */
-    public const OPTION_TYPE_DROP_DOWN = 'drop_down';
+    public const string OPTION_TYPE_DATE_TIME = 'date_time';
 
-    /**
-     * Option type radio
-     */
-    public const OPTION_TYPE_RADIO     = 'radio';
-
-    /**
-     * Option type checkbox
-     */
-    public const OPTION_TYPE_CHECKBOX  = 'checkbox';
-
-    /**
-     * Option type multiple
-     */
-    public const OPTION_TYPE_MULTIPLE  = 'multiple';
-
-    /**
-     * Option type date
-     */
-    public const OPTION_TYPE_DATE      = 'date';
-
-    /**
-     * Option type date/time
-     */
-    public const OPTION_TYPE_DATE_TIME = 'date_time';
-
-    /**
-     * Option type time
-     */
-    public const OPTION_TYPE_TIME      = 'time';
+    public const string OPTION_TYPE_TIME      = 'time';
 
     /**
      * Product instance

@@ -13,57 +13,57 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     /**
      * AIM gateway url
      */
-    public const CGI_URL = 'https://secure.authorize.net/gateway/transact.dll';
+    public const string CGI_URL = 'https://secure.authorize.net/gateway/transact.dll';
 
     /**
      * Transaction Details gateway url
      */
-    public const CGI_URL_TD = 'https://api.authorize.net/xml/v1/request.api';
+    public const string CGI_URL_TD = 'https://api.authorize.net/xml/v1/request.api';
 
-    public const REQUEST_METHOD_CC     = 'CC';
-    public const REQUEST_METHOD_ECHECK = 'ECHECK';
+    public const string REQUEST_METHOD_CC     = 'CC';
+    public const string REQUEST_METHOD_ECHECK = 'ECHECK';
 
-    public const REQUEST_TYPE_AUTH_CAPTURE = 'AUTH_CAPTURE';
-    public const REQUEST_TYPE_AUTH_ONLY    = 'AUTH_ONLY';
-    public const REQUEST_TYPE_CAPTURE_ONLY = 'CAPTURE_ONLY';
-    public const REQUEST_TYPE_CREDIT       = 'CREDIT';
-    public const REQUEST_TYPE_VOID         = 'VOID';
-    public const REQUEST_TYPE_PRIOR_AUTH_CAPTURE = 'PRIOR_AUTH_CAPTURE';
+    public const string REQUEST_TYPE_AUTH_CAPTURE = 'AUTH_CAPTURE';
+    public const string REQUEST_TYPE_AUTH_ONLY    = 'AUTH_ONLY';
+    public const string REQUEST_TYPE_CAPTURE_ONLY = 'CAPTURE_ONLY';
+    public const string REQUEST_TYPE_CREDIT       = 'CREDIT';
+    public const string REQUEST_TYPE_VOID         = 'VOID';
+    public const string REQUEST_TYPE_PRIOR_AUTH_CAPTURE = 'PRIOR_AUTH_CAPTURE';
 
-    public const ECHECK_ACCT_TYPE_CHECKING = 'CHECKING';
-    public const ECHECK_ACCT_TYPE_BUSINESS = 'BUSINESSCHECKING';
-    public const ECHECK_ACCT_TYPE_SAVINGS  = 'SAVINGS';
+    public const string ECHECK_ACCT_TYPE_CHECKING = 'CHECKING';
+    public const string ECHECK_ACCT_TYPE_BUSINESS = 'BUSINESSCHECKING';
+    public const string ECHECK_ACCT_TYPE_SAVINGS  = 'SAVINGS';
 
-    public const ECHECK_TRANS_TYPE_CCD = 'CCD';
-    public const ECHECK_TRANS_TYPE_PPD = 'PPD';
-    public const ECHECK_TRANS_TYPE_TEL = 'TEL';
-    public const ECHECK_TRANS_TYPE_WEB = 'WEB';
+    public const string ECHECK_TRANS_TYPE_CCD = 'CCD';
+    public const string ECHECK_TRANS_TYPE_PPD = 'PPD';
+    public const string ECHECK_TRANS_TYPE_TEL = 'TEL';
+    public const string ECHECK_TRANS_TYPE_WEB = 'WEB';
 
-    public const RESPONSE_DELIM_CHAR = '(~)';
+    public const string RESPONSE_DELIM_CHAR = '(~)';
 
-    public const RESPONSE_CODE_APPROVED = 1;
-    public const RESPONSE_CODE_DECLINED = 2;
-    public const RESPONSE_CODE_ERROR    = 3;
-    public const RESPONSE_CODE_HELD     = 4;
+    public const int RESPONSE_CODE_APPROVED = 1;
+    public const int RESPONSE_CODE_DECLINED = 2;
+    public const int RESPONSE_CODE_ERROR    = 3;
+    public const int RESPONSE_CODE_HELD     = 4;
 
-    public const RESPONSE_REASON_CODE_APPROVED = 1;
-    public const RESPONSE_REASON_CODE_NOT_FOUND = 16;
-    public const RESPONSE_REASON_CODE_PARTIAL_APPROVE = 295;
-    public const RESPONSE_REASON_CODE_PENDING_REVIEW_AUTHORIZED = 252;
-    public const RESPONSE_REASON_CODE_PENDING_REVIEW = 253;
-    public const RESPONSE_REASON_CODE_PENDING_REVIEW_DECLINED = 254;
+    public const int RESPONSE_REASON_CODE_APPROVED = 1;
+    public const int RESPONSE_REASON_CODE_NOT_FOUND = 16;
+    public const int RESPONSE_REASON_CODE_PARTIAL_APPROVE = 295;
+    public const int RESPONSE_REASON_CODE_PENDING_REVIEW_AUTHORIZED = 252;
+    public const int RESPONSE_REASON_CODE_PENDING_REVIEW = 253;
+    public const int RESPONSE_REASON_CODE_PENDING_REVIEW_DECLINED = 254;
 
-    public const PARTIAL_AUTH_CARDS_LIMIT = 5;
+    public const int PARTIAL_AUTH_CARDS_LIMIT = 5;
 
-    public const PARTIAL_AUTH_LAST_SUCCESS         = 'last_success';
-    public const PARTIAL_AUTH_LAST_DECLINED        = 'last_declined';
-    public const PARTIAL_AUTH_ALL_CANCELED         = 'all_canceled';
-    public const PARTIAL_AUTH_CARDS_LIMIT_EXCEEDED = 'card_limit_exceeded';
-    public const PARTIAL_AUTH_DATA_CHANGED         = 'data_changed';
+    public const string PARTIAL_AUTH_LAST_SUCCESS         = 'last_success';
+    public const string PARTIAL_AUTH_LAST_DECLINED        = 'last_declined';
+    public const string PARTIAL_AUTH_ALL_CANCELED         = 'all_canceled';
+    public const string PARTIAL_AUTH_CARDS_LIMIT_EXCEEDED = 'card_limit_exceeded';
+    public const string PARTIAL_AUTH_DATA_CHANGED         = 'data_changed';
 
-    public const METHOD_CODE = 'authorizenet';
+    public const string METHOD_CODE = 'authorizenet';
 
-    public const TRANSACTION_STATUS_EXPIRED = 'expired';
+    public const string TRANSACTION_STATUS_EXPIRED = 'expired';
 
     #[\Override]
     protected $_code  = self::METHOD_CODE;
@@ -438,7 +438,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
         $isFiled = false;
         foreach ($cardsStorage->getCards() as $card) {
             if ($requestedAmount > 0) {
-                $cardAmountForRefund = $this->_formatAmount($card->getCapturedAmount() - $card->getRefundedAmount());
+                $cardAmountForRefund = $this->_formatAmount($card->getCapturedAmount() - $card->getRefundedAmount(), true);
                 if ($cardAmountForRefund <= 0) {
                     continue;
                 }
@@ -924,7 +924,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param \Maho\DataObject $card
      * @return Mage_Sales_Model_Order_Payment_Transaction
      */
-    protected function _refundCardTransaction($payment, $amount, $card)
+    protected function _refundCardTransaction($payment, float $amount, $card)
     {
         /**
          * Card has last transaction with type "refund" when all captured amount is refunded.
@@ -1460,7 +1460,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
         $transactionType,
         array $transactionDetails = [],
         array $transactionAdditionalInfo = [],
-        $message = false,
+        ?string $message = null,
     ) {
         $payment->setTransactionId($transactionId);
         $payment->resetTransactionAdditionalInfo();

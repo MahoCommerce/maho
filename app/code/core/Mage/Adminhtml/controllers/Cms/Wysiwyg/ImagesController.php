@@ -12,11 +12,7 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * ACL resource
-     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
-     */
-    public const ADMIN_RESOURCE = 'cms/media_gallery';
+    public const string ADMIN_RESOURCE = 'cms/media_gallery';
 
     /**
      * Init storage

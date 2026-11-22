@@ -11,7 +11,7 @@ declare(strict_types=1);
 class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity_Attribute_Backend_Image
 {
     /** Directory of post images on the media mount. */
-    public const STORAGE_PATH = 'blog';
+    public const string STORAGE_PATH = 'blog';
 
     #[\Override]
     public function getImageEntity(): string

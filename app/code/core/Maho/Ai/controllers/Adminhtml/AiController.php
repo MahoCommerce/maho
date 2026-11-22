@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_Ai_Adminhtml_AiController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'system/config';
+    public const string ADMIN_RESOURCE = 'system/config';
 
     /**
      * Per-action ACL resources. Mass-queue + destructive actions require
@@ -19,7 +19,7 @@ class Maho_Ai_Adminhtml_AiController extends Mage_Adminhtml_Controller_Action
      * with general config access shouldn't be able to one-click-queue
      * thousands of paid embedding tasks.
      */
-    private const ACTION_RESOURCES = [
+    private const array ACTION_RESOURCES = [
         'tasks'       => 'system/ai/tasks',
         'view'        => 'system/ai/tasks',
         'taskstatus'  => 'system/ai/tasks',
@@ -45,7 +45,7 @@ class Maho_Ai_Adminhtml_AiController extends Mage_Adminhtml_Controller_Action
      * Per-action active menu paths. Drives the highlighted item in the
      * left-hand admin nav. Defaults to the parent "ai" node.
      */
-    private const ACTION_MENUS = [
+    private const array ACTION_MENUS = [
         'tasks'   => 'system/ai/tasks',
         'view'    => 'system/ai/tasks',
         'usage'   => 'system/ai/usage',

@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 final readonly class Mage_ImportExport_Model_ExportMessage
 {
-    public const QUEUE_NAME = 'importexport';
+    public const string QUEUE_NAME = 'importexport';
 
     /**
      * @param array<string, mixed> $parameters

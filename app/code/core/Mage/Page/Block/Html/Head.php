@@ -206,8 +206,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
     }
 
     /**
-     * Get HEAD HTML with CSS/JS/RSS definitions
-     * (actually it also renders other elements, TODO: fix it up or rename this method)
+     * Get the HTML of the head items: CSS, JS, RSS links and the other elements
      *
      * @return string
      */

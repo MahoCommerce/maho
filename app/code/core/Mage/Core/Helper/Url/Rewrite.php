@@ -13,13 +13,13 @@ class Mage_Core_Helper_Url_Rewrite extends Mage_Core_Helper_Abstract
     /**
      * Validation error constants
      */
-    public const VERR_MANYSLASHES = 1; // Too many slashes in a row of request path, e.g. '///foo//'
-    public const VERR_ANCHOR = 2;      // Anchor is not supported in request path, e.g. 'foo#bar'
+    public const int VERR_MANYSLASHES = 1; // Too many slashes in a row of request path, e.g. '///foo//'
+    public const int VERR_ANCHOR = 2;      // Anchor is not supported in request path, e.g. 'foo#bar'
 
     /**
      * Allowed request path length
      */
-    public const TARGET_PATH_ALLOWED_LENGTH = 255;
+    public const int TARGET_PATH_ALLOWED_LENGTH = 255;
 
     #[\Override]
     protected $_moduleName = 'Mage_Core';

@@ -86,13 +86,13 @@ use Maho\Config\ApiResource;
 )]
 class UrlRewrite extends CrudResource
 {
-    public const MODEL = 'core/url_rewrite';
-    public const PRIMARY_KEY = 'url_rewrite_id';
+    public const string MODEL = 'core/url_rewrite';
+    public const string PRIMARY_KEY = 'url_rewrite_id';
 
     /** Admin ACL gate. Mirrors backend Mage_Adminhtml_UrlrewriteController. */
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_UrlrewriteController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_UrlrewriteController::ADMIN_RESOURCE;
 
-    public const OPTIONS = \Mage_Core_Model_Url_Rewrite::OPTIONS;
+    public const array OPTIONS = \Mage_Core_Model_Url_Rewrite::OPTIONS;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

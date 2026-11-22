@@ -21,10 +21,7 @@
  */
 class Mage_Api2_Model_Route_Base
 {
-    /**
-     * URI delimiter
-     */
-    public const URI_DELIMITER = '/';
+    public const string URI_DELIMITER = '/';
 
     /**
      * Variable prefix in route pattern

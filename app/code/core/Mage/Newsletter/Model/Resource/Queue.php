@@ -15,7 +15,7 @@ class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_A
      * subscriber lists: a bulk addition can be large, so neither the IN() list
      * nor the row array may hold the whole set at once.
      */
-    public const LINK_INSERT_CHUNK = 1000;
+    public const int LINK_INSERT_CHUNK = 1000;
 
     #[\Override]
     protected function _construct(): void

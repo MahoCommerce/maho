@@ -20,8 +20,8 @@ declare(strict_types=1);
  */
 class Mage_Core_Model_Store_Group extends Mage_Core_Model_Abstract
 {
-    public const ENTITY         = 'store_group';
-    public const CACHE_TAG      = 'store_group';
+    public const string ENTITY         = 'store_group';
+    public const string CACHE_TAG      = 'store_group';
 
     #[\Override]
     protected $_cacheTag = true;

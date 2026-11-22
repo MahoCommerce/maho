@@ -16,10 +16,10 @@ use Maho\Exception as MahoException;
 
 class Exception extends MahoException
 {
-    public const NOTICE = 'NOTICE';
-    public const WARNING = 'WARNING';
-    public const ERROR = 'ERROR';
-    public const FATAL = 'FATAL';
+    public const string NOTICE = 'NOTICE';
+    public const string WARNING = 'WARNING';
+    public const string ERROR = 'ERROR';
+    public const string FATAL = 'FATAL';
 
     protected ?ContainerInterface $_container = null;
 

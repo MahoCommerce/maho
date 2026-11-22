@@ -10,8 +10,8 @@
 
 class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resource_Db_Abstract
 {
-    public const XML_PATH_INDEX_BATCH_SIZE = 'catalog/search/index_batch_size';
-    public const DEFAULT_INDEX_BATCH_SIZE = 500;
+    public const string XML_PATH_INDEX_BATCH_SIZE = 'catalog/search/index_batch_size';
+    public const int DEFAULT_INDEX_BATCH_SIZE = 500;
 
     /**
      * Searchable attributes cache

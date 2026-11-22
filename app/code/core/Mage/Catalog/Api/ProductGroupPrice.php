@@ -57,7 +57,7 @@ use ApiPlatform\Metadata\Put;
 class ProductGroupPrice extends \Maho\ApiPlatform\Resource
 {
     /** Admin ACL gate. Gated under product management. */
-    public const ADMIN_RESOURCE = \Mage_Adminhtml_Catalog_ProductController::ADMIN_RESOURCE;
+    public const string ADMIN_RESOURCE = \Mage_Adminhtml_Catalog_ProductController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, description: 'Composite identifier (productId_index)')]
     public ?string $id = null;

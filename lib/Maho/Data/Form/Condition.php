@@ -19,15 +19,15 @@ namespace Maho\Data\Form;
 
 final class Condition
 {
-    public const MODE_NOT = 'NOT';
-    public const MODE_AND = 'AND';
-    public const MODE_OR = 'OR';
-    public const MODE_XOR = 'XOR';
+    public const string MODE_NOT = 'NOT';
+    public const string MODE_AND = 'AND';
+    public const string MODE_OR = 'OR';
+    public const string MODE_XOR = 'XOR';
 
-    public const MODES = [self::MODE_NOT, self::MODE_AND, self::MODE_OR, self::MODE_XOR];
+    public const array MODES = [self::MODE_NOT, self::MODE_AND, self::MODE_OR, self::MODE_XOR];
 
     /** The wanted value that matches any value that is not empty. */
-    public const ANY_VALUE = '__any__';
+    public const string ANY_VALUE = '__any__';
 
     public static function isGroup(mixed $entry): bool
     {
