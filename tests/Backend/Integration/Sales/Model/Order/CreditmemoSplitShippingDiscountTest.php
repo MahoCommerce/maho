@@ -21,74 +21,9 @@ it('refunds the shipping discount that was charged to another invoice', function
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
     try {
-        $subtotal = $baseSubtotal = 0.0;
-        foreach ($prices as $sku => $price) {
-            $qty = $quantities[$sku] ?? 1;
-            $subtotal += round($price * $rate, 2) * $qty;
-            $baseSubtotal += $price * $qty;
-        }
-        $baseTotal = round($baseSubtotal / 2 + $shipping - $shippingDiscount, 2);
-        $saleTotal = round($subtotal / 2, 2);
-        $order = Mage::getModel('sales/order')
-            ->setIncrementId('REFUND-SHIPPING-' . uniqid('', true))
-            ->setStoreId(1)
-            ->setState(Mage_Sales_Model_Order::STATE_PROCESSING)
-            ->setStatus('processing')
-            ->setBaseCurrencyCode('USD')->setOrderCurrencyCode('EUR')->setBaseToOrderRate($rate)
-            ->setSubtotal($subtotal)->setBaseSubtotal($baseSubtotal)
-            ->setSubtotalInvoiced($subtotal)->setBaseSubtotalInvoiced($baseSubtotal)
-            ->setShippingAmount(0.0)->setBaseShippingAmount($shipping)
-            ->setShippingInvoiced(0.0)->setBaseShippingInvoiced($shipping)
-            ->setShippingDiscountAmount(0.0)->setBaseShippingDiscountAmount($shippingDiscount)
-            ->setDiscountAmount(-$saleTotal)->setBaseDiscountAmount(-($baseSubtotal / 2 + $shippingDiscount))
-            ->setGrandTotal($saleTotal)->setBaseGrandTotal($baseTotal)
-            ->setTotalInvoiced($saleTotal)->setBaseTotalInvoiced($baseTotal)
-            ->setTotalPaid($saleTotal)->setBaseTotalPaid($baseTotal);
-        $order->setPayment(Mage::getModel('sales/order_payment')->setMethod('checkmo')
-            ->setAmountPaid($saleTotal)->setBaseAmountPaid($baseTotal));
-        foreach ($prices as $sku => $price) {
-            $qty = $quantities[$sku] ?? 1;
-            $salePrice = round($price * $rate, 2);
-            $rowTotal = $salePrice * $qty;
-            $baseRowTotal = $price * $qty;
-            $order->addItem(Mage::getModel('sales/order_item')->setData([
-                'name' => $sku, 'sku' => $sku, 'product_type' => 'simple',
-                'qty_ordered' => $qty, 'qty_invoiced' => $qty,
-                'price' => $salePrice, 'base_price' => $price,
-                'row_total' => $rowTotal, 'base_row_total' => $baseRowTotal,
-                'row_invoiced' => $rowTotal, 'base_row_invoiced' => $baseRowTotal,
-                'discount_amount' => $rowTotal / 2, 'base_discount_amount' => $baseRowTotal / 2,
-                'discount_invoiced' => $rowTotal / 2, 'base_discount_invoiced' => $baseRowTotal / 2,
-            ]));
-        }
-        $order->save();
-        $order = Mage::getModel('sales/order')->load((int) $order->getId());
-        $items = [];
-        foreach ($order->getAllItems() as $item) {
-            $items[$item->getSku()] = $item;
-        }
-        $converter = Mage::getModel('sales/convert_order');
-        $invoices = [];
-        foreach (['shipping' => [$items['shipping']], 'discount' => array_diff_key($items, ['shipping' => true])] as $name => $invoiceItems) {
-            $invoice = $converter->toInvoice($order)->setOrderId((int) $order->getId())
-                ->setState(Mage_Sales_Model_Order_Invoice::STATE_PAID);
-            $discount = $name === 'discount' ? $shippingDiscount : 0.0;
-            $baseInvoiceShipping = $name === 'shipping' ? $shipping : 0.0;
-            $invoiceSubtotal = $baseInvoiceSubtotal = 0.0;
-            foreach ($invoiceItems as $item) {
-                $invoice->addItem($converter->itemToInvoiceItem($item)->setData('qty', $item->getQtyInvoiced())
-                    ->setRowTotal($item->getRowTotal())->setBaseRowTotal($item->getBaseRowTotal())
-                    ->setDiscountAmount($item->getDiscountAmount())->setBaseDiscountAmount($item->getBaseDiscountAmount()));
-                $invoiceSubtotal += $item->getRowTotal();
-                $baseInvoiceSubtotal += $item->getBaseRowTotal();
-            }
-            $invoice->setSubtotal($invoiceSubtotal)->setBaseSubtotal($baseInvoiceSubtotal)
-                ->setShippingAmount(0.0)->setBaseShippingAmount($baseInvoiceShipping)
-                ->setDiscountAmount(-$invoiceSubtotal / 2)->setBaseDiscountAmount(-($baseInvoiceSubtotal / 2 + $discount))
-                ->setGrandTotal($invoiceSubtotal / 2)->setBaseGrandTotal($baseInvoiceSubtotal / 2 + $baseInvoiceShipping - $discount)
-                ->save();
-            $invoices[$name] = $invoice;
-        }
+        [$order, $items, $invoices] = createSplitShippingRefundOrder($prices, $rate, $shipping, $shippingDiscount, $quantities);
+        $baseTotal = (float) $order->getBaseTotalPaid();
+        $saleTotal = (float) $order->getTotalPaid();
         $documents = Mage::getService('sales/order_document');
         foreach ($refunds as $refund) {
             [$sku, $expectedSale, $expectedBase, $expectedBaseDiscount] = $refund;
@@ -161,3 +96,187 @@ it('refunds the shipping discount that was charged to another invoice', function
         ['small' => 2],
     ],
 ]);
+
+it('limits online refunds to the invoice that carries the split shipping discount', function (string $gatewayScenario): void {
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $connection->beginTransaction();
+    $store = Mage::app()->getStore();
+    $paymentPath = 'payment/checkmo/model';
+    $previousPaymentModel = $store->getConfig($paymentPath);
+    try {
+        [$order, $items, $invoices] = createSplitShippingRefundOrder(
+            ['shipping' => 10.0, 'replacement' => 10.0],
+            0.004,
+            1.0,
+            0.01,
+            split: $gatewayScenario !== 'ordinary port',
+            decimalQuantities: $gatewayScenario === 'partial balance',
+        );
+        $documents = Mage::getService('sales/order_document');
+        $store->setConfig($paymentPath, SplitShippingRefundPaymentDouble::class);
+        $calls = new Maho\DataObject();
+        Mage::register('split_shipping_refund_payment_calls', $calls);
+        $invoice = $invoices['discount'];
+        $captureId = 'split-shipping-capture-' . uniqid();
+        $invoice->setTransactionId($captureId)->save();
+        Mage::getModel('sales/order_payment_transaction')->setOrderPaymentObject($order->getPayment())
+            ->setTxnId($captureId)->setTxnType(Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE)->save();
+        $data = ['qtys' => [(int) $items['replacement']->getId() => 1]];
+        if (in_array($gatewayScenario, ['historical', 'unlinked historical'], true)) {
+            $first = $documents->refund(
+                $order,
+                ['qtys' => [(int) $items['shipping']->getId() => 1], 'shipping_amount' => 1.0],
+                invoice: $gatewayScenario === 'historical' ? $invoices['shipping'] : null,
+                beforeRegister: static function ($memo): void {
+                    // Older collectors deducted the shipping discount on the port invoice.
+                    $memo->setBaseDiscountAmount(-5.01)->setBaseGrandTotal(5.99);
+                },
+            );
+            expect($first->getBaseGrandTotal())->toBe(5.99);
+            $order = Mage::getModel('sales/order')->load($order->getId());
+            expect(fn() => $documents->refund($order, $data, offlineRefund: false, invoice: $invoice))
+                ->toThrow(Mage_Core_Exception::class, 'The refund amount exceeds the refundable balance of this invoice.');
+            $order = Mage::getModel('sales/order')->load($order->getId());
+            expect($calls->getData('amount'))->toBeNull()
+                ->and($order->getBaseTotalRefunded())->toBe(5.99)
+                ->and($order->getCreditmemosCollection()->getSize())->toBe(1);
+            $offline = $documents->refund($order, $data, invoice: $invoice);
+            expect($offline->getBaseGrandTotal())->toBe(5.0)->and($calls->getData('amount'))->toBeNull();
+        } elseif ($gatewayScenario === 'partial balance') {
+            $half = ['qtys' => [(int) $items['replacement']->getId() => 0.5]];
+            $first = $documents->refund($order, $half, offlineRefund: false, invoice: $invoice);
+            expect($first->getBaseGrandTotal())->toBe(2.49)->and($calls->getData('amount'))->toBe(2.49);
+            $calls->unsetData('amount');
+            $order = Mage::getModel('sales/order')->load($order->getId());
+            $invoice = Mage::getModel('sales/order_invoice')->load($invoice->getId());
+            expect(fn() => $documents->refund($order, $half + ['adjustment_positive' => 0.01], offlineRefund: false, invoice: $invoice))
+                ->toThrow(Mage_Core_Exception::class, 'The refund amount exceeds the refundable balance of this invoice.');
+            $invoice = Mage::getModel('sales/order_invoice')->load($invoice->getId());
+            expect($invoice->getBaseTotalRefunded())->toBe(2.49)->and($calls->getData('amount'))->toBeNull();
+            $order = Mage::getModel('sales/order')->load($order->getId());
+            $documents->refund($order, $half, offlineRefund: false, invoice: $invoice);
+            expect($calls->getData('amount'))->toBe(2.50);
+        } else {
+            if ($gatewayScenario === 'ordinary port') {
+                $data['shipping_amount'] = 1.0;
+            }
+            $documents->refund($order, $data, offlineRefund: false, invoice: $invoice);
+            expect($calls->getData('amount'))->toBe($gatewayScenario === 'ordinary port' ? 5.99 : 4.99)
+                ->and($calls->getData('capture'))->toBe($captureId);
+        }
+    } finally {
+        Mage::unregister('split_shipping_refund_payment_calls');
+        $store->setConfig($paymentPath, $previousPaymentModel);
+        $connection->rollBack();
+    }
+})->with([
+    'discount already used on the historic port invoice' => 'historical',
+    'discount already used on an unlinked historic port refund' => 'unlinked historical',
+    'balance after a linked partial refund and an adjustment' => 'partial balance',
+    'no prior memo moved the discount' => 'matching',
+    'explicitly requested shipping on an ordinary order' => 'ordinary port',
+]);
+
+/**
+ * @param array<string, float> $prices
+ * @param array<string, int> $quantities
+ * @return array{Mage_Sales_Model_Order, array<string, Mage_Sales_Model_Order_Item>, array<string, Mage_Sales_Model_Order_Invoice>}
+ */
+function createSplitShippingRefundOrder(
+    array $prices,
+    float $rate,
+    float $shipping,
+    float $shippingDiscount,
+    array $quantities = [],
+    bool $split = true,
+    bool $decimalQuantities = false,
+): array {
+    $subtotal = $baseSubtotal = 0.0;
+    foreach ($prices as $sku => $price) {
+        $qty = $quantities[$sku] ?? 1;
+        $subtotal += round($price * $rate, 2) * $qty;
+        $baseSubtotal += $price * $qty;
+    }
+    $baseTotal = round($baseSubtotal / 2 + $shipping - $shippingDiscount, 2);
+    $saleTotal = round($subtotal / 2, 2);
+    $order = Mage::getModel('sales/order')
+        ->setIncrementId('REFUND-SHIPPING-' . uniqid('', true))
+        ->setStoreId(1)
+        ->setState(Mage_Sales_Model_Order::STATE_PROCESSING)
+        ->setStatus('processing')
+        ->setBaseCurrencyCode('USD')->setOrderCurrencyCode('EUR')->setBaseToOrderRate($rate)
+        ->setSubtotal($subtotal)->setBaseSubtotal($baseSubtotal)
+        ->setSubtotalInvoiced($subtotal)->setBaseSubtotalInvoiced($baseSubtotal)
+        ->setShippingAmount(0.0)->setBaseShippingAmount($shipping)
+        ->setShippingInvoiced(0.0)->setBaseShippingInvoiced($shipping)
+        ->setShippingDiscountAmount(0.0)->setBaseShippingDiscountAmount($shippingDiscount)
+        ->setDiscountAmount(-$saleTotal)->setBaseDiscountAmount(-($baseSubtotal / 2 + $shippingDiscount))
+        ->setGrandTotal($saleTotal)->setBaseGrandTotal($baseTotal)
+        ->setTotalInvoiced($saleTotal)->setBaseTotalInvoiced($baseTotal)
+        ->setTotalPaid($saleTotal)->setBaseTotalPaid($baseTotal);
+    $order->setPayment(Mage::getModel('sales/order_payment')->setMethod('checkmo')
+        ->setAmountPaid($saleTotal)->setBaseAmountPaid($baseTotal));
+    foreach ($prices as $sku => $price) {
+        $qty = $quantities[$sku] ?? 1;
+        $salePrice = round($price * $rate, 2);
+        $rowTotal = $salePrice * $qty;
+        $baseRowTotal = $price * $qty;
+        $order->addItem(Mage::getModel('sales/order_item')->setData([
+            'name' => $sku, 'sku' => $sku, 'product_type' => 'simple',
+            'qty_ordered' => $qty, 'qty_invoiced' => $qty, 'is_qty_decimal' => $decimalQuantities,
+            'price' => $salePrice, 'base_price' => $price,
+            'row_total' => $rowTotal, 'base_row_total' => $baseRowTotal,
+            'row_invoiced' => $rowTotal, 'base_row_invoiced' => $baseRowTotal,
+            'discount_amount' => $rowTotal / 2, 'base_discount_amount' => $baseRowTotal / 2,
+            'discount_invoiced' => $rowTotal / 2, 'base_discount_invoiced' => $baseRowTotal / 2,
+        ]));
+    }
+    $order->save();
+    $order = Mage::getModel('sales/order')->load((int) $order->getId());
+    $items = [];
+    foreach ($order->getAllItems() as $item) {
+        $items[$item->getSku()] = $item;
+    }
+    $converter = Mage::getModel('sales/convert_order');
+    $invoices = [];
+    foreach (['shipping' => [$items['shipping']], 'discount' => array_diff_key($items, ['shipping' => true])] as $name => $invoiceItems) {
+        $invoice = $converter->toInvoice($order)->setOrderId((int) $order->getId())
+            ->setState(Mage_Sales_Model_Order_Invoice::STATE_PAID);
+        $discount = $name === ($split ? 'discount' : 'shipping') ? $shippingDiscount : 0.0;
+        $baseInvoiceShipping = $name === 'shipping' ? $shipping : 0.0;
+        $invoiceSubtotal = $baseInvoiceSubtotal = 0.0;
+        foreach ($invoiceItems as $item) {
+            $invoice->addItem($converter->itemToInvoiceItem($item)->setData('qty', $item->getQtyInvoiced())
+                ->setRowTotal($item->getRowTotal())->setBaseRowTotal($item->getBaseRowTotal())
+                ->setDiscountAmount($item->getDiscountAmount())->setBaseDiscountAmount($item->getBaseDiscountAmount()));
+            $invoiceSubtotal += $item->getRowTotal();
+            $baseInvoiceSubtotal += $item->getBaseRowTotal();
+        }
+        $invoice->setSubtotal($invoiceSubtotal)->setBaseSubtotal($baseInvoiceSubtotal)
+            ->setShippingAmount(0.0)->setBaseShippingAmount($baseInvoiceShipping)
+            ->setDiscountAmount(-$invoiceSubtotal / 2)->setBaseDiscountAmount(-($baseInvoiceSubtotal / 2 + $discount))
+            ->setGrandTotal($invoiceSubtotal / 2)->setBaseGrandTotal($baseInvoiceSubtotal / 2 + $baseInvoiceShipping - $discount)
+            ->save();
+        $invoices[$name] = $invoice;
+    }
+    return [$order, $items, $invoices];
+}
+
+final class SplitShippingRefundPaymentDouble extends Mage_Payment_Model_Method_Checkmo
+{
+    #[\Override]
+    public function canRefund(): bool
+    {
+        return true;
+    }
+
+    #[\Override]
+    public function refund(Maho\DataObject $payment, $amount): static
+    {
+        Mage::registry('split_shipping_refund_payment_calls')
+            ->setData('amount', (float) $amount)
+            ->setData('capture', $payment->getParentTransactionId());
+        $payment->setTransactionId('split-shipping-refund-' . uniqid());
+        return $this;
+    }
+}

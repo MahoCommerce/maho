@@ -85,6 +85,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
 
     private function getBaseShippingDiscount(Mage_Sales_Model_Order_Creditmemo $memo, float $itemDiscount): float
     {
+        $memo->unsetData('is_split_shipping_discount_invoice_refund');
         $order = $memo->getOrder();
         $shipping = (float) $order->getBaseShippingAmount();
         $shippingDiscount = (float) $order->getBaseShippingDiscountAmount();
@@ -98,6 +99,10 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         $source = $this->getSplitDiscountInvoice($order, $shipping, $shippingDiscount);
         if (!$source) {
             return $default;
+        }
+        $invoice = $memo->getInvoice();
+        if ($invoice && $invoice->getId() === $source->getId()) {
+            $memo->setData('is_split_shipping_discount_invoice_refund', true);
         }
         $previous = [];
         $used = 0.0;
@@ -118,7 +123,6 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
             return 0.0;
         }
 
-        $invoice = $memo->getInvoice();
         $shippingLeft = round($shipping - (float) $order->getBaseShippingRefunded(), 4);
         if (($invoice && $refundedShipping !== min($shippingLeft, (float) $invoice->getBaseShippingAmount()))
             || $memo->getBaseAdjustmentPositive() || $memo->getBaseAdjustmentNegative()

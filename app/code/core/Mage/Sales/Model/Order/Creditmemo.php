@@ -413,6 +413,17 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
             );
         }
 
+        if ($this->getData('is_split_shipping_discount_invoice_refund')
+            && !$this->getOfflineRequested() && !$this->getPaymentRefundDisallowed()
+            && ($invoice = $this->getInvoice()) && $this->getOrder()->getPayment()->canRefund()
+        ) {
+            $store = Mage::app()->getStore();
+            $baseAmount = $store->roundPrice($this->getBaseGrandTotal());
+            if ($store->roundPrice($invoice->getBaseTotalRefunded() + $baseAmount) > $store->roundPrice($invoice->getBaseGrandTotal())) {
+                Mage::throwException(Mage::helper('sales')->__('The refund amount exceeds the refundable balance of this invoice.'));
+            }
+        }
+
         foreach ($this->getAllItems() as $item) {
             if ($item->getQty() > 0) {
                 $item->register();

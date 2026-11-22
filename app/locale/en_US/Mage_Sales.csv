@@ -794,6 +794,7 @@
 "There is no need to approve this payment.","There is no need to approve this payment."
 "There is no need to deny this payment.","There is no need to deny this payment."
 "There is no update for the payment.","There is no update for the payment."
+"The refund amount exceeds the refundable balance of this invoice.","The refund amount exceeds the refundable balance of this invoice."
 "The remaining shipping discount exceeds the amount of this invoice.","The remaining shipping discount exceeds the amount of this invoice."
 "The requested Payment Method is not available.","The requested Payment Method is not available."
 "the shipment email is not sent","the shipment email is not sent"
