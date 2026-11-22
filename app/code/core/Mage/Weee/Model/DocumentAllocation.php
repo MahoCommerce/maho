@@ -71,11 +71,14 @@ class Mage_Weee_Model_DocumentAllocation
             $fees = $helper->getAppliedToItem($item);
             $amount = $this->orderItemAmounts($item, $fees, $store);
             foreach ([
-                'gross' => ['discount', 'row_amount'],
-                'base_gross' => ['base_discount', 'base_row_amount'],
-            ] as $key => [$discountKey, $rowKey]) {
+                'gross' => ['discount', 'row_amount_incl_tax', 'amount_incl_tax'],
+                'base_gross' => ['base_discount', 'base_row_amount_incl_tax', 'base_amount_incl_tax'],
+            ] as $key => [$discountKey, $rowKey, $unitKey]) {
                 $discount = $amount[$discountKey];
-                $grossInclTax = array_sum(array_column($fees, $rowKey . '_incl_tax'));
+                $grossInclTax = 0.0;
+                foreach ($fees as $fee) {
+                    $grossInclTax += $fee[$rowKey] ?? ($fee[$unitKey] ?? 0.0) * $amount['qty'];
+                }
                 // A discount on the tax-inclusive fee can leave a signed net amount.
                 if ($discount > $store->roundPrice($amount[$key]) && $discount <= $store->roundPrice($grossInclTax)) {
                     $signedItems[$key][$id] = true;

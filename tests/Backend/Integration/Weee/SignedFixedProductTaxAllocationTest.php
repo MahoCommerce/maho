@@ -152,3 +152,27 @@ it('keeps a discount on taxable fixed product tax on the line that earned it', f
     'full-price line billed first' => [false, 20.0, 90.0, 13.20, 10.80],
     'one cent of signed fixed product tax' => [true, 10.0, 91.0, 10.89, 10.01],
 ]);
+
+it('reads the tax-inclusive amount of each saved fee from its row or unit amount', function (): void {
+    $order = Mage::getModel('sales/order')->setStoreId(1);
+    foreach ([1 => [8.64, 12.96], 2 => [0.0, 0.0]] as $id => [$recyclingDiscount, $disposalDiscount]) {
+        $item = Mage::getModel('sales/order_item')->setId($id)->setQtyOrdered(2);
+        Mage::helper('weee')->setApplied($item, [
+            [
+                'title' => 'Recycling', 'row_amount' => 8.0, 'base_row_amount' => 8.0,
+                'row_amount_incl_tax' => 9.60, 'base_amount_incl_tax' => 4.80,
+                'weee_discount' => $recyclingDiscount, 'base_weee_discount' => $recyclingDiscount,
+            ],
+            [
+                'title' => 'Disposal', 'row_amount' => 12.0, 'base_row_amount' => 12.0,
+                'row_amount_incl_tax' => 14.40, 'base_row_amount_incl_tax' => 14.40,
+                'weee_discount' => $disposalDiscount, 'base_weee_discount' => $disposalDiscount,
+            ],
+        ]);
+        $order->getItemsCollection()->addItem($item);
+    }
+
+    $amounts = new Mage_Weee_Model_DocumentAllocation()->orderAmounts($order);
+    expect(array_column($amounts, 'gross'))->toBe([20.0, 20.0])
+        ->and(array_column($amounts, 'base_gross'))->toBe([20.0, 20.0]);
+});
