@@ -142,10 +142,21 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
             $tax = $invoice->getTaxAmount() - $invoice->getShippingTaxAmount();
             $baseTax = $invoice->getBaseTaxAmount() - $invoice->getBaseShippingTaxAmount();
             $previous = Mage::getResourceModel('sales/order_creditmemo_collection')->setOrderFilter($order);
+            $priorMemos = [];
+            $invoicesWithRefundedItemTax = [];
             foreach ($previous as $memo) {
                 if ($memo->getState() == Mage_Sales_Model_Order_Creditmemo::STATE_CANCELED || $memo->getId() == $creditmemo->getId()) {
                     continue;
                 }
+                $priorMemos[] = $memo;
+                $invoiceId = $memo->getInvoiceId();
+                if ($invoiceId && ((float) $memo->getTaxAmount() !== (float) $memo->getShippingTaxAmount()
+                    || (float) $memo->getBaseTaxAmount() !== (float) $memo->getBaseShippingTaxAmount())
+                ) {
+                    $invoicesWithRefundedItemTax[$invoiceId] = true;
+                }
+            }
+            foreach ($priorMemos as $memo) {
                 $invoiceId = $memo->getInvoiceId();
                 if (!$invoiceId) {
                     $itemTax = $memo->getTaxAmount() - $memo->getShippingTaxAmount();
@@ -155,8 +166,9 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                     }
                     $memo->setOrder($order);
                     $source = $this->getWholeItemInvoice($memo, $order);
-                    // An older refund may have charged another invoice's outstanding tax.
-                    if (!$source || round($source->getTaxAmount() - $source->getShippingTaxAmount() - $itemTax, 4) != 0
+                    // The original invoice tax proves attribution only while no linked refund has consumed it.
+                    if (!$source || isset($invoicesWithRefundedItemTax[$source->getId()])
+                        || round($source->getTaxAmount() - $source->getShippingTaxAmount() - $itemTax, 4) != 0
                         || round($source->getBaseTaxAmount() - $source->getBaseShippingTaxAmount() - $baseItemTax, 4) != 0) {
                         return $this->getSignedItemTaxLeft($creditmemo, null);
                     }
