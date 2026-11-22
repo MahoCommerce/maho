@@ -62,10 +62,8 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
 
     /**
      * Set attribute instance
-     *
-     * @return Mage_Eav_Model_Attribute_Data_Abstract
      */
-    public function setAttribute(Mage_Eav_Model_Attribute $attribute)
+    public function setAttribute(Mage_Eav_Model_Attribute $attribute): static
     {
         $this->_attribite = $attribute;
         return $this;

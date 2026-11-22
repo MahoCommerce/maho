@@ -368,10 +368,8 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
 
     /**
      * Retrieve Default Attribute Set for Entity Type
-     *
-     * @param string|int $entityType
      */
-    public function getDefaultAttributeSetId($entityType): int
+    public function getDefaultAttributeSetId(string|int $entityType): int
     {
         $bind = ['entity_type' => $entityType];
         if (is_numeric($entityType)) {

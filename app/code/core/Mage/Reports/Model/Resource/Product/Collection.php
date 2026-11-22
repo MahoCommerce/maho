@@ -64,10 +64,8 @@ class Mage_Reports_Model_Resource_Product_Collection extends Mage_Catalog_Model_
 
     /**
      * Set the name of the ID field of the product entity table
-     *
-     * @return $this
      */
-    public function setProductEntityId(string $entityId)
+    public function setProductEntityId(string $entityId): static
     {
         $this->_productEntityId = $entityId;
         return $this;

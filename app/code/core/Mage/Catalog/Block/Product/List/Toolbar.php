@@ -192,10 +192,8 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
 
     /**
      * Set collection to pager
-     *
-     * @return $this
      */
-    public function setCollection(\Maho\Data\Collection $collection)
+    public function setCollection(\Maho\Data\Collection $collection): static
     {
         $this->_collection = $collection;
 
