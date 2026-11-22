@@ -332,13 +332,12 @@ class Mage_Sales_Model_Order_Payment_Transaction extends Mage_Core_Model_Abstrac
     /**
      * Check whether authorization in current hierarchy can be voided completely
      * Basically checks whether the authorization exists and it is not affected by a capture or void
-     * @return bool
      */
-    public function canVoidAuthorizationCompletely()
+    public function canVoidAuthorizationCompletely(): bool
     {
         try {
-            $authTransaction = $this->closeAuthorization('', true);
-            if ($authTransaction->hasChildTransaction() || $this->_children) {
+            $authTransaction = $this->closeAuthorization(false, true);
+            if (!$authTransaction || $authTransaction->hasChildTransaction() || $this->_children) {
                 return false;
             }
             return true;

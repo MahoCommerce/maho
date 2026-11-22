@@ -1262,24 +1262,19 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
     /**
      * Prepend a "prepared_message" that may be set to the payment instance before, to the specified message
      * Prepends value to the specified string or to the comment of specified order status history item instance
-     *
-     * @param string|Mage_Sales_Model_Order_Status_History $messagePrependTo
-     * @return string|Mage_Sales_Model_Order_Status_History
      */
-    protected function _prependMessage($messagePrependTo)
+    protected function _prependMessage(string $messagePrependTo): string
     {
         $preparedMessage = $this->getPreparedMessage();
-        if ($preparedMessage) {
-            if (is_string($preparedMessage)) {
-                return $preparedMessage . ' ' . $messagePrependTo;
-            }
-            if ($preparedMessage instanceof Mage_Sales_Model_Order_Status_History) {
-                $comment = $preparedMessage->getComment() . ' ' . $messagePrependTo;
-                $preparedMessage->setComment($comment);
-                return $comment;
-            }
+        if (!$preparedMessage) {
+            return $messagePrependTo;
         }
-        return $messagePrependTo;
+        if (is_string($preparedMessage)) {
+            return $preparedMessage . ' ' . $messagePrependTo;
+        }
+        $comment = $preparedMessage->getComment() . ' ' . $messagePrependTo;
+        $preparedMessage->setComment($comment);
+        return $comment;
     }
 
     /**
@@ -2027,6 +2022,11 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         return $value === null ? null : (bool) $value;
     }
 
+    /**
+     * A payment method sets the flag while it captures, so the value can change between two calls.
+     *
+     * @phpstan-impure
+     */
     public function getIsTransactionPending(): ?bool
     {
         $value = $this->getData('is_transaction_pending');

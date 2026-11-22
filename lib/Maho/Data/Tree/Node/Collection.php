@@ -27,10 +27,7 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
      */
     private $_nodes;
 
-    /**
-     * @var Tree
-     */
-    private $_container;
+    private Tree|Node $_container;
 
     public function __construct(Tree|Node $container)
     {
@@ -100,13 +97,10 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
     }
 
     /**
-     * Adds a node to this node
-     * @return Node
+     * Adds a node to this collection
      */
-    public function add(Node $node)
+    public function add(Node $node): Node
     {
-        $node->setParent($this->_container);
-
         // Set the Tree for the node
         if ($this->_container->getTree() instanceof Tree) {
             $node->setTree($this->_container->getTree());

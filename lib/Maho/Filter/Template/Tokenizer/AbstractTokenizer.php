@@ -27,9 +27,9 @@ abstract class AbstractTokenizer
      *
      * If index out of bounds returns false
      *
-     * @return boolean
+     * @phpstan-impure
      */
-    public function next()
+    public function next(): bool
     {
         if ($this->_currentIndex + 1 >= strlen($this->_string)) {
             return false;
@@ -44,9 +44,9 @@ abstract class AbstractTokenizer
      *
      * If index out of bounds returns false
      *
-     * @return boolean
+     * @phpstan-impure
      */
-    public function prev()
+    public function prev(): bool
     {
         if ($this->_currentIndex - 1 < 0) {
             return false;

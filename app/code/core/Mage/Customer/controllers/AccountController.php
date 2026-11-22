@@ -412,10 +412,8 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 
     /**
      * Get Customer Model
-     *
-     * @return Mage_Customer_Model_Customer
      */
-    protected function _getCustomer()
+    protected function _getCustomer(): Mage_Customer_Model_Customer
     {
         /** @var ?Mage_Customer_Model_Customer $customer */
         $customer = Mage::registry('current_customer');
@@ -423,7 +421,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $customer = Mage::getModel('customer/customer')->setId(null);
         }
         if ($this->getRequest()->getParam('is_subscribed', false)) {
-            $customer->setIsSubscribed(1);
+            $customer->setIsSubscribed();
         }
         /**
          * Initialize customer group id

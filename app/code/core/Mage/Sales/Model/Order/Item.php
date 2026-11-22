@@ -1188,13 +1188,13 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
         return $this->setData('gift_message_id', $value);
     }
 
-    public function getGiftMessageAvailable(): ?int
+    public function getGiftMessageAvailable(): ?bool
     {
         $value = $this->getData('gift_message_available');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setGiftMessageAvailable(?int $value): static
+    public function setGiftMessageAvailable(?bool $value = true): static
     {
         return $this->setData('gift_message_available', $value);
     }
