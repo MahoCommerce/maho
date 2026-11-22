@@ -131,7 +131,9 @@ class MahoReportExplorer {
 
     async post(url, params) {
         try {
-            return await mahoFetch(url, { method: 'POST', body: new URLSearchParams(params), rejectOnError: false });
+            const result = await mahoFetch(url, { method: 'POST', body: new URLSearchParams(params), rejectOnError: false });
+            // An answer that is not JSON, such as an error page, must show an error and not leave the page as it was
+            return typeof result === 'object' && result !== null ? result : { error: true, message: this.t('requestFailed') };
         } catch (error) {
             return { error: true, message: error.message };
         }

@@ -180,6 +180,7 @@ class Mage_Adminhtml_Block_Report_Explorer extends Mage_Adminhtml_Block_Template
             'targetsHint' => $helper->__('Set a target for each month. A report by the period with no other grouping and no filter shows it.'),
             'noTargets' => $helper->__('No target yet.'),
             'ofTarget' => $helper->__('%1$s % of the target %2$s'),
+            'requestFailed' => $helper->__('The report could not be loaded. Reload the page and try again.'),
             'forecastMonth' => $helper->__('Forecast for the month: %s'),
             'forecastYear' => $helper->__('Forecast for the year: %s'),
             'forecastOfTarget' => $helper->__('%s % of the target'),

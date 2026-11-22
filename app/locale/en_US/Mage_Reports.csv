@@ -406,6 +406,7 @@
 "The note with ID %s does not exist.","The note with ID %s does not exist."
 "The period before","The period before"
 "The report ""%s"" does not exist.","The report ""%s"" does not exist."
+"The report could not be loaded. Reload the page and try again.","The report could not be loaded. Reload the page and try again."
 "The report definition is required.","The report definition is required."
 "The report export failed","The report export failed"
 "The report export is ready","The report export is ready"
