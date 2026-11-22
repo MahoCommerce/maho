@@ -651,6 +651,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         if ($divideOrderWeight && !empty($items)) {
             $maxWeight = $this->_getWeight($this->_maxWeight, true);
             $sumWeight = 0;
+            $roundingTolerance = 2 * PHP_FLOAT_EPSILON * $maxWeight;
 
             $reverseOrderItems = $items;
             arsort($reverseOrderItems);
@@ -662,10 +663,11 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
                 unset($items[$key]);
                 $sumWeight = $weight;
                 foreach ($items as $keyItem => $weightItem) {
-                    if (($sumWeight + $weightItem) < $maxWeight) {
+                    $weightWithItem = $sumWeight + $weightItem;
+                    if ($weightWithItem < $maxWeight - $roundingTolerance) {
                         unset($items[$keyItem]);
-                        $sumWeight += $weightItem;
-                    } elseif (($sumWeight + $weightItem) > $maxWeight) {
+                        $sumWeight = $weightWithItem;
+                    } elseif ($weightWithItem > $maxWeight + $roundingTolerance) {
                         $numberOfPieces++;
                         $nodePiece = $nodePieces->addChild('Piece', '', '');
                         $nodePiece->addChild('PieceID', (string) $numberOfPieces);
@@ -675,11 +677,10 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
                     } else {
                         unset($items[$keyItem]);
                         $numberOfPieces++;
-                        $sumWeight += $weightItem;
                         $nodePiece = $nodePieces->addChild('Piece', '', '');
                         $nodePiece->addChild('PieceID', (string) $numberOfPieces);
                         $this->_addDimension($nodePiece);
-                        $nodePiece->addChild('Weight', (string) $sumWeight);
+                        $nodePiece->addChild('Weight', (string) $maxWeight);
                         $sumWeight = 0;
                         break;
                     }

@@ -293,9 +293,9 @@ class Mage_Shipping_Model_Shipping
                         if ($maxWeight > 0 && $itemWeight > $maxWeight) {
                             $qtyItem = floor($itemWeight / $maxWeight);
                             $decimalItems[] = ['weight' => $maxWeight, 'qty' => $qtyItem];
-                            $weightItem = round($itemWeight - $qtyItem * $maxWeight, 4);
-                            if ($weightItem > 0) {
-                                $decimalItems[] = ['weight' => $weightItem, 'qty' => 1];
+                            $weightItem = $itemWeight - $qtyItem * $maxWeight;
+                            if ($weightItem > 2 * PHP_FLOAT_EPSILON * $itemWeight) {
+                                $decimalItems[] = ['weight' => min($weightItem, $maxWeight), 'qty' => 1];
                             }
                             $checkWeight = false;
                         }
@@ -344,6 +344,7 @@ class Mage_Shipping_Model_Shipping
         $pieces = [];
         if (!empty($items)) {
             $sumWeight = 0;
+            $roundingTolerance = 2 * PHP_FLOAT_EPSILON * abs($maxWeight);
 
             $reverseOrderItems = $items;
             arsort($reverseOrderItems);
@@ -355,15 +356,16 @@ class Mage_Shipping_Model_Shipping
                 unset($items[$key]);
                 $sumWeight = $weight;
                 foreach ($items as $keyItem => $weightItem) {
-                    if (($sumWeight + $weightItem) < $maxWeight) {
+                    $weightWithItem = $sumWeight + $weightItem;
+                    if ($weightWithItem < $maxWeight - $roundingTolerance) {
                         unset($items[$keyItem]);
-                        $sumWeight += $weightItem;
-                    } elseif (($sumWeight + $weightItem) > $maxWeight) {
+                        $sumWeight = $weightWithItem;
+                    } elseif ($weightWithItem > $maxWeight + $roundingTolerance) {
                         $pieces[] = (string) (float) $sumWeight;
                         break;
                     } else {
                         unset($items[$keyItem]);
-                        $pieces[] = (string) (float) ($sumWeight + $weightItem);
+                        $pieces[] = (string) (float) $maxWeight;
                         $sumWeight = 0;
                         break;
                     }
