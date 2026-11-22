@@ -64,7 +64,26 @@ The chart shows one metric. Its type follows the first grouping:
   or five bar colors.
 
 The buttons **Auto**, **Line**, **Bar** and **Table** on the chart change its type. **Table** hides
-the chart.
+the chart. A report with two groupings also has **Matrix**: a table with one row for each value of
+the first grouping and one column for each value of the second grouping. The color of a cell grows
+with its value. **Share of the first column** shows each cell as a percent of the first cell of its
+row.
+
+## Customer cohorts
+
+The ready-made report **Customer cohorts** groups the customers by the month of their first order.
+Each row is one month of first orders. Each column is a number of months after that month: column
+0 is the month of the first order, column 1 the month after it, and so on. A cell shows how many
+customers of the row ordered in that month.
+
+Click **Share of the first column** to see the percent of the customers of each row who ordered
+again, for example 25 % in column 3.
+
+- A customer is a customer email, so a guest and a registered customer with the same email are one
+  customer. The first order is the first placed order, in any store view.
+- The report keeps only the customers whose first order is in the period, with the filter **First
+  order in the period**. Remove the filter to also see the later orders of older customers.
+- Change the metric of the chart to **Net sales** or **Orders** to see the amounts of each cohort.
 
 When the period changes, a date grouping changes its step: hours for one or two days, days up to
 two months, weeks up to six months, then months.

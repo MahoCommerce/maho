@@ -169,7 +169,7 @@ class MahoReportExplorer {
     }
 
     initialView() {
-        const view = { chartMetric: null, chartType: 'auto', panel: null, drill: [], valueLabels: {} };
+        const view = { chartMetric: null, chartType: 'auto', matrixShare: false, panel: null, drill: [], valueLabels: {} };
         const encoded = new URL(window.location.href).searchParams.get('view');
         if (encoded) {
             try {
@@ -256,6 +256,7 @@ class MahoReportExplorer {
                     <div class="d-card-body p-4 gap-3">
                         <div class="flex flex-wrap items-center gap-2" data-role="chart-header"></div>
                         <div class="relative h-72" data-role="chart-box"><canvas data-role="chart"></canvas></div>
+                        <div class="overflow-x-auto" data-role="matrix" hidden></div>
                         <div class="flex flex-wrap gap-2" data-role="notes"></div>
                     </div>
                 </div>
@@ -1275,6 +1276,9 @@ class MahoReportExplorer {
         if (dimensions.length === 0 || !this.chartMetric() || this.view.chartType === 'table') {
             return 'none';
         }
+        if (dimensions.length === 2 && (this.view.chartType === 'matrix' || (this.view.chartType === 'auto' && this.presetChart === 'matrix'))) {
+            return 'matrix';
+        }
         const first = dimensions[0];
         const overTime = Boolean(first.granularity) && !MahoReportExplorer.CYCLES.includes(first.granularity);
         if (this.view.chartType === 'line') {
@@ -1315,7 +1319,16 @@ class MahoReportExplorer {
         const group = this.element('div', 'd-join');
         group.setAttribute('role', 'group');
         group.setAttribute('aria-label', this.t('chartType'));
-        for (const type of ['auto', 'line', 'bar', 'table']) {
+        if (shape === 'matrix') {
+            const share = this.button(this.t('matrixShare'), `d-btn d-btn-xs ${this.view.matrixShare ? 'd-btn-active' : ''}`, () => {
+                this.setView({ matrixShare: !this.view.matrixShare });
+                this.renderChart(this.runToken);
+            });
+            share.setAttribute('aria-pressed', String(Boolean(this.view.matrixShare)));
+            header.append(share);
+        }
+        const types = this.dimensionColumns().length === 2 ? ['auto', 'line', 'bar', 'matrix', 'table'] : ['auto', 'line', 'bar', 'table'];
+        for (const type of types) {
             const option = this.button(this.t(type), `d-btn d-btn-xs d-join-item ${this.view.chartType === type ? 'd-btn-active' : ''}`, () => {
                 this.setView({ chartType: type });
                 this.renderChart(this.runToken);
@@ -1324,7 +1337,8 @@ class MahoReportExplorer {
             group.append(option);
         }
         header.append(group);
-        this.parts['chart-box'].hidden = shape === 'none';
+        this.parts['chart-box'].hidden = shape === 'none' || shape === 'matrix';
+        this.parts.matrix.hidden = shape !== 'matrix';
     }
 
     /**
@@ -1395,6 +1409,22 @@ class MahoReportExplorer {
         if (shape === 'none' || card.hidden) {
             return;
         }
+        if (shape === 'matrix') {
+            const metric = this.chartMetric();
+            const result = await this.runRequest({
+                ...this.state,
+                metrics: [metric.key],
+                dimensions: this.state.dimensions.slice(0, 2),
+                compare: undefined,
+                sort: undefined,
+                offset: undefined,
+                limit: this.config.maxRows,
+            });
+            if (token === this.runToken && own === this.chartToken && !result.error) {
+                this.renderMatrix(result.rows, metric);
+            }
+            return;
+        }
         let data;
         try {
             await this.loadChartJs();
@@ -1410,6 +1440,75 @@ class MahoReportExplorer {
             this.chart.destroy();
         }
         this.chart = this.drawChart(this.parts.chart, shape, data, this.chartMetric(), this.result);
+    }
+
+    /**
+     * A table of the values of the first grouping by the values of the second one, such as the month of the first
+     * order by the months after it. The color of a cell grows with its value. The share shows each cell against the
+     * first cell of its row, such as the customers of a cohort who order again.
+     */
+    renderMatrix(rows, metric) {
+        const holder = this.parts.matrix;
+        holder.textContent = '';
+        const [first, second] = this.dimensionColumns();
+        const key = (row, column) => String(row.dimensions[column.key] ?? '');
+        const order = (a, b) => (a !== '' && b !== '' && !Number.isNaN(Number(a)) && !Number.isNaN(Number(b)) ? Number(a) - Number(b) : a.localeCompare(b));
+        const rowLabels = new Map();
+        const columnLabels = new Map();
+        const cells = new Map();
+        for (const row of rows) {
+            rowLabels.set(key(row, first), row.labels?.[first.key] ?? key(row, first));
+            columnLabels.set(key(row, second), row.labels?.[second.key] ?? key(row, second));
+            cells.set(`${key(row, first)}\u0000${key(row, second)}`, row.values[metric.key]);
+        }
+        const rowKeys = [...rowLabels.keys()].sort(order);
+        const columnKeys = [...columnLabels.keys()].sort(order);
+        const share = Boolean(this.view.matrixShare);
+        const value = (rowKey, columnKey) => {
+            const cell = cells.get(`${rowKey}\u0000${columnKey}`);
+            if (!share || cell === undefined || cell === null) {
+                return cell ?? null;
+            }
+            const base = cells.get(`${rowKey}\u0000${columnKeys[0]}`);
+            return base ? (cell / base) * 100 : null;
+        };
+        // The first column of a share is always 100 %, so the color scales on the other columns
+        let max = 0;
+        for (const rowKey of rowKeys) {
+            for (const columnKey of share ? columnKeys.slice(1) : columnKeys) {
+                max = Math.max(max, Math.abs(Number(value(rowKey, columnKey) ?? 0)));
+            }
+        }
+
+        const table = this.element('table', 'd-table d-table-xs w-auto');
+        const headRow = this.element('tr');
+        headRow.append(this.element('th', 'whitespace-nowrap', `${first.label} / ${second.label}`));
+        for (const columnKey of columnKeys) {
+            headRow.append(this.element('th', 'text-end whitespace-nowrap', columnLabels.get(columnKey)));
+        }
+        const head = this.element('thead');
+        head.append(headRow);
+        const body = this.element('tbody');
+        for (const rowKey of rowKeys) {
+            const tr = this.element('tr');
+            tr.append(this.element('th', 'whitespace-nowrap', rowLabels.get(rowKey)));
+            for (const columnKey of columnKeys) {
+                const cell = value(rowKey, columnKey);
+                const td = this.element('td', 'text-end whitespace-nowrap');
+                if (cell !== null) {
+                    td.textContent = share ? `${this.number.format(cell)} %` : this.format(metric, cell);
+                    const strength = max ? Math.min(1, Math.abs(cell) / max) : 0;
+                    td.style.backgroundColor = `color-mix(in oklab, var(--color-primary) ${Math.round(strength * 75)}%, transparent)`;
+                    if (strength > 0.5) {
+                        td.style.color = 'var(--color-primary-content)';
+                    }
+                }
+                tr.append(td);
+            }
+            body.append(tr);
+        }
+        table.append(head, body);
+        holder.append(table);
     }
 
     drawChart(canvas, shape, data, metric, result, { compact = false } = {}) {

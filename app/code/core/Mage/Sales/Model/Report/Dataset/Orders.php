@@ -11,6 +11,7 @@
 declare(strict_types=1);
 
 use Maho\Db\Adapter\AdapterInterface;
+use Maho\Report\Context;
 use Maho\Report\DatasetProvider;
 use Maho\Report\Definition\Aggregate;
 use Maho\Report\Definition\ChartType;
@@ -81,7 +82,36 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
             . ' WHERE earlier.customer_email = main.customer_email AND earlier.created_at < main.created_at'
             . ' AND earlier.state NOT IN (' . $adapter->quote(self::NOT_PLACED_STATES) . '))';
 
+        // The first placed order of the customer email of the order, for the customer cohorts
+        $firstOrderOf = static fn(string $date): string => '(SELECT MIN(' . $date . ') FROM ' . $adapter->quoteIdentifier($orderTable) . ' first_order'
+            . ' WHERE first_order.customer_email = main.customer_email'
+            . ' AND first_order.state NOT IN (' . $adapter->quote(self::NOT_PLACED_STATES) . '))';
+        $firstOrder = $firstOrderOf('first_order.created_at');
+        $monthNumber = static fn(string $date): string => '(' . $adapter->getDateExtractSql($date, AdapterInterface::INTERVAL_YEAR)
+            . ' * 12 + ' . $adapter->getDateExtractSql($date, AdapterInterface::INTERVAL_MONTH) . ')';
+
         foreach ([
+            new Field(
+                'first_order_month',
+                $helper->__('Month of the first order'),
+                FieldType::String,
+                static fn(Context $context): string => (string) $adapter->getDateFormatSql($firstOrderOf($context->localTime('first_order.created_at')), '%Y-%m'),
+            ),
+            new Field(
+                'months_since_first_order',
+                $helper->__('Months after the first order'),
+                FieldType::Integer,
+                static fn(Context $context): string => '(' . $monthNumber($context->localTime('main.created_at'))
+                    . ' - ' . $monthNumber($firstOrderOf($context->localTime('first_order.created_at'))) . ')',
+            ),
+            new Field(
+                'first_order_in_period',
+                $helper->__('First order in the period'),
+                FieldType::Boolean,
+                static fn(Context $context): string => $context->utcFrom === null
+                    ? '1'
+                    : "CASE WHEN {$firstOrder} >= " . $context->quote($context->utcFrom) . ' THEN 1 ELSE 0 END',
+            ),
             new Field('order_id', $helper->__('Order ID'), FieldType::Id, 'main.entity_id', filterable: false),
             new Field('increment_id', $helper->__('Order #'), FieldType::String, 'main.increment_id'),
             new Field('created_at', $helper->__('Order date'), FieldType::Date, 'main.created_at'),
@@ -220,6 +250,8 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
             ['customer_group_id', $helper->__('Customer group')],
             ['customer_type', $helper->__('Customer type')],
             ['customer_kind', $helper->__('New or returning')],
+            ['first_order_month', $helper->__('Month of the first order')],
+            ['months_since_first_order', $helper->__('Months after the first order')],
             ['payment_method', $helper->__('Payment method')],
             ['shipping_method', $helper->__('Shipping carrier')],
             ['shipping_description', $helper->__('Shipping method')],
@@ -317,6 +349,13 @@ class Mage_Sales_Model_Report_Dataset_Orders implements DatasetProvider
                 'sort' => '-net_sales',
                 'range' => 'last_12_months',
             ], ChartType::None, $helper->__('Every customer email, guests included.')),
+            new Preset('customer_cohorts', $helper->__('Customer cohorts'), $customers, [
+                'metrics' => ['unique_customers', 'orders', 'net_sales'],
+                'dimensions' => ['first_order_month', 'months_since_first_order'],
+                'filters' => [['field' => 'first_order_in_period', 'operator' => 'eq', 'value' => 1]],
+                'sort' => 'first_order_month',
+                'range' => 'last_12_months',
+            ], ChartType::Matrix, $helper->__('The customers of each month of their first order, and how many of them order again in each month after it.')),
         ] as $preset) {
             $dataset->addPreset($preset);
         }

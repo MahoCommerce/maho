@@ -15,5 +15,7 @@ enum ChartType: string
 {
     case Line = 'line';
     case Bar = 'bar';
+    /** A table of the first grouping by the second one, with a color for each value, such as customer cohorts. */
+    case Matrix = 'matrix';
     case None = 'none';
 }

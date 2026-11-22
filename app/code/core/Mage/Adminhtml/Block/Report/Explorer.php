@@ -185,6 +185,8 @@ class Mage_Adminhtml_Block_Report_Explorer extends Mage_Adminhtml_Block_Template
             'line' => $helper->__('Line'),
             'bar' => $helper->__('Bar'),
             'table' => $helper->__('Table'),
+            'matrix' => $helper->__('Matrix'),
+            'matrixShare' => $helper->__('Share of the first column'),
             'pin' => $helper->__('Show on my dashboard'),
             'unpin' => $helper->__('Remove from my dashboard'),
             'email' => $helper->__('Email'),
