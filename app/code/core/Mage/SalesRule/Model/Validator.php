@@ -566,8 +566,8 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
             $this->deductCartFixedDiscount($rule, $address, $discountAmount, $baseDiscountAmount);
             $item->setDiscountAmount($item->getDiscountAmount() + $discountAmount);
             $item->setBaseDiscountAmount($item->getBaseDiscountAmount() + $baseDiscountAmount);
-            $item->setOriginalDiscountAmount(min($this->floorDiscountCapacity($itemOriginalPrice * $qty), $discountAmount));
-            $item->setBaseOriginalDiscountAmount(min($this->floorDiscountCapacity($baseItemOriginalPrice * $qty), $baseDiscountAmount));
+            $item->setOriginalDiscountAmount(min($this->floorDiscountCapacity($store, $itemOriginalPrice * $qty), $discountAmount));
+            $item->setBaseOriginalDiscountAmount(min($this->floorDiscountCapacity($store, $baseItemOriginalPrice * $qty), $baseDiscountAmount));
             if ($item->getDiscountAmount() === $previousDiscountAmount
                 && $item->getBaseDiscountAmount() === $previousBaseDiscountAmount
             ) {
@@ -581,9 +581,9 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
         /**
          * Process "delta" rounding
          */
+        $store = $quote->getStore();
         $percentKey = (string) $item->getDiscountPercent();
         if ($percentKey) {
-            $store = $quote->getStore();
             $discountAmount = $this->roundDiscountWithDelta(
                 (float) $discountAmount,
                 $percentKey,
@@ -597,8 +597,8 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                 $this->_baseRoundingDeltas,
             );
         } else {
-            $discountAmount     = $quote->getStore()->roundPrice($discountAmount);
-            $baseDiscountAmount = $quote->getStore()->roundPrice($baseDiscountAmount);
+            $discountAmount     = $store->roundPrice($discountAmount);
+            $baseDiscountAmount = $store->roundPrice($baseDiscountAmount);
         }
 
         /**
@@ -615,11 +615,11 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
         } else {
             $discountAmount = $itemDiscountAmount + max(0.0, min(
                 $discountAmount,
-                $this->floorDiscountCapacity($partialPercentCapacity[0]),
+                $this->floorDiscountCapacity($store, $partialPercentCapacity[0], $itemPrice * $qty),
             ));
             $baseDiscountAmount = $itemBaseDiscountAmount + max(0.0, min(
                 $baseDiscountAmount,
-                $this->floorDiscountCapacity($partialPercentCapacity[1]),
+                $this->floorDiscountCapacity($store, $partialPercentCapacity[1], $baseItemPrice * $qty),
             ));
         }
 
@@ -875,7 +875,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                     ? $this->roundDiscountWithDelta($raw, (string) $amount, $store, $deltas[$currency])
                     : $store->roundPrice($raw);
                 if ($percentage && $qty < $totalQty) {
-                    $limit = $this->floorDiscountCapacity($limit);
+                    $limit = $this->floorDiscountCapacity($store, $limit);
                 }
                 $discounts[$key][$currency] = min($limit, $discount);
             }
@@ -900,8 +900,8 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
         }
         $store = $address->getQuote()->getStore();
         [$budget, $baseBudget] = $this->getCartFixedBudget($rule, $address);
-        $capacity = $this->cartFixedCapacity($price, $totalQty, $qty, (float) $item->getDiscountAmount());
-        $baseCapacity = $this->cartFixedCapacity($basePrice, $totalQty, $qty, (float) $item->getBaseDiscountAmount());
+        $capacity = $this->cartFixedCapacity($store, $price, $totalQty, $qty, (float) $item->getDiscountAmount());
+        $baseCapacity = $this->cartFixedCapacity($store, $basePrice, $totalQty, $qty, (float) $item->getBaseDiscountAmount());
         $amount = $budget;
         $baseAmount = $baseBudget;
         $reserved = $this->reservedForLaterItems[$ruleId] ??= $this->reserveCartFixedShares($totals['lines'] ?? [], [$budget, $baseBudget], $store);
@@ -941,7 +941,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                 [$price, $totalQty, $qty] = [$line[$currency], $line[2], $line[3]];
                 $rows[$key] = [
                     'gross' => max(0.0, $price * $qty),
-                    'capacity' => $this->cartFixedCapacity($price, $totalQty, $qty, $this->projectedDiscounts[$key][$currency]),
+                    'capacity' => $this->cartFixedCapacity($store, $price, $totalQty, $qty, $this->projectedDiscounts[$key][$currency]),
                 ];
             }
             $later = 0.0;
@@ -955,16 +955,32 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
         return $reserved;
     }
 
-    private function cartFixedCapacity(float $price, float $totalQty, float $qty, float $discount): float
+    private function cartFixedCapacity(Mage_Core_Model_Store $store, float $price, float $totalQty, float $qty, float $discount): float
     {
         $fraction = $totalQty > 0 ? $qty / $totalQty : 0.0;
-        return $this->floorDiscountCapacity(($price * $totalQty - $discount) * $fraction);
+        return $this->floorDiscountCapacity($store, ($price * $totalQty - $discount) * $fraction, $price * $qty);
     }
 
-    private function floorDiscountCapacity(float $amount): float
+    private function floorDiscountCapacity(Mage_Core_Model_Store $store, float $amount, float $gross = 0.0): float
     {
-        // A line can absorb only whole cents up to its own capacity.
-        return round(round(max(0.0, $amount), 14), 2, \RoundingMode::NegativeInfinity);
+        $amount = max(0.0, $amount);
+        $rounded = $store->roundPrice($amount);
+        $adjustment = $rounded - $amount;
+        if ($adjustment <= 2 * PHP_FLOAT_EPSILON * max($gross, $amount)) {
+            return $rounded;
+        }
+
+        // Step away from the upper price until the store rounds down.
+        do {
+            $adjustedAmount = $amount - $adjustment;
+            if ($adjustedAmount <= 0.0) {
+                return 0.0;
+            }
+            $rounded = $store->roundPrice($adjustedAmount);
+            $adjustment *= 2;
+        } while ($rounded > $amount);
+
+        return $rounded;
     }
 
     /**
@@ -1087,8 +1103,17 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                     break;
                 case Mage_SalesRule_Model_Rule::CART_FIXED_ACTION:
                     [$budget, $baseBudget] = $this->getCartFixedBudget($rule, $address);
-                    $discountAmount = min($this->floorDiscountCapacity($shippingAmount - $address->getShippingDiscountAmount()), $budget);
-                    $baseDiscountAmount = min($this->floorDiscountCapacity($baseShippingAmount - $address->getBaseShippingDiscountAmount()), $baseBudget);
+                    $store = $quote->getStore();
+                    $discountAmount = min($budget, $this->floorDiscountCapacity(
+                        $store,
+                        $shippingAmount - $address->getShippingDiscountAmount(),
+                        (float) $shippingAmount,
+                    ));
+                    $baseDiscountAmount = min($baseBudget, $this->floorDiscountCapacity(
+                        $store,
+                        $baseShippingAmount - $address->getBaseShippingDiscountAmount(),
+                        (float) $baseShippingAmount,
+                    ));
                     $this->deductCartFixedDiscount($rule, $address, $discountAmount, $baseDiscountAmount);
                     break;
             }

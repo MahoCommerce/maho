@@ -21,15 +21,43 @@ it('uses the fixed cart budget within the remaining capacity of every eligible l
     ?float $shippingPrice = null,
     ?array $expectedLineDiscounts = null,
     ?array $expectedPersisted = null,
+    int $pricePrecision = 2,
 ): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
     $previousShippingConfig = [];
     $eventProperty = null;
     $originalEvents = null;
+    $storeProperty = null;
+    $originalStores = null;
     $observerAlias = 'cart_fixed_allocation_test/observer';
     try {
         Mage::getModel('directory/currency')->saveRates(['USD' => ['EUR' => $expectedPersisted['rate'] ?? 2.0]]);
+        if ($pricePrecision !== 2) {
+            $app = Mage::app();
+            $originalStore = $app->getStore(1);
+            $roundingStore = new class ($pricePrecision) extends Mage_Core_Model_Store {
+                public function __construct(private readonly int $pricePrecision)
+                {
+                    parent::__construct();
+                }
+
+                #[\Override]
+                public function roundPrice($price): float
+                {
+                    return round((float) $price, $this->pricePrecision);
+                }
+            };
+            $roundingStore->addData($originalStore->getData());
+            $roundingStore->setWebsite($originalStore->getWebsite());
+            $roundingStore->setGroup($originalStore->getGroup());
+            $storeProperty = new ReflectionProperty($app, '_stores');
+            $originalStores = $storeProperty->getValue($app);
+            $stores = $originalStores;
+            $stores[$originalStore->getId()] = $roundingStore;
+            $stores[$originalStore->getCode()] = $roundingStore;
+            $storeProperty->setValue($app, $stores);
+        }
         $store = setStoreDisplayCurrency($currency, 'USD,EUR');
         $storeId = (int) $store->getId();
         $websiteId = (int) $store->getWebsiteId();
@@ -75,7 +103,15 @@ it('uses the fixed cart budget within the remaining capacity of every eligible l
                 ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
                 ->setTaxClassId(0)
                 ->setWebsiteIds([$websiteId])
-                ->setStockData(['use_config_manage_stock' => 0, 'manage_stock' => 0, 'is_in_stock' => 1, 'qty' => 100])
+                ->setStockData([
+                    'use_config_manage_stock' => 0,
+                    'manage_stock' => 0,
+                    'is_in_stock' => 1,
+                    'qty' => 100,
+                    'is_qty_decimal' => $qty != floor($qty),
+                    'use_config_min_sale_qty' => 0,
+                    'min_sale_qty' => 0.01,
+                ])
                 ->save();
             $product = Mage::getModel('catalog/product')->setStoreId($storeId)->load($product->getId());
             $cart->addProduct($quote, $product, new Maho\DataObject(['qty' => $qty]), save: false);
@@ -118,7 +154,10 @@ it('uses the fixed cart budget within the remaining capacity of every eligible l
                     static fn(Mage_Sales_Model_Quote_Item $item): float => (float) $item->getBaseDiscountAmount(),
                     $quote->getAllVisibleItems(),
                 );
-                expect($baseDiscounts)->toBe($expectedLineDiscounts);
+                expect($baseDiscounts)->toHaveCount(count($expectedLineDiscounts));
+                foreach ($expectedLineDiscounts as $index => $amount) {
+                    expect($baseDiscounts[$index])->toEqualWithDelta($amount, 0.0000001);
+                }
             }
             if ($expectedPersisted !== null) {
                 $address = $quote->getBillingAddress();
@@ -150,6 +189,7 @@ it('uses the fixed cart budget within the remaining capacity of every eligible l
             $store->setConfig($path, $value);
         }
         resetCurrencyState();
+        $storeProperty?->setValue(Mage::app(), $originalStores);
     }
 })->with([
     'fully discounted first line' => [
@@ -218,5 +258,35 @@ it('uses the fixed cart budget within the remaining capacity of every eligible l
         [[10.0, 1]], [[Rule::CART_FIXED_ACTION, 2.0, null]],
         8.77, 6.40, 'EUR', null, [1.23],
         ['rate' => 0.73, 'remaining' => [0.77, 0.56], 'lines' => [0.90], 'callback' => [1.234, 0.904]],
+    ],
+    'whole cent capacity for three units at 119.99' => [
+        [[119.99, 3]], [[Rule::CART_FIXED_ACTION, 359.97, null]], 0.0, 0.0, 'USD', null, [359.97],
+    ],
+    'whole cent capacity for seven units at 19.99' => [
+        [[19.99, 7]], [[Rule::CART_FIXED_ACTION, 139.93, null]], 0.0, 0.0, 'USD', null, [139.93],
+    ],
+    'whole cent capacity after a preceding fixed discount' => [
+        [[119.99, 1]], [[Rule::BY_FIXED_ACTION, 119.98, null], [Rule::CART_FIXED_ACTION, 0.01, null]],
+        0.0, 0.0, 'USD', null, [119.99],
+    ],
+    'whole cent capacity after a large preceding fixed discount' => [
+        [[89999999.99, 1]], [[Rule::BY_FIXED_ACTION, 89999999.98, null], [Rule::CART_FIXED_ACTION, 0.01, null]],
+        0.0, 0.0, 'USD', null, [89999999.99],
+    ],
+    'whole cent credit on units priced to four decimals' => [
+        [[39.995, 2]], [[Rule::CART_FIXED_ACTION, 79.99, null]], 0.01, 0.01, 'USD', null, [79.99],
+    ],
+    'genuine fractional capacity of 0.009 in a standard store' => [
+        [[0.03, 0.3]], [[Rule::CART_FIXED_ACTION, 0.01, null]], 0.01, 0.01, 'USD', null, [0.0],
+    ],
+    'genuine fractional capacity independent in the base and store currencies' => [
+        [[0.03, 0.3]], [[Rule::CART_FIXED_ACTION, 0.01, null]], 0.01, 0.01, 'EUR', null, [0.0],
+        ['rate' => 2.0, 'remaining' => [0.01, 0.01], 'lines' => [0.01]],
+    ],
+    'whole mill capacity from a three decimal store' => [
+        [[19.999, 1]], [[Rule::CART_FIXED_ACTION, 19.999, null]], 0.0, 0.0, 'USD', null, [19.999], null, 3,
+    ],
+    'genuine fractional capacity in a three decimal store' => [
+        [[0.03, 0.66]], [[Rule::CART_FIXED_ACTION, 0.02, null]], 0.001, 0.001, 'USD', null, [0.019], null, 3,
     ],
 ]);
