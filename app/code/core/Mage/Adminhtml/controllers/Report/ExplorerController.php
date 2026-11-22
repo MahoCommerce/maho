@@ -16,9 +16,12 @@ class Mage_Adminhtml_Report_ExplorerController extends Mage_Adminhtml_Controller
 {
     public const string ADMIN_RESOURCE = 'report/explorer';
 
-    /** The link of the export notice has no secret key. The action checks that the file belongs to the administrator. */
+    /**
+     * The link of the export notice and the link of a report email have no secret key. The page only reads, and the
+     * download checks that the file belongs to the administrator.
+     */
     #[\Override]
-    protected $_publicActions = ['download'];
+    protected $_publicActions = ['index', 'download'];
 
     #[Maho\Config\Route('/admin/report_explorer/index')]
     public function indexAction(): void
@@ -137,6 +140,36 @@ class Mage_Adminhtml_Report_ExplorerController extends Mage_Adminhtml_Controller
                 $service->unpin($report, $adminUserId);
             }
             return ['saved' => Mage::helper('reports')->savedReportsFor($adminUserId, $this->access()), 'dashboard' => $service->pinnedIds($adminUserId)];
+        });
+    }
+
+    #[Maho\Config\Route('/admin/report_explorer/subscriptionSave', methods: ['POST'])]
+    public function subscriptionSaveAction(): void
+    {
+        $this->respond(function (int $adminUserId): array {
+            $params = $this->getRequest();
+            $service = Mage::getService('reports/subscription');
+            $subscription = $service->getFor((int) $params->getParam('id'), $adminUserId);
+            $threshold = $params->getParam('alert_threshold');
+            $subscription->setFrequency((string) $params->getParam('frequency'))
+                ->setAlertMetric((string) $params->getParam('alert_metric'))
+                ->setAlertDirection((string) $params->getParam('alert_direction'))
+                ->setAlertThreshold(is_numeric($threshold) ? (float) $threshold : null);
+            $service->save($subscription, $adminUserId, $this->access());
+            return ['subscriptions' => Mage::helper('reports')->subscriptionsFor($adminUserId)];
+        });
+    }
+
+    #[Maho\Config\Route('/admin/report_explorer/subscriptionDelete', methods: ['POST'])]
+    public function subscriptionDeleteAction(): void
+    {
+        $this->respond(function (int $adminUserId): array {
+            $service = Mage::getService('reports/subscription');
+            $subscription = $service->getFor((int) $this->getRequest()->getParam('id'), $adminUserId);
+            if ($subscription->getId() !== null) {
+                $service->delete($subscription, $adminUserId);
+            }
+            return ['subscriptions' => Mage::helper('reports')->subscriptionsFor($adminUserId)];
         });
     }
 

@@ -39,6 +39,12 @@ class Mage_Reports_Model_Observer
         Mage::getSingleton('reports/notFound')->recordRequest($request, $response);
     }
 
+    #[Maho\Config\CronJob('reports_send_subscriptions', schedule: '5 * * * *')]
+    public function sendSubscriptions(): void
+    {
+        Mage::getService('reports/subscription')->queueDue(new DateTimeImmutable('now', new DateTimeZone('UTC')));
+    }
+
     #[Maho\Config\CronJob('report_not_found_clean', schedule: '15 * * * *')]
     public function cleanNotFound(): void
     {

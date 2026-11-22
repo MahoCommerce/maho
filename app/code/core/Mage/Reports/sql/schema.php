@@ -331,6 +331,43 @@ return function (SchemaEditor $schema): void {
 
     $schema->addTable(
         Table::editor()
+            ->setUnquotedName('report_subscription')
+            ->addColumn(Schema::column('subscription_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('admin_user_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('saved_report_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('frequency', Types::STRING, length: 16))
+            ->addColumn(Schema::column('alert_metric', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('alert_direction', Types::STRING, length: 8, notNull: false))
+            ->addColumn(Schema::column('alert_threshold', Types::DECIMAL, precision: 12, scale: 2, notNull: false))
+            ->addColumn(Schema::column('checked_at', Types::DATETIME_IMMUTABLE, notNull: false))
+            ->addColumn(Schema::column('sent_at', Types::DATETIME_IMMUTABLE, notNull: false))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('subscription_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('admin_user_id', 'saved_report_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('saved_report_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('admin_user_id')
+                    ->setUnquotedReferencedTableName('admin_user')
+                    ->setUnquotedReferencedColumnNames('user_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('saved_report_id')
+                    ->setUnquotedReferencedTableName('report_saved')
+                    ->setUnquotedReferencedColumnNames('saved_report_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Saved Reports that an Administrator Gets by Email')
+            ->create(),
+    );
+
+    $schema->addTable(
+        Table::editor()
             ->setUnquotedName('report_annotation')
             ->addColumn(Schema::column('annotation_id', Types::INTEGER, unsigned: true, autoincrement: true))
             ->addColumn(Schema::column('admin_user_id', Types::INTEGER, unsigned: true, notNull: false))

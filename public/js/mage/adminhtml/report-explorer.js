@@ -33,6 +33,7 @@ class MahoReportExplorer {
         this.datasets = new Map(config.datasets.map((dataset) => [dataset.code, dataset]));
         this.saved = config.saved;
         this.dashboard = config.dashboard ?? [];
+        this.subscriptions = config.subscriptions ?? {};
         this.savedId = null;
         this.presetChart = null;
         this.result = null;
@@ -435,6 +436,11 @@ class MahoReportExplorer {
             pin.setAttribute('aria-pressed', String(pinned));
             pin.title = pinned ? this.t('unpin') : this.t('pin');
             actions.append(pin);
+            const subscription = this.subscriptions[current.id];
+            const email = this.button(subscription ? this.t('emailOn', this.t(subscription.frequency)) : this.t('email'),
+                'd-btn d-btn-sm d-btn-ghost', () => this.openEmailDialog(current));
+            email.setAttribute('aria-pressed', String(Boolean(subscription)));
+            actions.append(email);
         }
         if (current?.mine) {
             const deleteButton = this.button(this.t('delete'), 'd-btn d-btn-sm d-btn-ghost text-error', () => this.deleteSaved(current));
@@ -1993,6 +1999,78 @@ class MahoReportExplorer {
                 if (pinned !== this.dashboard.includes(result.report.id)) {
                     await this.togglePin(result.report, pinned);
                 }
+                this.renderControls();
+                return true;
+            },
+        });
+    }
+
+    openEmailDialog(report) {
+        const subscription = this.subscriptions[report.id] ?? null;
+        const dataset = this.dataset(report.request.dataset);
+        const option = (value, label, selected) => `<option value="${this.escape(value)}" ${selected ? 'selected' : ''}>${this.escape(label)}</option>`;
+        const frequencies = [['', this.t('emailNever')], ['daily', this.t('daily')], ['weekly', this.t('weekly')], ['monthly', this.t('monthly')]]
+            .map(([value, label]) => option(value, label, (subscription?.frequency ?? '') === value)).join('');
+        const metrics = (dataset?.metrics ?? []).map((metric) => option(metric.code, metric.label,
+            (subscription?.alertMetric ?? report.request.metrics?.[0]) === metric.code)).join('');
+        const directions = [['down', this.t('alertDown')], ['up', this.t('alertUp')], ['any', this.t('alertAny')]]
+            .map(([value, label]) => option(value, label, (subscription?.alertDirection ?? 'down') === value)).join('');
+        const alert = dataset?.dated ? `
+                <label class="flex items-center gap-2">
+                    <input class="d-checkbox" type="checkbox" name="alert" ${subscription?.alertMetric ? 'checked' : ''}>
+                    <span>${this.escape(this.t('alertOnly'))}</span>
+                </label>
+                <div class="flex flex-wrap items-center gap-2" data-role="alert">
+                    <select class="d-select d-select-sm w-auto" name="alert_metric" aria-label="${this.escape(this.t('alertMetric'))}">${metrics}</select>
+                    <select class="d-select d-select-sm w-auto" name="alert_direction" aria-label="${this.escape(this.t('alertDirection'))}">${directions}</select>
+                    <input class="d-input d-input-sm w-24" type="number" name="alert_threshold" min="0.01" max="1000" step="0.01"
+                        value="${this.escape(subscription?.alertThreshold ?? 20)}" aria-label="${this.escape(this.t('alertThreshold'))}">
+                    <span>%</span>
+                </div>` : '';
+        const content = `
+            <form class="flex flex-col gap-3" onsubmit="return false">
+                <label class="flex flex-col gap-1">
+                    <span class="font-semibold">${this.escape(this.t('emailFrequency'))}</span>
+                    <select class="d-select w-full" name="frequency">${frequencies}</select>
+                </label>
+                ${alert}
+                <p class="text-sm opacity-70">${this.escape(this.t('emailHelp'))}</p>
+                <p class="text-error text-sm" data-role="dialog-error" hidden></p>
+            </form>`;
+        Dialog.confirm(content, {
+            title: this.t('emailReport', report.name),
+            okLabel: this.t('save'),
+            onOpen: (dialog) => {
+                const checkbox = dialog.querySelector('[name=alert]');
+                const sync = () => dialog.querySelectorAll('[data-role=alert] :is(select, input)').forEach((field) => {
+                    field.disabled = !checkbox.checked;
+                });
+                checkbox?.addEventListener('change', sync);
+                if (checkbox) {
+                    sync();
+                }
+            },
+            onOk: async (dialog) => {
+                const frequency = dialog.querySelector('[name=frequency]').value;
+                const params = { id: String(report.id) };
+                let url = this.config.urls.subscriptionDelete;
+                if (frequency) {
+                    url = this.config.urls.subscriptionSave;
+                    params.frequency = frequency;
+                    if (dialog.querySelector('[name=alert]')?.checked) {
+                        for (const name of ['alert_metric', 'alert_direction', 'alert_threshold']) {
+                            params[name] = dialog.querySelector(`[name=${name}]`).value;
+                        }
+                    }
+                }
+                const result = await this.post(url, params);
+                if (result.error) {
+                    const error = dialog.querySelector('[data-role=dialog-error]');
+                    error.textContent = [result.message, ...(result.errors ?? []).map((e) => e.message)].join(' ');
+                    error.hidden = false;
+                    return false;
+                }
+                this.subscriptions = result.subscriptions;
                 this.renderControls();
                 return true;
             },

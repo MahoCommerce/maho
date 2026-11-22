@@ -106,3 +106,18 @@ To see the SQL and the time of each statement of a report, run:
 ```bash
 ./maho report:explain --preset=sales_overview --range=last_12_months
 ```
+
+## Report emails
+
+The cron job `reports_send_subscriptions` runs each hour. It puts each report email that is due in
+the `reports` queue, which goes to the `slow` worker pool. The worker runs the report with the
+permissions of the administrator, and sends the email through the email queue. So the emails need
+both cron and a queue worker.
+
+A report email is marked as checked when the cron job queues it. If the worker fails, the store
+does not send that email again. The message waits in **System > Message Queue**, where you can
+retry it.
+
+A report email runs the whole report, like a visit to the page. An alert also runs **Explain the
+change**, which reads the period once for each grouping. On a large store, a long period takes the
+time shown in [Speed on a large store](#speed-on-a-large-store), in the worker and not in a page.

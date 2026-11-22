@@ -1,5 +1,5 @@
 ---
-description: The Reports > Explorer page runs ready-made reports and reports that you build, on live order, cart, customer and stock data, with a chart, a comparison with an earlier period, the records behind a number, an explanation of a change, notes, monthly targets, saved reports pinned to the admin dashboard, and CSV export.
+description: The Reports > Explorer page runs ready-made reports and reports that you build, on live order, cart, customer and stock data, with a chart, a comparison with an earlier period, the records behind a number, an explanation of a change, notes, monthly targets, saved reports pinned to the admin dashboard or sent by email, alerts when a metric changes, and CSV export.
 admin_pages: [report_explorer]
 ---
 
@@ -137,6 +137,35 @@ Explorer. Click the star of the box to remove it from the dashboard.
 Each administrator pins reports for their own dashboard. A shared report that its owner stops
 sharing leaves the dashboard.
 
+## Get a report by email
+
+1. Open a saved report.
+2. Click **Email**, next to the star.
+3. In **Send me this report**, select **Each day**, **Each week** or **Each month**.
+4. To get the email only when a number changes, select **Only when a metric changes against the
+   period before**. Then select the metric, the direction and the change in percent, for example
+   **Net sales** **falls by at least** **20** %.
+5. Click **Save**.
+
+The email goes to the email address of your admin account. It shows the period, the total of each
+metric with its change, and the first 10 rows. The link at the end opens the report in the
+Explorer.
+
+The store sends the emails at the **Hour of the Report Emails**, in the time zone of the default
+configuration. A weekly email goes on the first day of the week, and a monthly email on the first
+day of the month. A saved report keeps its period as a named period, so a weekly email of a report
+on **Last 7 days** shows the last 7 days.
+
+An alert checks the metric at each sending time. It compares the period of the report with the
+earlier period of the report, or with the period before when the report has no comparison. When
+the change reaches the percent, the email goes, and it also lists the values that changed the
+metric the most. When the change does not reach the percent, no email goes. Only a report with a
+period can have an alert.
+
+The email shows the report as your role sees it. You can get a report by email if it is yours or
+shared. When its owner deletes it or stops sharing it, the emails stop. To stop an email, click
+**Email** and select **Never**.
+
 ## Orders that count
 
 The order reports have an **Orders** control with three values:
@@ -191,5 +220,8 @@ Each data set needs the permission of its classic report. For example, the order
 | Abandoned After (hours) | An active cart with an email and no order is abandoned after this time without activity |
 | Recent Carts (hours) | An active cart is recent when its last activity is within this time |
 | Attributes for Sales by Attribute | Each attribute gets a grouping and a "Sales by" report in the order items |
+| Hour of the Report Emails | The hour, from 0 to 23 in the default time zone, when the store emails the saved reports |
+| Sender of the Report Emails | The store email address that sends the report emails |
+| Template of the Report Emails | The email template of a report email |
 
 A save of this section clears the cached reports.

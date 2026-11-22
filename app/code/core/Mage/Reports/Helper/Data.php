@@ -162,6 +162,24 @@ class Mage_Reports_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * The report emails of an administrator for the Explorer page, by saved report ID.
+     *
+     * @return array<int, array{frequency: ?string, alertMetric: ?string, alertDirection: ?string, alertThreshold: ?float}>
+     */
+    public function subscriptionsFor(int $adminUserId): array
+    {
+        return array_map(
+            static fn(Mage_Reports_Model_Subscription $subscription): array => [
+                'frequency' => $subscription->getFrequency(),
+                'alertMetric' => $subscription->getAlertMetric(),
+                'alertDirection' => $subscription->getAlertDirection(),
+                'alertThreshold' => $subscription->getAlertThreshold(),
+            ],
+            Mage::getService('reports/subscription')->listFor($adminUserId),
+        );
+    }
+
+    /**
      * The saved reports that an administrator sees on the Explorer page.
      *
      * @return list<array{id: int, name: string, shared: bool, mine: bool, request: array<string, mixed>, updatedAt: ?string}>

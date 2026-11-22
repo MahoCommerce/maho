@@ -53,6 +53,9 @@ SPDX-License-Identifier: AFL-3.0
                     <dashboard_item>
                         <table>report_dashboard_item</table>
                     </dashboard_item>
+                    <subscription>
+                        <table>report_subscription</table>
+                    </subscription>
                     <annotation>
                         <table>report_annotation</table>
                     </annotation>
@@ -113,6 +116,15 @@ SPDX-License-Identifier: AFL-3.0
                 </not_found>
             </datasets>
         </reports>
+        <template>
+            <email>
+                <reports_explorer_email_template translate="label" module="reports">
+                    <label>Saved Report by Email</label>
+                    <file>reports_explorer_report.html</file>
+                    <type>html</type>
+                </reports_explorer_email_template>
+            </email>
+        </template>
         <docs>
             <user>docs/user</user>
             <developer>docs/developer</developer>
@@ -190,6 +202,9 @@ SPDX-License-Identifier: AFL-3.0
                 <abandoned_after_hours>24</abandoned_after_hours>
                 <recent_cart_hours>24</recent_cart_hours>
                 <report_attributes></report_attributes>
+                <email_hour>7</email_hour>
+                <email_template>reports_explorer_email_template</email_template>
+                <email_identity>general</email_identity>
             </explorer>
         </reports>
     </default>

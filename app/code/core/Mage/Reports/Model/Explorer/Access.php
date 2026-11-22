@@ -39,17 +39,45 @@ final class Mage_Reports_Model_Explorer_Access
      */
     public static function forAdmin(Mage_Admin_Model_Session $session): self
     {
+        return self::fromAcl($session->isAllowed(...));
+    }
+
+    /**
+     * The access of an administrator outside a session, such as in a cron job that emails a report: the same rules as
+     * {@see forAdmin()}, on the ACL of the role of the administrator.
+     */
+    public static function forAdminUser(Mage_Admin_Model_User $user): self
+    {
+        $acl = Mage::getResourceModel('admin/acl')->loadAcl();
+        $role = $user->getAclRole();
+        return self::fromAcl(static function (string $resource) use ($acl, $role): bool {
+            $resource = str_starts_with($resource, 'admin') ? $resource : 'admin/' . $resource;
+            try {
+                return $acl->isAllowed($role, $resource);
+            } catch (Exception) {
+                try {
+                    return !$acl->hasResource($resource) && $acl->isAllowed($role, null);
+                } catch (Exception) {
+                    return false;
+                }
+            }
+        });
+    }
+
+    /** @param \Closure(string): bool $isAllowed whether the role allows an ACL resource */
+    private static function fromAcl(\Closure $isAllowed): self
+    {
         $datasets = $records = [];
         foreach (Mage::getSingleton('reports/explorer_registry')->getDatasets() as $dataset) {
-            if ($session->isAllowed($dataset->aclResource)) {
+            if ($isAllowed($dataset->aclResource)) {
                 $datasets[] = $dataset->code;
                 $definition = $dataset->getRecords();
-                if ($definition !== null && $session->isAllowed($definition->aclResource)) {
+                if ($definition !== null && $isAllowed($definition->aclResource)) {
                     $records[] = $dataset->code;
                 }
             }
         }
-        return new self($datasets, $session->isAllowed('customer/manage'), null, $records);
+        return new self($datasets, $isAllowed('customer/manage'), null, $records);
     }
 
     public function allowsDataset(Dataset $dataset): bool
