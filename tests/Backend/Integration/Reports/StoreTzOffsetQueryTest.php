@@ -49,7 +49,7 @@ it('puts an order in the bucket of its hour on the 24 hour dashboard chart', fun
         Tests\Helpers\ReportFixture::placeOrder(Tests\Helpers\ReportFixture::createProduct('report-hourly'), 1);
         $hour = Mage::app()->getLocale()->utcToStore(Mage_Core_Model_App::ADMIN_STORE_ID)->format('Y-m-d H:00');
 
-        $collection = Mage::getResourceModel('reports/order_collection')->prepareSummary('24h', 0, 0, 0);
+        $collection = Mage::getResourceModel('reports/order_collection')->prepareSummary('24h', null, null);
         $quantities = [];
         foreach ($collection as $row) {
             $quantities[$row->getData('range')] = (int) $row->getData('quantity');
