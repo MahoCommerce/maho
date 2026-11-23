@@ -176,6 +176,14 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
                 if (in_array($variant, ['history', 'two historic fees', 'duplicated historic fees'], true) && $index === 0) {
                     partialFptUseHistoricDocumentFormat($invoice->getAllItems()[0], $orderItem, $variant === 'duplicated historic fees');
                 }
+                if ($variant === 'untitled historic invoice') {
+                    $helper = Mage::helper('weee');
+                    $invoiceItem = $invoice->getAllItems()[0];
+                    $applied = $helper->getApplied($invoiceItem);
+                    unset($applied[0]['title']);
+                    $helper->setApplied($invoiceItem, $applied);
+                    $invoiceItem->save();
+                }
                 $invoices[] = $invoice;
             }
         } finally {
@@ -294,6 +302,16 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
             $grossByTitle = [];
             foreach ($records as $index => $record) {
                 $storedFees = Mage::helper('weee')->getApplied($record->getAllItems()[0]);
+                if ($variant === 'untitled historic invoice' && $kind === 'credit memos') {
+                    expect($storedFees[0]['title'])->toBe(Mage::helper('weee')->getApplied($orderItem)[0]['title'])
+                        ->and((float) $storedFees[0]['row_amount'])->toBe((float) $record->getAllItems()[0]->getWeeeTaxAppliedRowAmount())
+                        ->and((float) $storedFees[0]['base_row_amount'])->toBe((float) $record->getAllItems()[0]->getBaseWeeeTaxAppliedRowAmount());
+                }
+                if ($variant === 'subcent') {
+                    $line = $record->getAllItems()[0];
+                    expect($record->getSubtotalInclTax() - $line->getRowTotalInclTax())->toEqualWithDelta((float) $storedFees[0]['row_amount_incl_tax'], 0.00001)
+                        ->and($record->getBaseSubtotalInclTax() - $line->getBaseRowTotalInclTax())->toEqualWithDelta((float) $storedFees[0]['base_row_amount_incl_tax'], 0.00001);
+                }
                 if ($threeFees || $fractionalQty) {
                     expect($storedFees)->toHaveCount($threeFees ? 3 : 1)
                         ->and(array_unique(array_column($storedFees, 'title')))->toHaveCount($variant === 'distinct small fees' ? 3 : 1);
@@ -390,6 +408,7 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
     'two distinct fixed taxes' => [[1, 1, 2], [1, 1, 2], true, 'two fees'],
     'two distinct historic fee discounts' => [[1, 1, 2], [1, 1, 2], true, 'two historic fees'],
     'repeated historic fee discount with a missing amount' => [[1, 1, 2], [1, 1, 2], true, 'duplicated historic fees'],
+    'untitled historic invoice linked to a named order fee' => [[1, 1], [1, 1], true, 'untitled historic invoice'],
     'historical fees without labels or VAT-inclusive amounts' => [[1, 1, 2], [1, 1, 2], true, 'missing fee fields'],
     'two subcent fees on separate lines and documents' => [[[1, 0], [0, 1]], [[1, 0], [0, 1]], true, 'subcent'],
     'refunds the tax remainder charged on historic invoices' => [[[1, 0], [0, 1]], [[1, 0], [0, 1]], true, 'subcent historic invoices'],

@@ -176,12 +176,15 @@ class Mage_Weee_Model_DocumentAllocation
         return $share;
     }
 
-    /** @param Share $share */
+    /**
+     * @param Share $share
+     * @return array{float, float} The allocated tax-inclusive totals in order and base currency.
+     */
     public function apply(
         Mage_Sales_Model_Order_Invoice_Item|Mage_Sales_Model_Order_Creditmemo_Item $item,
         array $share,
         Mage_Core_Model_Store $store,
-    ): void {
+    ): array {
         $helper = Mage::helper('weee');
         $qty = $item->getQty();
         $orderItem = $item->getOrderItem();
@@ -220,7 +223,8 @@ class Mage_Weee_Model_DocumentAllocation
         $applied = $helper->allocateTaxDiscounts($applied, $share['discount'], $share['base_discount'], $store);
         $discountsByTitle = $this->feeAmounts($applied);
         foreach (['gross' => ['row_amount', 'discount'], 'base_gross' => ['base_row_amount', 'base_discount']] as $key => [$amountKey, $discountKey]) {
-            $weights = $share['fees'] ?: $originalAmounts;
+            // Older invoice titles can differ from the entries written on the new document.
+            $weights = array_intersect_key($share['fees'], $originalAmounts) + $originalAmounts;
             foreach ($weights as $title => &$weight) {
                 $weight[$discountKey] = $discountsByTitle[$title][$discountKey] ?? 0.0;
             }
@@ -234,6 +238,18 @@ class Mage_Weee_Model_DocumentAllocation
         $item->setWeeeTaxRowDisposition($item->getWeeeTaxDisposition() * $qty);
         $item->setBaseWeeeTaxRowDisposition($item->getBaseWeeeTaxDisposition() * $qty);
         $helper->setApplied($item, $applied);
+
+        // Some older order items only have aggregate fee fields.
+        if (!$applied) {
+            return [$share['gross'], $share['base_gross']];
+        }
+
+        $inclTax = $baseInclTax = 0.0;
+        foreach ($applied as $fee) {
+            $inclTax += max((float) $fee['row_amount_incl_tax'], 0.0);
+            $baseInclTax += max((float) $fee['base_row_amount_incl_tax'], 0.0);
+        }
+        return [$inclTax, $baseInclTax];
     }
 
     /**
@@ -478,7 +494,7 @@ class Mage_Weee_Model_DocumentAllocation
         }
 
         $subtotalHasFee = $store->roundPrice($subtotal) > 0.0 || $store->roundPrice($baseSubtotal) > 0.0;
-        $taxHasFee = $store->roundPrice($tax) > 0.0 || $store->roundPrice($baseTax) > 0.0;
+        $taxHasFee = $store->roundPrice($tax) !== 0.0 || $store->roundPrice($baseTax) !== 0.0;
         return $subtotalHasFee === $taxHasFee ? null : $subtotalHasFee;
     }
 

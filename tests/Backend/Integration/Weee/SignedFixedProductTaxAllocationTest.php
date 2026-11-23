@@ -18,6 +18,7 @@ it('keeps a discount on taxable fixed product tax on the line that earned it', f
     float $discountPercent,
     float $discountedTotal,
     float $feeDiscount,
+    bool $changeFeeLocation = false,
 ): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
@@ -65,6 +66,7 @@ it('keeps a discount on taxable fixed product tax on the line that earned it', f
         ]);
 
         $skus = [];
+        $fullPriceTotal = $changeFeeLocation ? 100.0 : 110.0;
         foreach ([100.0 + $taxPercent, 100.0] as $index => $price) {
             $product = Mage::getModel('catalog/product')->setStoreId(0);
             $product->setAttributeSetId($product->getDefaultAttributeSetId())
@@ -75,7 +77,7 @@ it('keeps a discount on taxable fixed product tax on the line that earned it', f
                 ->setTaxClassId($index === 0 ? (int) $productTaxClass->getId() : 0)
                 ->setWebsiteIds([$websiteId])
                 ->setStockData(['use_config_manage_stock' => 0, 'manage_stock' => 0, 'is_in_stock' => 1, 'qty' => 20])
-                ->setData($feeAttribute, [['website_id' => $websiteId, 'country' => 'US', 'state' => '*', 'price' => 10.0]])
+                ->setData($feeAttribute, !$changeFeeLocation || $index === 0 ? [['website_id' => $websiteId, 'country' => 'US', 'state' => '*', 'price' => 10.0]] : [])
                 ->save();
             $product = Mage::getModel('catalog/product')->setStoreId($storeId)->load($product->getId());
             $skus[] = $product->getSku();
@@ -113,6 +115,9 @@ it('keeps a discount on taxable fixed product tax on the line that earned it', f
             $invoices[$line] = Mage::getModel('sales/order_invoice')->load((int) $invoice->getId());
         }
 
+        if ($changeFeeLocation) {
+            $store->setConfig('tax/weee/include_in_subtotal', '1');
+        }
         $refunds = [];
         foreach ($lines as $line) {
             $order = Mage::getModel('sales/order')->load($orderId);
@@ -127,10 +132,21 @@ it('keeps a discount on taxable fixed product tax on the line that earned it', f
         }
 
         $order = Mage::getModel('sales/order')->load($orderId);
-        expect($order->getGrandTotal())->toEqualWithDelta($discountedTotal + 110.0, 0.000001)
-            ->and($order->getTotalPaid())->toEqualWithDelta($discountedTotal + 110.0, 0.000001)
-            ->and($order->getTotalRefunded())->toEqualWithDelta($discountedTotal + 110.0, 0.000001);
-        foreach ([$discountedTotal, 110.00] as $line => $total) {
+        $expectedTotal = $discountedTotal + $fullPriceTotal;
+        if ($changeFeeLocation) {
+            $line = $refunds[0]->getAllItems()[0];
+            expect($refunds[0]->getSubtotal())->toBe($line->getRowTotal())
+                ->and($refunds[0]->getTaxAmount())->toEqualWithDelta($line->getTaxAmount() + 10.0 - $feeDiscount, 0.000001)
+                ->and($refunds[0]->getBaseSubtotal())->toBe($line->getBaseRowTotal())
+                ->and($refunds[0]->getBaseTaxAmount())->toEqualWithDelta($line->getBaseTaxAmount() + 10.0 - $feeDiscount, 0.000001)
+                ->and($order->getTotalRefunded())->toEqualWithDelta($expectedTotal, 0.000001);
+            return;
+        }
+
+        expect($order->getGrandTotal())->toEqualWithDelta($expectedTotal, 0.000001)
+            ->and($order->getTotalPaid())->toEqualWithDelta($expectedTotal, 0.000001)
+            ->and($order->getTotalRefunded())->toEqualWithDelta($expectedTotal, 0.000001);
+        foreach ([$discountedTotal, $fullPriceTotal] as $line => $total) {
             foreach ([$invoices[$line], $refunds[$line]] as $document) {
                 expect($document->getGrandTotal())->toEqualWithDelta($total, 0.000001)
                     ->and($document->getBaseGrandTotal())->toEqualWithDelta($total, 0.000001);
@@ -151,6 +167,7 @@ it('keeps a discount on taxable fixed product tax on the line that earned it', f
     'discounted line billed first' => [true, 20.0, 90.0, 13.20, 10.80],
     'full-price line billed first' => [false, 20.0, 90.0, 13.20, 10.80],
     'one cent of signed fixed product tax' => [true, 10.0, 91.0, 10.89, 10.01],
+    'signed fixed tax remains in tax after switching to subtotal' => [true, 10.0, 91.0, 10.89, 10.01, true],
 ]);
 
 it('reads the tax-inclusive amount of each saved fee from its row or unit amount', function (): void {
@@ -175,4 +192,18 @@ it('reads the tax-inclusive amount of each saved fee from its row or unit amount
     $amounts = new Mage_Weee_Model_DocumentAllocation()->orderAmounts($order);
     expect(array_column($amounts, 'gross'))->toBe([20.0, 20.0])
         ->and(array_column($amounts, 'base_gross'))->toBe([20.0, 20.0]);
+});
+
+it('retains aggregate-only legacy fee amounts when collecting tax-inclusive totals', function (): void {
+    $orderItem = Mage::getModel('sales/order_item')->setQtyOrdered(2);
+    $item = Mage::getModel('sales/order_invoice_item')->setOrderItem($orderItem)->setQty(1);
+    $store = Mage::app()->getStore();
+    $share = ['gross' => 0.09, 'base_gross' => 0.12, 'discount' => 0.0, 'base_discount' => 0.0, 'fees' => []];
+
+    $totals = (new Mage_Weee_Model_DocumentAllocation())->apply($item, $share, $store);
+
+    expect($totals)->toBe([0.09, 0.12])
+        ->and($item->getWeeeTaxAppliedRowAmount())->toBe(0.09)
+        ->and($item->getBaseWeeeTaxAppliedRowAmount())->toBe(0.12)
+        ->and(Mage::helper('weee')->getApplied($item))->toBe([]);
 });

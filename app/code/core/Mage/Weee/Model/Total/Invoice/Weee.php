@@ -89,14 +89,12 @@ class Mage_Weee_Model_Total_Invoice_Weee extends Mage_Sales_Model_Order_Invoice_
             $share['base_gross'] = $store->roundPrice($share['base_gross'] - $baseReduction);
             $excess = $store->roundPrice($excess - $reduction);
             $baseExcess = $store->roundPrice($baseExcess - $baseReduction);
-            $allocation->apply($item, $share, $store);
-            $weeeInclTax += $helper->getWeeeTaxInclTax($item) * $item->getQty();
-            $baseWeeeInclTax += $helper->getBaseWeeeTaxInclTax($item) * $item->getQty();
+            [$inclTax, $baseInclTax] = $allocation->apply($item, $share, $store);
+            $weeeInclTax += $inclTax;
+            $baseWeeeInclTax += $baseInclTax;
         }
-        if (!$last) {
-            $invoice->setSubtotalInclTax($invoice->getSubtotalInclTax() + $weeeInclTax);
-            $invoice->setBaseSubtotalInclTax($invoice->getBaseSubtotalInclTax() + $baseWeeeInclTax);
-        }
+        $invoice->setSubtotalInclTax($invoice->getSubtotalInclTax() + $weeeInclTax);
+        $invoice->setBaseSubtotalInclTax($invoice->getBaseSubtotalInclTax() + $baseWeeeInclTax);
 
         $invoice->setGrandTotal($invoice->getGrandTotal() + $totalTax);
         $invoice->setBaseGrandTotal($invoice->getBaseGrandTotal() + $baseTotalTax);
