@@ -19,6 +19,9 @@ abstract class Mage_Catalog_Model_Product_Attribute_Source_Abstract extends Mage
      */
     abstract public function getOptionArray(): array;
 
+    /**
+     * @return list<array{value: int|string, label: string}>
+     */
     #[\Override]
     public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array
     {

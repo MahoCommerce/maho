@@ -380,11 +380,10 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
     /**
      * Get tier prices (formatted)
      *
-     * @param Mage_Catalog_Model_Product $product
-     * @return array
+     * @return list<array<string, mixed>>
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function getTierPrices($product = null)
+    public function getTierPrices(?Mage_Catalog_Model_Product $product = null): array
     {
         $product ??= $this->getProduct();
         $prices = $product->getFormatedTierPrice();

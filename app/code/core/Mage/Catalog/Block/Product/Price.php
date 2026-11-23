@@ -81,11 +81,11 @@ class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstra
     /**
      * Get tier prices (formatted)
      *
-     * @param Mage_Catalog_Model_Product $product
-     * @param Mage_Catalog_Model_Product $parent
+     * @param Mage_Catalog_Model_Product|null $parent The bundle product of a bundle selection
+     * @return list<array<string, mixed>>
      */
     #[\Override]
-    public function getTierPrices($product = null, $parent = null): array
+    public function getTierPrices(?Mage_Catalog_Model_Product $product = null, ?Mage_Catalog_Model_Product $parent = null): array
     {
         $product ??= $this->getProduct();
         $prices = $product->getFormatedTierPrice();

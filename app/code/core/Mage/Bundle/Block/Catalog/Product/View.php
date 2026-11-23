@@ -19,11 +19,10 @@ class Mage_Bundle_Block_Catalog_Product_View extends Mage_Catalog_Block_Product_
     /**
      * Get tier prices (formatted)
      *
-     * @param Mage_Catalog_Model_Product|null $product
-     * @return array
+     * @return list<array<string, mixed>>
      */
     #[\Override]
-    public function getTierPrices($product = null)
+    public function getTierPrices(?Mage_Catalog_Model_Product $product = null): array
     {
         $product ??= $this->getProduct();
 

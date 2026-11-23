@@ -198,6 +198,8 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Load entity by attribute
      *
+     * @param Mage_Eav_Model_Entity_Attribute_Interface|int|string|list<array<string, mixed>> $attribute An attribute, or a list of conditions that match with OR
+     * @param int|string|array<string, mixed>|null $value A value, or a condition such as ['in' => [1, 2]]
      * @param list<string>|string $additionalAttributes
      */
     public function loadByAttribute(
