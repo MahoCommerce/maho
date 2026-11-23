@@ -44,7 +44,7 @@ describe('getTrackingSku', function () {
         $configurable = Mage::getModel('catalog/product')
             ->setTypeId(Mage_Catalog_Model_Product_Type_Configurable::TYPE_CODE)
             ->setSku('TSHIRT');
-        $configurable->addCustomOption('simple_product', 11, $simple);
+        $configurable->addCustomOption('simple_product', '11', $simple);
         gaTrackingAddSkuOption($configurable);
 
         expect($configurable->getSku())->toBe('TSHIRT-M-mycustom option');
