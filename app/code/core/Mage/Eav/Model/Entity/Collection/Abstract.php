@@ -163,13 +163,9 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
     /**
      * Set entity to use for attributes
      */
-    public function setEntity(Mage_Eav_Model_Entity_Abstract|Mage_Core_Model_Config_Element|string $entity): static
+    public function setEntity(Mage_Eav_Model_Entity_Abstract $entity): static
     {
-        if ($entity instanceof Mage_Eav_Model_Entity_Abstract) {
-            $this->_entity = $entity;
-        } else {
-            $this->_entity = Mage::getModel('eav/entity')->setType($entity);
-        }
+        $this->_entity = $entity;
         return $this;
     }
 

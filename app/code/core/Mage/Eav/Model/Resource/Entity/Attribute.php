@@ -63,7 +63,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
     /**
      * Load attribute data by attribute code
      */
-    public function loadByCode(Mage_Core_Model_Abstract $object, int|string $entityTypeId, ?string $code): bool
+    public function loadByCode(Mage_Core_Model_Abstract $object, int $entityTypeId, ?string $code): bool
     {
         if ($code === null) {
             return false;

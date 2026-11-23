@@ -256,14 +256,14 @@ class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
         return $items;
     }
 
-    public function getItemById(int|string $itemId): Mage_Sales_Model_Order_Shipment_Item|false
+    public function getItemById(int $itemId): ?Mage_Sales_Model_Order_Shipment_Item
     {
         foreach ($this->getItemsCollection() as $item) {
-            if ($item->getId() == $itemId) {
+            if ((int) $item->getId() === $itemId) {
                 return $item;
             }
         }
-        return false;
+        return null;
     }
 
     /**
