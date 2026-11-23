@@ -539,26 +539,20 @@ class Mage_Eav_Model_Config
     /**
      * Get codes of all entity type attributes
      *
-     * @param Mage_Eav_Model_Entity_Type $entityType
-     * @param \Maho\DataObject $object
-     * @return array
+     * $entityType is the entity type, its code or its ID, as getEntityType() takes it.
+     *
+     * @return list<string>
      * @throws Mage_Core_Exception
      * @throws Exception
      */
-    public function getEntityAttributeCodes($entityType, $object = null)
+    public function getEntityAttributeCodes(Mage_Eav_Model_Entity_Type|string|int $entityType, ?\Maho\DataObject $object = null): array
     {
         $entityType = $this->getEntityType($entityType);
-        $attributeSetId = 0;
-        if (($object instanceof \Maho\DataObject) && $object->getAttributeSetId()) {
-            $attributeSetId = $object->getAttributeSetId();
-        }
+        $attributeSetId = $object?->getAttributeSetId() ?: 0;
 
         // Technically store id is irrelevant for attribute sets, they are the same in all store scopes.
         // Use current store id when not specified to avoid loading two store-scope attribute data sets from cache
-        $storeId = $this->_storeId();
-        if (($object instanceof \Maho\DataObject) && $object->getStoreId()) {
-            $storeId = $object->getStoreId();
-        }
+        $storeId = $object?->getStoreId() ?: $this->_storeId();
         $this->_initializeStore($storeId);
 
         if ($attributeSetId) {
