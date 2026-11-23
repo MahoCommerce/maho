@@ -176,7 +176,7 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
             }
         }
 
-        return implode(' ', array_unique(array_filter($classes)));
+        return implode(' ', array_unique(array_filter($classes, boolval(...))));
     }
 
     /**

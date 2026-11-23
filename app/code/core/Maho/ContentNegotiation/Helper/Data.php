@@ -112,7 +112,7 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $lines = explode("\n", (string) Mage::getStoreConfig(self::XML_PATH_ALLOWED_ROUTES, $store));
 
-        return array_values(array_filter(array_map(trim(...), $lines)));
+        return array_values(array_filter(array_map(trim(...), $lines), boolval(...)));
     }
 
     public function getMarkdownUrl(Mage_Core_Controller_Request_Http $request): string

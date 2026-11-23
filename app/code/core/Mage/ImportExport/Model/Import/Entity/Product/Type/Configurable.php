@@ -361,7 +361,7 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
         }
         $this->_loadSkuSuperAttributeValues();
 
-        while ($bunch = $this->_entityModel->getNextBunch()) {
+        while (($bunch = $this->_entityModel->getNextBunch()) !== null && $bunch !== []) {
             $superAttributes = [
                 'attributes' => [],
                 'labels'     => [],
@@ -451,9 +451,9 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
             }
             $mainData = [];
 
-            foreach ($superAttributes['attributes'] as $productId => $attributesData) {
+            foreach ($superAttributes['attributes'] as $superProductId => $attributesData) {
                 foreach ($attributesData as $attrId => $row) {
-                    $row['product_id']   = $productId;
+                    $row['product_id']   = $superProductId;
                     $row['attribute_id'] = $attrId;
                     $mainData[]          = $row;
                 }

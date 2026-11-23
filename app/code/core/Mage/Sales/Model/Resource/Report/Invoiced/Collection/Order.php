@@ -24,15 +24,18 @@ class Mage_Sales_Model_Resource_Report_Invoiced_Collection_Order extends Mage_Sa
      */
     protected $_selectedColumns    = [];
 
+    protected string $_aggregationTable = 'sales/invoiced_aggregated_order';
+
+    private bool $isConstructed = false;
+
     /**
      * Initialize custom resource model
      */
     public function __construct()
     {
-        parent::_construct();
+        parent::__construct(Mage::getResourceModel('sales/report')->init($this->_aggregationTable));
+        $this->isConstructed = true;
         $this->setModel('adminhtml/report_item');
-        $this->_resource = Mage::getResourceModel('sales/report')->init('sales/invoiced_aggregated_order');
-        $this->setConnection($this->getResource()->getReadConnection());
     }
 
     /**
@@ -77,6 +80,11 @@ class Mage_Sales_Model_Resource_Report_Invoiced_Collection_Order extends Mage_Sa
     #[\Override]
     protected function _initSelect()
     {
+        // The parent constructor calls this method before the caller sets the period and the filters
+        if (!$this->isConstructed) {
+            return $this;
+        }
+
         $this->getSelect()->from($this->getResource()->getMainTable(), $this->_getSelectedColumns());
         if (!$this->isTotals()) {
             $this->getSelect()->group($this->_periodFormat);

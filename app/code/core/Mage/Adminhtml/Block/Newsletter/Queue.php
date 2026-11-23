@@ -10,8 +10,9 @@
 
 class Mage_Adminhtml_Block_Newsletter_Queue extends Mage_Adminhtml_Block_Template
 {
-    public function __construct()
+    public function __construct(array $args = [])
     {
+        parent::__construct($args);
         $this->setTemplate('newsletter/queue/list.phtml');
     }
 

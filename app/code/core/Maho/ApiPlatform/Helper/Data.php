@@ -141,7 +141,7 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
             }
         }
 
-        return array_values(array_unique(array_filter($roots)));
+        return array_values(array_unique(array_filter($roots, boolval(...))));
     }
 
     /**
@@ -218,7 +218,7 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
     public function getAllowedRedirectHosts(): array
     {
         $hosts = explode("\n", strtolower((string) Mage::getStoreConfig(self::XML_PATH_ALLOWED_REDIRECT_HOSTS)));
-        return array_values(array_filter(array_map(trim(...), $hosts)));
+        return array_values(array_filter(array_map(trim(...), $hosts), boolval(...)));
     }
 
     /**

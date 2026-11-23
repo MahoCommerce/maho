@@ -45,6 +45,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
      */
     public function __construct($parameters = [])
     {
+        parent::__construct();
         $this->_urlPolicy = (empty($parameters['redirectPolicy']))
             ? Mage::getModel('admin/redirectpolicy') : $parameters['redirectPolicy'];
 

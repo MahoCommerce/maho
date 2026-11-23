@@ -45,6 +45,7 @@ class Mage_Adminhtml_Model_System_Store extends \Maho\DataObject
      */
     public function __construct()
     {
+        parent::__construct();
         $this->reload();
     }
 

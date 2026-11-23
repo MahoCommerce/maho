@@ -10,8 +10,9 @@
 
 class Mage_Adminhtml_Block_System_Currency_Rate_Matrix extends Mage_Adminhtml_Block_Template
 {
-    public function __construct()
+    public function __construct(array $args = [])
     {
+        parent::__construct($args);
         $this->setTemplate('system/currency/rate/matrix.phtml');
     }
 

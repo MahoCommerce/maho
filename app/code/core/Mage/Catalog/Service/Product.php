@@ -466,7 +466,7 @@ class Mage_Catalog_Service_Product
     public function changeAttributeSet(array $productIds, int $setId): int
     {
         $helper = Mage::helper('catalog');
-        $productIds = array_values(array_unique(array_filter(array_map(intval(...), $productIds))));
+        $productIds = array_values(array_unique(array_filter(array_map(intval(...), $productIds), boolval(...))));
         /** @var Mage_Catalog_Model_Resource_Product $resource */
         $resource = Mage::getResourceSingleton('catalog/product');
         if (!Mage::getModel('catalog/product')->isProductAttributeSet($setId)) {

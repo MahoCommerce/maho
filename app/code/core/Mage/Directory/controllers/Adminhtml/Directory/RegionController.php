@@ -343,7 +343,7 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
     public function importAction(): void
     {
         $request = $this->getRequest();
-        $countries = array_filter(array_map(trim(...), explode(',', (string) $request->getParam('countries'))));
+        $countries = array_filter(array_map(trim(...), explode(',', (string) $request->getParam('countries'))), boolval(...));
         $locales = array_map(trim(...), explode(',', (string) $request->getParam('locales', 'en_US')));
         $updateExisting = $request->getParam('updateExisting') === 'true';
         $dryRun = $request->getParam('dryRun') === 'true';

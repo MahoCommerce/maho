@@ -369,7 +369,7 @@ final class Runtime
         $path = implode(PATH_SEPARATOR, array_unique(array_filter([
             ...explode(PATH_SEPARATOR, (string) getenv('PATH')),
             $nodePath !== null ? dirname($nodePath) : '',
-        ])));
+        ], boolval(...))));
         // A bare binary name resolves against the parent PATH, not the child one
         $command[0] = Mage::findExecutable($command[0]) ?? $command[0];
 

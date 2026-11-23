@@ -83,8 +83,9 @@ abstract class Mage_Checkout_Model_Type_Abstract extends \Maho\DataObject
         if (is_null($address)) {
             $address = $this->getCustomer()->getDefaultShippingAddress();
             if (!$address) {
-                foreach ($this->getCustomer()->getAddresses() as $address) {
-                    if ($address) {
+                foreach ($this->getCustomer()->getAddresses() as $customerAddress) {
+                    if ($customerAddress) {
+                        $address = $customerAddress;
                         break;
                     }
                 }
@@ -105,8 +106,9 @@ abstract class Mage_Checkout_Model_Type_Abstract extends \Maho\DataObject
         if (is_null($address)) {
             $address = $this->getCustomer()->getDefaultBillingAddress();
             if (!$address) {
-                foreach ($this->getCustomer()->getAddresses() as $address) {
-                    if ($address) {
+                foreach ($this->getCustomer()->getAddresses() as $customerAddress) {
+                    if ($customerAddress) {
+                        $address = $customerAddress;
                         break;
                     }
                 }

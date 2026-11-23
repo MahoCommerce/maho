@@ -52,6 +52,7 @@ class Mage_Sales_Model_Quote_Address_Total_Collector extends Mage_Sales_Model_Co
      */
     public function __construct($options)
     {
+        parent::__construct();
         if (isset($options['store'])) {
             $this->_store = $options['store'];
         } else {

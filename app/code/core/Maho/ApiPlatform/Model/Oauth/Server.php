@@ -447,7 +447,7 @@ class Maho_ApiPlatform_Model_Oauth_Server
      */
     public function normalizeScope(string $scope): string
     {
-        $requested = array_values(array_filter(preg_split('/\s+/', trim($scope)) ?: []));
+        $requested = array_values(array_filter(preg_split('/\s+/', trim($scope)) ?: [], boolval(...)));
         if ($requested === []) {
             return self::SCOPE_MCP;
         }

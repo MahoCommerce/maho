@@ -797,7 +797,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
             $codes = array_values(array_filter(array_map(
                 $this->_normalizeCurrencyCode(...),
                 explode(',', (string) $this->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_ALLOW)),
-            )));
+            ), boolval(...)));
             // add base currency, if it is not in allowed currencies
             $baseCurrencyCode = $this->getBaseCurrencyCode();
             if (!in_array($baseCurrencyCode, $codes)) {

@@ -313,7 +313,7 @@ class Maho_Ai_Adminhtml_AiController extends Mage_Adminhtml_Controller_Action
                     $text = trim(implode(' ', array_filter([
                         $category->getName(),
                         strip_tags((string) ($category->getData('description') ?? '')),
-                    ])));
+                    ], boolval(...))));
                     if ($text === '') {
                         continue;
                     }
@@ -341,6 +341,6 @@ class Maho_Ai_Adminhtml_AiController extends Mage_Adminhtml_Controller_Action
             $product->getName(),
             strip_tags((string) ($product->getData('short_description') ?? '')),
             strip_tags((string) ($product->getData('description') ?? '')),
-        ])));
+        ], boolval(...))));
     }
 }

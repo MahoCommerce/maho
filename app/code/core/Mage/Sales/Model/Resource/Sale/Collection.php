@@ -49,8 +49,7 @@ class Mage_Sales_Model_Resource_Sale_Collection extends \Maho\Data\Collection\Db
      */
     public function __construct()
     {
-        $conn = Mage::getResourceSingleton('sales/order')->getReadConnection();
-        $this->setConnection($conn);
+        parent::__construct(Mage::getResourceSingleton('sales/order')->getReadConnection());
     }
 
     /**

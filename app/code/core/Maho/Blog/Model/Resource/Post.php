@@ -12,6 +12,7 @@ class Maho_Blog_Model_Resource_Post extends Maho_Blog_Model_Resource_Abstract
 
     public function __construct()
     {
+        parent::__construct();
         $this->setType('blog_post');
         $this->_storeTable = $this->getTable('blog/post_store');
 

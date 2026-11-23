@@ -530,7 +530,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
             $allowed = $extensions['allowed'];
         }
 
-        return array_keys(array_filter($allowed));
+        return array_keys(array_filter($allowed, boolval(...)));
     }
 
     /** The thumbnail root on the media mount. */

@@ -279,7 +279,7 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
                 continue;
             }
             $path = preg_replace('#\{[^}]*\}#', '', (string) $operation->getUriTemplate()) ?? '';
-            $segments = count(array_filter(explode('/', $path), static fn(string $s): bool => $s !== ''));
+            $segments = count(array_filter(explode('/', $path), boolval(...)));
             if ($segments < $depth) {
                 $canonical = (string) $sourceName;
                 $depth = $segments;
@@ -365,7 +365,7 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
             extraProperties: $operation->getExtraProperties() + array_filter([
                 SourceOperationResolver::SOURCE_OPERATION => $sourceName,
                 self::LIST_ARGUMENTS => $listArguments,
-            ]),
+            ], boolval(...)),
         );
     }
 

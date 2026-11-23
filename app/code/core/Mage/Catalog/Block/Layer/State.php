@@ -52,6 +52,7 @@ class Mage_Catalog_Block_Layer_State extends Mage_Core_Block_Template
             $filter = $item->getFilter();
             $filterState[$filter->getRequestVar()] = $filter->getCleanValue();
         }
+        $params = [];
         $params['_current']     = true;
         $params['_use_rewrite'] = true;
         $params['_query']       = $filterState;

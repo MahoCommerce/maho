@@ -106,7 +106,7 @@ class Maho_Ai_Model_Observer
             (string) $product->getName(),
             strip_tags((string) $product->getShortDescription()),
             strip_tags((string) $product->getDescription()),
-        ])));
+        ], boolval(...))));
     }
 
     private function buildCategoryText(Mage_Catalog_Model_Category $category): string
@@ -114,6 +114,6 @@ class Maho_Ai_Model_Observer
         return trim(implode(' ', array_filter([
             (string) $category->getName(),
             strip_tags((string) $category->getDescription()),
-        ])));
+        ], boolval(...))));
     }
 }

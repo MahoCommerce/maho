@@ -46,7 +46,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Design_Package
             ->addFieldToFilter('path', ['in' => $paths])
             ->getColumnValues('value');
         $trimmed = array_map(static fn($value): string => trim((string) $value), $stored);
-        $missing = array_diff(array_unique(array_filter($trimmed)), $installed);
+        $missing = array_diff(array_unique(array_filter($trimmed, boolval(...))), $installed);
         sort($missing);
         return $missing;
     }

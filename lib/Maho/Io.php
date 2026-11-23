@@ -82,7 +82,7 @@ abstract class Io implements IoInterface
         $pathParts = explode('/', $pathTokP);
         $realPathParts = [];
 
-        for ($i = 0, $realPathParts = []; $i < count($pathParts); $i++) {
+        for ($i = 0; $i < count($pathParts); $i++) {
             if ($pathParts[$i] == '.') {
                 continue;
             }

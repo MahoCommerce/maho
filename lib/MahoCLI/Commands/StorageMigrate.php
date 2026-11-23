@@ -166,7 +166,7 @@ class StorageMigrate extends BaseMahoCommand
         $this->runJobs(
             $progress,
             $this->splitIntoParts($files, $jobCount),
-            array_values(array_filter(['storage:migrate', $name, '--files-from-stdin', $dryRun ? '--dry-run' : null])),
+            array_values(array_filter(['storage:migrate', $name, '--files-from-stdin', $dryRun ? '--dry-run' : null], static fn(?string $argument): bool => $argument !== null)),
             fn(array $part) => $this->addPartResult($result, $part),
             function (int $i, string $error) use ($result, $jobCount): void {
                 $result->failed["(job {$i}/{$jobCount})"] = $error;

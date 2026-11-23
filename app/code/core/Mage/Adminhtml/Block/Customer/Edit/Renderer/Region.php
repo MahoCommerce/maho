@@ -20,6 +20,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Renderer_Region extends Mage_Adminhtml_
 
     public function __construct(array $args = [])
     {
+        parent::__construct($args);
         $this->_factory = empty($args['factory']) ? Mage::getSingleton('core/factory') : $args['factory'];
     }
 

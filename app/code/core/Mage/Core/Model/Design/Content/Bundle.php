@@ -294,7 +294,7 @@ class Mage_Core_Model_Design_Content_Bundle
      */
     protected function deleteOldFiles(array $previous, array $current): void
     {
-        $keep = array_filter([...array_column($previous, 'file'), ...array_column($current, 'file')]);
+        $keep = array_filter([...array_column($previous, 'file'), ...array_column($current, 'file')], boolval(...));
         $mount = Mage::getStorage(self::MOUNT);
         foreach ($mount->listFiles(self::FOLDER) as $file) {
             if (!in_array($file->path(), $keep, true)) {

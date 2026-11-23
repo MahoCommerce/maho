@@ -455,7 +455,7 @@ final class McpToolbox implements ToolboxInterface
         if (isset($current['groupLabel'], $current['label']) && is_string($current['groupLabel']) && is_string($current['label'])) {
             $sectionLabel = is_string($current['sectionLabel'] ?? null) ? $current['sectionLabel'] : '';
 
-            return implode(' > ', array_filter([$sectionLabel, $current['groupLabel'], $current['label']], static fn(string $part): bool => $part !== ''));
+            return implode(' > ', array_filter([$sectionLabel, $current['groupLabel'], $current['label']], boolval(...)));
         }
         foreach (self::RECORD_LABELS as $label) {
             if (isset($current[$label]) && is_scalar($current[$label]) && (string) $current[$label] !== '') {
@@ -641,7 +641,7 @@ final class McpToolbox implements ToolboxInterface
     {
         if ($this->excludedSections === null) {
             $raw = (string) \Mage::getStoreConfig('ai/chat/excluded_sections');
-            $this->excludedSections = array_values(array_filter(array_map(trim(...), explode(',', $raw))));
+            $this->excludedSections = array_values(array_filter(array_map(trim(...), explode(',', $raw)), boolval(...)));
         }
 
         return $this->excludedSections;

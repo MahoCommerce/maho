@@ -30,6 +30,7 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
      */
     public function __construct($filePath = null)
     {
+        parent::__construct();
         if (!is_null($filePath)) {
             $this->_setUploadFile($filePath);
         }

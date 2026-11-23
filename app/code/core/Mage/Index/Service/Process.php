@@ -151,7 +151,7 @@ class Mage_Index_Service_Process
                 $fault ??= $result['error'];
             }
         }
-        $problems = array_filter($problems);
+        $problems = array_filter($problems, boolval(...));
         if ($fault !== null) {
             throw new RuntimeException('An index failed during the reindex.', 0, $fault);
         }

@@ -10,8 +10,9 @@
 
 class Mage_Adminhtml_Block_Review_Rating_Summary extends Mage_Adminhtml_Block_Template
 {
-    public function __construct()
+    public function __construct(array $args = [])
     {
+        parent::__construct($args);
         $this->setTemplate('rating/stars/summary.phtml');
         $this->setReviewId(Mage::registry('review_data')->getId());
     }

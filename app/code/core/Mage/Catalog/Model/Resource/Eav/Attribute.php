@@ -274,7 +274,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
             && $this->isValueChanged('apply_to')
         ) {
             $productTypes = array_keys(Mage_Catalog_Model_Product_Type::getTypes());
-            $applyTo = array_filter(array_map(strval(...), $this->getApplyTo()), static fn(string $type): bool => $type !== '');
+            $applyTo = array_filter(array_map(strval(...), $this->getApplyTo()), boolval(...));
             if (array_diff($applyTo, $productTypes) !== []) {
                 $errors->addError('apply_to', $helper->__('Apply To must contain only these product types: %s', implode(', ', $productTypes)));
             }
@@ -289,7 +289,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
     #[\Override]
     public function getAllowedOptionTags(): array
     {
-        return array_values(array_filter(explode(',', (string) Mage::getStoreConfig(self::XML_PATH_ALLOWED_HTML_TAGS))));
+        return array_values(array_filter(explode(',', (string) Mage::getStoreConfig(self::XML_PATH_ALLOWED_HTML_TAGS)), boolval(...)));
     }
 
     /**

@@ -248,6 +248,7 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_Packaging extends Mage_Adminhtml
      */
     public function getPrintButton()
     {
+        $data = [];
         $data['shipment_id'] = $this->getShipment()->getId();
         $url = $this->getUrl('*/sales_order_shipment/printPackage', $data);
         return $this->getLayout()

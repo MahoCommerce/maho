@@ -443,9 +443,10 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
             foreach ($supportedBlocks->children() as $block) {
                 if ((string) $block->block_name == $blockReference) {
                     if ($block->template && $block->template->children()) {
-                        foreach ($block->template->children() as $template) {
-                            if (isset($widgetTemplates[(string) $template])) {
-                                $templates[] = $widgetTemplates[(string) $template];
+                        foreach ($block->template->children() as $blockTemplate) {
+                            $template = $blockTemplate;
+                            if (isset($widgetTemplates[(string) $blockTemplate])) {
+                                $templates[] = $widgetTemplates[(string) $blockTemplate];
                             }
                         }
                     } else {

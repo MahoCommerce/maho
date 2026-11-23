@@ -79,6 +79,7 @@ class Reviews extends AbstractImporter
         $result = new Result();
         $entityId = (int) Mage::getModel('review/review')->getEntityIdByCode(\Mage_Review_Model_Review::ENTITY_PRODUCT_CODE);
         $touched = [];
+        $ratingStores = [];
         foreach ($rows as $row) {
             $review = $this->find($entityId, $row);
             $review->getId() ? $result->updated++ : $result->created++;
@@ -104,7 +105,7 @@ class Reviews extends AbstractImporter
                 $ratingStores[$code][$row['store_id']] = (int) $row['store_id'];
             }
         }
-        foreach ($ratingStores ?? [] as $code => $stores) {
+        foreach ($ratingStores as $code => $stores) {
             $this->assignRatingToStores($code, $stores);
         }
         foreach ($touched as $review) {

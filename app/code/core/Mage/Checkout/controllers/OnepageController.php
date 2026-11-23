@@ -540,6 +540,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
             return;
         }
 
+        $result = [];
         try {
             if (!$this->getRequest()->isPost()) {
                 $this->_ajaxRedirectResponse();

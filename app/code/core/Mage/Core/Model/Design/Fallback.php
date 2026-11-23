@@ -115,7 +115,7 @@ class Mage_Core_Model_Design_Fallback
     {
         $scheme = [[]];
         $this->_visited = [];
-        while ($parent = (string) $this->_config->getNode($area . '/' . $package . '/' . $theme . '/parent')) {
+        while (($parent = (string) $this->_config->getNode($area . '/' . $package . '/' . $theme . '/parent')) !== '' && $parent !== '0') {
             $this->_checkVisited($area, $package, $theme);
 
             $parts = explode('/', $parent);

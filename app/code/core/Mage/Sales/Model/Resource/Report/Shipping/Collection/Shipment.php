@@ -7,12 +7,10 @@
  * @package Mage_Sales
  */
 
+declare(strict_types=1);
+
 class Mage_Sales_Model_Resource_Report_Shipping_Collection_Shipment extends Mage_Sales_Model_Resource_Report_Shipping_Collection_Order
 {
-    public function __construct()
-    {
-        $this->setModel('adminhtml/report_item');
-        $this->_resource = Mage::getResourceModel('sales/report')->init('sales/shipping_aggregated');
-        $this->setConnection($this->getResource()->getReadConnection());
-    }
+    #[\Override]
+    protected string $_aggregationTable = 'sales/shipping_aggregated';
 }

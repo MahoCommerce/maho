@@ -618,6 +618,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
         $statusAttribute      = $this->getAttribute('status');
         $statusAttributeId    = $statusAttribute->getAttributeId();
         $statusAttributeTable = $statusAttribute->getBackend()->getTable();
+        $updateCond           = [];
         $updateCond[]         = 'store_id > 0';
         $updateCond[]         = $adapter->quoteInto('entity_id = ?', $newId);
         $updateCond[]         = $adapter->quoteInto('attribute_id = ?', $statusAttributeId);

@@ -19,8 +19,9 @@ class Mage_Adminhtml_Block_Notification_Curl extends Mage_Adminhtml_Block_Templa
      */
     protected $_curlVersion;
 
-    public function __construct()
+    public function __construct(array $args = [])
     {
+        parent::__construct($args);
         $this->_curlVersion = curl_version();
     }
 

@@ -118,7 +118,7 @@ class Mage_Adminhtml_Service_GlobalSearch
      */
     private function filterByStore(array $rows, string $entity, array $storeIds): array
     {
-        $ids = array_values(array_filter(array_column($rows, 'entityId')));
+        $ids = array_values(array_filter(array_column($rows, 'entityId'), boolval(...)));
         $scopeIds = $entity === 'order' ? $storeIds : $this->websiteIds($storeIds);
         if ($ids === [] || $scopeIds === []) {
             return [];

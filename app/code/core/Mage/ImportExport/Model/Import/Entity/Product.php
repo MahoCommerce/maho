@@ -352,7 +352,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     {
         $productEntityTable = Mage::getModel('importexport/import_proxy_product_resource')->getEntityTable();
 
-        while ($bunch = $this->_dataSourceModel->getNextBunch()) {
+        while (($bunch = $this->_dataSourceModel->getNextBunch()) !== null && $bunch !== []) {
             $idToDelete = [];
 
             foreach ($bunch as $rowNum => $rowData) {
@@ -746,7 +746,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
         $lastStoreId           = null;
         $lastProductId         = null;
         $currentValueId        = null;
-        while ($bunch = $this->_dataSourceModel->getNextBunch()) {
+        while (($bunch = $this->_dataSourceModel->getNextBunch()) !== null && $bunch !== []) {
             $customOptions = [
                 'product_id'    => [],
                 $optionTable    => [],
@@ -1042,7 +1042,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
 
         $helper = Mage::getResourceHelper('importexport');
         $nextLinkId = $helper->getNextAutoincrement($mainTable);
-        while ($bunch = $this->_dataSourceModel->getNextBunch()) {
+        while (($bunch = $this->_dataSourceModel->getNextBunch()) !== null && $bunch !== []) {
             $productIds   = [];
             $linkRows     = [];
             $positionRows = [];
@@ -1244,7 +1244,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     {
         $priceIsGlobal  = Mage::helper('catalog')->isPriceGlobal();
 
-        while ($bunch = $this->_dataSourceModel->getNextBunch()) {
+        while (($bunch = $this->_dataSourceModel->getNextBunch()) !== null && $bunch !== []) {
             $entityRowsIn = [];
             $entityRowsUp = [];
             $attributes   = [];
@@ -1758,7 +1758,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
         /** @var Mage_CatalogInventory_Helper_Data $helper */
         $helper      = Mage::helper('cataloginventory');
 
-        while ($bunch = $this->getNextBunch()) {
+        while (($bunch = $this->getNextBunch()) !== null && $bunch !== []) {
             $stockData = [];
 
             // Format bunch to stock data rows
@@ -2095,7 +2095,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     {
         $productIds = [];
         $productId = null;
-        while ($bunch = $this->_dataSourceModel->getNextBunch()) {
+        while (($bunch = $this->_dataSourceModel->getNextBunch()) !== null && $bunch !== []) {
             foreach ($bunch as $rowNum => $rowData) {
                 if (!$this->isRowAllowedToImport($rowData, $rowNum)) {
                     continue;

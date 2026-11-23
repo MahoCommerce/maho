@@ -51,6 +51,7 @@ class Mage_Adminhtml_Model_Session_Quote extends Mage_Core_Model_Session_Abstrac
 
     public function __construct()
     {
+        parent::__construct();
         $this->init('adminhtml_quote');
         if (Mage::app()->isSingleStoreMode()) {
             $this->setStoreId(Mage::app()->getStore(true)->getId());

@@ -36,8 +36,9 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option extends
      *
      * Sets block template and necessary data
      */
-    public function __construct()
+    public function __construct(array $args = [])
     {
+        parent::__construct($args);
         $this->setTemplate('bundle/product/edit/bundle/option.phtml');
         $this->setCanReadPrice();
         $this->setCanEditPrice();

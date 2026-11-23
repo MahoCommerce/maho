@@ -217,7 +217,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     #[\Override]
     protected function _importData(): bool
     {
-        while ($bunch = $this->_dataSourceModel->getNextBunch()) {
+        while (($bunch = $this->_dataSourceModel->getNextBunch()) !== null && $bunch !== []) {
             foreach ($bunch as $rowNum => $rowData) {
                 if (!$this->validateRow($rowData, $rowNum)) {
                     continue;

@@ -46,6 +46,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
      */
     public function __construct()
     {
+        parent::__construct();
         $resource = Mage::getSingleton('core/resource');
         $this->setType(Mage_Catalog_Model_Category::ENTITY)
             ->setConnection(

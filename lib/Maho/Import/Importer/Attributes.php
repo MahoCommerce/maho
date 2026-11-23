@@ -364,7 +364,7 @@ class Attributes extends AbstractImporter
             ->addFieldToFilter('path', self::SWATCH_CONFIG_PATH)
             ->addFieldToFilter('scope', 'default')
             ->getFirstItem();
-        $ids = array_filter(array_map(intval(...), explode(',', (string) $stored->getValue())));
+        $ids = array_filter(array_map(intval(...), explode(',', (string) $stored->getValue())), boolval(...));
         foreach ($codes as $code) {
             $ids[] = $this->resolver->attributeId($code);
         }

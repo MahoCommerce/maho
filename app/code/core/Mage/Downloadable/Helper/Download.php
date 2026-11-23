@@ -287,11 +287,11 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
                 'get_object_options' => array_filter([
                     'ResponseContentType' => $contentType,
                     'ResponseContentDisposition' => $disposition,
-                ]),
+                ], boolval(...)),
                 'gcp_signing_options' => array_filter([
                     'responseType' => $contentType,
                     'responseDisposition' => $disposition,
-                ]),
+                ], boolval(...)),
             ],
         );
     }
@@ -343,7 +343,7 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
     public function getLinkUrlAllowedPrefixes(mixed $store = null): array
     {
         $prefixes = preg_split('/\R/', (string) Mage::getStoreConfig(self::XML_PATH_LINK_URL_ALLOWED_PREFIXES, $store)) ?: [];
-        return array_values(array_filter(array_map(trim(...), $prefixes)));
+        return array_values(array_filter(array_map(trim(...), $prefixes), boolval(...)));
     }
 
     /**

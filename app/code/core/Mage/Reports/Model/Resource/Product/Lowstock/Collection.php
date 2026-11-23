@@ -176,7 +176,7 @@ class Mage_Reports_Model_Resource_Product_Lowstock_Collection extends Mage_Repor
     public function filterByIsQtyProductTypes()
     {
         $this->filterByProductType(
-            array_keys(array_filter(Mage::helper('cataloginventory')->getIsQtyTypeIds())),
+            array_keys(array_filter(Mage::helper('cataloginventory')->getIsQtyTypeIds(), boolval(...))),
         );
         return $this;
     }
