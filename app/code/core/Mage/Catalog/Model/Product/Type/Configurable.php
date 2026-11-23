@@ -654,8 +654,8 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
                 }
                 if ($subProduct) {
                     $product->addCustomOption('attributes', Mage::helper('core')->jsonEncode($attributes));
-                    $product->addCustomOption('product_qty_' . $subProduct->getId(), 1, $subProduct);
-                    $product->addCustomOption('simple_product', $subProduct->getId(), $subProduct);
+                    $product->addCustomOption('product_qty_' . $subProduct->getId(), '1', $subProduct);
+                    $product->addCustomOption('simple_product', (string) $subProduct->getId(), $subProduct);
                     $_result = $subProduct->getTypeInstance(true)->_prepareProduct(
                         $buyRequest,
                         $subProduct,
@@ -682,7 +682,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
                     $_result[0]->setParentProductId($product->getId())
                         // add custom option to simple product for protection of process
                         //when we add simple product separately
-                        ->addCustomOption('parent_product_id', $product->getId());
+                        ->addCustomOption('parent_product_id', (string) $product->getId());
                     if ($this->_isStrictProcessMode($processMode)) {
                         $_result[0]->setCartQty(1);
                     }

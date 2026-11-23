@@ -351,7 +351,7 @@ class Mage_Catalog_Model_Product_Type_Grouped extends Mage_Catalog_Model_Product
                                 $products[] = $_result[0];
                             } else {
                                 $associatedProductsInfo[] = [$subProductId => $qty];
-                                $product->addCustomOption('associated_product_' . $subProductId, $qty);
+                                $product->addCustomOption('associated_product_' . $subProductId, (string) $qty);
                             }
                         }
                     }

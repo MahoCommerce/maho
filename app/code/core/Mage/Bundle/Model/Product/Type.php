@@ -733,9 +733,9 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
                 }
                 $qty = (float) $qty;
 
-                $product->addCustomOption('selection_qty_' . $selection->getSelectionId(), $qty, $selection);
-                $selection->addCustomOption('selection_id', $selection->getSelectionId());
-                $product->addCustomOption('product_qty_' . $selection->getId(), $qty, $selection);
+                $product->addCustomOption('selection_qty_' . $selection->getSelectionId(), (string) $qty, $selection);
+                $selection->addCustomOption('selection_id', (string) $selection->getSelectionId());
+                $product->addCustomOption('product_qty_' . $selection->getId(), (string) $qty, $selection);
 
                 /*
                  * Create extra attributes that will be converted to product options in order item
