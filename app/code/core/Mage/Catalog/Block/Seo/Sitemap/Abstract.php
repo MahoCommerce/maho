@@ -8,6 +8,9 @@
  * @package Mage_Catalog
  */
 
+/**
+ * @template TItem of Mage_Catalog_Model_Abstract
+ */
 abstract class Mage_Catalog_Block_Seo_Sitemap_Abstract extends Mage_Core_Block_Template
 {
     /**
@@ -25,15 +28,7 @@ abstract class Mage_Catalog_Block_Seo_Sitemap_Abstract extends Mage_Core_Block_T
     }
 
     /**
-     * Get item URL
-     *
-     * In most cases should be overridden in descendant blocks
-     *
-     * @param Mage_Catalog_Block_Seo_Sitemap_Abstract $item
-     * @return string
+     * @param TItem $item
      */
-    public function getItemUrl($item)
-    {
-        return $item->getUrl();
-    }
+    abstract public function getItemUrl(Mage_Catalog_Model_Abstract $item): string;
 }
