@@ -452,9 +452,9 @@ final class Mage
      * $model = Mage::getModel('core/store'); // Mage_Core_Model_Store
      * ```
      *
-     * @param mixed $arguments The one argument of the model constructor.
+     * @param array<mixed>|object|string $arguments The one argument of the model constructor.
      */
-    public static function getModel(string $modelAlias, mixed $arguments = []): object|false
+    public static function getModel(string $modelAlias, array|object|string $arguments = []): object|false
     {
         return self::getConfig()->getModelInstance($modelAlias, $arguments);
     }
@@ -466,9 +466,9 @@ final class Mage
      * $model = Mage::getModel('core/session'); // Mage_Core_Model_Session
      * ```
      *
-     * @param mixed $arguments The one argument of the model constructor.
+     * @param array<mixed>|object|string $arguments The one argument of the model constructor.
      */
-    public static function getSingleton(string $modelAlias, mixed $arguments = []): object|false
+    public static function getSingleton(string $modelAlias, array|object|string $arguments = []): object|false
     {
         $registryKey = "_singleton/$modelAlias";
         if (!isset(self::$_registry[$registryKey])) {
@@ -506,9 +506,9 @@ final class Mage
      * $model = Mage::getResourceModel('core/store_collection'); // Mage_Core_Model_Resource_Store_Collection
      * ```
      *
-     * @param mixed $arguments The one argument of the resource model constructor.
+     * @param array<mixed>|object|string $arguments The one argument of the resource model constructor.
      */
-    public static function getResourceModel(string $modelAlias, mixed $arguments = []): object|false
+    public static function getResourceModel(string $modelAlias, array|object|string $arguments = []): object|false
     {
         return self::getConfig()->getResourceModelInstance($modelAlias, $arguments);
     }
@@ -537,9 +537,9 @@ final class Mage
      * $model = Mage::getResourceSingleton('core/session'); // Mage_Core_Model_Resource_Session
      * ```
      *
-     * @param mixed $arguments The one argument of the resource model constructor.
+     * @param array<mixed>|object|string $arguments The one argument of the resource model constructor.
      */
-    public static function getResourceSingleton(string $modelAlias, mixed $arguments = []): object|false
+    public static function getResourceSingleton(string $modelAlias, array|object|string $arguments = []): object|false
     {
         $registryKey = "_resource_singleton/$modelAlias";
         if (!isset(self::$_registry[$registryKey])) {

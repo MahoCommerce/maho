@@ -325,15 +325,13 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     }
 
     /**
-     * Retrieve attribute instance by name, id or config node
+     * Retrieve attribute instance by code, id or attribute model
      *
      * This will add the attribute configuration to entity's attributes cache
      *
      * If attribute is not found false is returned
-     *
-     * @param string|int|Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      */
-    public function getAttribute($attribute): Mage_Eav_Model_Entity_Attribute_Abstract|false
+    public function getAttribute(Mage_Eav_Model_Entity_Attribute_Abstract|int|string|null $attribute): Mage_Eav_Model_Entity_Attribute_Abstract|false
     {
         if (is_numeric($attribute)) {
             $attributeId = $attribute;

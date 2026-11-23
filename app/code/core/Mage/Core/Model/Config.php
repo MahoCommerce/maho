@@ -1457,9 +1457,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     /**
      * Retrieve model instance
      *
-     * @param mixed $constructArguments The one argument of the model constructor.
+     * @param array<mixed>|object|string $constructArguments The one argument of the model constructor.
      */
-    public function getModelInstance(string $modelAlias, mixed $constructArguments = []): object|false
+    public function getModelInstance(string $modelAlias, array|object|string $constructArguments = []): object|false
     {
         $className = $this->getModelClassName($modelAlias);
         if (!class_exists($className)) {
@@ -1502,9 +1502,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     /**
      * Retrieve resource model instance
      *
-     * @param mixed $constructArguments The one argument of the resource model constructor.
+     * @param array<mixed>|object|string $constructArguments The one argument of the resource model constructor.
      */
-    public function getResourceModelInstance(string $modelAlias, mixed $constructArguments = []): object|false
+    public function getResourceModelInstance(string $modelAlias, array|object|string $constructArguments = []): object|false
     {
         $className = $this->getResourceModelClassName($modelAlias);
         if ($className === false || !class_exists($className)) {
