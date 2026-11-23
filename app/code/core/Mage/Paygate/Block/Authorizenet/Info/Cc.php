@@ -47,10 +47,14 @@ class Mage_Paygate_Block_Authorizenet_Info_Cc extends Mage_Payment_Block_Info_Cc
     public function getInfo()
     {
         $cardInfo = $this->getCardInfoObject();
-        if ($cardInfo instanceof \Maho\DataObject) {
-            return Mage::getModel('payment/info')->setData($cardInfo->getData());
+        if (!$cardInfo instanceof \Maho\DataObject) {
+            return parent::getInfo();
         }
-        return parent::getInfo();
+        if (!$cardInfo instanceof Mage_Payment_Model_Info) {
+            $cardInfo = Mage::getModel('payment/info')->setData($cardInfo->getData());
+            $this->setCardInfoObject($cardInfo);
+        }
+        return $cardInfo;
     }
 
     /**
