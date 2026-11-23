@@ -180,6 +180,43 @@ describe('the product service', function (): void {
         expect(productRecordService()->validateAttributes(['name' => 'Pest', 'pest_unknown_attribute' => 1, 'sku' => 'X']))->toBe(['name' => 'Pest']);
     });
 
+    it('refuses an empty value of a required attribute in a mass change, as an error of the field', function (): void {
+        try {
+            productRecordService()->validateAttributes(['name' => '']);
+            expect(false)->toBeTrue('An empty name passed the check.');
+        } catch (Mage_Core_Exception_Input $e) {
+            expect($e->getErrors()[0]['field'])->toBe('name')
+                ->and($e->getMessage())->toContain('is a required value');
+        }
+    });
+
+    it('requires an attribute that its condition can hide when the mass change does not set the field of the condition', function (): void {
+        $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'name');
+        $attribute->setDependsOn([['operator' => 'AND', 'condition' => ['status' => [(string) Mage_Catalog_Model_Product_Status::STATUS_DISABLED]]]]);
+        try {
+            expect(fn() => productRecordService()->validateAttributes(['name' => '']))->toThrow(Mage_Core_Exception_Input::class)
+                ->and(productRecordService()->validateAttributes(['name' => '', 'status' => Mage_Catalog_Model_Product_Status::STATUS_ENABLED]))
+                ->toBe(['name' => '', 'status' => Mage_Catalog_Model_Product_Status::STATUS_ENABLED]);
+        } finally {
+            $attribute->setDependsOn(null);
+        }
+    });
+
+    it('refuses a value of a unique attribute that another product holds, as an error of the field', function (): void {
+        productRecordCreate('PEST-RECORD-UNIQUE');
+        $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'name');
+        $attribute->setIsUnique(true);
+        try {
+            productRecordService()->validateAttributes(['name' => 'Pest Record Product']);
+            expect(false)->toBeTrue('A name that another product holds passed the check.');
+        } catch (Mage_Core_Exception_Input $e) {
+            expect($e->getErrors()[0]['field'])->toBe('name')
+                ->and($e->getMessage())->toContain('must be unique');
+        } finally {
+            $attribute->setIsUnique(false);
+        }
+    });
+
     it('copies the values of a store view to another store view, in the service and on the admin page', function (): void {
         $product = productRecordCreate('PEST-RECORD-COPY');
         $productId = (int) $product->getId();
