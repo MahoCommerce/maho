@@ -91,6 +91,8 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
         $allowedTax = $order->getTaxInvoiced() - $order->getTaxRefunded() - $creditmemo->getTaxAmount();
         $allowedBaseTax = $order->getBaseTaxInvoiced() - $order->getBaseTaxRefunded()
                 - $creditmemo->getBaseTaxAmount();
+        $taxRefund = min($allowedTax, $totalTax);
+        $baseTaxRefund = min($allowedBaseTax, $baseTotalTax);
         $signedTax = (float) $order->getTaxAmount() < (float) $order->getShippingTaxAmount();
         $signedBaseTax = (float) $order->getBaseTaxAmount() < (float) $order->getBaseShippingTaxAmount();
         if ($signedTax || $signedBaseTax) {
@@ -99,33 +101,43 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
             [$taxLeft, $baseTaxLeft, $last] = $this->getSignedItemTaxLeft($creditmemo, $itemInvoice);
             if ($signedTax) {
                 $allowedTax = $taxLeft + $shippingTaxAmount - $creditmemo->getTaxAmount();
-                $totalTax = $last ? $allowedTax : $totalTax;
+                $taxRefund = $this->getSignedRefundTax($totalTax, $allowedTax, $shippingTaxAmount, $last);
             }
             if ($signedBaseTax) {
                 $allowedBaseTax = $baseTaxLeft + $baseShippingTaxAmount - $creditmemo->getBaseTaxAmount();
-                $baseTotalTax = $last ? $allowedBaseTax : $baseTotalTax;
+                $baseTaxRefund = $this->getSignedRefundTax($baseTotalTax, $allowedBaseTax, $baseShippingTaxAmount, $last);
             }
         }
         // The invoiced and refunded hidden tax of the order both include the shipping hidden tax.
         $allowedHiddenTax = $order->getHiddenTaxInvoiced() - $order->getHiddenTaxRefunded();
         $allowedBaseHiddenTax = $order->getBaseHiddenTaxInvoiced() - $order->getBaseHiddenTaxRefunded();
 
-        $totalTax = min($allowedTax, $totalTax);
-        $baseTotalTax = min($allowedBaseTax, $baseTotalTax);
         $totalHiddenTax = min($allowedHiddenTax, $totalHiddenTax);
         $baseTotalHiddenTax = min($allowedBaseHiddenTax, $baseTotalHiddenTax);
 
-        $creditmemo->setTaxAmount($creditmemo->getTaxAmount() + $totalTax);
-        $creditmemo->setBaseTaxAmount($creditmemo->getBaseTaxAmount() +  $baseTotalTax);
+        $creditmemo->setTaxAmount($creditmemo->getTaxAmount() + $taxRefund);
+        $creditmemo->setBaseTaxAmount($creditmemo->getBaseTaxAmount() + $baseTaxRefund);
         $creditmemo->setHiddenTaxAmount($totalHiddenTax);
         $creditmemo->setBaseHiddenTaxAmount($baseTotalHiddenTax);
 
         $creditmemo->setShippingTaxAmount($shippingTaxAmount);
         $creditmemo->setBaseShippingTaxAmount($baseShippingTaxAmount);
 
-        $creditmemo->setGrandTotal($creditmemo->getGrandTotal() + $totalTax + $totalHiddenTax);
-        $creditmemo->setBaseGrandTotal($creditmemo->getBaseGrandTotal() + $baseTotalTax + $baseTotalHiddenTax);
+        $creditmemo->setGrandTotal($creditmemo->getGrandTotal() + $taxRefund + $totalHiddenTax);
+        $creditmemo->setBaseGrandTotal($creditmemo->getBaseGrandTotal() + $baseTaxRefund + $baseTotalHiddenTax);
         return $this;
+    }
+
+    private function getSignedRefundTax(float $tax, float $allowed, float $shippingTax, bool $last): float
+    {
+        if ($last) {
+            return $allowed;
+        }
+        // Shipping tax can make the memo positive even when its returned item has a negative tax.
+        if ($tax < $shippingTax) {
+            return max($tax, min($allowed, $shippingTax));
+        }
+        return min($tax, $allowed);
     }
 
     /** @return array{float, float, bool} */

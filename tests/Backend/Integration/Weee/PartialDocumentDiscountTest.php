@@ -724,6 +724,45 @@ it('refunds the signed item tax charged on each invoice of a historic order', fu
     'order refund covers both items on the first invoice' => [false, 'group'],
 ]);
 
+it('refunds proportional signed item tax when a customer returns one of two units', function (bool $shippingFirst): void {
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $connection->beginTransaction();
+    try {
+        $store = setStoreDisplayCurrency('EUR', 'USD,EUR');
+        $order = Mage::getModel('sales/order')->setStoreId((int) $store->getId())
+            ->setIncrementId('signed-tax-' . uniqid())->setState(Mage_Sales_Model_Order::STATE_PROCESSING)
+            ->setBaseCurrencyCode('USD')->setOrderCurrencyCode('EUR')->setBaseToOrderRate(0.8)
+            ->setSubtotal(32.0)->setBaseSubtotal(40.0)->setShippingAmount(16.0)->setBaseShippingAmount(20.0)
+            ->setShippingTaxAmount(16.0)->setBaseShippingTaxAmount(20.0)->setTaxAmount(8.0)->setBaseTaxAmount(10.0)
+            ->setGrandTotal(56.0)->setBaseGrandTotal(70.0);
+        $item = Mage::getModel('sales/order_item')->setSku('signed-item')->setProductType('simple')->setQtyOrdered(2)
+            ->setPrice(16.0)->setBasePrice(20.0)->setRowTotal(32.0)->setBaseRowTotal(40.0)
+            ->setTaxAmount(-8.0)->setBaseTaxAmount(-10.0);
+        $order->addItem($item)->setPayment(Mage::getModel('sales/order_payment')->setMethod('checkmo'));
+        $order->save();
+        $documents = Mage::getService('sales/order_document');
+        $order = Mage::getModel('sales/order')->load($order->getId());
+        $invoice = $documents->invoice($order, captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE, sendEmail: false);
+        foreach ([$shippingFirst, !$shippingFirst] as $refundShipping) {
+            $order = Mage::getModel('sales/order')->load($order->getId());
+            $invoice = Mage::getModel('sales/order_invoice')->load($invoice->getId());
+            $data = ['qtys' => [$item->getId() => 1], 'shipping_amount' => $refundShipping ? 20.0 : 0.0];
+            $memo = $documents->refund($order, $data, invoice: $invoice, sendEmail: false);
+            $memo = Mage::getModel('sales/order_creditmemo')->load($memo->getId());
+            expect($memo->getBaseTaxAmount())->toBe($refundShipping ? 15.0 : -5.0)
+                ->and($memo->getTaxAmount())->toBe($refundShipping ? 12.0 : -4.0)
+                ->and($memo->getBaseGrandTotal())->toBe($refundShipping ? 55.0 : 15.0)
+                ->and($memo->getGrandTotal())->toBe($refundShipping ? 44.0 : 12.0);
+        }
+        $order->load($order->getId());
+        expect($order->getTotalRefunded())->toBe($order->getTotalPaid())
+            ->and($order->getBaseTotalRefunded())->toBe($order->getBaseTotalPaid());
+    } finally {
+        $connection->rollBack();
+        resetCurrencyState();
+    }
+})->with(['shipping first' => true, 'shipping last' => false]);
+
 it('preserves the order balance for an adjusted refund without an invoice link', function (
     ?float $priorShippingTax,
     float $adjustment,
